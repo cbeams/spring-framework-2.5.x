@@ -27,13 +27,13 @@ import org.springframework.util.ToStringCreator;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * A base super class for state definitions. Each state is associated with an
- * owning flow definition. Standard types of states include action states,
- * view states, subflow states, and end states.
- * 
+ * A base super class for state definitions. Each state is associated with
+ * exactly one owning flow definition. Standard types of states include action
+ * states, view states, subflow states, and end states.
  * <p>
  * Subclasses of this class capture all the configuration information needed for
  * a specific type of state.
+ * <p>
  * Subclasses should override the <code>doEnterState</code> method to execute
  * the action that should occur when this state is entered, acting on its
  * configuration information.
@@ -57,12 +57,13 @@ public abstract class AbstractState implements Serializable {
 
 	/**
 	 * Creates a state for the provided <code>flow</code> identified by the
-	 * provided <code>id</code>. The id must be locally unique to the owning flow.
-	 * Flow state will automatically be added to the owning flow.
+	 * provided <code>id</code>. The id must be locally unique to the owning
+	 * flow. The flow state will be automatically added to the flow.
 	 * 
 	 * @param flow The owning flow
 	 * @param id The state identifier (must be unique to the flow)
-	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 * @throws IllegalArgumentException if this state cannot be added to the
+	 *         flow
 	 */
 	public AbstractState(Flow flow, String id) throws IllegalArgumentException {
 		setId(id);
@@ -88,7 +89,7 @@ public abstract class AbstractState implements Serializable {
 	}
 
 	/**
-	 * @return The owning flow. 
+	 * @return The owning flow.
 	 */
 	public Flow getFlow() {
 		return flow;
@@ -103,9 +104,9 @@ public abstract class AbstractState implements Serializable {
 	}
 
 	/**
-	 * Is this state transitionable? Meaning, is it capable of executing a
-	 * transition to another state on the occurence of an event? All subclasses
-	 * of <code>TransitionableState</code> are transitionable.
+	 * Is this state transitionable? That is, is this state capable of executing
+	 * a transition to another state on the occurence of an event? All
+	 * subclasses of <code>TransitionableState</code> are transitionable.
 	 * @return true or false
 	 */
 	public boolean isTransitionable() {
@@ -113,10 +114,9 @@ public abstract class AbstractState implements Serializable {
 	}
 
 	/**
-	 * Requesting entering of this state for the active (currently executing)
-	 * flow session.
-	 * @param flowExecution The flow execution stack, tracking the current
-	 *        active flow session
+	 * Requesting entering of this state in the provided flow execution.
+	 * @param flowExecution The flow execution stack, tracking a ongoing flow
+	 *        execution (client instance of a flow)
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
@@ -133,8 +133,8 @@ public abstract class AbstractState implements Serializable {
 
 	/**
 	 * Hook method to do any processing as a result of entering this state.
-	 * @param flowExecution The session execution stack, tracking the
-	 *        current active flow session
+	 * @param flowExecution The session execution stack, tracking the current
+	 *        active flow session
 	 * @param request The client http request
 	 * @param response The server http response
 	 * @return A view descriptor containing model and view information needed to
@@ -143,6 +143,11 @@ public abstract class AbstractState implements Serializable {
 	protected abstract ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response);
 
+	/**
+	 * Returns <code>true</code> if this state equals another. Two states are
+	 * equal if they have the same owning <code>flow</code> and
+	 * <code>id</code>.
+	 */
 	public boolean equals(Object o) {
 		if (!(o instanceof AbstractState)) {
 			return false;
@@ -162,9 +167,9 @@ public abstract class AbstractState implements Serializable {
 	}
 
 	/**
-	 * Method subclasses may override to insert toStringification of their
-	 * properties.
-	 * @param creator
+	 * Subclasses may override this hook method to insert stringfy their
+	 * internal state.  This default implementation does nothing.
+	 * @param creator The toString creator, to stringify properties.
 	 */
 	protected void createToString(ToStringCreator creator) {
 	}
