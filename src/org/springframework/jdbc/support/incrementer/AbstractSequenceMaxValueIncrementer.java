@@ -19,10 +19,6 @@ import org.springframework.jdbc.support.JdbcUtils;
  */
 public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-	}
-
 	protected long getNextKey() throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
