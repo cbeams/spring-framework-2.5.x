@@ -102,4 +102,25 @@
 		<constructor-arg><value>/test</value></constructor-arg>
 	</bean>
 
+	<bean id="beanWithBoolean" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
+	   <constructor-arg type="boolean"><value>true</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithBooleanAndString" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
+	   <constructor-arg type="boolean"><value>true</value></constructor-arg>
+	   <constructor-arg><value>A String</value></constructor-arg>
+	</bean>
+
+	<bean id="Boolean" class="java.lang.Boolean">
+		<constructor-arg><value>false</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithDoubleBoolean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" singleton="false">
+		<constructor-arg type="java.lang.Boolean"><value>true</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithDoubleBooleanAndIndex" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" singleton="false">
+		<constructor-arg index="1"><value>true</value></constructor-arg>
+	</bean>
+
 </beans>

@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.xml;
 
@@ -93,7 +93,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		TestBean georgia = (TestBean) xbf.getBean("georgia");
 		ITestBean emmasJenks = emma.getSpouse();
 		ITestBean georgiasJenks = georgia.getSpouse();
-		assertTrue("Emma and georgia think they have a different boyfriend",emmasJenks != georgiasJenks);
+		assertTrue("Emma and georgia think they have a different boyfriend", emmasJenks != georgiasJenks);
 		assertTrue("Emmas jenks has right name", emmasJenks.getName().equals("Andrew"));
 		assertTrue("Emmas doesn't equal new ref", emmasJenks != xbf.getBean("jenks"));
 		assertTrue("Georgias jenks has right name", emmasJenks.getName().equals("Andrew"));
@@ -380,7 +380,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(friends.size() == 2);
 
 		assertTrue("First friend must be jen, not " + friends.get(0),
-			friends.get(0) == jen);
+				friends.get(0) == jen);
 		assertTrue(friends.get(1) == dave);
 		// Should be ordered
 	}
@@ -394,7 +394,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		List friends = (List) rod.getFriends();
 		assertTrue(friends.size() == 2);
 		assertTrue("First friend must be jen, not " + friends.get(0),
-			friends.get(0).toString().equals(jen.toString()));
+				friends.get(0).toString().equals(jen.toString()));
 		assertTrue("Jen not same instance", friends.get(0) != jen);
 		assertTrue(friends.get(1).toString().equals(dave.toString()));
 		assertTrue("Dave not same instance", friends.get(1) != dave);
@@ -403,7 +403,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		List friends2 = (List) rod2.getFriends();
 		assertTrue(friends2.size() == 2);
 		assertTrue("First friend must be jen, not " + friends2.get(0),
-			friends2.get(0).toString().equals(jen.toString()));
+				friends2.get(0).toString().equals(jen.toString()));
 		assertTrue("Jen not same instance", friends2.get(0) != friends.get(0));
 		assertTrue(friends2.get(1).toString().equals(dave.toString()));
 		assertTrue("Dave not same instance", friends2.get(1) != friends.get(1));
@@ -550,7 +550,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(m.size() == 2);
 		assertTrue(m.get("fo").equals("bar"));
 		assertTrue("Map element 'jenny' should be equal to jenny bean, not " + m.get("jen"),
-			m.get("jen").equals(jenny));
+				m.get("jen").equals(jenny));
 
 		// Check nested list in list
 		l = (List) l.get(2);
@@ -565,7 +565,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(m.size() == 2);
 		assertTrue(m.get("foo").equals("bar"));
 		assertTrue("Map element 'jenny' should be equal to jenny bean, not " + m.get("jenny"),
-			m.get("jenny").equals(jenny));
+				m.get("jenny").equals(jenny));
 	}
 
 	public void testEmptySet() throws Exception {
@@ -601,7 +601,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testObjectArray() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("objectArray");
-		assertTrue(hasMap.getObjectArray().length ==2);
+		assertTrue(hasMap.getObjectArray().length == 2);
 		assertTrue(hasMap.getObjectArray()[0].equals("one"));
 		assertTrue(hasMap.getObjectArray()[1].equals(xbf.getBean("jenny")));
 	}
@@ -609,7 +609,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testClassArray() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("classArray");
-		assertTrue(hasMap.getClassArray().length ==2);
+		assertTrue(hasMap.getClassArray().length == 2);
 		assertTrue(hasMap.getClassArray()[0].equals(String.class));
 		assertTrue(hasMap.getClassArray()[1].equals(Exception.class));
 	}
@@ -978,7 +978,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testFactoryBeanDefinedAsPrototype()  {
+	public void testFactoryBeanDefinedAsPrototype() {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("invalid-factory.xml", getClass()));
 			fail("Should have thrown BeanDefinitionStoreException");
@@ -1063,7 +1063,7 @@ public class XmlBeanFactoryTests extends TestCase {
 			reader.loadBeanDefinitions(new ClassPathResource("classNotFound.xml", getClass()));
 			assertTrue(bf.getBeanDefinition("classNotFound") instanceof RootBeanDefinition);
 			assertEquals(((RootBeanDefinition) bf.getBeanDefinition("classNotFound")).getBeanClassName(),
-									 "org.springframework.beans.TestBeana");
+					"org.springframework.beans.TestBeana");
 		}
 		catch (BeanDefinitionStoreException ex) {
 			fail("Should not have thrown BeanDefinitionStoreException");
@@ -1209,12 +1209,12 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
-		
+
 		testLookupOverrideMethodsWithSetterInjection(xbf, "overrideOneMethod", true);
 		// Should work identically on subclass definition, in which lookup
 		// methods are inherited
 		testLookupOverrideMethodsWithSetterInjection(xbf, "overrideInheritedMethod", true);
-		
+
 		// Check cost of repeated construction of beans with method overrides
 		// Will pick up misuse of CGLIB
 		int howmany = 100;
@@ -1226,32 +1226,32 @@ public class XmlBeanFactoryTests extends TestCase {
 		sw.stop();
 		System.out.println(sw);
 		assertTrue(sw.getTotalTimeMillis() < 1000);
-		
+
 		// Now test distinct bean with swapped value in factory, to ensure the two are independent
 		OverrideOneMethod swappedOom = (OverrideOneMethod) xbf.getBean("overrideOneMethodSwappedReturnValues");
-		
+
 		TestBean tb = swappedOom.getPrototypeDependency();
-		assertEquals("David", tb.getName()); 
+		assertEquals("David", tb.getName());
 		tb = swappedOom.protectedOverrideSingleton();
-		assertEquals("Jenny", tb.getName()); 
+		assertEquals("Jenny", tb.getName());
 	}
-	
+
 	private void testLookupOverrideMethodsWithSetterInjection(BeanFactory xbf, String beanName, boolean singleton) {
 		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean(beanName);
-		
+
 		if (singleton) {
 			assertSame(oom, xbf.getBean(beanName));
 		}
 		else {
 			assertNotSame(oom, xbf.getBean(beanName));
 		}
-		
+
 		TestBean jenny1 = oom.getPrototypeDependency();
-		assertEquals("Jenny", jenny1.getName()); 
+		assertEquals("Jenny", jenny1.getName());
 		TestBean jenny2 = oom.getPrototypeDependency();
 		assertEquals("Jenny", jenny2.getName());
-		assertNotSame(jenny1, jenny2); 
-		
+		assertNotSame(jenny1, jenny2);
+
 		// Check that the bean can invoke the overriden method on itself
 		// This differs from Spring's AOP support, which has
 		// a distinct notion of a "target" object, meaning that the
@@ -1259,50 +1259,50 @@ public class XmlBeanFactoryTests extends TestCase {
 		// an advised method on itself
 		TestBean jenny3 = oom.invokesOverridenMethodOnSelf();
 		assertEquals("Jenny", jenny3.getName());
-		assertNotSame(jenny1, jenny3); 
-		
+		assertNotSame(jenny1, jenny3);
+
 		// Now try protected method, and singleton
 		TestBean dave1 = oom.protectedOverrideSingleton();
-		assertEquals("David", dave1.getName()); 
+		assertEquals("David", dave1.getName());
 		TestBean dave2 = oom.protectedOverrideSingleton();
 		assertEquals("David", dave2.getName());
-		assertSame(dave1, dave2); 
+		assertSame(dave1, dave2);
 	}
-	
+
 	public void testReplaceMethodOverrideWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml", getClass()));
-		
+
 		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethod");
-		
+
 		// Same contract as for overrides.xml
 		TestBean jenny1 = oom.getPrototypeDependency();
-		assertEquals("Jenny", jenny1.getName()); 
+		assertEquals("Jenny", jenny1.getName());
 		TestBean jenny2 = oom.getPrototypeDependency();
 		assertEquals("Jenny", jenny2.getName());
-		assertNotSame(jenny1, jenny2); 
-		
+		assertNotSame(jenny1, jenny2);
+
 		// Now try protected method, and singleton
 		TestBean dave1 = oom.protectedOverrideSingleton();
-		assertEquals("David", dave1.getName()); 
+		assertEquals("David", dave1.getName());
 		TestBean dave2 = oom.protectedOverrideSingleton();
 		assertEquals("David", dave2.getName());
-		assertSame(dave1, dave2); 
-		
+		assertSame(dave1, dave2);
+
 		// Check unadvised behaviour
 		String str = "woierowijeiowiej";
 		assertEquals(str, oom.echo(str));
-		
+
 		// Now test replace
 		String s = "this is not a palindrome";
 		String reverse = new StringBuffer(s).reverse().toString();
 		assertEquals("Should have overridden to reverse, not echo", reverse, oom.replaceMe(s));
-		
+
 		assertEquals("Should have overridden no-arg overloaded replaceMe method to return fixed value",
 				FixedMethodReplacer.VALUE, oom.replaceMe());
-		
+
 		OverrideOneMethodSubclass ooms = (OverrideOneMethodSubclass) xbf.getBean("replaceVoidMethod");
 		DoSomethingReplacer dos = (DoSomethingReplacer) xbf.getBean("doSomethingReplacer");
 		assertEquals(null, dos.lastArg);
@@ -1313,20 +1313,20 @@ public class XmlBeanFactoryTests extends TestCase {
 		ooms.doSomething(s2);
 		assertEquals(s2, dos.lastArg);
 	}
-	
+
 	public void testLookupOverrideOneMethodWithConstructorInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("constructorOverrides.xml", getClass()));
-		
+
 		ConstructorInjectedOverrides cio = (ConstructorInjectedOverrides) xbf.getBean("constructorOverrides");
-		
+
 		// Check that the setter was invoked...
 		// We should be able to combine Constructor and
 		// Setter Injection
 		assertEquals("Setter string was set", "from property element", cio.getSetterString());
-		
+
 		// Jenny is a singleton
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertSame(jenny, cio.getTestBean());
@@ -1337,7 +1337,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertSame("The two prototypes hold the same singleton reference",
 				fm1.getTestBean(), fm2.getTestBean());
 	}
-	
+
 	public void testRejectsOverrideOfBogusMethodName() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -1351,7 +1351,7 @@ public class XmlBeanFactoryTests extends TestCase {
 			assertTrue("Bogus method name correctly reported", ex.getMessage().indexOf("bogusMethod") != -1);
 		}
 	}
-	
+
 	/**
 	 * Assert the presence of this bug until we resolve
 	 * it
@@ -1366,7 +1366,7 @@ public class XmlBeanFactoryTests extends TestCase {
 			System.err.println("****** SPR-356: Objects with MethodReplace overrides are not serializable");
 		}
 	}
-	
+
 	public void BUGtestSerializableMethodReplacerAndSuperclass() throws IOException, ClassNotFoundException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -1380,8 +1380,8 @@ public class XmlBeanFactoryTests extends TestCase {
 		s = (SerializableMethodReplacerCandidate) SerializationTestUtils.serializeAndDeserialize(s);
 		assertEquals("Method replace still works after serialization and deserialization", backwards, s.replaceMe(forwards));
 	}
-				
-	
+
+
 	public void testFactoryMethodsSingletonOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -1392,22 +1392,22 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("default", fm.getName());
 		assertEquals("defaultInstance", fm.getTestBean().getName());
 		assertEquals("setterString", fm.getStringValue());
-		
+
 		fm = (FactoryMethods) xbf.getBean("testBeanOnly");
 		assertEquals(0, fm.getNum());
 		assertEquals("default", fm.getName());
 		// This comes from the test bean
 		assertEquals("Juergen", fm.getTestBean().getName());
-		
+
 		fm = (FactoryMethods) xbf.getBean("full");
 		assertEquals(27, fm.getNum());
 		assertEquals("gotcha", fm.getName());
 		assertEquals("Juergen", fm.getTestBean().getName());
-		
+
 		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("full");
 		assertSame(fm, fm2);
 	}
-	
+
 	public void testFactoryMethodsPrototypeOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -1424,7 +1424,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		// The TestBean is created separately for each bean
 		assertNotSame(fm.getTestBean(), fm2.getTestBean());
 		assertNotSame(fm, fm2);
-		
+
 		fm = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype");
 		fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype");
 		assertEquals(0, fm.getNum());
@@ -1436,7 +1436,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		// The TestBean reference is resolved to a prototype in the factory
 		assertSame(fm.getTestBean(), fm2.getTestBean());
 		assertNotSame(fm, fm2);
-		
+
 		fm = (FactoryMethods) xbf.getBean("fullPrototype");
 		fm2 = (FactoryMethods) xbf.getBean("fullPrototype");
 		assertEquals(27, fm.getNum());
@@ -1448,7 +1448,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertSame(fm.getTestBean(), fm2.getTestBean());
 		assertNotSame(fm, fm2);
 	}
-	
+
 	/**
 	 * Tests where the static factory method is on a different class
 	 *
@@ -1461,12 +1461,12 @@ public class XmlBeanFactoryTests extends TestCase {
 		TestBean tb = (TestBean) xbf.getBean("externalFactoryMethodWithoutArgs");
 		assertEquals(2, tb.getAge());
 		assertEquals("Tristan", tb.getName());
-		
+
 		tb = (TestBean) xbf.getBean("externalFactoryMethodWithArgs");
 		assertEquals(33, tb.getAge());
 		assertEquals("Rod", tb.getName());
 	}
-	
+
 	public void testInstanceFactoryMethodWithoutArgs() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -1474,18 +1474,18 @@ public class XmlBeanFactoryTests extends TestCase {
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("instanceFactoryMethodWithoutArgs");
 		assertEquals("instanceFactory", fm.getTestBean().getName());
-		
+
 		//tb = (TestBean) xbf.getBean("externalFactoryMethodWithArgs");
 		//assertEquals(33, tb.getAge());
 		//assertEquals("Rod", tb.getName());
 	}
-	
+
 	public void testFactoryMethodNoMatchingStaticMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-		try{
+		try {
 			xbf.getBean("noMatchPrototype");
 			fail("No static method matched");
 		}
@@ -1493,7 +1493,7 @@ public class XmlBeanFactoryTests extends TestCase {
 			// Ok
 		}
 	}
-	
+
 	public void testCanSpecifyFactoryMethodArgumentsOnFactoryMethodPrototype() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -1503,9 +1503,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		tbArg.setName("arg1");
 		TestBean tbArg2 = new TestBean();
 		tbArg2.setName("arg2");
-		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] { tbArg });	
-		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[] { tbArg2 });	
-		
+		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[]{tbArg});
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnlyPrototype", new Object[]{tbArg2});
+
 		assertEquals(0, fm1.getNum());
 		assertEquals("default", fm1.getName());
 		// This comes from the test bean
@@ -1518,33 +1518,70 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertSame(fm2.getTestBean(), fm2.getTestBean());
 		assertNotSame(fm1, fm2);
 	}
-	
+
 	public void testCannotSpecifyFactoryMethodArgumentsOnSingleton() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 		try {
-			xbf.getBean("testBeanOnly", new Object[] { new TestBean() });	
+			xbf.getBean("testBeanOnly", new Object[]{new TestBean()});
 			fail("Shouldn't allow args to be passed to a singleton");
 		}
 		catch (BeanDefinitionStoreException ex) {
 			// OK
 		}
 	}
-	
+
 	public void testCannotSpecifyFactoryMethodArgumentsExceptWithFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
 		try {
-			xbf.getBean("overrideOnPrototype", new Object[] { new TestBean() });	
+			xbf.getBean("overrideOnPrototype", new Object[]{new TestBean()});
 			fail("Shouldn't allow args to be passed to a Setter-Injected object");
 		}
 		catch (BeanDefinitionStoreException ex) {
-			// OK			
+			// OK
 		}
+	}
+
+	public void testConstructorArgWithSingleSimpleTypeMatch() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
+		try {
+			SingleSimpleTypeConstructorBean bean = (SingleSimpleTypeConstructorBean) xbf.getBean("beanWithBoolean");
+			assertTrue(bean.isSingleBoolean());
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			fail("Can't convert simple value to boolean: " + ex.getMessage());
+		}
+	}
+
+	public void testConstructorArgWithDoubleSimpleTypeMatch() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
+		try {
+			SingleSimpleTypeConstructorBean bean = (SingleSimpleTypeConstructorBean) xbf.getBean("beanWithBooleanAndString");
+			assertTrue(bean.isSecondBoolean());
+			assertEquals("A String", bean.getTestString());
+		}
+		catch (BeanCreationException ex) {
+			fail("Can't convert simple value to boolean: " + ex.getMessage());
+		}
+	}
+
+	public void testDoubleBooleanAutowire() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
+		DoubleBooleanConstructorBean bean = (DoubleBooleanConstructorBean) xbf.getBean("beanWithDoubleBoolean");
+		assertEquals(Boolean.TRUE, bean.boolean1);
+		assertEquals(Boolean.FALSE, bean.boolean2);
+	}
+
+	public void testDoubleBooleanAutowireWithIndex() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
+		DoubleBooleanConstructorBean bean = (DoubleBooleanConstructorBean) xbf.getBean("beanWithDoubleBooleanAndIndex");
+		assertEquals(Boolean.FALSE, bean.boolean1);
+		assertEquals(Boolean.TRUE, bean.boolean2);
 	}
 
 
@@ -1635,6 +1672,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public static class PreparingBean1 implements DisposableBean {
 
 		public static boolean prepared = false;
+
 		public static boolean destroyed = false;
 
 		public PreparingBean1() {
@@ -1650,6 +1688,7 @@ public class XmlBeanFactoryTests extends TestCase {
 	public static class PreparingBean2 implements DisposableBean {
 
 		public static boolean prepared = false;
+
 		public static boolean destroyed = false;
 
 		public PreparingBean2() {
@@ -1705,6 +1744,18 @@ public class XmlBeanFactoryTests extends TestCase {
 				throw new IllegalStateException("Should not be destroyed before DependingBean");
 			}
 			destroyed = true;
+		}
+	}
+
+
+	public static class DoubleBooleanConstructorBean {
+
+		private Boolean boolean1;
+		private Boolean boolean2;
+
+		public DoubleBooleanConstructorBean(Boolean b1, Boolean b2) {
+			this.boolean1 = b1;
+			this.boolean2 = b2;
 		}
 	}
 

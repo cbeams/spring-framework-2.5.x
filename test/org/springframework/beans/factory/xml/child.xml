@@ -42,4 +42,6 @@
 
 	<bean id="bogusParent" parent="bogus" singleton="false"/>
 
+	<bean parent="inheritedTestBean"/>
+
 </beans>
