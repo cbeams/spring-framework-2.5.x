@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.context.support;
 
@@ -27,6 +27,8 @@ import javax.servlet.ServletContext;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Resource implementation for ServletContext resources,
@@ -58,7 +60,8 @@ public class ServletContextResource extends AbstractResource {
 	 */
 	public ServletContextResource(ServletContext servletContext, String path) {
 		this.servletContext = servletContext;
-		if (path != null && !path.startsWith("/")) {
+		Assert.notNull(path, "path is required");
+		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
 		this.path = path;
@@ -106,12 +109,7 @@ public class ServletContextResource extends AbstractResource {
 	 * @see javax.servlet.ServletContext#getRealPath
 	 */
 	public File getFile() throws IOException {
-		String realPath = this.servletContext.getRealPath(this.path);
-		if (realPath == null) {
-			throw new FileNotFoundException(
-					getDescription() + " cannot be resolved to absolute file path - " +
-					"web application archive not expanded?");
-		}
+		String realPath = WebUtils.getRealPath(this.servletContext, this.path);
 		return new File(realPath);
 	}
 
