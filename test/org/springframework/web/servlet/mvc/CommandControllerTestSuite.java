@@ -391,11 +391,11 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct float value", errors.getFieldValue("myFloat") != null);
 	}
 
-	public void testResetEmptyCheckboxes() throws Exception {
+	public void testResetEmptyFields() throws Exception {
 		TestController mc = new TestController();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
-		request.addParameter(ServletRequestDataBinder.CHECKBOX_MARKER_PREFIX + "name", "true");
+		request.addParameter(ServletRequestDataBinder.FIELD_MARKER_PREFIX + "name", "true");
 		request.addParameter("name", "test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -405,7 +405,7 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct name value", "test".equals(errors.getFieldValue("name")));
 
 		request = new MockHttpServletRequest("GET", "/welcome.html");
-		request.addParameter(ServletRequestDataBinder.CHECKBOX_MARKER_PREFIX + "name", "true");
+		request.addParameter(ServletRequestDataBinder.FIELD_MARKER_PREFIX + "name", "true");
 		mv = mc.handleRequest(request, response);
 		tb = (TestBean) mv.getModel().get("command");
 		errors = (Errors) mv.getModel().get("errors");
@@ -419,12 +419,12 @@ public class CommandControllerTestSuite extends TestCase {
 				return new TestBean("original", 99);
 			}
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
-				binder.setResetEmptyCheckboxFields(false);
+				binder.setResetEmptyFields(false);
 			}
 		};
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
-		request.addParameter(ServletRequestDataBinder.CHECKBOX_MARKER_PREFIX + "name", "true");
+		request.addParameter(ServletRequestDataBinder.FIELD_MARKER_PREFIX + "name", "true");
 		request.addParameter("name", "test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -434,7 +434,7 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct name value", "test".equals(errors.getFieldValue("name")));
 
 		request = new MockHttpServletRequest("GET", "/welcome.html");
-		request.addParameter(ServletRequestDataBinder.CHECKBOX_MARKER_PREFIX + "name", "true");
+		request.addParameter(ServletRequestDataBinder.FIELD_MARKER_PREFIX + "name", "true");
 		mv = mc.handleRequest(request, response);
 		tb = (TestBean) mv.getModel().get("command");
 		errors = (Errors) mv.getModel().get("errors");

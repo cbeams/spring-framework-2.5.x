@@ -49,13 +49,17 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public class ServletRequestDataBinder extends DataBinder {
 
 	/**
-	 * Prefix that checkbox marker parameters start with, followed
-	 * by the field name: e.g. "_checkbox.subscribeToNewsletter"
-	 * for a field "subscribeToNewsletter".
+	 * Prefix that field marker parameters start with, followed by the field
+	 * name: e.g. "_subscribeToNewsletter" for a field "subscribeToNewsletter".
+	 * <p>Such a marker parameter indicates that the field existed in the form
+	 * that caused the submission. If no corresponding field value parameter
+	 * was found, the field will be reset. This is particularly useful for
+	 * HTML checkboxes and select options.
+	 * @see #resetEmptyFields
 	 */
-	public static final String CHECKBOX_MARKER_PREFIX = "_checkbox.";
+	public static final String FIELD_MARKER_PREFIX = "_";
 
-	private boolean resetEmptyCheckboxFields = true;
+	private boolean resetEmptyFields = true;
 
 	private boolean bindEmptyMultipartFiles = true;
 
@@ -70,8 +74,9 @@ public class ServletRequestDataBinder extends DataBinder {
 	}
 
 	/**
-	 * Set whether to automatically reset empty checkbox fields that are marked
-	 * through "_checkbox.FIELD" parameters. Default is true.
+	 * Set whether to automatically reset empty fields that are marked through
+	 * "_FIELD" parameters (e.g. "_subscribeToNewsletter"). Default is true.
+	 * This is particularly useful for HTML checkboxes and select options.
 	 * <p>HTML checkboxes only send a value when they're checked, so it is not
 	 * possible to detect that a formerly checked box has just been unchecked,
 	 * at least not with standard HTML means.
@@ -81,14 +86,14 @@ public class ServletRequestDataBinder extends DataBinder {
 	 * in a custom <code>onBind</code> implementation.
 	 * <p>This auto-reset mechanism addresses this deficiency, provided
 	 * that a marker parameter is sent for each checkbox field, like
-	 * "_checkbox.subscribeToNewsletter" for a "subscribeToNewsletter" field.
-	 * As the marker parameter is sent in any case, the data binder can detect
-	 * an empty checkbox field and automatically reset its value.
-	 * @see #CHECKBOX_MARKER_PREFIX
+	 * "_subscribeToNewsletter" for a "subscribeToNewsletter" field.
+	 * As the marker parameter is sent in any case, the data binder can
+	 * detect an empty field and automatically reset its value.
+	 * @see #FIELD_MARKER_PREFIX
 	 * @see org.springframework.web.servlet.mvc.BaseCommandController#onBind
 	 */
-	public void setResetEmptyCheckboxFields(boolean resetEmptyCheckboxFields) {
-		this.resetEmptyCheckboxFields = resetEmptyCheckboxFields;
+	public void setResetEmptyFields(boolean resetEmptyFields) {
+		this.resetEmptyFields = resetEmptyFields;
 	}
 
 	/**
@@ -123,13 +128,13 @@ public class ServletRequestDataBinder extends DataBinder {
 		// bind normal HTTP parameters
 		MutablePropertyValues pvs = new ServletRequestParameterPropertyValues(request);
 
-		// check for special checkbox markers
-		if (this.resetEmptyCheckboxFields) {
+		// check for special field markers
+		if (this.resetEmptyFields) {
 			PropertyValue[] pvArray = pvs.getPropertyValues();
 			for (int i = 0; i < pvArray.length; i++) {
 				PropertyValue pv = pvArray[i];
-				if (pv.getName().startsWith(CHECKBOX_MARKER_PREFIX)) {
-					String field = pv.getName().substring(CHECKBOX_MARKER_PREFIX.length());
+				if (pv.getName().startsWith(FIELD_MARKER_PREFIX)) {
+					String field = pv.getName().substring(FIELD_MARKER_PREFIX.length());
 					if (!pvs.contains(field)) {
 						try {
 							Class type = getBeanWrapper().getPropertyType(field);
