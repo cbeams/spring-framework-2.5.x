@@ -12,7 +12,7 @@
 
 	<bean id="searchFrontController" name="/search.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="cacheSeconds"><value>0</value></property>
-		<property name="flow"><ref bean="search.flow"/></property>
+		<property name="flow"><ref bean="person.Search"/></property>
 	</bean>
 	
 	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">

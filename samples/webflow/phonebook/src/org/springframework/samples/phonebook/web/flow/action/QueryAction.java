@@ -20,6 +20,6 @@ public class QueryAction implements Action {
 			throws Exception {
 		PhoneBookQuery query = (PhoneBookQuery)model.getAttribute("query");
 		model.setAttribute("persons", phoneBook.query(query));
-		return "ok";
+		return "success";
 	}
 }

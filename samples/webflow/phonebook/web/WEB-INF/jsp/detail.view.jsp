@@ -42,7 +42,7 @@
 				for (int i=0; i<person.nrColleagues(); i++) {
 					Person colleague=person.getColleague(i);
 			%>
-				<A href="select?_flowExecutionId=<%=request.getAttribute("flowExecutionId") %>&_eventId=colleagueDetail&id=<%=colleague.getUserId() %>">
+				<A href="detail.htm?_flowExecutionId=<%=request.getAttribute("flowExecutionId") %>&_eventId=select&id=<%=colleague.getUserId() %>">
 					<%=colleague.getFirstName() %> <%=colleague.getLastName() %>
 				</A>
 				<BR>

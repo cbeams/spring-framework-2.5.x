@@ -32,7 +32,7 @@
 							<TD><%=person.getFirstName() %></TD>
 							<TD><%=person.getLastName() %></TD>
 							<TD>
-								<A href="search?_flowExecutionId=<%=request.getAttribute("flowExecutionId") %>&_eventId=select&id=<%=person.getUserId() %>">
+								<A href="search.htm?_flowExecutionId=<%=request.getAttribute("flowExecutionId") %>&_eventId=select&id=<%=person.getUserId() %>">
 									<%=person.getUserId() %>
 								</A>
 							</TD>

@@ -12,7 +12,7 @@
 		
 		<DIV align="left">
 			<P>
-				<A href="phoneBook/search">Phone Book</A>
+				<A href="search.htm">Phone Book</A>
 			</P>
 			
 			<P>
