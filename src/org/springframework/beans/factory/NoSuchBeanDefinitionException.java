@@ -22,7 +22,7 @@ import org.springframework.beans.BeansException;
  * Exception thrown when a BeanFactory is asked for a bean
  * instance name for which it cannot find a definition.
  * @author Rod Johnson
- * @version $Id: NoSuchBeanDefinitionException.java,v 1.4 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: NoSuchBeanDefinitionException.java,v 1.5 2004-03-18 10:37:40 jhoeller Exp $
  */
 public class NoSuchBeanDefinitionException extends BeansException {
 
@@ -35,32 +35,34 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	/**
 	 * Create new <code>NoSuchBeanDefinitionException</code>.
 	 * @param name the name of the missing bean
-	 * @param message further, detailed message describing the problem.
+	 * @param message further, detailed message describing the problem
 	 */
 	public NoSuchBeanDefinitionException(String name, String message) {
-		super("No bean named '" + name + "' is defined: " + message, null);
+		super("No bean named '" + name + "' is defined: " + message);
 		this.beanName = name;
 	}
 
 	/**
 	 * Create new <code>NoSuchBeanDefinitionException</code>.
 	 * @param type required type of bean
-	 * @param message further, detailed message describing the problem.
+	 * @param message further, detailed message describing the problem
 	 */
 	public NoSuchBeanDefinitionException(Class type, String message) {
-		super("No unique bean of type [" + type.getName() + "] is defined: " + message, null);
+		super("No unique bean of type [" + type.getName() + "] is defined: " + message);
 		this.beanType = type;
 	}
 
 	/**
-	 * Return the name of the missing bean.
+	 * Return the name of the missing bean,
+	 * if it was a lookup by name that failed.
 	 */
 	public String getBeanName() {
 		return beanName;
 	}
 
 	/**
-	 * Return the required type of bean.
+	 * Return the required type of bean,
+	 * if it was a lookup by type that failed.
 	 */
 	public Class getBeanType() {
 		return beanType;

@@ -18,6 +18,7 @@ package org.springframework.aop.target;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -27,20 +28,18 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Base class for dynamic TargetSources that can create new prototype bean
- * instances to support a pooling or new-instance-per-invocation strategy. Such
- * TargetSources must run in a BeanFactory, as it needs to call the getBean()
- * method to create a new prototype instance.
- * 
+ * instances to support a pooling or new-instance-per-invocation strategy.
+ * Such TargetSources must run in a BeanFactory, as it needs to call the
+ * getBean() method to create a new prototype instance.
  * @author Rod Johnson
- * @version $Id: AbstractPrototypeTargetSource.java,v 1.4 2004-03-18 02:46:13 trisberg Exp $
+ * @version $Id: AbstractPrototypeTargetSource.java,v 1.5 2004-03-18 10:38:13 jhoeller Exp $
  */
-public abstract class AbstractPrototypeTargetSource implements TargetSource, BeanFactoryAware, InitializingBean {
+public abstract class AbstractPrototypeTargetSource
+		implements TargetSource, BeanFactoryAware, InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Name of the target bean we will create on each invocation
-	 */
+	/** Name of the target bean we will create on each invocation */
 	private String targetBeanName;
 
 	/**
@@ -56,16 +55,17 @@ public abstract class AbstractPrototypeTargetSource implements TargetSource, Bea
 	 * Set the name of the target bean in the factory. This bean should be a
 	 * prototype, or the same instance will always be obtained from the
 	 * factory, resulting in the same behaviour as the InvokerInterceptor
-	 * 
-	 * @param targetBeanName
-	 *                  name of the target bean in the BeanFactory that owns this
-	 *                  interceptor.
+	 * @param targetBeanName name of the target bean in the BeanFactory
+	 * that owns this interceptor
 	 */
-	public final void setTargetBeanName(String targetBeanName) {
+	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
 	}
 
-	public final String getTargetBeanName() {
+	/**
+	 * Return the name of the target bean in the factory.
+	 */
+	public String getTargetBeanName() {
 		return this.targetBeanName;
 	}
 
@@ -77,8 +77,7 @@ public abstract class AbstractPrototypeTargetSource implements TargetSource, Bea
 		this.owningBeanFactory = beanFactory;
 		if (this.owningBeanFactory.isSingleton(this.targetBeanName)) {
 			throw new BeanDefinitionStoreException(
-				"Cannot use PrototypeTargetSource against a Singleton bean; instances would not be independent",
-				null);
+				"Cannot use PrototypeTargetSource against a Singleton bean; instances would not be independent");
 		}
 		logger.info("Getting bean with name '" + targetBeanName + "' to find class");
 		this.targetClass = owningBeanFactory.getBean(targetBeanName).getClass();
@@ -94,26 +93,18 @@ public abstract class AbstractPrototypeTargetSource implements TargetSource, Bea
 		return this.owningBeanFactory.getBean(this.targetBeanName);
 	}
 
-	/**
-	 * @see org.springframework.aop.TargetSource#getTargetClass()
-	 */
-	public final Class getTargetClass() {
+	public Class getTargetClass() {
 		return this.targetClass;
 	}
 
-	/**
-	 * @see org.springframework.aop.TargetSource#isStatic()
-	 */
-	public final boolean isStatic() {
+	public boolean isStatic() {
 		return false;
 	}
 
-	/**
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (this.targetBeanName == null) {
-			throw new IllegalStateException("targetBeanName property must be set.");
+			throw new IllegalStateException("targetBeanName is required");
 		}
 	}
+
 }
