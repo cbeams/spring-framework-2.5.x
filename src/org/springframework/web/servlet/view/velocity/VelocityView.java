@@ -30,6 +30,7 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -69,10 +70,11 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityView.java,v 1.28 2004-07-02 00:40:03 davison Exp $
+ * @version $Id: VelocityView.java,v 1.29 2004-07-23 08:38:54 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  * @see #setUrl
+ * @see #setExposeSpringMacroHelpers
  * @see #setEncoding
  * @see #setVelocityEngine
  * @see VelocityConfig
@@ -80,7 +82,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  */
 public class VelocityView extends AbstractTemplateView {
 
-    private String encoding = null;
+	private String encoding = null;
 
 	private String velocityFormatterAttribute;
 
@@ -185,8 +187,8 @@ public class VelocityView extends AbstractTemplateView {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new ApplicationContextException("Must define a single VelocityConfig bean in this web application " +
-					"context (may be inherited): VelocityConfigurer is the usual implementation. " +
-					"This bean may be given any name.", ex);
+																							"context (may be inherited): VelocityConfigurer is the usual " +
+																							"implementation. This bean may be given any name.", ex);
 			}
 		}
 
@@ -221,7 +223,9 @@ public class VelocityView extends AbstractTemplateView {
 
 		response.setContentType(getContentType());
 
-	    // create context from model and add Velocity helpers
+		exposeHelpers(model, request);
+
+		// create context from model
 		Context velocityContext = new VelocityContext(model);
 		exposeHelpers(velocityContext, request);
 
@@ -259,11 +263,25 @@ public class VelocityView extends AbstractTemplateView {
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
 	 * <p>Called by renderMergedTemplateModel. The default implementations is empty.
+	 * This method can be overridden to add custom helpers to the model.
+	 * @param model The model that will be passed to the template at merge time
+	 * @param request current HTTP request
+	 * @throws Exception if there's a fatal error while we're adding information to the context
+	 * @see #renderMergedTemplateModel
+	 */
+	protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
+	}
+
+	/**
+	 * Expose helpers unique to each rendering operation. This is necessary so that
+	 * different rendering operations can't overwrite each other's formats etc.
+	 * <p>Called by renderMergedTemplateModel. The default implementations is empty.
 	 * This method can be overridden to add custom helpers to the Velocity context.
 	 * @param velocityContext Velocity context that will be passed to the template at merge time
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding information to the context
-	 * @see #renderMergedTemplateModel
+	 * @deprecated in favor of exposeHelpers(Map, HttpServletRequest)
+	 * @see #exposeHelpers(Map, HttpServletRequest)
 	 */
 	protected void exposeHelpers(Context velocityContext, HttpServletRequest request) throws Exception {
 	}

@@ -23,16 +23,16 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
-
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 
 /**
  * View using the FreeMarker template engine.
@@ -54,8 +54,9 @@ import freemarker.template.TemplateException;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 3/3/2004
- * @version $Id: FreeMarkerView.java,v 1.4 2004-07-02 00:40:02 davison Exp $
+ * @version $Id: FreeMarkerView.java,v 1.5 2004-07-23 08:38:55 jhoeller Exp $
  * @see #setUrl
+ * @see #setExposeSpringMacroHelpers
  * @see #setEncoding
  * @see #setConfiguration
  * @see FreeMarkerConfig
@@ -66,6 +67,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	private String encoding;
 
 	private Configuration configuration;
+
 
 	/**
 	 * Set the encoding of the FreeMarker template file. Default is determined
@@ -121,8 +123,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new ApplicationContextException("Must define a single FreeMarkerConfig bean in this web application " +
-				        	"context (may be inherited): FreeMarkerConfigurer is the usual implementation. " +
-							"This bean may be given any name.", ex);
+																							"context (may be inherited): FreeMarkerConfigurer is the usual " +
+																							"implementation. This bean may be given any name.", ex);
 			}
 		}
 
@@ -136,13 +138,14 @@ public class FreeMarkerView extends AbstractTemplateView {
 		}
 	}
 
+
 	/**
 	 * Process the model map by merging it with the FreeMarker template. Output is
 	 * directed to the response. This method can be overridden if custom behavior
 	 * is needed.
 	 */
 	protected void renderMergedTemplateModel(Map model, HttpServletRequest request,
-												HttpServletResponse response) throws Exception {
+																					 HttpServletResponse response) throws Exception {
 	   
 		// grab the locale-specific version of the template
 		Template template = getTemplate(RequestContextUtils.getLocale(request));

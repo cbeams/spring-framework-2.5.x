@@ -20,7 +20,7 @@ import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.view.UrlBasedViewResolver;
+import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 
 /**
  * Convenience subclass of UrlBasedViewResolver that supports VelocityView
@@ -39,18 +39,20 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
  * @see #setPrefix
  * @see #setSuffix
  * @see #setRequestContextAttribute
+ * @see #setExposeSpringMacroHelpers
  * @see #setVelocityFormatterAttribute
  * @see #setDateToolAttribute
  * @see #setNumberToolAttribute
  * @see VelocityView
  */
-public class VelocityViewResolver extends UrlBasedViewResolver {
+public class VelocityViewResolver extends AbstractTemplateViewResolver {
 
 	private String velocityFormatterAttribute;
 
 	private String dateToolAttribute;
 
 	private String numberToolAttribute;
+
 
 	/**
 	 * Sets default viewClass to VelocityView.
@@ -95,6 +97,7 @@ public class VelocityViewResolver extends UrlBasedViewResolver {
 	public void setNumberToolAttribute(String numberToolAttribute) {
 		this.numberToolAttribute = numberToolAttribute;
 	}
+
 
 	protected View loadView(String viewName, Locale locale) throws BeansException {
 		VelocityView view = (VelocityView) super.loadView(viewName, locale);

@@ -19,33 +19,48 @@ package org.springframework.web.servlet.view;
 import java.util.Enumeration;
 import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.web.servlet.support.RequestContext;
+
 /**
  * AbstractTemplateView provides template based view technologies such as
- * Velocity and FreeMarker with the ability to use request and session
- * attributes in their model.
+ * Velocity and FreeMarker, with the ability to use request and session
+ * attributes in their model and the option to expose helper objects
+ * for Spring's Velocity/FreeMarker macro library.
  *
  * <p>JSP/JSTL and other view technologies automatically have access to the
  * HttpServletRequest object and thereby the request/session attributes
- * for the current user.
+ * for the current user. Furthermore, they are able to create and cache
+ * helper objects as request attributes themselves.
  *
  * @author Darren Davison
  * @author Juergen Hoeller
- * @since May 17, 2004
- * @version $Id: AbstractTemplateView.java,v 1.2 2004-05-21 19:33:38 jhoeller Exp $
+ * @since 17.05.2004
+ * @version $Id: AbstractTemplateView.java,v 1.3 2004-07-23 08:38:52 jhoeller Exp $
  */
 public abstract class AbstractTemplateView extends AbstractUrlBasedView {
+
+	/**
+	 * Variable name of the RequestContext instance in the template model,
+	 * available to Spring's macros: e.g. for creating BindStatus objects.
+	 */
+	public static final String SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE = "springMacroRequestContext";
+
 
 	private boolean exposeRequestAttributes = false;
 
 	private boolean exposeSessionAttributes = false;
 
+	private boolean exposeSpringMacroHelpers = false;
+
+
 	/**
 	 * Set whether all request attributes should be added to the
-	 * model prior to merging with the template.
+	 * model prior to merging with the template. Default is false.
 	 */
 	public void setExposeRequestAttributes(boolean exposeRequestAttributes) {
 		this.exposeRequestAttributes = exposeRequestAttributes;
@@ -53,10 +68,22 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Set whether all HttpSession attributes should be added to the
-	 * model prior to merging with the template.
+	 * model prior to merging with the template. Default is false.
 	 */
 	public void setExposeSessionAttributes(boolean exposeSessionAttributes) {
 		this.exposeSessionAttributes = exposeSessionAttributes;
+	}
+
+	/**
+	 * Set whether to expose a RequestContext for use by Spring's macro library,
+	 * under the name "springBindRequestContext". Default is false.
+	 * <p>Currently needed for Spring's Velocity and FreeMarker default macros.
+	 * Note that this is <b>not</b> required for templates that use HTML
+	 * forms <b>unless</b> you wish to take advantage of the Spring helper macros.
+	 * @see #SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE
+	 */
+	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {
+		this.exposeSpringMacroHelpers = exposeSpringMacroHelpers;
 	}
 
 	protected final void renderMergedOutputModel(Map model, HttpServletRequest request,
@@ -65,6 +92,10 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 		if (this.exposeRequestAttributes) {
 			for (Enumeration enum = request.getAttributeNames(); enum.hasMoreElements();) {
 				String attribute = (String) enum.nextElement();
+				if (model.containsKey(attribute)) {
+					throw new ServletException("Cannot expose request attribute '" + attribute +
+																		 "' because of an existing model object of the same name");
+				}
 				Object attributeValue = request.getAttribute(attribute);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Exposing request attribute '" + attribute + "' with value [" +
@@ -79,6 +110,10 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 			if (session != null) {
 				for (Enumeration enum = session.getAttributeNames(); enum.hasMoreElements();) {
 					String attribute = (String) enum.nextElement();
+					if (model.containsKey(attribute)) {
+						throw new ServletException("Cannot expose session attribute '" + attribute +
+																			 "' because of an existing model object of the same name");
+					}
 					Object attributeValue = session.getAttribute(attribute);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Exposing session attribute '" + attribute + "' with value [" +
@@ -87,6 +122,15 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 					model.put(attribute, attributeValue);
 				}
 			}
+		}
+
+		if (this.exposeSpringMacroHelpers) {
+			if (model.containsKey(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)) {
+				throw new ServletException("Cannot expose bind macro helper '" + SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE +
+																	 "' because of an existing model object of the same name");
+			}
+			// expose RequestContext instance for Spring macros
+			model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(request, model));
 		}
 
 		renderMergedTemplateModel(model, request, response);
