@@ -39,9 +39,10 @@ import org.springframework.util.Log4jConfigurer;
  *
  * <ul>
  * <li><i>"log4jConfigLocation":</i><br>
- * Name of the Log4J config file (relative to the web application root directory,
- * e.g. "/WEB-INF/log4j.properties"). If not specified, default Log4J initialization
- * will apply (from "log4j.properties" in the classpath).
+ * Name of the Log4J config file; relative to the web application root directory, e.g.
+ * "/WEB-INF/log4j.properties", or an absolute file URL, e.g. "file:C:/log4j.properties).
+ * If not specified, default Log4J initialization will apply (from "log4j.properties"
+ * in the class path; see Log4J documentation for details).
  * <li><i>"log4jRefreshInterval":</i><br>
  * Interval between config file refresh checks, in milliseconds. If not specified,
  * no refresh checks will happen, which avoids starting Log4J's watchdog thread.
@@ -92,6 +93,8 @@ public abstract class Log4jWebConfigurer {
 	/** Parameter specifying the refresh interval for checking the Log4J config file */
 	public static final String REFRESH_INTERVAL_PARAM = "log4jRefreshInterval";
 
+	public static final String FILE_URL_PREFIX = "file:";
+
 
 	/**
 	 * Initialize Log4J, including setting the web app root system property.
@@ -99,7 +102,6 @@ public abstract class Log4jWebConfigurer {
 	 * @see WebUtils#setWebAppRootSystemProperty
 	 */
 	public static void initLogging(ServletContext servletContext) {
-
 		// Set the web app root system property.
 		WebUtils.setWebAppRootSystemProperty(servletContext);
 
@@ -107,22 +109,12 @@ public abstract class Log4jWebConfigurer {
 		String location = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
 		if (location != null) {
 
-			// Interpret location as relative to the web application root directory
-			if (!location.startsWith("/")) {
-				location = "/" + location;
-			}
-
 			// Write log message to server log.
 			servletContext.log("Initializing Log4J from [" + location + "]");
 
 			// Perform actual Log4J initialization.
 			try {
-				String realPath = servletContext.getRealPath(location);
-				if (realPath == null) {
-					throw new FileNotFoundException(
-							"ServletContext resource [" + realPath + "] cannot be resolved to absolute file path - " +
-							"web application archive not expanded?");
-				}
+				String filePath = getFilePath(location, servletContext);
 
 				// Check whether refresh interval was specified.
 				String intervalString = servletContext.getInitParameter(REFRESH_INTERVAL_PARAM);
@@ -131,7 +123,7 @@ public abstract class Log4jWebConfigurer {
 					// checking the file in the background.
 					try {
 						long refreshInterval = Long.parseLong(intervalString);
-						Log4jConfigurer.initLogging(realPath, refreshInterval);
+						Log4jConfigurer.initLogging(filePath, refreshInterval);
 					}
 					catch (NumberFormatException ex) {
 						throw new IllegalArgumentException("Invalid 'log4jRefreshInterval' parameter: " + ex.getMessage());
@@ -139,13 +131,38 @@ public abstract class Log4jWebConfigurer {
 				}
 				else {
 					// Initialize without refresh check, i.e. without Log4J's watchdog thread.
-					Log4jConfigurer.initLogging(realPath);
+					Log4jConfigurer.initLogging(filePath);
 				}
 			}
 			catch (FileNotFoundException ex) {
 				throw new IllegalArgumentException("Invalid 'log4jConfigLocation' parameter: " + ex.getMessage());
 			}
 		}
+	}
+
+	/**
+	 * Turn the given location into an absolute file path in the file system.
+	 * @param location the Log4J config location
+	 * @param servletContext the current ServletContext
+	 * @return the absolute file path
+	 * @throws FileNotFoundException if the location cannot be resolved as file path
+	 */
+	private static String getFilePath(String location, ServletContext servletContext) throws FileNotFoundException {
+		// Check for "file:" URL.
+		if (location.startsWith(FILE_URL_PREFIX)) {
+			return location.substring(FILE_URL_PREFIX.length());
+		}
+		// Interpret location as relative to the web application root directory.
+		if (!location.startsWith("/")) {
+			location = "/" + location;
+		}
+		String realPath = servletContext.getRealPath(location);
+		if (realPath == null) {
+			throw new FileNotFoundException(
+					"ServletContext resource [" + location + "] cannot be resolved to absolute file path - " +
+					"web application archive not expanded?");
+		}
+		return realPath;
 	}
 
 	/**
