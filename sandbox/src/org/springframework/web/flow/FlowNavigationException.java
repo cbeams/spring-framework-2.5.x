@@ -15,6 +15,8 @@
  */
 package org.springframework.web.flow;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * Abstract superclass of all flow navigation exceptions. A flow
  * navigation exception signals a problem while navigating inside
@@ -24,21 +26,12 @@ package org.springframework.web.flow;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class FlowNavigationException extends RuntimeException {
+public abstract class FlowNavigationException extends NestedRuntimeException {
 
 	/**
 	 * The definition of the flow where the exception was thrown.
 	 */
 	private Flow flow;
-
-	/**
-	 * Create a new navigation exception.
-	 * @param flow the flow in which the navigation exception occured
-	 */
-	public FlowNavigationException(Flow flow) {
-		super();
-		this.flow = flow;
-	}
 
 	/**
 	 * Create a new navigation exception.
@@ -58,16 +51,6 @@ public abstract class FlowNavigationException extends RuntimeException {
 	 */
 	public FlowNavigationException(Flow flow, String message, Throwable cause) {
 		super(message, cause);
-		this.flow = flow;
-	}
-
-	/**
-	 * Create a new navigation exception.
-	 * @param flow the flow in which the navigation exception occured
-	 * @param cause the underlying cause of the exception
-	 */
-	public FlowNavigationException(Flow flow, Throwable cause) {
-		super(cause);
 		this.flow = flow;
 	}
 

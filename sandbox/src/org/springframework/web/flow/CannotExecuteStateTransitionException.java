@@ -40,7 +40,8 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	 * @param cause the underlying cause of this exception
 	 */
 	public CannotExecuteStateTransitionException(State state, Throwable cause) {
-		super(state.getFlow(), cause);
+		super(state.getFlow(), "Could not execute a transition from state '" + state + "' to another state in flow '"
+				+ state.getFlow().getId() + "'", cause);
 		this.stateIdTransitioningFrom = state.getId();
 	}
 
@@ -60,23 +61,9 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	 * @param cause the underlying cause of this exception
 	 */
 	public CannotExecuteStateTransitionException(Transition transition, Throwable cause) {
-		super(transition.getSourceState().getFlow(), cause);
+		super(transition.getSourceState().getFlow(), "Could not execute transition from state '"
+				+ transition.getSourceState().getId() + "' to state '" + transition.getTargetStateId() + "' in flow '"
+				+ transition.getSourceState().getFlow() + "'", cause);
 		this.transition = transition;
-	}
-
-	public String getMessage() {
-		if (super.getMessage() != null) {
-			return super.getMessage();
-		}
-		else {
-			if (transition != null) {
-				return "Could not execute transition from state '" + transition.getSourceState().getId()
-						+ "' to state '" + transition.getTargetStateId() + "' in flow '" + getFlow().getId() + "'";
-			}
-			else {
-				return "Could not execute a transition from state '" + stateIdTransitioningFrom
-						+ "' to another state in flow '" + getFlow().getId() + "'";
-			}
-		}
 	}
 }

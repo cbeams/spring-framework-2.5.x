@@ -15,17 +15,18 @@
  */
 package org.springframework.web.flow;
 
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract superclass of all flow service lookup exceptions. A service
- * lookup exception is thrown when a service artifact required by a flow
- * cannot be obtained, either at flow configuration time or at runtime.
+ * Abstract superclass of all flow service lookup exceptions. A service lookup
+ * exception is thrown when a service artifact required by a flow cannot be
+ * obtained, either at flow configuration time or at runtime.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class ServiceLookupException extends RuntimeException {
+public abstract class ServiceLookupException extends NestedRuntimeException {
 
 	private String serviceId;
 
@@ -34,52 +35,13 @@ public abstract class ServiceLookupException extends RuntimeException {
 	/**
 	 * Create a new service lookup exception.
 	 * @param serviceId the id of the service that cannot be found
-	 */
-	public ServiceLookupException(String serviceId) {
-		super();
-		this.serviceId = serviceId;
-	}
-
-	/**
-	 * Create a new service lookup exception.
-	 * @param serviceId the id of the service that cannot be found
-	 * @param cause the underlying cause of this exception
-	 */
-	public ServiceLookupException(String serviceId, Throwable cause) {
-		super(cause);
-		this.serviceId = serviceId;
-	}
-
-	/**
-	 * Create a new service lookup exception.
-	 * @param serviceId the id of the service that cannot be found
 	 * @param message descriptive message
 	 * @param cause the underlying cause of this exception
 	 */
 	public ServiceLookupException(String serviceId, String message, Throwable cause) {
-		super(message, cause);
+		super((StringUtils.hasText(message) ? message : "Unable to look up service with id '" + serviceId
+				+ "'; make sure there is at least one service exported in the registry with this id"), cause);
 		this.serviceId = serviceId;
-	}
-
-	/**
-	 * Create a new service lookup exception.
-	 * @param serviceImplementationClass the required implementation class of
-	 *        the service that cannot be found
-	 */
-	public ServiceLookupException(Class serviceImplementationClass) {
-		super();
-		this.serviceImplementationClass = serviceImplementationClass;
-	}
-
-	/**
-	 * Create a new service lookup exception.
-	 * @param serviceImplementationClass the required implementation class of
-	 *        the service that cannot be found
-	 * @param cause the underlying cause of this exception
-	 */
-	public ServiceLookupException(Class serviceImplementationClass, Throwable cause) {
-		super(cause);
-		this.serviceImplementationClass = serviceImplementationClass;
 	}
 
 	/**
@@ -90,24 +52,10 @@ public abstract class ServiceLookupException extends RuntimeException {
 	 * @param cause the underlying cause of this exception
 	 */
 	public ServiceLookupException(Class serviceImplementationClass, String message, Throwable cause) {
-		super(message, cause);
+		super((StringUtils.hasText(message) ? message : "Unable to look up service implementation '"
+				+ serviceImplementationClass
+				+ "'; make sure there is a single service exported in the registry of this type"), cause);
 		this.serviceImplementationClass = serviceImplementationClass;
-	}
-
-	public String getMessage() {
-		if (StringUtils.hasText(super.getMessage())) {
-			return super.getMessage();
-		}
-		else {
-			if (StringUtils.hasText(serviceId)) {
-				return "Unable to look up service with id '" + serviceId
-						+ "'; make sure there is at least one service exported in the context with this id";
-			}
-			else {
-				return "Unable to look up service implementation '" + serviceImplementationClass
-						+ "'; make sure there is a single service exported in the context of this type";
-			}
-		}
 	}
 
 	/**
@@ -132,7 +80,8 @@ public abstract class ServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * Returns the required implementation class of the service that cannot be found.
+	 * Returns the required implementation class of the service that cannot be
+	 * found.
 	 */
 	public Class getServiceImplementationClass() {
 		return serviceImplementationClass;

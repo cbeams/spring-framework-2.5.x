@@ -15,13 +15,15 @@
  */
 package org.springframework.web.flow.action;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * Exception thrown if a form object could not be retrieved via its identifier.
  * Provides information about the persistent class and the identifier.
  * @author Keith Donald 
  * @author Juergen Hoeller
  */
-public class FormObjectRetrievalFailureException extends RuntimeException {
+public class FormObjectRetrievalFailureException extends NestedRuntimeException {
 
 	private String formObjectName;
 
@@ -48,8 +50,8 @@ public class FormObjectRetrievalFailureException extends RuntimeException {
 	 * @param ex source exception
 	 */
 	public FormObjectRetrievalFailureException(
-			Class formObjectClass, String formObjectName, String msg, Throwable ex) {
-		super(msg, ex);
+			Class formObjectClass, String formObjectName, String msg, Throwable cause) {
+		super(msg, cause);
 		this.formObjectClass = formObjectClass;
 		this.formObjectName = formObjectName;
 	}

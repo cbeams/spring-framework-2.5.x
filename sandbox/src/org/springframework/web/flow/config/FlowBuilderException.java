@@ -15,12 +15,14 @@
  */
 package org.springframework.web.flow.config;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * Exception thrown to indicate a problem while building a flow.
  * 
  * @author Erwin Vervaet
  */
-public class FlowBuilderException extends RuntimeException {
+public class FlowBuilderException extends NestedRuntimeException {
 
 	/**
 	 * Create a new flow builder exception.
@@ -28,14 +30,6 @@ public class FlowBuilderException extends RuntimeException {
 	 */
 	public FlowBuilderException(String message) {
 		super(message);
-	}
-
-	/**
-	 * Create a new flow builder exception.
-	 * @param cause the underlying cause of this exception
-	 */
-	public FlowBuilderException(Throwable cause) {
-		super(cause);
 	}
 
 	/**

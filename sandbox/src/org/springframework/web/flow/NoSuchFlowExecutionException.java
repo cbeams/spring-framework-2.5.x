@@ -15,6 +15,8 @@
  */
 package org.springframework.web.flow;
 
+import org.springframework.core.NestedRuntimeException;
+
 /**
  * Thrown when no flow execution exists by the specified
  * <code>flowExecutionId</code>. This might occur if the flow execution timed
@@ -23,7 +25,7 @@ package org.springframework.web.flow;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class NoSuchFlowExecutionException extends RuntimeException {
+public class NoSuchFlowExecutionException extends NestedRuntimeException {
 
 	private String flowExecutionId;
 
@@ -32,7 +34,7 @@ public class NoSuchFlowExecutionException extends RuntimeException {
 	 * @param flowExecutionId id of the flow execution that cannot be found
 	 */
 	public NoSuchFlowExecutionException(String flowExecutionId) {
-		this.flowExecutionId = flowExecutionId;
+		this(flowExecutionId, null);
 	}
 
 	/**
@@ -41,11 +43,16 @@ public class NoSuchFlowExecutionException extends RuntimeException {
 	 * @param cause the underlying cause of this exception
 	 */
 	public NoSuchFlowExecutionException(String flowExecutionId, Throwable cause) {
-		super(cause);
+		super("No executing flow could be found with id '" + flowExecutionId
+				+ "' -- perhaps the flow has ended or expired?", cause);
 		this.flowExecutionId = flowExecutionId;
 	}
-
-	public String getMessage() {
-		return "No executing flow could be found with id '" + flowExecutionId + "' -- perhaps the flow has ended?";
+	
+	/**
+	 * Returns the id of the flow execution that was not found.
+	 * @return The flow execution id.
+	 */
+	public String getFlowExecutionId() {
+		return flowExecutionId;
 	}
 }

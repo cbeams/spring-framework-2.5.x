@@ -25,48 +25,28 @@ public class NoSuchFlowDefinitionException extends ServiceLookupException {
 
 	/**
 	 * Create a new flow definition lookup exception.
-	 * @param serviceImplementationClass the required implementation class of
-	 *        the service that cannot be found
-	 */
-	public NoSuchFlowDefinitionException(Class serviceImplementationClass) {
-		super(serviceImplementationClass);
-	}
-
-	/**
-	 * Create a new flow definition lookup exception.
-	 * @param serviceImplementationClass the required implementation class of
-	 *        the service that cannot be found
+	 * @param flowBuilderClass the required implementation class of the service
+	 *        that cannot be found
 	 * @param cause the underlying cause of this exception
 	 */
-	public NoSuchFlowDefinitionException(Class serviceImplementationClass, Throwable cause) {
-		super(serviceImplementationClass, cause);
+	public NoSuchFlowDefinitionException(Class flowBuilderClass, Throwable cause) {
+		super(flowBuilderClass, "No flow definition was found produced by this FlowBuilder implementation '"
+				+ flowBuilderClass
+				+ "'; make sure there is exactly one FlowFactoryBean using this FlowBuilder exported in the registry",
+				cause);
 	}
 
 	/**
 	 * Create a new flow definition lookup exception.
-	 * @param serviceId the id of the service that cannot be found
-	 */
-	public NoSuchFlowDefinitionException(String serviceId) {
-		super(serviceId);
-	}
-
-	/**
-	 * Create a new flow definition lookup exception.
-	 * @param serviceId the id of the service that cannot be found
+	 * @param flowId the id of the service that cannot be found
 	 * @param cause the underlying cause of this exception
 	 */
-	public NoSuchFlowDefinitionException(String serviceId, Throwable cause) {
-		super(serviceId, cause);
-	}
-
-	public String getMessage() {
-		if (isServiceIdLookupFailure()) {
-			return "No flow definition was found with id '" + getServiceId()
-					+ "' -- make sure there is a single Flow implementation exported in the context with this id";
-		}
-		else {
-			return "No flow definition was found of implementation '" + getServiceImplementationClass()
-					+ "'; make sure there is a single Flow implementation of this type exported in the context";
-		}
+	public NoSuchFlowDefinitionException(String flowId, Throwable cause) {
+		super(
+				flowId,
+				"No flow definition was found with id '"
+						+ flowId
+						+ "' -- make sure there is a Flow or FlowFactoryBean instance exported in the registry with this id",
+				cause);
 	}
 }

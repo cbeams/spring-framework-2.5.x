@@ -27,38 +27,25 @@ public class NoSuchFlowAttributeMapperException extends ServiceLookupException {
 
 	/**
 	 * Create a new flow model mapper lookup exception.
-	 * @param serviceImplementationClass the required implementation class of
-	 *        the service that cannot be found
+	 * @param attributeMapperId the id of the service that cannot be found
+	 * @param cause the underlying cause of this exception
 	 */
-	public NoSuchFlowAttributeMapperException(Class serviceImplementationClass) {
-		super(serviceImplementationClass);
+	public NoSuchFlowAttributeMapperException(String attributeMapperId, Throwable cause) {
+		super(attributeMapperId, "No flow attribute mapper was found with id '"
+				+ attributeMapperId
+				+ "' -- make sure there is a single FlowAttributeMapper instance exported in the registry with this id", cause);
 	}
 
 	/**
 	 * Create a new flow model mapper lookup exception.
-	 * @param serviceImplementationClass the required implementation class of
+	 * @param attributeMapperImplementationClass the required implementation class of
 	 *        the service that cannot be found
 	 * @param cause the underlying cause of this exception
 	 */
-	public NoSuchFlowAttributeMapperException(Class serviceImplementationClass, Throwable cause) {
-		super(serviceImplementationClass, cause);
-	}
-
-	/**
-	 * Create a new flow model mapper lookup exception.
-	 * @param serviceId the id of the service that cannot be found
-	 */
-	public NoSuchFlowAttributeMapperException(String serviceId) {
-		super(serviceId);
-	}
-
-	/**
-	 * Create a new flow model mapper lookup exception.
-	 * @param serviceId the id of the service that cannot be found
-	 * @param cause the underlying cause of this exception
-	 */
-	public NoSuchFlowAttributeMapperException(String serviceId, Throwable cause) {
-		super(serviceId, cause);
+	public NoSuchFlowAttributeMapperException(Class attributeMapperImplementationClass, Throwable cause) {
+		super(attributeMapperImplementationClass, "No flow attribute mapper was found with implementation class '"
+				+ attributeMapperImplementationClass
+				+ "' -- make sure there is exactly one implementation in the registry with this type", cause);
 	}
 
 	public String getMessage() {

@@ -18,10 +18,9 @@ package org.springframework.web.flow;
 import org.springframework.util.Styler;
 
 /**
- * Throw when no transition can be found in a state that fires for
- * a certain flow execution request context. Typically this is because
- * there is no "handler" transition for the last event that occured
- * in the request context.
+ * Throw when no transition can be found in a state that fires for a certain
+ * flow execution request context. Typically this is because there is no
+ * "handler" transition for the last event that occured in the request context.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -44,9 +43,7 @@ public class NoSuchTransitionException extends FlowNavigationException {
 	 * @param event unsupported event
 	 */
 	public NoSuchTransitionException(TransitionableState state, Event event) {
-		super(state.getFlow());
-		this.state = state;
-		this.event = event;
+		this(state, event, null);
 	}
 
 	/**
@@ -56,14 +53,26 @@ public class NoSuchTransitionException extends FlowNavigationException {
 	 * @param cause underlying cause of this exception
 	 */
 	public NoSuchTransitionException(TransitionableState state, Event event, Throwable cause) {
-		super(state.getFlow(), cause);
+		super(state.getFlow(), "No transition found for event '" + event.getId() + "' in state '" + state.getId()
+				+ "' of flow '" + state.getFlow().getId() + "' -- valid transitional criteria are "
+				+ Styler.call(state.getTransitionalCriteria()) + " -- programmer error?", cause);
 		this.state = state;
 		this.event = event;
 	}
 
-	public String getMessage() {
-		return "No transition found for event '" + event.getId() + "' in state '" + state.getId() + "' of flow '"
-				+ getFlow().getId() + "' -- valid transitional criteria are "
-				+ Styler.call(state.getTransitionalCriteria()) + " -- programmer error?";
+	/**
+	 * @return Returns the event that occured that could not be handled.
+	 */
+	public Event getEvent() {
+		return event;
 	}
+
+	/**
+	 * @return Returns the state that could not execute a transition on the
+	 *         occurence of the event.
+	 */
+	public TransitionableState getState() {
+		return state;
+	}
+
 }

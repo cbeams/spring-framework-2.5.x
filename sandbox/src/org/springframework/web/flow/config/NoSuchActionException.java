@@ -27,48 +27,22 @@ public class NoSuchActionException extends ServiceLookupException {
 
 	/**
 	 * Create a new action lookup exception.
-	 * @param serviceId the id of the service that cannot be found
-	 */
-	public NoSuchActionException(String serviceId) {
-		super(serviceId);
-	}
-
-	/**
-	 * Create a new action lookup exception.
-	 * @param serviceId the id of the service that cannot be found
+	 * @param actionId the id of the service that cannot be found
 	 * @param cause the underlying cause of this exception
 	 */
-	public NoSuchActionException(String serviceId, Throwable cause) {
-		super(serviceId, cause);
+	public NoSuchActionException(String actionId, Throwable cause) {
+		super(actionId, "No action was found with id '" + actionId
+				+ "' -- make sure there is a single Action instance exported in the registry with this id", cause);
 	}
 
 	/**
 	 * Create a new action lookup exception.
-	 * @param serviceImplementationClass the required implementation class of
-	 *        the service that cannot be found
-	 */
-	public NoSuchActionException(Class serviceImplementationClass) {
-		super(serviceImplementationClass);
-	}
-
-	/**
-	 * Create a new action lookup exception.
-	 * @param serviceImplementationClass the required implementation class of
+	 * @param actionImplementationClass the required implementation class of
 	 *        the service that cannot be found
 	 * @param cause the underlying cause of this exception
 	 */
-	public NoSuchActionException(Class serviceImplementationClass, Throwable cause) {
-		super(serviceImplementationClass, cause);
-	}
-
-	public String getMessage() {
-		if (isServiceIdLookupFailure()) {
-			return "No action was found with id '" + getServiceId()
-					+ "' -- make sure there is a single Action implementation exported in the context with this id";
-		}
-		else {
-			return "No action was found of implementation '" + getServiceImplementationClass()
-					+ "' -- make sure there is a single Action implementation of this type exported in the context";
-		}
+	public NoSuchActionException(Class actionImplementationClass, Throwable cause) {
+		super(actionImplementationClass, "No action was found of implementation '" + actionImplementationClass
+				+ "' -- make sure there is exactly one Action instace of this type exported in the registry", cause);
 	}
 }

@@ -34,8 +34,7 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 	 * @param stateId the state id that cannot be found
 	 */
 	public NoSuchFlowStateException(Flow flow, String stateId) {
-		super(flow);
-		this.stateId = stateId;
+		this(flow, stateId, null);
 	}
 
 	/**
@@ -45,12 +44,17 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 	 * @param cause the underlying cause of this exception
 	 */
 	public NoSuchFlowStateException(Flow flow, String stateId, Throwable cause) {
-		super(flow, cause);
+		super(flow, "No state with state id '" + stateId + "' exists for flow '" + flow.getId()
+				+ "' -- valid states are " + Styler.call(flow.getStateIds())
+				+ "-- likely programmer error, check your flow configuration", cause);
 		this.stateId = stateId;
 	}
-
-	public String getMessage() {
-		return "No state with state id '" + stateId + "' exists for flow '" + getFlow().getId()
-				+ "' -- valid states are " + Styler.call(getFlow().getStateIds()) + "-- programmer error?";
+	
+	/**
+	 * Returns the id of the state that was not found.
+	 * @return The state id
+	 */
+	public String getStateId() {
+		return stateId;
 	}
 }
