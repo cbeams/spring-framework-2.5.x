@@ -1,12 +1,13 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.81 2004-01-21 20:21:19 johnsonr Exp $
+$Id: changelog.txt,v 1.82 2004-01-25 19:30:48 johnsonr Exp $
 
 
 Changes in version 1.0 RC1 (xx.01.2003)
 ---------------------------------------
 
 Package org.springframework.aop
+* Overhauled advice manipulation methods on AdvisedSupport
 * SimpleIntroductionAdvisor -> DefaultInterceptionIntroductionAdvisor
 * added AfterReturning advice to complete AOP advice types
 * RegexpMethodPointcut now also handles multiple patterns (backward compatible)
