@@ -10,6 +10,8 @@
 		<property name="stringValue"><value>setterString</value></property>
 	</bean>
 
+	<bean id="defaultTestBean" factory-bean="default" factory-method="getTestBean"/> 
+
 	<bean id="testBeanOnly" class="org.springframework.beans.factory.xml.FactoryMethods"
 		factory-method="newInstance">
 		<constructor-arg><ref local="juergen"/></constructor-arg>
@@ -62,16 +64,12 @@
 		<constructor-arg index="3"><value>bogus</value></constructor-arg>
 	</bean>
 
-	
 	<bean id="juergen" class="org.springframework.beans.TestBean">
-		<property name="name">
-			<value>Juergen</value>
-		</property>
+		<property name="name"><value>Juergen</value></property>
 	</bean>
 
-
 	<!--
-		The class is the factory class, not the created class 
+		The class is the factory class, not the created class.
 	-->
 	<bean id="externalFactoryMethodWithoutArgs" 
 			class="org.springframework.beans.factory.xml.TestBeanCreator"

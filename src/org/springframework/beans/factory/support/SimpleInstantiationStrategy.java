@@ -61,7 +61,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 */
 	protected Object instantiateWithMethodInjection(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
-		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
+		throw new UnsupportedOperationException(
+				"Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
 	public Object instantiate(
@@ -84,32 +85,29 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	protected Object instantiateWithMethodInjection(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			Constructor ctor, Object[] args) {
-		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
+		throw new UnsupportedOperationException(
+				"Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
 	public Object instantiate(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Method factoryMethod, Object[] args) {
+			Object factoryBean, Method factoryMethod, Object[] args) {
 
-		Object target = null;
-		if (beanDefinition.getFactoryBeanName() != null) {
-			target = owner.getBean(beanDefinition.getFactoryBeanName());
-		}
-		
 		try {
 			// It's a static method if the target is null.
-			return factoryMethod.invoke(target, args);
+			return factoryMethod.invoke(factoryBean, args);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new BeanDefinitionStoreException("Illegal arguments to factory method " + factoryMethod + "; " +
-					"args=" + StringUtils.arrayToCommaDelimitedString(args));
+			throw new BeanDefinitionStoreException(
+					"Illegal arguments to factory method [" + factoryMethod + "]; " +
+					"args: " + StringUtils.arrayToCommaDelimitedString(args));
 		}
 		catch (IllegalAccessException ex) {
 			throw new BeanDefinitionStoreException(
-					"Cannot access factory method " + factoryMethod + "; is it public?");
+					"Cannot access factory method [" + factoryMethod + "]; is it public?");
 		}
 		catch (InvocationTargetException ex) {
-			String msg = "Factory method " + factoryMethod + " threw exception";
+			String msg = "Factory method [" + factoryMethod + "] threw exception";
 			// We want to log this one, as it may be a config error:
 			// the method may match, but may have been given incorrect arguments.
 			logger.warn(msg, ex.getTargetException());

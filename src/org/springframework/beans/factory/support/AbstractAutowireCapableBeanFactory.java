@@ -367,9 +367,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		boolean isStatic = true;
 		Class factoryClass = null;
+		Object factoryBean = null;
+
 		if (mergedBeanDefinition.getFactoryBeanName() != null) {
-			// It's an instance method on the factory bean's class.
-			factoryClass = getType(mergedBeanDefinition.getFactoryBeanName());
+			factoryBean = getBean(mergedBeanDefinition.getFactoryBeanName());
+			factoryClass = factoryBean.getClass();
 			isStatic = false;
 		}
 		else {
@@ -398,16 +400,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					continue;
 				}
 
-				// If we get here, we found a factory method
+				// If we get here, we found a factory method.
 				Object beanInstance =
-						this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this, factoryMethod, args);
+						this.instantiationStrategy.instantiate(
+								mergedBeanDefinition, beanName, this, factoryBean, factoryMethod, args);
 
 				// TODO: If we got to here, we could cache the resolved Method in the RootBeanDefinition
 				// for efficiency on future creation, but that would need to be synchronized.
 
 				bw.setWrappedInstance(beanInstance);
-				if (logger.isInfoEnabled()) {
-					logger.info("Bean '" + beanName + "' instantiated via factory method [" + factoryMethod + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Bean '" + beanName + "' instantiated via factory method '" + factoryMethod + "'");
 				}
 				return bw;
 			}
@@ -416,7 +419,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// If we get here, we didn't match any method.
 		throw new BeanDefinitionStoreException(
 				"Cannot find matching factory method '" + mergedBeanDefinition.getFactoryMethodName() +
-				"' on class " + factoryClass);
+				"' on class [" + factoryClass.getName() + "]");
 	}
 
 

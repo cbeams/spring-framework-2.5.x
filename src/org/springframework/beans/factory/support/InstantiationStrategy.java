@@ -40,7 +40,8 @@ public interface InstantiationStrategy {
 	 * @param owner owning BeanFactory
 	 * @return a bean instance for this bean definition
 	 */
-	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner);
+	Object instantiate(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner);
 	
 	/**
 	 * Return an instance of the bean with the given name in this factory,
@@ -53,7 +54,8 @@ public interface InstantiationStrategy {
 	 * @param args the constructor arguments to apply
 	 * @return a bean instance for this bean definition
 	 */
-	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+	Object instantiate(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			Constructor ctor, Object[] args);
 	
 	/**
@@ -63,11 +65,14 @@ public interface InstantiationStrategy {
 	 * @param beanName name of the bean when it's created in this context.
 	 * The name can be null if we're autowiring a bean that doesn't belong to the factory.
 	 * @param owner owning BeanFactory
+	 * @param factoryBean the factory bean instance to call the factory method on,
+	 * or null in case of a static factory method
 	 * @param factoryMethod the factory method to use
 	 * @param args the factory method arguments to apply
 	 * @return a bean instance for this bean definition
 	 */
-	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Method factoryMethod, Object[] args);
+	Object instantiate(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+			Object factoryBean, Method factoryMethod, Object[] args);
 	
 }

@@ -996,12 +996,15 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("Method replace still works after serialization and deserialization", backwards, s.replaceMe(forwards));
 	}
 
-
 	public void testFactoryMethodsSingletonOnTargetClass() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(true);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
+		TestBean tb = (TestBean) xbf.getBean("defaultTestBean");
+		assertEquals("defaultInstance", tb.getName());
+		
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("default");
 		assertEquals(0, fm.getNum());
 		assertEquals("default", fm.getName());
