@@ -1,9 +1,10 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.37 2003-11-05 11:30:58 jhoeller Exp $
+$Id: changelog.txt,v 1.38 2003-11-05 20:36:58 jhoeller Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
+* fixed empty-value-on-primitive-property check in BeanWrapperImpl to allow a custom editor to modify the value first
 * redefined autowiring to ignore if no matching bean found but still complain in case of more than one matching bean
 * ignore specified dependency types on autowiring, like BeanFactory and ApplicationContext
 * introduced "getBeansOfType" method in ListableBeanFactory, retrieving both normal beans and FactoryBean-created beans
@@ -22,24 +23,27 @@ Changes in version 1.0 M3 (XX.11.2003)
 * reworked PropertiesFactoryBean to allow for loaded and local properties
 * added "targetClass" argument to StaticMethodPointcut.applies()
 * can now cast any AOP proxy to ProxyConfig to manipulate it
-* can force CGLIB proxying using new proxyTargetClass property on DefaultProxyConfig
+* can force CGLIB proxying using new "proxyTargetClass" property on DefaultProxyConfig
 * CGLIB proxies support introductions now
 * split ApplicationContext interface into ApplicationContext client interface and ConfigurableApplicationContext SPI
 * added support for placeholders in bean reference names to PropertyPlaceholderConfigurer
 * added support for cross-referencing placeholders in placeholder values to PropertyPlaceholderConfigurer
-* refactored JDBC core package so that SQLErrorCodeExceptionTranslator can be subclassed by and passed into JdbcTemplate
-* refactored JDBC object package so that one JdbcTemplate can be used to configure multiple RdbmsOperations
-* reworked JdbcBeanFactory to extend ListableBeanFactoryImpl instead of using a refreshable delegate
 * moved commit exception handling from concrete implementations up to the generic AbstractPlatformTransactionManager
 * added "rollbackOnCommitFailure" bean property to AbstractPlatformTransactionManager
 * added "cleanupAfterCompletion" template method to AbstractPlatformTransactionManager
 * reworked commit exception handling in HibernateTransactionManager and JdoTransactionManager
 * reworked cleanup code in DataSourceTransactionManager, HibernateTransactionManager, and JdoTransactionManager
+* dissolved ThreadObjectManager and put resource binding (for JDBC/JDO/Hibernate) in TransactionSynchronizationManager
+* added transaction synchronization support for JDBC and JDO to always return the same resources in a JTA transaction
 * added setter methods for data access templates to JdbcDaoSupport, HibernateDaoSupport, and JdoDaoSupport
+* refactored JDBC core package so that SQLErrorCodeExceptionTranslator can be subclassed by and passed into JdbcTemplate
+* refactored JDBC object package so that one JdbcTemplate can be used to configure multiple RdbmsOperations
+* reworked JdbcBeanFactory to extend ListableBeanFactoryImpl instead of using a refreshable delegate
 * made LocalSessionFactoryBean and LocalPersistenceManagerFactoryBean methods non-final
 * reworked HibernateAccessor/HibernateTemplate/HibernateInterceptor flush handling
 * added "jdbcExceptionTranslator" property to HibernateTemplate, allowing to set a SQLExceptionTranslator for SQL ex's
 * added "jdbcExceptionTranslator" property to HibernateTransactionManager, applied to flushing failures on commit
+* added "jdbcExceptionTranslator" parameter to SessionFactoryUtils.getSession, applied to transaction synchronizations
 * introduced JdoAccessor as common base class for JdoTemplate and JdoInterceptor
 * introduced JdoDialect interface with getJdbcConnection and flush methods
 * added support for JdoDialect in JdoTransactionManager and JdoAccessor/JdoTemplate/JdoInterceptor
