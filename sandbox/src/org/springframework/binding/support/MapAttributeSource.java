@@ -23,14 +23,14 @@ import java.util.Map;
  * interface.
  * @author Keith Donald
  */
-public class MapAttributeSetterAdapter extends AttributeSetterSupport {
+public class MapAttributeSource extends AttributeSourceSupport {
 
 	private Map map;
 
 	/**
 	 * Create a new map attribute setter adapter.
 	 */
-	public MapAttributeSetterAdapter() {
+	public MapAttributeSource() {
 		this.map = new HashMap();
 	}
 
@@ -38,7 +38,7 @@ public class MapAttributeSetterAdapter extends AttributeSetterSupport {
 	 * Create a new map attribute setter adapter.
 	 * @param map the map to wrap
 	 */
-	public MapAttributeSetterAdapter(Map map) {
+	public MapAttributeSource(Map map) {
 		this.map = map;
 	}
 

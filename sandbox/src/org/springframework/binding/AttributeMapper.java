@@ -30,6 +30,6 @@ public interface AttributeMapper {
 	 * @param source The accessor to the source map
 	 * @param target The setter to the target map
 	 */
-	public void map(AttributeAccessor source, AttributeSetter target);
+	public void map(AttributeSource source, MutableAttributeSource target);
 
 }

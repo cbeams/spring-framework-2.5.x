@@ -20,12 +20,12 @@ package org.springframework.binding;
  * collection. Useful for hiding the structure or source of the underlying
  * collection.
  * <p>
- * For example, the backing collection might be a javabean, an http request,
- * an http session, a map, an mbean, or some other mutable attribute holder.
+ * For example, the backing collection might be a javabean, an http request, an
+ * http session, a map, an mbean, or some other mutable attribute holder.
  * 
  * @author Keith Donald
  */
-public interface AttributeSetter extends AttributeAccessor {
+public interface MutableAttributeSource extends AttributeSource {
 
 	/**
 	 * Set the attribute with the provided name to the value provided.

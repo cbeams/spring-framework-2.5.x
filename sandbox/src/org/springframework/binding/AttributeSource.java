@@ -25,7 +25,7 @@ package org.springframework.binding;
  * 
  * @author Keith Donald
  */
-public interface AttributeAccessor {
+public interface AttributeSource {
 
 	/**
 	 * Does the attribute by the provided name exist in this model?

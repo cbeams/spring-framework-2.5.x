@@ -9,26 +9,24 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.Styler;
 import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.IteratorProcessTemplate;
 
 /**
- * Support class for attribute setters.
- * TODO - should this implement map?
+ * Support class for attribute setters. TODO - should this implement map?
  * @author Keith Donald
  */
-public abstract class AttributeSetterSupport implements AttributeSetter, Map {
+public abstract class AttributeSourceSupport implements MutableAttributeSource, Map {
 
 	/**
 	 * Get an attribute value and make sure it is of the required type.
 	 * @param attributeName name of the attribute to get
 	 * @param requiredType the required type of the attribute value
 	 * @return the attribute value, or null if not found
-	 * @throws IllegalStateException when the value is not of the required
-	 *         type
+	 * @throws IllegalStateException when the value is not of the required type
 	 */
 	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException {
 		Object value = getAttribute(attributeName);
@@ -46,13 +44,13 @@ public abstract class AttributeSetterSupport implements AttributeSetter, Map {
 	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
 		Object value = getAttribute(attributeName);
 		if (value == null) {
-			throw new IllegalStateException("Required attribute '" + attributeName
-					+ "' is not present in this " + getMapName() + "; attributes present are = " + Styler.call(getAttributeMap()));
+			throw new IllegalStateException("Required attribute '" + attributeName + "' is not present in this "
+					+ getSourceName() + "; attributes present are = " + Styler.call(getAttributeMap()));
 		}
 		return value;
 	}
-	
-	protected String getMapName() {
+
+	protected String getSourceName() {
 		return "map";
 	}
 
@@ -81,7 +79,7 @@ public abstract class AttributeSetterSupport implements AttributeSetter, Map {
 			setAttribute((String)entry.getKey(), entry.getValue());
 		}
 	}
-	
+
 	/**
 	 * @param attributeName
 	 * @param requiredType
@@ -133,7 +131,7 @@ public abstract class AttributeSetterSupport implements AttributeSetter, Map {
 	public abstract Map getAttributeMap();
 
 	// map operations
-	
+
 	public boolean containsKey(Object key) {
 		return containsAttribute(String.valueOf(key));
 	}

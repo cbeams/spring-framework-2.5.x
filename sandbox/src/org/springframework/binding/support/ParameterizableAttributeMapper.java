@@ -23,9 +23,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.binding.AttributeAccessor;
+import org.springframework.binding.AttributeSource;
 import org.springframework.binding.AttributeMapper;
-import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.util.Assert;
 
 /**
@@ -181,7 +181,7 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 	/**
 	 * Map data from one map to another map using specified mappings.
 	 */
-	public void map(AttributeAccessor source, AttributeSetter target) {
+	public void map(AttributeSource source, MutableAttributeSource target) {
 		if (mappings != null) {
 			Iterator it = this.mappings.iterator();
 			while (it.hasNext()) {

@@ -18,8 +18,7 @@ package org.springframework.binding.thread.support;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.binding.AttributeAccessor;
-import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.thread.ThreadCleanupBroadcaster;
 import org.springframework.binding.thread.ThreadCleanupListener;
 import org.springframework.binding.thread.ThreadLocalContext;
@@ -32,8 +31,7 @@ import org.springframework.binding.thread.ThreadLocalContext;
  * it should clear its storage.
  * @author Keith Donald
  */
-public class DefaultThreadLocalContext implements ThreadLocalContext, ThreadCleanupListener, AttributeAccessor,
-		AttributeSetter {
+public class DefaultThreadLocalContext implements ThreadLocalContext, ThreadCleanupListener, MutableAttributeSource {
 
 	private static final String CREATED_KEY = DefaultThreadLocalContext.class + ".created";
 

@@ -21,8 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.binding.AttributeAccessor;
-import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.AttributeSource;
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.util.Assert;
 
@@ -105,7 +105,7 @@ public class Mapping implements Serializable {
 	 * @param mapMissingAttributesToNull map attributes that aren't present to a
 	 *        null value?
 	 */
-	public void map(AttributeAccessor source, AttributeSetter target, boolean mapMissingAttributesToNull) {
+	public void map(AttributeSource source, MutableAttributeSource target, boolean mapMissingAttributesToNull) {
 		Object value;
 		BeanWrapper beanAccessor = null;
 		int propertyDelimiterIndex = sourceAttributeName.indexOf('.');
