@@ -9,9 +9,14 @@ Changes in version 1.1 final (16.8.2004)
 Package org.springframework.beans
 * set getter/setter methods accessible if the declaring class is not public (e.g. in case of a non-public base class)
 * fixed "getBeansOfType" check (as used by autowiring) and "isSingleton" for parent bean definitions without class
+* CustomEditorConfigurer and ClassEditor delegate to same ClassUtils.forName method, understanding array class names
+* added FieldRetrievingFactoryBean, for retrieving static fields (and also non-static field values of target objects)
 
 Package org.springframework.jms
 * fixed JmsTemplate102's "doSend" implementation to properly work with a JMS 1.0.2 API jar in the classpath
+
+Package org.springframework.validation
+* added "pushNestedPath"/"popNestedPath" methods to Errors interface, for convenient handling of temporary nested paths
 
 Package org.springframework.web
 * fixed TransformTag to derive from HtmlEscapingAwareTag and actually HTML-escape results (matching the TLD now)
