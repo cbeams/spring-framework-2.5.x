@@ -1,10 +1,4 @@
 /*
- * BeanWrapperTestSuite.java
- *
- * Created on 1 September 2001, 19:35
- */
-
-/*
  * Copyright 2002-2004 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +38,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	/**
 	 * Roderick beans inherits from rod,
-	 * overriding name only
+	 * overriding name only.
 	 */
 	public void testInheritance() {
 		assertTrue(getBeanFactory().containsBean("rod"));
