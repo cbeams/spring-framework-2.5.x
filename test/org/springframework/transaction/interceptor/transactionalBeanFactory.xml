@@ -85,7 +85,7 @@
 			</props>
 		</property>
 		<property name="proxyTargetClass"><value>true</value></property>
-		<property name="enableCglibSubclassOptimizations"><value>false</value></property>
+		<property name="optimize"><value>false</value></property>
 	</bean>
 
 	<bean id="txnInvocationCounterPointcut" 

@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
  * If it's absolutely necessary to expose the MethodInvocation, use an
  * interceptor to do so.
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.5 2003-12-11 09:02:34 johnsonr Exp $
+ * @version $Id: ProxyConfig.java,v 1.6 2003-12-19 10:22:02 johnsonr Exp $
  */
 public class ProxyConfig {
 	
@@ -35,7 +35,7 @@ public class ProxyConfig {
 
 	private boolean proxyTargetClass;
 	
-	private boolean enableCglibSubclassOptimizations;
+	private boolean optimize;
 	
 	/**
 	 * Should proxies obtained from this configuration expose
@@ -50,7 +50,7 @@ public class ProxyConfig {
 	}
 
 	public void copyFrom(ProxyConfig other) {
-		this.enableCglibSubclassOptimizations = other.getEnableCglibSubclassOptimizations();
+		this.optimize = other.getOptimize();
 		this.proxyTargetClass = other.proxyTargetClass;
 		this.exposeProxy = other.exposeProxy;
 	}
@@ -69,30 +69,41 @@ public class ProxyConfig {
 	}
 	
 	/**
-	 * @return return whether CGLIB-enhanced proxies will optimize out
-	 * overriding methods with no advice chain. Can produce 2.5x performance
-	 * improvement for methods with no advice.
+	 * @return whether proxies should perform agressive optimizations.
 	 */
-	public boolean getEnableCglibSubclassOptimizations() {
-		return this.enableCglibSubclassOptimizations;
+	public boolean getOptimize() {
+		return this.optimize;
 	}
 
 	/**
-	 * Set whether CGLIB-enhanced proxies will optimize out
-	 * overriding methods with no advice chain. Can produce 2.5x performance
-	 * improvement for methods with no advice. Default is false.
+	 * Set whether proxies should perform agressive optimizations.
+	 * The exact meaning of "agressive optimizations" will differ
+	 * between proxies, but there is usually some tradeoff. 
+	 * For example, optimization will usually mean that advice changes won't take
+	 * effect after a proxy has been created. For this reason, optimization
+	 * is disabled by default. An optimize value of true may be ignored
+	 * if other settings preclude optimization: for example, if exposeProxy
+	 * is set to true and that's not compatible with the optimization.
+	 * <br>For example, CGLIB-enhanced proxies may optimize out.
+	 * overriding methods with no advice chain. This can produce 2.5x performance
+	 * improvement for methods with no advice. 
 	 * <br><b>Warning:</b> Setting this to true can produce large performance
 	 * gains when using CGLIB (also set proxyTargetClass to true), so it's
 	 * a good setting for performance-critical proxies. However, enabling this
 	 * will mean that advice cannot be changed after a proxy has been obtained
 	 * from this factory.
-	 * @param enableCglibSubclassOptimizations The enableCglibSubclassOptimizations to set.
+	 * @param optimize whether to enable agressive optimizations. 
+	 * Default is false.
 	 */
-	public void setEnableCglibSubclassOptimizations(boolean enableCglibSubclassOptimizations) {
-		this.enableCglibSubclassOptimizations = enableCglibSubclassOptimizations;
+	public void setOptimize(boolean optimize) {
+		this.optimize = optimize;
 	}
 
 
+	/**
+	 * @return whether the AOP proxy will expose the AOP proxy for
+	 * each invocation.
+	 */
 	public final boolean getExposeProxy() {
 		return this.exposeProxy;
 	}
@@ -112,7 +123,7 @@ public class ProxyConfig {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("exposeProxy=" + exposeProxy + "; ");
-		sb.append("enableCglibSubclassOptimizations=" + enableCglibSubclassOptimizations + "; ");
+		sb.append("enableCglibSubclassOptimizations=" + optimize + "; ");
 		return sb.toString();
 	}
 
