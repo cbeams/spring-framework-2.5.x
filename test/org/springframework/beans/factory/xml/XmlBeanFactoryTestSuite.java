@@ -644,17 +644,16 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testNoSuchInitMethod() throws Exception {
-		InputStream is = getClass().getResourceAsStream("initializers.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
 		try {
 			xbf.getBean("init-method3");
 			fail();
 		}
 		catch (FatalBeanException ex) {
-			// Ok
-			// Check message is helpful
+			// check message is helpful
+			assertTrue(ex.getMessage().indexOf("initializers.xml") != -1);
+			assertTrue(ex.getMessage().indexOf("init-method3") != -1);
 			assertTrue(ex.getMessage().indexOf("init") != -1);
-			assertTrue(ex.getMessage().indexOf("beans.TestBean") != -1);
 		}
 	}
 
@@ -834,9 +833,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertNull(rod5.getSpouse());
 
 		BeanFactory appCtx = (BeanFactory) xbf.getBean("childAppCtx");
-		assertTrue(appCtx.getBean("rod1") != null);
-		assertTrue(appCtx.getBean("dependingBean") != null);
-		assertTrue(appCtx.getBean("jenny") != null);
+		assertTrue(appCtx.containsBean("rod1"));
+		assertTrue(appCtx.containsBean("jenny"));
 	}
 
 	public void testAutowireWithDefault() throws Exception {
@@ -899,6 +897,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 
 	public void testAutowireByConstructorWithSimpleValues() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
+
 		ConstructorDependenciesBean rod5 = (ConstructorDependenciesBean) xbf.getBean("rod5");
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
@@ -910,13 +909,18 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(99, rod5.getAge());
 		assertEquals("myname", rod5.getName());
 
-		ConstructorDependenciesBean rod6 = (ConstructorDependenciesBean) xbf.getBean("rod6");
+		DerivedConstructorDependenciesBean rod6 = (DerivedConstructorDependenciesBean) xbf.getBean("rod6");
 		// should have been autowired
+		assertTrue(rod6.initialized);
+		assertTrue(!rod6.destroyed);
 		assertEquals(kerry2, rod6.getSpouse1());
 		assertEquals(kerry1, rod6.getSpouse2());
 		assertEquals(other, rod6.getOther());
 		assertEquals(0, rod6.getAge());
 		assertEquals(null, rod6.getName());
+
+		xbf.destroySingletons();
+		assertTrue(rod6.destroyed);
 	}
 
 	public void testConstructorArgResolution() {
@@ -981,13 +985,49 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testDependsOn() {
+		doTestDependencies("dependencies-dependsOn.xml");
+	}
+
+	public void testDependsOnInInnerBean() {
+		doTestDependencies("dependencies-dependsOn-inner.xml");
+	}
+
+	public void testDependenciesThroughConstructorArguments() {
+		doTestDependencies("dependencies-carg.xml");
+	}
+
+	public void testDependenciesThroughConstructorArgumentAutowiring() {
+		doTestDependencies("dependencies-carg-autowire.xml");
+	}
+
+	public void testDependenciesThroughConstructorArgumentsInInnerBean() {
+		doTestDependencies("dependencies-carg-inner.xml");
+	}
+
+	public void testDependenciesThroughProperties() {
+		doTestDependencies("dependencies-prop.xml");
+	}
+
+	public void testDependenciesThroughPropertyAutowiringByName() {
+		doTestDependencies("dependencies-prop-autowireByName.xml");
+	}
+
+	public void testDependenciesThroughPropertyAutowiringByType() {
+		doTestDependencies("dependencies-prop-autowireByType.xml");
+	}
+
+	public void testDependenciesThroughPropertiesInInnerBean() {
+		doTestDependencies("dependencies-prop-inner.xml");
+	}
+
+	private void doTestDependencies(String filename) {
 		PreparingBean1.prepared = false;
 		PreparingBean1.destroyed = false;
 		PreparingBean2.prepared = false;
 		PreparingBean2.destroyed = false;
 		DependingBean.destroyed = false;
-		InputStream is = getClass().getResourceAsStream("initializers.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		HoldingBean.destroyed = false;
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource(filename, getClass()));
 		xbf.preInstantiateSingletons();
 		xbf.destroySingletons();
 		assertTrue(PreparingBean1.prepared);
@@ -995,6 +1035,9 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertTrue(PreparingBean2.prepared);
 		assertTrue(PreparingBean2.destroyed);
 		assertTrue(DependingBean.destroyed);
+		if (xbf.containsBean("holdingBean")) {
+			assertTrue(HoldingBean.destroyed);
+		}
 	}
 
 	public void testClassNotFoundWithDefault() {
@@ -1592,11 +1635,23 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 
-	public static class DependingBean implements DisposableBean {
+	public static class DependingBean implements InitializingBean, DisposableBean {
 
 		public static boolean destroyed = false;
 
 		public DependingBean() {
+		}
+
+		public DependingBean(PreparingBean1 bean1, PreparingBean2 bean2) {
+		}
+
+		public void setBean1(PreparingBean1 bean1) {
+		}
+
+		public void setBean2(PreparingBean2 bean2) {
+		}
+
+		public void afterPropertiesSet() {
 			if (!(PreparingBean1.prepared && PreparingBean2.prepared)) {
 				throw new IllegalStateException("Need prepared PreparedBeans!");
 			}
@@ -1604,7 +1659,23 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 
 		public void destroy() {
 			if (PreparingBean1.destroyed || PreparingBean2.destroyed) {
-				throw new Error("Should not be destroyed before PreparedBeans");
+				throw new IllegalStateException("Should not be destroyed before PreparedBeans");
+			}
+			destroyed = true;
+		}
+	}
+
+
+	public static class HoldingBean implements DisposableBean {
+
+		public static boolean destroyed = false;
+
+		public void setDependingBean(DependingBean dependingBean) {
+		}
+
+		public void destroy() {
+			if (DependingBean.destroyed) {
+				throw new IllegalStateException("Should not be destroyed before DependingBean");
 			}
 			destroyed = true;
 		}

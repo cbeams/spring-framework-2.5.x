@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -60,31 +61,142 @@ public abstract class BeanUtils {
 	 * class-loading issues.
 	 * <p>Note that this method tries to set the constructor accessible
 	 * if given a non-accessible (i.e. non-public) constructor.
-	 * @param constructor constructor to instantiate
+	 * @param ctor constructor to instantiate
 	 * @return the new instance
 	 */
-	public static Object instantiateClass(Constructor constructor, Object[] arguments) throws BeansException {
+	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeansException {
 		try {
-			if (!Modifier.isPublic(constructor.getModifiers())) {
-				constructor.setAccessible(true);
+			if (!Modifier.isPublic(ctor.getModifiers()) ||
+					!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
+				ctor.setAccessible(true);
 			}
-			return constructor.newInstance(arguments);
+			return ctor.newInstance(args);
 		}
 		catch (InstantiationException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
+			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
 					"]: Is it an interface or an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
+			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
 					"]: Has the class definition changed? Is the constructor accessible?", ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
-					"]: illegal arguments for constructor", ex);
+			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
+					"]: illegal args for constructor", ex);
 		}
 		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
+			throw new FatalBeanException("Could not instantiate class [" + ctor.getDeclaringClass().getName() +
 					"]; constructor threw exception", ex.getTargetException());
+		}
+	}
+
+	/**
+	 * Find a method with the given method name and the given parameter types,
+	 * declared on the given class or one of its superclasses. Prefers public methods,
+	 * but will return a protected, package access, or private method too.
+	 * <p>Checks <code>Class.getMethod</code> first, falling back to
+	 * <code>findDeclaredMethod</code>. This allows to find public methods
+	 * without issues even in environments with restricted Java security settings.
+	 * @param clazz the class to check
+	 * @param methodName the name of the method to find
+	 * @param paramTypes the parameter types of the method to find
+	 * @return the method object, or null if not found
+	 * @see java.lang.Class#getMethod
+	 * @see #findDeclaredMethod
+	 */
+	public static Method findMethod(Class clazz, String methodName, Class[] paramTypes) {
+		try {
+			return clazz.getMethod(methodName, paramTypes);
+		}
+		catch (NoSuchMethodException ex) {
+			return findDeclaredMethod(clazz, methodName, paramTypes);
+		}
+	}
+
+	/**
+	 * Find a method with the given method name and the given parameter types,
+	 * declared on the given class or one of its superclasses. Will return a public,
+	 * protected, package access, or private method.
+	 * <p>Checks <code>Class.getDeclaredMethod</code>, cascading upwards to all superclasses.
+	 * @param clazz the class to check
+	 * @param methodName the name of the method to find
+	 * @param paramTypes the parameter types of the method to find
+	 * @return the method object, or null if not found
+	 * @see java.lang.Class#getDeclaredMethod
+	 */
+	public static Method findDeclaredMethod(Class clazz, String methodName, Class[] paramTypes) {
+		try {
+			return clazz.getDeclaredMethod(methodName, paramTypes);
+		}
+		catch (NoSuchMethodException ex) {
+			if (clazz.getSuperclass() != null) {
+				return findDeclaredMethod(clazz.getSuperclass(), methodName, paramTypes);
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * Find a method with the given method name and minimal parameters (best case: none),
+	 * declared on the given class or one of its superclasses. Prefers public methods,
+	 * but will return a protected, package access, or private method too.
+	 * <p>Checks <code>Class.getMethods</code> first, falling back to
+	 * <code>findDeclaredMethodWithMinimalParameters</code>. This allows to find public
+	 * methods without issues even in environments with restricted Java security settings.
+	 * @param clazz the class to check
+	 * @param methodName the name of the method to find
+	 * @return the method object, or null if not found
+	 * @see java.lang.Class#getMethods
+	 * @see #findDeclaredMethodWithMinimalParameters
+	 */
+	public static Method findMethodWithMinimalParameters(Class clazz, String methodName) {
+		Method[] methods = clazz.getMethods();
+		Method targetMethod = null;
+		for (int i = 0; i < methods.length; i++) {
+			if (methods[i].getName().equals(methodName)) {
+				if (targetMethod == null ||
+						methods[i].getParameterTypes().length < targetMethod.getParameterTypes().length) {
+					targetMethod = methods[i];
+				}
+			}
+		}
+		if (targetMethod != null) {
+			return targetMethod;
+		}
+		else {
+			return findDeclaredMethodWithMinimalParameters(clazz, methodName);
+		}
+	}
+
+	/**
+	 * Find a method with the given method name and minimal parameters (best case: none),
+	 * declared on the given class or one of its superclasses. Will return a public,
+	 * protected, package access, or private method.
+	 * <p>Checks <code>Class.getDeclaredMethods</code>, cascading upwards to all superclasses.
+	 * @param clazz the class to check
+	 * @param methodName the name of the method to find
+	 * @return the method object, or null if not found
+	 * @see java.lang.Class#getDeclaredMethods
+	 */
+	public static Method findDeclaredMethodWithMinimalParameters(Class clazz, String methodName) {
+		Method[] methods = clazz.getDeclaredMethods();
+		Method targetMethod = null;
+		for (int i = 0; i < methods.length; i++) {
+			if (methods[i].getName().equals(methodName)) {
+				if (targetMethod == null ||
+						methods[i].getParameterTypes().length < targetMethod.getParameterTypes().length) {
+					targetMethod = methods[i];
+				}
+			}
+		}
+		if (targetMethod != null) {
+			return targetMethod;
+		}
+		else {
+			if (clazz.getSuperclass() != null) {
+				return findDeclaredMethodWithMinimalParameters(clazz.getSuperclass(), methodName);
+			}
+			return null;
 		}
 	}
 

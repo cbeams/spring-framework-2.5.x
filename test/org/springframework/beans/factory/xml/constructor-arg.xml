@@ -44,7 +44,8 @@
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
-	<bean id="rod6" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean">
+	<bean id="rod6" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean"
+			init-method="init" destroy-method="destroy">
 		<constructor-arg index="1"><ref bean="kerry1"/></constructor-arg>
 		<constructor-arg><ref bean="other"/></constructor-arg>
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>

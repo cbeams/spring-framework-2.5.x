@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,17 +61,15 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.JdkVersion;
 
 /**
- * Abstract BeanFactory superclass that implements default bean creation.
+ * Abstract bean factory superclass that implements default bean creation.
  * Implements the AutowireCapableBeanFactory interface.
  *
- * <p>Provides bean creation, initialization and wiring, supporting
- * autowiring and constructor resolution. Handles runtime bean references,
- * managed collections, and bean destruction.
+ * <p>Provides bean creation, initialization and wiring, supporting autowiring and constructor
+ * resolution. Handles runtime bean references, managed collections, and bean destruction.
  *
- * <p>The main template method to be implemented by subclasses is
- * findMatchingBeans, used for autowiring by type. Note that this class
- * does <i>not</i> implement bean definition registry capabilities
- * (DefaultListableBeanFactory does).
+ * <p>The main template method to be implemented by subclasses is <code>findMatchingBeans</code,
+ * used for autowiring by type. Note that this class does <i>not</i> implement bean definition
+ * registry capabilities (DefaultListableBeanFactory does).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -100,7 +99,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * the DisposableBean interface, to be destroyed on destroySingletons.
 	 * @see #destroySingletons
 	 */
-	private final Set disposableInnerBeans = Collections.synchronizedSet(new HashSet());
+	private final Map disposableInnerBeans = Collections.synchronizedMap(new HashMap());
+
+	private final Map dependentBeanMap = Collections.synchronizedMap(new HashMap());
 
 
 	/**
@@ -220,8 +221,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return a new instance of the bean
 	 * @throws BeansException in case of errors
 	 */
-	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition,
-	                            Object[] args, boolean allowEagerCaching) throws BeansException {
+	protected Object createBean(
+			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args, boolean allowEagerCaching)
+			throws BeansException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating instance of bean '" + beanName +
 					"' with merged definition [" + mergedBeanDefinition + "]");
@@ -272,14 +275,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			if (bean instanceof BeanNameAware) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Invoking setBeanName() on BeanNameAware bean '" + beanName + "'");
+					logger.debug("Invoking setBeanName on BeanNameAware bean '" + beanName + "'");
 				}
 				((BeanNameAware) bean).setBeanName(beanName);
 			}
 
 			if (bean instanceof BeanFactoryAware) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Invoking setBeanFactory() on BeanFactoryAware bean '" + beanName + "'");
+					logger.debug("Invoking setBeanFactory on BeanFactoryAware bean '" + beanName + "'");
 				}
 				((BeanFactoryAware) bean).setBeanFactory(this);
 			}
@@ -298,8 +301,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (eagerlyCached) {
 				removeSingleton(beanName);
 			}
-			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-																			errorMessage, ex);
+			throw new BeanCreationException(
+					mergedBeanDefinition.getResourceDescription(), beanName, errorMessage, ex);
+		}
+
+		// Register bean as dependent on specified "dependsOn" beans.
+		// This information is used on shutdown, to destroy dependent beans
+		// before the beans that they depend on.
+		if (mergedBeanDefinition.isSingleton()) {
+			String[] dependsOn = mergedBeanDefinition.getDependsOn();
+			if (dependsOn != null) {
+				for (int i = 0; i < dependsOn.length; i++) {
+					registerDependentBean(dependsOn[i], beanName);
+				}
+			}
 		}
 
 		return bean;
@@ -309,14 +324,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Instantiate the bean using a named factory method. The method may be static, if the
 	 * mergedBeanDefinition parameter specifies a class, rather than a factoryBean, or
 	 * an instance variable on a factory object itself configured using Dependency Injection.
-	 * <br>Implementation requires iterating over the static or instance methods with the
+	 * <p>Implementation requires iterating over the static or instance methods with the
 	 * name specified in the RootBeanDefinition (the method may be overloaded) and trying
 	 * to match with the parameters. We don't have the types attached to constructor args,
 	 * so trial and error is the only way to go here. The args array may contain argument
 	 * values passed in programmatically via the overloaded getBean() method.
 	 */
-	protected BeanWrapper instantiateUsingFactoryMethod(String beanName, RootBeanDefinition mergedBeanDefinition,
-					Object[] args) throws BeansException {
+	protected BeanWrapper instantiateUsingFactoryMethod(
+			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeansException {
+
 		ConstructorArgumentValues cargs = mergedBeanDefinition.getConstructorArgumentValues();
 		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
 		int expectedArgCount = 0;
@@ -369,7 +385,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 
 				// If we get here, we found a factory method
-				Object beanInstance = instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this, factoryMethod, args);
+				Object beanInstance =
+						this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this, factoryMethod, args);
 
 				// TODO: If we got to here, we could cache the resolved Method in the RootBeanDefinition for
 				// efficiency on future creation, but that would need to be synchronized.
@@ -488,6 +505,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private int resolveConstructorArguments(
 			String beanName, RootBeanDefinition mergedBeanDefinition,
 			ConstructorArgumentValues cargs, ConstructorArgumentValues resolvedValues) {
+
 		int minNrOfArgs;
 		minNrOfArgs = cargs.getArgumentCount();
 		for (Iterator it = cargs.getIndexedArgumentValues().entrySet().iterator(); it.hasNext();) {
@@ -502,14 +520,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				minNrOfArgs = index + 1;
 			}
 			String argName = "constructor argument with index " + index;
-			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) entry.getValue();
-			Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
+			ConstructorArgumentValues.ValueHolder valueHolder =
+					(ConstructorArgumentValues.ValueHolder) entry.getValue();
+			Object resolvedValue =
+					resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
 			resolvedValues.addIndexedArgumentValue(index, resolvedValue, valueHolder.getType());
 		}
 		for (Iterator it = cargs.getGenericArgumentValues().iterator(); it.hasNext();) {
-			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) it.next();
+			ConstructorArgumentValues.ValueHolder valueHolder =
+					(ConstructorArgumentValues.ValueHolder) it.next();
 			String argName = "constructor argument";
-			Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
+			Object resolvedValue =
+					resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
 			resolvedValues.addGenericArgumentValue(resolvedValue, valueHolder.getType());
 		}
 		return minNrOfArgs;
@@ -558,7 +580,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 							"] for autowiring constructor. There should have been 1 to be able to " +
 							"autowire constructor of bean '" + beanName + "'.");
 				}
-				args[j] = matchingBeans.values().iterator().next();
+				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
+				Object autowiredBean = matchingBeans.values().iterator().next();
+				args[j] = autowiredBean;
+				if (mergedBeanDefinition.isSingleton()) {
+					registerDependentBean(autowiredBeanName, beanName);
+				}
 				if (logger.isInfoEnabled()) {
 					logger.info("Autowiring by type from bean name '" + beanName +
 							"' via constructor to bean named '" + matchingBeans.keySet().iterator().next() + "'");
@@ -613,7 +640,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mergedBeanDefinition the bean definition for the bean
 	 * @param bw BeanWrapper with bean instance
 	 */
-	protected void populateBean(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw) {
+	protected void populateBean(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw)
+			throws BeansException {
+
 		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
 
 		if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME ||
@@ -646,14 +675,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bw BeanWrapper from which we can obtain information about the bean
 	 * @param pvs the PropertyValues to register wired objects with
 	 */
-	protected void autowireByName(String beanName, RootBeanDefinition mergedBeanDefinition,
-																BeanWrapper bw, MutablePropertyValues pvs) {
+	protected void autowireByName(
+			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, MutablePropertyValues pvs)
+			throws BeansException {
+
 		String[] propertyNames = unsatisfiedObjectProperties(mergedBeanDefinition, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];
 			if (containsBean(propertyName)) {
 				Object bean = getBean(propertyName);
 				pvs.addPropertyValue(propertyName, bean);
+				if (mergedBeanDefinition.isSingleton()) {
+					registerDependentBean(propertyName, beanName);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Added autowiring by name from bean name '" + beanName +
 						"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
@@ -679,8 +713,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bw BeanWrapper from which we can obtain information about the bean
 	 * @param pvs the PropertyValues to register wired objects with
 	 */
-	protected void autowireByType(String beanName, RootBeanDefinition mergedBeanDefinition,
-																BeanWrapper bw, MutablePropertyValues pvs) {
+	protected void autowireByType(
+			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, MutablePropertyValues pvs)
+			throws BeansException {
+
 		String[] propertyNames = unsatisfiedObjectProperties(mergedBeanDefinition, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];
@@ -688,19 +724,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			Class requiredType = bw.getPropertyDescriptor(propertyName).getPropertyType();
 			Map matchingBeans = findMatchingBeans(requiredType);
 			if (matchingBeans != null && matchingBeans.size() == 1) {
-				pvs.addPropertyValue(propertyName, matchingBeans.values().iterator().next());
+				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
+				Object autowiredBean = matchingBeans.values().iterator().next();
+				pvs.addPropertyValue(propertyName, autowiredBean);
+				if (mergedBeanDefinition.isSingleton()) {
+					registerDependentBean(autowiredBeanName, beanName);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Autowiring by type from bean name '" + beanName +
-											"' via property '" + propertyName + "' to bean named '" +
-											matchingBeans.keySet().iterator().next() + "'");
+							"' via property '" + propertyName + "' to bean named '" +
+							matchingBeans.keySet().iterator().next() + "'");
 				}
 			}
 			else if (matchingBeans != null && matchingBeans.size() > 1) {
 				throw new UnsatisfiedDependencyException(
 						mergedBeanDefinition.getResourceDescription(), beanName, propertyName,
-						"There are " + matchingBeans.size() + " beans of type [" + requiredType + "] for autowire by type. " +
-						"There should have been 1 to be able to autowire property '" + propertyName + "' of bean '" +
-						beanName + "'.");
+						"There are " + matchingBeans.size() + " beans of type [" + requiredType +
+						"] for autowire by type. There should have been 1 to be able to autowire property '" +
+						propertyName + "' of bean '" + beanName + "'.");
 			}
 			else {
 				if (logger.isDebugEnabled()) {
@@ -717,11 +758,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * simple (primitives and String), or all (both).
 	 * @param beanName name of the bean
 	 */
-	protected void dependencyCheck(String beanName, RootBeanDefinition mergedBeanDefinition,
-																 BeanWrapper bw, PropertyValues pvs) throws UnsatisfiedDependencyException {
+	protected void dependencyCheck(
+			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, PropertyValues pvs)
+			throws UnsatisfiedDependencyException {
+
 		int dependencyCheck = mergedBeanDefinition.getDependencyCheck();
-		if (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_NONE)
+		if (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_NONE) {
 			return;
+		}
 
 		Set ignoreTypes = getIgnoredDependencyTypes();
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
@@ -776,9 +820,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void applyPropertyValues(
 			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, PropertyValues pvs)
 			throws BeansException {
+
 		if (pvs == null) {
 			return;
 		}
+
 		MutablePropertyValues deepCopy = new MutablePropertyValues(pvs);
 		PropertyValue[] pvals = deepCopy.getPropertyValues();
 		for (int i = 0; i < pvals.length; i++) {
@@ -788,6 +834,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// update mutable copy
 			deepCopy.setPropertyValueAt(pv, i);
 		}
+
 		// set our (possibly massaged) deepCopy
 		try {
 			// synchronize if custom editors are registered
@@ -826,6 +873,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object resolveValueIfNecessary(
 			String beanName, RootBeanDefinition mergedBeanDefinition, String argName, Object value)
 			throws BeansException {
+
 		// We must check each PropertyValue to see whether it
 		// requires a runtime reference to another bean to be resolved.
 		// If it does, we'll attempt to instantiate the bean and set the reference.
@@ -837,7 +885,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		else if (value instanceof BeanDefinition) {
 			// Resolve plain BeanDefinition, without contained name: use dummy name.
 			BeanDefinition bd = (BeanDefinition) value;
-			return resolveInnerBeanDefinition(beanName, "(inner bean)", bd);
+			return resolveInnerBeanDefinition(
+					beanName, "(inner bean of type " + bd.getBeanClass().getName() + ")", bd);
 		}
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
@@ -868,15 +917,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Resolve an inner bean definition.
 	 */
-	protected Object resolveInnerBeanDefinition(String beanName, String innerBeanName, BeanDefinition bd)
+	protected Object resolveInnerBeanDefinition(String beanName, String innerBeanName, BeanDefinition innerBd)
 	    throws BeansException {
-		RootBeanDefinition mbd = getMergedBeanDefinition(innerBeanName, bd);
-		Object bean = createBean(innerBeanName, mbd, null, false);
-		if (bean instanceof DisposableBean) {
-			// keep reference to inner bean, to be able to destroy it on factory shutdown
-			this.disposableInnerBeans.add(bean);
+		RootBeanDefinition mergedInnerBd = getMergedBeanDefinition(innerBeanName, innerBd);
+		Object innerBean = createBean(innerBeanName, mergedInnerBd, null, false);
+		if (mergedInnerBd.isSingleton()) {
+			if (innerBean instanceof DisposableBean) {
+				registerDependentBean(innerBeanName, beanName);
+				// keep reference to inner bean, to be able to destroy it on factory shutdown
+				this.disposableInnerBeans.put(innerBeanName, innerBean);
+			}
 		}
-		return getObjectForSharedInstance(innerBeanName, bean);
+		return getObjectForSharedInstance(innerBeanName, innerBean);
 	}
 
 	/**
@@ -885,6 +937,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object resolveReference(
 			String beanName, RootBeanDefinition mergedBeanDefinition, String argName, RuntimeBeanReference ref)
 			throws BeansException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolving reference from property '" + argName + "' in bean '" +
 					beanName + "' to bean '" + ref.getBeanName() + "'");
@@ -900,6 +953,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				return getParentBeanFactory().getBean(ref.getBeanName());
 			}
 			else {
+				if (mergedBeanDefinition.isSingleton()) {
+					registerDependentBean(ref.getBeanName(), beanName);
+				}
 				return getBean(ref.getBeanName());
 			}
 		}
@@ -914,8 +970,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	protected List resolveManagedList(String beanName, RootBeanDefinition mergedBeanDefinition,
-																		String argName, List ml) throws BeansException {
+	protected List resolveManagedList(
+			String beanName, RootBeanDefinition mergedBeanDefinition, String argName, List ml)
+			throws BeansException {
+
 		List resolved = new ArrayList(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
@@ -933,6 +991,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Set resolveManagedSet(
 			String beanName, RootBeanDefinition mergedBeanDefinition, String argName, Set ms)
 			throws BeansException {
+
 		Set resolved = new HashSet(ms.size());
 		int i = 0;
 		for (Iterator it = ms.iterator(); it.hasNext();) {
@@ -952,6 +1011,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Map resolveManagedMap(
 			String beanName, RootBeanDefinition mergedBeanDefinition, String argName, Map mm)
 			throws BeansException {
+
 		Map resolved = null;
 		// A LinkedHashMap will preserve insertion order, but is not available pre-1.4.
 		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
@@ -973,6 +1033,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return resolved;
 	}
 
+	protected final void registerDependentBean(String beanName, String dependentBeanName) {
+		synchronized (this.dependentBeanMap) {
+			List dependencies = (List) this.dependentBeanMap.get(beanName);
+			if (dependencies == null) {
+				dependencies = new LinkedList();
+				this.dependentBeanMap.put(beanName, dependencies);
+			}
+			dependencies.add(dependentBeanName);
+		}
+	}
+
 	/**
 	 * Give a bean a chance to react now all its properties are set,
 	 * and a chance to know about its owning bean factory (this object).
@@ -980,49 +1051,69 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * and/or BeanFactoryAware, and invoking the necessary callback(s) if it does.
 	 * @param bean new bean instance we may need to initialize
 	 * @param beanName the bean has in the factory. Used for debug output.
+	 * @throws Throwable if thrown by init methods or by the invocation process
 	 */
 	protected void invokeInitMethods(String beanName, RootBeanDefinition mergedBeanDefinition, Object bean)
-			throws Exception {
+			throws Throwable {
 
 		if (bean instanceof InitializingBean) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Calling afterPropertiesSet() on bean with beanName '" + beanName + "'");
+				logger.debug("Invoking afterPropertiesSet() on bean with beanName '" + beanName + "'");
 			}
 			((InitializingBean) bean).afterPropertiesSet();
 		}
 
 		if (mergedBeanDefinition.getInitMethodName() != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Calling custom init method '" + mergedBeanDefinition.getInitMethodName() +
-						"' on bean with beanName '" + beanName + "'");
+			invokeCustomInitMethod(beanName, bean, mergedBeanDefinition.getInitMethodName(),
+					mergedBeanDefinition.getResourceDescription());
+		}
+	}
+
+	/**
+	 * Invoke the specified custom init method on the given bean.
+	 * <p>Can be overridden in subclasses for custom resolution of init
+	 * methods with arguments.
+	 */
+	protected void invokeCustomInitMethod(String beanName, Object bean, String initMethodName,
+			String resourceDescription) throws Throwable {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking custom init method '" + initMethodName +
+					"' on bean with beanName '" + beanName + "'");
+		}
+		try {
+			Method initMethod = BeanUtils.findMethod(bean.getClass(), initMethodName, null);
+			if (initMethod == null) {
+				throw new NoSuchMethodException("Couldn't find an init method named '" + initMethodName +
+						"' on bean with name '" + beanName + "'");
 			}
-			try {
-				bean.getClass().getMethod(mergedBeanDefinition.getInitMethodName(), null).invoke(bean, null);
+			if (!Modifier.isPublic(initMethod.getModifiers())) {
+				initMethod.setAccessible(true);
 			}
-			catch (InvocationTargetException ex) {
-				throw new BeanCreationException(
-						mergedBeanDefinition.getResourceDescription(), beanName,
-						"Initialization method '" + mergedBeanDefinition.getInitMethodName() + "' threw exception",
-						ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new BeanCreationException(
-						mergedBeanDefinition.getResourceDescription(), beanName,
-						"Invocation of initialization method '" + mergedBeanDefinition.getInitMethodName() + "' failed",
-						ex);
-			}
+			initMethod.invoke(bean, null);
+		}
+		catch (InvocationTargetException ex) {
+			throw ex.getTargetException();
 		}
 	}
 
 	public void destroySingletons() {
 		super.destroySingletons();
 
+		if (logger.isInfoEnabled()) {
+			logger.info("Destroying inner beans in factory {" + this + "}");
+		}
 		synchronized (this.disposableInnerBeans) {
-			for (Iterator it = this.disposableInnerBeans.iterator(); it.hasNext();) {
-				Object bean = it.next();
-				it.remove();
-				destroyBean("(inner bean of type " + bean.getClass().getName() + ")", bean);
+			for (Iterator it = new HashSet(this.disposableInnerBeans.keySet()).iterator(); it.hasNext();) {
+				destroyDisposableInnerBean((String) it.next());
 			}
+		}
+	}
+
+	private void destroyDisposableInnerBean(String innerBeanName) {
+		Object innerBeanInstance = this.disposableInnerBeans.remove(innerBeanName);
+		if (innerBeanInstance != null) {
+			destroyBean(innerBeanName, innerBeanInstance);
 		}
 	}
 
@@ -1030,10 +1121,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving depending beans for bean '" + beanName + "'");
 		}
-		String[] dependingBeans = getDependingBeanNames(beanName);
-		if (dependingBeans != null) {
-			for (int i = 0; i < dependingBeans.length; i++) {
-				destroySingleton(dependingBeans[i]);
+		List dependencies = (List) this.dependentBeanMap.remove(beanName);
+		if (dependencies != null) {
+			for (Iterator it = dependencies.iterator(); it.hasNext();) {
+				String dependentBeanName = (String) it.next();
+				if (containsBean(dependentBeanName)) {
+					// registered singleton
+					destroySingleton(dependentBeanName);
+				}
+				else {
+					// disposable inner bean
+					destroyDisposableInnerBean(dependentBeanName);
+				}
 			}
 		}
 
@@ -1049,12 +1148,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (bean instanceof DisposableBean) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Calling destroy() on bean with name '" + beanName + "'");
+				logger.debug("Invoking destroy() on bean with name '" + beanName + "'");
 			}
 			try {
 				((DisposableBean) bean).destroy();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				logger.error("destroy() on bean with name '" + beanName + "' threw an exception", ex);
 			}
 		}
@@ -1063,7 +1162,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
 			if (bd.getDestroyMethodName() != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Calling custom destroy method '" + bd.getDestroyMethodName() +
+					logger.debug("Invoking custom destroy method '" + bd.getDestroyMethodName() +
 							"' on bean with name '" + beanName + "'");
 				}
 				invokeCustomDestroyMethod(beanName, bean, bd.getDestroyMethodName());
@@ -1083,22 +1182,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * methods with arguments.
 	 */
 	protected void invokeCustomDestroyMethod(String beanName, Object bean, String destroyMethodName) {
-		Method[] methods = bean.getClass().getMethods();
-		Method targetMethod = null;
-		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getName().equals(destroyMethodName)) {
-				if (targetMethod == null ||
-						methods[i].getParameterTypes().length < targetMethod.getParameterTypes().length) {
-					targetMethod = methods[i];
-				}
-			}
-		}
-		if (targetMethod == null) {
-			logger.error("Couldn't find a method named '" + destroyMethodName +
+		Method destroyMethod =
+				BeanUtils.findDeclaredMethodWithMinimalParameters(bean.getClass(), destroyMethodName);
+		if (destroyMethod == null) {
+			logger.error("Couldn't find a destroy method named '" + destroyMethodName +
 					"' on bean with name '" + beanName + "'");
 		}
 		else {
-			Class[] paramTypes = targetMethod.getParameterTypes();
+			Class[] paramTypes = destroyMethod.getParameterTypes();
 			if (paramTypes.length > 1) {
 				logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
 						"' has more than one parameter - not supported as destroy method");
@@ -1112,14 +1203,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (paramTypes.length == 1) {
 					args[0] = Boolean.TRUE;
 				}
+				if (!Modifier.isPublic(destroyMethod.getModifiers())) {
+					destroyMethod.setAccessible(true);
+				}
 				try {
-					targetMethod.invoke(bean, args);
+					destroyMethod.invoke(bean, args);
 				}
 				catch (InvocationTargetException ex) {
 					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
 							"' of bean with name '" + beanName + "'", ex.getTargetException());
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
 							"' of bean with name '" + beanName + "'", ex);
 				}
@@ -1129,7 +1223,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	//---------------------------------------------------------------------
-	// Abstract methods to be implemented by concrete subclasses
+	// Abstract method to be implemented by concrete subclasses
 	//---------------------------------------------------------------------
 
 	/**
@@ -1144,16 +1238,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #autowireConstructor
 	 */
 	protected abstract Map findMatchingBeans(Class requiredType) throws BeansException;
-
-	/**
-	 * Return the names of the beans that depend on the given bean.
-	 * Called by destroyBean, to be able to destroy depending beans first.
-	 * @param beanName name of the bean to find depending beans for
-	 * @return array of names of depending beans, or null if none
-	 * @throws BeansException in case of errors
-	 * @see #destroyBean
-	 */
-	protected abstract String[] getDependingBeanNames(String beanName) throws BeansException;
 
 
 	/**

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="dependingBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$DependingBean"
+		depends-on="preparingBean1, preparingBean2"/>
+
+	<bean id="preparingBean1" class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$PreparingBean1"/>
+
+	<bean id="preparingBean2" class="org.springframework.beans.factory.xml.XmlBeanFactoryTestSuite$PreparingBean2"/>
+
+</beans>

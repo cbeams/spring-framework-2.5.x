@@ -24,17 +24,20 @@ import org.springframework.beans.TestBean;
  * @author Juergen Hoeller
  * @since 09.11.2003
  */
-public class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
+class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
 
-	public DerivedConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, IndexedTestBean other) {
+	boolean initialized;
+	boolean destroyed;
+
+	DerivedConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, IndexedTestBean other) {
 		super(spouse1, spouse2, other);
 	}
 
-	public DerivedConstructorDependenciesBean(TestBean spouse1, Object spouse2, IndexedTestBean other) {
+	private DerivedConstructorDependenciesBean(TestBean spouse1, Object spouse2, IndexedTestBean other) {
 		super(spouse1, null, other);
 	}
 
-	public DerivedConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, IndexedTestBean other, int age, int otherAge) {
+	protected DerivedConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, IndexedTestBean other, int age, int otherAge) {
 		super(spouse1, spouse2, other);
 	}
 
@@ -42,6 +45,14 @@ public class DerivedConstructorDependenciesBean extends ConstructorDependenciesB
 		super(spouse1, spouse2, other);
 		setAge(age);
 		setName(name);
+	}
+
+	private void init() {
+		this.initialized = true;
+	}
+
+	private void destroy() {
+		this.destroyed = true;
 	}
 
 }

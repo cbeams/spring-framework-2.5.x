@@ -299,26 +299,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return bd;
 	}
 
-	protected String[] getDependingBeanNames(String beanName) throws BeansException {
-		List dependingBeanNames = new ArrayList();
-		String[] beanDefinitionNames = getBeanDefinitionNames();
-		for (int i = 0; i < beanDefinitionNames.length; i++) {
-			if (containsBeanDefinition(beanDefinitionNames[i])) {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanDefinitionNames[i], false);
-				if (bd.getDependsOn() != null) {
-					List dependsOn = Arrays.asList(bd.getDependsOn());
-					if (dependsOn.contains(beanName)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Found depending bean '" + beanDefinitionNames[i] + "' for bean '" + beanName + "'");
-						}
-						dependingBeanNames.add(beanDefinitionNames[i]);
-					}
-				}
-			}
-		}
-		return (String[]) dependingBeanNames.toArray(new String[dependingBeanNames.size()]);
-	}
-
 	protected Map findMatchingBeans(Class requiredType) {
 		return BeanFactoryUtils.beansOfTypeIncludingAncestors(this, requiredType, true, true);
 	}
