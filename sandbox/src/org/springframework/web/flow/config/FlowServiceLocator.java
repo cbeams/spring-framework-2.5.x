@@ -43,7 +43,7 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @return the instantiated (and possibly autowired) action
 	 * @throws ServiceLookupException when the action cannot be created
 	 */
-	public Action createAction(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException;
+	public Action createAction(Class implementationClass, AutowireMode autowireMode);
 
 	/**
 	 * Lookup an action with specified id.
@@ -60,6 +60,17 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @throws ServiceLookupException when the action cannot be found
 	 */
 	public Action getAction(Class actionImplementationClass) throws ServiceLookupException;
+
+	/**
+	 * Request that the registry backed by this locator instantiate the flow
+	 * attribute mapper of the specified implementation class, using the given
+	 * autowire policy. Note: not all registries may support this advanced
+	 * feature (Spring does though ;-)).
+	 * @param implementationClass the implementation class
+	 * @param autowireMode the autowire policy
+	 * @return the instantiated (and possibly autowired) attribute mapper
+	 */
+	public FlowAttributeMapper createFlowAttributeMapper(Class attributeMapperImplementationClass, AutowireMode autowireMode);
 
 	/**
 	 * Lookup a flow model mapper with specified id.

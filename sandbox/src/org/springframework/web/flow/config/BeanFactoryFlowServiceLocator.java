@@ -70,14 +70,14 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		if (this.beanFactory == null) {
 			throw new IllegalStateException(
 					"The bean factory reference has not yet been set for this BeanFactoryServiceLocator"
-					+ " -- call setBeanFactory()");
+							+ " -- call setBeanFactory()");
 		}
 		return beanFactory;
 	}
 
 	/**
-	 * Returns the default autowire mode. This defaults
-	 * to {@link AutowireMode#NONE}.
+	 * Returns the default autowire mode. This defaults to
+	 * {@link AutowireMode#NONE}.
 	 */
 	public AutowireMode getDefaultAutowireMode() {
 		return defaultAutowireMode;
@@ -106,21 +106,24 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (AutowireCapableBeanFactory)getBeanFactory();
 	}
 
-	public Action createAction(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException {
-		try {
-			if (autowireMode == AutowireMode.DEFAULT) {
-				return createAction(implementationClass, getDefaultAutowireMode());
-			}
-			if (autowireMode == AutowireMode.NONE) {
-				return (Action)BeanUtils.instantiateClass(implementationClass);
-			}
-			else {
-				return (Action)
-					getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(), false);
-			}
+	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
+		Assert.isTrue(FlowAttributeMapper.class.isAssignableFrom(implementationClass),
+				"The service to instantiate must implement the Action interface, the implementation class '"
+						+ implementationClass + "' you provided doesn't.");
+		return (Action)createService(implementationClass, autowireMode);
+	}
+
+	private Object createService(Class implementationClass, AutowireMode autowireMode) {
+		if (autowireMode == AutowireMode.DEFAULT) {
+			return createService(implementationClass, getDefaultAutowireMode());
 		}
-		catch (BeansException e) {
-			throw new NoSuchActionException(implementationClass, e);
+		// TODO throw a service creation exception?
+		if (autowireMode == AutowireMode.NONE) {
+			return (Action)BeanUtils.instantiateClass(implementationClass);
+		}
+		else {
+			return (Action)getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(),
+					false);
 		}
 	}
 
@@ -192,6 +195,13 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		}
 	}
 
+	public FlowAttributeMapper createFlowAttributeMapper(Class implementationClass, AutowireMode autowireMode) {
+		Assert.isTrue(FlowAttributeMapper.class.isAssignableFrom(implementationClass),
+				"The service to instantiate must be implement the FlowAttributeMapper interface, the implementation class '"
+						+ implementationClass + "' you provided doesn't.");
+		return (FlowAttributeMapper)createService(implementationClass, autowireMode);
+	}
+
 	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
 		try {
 			return (FlowAttributeMapper)getBeanFactory().getBean(flowModelMapperId, FlowAttributeMapper.class);
@@ -204,7 +214,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public FlowAttributeMapper getFlowAttributeMapper(Class flowModelMapperImplementationClass)
 			throws ServiceLookupException {
 		if (!FlowAttributeMapper.class.isAssignableFrom(flowModelMapperImplementationClass)) {
-			throw new IllegalArgumentException("Your model mapper implementation '"
+			throw new IllegalArgumentException("Your flow attribute implementation '"
 					+ flowModelMapperImplementationClass + "' must implement the '"
 					+ FlowAttributeMapper.class.getName() + "' interface");
 

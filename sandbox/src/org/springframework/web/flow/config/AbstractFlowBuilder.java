@@ -431,7 +431,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * and executed when the action state being built is entered. Creates the
 	 * action instance.
 	 * @param actionImplementationClass The action implementation to instantiate
-	 * @return The action The action
+	 * @return The action
 	 */
 	protected Action createAction(Class actionImplementationClass) {
 		return getFlowServiceLocator().createAction(actionImplementationClass, AutowireMode.DEFAULT);
@@ -443,7 +443,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Creates the action instances.
 	 * @param actionImplementationClasses The action implementations to
 	 *        instantiate
-	 * @return The actions The actions
+	 * @return The actions
 	 */
 	protected Action[] createActions(Class[] actionImplementationClasses) {
 		Action[] actions = new Action[actionImplementationClasses.length];
@@ -459,7 +459,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * action instance.
 	 * @param actionImplementationClass The action implementation to instantiate
 	 * @param autowireMode the instance autowiring strategy
-	 * @return The action The action
+	 * @return The action
 	 */
 	protected Action createAction(Class actionImplementationClass, AutowireMode autowireMode) {
 		return getFlowServiceLocator().createAction(actionImplementationClass, autowireMode);
@@ -472,7 +472,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param actionImplementationClasses The action implementations to
 	 *        instantiate
 	 * @param autowireMode the instance autowiring strategy
-	 * @return The actions The actions
+	 * @return The actions
 	 */
 	protected Action[] createActions(Class[] actionImplementationClasses, AutowireMode autowireMode) {
 		Action[] actions = new Action[actionImplementationClasses.length];
@@ -517,6 +517,32 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	protected FlowAttributeMapper useAttributeMapper(Class flowAttributeMapperImplementationClass)
 			throws NoSuchFlowAttributeMapperException {
 		return getFlowServiceLocator().getFlowAttributeMapper(flowAttributeMapperImplementationClass);
+	}
+
+	/**
+	 * Request that the flow attribute mapper with the specified implementation
+	 * be instantiated, to be used to map attributs when a subflow is spawned in
+	 * a subflow state. Creates the mapper instance.
+	 * @param attributeMapperImplementationClass The attribute mapper
+	 *        implementation to instantiate
+	 * @return The attribute mapper
+	 */
+	protected FlowAttributeMapper createAttributeMapper(Class attributeMapperImplementationClass) {
+		return getFlowServiceLocator().createFlowAttributeMapper(attributeMapperImplementationClass, AutowireMode.DEFAULT);
+	}
+
+	/**
+	 * Request that the flow attribute mapper with the specified implementation
+	 * be instantiated, to be used to map attributs when a subflow is spawned in
+	 * a subflow state. Creates the mapper instance.
+	 * @param attributeMapperImplementationClass The action implementation to
+	 *        instantiate
+	 * @param autowireMode the instance autowiring strategy
+	 * @return The action The action
+	 */
+	protected FlowAttributeMapper createAttributeMapper(Class attributeMapperImplementationClass,
+			AutowireMode autowireMode) {
+		return getFlowServiceLocator().createFlowAttributeMapper(attributeMapperImplementationClass, autowireMode);
 	}
 
 	/**
