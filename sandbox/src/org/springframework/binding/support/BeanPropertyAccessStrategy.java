@@ -42,10 +42,10 @@ import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
 import org.springframework.binding.value.support.PropertyAdapter;
 import org.springframework.binding.value.support.ValueHolder;
+import org.springframework.core.ToStringCreator;
+import org.springframework.core.enums.LabeledEnum;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ToStringCreator;
-import org.springframework.util.enums.LabeledEnum;
 
 /**
  * EXPERIMENTAL - not yet fit for general use

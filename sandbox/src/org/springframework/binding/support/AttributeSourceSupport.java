@@ -10,10 +10,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.binding.MutableAttributeSource;
+import org.springframework.core.Styler;
+import org.springframework.core.closure.ProcessTemplate;
+import org.springframework.core.closure.support.IteratorProcessTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.Styler;
-import org.springframework.util.closure.ProcessTemplate;
-import org.springframework.util.closure.support.IteratorProcessTemplate;
 
 /**
  * Support class for attribute setters. TODO - should this implement map?

@@ -15,7 +15,7 @@
  */
 package org.springframework.binding.value.support;
 
-import org.springframework.util.ToStringCreator;
+import org.springframework.core.ToStringCreator;
 
 /**
  * A simple value model that contains a single value. Notifies listeners when

@@ -21,7 +21,7 @@ import java.text.ParseException;
 import javax.swing.JFormattedTextField;
 
 import org.springframework.binding.value.ValueModel;
-import org.springframework.util.closure.Closure;
+import org.springframework.core.closure.Closure;
 
 /**
  * @author Keith Donald

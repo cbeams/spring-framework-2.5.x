@@ -19,7 +19,7 @@ import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.Converter;
 import org.springframework.binding.format.Formatter;
 import org.springframework.binding.format.InvalidFormatException;
-import org.springframework.util.closure.Closure;
+import org.springframework.core.closure.Closure;
 
 /**
  * Adapts a Formatter to the Converter interface.

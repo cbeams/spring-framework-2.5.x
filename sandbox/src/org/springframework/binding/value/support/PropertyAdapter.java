@@ -21,7 +21,7 @@ import java.beans.PropertyChangeListener;
 import org.springframework.binding.MutablePropertyAccessStrategy;
 import org.springframework.binding.value.PropertyChangePublisher;
 import org.springframework.binding.value.ValueChangeListener;
-import org.springframework.util.ToStringCreator;
+import org.springframework.core.ToStringCreator;
 
 /**
  * Adapts access to a domain model property to the value model interface. The

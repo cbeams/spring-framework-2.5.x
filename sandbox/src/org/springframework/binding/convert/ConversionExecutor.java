@@ -17,7 +17,7 @@ package org.springframework.binding.convert;
 
 import java.io.Serializable;
 
-import org.springframework.util.closure.Closure;
+import org.springframework.core.closure.Closure;
 
 /**
  * A command object that is parameterized with the information neccessary to

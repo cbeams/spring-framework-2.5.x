@@ -16,7 +16,7 @@
 package org.springframework.binding.convert.support;
 
 import org.springframework.binding.format.FormatterLocator;
-import org.springframework.util.enums.LabeledEnum;
+import org.springframework.core.enums.LabeledEnum;
 
 /**
  * Converter that converts textual representations of <coded>CodedEnum</code>

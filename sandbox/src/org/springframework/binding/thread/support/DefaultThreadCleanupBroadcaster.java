@@ -20,7 +20,7 @@ import java.util.Iterator;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.binding.thread.ThreadCleanupBroadcaster;
 import org.springframework.binding.thread.ThreadCleanupListener;
-import org.springframework.util.EventListenerListHelper;
+import org.springframework.core.EventListenerListHelper;
 
 /**
  * Default thread cleanup broadcaster that broadcast cleanup events to all

@@ -15,9 +15,9 @@
  */
 package org.springframework.binding.value.support;
 
+import org.springframework.core.Styler;
+import org.springframework.core.closure.Closure;
 import org.springframework.util.Assert;
-import org.springframework.util.Styler;
-import org.springframework.util.closure.Closure;
 
 /**
  * @author Keith Donald

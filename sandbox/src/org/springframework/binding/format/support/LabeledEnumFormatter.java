@@ -15,10 +15,10 @@
  */
 package org.springframework.binding.format.support;
 
+import org.springframework.core.enums.LabeledEnum;
+import org.springframework.core.enums.LabeledEnumResolver;
+import org.springframework.core.enums.support.StaticLabeledEnumResolver;
 import org.springframework.util.Assert;
-import org.springframework.util.enums.LabeledEnum;
-import org.springframework.util.enums.LabeledEnumResolver;
-import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
 /**
  * Converts from string to a <cod>LabeledEnum</code> instance and back.

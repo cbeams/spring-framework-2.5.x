@@ -24,7 +24,7 @@ import java.util.Set;
 import org.springframework.binding.value.BoundValueModel;
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
-import org.springframework.util.closure.Closure;
+import org.springframework.core.closure.Closure;
 
 /**
  * Base helper implementation of a value model.

@@ -17,9 +17,9 @@ package org.springframework.binding.value.support;
 
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
-import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Closure;
-import org.springframework.util.closure.support.NoArgBlock;
+import org.springframework.core.ToStringCreator;
+import org.springframework.core.closure.Closure;
+import org.springframework.core.closure.support.NoArgBlock;
 
 /**
  * A value model that wraps another value model; delaying or buffering changes
