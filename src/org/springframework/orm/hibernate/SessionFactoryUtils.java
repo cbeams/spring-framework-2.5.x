@@ -317,8 +317,8 @@ public abstract class SessionFactoryUtils {
 		}
 
 		if (!allowCreate) {
-			throw new IllegalStateException("No Hibernate session bound to thread, and configuration " +
-																			"does not allow creation of new one here");
+			throw new IllegalStateException("No Hibernate session bound to thread, " +
+			    "and configuration does not allow creation of new one here");
 		}
 
 		logger.debug("Opening Hibernate session");
@@ -382,7 +382,8 @@ public abstract class SessionFactoryUtils {
 		}
 		catch (JDBCException ex) {
 			// SQLException underneath
-			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex.getSQLException());
+			throw new DataAccessResourceFailureException(
+			    "Could not open Hibernate session", ex.getSQLException());
 		}
 		catch (HibernateException ex) {
 			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex);
@@ -397,7 +398,8 @@ public abstract class SessionFactoryUtils {
 	 * @param sessionFactory Hibernate SessionFactory that the Query was created for
 	 */
 	public static void applyTransactionTimeout(Query query, SessionFactory sessionFactory) {
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		SessionHolder sessionHolder =
+		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			query.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
@@ -410,7 +412,8 @@ public abstract class SessionFactoryUtils {
 	 * @param sessionFactory Hibernate SessionFactory that the Criteria was created for
 	 */
 	public static void applyTransactionTimeout(Criteria criteria, SessionFactory sessionFactory) {
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		SessionHolder sessionHolder =
+		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
@@ -529,7 +532,8 @@ public abstract class SessionFactoryUtils {
 		if (session == null) {
 			return;
 		}
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		SessionHolder sessionHolder =
+		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && sessionHolder.containsSession(session)) {
 			return;
 		}
