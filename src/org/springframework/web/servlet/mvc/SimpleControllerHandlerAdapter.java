@@ -17,12 +17,12 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>This is an SPI class, not used directly by application code.
  *
  * @author Rod Johnson
- * @version $Id: SimpleControllerHandlerAdapter.java,v 1.3 2003-10-06 14:24:22 jhoeller Exp $
+ * @version $Id: SimpleControllerHandlerAdapter.java,v 1.4 2003-11-21 09:39:30 jhoeller Exp $
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see Controller
  * @see LastModified
  */
-public class SimpleControllerHandlerAdapter extends WebApplicationObjectSupport implements HandlerAdapter {
+public class SimpleControllerHandlerAdapter implements HandlerAdapter {
 	
 	public boolean supports(Object handler) {
 		return handler != null && Controller.class.isAssignableFrom(handler.getClass());

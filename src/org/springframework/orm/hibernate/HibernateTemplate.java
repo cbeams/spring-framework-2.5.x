@@ -187,6 +187,58 @@ public class HibernateTemplate extends HibernateAccessor {
 	}
 
 	/**
+	 * Save the given persistent instance.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.save.
+	 * @param entity the persistent instance to save
+	 * @return the generated identifier
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#save(Object)
+	 */
+	public Serializable save(final Object entity) throws DataAccessException {
+		return (Serializable) execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return session.save(entity);
+			}
+		});
+	}
+
+	/**
+	 * Save the given persistent instance with the given identifier.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.save.
+	 * @param entity the persistent instance to save
+	 * @param id the identifier to assign
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#save(Object, Serializable)
+	 */
+	public void save(final Object entity, final Serializable id) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.save(entity, id);
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * Update the given persistent instance.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.update.
+	 * @param entity the persistent instance to update
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#update(Object)
+	 */
+	public void update(final Object entity) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.update(entity);
+				return null;
+			}
+		});
+	}
+
+	/**
 	 * Save respectively update the given persistent instance,
 	 * according to its id (matching the configured "unsaved-value"?).
 	 * <p>This is a convenience method for single step actions,
@@ -199,40 +251,6 @@ public class HibernateTemplate extends HibernateAccessor {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.saveOrUpdate(entity);
-				return null;
-			}
-		});
-	}
-
-	/**
-	 * Save the given persistent instance.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.save.
-	 * @param entity the persistent instance to save
-	 * @return the generated identifier
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#saveOrUpdate(Object)
-	 */
-	public Serializable save(final Object entity) throws DataAccessException {
-		return (Serializable) execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				return session.save(entity);
-			}
-		});
-	}
-
-	/**
-	 * Update the given persistent instance.
-	 * <p>This is a convenience method for single step actions,
-	 * mirroring Session.update.
-	 * @param entity the persistent instance to update
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#saveOrUpdate(Object)
-	 */
-	public void update(final Object entity) throws DataAccessException {
-		execute(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				session.update(entity);
 				return null;
 			}
 		});
