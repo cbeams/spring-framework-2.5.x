@@ -1,12 +1,17 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.57 2003-12-05 17:16:46 jhoeller Exp $
+$Id: changelog.txt,v 1.58 2003-12-06 15:57:40 jhoeller Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
 --------------------------------------
-* (AOP) Introduced before advice, in addition to interception around advice.
-* InvokerInterceptor and ProxyInterceptor interface replaced by TargetSource interface.
+
+Package org.springframework.aop
+* introduced ProxyConfig base class for ProxyFactoryBean etc, specifying common AOP proxy settings
+* introduced before advice, in addition to interception around advice
+* replaced InvokerInterceptor and ProxyInterceptor interface by TargetSource interface
+
+Package org.springframework.beans
 * dissolved event propagation support in BeanWrapper and DataBinder
 * introduced AutowireCapableBeanFactory interface, allowing for autowiring of externally managed bean instances
 * dissolved PropertyValuesProviderFactoryBean interface and AbstractFactoryBean convenience base class
@@ -20,11 +25,13 @@ Changes in version 1.0 M4 (XX.12.2003)
 * allow for "list" and "map" as sub-element of "list" in XML bean definitions
 * added "default-lazy-init" attribute for XML bean definitions
 * added two "beanOfType" convenience methods to BeanFactoryUtils
-* introduced ProxyConfig base class for ProxyFactoryBean etc, specifying common AOP proxy settings
+
+Package org.springframework.context
 * ApplicationContext interface extends AutowireCapableBeanFactory
 * fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons"
 * added support for pseudo URL prefix "classpath:" in AbstractApplicationContext's "getResourceAsStream"
-* dissolved TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
+
+Package org.springframework.jdbc
 * moved JDBC-specific DataAccessException subclasses from jdbc.core to root jdbc package
 * moved SQLExceptionTranslator interface plus implementations from package jdbc.core to jdbc.support
 * moved DataFieldMaxValueIncrementer interface plus implementations from jdbc.core.support to jdbc.support.incrementer
@@ -34,10 +41,31 @@ Changes in version 1.0 M4 (XX.12.2003)
 * introduced BlobCreator interface plus DefaultBlobCreator implementation in package jdbc.support.lob
 * added OracleBlobCreator implementation for the peculiar requirements of Oracle's JDBC driver
 * dissolved setExceptionTranslator on RdbmsOperation, set an appropriately configured JdbcTemplate instead
-* introduced support for iBATIS Database Layer, in the org.springframework.orm.ibatis package
+
+Package org.springframework.orm
+* added OpenSessionInViewInterceptor and OpenSessionInViewFilter to org.springframework.orm.hibernate.support
+* introduced support for iBATIS Database Layer, in the package org.springframework.orm.ibatis
+
+Package org.springframework.samples
+* introduced JPetStore sample application, an adapted version of Clinton Begin's JPetStore
+
+Package org.springframework.transaction
+* dissolved TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
+
+Package org.springframework.web
 * added "getOrCreateSessionAttribute" helper method to WebUtils, for on-demand state objects in a web tier
+* introduced RootWebApplicationContext and NestedWebApplicationContext configuration interfaces
+* reworked initialization workflow of XmlWebApplicationContext and StaticWebApplicationContext
+* allow for overriding context creation in ContextLoader (now a full object) and FrameworkServlet
+* introduced GenericFilterBean and OncePerRequestFilter base classes in package org.springframework.web.filter
+* reworked MultipartFilter to extend GenericFilterBean/OncePerRequestFilter
 * DispatcherServlet's default exception handling lets RuntimeExceptions straight through
 * HandlerInterceptors are allowed to throw any Exception
+* added ModelAndView argument to HandlerInterceptor's "postHandle" method, for exposing additional model objects
+* added "afterCompletion" method to HandlerInterceptor, invoked on any outcome for proper resource cleanup
+* added HandlerInterceptorAdapter for simplified implementation of pre-only/post-only interceptors
+* moved SimpleMappingExceptionResolver from package org.springframework.web.servlet.support to web.servlet.handler
+* moved UserRoleAuthorizationInterceptor from package org.springframework.web.servlet.support to web.servlet.handler
 * moved WebContentGenerator from package org.springframework.web.servlet.mvc to web.servlet.support
 * introduced WebContentInterceptor for applying request/response checks and preparations to a set of controllers
 * MultiActionController extends AbstractController, for applying checks and preparation to all handle methods
@@ -45,7 +73,6 @@ Changes in version 1.0 M4 (XX.12.2003)
 * added additional "referenceData(request,page)" method to AbstractWizardFormController
 * added additional "getTargetPage(request,command,errors,currentPage)" method to AbstractWizardFormController
 * renamed org.springframework.web.servlet.view.velocity.VelocityConfiguration to VelocityConfig
-* introduced JPetStore sample application, an adapted version of Clinton Begin's JPetStore
 
 
 Changes in version 1.0 M3 (25.11.2003)
