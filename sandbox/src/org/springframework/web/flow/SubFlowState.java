@@ -22,18 +22,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
-import org.springframework.web.flow.config.NoSuchFlowAttributesMapperException;
 import org.springframework.web.flow.config.NoSuchFlowDefinitionException;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * State that executes a sub flow.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class SubFlowState extends TransitionableState {
 
 	private Flow subFlow;
 
-	private FlowAttributesMapper attributesMapper;
+	private FlowAttributesMapper flowAttributesMapper;
 
 	public SubFlowState(Flow flow, String id, Flow subFlow, Transition transition) {
 		this(flow, id, subFlow, new Transition[] { transition });
@@ -51,7 +53,7 @@ public class SubFlowState extends TransitionableState {
 			Transition[] transitions) {
 		super(flow, id, transitions);
 		setSubFlow(subFlow);
-		setAttributesMapper(attributesMapper);
+		setFlowAttributesMapper(attributesMapper);
 	}
 
 	protected void setSubFlow(Flow subFlow) {
@@ -63,12 +65,12 @@ public class SubFlowState extends TransitionableState {
 		return this.subFlow;
 	}
 
-	protected void setAttributesMapper(FlowAttributesMapper attributesMapper) {
-		this.attributesMapper = attributesMapper;
+	protected void setFlowAttributesMapper(FlowAttributesMapper attributesMapper) {
+		this.flowAttributesMapper = attributesMapper;
 	}
 
-	protected FlowAttributesMapper getAttributesMapper() throws NoSuchFlowAttributesMapperException {
-		return this.attributesMapper;
+	protected FlowAttributesMapper getFlowAttributesMapper() {
+		return this.flowAttributesMapper;
 	}
 
 	public boolean isSubFlowState() {
@@ -83,12 +85,12 @@ public class SubFlowState extends TransitionableState {
 					+ flowExecution.getActiveFlowId() + "'");
 		}
 		Map subFlowAttributes;
-		if (getAttributesMapper() != null) {
+		if (getFlowAttributesMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
 						+ "down to the spawned subflow for access within the subflow");
 			}
-			subFlowAttributes = getAttributesMapper().createSpawnedSubFlowAttributesMap(flowExecution);
+			subFlowAttributes = getFlowAttributesMapper().createSpawnedSubFlowAttributesMap(flowExecution);
 		}
 		else {
 			if (logger.isDebugEnabled()) {

@@ -27,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
+ * @author Erwin Vervaet
  */
 public class EndState extends AbstractState {
 
@@ -72,12 +73,12 @@ public class EndState extends AbstractState {
 			Flow resumingParentFlow = flowExecution.getActiveFlow();
 			Assert.isInstanceOf(SubFlowState.class, flowExecution.getCurrentState());
 			SubFlowState resumingState = (SubFlowState)flowExecution.getCurrentState();
-			if (resumingState.getAttributesMapper() != null) {
+			if (resumingState.getFlowAttributesMapper() != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Messaging the configured attributes mapper to map subflow attributes back up to the resuming parent flow - "
 							+ "the resuming parent flow will now have access to attributes passed up by the completed subflow");
 				}
-				resumingState.getAttributesMapper().mapToResumingParentFlow(endingFlowSession,
+				resumingState.getFlowAttributesMapper().mapToResumingParentFlow(endingFlowSession,
 						flowExecution.getActiveFlowSession());
 			}
 			else {
