@@ -116,7 +116,7 @@ July/October 2003</i>
 <p>Note that most business and data access objects will implement a respective interface, so that client classes like web controllers just need to know the interfaces. This allows for flexible reconfiguration, e.g. simply switching a certain bean definition to a different class that implements the same interface, without any implications on the definitions of client objects.
 
 
-<p><h3>5. Spring Bean Container vs Avalon / Fortress</h3>
+<p><h3>5. Spring Bean Factory vs Avalon / Fortress</h3>
 
 <p>Avalon is the oldest IoC container in the field, although still not very prevalent. It is basically just a set of interfaces for components and service managers, with various implementations. Most of the latter are in somewhat unclear states though, the only major ones are Phoenix and Fortress.
 
@@ -129,7 +129,7 @@ July/October 2003</i>
 <p>Finally, an example of Avalon's programming model: If you'd like to create the above generic application context with Avalon, you'd have to subclass BasicDataSource and make it implement Configurable (for the parameters) and Stoppable (for the close call), or wrap it in a respective service adapter. Furthermore, "exampleDataAccessObject" would have to implement Serviceable to look up the DataSource, and use the ServiceSelector mechanism to choose one by some key if there were more than one.
 
 
-<p><h3>6. Spring Bean Container vs PicoContainer</h3>
+<p><h3>6. Spring Bean Factory vs PicoContainer</h3>
 
 <p>Another lightweight container getting attention recently is the PicoContainer. Its original incentive is to offer a more lightweight and less intrusive model than Avalon. It is built around components that specify dependencies via constructor arguments, instead of having to use some ServiceManager. This infrastructure intends to solve the same problems as Spring's bean factory concept but has some severe drawbacks:
 
@@ -157,13 +157,15 @@ July/October 2003</i>
 <li>In the future, Spring may offer dynamic reconfiguration of contexts, if beans can handle it by updating individual changed properties. With constructors alone this would mean changing the identity of the component.
 </ul>
 
-<p>PicoContainer's typical usage style involves programmatic component and parameter registration. This is also possible with Spring, using ListableBeanFactoryImpl and its registerBeanDefinition methods. The difference is that we recommend the XML style while Pico favors programmatic registration. NanoContainers built on top of Pico might offer XML component definitions; as of October 2003, the Nano project is still not in a public stage though.
+<p>PicoContainer's typical usage style involves programmatic component and parameter registration. This is also possible with Spring, using DefaultListableBeanFactory and its registerBeanDefinition methods. The difference is that we recommend the XML style while Pico favors programmatic registration. NanoContainers built on top of Pico might offer XML component definitions; as of October 2003, the Nano project is still not in a public stage though.
 
 <p>An example: To create the above generic application context with PicoContainer, you'd have to subclass BasicDataSource to give it one single constructor that takes all necessary (?) parameters (is "password" or "validationQuery" necessary, for example?), and you would just be able to pass one DataSource instance to each component.
 
 <p>The main argument for Pico's constructor-based "Type 3 IoC" approach is that it cannot miss any dependencies; it guarantees a fully configured instance. But why should every component need to receive instances for all possible dependencies and parameters? A bean-based approach, aka "Type 2 IoC" but without enabler interfaces, allows for optional dependencies without any hassle. We consider such flexibility more important than to avoid missing dependencies at any cost.
 
 <p>As of release 1.0 M2, Spring offers "autowire" functionality, that is, automatically satisfying dependencies with matching objects from the application context if there's just one instance of each demanded type defined there. The new "dependency-check" feature lets the bean factory check that all dependencies (objects, simple parameters, or both) have been satisfied if this is a requirement. Both features allow a Spring bean factory to give the same level of guarantee for proper configuration as a PicoContainer.
+
+<p>As of release 1.0 M3, Spring also offers support for resolving constructor arguments, both via autowiring and via explicit references/values. This can be mixed with bean properties without any hassle: Spring offers all of its configuration power for Type 2 and Type 3 IoC now. Note that we still recommend the bean-style approach.
 
 
 <p><h3>Links</h3>
