@@ -43,7 +43,7 @@ public class JBossNativeJdbcExtractor implements NativeJdbcExtractor {
 	public Connection getNativeConnection(Connection con) throws SQLException {
 		if (con instanceof WrappedConnection) {
 			return ((WrappedConnection) con).getUnderlyingConnection();
-		};
+		}
 		return con;
 	}
 
