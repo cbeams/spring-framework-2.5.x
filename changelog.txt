@@ -13,6 +13,7 @@ Package org.springframework.beans
 * fixed PropertyPlaceholderConfigurer to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
 
 Package org.springframework.core
+* added initial capacity check to CollectionFactory, to always pass a positive capacity number to Commons Collections
 * fixed AbstractPathResolvingPropertyEditor to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
 * PathMatchingResourcePatternResolver supports path matching in jar files now (for both "classpath:" and "classpath*:")
 
@@ -31,6 +32,9 @@ Package org.springframework.ui
 * added JasperReportsUtils to allow for convenient creation of CSV/HTML/PDF/XLS reports with Jasper Reports
 
 Package org.springframework.web
+* UrlBasedViewResolver supports a "forward:" prefix too, for forwards to other controllers through special view names
+* factored out "doRender" and "getTemplate(name)" methods in VelocityView, for easy subclassing (multiple templates etc)
+* factored out "doRender" and "getTemplate(name, Locale)" methods in FreeMarkerView, for easy subclassing
 * changed value for "selected" attribute from "true" to "selected" in Velocity and FreeMarker macros (spring.vm/ftl)
 * added JasperReportsXxxView to allow for convenient creation of CSV/HTML/PDF/XLS web views with Jasper Reports
 
