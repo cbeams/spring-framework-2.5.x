@@ -37,9 +37,9 @@ public class DefaultRulesSource implements RulesSource {
     }
 
     public void setBeanRules(List rules) {
+        rules.clear();
         for (Iterator i = rules.iterator(); i.hasNext();) {
-            Rules r = (Rules)i.next();
-            this.rules.put(r.getBeanClass(), r);
+            addRules((Rules)i.next());
         }
     }
 
