@@ -32,7 +32,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.6 2003-12-05 16:49:14 jhoeller Exp $
+ * @version $Id: BeanWrapper.java,v 1.7 2003-12-10 08:53:42 jhoeller Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -71,6 +71,14 @@ public interface BeanWrapper {
 	 * @return the class of the wrapped object
 	 */
 	Class getWrappedClass();
+
+	/**
+	 * Register the given custom property editor for all properties of the
+	 * given type.
+	 * @param requiredType type of the property
+	 * @param propertyEditor editor to register
+	 */
+	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 
 	/**
 	 * Register the given custom property editor for the given type and

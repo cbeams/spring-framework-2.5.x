@@ -58,7 +58,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.18 2003-12-05 16:49:14 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.19 2003-12-10 08:53:42 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -195,6 +195,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return object;
 	}
 
+
+	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
+		registerCustomEditor(requiredType, null, propertyEditor);
+	}
 
 	public void registerCustomEditor(Class requiredType, String propertyPath, PropertyEditor propertyEditor) {
 		if (propertyPath != null) {
