@@ -201,16 +201,16 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	// Implementation of BeanDefinitionRegistry
 	//---------------------------------------------------------------------
 
-	public BeanDefinition getBeanDefinition(String name) throws BeansException {
-		return this.beanFactory.getBeanDefinition(name);
+	public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
+		return this.beanFactory.getBeanDefinition(beanName);
 	}
 
-	public void registerBeanDefinition(String name, BeanDefinition beanDefinition) throws BeansException {
-		this.beanFactory.registerBeanDefinition(name, beanDefinition);
+	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeansException {
+		this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
 	}
 
-	public void registerAlias(String name, String alias) throws BeansException {
-		this.beanFactory.registerAlias(name, alias);
+	public void registerAlias(String beanName, String alias) throws BeansException {
+		this.beanFactory.registerAlias(beanName, alias);
 	}
 
 }

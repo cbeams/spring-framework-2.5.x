@@ -47,20 +47,24 @@ public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for URL mappings in application context: " + getApplicationContext());
 		}
-		String[] urlMaps = getApplicationContext().getBeanDefinitionNames();
+		String[] beanNames = getApplicationContext().getBeanDefinitionNames();
 
-		// take anything beginning with a slash in the bean name
-		for (int i = 0; i < urlMaps.length; i++) {
-			String[] urls = checkForUrl(urlMaps[i]);
+		// Take any bean name or alias that begins with a slash.
+		for (int i = 0; i < beanNames.length; i++) {
+			String[] urls = checkForUrl(beanNames[i]);
 			if (urls.length > 0) {
-				logger.debug("Found URL mapping [" + urlMaps[i] + "]");
-				// create a mapping to each part of the path
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found URL mapping [" + beanNames[i] + "]");
+				}
+				// Create a mapping to each part of the path.
 				for (int j = 0; j < urls.length; j++) {
-					registerHandler(urls[j], urlMaps[i]);
+					registerHandler(urls[j], beanNames[i]);
 				}
 			}
 			else {
-				logger.debug("Rejected bean name '" + urlMaps[i] + "'");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Rejected bean name '" + beanNames[i] + "'");
+				}
 			}
 		}
 	}
