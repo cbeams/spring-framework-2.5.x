@@ -29,12 +29,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.LastModified;
-import org.springframework.web.servlet.mvc.SessionRequiredException;
+import org.springframework.web.servlet.support.SessionRequiredException;
 
 /**
  * Controller implementation that allows multiple request types to be
@@ -91,8 +94,18 @@ import org.springframework.web.servlet.mvc.SessionRequiredException;
  */
 public class MultiActionController extends AbstractController implements LastModified  {
 		
-	/** Prefix for last modified methods */
+	/** Suffix for last-modified methods */
 	public static final String LAST_MODIFIED_METHOD_SUFFIX = "LastModified";
+	
+	/**
+	 * Log category to use when no mapped handler is found for a request.
+	 */
+	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
+
+	/**
+	 * Additional logger to use when no mapped handler is found for a request.
+	 */
+	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 
 	//---------------------------------------------------------------------
@@ -150,17 +163,15 @@ public class MultiActionController extends AbstractController implements LastMod
 	//---------------------------------------------------------------------
 
 	/**
-	 * Set the method name resolver used by this class.
-	 * Allows parameterization of mappings.
-	 * @param methodNameResolver the method name resolver used by this class
+	 * Set the method name resolver that this class should use.
+	 * Allows parameterization of handler method mappings.
 	 */
 	public final void setMethodNameResolver(MethodNameResolver methodNameResolver) {
 		this.methodNameResolver = methodNameResolver;
 	}
 	
 	/**
-	 * Get the MethodNameResolver used by this class
-	 * @return MethodNameResolver the method name resolver used by this class
+	 * Get the MethodNameResolver used by this class.
 	 */
 	public final MethodNameResolver getMethodNameResolver() {
 		return this.methodNameResolver;
@@ -178,7 +189,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	public final void setDelegate(Object delegate) throws ApplicationContextException {
 		if (delegate == null) {
-			throw new IllegalArgumentException("Delegate cannot be null in MultiActionController");
+			throw new IllegalArgumentException("delegate cannot be null in MultiActionController");
 		}
 		this.delegate = delegate;
 		this.methodHash = new HashMap();
@@ -258,28 +269,27 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	public final long getLastModified(HttpServletRequest request) {
 		try {
-			String handlerMethodName = methodNameResolver.getHandlerMethodName(request);
+			String handlerMethodName = this.methodNameResolver.getHandlerMethodName(request);
 			Method lastModifiedMethod = (Method) this.lastModifiedMethodHash.get(handlerMethodName);
 			if (lastModifiedMethod != null) {
 				try {
-					// Invoke the LastModified method
+					// invoke the last-modified method
 					Long wrappedLong = (Long) lastModifiedMethod.invoke(this.delegate, new Object[] { request });
 					return wrappedLong.longValue();
 				}
 				catch (Exception ex) {
-					// We encountered an error invoking the lastModified method
-					// We can't do anything useful except log this, as we can't throw an exception
+					// We encountered an error invoking the last-modified method.
+					// We can't do anything useful except log this, as we can't throw an exception.
 					logger.error("Failed to invoke lastModified method", ex);
 				}
 			}	// if we had a lastModified method for this request
 		}
 		catch (NoSuchRequestHandlingMethodException ex) {
-			// No handler method for this request. This shouldn't
-			// happen, as this method shouldn't be called unless a previous invocation
-			// of this class has generated content.
-			// Do nothing, that's ok: we'll return default
+			// No handler method for this request. This shouldn't happen, as this
+			// method shouldn't be called unless a previous invocation of this class
+			// has generated content. Do nothing, that's OK: We'll return default.
 		}
-		// The default if we didn't find a method
+		// the default if we didn't find a method
 		return -1L;
 	}
 
@@ -290,8 +300,15 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 	    throws Exception {
-		String name = this.methodNameResolver.getHandlerMethodName(request);
-		return invokeNamedMethod(name, request, response);
+		try {
+			String methodName = this.methodNameResolver.getHandlerMethodName(request);
+			return invokeNamedMethod(methodName, request, response);
+		}
+		catch (NoSuchRequestHandlingMethodException ex) {
+			pageNotFoundLogger.warn(ex.getMessage());
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
 	}
 	
 	/**
@@ -305,7 +322,7 @@ public class MultiActionController extends AbstractController implements LastMod
 		
 		Method m = (Method) this.methodHash.get(method);
 		if (m == null) {
-			throw new NoSuchRequestHandlingMethodException(method, this);
+			throw new NoSuchRequestHandlingMethodException(method, getClass());
 		}
 
 		try {
@@ -317,8 +334,9 @@ public class MultiActionController extends AbstractController implements LastMod
 			if (m.getParameterTypes().length >= 3 && m.getParameterTypes()[2].equals(HttpSession.class) ){
 				HttpSession session = request.getSession(false);
 				if (session == null) {
-					return handleException(request, response,
-																 new SessionRequiredException("Session was required for method '" + method + "'"));
+					return handleException(
+							request, response,
+							new SessionRequiredException("Pre-existing session required for handler method '" + method + "'"));
 				}
 				params.add(session);
 			}

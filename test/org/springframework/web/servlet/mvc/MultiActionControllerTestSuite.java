@@ -40,6 +40,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver;
+import org.springframework.web.servlet.support.SessionRequiredException;
 
 /**
  * @author Rod Johnson
