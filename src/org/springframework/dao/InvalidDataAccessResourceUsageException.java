@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.dao;
 
 /**
  * Root for exceptions thrown when we use a data access resource incorrectly.
  * Thrown for example on specifying bad SQL when using a RDBMS.
- * Resource-specific subclasses will probably be supplied by data access packages.
+ * Resource-specific subclasses are supplied by concrete data access packages.
  * @author Rod Johnson
  */
 public class InvalidDataAccessResourceUsageException extends DataAccessException {
