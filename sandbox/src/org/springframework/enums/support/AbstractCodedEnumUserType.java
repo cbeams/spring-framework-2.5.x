@@ -28,7 +28,6 @@ import net.sf.hibernate.type.NullableType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.enums.CodedEnum;
 import org.springframework.enums.CodedEnumResolver;
 import org.springframework.enums.LetterCodedEnum;
@@ -57,7 +56,7 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
 	}
 
 	public int[] sqlTypes() {
-		return persistentType().sqlTypes(null);
+		return new int[] { persistentType().sqlType() };
 	}
 
 	protected String enumType() {
@@ -82,7 +81,7 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
 
 	public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
 		Comparable code;
-		code = (Comparable) persistentType().nullSafeGet(rs, names[0]);
+		code = (Comparable)persistentType().nullSafeGet(rs, names[0]);
 		if (code == null) {
 			return null;
 		}
@@ -98,21 +97,14 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
 			throw new IllegalArgumentException("Received value is not a [" + returnedClass().getName() + "] but ["
 					+ value.getClass() + "]");
 		}
-		CodedEnum codedEnum = (CodedEnum) value;
+		CodedEnum codedEnum = (CodedEnum)value;
 		if (codedEnum != null) {
-			Object code = codedEnum.getCode();
-			Assert.notNull(code, "Enum codes cannot be null!");
-			// for some reason some characters don't map well, convert to string
-			// instead...
-			if (code instanceof Character) {
-				stmt.setString(index, ((Character) code).toString());
-			}
-			else {
-				stmt.setObject(index, code);
-			}
+			Comparable code = codedEnum.getCode();
+			Assert.notNull(code, "Enum codes cannot be null, but this one is");
+			persistentType().nullSafeSet(stmt, code, index);
 		}
 		else {
-			stmt.setNull(index, sqlTypes()[0]);
+			persistentType().nullSafeSet(stmt, null, index);
 		}
 	}
 
@@ -123,5 +115,4 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
 	public boolean isMutable() {
 		return false;
 	}
-
 }
