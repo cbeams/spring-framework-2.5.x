@@ -5,9 +5,7 @@
 
 package org.springframework.ui.velocity;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -15,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
 
-import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.core.io.Resource;
 
 /**
  * Factory that configures a VelocityEngine in a Spring application context.
@@ -50,15 +48,15 @@ import org.springframework.context.support.ApplicationObjectSupport;
  * @see VelocityEngineFactoryBean
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
  */
-public class VelocityEngineFactory extends ApplicationObjectSupport {
+public class VelocityEngineFactory {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private String configLocation;
+	private Resource configLocation;
 
 	private Properties velocityProperties;
 
-	private String resourceLoaderPath;
+	private Resource resourceLoaderPath;
 
 	private boolean overrideLogging = true;
 
@@ -73,7 +71,7 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 	 * @see #setVelocityProperties
 	 * @see #getDefaultConfigLocation
 	 */
-	public void setConfigLocation(String configLocation) {
+	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
 	}
 
@@ -93,10 +91,10 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 	 * <p>Will define a path for the default Velocity resource loader with the name
 	 * "file", of type org.apache.velocity.runtime.resource.loader.FileResourceLoader,
 	 * appending the given path to the application context resource base.
-	 * @see org.springframework.context.ApplicationContext#getResourceBase
+	 * @see org.springframework.context.ApplicationContext#getResource
 	 * @see org.apache.velocity.runtime.resource.loader.FileResourceLoader
 	 */
-	public void setResourceLoaderPath(String resourceLoaderPath) {
+	public void setResourceLoaderPath(Resource resourceLoaderPath) {
 		this.resourceLoaderPath = resourceLoaderPath;
 	}
 
@@ -111,15 +109,6 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 
 
 	/**
-	 * Only invoked when actually running in an ApplicationContext.
-	 * Else, lazy initialization will be triggered by getVelocityEngine.
-	 * @see #getVelocityEngine
-	 */
-	protected void initApplicationContext() {
-		initVelocityEngine();
-	}
-
-	/**
 	 * Prepare the VelocityEngine instance.
 	 * @throws VelocityInitializationException on Velocity initialization failure
 	 */
@@ -127,27 +116,21 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 		this.velocityEngine = newVelocityEngine();
 		Properties props = new Properties();
 
-		// try default config location as fallback
-		String actualLocation = this.configLocation;
-		if (this.configLocation == null && this.velocityProperties == null && this.resourceLoaderPath == null) {
-			actualLocation = getDefaultConfigLocation();
+		try {
+			// try default config location as fallback
+			Resource actualLocation = this.configLocation;
+			if (this.configLocation == null && this.velocityProperties == null && this.resourceLoaderPath == null) {
+				actualLocation = getDefaultConfigLocation();
+			}
+
+			// load config file if set
+			if (actualLocation != null) {
+				logger.info("Loading Velocity config from [" + actualLocation + "]");
+				props.load(actualLocation.getInputStream());
+			}
 		}
-		// load config file if set
-		if (actualLocation != null) {
-			if (getApplicationContext() == null) {
-				throw new VelocityInitializationException("Need to run in application context to load external config file");
-			}
-			logger.info("Loading Velocity config from [" + actualLocation + "]");
-			try {
-				InputStream is = getApplicationContext().getResourceAsStream(actualLocation);
-				if (is == null) {
-					throw new VelocityInitializationException("Velocity properties file not found at [" + actualLocation + "]");
-				}
-				props.load(is);
-			}
-			catch (IOException ex) {
-				throw new VelocityInitializationException("Error loading Velocity config from [" + this.configLocation + "]", ex);
-			}
+		catch (IOException ex) {
+			throw new VelocityInitializationException("Error loading Velocity config from [" + this.configLocation + "]", ex);
 		}
 
 		// merge local properties if set
@@ -161,33 +144,27 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 			this.velocityEngine.setProperty(key, props.getProperty(key));
 		}
 
-		// set a context-relative resource loader path, if required
-		if (this.resourceLoaderPath != null) {
-			if (getApplicationContext() != null) {
-				File resourceBase = getApplicationContext().getResourceBase();
-				if (resourceBase != null) {
-					this.velocityEngine.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH,
-																					(new File(resourceBase, resourceLoaderPath)).getAbsolutePath());
-				}
-				else {
-					logger.warn("Cannot set resource loader path [" + this.resourceLoaderPath +
-											"] relative to resource base - no base directory available");
-				}
-			}
-			else {
-				logger.warn("Cannot set resource loader path [" + this.resourceLoaderPath +
-										"] relative to resource base - no application context available");
-			}
-		}
-
-		// log via Commons Logging?
-		if (this.overrideLogging) {
-			this.velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
-		}
-
-		// perform initialization
 		try {
+			// set a resource loader path, if required
+			if (this.resourceLoaderPath != null) {
+				if (!this.resourceLoaderPath.exists()) {
+					throw new VelocityInitializationException("Specified resource loader path does not exist: " +
+																										this.resourceLoaderPath);
+				}
+				this.velocityEngine.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH,
+																				this.resourceLoaderPath.getFile().getAbsolutePath());
+			}
+
+			// log via Commons Logging?
+			if (this.overrideLogging) {
+				this.velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
+			}
+
+			// perform initialization
 			this.velocityEngine.init();
+		}
+		catch (VelocityInitializationException ex) {
+			throw ex;
 		}
 		catch (Exception ex) {
 			throw new VelocityInitializationException("Could not initialize Velocity engine", ex);
@@ -199,7 +176,7 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 	 * "velocityProperties" nor "resourceLoaderPath" is set, this will be used as
 	 * config location. Default is none: can be overridden in subclasses.
 	 */
-	protected String getDefaultConfigLocation() {
+	protected Resource getDefaultConfigLocation() throws IOException {
 		return null;
 	}
 

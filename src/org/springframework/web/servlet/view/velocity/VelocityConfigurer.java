@@ -5,6 +5,11 @@
 
 package org.springframework.web.servlet.view.velocity;
 
+import java.io.IOException;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.io.Resource;
 import org.springframework.ui.velocity.VelocityEngineFactory;
 
 /**
@@ -30,18 +35,26 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityConfigurer.java,v 1.9 2003-12-13 00:33:07 jhoeller Exp $
+ * @version $Id: VelocityConfigurer.java,v 1.10 2003-12-30 00:26:44 jhoeller Exp $
  * @see #setConfigLocation
  * @see #setVelocityProperties
  * @see #setResourceLoaderPath
  * @see VelocityView
  */
-public class VelocityConfigurer extends VelocityEngineFactory implements VelocityConfig {
+public class VelocityConfigurer extends VelocityEngineFactory
+		implements ApplicationContextAware, VelocityConfig {
 
 	public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/velocity.properties";
 
-	protected String getDefaultConfigLocation() {
-		return DEFAULT_CONFIG_LOCATION;
+	private ApplicationContext applicationContext;
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+		initVelocityEngine();
+	}
+
+	protected Resource getDefaultConfigLocation() throws IOException {
+		return this.applicationContext.getResource(DEFAULT_CONFIG_LOCATION);
 	}
 
 }
