@@ -123,6 +123,16 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
+	 * Returns the calling action state
+	 * @param context the request context
+	 * @return the current state (the calling action state)
+	 */
+	protected ActionState getActionState(RequestContext context) {
+		Assert.isInstanceOf(ActionState.class, context.getCurrentState());
+		return ((ActionState)context.getCurrentState());
+	}
+
+	/**
 	 * Returns the parameter object that provides contextual information about this action's use within
 	 * the calling action state.
 	 * @param context the current request context
@@ -133,13 +143,25 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Returns the calling action state
+	 * Returns value of the specified action property in the context of the calling action state
+	 * associated with the current request context.
+	 * @param propertyName the action property name
 	 * @param context the request context
-	 * @return the current state (the calling action state)
+	 * @return the property value, or <code>null</code> if no property was present.
 	 */
-	protected ActionState getActionState(RequestContext context) {
-		Assert.isInstanceOf(ActionState.class, context.getCurrentState());
-		return ((ActionState)context.getCurrentState());
+	protected String getProperty(String propertyName, RequestContext context) {
+		return getActionStateAction(context).getProperty(propertyName);
+	}
+
+	/**
+	 * Returns <code>true</code> if the specified action property exists in the context of the calling 
+	 * action state associated with the current request context.
+	 * @param propertyName the action property name
+	 * @param context the request context
+	 * @return true if the property is present, false if it isn't
+	 */
+	protected boolean containsProperty(String propertyName, RequestContext context) {
+		return getActionStateAction(context).containsProperty(propertyName);
 	}
 
 	// action pre and post execution logic

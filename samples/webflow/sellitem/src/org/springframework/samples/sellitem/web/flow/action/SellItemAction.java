@@ -36,7 +36,7 @@ public class SellItemAction extends FormAction {
 	 * specified in the calling action state.
 	 */
 	protected boolean validationEnabled(RequestContext context) {
-		return getActionStateAction(context).containsProperty(VALIDATOR_METHOD_PROPERTY);
+		return containsProperty(VALIDATOR_METHOD_PROPERTY, context);
 	}
 
 	public Event isShipping(RequestContext context) throws Exception {
