@@ -21,15 +21,17 @@ import org.springframework.util.Cache;
  * data argument to accept (double-dispatch.) For example:
  * 
  * <pre>
- *  public String ToStringStyler.styleValue(Object value) { // visit&lt;valueType&gt; callback will be invoked using reflection reflectiveVistorSupport.invokeVisit(this, value) }
+ * 
+ *   public String ToStringStyler.styleValue(Object value) { // visit&lt;valueType&gt; callback will be invoked using reflection reflectiveVistorSupport.invokeVisit(this, value) }
+ *  
  * </pre>
  * 
  * @author Keith Donald
  * @author Bob Lee
  */
 public class ReflectiveVisitorSupport {
-    private static final Log logger =
-        LogFactory.getLog(ReflectiveVisitorSupport.class);
+    private static final Log logger = LogFactory
+            .getLog(ReflectiveVisitorSupport.class);
     private static final String VISIT_METHOD = "visit";
     private static final String VISIT_NULL = "visitNull";
 
@@ -64,10 +66,8 @@ public class ReflectiveVisitorSupport {
         /** Is the method a visitor? */
         public boolean isVisitor(Method method) {
             Class[] params = method.getParameterTypes();
-            return (
-                method.getName().equals(VISIT_METHOD)
-                    && (params.length == 1)
-                    && (params[0] != Object.class));
+            return (method.getName().equals(VISIT_METHOD)
+                    && (params.length == 1) && (params[0] != Object.class));
         }
 
         /** Gets visitDefault() method. */
@@ -76,25 +76,21 @@ public class ReflectiveVisitorSupport {
                 return defaultVisitMethod;
             }
             final Class[] args = { Object.class };
-            for (Class clazz = visitorClass;
-                clazz != null;
-                clazz = clazz.getSuperclass()) {
+            for (Class clazz = visitorClass; clazz != null; clazz = clazz
+                    .getSuperclass()) {
                 try {
                     return clazz.getDeclaredMethod(VISIT_METHOD, args);
                 } catch (NoSuchMethodException e) {
                 }
             }
-            logger.warn(
-                "No default '"
-                    + VISIT_METHOD
+            logger.warn("No default '" + VISIT_METHOD
                     + "' method found.  Returning <null>");
             return null;
         }
 
         private Method findNullVisitorMethod() {
-            for (Class clazz = visitorClass;
-                clazz != null;
-                clazz = clazz.getSuperclass()) {
+            for (Class clazz = visitorClass; clazz != null; clazz = clazz
+                    .getSuperclass()) {
                 try {
                     return clazz.getDeclaredMethod(VISIT_NULL, null);
                 } catch (NoSuchMethodException e) {
@@ -132,20 +128,14 @@ public class ReflectiveVisitorSupport {
                 // check for a visitor method matching this type.
                 try {
                     if (logger.isDebugEnabled()) {
-                        logger.debug(
-                            "Looking for method "
-                                + VISIT_METHOD
-                                + "("
-                                + clazz
-                                + ")");
+                        logger.debug("Looking for method " + VISIT_METHOD + "("
+                                + clazz + ")");
                     }
-                    return visitorClass.getDeclaredMethod(
-                        VISIT_METHOD,
-                        new Class[] { clazz });
+                    return findVisitMethod(visitorClass, clazz);
                 } catch (NoSuchMethodException e) {
                     // queue up the super class if it's not of type Object.
                     if (!clazz.isInterface()
-                        && (clazz.getSuperclass() != Object.class)) {
+                            && (clazz.getSuperclass() != Object.class)) {
                         classQueue.addFirst(clazz.getSuperclass());
                     }
 
@@ -158,6 +148,20 @@ public class ReflectiveVisitorSupport {
             }
             // none found, return the default.
             return findDefaultVisitMethod();
+        }
+
+        private Method findVisitMethod(Class visitorClass, Class clazz)
+                throws NoSuchMethodException {
+            try {
+                return visitorClass.getDeclaredMethod(VISIT_METHOD,
+                        new Class[] { clazz });
+            } catch (NoSuchMethodException e) {
+                if (visitorClass.getSuperclass() != Object.class) {
+                    return findVisitMethod(visitorClass.getSuperclass(), clazz);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
@@ -186,12 +190,12 @@ public class ReflectiveVisitorSupport {
         } else {
             Method method = getMethod(visitor.getClass(), argument);
             if (method == null) {
-                logger.warn(
-                    "No method found by reflection for visitor class '"
-                        + visitor.getClass()
-                        + "' and argument of type '"
-                        + (argument != null ? argument.getClass() : null)
-                        + "'");
+                logger
+                        .warn("No method found by reflection for visitor class '"
+                                + visitor.getClass()
+                                + "' and argument of type '"
+                                + (argument != null ? argument.getClass()
+                                        : null) + "'");
                 return null;
             }
             try {
@@ -200,7 +204,7 @@ public class ReflectiveVisitorSupport {
                     args = new Object[] { argument };
                 }
                 if (!Modifier.isPublic(method.getModifiers())
-                    && method.isAccessible() == false) {
+                        && method.isAccessible() == false) {
                     method.setAccessible(true);
                 }
                 return method.invoke(visitor, args);
@@ -213,10 +217,10 @@ public class ReflectiveVisitorSupport {
     }
 
     private Method getMethod(Class visitorClass, Object argument) {
-        ClassVisitMethods visitMethods =
-            (ClassVisitMethods)visitorClassVisitMethods.get(visitorClass);
-        return visitMethods.getVisitMethod(
-            (argument != null ? argument.getClass() : null));
+        ClassVisitMethods visitMethods = (ClassVisitMethods)visitorClassVisitMethods
+                .get(visitorClass);
+        return visitMethods.getVisitMethod((argument != null ? argument
+                .getClass() : null));
     }
 
     /**
