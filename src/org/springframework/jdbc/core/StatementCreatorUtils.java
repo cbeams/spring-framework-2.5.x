@@ -57,8 +57,9 @@ public class StatementCreatorUtils {
 	 * @param inValue the value to set
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
-	public static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter declaredParam,
-			Object inValue) throws SQLException {
+	public static void setParameterValue(
+	    PreparedStatement ps, int paramIndex, SqlParameter declaredParam, Object inValue)
+	    throws SQLException {
 		setParameterValue(ps, paramIndex, declaredParam.getSqlType(), declaredParam.getTypeName(), inValue);
 	}
 
@@ -72,21 +73,24 @@ public class StatementCreatorUtils {
 	 * @param inValue the value to set
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
-	public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
-			Object inValue) throws SQLException {
+	public static void setParameterValue(
+	    PreparedStatement ps, int paramIndex, int sqlType, String typeName, Object inValue)
+	    throws SQLException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting SQL statement parameter value; columnIndex=" + paramIndex +
 					", parameter value='" + inValue +
 					"', valueClass=" + (inValue != null ? inValue.getClass().getName() : "null") +
-					", sqlType=" + sqlType);
+					", sqlType=" + (sqlType == SqlTypeValue.TYPE_UNKNOWN ? "unknown" : Integer.toString(sqlType)));
 		}
 
 		if (inValue == null) {
-			if (typeName != null) {
-				ps.setNull(paramIndex, sqlType, typeName);
+			if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
+				// possible alternative: ps.setNull(paramIndex, Types.NULL);
+				ps.setObject(paramIndex, null);
 			}
-			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
-				ps.setObject(paramIndex, inValue);
+			else if (typeName != null) {
+				ps.setNull(paramIndex, sqlType, typeName);
 			}
 			else {
 				ps.setNull(paramIndex, sqlType);
@@ -101,25 +105,66 @@ public class StatementCreatorUtils {
 				ps.setString(paramIndex, inValue.toString());
 			}
 			else if (sqlType == Types.DATE) {
-				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date)) {
-					inValue = new java.sql.Date(((java.util.Date) inValue).getTime());
+				if (inValue instanceof java.util.Date) {
+					if (inValue instanceof java.sql.Date) {
+						ps.setDate(paramIndex, (java.sql.Date) inValue);
+					}
+					else {
+						ps.setDate(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
+					}
 				}
-				ps.setObject(paramIndex, inValue, Types.DATE);
+				else if (inValue instanceof java.util.Calendar) {
+					java.util.Calendar cal = (java.util.Calendar) inValue;
+					ps.setDate(paramIndex, new java.sql.Date(cal.getTime().getTime()), cal);
+				}
+				else {
+					ps.setObject(paramIndex, inValue, Types.DATE);
+				}
 			}
 			else if (sqlType == Types.TIME) {
-				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Time)) {
-					inValue = new java.sql.Time(((java.util.Date) inValue).getTime());
+				if (inValue instanceof java.util.Date) {
+					if (inValue instanceof java.sql.Time) {
+						ps.setTime(paramIndex, (java.sql.Time) inValue);
+					}
+					else {
+						ps.setTime(paramIndex, new java.sql.Time(((java.util.Date) inValue).getTime()));
+					}
 				}
-				ps.setObject(paramIndex, inValue, Types.TIME);
+				else if (inValue instanceof java.util.Calendar) {
+					java.util.Calendar cal = (java.util.Calendar) inValue;
+					ps.setTime(paramIndex, new java.sql.Time(cal.getTime().getTime()), cal);
+				}
+				else {
+					ps.setObject(paramIndex, inValue, Types.TIME);
+				}
 			}
 			else if (sqlType == Types.TIMESTAMP) {
-				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Timestamp)) {
-					inValue = new java.sql.Timestamp(((java.util.Date) inValue).getTime());
+				if (inValue instanceof java.util.Date) {
+					if (inValue instanceof java.sql.Timestamp) {
+						ps.setTimestamp(paramIndex, (java.sql.Timestamp) inValue);
+					}
+					else {
+						ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
+					}
 				}
-				ps.setObject(paramIndex, inValue, Types.TIMESTAMP);
+				else if (inValue instanceof java.util.Calendar) {
+					java.util.Calendar cal = (java.util.Calendar) inValue;
+					ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+				}
+				else {
+					ps.setObject(paramIndex, inValue, Types.TIMESTAMP);
+				}
 			}
 			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
-				ps.setObject(paramIndex, inValue);
+				if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date)) {
+					ps.setObject(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
+				}
+				else if (inValue instanceof java.util.Calendar) {
+					ps.setObject(paramIndex, new java.sql.Date(((java.util.Calendar) inValue).getTime().getTime()));
+				}
+				else {
+					ps.setObject(paramIndex, inValue);
+				}
 			}
 			else {
 				ps.setObject(paramIndex, inValue, sqlType);
