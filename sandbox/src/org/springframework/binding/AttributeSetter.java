@@ -22,7 +22,6 @@ package org.springframework.binding;
  * <p>
  * For example, the backing collection might be a javabean, a http request, a
  * http session, a map, a mbean, or some other mutable attribute holder.
- * 
  * @author Keith Donald
  */
 public interface AttributeSetter extends AttributeAccessor {

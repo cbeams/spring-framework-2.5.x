@@ -2,6 +2,8 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
+import org.springframework.beans.PropertyComparator;
+
 import junit.framework.TestCase;
 
 public class ComparatorTests extends TestCase {
