@@ -19,7 +19,7 @@ package org.springframework.jdbc.support.incrementer;
 import javax.sql.DataSource;
 
 /**
- * Class to retrieve the next value of a given Oracle Sequence.
+ * DataFieldMaxValueIncrementer that retrieves the next value of a given Oracle sequence.
  * @author Dmitriy Kopylenko
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -35,7 +35,7 @@ public class OracleSequenceMaxValueIncrementer extends AbstractSequenceMaxValueI
 	/**
 	 * Convenience constructor.
 	 * @param ds the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
+	 * @param incrementerName the name of the sequence to use
 	 */
 	public OracleSequenceMaxValueIncrementer(DataSource ds, String incrementerName) {
 		setDataSource(ds);
