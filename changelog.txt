@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.147 2004-05-23 21:59:22 jhoeller Exp $
+$Id: changelog.txt,v 1.148 2004-05-24 10:02:48 jhoeller Exp $
 
 
 Changes in version 1.0.2 (25.5.2004)
@@ -58,6 +58,7 @@ Package org.springframework.jdbc
 * added LobRetrievalFailureException, typically wrapping an IOException thrown by stream access methods
 * added AbstractLobStreamingResultSetExtractor, offering conversion of IOException to LobRetrievalFailureException
 * added AbstractLobCreatingPreparedStatementCallback, offering convenient usage of a LobCreator for LOB updates
+* changed visibility of JdbcDaoSupport's resource factory accessors to public
 
 Package org.springframework.jndi
 * added protected "lookup" method to AbstractJndiLocator, for refetching the cached JNDI object on demand
@@ -71,6 +72,8 @@ Package org.springframework.mock
 Package org.springframework.orm
 * added "namingStrategy" property to LocalSessionFactoryBean, for specifying a custom Hibernate NamingStrategy
 * SessionFactoryUtils autodetects JTA TransactionManager with Hibernate JCA Connector too, for Session synchronization
+* changed visibility of HibernateDaoSupport's and JdoDaoSupport's resource factory accessors to public
+* changed visibility of SqlMapDaoSupport's and SqlMapClientDaoSupport's resource factory accessors to public
 
 Package org.springframework.remoting
 * exposed HessianProxyFactory's "overloadEnabled" property in HessianClientInterceptor
