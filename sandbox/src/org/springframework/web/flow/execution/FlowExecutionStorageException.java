@@ -16,6 +16,7 @@
 package org.springframework.web.flow.execution;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.web.flow.FlowExecution;
 
 /**
  * Exception signaling a fatal, technical problem while accessing
@@ -24,9 +25,11 @@ import org.springframework.core.NestedRuntimeException;
  * @author Erwin Vervaet
  */
 public class FlowExecutionStorageException extends NestedRuntimeException {
-	
-	private FlowExecutionStorage flowExecutionStorage;
-	
+
+	private String flowExecutionId;
+
+	private FlowExecution flowExecution;
+
 	/**
 	 * Create a new flow execution storage exception.
 	 * @param msg a descriptive message
@@ -42,16 +45,27 @@ public class FlowExecutionStorageException extends NestedRuntimeException {
 	 * @param msg a descriptive message
 	 * @param ex the underlying cause of this exception
 	 */
-	public FlowExecutionStorageException(FlowExecutionStorage flowExecutionStorage, String msg, Throwable ex) {
+	public FlowExecutionStorageException(String flowExecutionId, FlowExecution flowExecution, String msg, Throwable ex) {
 		super(msg, ex);
-		this.flowExecutionStorage = flowExecutionStorage;
+		this.flowExecutionId = flowExecutionId;
+		this.flowExecution = flowExecution;
 	}
-	
+
 	/**
-	 * Returns the flow execution storage that encountered the problem.
+	 * Returns the unique id of the flow execution.
 	 * Could be <code>null</code>.
+	 * @returns the flow execution id
 	 */
-	public FlowExecutionStorage getFlowExecutionStorage() {
-		return flowExecutionStorage;
+	public String getFlowExecutionId() {
+		return flowExecutionId;
+	}
+
+	/**
+	 * Returns the flow execution involved.
+	 * Could be <code>null</code>.
+	 * @returns the flow execution
+	 */
+	public FlowExecution getFlowExecution() {
+		return flowExecution;
 	}
 }

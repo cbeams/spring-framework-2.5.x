@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution.http;
+package org.springframework.web.flow.execution.servlet;
 
 import java.util.Collections;
 import java.util.Date;

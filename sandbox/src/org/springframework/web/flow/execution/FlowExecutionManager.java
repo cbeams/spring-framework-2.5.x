@@ -27,7 +27,6 @@ import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.execution.http.HttpSessionFlowExecutionStorage;
 
 /**
  * Objects of this class can manage flow executions on behalf of
@@ -102,7 +101,7 @@ public class FlowExecutionManager {
 
 	private FlowExecutionListener[] flowExecutionListeners;
 
-	private FlowExecutionStorage flowExecutionStorage = new HttpSessionFlowExecutionStorage();
+	private FlowExecutionStorage flowExecutionStorage;
 
 	/**
 	 * Create a new flow execution manager for a single Flow definition.

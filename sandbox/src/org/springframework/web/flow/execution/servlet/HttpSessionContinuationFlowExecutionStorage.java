@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution.http;
+package org.springframework.web.flow.execution.servlet;
 
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecution;
@@ -28,7 +28,7 @@ import org.springframework.web.util.WebUtils;
  * <p>
  * This storage strategy requires a <code>HttpServletRequestEvent</code>.
  * 	
- * @see org.springframework.web.flow.execution.http.HttpServletRequestEvent
+ * @see org.springframework.web.flow.execution.servlet.HttpServletRequestEvent
  * 
  * @author Erwin Vervaet
  */

@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager;
+import org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
@@ -44,12 +44,12 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * </tr>
  * <tr>
  * <td>flowExecutionManager</td>
- * <td>{@link org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager default}</td>
+ * <td>{@link org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager default}</td>
  * <td>Configures the flow execution manager implementation to use.</td>
  * </tr>
  * </table>
  * 
- * @see org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager
+ * @see org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager
  * 
  * @author Erwin Vervaet
  * @author Keith Donald

@@ -32,7 +32,7 @@ import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.FormObjectAccessor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
-import org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager;
+import org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
@@ -109,7 +109,7 @@ import org.springframework.web.util.WebUtils;
  * <code>ActionForm</code> classes found in traditional Struts-based apps.
  * 
  * @see org.springframework.web.flow.struts.FlowActionMapping
- * @see org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager
+ * @see org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager
  * @see org.springframework.web.struts.BindingActionForm
  * @see org.springframework.web.struts.BindingRequestProcessor
  * @see org.springframework.web.struts.BindingPlugin
