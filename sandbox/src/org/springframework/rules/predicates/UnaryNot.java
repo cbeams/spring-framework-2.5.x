@@ -26,6 +26,14 @@ public class UnaryNot implements UnaryPredicate {
     private UnaryPredicate predicate;
 
     /**
+     * Creates a UnaryNot in temporary invalid state - please use only
+     * if you have to, the well-formed constructor is much preferred.
+     */
+    public UnaryNot() {
+        
+    }
+    
+    /**
      * Creates a UnaryNot
      * 
      * @param predicate
@@ -39,6 +47,10 @@ public class UnaryNot implements UnaryPredicate {
         return predicate;
     }
 
+    public void setPredicate(UnaryPredicate predicate) {
+        this.predicate = predicate;
+    }
+    
     /**
      * Negates the boolean result returned by testing the wrapped predicate.
      * 
