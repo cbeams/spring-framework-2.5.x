@@ -46,7 +46,7 @@ public class InterfaceBasedMBeanInfoAssemblerCustomTests extends AbstractJmxAsse
 
 	public void testGetAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
-		ModelMBeanAttributeInfo attr = info.getAttribute("age");
+		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
 		assertTrue(attr.isReadable());
 		assertFalse(attr.isWritable());

@@ -31,7 +31,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 
 	public void testGetAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
-		ModelMBeanAttributeInfo attr = info.getAttribute("age");
+		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
 		assertTrue("Age is not readable", attr.isReadable());
 		assertFalse("Age is not writable", attr.isWritable());
@@ -43,14 +43,14 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 		assembler.setManagedMethods(new String[] {"getNickName", "setNickName"});
 
 		ModelMBeanInfo inf = assembler.getMBeanInfo(getObjectName(), getBean().getClass());
-		MBeanAttributeInfo attr = inf.getAttribute("nickName");
+		MBeanAttributeInfo attr = inf.getAttribute("NickName");
 
 		assertNickName(attr);
 	}
 
 	public void testNickNameIsExposed() throws Exception {
 		ModelMBeanInfo inf = (ModelMBeanInfo) getMBeanInfo();
-		MBeanAttributeInfo attr = inf.getAttribute("nickName");
+		MBeanAttributeInfo attr = inf.getAttribute("NickName");
 
 		assertNickName(attr);
 	}

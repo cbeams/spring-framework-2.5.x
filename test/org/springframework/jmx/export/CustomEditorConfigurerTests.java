@@ -39,8 +39,8 @@ public class CustomEditorConfigurerTests extends AbstractJmxTests {
 		System.out.println(server.getClass().getName());
 		ObjectName oname = new ObjectName("bean:name=dateRange");
 
-		Date startJmx = (Date) server.getAttribute(oname, "startDate");
-		Date endJmx = (Date) server.getAttribute(oname, "endDate");
+		Date startJmx = (Date) server.getAttribute(oname, "StartDate");
+		Date endJmx = (Date) server.getAttribute(oname, "EndDate");
 
 		assertEquals("startDate ", getStartDate(), startJmx);
 		assertEquals("endDate ", getEndDate(), endJmx);

@@ -48,7 +48,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	public void testAttributeDescriptionOnSetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 
-		ModelMBeanAttributeInfo attr = inf.getAttribute("age");
+		ModelMBeanAttributeInfo attr = inf.getAttribute(AGE_ATTRIBUTE);
 
 		assertEquals("The description for the age attribute is incorrect",
 				"The Age Attribute", attr.getDescription());
@@ -57,7 +57,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	public void testAttributeDescriptionOnGetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 
-		ModelMBeanAttributeInfo attr = inf.getAttribute("name");
+		ModelMBeanAttributeInfo attr = inf.getAttribute(NAME_ATTRIBUTE);
 
 		assertEquals("The description for the name attribute is incorrect",
 				"The Name Attribute", attr.getDescription());
@@ -69,7 +69,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	public void testReadOnlyAttribute() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 
-		ModelMBeanAttributeInfo attr = inf.getAttribute("age");
+		ModelMBeanAttributeInfo attr = inf.getAttribute(AGE_ATTRIBUTE);
 
 		assertFalse("The age attribute should not be writable",
 				attr.isWritable());
@@ -78,7 +78,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	public void testReadWriteAttribute() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 
-		ModelMBeanAttributeInfo attr = inf.getAttribute("name");
+		ModelMBeanAttributeInfo attr = inf.getAttribute(NAME_ATTRIBUTE);
 
 		assertTrue("The name attribute should be writable",
 				attr.isWritable());
@@ -95,7 +95,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	public void testWithOnlyGetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 
-		ModelMBeanAttributeInfo attr = inf.getAttribute("nickName");
+		ModelMBeanAttributeInfo attr = inf.getAttribute("NickName");
 
 		assertNotNull("Attribute should not be null", attr);
 	}
@@ -109,7 +109,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	public void testWithOnlySetter() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
-		ModelMBeanAttributeInfo attr = info.getAttribute("superman");
+		ModelMBeanAttributeInfo attr = info.getAttribute("Superman");
 
 		assertNotNull("Attribute should not be null", attr);
 	}
@@ -131,7 +131,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	public void testAttributeDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
-		Descriptor desc = info.getAttribute("name").getDescriptor();
+		Descriptor desc = info.getAttribute(NAME_ATTRIBUTE).getDescriptor();
 
 		assertEquals("Default value should be foo", "foo", desc.getFieldValue("default"));
 		assertEquals("Currency Time Limit should be 20", "20", desc.getFieldValue("currencyTimeLimit"));

@@ -36,6 +36,10 @@ import org.springframework.jmx.support.ObjectNameManager;
  */
 public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
+	protected static final String AGE_ATTRIBUTE = "Age";
+
+	protected static final String NAME_ATTRIBUTE = "Name";
+
 	protected abstract String getObjectName();
 
 	public void testMBeanRegistration() throws Exception {
@@ -105,7 +109,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 	public void testSetAttribute() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
-		server.setAttribute(objectName, new Attribute("name", "Rob Harrop"));
+		server.setAttribute(objectName, new Attribute(NAME_ATTRIBUTE, "Rob Harrop"));
 		IJmxTestBean bean = (IJmxTestBean) getContext().getBean("testBean");
 		assertEquals("Rob Harrop", bean.getName());
 	}
@@ -113,7 +117,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	public void testGetAttribute() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		getBean().setName("John Smith");
-		Object val = server.getAttribute(objectName, "name");
+		Object val = server.getAttribute(objectName, NAME_ATTRIBUTE);
 		assertEquals("Incorrect result", "John Smith", val);
 	}
 
@@ -127,7 +131,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	public void testAttributeInfoHasDescriptors() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
-		ModelMBeanAttributeInfo attr = info.getAttribute("name");
+		ModelMBeanAttributeInfo attr = info.getAttribute(NAME_ATTRIBUTE);
 		Descriptor desc = attr.getDescriptor();
 		assertNotNull("getMethod field should not be null",
 				desc.getFieldValue("getMethod"));
