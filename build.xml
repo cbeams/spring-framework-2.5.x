@@ -845,7 +845,6 @@
 				<include name="lib/jamon/**"/>
 				<include name="lib/jasperreports/**"/>
 				<include name="lib/jdo/**"/>
-				<include name="lib/jdom/**"/>
 				<include name="lib/jotm/**"/>
 				<include name="lib/jsf/**"/>
 				<include name="lib/junit/**"/>
