@@ -28,8 +28,7 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * from the given XML file.
 	 * @param configLocation file path
 	 */
-	public ClassPathXmlApplicationContext(String configLocation)
-	    throws BeansException, IOException {
+	public ClassPathXmlApplicationContext(String configLocation) throws BeansException {
 		super(configLocation);
 	}
 
@@ -38,8 +37,7 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * from the given XML files.
 	 * @param configLocations array of file paths
 	 */
-	public ClassPathXmlApplicationContext(String[] configLocations)
-	    throws BeansException, IOException {
+	public ClassPathXmlApplicationContext(String[] configLocations) throws BeansException {
 		super(configLocations);
 	}
 
@@ -50,7 +48,7 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * @param parent the parent context
 	 */
 	public ClassPathXmlApplicationContext(String[] configLocations, ApplicationContext parent)
-	    throws BeansException, IOException {
+	    throws BeansException {
 		super(configLocations, parent);
 	}
 
@@ -70,8 +68,7 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	}
 
 	/**
-	 * This implementation returns null, as there is no base path for
-	 * class path resources.
+	 * This implementation returns null, as there is no base path for class path resources.
 	 */
 	public String getResourceBasePath() {
 		return null;

@@ -29,7 +29,7 @@ import org.springframework.context.config.ConfigurableApplicationContext;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.12 2003-11-11 22:19:16 dkopylenko Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.13 2003-11-14 11:35:00 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -63,7 +63,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		sac.registerSingleton("beanThatListens", BeanThatListens.class, new MutablePropertyValues());
 		sac.registerSingleton("aca", ACATest.class, new MutablePropertyValues());
 		sac.registerPrototype("aca-prototype", ACATest.class, new MutablePropertyValues());
-		LBIInit.createTestBeans(sac.defaultBeanFactory);
+		LBIInit.createTestBeans(sac.getListableBeanFactoryImpl());
 		sac.rebuild();
 
 		StaticMessageSource sacMessageSource = (StaticMessageSource) sac.getBean("messageSource");

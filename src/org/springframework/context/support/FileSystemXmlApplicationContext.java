@@ -22,8 +22,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * from the given XML file.
 	 * @param configLocation file path
 	 */
-	public FileSystemXmlApplicationContext(String configLocation)
-	    throws BeansException, IOException {
+	public FileSystemXmlApplicationContext(String configLocation) throws BeansException {
 		this.configLocations = new String[] {configLocation};
 		refresh();
 	}
@@ -33,8 +32,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * from the given XML files.
 	 * @param configLocations array of file paths
 	 */
-	public FileSystemXmlApplicationContext(String[] configLocations)
-	    throws BeansException, IOException {
+	public FileSystemXmlApplicationContext(String[] configLocations) throws BeansException {
 		this.configLocations = configLocations;
 		refresh();
 	}
@@ -46,13 +44,13 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * @param parent the parent context
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations, ApplicationContext parent)
-	    throws BeansException, IOException {
+			throws BeansException {
 		super(parent);
 		this.configLocations = configLocations;
 		refresh();
 	}
 
-	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws IOException {
+	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws BeansException, IOException {
 		if (this.configLocations != null) {
 			for (int i = 0; i < this.configLocations.length; i++) {
 				beanFactory.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));

@@ -171,7 +171,7 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 		}
 	}
 
-	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws IOException {
+	protected void loadBeanDefinitions(XmlBeanFactory beanFactory) throws BeansException, IOException {
 		for (int i = 0; i < this.configLocations.length; i++) {
 			beanFactory.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]));
 		}

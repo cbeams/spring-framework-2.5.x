@@ -1,17 +1,13 @@
 package org.springframework.context.support;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 
 /**
  * ApplicationContext to allow concrete registration of Java objects
@@ -21,43 +17,41 @@ import org.springframework.context.ApplicationContextException;
  */
 public class StaticApplicationContext extends AbstractApplicationContext {
 
-	ListableBeanFactoryImpl defaultBeanFactory;
+	private ListableBeanFactoryImpl beanFactory;
 
-	/** Namespace --> name */
-	private Map beanFactoryHash = new HashMap();
-
-	public StaticApplicationContext() {
+	/**
+	 * Create new StaticApplicationContext.
+	 */
+	public StaticApplicationContext() throws BeansException {
 		this(null);
 	}
 
-	public StaticApplicationContext(ApplicationContext parent) {
+	/**
+	 * Create new StaticApplicationContext with the given parent.
+	 * @param parent the parent application context
+	 */
+	public StaticApplicationContext(ApplicationContext parent) throws BeansException {
 		super(parent);
 
 		// create bean factory with parent
-		defaultBeanFactory = new ListableBeanFactoryImpl(parent);
+		this.beanFactory = new ListableBeanFactoryImpl(parent);
 
 		// Register the message source bean
-		defaultBeanFactory.registerBeanDefinition(MESSAGE_SOURCE_BEAN_NAME,
-			new RootBeanDefinition(StaticMessageSource.class, null));
+		registerSingleton(MESSAGE_SOURCE_BEAN_NAME, StaticMessageSource.class, null);
 	}
 
 	/**
-	 * Must invoke when finished.
+	 * Return the underlying bean factory of this context.
 	 */
-	public void rebuild() throws ApplicationContextException, BeansException {
-		refresh();
+	public ListableBeanFactoryImpl getListableBeanFactoryImpl() {
+		return beanFactory;
 	}
 
 	/**
-	 * Return the BeanFactory for this namespace.
+	 * Return underlying bean factory for super class.
 	 */
-	protected BeanFactory loadBeanFactory(String namespace) throws ApplicationContextException {
-		BeanFactory bf = (BeanFactory) beanFactoryHash.get(namespace);
-		if (bf == null) {
-			// No one's created it yet
-			throw new ApplicationContextException("Unknown namespace '" + namespace + "'");
-		}
-		return bf;
+	protected ConfigurableListableBeanFactory getBeanFactory() {
+		return beanFactory;
 	}
 
 	/**
@@ -66,21 +60,18 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	protected void refreshBeanFactory() {
 	}
 
-	protected ConfigurableListableBeanFactory getBeanFactory() {
-		return defaultBeanFactory;
+	/**
+	 * Register a singleton bean with the default bean factory.
+	 */
+	public void registerSingleton(String name, Class clazz, PropertyValues pvs) throws BeansException {
+		this.beanFactory.registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs));
 	}
 
 	/**
-	 * Register a bean with the default bean factory.
+	 * Register a prototype bean with the default bean factory.
 	 */
-	public void registerSingleton(String name, Class clazz, PropertyValues pvs) throws BeansException {
-		defaultBeanFactory.registerBeanDefinition(name,
-			new RootBeanDefinition(clazz, pvs));
-	}
-
 	public void registerPrototype(String name, Class clazz, PropertyValues pvs) throws BeansException {
-		defaultBeanFactory.registerBeanDefinition(name,
-			new RootBeanDefinition(clazz, pvs, false));
+		this.beanFactory.registerBeanDefinition(name, new RootBeanDefinition(clazz, pvs, false));
 	}
 
 	/**
@@ -92,6 +83,13 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	public void addMessage(String code, Locale locale, String defaultMessage) {
 		StaticMessageSource messageSource = (StaticMessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME);
 		messageSource.addMessage(code, locale, defaultMessage);
+	}
+
+	/**
+	 * Must invoke when finished.
+	 */
+	public void rebuild() throws BeansException {
+		refresh();
 	}
 
 }

@@ -18,7 +18,7 @@ import org.springframework.context.ApplicationContextException;
  * drawing their configuration from XML documents containing bean definitions
  * understood by an XMLBeanFactory.
  * @author Rod Johnson
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see org.springframework.beans.factory.xml.XmlBeanFactory
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
@@ -40,18 +40,18 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		super(parent);
 	}
 	
-	protected void refreshBeanFactory() throws ApplicationContextException, BeansException {
+	protected void refreshBeanFactory() throws BeansException {
 		String identifier = "application context [" + getDisplayName() + "]";
 		try {
 			this.xmlBeanFactory = new XmlBeanFactory(getParent());
 			this.xmlBeanFactory.setEntityResolver(new ResourceBaseEntityResolver(this));
 			loadBeanDefinitions(this.xmlBeanFactory);
 			if (logger.isInfoEnabled()) {
-				logger.info("BeanFactory for application context: " + this.xmlBeanFactory);
+				logger.info("Bean factory for application context: " + this.xmlBeanFactory);
 			}
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("IOException parsing XML document for " + identifier, ex);
+			throw new ApplicationContextException("I/O error parsing XML document for " + identifier, ex);
 		} 
 	}
 	
@@ -67,9 +67,10 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	 * <p>The lifecycle of the bean factory is handled by refreshBeanFactory;
 	 * therefore an implemention of this template method is just supposed
 	 * to load and/or register bean definitions.
-	 * @exception IOException if the required XML document isn't found
+	 * @throws BeansException in case of bean registration errors
+	 * @throws IOException if the required XML document isn't found
 	 * @see #refreshBeanFactory
 	 */
-	protected abstract void loadBeanDefinitions(XmlBeanFactory beanFactory) throws IOException;
+	protected abstract void loadBeanDefinitions(XmlBeanFactory beanFactory) throws BeansException, IOException;
 	
 }

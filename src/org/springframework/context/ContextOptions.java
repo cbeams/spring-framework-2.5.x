@@ -14,7 +14,12 @@ public class ContextOptions {
 
 	private boolean reloadable = true;
 
-	public ContextOptions() {
+	/**
+	 * Set if we can reload this config.
+	 * @param reloadable if we can reload this config.
+	 */
+	public void setReloadable(boolean reloadable) {
+		this.reloadable = reloadable;
 	}
 
 	/**
@@ -29,16 +34,8 @@ public class ContextOptions {
 		return reloadable;
 	}
 
-	/**
-	 * Set if we can reload this config.
-	 * @param reloadable if we can reload this config.
-	 */
-	public void setReloadable(boolean reloadable) {
-		this.reloadable = reloadable;
-	}
-
 	public String toString() {
-		return getClass().getName() + ": reloadable=" + reloadable;
+		return getClass().getName() + ": reloadable=" + this.reloadable;
 	}
 
 }

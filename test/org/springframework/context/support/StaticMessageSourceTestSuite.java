@@ -247,7 +247,7 @@ public class StaticMessageSourceTestSuite
 		    AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME,
 		    StaticMessageSource.class, null);
 
-		LBIInit.createTestBeans(sac.defaultBeanFactory);
+		LBIInit.createTestBeans(sac.getListableBeanFactoryImpl());
 		sac.rebuild();
 
 		StaticMessageSource staticMsgSrc = (StaticMessageSource) sac.getBean(

@@ -66,7 +66,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -201,8 +201,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * @throws BeansException if the bean factory could not be initialized
 	 */
 	public final void refresh() throws BeansException {
-		if (this.contextOptions != null && !this.contextOptions.isReloadable())
+		if (this.contextOptions != null && !this.contextOptions.isReloadable()) {
 			throw new ApplicationContextException("Forbidden to reload config");
+		}
 
 		this.startupTime = System.currentTimeMillis();
 
@@ -240,14 +241,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 		// last step: publish respective event
 		publishEvent(new ContextRefreshedEvent(this));
-	}
-
-	/**
-	 * Callback method which can be overridden to add context-specific refresh work.
-	 * @throws BeansException in case of errors during refresh
-	 */
-	protected void onRefresh() throws BeansException {
-		// For subclasses: do nothing by default.
 	}
 
 	/**
@@ -294,8 +287,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	private void loadOptions() throws BeansException {
 		try {
 			this.contextOptions = (ContextOptions) getBean(OPTIONS_BEAN_NAME);
-		} catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No options bean (\"" + OPTIONS_BEAN_NAME + "\") found: using default");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			logger.info("No options bean '" + OPTIONS_BEAN_NAME + "' found: using default");
 			this.contextOptions = new ContextOptions();
 		}
 	}
@@ -322,21 +316,11 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	}
 
 	/**
-	 * Invoke the setApplicationContext() callback on all objects
-	 * in the context. This involves instantiating the objects.
-	 * Only singletons will be instantiated eagerly.
+	 * Template method which can be overridden to add context-specific refresh work.
+	 * @throws BeansException in case of errors during refresh
 	 */
-	private void preInstantiateSingletons() throws BeansException {
-		logger.info("Configuring singleton beans in context");
-		String[] beanNames = getBeanDefinitionNames();
-		logger.debug("Found " + beanNames.length + " listeners in bean factory: names=[" +
-		             StringUtils.arrayToDelimitedString(beanNames, ",") + "]");
-		for (int i = 0; i < beanNames.length; i++) {
-			String beanName = beanNames[i];
-			if (isSingleton(beanName)) {
-				getBean(beanName);
-			}
-		}
+	protected void onRefresh() throws BeansException {
+		// For subclasses: do nothing by default.
 	}
 
 	/**
@@ -351,6 +335,24 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 			ApplicationListener listener = (ApplicationListener) it.next();
 			addListener(listener);
 			logger.info("Application listener [" + listener + "] added");
+		}
+	}
+
+	/**
+	 * Invoke the setApplicationContext() callback on all objects
+	 * in the context. This involves instantiating the objects.
+	 * Only singletons will be instantiated eagerly.
+	 */
+	private void preInstantiateSingletons() throws BeansException {
+		logger.info("Configuring singleton beans in context");
+		String[] beanNames = getBeanDefinitionNames();
+		logger.debug("Found " + beanNames.length + " listeners in bean factory: [" +
+		             StringUtils.arrayToDelimitedString(beanNames, ",") + "]");
+		for (int i = 0; i < beanNames.length; i++) {
+			String beanName = beanNames[i];
+			if (isSingleton(beanName)) {
+				getBean(beanName);
+			}
 		}
 	}
 
@@ -507,14 +509,14 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	public String toString() {
 		StringBuffer sb = new StringBuffer("ApplicationContext: displayName=[" + this.displayName + "]; ");
 		sb.append("class=[" + getClass().getName() + "]; ");
-		sb.append("BeanFactory={" + getBeanFactory() + "}; ");
-		sb.append("} MessageSource={" + this.messageSource + "}; ");
-		sb.append("ContextOptions={" + this.contextOptions + "}; ");
-		sb.append("Startup date=" + new Date(this.startupTime) + "; ");
+		sb.append("beanFactory=[" + getBeanFactory() + "]; ");
+		sb.append("messageSource=[" + this.messageSource + "]; ");
+		sb.append("contextOptions=[" + this.contextOptions + "]; ");
+		sb.append("startup date=[" + new Date(this.startupTime) + "]; ");
 		if (this.parent == null)
-			sb.append("Root of ApplicationContext hierarchy");
+			sb.append("root of ApplicationContext hierarchy");
 		else
-			sb.append("Parent={" + this.parent + "}");
+			sb.append("parent=[" + this.parent + "]");
 		return sb.toString();
 	}
 
@@ -528,7 +530,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * The method is invoked by refresh before any other initialization work.
 	 * @see #refresh
 	 */
-	protected abstract void refreshBeanFactory() throws ApplicationContextException, BeansException;
+	protected abstract void refreshBeanFactory() throws BeansException;
 
 	/**
 	 * Subclasses must return their internal bean factory here.
