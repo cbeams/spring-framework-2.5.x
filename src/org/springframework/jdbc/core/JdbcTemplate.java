@@ -18,6 +18,7 @@ package org.springframework.jdbc.core;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -82,7 +83,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.41 2004-05-26 10:11:21 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.42 2004-05-27 14:42:27 jhoeller Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -447,7 +448,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return (int[]) execute(sql, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				int batchSize = pss.getBatchSize();
-				if (ps.getConnection().getMetaData().supportsBatchUpdates()) {
+				DatabaseMetaData dbmd = ps.getConnection().getMetaData();
+				if (dbmd != null && dbmd.supportsBatchUpdates()) {
 					for (int i = 0; i < batchSize; i++) {
 						pss.setValues(ps, i);
 						ps.addBatch();
@@ -515,114 +517,33 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				if (logger.isDebugEnabled()) {
 					logger.debug("CallableStatement.execute returned [" + retVal + "]");
 				}
-				Map retMap = new HashMap();
+				Map returnedResults = new HashMap();
 				if (retVal) {
-					retMap.putAll(extractReturnedResultSets(cs, declaredParameters));
+					returnedResults.putAll(extractReturnedResultSets(cs, declaredParameters));
 				}
-				retMap.putAll(extractOutputParameters(cs, declaredParameters));
-				return retMap;
+				returnedResults.putAll(extractOutputParameters(cs, declaredParameters));
+				return returnedResults;
 			}
 		});
 	}
 
 	/**
-	 * Extract output parameters from the completed stored procedure.
-	 * @param cs JDBC wrapper for the stored procedure
-	 * @param parameters parameter list for the stored procedure
-	 * @return parameters to the stored procedure
-	 */
-	protected Map extractOutputParameters(CallableStatement cs, List parameters) throws SQLException {
-		Map outParams = new HashMap();
-		int sqlColIndex = 1;
-		for (int i = 0; i < parameters.size(); i++) {
-			SqlParameter param = (SqlParameter) parameters.get(i);
-			if (param instanceof SqlOutParameter) {
-				SqlOutParameter outParam = (SqlOutParameter) param;
-				Object out = cs.getObject(sqlColIndex);
-				if (out instanceof ResultSet) {
-					ResultSet outRs = (ResultSet) out;
-					ResultSet rsToUse = outRs;
-					if (this.nativeJdbcExtractor != null) {
-						rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rsToUse);
-					}
-					// we can't pass back a ResultSet since the connection will be closed - we must process it
-					try {
-						if (outParam.isResultSetSupported()) {
-							RowCallbackHandler rch = null;
-							if (outParam.isRowMapperSupported()) {
-								rch = outParam.newResultReader();
-							}
-							else {
-								rch = outParam.getRowCallbackHandler();
-							}
-							(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
-							logger.debug("ResultSet returned from stored procedure was processed");
-							if (outParam.isRowMapperSupported()) {
-								outParams.put(param.getName(), ((ResultReader) rch).getResults());
-							}
-							else {
-								outParams.put(param.getName(), "ResultSet processed.");
-							}
-						}
-						else {
-							logger.warn("ResultSet returned from stored procedure but a corresponding SqlOutParameter with a RowCallbackHandler was not declared");
-							outParams.put(param.getName(), "ResultSet was returned but not processed.");
-						}
-					}
-					finally {
-						JdbcUtils.closeResultSet(outRs);
-					}
-				}
-				else {
-					outParams.put(param.getName(), out);
-				}
-			}
-			if (!(param instanceof SqlReturnResultSet)) {
-				sqlColIndex++;
-			}
-		}
-		return outParams;
-	}
-
-	/**
-	 * Extract returned resultsets from the completed stored procedure.
+	 * Extract returned ResultSets from the completed stored procedure.
 	 * @param cs JDBC wrapper for the stored procedure
 	 * @param parameters Parameter list for the stored procedure
+	 * @return Map that contains returned results
 	 */
 	protected Map extractReturnedResultSets(CallableStatement cs, List parameters) throws SQLException {
 		Map returnedResults = new HashMap();
 		int rsIndex = 0;
 		do {
-			SqlParameter param = null;
+			Object param = null;
 			if (parameters != null && parameters.size() > rsIndex) {
-				param = (SqlParameter) parameters.get(rsIndex);
+				param = parameters.get(rsIndex);
 			}
 			if (param instanceof SqlReturnResultSet) {
 				SqlReturnResultSet rsParam = (SqlReturnResultSet) param;
-				ResultSet rs = cs.getResultSet();
-				try {
-					ResultSet rsToUse = rs;
-					if (this.nativeJdbcExtractor != null) {
-						rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
-					}
-					RowCallbackHandler rch = null;
-					if (rsParam.isRowMapperSupported()) {
-						rch = rsParam.newResultReader();
-					}
-					else {
-						rch = rsParam.getRowCallbackHandler();
-					}
-					(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
-					if (rsParam.isRowMapperSupported()) {
-						returnedResults.put(param.getName(), ((ResultReader) rch).getResults());
-					}
-					else {
-						returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed");
-					}
-				}
-				finally {
-					JdbcUtils.closeResultSet(rs);
-				}
+				returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
 			}
 			else {
 				logger.warn("ResultSet returned from stored procedure but a corresponding " +
@@ -631,6 +552,79 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			rsIndex++;
 		}
 		while (cs.getMoreResults());
+		return returnedResults;
+	}
+
+	/**
+	 * Extract output parameters from the completed stored procedure.
+	 * @param cs JDBC wrapper for the stored procedure
+	 * @param parameters parameter list for the stored procedure
+	 * @return parameters to the stored procedure
+	 * @return Map that contains returned results
+	 */
+	protected Map extractOutputParameters(CallableStatement cs, List parameters) throws SQLException {
+		Map returnedResults = new HashMap();
+		int sqlColIndex = 1;
+		for (int i = 0; i < parameters.size(); i++) {
+			Object param = parameters.get(i);
+			if (param instanceof SqlOutParameter) {
+				SqlOutParameter outParam = (SqlOutParameter) param;
+				Object out = cs.getObject(sqlColIndex);
+				if (out instanceof ResultSet) {
+					if (outParam.isResultSetSupported()) {
+						returnedResults.putAll(processResultSet((ResultSet) out, outParam));
+					}
+					else {
+						logger.warn("ResultSet returned from stored procedure but a corresponding " +
+												"SqlOutParameter with a RowCallbackHandler was not declared");
+						returnedResults.put(outParam.getName(), "ResultSet was returned but not processed.");
+					}
+				}
+				else {
+					returnedResults.put(outParam.getName(), out);
+				}
+			}
+			if (!(param instanceof SqlReturnResultSet)) {
+				sqlColIndex++;
+			}
+		}
+		return returnedResults;
+	}
+
+	/**
+	 * Process the given ResultSet from a stored procedure.
+	 * @param rs the ResultSet to process
+	 * @param param the corresponding stored procedure parameter
+	 * @return Map that contains returned results
+	 */
+	protected Map processResultSet(ResultSet rs, ResultSetAwareSqlParameter param) throws SQLException {
+		Map returnedResults = new HashMap();
+		try {
+			ResultSet rsToUse = rs;
+			if (this.nativeJdbcExtractor != null) {
+				rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
+			}
+			if (param.isRowCallbackHandlerSupported()) {
+				// It's a RowCallbackHandler or RowMapper.
+				// We'll get a RowCallbackHandler to use in both cases.
+				RowCallbackHandler rch = param.getRowCallbackHandler();
+				(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
+				if (rch instanceof ResultReader) {
+					returnedResults.put(param.getName(), ((ResultReader) rch).getResults());
+				}
+				else {
+					returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed.");
+				}
+			}
+			else {
+				// It's a ResultSetExtractor - simply apply it.
+				Object result = param.getResultSetExtractor().extractData(rsToUse);
+				returnedResults.put(param.getName(), result);
+			}
+		}
+		finally {
+			JdbcUtils.closeResultSet(rs);
+		}
 		return returnedResults;
 	}
 

@@ -26,17 +26,12 @@ package org.springframework.jdbc.core;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
-public class SqlOutParameter extends SqlParameter {
-
-	private RowCallbackHandler rowCallbackHandler = null;
-
-	private RowMapper rowMapper = null;
-
-	private int rowsExpected = -1;
+public class SqlOutParameter extends ResultSetAwareSqlParameter {
 
 	/**
-	 * Create a new OutputParameter, supplying name and SQL type
+	 * Create a new SqlOutParameter, supplying name and SQL type.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param type SQL type of the parameter according to java.sql.Types
 	 */
@@ -48,43 +43,20 @@ public class SqlOutParameter extends SqlParameter {
 		super(name, type, typeName);
 	}
 
+	public SqlOutParameter(String name, int type, ResultSetExtractor rse) {
+		super(name, type, rse);
+	}
+
 	public SqlOutParameter(String name, int type, RowCallbackHandler rch) {
-		super(name, type);
-		this.rowCallbackHandler = rch;
+		super(name, type, rch);
 	}
 
 	public SqlOutParameter(String name, int type, RowMapper rm) {
-		super(name, type);
-		this.rowMapper = rm;
+		super(name, type, rm);
 	}
 
 	public SqlOutParameter(String name, int type, RowMapper rm, int rowsExpected) {
-		super(name, type);
-		this.rowMapper = rm;
-		this.rowsExpected = rowsExpected;
+		super(name, type, rm, rowsExpected);
 	}
 
-	public boolean isResultSetSupported() {
-		return (this.rowCallbackHandler != null || this.rowMapper != null);
-	}
-	
-	public boolean isRowMapperSupported() {
-		return (this.rowMapper != null);
-	}
-
-	public RowCallbackHandler getRowCallbackHandler() {
-		return rowCallbackHandler;
-	}
-
-	/**
-	 * Return new instance of the implementation of a ResultReader usable for
-	 * returned ResultSets. This implementation invokes the RowMapper's
-	 * implementation of the mapRow method, via a RowMapperResultReader adapter.
-	 * @see #isRowMapperSupported
-	 * @see RowMapperResultReader
-	 */
-	protected final ResultReader newResultReader() {
-		return new RowMapperResultReader(this.rowMapper, this.rowsExpected);
-	}
-	
 }

@@ -17,8 +17,8 @@
 package org.springframework.jdbc.core;
 
 /**
- * Subclass of SqlParameter to represent a returned resultset from a
- * stored procedure call.
+ * Subclass of SqlOutParameter to represent a returned ResultSet
+ * from a stored procedure call.
  *
  * <p>Must declare a RowCallbackHandler to handle any returned rows.
  * No additional properties: instanceof will be used to check
@@ -29,47 +29,18 @@ package org.springframework.jdbc.core;
  *
  * @author Thomas Risberg
  */
-public class SqlReturnResultSet extends SqlParameter {
-
-	private RowCallbackHandler rowCallbackHandler = null;
-
-	private RowMapper rowMapper = null;
-
-	private int rowsExpected = -1;
+public class SqlReturnResultSet extends ResultSetAwareSqlParameter {
 
 	public SqlReturnResultSet(String name, RowCallbackHandler rch) {
-		super(name, 0);
-		this.rowCallbackHandler = rch;
+		super(name, 0, rch);
 	}
 
 	public SqlReturnResultSet(String name, RowMapper rm) {
-		super(name, 0);
-		this.rowMapper = rm;
+		super(name, 0, rm);
 	}
 
 	public SqlReturnResultSet(String name, RowMapper rm, int rowsExpected) {
-		super(name, 0);
-		this.rowMapper = rm;
-		this.rowsExpected = rowsExpected;
-	}
-
-	public RowCallbackHandler getRowCallbackHandler() {
-		return rowCallbackHandler;
-	}
-
-	public boolean isRowMapperSupported() {
-		return (this.rowMapper != null);
-	}
-
-	/**
-	 * Return new instance of the implementation of a ResultReader usable for
-	 * returned ResultSets. This implementation invokes the RowMapper's
-	 * implementation of the mapRow method, via a RowMapperResultReader adapter.
-	 * @see #isRowMapperSupported
-	 * @see RowMapperResultReader
-	 */
-	protected final ResultReader newResultReader() {
-		return new RowMapperResultReader(this.rowMapper, this.rowsExpected);
+		super(name, 0, rm, rowsExpected);
 	}
 
 }
