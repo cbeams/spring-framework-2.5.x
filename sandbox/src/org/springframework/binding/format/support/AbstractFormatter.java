@@ -84,6 +84,9 @@ public abstract class AbstractFormatter implements Formatter {
 	 */
 	public final Object parseValue(String formattedString) throws InvalidFormatException {
 		try {
+			if (allowEmpty && isEmpty(formattedString)) {
+				return null;
+			}
 			return doParseValue(formattedString);
 		}
 		catch (ParseException ex) {
