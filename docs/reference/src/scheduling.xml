@@ -257,6 +257,10 @@ public class CheckEmailAddresses extends TimerTask {
 </bean>
 			]]></programlisting>			
 		</para>
+		<para>
+			<emphasis>Letting the task only run once can be done by changing the <literal>period</literal> property to -1 (or some other
+				negative value)</emphasis>				
+		</para>
 	</sect2>
 	<sect2>
 		<title>Using the MethodInvokingTimerTaskFactoryBean</title>
