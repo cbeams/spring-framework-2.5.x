@@ -49,10 +49,11 @@
 		</property>
 		<property name="friends">
 			<list>
-				<bean id="innerBean" class="org.springframework.beans.TestBean">
+				<bean id="innerBean" class="org.springframework.beans.DerivedTestBean">
 					<property name="name"><value>inner2</value></property>
 					<property name="age"><value>7</value></property>
 				</bean>
+				<bean id="innerBeanFactory" class="org.springframework.beans.factory.DummyFactory"/>
 			</list>
 		</property>
 		<property name="someMap">

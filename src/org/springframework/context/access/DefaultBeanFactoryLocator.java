@@ -26,26 +26,22 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  * as the default name for the bean factory reference definition. It is not possible
  * nor legal to share definitions with SingletonBeanFactoryLocator, at the same time.
  * 
- * @version $Revision: 1.4 $
  * @author colin sampaleanu
- * 
+ * @version $Revision: 1.5 $
  * @see org.springframework.context.access.LocatorFactory
  */
 public class DefaultBeanFactoryLocator extends SingletonBeanFactoryLocator {
 
-    // --- statics
 	public static final String BEANS_REFS_XML_NAME = "beanRefContext.xml";
 	
 	// the keyed singleton instances
-	private static HashMap _instances = new HashMap();
+	private static HashMap instances = new HashMap();
 	
 	/**
 	 * Returns an instance which uses the default "beanRefContext.xml", as the name
 	 * of the definition file(s). All resources returned by the current thread's context
 	 * classloader's getResources() method with this name will be combined to create a
 	 * definition, which is just a BeanFactory.
-	 *  
-	 * @throws FatalBeanException
 	 */
 	public static BeanFactoryLocator getInstance() throws FatalBeanException {
 		return getInstance(BEANS_REFS_XML_NAME);
@@ -56,46 +52,39 @@ public class DefaultBeanFactoryLocator extends SingletonBeanFactoryLocator {
 	 * definition file(s). All resources returned by the current thread's context
 	 * classloader's getResources() method with this name will be combined to create a
 	 * definition, which is just a a BeanFactory.
-	 *
 	 * @param selector the name of the resource(s) which will be read and combine to
 	 * form the definition for the KeyedSingletonBeanFactoryLocator instance
-	 *  
-	 * @throws FatalBeanException
 	 */
-	public static BeanFactoryLocator getInstance(String selector)
-			throws FatalBeanException {
-
-		synchronized (_instances) {
-			_log.debug("DefaultBeanFactoryLocator.getInstance(): DefaultBeanFactoryLocator.class="
+	public static BeanFactoryLocator getInstance(String selector) throws FatalBeanException {
+		synchronized (instances) {
+			logger.debug("DefaultBeanFactoryLocator.getInstance(): DefaultBeanFactoryLocator.class="
 				+ DefaultBeanFactoryLocator.class + "hash= " + DefaultBeanFactoryLocator.class.hashCode());
-			_log.debug("DefaultBeanFactoryLocator.getInstance(): instances.hashCode=" + _instances.hashCode() + ", instances=" + _instances);
-			
-			BeanFactoryLocator bfl = (BeanFactoryLocator) _instances.get(selector);
+			logger.debug("DefaultBeanFactoryLocator.getInstance(): instances.hashCode=" + instances.hashCode() + ", instances=" + instances);
+			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
 			if (bfl == null) {
 				bfl = new DefaultBeanFactoryLocator(selector);
-				_instances.put(selector, bfl);
+				instances.put(selector, bfl);
 			}
-
 			return bfl;
 		}
 	}
 
-	//
-	// Constructor which uses the default "bean-refs.xml", as the name of the
-	// definition file(s). All resources returned by the definition classloader's
-	// getResources() method with this name will be combined to create a definition
-	// definition. 
-	//
+	/**
+	 * Constructor which uses the default "bean-refs.xml", as the name of the
+	 * definition file(s). All resources returned by the definition classloader's
+	 * getResources() method with this name will be combined to create a definition
+	 * definition.
+	 */
 	protected DefaultBeanFactoryLocator() {
 		super(BEANS_REFS_XML_NAME);
 	}
 
-	//
-	// Constructor which uses the the specified name as the name of the
-	// definition file(s). All resources returned by the definition classloader's
-	// getResources() method with this name will be combined to create a definition
-	// definition. 
-	//
+	/**
+	 * Constructor which uses the the specified name as the name of the
+	 * definition file(s). All resources returned by the definition classloader's
+	 * getResources() method with this name will be combined to create a definition
+	 * definition.
+	 */
 	protected DefaultBeanFactoryLocator(String resourceName) {
 		super(resourceName);
 	}
@@ -104,9 +93,6 @@ public class DefaultBeanFactoryLocator extends SingletonBeanFactoryLocator {
 	 * Overrides default method to create definition oject as an ApplicationContext
 	 * instead of the default BeanFactory. This does not affect what can actually
 	 * be loaded by that definition.
-	 *  
-	 * @param resources
-	 * @return
 	 */
 	protected BeanFactory createDefinition(String[] resources) throws FatalBeanException {
 		FileSystemXmlApplicationContext groupContext = new FileSystemXmlApplicationContext(

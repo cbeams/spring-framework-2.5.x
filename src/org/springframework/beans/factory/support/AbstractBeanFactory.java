@@ -70,7 +70,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.44 2004-02-05 01:22:49 dkopylenko Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.45 2004-02-09 10:11:42 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory, ConfigurableBeanFactory {
 
@@ -991,7 +991,8 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 			AbstractBeanDefinition bd = (AbstractBeanDefinition) value;
 			bd.setSingleton(false);  // inner beans should never be cached as singleton
 			String innerBeanName = "(inner bean for property '" + beanName + "." + argName + "')";
-			return createBean(innerBeanName, getMergedBeanDefinition(innerBeanName, bd));
+			Object beanInstance = createBean(innerBeanName, getMergedBeanDefinition(innerBeanName, bd));
+			return getObjectForSharedInstance(innerBeanName, beanInstance);
 		}
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
