@@ -41,6 +41,12 @@ public class PropertyPresent implements UnaryPredicate {
         this.propertyName = propertyName;
     }
 
+    /**
+     * Test if the value of <code>propertyName</code> is present for the
+     * specified bean.
+     * 
+     * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
+     */
     public boolean test(Object bean) {
         BeanWrapper wrapper = new BeanWrapperImpl(bean);
         Object value = wrapper.getPropertyValue(propertyName);

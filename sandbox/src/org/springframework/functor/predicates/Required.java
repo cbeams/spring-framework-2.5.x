@@ -27,10 +27,15 @@ import org.springframework.util.StringUtils;
 public class Required implements UnaryPredicate {
     private static final Required instance = new Required();
 
-    public boolean test(Object value) {
-        if (value != null) {
-            if (value instanceof String) {
-                if (StringUtils.hasText((String)value)) {
+    /**
+     * Tests if this argument is present (non-null, not-empty, not blank)
+     * 
+     * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
+     */
+    public boolean test(Object argument) {
+        if (argument != null) {
+            if (argument instanceof String) {
+                if (StringUtils.hasText((String)argument)) {
                     return true;
                 }
             } else {

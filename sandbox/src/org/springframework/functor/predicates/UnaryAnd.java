@@ -42,6 +42,12 @@ public class UnaryAnd extends CompoundUnaryPredicate implements UnaryPredicate {
         super(predicates);
     }
 
+    /**
+     * Tests if all of the predicates aggregated by this compound predicate test
+     * <code>true</code>.
+     * 
+     * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
+     */
     public boolean test(Object value) {
         for (Iterator i = iterator(); i.hasNext();) {
             if (!((UnaryPredicate)i.next()).test(value)) {

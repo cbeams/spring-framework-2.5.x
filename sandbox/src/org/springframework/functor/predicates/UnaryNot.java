@@ -18,7 +18,7 @@ package org.springframework.functor.predicates;
 import org.springframework.functor.UnaryPredicate;
 
 /**
- * "Nots" another unary predicate (the inverse) by composition.
+ * "Nots" another unary predicate (the inverse) by using composition.
  * 
  * @author Keith Donald
  */
@@ -35,6 +35,11 @@ public class UnaryNot implements UnaryPredicate {
         this.predicate = predicate;
     }
 
+    /**
+     * Negates the boolean result returned by testing the wrapped predicate.
+     * 
+     * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
+     */
     public boolean test(Object value) {
         return !predicate.test(value);
     }

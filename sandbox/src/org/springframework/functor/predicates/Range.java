@@ -52,8 +52,13 @@ public final class Range implements Serializable, UnaryPredicate {
         this.rangeConstraint = new UnaryAnd(minimum, maximum);
     }
 
-    public boolean test(Object value) {
-        return this.rangeConstraint.test(value);
+    /**
+     * Test if the specified comparable argument falls within the range.
+     * 
+     * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
+     */
+    public boolean test(Object argument) {
+        return this.rangeConstraint.test(argument);
     }
 
     public String toString() {
