@@ -23,6 +23,7 @@ import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -66,6 +67,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 		root.setServletContext(sc);
 		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
 		root.refresh();
+
 		ConfigurableWebApplicationContext wac = new XmlWebApplicationContext();
 		wac.setParent(root);
 		wac.setServletContext(sc);
@@ -95,16 +97,32 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 		// Do nothing
 	}
 
+	public void testRootMessageSourceWithUseCodeAsDefaultMessage() throws NoSuchMessageException {
+		AbstractMessageSource messageSource = (AbstractMessageSource) root.getBean("messageSource");
+		messageSource.setUseCodeAsDefaultMessage(true);
+
+		assertEquals("message1", applicationContext.getMessage("code1", null, Locale.getDefault()));
+		assertEquals("message2", applicationContext.getMessage("code2", null, Locale.getDefault()));
+
+		try {
+			applicationContext.getMessage("code0", null, Locale.getDefault());
+			fail("looking for code0 should throw a NoSuchMessageException");
+		}
+		catch (NoSuchMessageException ex) {
+			// that's how it should be
+		}
+	}
+
 	/**
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 * NOTE: Messages are contained within the "test/org/springframework/web/context/WEB-INF/messagesXXX.properties" files.
 	 */
 	public void testGetMessageWithDefaultPassedInAndFoundInMsgCatalog() {
 		assertTrue("valid msg from resourcebundle with default msg passed in returned default msg. Expected msg from catalog.",
-							 root.getMessage("message.format.example2", null, "This is a default msg if not found in msg.cat.", Locale.US
+							 getApplicationContext().getMessage("message.format.example2", null, "This is a default msg if not found in msg.cat.", Locale.US
 							 )
 							 .equals("This is a test message in the message catalog with no args."));
-		// root.getTheme("theme").getMessageSource().getMessage()
+		// getApplicationContext().getTheme("theme").getMessageSource().getMessage()
 	}
 
 	/**
@@ -113,7 +131,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	 */
 	public void testGetMessageWithDefaultPassedInAndNotFoundInMsgCatalog() {
 		assertTrue("bogus msg from resourcebundle with default msg passed in returned default msg",
-							 root.getMessage("bogus.message", null, "This is a default msg if not found in msg.cat.", Locale.UK
+							 getApplicationContext().getMessage("bogus.message", null, "This is a default msg if not found in msg.cat.", Locale.UK
 							 )
 							 .equals("This is a default msg if not found in msg.cat."));
 	}
@@ -132,11 +150,11 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 		};
 
 		// The first time searching, we don't care about for this test
-		root.getMessage("message.format.example1", arguments, Locale.US);
+		getApplicationContext().getMessage("message.format.example1", arguments, Locale.US);
 
 		// Now msg better be as expected
 		assertTrue("2nd search within MsgFormat cache returned expected message for Locale.US",
-							 root.getMessage("message.format.example1", arguments, Locale.US
+							 getApplicationContext().getMessage("message.format.example1", arguments, Locale.US
 							 )
 							 .indexOf("there was \"a disturbance in the Force\" on planet 7.") != -1);
 
@@ -147,7 +165,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 
 		// Now msg better be as expected even with different args
 		assertTrue("2nd search within MsgFormat cache with different args returned expected message for Locale.US",
-							 root.getMessage("message.format.example1", newArguments, Locale.US
+							 getApplicationContext().getMessage("message.format.example1", newArguments, Locale.US
 							 )
 							 .indexOf("there was \"a disturbance in the Force\" on planet 8.") != -1);
 	}
@@ -174,19 +192,19 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 		 minutes of the time might not be the same.
 		 */
 		assertTrue("msg from resourcebundle for Locale.US substituting args for placeholders is as expected",
-							 root.getMessage("message.format.example1", arguments, Locale.US
+							 getApplicationContext().getMessage("message.format.example1", arguments, Locale.US
 							 )
 							 .indexOf("there was \"a disturbance in the Force\" on planet 7.") != -1);
 
 		// Try with Locale.UK
 		assertTrue("msg from resourcebundle for Locale.UK substituting args for placeholders is as expected",
-							 root.getMessage("message.format.example1", arguments, Locale.UK
+							 getApplicationContext().getMessage("message.format.example1", arguments, Locale.UK
 							 )
 							 .indexOf("there was \"a disturbance in the Force\" on station number 7.") != -1);
 
 		// Try with Locale.US - different test msg that requires no args
 		assertTrue("msg from resourcebundle that requires no args for Locale.US is as expected",
-							 root.getMessage("message.format.example2", null, Locale.US)
+							 getApplicationContext().getMessage("message.format.example2", null, Locale.US)
 							 .equals("This is a test message in the message catalog with no args."));
 	}
 
@@ -197,7 +215,7 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	public void testGetMessageWithNoDefaultPassedInAndNotFoundInMsgCatalog() {
 		// Expecting an exception
 		try {
-			root.getMessage("bogus.message", null, Locale.UK);
+			getApplicationContext().getMessage("bogus.message", null, Locale.UK);
 			fail("bogus msg from resourcebundle without default msg should have thrown exception");
 		}
 		catch (NoSuchMessageException tExcept) {
@@ -207,9 +225,9 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	}
 
 	public void testGetMultipleBasenamesForMessageSource() throws NoSuchMessageException {
-		assertEquals("message1", root.getMessage("code1", null, Locale.UK));
-		assertEquals("message2", root.getMessage("code2", null, Locale.UK));
-		assertEquals("message3", root.getMessage("code3", null, Locale.UK));
+		assertEquals("message1", getApplicationContext().getMessage("code1", null, Locale.UK));
+		assertEquals("message2", getApplicationContext().getMessage("code2", null, Locale.UK));
+		assertEquals("message3", getApplicationContext().getMessage("code3", null, Locale.UK));
 	}
 
 	/**
@@ -217,7 +235,6 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/themeXXX.properties" files.
 	 */
 	public void testGetMessageWithDefaultPassedInAndFoundInThemeCatalog() {
-
 		// Try with Locale.US
 		String msg = getThemeMessage("theme.example1", null, "This is a default theme msg if not found in theme cat.", Locale.US);
 		assertTrue("valid msg from theme resourcebundle with default msg passed in returned default msg.  Expected msg from catalog. Received: " + msg,

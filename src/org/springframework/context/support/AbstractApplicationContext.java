@@ -342,11 +342,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private void initMessageSource() throws BeansException {
 		try {
 			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME);
-			// set parent message source if applicable,
-			// and if the message source is defined in this context, not in a parent
+			// Set parent message source if applicable,
+			// and if the message source is defined in this context, not in a parent.
 			if (this.parent != null && (this.messageSource instanceof HierarchicalMessageSource) &&
-			    Arrays.asList(getBeanDefinitionNames()).contains(MESSAGE_SOURCE_BEAN_NAME)) {
-				((HierarchicalMessageSource) this.messageSource).setParentMessageSource(this.parent);
+			    containsBeanDefinition(MESSAGE_SOURCE_BEAN_NAME)) {
+				((HierarchicalMessageSource) this.messageSource).setParentMessageSource(
+				    getInternalParentMessageSource());
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -507,6 +508,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
 		return this.messageSource.getMessage(resolvable, locale);
+	}
+
+	/**
+	 * Return the internal message source of the parent context if it is an
+	 * AbstractApplicationContext too; else, return the parent context itself.
+	 */
+	protected MessageSource getInternalParentMessageSource() {
+		return (getParent() instanceof AbstractApplicationContext) ?
+		    ((AbstractApplicationContext) getParent()).messageSource : getParent();
 	}
 
 

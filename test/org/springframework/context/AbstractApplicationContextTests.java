@@ -47,6 +47,10 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		return applicationContext;
 	}
 
+	protected ApplicationContext getApplicationContext() {
+		return applicationContext;
+	}
+
 	/**
 	 * Must register a TestListener.
 	 * Must register standard beans.
@@ -110,13 +114,14 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	}
 
 	public void testMessageSource() throws NoSuchMessageException {
-		assertEquals(applicationContext.getMessage("code1", null, Locale.getDefault()), "message1");
-		assertEquals(applicationContext.getMessage("code2", null, Locale.getDefault()), "message2");
+		assertEquals("message1", applicationContext.getMessage("code1", null, Locale.getDefault()));
+		assertEquals("message2", applicationContext.getMessage("code2", null, Locale.getDefault()));
 
 		try {
 			applicationContext.getMessage("code0", null, Locale.getDefault());
 			fail("looking for code0 should throw a NoSuchMessageException");
-		} catch (NoSuchMessageException ex) {
+		}
+		catch (NoSuchMessageException ex) {
 			// that's how it should be
 		}
 	}

@@ -91,7 +91,8 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		return defaultMessage;
 	}
 
-	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+	public final String getMessage(String code, Object[] args, Locale locale)
+	    throws NoSuchMessageException {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
@@ -102,7 +103,8 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		throw new NoSuchMessageException(code, locale);
 	}
 
-	public final String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
+	public final String getMessage(MessageSourceResolvable resolvable, Locale locale)
+	    throws NoSuchMessageException {
 		String[] codes = resolvable.getCodes();
 		if (codes == null) {
 			throw new NoSuchMessageException(null, locale);
@@ -151,12 +153,14 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			return messageFormat.format(resolveArguments(args, locale));
 		}
 		else if (this.parentMessageSource != null) {
-			// check parent MessageSource, returning null if not found there
-			try {
-				return this.parentMessageSource.getMessage(code, args, locale);
+			if (this.parentMessageSource instanceof AbstractMessageSource) {
+				// Call internal method to avoid getting the default code back
+				// in case of "useCodeAsDefaultMessage" being activated.
+				return ((AbstractMessageSource) this.parentMessageSource).getMessageInternal(code, args, locale);
 			}
-			catch (NoSuchMessageException ex) {
-				return null;
+			else {
+				// Check parent MessageSource, returning null if not found there.
+				return this.parentMessageSource.getMessage(code, args, null, locale);
 			}
 		}
 		else {
@@ -176,11 +180,10 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		if (args == null) {
 			return new Object[0];
 		}
-		List resolvedArgs = new ArrayList();
+		List resolvedArgs = new ArrayList(args.length);
 		for (int i = 0; i < args.length; i++) {
 			if (args[i] instanceof MessageSourceResolvable) {
-				resolvedArgs.add(getMessage((MessageSourceResolvable) args[i],
-				                            locale));
+				resolvedArgs.add(getMessage((MessageSourceResolvable) args[i], locale));
 			}
 			else {
 				resolvedArgs.add(args[i]);
