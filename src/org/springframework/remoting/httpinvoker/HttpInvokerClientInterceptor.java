@@ -102,18 +102,4 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		return getHttpInvokerRequestExecutor().executeRequest(this, invocation);
 	}
 
-	/**
-	 * Recreate the invocation result contained in the given RemoteInvocationResult
-	 * object. The default implementation calls the default recreate method.
-	 * <p>Can be overridden in subclass to provide custom recreation, potentially
-	 * processing the returned result object.
-	 * @param result the RemoteInvocationResult to recreate
-	 * @return a return value if the invocation result is a successful return
-	 * @throws Throwable if the invocation result is an exception
-	 * @see org.springframework.remoting.support.RemoteInvocationResult#recreate
-	 */
-	protected Object recreateRemoteInvocationResult(RemoteInvocationResult result) throws Throwable {
-		return result.recreate();
-	}
-
 }
