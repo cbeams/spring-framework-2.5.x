@@ -12,7 +12,7 @@ import org.springframework.beans.factory.BeanFactory;
 /**
  * Simple PoolingTargetSourceCreator that pools everything.
  * @author Rod Johnson
- * @version $Id: TestPoolingTargetSourceCreator.java,v 1.1 2003-12-12 18:42:36 johnsonr Exp $
+ * @version $Id: TestPoolingTargetSourceCreator.java,v 1.2 2003-12-15 10:01:00 johnsonr Exp $
  */
 public class TestPoolingTargetSourceCreator extends AbstractPoolingTargetSourceCreator {
 
@@ -20,6 +20,8 @@ public class TestPoolingTargetSourceCreator extends AbstractPoolingTargetSourceC
 	 * @see org.springframework.aop.framework.autoproxy.target.AbstractPoolingTargetSourceCreator#getPoolingAttribute(java.lang.Object, java.lang.String, org.springframework.beans.factory.BeanFactory)
 	 */
 	protected PoolingAttribute getPoolingAttribute(Object bean, String beanName, BeanFactory bf) {
+		if (!beanName.startsWith("pooling"))
+			return null;
 		return new PoolingAttribute(25);
 	}
 

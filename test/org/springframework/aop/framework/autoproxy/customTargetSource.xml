@@ -7,21 +7,40 @@
 -->
 <beans>
 
-	<bean id="auto_txPP"
+	<bean id="autoproxy"
 		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">
 		<property name="customTargetSourceCreators">
 			<list>
-				<ref local="auto_poolingTargetSourceCreator" />
+				<ref local="autoproxy.poolingTargetSourceCreator" />
+				<ref local="autoproxy.prototypeTargetSourceCreator" />
 			</list>
 		</property>
 	</bean>
 	
-	<bean id="auto_poolingTargetSourceCreator"
+	<bean id="autoproxy.poolingTargetSourceCreator"
 		class="org.springframework.aop.framework.autoproxy.TestPoolingTargetSourceCreator">
+	</bean>
+	
+	<bean id="autoproxy.prototypeTargetSourceCreator"
+		class="org.springframework.aop.framework.autoproxy.SelectivePrototypeTargetSourceCreator">
 	</bean>
 
 
 	<bean id="test" singleton="false"
+		class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+	
+	<!-- Prefix will prompt pooling -->
+	<bean id="poolingTest" singleton="false"
+		class="org.springframework.beans.TestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+	
+	<!-- Prefix will prompt prototype -->
+	<bean id="prototypeTest" singleton="false"
 		class="org.springframework.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
