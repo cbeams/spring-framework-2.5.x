@@ -36,14 +36,6 @@ import org.springframework.orm.ibatis.support.SqlMapDaoSupport;
  */
 public class SqlMapTests extends TestCase {
 
-	public void testSqlMapFactoryBean() throws IOException {
-		SqlMapFactoryBean factory = new SqlMapFactoryBean();
-		factory.setConfigLocation(new ClassPathResource("sql-map-config.xml", getClass()));
-		factory.afterPropertiesSet();
-		assertTrue(factory.getObject() instanceof SqlMap);
-		assertEquals(201, ((SqlMap) factory.getObject()).getStatementCacheSize());
-	}
-
 	public void testSqlMapFactoryBeanWithConfigNotFound() {
 		SqlMapFactoryBean factory = new SqlMapFactoryBean();
 		factory.setConfigLocation(new ClassPathResource("example/sql-map-config.xml"));
