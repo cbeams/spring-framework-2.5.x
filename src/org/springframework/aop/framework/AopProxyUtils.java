@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -31,21 +31,13 @@ public abstract class AopProxyUtils {
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
 		// Won't include Advised, which may be necessary.
-		Class[] proxiedInterfacesOnConfig = advised.getProxiedInterfaces() == null ?
-				new Class[0] : advised.getProxiedInterfaces();
-
-		int lengthFromConfig = proxiedInterfacesOnConfig.length;
-		int addedInterfaces = 0;
+		Class[] specifiedInterfaces = advised.getProxiedInterfaces();
+		Class[] proxiedInterfaces = specifiedInterfaces;
 		if (!advised.isOpaque() && !advised.isInterfaceProxied(Advised.class)) {
-			// We need to add Advised
-			addedInterfaces = 1;
-		}
-		Class[] proxiedInterfaces = new Class[lengthFromConfig + addedInterfaces];
-		
-		System.arraycopy(proxiedInterfacesOnConfig, 0, proxiedInterfaces, addedInterfaces,
-				proxiedInterfacesOnConfig.length);
-		if (addedInterfaces == 1) {
+			// We need to add the Advised interface.
+			proxiedInterfaces = new Class[specifiedInterfaces.length + 1];
 			proxiedInterfaces[0] = Advised.class;
+			System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 1, specifiedInterfaces.length);
 		}
 		return proxiedInterfaces;
 	}
