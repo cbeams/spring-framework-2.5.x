@@ -125,6 +125,14 @@
 	</target>
 
 
+	<target name="dist" depends="warfile">
+		<!-- 
+			delegate to warfile target by depending on it.  dist is just to offer
+			a generic target name across all Spring sample apps that may be used
+			for autobuilds testing
+		-->
+	</target>
+	
 	<target name="warfile" depends="build,docs" description="Build the web application archive">
 
 		<!-- To not include jboss file if jboss.root was not set before -->
