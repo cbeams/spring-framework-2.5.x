@@ -36,6 +36,7 @@ import org.springframework.web.flow.SimpleEvent;
  * <li>Inserting action pre and post execution logic (may also be done with an
  * interceptor)
  * </ul>
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -60,14 +61,14 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * Returns the default error event.
 	 */
 	protected Event error() {
-		return new SimpleEvent(this, "error");
+		return result("error");
 	}
 
 	/**
 	 * Returns the default success event.
 	 */
 	protected Event success() {
-		return new SimpleEvent(this, "success");
+		return result("success");
 	}
 
 	/**
@@ -133,8 +134,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Returns the parameter object that provides contextual information about this action's use within
-	 * the calling action state.
+	 * Returns the parameter object that provides contextual information about
+	 * this action's use within the calling action state.
 	 * @param context the current request context
 	 * @return the action state action
 	 */
@@ -143,8 +144,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Returns value of the specified action property in the context of the calling action state
-	 * associated with the current request context.
+	 * Returns the value of the specified action property in the context of the
+	 * calling action state associated with the current request context.
 	 * @param propertyName the action property name
 	 * @param context the request context
 	 * @return the property value, or <code>null</code> if no property was present.
@@ -154,8 +155,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Returns <code>true</code> if the specified action property exists in the context of the calling 
-	 * action state associated with the current request context.
+	 * Returns <code>true</code> if the specified action property exists in the
+	 * context of the calling action state associated with the current request context.
 	 * @param propertyName the action property name
 	 * @param context the request context
 	 * @return true if the property is present, false if it isn't

@@ -28,7 +28,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.PropertyEditorRegistrar;
 import org.springframework.validation.Validator;
-import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ScopeType;
@@ -491,10 +490,12 @@ public class FormAction extends MultiAction implements InitializingBean {
 			}
 			try {
 				return createFormObject(context);
-			} catch (InstantiationException e) {
+			}
+			catch (InstantiationException e) {
 				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to instantiate form object", e);
-			} catch (IllegalAccessException e) {
+			}
+			catch (IllegalAccessException e) {
 				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to access form object class constructor", e);
 			}
@@ -570,15 +571,17 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	/**
-	 * Validate given form object using a registered validator.
+	 * Validate given form object using a registered validator. If a "validatorMethod"
+	 * action property is specified for the currently executing action state action,
+	 * the identified validator method will be invoked. When no such property is found,
+	 * the defualt <code>validate()</code> method is invoked.
 	 * @param context the action execution context, for accessing and setting
 	 *        data in "flow scope" or "request scope"
 	 * @param formObject the form object
 	 * @param errors possible binding errors
 	 */
 	protected void validate(RequestContext context, Object formObject, Errors errors) throws Exception {
-		ActionStateAction action = getActionStateAction(context);
-		String validatorMethod = action.getProperty(VALIDATOR_METHOD_PROPERTY);
+		String validatorMethod = getProperty(VALIDATOR_METHOD_PROPERTY, context);
 		if (StringUtils.hasText(validatorMethod)) {
 			invokeValidatorMethod(validatorMethod, formObject, errors);
 		}
@@ -587,6 +590,13 @@ public class FormAction extends MultiAction implements InitializingBean {
 		}
 	}
 
+	/**
+	 * Invoke specified validator method on the validator registered with this
+	 * action.
+	 * @param validatorMethod the name of the validator method to invoke
+	 * @param formObject the form object
+	 * @param errors possible binding errors
+	 */
 	protected void invokeValidatorMethod(String validatorMethod, Object formObject, Errors errors) throws Exception {
 		this.validateMethodDispatcher.dispatch(validatorMethod, new Object[] { formObject, errors });
 	}

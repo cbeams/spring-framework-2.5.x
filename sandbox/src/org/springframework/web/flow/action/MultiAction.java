@@ -108,18 +108,19 @@ public class MultiAction extends AbstractAction {
 	private ActionExecuteMethodNameResolver executeMethodNameResolver = new DefaultActionExecuteMethodNameResolver();
 
 	/**
+	 * Returns the delegate object holding the action execution methods.
+	 * Defaults to this object.
+	 */
+	public Object getDelegate() {
+		return this.executeMethodDispatcher.getTarget();
+	}
+
+	/**
 	 * Set the delegate object holding the action execution methods.
 	 * @param delegate the delegate to set
 	 */
 	public void setDelegate(Object delegate) {
 		this.executeMethodDispatcher.setTarget(delegate);
-	}
-
-	/**
-	 * Set the strategy used to resolve action execution method names.
-	 */
-	public void setExecuteMethodNameResolver(ActionExecuteMethodNameResolver methodNameResolver) {
-		this.executeMethodNameResolver = methodNameResolver;
 	}
 
 	/**
@@ -130,17 +131,16 @@ public class MultiAction extends AbstractAction {
 		return executeMethodNameResolver;
 	}
 
+	/**
+	 * Set the strategy used to resolve action execution method names.
+	 */
+	public void setExecuteMethodNameResolver(ActionExecuteMethodNameResolver methodNameResolver) {
+		this.executeMethodNameResolver = methodNameResolver;
+	}
+
 	protected Event doExecuteAction(RequestContext context) throws Exception {
 		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context, this);
 		return (Event)this.executeMethodDispatcher.dispatch(actionExecuteMethodName, new Object[] { context });
-	}
-
-	/**
-	 * Returns the delegate object holding the action execution methods.
-	 * Defaults to this object.
-	 */
-	public Object getDelegate() {
-		return this.executeMethodDispatcher.getTarget();
 	}
 
 	/**
