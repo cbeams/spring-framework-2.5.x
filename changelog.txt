@@ -20,9 +20,17 @@ Package org.springframework.beans
 Package org.springframework.jdbc
 * added explicit "query" methods that accept a RowMapper parameter to JdbcOperations and JdbcTemplate
 
+Package org.springframework.core
+* added "getFilename" and "createRelative" methods to Resource interface, with corresponding implementations
+* provided more efficient "equals" and "hashCode" implementations for all concrete Resource classes
+
 Package org.springframework.jms
 * fixed JmsTemplate's "doReceive" implementation to not try to acknowledge message if null returned after timeout
 * fixed JmsTemplate102's "doSend" implementation to properly work with a JMS 1.0.2 API jar in the classpath
+
+Package org.springframework.mail
+* added "isMultipart" method and "getMimeMultipart" accessor to MimeMessageHelper
+* added "addInline" methods to MimeMessageHelper, for adding inline elements with content IDs (referenced via "cid:xxx")
 
 Package org.springframework.orm
 * renamed HibernateOperations/HibernateTemplate's "find" methods for named parameters to "findByNamedParam"
