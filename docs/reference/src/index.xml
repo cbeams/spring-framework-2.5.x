@@ -36,6 +36,10 @@
                 <surname>Johnson</surname>
             </author>
             <author>
+                <firstname>Juergen</firstname>
+                <surname> Hoeller</surname>
+            </author>
+            <author>
                 <firstname>Alef</firstname>
                 <surname>Arendsen</surname>
             </author>
@@ -47,11 +51,11 @@
             	<firstname>Thomas</firstname>
             	<surname>Risberg</surname>
             </author>
-            </author>
+            <author>
             	<firstname>Darren</firstname>
             	<surname>Davison</surname>
             </author>
-            </author>
+            <author>
             	<firstname>Colin</firstname>
             	<surname>Sampaleanu</surname>
             </author>

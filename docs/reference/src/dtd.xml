@@ -43,7 +43,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: dtd.xml,v 1.2 2004-03-07 18:12:29 aarendsen Exp $
+	$Id: dtd.xml,v 1.3 2004-03-21 17:53:01 trisberg Exp $
 -->
 
 <!--
@@ -333,8 +333,9 @@
 >
 
 <!--
-	Each property element must specify the key. The value
-	is the element content.
+	Each property element must specify the key. The value is the
+	element content: Note that whitespace is trimmed off to avoid
+	unwanted whitespace caused by typical XML formatting.
 -->
 <!ATTLIST prop key CDATA #REQUIRED>
 
@@ -358,5 +359,5 @@
 	null value unless a special PropertyEditor does so.
 -->
 <!ELEMENT null (#PCDATA)>
-			]]></programlisting></para>
+]]></programlisting></para>
 		</appendix>
