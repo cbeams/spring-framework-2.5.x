@@ -93,7 +93,7 @@ import org.springframework.util.ObjectUtils;
  * @see #setProperties
  * @see #setPlaceholderPrefix
  * @see #setPlaceholderSuffix
- * @see #setSystemPropertiesMode
+ * @see #setSystemPropertiesModeName
  * @see System#getProperty(String)
  * @see #convertPropertyValue
  * @see PropertyOverrideConfigurer
@@ -156,6 +156,17 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	/**
+	 * Set the system property mode by the name of the corresponding constant,
+	 * e.g. "SYSTEM_PROPERTIES_MODE_OVERRIDE".
+	 * @param constantName name of the constant
+	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
+	 * @see #setSystemPropertiesMode
+	 */
+	public void setSystemPropertiesModeName(String constantName) throws IllegalArgumentException {
+		this.systemPropertiesMode = constants.asNumber(constantName).intValue();
+	}
+
+	/**
 	 * Set how to check system properties: as fallback, as override, or never.
 	 * For example, will resolve ${user.dir} to the "user.dir" system property.
 	 * <p>The default is "fallback": If not being able to resolve a placeholder
@@ -165,20 +176,10 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * @see #SYSTEM_PROPERTIES_MODE_NEVER
 	 * @see #SYSTEM_PROPERTIES_MODE_FALLBACK
 	 * @see #SYSTEM_PROPERTIES_MODE_OVERRIDE
+	 * @see #setSystemPropertiesModeName
 	 */
 	public void setSystemPropertiesMode(int systemPropertiesMode) {
 		this.systemPropertiesMode = systemPropertiesMode;
-	}
-
-	/**
-	 * Set the system property mode by the name of the corresponding constant,
-	 * e.g. "SYSTEM_PROPERTIES_MODE_OVERRIDE".
-	 * @param constantName name of the constant
-	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
-	 * @see #setSystemPropertiesMode
-	 */
-	public void setSystemPropertiesModeName(String constantName) throws IllegalArgumentException {
-		this.systemPropertiesMode = constants.asNumber(constantName).intValue();
 	}
 
 	/**
@@ -393,17 +394,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 					originalPlaceholderToUse = placeholder;
 				}
 
-				String propVal = null;
-				if (this.systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
-					propVal = System.getProperty(placeholder);
-				}
-				if (propVal == null) {
-					propVal = resolvePlaceholder(placeholder, props);
-				}
-				if (propVal == null && this.systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
-					propVal = System.getProperty(placeholder);
-				}
-
+				String propVal = resolvePlaceholder(placeholder, props, this.systemPropertiesMode);
 				if (propVal != null) {
 					propVal = parseString(props, propVal, originalPlaceholderToUse);
 					if (logger.isDebugEnabled()) {
@@ -429,6 +420,36 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	/**
+	 * Resolve the given placeholder using the given properties, performing
+	 * a system properties check according to the given mode.
+	 * <p>Default implementation delegates to <code>resolvePlaceholder
+	 * (placeholder, props)</code> before/after the system properties check.
+	 * <p>Subclasses can override this for custom resolution strategies,
+	 * including customized points for the system properties check.
+	 * @param placeholder the placeholder to resolve
+	 * @param props the merged properties of this configurer
+	 * @param systemPropertiesMode the system properties mode,
+	 * according to the constants in this class
+	 * @return the resolved value, of null if none
+	 * @see #setSystemPropertiesMode
+	 * @see System#getProperty
+	 * @see #resolvePlaceholder(String, java.util.Properties)
+	 */
+	protected String resolvePlaceholder(String placeholder, Properties props, int systemPropertiesMode) {
+		String propVal = null;
+		if (this.systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
+			propVal = System.getProperty(placeholder);
+		}
+		if (propVal == null) {
+			propVal = resolvePlaceholder(placeholder, props);
+		}
+		if (propVal == null && this.systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
+			propVal = System.getProperty(placeholder);
+		}
+		return propVal;
+	}
+
+	/**
 	 * Resolve the given placeholder using the given properties.
 	 * Default implementation simply checks for a corresponding property key.
 	 * <p>Subclasses can override this for customized placeholder-to-key mappings
@@ -438,7 +459,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * after this method is invoked, according to the system properties mode.
 	 * @param placeholder the placeholder to resolve
 	 * @param props the merged properties of this configurer
-	 * @return the resolved value
+	 * @return the resolved value, of null if none
 	 * @see #setSystemPropertiesMode
 	 */
 	protected String resolvePlaceholder(String placeholder, Properties props) {
