@@ -28,7 +28,6 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.hibernate.Criteria;
 import org.hibernate.FlushMode;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.JDBCException;
@@ -43,7 +42,6 @@ import org.hibernate.StaleObjectStateException;
 import org.hibernate.TransientObjectException;
 import org.hibernate.WrongClassException;
 import org.hibernate.classic.Session;
-import org.hibernate.type.Type;
 
 import org.springframework.beans.TestBean;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -494,6 +492,46 @@ public class HibernateTemplateTests extends TestCase {
 		assertTrue("Correct result", result == tb);
 	}
 
+	public void testGetWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.get("myEntity", "");
+		sessionControl.setReturnValue(tb, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Object result = ht.get("myEntity", "");
+		assertTrue("Correct result", result == tb);
+	}
+
+	public void testGetWithEntityNameAndLockMode() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.get("myEntity", "", LockMode.UPGRADE_NOWAIT);
+		sessionControl.setReturnValue(tb, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Object result = ht.get("myEntity", "", LockMode.UPGRADE_NOWAIT);
+		assertTrue("Correct result", result == tb);
+	}
+
 	public void testLoad() throws HibernateException {
 		TestBean tb = new TestBean();
 
@@ -559,6 +597,48 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		Object result = ht.load(TestBean.class, "", LockMode.UPGRADE);
+		assertTrue("Correct result", result == tb);
+	}
+
+	public void testLoadWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.load("myEntity", "");
+		sessionControl.setReturnValue(tb, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Object result = ht.load("myEntity", "");
+		assertTrue("Correct result", result == tb);
+	}
+
+	public void testLoadWithEntityNameLockMode() throws HibernateException {
+		TestBean tb = new TestBean();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.load("myEntity", "", LockMode.UPGRADE);
+		sessionControl.setReturnValue(tb, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Object result = ht.load("myEntity", "", LockMode.UPGRADE);
 		assertTrue("Correct result", result == tb);
 	}
 
@@ -750,6 +830,25 @@ public class HibernateTemplateTests extends TestCase {
 		ht.lock(tb, LockMode.WRITE);
 	}
 
+	public void testLockWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.lock("myEntity", tb, LockMode.WRITE);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+			sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.lock("myEntity", tb, LockMode.WRITE);
+	}
+
 	public void testSave() throws HibernateException {
 		TestBean tb = new TestBean();
 		sf.openSession();
@@ -790,6 +889,48 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.save(tb, "id");
+	}
+
+	public void testSaveWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.save("myEntity", tb);
+		sessionControl.setReturnValue(new Integer(0), 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		assertEquals("Correct return value", ht.save("myEntity", tb), new Integer(0));
+	}
+
+	public void testSaveWithEntityNameAndId() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.save("myEntity", tb, "id");
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.save("myEntity", tb, "id");
 	}
 
 	public void testUpdate() throws HibernateException {
@@ -836,6 +977,50 @@ public class HibernateTemplateTests extends TestCase {
 		ht.update(tb, LockMode.UPGRADE);
 	}
 
+	public void testUpdateWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.update("myEntity", tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.update("myEntity", tb);
+	}
+
+	public void testUpdateWithEntityNameAndLockMode() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.update("myEntity", tb);
+		sessionControl.setVoidCallable(1);
+		session.lock(tb, LockMode.UPGRADE);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.update("myEntity", tb, LockMode.UPGRADE);
+	}
+
 	public void testSaveOrUpdate() throws HibernateException {
 		TestBean tb = new TestBean();
 		sf.openSession();
@@ -878,6 +1063,27 @@ public class HibernateTemplateTests extends TestCase {
 		catch (InvalidDataAccessApiUsageException ex) {
 			// expected
 		}
+	}
+
+	public void testSaveOrUpdateWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.saveOrUpdate("myEntity", tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.saveOrUpdate("myEntity", tb);
 	}
 
 	public void testSaveOrUpdateAll() throws HibernateException {
@@ -928,6 +1134,27 @@ public class HibernateTemplateTests extends TestCase {
 		ht.persist(tb);
 	}
 
+	public void testPersistWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.persist("myEntity", tb);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.persist("myEntity", tb);
+	}
+
 	public void testMerge() throws HibernateException {
 		TestBean tb = new TestBean();
 		TestBean tbMerged = new TestBean();
@@ -948,6 +1175,28 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		assertSame(tbMerged, ht.merge(tb));
+	}
+
+	public void testMergeWithEntityName() throws HibernateException {
+		TestBean tb = new TestBean();
+		TestBean tbMerged = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO);
+		session.merge("myEntity", tb);
+		sessionControl.setReturnValue(tbMerged, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		assertSame(tbMerged, ht.merge("myEntity", tb));
 	}
 
 	public void testDelete() throws HibernateException {
@@ -1114,35 +1363,6 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testFindWithParameterAndType() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter(0, "myvalue", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query string", "myvalue", Hibernate.STRING);
-		assertTrue("Correct list", result == list);
-		queryControl.verify();
-	}
-
 	public void testFindWithParameters() throws HibernateException {
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
@@ -1174,52 +1394,6 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testFindWithParametersAndTypes() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter(0, "myvalue1", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.setParameter(1, new Integer(2), Hibernate.INTEGER);
-		queryControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query string",
-				new Object[] {"myvalue1", new Integer(2)},
-				new Type[] {Hibernate.STRING, Hibernate.INTEGER});
-		assertTrue("Correct list", result == list);
-		queryControl.verify();
-	}
-
-	public void testFindWithParametersAndTypesForInvalidArguments() {
-		HibernateTemplate ht = new HibernateTemplate();
-		try {
-			ht.find("some query string",
-							new Object[] {"myvalue1", new Integer(2)},
-							new Type[] {Hibernate.STRING});
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-	}
-
 	public void testFindWithNamedParameter() throws HibernateException {
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
@@ -1245,35 +1419,6 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedParam("some query string", "myparam", "myvalue");
-		assertTrue("Correct list", result == list);
-		queryControl.verify();
-	}
-
-	public void testFindWithNamedParameterAndType() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter("myparam", "myvalue", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedParam("some query string", "myparam", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
 		queryControl.verify();
 	}
@@ -1307,40 +1452,6 @@ public class HibernateTemplateTests extends TestCase {
 		List result = ht.findByNamedParam("some query string",
 				new String[] {"myparam1", "myparam2"},
 				new Object[] {"myvalue1", new Integer(2)});
-		assertTrue("Correct list", result == list);
-		queryControl.verify();
-	}
-
-	public void testFindWithNamedParametersAndTypes() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter("myparam1", "myvalue1", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.setParameter("myparam2", new Integer(2), Hibernate.INTEGER);
-		queryControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedParam("some query string",
-				new String[] {"myparam1", "myparam2"},
-				new Object[] {"myvalue1", new Integer(2)},
-				new Type[] {Hibernate.STRING, Hibernate.INTEGER});
 		assertTrue("Correct list", result == list);
 		queryControl.verify();
 	}
@@ -1431,35 +1542,6 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testFindByNamedQueryWithParameterAndType() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.getNamedQuery("some query name");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter(0, "myvalue", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQuery("some query name", (Object) "myvalue", Hibernate.STRING);
-		assertTrue("Correct list", result == list);
-		queryControl.verify();
-	}
-
 	public void testFindByNamedQueryWithParameters() throws HibernateException {
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
@@ -1491,52 +1573,6 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testFindByNamedQueryWithParametersAndTypes() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.getNamedQuery("some query name");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter(0, "myvalue1", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.setParameter(1, new Integer(2), Hibernate.INTEGER);
-		queryControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQuery("some query name",
-																			new Object[] {"myvalue1", new Integer(2)},
-																			new Type[] {Hibernate.STRING, Hibernate.INTEGER});
-		assertTrue("Correct list", result == list);
-		queryControl.verify();
-	}
-
-	public void testFindByNamedQueryWithParametersAndTypesForInvalidArguments() {
-		HibernateTemplate ht = new HibernateTemplate();
-		try {
-			ht.findByNamedQuery("some query string",
-													new Object[] {"myvalue1", "myValue2"},
-													new Type[] {Hibernate.STRING});
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-	}
-
 	public void testFindByNamedQueryWithNamedParameter() throws HibernateException {
 		MockControl queryControl = MockControl.createControl(Query.class);
 		Query query = (Query) queryControl.getMock();
@@ -1562,35 +1598,6 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		List result = ht.findByNamedQueryAndNamedParam("some query name", "myparam", "myvalue");
-		assertTrue("Correct list", result == list);
-		queryControl.verify();
-	}
-
-	public void testFindByNamedQueryWithNamedParameterAndType() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.getNamedQuery("some query name");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter("myparam", "myvalue", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQueryAndNamedParam("some query name", "myparam", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
 		queryControl.verify();
 	}
@@ -1624,40 +1631,6 @@ public class HibernateTemplateTests extends TestCase {
 		List result = ht.findByNamedQueryAndNamedParam("some query name",
 				new String[] {"myparam1", "myparam2"},
 				new Object[] {"myvalue1", new Integer(2)});
-		assertTrue("Correct list", result == list);
-		queryControl.verify();
-	}
-
-	public void testFindByNamedQueryWithNamedParametersAndTypes() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		List list = new ArrayList();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.getNamedQuery("some query name");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter("myparam1", "myvalue1", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.setParameter("myparam2", new Integer(2), Hibernate.INTEGER);
-		queryControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQueryAndNamedParam("some query name",
-				new String[] {"myparam1", "myparam2"},
-				new Object[] {"myvalue1", new Integer(2)},
-				new Type[] {Hibernate.STRING, Hibernate.INTEGER});
 		assertTrue("Correct list", result == list);
 		queryControl.verify();
 	}
@@ -1933,39 +1906,6 @@ public class HibernateTemplateTests extends TestCase {
 		Iterator result = ht.iterate("some query string", "myvalue");
 		assertTrue("Correct list", result == it);
 		queryControl.verify();
-	}
-
-	public void testIterateWithParametersAndTypes() throws HibernateException {
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
-
-		Iterator it = Collections.EMPTY_LIST.iterator();
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.setParameter(0, "myvalue1", Hibernate.STRING);
-		queryControl.setReturnValue(query, 1);
-		query.setParameter(1, new Integer(2), Hibernate.INTEGER);
-		queryControl.setReturnValue(query, 1);
-		query.iterate();
-		queryControl.setReturnValue(it, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		queryControl.replay();
-
-		HibernateTemplate ht = new HibernateTemplate(sf);
-		Iterator result = ht.iterate("some query string",
-				new Object[] {"myvalue1", new Integer(2)},
-				new Type[] {Hibernate.STRING, Hibernate.INTEGER});
-		assertTrue("Correct list", result == it);
-		sfControl.verify();
 	}
 
 	public void testExceptions() throws HibernateException {
