@@ -45,7 +45,7 @@ import org.springframework.core.Ordered;
  * that delegate to the given interceptors before invoking the bean itself.
  * 
  * <p>This class distinguishes between "common" interceptors: shared for all proxies it
- * creators, and "specific" interceptors: unique per bean instance. There need not
+ * creates, and "specific" interceptors: unique per bean instance. There need not
  * be any common interceptors. If there are, they are set using the interceptorNames
  * property. As with ProxyFactoryBean, interceptors names in the current factory
  * are used rather than bean references to allow correct handling of prototype
@@ -75,7 +75,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.10 2004-05-23 20:13:05 jhoeller Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.11 2004-06-09 00:52:15 dkopylenko Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		implements BeanPostProcessor, BeanFactoryAware, Ordered {
