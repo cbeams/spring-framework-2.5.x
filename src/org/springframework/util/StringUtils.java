@@ -3,7 +3,6 @@
  * of the Apache Software License.
  */
 
-
 package org.springframework.util;
 
 import java.util.ArrayList;
@@ -16,15 +15,17 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 /**
- * Miscellaneous string utility methods. This class delivers some
- * simple functionality that should really be provided by the core
- * Java String and StringBuffer classes, such as the ability to
- * replace all occurrences of a given substring in a target string.
- * It also provides easy-to-use methods to convert between delimited
- * strings, such as CSV strings, and collections and arrays.
- * @author  Rod Johnson
+ * Miscellaneous string utility methods.
+ *
+ * <p>This class delivers some simple functionality that should really be
+ * provided by the core Java String and StringBuffer classes, such as the
+ * ability to replace all occurrences of a given substring in a target
+ * string. It also provides easy-to-use methods to convert between
+ * delimited strings, such as CSV strings, and collections and arrays.
+ *
+ * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.4 2003-10-09 18:18:41 jhoeller Exp $
+ * @version $Id: StringUtils.java,v 1.5 2004-02-22 21:52:30 jhoeller Exp $
  */
 public abstract class StringUtils {
 
@@ -234,6 +235,13 @@ public abstract class StringUtils {
 		return collectionToDelimitedString(c, ",");
 	}
 
+	/**
+	 * Append the given String to the given String array, returning a new
+	 * array consisting of the input array contents plus the given String.
+	 * @param arr the array to append to
+	 * @param s the String to append
+	 * @return the new array
+	 */
 	public static String[] addStringToArray(String[] arr, String s) {
 		String[] newArr = new String[arr.length + 1];
 		System.arraycopy(arr, 0, newArr, 0, arr.length);
