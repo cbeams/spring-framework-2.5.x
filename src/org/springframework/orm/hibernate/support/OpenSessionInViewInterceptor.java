@@ -28,10 +28,16 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>In contrast to OpenSessionInViewFilter, this interceptor is set up in a Spring
  * application context and can thus take advantage of bean wiring. It derives from
- * HibernateAccessor to inherit Hibernate configuration properties.
+ * HibernateAccessor to inherit common Hibernate configuration properties.
  *
- * <p>Note: This interceptor will by default not flush the Hibernate session, as it
- * assumes to be used in combination with middle tier transactions that care for
+ * <p><b>WARNING:</b> Applying this interceptor to existing logic can cause issues that
+ * have not appeared before, through the use of a single Hibernate Session for the
+ * processing of an entire request. In particular, the reassociation of persistent
+ * objects with a Hibernate Session has to occur at the very beginning of request
+ * processing, to avoid clashes will already loaded instances of the same objects.
+ *
+ * <p><b>NOTE</b>: This interceptor will by default not flush the Hibernate session,
+ * as it assumes to be used in combination with middle tier transactions that care for
  * the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
  * interceptor to flush after the handler has been invoked but before view rendering,
  * set the flushMode of this interceptor to FLUSH_AUTO in such a scenario.
@@ -47,7 +53,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 
 	/**
 	 * Create a new OpenSessionInViewInterceptor,
-	 * turning the default flushMode to FLUSH_NEVER
+	 * turning the default flushMode to FLUSH_NEVER.
 	 * @see #setFlushMode
 	 */
 	public OpenSessionInViewInterceptor() {

@@ -31,11 +31,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * execution but also for middle tier transactions via HibernateTransactionManager.
  * The latter will automatically use Sessions pre-bound by this filter.
  *
- * <p>WARNING: Applying this filter to existing logic can cause issues that
- * have not appeared before, through the use of a single Hibernate Session
- * for the processing of an entire request. In particular, the reassociation
- * of persistent objects with a Hibernate Session has to occur at the very
- * beginning of request processing.
+ * <p><b>WARNING:</b> Applying this filter to existing logic can cause issues that
+ * have not appeared before, through the use of a single Hibernate Session for the
+ * processing of an entire request. In particular, the reassociation of persistent
+ * objects with a Hibernate Session has to occur at the very beginning of request
+ * processing, to avoid clashes will already loaded instances of the same objects.
  *
  * <p>Looks up the SessionFactory in Spring's root web application context.
  * Supports a "sessionFactoryBeanName" filter init-param; the default bean name is
@@ -43,8 +43,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * initialization order issues (if using ContextLoaderServlet, the root
  * application context will get initialized <i>after</i> this filter).
  *
- * <p>Note: This filter will by default not flush the Hibernate session, as it
- * assumes to be used in combination with middle tier transactions that care for
+ * <p><b>NOTE</b>: This filter will by default not flush the Hibernate session, as
+ * it assumes to be used in combination with middle tier transactions that care for
  * the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
  * filter to flush after completed request processing, override closeSession and
  * invoke flush on the Session before closing it.
@@ -52,6 +52,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * @author Juergen Hoeller
  * @since 06.12.2003
  * @see OpenSessionInViewInterceptor
+ * @see #closeSession
  * @see org.springframework.orm.hibernate.HibernateInterceptor
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
@@ -139,8 +140,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Close the given Session.
 	 * The default implementation invokes SessionFactoryUtils.closeSessionIfNecessary.
-	 * <p>Can be overridden in subclasses e.g. for flushing the Session before
-	 * closing it.
+	 * <p>Can be overridden in subclasses, e.g. for flushing the Session before
+	 * closing it. See class-level javadoc for a discussion of flush handling.
 	 * @param session the Session used for filtering
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 * @throws DataAccessResourceFailureException if the Session could not be closed
