@@ -206,13 +206,92 @@ su.update();</programlisting>The custom translator is passed a data source
     <sect2>
       <title>Executing Statements</title>
 
-      <para>ToDo</para>
+      <para>To execute an SQL statement, there is very little code needed. All
+      you need is a <literal>DataSource</literal> and a
+      <literal>JdbcTemplate</literal>. Once you have that, you can use a
+      number of convenience methods that are provided with the
+      <literal>JdbcTemplate</literal>. Here is a short example showing what
+      you need to include for a minimal but fully functional class that
+      creates a new table.<programlisting>import javax.sql.DataSource;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+/**
+ * @author trisberg
+ */
+public class ExecuteAStatement {
+  private JdbcTemplate jt;
+  private DataSource dataSource;
+
+  public void doExecute() {
+    jt = new JdbcTemplate(dataSource);
+    jt.execute("create table mytable (id integer, name varchar(100))"); 
+  }
+
+  public void setDataSource(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
+}</programlisting></para>
     </sect2>
 
     <sect2>
       <title>Running Queries</title>
 
-      <para>ToDo</para>
+      <para>In addition to the execute methods, there is a large number of
+      query methods. Some of these methods are intended to be used for queries
+      that return a single value. Maybe you want a count or a specific value
+      from one row. If that is the case then you can use
+      <literal>queryForInt</literal>,<literal>queryForLong</literal> or
+      <literal>queryForObject</literal>. The latter will convert the returned
+      JDBC Type to the Java class that is passed in as an argument. If the
+      type conversion is invalid, then an
+      <literal>InvalidDataAccessApiUsageException</literal> will be thrown.
+      Here is an example that contains two query methods, one for an
+      <literal>int</literal> and one that queries for a
+      <literal>String</literal>. </para>
+
+      <programlisting>import javax.sql.DataSource;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+/**
+ * @author trisberg
+ */
+public class ExecuteAQuery {
+  private JdbcTemplate jt;
+  private DataSource dataSource;
+  
+  public int getCount() {
+    jt = new JdbcTemplate(dataSource);
+    int count = jt.queryForInt("select count(*) from mytable");
+    return count;
+  }
+
+  public String getName() {
+    jt = new JdbcTemplate(dataSource);
+    String name = (String) jt.queryForObject("select name from mytable", java.lang.String.class);
+    return name;
+  }
+
+  public void setDataSource(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
+}</programlisting>
+
+      <para>In addition to the singe results query methods there are several
+      methods that return a List with an entry for each row that the query
+      returned. The most generic one is <literal>queryForList</literal> which
+      returns a <literal>List</literal> where each entry is a
+      <literal>Map</literal> with each entry in the map representing the
+      column value for that row. If we add a method to the above example to
+      retrieve a list of all the rows, it would look like this:</para>
+
+      <programlisting>  public List getList() {
+    jt = new JdbcTemplate(dataSource);
+    List rows = jt.queryForList("select * from mytable");
+    return rows;
+  }</programlisting>
+
+      <para>The list returned would look something like this:
+      <literal>[{name=Bob, id=1}, {name=Mary, id=2}].</literal></para>
     </sect2>
 
     <sect2>
