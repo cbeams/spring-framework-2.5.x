@@ -26,6 +26,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.Topic;
@@ -172,10 +173,10 @@ public class JmsTemplate102 extends JmsTemplate {
 		}
 		else {
 			if (this.isExplicitQosEnabled()) {
-				producer.send(message, getDeliveryMode(), getPriority(), getTimeToLive());
+				((QueueSender) producer).send(message, getDeliveryMode(), getPriority(), getTimeToLive());
 			}
 			else {
-				producer.send(message);
+				((QueueSender) producer).send(message);
 			}
 		}
 	}
