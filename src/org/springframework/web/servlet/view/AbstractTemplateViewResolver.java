@@ -23,7 +23,7 @@ import org.springframework.web.servlet.View;
 
 /**
  * @author Juergen Hoeller
- * @since 23.07.2004
+ * @since 1.1
  */
 public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 

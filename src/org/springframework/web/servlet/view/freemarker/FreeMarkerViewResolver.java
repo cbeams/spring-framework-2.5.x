@@ -30,7 +30,7 @@ import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
  * the underlying resource actually exists.
  *
  * @author Juergen Hoeller
- * @since 13.12.2003
+ * @since 1.1
  * @see #setViewClass
  * @see #setPrefix
  * @see #setSuffix
