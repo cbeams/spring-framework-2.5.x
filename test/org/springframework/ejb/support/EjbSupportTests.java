@@ -12,32 +12,27 @@ import javax.ejb.EJBException;
 import javax.ejb.MessageDrivenContext;
 import javax.ejb.SessionContext;
 import javax.jms.Message;
+import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanFactoryLoader;
 import org.springframework.beans.factory.support.BootstrapException;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.springframework.jndi.support.SimpleNamingContextBuilder;
 
 /**
  * Most of the value of the tests here is in being forced
  * to implement ejbCreate() methods.
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: EjbSupportTests.java,v 1.4 2003-12-07 23:22:45 colins Exp $
+ * @version $Id: EjbSupportTests.java,v 1.5 2003-12-30 02:04:18 jhoeller Exp $
  */
 public class EjbSupportTests extends TestCase {
 
-	/**
-	 * @param arg0
-	 */
-	public EjbSupportTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testSfsb() throws CreateException {
 		MockControl mc = MockControl.createControl(SessionContext.class);
 		SessionContext sc = (SessionContext) mc.getMock();
@@ -77,9 +72,10 @@ public class EjbSupportTests extends TestCase {
 	
 	/**
 	 * Check there's a helpful message if no JNDI key is present
-	 *
 	 */
-	public void testHelpfulNamingLookupMessage() {
+	public void testHelpfulNamingLookupMessage() throws NamingException {
+		SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+		
 		MockControl mc = MockControl.createControl(SessionContext.class);
 		SessionContext sc = (SessionContext) mc.getMock();
 		mc.replay();
@@ -98,7 +94,6 @@ public class EjbSupportTests extends TestCase {
 			fail();
 		}
 		catch (CreateException ex) {
-			System.err.println(ex.getMessage());
 			assertTrue(ex.getMessage().indexOf("environment") != -1);
 			assertTrue(ex.getMessage().indexOf("ejb/BeanFactoryPath") != -1);
 		}
