@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -92,15 +91,6 @@ public abstract class AbstractState implements Serializable {
 		Assert.notNull(flow, "The owning flow is required");
 		if (this.flow != null && this.flow.equals(flow)) {
 			return;
-		}
-		if (flow.containsState(this.id)) {
-			throw new IllegalStateException(
-					"This flow '"
-							+ flow.getId()
-							+ "' already contains a state with id '"
-							+ id
-							+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
-							+ DefaultObjectStyler.call(flow.getStateIds()));
 		}
 		this.flow = flow;
 	}

@@ -48,6 +48,15 @@ public class StateGroup implements Serializable {
 	}
 
 	public void add(AbstractState state) {
+		if (flow.containsState(state.getId())) {
+			throw new IllegalStateException(
+					"This flow '"
+							+ flow.getId()
+							+ "' already contains a state with id '"
+							+ id
+							+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
+							+ DefaultObjectStyler.call(flow.getStateIds()));
+		}
 		state.setFlow(flow);
 		this.states.add(state);
 	}
