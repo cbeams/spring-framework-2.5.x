@@ -42,7 +42,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * the "lazy-init" attribute.
  *
  * @author Rod Johnson
- * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.11 2004-05-18 07:54:00 jhoeller Exp $
+ * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.12 2004-07-06 14:52:01 jhoeller Exp $
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
@@ -56,12 +56,15 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 		}
 
 		// call superclass to invoke the EJB create method on the cached home
-		EJBLocalObject session = (EJBLocalObject) create();
+		Object ejbInstance = create();
+		if (!(ejbInstance instanceof EJBLocalObject)) {
+			throw new AspectException("EJB instance [" + ejbInstance + "] is not a local SLSB");
+		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Obtained reference to local EJB: " + session);
+			logger.debug("Obtained reference to local EJB: " + ejbInstance);
 		}
-		return session;
+		return (EJBLocalObject) ejbInstance;
 	}
 
 	/**
@@ -75,7 +78,9 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetException = ex.getTargetException();
-			logger.info("Method of local EJB [" + getJndiName() + "] threw exception", targetException);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Method of local EJB [" + getJndiName() + "] threw exception", targetException);
+			}
 			if (targetException instanceof CreateException) {
 				throw new AspectException("Could not create local EJB [" + getJndiName() + "]", targetException);
 			}
@@ -92,7 +97,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 					ejb.remove();
 				}
 				catch (Throwable ex) {
-					logger.warn("Could not invoker 'remove' on Stateless Session Bean proxy", ex);
+					logger.warn("Could not invoke 'remove' on local EJB proxy", ex);
 				}
 			}
 		}

@@ -21,6 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
 
+import org.aopalliance.aop.AspectException;
+
 /**
  * Superclass for interceptors proxying remote Stateless Session Beans.
  *
@@ -28,7 +30,7 @@ import javax.naming.NamingException;
  * In this case, there is no target object.
  *
  * @author Rod Johnson
- * @version $Id: AbstractRemoteSlsbInvokerInterceptor.java,v 1.7 2004-05-18 07:54:00 jhoeller Exp $
+ * @version $Id: AbstractRemoteSlsbInvokerInterceptor.java,v 1.8 2004-07-06 14:52:01 jhoeller Exp $
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 	
@@ -41,14 +43,17 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 			logger.debug("Trying to create reference to remote EJB");
 		}
 
-		// Invoke the superclass's generic create method
-		EJBObject session = (EJBObject) create();
+		// invoke the superclass's generic create method
+		Object ejbInstance = create();
+		if (!(ejbInstance instanceof EJBObject)) {
+			throw new AspectException("EJB instance [" + ejbInstance + "] is not a remote SLSB");
+		}
 		// if it throws remote exception (wrapped in bean exception), retry?
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Obtained reference to remote EJB: " + session);
+			logger.debug("Obtained reference to remote EJB: " + ejbInstance);
 		}
-		return session;
+		return (EJBObject) ejbInstance;
 	}
 
 }
