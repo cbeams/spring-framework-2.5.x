@@ -16,8 +16,6 @@
 
 package org.springframework.aop.support;
 
-import java.lang.reflect.Method;
-
 import junit.framework.TestCase;
 
 import org.springframework.aop.Pointcut;
@@ -29,7 +27,7 @@ import org.springframework.beans.TestBean;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ControlFlowPointcutTests.java,v 1.3 2004-03-18 03:01:17 trisberg Exp $
+ * @version $Id: ControlFlowPointcutTests.java,v 1.4 2004-07-26 14:31:15 johnsonr Exp $
  */
 public class ControlFlowPointcutTests extends TestCase {
 	
@@ -72,12 +70,7 @@ public class ControlFlowPointcutTests extends TestCase {
 		target.setAge(27);
 		NopInterceptor nop = new NopInterceptor();
 		ControlFlowPointcut cflow = new ControlFlowPointcut(One.class);
-		Pointcut settersPc = new StaticMethodMatcherPointcut() {
-			public boolean matches(Method m, Class targetClass) {
-				return m.getName().startsWith("set");
-			}
-		};
-		Pointcut settersUnderOne = Pointcuts.intersection(settersPc, cflow);
+		Pointcut settersUnderOne = Pointcuts.intersection(Pointcuts.SETTERS, cflow);
 		ProxyFactory pf = new ProxyFactory(target);
 		ITestBean proxied = (ITestBean) pf.getProxy();
 		pf.addAdvisor(new DefaultPointcutAdvisor(settersUnderOne, nop));
