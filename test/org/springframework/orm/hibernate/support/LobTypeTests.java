@@ -270,11 +270,57 @@ public class LobTypeTests extends TestCase {
 		tmControl.verify();
 	}
 
+	public void testHbm2JavaStyleInitialization() throws Exception {
+		rsControl.reset();
+		psControl.reset();
+		lobHandlerControl.reset();
+		lobCreatorControl.reset();
+
+		ClobStringType cst = null;
+		BlobByteArrayType bbat = null;
+		BlobSerializableType bst = null;
+		try {
+			cst = new ClobStringType();
+			bbat = new BlobByteArrayType();
+			bst = new BlobSerializableType();
+		}
+		catch (Exception ex) {
+			fail("Should not have thrown exception on initialization");
+		}
+
+		try {
+			cst.nullSafeGet(rs, new String[] {"column"}, null);
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+		try {
+			bbat.nullSafeGet(rs, new String[] {"column"}, null);
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+		try {
+			bst.nullSafeGet(rs, new String[] {"column"}, null);
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+	}
+
 	protected void tearDown() {
-		rsControl.verify();
-		psControl.verify();
-		lobHandlerControl.verify();
-		lobCreatorControl.verify();
+		try {
+			rsControl.verify();
+			psControl.verify();
+			lobHandlerControl.verify();
+			lobCreatorControl.verify();
+		}
+		catch (IllegalStateException ex) {
+			// ignore: test method didn't call replay
+		}
 	}
 
 }

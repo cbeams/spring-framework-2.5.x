@@ -79,10 +79,6 @@ public abstract class AbstractLobType implements UserType {
 	 * and an explicit JTA TransactionManager (can be null).
 	 */
 	protected AbstractLobType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
-		if (lobHandler == null) {
-			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on LocalSessionFactoryBean");
-		}
 		this.lobHandler = lobHandler;
 		this.jtaTransactionManager = jtaTransactionManager;
 	}
@@ -118,6 +114,10 @@ public abstract class AbstractLobType implements UserType {
 	 */
 	public final Object nullSafeGet(ResultSet rs, String[] names, Object owner)
 			throws HibernateException, SQLException {
+		if (this.lobHandler == null) {
+			throw new IllegalStateException("No LobHandler found for configuration - " +
+			    "lobHandler property must be set on LocalSessionFactoryBean");
+		}
 		try {
 			return nullSafeGetInternal(rs, rs.findColumn(names[0]), this.lobHandler);
 		}
@@ -134,6 +134,10 @@ public abstract class AbstractLobType implements UserType {
 	 */
 	public final void nullSafeSet(PreparedStatement st, Object value, int index)
 			throws HibernateException, SQLException {
+		if (this.lobHandler == null) {
+			throw new IllegalStateException("No LobHandler found for configuration - " +
+			    "lobHandler property must be set on LocalSessionFactoryBean");
+		}
 		LobCreator lobCreator = this.lobHandler.getLobCreator();
 		try {
 			nullSafeSetInternal(st, index, value, lobCreator);
