@@ -31,7 +31,6 @@ import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.ProcessTemplate;
 import org.springframework.util.closure.support.Block;
-import org.springframework.web.flow.config.NoSuchFlowStateException;
 
 /**
  * Singleton definition of a web flow.
