@@ -95,7 +95,7 @@ public class StateGroups implements Serializable {
 		private Iterator statesIterator;
 
 		public boolean hasNext() {
-			return groupIterator.hasNext() || statesIterator.hasNext();
+			return groupIterator.hasNext() || (statesIterator != null && statesIterator.hasNext());
 		}
 
 		public Object next() {
