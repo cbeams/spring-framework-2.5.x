@@ -60,7 +60,7 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	public MockHttpServletRequest(ServletContext sc, String method, String url) {
 		this.url = url;
 		this.contextPath = "";
-		this.servletPath = url;
+		this.servletPath = "";
 		this.method = method;
 		
 		// We must save the request dispatcher
@@ -151,7 +151,7 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	}
 
 	public String getServletPath() {
-		return "";
+		return servletPath;
 	}
 
 	public HttpSession getSession(boolean create) {

@@ -18,8 +18,6 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/servlet/handler/map1.xml";
 	
-	private HandlerMapping hm;
-	
 	private WebApplicationContext wac;
 
 	public void setUp() throws Exception {
@@ -27,48 +25,105 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, CONF);
 		wac = new XmlWebApplicationContext();
 		wac.setServletContext(sc);
-		hm = new BeanNameUrlHandlerMapping();
-		hm.setApplicationContext(wac);
 	}
 
-	public void testRequestsWithHandlers() throws Exception {
-		Object bean = wac.getBean("godCtrl");
-
-		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/welcome.html");
-		HandlerExecutionChain hec = hm.getHandler(req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-		
-		req = new MockHttpServletRequest(null, "GET", "/show.html");
-		hec = hm.getHandler(req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-
-		req = new MockHttpServletRequest(null, "GET", "/bookseats.html");
-		hec = hm.getHandler(req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-	}
-	
 	public void testRequestsWithoutHandlers() throws Exception {
-		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/nonsense.html");
+		HandlerMapping hm = new BeanNameUrlHandlerMapping();
+		hm.setApplicationContext(wac);
+
+		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/nonsense.html");
+		req.setContextPath("/myapp");
 		Object h = hm.getHandler(req);
 		assertTrue("Handler is null", h == null);
-		
+
 		req = new MockHttpServletRequest(null, "GET", "/foo/bar/baz.html");
 		h = hm.getHandler(req);
 		assertTrue("Handler is null", h == null);
 	}
 
-	public void testAsteriskMatches() throws ServletException {
+	public void testRequestsWithSubPaths() throws Exception {
+		HandlerMapping hm = new BeanNameUrlHandlerMapping();
+		hm.setApplicationContext(wac);
 		Object bean = wac.getBean("godCtrl");
 
-		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/test.html");
+		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/testarossa");
+		req = new MockHttpServletRequest(null, "GET", "/myapp/mypath/welcome.html");
+		req.setContextPath("/myapp");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		
+		req = new MockHttpServletRequest(null, "GET", "/myapp/mypath/welcome.html");
+		req.setContextPath("/myapp");
+		req.setServletPath("/mypath/welcome.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/tes");
+		req = new MockHttpServletRequest(null, "GET", "/myapp/myservlet/mypath/welcome.html");
+		req.setContextPath("/myapp");
+		req.setServletPath("/myservlet");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest(null, "GET", "/myapp/myapp/mypath/welcome.html");
+		req.setContextPath("/myapp");
+		req.setServletPath("/myapp");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest(null, "GET", "/mypath/show.html");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest(null, "GET", "/mypath/bookseats.html");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+	}
+	
+	public void testRequestsWithFullPaths() throws Exception {
+		BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
+		hm.setAlwaysUseFullPath(true);
+		hm.setApplicationContext(wac);
+		Object bean = wac.getBean("godCtrl");
+
+		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/welcome.html");
+		HandlerExecutionChain hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest(null, "GET", "/myapp/mypath/welcome.html");
+		req.setContextPath("/myapp");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest(null, "GET", "/mypath/welcome.html");
+		req.setContextPath("");
+		req.setServletPath("/mypath");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest(null, "GET", "/myapp/mypath/welcome.html");
+		req.setContextPath("/myapp");
+		req.setServletPath("/mypath");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+	}
+
+	public void testAsteriskMatches() throws ServletException {
+		HandlerMapping hm = new BeanNameUrlHandlerMapping();
+		hm.setApplicationContext(wac);
+		Object bean = wac.getBean("godCtrl");
+
+		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/test.html");
+		HandlerExecutionChain hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest(null, "GET", "/mypath/testarossa");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest(null, "GET", "/mypath/tes");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec == null);
 	}

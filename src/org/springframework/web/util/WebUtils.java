@@ -34,12 +34,6 @@ public abstract class WebUtils {
 	 */
 	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
-	/** HTTP header value */
-	public static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
-
-	/** HTTP header value */
-	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
-
 	/** Name suffix in case of image buttons */
 	public static final String SUBMIT_IMAGE_SUFFIX = ".x";
 
@@ -172,9 +166,7 @@ public abstract class WebUtils {
 	 * @return the path within the servlet mapping, or ""
 	 */
 	public static String getPathWithinServletMapping(HttpServletRequest request) {
-		String uri = getRequestUri(request);
-		int servletIndex = uri.indexOf(request.getServletPath());
-		return uri.substring(servletIndex + request.getServletPath().length());
+		return getPathWithinApplication(request).substring(request.getServletPath().length());
 	}
 
 	/**
@@ -187,8 +179,9 @@ public abstract class WebUtils {
 	 */
 	public static String getLookupPathForRequest(HttpServletRequest request, boolean alwaysUseFullPath) {
 		// always use full path within current servlet context?
-		if (alwaysUseFullPath)
+		if (alwaysUseFullPath) {
 			return WebUtils.getPathWithinApplication(request);
+		}
 		// else use path within current servlet mapping if applicable
 		String rest = WebUtils.getPathWithinServletMapping(request);
 		if (!"".equals(rest))

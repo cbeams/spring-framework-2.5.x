@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="godCtrl" name="/welcome.html /show.html /bookseats.html /reservation.html /payment.html /confirmation.html /test*"
+	<bean id="godCtrl" name="/mypath/welcome.html /mypath/show.html /mypath/bookseats.html /mypath/reservation.html /mypath/payment.html /mypath/confirmation.html /mypath/test*"
 		class="java.lang.Object"/>
 
 </beans>
