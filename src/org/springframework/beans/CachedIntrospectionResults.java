@@ -1,3 +1,8 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+
 package org.springframework.beans;
 
 import java.beans.BeanInfo;
@@ -6,14 +11,13 @@ import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * Class to cache PropertyDescriptor information for a Java class.
- * Package-visible; not used by application code.
+ * Package-visible; not for use by application code.
  *
  * <p>Necessary as Introspector.getBeanInfo() in JDK 1.3 will return a new
  * deep copy of the BeanInfo every time we ask for it. We take the opportunity
@@ -26,16 +30,16 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @since 05 May 2001
- * @version $Revision: 1.4 $
+*  @version $Id: CachedIntrospectionResults.java,v 1.5 2003-11-25 13:03:14 johnsonr Exp $
  */
 final class CachedIntrospectionResults {
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
 	/**
-	 * Map keyed by class containing CachedIntrospectionResults or ReflectionException
+	 * Map keyed by class containing CachedIntrospectionResults
 	 */
-	private static Map $cache = new HashMap();
+	private static HashMap classCache = new HashMap();
 
 	/**
 	 * We might use this from the EJB tier, so we don't want to use synchronization.
@@ -43,24 +47,16 @@ final class CachedIntrospectionResults {
 	 * unnecessary lookup at startup only.
 	 */
 	protected static CachedIntrospectionResults forClass(Class clazz) throws BeansException {
-		Object o = $cache.get(clazz);
+		Object o = classCache.get(clazz);
 		if (o == null) {
-			try {
-				o = new CachedIntrospectionResults(clazz);
-			}
-			catch (BeansException ex) {
-				o = ex;
-			}
-			$cache.put(clazz, o);
+			// Can throw BeansException
+			o = new CachedIntrospectionResults(clazz);
+			classCache.put(clazz, o);
 		}
 		else {
-			logger.debug("Using cached introspection results for class " + clazz);
-		}
-
-		// o is now an exception or CachedIntrospectionResults
-		// We already have data for this class in the cache
-		if (o instanceof BeansException) {
-			throw (BeansException) o;
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using cached introspection results for class " + clazz.getName());
+			}
 		}
 		return (CachedIntrospectionResults) o;
 	}
@@ -69,10 +65,10 @@ final class CachedIntrospectionResults {
 	private BeanInfo beanInfo;
 
 	/** Property descriptors keyed by property name */
-	private Map propertyDescriptorMap;
+	private HashMap propertyDescriptorMap;
 
 	/** Property descriptors keyed by property name */
-	private Map methodDescriptorMap;
+	private HashMap methodDescriptorMap;
 
 	/**
 	 * Create new CachedIntrospectionResults instance fot the given class.
