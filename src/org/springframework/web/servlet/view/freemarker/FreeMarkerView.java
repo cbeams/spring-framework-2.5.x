@@ -23,16 +23,16 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractTemplateView;
-
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 
 /**
  * View using the FreeMarker template engine.
@@ -54,7 +54,7 @@ import freemarker.template.TemplateException;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 3/3/2004
- * @version $Id: FreeMarkerView.java,v 1.2 2004-05-18 22:47:02 davison Exp $
+ * @version $Id: FreeMarkerView.java,v 1.3 2004-05-21 19:33:40 jhoeller Exp $
  * @see #setUrl
  * @see #setEncoding
  * @see #setConfiguration
@@ -137,16 +137,14 @@ public class FreeMarkerView extends AbstractTemplateView {
 	}
 
 	/**
-	 * Process the model map by merging it with the FreeMarker template.  Output is
-	 * directed to the response.  This method can be overridden if custom behaviour
+	 * Process the model map by merging it with the FreeMarker template. Output is
+	 * directed to the response. This method can be overridden if custom behavior
 	 * is needed.
 	 */
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
+	protected void renderMergedTemplateModel(Map model, HttpServletRequest request,
+																					 HttpServletResponse response)
 			throws IOException, TemplateException {
 	   
-	    // add request or session attributes to the model if needed
-	    exposeAttributesToModel(request, model);
-	    
 		// grab the locale-specific version of the template
 		Template template = getTemplate(RequestContextUtils.getLocale(request));
 		if (logger.isDebugEnabled()) {

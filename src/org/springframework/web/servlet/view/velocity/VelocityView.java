@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.view.velocity;
 
@@ -70,7 +70,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityView.java,v 1.26 2004-05-18 22:47:00 davison Exp $
+ * @version $Id: VelocityView.java,v 1.27 2004-05-21 19:33:40 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  * @see #setUrl
@@ -209,8 +209,13 @@ public class VelocityView extends AbstractTemplateView {
 		}
 	}
 
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request,
-	                                       HttpServletResponse response) throws Exception {
+	/**
+	 * Process the model map by merging it with the Velocity template. Output is
+	 * directed to the response. This method can be overridden if custom behavior
+	 * is needed.
+	 */
+	protected void renderMergedTemplateModel(Map model, HttpServletRequest request,
+																					 HttpServletResponse response) throws Exception {
 
 		// We already hold a reference to the template, but we might want to load it
 		// if not caching. As Velocity itself caches templates, so our ability to
@@ -221,10 +226,7 @@ public class VelocityView extends AbstractTemplateView {
 		}
 
 		response.setContentType(getContentType());
-		
-		// add request or session attributes to the model if needed
-	    exposeAttributesToModel(request, model);
-	    
+
 	    // create context from model and add Velocity helpers
 		Context velocityContext = new VelocityContext(model);
 		exposeHelpers(velocityContext, request);
