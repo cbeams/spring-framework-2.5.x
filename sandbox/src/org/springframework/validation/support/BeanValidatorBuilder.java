@@ -10,6 +10,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +40,15 @@ public class BeanValidatorBuilder {
 
     public BeanValidatorBuilder(Class rootBeanType) {
         setRootBeanType(rootBeanType);
+    }
+
+    public void setPropertyValidators(Map propertyValidators) {
+        for (Iterator i = propertyValidators.entrySet().iterator(); i.hasNext();) {
+            Map.Entry entry = (Map.Entry)i.next();
+            String propertyName = (String)entry.getKey();
+            Set propertyValidationRules = (Set)entry.getValue();
+            addPropertyValidator(propertyName, propertyValidationRules);
+        }
     }
 
     public void setRootBeanType(Class rootBeanType) {
