@@ -12,7 +12,11 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
@@ -71,7 +76,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -383,132 +388,88 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Both doGet() and doPost() are handled by this method.
 	 * It's up to HandlerAdapters to decide which methods are acceptable.
 	 */
-	protected void doService(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
-
+	protected void doService(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		logger.debug("DispatcherServlet with name '" + getServletName() + "' received request for [" + WebUtils.getRequestUri(request) + "]");
 
-		// Make web application context available
+		// Make framework objects available for handlers
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
-
-		// Make locale resolver available
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
-
-		// Make theme resolver available
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 
-		// Convert the request into a multipart request and make multipart 
-		// resolver available.  If no multipart resolver is set, simply use 
-		// the existing request.  
+		// Convert the request into a multipart request, and make multipart resolver available.
+		// If no multipart resolver is set, simply use the existing request.
 		HttpServletRequest processedRequest = request;
-		if (this.multipartResolver != null
-			&& this.multipartResolver.isMultipart(request)) {
-			request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);				
+		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+			request.setAttribute(MULTIPART_RESOLVER_ATTRIBUTE, this.multipartResolver);
 			processedRequest = this.multipartResolver.resolveMultipart(request);
 		}
 
-		HandlerExecutionChain mappedHandler = getHandler(processedRequest);
+		try {
+			HandlerExecutionChain mappedHandler = getHandler(processedRequest);
+			if (mappedHandler == null || mappedHandler.getHandler() == null) {
+				// if we didn't find a handler
+				pageNotFoundLogger.warn("No mapping for [" + WebUtils.getRequestUri(processedRequest) + "] in DispatcherServlet with name '" + getServletName() + "'");
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
 
-		if (mappedHandler == null || mappedHandler.getHandler() == null) {
-			// if we didn't find a handler
-			pageNotFoundLogger.warn("No mapping for [" + WebUtils.getRequestUri(processedRequest) + "] in DispatcherServlet with name '" + getServletName() + "'");
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
-
-		// This will throw an exception if no adapter is found
-		HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
-
-		// Send not-modified header for cache control?
-		if (wasRevalidated(processedRequest, response, ha, mappedHandler.getHandler())) {
-			return;
-		}
-
-		// Apply preHandle methods of registered interceptors
-		if (mappedHandler.getInterceptors() != null) {
-			for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
-				HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-				if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
-					return;
+			// Apply preHandle methods of registered interceptors
+			if (mappedHandler.getInterceptors() != null) {
+				for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
+					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+					if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
+						return;
+					}
 				}
 			}
-		}
 
-		// Actually invoke the handler
-		ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+			// Actually invoke the handler
+			HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+			ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
-		// Apply postHandle methods of registered interceptors
-		if (mappedHandler.getInterceptors() != null) {
-			for (int i = mappedHandler.getInterceptors().length - 1; i >=0 ; i--) {
-				HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-				interceptor.postHandle(processedRequest, response, mappedHandler.getHandler());
+			// Apply postHandle methods of registered interceptors
+			if (mappedHandler.getInterceptors() != null) {
+				for (int i = mappedHandler.getInterceptors().length - 1; i >=0 ; i--) {
+					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+					interceptor.postHandle(processedRequest, response, mappedHandler.getHandler());
+				}
+			}
+
+			// Did the handler return a view to render?
+			if (mv != null) {
+				logger.debug("Will render view in DispatcherServlet with name '" + getServletName() + "'");
+				Locale locale = this.localeResolver.resolveLocale(processedRequest);
+				response.setLocale(locale);
+				render(mv, processedRequest, response, locale);
+			}
+			else {
+				logger.debug("Null ModelAndView returned to DispatcherServlet with name '" + getServletName() + "': assuming HandlerAdapter completed request handling");
 			}
 		}
-
-		// Did the handler return a view to render?
-		if (mv != null) {
-			logger.debug("Will render view in DispatcherServlet with name '" + getServletName() + "'");
-			Locale locale = this.localeResolver.resolveLocale(processedRequest);
-			response.setLocale(locale);
-			render(mv, processedRequest, response, locale);
-		}
-		else {
-			logger.debug("Null ModelAndView returned to DispatcherServlet with name '" + getServletName() + "': assuming HandlerAdapter completed request handling");
-		}
-		
-		// Cleanup any resources used by a multipart request.  
-		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
-			this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
+		finally {
+			// Clean up any resources used by a multipart request.
+			if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
+			}
 		}
 	}
 
 	/**
-	 * Implementation method to support HTTP cache control.
-	 * Was the request successfully revalidated? In this case we can return.
+	 * Override HttpServlet's getLastModified to evaluate the Last-Modified
+	 * value of the mapped handler.
 	 */
-	private boolean wasRevalidated(HttpServletRequest request, HttpServletResponse response,
-	                               HandlerAdapter ha, Object mappedHandler) {
-		// Based on code from javax.servlet.HttpServlet from Apache Servlet API
-		// HttpServlet checks getLastModified() before calling doGet(), so we need to
-		// leave the default implementation of getLastModified() to return -1, before
-		// handling unmodified requests here.
-		if (!"GET".equals(request.getMethod()))
-			return false;
-
-		// Apply last modified rule
-		long ifModifiedSince = request.getDateHeader(WebUtils.HEADER_IF_MODIFIED_SINCE);
-		if (ifModifiedSince == -1)
-			return false;
-
-		// We have an if modified since header (value is -1 if we don't)
-		logger.debug("GET request: " + WebUtils.HEADER_IF_MODIFIED_SINCE + " request header present");
-		long lastModified = ha.getLastModified(request, mappedHandler);
-
-		if (lastModified == -1 || ifModifiedSince < lastModified) {
-			// lastModified was -1, indicating it wasn't understood,
-			// or was earlier than the servlet mod date.
-			// We need to regenerate content.
-			logger.debug("GET request: " + WebUtils.HEADER_IF_MODIFIED_SINCE + " request header contains an earlier date than lastModified date. Will regenerate content and reset lastModified header." );
-			setLastModifiedIfNecessary(response, lastModified);
-			return false;
+	protected long getLastModified(HttpServletRequest request) {
+		try {
+			HandlerExecutionChain mappedHandler = getHandler(request);
+			HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+			long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
+			logger.debug("Last-Modified value for [" + WebUtils.getRequestUri(request) + "] is [" + lastModified + "]");
+			return lastModified;
 		}
-		else {
-			// If mod header present and shows a later date than last modified date on the resource
-			logger.debug("GET request: " + WebUtils.HEADER_IF_MODIFIED_SINCE + " request header contains a later date than lastModified date, or revalidation isn't supported. Indicating unmodified.");
-			response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-			return true;
-		}
-	}
-
-	/**
-	 * Set the Last-Modified entity header field, if it has not already
-	 * been set and if the value is meaningful. Called before doGet,
-	 * to ensure that headers are set before response data is written.
-	 * A subclass might have set this header already, so we check.
-	 */
-	private void setLastModifiedIfNecessary(HttpServletResponse response, long lastModified) {
-		if (!response.containsHeader(WebUtils.HEADER_LAST_MODIFIED) && lastModified >= 0) {
-			response.setDateHeader(WebUtils.HEADER_LAST_MODIFIED, lastModified);
+		catch (ServletException ex) {
+			// ignore -> will reappear on doService
+			logger.debug("Exception thrown on getLastModified", ex);
+			return -1;
 		}
 	}
 

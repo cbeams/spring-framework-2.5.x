@@ -103,6 +103,8 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	public static interface MyHandler {
 
 		public void doSomething(HttpServletRequest request) throws ServletException;
+
+		public long lastModified();
 	}
 
 
@@ -123,7 +125,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		public long getLastModified(HttpServletRequest request, Object delegate) {
-			return -1;
+			return ((MyHandler) delegate).lastModified();
 		}
 	}
 
@@ -213,6 +215,10 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			if (!"theme".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
 				throw new ServletException("Incorrect theme name");
 			}
+		}
+
+		public long lastModified() {
+			return 99;
 		}
 	}
 

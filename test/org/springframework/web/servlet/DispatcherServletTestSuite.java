@@ -109,6 +109,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
+			assertEquals(98, simpleControllerServlet.getLastModified(request));
 			simpleControllerServlet.doGet(request, response);
 			assertTrue("Not forwarded", response.forwarded == null);
 		}
@@ -177,6 +178,7 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
+			assertEquals(99, complexControllerServlet.getLastModified(request));
 			complexControllerServlet.doGet(request, response);
 			assertTrue("Not forwarded", response.forwarded == null);
 		}

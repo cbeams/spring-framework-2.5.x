@@ -21,6 +21,7 @@ import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
@@ -51,7 +52,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 	}
 
 
-	public static class LocaleChecker implements Controller {
+	public static class LocaleChecker implements Controller, LastModified {
 
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 			if (!(RequestContextUtils.getWebApplicationContext(request) instanceof SimpleWebApplicationContext)) {
@@ -65,7 +66,12 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 			}
 			return null;
 		}
+
+		public long getLastModified(HttpServletRequest request) {
+			return 98;
+		}
 	}
+
 
 	public static class DummyThemeSource implements ThemeSource {
 
