@@ -11,7 +11,7 @@ package org.springframework.transaction.interceptor;
  * determine whether a transaction should commit or rollback after an
  * exception has been thrown.
  * @since 09-Apr-2003
- * @version $Id: RollbackRuleAttribute.java,v 1.2 2003-08-18 16:21:04 jhoeller Exp $
+ * @version $Id: RollbackRuleAttribute.java,v 1.3 2003-10-21 09:42:18 johnsonr Exp $
  * @author Rod Johnson
  */
 public class RollbackRuleAttribute {
@@ -29,8 +29,14 @@ public class RollbackRuleAttribute {
 	 * Construct a new RollbackRule for the given exception name.
 	 * This can be a substring, with no wildcard support at present.
 	 * A value of "ServletException" would match ServletException and
-	 * subclasses, for example.
-	 * @param exceptionName
+	 * subclasses, for example.<br>
+	 * <b>NB: </b>Consider carefully how specific the pattern is, and whether
+	 * to include package information (which isn't mandatory). For example,
+	 * "Exception" will match nearly anything, and will probably hide other rules.
+	 * "java.lang.Exception" would be correct if "Exception" was meant to define
+	 * a rule for all checked exceptions. With more unusual Exception
+	 * names such as "BaseBusinessException" there's no need to use a FQN.
+	 * @param exceptionName the exception pattern
 	 */
 	public RollbackRuleAttribute(String exceptionName) {
 		this.exceptionName = exceptionName;
