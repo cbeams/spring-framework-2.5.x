@@ -1,16 +1,9 @@
 /*
- * Generic framework code included with
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002).
- * This code is free to use and modify. However, please
- * acknowledge the source and include the above URL in each
- * class using or derived from this code.
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
-
+ 
 package org.springframework.web.servlet.view.xslt;
-
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -35,29 +28,47 @@ import org.w3c.dom.Node;
  * <p>Based on an example by Taylor Cowan.
  * 
  * @author Rod Johnson
+ * @see AbstractXsltView
  */
 public class FormatHelper {
 
 	/**
 	 * Creates a formatted-date node with the given ISO language and country strings.
-	 */
+	 * If either the language or country parameters are null, the system default
+	 * <code>Locale</code> will be used.
+	 * 
+     * @param time the time in ms since the epoch that should be used to obtain
+     * the formatted date
+     * @param language the two character language code required to construct a 
+     * <code>java.util.Locale</code>
+     * @param country the two character country code required to construct a 
+     * <code>java.util.Locale</code>
+     * @return a W3C Node containing child Elements with the formatted date-time fragments
+     */
 	public static Node dateTimeElement(long time, String language, String country) {
-		Locale l = new Locale(language, country);
-		return dateTimeElement(time, l);
+		Locale locale = getLocale(language, country);
+		return dateTimeElement(time, locale);
 	}
 
 	/**
-	 * Creates a formatted-date node with the default language.
-	 */
+	 * Creates a formatted-date node with system default <code>Locale</code>
+	 * 
+     * @param time the time in ms since the epoch that should be used to obtain
+     * the formatted date
+     * @return a W3C Node containing child Elements with the formatted date-time fragments
+     */
 	public static Node dateTimeElement(long time) {
 		return dateTimeElement(time, Locale.getDefault());
 	}
 
 	/**
-	 * Create an XML element to represent this system time in the current locale.
-	 * Enables XSLT stylesheets to display content, without needing to do the work
-	 * of internationalization.
-	 */
+	 * Creates a formatted-date node with the given <code>Locale</code>
+	 * 
+     * @param time the time in ms since the epoch that should be used to obtain
+     * the formatted date
+     * @param locale the <code>java.util.Locale</code> to determine the date formatting
+     * @return a W3C Node containing child Elements with the formatted date-time fragments
+     */
 	public static Node dateTimeElement(long time, Locale locale) {
 		try {
 			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -90,23 +101,28 @@ public class FormatHelper {
 
 	/**
 	 * Format a currency amount in a given locale.
-	 */
+	 * 
+     * @param amount the currency value to format
+     * @param locale the <code>java.util.Locale</code> to use to format the amount
+     * @return a formatted <code>String</code> representing the amount
+     */
 	public static String currency(double amount, Locale locale) {
 		NumberFormat nf = NumberFormat.getCurrencyInstance(locale);
 		return nf.format(amount);
 	}
 
 	/**
-	 * Format a currency amount in a given locale.
-	 */
+	 * Format a currency amount for a given language and country.
+	 * 
+     * @param amount the currency value to format
+     * @param language the two character language code required to construct a 
+     * <code>java.util.Locale</code>
+     * @param country the two character country code required to construct a 
+     * <code>java.util.Locale</code>
+     * @return a formatted <code>String</code> representing the amount
+     */
 	public static String currency(double amount, String language, String country) {
-		Locale locale = null;
-		if (language == null || country == null) {
-			locale = Locale.getDefault();
-		}
-		else {
-			locale = new Locale(language, country);
-		}
+		Locale locale = getLocale(language, country);
 		return currency(amount, locale);
 	}
 
@@ -118,10 +134,28 @@ public class FormatHelper {
 		child.appendChild(parent.getOwnerDocument().createTextNode(text));
 		parent.appendChild(child);
 	}
+	
+	/**
+	 * Utility method to guarantee a Locale.
+	 */
+	private static Locale getLocale(String language, String country) {
+		Locale locale = null;
+		if (language == null || country == null) {
+			locale = Locale.getDefault();
+		}
+		else {
+			locale = new Locale(language, country);
+		}
+		return locale;
+	}
 
 
-	public static class XsltFormattingException extends NestedRuntimeException {
-
+	/**
+     * XsltFormattingException
+     * 
+     * @author Rod Johnson
+     */
+    public static class XsltFormattingException extends NestedRuntimeException {		
 		public XsltFormattingException(String msg, Throwable ex) {
 			super(msg, ex);
 		}
