@@ -23,8 +23,8 @@ public interface AttributeMapper {
 
 	/**
 	 * Map data from one map to another map.
-	 * @param from The accessor to the source map
-	 * @param to The setter to the target map
+	 * @param source The accessor to the source map
+	 * @param target The setter to the target map
 	 */
 	public void map(AttributeAccessor source, AttributeSetter target);
 
