@@ -68,6 +68,9 @@ Package org.springframework.remoting
 * added support for dynamic class downloading to AbstractHttpInvokerRequestExecutor and its subclasses
 * added hooks for decorating input/output streams to AbstractHttpInvokerRequestExecutor and HttpInvokerServiceExporter
 
+Package org.springframework.scheduling
+* reworked LocalDataSourceConnectionProvider to register Quartz ConnectionProviders, for proper helper thread shutdown
+
 Package org.springframework.ui
 * activated caching by default in VelocityEngineFactory, with file timestamp check for resources in the file system
 * added "preferFileSystemAccess" property to VelocityEngineFactory, to be able to suppress file system access
