@@ -50,7 +50,7 @@ public class CosMultipartResolverTests extends TestCase {
 		assertEquals("enc", resolver.getDefaultEncoding());
 		assertEquals(new File("mytemp"), resolver.getUploadTempDir());
 
-		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
+		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
 		assertTrue(resolver.isMultipart(originalRequest));
@@ -65,7 +65,7 @@ public class CosMultipartResolverTests extends TestCase {
 	
 	public void testMultipartResolution() throws MultipartException, IOException{
 		MockServletContext sc = new MockServletContext();
-		MockHttpServletRequest rq = new MockHttpServletRequest(sc,"GET","/url");
+		MockHttpServletRequest rq = new MockHttpServletRequest(sc);
 		CosMultipartResolver resolver = new CosMultipartResolver(sc);
 		resolver.setUploadTempDir(new FileSystemResource("bogusTmpDir"));
 		try {

@@ -71,29 +71,29 @@ public class SimpleUrlHandlerMappingTestSuite extends TestCase {
 		Object bean = wac.getBean("mainController");
 		HandlerMapping hm = (HandlerMapping) wac.getBean(beanName);
 
-		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/show.html");
+		req = new MockHttpServletRequest("GET", "/show.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/bookseats.html");
+		req = new MockHttpServletRequest("GET", "/bookseats.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/original-welcome.html");
+		req = new MockHttpServletRequest("GET", "/original-welcome.html");
 		req.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/welcome.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/original-show.html");
+		req = new MockHttpServletRequest("GET", "/original-show.html");
 		req.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/show.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/original-bookseats.html");
+		req = new MockHttpServletRequest("GET", "/original-bookseats.html");
 		req.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/bookseats.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);

@@ -98,8 +98,8 @@ public class ExpressionEvaluationUtilsTestSuite extends TestCase {
 	}
 	
 	private PageContext getMockPageContext() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(null,
-			"POST", "http://www.springframework.org");
+		MockHttpServletRequest request = new MockHttpServletRequest(null
+		);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockPageContext pageContext = new MockPageContext() {
 			private Map attributes = new HashMap();

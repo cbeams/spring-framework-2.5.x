@@ -34,7 +34,7 @@ public class ServletRequestParameterPropertyValuesTestSuite extends AbstractProp
 	}
 
 	public void testNoPrefix() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test/foobar");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("forname", "Tony");
 		request.addParameter("surname", "Blair");
 		request.addParameter("age", "" + 50);
@@ -44,7 +44,7 @@ public class ServletRequestParameterPropertyValuesTestSuite extends AbstractProp
 	}
 
 	public void testPrefix() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test/foobar");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("test_forname", "Tony");
 		request.addParameter("test_surname", "Blair");
 		request.addParameter("test_age", "" + 50);
@@ -58,13 +58,13 @@ public class ServletRequestParameterPropertyValuesTestSuite extends AbstractProp
 	}
 
 	public void testNoParameters() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test/foobar");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
 		assertTrue("Found no parameters", pvs.getPropertyValues().length == 0);
 	}
 
 	public void testMultipleValuesForParameter() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test/foobar");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		String[] original = new String[] {"Tony", "Rod"};
 		request.addParameter("forname", original);
 

@@ -160,7 +160,7 @@ public class StrutsSupportTests extends TestCase {
 		mapping.setPath("/test");
 		mapping.setModuleConfig(moduleConfig);
 		ActionForward forward = proxy.execute(mapping, null,
-																					new MockHttpServletRequest(servletContext, "GET", "/test.do"),
+																					new MockHttpServletRequest(servletContext),
 																					new MockHttpServletResponse());
 		assertEquals("/test", forward.getPath());
 
@@ -198,7 +198,7 @@ public class StrutsSupportTests extends TestCase {
 		mapping.setPath("/test2");
 		mapping.setModuleConfig(moduleConfig);
 		ActionForward forward = proxy.execute(mapping, null,
-																					new MockHttpServletRequest(servletContext, "GET", "/module/test2.do"),
+																					new MockHttpServletRequest(servletContext),
 																					new MockHttpServletResponse());
 		assertEquals("/module/test2", forward.getPath());
 

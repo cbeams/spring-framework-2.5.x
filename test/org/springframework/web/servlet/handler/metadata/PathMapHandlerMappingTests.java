@@ -32,7 +32,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 
 /**
  * @author Rod Johnson
- * @version $Id: PathMapHandlerMappingTests.java,v 1.4 2004-04-28 18:31:44 jhoeller Exp $
+ * @version $Id: PathMapHandlerMappingTests.java,v 1.5 2004-04-30 09:03:06 jhoeller Exp $
  */
 public class PathMapHandlerMappingTests extends TestCase {
 	
@@ -47,9 +47,10 @@ public class PathMapHandlerMappingTests extends TestCase {
 		hm.setApplicationContext(wac);
 		ConstructorController cc = (ConstructorController) wac.getBean(ConstructorController.class.getName());
 		assertSame(wac.getBean("test"), cc.testBean);
-		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest(null, "GET", path));
+		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest("GET", path));
+		assertNotNull(chain);
 		assertEquals("Path is mapped correctly based on attribute", cc, chain.getHandler());
-		chain = hm.getHandler(new MockHttpServletRequest(null, "GET", "completeRubbish.html"));
+		chain = hm.getHandler(new MockHttpServletRequest("GET", "completeRubbish.html"));
 		assertNull("Don't know anything about this path", chain);
 	}
 
@@ -82,7 +83,8 @@ public class PathMapHandlerMappingTests extends TestCase {
 		hm.setApplicationContext(wac);
 		ConstructorController cc = (ConstructorController) wac.getBean(ConstructorController.class.getName());
 		assertSame(wac.getBean("test"), cc.testBean);
-		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest(null, "GET", path1));
+		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest("GET", path1));
+		assertNotNull(chain);
 		assertEquals("Path is mapped correctly based on attribute 1", cc, chain.getHandler());
 		chain = hm.getHandler(new MockHttpServletRequest(null, "GET", "/" + path2));
 		assertEquals("Path is mapped correctly based on attribute 2", cc, chain.getHandler());

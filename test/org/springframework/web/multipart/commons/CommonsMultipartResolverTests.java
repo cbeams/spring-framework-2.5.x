@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,13 +37,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.mockobjects.servlet.MockFilterChain;
-import com.mockobjects.servlet.MockFilterConfig;
 import junit.framework.TestCase;
 import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -81,7 +79,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertEquals("enc", fileUpload.getHeaderEncoding());
 		assertTrue(fileUpload.getRepositoryPath().endsWith("mytemp"));
 
-		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
+		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
 		assertTrue(resolver.isMultipart(originalRequest));
@@ -217,32 +215,26 @@ public class CommonsMultipartResolverTests extends TestCase {
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
 		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
 
-		MockFilterConfig filterConfig = new MockFilterConfig() {
-			public Enumeration getInitParameterNames() {
-				return Collections.enumeration(new ArrayList());
-			}
-		};
-		filterConfig.setupGetServletContext(wac.getServletContext());
-
+		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		final MultipartFilter filter = new MultipartFilter();
 		filter.init(filterConfig);
 
 		final List files = new ArrayList();
-		final MockFilterChain filterChain = new MockFilterChain() {
+		final FilterChain filterChain = new FilterChain() {
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				MultipartHttpServletRequest request = (MultipartHttpServletRequest) servletRequest;
 				files.addAll(request.getFileMap().values());
 			}
 		};
 
-		MockFilterChain filterChain2 = new MockFilterChain() {
+		FilterChain filterChain2 = new FilterChain() {
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
 			    throws IOException, ServletException {
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
 		};
 
-		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
+		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
@@ -264,21 +256,11 @@ public class CommonsMultipartResolverTests extends TestCase {
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
 		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
 
-		MockFilterConfig filterConfig = new MockFilterConfig() {
-			public String getInitParameter(String s) {
-				if ("multipartResolverBeanName".equals(s))
-					return "myMultipartResolver";
-				else
-					return super.getInitParameter(s);
-			}
-			public Enumeration getInitParameterNames() {
-				return Collections.enumeration(Arrays.asList(new String[] {"multipartResolverBeanName"}));
-			}
-		};
-		filterConfig.setupGetServletContext(wac.getServletContext());
+		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
+		filterConfig.addInitParameter("multipartResolverBeanName", "myMultipartResolver");
 
 		final List files = new ArrayList();
-		MockFilterChain filterChain = new MockFilterChain() {
+		FilterChain filterChain = new FilterChain() {
 			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
 				if (originalRequest instanceof MultipartHttpServletRequest) {
 					MultipartHttpServletRequest request = (MultipartHttpServletRequest) originalRequest;
@@ -300,7 +282,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		};
 		filter.init(filterConfig);
 
-		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
+		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
 		originalRequest.setContentType("multipart/form-data");
 		originalRequest.addHeader("Content-type", "multipart/form-data");
 		HttpServletResponse response = new MockHttpServletResponse();

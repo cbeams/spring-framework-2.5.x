@@ -40,7 +40,7 @@ public class LocaleResolverTestSuite extends TestCase {
 	private void internalTest(LocaleResolver localeResolver, boolean shouldSet) {
 		// create mocks
 		MockServletContext context = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(context, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest(context);
 		request.addPreferredLocale(Locale.UK);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		// check original locale

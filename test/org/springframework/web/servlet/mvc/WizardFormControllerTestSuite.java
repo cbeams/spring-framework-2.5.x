@@ -207,7 +207,7 @@ public class WizardFormControllerTestSuite extends TestCase {
 
 	private HttpSession performRequest(Controller wizard, HttpSession session, Properties params,
 	                                   int target, String name, int age, String pageAttr) throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, (params != null ? "POST" : "GET"), "/wizard");
+		MockHttpServletRequest request = new MockHttpServletRequest((params != null ? "POST" : "GET"), "/wizard");
 		if (params != null) {
 			for (Iterator it = params.keySet().iterator(); it.hasNext();) {
 				String param = (String) it.next();

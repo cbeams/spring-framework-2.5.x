@@ -64,6 +64,14 @@ public class MockHttpSession implements HttpSession {
 		this.servletContext = servletContext;
 	}
 
+	/**
+	 * Create a new MockHttpSession with a MockServletContext.
+	 * @see MockServletContext
+	 */
+	public MockHttpSession() {
+		this(new MockServletContext());
+	}
+
 
 	public long getCreationTime() {
 		return creationTime;

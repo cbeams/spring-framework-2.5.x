@@ -25,7 +25,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.mockobjects.servlet.MockHttpServletResponse;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -34,6 +33,7 @@ import org.easymock.MockControl;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
@@ -106,7 +106,7 @@ public class FreeMarkerViewTests extends TestCase {
 		fv.setUrl("templateName");
 		fv.setApplicationContext(wac);
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addPreferredLocale(Locale.US);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		HttpServletResponse response = new MockHttpServletResponse();

@@ -27,12 +27,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.mockobjects.servlet.MockHttpServletRequest;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -41,14 +41,6 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Rod Johnson
  */
 public class BaseViewTests extends TestCase {
-
-	/**
-	 * Constructor for AbstractViewTest.
-	 * @param arg0
-	 */
-	public BaseViewTests(String arg0) {
-		super(arg0);
-	}
 
 	public void testRenderWithoutStaticAttributes() throws Exception {
 		MockControl mc = MockControl.createControl(WebApplicationContext.class);
@@ -66,9 +58,8 @@ public class BaseViewTests extends TestCase {
 		model.put("foo", "bar");
 		model.put("something", new Object());
 		tv.render(model, request, response);
-		
-		
-		// Check it contains all
+
+		// check it contains all
 		checkContainsAll(model, tv.model);
 		
 		assertTrue(tv.inited);
@@ -76,7 +67,7 @@ public class BaseViewTests extends TestCase {
 	}
 	
 	/**
-	 * Test attribute passing, NOT csv parsing
+	 * Test attribute passing, NOT CSV parsing.
 	 */
 	public void testRenderWithStaticAttributesNoCollision() throws Exception {
 		MockControl mc = MockControl.createControl(WebApplicationContext.class);
@@ -96,8 +87,7 @@ public class BaseViewTests extends TestCase {
 		model.put("one", new HashMap());
 		model.put("two", new Object());
 		tv.render(model, request, response);
-	
-	
+
 		// Check it contains all
 		checkContainsAll(model, tv.model);
 		checkContainsAll(p, tv.model);
@@ -125,7 +115,6 @@ public class BaseViewTests extends TestCase {
 		model.put("two", new Object());
 		tv.render(model, request, response);
 
-
 		// Check it contains all
 		checkContainsAll(model, tv.model);
 		assertTrue(tv.model.size() == 3);
@@ -143,7 +132,7 @@ public class BaseViewTests extends TestCase {
 	}
 	
 	/**
-	 * Test only the CSV parsing implementation
+	 * Test only the CSV parsing implementation.
 	 */
 	public void testAttributeCSVParsingIgnoresNull() {
 		AbstractView v = new ConcreteView();
@@ -157,7 +146,9 @@ public class BaseViewTests extends TestCase {
 		assertTrue(v.getStaticAttributes().size() == 0);
 	}
 	
-	//Format is attname0={value1},attname1={value1}
+	/**
+	 * Format is attname0={value1},attname1={value1}
+	 */
 	public void testAttributeCSVParsingValid() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("foo=[bar],king=[kong]");

@@ -25,7 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * @author Rod Johnson
  * @since March 2, 2003
- * @version $Id: ParameterizableViewControllerTestSuite.java,v 1.4 2004-04-28 18:31:46 jhoeller Exp $
+ * @version $Id: ParameterizableViewControllerTestSuite.java,v 1.5 2004-04-30 09:03:06 jhoeller Exp $
  */
 public class ParameterizableViewControllerTestSuite extends TestCase {
 
@@ -46,7 +46,7 @@ public class ParameterizableViewControllerTestSuite extends TestCase {
 		pvc.setViewName(viewName);
 		pvc.initApplicationContext();
 		// We don't care about the params
-		ModelAndView mv = pvc.handleRequest(new MockHttpServletRequest(null, "GET", "foo.html"), null);
+		ModelAndView mv = pvc.handleRequest(new MockHttpServletRequest("GET", "foo.html"), null);
 		assertTrue("model has no data", mv.getModel().size() == 0);
 		assertTrue("model has correct viewname", mv.getViewName().equals(viewName));
 		

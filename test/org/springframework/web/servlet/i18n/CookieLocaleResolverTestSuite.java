@@ -69,7 +69,7 @@ public class CookieLocaleResolverTestSuite extends TestCase {
 
 	public void testResolveLocale() {
 		MockServletContext context = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(context, "POST", "test");
+		MockHttpServletRequest request = new MockHttpServletRequest(context);
 				
 		Cookie c = new Cookie("LanguageKoek", "nl");		
 		request.setCookies(new Cookie[] {c});
@@ -83,7 +83,7 @@ public class CookieLocaleResolverTestSuite extends TestCase {
 
 	public void testSetLocale() {
 		MockServletContext context = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(context, "POST", "test");
+		MockHttpServletRequest request = new MockHttpServletRequest(context);
 		
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		
@@ -103,7 +103,7 @@ public class CookieLocaleResolverTestSuite extends TestCase {
 		System.out.println("found '" + found.getValue() + "'");
 		
 		context = new MockServletContext();
-		request = new MockHttpServletRequest(context, "POST", "test");
+		request = new MockHttpServletRequest(context);
 		
 		request.setCookies(new Cookie[] {found});
 

@@ -58,7 +58,7 @@ public class OpenSessionInViewTests extends TestCase {
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
 		interceptor.setSessionFactory(sf);
 		MockServletContext sc = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		sf.openSession();
@@ -103,7 +103,7 @@ public class OpenSessionInViewTests extends TestCase {
 		interceptor.setSessionFactory(sf);
 		interceptor.setFlushMode(HibernateAccessor.FLUSH_AUTO);
 		MockServletContext sc = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		sf.openSession();
@@ -174,7 +174,7 @@ public class OpenSessionInViewTests extends TestCase {
 		wac.getDefaultListableBeanFactory().registerSingleton("mySessionFactory", sf2);
 		wac.refresh();
 		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		MockFilterConfig filterConfig = new MockFilterConfig() {

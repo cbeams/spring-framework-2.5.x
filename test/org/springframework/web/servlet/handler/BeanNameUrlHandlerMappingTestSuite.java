@@ -49,12 +49,12 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 	public void testRequestsWithoutHandlers() throws Exception {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 
-		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/nonsense.html");
+		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/nonsense.html");
 		req.setContextPath("/myapp");
 		Object h = hm.getHandler(req);
 		assertTrue("Handler is null", h == null);
 
-		req = new MockHttpServletRequest(null, "GET", "/foo/bar/baz.html");
+		req = new MockHttpServletRequest("GET", "/foo/bar/baz.html");
 		h = hm.getHandler(req);
 		assertTrue("Handler is null", h == null);
 	}
@@ -63,38 +63,38 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 		Object bean = wac.getBean("godCtrl");
 
-		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/welcome.html");
+		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/myapp/mypath/welcome.html");
+		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 		
-		req = new MockHttpServletRequest(null, "GET", "/myapp/mypath/welcome.html");
+		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/mypath/welcome.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/myapp/myservlet/mypath/welcome.html");
+		req = new MockHttpServletRequest("GET", "/myapp/myservlet/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/myservlet");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/myapp/myapp/mypath/welcome.html");
+		req = new MockHttpServletRequest("GET", "/myapp/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/myapp");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/mypath/show.html");
+		req = new MockHttpServletRequest("GET", "/mypath/show.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/mypath/bookseats.html");
+		req = new MockHttpServletRequest("GET", "/mypath/bookseats.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
@@ -105,22 +105,22 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 		hm.setApplicationContext(wac);
 		Object bean = wac.getBean("godCtrl");
 
-		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/welcome.html");
+		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/myapp/mypath/welcome.html");
+		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/mypath/welcome.html");
+		req = new MockHttpServletRequest("GET", "/mypath/welcome.html");
 		req.setContextPath("");
 		req.setServletPath("/mypath");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/myapp/mypath/welcome.html");
+		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/mypath");
 		hec = hm.getHandler(req);
@@ -131,15 +131,15 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 		Object bean = wac.getBean("godCtrl");
 
-		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/test.html");
+		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/test.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/mypath/testarossa");
+		req = new MockHttpServletRequest("GET", "/mypath/testarossa");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		req = new MockHttpServletRequest(null, "GET", "/mypath/tes");
+		req = new MockHttpServletRequest("GET", "/mypath/tes");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec == null);
 	}

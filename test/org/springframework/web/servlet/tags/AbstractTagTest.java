@@ -42,7 +42,7 @@ public abstract class AbstractTagTest extends TestCase {
 	
 	protected MockPageContext createPageContext() {
 		MockServletContext sc = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		SimpleWebApplicationContext wac = new SimpleWebApplicationContext();
 		wac.setServletContext(sc);
 		wac.setNamespace("test");

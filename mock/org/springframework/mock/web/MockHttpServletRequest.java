@@ -63,10 +63,6 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
-	public static final String DEFAULT_CONTEXT_PATH = "";
-
-	public static final String DEFAULT_SERVLET_PATH = "";
-
 
 	//---------------------------------------------------------------------
 	// ServletRequest properties
@@ -116,7 +112,7 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 
 	private String pathInfo;
 
-	private String contextPath = DEFAULT_CONTEXT_PATH;
+	private String contextPath = "";
 
 	private String queryString;
 
@@ -126,9 +122,9 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 
 	private Principal userPrincipal;
 
-	private String requestURI;
+	private String requestURI = "";
 
-	private String servletPath = DEFAULT_SERVLET_PATH;
+	private String servletPath = "";
 
 	private HttpSession session;
 
@@ -143,20 +139,47 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	// Constructors
 	//---------------------------------------------------------------------
 
+	/**
+	 * Create a new MockHttpServletRequest.
+	 * @param servletContext the ServletContext that the request runs in
+	 */
 	public MockHttpServletRequest(ServletContext servletContext) {
 		this.locales.add(Locale.ENGLISH);
 		this.servletContext = servletContext;
 	}
 
-	public MockHttpServletRequest(ServletContext servletContext, String method) {
+	/**
+	 * Create a new MockHttpServletRequest.
+	 * @param servletContext the ServletContext that the request runs in
+	 * @param method the request method
+	 * @param requestURI the request URI
+	 * @see #setMethod
+	 * @see #setRequestURI
+	 */
+	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
 		this(servletContext);
 		this.method = method;
+		this.requestURI = requestURI;
 	}
 
-	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
-		this(servletContext, method);
-		this.requestURI = requestURI;
-		this.locales.add(Locale.ENGLISH);
+	/**
+	 * Create a new MockHttpServletRequest with a MockServletContext.
+	 * @see MockServletContext
+	 */
+	public MockHttpServletRequest() {
+		this(new MockServletContext());
+	}
+
+	/**
+	 * Create a new MockHttpServletRequest with a MockServletContext.
+	 * @param method the request method
+	 * @param requestURI the request URI
+	 * @see #setMethod
+	 * @see #setRequestURI
+	 * @see MockServletContext
+	 */
+	public MockHttpServletRequest(String method, String requestURI) {
+		this(new MockServletContext(), method, requestURI);
 	}
 
 

@@ -94,7 +94,7 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct URL", "example2".equals(((InternalResourceView) view).getUrl()));
 		assertTrue("Correct contentType", "myContentType".equals(((InternalResourceView) view).getContentType()));
 
-		HttpServletRequest request = new MockHttpServletRequest(wac.getServletContext(), "GET", "/example");
+		HttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		HttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
@@ -142,7 +142,7 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct URL", "example2".equals(((InternalResourceView) view).getUrl()));
 
 		ServletContext sc = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/example");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.ENGLISH;
 		request.addPreferredLocale(locale);
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -183,7 +183,7 @@ public class ViewResolverTestSuite extends TestCase {
 		TestBean tb = new TestBean();
 		model.put("tb", tb);
 
-		HttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/example");
+		HttpServletRequest request = new MockHttpServletRequest(sc);
 		HttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
@@ -192,7 +192,7 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct test1 attribute", "testvalue1".equals(request.getAttribute("test1")));
 		assertTrue("Correct test2 attribute", testBean.equals(request.getAttribute("test2")));
 
-		request = new MockHttpServletRequest(sc, "GET", "/example");
+		request = new MockHttpServletRequest(sc);
 		response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());

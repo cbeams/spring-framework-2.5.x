@@ -48,7 +48,7 @@ public class CommandControllerTestSuite extends TestCase {
 
 	public void testNoArgsNoErrors() throws Exception {
 		TestController mc = new TestController();
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(request.getServletPath()));
@@ -62,7 +62,7 @@ public class CommandControllerTestSuite extends TestCase {
 
 	public void test2ArgsNoErrors() throws Exception {
 		TestController mc = new TestController();
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		String name = "Rod";
 		int age = 32;
 		request.addParameter("name", name);
@@ -80,7 +80,7 @@ public class CommandControllerTestSuite extends TestCase {
 	
 	public void test2Args1Mismatch() throws Exception {
 		TestController mc = new TestController();
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		String name = "Rod";
 		String age = "32x";
 		request.addParameter("name", name);
@@ -103,7 +103,7 @@ public class CommandControllerTestSuite extends TestCase {
 	public void testSupportedMethods() throws Exception {
 		TestController mc = new TestController();
 		mc.setSupportedMethods(new String[] {"POST"});
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		HttpServletResponse response = new MockHttpServletResponse();
 		try {
 			mc.handleRequest(request, response);
@@ -117,7 +117,7 @@ public class CommandControllerTestSuite extends TestCase {
 	public void testRequireSessionWithoutSession() throws Exception {
 		TestController mc = new TestController();
 		mc.setRequireSession(true);
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		HttpServletResponse response = new MockHttpServletResponse();
 		try {
 			mc.handleRequest(request, response);
@@ -131,7 +131,7 @@ public class CommandControllerTestSuite extends TestCase {
 	public void testRequireSessionWithSession() throws Exception {
 		TestController mc = new TestController();
 		mc.setRequireSession(true);
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		request.setSession(new MockHttpSession(null));
 		HttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
@@ -140,7 +140,7 @@ public class CommandControllerTestSuite extends TestCase {
 	public void testNoCaching() throws Exception {
 		TestController mc = new TestController();
 		mc.setCacheSeconds(0);
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		System.out.println(response.getHeader("Expires"));
@@ -152,7 +152,7 @@ public class CommandControllerTestSuite extends TestCase {
 		TestController mc = new TestController();
 		mc.setCacheSeconds(0);
 		mc.setUseExpiresHeader(false);
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("No expires header", response.getHeader("Expires") == null);
@@ -163,7 +163,7 @@ public class CommandControllerTestSuite extends TestCase {
 		TestController mc = new TestController();
 		mc.setCacheSeconds(0);
 		mc.setUseCacheControlHeader(false);
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
@@ -173,7 +173,7 @@ public class CommandControllerTestSuite extends TestCase {
 	public void testCaching() throws Exception {
 		TestController mc = new TestController();
 		mc.setCacheSeconds(10);
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
@@ -184,7 +184,7 @@ public class CommandControllerTestSuite extends TestCase {
 		TestController mc = new TestController();
 		mc.setCacheSeconds(10);
 		mc.setUseExpiresHeader(false);
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("No expires header", response.getHeader("Expires") == null);
@@ -195,7 +195,7 @@ public class CommandControllerTestSuite extends TestCase {
 		TestController mc = new TestController();
 		mc.setCacheSeconds(10);
 		mc.setUseCacheControlHeader(false);
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
@@ -210,7 +210,7 @@ public class CommandControllerTestSuite extends TestCase {
 		}
 		LastModifiedTestController mc = new LastModifiedTestController();
 		mc.setCacheSeconds(10);
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
@@ -224,7 +224,7 @@ public class CommandControllerTestSuite extends TestCase {
 				return super.handle(request, response, command, errors);
 			}
 		};
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
@@ -238,7 +238,7 @@ public class CommandControllerTestSuite extends TestCase {
 				return super.handle(request, response, command, errors);
 			}
 		};
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
@@ -252,7 +252,7 @@ public class CommandControllerTestSuite extends TestCase {
 				return super.handle(request, response, command, errors);
 			}
 		};
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
@@ -266,7 +266,7 @@ public class CommandControllerTestSuite extends TestCase {
 				return super.handle(request, response, command, errors);
 			}
 		};
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("No expires header", response.getHeader("Expires") == null);
@@ -281,7 +281,7 @@ public class CommandControllerTestSuite extends TestCase {
 			}
 		};
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("date", "1.5.2003");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -291,7 +291,7 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct date property", df.parse("1.5.2003").equals(tb.getDate()));
 		assertTrue("Correct date value", "01.05.2003".equals(errors.getFieldValue("date")));
 
-		request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("date", "");
 		response = new MockHttpServletResponse();
 		mv = mc.handleRequest(request, response);
@@ -310,7 +310,7 @@ public class CommandControllerTestSuite extends TestCase {
 			}
 		};
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("date", "1.5.2003");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -320,7 +320,7 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct date property", df.parse("1.5.2003").equals(tb.getDate()));
 		assertTrue("Correct date value", "01.05.2003".equals(errors.getFieldValue("date")));
 
-		request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("date", "");
 		response = new MockHttpServletResponse();
 		mv = mc.handleRequest(request, response);
@@ -340,7 +340,7 @@ public class CommandControllerTestSuite extends TestCase {
 			}
 		};
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("myFloat", "5,1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -350,7 +350,7 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct float property", (new Float(5.1)).equals(tb.getMyFloat()));
 		assertTrue("Correct float value", "5,1".equals(errors.getFieldValue("myFloat")));
 
-		request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("myFloat", "");
 		response = new MockHttpServletResponse();
 		mv = mc.handleRequest(request, response);
@@ -370,7 +370,7 @@ public class CommandControllerTestSuite extends TestCase {
 			}
 		};
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("myFloat", "5,1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -380,7 +380,7 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct float property", (new Float(5.1)).equals(tb.getMyFloat()));
 		assertTrue("Correct float value", "5,1".equals(errors.getFieldValue("myFloat")));
 
-		request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("myFloat", "");
 		response = new MockHttpServletResponse();
 		mv = mc.handleRequest(request, response);

@@ -27,7 +27,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 public class RequestUtilsTestSuite extends TestCase {
 
 	public void testIntParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "5");
 		request.addParameter("param2", "e");
 
@@ -54,7 +54,7 @@ public class RequestUtilsTestSuite extends TestCase {
 	}
 
 	public void testDoubleParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "5.5");
 		request.addParameter("param2", "e");
 
@@ -81,7 +81,7 @@ public class RequestUtilsTestSuite extends TestCase {
 	}
 
 	public void testBooleanParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "true");
 		request.addParameter("param2", "e");
 		request.addParameter("param4", "yes");
@@ -110,7 +110,7 @@ public class RequestUtilsTestSuite extends TestCase {
 	}
 
 	public void testStringParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("param1", "str");
 
 		assertEquals(RequestUtils.getStringParameter(request, "param1", "string"), "str");

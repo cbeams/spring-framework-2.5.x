@@ -37,7 +37,7 @@ public class BindUtilsTestSuite extends TestCase {
 
 	public void testBind() throws ServletException {
 		ServletContext sc = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test.do");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		request.addParameter("name", " myname ");
 		request.addParameter("age", "myage");
 		request.addParameter("spouse.name", " spousename ");
@@ -63,7 +63,7 @@ public class BindUtilsTestSuite extends TestCase {
 
 	public void testBindAndValidate() throws ServletException {
 		ServletContext sc = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test.do");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		request.addParameter("name", " myname ");
 		request.addParameter("age", "myage");
 		TestBean tb = new TestBean();
@@ -89,7 +89,7 @@ public class BindUtilsTestSuite extends TestCase {
 
 	public void testBindWithInitializer() throws ServletException {
 		ServletContext sc = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test.do");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		request.addParameter("name", " myname ");
 		request.addParameter("age", "myage");
 		TestBean tb = new TestBean();
@@ -109,7 +109,7 @@ public class BindUtilsTestSuite extends TestCase {
 
 	public void testBindAndValidateWithInitializer() throws ServletException {
 		ServletContext sc = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test.do");
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		request.addParameter("name", " myname ");
 		request.addParameter("age", "myage");
 		TestBean tb = new TestBean();

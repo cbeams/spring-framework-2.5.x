@@ -43,7 +43,7 @@ public class ThemeResolverTestSuite extends TestCase {
 	private void internalTest(ThemeResolver themeResolver, boolean shouldSet, String defaultName) {
 		// create mocks
 		MockServletContext context = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(context, "GET", "/test");
+		MockHttpServletRequest request = new MockHttpServletRequest(context);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		// check original theme
 		String themeName = themeResolver.resolveThemeName(request);

@@ -55,7 +55,7 @@ public class FormControllerTestSuite extends TestCase {
 		mc.setSuccessView(successView);
 		mc.refDataCount = 0;
 		
-		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(formView));
@@ -78,7 +78,7 @@ public class FormControllerTestSuite extends TestCase {
 		mc.setSuccessView(successView);
 		mc.refDataCount = 0;
 		
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/welcome.html");
 		request.addParameter("age", "23x");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -101,7 +101,7 @@ public class FormControllerTestSuite extends TestCase {
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
 		
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("name", "rod");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -122,7 +122,7 @@ public class FormControllerTestSuite extends TestCase {
 		mc.setSuccessView(successView);
 		mc.setBindOnNewForm(true);
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
 		request.addParameter("name", "rod");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -145,7 +145,7 @@ public class FormControllerTestSuite extends TestCase {
 		String name = "Rod";
 		int age = 32;
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/welcome.html");
 		request.addParameter("name", name);
 		request.addParameter("age", "" + age);
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -169,7 +169,7 @@ public class FormControllerTestSuite extends TestCase {
 		String name = "Rod";
 		int age = 32;
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/welcome.html");
 		request.addParameter("name", name);
 		request.addParameter("age", "" + age);
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -190,7 +190,7 @@ public class FormControllerTestSuite extends TestCase {
 		String name = "Roderick Johnson";
 		int age = 32;
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/welcome.html");
 		request.addParameter("name", name);
 		request.addParameter("age", "" + age);
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -215,7 +215,7 @@ public class FormControllerTestSuite extends TestCase {
 		String name = "Rod";
 		String age = "xxx";
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/foo.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/foo.html");
 		request.addParameter("name", name);
 		request.addParameter("age", "" + age);
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -248,7 +248,7 @@ public class FormControllerTestSuite extends TestCase {
 		// will be rejected
 		String age = "xxx";
 		
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/foo.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/foo.html");
 		request.addParameter("name", name);
 		request.addParameter("age", "" + age);
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -287,7 +287,7 @@ public class FormControllerTestSuite extends TestCase {
 		mc.setSessionForm(true);
 
 		// first request: GET form
-		HttpServletRequest request1 = new MockHttpServletRequest(null, "GET", "/welcome.html");
+		HttpServletRequest request1 = new MockHttpServletRequest("GET", "/welcome.html");
 		HttpServletResponse response1 = new MockHttpServletResponse();
 		ModelAndView mv1 = mc.handleRequest(request1, response1);
 		assertTrue("returned correct view name", mv1.getViewName().equals(formView));
@@ -296,7 +296,7 @@ public class FormControllerTestSuite extends TestCase {
 		assertTrue("Bean age default ok", person.getAge() == TestController.DEFAULT_AGE);
 
 		// second request, using same session: POST submit
-		MockHttpServletRequest request2 = new MockHttpServletRequest(null, "POST", "/welcome.html");
+		MockHttpServletRequest request2 = new MockHttpServletRequest("POST", "/welcome.html");
 		request2.setSession(request1.getSession(false));
 		HttpServletResponse response2 = new MockHttpServletResponse();
 		ModelAndView mv2 = mc.handleRequest(request2, response2);
@@ -315,7 +315,7 @@ public class FormControllerTestSuite extends TestCase {
 		mc.setSessionForm(true);
 
 		// invalid request: POST submit
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/welcome.html");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(successView));
@@ -338,7 +338,7 @@ public class FormControllerTestSuite extends TestCase {
 		mc.setSessionForm(true);
 
 		// invalid request: POST submit
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/welcome.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/welcome.html");
 		HttpServletResponse response = new MockHttpServletResponse();
 		try {
 			mc.handleRequest(request, response);
@@ -358,7 +358,7 @@ public class FormControllerTestSuite extends TestCase {
 		mc.setFormView(formView);
 		mc.setSuccessView(successView);
 
-		MockHttpServletRequest request = new MockHttpServletRequest(null, "POST", "/foo.html");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/foo.html");
 		request.addParameter("array[0].name", "name3");
 		request.addParameter("array[1].age", "name2");
 		request.addParameter("list[0].name", "name1");
