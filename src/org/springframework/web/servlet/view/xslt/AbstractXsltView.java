@@ -7,6 +7,8 @@ package org.springframework.web.servlet.view.xslt;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -48,15 +50,19 @@ import org.springframework.web.servlet.view.AbstractView;
  * affect performance in production and isn't threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: AbstractXsltView.java,v 1.7 2004-02-07 00:18:32 jhoeller Exp $
+ * @author Darren Davison
+ * @version $Id: AbstractXsltView.java,v 1.8 2004-02-27 01:23:20 davison Exp $
  */
 public abstract class AbstractXsltView extends AbstractView {
 
+	private String DEFAULT_ROOT_TAGNAME = "DocRoot";
+	
+	
 	/** URL of stylesheet */
 	private Resource stylesheetLocation;
 
-	/** Document root element name */
-	private String root;
+	/** Document root element name, normally overridden in the view definition config */
+	private String root = DEFAULT_ROOT_TAGNAME;
 
 	/** Custom URIResolver, set by subclass or as bean property */
 	private URIResolver uriResolver;
@@ -167,9 +173,6 @@ public abstract class AbstractXsltView extends AbstractView {
 			response.setContentType(getContentType());
 		}
 
-		if (model == null)
-			throw new ServletException("Cannot do XSLT transform on null model");
-
 		Node dom = null;
 		String docRoot = null;
 
@@ -178,6 +181,7 @@ public abstract class AbstractXsltView extends AbstractView {
 
 		if (model.size() == 1) {
 			docRoot = (String) model.keySet().iterator().next();
+			logger.info("Single model object received, keyname [" + docRoot + "] will be used as root tag name");
 			singleModel = model.get(docRoot);
 		}
 
@@ -189,16 +193,10 @@ public abstract class AbstractXsltView extends AbstractView {
 			logger.debug("No need to domify: was passed an XML node");
 			dom = (Node) singleModel;
 		}
-		else {
-			if (this.root == null && docRoot == null) {
-				throw new ServletException(
-					"Cannot domify multiple non-Node objects without a root element name in XSLT view with name='" + getBeanName() + "'");
-			}
-			
+		else 			
 			// docRoot local variable takes precedence
 			dom = createDomNode(model, (docRoot == null) ? this.root : docRoot, request, response);
-		}
-
+		
 		doTransform(response, dom);
 	}
 
@@ -206,7 +204,11 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Return the XML node to transform.
 	 * Subclasses must implement this method.
 	 * @param model the model Map
-	 * @param root name for root element
+	 * @param root name for root element.  This can be supplied as a bean property
+	 * to concrete subclasses within the view definition file, but will be overridden
+	 * in the case of a single object in the model map to be the key for that object.
+	 * If no root property is specified and multiple model objects exist, a default
+	 * root tag name will be supplied. 
 	 * @param request HTTP request. Subclasses won't normally use this, as
 	 * request processing should have been complete. However, we might to
 	 * create a RequestContext to expose as part of the model.
@@ -219,6 +221,18 @@ public abstract class AbstractXsltView extends AbstractView {
 	                                      HttpServletResponse response) throws Exception;
 
 	/**
+	 * Return a <code>Map</code> of parameters to be applied to the stylesheet.  Subclasses
+	 * can override the default implementation (which simply returns null) in order to
+	 * apply one or more parameters to the transformation process.
+	 * 
+	 * @return a Map of parameters to apply to the transformation process
+	 * @see javax.xml.transform.Transformer#setParameter(java.lang.String, java.lang.String)
+	 */
+	protected Map getParameters() {
+		return null;
+	}
+	
+	/**
 	 * Use TrAX to perform the transform.
 	 */
 	protected void doTransform(HttpServletResponse response, Node dom) throws ServletException, IOException {
@@ -226,23 +240,33 @@ public abstract class AbstractXsltView extends AbstractView {
 			Transformer trans = (this.templates != null) ?
 			    this.templates.newTransformer() : // we have a stylesheet
 						this.transformerFactory.newTransformer(); // just a copy
+				
+			// apply any subclass supplied parameters to the transformer
+			Map parameters = getParameters();		
+			if (parameters != null) {
+				for (Iterator iter = parameters.entrySet().iterator(); iter.hasNext();) {
+					Map.Entry entry = (Map.Entry) iter.next();
+					trans.setParameter(entry.getKey().toString(), entry.getValue());
+				}			
+				logger.debug("Added parameters [" + parameters + "] to transformer object");
+			}
 
 			trans.setOutputProperty(OutputKeys.INDENT, "yes");
 			// Xalan-specific, but won't do any harm in other XSLT engines
 			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			trans.transform(new DOMSource(dom), new StreamResult(new BufferedOutputStream(response.getOutputStream())));
 
-			logger.debug("XSLT transformed OK with stylesheet '" + this.stylesheetLocation + "'");
+			logger.debug("XSLT transformed OK with stylesheet [" + this.stylesheetLocation + "]");
 		}
 		catch (TransformerConfigurationException ex) {
 			throw new ServletException(
-				"Couldn't create XSLT transformer for stylesheet '" + this.stylesheetLocation +
-				"' in XSLT view with name='" + getBeanName() + "'", ex);
+				"Couldn't create XSLT transformer for stylesheet [" + this.stylesheetLocation +
+				"] in XSLT view with name [" + getBeanName() + "]", ex);
 		}
 		catch (TransformerException ex) {
 			throw new ServletException(
-				"Couldn't perform transform with stylesheet '" + this.stylesheetLocation +
-				"' in XSLT view with name='" + getBeanName() + "'", ex);
+				"Couldn't perform transform with stylesheet [" + this.stylesheetLocation +
+				"] in XSLT view with name [" + getBeanName() + "]", ex);
 		}
 	}
 
