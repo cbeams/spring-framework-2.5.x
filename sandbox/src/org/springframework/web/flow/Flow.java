@@ -136,110 +136,94 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private static final long serialVersionUID = 3258695403305513015L;
 
+    /**
+     * The <code>ADD</code> action state/event identifier.
+     */
+    public static final String ADD = "add";
+    /**
+     * The <code>BACK</code> action state/event identifier.
+     */
+    public static final String BACK = "back";
+    /**
+     * The <code>BIND_AND_VALIDATE</code> action state/event identifier.
+     */
+    public static final String BIND_AND_VALIDATE = "bindAndValidate";
+    /**
+     * The <code>CANCEL</code> action state/event identifier.
+     */
+    public static final String CANCEL = "cancel";
 	/**
 	 * The <code>CREATE</code> action state/event identifier.
 	 */
 	public static final String CREATE = "create";
-
-	/**
-	 * The <code>ADD</code> action state/event identifier.
-	 */
-	public static final String ADD = "add";
-
-	/**
-	 * The <code>LINK</code> action state/event identifier.
-	 */
-	public static final String LINK = "link";
-
-	/**
-	 * The <code>REMOVE</code> action state/event identifier.
-	 */
-	public static final String REMOVE = "remove";
-
-	/**
-	 * The <code>UNLINK</code> action state/event identifier.
-	 */
-	public static final String UNLINK = "unlink";
-
-	/**
-	 * The <code>DELETE</code> action state/event identifier.
-	 */
-	public static final String DELETE = "delete";
-
-	/**
-	 * The <code>GET</code> action state/event identifier.
-	 */
-	public static final String GET = "get";
-
-	/**
-	 * The <code>POPULATE</code> form action state/event identifier.
-	 */
-	public static final String POPULATE = "populate";
-
-	/**
-	 * The <code>VIEW</code> view state identifier.
-	 */
-	public static final String VIEW = "view";
-
-	/**
-	 * The <code>SUBMIT</code> action state/event identifier.
-	 */
-	public static final String SUBMIT = "submit";
-
-	/**
-	 * The <code>BIND_AND_VALIDATE</code> action state/event identifier.
-	 */
-	public static final String BIND_AND_VALIDATE = "bindAndValidate";
-
-	/**
-	 * The <code>EDIT</code> action state/event identifier.
-	 */
-	public static final String EDIT = "edit";
-
-	/**
-	 * The <code>VALIDATE</code> action state/event identifier.
-	 */
-	public static final String VALIDATE = "validate";
-
-	/**
-	 * The <code>SEARCH</code> action state/event identifier.
-	 */
-	public static final String SEARCH = "search";
-
-	/**
-	 * The <code>SAVE</code> action state/event identifier.
-	 */
-	public static final String SAVE = "save";
-
-	/**
-	 * The <code>SUCCESS</code> action state/event identifier.
-	 */
-	public static final String SUCCESS = "success";
-
-	/**
-	 * The <code>ERROR</code> event id
-	 */
-	public static final String ERROR = "error";
-
-	/**
-	 * The <code>BACK</code> action state/event identifier.
-	 */
-	public static final String BACK = "back";
-
-	/**
-	 * The <code>CANCEL</code> action state/event identifier.
-	 */
-	public static final String CANCEL = "cancel";
-
-	/**
-	 * The <code>FINISH</code> action state/event identifier.
-	 */
-	public static final String FINISH = "finish";
-
-	/**
-	 * The <code>RESUME</code> action state/event identifier.
-	 */
-	public static final String RESUME = "resume";
+    /**
+     * The <code>DELETE</code> action state/event identifier.
+     */
+    public static final String DELETE = "delete";
+    /**
+     * The <code>EDIT</code> action state/event identifier.
+     */
+    public static final String EDIT = "edit";
+    /**
+     * The <code>ERROR</code> event id
+     */
+    public static final String ERROR = "error";
+    /**
+     * The <code>FINISH</code> action state/event identifier.
+     */
+    public static final String FINISH = "finish";
+    /**
+     * The <code>GET</code> action state/event identifier.
+     */
+    public static final String GET = "get";
+    /**
+     * The <code>LINK</code> action state/event identifier.
+     */
+    public static final String LINK = "link";
+    /**
+     * The <code>REMOVE</code> action state/event identifier.
+     */
+    public static final String REMOVE = "remove";
+    /**
+     * The <code>POPULATE</code> form action state/event identifier.
+     */
+    public static final String POPULATE = "populate";
+    /**
+     * The <code>RESET</code> action state/event identifier.
+     */
+    public static final String RESET = "resume";
+    /**
+     * The <code>RESUME</code> action state/event identifier.
+     */
+    public static final String RESUME = "resume";
+    /**
+     * The <code>SAVE</code> action state/event identifier.
+     */
+    public static final String SAVE = "save";
+    /**
+     * The <code>SEARCH</code> action state/event identifier.
+     */
+    public static final String SEARCH = "search";
+    /**
+     * The <code>SUCCESS</code> action state/event identifier.
+     */
+    public static final String SUCCESS = "success";
+    /**
+     * The <code>SUBMIT</code> action state/event identifier.
+     */
+    public static final String SUBMIT = "submit";
+    /**
+     * The <code>UNLINK</code> action state/event identifier.
+     */
+    public static final String UNLINK = "unlink";
+    /**
+     * The <code>VALIDATE</code> action state/event identifier.
+     */
+    public static final String VALIDATE = "validate";
+    /**
+     * The <code>VIEW</code> view state identifier.
+     */
+    public static final String VIEW = "view";
 
 	/**
 	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
@@ -1341,6 +1325,17 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public String getErrorEventId() {
 		return ERROR;
 	}
+    
+    public Transition onReset(String resetStateIdPrefix) {
+        return onEvent(getResetEventId(), resetStateIdPrefix);
+    }
+
+    /**
+     * @return
+     */
+    public String getResetEventId() {
+        return RESET;
+    }
 
 	public Transition onResume(String resumeStateIdPrefix) {
 		return onEvent(getResumeEventId(), resumeStateIdPrefix);
@@ -1461,5 +1456,4 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return new ToStringCreator(this).append("id", id).append("startState", startState).append("stateGroups",
 				stateGroups).toString();
 	}
-
 }
