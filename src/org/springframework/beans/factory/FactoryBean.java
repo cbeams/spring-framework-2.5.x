@@ -6,7 +6,6 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.PropertyValues;
 
 /**
  * Interface to be implemented by objects used within a BeanFactory
@@ -21,7 +20,7 @@ import org.springframework.beans.PropertyValues;
  * @author Rod Johnson
  * @since March 08, 2003
  * @see org.springframework.beans.factory.BeanFactory
- * @version $Id: FactoryBean.java,v 1.2 2003-08-19 16:25:02 jhoeller Exp $
+ * @version $Id: FactoryBean.java,v 1.3 2003-09-06 17:06:21 johnsonr Exp $
  */
 public interface FactoryBean {
 
@@ -41,17 +40,5 @@ public interface FactoryBean {
 	 * @return if this bean is a singleton
 	 */
 	boolean isSingleton();
-
-	/**
-	 * Property values to pass to new bean instances created
-	 * by this factory. Mapped directly onto the bean instance using
-	 * reflection. This occurs <i>after</i> any configuration of the
-	 * instance performed by the factory itself, and is an optional
-	 * step within the control of the owning BeanFactory.
-	 * @return PropertyValues to pass to each new instance,
-	 * or null (the default) if there are no properties to
-	 * pass to the instance
-	 */
-	PropertyValues getPropertyValues();
 
 }

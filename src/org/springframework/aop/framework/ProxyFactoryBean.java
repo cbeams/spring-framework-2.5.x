@@ -16,7 +16,6 @@ import java.util.Map;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -46,7 +45,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.1.1.1 2003-08-14 16:20:14 trisberg Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.2 2003-09-06 17:06:21 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  */
@@ -287,14 +286,6 @@ public class ProxyFactoryBean extends DefaultProxyConfig implements FactoryBean,
 		refreshInterceptorChain();
 		AopProxy proxy = new AopProxy(this);
 		return proxy.getProxy();
-	}
-
-	/**
-	 * This factory doesn't support pass through properties.
-	 * @see org.springframework.beans.factory.FactoryBean#getPropertyValues()
-	 */
-	public PropertyValues getPropertyValues() {
-		return null;
 	}
 
 	/**

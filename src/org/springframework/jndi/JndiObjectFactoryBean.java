@@ -1,6 +1,5 @@
 package org.springframework.jndi;
 
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
@@ -40,10 +39,6 @@ public class JndiObjectFactoryBean extends AbstractJndiLocator implements Factor
 
 	public boolean isSingleton() {
 		return false;
-	}
-
-	public PropertyValues getPropertyValues() {
-		return null;
 	}
 
 }

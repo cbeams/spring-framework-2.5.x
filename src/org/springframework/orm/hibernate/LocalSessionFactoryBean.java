@@ -12,7 +12,6 @@ import net.sf.hibernate.cfg.Environment;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -230,10 +229,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	public final boolean isSingleton() {
 		return true;
-	}
-
-	public final PropertyValues getPropertyValues() {
-		return null;
 	}
 
 	/**

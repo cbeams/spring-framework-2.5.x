@@ -8,7 +8,6 @@ import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -127,10 +126,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 	public final boolean isSingleton() {
 		return true;
-	}
-
-	public final PropertyValues getPropertyValues() {
-		return null;
 	}
 
 }

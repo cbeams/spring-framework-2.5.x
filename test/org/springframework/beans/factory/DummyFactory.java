@@ -18,9 +18,9 @@ import org.springframework.beans.factory.support.AbstractFactoryBean;
  * factories get this lifecycle callback if they want.
  * @author Rod Johnson
  * @since 10-Mar-2003
- * version $Id: DummyFactory.java,v 1.1.1.1 2003-08-14 16:21:05 trisberg Exp $
+ * version $Id: DummyFactory.java,v 1.2 2003-09-06 17:06:22 johnsonr Exp $
  */
-public class DummyFactory extends AbstractFactoryBean implements InitializingBean {
+public class DummyFactory extends AbstractFactoryBean implements InitializingBean, PropertyValuesProviderFactoryBean {
 	
 	public static final String SINGLETON_NAME = "Factory singleton";
 	

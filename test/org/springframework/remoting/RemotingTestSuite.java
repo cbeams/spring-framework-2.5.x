@@ -36,8 +36,6 @@ public class RemotingTestSuite extends TestCase {
 		factory.setPassword("bean");
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue("No property values", factory.getPropertyValues() == null);
-
 		ITestBean bean = (ITestBean) factory.getObject();
 		try {
 			bean.setName("test");

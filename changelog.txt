@@ -3,6 +3,9 @@ SPRING FRAMEWORK CHANGELOG
 
 Changes in version 1.0 M2 (XX.XX.2003)
 -------------------------------------
+* added PropertyValuesProviderFactoryBean so that FactoryBean interface no longer
+needs to implement getPropertyValues() method. Significant API
+and conceptual simplification for typical FactoryBean usage
 * added optional dependency checking for BeanFactories, ensuring that all bean properties have been set before use
 * added "autowire" functionality so that BeanFactories can optional check
 dependencies between betweens and configure them automatically.
