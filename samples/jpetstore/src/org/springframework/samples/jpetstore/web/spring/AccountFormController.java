@@ -11,7 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.samples.jpetstore.domain.Account;
 import org.springframework.samples.jpetstore.domain.logic.PetStoreFacade;
 import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.util.WebUtils;
@@ -66,7 +66,7 @@ public class AccountFormController extends SimpleFormController {
 
 		if (accountForm.isNewAccount()) {
 			account.setStatus("OK");
-			rejectIfEmpty(errors, "account.username", "USER_ID_REQUIRED", "User ID is required.");
+			ValidationUtils.rejectIfEmpty(errors, "account.username", "USER_ID_REQUIRED", "User ID is required.");
 			if (account.getPassword() == null || account.getPassword().length() < 1 ||
 					!account.getPassword().equals(accountForm.getRepeatedPassword())) {
 			 errors.reject("PASSWORD_MISMATCH",
@@ -80,13 +80,6 @@ public class AccountFormController extends SimpleFormController {
 		  }
 	  }
  	}
-
-	protected void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage) {
-		Object fieldValue = errors.getFieldValue(field);
-		if (fieldValue == null || fieldValue.toString().length() == 0) {
-			errors.rejectValue(field, errorCode, defaultMessage);
-		}
-	}
 
 	protected Map referenceData(HttpServletRequest request) throws Exception {
 		Map model = new HashMap();
