@@ -246,12 +246,18 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	public void testDependenciesMaterializeThis() throws Exception {
-		InputStream pis = getClass().getResourceAsStream("dependenciesMaterializeThis.xml");
-		XmlBeanFactory bf = new XmlBeanFactory(pis);
-		DummyBoImpl bos = (DummyBoImpl) bf.getBean("boSingleton");
-		DummyBoImpl bop = (DummyBoImpl) bf.getBean("boPrototype");
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("dependenciesMaterializeThis.xml", getClass()));
+		DummyBoImpl bos = (DummyBoImpl) xbf.getBean("boSingleton");
+		DummyBoImpl bop = (DummyBoImpl) xbf.getBean("boPrototype");
 		assertNotSame(bos, bop);
 		assertTrue(bos.dao == bop.dao);
+
+		assertEquals(2, xbf.getBeansOfType(DummyBoImpl.class, true, true).size());
+		assertEquals(1, xbf.getBeansOfType(DummyBoImpl.class, false, true).size());
+		assertEquals(2, xbf.getBeansOfType(DummyBoImpl.class).size());
+		assertEquals(3, xbf.getBeansOfType(DummyBo.class, true, true).size());
+		assertEquals(2, xbf.getBeansOfType(DummyBo.class, true, false).size());
+		assertEquals(3, xbf.getBeansOfType(DummyBo.class).size());
 	}
 
 	public void testChildOverridesParentBean() throws Exception {

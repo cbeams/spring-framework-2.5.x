@@ -495,27 +495,37 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Return the names of beans in the singleton cache that match the given
-	 * object type (including subclasses). Will <i>not</i> consider FactoryBeans
-	 * as the type of their created objects is not known before instantiation.
+	 * Return the names of beans in the singleton cache.
 	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * @param type class or interface to match, or null for all bean names
-	 * @return the names of beans in the singleton cache that match the given
-	 * object type (including subclasses), or an empty array if none
+	 * @return the names of beans in the singleton cache
 	 */
-	public String[] getSingletonNames(Class type) {
-		synchronized (this.singletonCache) {
-			Set matches = new HashSet();
-			Iterator it = this.singletonCache.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String beanName = (String) entry.getKey();
-				Object bean = entry.getValue();
-				if (type == null || type.isAssignableFrom(bean.getClass())) {
-					matches.add(beanName);
-				}
+	public String[] getSingletonNames() {
+		return (String[]) this.singletonCache.keySet().toArray(new String[this.singletonCache.size()]);
+	}
+
+	/**
+	 * Determine whether the bean with the given name is a FactoryBean.
+	 * @param name the name of the bean to check
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 */
+	protected boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
+		String beanName = transformedBeanName(name);
+		try {
+			Object beanInstance = this.singletonCache.get(beanName);
+			if (beanInstance != null) {
+				return (beanInstance instanceof FactoryBean);
 			}
-			return (String[]) matches.toArray(new String[matches.size()]);
+			else {
+				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+				return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// not found -> check parent
+			if (this.parentBeanFactory != null) {
+				return this.parentBeanFactory.isSingleton(name);
+			}
+			throw ex;
 		}
 	}
 
@@ -545,7 +555,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName the name of the bean
 	 * @param bean the bean instance
 	 */
-	protected void registerDisposableBean(String beanName, DisposableBean bean) {
+	protected final void registerDisposableBean(String beanName, DisposableBean bean) {
 		this.disposableBeans.put(beanName, bean);
 	}
 

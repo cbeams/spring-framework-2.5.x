@@ -32,15 +32,15 @@ import org.springframework.web.servlet.HandlerAdapter;
 
 /**
  * @author Rod Johnson
- * @since 04-Jul-2003
+ * @since 04.07.2003
  */
 public class BeanFactoryUtilsTests extends TestCase {
 
 	private ListableBeanFactory listableFactory;
 
 	protected void setUp() {
-		// Interesting hierarchical factory to test counts
-		// Slow to read so we cache it
+		// Interesting hierarchical factory to test counts.
+		// Slow to read so we cache it.
 		XmlBeanFactory grandParent = new XmlBeanFactory(new ClassPathResource("root.xml", getClass()));
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("middle.xml", getClass()), grandParent);
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("leaf.xml", getClass()), parent);
@@ -55,8 +55,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 	}
 
 	/**
-	 * Check that override doesn't count as too separate beans
-	 * @throws java.lang.Exception
+	 * Check that override doesn't count as too separate beans.
 	 */
 	public void testHierarchicalCountBeansWithOverride() throws Exception {
 		// Leaf count
@@ -67,22 +66,25 @@ public class BeanFactoryUtilsTests extends TestCase {
 	}
 
 	public void testHierarchicalNamesWithOverride() throws Exception {
-		List names = Arrays.asList(BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, ITestBean.class));
+		List names = Arrays.asList(
+				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, ITestBean.class));
 		assertEquals(2, names.size());
 		assertTrue(names.contains("test"));
 		assertTrue(names.contains("test3"));
 	}
 
 	public void testHierarchicalNamesWithNoMatch() throws Exception {
-		List names = Arrays.asList(BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, HandlerAdapter.class));
+		List names = Arrays.asList(
+				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, HandlerAdapter.class));
 		assertEquals(0, names.size());
 	}
 
 	public void testHierarchicalNamesWithMatchOnlyInRoot() throws Exception {
-		List names = Arrays.asList(BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, IndexedTestBean.class));
+		List names = Arrays.asList(
+				BeanFactoryUtils.beanNamesIncludingAncestors(this.listableFactory, IndexedTestBean.class));
 		assertEquals(1, names.size());
 		assertTrue(names.contains("indexedBean"));
-		// Distinguish from default ListableBeanFactory behaviour
+		// Distinguish from default ListableBeanFactory behavior
 		assertTrue(listableFactory.getBeanDefinitionNames(IndexedTestBean.class).length == 0);
 	}
 

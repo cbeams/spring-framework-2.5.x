@@ -3,6 +3,8 @@
 
 <beans>
 
+	<bean class="org.springframework.context.support.FactoryBeanAndApplicationListener"/>
+
 	<bean name="service" class="org.springframework.context.support.Service"/>
 
 	<bean name="assemblerOne" class="org.springframework.context.support.Assembler">

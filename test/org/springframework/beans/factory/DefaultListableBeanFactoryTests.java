@@ -40,8 +40,7 @@ import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 
 /**
- * This largely tests properties population:
- * ListableBeanFactoryTestSuite tests basic functionality-
+ * This largely tests properties population.
  * @author Rod Johnson
  */
 public class DefaultListableBeanFactoryTests extends TestCase {
@@ -67,6 +66,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
 		assertTrue("singleton not instantiated", !KnowsIfInstantiated.wasInstantiated());
 		lbf.preInstantiateSingletons();
+
 		assertTrue("singleton not instantiated", !KnowsIfInstantiated.wasInstantiated());
 		lbf.getBean("x1");
 		assertTrue("singleton was instantiated", KnowsIfInstantiated.wasInstantiated());
@@ -84,6 +84,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		assertEquals(TestBean.class, lbf.getType("x1"));
 		lbf.preInstantiateSingletons();
+
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		lbf.getBean("x1");
 		assertEquals(TestBean.class, lbf.getType("x1"));
@@ -166,9 +167,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		String PREFIX = "beans.";
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
-
-		//p.setProperty(PREFIX + "rod.class", "org.springframework.beans.TestBean");
-		//p.setProperty(PREFIX + "rod.name", "Rod");
 
 		try {
 			p.setProperty(PREFIX + "kerry.class", "org.springframework.beans.TestBean");
@@ -366,15 +364,20 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
 		Object singletonObject = new TestBean();
 		lbf.registerSingleton("singletonObject", singletonObject);
+
 		assertTrue(lbf.isSingleton("singletonObject"));
 		assertEquals(TestBean.class, lbf.getType("singletonObject"));
 		TestBean test = (TestBean) lbf.getBean("test");
 		assertEquals(singletonObject, lbf.getBean("singletonObject"));
 		assertEquals(singletonObject, test.getSpouse());
+
 		Map beansOfType = lbf.getBeansOfType(TestBean.class, false, true);
 		assertEquals(2, beansOfType.size());
 		assertTrue(beansOfType.containsValue(test));
 		assertTrue(beansOfType.containsValue(singletonObject));
+
+		beansOfType = lbf.getBeansOfType(null, false, true);
+		assertEquals(2, beansOfType.size());
 	}
 
 	public void testRegisterExistingSingletonWithAutowire() {
@@ -388,6 +391,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test", bd);
 		Object singletonObject = new TestBean();
 		lbf.registerSingleton("singletonObject", singletonObject);
+
 		assertTrue(lbf.containsBean("singletonObject"));
 		assertTrue(lbf.isSingleton("singletonObject"));
 		assertEquals(TestBean.class, lbf.getType("singletonObject"));
@@ -415,8 +419,8 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
 		lbf.registerBeanDefinition("spouse", bd);
 		ConstructorDependenciesBean bean =
-				(ConstructorDependenciesBean) lbf.autowire(ConstructorDependenciesBean.class,
-																									 AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);
+				(ConstructorDependenciesBean) lbf.autowire(
+						ConstructorDependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);
 		Object spouse = lbf.getBean("spouse");
 		assertTrue(bean.getSpouse1() == spouse);
 		assertTrue(BeanFactoryUtils.beanOfType(lbf, TestBean.class) == spouse);
