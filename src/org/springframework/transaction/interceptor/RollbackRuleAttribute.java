@@ -6,13 +6,13 @@
 package org.springframework.transaction.interceptor;
 
 /**
- * Rule determining whether or not a given exception (and any subclasses)
- * should cause a rollback. Multiple such rules can be applied to
- * determine whether a transaction should commit or rollback after an
- * exception has been thrown.
+ * Rule determining whether or not a given exception (and any subclasses) should
+ * cause a rollback. Multiple such rules can be applied to determine whether a
+ * transaction should commit or rollback after an exception has been thrown.
  * @since 09-Apr-2003
- * @version $Id: RollbackRuleAttribute.java,v 1.3 2003-10-21 09:42:18 johnsonr Exp $
+ * @version $Id: RollbackRuleAttribute.java,v 1.4 2003-11-27 18:36:18 jhoeller Exp $
  * @author Rod Johnson
+ * @see NoRollbackRuleAttribute
  */
 public class RollbackRuleAttribute {
 	
@@ -29,8 +29,8 @@ public class RollbackRuleAttribute {
 	 * Construct a new RollbackRule for the given exception name.
 	 * This can be a substring, with no wildcard support at present.
 	 * A value of "ServletException" would match ServletException and
-	 * subclasses, for example.<br>
-	 * <b>NB: </b>Consider carefully how specific the pattern is, and whether
+	 * subclasses, for example.
+	 * <p><b>NB: </b>Consider carefully how specific the pattern is, and whether
 	 * to include package information (which isn't mandatory). For example,
 	 * "Exception" will match nearly anything, and will probably hide other rules.
 	 * "java.lang.Exception" would be correct if "Exception" was meant to define
@@ -59,19 +59,19 @@ public class RollbackRuleAttribute {
 	}
 
 	private int getDepth(Class exceptionClass, int depth) {
-		if (exceptionClass.getName().indexOf(this.exceptionName) != -1)
+		if (exceptionClass.getName().indexOf(this.exceptionName) != -1) {
 			// Found it!
 			return depth;
-			
+		}
 		// If we've gone as far as we can go and haven't found it...
-		if (exceptionClass.equals(Throwable.class))
+		if (exceptionClass.equals(Throwable.class)) {
 			return -1;
-			
+		}
 		return getDepth(exceptionClass.getSuperclass(), depth + 1);
 	}
 	
 	public String toString() {
-		return "RollbackRule: pattern='" + this.exceptionName + "'";
+		return "RollbackRule with pattern '" + this.exceptionName + "'";
 	}
 
 }

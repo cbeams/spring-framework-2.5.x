@@ -6,16 +6,20 @@
 package org.springframework.transaction.interceptor;
 
 /**
- * Tag class. Its class means it has the opposite 
- * behaviour to the RollbackRule superclass.
+ * Tag class. Its class means it has the opposite behaviour to the
+ * RollbackRule superclass.
  * @author Rod Johnson
  * @since 09-Apr-2003
- * @version $Id: NoRollbackRuleAttribute.java,v 1.2 2003-10-21 08:56:44 johnsonr Exp $
+ * @version $Id: NoRollbackRuleAttribute.java,v 1.3 2003-11-27 18:36:18 jhoeller Exp $
  */
 public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 
 	/**
-	 * @param exceptionName
+	 * Construct a new NoRollbackRule for the given exception name.
+	 * This can be a substring, with no wildcard support at present.
+	 * A value of "ServletException" would match ServletException and
+	 * subclasses, for example.
+	 * @param exceptionName the exception pattern
 	 */
 	public NoRollbackRuleAttribute(String exceptionName) {
 		super(exceptionName);
