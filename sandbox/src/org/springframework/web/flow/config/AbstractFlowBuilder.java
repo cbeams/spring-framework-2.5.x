@@ -17,7 +17,6 @@ package org.springframework.web.flow.config;
 
 import java.util.Properties;
 
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
@@ -567,24 +566,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Appends the identifying 'attributeMapper' suffix to the specified prefix
-	 * qualifier, returning a fully-qualified attribute mapper service
-	 * identifier. For example: <code>attributeMapperId("customerId")</code>
-	 * results in <code>customerId.attributeMapper</code>.
-	 * @param attributeMapperIdPrefix the attribute mapper id qualifier
-	 * @return the qualified attribute mapper id
-	 */
-	protected String attributeMapperId(String attributeMapperIdPrefix) {
-		Assert.notNull(attributeMapperIdPrefix, "The attribute mapper id prefix is required");
-		if (!attributeMapperIdPrefix.endsWith(ATTRIBUTE_MAPPER_ID_SUFFIX)) {
-			return join(attributeMapperIdPrefix, ATTRIBUTE_MAPPER_ID_SUFFIX);
-		}
-		else {
-			return attributeMapperIdPrefix;
-		}
-	}
-
-	/**
 	 * Request that the <code>Flow</code> with the specified flowId be spawned
 	 * as a subflow when the subflow state being built is entered. Simply
 	 * resolves the subflow definition by id and returns it; throwing a
@@ -696,7 +677,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String success() {
-		return eventId("success");
+		return "success";
 	}
 
 	/**
@@ -705,7 +686,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String error() {
-		return eventId("error");
+		return "error";
 	}
 
 	/**
@@ -714,7 +695,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String submit() {
-		return eventId("submit");
+		return "submit";
 	}
 
 	/**
@@ -723,7 +704,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String back() {
-		return eventId("back");
+		return "back";
 	}
 
 	/**
@@ -732,7 +713,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String cancel() {
-		return eventId("cancel");
+		return "cancel";
 	}
 
 	/**
@@ -741,7 +722,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String finish() {
-		return eventId("finish");
+		return "finish";
 	}
 
 	/**
@@ -750,7 +731,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String select() {
-		return eventId("select");
+		return "select";
 	}
 
 	/**
@@ -759,7 +740,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String edit() {
-		return eventId("edit");
+		return "edit";
 	}
 
 	/**
@@ -768,7 +749,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String add() {
-		return eventId("add");
+		return "add";
 	}
 
 	/**
@@ -777,18 +758,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the event id
 	 */
 	protected String delete() {
-		return eventId("delete");
-	}
-
-	/**
-	 * Factory method for producing a event id given a string key identifier.
-	 * Default implementation does nothing, returning the key as the
-	 * <code>eventId</code>. Subclasses may override.
-	 * @param key the event id key
-	 * @return the event id
-	 */
-	protected String eventId(String key) {
-		return key;
+		return "delete";
 	}
 
 	/**
