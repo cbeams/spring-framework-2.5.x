@@ -159,6 +159,7 @@ public class MethodInvoker {
 		if (this.arguments == null) {
 			this.arguments = new Object[0];
 		}
+
 		Class[] types = new Class[this.arguments.length];
 		for (int i = 0; i < this.arguments.length; ++i) {
 			if (this.arguments[i] != null) {
@@ -173,8 +174,8 @@ public class MethodInvoker {
 		}
 		catch (NoSuchMethodException ex) {
 			int matches = 0;
-			// then try to get a method with the same number of arguments
-			// we'll fail at runtime if in fact the arguments are not assignment compatible
+			// Then try to get a method with the same number of arguments.
+			// We'll fail at runtime if in fact the arguments are not assignment compatible.
 			Method[] methods = targetClass.getMethods();
 			for (int i = 0; i < methods.length; ++i) {
 				Method method = methods[i];
@@ -188,8 +189,9 @@ public class MethodInvoker {
 				throw ex;
 			}
 		}
+
 		if (this.targetObject == null && !Modifier.isStatic(this.methodObject.getModifiers())) {
-			throw new IllegalArgumentException("Target method must not be static without a target");
+			throw new IllegalArgumentException("Target method must not be non-static without a target");
 		}
 	}
 
