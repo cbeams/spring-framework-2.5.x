@@ -16,8 +16,6 @@
 
 package org.springframework.orm.hibernate.support;
 
-import java.io.Serializable;
-
 import junit.framework.TestCase;
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.SessionFactory;
@@ -37,8 +35,6 @@ import bsh.Interpreter;
  */
 public class DependencyInjectionInterceptorFactoryBeanTests extends TestCase {
 	
-	private static final Integer id = new Integer(25);
-	
 	public void testNoChainNoRegistration() throws Exception {
 		DependencyInjectionInterceptorFactoryBean dias = new DependencyInjectionInterceptorFactoryBean();
 		// We'll ask for a different class
@@ -48,7 +44,7 @@ public class DependencyInjectionInterceptorFactoryBeanTests extends TestCase {
 		dias.afterPropertiesSet();
 		
 		Interceptor interceptor = (Interceptor) dias.getObject();
-		assertNull("Doesn't know about this class", interceptor.instantiate(TestBean.class, id));
+		assertNull("Doesn't know about this class", interceptor.instantiate(TestBean.class, new Integer(25)));
 	}
 	
 	public void testAutowireByType() throws Exception {
@@ -61,11 +57,38 @@ public class DependencyInjectionInterceptorFactoryBeanTests extends TestCase {
 		dias.afterPropertiesSet();
 		
 		Interceptor interceptor = (Interceptor) dias.getObject();
-		TestBean tb = (TestBean) interceptor.instantiate(TestBean.class, id);
-		assertNull("Doesn't know about this class", interceptor.instantiate(NestedTestBean.class, id));
+		TestBean tb = (TestBean) interceptor.instantiate(TestBean.class, new Integer(12));
+		assertNull("Doesn't know about this class", interceptor.instantiate(NestedTestBean.class, new Integer(25)));
 		assertNotNull("Knows about this class", tb);
 		assertSame("Spouse dependency was populated", bf.getBean("kerry"), tb.getSpouse() );
-		assertEquals("Id was set", 25, tb.getAge());
+		assertEquals("Id was set", 12, tb.getAge());
+	}
+	
+	public void testAutowirePrototype() throws Exception {
+		DependencyInjectionInterceptorFactoryBean dias = new DependencyInjectionInterceptorFactoryBean();
+		DefaultListableBeanFactory bf = DependencyInjectionAspectSupportTests.beanFactoryWithTestBeanSingleton();
+		String expectedName = "cherie";
+		String prototypeName = "tb";
+		bf.registerBeanDefinition(prototypeName, DependencyInjectionAspectSupportTests.prototypeSpouseBeanDefinition(expectedName));
+		
+		dias.addManagedClassToPrototypeMapping(TestBean.class, prototypeName);
+		dias.setSessionFactory(mockSessionFactory(TestBean.class));
+		dias.setBeanFactory(bf);
+		dias.afterPropertiesSet();
+		
+		Interceptor interceptor = (Interceptor) dias.getObject();
+		TestBean tb1 = (TestBean) interceptor.instantiate(TestBean.class, new Integer(25));
+		assertNull("Doesn't know about this class", interceptor.instantiate(NestedTestBean.class, new Integer(25)));
+		assertNotNull("Knows about this class", tb1);
+		assertSame("Spouse dependency was populated", bf.getBean("kerry"), tb1.getSpouse() );
+		assertEquals("Name was populated", expectedName, tb1.getName());
+		assertEquals("Id was set", 25, tb1.getAge());
+		
+		TestBean tb2 = (TestBean) interceptor.instantiate(TestBean.class, new Integer(26));
+		assertEquals("Name was populated", expectedName, tb2.getName());
+		assertEquals("Id was set", 26, tb2.getAge());
+		assertNotSame("Prototypes are distinct", tb1, tb2);
+		assertSame("Two prototypes reference same singleton", tb1.getSpouse(), tb2.getSpouse());
 	}
 
 	protected SessionFactory mockSessionFactory(Class clazz) throws Exception {
@@ -77,7 +100,9 @@ public class DependencyInjectionInterceptorFactoryBeanTests extends TestCase {
 		Interpreter bsh = new Interpreter();
 		bsh.eval("public String getIdentifierPropertyName() { return \"age\"; }");
 		ClassMetadata cm = (ClassMetadata) bsh.eval("return (" + ClassMetadata.class.getName() + ") this");
-		mc.setReturnValue(cm);
+		
+		// We don't validate that the calls were made
+		mc.setReturnValue(cm, 2);
 		mc.replay();
 		return sf;
 	}
