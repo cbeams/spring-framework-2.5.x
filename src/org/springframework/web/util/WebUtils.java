@@ -20,6 +20,13 @@ import javax.servlet.http.HttpSession;
 public abstract class WebUtils {
 
 	/**
+	 * Default character encoding to use when request.getCharacterEncoding
+	 * returns null, according to the Servlet spec.
+	 * @see ServletRequest#getCharacterEncoding
+	 */
+	public static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";
+
+	/**
 	 * Standard Servlet spec context attribute that specifies a temporary
 	 * directory for the current web application, of type java.io.File
 	 */
@@ -36,7 +43,7 @@ public abstract class WebUtils {
 
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
-	
+
 
 	/**
 	 * Set a system property to the web application root directory.

@@ -2,6 +2,7 @@ package org.springframework.web.multipart.commons;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -50,6 +51,8 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private DiskFileUpload fileUpload;
+
+	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 	private File uploadTempDir;
 
@@ -116,13 +119,23 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 	}
 
 	/**
-	 * The character encoding to be used when reading the headers of individual parts.
-	 * When not specified, or <code>null</code>, the platform default encoding is used.
-	 * @param headerEncoding the character encoding to use
+	 * Set the default character encoding to use for parsing requests,
+	 * to be applied to headers of individual parts and to form fields.
+	 * Default is ISO-8859-1, according to the Servlet spec.
+	 * <p>If the request specifies a character encoding itself, the request
+	 * encoding will override this setting. This also allows for generically
+	 * overriding the character encoding in a filter that invokes the
+	 * ServletRequest.setCharacterEncoding method.
+	 * @param defaultEncoding the character encoding to use
+	 * @see #determineEncoding
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding
+	 * @see javax.servlet.ServletRequest#setCharacterEncoding
+	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 * @see org.apache.commons.fileupload.FileUploadBase#setHeaderEncoding
 	 */
-	public void setHeaderEncoding(String headerEncoding) {
-		this.fileUpload.setHeaderEncoding(headerEncoding);
+	public void setDefaultEncoding(String defaultEncoding) {
+		this.defaultEncoding = defaultEncoding;
+		this.fileUpload.setHeaderEncoding(defaultEncoding);
 	}
 
 	/**
@@ -135,8 +148,8 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir +
 																				 "] could not be created");
 		}
-		this.fileUpload.setRepositoryPath(uploadTempDir.getFile().getAbsolutePath());
 		this.uploadTempDir = uploadTempDir.getFile();
+		this.fileUpload.setRepositoryPath(uploadTempDir.getFile().getAbsolutePath());
 	}
 
 	public void setServletContext(ServletContext servletContext) {
@@ -151,21 +164,43 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 	}
 
 	public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
+		DiskFileUpload fileUpload = this.fileUpload;
+		String enc = determineEncoding(request);
+
+		// use prototype FileUpload instance if the request specifies
+		// its own encoding that does not match the default encoding
+		if (!enc.equals(this.defaultEncoding)) {
+			fileUpload = new DiskFileUpload();
+			fileUpload.setSizeMax(this.fileUpload.getSizeMax());
+			fileUpload.setSizeThreshold(this.fileUpload.getSizeThreshold());
+			fileUpload.setRepositoryPath(this.fileUpload.getRepositoryPath());
+			fileUpload.setHeaderEncoding(enc);
+		}
+
 		try {
-			List fileItems = this.fileUpload.parseRequest(request);
+			List fileItems = fileUpload.parseRequest(request);
 			Map parameters = new HashMap();
 			Map multipartFiles = new HashMap();
-			for (Iterator i = fileItems.iterator(); i.hasNext();) {
-				FileItem fileItem = (FileItem) i.next();
+			for (Iterator it = fileItems.iterator(); it.hasNext();) {
+				FileItem fileItem = (FileItem) it.next();
 				if (fileItem.isFormField()) {
+					String value = null;
+					try {
+						value = fileItem.getString(enc);
+					}
+					catch (UnsupportedEncodingException ex) {
+						logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
+						            "] with encoding '" + enc + "': using platform default");
+						value = fileItem.getString();
+					}
 					String[] curParam = (String[]) parameters.get(fileItem.getFieldName());
 					if (curParam == null) {
 						// simple form field
-						parameters.put(fileItem.getFieldName(), new String[] { fileItem.getString() });
+						parameters.put(fileItem.getFieldName(), new String[] { value });
 					}
 					else {
 						// array of simple form fields
-						String[] newParam = StringUtils.addStringToArray(curParam, fileItem.getString());
+						String[] newParam = StringUtils.addStringToArray(curParam, value);
 						parameters.put(fileItem.getFieldName(), newParam);
 					}
 				}
@@ -185,6 +220,24 @@ public class CommonsMultipartResolver implements MultipartResolver, ServletConte
 		catch (FileUploadException ex) {
 			throw new MultipartException("Could not parse multipart request", ex);
 		}
+	}
+
+	/**
+	 * Determine the encoding for the given request.
+	 * Can be overridden in subclasses.
+	 * <p>The default implementation checks the request encoding,
+	 * falling back to the default encoding specified for this resolver.
+	 * @param request current HTTP request
+	 * @return the encoding for the request (never null)
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding
+	 * @see #setDefaultEncoding
+	 */
+	protected String determineEncoding(HttpServletRequest request) {
+		String enc = request.getCharacterEncoding();
+		if (enc == null) {
+			enc = this.defaultEncoding;
+		}
+		return enc;
 	}
 
 	public void cleanupMultipart(MultipartHttpServletRequest request) {

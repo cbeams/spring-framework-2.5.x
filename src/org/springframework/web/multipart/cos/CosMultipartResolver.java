@@ -23,9 +23,9 @@ import org.springframework.web.util.WebUtils;
  * <a href="http://www.servlets.com/cos">COS (com.oreilly.servlet)</a>.
  * Works with a COS MultipartRequest underneath.
  *
- * <p>Provides maxUploadSize and headerEncoding settings as bean properties;
+ * <p>Provides "maxUploadSize" and "defaultEncoding" settings as bean properties;
  * see respective MultipartRequest constructor parameters for details.
- * Default maximum file size is unlimited; default encoding is the platform's default.
+ * Default maximum file size is unlimited; fallback encoding is the platform's default.
  *
  * @author Juergen Hoeller
  * @since 06.10.2003
@@ -41,7 +41,7 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 
 	private int maxUploadSize = Integer.MAX_VALUE;
 
-	private String headerEncoding;
+	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 	private File uploadTempDir;
 
@@ -75,22 +75,36 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 		this.maxUploadSize = maxUploadSize;
 	}
 
+	/**
+	 * Return the maximum allowed file size (in bytes) before uploads are refused.
+	 */
 	protected int getMaxUploadSize() {
 		return maxUploadSize;
 	}
 
 	/**
-	 * Set the character encoding to be used when reading the headers of individual parts.
-	 * When not specified, or <code>null</code>, the platform default encoding is used.
-	 * @param headerEncoding the character encoding to use
-	 * @see org.apache.commons.fileupload.FileUploadBase#setHeaderEncoding
+	 * Set the default character encoding to use for parsing requests,
+	 * to be applied to headers of individual parts and to form fields.
+	 * Default is ISO-8859-1, according to the Servlet spec.
+	 * <p>If the request specifies a character encoding itself, the request
+	 * encoding will override this setting. This also allows for generically
+	 * overriding the character encoding in a filter that invokes the
+	 * ServletRequest.setCharacterEncoding method.
+	 * @param defaultEncoding the character encoding to use
+	 * @see #determineEncoding
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding
+	 * @see javax.servlet.ServletRequest#setCharacterEncoding
+	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 */
-	public void setHeaderEncoding(String headerEncoding) {
-		this.headerEncoding = headerEncoding;
+	public void setDefaultEncoding(String defaultEncoding) {
+		this.defaultEncoding = defaultEncoding;
 	}
 
-	protected String getHeaderEncoding() {
-		return headerEncoding;
+	/**
+	 * Return the default character encoding to use for parsing requests.
+	 */
+	protected String getDefaultEncoding() {
+		return defaultEncoding;
 	}
 
 	/**
@@ -106,6 +120,9 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 		this.uploadTempDir = uploadTempDir.getFile();
 	}
 
+	/**
+	 * Return the temporary directory where uploaded files get stored.
+	 */
 	protected File getUploadTempDir() {
 		return uploadTempDir;
 	}
@@ -150,9 +167,26 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 	 */
 	protected MultipartRequest newMultipartRequest(HttpServletRequest request) throws IOException {
 		String tempPath = this.uploadTempDir.getAbsolutePath();
-		return this.headerEncoding != null ?
-		    new MultipartRequest(request, tempPath, this.maxUploadSize, this.headerEncoding) :
-				new MultipartRequest(request, tempPath, this.maxUploadSize);
+		String enc = determineEncoding(request);
+		return new MultipartRequest(request, tempPath, this.maxUploadSize, enc);
+	}
+
+	/**
+	 * Determine the encoding for the given request.
+	 * Can be overridden in subclasses.
+	 * <p>The default implementation checks the request encoding,
+	 * falling back to the default encoding specified for this resolver.
+	 * @param request current HTTP request
+	 * @return the encoding for the request (never null)
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding
+	 * @see #setDefaultEncoding
+	 */
+	protected String determineEncoding(HttpServletRequest request) {
+		String enc = request.getCharacterEncoding();
+		if (enc == null) {
+			enc = this.defaultEncoding;
+		}
+		return enc;
 	}
 
 	public void cleanupMultipart(MultipartHttpServletRequest request) {

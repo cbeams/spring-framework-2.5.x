@@ -58,7 +58,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		DiskFileUpload fileUpload = resolver.getFileUpload();
 		resolver.setMaxUploadSize(1000);
 		resolver.setMaxInMemorySize(100);
-		resolver.setHeaderEncoding("enc");
+		resolver.setDefaultEncoding("enc");
 		resolver.setServletContext(wac.getServletContext());
 		assertEquals(1000, fileUpload.getSizeMax());
 		assertEquals(100, fileUpload.getSizeThreshold());
@@ -375,7 +375,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		}
 
 		public String getString(String encoding) throws UnsupportedEncodingException {
-			return new String(encoding);
+			return new String(get(), encoding);
 		}
 
 		public String getString() {

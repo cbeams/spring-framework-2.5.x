@@ -28,10 +28,10 @@ public class CosMultipartResolverTests extends TestCase {
 		wac.refresh();
 		CosMultipartResolver resolver = new CosMultipartResolver();
 		resolver.setMaxUploadSize(1000);
-		resolver.setHeaderEncoding("enc");
+		resolver.setDefaultEncoding("enc");
 		resolver.setServletContext(wac.getServletContext());
 		assertEquals(1000, resolver.getMaxUploadSize());
-		assertEquals("enc", resolver.getHeaderEncoding());
+		assertEquals("enc", resolver.getDefaultEncoding());
 		assertEquals(new File("mytemp"), resolver.getUploadTempDir());
 
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
