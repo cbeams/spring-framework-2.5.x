@@ -21,31 +21,35 @@ import org.springframework.util.Log4jConfigurer;
  * <p>Note: initLogging should be called before any other Spring activity (when using
  * Log4J), to guarantee proper initialization before any Spring logging attempts.
  *
- * <p>Note: Sets the web app root system property implicitly, for ${key} substitutions
+ * <p>Note: Sets the web app root system property, for "${key}" substitutions
  * within log file locations in the Log4J config file. The default system property
  * key is "webapp.root". Example, using context-param "webAppRootKey" = "demo.root":
  * log4j.appender.myfile.File=${demo.root}/WEB-INF/demo.log
  *
- * <p>WARNING: Some containers like Tomcat do NOT keep system properties separate
+ * <p><b>WARNING</b>: Some containers like Tomcat do NOT keep system properties separate
  * per web app. You have to use unique "webAppRootKey" context-params per web app
  * then, to avoid clashes. Other containers like Resin do isolate each web app's
  * system properties: Here you can use the default key (i.e. no "webAppRootKey"
  * context-param at all) without worrying.
  *
+ * <p><b>WARNING</b>: The WAR file containing the web application needs to be expanded
+ * to allow for setting the web app root system property and for loading Log4J
+ * configuration from a custom location. This is by default not the case when a
+ * WAR file gets deployed to WebLogic, for example. Do not use this configurer
+ * respectively Log4jConfigListener or Log4jConfigServlet in such an environment!
+ *
  * @author Juergen Hoeller
  * @since 12.08.2003
  * @see org.springframework.util.Log4jConfigurer
+ * @see Log4jConfigListener
+ * @see Log4jConfigServlet
  */
 public abstract class Log4jWebConfigurer {
 
-	/**
-	 * Parameter specifying the location of the Log4J config file.
-	 */
+	/** Parameter specifying the location of the Log4J config file */
 	public static final String CONFIG_LOCATION_PARAM = "log4jConfigLocation";
 
-	/**
-	 * Parameter specifying the refresh interval for checking the Log4J config file.
-	 */
+	/** Parameter specifying the refresh interval for checking the Log4J config file */
 	public static final String REFRESH_INTERVAL_PARAM = "log4jRefreshInterval";
 
 	public static void initLogging(ServletContext servletContext) {
@@ -70,7 +74,7 @@ public abstract class Log4jWebConfigurer {
 			}
 
 			// write log message to server log
-			servletContext.log("Initializing Log4J from " + location);
+			servletContext.log("Initializing Log4J from [" + location + "]");
 
 			// perform actual Log4J initialization
 			try {
@@ -86,7 +90,7 @@ public abstract class Log4jWebConfigurer {
 	 * Shutdown Log4J to release all file locks.
 	 */
 	public static void shutdownLogging(ServletContext servletContext) {
-		servletContext.log("Terminating Log4J");
+		servletContext.log("Shutting down Log4J");
 		Log4jConfigurer.shutdownLogging();
 	}
 

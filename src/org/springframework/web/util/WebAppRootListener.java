@@ -10,25 +10,29 @@ import javax.servlet.ServletContextListener;
  * the default key is "webapp.root".
  *
  * <p>Can be used for toolkits that support substition with system properties
- * (i.e. System.getProperty values), like Log4J's ${key} syntax within log file
- * locations.
+ * (i.e. System.getProperty values), like Log4J's "${key}" syntax within log
+ * file locations.
  *
  * <p>Note: This listener should be placed before ContextLoaderListener in web.xml,
- * at least when used for Log4J.
- * 
- * <p>Note: Log4jConfigListener sets the system property implicitly,
- * so there's no need for this listener in addition to it.
+ * at least when used for Log4J. Log4jConfigListener sets the system property
+ * implicitly, so there's no need for this listener in addition to it.
  *
- * <p>WARNING: Some containers like Tomcat do NOT keep system properties separate
+ * <p><b>WARNING</b>: Some containers like Tomcat do NOT keep system properties separate
  * per web app. You have to use unique "webAppRootKey" context-params per web app
  * then, to avoid clashes. Other containers like Resin do isolate each web app's
  * system properties: Here you can use the default key (i.e. no "webAppRootKey"
  * context-param at all) without worrying.
  *
+ * <p><b>WARNING</b>: The WAR file containing the web application needs to be expanded
+ * to allow for setting the web app root system property. This is by default not
+ * the case when a WAR file gets deployed to WebLogic, for example. Do not use
+ * this listener in such an environment!
+ *
  * @author Juergen Hoeller
  * @since 18.04.2003
  * @see WebUtils#setWebAppRootSystemProperty
  * @see Log4jConfigListener
+ * @see java.lang.System#getProperty
  */
 public class WebAppRootListener implements ServletContextListener {
 

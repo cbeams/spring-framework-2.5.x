@@ -50,30 +50,31 @@ public abstract class WebUtils {
 
 	/**
 	 * Set a system property to the web application root directory.
-	 * The key of the system property can be defined with the
-	 * "webAppRootKey" init parameter at the servlet context level
-	 * (i.e. web.xml), the default key is "webapp.root".
-	 * <p>Can be used for toolkits that support substition with
-	 * system properties (i.e. System.getProperty values),
-	 * like Log4J's ${key} syntax within log file locations.
+	 * The key of the system property can be defined with the "webAppRootKey"
+	 * context-param in web.xml. Default is "webapp.root".
+	 * <p>Can be used for toolkits that support substition with System.getProperty
+	 * values, like Log4J's "${key}" syntax within log file locations.
 	 * @param servletContext the servlet context of the web application
+	 * @throws IllegalStateException if the system property is already set,
+	 * or if the WAR file is not expanded
 	 * @see #WEB_APP_ROOT_KEY_PARAM
 	 * @see #DEFAULT_WEB_APP_ROOT_KEY
 	 * @see WebAppRootListener
 	 */
-	public static void setWebAppRootSystemProperty(ServletContext servletContext) {
+	public static void setWebAppRootSystemProperty(ServletContext servletContext) throws IllegalStateException {
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		String oldValue = System.getProperty(key);
 		if (oldValue != null) {
-			servletContext.log("WARNING: Web app root system property already set: " + key + " = " + oldValue);
-			servletContext.log("WARNING: Choose unique webAppRootKey values in your web.xml files!");
+			throw new IllegalStateException("WARNING: Web app root system property already set: " + key + " = " +
+																			oldValue + " - Choose unique webAppRootKey values in your web.xml files!");
 		}
-		else {
-			String root = servletContext.getRealPath("/");
-			System.setProperty(key, root);
-			servletContext.log("Set web app root system property: " + key + " = " + root);
+		String root = servletContext.getRealPath("/");
+		if (root == null) {
+			throw new IllegalStateException("Cannot set web app root system property when WAR file is not expanded");
 		}
+		System.setProperty(key, root);
+		servletContext.log("Set web app root system property: " + key + " = " + root);
 	}
 
 	/**
@@ -263,8 +264,9 @@ public abstract class WebUtils {
 	public static Map getParametersStartingWith(ServletRequest request, String base) {
 		Enumeration enum = request.getParameterNames();
 		Map params = new HashMap();
-		if (base == null)
+		if (base == null) {
 			base = "";
+		}
 		while (enum != null && enum.hasMoreElements()) {
 			String paramName = (String) enum.nextElement();
 			if (base == null || "".equals(base) || paramName.startsWith(base)) {
