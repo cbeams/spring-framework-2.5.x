@@ -20,7 +20,7 @@ import org.springframework.beans.BeansException;
  * @author Rod Johnson
  * @since March 08, 2003
  * @see org.springframework.beans.factory.BeanFactory
- * @version $Id: FactoryBean.java,v 1.3 2003-09-06 17:06:21 johnsonr Exp $
+ * @version $Id: FactoryBean.java,v 1.4 2003-10-28 11:54:07 jhoeller Exp $
  */
 public interface FactoryBean {
 
@@ -34,9 +34,9 @@ public interface FactoryBean {
 
 	/**
 	 * Is the bean managed by this factory a singleton or a prototype?
-	 * That is, will getBean() always return the same object?
-	 * <p>The singleton status of a FactoryBean will generally
-	 * be provided by the owning BeanFactory.
+	 * That is, will getObject() always return the same object?
+	 * <p>The singleton status of the FactoryBean itself will
+	 * generally be provided by the owning BeanFactory.
 	 * @return if this bean is a singleton
 	 */
 	boolean isSingleton();
