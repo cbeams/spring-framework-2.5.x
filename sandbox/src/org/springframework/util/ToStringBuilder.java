@@ -35,15 +35,7 @@ public class ToStringBuilder {
 
     public static final String propertiesToString(Object bean) {
         ToStringBuilder builder = new ToStringBuilder(bean);
-        BeanWrapper wrapper = new BeanWrapperImpl(bean);
-        PropertyDescriptor[] properties = wrapper.getPropertyDescriptors();
-        for (int i = 0; i < properties.length; i++) {
-            PropertyDescriptor property = properties[i];
-            if (property.getReadMethod() != null) {
-                builder.append(property.getDisplayName(), wrapper
-                        .getPropertyValue(property.getName()));
-            }
-        }
+        builder.appendProperties();
         return builder.toString();
     }
 
@@ -174,6 +166,19 @@ public class ToStringBuilder {
     public ToStringBuilder append(String fieldName, Object value) {
         printFieldSeparator();
         styler.styleField(buffer, fieldName, value);
+        return this;
+    }
+
+    public ToStringBuilder appendProperties() {
+        BeanWrapper wrapper = new BeanWrapperImpl(object);
+        PropertyDescriptor[] properties = wrapper.getPropertyDescriptors();
+        for (int i = 0; i < properties.length; i++) {
+            PropertyDescriptor property = properties[i];
+            if (property.getReadMethod() != null) {
+                append(property.getDisplayName(), wrapper
+                        .getPropertyValue(property.getName()));
+            }
+        }
         return this;
     }
 
