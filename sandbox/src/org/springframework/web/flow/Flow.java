@@ -791,6 +791,32 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param stateIdPrefix
 	 * @return
 	 */
+	public ViewState createViewStateMarker(String stateIdPrefix) {
+		return createViewState(stateIdPrefix, (String)null);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ViewState createViewStateMarker(String stateIdPrefix, Transition transition) {
+		return createViewState(stateIdPrefix, (String)null, transition);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ViewState createViewStateMarker(String stateIdPrefix, Transition[] transitions) {
+		return createViewState(stateIdPrefix, (String)null, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ViewState createViewState(String stateIdPrefix) {
 		return createViewState(stateIdPrefix, new Transition[] { onBackEnd(), onCancelEnd(),
 				onSubmitBindAndValidate(stateIdPrefix) });
@@ -804,6 +830,25 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public ViewState createViewState(String stateIdPrefix, String viewName) {
 		return createViewState(stateIdPrefix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
 				onSubmitBindAndValidate(stateIdPrefix) });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ViewState createViewState(String stateIdPrefix, Transition[] transitions) {
+		return new ViewState(this, view(stateIdPrefix), createViewName(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param viewName
+	 * @param transitions
+	 * @return
+	 */
+	public ViewState createViewState(String stateIdPrefix, String viewName, Transition[] transitions) {
+		return new ViewState(this, view(stateIdPrefix), viewName, transitions);
 	}
 
 	/**
@@ -827,25 +872,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public ViewState createViewState(String stateIdPrefix, String viewName, Transition transition) {
 		return new ViewState(this, view(stateIdPrefix), viewName, transition);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
-	 */
-	public ViewState createViewState(String stateIdPrefix, Transition[] transitions) {
-		return new ViewState(this, view(stateIdPrefix), createViewName(stateIdPrefix), transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param viewName
-	 * @param transitions
-	 * @return
-	 */
-	public ViewState createViewState(String stateIdPrefix, String viewName, Transition[] transitions) {
-		return new ViewState(this, view(stateIdPrefix), viewName, transitions);
 	}
 
 	/**
