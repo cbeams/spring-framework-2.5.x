@@ -104,20 +104,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 
 	/**
-	 * Load bean definitions from the specified XML files.
-	 * @param resources the resource descriptors for the XML files
-	 * @return the number of bean definitions found
-	 * @throws BeansException in case of loading or parsing errors
-	 */
-	public int loadBeanDefinitions(Resource[] resources) throws BeansException {
-		int counter = 0;
-		for (int i = 0; i < resources.length; i++) {
-			counter += loadBeanDefinitions(resources[i]);
-		}
-		return counter;
-	}
-
-	/**
 	 * Load bean definitions from the specified XML file.
 	 * @param resource the resource descriptor for the XML file
 	 * @return the number of bean definitions found

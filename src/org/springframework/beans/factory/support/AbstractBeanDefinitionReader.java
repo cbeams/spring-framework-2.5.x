@@ -19,6 +19,9 @@ package org.springframework.beans.factory.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeansException;
+import org.springframework.core.io.Resource;
+
 /**
  * Abstract base class for bean definition readers which implement
  * the BeanDefinitionReader interface.
@@ -65,6 +68,21 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	public ClassLoader getBeanClassLoader() {
 		return beanClassLoader;
+	}
+
+
+	/**
+	 * Load bean definitions from the specified files.
+	 * @param resources the resource descriptors for the files
+	 * @return the number of bean definitions found
+	 * @throws BeansException in case of loading or parsing errors
+	 */
+	public int loadBeanDefinitions(Resource[] resources) throws BeansException {
+		int counter = 0;
+		for (int i = 0; i < resources.length; i++) {
+			counter += loadBeanDefinitions(resources[i]);
+		}
+		return counter;
 	}
 
 }
