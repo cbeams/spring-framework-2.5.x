@@ -85,25 +85,25 @@ public abstract class AbstractLobType implements UserType {
 
 
 	/**
+	 * This implementation returns false.
+	 */
+	public boolean isMutable() {
+		return false;
+	}
+
+	/**
 	 * This implementation delegates to the Hibernate EqualsHelper.
 	 * @see net.sf.hibernate.util.EqualsHelper#equals
 	 */
-	public boolean equals(Object x, Object y) {
+	public boolean equals(Object x, Object y) throws HibernateException {
 		return EqualsHelper.equals(x, y);
 	}
 
 	/**
 	 * This implementation returns the passed-in value as-is.
 	 */
-	public Object deepCopy(Object value) {
+	public Object deepCopy(Object value) throws HibernateException {
 		return value;
-	}
-
-	/**
-	 * This implementation returns false.
-	 */
-	public boolean isMutable() {
-		return false;
 	}
 
 
@@ -179,9 +179,10 @@ public abstract class AbstractLobType implements UserType {
 	 * @return the extracted value
 	 * @throws SQLException if thrown by JDBC methods
 	 * @throws IOException if thrown by streaming methods
+	 * @throws HibernateException in case of any other exceptions
 	 */
 	protected abstract Object nullSafeGetInternal(ResultSet rs, int index, LobHandler lobHandler)
-			throws SQLException, IOException;
+			throws SQLException, IOException, HibernateException;
 
 	/**
 	 * Template method to set the given value on the given statement.
@@ -191,10 +192,11 @@ public abstract class AbstractLobType implements UserType {
 	 * @param lobCreator the LobCreator to use
 	 * @throws SQLException if thrown by JDBC methods
 	 * @throws IOException if thrown by streaming methods
+	 * @throws HibernateException in case of any other exceptions
 	 */
 	protected abstract void nullSafeSetInternal(
 	    PreparedStatement ps, int index, Object value, LobCreator lobCreator)
-			throws SQLException, IOException;
+			throws SQLException, IOException, HibernateException;
 
 
 	/**
