@@ -43,7 +43,8 @@ public class MessageTestSuite extends AbstractTagTest {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setCode("test");
+		pc.setAttribute("myattr", "test");
+		tag.setCode("${myattr}");
 		tag.setHtmlEscape("true");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correct message", "Canadian &amp; test message".equals(message.toString()));
@@ -73,8 +74,9 @@ public class MessageTestSuite extends AbstractTagTest {
 			}
 		};
 		tag.setPageContext(pc);
+		pc.setAttribute("myattr", "test & text");
 		tag.setCode("test2");
-		tag.setText("test & text");
+		tag.setText("${myattr}");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correct message", "test & text".equals(message.toString()));
 	}

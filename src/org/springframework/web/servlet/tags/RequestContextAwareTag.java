@@ -31,7 +31,7 @@ public abstract class RequestContextAwareTag extends TagSupport {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Boolean htmlEscape;
+	private String htmlEscape;
 
 	private RequestContext requestContext;
 
@@ -41,18 +41,20 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 * @see HtmlEscapeTag#setDefaultHtmlEscape
 	 */
 	public final void setHtmlEscape(String htmlEscape) throws JspException {
-		this.htmlEscape =	new Boolean(ExpressionEvaluationUtils.evaluateBoolean("htmlEscape", htmlEscape, pageContext));
+		this.htmlEscape =	htmlEscape;
 	}
 
 	/**
 	 * Returns the HTML escaping setting for this tag,
 	 * or the default setting if not overridden.
 	 */
-	protected final boolean isHtmlEscape() {
-		return (
-				this.htmlEscape != null
-				? this.htmlEscape.booleanValue()
-				: HtmlEscapeTag.isDefaultHtmlEscape(this.pageContext));
+	protected final boolean isHtmlEscape() throws JspException {
+		if (this.htmlEscape != null) {
+			return ExpressionEvaluationUtils.evaluateBoolean("htmlEscape", this.htmlEscape, pageContext);
+		}
+		else {
+			return HtmlEscapeTag.isDefaultHtmlEscape(this.pageContext);
+		}
 	}
 
 	/**

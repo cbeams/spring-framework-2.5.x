@@ -23,11 +23,12 @@ public class BindErrorsTag extends RequestContextAwareTag {
 	 * Set the name of the bean that this tag should check.
 	 */
 	public void setName(String name) throws JspException {
-		this.name = ExpressionEvaluationUtils.evaluateString("name", name, pageContext);
+		this.name = name;
 	}
 
-	protected int doStartTagInternal() throws ServletException {
-		Errors errors = getRequestContext().getErrors(this.name, isHtmlEscape());
+	protected int doStartTagInternal() throws ServletException, JspException {
+		String resolvedName = ExpressionEvaluationUtils.evaluateString("name", name, pageContext);
+		Errors errors = getRequestContext().getErrors(resolvedName, isHtmlEscape());
 		if (errors != null && errors.hasErrors()) {
 			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, errors);
 			return EVAL_BODY_INCLUDE;

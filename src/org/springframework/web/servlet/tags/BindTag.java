@@ -10,8 +10,8 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
  * <p>Bind tag, supporting evaluation of binding errors for a certain
@@ -46,16 +46,7 @@ public class BindTag extends RequestContextAwareTag {
 	 * (e.g. "person.name"), also supporting nested beans.
 	 */
 	public void setPath(String path) throws JspException {
-		this.path = ExpressionEvaluationUtils.evaluateString("path", path, pageContext);
-	}
-
-	/**
-	 * Retrieve the property that this tag is currently bound to,
-	 * or null if bound to an object rather than a specific property.
-	 * Intended for cooperating nesting tags.
-	 */
-	public String getProperty() {
-		return property;
+		this.path = path;
 	}
 
 	/**
@@ -78,6 +69,15 @@ public class BindTag extends RequestContextAwareTag {
 	}
 
 	/**
+	 * Retrieve the property that this tag is currently bound to,
+	 * or null if bound to an object rather than a specific property.
+	 * Intended for cooperating nesting tags.
+	 */
+	public String getProperty() {
+		return property;
+	}
+
+	/**
 	 * Retrieve the property editor for the property that this tag is
 	 * currently bound to. Intended for cooperating nesting tags.
 	 * @return the property editor, or null if none applicable
@@ -87,18 +87,20 @@ public class BindTag extends RequestContextAwareTag {
 	}
 
 	protected int doStartTagInternal() throws Exception {
+		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", this.path, pageContext);
+
 		// determine name of the object and property
 		String name = null;
 		this.property = null;
 
-		int dotPos = this.path.indexOf('.');
+		int dotPos = resolvedPath.indexOf('.');
 		if (dotPos == -1) {
 			// property not set, only the object itself
-			name = this.path;
+			name = resolvedPath;
 		}
 		else {
-			name = this.path.substring(0, dotPos);
-			this.property = this.path.substring(dotPos + 1);
+			name = resolvedPath.substring(0, dotPos);
+			this.property = resolvedPath.substring(dotPos + 1);
 		}
 
 		// retrieve Errors object
@@ -133,7 +135,7 @@ public class BindTag extends RequestContextAwareTag {
 			fes = this.errors.getGlobalErrors();
 		}
 
-		// instantiate the bindstatus object
+		// instantiate the status object
 		BindStatus status = new BindStatus(this.property, value, getErrorCodes(fes), getErrorMessages(fes));
 		this.pageContext.setAttribute(STATUS_VARIABLE_NAME, status);
 		return EVAL_BODY_INCLUDE;
@@ -145,7 +147,7 @@ public class BindTag extends RequestContextAwareTag {
 	private String[] getErrorCodes(List fes) {
 		String[] codes = new String[fes.size()];
 		for (int i = 0; i < fes.size(); i++) {
-			ObjectError error = (ObjectError)fes.get(i);
+			ObjectError error = (ObjectError) fes.get(i);
 			codes[i] = error.getCode();
 		}
 		return codes;
@@ -154,10 +156,10 @@ public class BindTag extends RequestContextAwareTag {
 	/**
 	 * Extract the error messages from the given ObjectError list.
 	 */
-	private String[] getErrorMessages(List fes) throws NoSuchMessageException {
+	private String[] getErrorMessages(List fes) throws NoSuchMessageException, JspException {
 		String[] messages = new String[fes.size()];
 		for (int i = 0; i < fes.size(); i++) {
-			ObjectError error = (ObjectError)fes.get(i);
+			ObjectError error = (ObjectError) fes.get(i);
 			messages[i] = getRequestContext().getMessage(error, isHtmlEscape());
 		}
 		return messages;

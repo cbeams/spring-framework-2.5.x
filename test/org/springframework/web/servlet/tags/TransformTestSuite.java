@@ -32,40 +32,40 @@ public class TransformTestSuite extends AbstractTagTest {
 		// execute the bind tag using the date property
 		BindTag bind = new BindTag();
 		bind.setPageContext(pc);
-		bind.setPath("tb.date");		
+		bind.setPath("tb.date");
 		bind.doStartTag();
 
 		// transform stuff
 		TransformTag transform = new TransformTag();
-		transform.setPageContext(pc);	
+		transform.setPageContext(pc);
 		pc.setAttribute("date", tb.getDate());
 		System.out.println("Date " + tb.getDate());
 		transform.setParent(bind);
-		transform.setValue("${date}"); 		
+		transform.setValue("${date}");
 		transform.setVar("theDate");
-		transform.doStartTag();		
-		
+		transform.doStartTag();
+
 		assertNotNull(pc.getAttribute("theDate"));
 		assertEquals(pc.getAttribute("theDate"), df.format(tb.getDate()));
-		
+
 		// try another time, this time using Strings
 		bind = new BindTag();
 		bind.setPageContext(pc);
 		bind.setPath("tb.name");
 		bind.doStartTag();
-		
+
 		transform = new TransformTag();
 		transform.setPageContext(pc);
 		pc.setAttribute("string", "name");
 		transform.setValue("${string}");
 		transform.setParent(bind);
-		transform.setVar("theString");		
+		transform.setVar("theString");
 		transform.doStartTag();
-		
+
 		assertNotNull(pc.getAttribute("theString"));
 		assertEquals(pc.getAttribute("theString"), "name");
 	}
-	
+
 	public void testTransformTagOutsideBindTag() throws JspException {
 		// first set up the pagecontext and the bean
 		MockPageContext pc = createPageContext();
@@ -84,10 +84,11 @@ public class TransformTestSuite extends AbstractTagTest {
 		try {
 			transform.doStartTag();
 			fail("Tag can be executed outside BindTag");
-		} catch (JspException e) {
+		}
+		catch (JspException e) {
 			// this is ok!
 		}
-		
+
 		// now try to execute the tag outside a bindtag, but inside a messageTag
 		MessageTag message = new MessageTag();
 		message.setPageContext(pc);
@@ -99,11 +100,12 @@ public class TransformTestSuite extends AbstractTagTest {
 		try {
 			transform.doStartTag();
 			fail("Tag can be executed outside BindTag and inside messagtag");
-		} catch (JspException e) {
+		}
+		catch (JspException e) {
 			// this is ok!
-		}	
+		}
 	}
-	
+
 	public void testTransformTagNonExistingValue() throws JspException {
 		//		first set up the pagecontext and the bean
 		MockPageContext pc = createPageContext();
@@ -113,7 +115,7 @@ public class TransformTestSuite extends AbstractTagTest {
 		CustomDateEditor l = new CustomDateEditor(df, true);
 		binder.registerCustomEditor(Date.class, l);
 		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
-		
+
 		// try with non-existing value
 		BindTag bind = new BindTag();
 		bind.setPageContext(pc);
@@ -121,68 +123,68 @@ public class TransformTestSuite extends AbstractTagTest {
 		bind.doStartTag();
 
 		TransformTag transform = new TransformTag();
-		transform.setPageContext(pc);		
+		transform.setPageContext(pc);
 		transform.setValue("${string2}");
 		transform.setParent(bind);
-		transform.setVar("theString2");		
+		transform.setVar("theString2");
 		transform.doStartTag();
 
 		System.out.println(pc.getAttribute("theString2"));
 		assertNull(pc.getAttribute("theString2"));
 	}
-	
+
 	public void testSettingOfScope() throws JspException {
-		 // first set up the pagecontext and the bean
-		 MockPageContext pc = createPageContext();
-		 TestBean tb = new TestBean();
-		 DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		 ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
-		 CustomDateEditor l = new CustomDateEditor(df, true);
-		 binder.registerCustomEditor(Date.class, l);
-		 pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
+		// first set up the pagecontext and the bean
+		MockPageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		CustomDateEditor l = new CustomDateEditor(df, true);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindException.ERROR_KEY_PREFIX + "tb", binder.getErrors());
 
-		 // execute the bind tag using the date property
-		 BindTag bind = new BindTag();
-		 bind.setPageContext(pc);
-		 bind.setPath("tb.date");		
-		 bind.doStartTag();
+		// execute the bind tag using the date property
+		BindTag bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.date");
+		bind.doStartTag();
 
-		 // transform stuff
-		 TransformTag transform = new TransformTag();
-		 transform.setPageContext(pc);	
-		 pc.setAttribute("date", tb.getDate());
-		 System.out.println("Date " + tb.getDate());
-		 transform.setParent(bind);
-		 transform.setValue("${date}"); 		
-		 transform.setVar("theDate");
-		 transform.setScope("page");
-		 transform.doStartTag();
-		 
-		transform.release();		
-	
-		 assertNotNull(pc.getAttribute("theDate"));
-		 assertEquals(pc.getAttribute("theDate"), df.format(tb.getDate()));
-	
-		 // try another time, this time using Strings
-		 bind = new BindTag();
-		 bind.setPageContext(pc);
-		 bind.setPath("tb.name");
-		 bind.doStartTag();
-	
-		 transform = new TransformTag();
-		 transform.setPageContext(pc);
-		 pc.setAttribute("string", "name");
-		 pc.setAttribute("scopy", "page");
-		 transform.setValue("${string}");
-		 transform.setParent(bind);
-		 transform.setVar("theString");
-		 transform.setScope("${scopy}");		
-		 transform.doStartTag();
-		 
-		 transform.release();
-	
-		 assertNotNull(pc.getAttribute("theString"));
-		 assertEquals(pc.getAttribute("theString"), "name");
+		// transform stuff
+		TransformTag transform = new TransformTag();
+		transform.setPageContext(pc);
+		pc.setAttribute("date", tb.getDate());
+		System.out.println("Date " + tb.getDate());
+		transform.setParent(bind);
+		transform.setValue("${date}");
+		transform.setVar("theDate");
+		transform.setScope("page");
+		transform.doStartTag();
+
+		transform.release();
+
+		assertNotNull(pc.getAttribute("theDate"));
+		assertEquals(pc.getAttribute("theDate"), df.format(tb.getDate()));
+
+		// try another time, this time using Strings
+		bind = new BindTag();
+		bind.setPageContext(pc);
+		bind.setPath("tb.name");
+		bind.doStartTag();
+
+		transform = new TransformTag();
+		transform.setPageContext(pc);
+		pc.setAttribute("string", "name");
+		pc.setAttribute("scopy", "page");
+		transform.setValue("${string}");
+		transform.setParent(bind);
+		transform.setVar("theString");
+		transform.setScope("${scopy}");
+		transform.doStartTag();
+
+		transform.release();
+
+		assertNotNull(pc.getAttribute("theString"));
+		assertEquals(pc.getAttribute("theString"), "name");
 	}
 
 }

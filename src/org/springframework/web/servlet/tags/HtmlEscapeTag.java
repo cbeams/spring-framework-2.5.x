@@ -25,21 +25,23 @@ public class HtmlEscapeTag extends TagSupport {
 	/** PageContext attribute for page-level default */
 	public static final String HTML_ESCAPE_PAGE_ATTR = "org.springframework.web.servlet.tags.HTML_ESCAPE";
 
-	private boolean defaultHtmlEscape = false;
+	private String defaultHtmlEscape;
 
 	/**
 	 * Set the default value for HTML escaping,
 	 * to be put in the current PageContext.
 	 */
 	public void setDefaultHtmlEscape(String defaultHtmlEscape) throws JspException {
-		this.defaultHtmlEscape = ExpressionEvaluationUtils.evaluateBoolean("defaultHtmlEscape", defaultHtmlEscape, pageContext);
+		this.defaultHtmlEscape = defaultHtmlEscape;
 	}
 
 	public int doStartTag() throws JspException {
 		super.doStartTag();
+		boolean resolvedDefaultHtmlEscape = ExpressionEvaluationUtils.evaluateBoolean("defaultHtmlEscape",
+																																									this.defaultHtmlEscape, pageContext);
 
 		// simply add a respective PageContext attribute, for detection by other tags
-		this.pageContext.setAttribute(HTML_ESCAPE_PAGE_ATTR, new Boolean(this.defaultHtmlEscape));
+		this.pageContext.setAttribute(HTML_ESCAPE_PAGE_ATTR, new Boolean(resolvedDefaultHtmlEscape));
 
 		return EVAL_BODY_INCLUDE;
 	}

@@ -9,12 +9,12 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.PageContext;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.TagUtils;
 
 /**
  * Custom tag to look up a message in the scope of this page.
@@ -43,35 +43,34 @@ public class MessageTag extends RequestContextAwareTag {
 	
 	private String var = null;
 	
-	private int scope = PageContext.PAGE_SCOPE;
+	private String scope = TagUtils.SCOPE_PAGE;
 
 	/**
 	 * Set the message code for this tag.
 	 */
 	public final void setCode(String code) throws JspException {
-		this.code = ExpressionEvaluationUtils.evaluateString("code", code, pageContext);
+		this.code = code;
 	}
 
 	/**
 	 * Set the message text for this tag.
 	 */
 	public final void setText(String text) throws JspException {
-		this.text = ExpressionEvaluationUtils.evaluateString("text", text, pageContext);
+		this.text = text;
 	}
 	
 	/**
 	 * Set othe var String under which to bind the variable.
 	 */
 	public final void setVar(String var)  throws JspException {
-		this.var = ExpressionEvaluationUtils.evaluateString("var", var, pageContext);
+		this.var = var;
 	}
 	
 	/**
 	 * Set the scope to export the var to.
 	 */
 	public final void setScope(String scope) throws JspException {
-		String tmpScope = ExpressionEvaluationUtils.evaluateString("scope", this.var, pageContext);
-		this.scope = TagUtils.getScope(tmpScope);
+		this.scope = scope;
 	}
 
 	protected final int doStartTagInternal() throws Exception {
@@ -79,27 +78,31 @@ public class MessageTag extends RequestContextAwareTag {
 		if (messageSource == null) {
 			throw new JspTagException("No corresponding MessageSource found");
 		}
+		String resolvedCode = ExpressionEvaluationUtils.evaluateString("code", this.code, pageContext);
+		String resolvedText = ExpressionEvaluationUtils.evaluateString("text", this.text, pageContext);
+		String resolvedVar = ExpressionEvaluationUtils.evaluateString("var", this.var, pageContext);
 		try {
 			String msg = null;
-			if (this.code != null) {
-				if (this.text != null) {
-					msg = messageSource.getMessage(this.code, null, this.text,
+			if (resolvedCode != null) {
+				if (resolvedText != null) {
+					msg = messageSource.getMessage(resolvedCode, null, resolvedText,
 					                               getRequestContext().getLocale());
 				}
 				else {
-					msg = messageSource.getMessage(this.code, null,
+					msg = messageSource.getMessage(resolvedCode, null,
 					                               getRequestContext().getLocale());
 				}
 			}
 			else {
-				msg = this.text;
+				msg = resolvedText;
 			}
 			msg = isHtmlEscape() ? HtmlUtils.htmlEscape(msg) : msg;
-			if (this.var == null) {
-				writeMessage(msg);
+			if (resolvedVar != null) {
+				String resolvedScope = ExpressionEvaluationUtils.evaluateString("scope", this.scope, pageContext);
+				pageContext.setAttribute(resolvedVar, msg, TagUtils.getScope(resolvedScope));
 			}
 			else {
-				pageContext.setAttribute(var, msg, scope);				
+				writeMessage(msg);
 			}
 		}
 		catch (NoSuchMessageException ex) {
@@ -128,10 +131,10 @@ public class MessageTag extends RequestContextAwareTag {
 	
 	public void release() {
 		super.release();
-		this.var = null;
-		this.scope = PageContext.PAGE_SCOPE;
 		this.code = null;
 		this.text = null;
+		this.var = null;
+		this.scope = TagUtils.SCOPE_PAGE;
 	}
 
 }
