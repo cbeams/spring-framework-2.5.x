@@ -69,9 +69,8 @@ public abstract class RequestContextUtils {
 	 * @throws IllegalStateException if neither a servlet-specific nor a
 	 * global context has been found
 	 */
-	public static WebApplicationContext getWebApplicationContext(ServletRequest request,
-	                                                             ServletContext servletContext)
-	    throws IllegalStateException {
+	public static WebApplicationContext getWebApplicationContext(
+			ServletRequest request, ServletContext servletContext) throws IllegalStateException {
 		WebApplicationContext webApplicationContext = (WebApplicationContext) request.getAttribute(
 				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (webApplicationContext == null) {

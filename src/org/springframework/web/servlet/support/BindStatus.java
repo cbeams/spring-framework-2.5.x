@@ -135,8 +135,8 @@ public class BindStatus {
 
 			Object target = requestContext.getModelObject(beanName);
 			if (target == null) {
-				throw new IllegalStateException("Neither Errors instance nor plain target object for bean name " +
-						beanName + " available as request attribute");
+				throw new IllegalStateException("Neither Errors instance nor plain target object for bean name '" +
+						beanName + "' available as request attribute");
 			}
 
 			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
