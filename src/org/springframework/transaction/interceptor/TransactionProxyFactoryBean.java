@@ -18,14 +18,13 @@ package org.springframework.transaction.interceptor;
 
 import java.util.Properties;
 
-import org.aopalliance.aop.AspectException;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -61,17 +60,15 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.28 2004-04-30 15:26:00 jhoeller Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.29 2004-05-23 20:13:33 jhoeller Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
-	private PlatformTransactionManager transactionManager;
+	private final TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 
 	private Object target;
 
 	private Class[] proxyInterfaces;
-
-	private TransactionAttributeSource transactionAttributeSource;
 
 	private Pointcut pointcut;
 
@@ -79,15 +76,19 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 	private Object[] postInterceptors;
 
+	/** Default is global AdvisorAdapterRegistry */
+	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
+
 	private Object proxy;
 
 
 	/**
 	 * Set the transaction manager. This will perform actual
 	 * transaction management: This class is just a way of invoking it.
+	 * @see TransactionInterceptor#setTransactionManager
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
-		this.transactionManager = transactionManager;
+		this.transactionInterceptor.setTransactionManager( transactionManager);
 	}
 
 	/**
@@ -108,21 +109,8 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	 * out which interfaces need proxying by analyzing the target,
 	 * proxying all the interfaces that the target object implements.
 	 */
-	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
+	public void setProxyInterfaces(String[] interfaceNames) throws ClassNotFoundException {
 		this.proxyInterfaces = AopUtils.toInterfaceArray(interfaceNames);
-	}
-
-	/**
-	 * Set the transaction attribute source which is used to find transaction
-	 * attributes. If specifying a String property value, a PropertyEditor
-	 * will create a MethodMapTransactionAttributeSource from the value.
-	 * @see #setTransactionAttributes
-	 * @see TransactionAttributeSourceEditor
-	 * @see MethodMapTransactionAttributeSource
-	 * @see NameMatchTransactionAttributeSource
-	 */
-	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
-		this.transactionAttributeSource = transactionAttributeSource;
 	}
 
 	/**
@@ -134,13 +122,26 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	 * <p>Internally, a NameMatchTransactionAttributeSource will be
 	 * created from the given properties.
 	 * @see #setTransactionAttributeSource
+	 * @see TransactionInterceptor#setTransactionAttributes
 	 * @see TransactionAttributeEditor
 	 * @see NameMatchTransactionAttributeSource
 	 */
 	public void setTransactionAttributes(Properties transactionAttributes) {
-		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
-		tas.setProperties(transactionAttributes);
-		this.transactionAttributeSource = tas;
+		this.transactionInterceptor.setTransactionAttributes(transactionAttributes);
+	}
+
+	/**
+	 * Set the transaction attribute source which is used to find transaction
+	 * attributes. If specifying a String property value, a PropertyEditor
+	 * will create a MethodMapTransactionAttributeSource from the value.
+	 * @see #setTransactionAttributes
+	 * @see TransactionInterceptor#setTransactionAttributeSource
+	 * @see TransactionAttributeSourceEditor
+	 * @see MethodMapTransactionAttributeSource
+	 * @see NameMatchTransactionAttributeSource
+	 */
+	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
+		this.transactionInterceptor.setTransactionAttributeSource(transactionAttributeSource);
 	}
 
 	/**
@@ -177,44 +178,45 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		this.postInterceptors = preInterceptors;
 	}
 
+	/**
+	 * Specify the AdvisorAdapterRegistry to use.
+	 * Default is the global AdvisorAdapterRegistry.
+	 * @see org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry
+	 */
+	public void setAdvisorAdapterRegistry(AdvisorAdapterRegistry advisorAdapterRegistry) {
+		this.advisorAdapterRegistry = advisorAdapterRegistry;
+	}
+
 
 	public void afterPropertiesSet() throws AopConfigException {
+		this.transactionInterceptor.afterPropertiesSet();
+
 		if (this.target == null) {
-			throw new AopConfigException("'target' is required");
+			throw new IllegalArgumentException("'target' is required");
 		}
 		
-		if (this.transactionAttributeSource == null) {
-			throw new AopConfigException("Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
-																	 "If there are no transactional methods, don't use a transactional proxy.");
-		}
-
-		TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
-		transactionInterceptor.setTransactionManager(this.transactionManager);
-		transactionInterceptor.setTransactionAttributeSource(this.transactionAttributeSource);
-		transactionInterceptor.afterPropertiesSet();
-
 		ProxyFactory proxyFactory = new ProxyFactory();
 
 		if (this.preInterceptors != null) {
 			for (int i = 0; i < this.preInterceptors.length; i++) {
-				proxyFactory.addAdvisor(GlobalAdvisorAdapterRegistry.getInstance().wrap(this.preInterceptors[i]));
+				proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(this.preInterceptors[i]));
 			}
 		}
 
 		if (this.pointcut != null) {
-			Advisor advice = new DefaultPointcutAdvisor(this.pointcut, transactionInterceptor);
+			Advisor advice = new DefaultPointcutAdvisor(this.pointcut, this.transactionInterceptor);
 			proxyFactory.addAdvisor(advice);
 		}
 		else {
 			// rely on default pointcut
-			proxyFactory.addAdvisor(new TransactionAttributeSourceAdvisor(transactionInterceptor));
+			proxyFactory.addAdvisor(new TransactionAttributeSourceAdvisor(this.transactionInterceptor));
 			// could just do the following, but it's usually less efficient because of AOP advice chain caching
 			// proxyFactory.addInterceptor(transactionInterceptor);
 		}
 
 		if (this.postInterceptors != null) {
 			for (int i = 0; i < this.postInterceptors.length; i++) {
-				proxyFactory.addAdvisor(GlobalAdvisorAdapterRegistry.getInstance().wrap(this.postInterceptors[i]));
+				proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(this.postInterceptors[i]));
 			}
 		}
 
