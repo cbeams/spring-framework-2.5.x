@@ -16,7 +16,7 @@ import java.util.List;
  * Provides e.g. methods for sorting lists of beans by any property.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.9 2003-11-23 22:42:05 jhoeller Exp $
+ * @version $Id: BeanUtils.java,v 1.10 2003-12-05 16:48:06 jhoeller Exp $
  */
 public abstract class BeanUtils {
 
@@ -53,18 +53,35 @@ public abstract class BeanUtils {
 			throw new FatalBeanException("Illegal arguments when trying to instantiate constructor: " + constructor, ex);
 		}
 		catch (InstantiationException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() + "]; is it an interface or an abstract class?", ex);
+			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
+			                             "]; is it an interface or an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() + "]; has class definition changed? Is there a public constructor?", ex);
+			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
+			                             "]; has class definition changed? Is there a public constructor?", ex);
 		}
 		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() + "]; constructor threw exception", ex.getTargetException());
+			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
+			                             "]; constructor threw exception", ex.getTargetException());
 		}
 	}
 
 	/**
-	 * Check if the given class represents a primitive array.
+	 * Check if the given class represents a "simple" property,
+	 * i.e. a primitive, a String, a Class, or a corresponding array.
+	 * Used to determine properties to check for a "simple" dependency-check.
+	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
+	 * @see org.springframework.beans.factory.support.AbstractBeanFactory#dependencyCheck
+	 */
+	public static boolean isSimpleProperty(Class clazz) {
+		return clazz.isPrimitive() || isPrimitiveArray(clazz) || isPrimitiveWrapperArray(clazz) ||
+		    clazz.equals(String.class) || clazz.equals(String[].class) ||
+		    clazz.equals(Class.class) || clazz.equals(Class[].class);
+	}
+
+	/**
+	 * Check if the given class represents a primitive array,
+	 * i.e. boolean, byte, char, short, int, long, float, or double.
 	 */
 	public static boolean isPrimitiveArray(Class clazz) {
 		return boolean[].class.equals(clazz) || byte[].class.equals(clazz) || char[].class.equals(clazz) ||
@@ -73,13 +90,13 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Check if the given class represents a "simple" property,
-	 * i.e. a primitive, a String, a Class, or a corresponding array.
+	 * Check if the given class represents an array of primitive wrappers,
+	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
 	 */
-	public static boolean isSimpleProperty(Class clazz) {
-		return clazz.isPrimitive() || isPrimitiveArray(clazz) ||
-		    clazz.equals(String.class) || clazz.equals(String[].class) ||
-		    clazz.equals(Class.class) || clazz.equals(Class[].class);
+	public static boolean isPrimitiveWrapperArray(Class clazz) {
+		return Boolean[].class.equals(clazz) || Byte[].class.equals(clazz) || Character[].class.equals(clazz) ||
+		    Short[].class.equals(clazz) || Integer[].class.equals(clazz) || Long[].class.equals(clazz) ||
+		    Float[].class.equals(clazz) || Double[].class.equals(clazz);
 	}
 
 	/**
