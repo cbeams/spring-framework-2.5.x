@@ -21,6 +21,7 @@
 <!ENTITY scheduling			SYSTEM "scheduling.xml">
 <!ENTITY remoting			SYSTEM "remoting.xml">
 <!ENTITY background			SYSTEM "background.xml">
+<!ENTITY testing			SYSTEM "testing.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 ]>
 
@@ -120,6 +121,8 @@
 	    &mail;
 	    
 	    &scheduling;
+	    
+	    &testing;
 	
 	    &dtd;
 	
