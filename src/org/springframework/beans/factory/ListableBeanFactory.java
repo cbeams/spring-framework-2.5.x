@@ -76,7 +76,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Does not consider any hierarchy this factory may participate in.
 	 * <p>Note: Ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
-	 * @param type class or interface to match, or null for all bean names
+	 * @param type the class or interface to match, or null for all bean names
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
 	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory, Class)
@@ -107,7 +107,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>This version of getBeansOfType matches all kinds of beans, be it
 	 * singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for <code>getBeansOfType(type, true, true)</code>.
-	 * @param type class or interface to match
+	 * @param type the class or interface to match, or null for all concrete beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if the beans could not be created
@@ -127,11 +127,11 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Prototypes without explicit object type specification should be ignored.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
-	 * @param type class or interface to match
+	 * @param type the class or interface to match, or null for all concrete beans
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
 	 * @param includeFactoryBeans whether to include FactoryBeans too
-	 * or just normal beans
+	 * or just conventional beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if the beans could not be created
