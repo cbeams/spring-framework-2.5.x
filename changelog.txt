@@ -15,6 +15,9 @@ Package org.springframework.beans
 * added hooks for custom conversion of read-in property values to PropertyResourceConfigurer (e.g. for decryption)
 * fixed PropertyPlaceholderConfigurer to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
 * fixed AbstractAutowireCapableBeanFactory to not create prototype beans referenced by a "factory-bean" attribute twice
+* factored out AbstractAutowireCapableBeanFactory's BeanWrapper creation into protected "createBeanWrapper" method
+* reworked DefaultListableBeanFactory's "getBeansOfType" to return FactoryBean instances when passed a FactoryBean type
+* reworked StaticListableBeanFactory's "getBeansOfType" to return FactoryBean instances when passed a FactoryBean type
 * moved "loadBeanDefinitions(Resource[])" method from XmlBeanDefinitionReader up to AbstractBeanDefinitionReader
 
 Package org.springframework.context
@@ -59,6 +62,7 @@ Package org.springframework.ui
 
 Package org.springframework.util
 * changed Log4jConfigurer's "initLogging" to only do config file refresh checks in case of explicit refresh interval
+* factored out LocaleEditor's string parsing into the "parseLocaleString" method of StringUtils
 
 Package org.springframework.validation
 * added "setIgnoreUnknownFields" method to DataBinder, enforcing request parameters to match fields when turned "false"
@@ -74,6 +78,7 @@ Package org.springframework.web
 * turned AbstractWizardFormController's "getPageSessionAttributeName" method non-final, to allow for specifying the name
 * changed AbstractWizardFormController's "validatePagesAndFinish" to show the offending page for global errors too
 * changed SimpleMappingExceptionResolver's "exceptionMappings" to support exception patterns (similar to rollback rules)
+* changed CookieLocaleResolver's cookie value separator from space to underscore, for Resin and Tomcat 5.5 compatibility
 * fixed BindStatus to look for plain target object in model map first (to also work in Velocity and FreeMarker views)
 * UrlBasedViewResolver supports a "forward:" prefix too, for forwards to other controllers through special view names
 * InternalResourceView performs an include if the response has already been committed (-> forward not possible anymore)
@@ -85,6 +90,7 @@ Package org.springframework.web
 * factored out "doRender" and "getTemplate(name, Locale)" methods in FreeMarkerView, for easy subclassing
 * changed value for "selected" attribute from "true" to "selected" in Velocity and FreeMarker macros (spring.vm/ftl)
 * added JasperReportsXxxView to allow for convenient rendering of CSV/HTML/PDF/XLS web views with Jasper Reports
+* added MappingDispatchActionSupport class, as convenience subclass of Struts 1.2's MappingDispatchAction
 
 
 Changes in version 1.1.2 (14.11.2004)
