@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.1 (29.9.2004)
+Changes in version 1.1.1 (28.9.2004)
 ------------------------------------
 
 Package org.springframework.aop
 * introduced new IntroductionInfo interface, allowing introduction without an IntroductionAdvisor
 * DelegatingIntroductionInterceptor lets unchecked exceptions thrown by introduction delegates through without wrapping
 * HashMapCachingAdvisorChainFactory uses Commons Collections IdentityMap (if available, on JDK <= 1.4) for method cache
+* deprecated PoolingConfig's "getActive"/"getFree" in favor of "getActiveCount"/"getIdleCount", for consistent naming
 
 Package org.springframework.beans
 * MutablePropertyValues's "addPropertyValues" methods return MutablePropertyValues, for invocation chains in 1 statement
@@ -57,9 +58,6 @@ Package org.springframework.mock
 * fixed MockServletContext's "getResource" implementation to correctly determine URL via Resource's "getURL" method
 * added full support for scoped attributes to MockPageContext, properly regarding request/session/application scope
 
-Package org.springframework.test
-* included new "test" package in mock JAR, offering superclasses for tests requiring Spring contexts
-
 Package org.springframework.orm
 * LocalSessionFactoryBean exposes a config-time JTA TransactionManager before mapping resources get registered
 * pre-bound Hibernate Session gets set to FlushMode.AUTO for transaction synchronization, to enforce flush at commit
@@ -67,6 +65,12 @@ Package org.springframework.orm
 * BlobSerializableType properly converts between Java null and SQL NULL, and properly handles null in its "deepCopy"
 * added "deepCopy" implementation to BlobSerializableType, serializing and deserializing the given value
 * added "applyQueryTimeout" method to JdoDialect, called by JdoTemplate for each created JDO query object
+
+Package org.springframework.remoting
+* added "addAttribute" and "getAttribute" methods to RemoteInvocation, for key-based additional invocation context
+
+Package org.springframework.test
+* included new "test" package in mock JAR, offering superclasses for tests requiring Spring contexts
 
 Package org.springframework.web
 * fixed "createRelative" implementation in ServletContextResource to correctly handle relative subdirectories
