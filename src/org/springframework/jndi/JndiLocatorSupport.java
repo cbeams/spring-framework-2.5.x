@@ -16,16 +16,11 @@
 
 package org.springframework.jndi;
 
-import java.util.Properties;
-
 import javax.naming.NamingException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Convenient superclass for classes that can locate any number of JNDI objects.
- * Subclasses are JavaBeans, exposing jndiTemplate and jndiEnvironment properties.
+ * Derives from JndiAccessor to inherit jndiTemplate and jndiEnvironment properties.
  *
  * <p>JNDI names may or may not include the "java:comp/env/" prefix expected
  * by J2EE applications when accessing a locally mapped (ENC - Environmental
@@ -39,50 +34,12 @@ import org.apache.commons.logging.LogFactory;
  * @see #setJndiEnvironment
  * @see #setResourceRef
  */
-public abstract class JndiLocatorSupport {
+public abstract class JndiLocatorSupport extends JndiAccessor {
 
 	/** JNDI prefix used in a J2EE container */
 	public static String CONTAINER_PREFIX = "java:comp/env/";
 
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private JndiTemplate jndiTemplate = new JndiTemplate();
-
 	private boolean resourceRef = false;
-
-
-	/**
-	 * Set the JNDI template to use for the JNDI lookup.
-	 * You can also specify JNDI environment settings via setJndiEnvironment.
-	 * @see #setJndiEnvironment
-	 */
-	public void setJndiTemplate(JndiTemplate jndiTemplate) {
-		this.jndiTemplate = jndiTemplate;
-	}
-
-	/**
-	 * Return the JNDI template to use for the JNDI lookup.
-	 */
-	public JndiTemplate getJndiTemplate() {
-		return jndiTemplate;
-	}
-
-	/**
-	 * Set the JNDI environment to use for the JNDI lookup.
-	 * Creates a JndiTemplate with the given environment settings.
-	 * @see #setJndiTemplate
-	 */
-	public void setJndiEnvironment(Properties jndiEnvironment) {
-		this.jndiTemplate = new JndiTemplate(jndiEnvironment);
-	}
-
-	/**
-	 * Return the JNDI enviromment to use for the JNDI lookup.
-	 */
-	public Properties getJndiEnvironment() {
-		return jndiTemplate.getEnvironment();
-	}
 
 	/**
 	 * Set if the lookup occurs in a J2EE container, i.e. if the prefix
@@ -101,7 +58,6 @@ public abstract class JndiLocatorSupport {
 		return resourceRef;
 	}
 
-
 	/**
 	 * Perform an actual JNDI lookup for the given name via the JndiTemplate.
    * If the name doesn't begin with "java:comp/env/", this prefix is added
@@ -114,7 +70,7 @@ public abstract class JndiLocatorSupport {
 		String jndiNameToUse = convertJndiName(jndiName);
 		Object jndiObject = getJndiTemplate().lookup(jndiNameToUse);
 		if (logger.isInfoEnabled()) {
-			logger.info("Located object with JNDI name '" + jndiNameToUse + "': value=[" + jndiObject + "]");
+			logger.info("Located object with JNDI name [" + jndiNameToUse + "]: value=[" + jndiObject + "]");
 		}
 		return jndiObject;
 	}
