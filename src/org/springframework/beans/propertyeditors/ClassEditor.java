@@ -4,9 +4,10 @@ import java.beans.PropertyEditorSupport;
 
 /**
  * Editor for java.lang.Class, to directly feed a Class property
- * instead of needing an additional class name property.
+ * instead of using a String class name property.
  * @author Juergen Hoeller
  * @since 13.05.2003
+ * @see java.lang.Class
  */
 public class ClassEditor extends PropertyEditorSupport {
 

@@ -14,19 +14,20 @@ import org.springframework.beans.BeanWrapperImpl;
 /**
  * Default implementation of the Errors interface, supporting
  * registration and evaluation of binding errors.
- * Slightly unusual, as it _is_ an exception.
+ * Slightly unusual, as it <i>is</i> an exception.
  *
- * <p>This is mainly a framework-internal class. Normally,
- * application code will work with the Errors interface.
+ * <p>This is mainly a framework-internal class. Normally, application
+ * code will work with the Errors interface, or a DataBinder that in
+ * turn exposes a BindException via <code>getErrors()</code>.
  *
  * <p>Supports exporting a model, suitable for example for web MVC.
- * Thus, it is sometimes used as parameter type instead of the
- * Errors interface itself - if extracting the model makes sense
- * in the respective context.
+ * Thus, it is sometimes used as parameter type instead of the Errors interface
+ * itself - if extracting the model makes sense in the respective context.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #getModel
+ * @see DataBinder#getErrors
  */
 public class BindException extends Exception implements Errors {
 
@@ -75,7 +76,7 @@ public class BindException extends Exception implements Errors {
 	 * Intended to be used by subclasses like DataBinder.
 	 */
 	protected void addFieldError(FieldError fe) {
-		errors.add(fe);
+		this.errors.add(fe);
 	}
 
 	/**
@@ -132,8 +133,9 @@ public class BindException extends Exception implements Errors {
 		List result = new ArrayList();
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			ObjectError fe = (ObjectError) it.next();
-			if (!(fe instanceof FieldError))
+			if (!(fe instanceof FieldError)) {
 				result.add(fe);
+			}
 		}
 		return Collections.unmodifiableList(result);
 	}
@@ -141,8 +143,9 @@ public class BindException extends Exception implements Errors {
 	public ObjectError getGlobalError() {
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			ObjectError fe = (ObjectError) it.next();
-			if (!(fe instanceof FieldError))
+			if (!(fe instanceof FieldError)) {
 				return fe;
+			}
 		}
 		return null;
 	}
@@ -160,8 +163,9 @@ public class BindException extends Exception implements Errors {
 		field = fixedField(field);
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			ObjectError fe = (ObjectError) it.next();
-			if (fe instanceof FieldError && field.equals(((FieldError) fe).getField()))
+			if (fe instanceof FieldError && field.equals(((FieldError) fe).getField())) {
 				result.add(fe);
+			}
 		}
 		return Collections.unmodifiableList(result);
 	}
@@ -170,8 +174,9 @@ public class BindException extends Exception implements Errors {
 		field = fixedField(field);
 		for (Iterator it = errors.iterator(); it.hasNext();) {
 			ObjectError fe = (ObjectError) it.next();
-			if (fe instanceof FieldError && field.equals(((FieldError) fe).getField()))
+			if (fe instanceof FieldError && field.equals(((FieldError) fe).getField())) {
 				return (FieldError) fe;
+			}
 		}
 		return null;
 	}
@@ -202,10 +207,12 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public void setNestedPath(String nestedPath) {
-		if (nestedPath == null)
+		if (nestedPath == null) {
 			nestedPath = "";
-		if (nestedPath.length() > 0)
+		}
+		if (nestedPath.length() > 0) {
 			nestedPath += ".";
+		}
 		this.nestedPath = nestedPath;
 	}
 
