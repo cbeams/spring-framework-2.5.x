@@ -23,15 +23,19 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * PropertyValues implementation created from parameters in a ServletRequest.
- * Looks for all property values beginning with a certain prefix
- * and prefix separator.
+ * Looks for all property values beginning with a certain prefix and
+ * prefix separator (default is "_").
+ *
+ * <p>For example, with a prefix of "spring", "spring_param1" and
+ * "spring_param2" result in a Map with "param1" and "param2" as keys.
  *
  * <p>This class is not immutable to be able to efficiently remove property
  * values that should be ignored for binding.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ServletRequestParameterPropertyValues.java,v 1.4 2004-03-18 02:46:15 trisberg Exp $
+ * @version $Id: ServletRequestParameterPropertyValues.java,v 1.5 2004-06-11 23:31:59 jhoeller Exp $
+ * @see org.springframework.web.util.WebUtils#getParametersStartingWith
  */
 public class ServletRequestParameterPropertyValues extends MutablePropertyValues {
 
@@ -41,31 +45,36 @@ public class ServletRequestParameterPropertyValues extends MutablePropertyValues
 	/**
 	 * Create new ServletRequestPropertyValues using no prefix
 	 * (and hence, no prefix separator).
-	 * @param request HTTP Request
+	 * @param request HTTP request
 	 */
 	public ServletRequestParameterPropertyValues(ServletRequest request) {
 		this(request, null, null);
 	}
 
 	/**
-	 * Create new ServletRequestPropertyValues using the default prefix
-	 * separator and the given prefix (the underscore character "_").
-	 * @param request HTTP Request
-	 * @param prefix prefix for properties
+	 * Create new ServletRequestPropertyValues using the given prefix and
+	 * the default prefix separator (the underscore character "_").
+	 * @param request HTTP request
+	 * @param prefix the prefix for parameters (the full prefix will
+	 * consist of this plus the separator)
+	 * @see #DEFAULT_PREFIX_SEPARATOR
 	 */
 	public ServletRequestParameterPropertyValues(ServletRequest request, String prefix) {
 		this(request, prefix, DEFAULT_PREFIX_SEPARATOR);
 	}
 
 	/**
-	 * Create new ServletRequestPropertyValues supplying both prefix and prefix separator.
-	 * @param request HTTP Request
-	 * @param prefix prefix for properties
-	 * @param prefixSeparator Separator delimiting prefix (e.g. user) from property name
-	 * (e.g. age) to build a request parameter name such as user_age
+	 * Create new ServletRequestPropertyValues supplying both prefix and
+	 * prefix separator.
+	 * @param request HTTP request
+	 * @param prefix the prefix for parameters (the full prefix will
+	 * consist of this plus the separator)
+	 * @param prefixSeparator separator delimiting prefix (e.g. "spring")
+	 * and the rest of the parameter name ("param1", "param2")
 	 */
 	public ServletRequestParameterPropertyValues(ServletRequest request, String prefix, String prefixSeparator) {
-		super(WebUtils.getParametersStartingWith(request, (prefix != null) ? prefix + prefixSeparator : null));
+		super(WebUtils.getParametersStartingWith(request,
+																						 (prefix != null) ? prefix + prefixSeparator : null));
 	}
 
 }

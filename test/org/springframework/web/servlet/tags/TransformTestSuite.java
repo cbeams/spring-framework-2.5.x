@@ -54,7 +54,6 @@ public class TransformTestSuite extends AbstractTagTests {
 		TransformTag transform = new TransformTag();
 		transform.setPageContext(pc);
 		pc.setAttribute("date", tb.getDate());
-		System.out.println("Date " + tb.getDate());
 		transform.setParent(bind);
 		transform.setValue("${date}");
 		transform.setVar("theDate");
@@ -144,7 +143,6 @@ public class TransformTestSuite extends AbstractTagTests {
 		transform.setVar("theString2");
 		transform.doStartTag();
 
-		System.out.println(pc.getAttribute("theString2"));
 		assertNull(pc.getAttribute("theString2"));
 	}
 
@@ -168,7 +166,6 @@ public class TransformTestSuite extends AbstractTagTests {
 		TransformTag transform = new TransformTag();
 		transform.setPageContext(pc);
 		pc.setAttribute("date", tb.getDate());
-		System.out.println("Date " + tb.getDate());
 		transform.setParent(bind);
 		transform.setValue("${date}");
 		transform.setVar("theDate");
