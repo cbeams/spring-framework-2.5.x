@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.60 2004-05-26 10:49:39 jhoeller Exp $
+    $Id: build.xml,v 1.61 2004-05-27 09:18:33 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -413,6 +413,9 @@
 	</target>
 
 
+	<target name="clean_release" depends="clean, release"/>
+
+
  	<target name="compiletestattr" depends="buildmock">
 
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
@@ -492,6 +495,9 @@
 		</junit>
 
 	</target>
+
+
+	<target name="clean_tests" depends="clean, tests"/>
 
 
 	<!--
