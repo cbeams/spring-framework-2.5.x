@@ -3,7 +3,7 @@
 <!--
   Build file for the Spring Framework.
 
-  $Id: build.xml,v 1.76 2004-08-10 08:35:53 jhoeller Exp $
+  $Id: build.xml,v 1.77 2004-08-16 15:25:33 jhoeller Exp $
 
   This script requires a "lib" directory containing the necessary third party JAR files.
   See project.properties for the definitions of the properties used in this file.
@@ -35,7 +35,7 @@
 	<path id="attribute-compiler-classpath">
 
 		<fileset dir="lib/jakarta-commons">
-			<include name="commons-attributes-compiler-*.jar"/>
+			<include name="commons-attributes-compiler.jar"/>
 			<include name="commons-collections.jar"/>
 		</fileset>
 		<fileset dir="lib/xdoclet">
@@ -433,9 +433,9 @@
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
 				<include name="lib/ojb/**"/>
+				<include name="lib/oro/**"/>
 				<include name="lib/poi/**"/>
 				<include name="lib/quartz/**"/>
-				<include name="lib/regexp/**"/>
 				<include name="lib/struts/**"/>
 				<include name="lib/velocity/**"/>
 				<include name="lib/xdoclet/**"/>
