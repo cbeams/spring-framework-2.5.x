@@ -70,7 +70,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.43 2004-02-04 17:23:45 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.44 2004-02-05 01:22:49 dkopylenko Exp $
  */
 public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory, ConfigurableBeanFactory {
 
@@ -128,7 +128,7 @@ public abstract class AbstractBeanFactory implements AutowireCapableBeanFactory,
 	//---------------------------------------------------------------------
 
 	/**
-	 * Return the bean name, stripping out the factory deference prefix if necessary,
+	 * Return the bean name, stripping out the factory dereference prefix if necessary,
 	 * and resolving aliases to canonical names.
 	 */
 	private String transformedBeanName(String name) throws NoSuchBeanDefinitionException {
