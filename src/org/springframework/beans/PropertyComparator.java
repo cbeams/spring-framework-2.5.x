@@ -32,14 +32,18 @@ public class PropertyComparator implements Comparator {
 			v2 = ((String) v2).toLowerCase();
 		}
 		int result;
-		if (v1 != null) {
-			result = ((Comparable) v1).compareTo(v2);
-		} else {
-			if (v2 != null) {
-				result = - ((Comparable) v2).compareTo(v1);
+		try {
+			if (v1 != null) {
+				result = ((Comparable) v1).compareTo(v2);
 			} else {
-				return 0;
+				if (v2 != null) {
+					result = - ((Comparable) v2).compareTo(v1);
+				} else {
+					return 0;
+				}
 			}
+		} catch (NullPointerException e) {
+			return 0;
 		}
 		return (this.sortDefinition.isAscending() ? result : -result);
 	}
