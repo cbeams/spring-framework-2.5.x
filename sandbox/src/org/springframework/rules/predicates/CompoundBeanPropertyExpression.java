@@ -66,5 +66,9 @@ public class CompoundBeanPropertyExpression implements BeanPropertyExpression {
     public boolean test(Object bean) {
         return compoundPredicate.test(bean);
     }
+    
+    public String toString() {
+        return compoundPredicate.toString();
+    }
 
 }

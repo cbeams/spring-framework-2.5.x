@@ -18,6 +18,7 @@ package org.springframework.rules.predicates;
 import java.util.Comparator;
 
 import org.springframework.rules.BinaryPredicate;
+import org.springframework.rules.RelationalOperator;
 
 /**
  * Predicate that tests if one comparable object is greater than another.
@@ -43,5 +44,10 @@ public class GreaterThan extends ComparisonBinaryPredicate implements
     public static BinaryPredicate instance() {
         return INSTANCE;
     }
+    
+    public String toString() {
+        return RelationalOperator.GREATER_THAN.toString();
+    }
+
 
 }

@@ -2,25 +2,31 @@
  * Copyright 2002-2004 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy
- * of the License at
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.rules;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
+import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
+import org.springframework.rules.predicates.CompoundUnaryPredicate;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.util.Assert;
-import org.springframework.util.Cache;
+import org.springframework.util.ToStringBuilder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -30,16 +36,57 @@ import org.springframework.validation.Validator;
  * @author Keith Donald
  */
 public class Rules implements UnaryPredicate, Validator {
+    private static final Log logger = LogFactory.getLog(Rules.class);
     private Class beanClass;
-    private Cache propertyRules = new Cache() {
-        public Object create(Object key) {
-            return new UnaryAnd();
-        }
-    };
+    private Map propertyRules = new HashMap();
 
-    private Rules(Class beanClass) {
+    public Rules() {
+
+    }
+
+    public Rules(Class beanClass) {
+        setBeanClass(beanClass);
+    }
+
+    public Class getBeanClass() {
+        return beanClass;
+    }
+
+    public void setBeanClass(Class beanClass) {
         Assert.notNull(beanClass);
         this.beanClass = beanClass;
+    }
+
+    public void setPropertyRules(Map propertyRules) {
+        for (Iterator i = propertyRules.entrySet().iterator(); i.hasNext();) {
+            Map.Entry entry = (Map.Entry)i.next();
+            String propertyName = (String)entry.getKey();
+            UnaryPredicate p = (UnaryPredicate)entry.getValue();
+            BeanPropertyExpression e;
+            if (p instanceof CompoundUnaryPredicate) {
+                e = new CompoundBeanPropertyExpression(
+                        (CompoundUnaryPredicate)p);
+            } else if (p instanceof BeanPropertyExpression) {
+                e = (BeanPropertyExpression)p;
+            } else {
+                e = new BeanPropertyValueConstraint(propertyName, p);
+            }
+            setRules(propertyName, e);
+        }
+    }
+
+    public void setRules(String propertyName, BeanPropertyExpression e) {
+        UnaryAnd and = new UnaryAnd();
+        and.add(e);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Configuring rules for property '" + propertyName
+                    + "', rules -> [" + e + "]");
+        }
+        propertyRules.put(propertyName, e);
+    }
+
+    public BeanPropertyExpression getRules(String property) {
+        return (BeanPropertyExpression)propertyRules.get(property);
     }
 
     /**
@@ -53,8 +100,8 @@ public class Rules implements UnaryPredicate, Validator {
     }
 
     public Rules add(BeanPropertyExpression expression) {
-        UnaryAnd and =
-            (UnaryAnd)propertyRules.get(expression.getPropertyName());
+        UnaryAnd and = (UnaryAnd)propertyRules
+                .get(expression.getPropertyName());
         and.add(expression);
         return this;
     }
@@ -63,7 +110,7 @@ public class Rules implements UnaryPredicate, Validator {
      * @see org.springframework.rules.UnaryPredicate#test(java.lang.Object)
      */
     public boolean test(Object bean) {
-        for (Iterator i = propertyRules.values(); i.hasNext();) {
+        for (Iterator i = propertyRules.values().iterator(); i.hasNext();) {
             UnaryPredicate predicate = (UnaryPredicate)i.next();
             if (!predicate.test(bean)) {
                 return false;
@@ -103,6 +150,11 @@ public class Rules implements UnaryPredicate, Validator {
      */
     public void add(String propertyName, UnaryPredicate valueConstraint) {
         add(new BeanPropertyValueConstraint(propertyName, valueConstraint));
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this).append("beanClass", beanClass).append(
+                "propertyRules", propertyRules).toString();
     }
 
 }

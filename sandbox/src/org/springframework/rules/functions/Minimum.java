@@ -60,4 +60,8 @@ public class Minimum implements BinaryFunction {
         return INSTANCE;
     }
 
+    public String toString() {
+        return "min";
+    }
+
 }

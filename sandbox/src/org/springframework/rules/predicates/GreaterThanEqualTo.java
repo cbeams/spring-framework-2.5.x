@@ -18,6 +18,7 @@ package org.springframework.rules.predicates;
 import java.util.Comparator;
 
 import org.springframework.rules.BinaryPredicate;
+import org.springframework.rules.RelationalOperator;
 
 /**
  * Predicate that tests if one comparable object is greater than or equal to
@@ -45,4 +46,7 @@ public class GreaterThanEqualTo extends ComparisonBinaryPredicate implements
         return INSTANCE;
     }
 
+    public String toString() {
+        return RelationalOperator.GREATER_THAN_EQUAL_TO.toString();
+    }
 }

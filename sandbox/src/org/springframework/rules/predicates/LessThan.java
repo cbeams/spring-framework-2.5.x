@@ -18,6 +18,7 @@ package org.springframework.rules.predicates;
 import java.util.Comparator;
 
 import org.springframework.rules.BinaryPredicate;
+import org.springframework.rules.RelationalOperator;
 
 /**
  * Predicate that tests if one comparable object is less than another.
@@ -42,6 +43,10 @@ public class LessThan extends ComparisonBinaryPredicate implements
 
     public static BinaryPredicate instance() {
         return INSTANCE;
+    }
+
+    public String toString() {
+        return RelationalOperator.LESS_THAN.toString();
     }
 
 }

@@ -47,5 +47,9 @@ public class UnaryNot implements UnaryPredicate {
     public boolean test(Object value) {
         return !predicate.test(value);
     }
+    
+    public String toString() {
+        return "not(" + getPredicate() + ")";
+    }
 
 }

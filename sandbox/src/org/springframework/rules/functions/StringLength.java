@@ -50,4 +50,9 @@ public class StringLength implements UnaryFunction {
         return INSTANCE;
     }
 
+    public String toString() {
+        return "strLength";
+    }
+
+
 }

@@ -49,4 +49,8 @@ public class PropertyPresent extends AbstractBeanPropertyExpression implements
                 .test(getProperty.evaluate(getPropertyName()));
     }
 
+    public String toString() {
+        return "required if '" + getPropertyName() + "' present";
+    }
+
 }

@@ -60,4 +60,8 @@ public class Maximum implements BinaryFunction {
         return INSTANCE;
     }
 
+    public String toString() {
+        return "max";
+    }
+
 }

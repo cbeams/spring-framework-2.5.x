@@ -56,4 +56,7 @@ public class UnaryFunctionResultConstraint implements UnaryPredicate {
         return this.constraint.test(function.evaluate(argument));
     }
 
+    public String toString() {
+        return constraint.toString() + "(" + function.toString() + ")";
+    }
 }

@@ -66,5 +66,9 @@ public class RequiredIfTrue extends AbstractBeanPropertyExpression implements
             return true;
         }
     }
+    
+    public String toString() {
+        return "required if (" + predicate + ")";
+    }
 
 }

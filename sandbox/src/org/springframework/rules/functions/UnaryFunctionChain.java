@@ -103,4 +103,15 @@ public class UnaryFunctionChain implements UnaryFunction {
         return result;
     }
 
+    public String toString() {
+        StringBuffer buf = new StringBuffer("chain(");
+        for (Iterator i = iterator(); i.hasNext();) {
+            buf.append(i.next());
+            if (i.hasNext()) {
+                buf.append("->");
+            }
+        }
+        buf.append(")");
+        return buf.toString();
+    }
 }

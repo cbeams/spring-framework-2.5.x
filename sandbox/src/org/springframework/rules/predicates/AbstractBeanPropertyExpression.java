@@ -4,14 +4,14 @@
  */
 package org.springframework.rules.predicates;
 
-import org.springframework.rules.*;
+import org.springframework.rules.BeanPropertyExpression;
 import org.springframework.util.Assert;
 
 /**
  * @author Keith Donald
  */
-public abstract class AbstractBeanPropertyExpression
-    implements BeanPropertyExpression {
+public abstract class AbstractBeanPropertyExpression implements
+        BeanPropertyExpression {
     private String propertyName;
 
     public AbstractBeanPropertyExpression(String propertyName) {
@@ -25,6 +25,10 @@ public abstract class AbstractBeanPropertyExpression
     protected void setPropertyName(String propertyName) {
         Assert.notNull(propertyName);
         this.propertyName = propertyName;
+    }
+
+    public String toString() {
+        return getPropertyName();
     }
 
 }

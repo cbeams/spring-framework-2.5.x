@@ -43,4 +43,7 @@ public class SetProperty implements BinaryProcedure {
         beanWrapper.setPropertyValue((String)propertyName, propertyValue);
     }
 
+    public String toString() {
+        return "setProperty(" + beanWrapper + ")";
+    }
 }

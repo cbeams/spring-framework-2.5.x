@@ -70,4 +70,16 @@ public class UnaryOr extends CompoundUnaryPredicate implements UnaryPredicate {
         return false;
     }
 
+    public String toString() {
+        StringBuffer buf = new StringBuffer("or(");
+        for (Iterator i = iterator(); i.hasNext();) {
+            buf.append(i.next());
+            if (i.hasNext()) {
+                buf.append(", ");
+            }
+        }
+        buf.append(")");
+        return buf.toString();
+    }
+    
 }

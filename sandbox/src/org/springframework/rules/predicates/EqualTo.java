@@ -16,6 +16,7 @@
 package org.springframework.rules.predicates;
 
 import org.springframework.rules.BinaryPredicate;
+import org.springframework.rules.RelationalOperator;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -47,4 +48,7 @@ public class EqualTo implements BinaryPredicate {
         return INSTANCE;
     }
 
+    public String toString() {
+        return RelationalOperator.EQUAL_TO.toString();
+    }
 }

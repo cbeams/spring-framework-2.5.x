@@ -61,4 +61,8 @@ public class ParameterizedBinaryPredicate implements UnaryPredicate {
         return predicate.test(value, this.parameter);
     }
 
+    public String toString() {
+        return predicate.toString() + " " + getParameter();
+    }
+
 }

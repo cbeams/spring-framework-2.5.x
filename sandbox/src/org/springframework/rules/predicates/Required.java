@@ -48,5 +48,9 @@ public class Required implements UnaryPredicate {
     public static UnaryPredicate instance() {
         return instance;
     }
+    
+    public String toString() {
+        return "required";
+    }
 
 }
