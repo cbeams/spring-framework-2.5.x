@@ -20,11 +20,14 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Session;
+import javax.jms.TransactionRolledBackException;
 
-import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -133,19 +136,6 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 		return con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 	}
 
-	/**
-	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to
-	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
-	 * equivalent.
-	 * <p>Default implementation delegates to JmsUtils.
-	 * @param ex the original checked JMSException to convert
-	 * @return the Spring runtime JmsException wrapping <code>ex</code>
-	 * @see org.springframework.jms.support.JmsUtils#convertJmsAccessException
-	 */
-	protected JmsException convertJmsAccessException(JMSException ex) {
-		return JmsUtils.convertJmsAccessException(ex);
-	}
-
 
 	protected Object doGetTransaction() {
 		JmsTransactionObject txObject = new JmsTransactionObject();
@@ -174,12 +164,13 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 				txObject.getConnectionHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
-			TransactionSynchronizationManager.bindResource(getConnectionFactory(), txObject.getConnectionHolder());
+			TransactionSynchronizationManager.bindResource(
+					getConnectionFactory(), txObject.getConnectionHolder());
 		}
 		catch (JMSException ex) {
 			JmsUtils.closeSession(session);
 			JmsUtils.closeConnection(con);
-			throw convertJmsAccessException(ex);
+			throw new CannotCreateTransactionException("Could not create JMS transaction", ex);
 		}
 	}
 
@@ -199,8 +190,11 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 		try {
 			txObject.getConnectionHolder().getSession().commit();
 		}
+		catch (TransactionRolledBackException ex) {
+			throw new UnexpectedRollbackException("JMS transaction rolled back", ex);
+		}
 		catch (JMSException ex) {
-			throw convertJmsAccessException(ex);
+			throw new TransactionSystemException("JMS failure on commit", ex);
 		}
 	}
 
@@ -210,7 +204,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 			txObject.getConnectionHolder().getSession().rollback();
 		}
 		catch (JMSException ex) {
-			throw convertJmsAccessException(ex);
+			throw new TransactionSystemException("JMS failure on rollback", ex);
 		}
 	}
 
