@@ -23,16 +23,16 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.support.RequestContextUtils;
-import org.springframework.web.servlet.view.AbstractUrlBasedView;
+import org.springframework.web.servlet.view.AbstractTemplateView;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 /**
  * View using the FreeMarker template engine.
@@ -41,8 +41,8 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * <ul>
  * <li><b>url</b>: the location of the FreeMarker template to be wrapped,
  * relative to the FreeMarker template context (directory).
- * <li><b>encoding</b> (optional, default is determined by Velocity configuration):
- * the encoding of the Velocity template file
+ * <li><b>encoding</b> (optional, default is determined by FreeMarker configuration):
+ * the encoding of the FreeMarker template file
  * </ul>
  *
  * <p>Depends on a single FreeMarkerConfig object such as FreeMarkerConfigurer
@@ -54,14 +54,14 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 3/3/2004
- * @version $Id: FreeMarkerView.java,v 1.1 2004-03-20 15:41:33 trisberg Exp $
+ * @version $Id: FreeMarkerView.java,v 1.2 2004-05-18 22:47:02 davison Exp $
  * @see #setUrl
  * @see #setEncoding
  * @see #setConfiguration
  * @see FreeMarkerConfig
  * @see FreeMarkerConfigurer
  */
-public class FreeMarkerView extends AbstractUrlBasedView {
+public class FreeMarkerView extends AbstractTemplateView {
 
 	private String encoding;
 
@@ -143,6 +143,10 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 */
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, TemplateException {
+	   
+	    // add request or session attributes to the model if needed
+	    exposeAttributesToModel(request, model);
+	    
 		// grab the locale-specific version of the template
 		Template template = getTemplate(RequestContextUtils.getLocale(request));
 		if (logger.isDebugEnabled()) {
