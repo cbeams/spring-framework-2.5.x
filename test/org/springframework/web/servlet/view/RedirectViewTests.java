@@ -8,12 +8,10 @@ package org.springframework.web.servlet.view;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 
 /**
@@ -22,18 +20,10 @@ import org.easymock.MockControl;
  * Uses mock objects.
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: RedirectViewTests.java,v 1.2 2003-09-19 11:50:39 johnsonr Exp $
+ * @version $Id: RedirectViewTests.java,v 1.3 2003-11-21 22:34:58 jhoeller Exp $
  */
 public class RedirectViewTests extends TestCase {
 
-	/**
-	 * Constructor for RedirectViewTests.
-	 * @param arg0
-	 */
-	public RedirectViewTests(String arg0) {
-		super(arg0);
-	}
-	
 	private void test(final Map m, String url, String expectedUrlForEncoding, String afterEncoding) throws Exception {
 		class TestRedirectView extends RedirectView {
 			public boolean valid;
@@ -112,23 +102,13 @@ public class RedirectViewTests extends TestCase {
 	
 	public void testNoUrlSet() throws Exception {
 		RedirectView rv = new RedirectView();
-		
-		MockControl rc = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) rc.getMock();
-		rc.replay();
-	
-		MockControl mc = MockControl.createControl(HttpServletResponse.class);
-		HttpServletResponse resp = (HttpServletResponse) mc.getMock();
-		mc.replay();
-	
 		try {
-			rv.render(new HashMap(), request, resp);
-			fail("Shouldn't render with null url");
+			rv.initApplicationContext();
+			fail("Should have thrown IllegalArgumentException");
 		}
-		catch (ServletException ex) {
-			// Ok
+		catch (IllegalArgumentException ex) {
+			// expected
 		}
-	
 	}
 
 }

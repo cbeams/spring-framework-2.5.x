@@ -7,9 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -88,91 +86,42 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 			fail("No such view should fail with servlet exception, not " + ex);
 		}
 	} 
-	
-	
-	public static class TestView extends AbstractView {
-		
-		public int initCount;
-		
-		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		}
-		
-		protected void initApplicationContext() {
-			++initCount;
-		}
-		
-	}
-	
-	
+
 	public void testOnSetContextCalledOnce() throws Exception {
 		TestView tv = (TestView) rb.resolveViewName("test", Locale.ENGLISH);
 		tv = (TestView) rb.resolveViewName("test", Locale.ENGLISH);
 		tv = (TestView) rb.resolveViewName("test", Locale.ENGLISH);
 		assertTrue("test has correct name", "test".equals(tv.getName()));
 		assertTrue("test should have been initialized once, not " + tv.initCount + " times", tv.initCount == 1);
-			
-	} 
+	}
 	
-	public void testCopyXSLTViewOnNull() throws Exception {
-		View v = rb.resolveViewName("XintResultView", Locale.GERMAN);
-		//assertTrue("test was inited", tv.inited());
-			
-	} 
-	
-	public void testCopyXSLTViewOnEmptyString() throws Exception {
-		View v = rb.resolveViewName("XintResultView3", Locale.GERMAN);
-		//assertTrue("test was inited", tv.inited());
-			
-	} 
-	
-//	public void testStylesheetXSLTView() throws Exception {
-//		try {
-//			View v = rb.resolveViewname("XintResultView2", Locale.GERMAN);
-//			//assertTrue("test was inited", tv.inited());
-//			fail("Should have thrown ServletException when it couldn't load XSLT");
-//		}
-//		catch (ServletException ex) {
-//		}
-//		catch (Throwable t) {
-//			t.printStackTrace();
-//			fail("Should have thrown ServletException when it couldn't load XSLT, not " + t.getClass());
-//			
-//		}
-//			
-//	} 
-	
-
-	//public void testNotNull() throws Exception {
-	//	View v = rb.resolveViewname("VintResultView", Locale.ENGLISH);
-	//	assertTrue("VintResultView isn't null", v != null);
-//
-//	}
-
 	public void testNoSuchBasename() throws Exception {
 		try {
 			ResourceBundleViewResolver rb2 = new ResourceBundleViewResolver();
 			rb2.setBasename("weoriwoierqupowiuer");
 			View v = rb2.resolveViewName("debugView", Locale.ENGLISH);
 			fail("No such basename: all requests should fail with servlet exception");
-		} catch (ServletException ex) {
+		}
+		catch (ServletException ex) {
 			// OK
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			fail("No such basename: all requests should fail with servlet exception, not " + ex);
 		}
 	}
 
-	public static void main(String[] args) {
-		junit.textui.TestRunner.run(suite());
-		//	junit.swingui.TestRunner.main(new String[] {PrototypeFactoryTests.class.getName() } );
+
+	public static class TestView extends AbstractView {
+
+		public int initCount;
+
+		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		}
+
+		protected void initApplicationContext() {
+			++initCount;
+		}
 	}
 
-	public static Test suite() {
-		TestSuite ts = new TestSuite(ResourceBundleViewResolverTestSuite.class);
-		
-		// This is how to run additional tests...
-		ts.addTestSuite(ResourceBundleViewResolverTestSuiteNoCache.class);
-		return ts;
-	}
- 
 }
 

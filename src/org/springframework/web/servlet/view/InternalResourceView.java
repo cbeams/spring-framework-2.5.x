@@ -14,7 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.context.ApplicationContextException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -24,7 +23,7 @@ import org.springframework.web.util.WebUtils;
  * to the specified resource URL using a RequestDispatcher.
  *
  * @author Rod Johnson
- * @version $Id: InternalResourceView.java,v 1.3 2003-11-21 15:25:16 jhoeller Exp $
+ * @version $Id: InternalResourceView.java,v 1.4 2003-11-21 22:34:57 jhoeller Exp $
  */
 public class InternalResourceView extends AbstractView {
 
@@ -64,9 +63,9 @@ public class InternalResourceView extends AbstractView {
 	/**
 	 * Overridden lifecycle method to check that 'url' property is set.
 	 */
-	protected void initApplicationContext() throws ApplicationContextException {
+	protected void initApplicationContext() throws IllegalArgumentException {
 		if (this.url == null) {
-			throw new ApplicationContextException("Must set 'url' property in class [" + getClass().getName() + "]");
+			throw new IllegalArgumentException("Must set 'url' property in class [" + getClass().getName() + "]");
 		}
 	}
 

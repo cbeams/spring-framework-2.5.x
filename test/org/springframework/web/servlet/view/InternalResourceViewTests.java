@@ -35,7 +35,7 @@ public class InternalResourceViewTests extends TestCase {
 			v.setApplicationContext(wac);
 			fail("Should be forced to set URL");
 		}
-		catch (ApplicationContextException ex) {
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 	}

@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  * exposing all model attributes as HTTP query parameters.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RedirectView.java,v 1.2 2003-11-19 15:31:09 dkopylenko Exp $
+ * @version $Id: RedirectView.java,v 1.3 2003-11-21 22:34:58 jhoeller Exp $
  */
 public class RedirectView extends AbstractView {
 
@@ -40,43 +40,37 @@ public class RedirectView extends AbstractView {
 	}
 
 	/**
-	 * Get encodingScheme
-	 * @return String representing encoding scheme
-     */
-	public String getEncodingScheme() {
-		return this.encodingScheme;
-	}
-
-	/**
-	 * Set encodingScheme
-	 * @param String representing encoding scheme
+	 * Set the encoding scheme for this view.
 	 */
 	public void setEncodingScheme(String encodingScheme) {
 		this.encodingScheme = encodingScheme;
 	}
 
 	/**
-	 * Subclasses can override this method to return name-value pairs for query strings,
-	 * which will be URLEncoded and formatted by this class.
-	 * This implementation tries to stringify all model elements.
-	 */
-	protected Map queryProperties(Map model) {
-		return model;
+	 * Return the encoding scheme for this view.
+   */
+	protected String getEncodingScheme() {
+		return this.encodingScheme;
 	}
 
 	/**
-	 * Convert model to request parameters and redirect to url.
+	 * Overridden lifecycle method to check that 'url' property is set.
+	 */
+	protected void initApplicationContext() throws IllegalArgumentException {
+		if (this.url == null) {
+			throw new IllegalArgumentException("Must set 'url' property in class [" + getClass().getName() + "]");
+		}
+	}
+
+	/**
+	 * Convert model to request parameters and redirect to the given URL.
 	 */
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-		throws IOException, ServletException {
-		if (getUrl() == null)
-			throw new ServletException("RedirectView is not configured: URL cannot be null");
+			throws ServletException, IOException {
 
 		StringBuffer url = new StringBuffer(getUrl());
-
 		// If there are not already some parameters, we need a ?
 		boolean first = (getUrl().indexOf('?') < 0);
-
 		Iterator entries = queryProperties(model).entrySet().iterator();
 		while (entries.hasNext()) {
 			if (first) {
@@ -86,15 +80,23 @@ public class RedirectView extends AbstractView {
 			else {
 				url.append("&");
 			}
-
 			Map.Entry entry = (Map.Entry)entries.next();
-
-			url.append(URLEncoder.encode(entry.getKey().toString(), this.encodingScheme));
+			String encodedKey = URLEncoder.encode(entry.getKey().toString());
+			String encodedValue = (entry.getValue() != null ? URLEncoder.encode(entry.getValue().toString()) : "");
+			url.append(new String(encodedKey.getBytes(this.encodingScheme), this.encodingScheme));
 			url.append("=");
-			url.append(URLEncoder.encode(entry.getValue().toString(), this.encodingScheme));
+			url.append(new String(encodedValue.getBytes(this.encodingScheme), this.encodingScheme));
 		}
-
 		response.sendRedirect(response.encodeRedirectURL(url.toString()));
+	}
+
+	/**
+	 * Subclasses can override this method to return name-value pairs for query strings,
+	 * which will be URLEncoded and formatted by this class.
+	 * This implementation tries to stringify all model elements.
+	 */
+	protected Map queryProperties(Map model) {
+		return model;
 	}
 
 }
