@@ -26,7 +26,7 @@ import com.meterware.httpunit.WebResponse;
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.1 2004-01-08 01:29:26 davison Exp $
+ * @version $Id: AllTests.java,v 1.2 2004-06-10 20:51:13 aarendsen Exp $
  */
 public class AllTests extends TestCase {
 
@@ -44,10 +44,10 @@ public class AllTests extends TestCase {
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream("build.properties"));
-			testServer = "http://localhost:" + props.getProperty("autobuilds.server.http.port", "8080");
+			testServer = "http://localhost:" + props.getProperty("autobuilds.server.http.port", "13084");
 		
 		} catch (IOException ioe) {
-			testServer = "http://localhost:8080";		
+			testServer = "http://localhost:13084";		
 		}
 		
 		wc = new WebConversation();		      
@@ -59,7 +59,7 @@ public class AllTests extends TestCase {
             assertTrue(resp.getText().indexOf("buildtest was deployed successfully") > -1);
                         
         } catch (Exception e) {
-			fail("Exception: " + e);
+			fail("Exception while testing URL " + testServer + "/buildtest:" + e);
         }
 
     }
