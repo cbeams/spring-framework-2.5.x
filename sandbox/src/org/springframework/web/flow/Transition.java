@@ -87,9 +87,8 @@ public class Transition implements Serializable {
 				if (sessionExecution.isActive()) {
 					logger.debug("Event '" + getId() + "' within now previous state '" + fromState.getId()
 							+ "' for flow '" + qualifiedActiveFlowId
-							+ "' was processed; as a result, the new qualified flow state is '"
-							+ sessionExecution.getQualifiedActiveFlowId() + "." + sessionExecution.getCurrentStateId()
-							+ "'");
+							+ "' was processed; as a result, the new state is '" + sessionExecution.getCurrentStateId()
+							+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
 				}
 				else {
 					logger.debug("Event '" + getId() + "' within now previous state '" + fromState.getId()
