@@ -137,107 +137,107 @@ public class Flow implements FlowEventProcessor, Serializable {
 	private static final long serialVersionUID = 3258695403305513015L;
 
 	/**
-	 * Comment for <code>CREATE</code>
+	 * The <code>CREATE</code> action state/event identifier.
 	 */
 	public static final String CREATE = "create";
 
 	/**
-	 * Comment for <code>ADD</code>
+	 * The <code>ADD</code> action state/event identifier.
 	 */
 	public static final String ADD = "add";
 
 	/**
-	 * Comment for <code>LINK</code>
+	 * The <code>LINK</code> action state/event identifier.
 	 */
 	public static final String LINK = "link";
 
 	/**
-	 * Comment for <code>REMOVE</code>
+	 * The <code>REMOVE</code> action state/event identifier.
 	 */
 	public static final String REMOVE = "remove";
 
 	/**
-	 * Comment for <code>UNLINK</code>
+	 * The <code>UNLINK</code> action state/event identifier.
 	 */
 	public static final String UNLINK = "unlink";
 
 	/**
-	 * Comment for <code>DELETE</code>
+	 * The <code>DELETE</code> action state/event identifier.
 	 */
 	public static final String DELETE = "delete";
 
 	/**
-	 * Comment for <code>GET</code>
+	 * The <code>GET</code> action state/event identifier.
 	 */
 	public static final String GET = "get";
 
 	/**
-	 * Comment for <code>POPULATE</code>
+	 * The <code>POPULATE</code> form action state/event identifier.
 	 */
 	public static final String POPULATE = "populate";
 
 	/**
-	 * Comment for <code>VIEW</code>
+	 * The <code>VIEW</code> view state identifier.
 	 */
 	public static final String VIEW = "view";
 
 	/**
-	 * Comment for <code>SUBMIT</code>
+	 * The <code>SUBMIT</code> action state/event identifier.
 	 */
 	public static final String SUBMIT = "submit";
 
 	/**
-	 * Comment for <code>BIND_AND_VALIDATE</code>
+	 * The <code>BIND_AND_VALIDATE</code> action state/event identifier.
 	 */
 	public static final String BIND_AND_VALIDATE = "bindAndValidate";
 
 	/**
-	 * Comment for <code>EDIT</code>
+	 * The <code>EDIT</code> action state/event identifier.
 	 */
 	public static final String EDIT = "edit";
 
 	/**
-	 * Comment for <code>VALIDATE</code>
+	 * The <code>VALIDATE</code> action state/event identifier.
 	 */
 	public static final String VALIDATE = "validate";
 
 	/**
-	 * Comment for <code>SEARCH</code>
+	 * The <code>SEARCH</code> action state/event identifier.
 	 */
 	public static final String SEARCH = "search";
 
 	/**
-	 * Comment for <code>SAVE</code>
+	 * The <code>SAVE</code> action state/event identifier.
 	 */
 	public static final String SAVE = "save";
 
 	/**
-	 * Comment for <code>SUCCESS</code>
+	 * The <code>SUCCESS</code> action state/event identifier.
 	 */
 	public static final String SUCCESS = "success";
 
 	/**
-	 * Comment for <code>ERROR</code>
+	 * The <code>ERROR</code> event id
 	 */
 	public static final String ERROR = "error";
 
 	/**
-	 * Comment for <code>BACK</code>
+	 * The <code>BACK</code> action state/event identifier.
 	 */
 	public static final String BACK = "back";
 
 	/**
-	 * Comment for <code>CANCEL</code>
+	 * The <code>CANCEL</code> action state/event identifier.
 	 */
 	public static final String CANCEL = "cancel";
 
 	/**
-	 * Comment for <code>FINISH</code>
+	 * The <code>FINISH</code> action state/event identifier.
 	 */
 	public static final String FINISH = "finish";
 
 	/**
-	 * Comment for <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
+	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
 	 */
 	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "AttributesMapper";
 
