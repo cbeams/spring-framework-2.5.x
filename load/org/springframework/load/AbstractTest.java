@@ -1,10 +1,6 @@
-/**
- * Generic framework code included with 
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). 
- * This code is free to use and modify. 
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
 
 package org.springframework.load;
@@ -27,6 +23,7 @@ import org.springframework.util.StopWatch;
  * 
  * @author  Rod Johnson
  * @since February 9, 2001
+ * @version $Id: AbstractTest.java,v 1.4 2003-11-19 14:10:28 johnsonr Exp $
  */
 public abstract class AbstractTest implements Test {
 
@@ -418,6 +415,41 @@ public abstract class AbstractTest implements Test {
 	 */
 	public static int randomIndex(int sz) {
 		return Math.abs(rand.nextInt(sz));
+	}
+	
+	/**
+	 * Like JUnit assertion
+	 * @param s
+	 */
+	protected void assertTrue(String s, boolean condition) throws TestFailedException {
+		if (!condition)
+			throw new TestFailedException(s);
+	}
+	
+	protected void assertEquals(String s, Object a, Object b) throws TestFailedException {
+		if (a == b)
+			return;
+		if (a == null) {
+			if (b != null)
+				throw new TestFailedException(s);
+		}
+		else if (b == null) {
+			// a isn't null
+			throw new TestFailedException(s);
+		}
+		if (!a.equals(b)) {
+			throw new TestFailedException(s);
+		}
+	}
+	
+	protected void assertEquals(String s, int a, int b) throws TestFailedException {
+		if (a != b)
+			throw new TestFailedException(s);
+	}
+	
+	protected void assertEquals(String s, long a, long b) throws TestFailedException {
+		if (a != b)
+			throw new TestFailedException(s);
 	}
 
 } 	// class AbstractTest

@@ -1,7 +1,9 @@
 package org.springframework.load;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.springframework.beans.BeansException;
@@ -27,7 +29,7 @@ public class PropertiesTestSuiteLoader  {
 		ListableBeanFactoryImpl lbf = new ListableBeanFactoryImpl();
 		Properties props = new Properties();
 		try {
-			props.load(new FileInputStream(file));
+			props.load(getInputStream(file));
 			
 			System.out.println("Loading properties file '" + file + "'. Looking for bean definitions...");
 			
@@ -71,6 +73,24 @@ public class PropertiesTestSuiteLoader  {
 		catch (Exception ex) {
 			// Reporter failed...?
 			ex.printStackTrace();
+		}
+	}
+
+	private static InputStream getInputStream(String name) throws IOException {
+		try {
+			return new FileInputStream(name);
+		}
+		catch (FileNotFoundException ex) {
+			System.err.println("Failed to load from file system");
+			// Try on classpath
+			InputStream is = PropertiesTestSuiteLoader.class.getResourceAsStream(name);
+			if (is != null) {
+				return is;
+			}
+			else {
+				throw new IOException("Cannot load properties file '" + name + "' from filesystem or classpath: " +
+						" Use package name of form /com/foo/bar/MyFile.txt");
+			}
 		}
 	}
 
