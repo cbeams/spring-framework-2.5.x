@@ -8,19 +8,26 @@ import java.io.InputStream;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 02 April 2001
+ * @see ClassLoader
  */
 public abstract class ClassLoaderUtils {
 
 	/**
-	 * Load a resource from the classpath, first trying the thread context
+	 * Load a resource from the class path, first trying the thread context
 	 * class loader, then the class loader of the given class.
 	 * @param clazz a class to try the class loader of
 	 * @param name the resource name
 	 * @return an input stream for reading the resource,
 	 * or null if not found
+	 * @see ClassLoader#getResourceAsStream
+	 * @see Class#getResourceAsStream
 	 */
 	public static InputStream getResourceAsStream(Class clazz, String name) {
-		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
+		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+		InputStream in = null;
+		if (ccl != null) {
+			in = ccl.getResourceAsStream(name);
+		}
 		if (in == null) {
 			in = clazz.getResourceAsStream(name);
 		}
