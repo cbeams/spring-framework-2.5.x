@@ -32,7 +32,7 @@
 	  -     return null;
 	  -   }
     -->
-	<bean id="exampleController" name="/test" class="example.ExampleController"/>
+	<bean name="/test" class="example.ExampleController"/>
 
 	<!--
 	  - Optional: Explicit InternalResourceViewResolver definition,
