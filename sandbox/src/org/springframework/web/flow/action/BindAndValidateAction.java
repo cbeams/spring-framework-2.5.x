@@ -62,6 +62,13 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 		}
 	};
 
+	/**
+	 * Constant <code>ActionBeanEvent</code> marker that indicates to the base
+	 * BindAndValidate action that it should attempt to return a default
+	 * <code>success</code> or <code>error</code> event. What event to
+	 * returned is calculated based on whether any errors were generated during
+	 * the bind and validate process.
+	 */
 	protected static final ActionBeanEvent USE_DEFAULT_EVENT = new ActionBeanEvent(ACTION_BEAN_NULL_OBJECT, null);
 
 	/**
@@ -182,6 +189,9 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 		return messageCodesResolver;
 	}
 
+	/**
+	 *  
+	 */
 	public void afterPropertiesSet() {
 		if (this.validators != null) {
 			for (int i = 0; i < this.validators.length; i++) {
@@ -192,6 +202,9 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 		}
 	}
 
+	/*
+	 *  
+	 */
 	protected ActionBeanEvent doExecuteAction(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws ObjectRetrievalFailureException, IllegalStateException {
 		Object formObject = loadRequiredFormObject(request, model);
@@ -206,11 +219,22 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 		}
 	}
 
+	/**
+	 * @param request
+	 * @param model
+	 * @param formObject
+	 * @param errors
+	 * @return
+	 */
 	protected ActionBeanEvent getDefaultResultEvent(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
 		return errors.hasErrors() ? error() : success();
 	}
 
+	/**
+	 * @param errors
+	 * @param model
+	 */
 	public static void exportErrors(BindException errors, MutableAttributesAccessor model) {
 		// and also bind it under the local (to flow) alias, so other
 		// actions can find it easily
@@ -439,17 +463,37 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 		if (!errors.hasErrors()) {
 			return onBindAndValidateSuccess(request, model, formObject, errors);
 		}
-		return USE_DEFAULT_EVENT;
+		return null;
 	}
 
+	/**
+	 * Hook called when binding and validation completes successfully;
+	 * subclasses may optionally return a ActionBeanEvent to supercede the
+	 * default result event, which will be success().
+	 * @param request
+	 * @param model
+	 * @param formObject
+	 * @param errors
+	 * @return
+	 */
 	protected ActionBeanEvent onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
-		return onBindAndValidateSuccess(request, model, formObject, errors);
+		return onBindAndValidateSuccess(request, model, formObject);
 	}
 
+	/**
+	 * Hook called when binding and validation completes successfully;
+	 * subclasses may optionally return a ActionBeanEvent to supercede the
+	 * default result event, which will be success().
+	 * 
+	 * @param request
+	 * @param model
+	 * @param formObject
+	 * @return
+	 */
 	protected ActionBeanEvent onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject) {
-		return USE_DEFAULT_EVENT;
+		return null;
 	}
 
 }
