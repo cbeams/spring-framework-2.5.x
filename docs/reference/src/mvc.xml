@@ -90,7 +90,7 @@
     <sect2 id="mvc-features">
       <title>Features of Spring MVC</title>
 
-      <para>If just focussing on the web support, some of the Spring's unique
+      <para>If just focusing on the web support, some of the Spring's unique
       features are:</para>
 
       <itemizedlist spacing="compact">
