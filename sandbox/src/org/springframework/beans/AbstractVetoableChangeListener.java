@@ -47,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
  * throw another PropertyVetoException, which will be ignored by the caller.
  *
  * @author Rod Johnson
- * @version $Id: AbstractVetoableChangeListener.java,v 1.2 2003-11-02 12:54:22 johnsonr Exp $
+ * @version $Id: AbstractVetoableChangeListener.java,v 1.1 2004-02-02 11:27:30 jhoeller Exp $
  */
 public abstract class AbstractVetoableChangeListener implements VetoableChangeListener {
 
