@@ -28,22 +28,13 @@
 	</bean>
 	-->
 
-	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ======================== -->
 
 	<!-- Generic validator for Account objects, to be used for example by the Spring web tier -->
 	<bean id="accountValidator" class="org.springframework.samples.jpetstore.domain.logic.AccountValidator"/>
 
 	<!-- Generic validator for Order objects, to be used for example by the Spring web tier -->
 	<bean id="orderValidator" class="org.springframework.samples.jpetstore.domain.logic.OrderValidator"/>
-
-	<!-- JPetStore primary business object: default implementation -->
-	<bean id="petStoreTarget" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
-		<property name="accountDao"><ref bean="accountDao"/></property>
-		<property name="categoryDao"><ref bean="categoryDao"/></property>
-		<property name="productDao"><ref bean="productDao"/></property>
-		<property name="itemDao"><ref bean="itemDao"/></property>
-		<property name="orderDao"><ref bean="orderDao"/></property>
-	</bean>
 
 	<!-- AOP advice used to send confirmation email after order has been submitted -->
 	<!--
@@ -60,10 +51,35 @@
 	</bean>
 	-->
 
-	<!-- Transactional proxy for the JPetStore primary business object -->
-	<bean id="petStore" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <!-- a parent bean definition which is a template' or base definition for
+	     transaction proxies. It is set as lazy-init, since it is never
+		 supposed to be instantiated itself. -->
+	<bean id="baseTxProxy" lazy-init="true"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref bean="transactionManager"/></property>
-		<property name="target"><ref local="petStoreTarget"/></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- JPetStore primary business object (default implementation), as an
+	     inner bean wrapped by an outer transactional proxy. The two bean
+		 definitions could have been separate, but this is cleaner as there
+		 is no need to ever access the unwrapped object.
+		 Note that we override the transaction propagation settings from the
+		 base 'proxyTxProxy' definition -->
+	<bean id="petStore" parent="baseTxProxy">
+		<property name="target">
+			<bean class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
+				<property name="accountDao"><ref bean="accountDao"/></property>
+				<property name="categoryDao"><ref bean="categoryDao"/></property>
+				<property name="productDao"><ref bean="productDao"/></property>
+				<property name="itemDao"><ref bean="itemDao"/></property>
+				<property name="orderDao"><ref bean="orderDao"/></property>
+			</bean>
+		</property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="insert*">PROPAGATION_REQUIRED</prop>
@@ -81,7 +97,7 @@
  		-->
 	</bean>
 
-	<!-- ========================= REMOTE EXPORTER DEFINITIONS ========================= -->
+	<!-- ========================= REMOTE EXPORTER DEFINITIONS ======================== -->
 
 	<!-- RMI exporter for the JPetStore OrderService -->
 	<!-- Commented out by default to avoid conflicts with EJB containers -->
