@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Juergen Hoeller
@@ -245,6 +246,11 @@ public class TransactionTestSuite extends TestCase {
 		}
 		template.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
 		assertTrue("Correct isolation level set", template.getIsolationLevel() == TransactionDefinition.ISOLATION_REPEATABLE_READ);
+	}
+
+	protected void tearDown() {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }

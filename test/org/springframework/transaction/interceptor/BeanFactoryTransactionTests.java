@@ -31,7 +31,7 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.13 2003-12-02 16:30:33 johnsonr Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.14 2003-12-21 17:16:59 jhoeller Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
@@ -87,7 +87,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		// Install facade expecting a call
 		ptmControl = MockControl.createControl(PlatformTransactionManager.class);
 		ptm = (PlatformTransactionManager) ptmControl.getMock();
-		TransactionStatus txStatus = new TransactionStatus(null, true);
+		TransactionStatus txStatus = new TransactionStatus(null, true, false, false);
 		TransactionInterceptor txInterceptor = (TransactionInterceptor) factory.getBean("txInterceptor");
 		MethodMapTransactionAttributeSource txAttSrc = (MethodMapTransactionAttributeSource) txInterceptor.getTransactionAttributeSource();
 		ptm.getTransaction((TransactionDefinition) txAttSrc.methodMap.values().iterator().next());

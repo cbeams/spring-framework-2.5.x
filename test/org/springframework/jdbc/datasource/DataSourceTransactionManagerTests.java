@@ -30,14 +30,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class DataSourceTransactionManagerTests extends TestCase {
 	
 	public void testTransactionCommitRestoringAutoCommitToTrue() throws Exception {
-		testTransactionCommitRestoringAutoCommit(true);
+		doTestTransactionCommitRestoringAutoCommit(true);
 	}
 	
 	public void testTransactionCommitWithAutoCommitToFalse() throws Exception {
-		testTransactionCommitRestoringAutoCommit(false);
+		doTestTransactionCommitRestoringAutoCommit(false);
 	}
 
-	private void testTransactionCommitRestoringAutoCommit(final boolean autoCommit) throws Exception {
+	private void doTestTransactionCommitRestoringAutoCommit(final boolean autoCommit) throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		con.getAutoCommit();
@@ -74,7 +74,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-				assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+				assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue("Is new transaction", status.isNewTransaction());
 				assertEquals("Preserved information about old autocommit setting", 
 						autoCommit, ((DataSourceTransactionObject) status.getTransaction()).getMustRestoreAutoCommit());
@@ -134,7 +134,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-					assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue("Is new transaction", status.isNewTransaction());
 					assertEquals("Preserved information about old autocommit setting", 
 											autoCommit, ((DataSourceTransactionObject) status.getTransaction()).getMustRestoreAutoCommit());
@@ -162,7 +162,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.replay();
 		dsControl.replay();
 
-		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);
+		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
@@ -226,7 +227,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				tt.execute(new TransactionCallbackWithoutResult() {
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-						assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 						assertTrue("Is existing transaction", !status.isNewTransaction());
 						status.setRollbackOnly();
 					}

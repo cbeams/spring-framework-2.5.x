@@ -26,7 +26,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * testing the helper implementation.
  * @author Rod Johnson
  * @since 16-Mar-2003
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class TransactionInterceptorTests extends TestCase {
 
@@ -78,7 +78,7 @@ public class TransactionInterceptorTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = new TransactionStatus(null, false);
+		TransactionStatus status = new TransactionStatus(null, false, false, false);
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 		// Expect a transaction
@@ -115,7 +115,7 @@ public class TransactionInterceptorTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = new TransactionStatus(null, false);
+		TransactionStatus status = new TransactionStatus(null, false, false, false);
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
@@ -204,7 +204,7 @@ public class TransactionInterceptorTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = new TransactionStatus(null, false);
+		TransactionStatus status = new TransactionStatus(null, false, false, false);
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 		// Gets additional call(s) from TransactionControl
@@ -315,7 +315,7 @@ public class TransactionInterceptorTests extends TestCase {
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
 
-		TransactionStatus status = new TransactionStatus(null, false);
+		TransactionStatus status = new TransactionStatus(null, false, false, false);
 		ptm.getTransaction(txatt);
 		ptxControl.setReturnValue(status);
 		UnexpectedRollbackException ex = new UnexpectedRollbackException("foobar", null);

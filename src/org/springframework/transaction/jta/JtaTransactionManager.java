@@ -9,6 +9,7 @@ import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.HeuristicCompletionException;
@@ -20,7 +21,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * PlatformTransactionManager implementation for JTA, i.e. J2EE container transactions.
@@ -32,14 +32,27 @@ import org.springframework.beans.factory.InitializingBean;
  * and for accessing a single resource with Hibernate (including transactional cache),
  * HibernateTransactionManager is appropriate.
  *
- * <p>Transaction synchronization is active by default, as it will typically be
- * leveraged for transactional cache handling e.g. with Hibernate. Note that such
- * synchronization will only work when JtaTransactionManager actually drives the JTA
- * transactions. If participating in existing transactions, e.g. in an EJB environment,
- * synchronization needs to be turned off to avoid dangling resource holders that
- * wait for afterTransactionCompletion callbacks.
+ * <p>Transaction synchronization is active by default, to allow data access support
+ * classes to register resources that are opened within the transaction for closing at
+ * transaction completion time. Spring's support classes for JDBC, Hibernate, and JDO
+ * all perform such registration, allowing for reuse of the same Hibernate Session etc
+ * within the transaction. Standard JTA does not even guarantee that for Connections
+ * from a transactional JDBC DataSource: Spring's synchronization solves those issues.
  *
- * <p>Note: This implementation supports timeouts but not custom isolation levels.
+ * <p>Synchronization is also leveraged for transactional cache handling with Hibernate.
+ * Therefore, as long as JtaTransactionManager drives the JTA transactions, there is
+ * absolutely no need to configure Hibernate for its JTATransaction strategy (with a
+ * corresponding container-specific TransactionManagerLookup). Hibernate's own
+ * transaction (and JTA) support does not need to be used in such a scenario.
+ *
+ * <p>If JtaTransactionManager participates in an existing JTA transaction, e.g. from
+ * EJB CMT, synchronization will be triggered on finishing the nested transaction,
+ * before passing transaction control back to the J2EE container. In this case, a
+ * container-specific Hibernate TransactionManagerLookup is the only way to achieve
+ * exact afterCompletion callbacks for transactional cache handling with Hibernate.
+ * In such a scenario, use Hibernate >=2.1 which features automatic JTA detection.
+ *
+ * <p>This implementation supports timeouts but not custom isolation levels.
  * The latter need to be interpreted in container-specific subclasses, overriding
  * the applyIsolationLevel method in this class. Note that DataSourceTransactionManager
  * and HibernateTransactionManager do support both custom isolation levels and timeouts.
@@ -63,24 +76,12 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 	private UserTransaction cachedUserTransaction;
 
-	/**
-	 * Create a new JtaTransactionManager instance,
-	 * with transaction synchronization activated by default.
-	 * <p>Turn off transaction synchronization when using this manager
-	 * with existing transactions like in an EJB environment. Keep it
-	 * active when this manager actually drives the JTA transactions,
-	 * to enable e.g. proper Hibernate cache synchronization callbacks.
-	 * @see #setTransactionSynchronization
-	 */
-	public JtaTransactionManager() {
-		setTransactionSynchronization(true);
-	}
 
 	/**
 	 * Set the JndiTemplate to use for JNDI lookup.
 	 * A default one is used if not set.
 	 */
-	public final void setJndiTemplate(JndiTemplate jndiTemplate) {
+	public void setJndiTemplate(JndiTemplate jndiTemplate) {
 		if (jndiTemplate == null) {
 			throw new IllegalArgumentException("jndiTemplate must not be null");
 		}
@@ -107,6 +108,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	public void setCacheUserTransaction(boolean cacheUserTransaction) {
 		this.cacheUserTransaction = cacheUserTransaction;
 	}
+
 
 	/**
 	 * Eagerly fetch the UserTransaction if cacheUserTransaction is true.
@@ -145,7 +147,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 	protected boolean isExistingTransaction(Object transaction) {
 		try {
-			return (((UserTransaction) transaction).getStatus() != Status.STATUS_NO_TRANSACTION);
+			int status = ((UserTransaction) transaction).getStatus();
+			return (status != Status.STATUS_NO_TRANSACTION && status != Status.STATUS_MARKED_ROLLBACK);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on getStatus", ex);
@@ -153,11 +156,13 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		logger.debug("Beginning JTA transaction");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Beginning JTA transaction [" + transaction + "] ");
+		}
 		UserTransaction ut = (UserTransaction) transaction;
 		applyIsolationLevel(ut, definition.getIsolationLevel());
 		if (definition.isReadOnly()) {
-			logger.warn("JtaTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
+			logger.info("JtaTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
 		}
 		try {
 			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -197,7 +202,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doCommit(TransactionStatus status) {
-		logger.debug("Committing JTA transaction");
+		if (status.isDebug()) {
+			logger.debug("Committing JTA transaction [" + status.getTransaction() + "]");
+		}
 		try {
 			((UserTransaction) status.getTransaction()).commit();
 		}
@@ -216,7 +223,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doRollback(TransactionStatus status) {
-		logger.debug("Rolling back JTA transaction");
+		if (status.isDebug()) {
+			logger.debug("Rolling back JTA transaction [" + status.getTransaction() + "]");
+		}
 		try {
 			((UserTransaction) status.getTransaction()).rollback();
 		}
@@ -226,7 +235,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doSetRollbackOnly(TransactionStatus status) {
-		logger.debug("Setting JTA transaction rollback-only");
+		if (status.isDebug()) {
+			logger.debug("Setting JTA transaction [" + status.getTransaction() + "] rollback-only");
+		}
 		try {
 			((UserTransaction) status.getTransaction()).setRollbackOnly();
 		}

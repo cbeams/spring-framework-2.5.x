@@ -45,7 +45,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.9 2003-12-12 18:48:03 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.10 2003-12-21 17:16:58 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -108,8 +108,14 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 */
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
+
+		// cache to avoid repeated checks
+		boolean debugEnabled = logger.isDebugEnabled();
+
 		if (txObject.getConnectionHolder() == null) {
-			logger.debug("Opening new connection for JDBC transaction");
+			if (debugEnabled) {
+				logger.debug("Opening new connection for JDBC transaction");
+			}
 			Connection con = DataSourceUtils.getConnection(this.dataSource);
 			txObject.setConnectionHolder(new ConnectionHolder(con));
 		}
@@ -118,6 +124,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		try {
 			// apply read-only
 			if (definition.isReadOnly()) {
+				if (debugEnabled) {
+					logger.debug("Setting JDBC connection [" + con + "] read-only");
+				}
 				try {
 					con.setReadOnly(true);
 				}
@@ -129,7 +138,10 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 			// apply isolation level
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-				logger.debug("Changing isolation level to " + definition.getIsolationLevel());
+				if (debugEnabled) {
+					logger.debug("Changing isolation level of JDBC connection [" + con + "] to " +
+											 definition.getIsolationLevel());
+				}
 				txObject.setPreviousIsolationLevel(new Integer(con.getTransactionIsolation()));
 				con.setTransactionIsolation(definition.getIsolationLevel());
 			}
@@ -139,7 +151,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			// Commons DBCP to set it already)
 			if (con.getAutoCommit()) {
 				txObject.setMustRestoreAutoCommit(true);
-				logger.debug("Switching JDBC connection [" + con + "] to manual commit");
+				if (debugEnabled) {
+					logger.debug("Switching JDBC connection [" + con + "] to manual commit");
+				}
 				con.setAutoCommit(false);
 			}
 
@@ -163,7 +177,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected void doCommit(TransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
-		logger.debug("Committing JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
+		if (status.isDebug()) {
+			logger.debug("Committing JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
+		}
 		try {
 			txObject.getConnectionHolder().getConnection().commit();
 		}
@@ -174,7 +190,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected void doRollback(TransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
-		logger.debug("Rolling back JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
+		if (status.isDebug()) {
+			logger.debug("Rolling back JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
+		}
 		try {
 			txObject.getConnectionHolder().getConnection().rollback();
 		}
@@ -185,7 +203,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected void doSetRollbackOnly(TransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
-		logger.debug("Setting JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "] rollback-only");
+		if (status.isDebug()) {
+			logger.debug("Setting JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "] rollback-only");
+		}
 		txObject.getConnectionHolder().setRollbackOnly();
 	}
 

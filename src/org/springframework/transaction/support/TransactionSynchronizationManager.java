@@ -127,20 +127,24 @@ public abstract class TransactionSynchronizationManager {
 
 
 	/**
-	 * Activate thread synchronizations for the current thread.
-	 * Called by transaction manager on transaction begin.
-	 */
-	public static void initSynchronization() {
-		synchronizations.set(new ArrayList());
-	}
-
-	/**
 	 * Return if thread synchronizations are active for the current thread.
 	 * Can be called before register to avoid unnecessary instance creation.
 	 * @see #registerSynchronization
 	 */
 	public static boolean isSynchronizationActive() {
 		return (synchronizations.get() != null);
+	}
+
+	/**
+	 * Activate thread synchronizations for the current thread.
+	 * Called by transaction manager on transaction begin.
+	 * @throws IllegalStateException if synchronization is already active
+	 */
+	public static void initSynchronization() throws IllegalStateException {
+		if (isSynchronizationActive()) {
+			throw new IllegalStateException("Cannot activate transaction synchronization - already active");
+		}
+		synchronizations.set(new ArrayList());
 	}
 
 	/**
@@ -162,6 +166,7 @@ public abstract class TransactionSynchronizationManager {
 	 */
 	public static void triggerBeforeCommit() throws RuntimeException {
 		if (isSynchronizationActive()) {
+			logger.debug("Triggering beforeCommit synchronization");
 			for (Iterator it = ((List) synchronizations.get()).iterator(); it.hasNext();) {
 				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
 				synchronization.beforeCommit();
@@ -177,6 +182,7 @@ public abstract class TransactionSynchronizationManager {
 	 */
 	public static void triggerBeforeCompletion() throws RuntimeException {
 		if (isSynchronizationActive()) {
+			logger.debug("Triggering beforeCompletion synchronization");
 			for (Iterator it = ((List) synchronizations.get()).iterator(); it.hasNext();) {
 				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
 				synchronization.beforeCompletion();
@@ -193,6 +199,7 @@ public abstract class TransactionSynchronizationManager {
 	 */
 	public static void triggerAfterCompletion(int status) throws RuntimeException {
 		if (isSynchronizationActive()) {
+			logger.debug("Triggering afterCompletion synchronization");
 			for (Iterator it = ((List) synchronizations.get()).iterator(); it.hasNext();) {
 				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
 				synchronization.afterCompletion(status);
@@ -203,8 +210,12 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Deactivate thread synchronizations for the current thread.
 	 * Called by transaction manager on transaction cleanup.
+	 * @throws IllegalStateException if synchronization is not active
 	 */
-	public static void clearSynchronization() {
+	public static void clearSynchronization() throws IllegalStateException {
+		if (!isSynchronizationActive()) {
+			throw new IllegalStateException("Cannot deactivate transaction synchronization - not active");
+		}
 		synchronizations.set(null);
 	}
 

@@ -25,6 +25,7 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 	protected TestTransactionManager(boolean existingTransaction, boolean canCreateTransaction) {
 		this.existingTransaction = existingTransaction;
 		this.canCreateTransaction = canCreateTransaction;
+		setTransactionSynchronization(SYNCHRONIZATION_NEVER);
 	}
 
 	protected Object doGetTransaction() {

@@ -26,54 +26,52 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * PlatformTransactionManager implementation for single Hibernate session
- * factories. Binds a Hibernate Session from the specified factory to the
- * thread, potentially allowing for one thread Session per factory.
- * SessionFactoryUtils and HibernateTemplate are aware of thread-bound
- * Sessions and take part in such transactions automatically. Using either
- * is required for proper Hibernate access code supporting this transaction
- * handling mechanism.
+ * PlatformTransactionManager implementation for single Hibernate session factories.
+ * Binds a Hibernate Session from the specified factory to the thread, potentially
+ * allowing for one thread Session per factory. SessionFactoryUtils and
+ * HibernateTemplate are aware of thread-bound Sessions and participate in such
+ * transactions automatically. Using either is required for Hibernate access code
+ * that needs to support this transaction handling mechanism.
  *
- * <p>Supports custom isolation levels, and timeouts that get applied as
- * appropriate Hibernate query timeouts. To support the latter, application
- * code must either use HibernateTemplate.find or call SessionFactoryUtils'
- * applyTransactionTimeout method for each created Hibernate Query object.
+ * <p>Supports custom isolation levels, and timeouts that get applied as appropriate
+ * Hibernate query timeouts. To support the latter, application code must either use
+ * HibernateTemplate.find or call SessionFactoryUtils' applyTransactionTimeout
+ * method for each created Hibernate Query object.
  *
- * <p>This implementation is appropriate for applications that solely use
- * Hibernate for transactional data access, but it also supports direct
- * data source access within a transaction (i.e. plain JDBC code working
- * with the same DataSource). This allows for mixing services that access
- * Hibernate including proper transactional caching and services that use
- * plain JDBC without being aware of Hibernate! Application code needs to
- * stick to the same simple Connection lookup pattern as with
- * DataSourceTransactionManager (i.e. DataSourceUtils.getConnection).
+ * <p>This implementation is appropriate for applications that solely use Hibernate
+ * for transactional data access, but it also supports direct data source access
+ * within a transaction (i.e. plain JDBC code working with the same DataSource).
+ * This allows for mixing services that access Hibernate (including transactional
+ * caching) and services that use plain JDBC (without being aware of Hibernate)!
+ * Application code needs to stick to the same simple Connection lookup pattern as
+ * with DataSourceTransactionManager (i.e. DataSourceUtils.getConnection).
  *
- * <p>Note that to be able to register a DataSource's Connection for plain
- * JDBC code, this instance needs to be aware of the DataSource (see
- * setDataSource). The given DataSource should obviously match the one used
- * by the given SessionFactory. To achieve this, either configure both to
- * the same JNDI DataSource, or create the SessionFactory by supplying the
- * same DataSource to LocalSessionFactoryBean. In the latter case, the
- * Hibernate settings do not have to define a connection provider at all,
- * avoiding duplicated configuration.
+ * <p>Note that to be able to register a DataSource's Connection for plain JDBC
+ * code, this instance needs to be aware of the DataSource (see setDataSource).
+ * The given DataSource should obviously match the one used by the given
+ * SessionFactory. To achieve this, configure both to the same JNDI DataSource,
+ * or preferably create the SessionFactory by supplying the same DataSource to
+ * LocalSessionFactoryBean. In the latter case, the Hibernate settings do not
+ * have to define a connection provider at all, avoiding duplicated configuration.
  *
  * <p>JTA resp. JtaTransactionManager is necessary for accessing multiple
  * transactional resources. The DataSource that Hibernate uses needs to be
  * JTA-enabled then (see container setup), alternatively the Hibernate JCA
- * connector can to be used for direct container integration. Normally,
- * Hibernate JTA setup is somewhat container-specific due to the JTA
- * TransactionManager lookup, required for proper transactional handling of
- * the JVM-level read-write cache. Using the JCA Connector can solve this but
- * involves classloading issues and container-specific connector deployment.
+ * connector can to be used for direct container integration. Normally, JTA setup
+ * for Hibernate is somewhat container-specific due to the JTA TransactionManager
+ * lookup, required for proper transactional handling of the JVM-level read-write
+ * cache. Using the JCA Connector can solve this but involves packaging issues
+ * and container-specific connector deployment.
  *
  * <p>Fortunately, there is an easier way with Spring: SessionFactoryUtils'
- * close and thus HibernateTemplate register synchronizations with
- * JtaTransactionManager, for proper completion callbacks. Therefore,
- * as long as JtaTransactionManager demarcates the JTA transactions,
- * Hibernate does not require any special JTA configuration for proper JTA.
+ * close (and thus HibernateTemplate) registers synchronizations with
+ * JtaTransactionManager, for proper afterCompletion callbacks. Therefore,
+ * as long as JtaTransactionManager drives the JTA transactions, Hibernate
+ * does not require any special configuration for proper JTA participation.
+ * The only special case is participating in existing JTA transactions from
+ * EJB CMT: See JtaTransactionManager's javadoc for details.
  *
- * <p>Note: This class, like all of Spring's Hibernate support, requires
- * Hibernate 2.0 (initially developed with RC1).
+ * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
  *
  * @author Juergen Hoeller
  * @since 02.05.2003

@@ -26,7 +26,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.11 2003-12-17 09:25:59 johnsonr Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.12 2003-12-21 17:16:58 jhoeller Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -166,7 +166,7 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 			}
 		}
 		if (status != null) {
-			if (status.isDebugEnabled()) {
+			if (status.isDebug()) {
 				logger.debug("Invoking commit for transaction on method '" + invocation.getMethod().getName() + "'");
 			}
 			this.transactionManager.commit(status);

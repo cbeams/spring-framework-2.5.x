@@ -379,14 +379,24 @@ public class HibernateTransactionManagerTests extends TestCase {
 	}
 
 	public void testJtaTransactionCommit() throws Exception {
+		doTestJtaTransactionCommit(Status.STATUS_NO_TRANSACTION);
+	}
+
+	public void testJtaTransactionCommitWithExisting() throws Exception {
+		doTestJtaTransactionCommit(Status.STATUS_ACTIVE);
+	}
+
+	private void doTestJtaTransactionCommit(int status) throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
-		ut.begin();
-		utControl.setVoidCallable(1);
-		ut.commit();
-		utControl.setVoidCallable(1);
+		utControl.setReturnValue(status, 1);
+		if (status == Status.STATUS_NO_TRANSACTION) {
+			ut.begin();
+			utControl.setVoidCallable(1);
+			ut.commit();
+			utControl.setVoidCallable(1);
+		}
 		utControl.replay();
 
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -429,6 +439,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 					sessionControl.verify();
 					sessionControl.reset();
 					try {
+						session.getFlushMode();
+						sessionControl.setReturnValue(FlushMode.AUTO, 1);
 						session.flush();
 						sessionControl.setVoidCallable(1);
 						session.close();
@@ -522,6 +534,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Session session = (Session) sessionControl.getMock();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		session.flush();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -545,6 +559,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 						return null;
 					}
 				});
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				return null;
 			}
 		});
@@ -814,7 +829,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 	}
 
 	protected void tearDown() {
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		//assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
