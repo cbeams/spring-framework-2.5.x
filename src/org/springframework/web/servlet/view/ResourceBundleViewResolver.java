@@ -26,8 +26,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.context.support.ContextResourceEditor;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
 import org.springframework.web.servlet.View;
 
 /**
@@ -50,7 +50,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 	/** Default if no other basename is supplied */
 	public final static String DEFAULT_BASENAME = "views";
 
-	private String basename = DEFAULT_BASENAME;
+	private String[] basenames = new String[] {DEFAULT_BASENAME};
 
 	private String defaultParentView;
 
@@ -62,11 +62,21 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 	 * ResourceBundle supports different suffixes. For example, a base name of
 	 * "views" might map to ResourceBundle files "views", "views_en_au" and "views_de".
 	 * <p>The default is "views".
-	 * @param basename the ResourceBundle base name
+	 * @param basename the ResourceBundle basename
+	 * @see #setBasenames
 	 * @see java.util.ResourceBundle
 	 */
 	public void setBasename(String basename) {
-		this.basename = basename;
+		setBasenames(new String[] {basename});
+	}
+
+	/**
+	 * Set multiple ResourceBundle basenames.
+	 * @param basenames multiple ResourceBundle basenames
+	 * @see #setBasename
+	 */
+	public void setBasenames(String[] basenames) {
+		this.basenames = basenames;
 	}
 
 	/**
@@ -95,13 +105,15 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver {
 		if (parsedBundle != null) {
 			return parsedBundle;
 		}
-		ResourceBundle bundle = ResourceBundle.getBundle(this.basename, locale,
-																										 Thread.currentThread().getContextClassLoader());
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(getApplicationContext());
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(lbf);
 		reader.setDefaultParentBean(this.defaultParentView);
-		reader.registerBeanDefinitions(bundle);
-		lbf.registerCustomEditor(Resource.class, new ContextResourceEditor(getApplicationContext()));
+		for (int i = 0; i < this.basenames.length; i++) {
+			ResourceBundle bundle = ResourceBundle.getBundle(this.basenames[i], locale,
+																											 Thread.currentThread().getContextClassLoader());
+			reader.registerBeanDefinitions(bundle);
+		}
+		lbf.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));
 		lbf.preInstantiateSingletons();
 		if (isCache()) {
 			this.cachedFactories.put(locale, lbf);
