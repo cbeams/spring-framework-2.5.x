@@ -82,5 +82,7 @@
 	<classpathentry kind="lib" path="lib/rowset/rowset.jar"/>
 	<classpathentry kind="lib" path="lib/jboss/jboss.jar"/>
 	<classpathentry kind="lib" path="lib/cglib/cglib-2.0.2-dev.jar"/>
+	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
+	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
