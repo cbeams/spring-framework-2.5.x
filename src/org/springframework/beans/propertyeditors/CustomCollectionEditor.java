@@ -76,6 +76,13 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	}
 
 	/**
+	 * Convert the given text value to a Collection with a single element.
+	 */
+	public void setAsText(String text) throws IllegalArgumentException {
+		setValue(text);
+	}
+
+	/**
 	 * Convert the given value to a Collection of the target type.
 	 */
 	public void setValue(Object value) {
@@ -100,7 +107,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 			super.setValue(target);
 		}
 		else {
-			// A plain value: convert it to an array with a single component.
+			// A plain value: convert it to a Collection with a single element.
 			Collection target = createCollection(this.collectionType, 1);
 			target.add(value);
 			super.setValue(target);
