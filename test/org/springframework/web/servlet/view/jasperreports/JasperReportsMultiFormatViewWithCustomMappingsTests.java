@@ -29,6 +29,7 @@ public class JasperReportsMultiFormatViewWithCustomMappingsTests extends JasperR
 		view.setFormatKey("fmt");
 
 		Properties props = new Properties();
+		props.setProperty("csv", JasperReportsCsvView.class.getName());
 		props.setProperty("comma-separated", JasperReportsCsvView.class.getName());
 		props.setProperty("html", JasperReportsHtmlView.class.getName());
 
