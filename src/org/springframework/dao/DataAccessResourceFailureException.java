@@ -1,10 +1,6 @@
-/**
- * Generic framework code included with 
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). 
- * This code is free to use and modify. 
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
 
 package org.springframework.dao;
@@ -13,7 +9,7 @@ package org.springframework.dao;
  * Data access exception thrown when a resource fails completely:
  * for example, if we can't connect to a database using JDBC.
  * @author Rod Johnson
- * @version $Id: DataAccessResourceFailureException.java,v 1.2 2003-10-14 16:30:13 jhoeller Exp $
+ * @version $Id: DataAccessResourceFailureException.java,v 1.3 2003-11-02 12:53:04 johnsonr Exp $
  */
 public class DataAccessResourceFailureException extends DataAccessException {
 

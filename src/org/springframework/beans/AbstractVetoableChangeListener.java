@@ -1,3 +1,8 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+ 
 package org.springframework.beans;
 
 import java.beans.Introspector;
@@ -17,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
  * the method call to one of any number of validation methods defined in
  * concrete subclasses. This is a typical use of reflection to avoid the
  * need for a chain of if/else statements, discussed in
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-on-One J2EE Design and Development</a>.
+ * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-on-One J2EE Design and Development</a>.
  *
  * <p>The signature for validation methods must be of this form
  * (the following example validates an int property named age):
@@ -42,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
  * throw another PropertyVetoException, which will be ignored by the caller.
  *
  * @author Rod Johnson
- * @version $Id: AbstractVetoableChangeListener.java,v 1.1.1.1 2003-08-14 16:20:14 trisberg Exp $
+ * @version $Id: AbstractVetoableChangeListener.java,v 1.2 2003-11-02 12:54:22 johnsonr Exp $
  */
 public abstract class AbstractVetoableChangeListener implements VetoableChangeListener {
 

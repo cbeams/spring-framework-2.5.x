@@ -1,10 +1,6 @@
-/**
- * Generic framework code included with 
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). 
- * This code is free to use and modify. 
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
 
 package org.springframework.dao;
@@ -15,7 +11,7 @@ package org.springframework.dao;
  * is not purely a relational concept; unique primary keys are
  * required by most database types.
  * @author Rod Johnson
- * @version $Id: DataIntegrityViolationException.java,v 1.1.1.1 2003-08-14 16:20:24 trisberg Exp $
+ * @version $Id: DataIntegrityViolationException.java,v 1.2 2003-11-02 12:53:06 johnsonr Exp $
  */
 public class DataIntegrityViolationException extends DataAccessException {
 

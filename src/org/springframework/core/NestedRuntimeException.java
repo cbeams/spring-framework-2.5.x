@@ -1,10 +1,6 @@
-/**
- * Generic framework code included with
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002).
- * This code is free to use and modify.
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
 
 package org.springframework.core;
@@ -27,12 +23,12 @@ import java.io.PrintWriter;
  * as Java forces these two classes to have different superclasses (ah, the inflexibility
  * of concrete inheritance!).
  *
- * <p>As discussed in <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>,
+ * <p>As discussed in <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>,
  * runtime exceptions are often a better alternative to checked exceptions. However, all exceptions
  * should preserve their stack trace, if caused by a lower-level exception.
  *
  * @author Rod Johnson
- * @version $Id: NestedRuntimeException.java,v 1.2 2003-10-08 08:40:37 jhoeller Exp $
+ * @version $Id: NestedRuntimeException.java,v 1.3 2003-11-02 12:53:54 johnsonr Exp $
  */
 public abstract class NestedRuntimeException extends RuntimeException implements HasRootCause {
 
