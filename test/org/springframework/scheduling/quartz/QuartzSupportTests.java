@@ -16,8 +16,10 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -25,12 +27,17 @@ import org.easymock.MockControl;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobListener;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerContext;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
+import org.quartz.SchedulerListener;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
+import org.quartz.TriggerListener;
 
 import org.springframework.beans.TestBean;
 import org.springframework.context.support.StaticApplicationContext;
@@ -121,6 +128,53 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.verify();
 	}
 	
+	public void testSchedulerFactoryBeanWithListeners() throws Exception {
+		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
+		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+
+		SchedulerListener schedulerListener = new TestSchedulerListener();
+		JobListener globalJobListener = new TestJobListener();
+		JobListener jobListener = new TestJobListener();
+		TriggerListener globalTriggerListener = new TestTriggerListener();
+		TriggerListener triggerListener = new TestTriggerListener();
+
+		scheduler.addSchedulerListener(schedulerListener);
+		schedulerControl.setVoidCallable();
+		scheduler.addGlobalJobListener(globalJobListener);
+		schedulerControl.setVoidCallable();
+		scheduler.addJobListener(jobListener);
+		schedulerControl.setVoidCallable();
+		scheduler.addGlobalTriggerListener(globalTriggerListener);
+		schedulerControl.setVoidCallable();
+		scheduler.addTriggerListener(triggerListener);
+		schedulerControl.setVoidCallable();
+		scheduler.start();
+		schedulerControl.setVoidCallable();
+		scheduler.shutdown(false);
+		schedulerControl.setVoidCallable();
+		schedulerControl.replay();
+
+		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
+					throws SchedulerException {
+				return scheduler;
+			}
+		};
+		schedulerFactoryBean.setSchedulerListeners(new SchedulerListener[] {schedulerListener});
+		schedulerFactoryBean.setGlobalJobListeners(new JobListener[] {globalJobListener});
+		schedulerFactoryBean.setJobListeners(new JobListener[] {jobListener});
+		schedulerFactoryBean.setGlobalTriggerListeners(new TriggerListener[] {globalTriggerListener});
+		schedulerFactoryBean.setTriggerListeners(new TriggerListener[] {triggerListener});
+		try {
+			schedulerFactoryBean.afterPropertiesSet();
+		}
+		finally {
+			schedulerFactoryBean.destroy();
+		}
+
+		schedulerControl.verify();
+	}
+
 	/*public void testMethodInvocationWithConcurrency() throws Exception {
 		methodInvokingConcurrency(true);
 	}*/
@@ -336,6 +390,99 @@ public class QuartzSupportTests extends TestCase {
 
 		assertEquals(tb, jobDetail.getJobDataMap().get("testBean"));
 		assertEquals(ac, jobDetail.getJobDataMap().get("appCtx"));
+	}
+
+	public void testJobDetailBeanWithListenerNames() {
+		JobDetailBean jobDetail = new JobDetailBean();
+		String[] names = new String[] {"test1", "test2"};
+		jobDetail.setJobListenerNames(names);
+		List result = Arrays.asList(jobDetail.getJobListenerNames());
+		assertEquals(Arrays.asList(names), result);
+	}
+
+	public void testCronTriggerBeanWithListenerNames() {
+		CronTriggerBean trigger = new CronTriggerBean();
+		String[] names = new String[] {"test1", "test2"};
+		trigger.setTriggerListenerNames(names);
+		List result = Arrays.asList(trigger.getTriggerListenerNames());
+		assertEquals(Arrays.asList(names), result);
+	}
+
+	public void testSimpleTriggerBeanWithListenerNames() {
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		String[] names = new String[] {"test1", "test2"};
+		trigger.setTriggerListenerNames(names);
+		List result = Arrays.asList(trigger.getTriggerListenerNames());
+		assertEquals(Arrays.asList(names), result);
+	}
+
+
+	private static class TestSchedulerListener implements SchedulerListener {
+
+		public void jobScheduled(Trigger trigger) {
+		}
+
+		public void jobUnscheduled(String triggerName, String triggerGroup) {
+		}
+
+		public void triggerFinalized(Trigger trigger) {
+		}
+
+		public void triggersPaused(String triggerName, String triggerGroup) {
+		}
+
+		public void triggersResumed(String triggerName, String triggerGroup) {
+		}
+
+		public void jobsPaused(String jobName, String jobGroup) {
+		}
+
+		public void jobsResumed(String jobName, String jobGroup) {
+		}
+
+		public void schedulerError(String msg, SchedulerException cause) {
+		}
+
+		public void schedulerShutdown() {
+		}
+	}
+
+
+	private static class TestJobListener implements JobListener {
+
+		public String getName() {
+			return null;
+		}
+
+		public void jobToBeExecuted(JobExecutionContext context) {
+		}
+
+		public void jobExecutionVetoed(JobExecutionContext context) {
+		}
+
+		public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
+		}
+	}
+
+
+	private static class TestTriggerListener implements TriggerListener {
+
+		public String getName() {
+			return null;
+		}
+
+		public void triggerFired(Trigger trigger, JobExecutionContext context) {
+		}
+
+		public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
+			return false;
+		}
+
+		public void triggerMisfired(Trigger trigger) {
+		}
+
+		public void triggerComplete(Trigger trigger, JobExecutionContext context, int triggerInstructionCode) {
+		}
 	}
 
 }

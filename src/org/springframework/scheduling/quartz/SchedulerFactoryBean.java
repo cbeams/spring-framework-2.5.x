@@ -33,10 +33,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.Calendar;
 import org.quartz.JobDetail;
+import org.quartz.JobListener;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
+import org.quartz.SchedulerListener;
 import org.quartz.Trigger;
+import org.quartz.TriggerListener;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.SimpleThreadPool;
 
@@ -54,13 +57,17 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- * FactoryBean that sets up a Quartz Scheduler and exposes it for
- * bean references.
+ * FactoryBean that sets up a Quartz Scheduler and exposes it for bean references.
  *
- * <p>Allows registration of JobDetails, Calendars and Triggers,
- * automatically starting the scheduler on initialization and
- * shutting it down on destruction. In typical scenarios, there is
- * no need to access the Scheduler instance itself in application code.
+ * <p>Allows registration of JobDetails, Calendars and Triggers, automatically
+ * starting the scheduler on initialization and shutting it down on destruction.
+ * In scenarios that just require static registration of jobs at startup, there
+ * is no need to access the Scheduler instance itself in application code.
+ *
+ * <p>For dynamic registration of jobs at runtime, use a bean reference to
+ * this SchedulerFactoryBean to get direct access to the Quartz Scheduler
+ * (<code>org.quartz.Scheduler</code>). This allows you to create new jobs
+ * and triggers, and also to control and monitor the entire Scheduler.
  *
  * <p>Note that Quartz instantiates a new Job for each execution, in
  * contrast to Timer which uses a TimerTask instance that is shared
@@ -112,6 +119,7 @@ public class SchedulerFactoryBean
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+
 	private Class schedulerFactoryClass = StdSchedulerFactory.class;
 
 	private String schedulerName;
@@ -124,11 +132,13 @@ public class SchedulerFactoryBean
 
 	private PlatformTransactionManager transactionManager;
 
+
 	private Map schedulerContextMap;
 
 	private ApplicationContext applicationContext;
 
 	private String applicationContextSchedulerContextKey;
+
 
 	private boolean overwriteExistingJobs = false;
 
@@ -140,11 +150,24 @@ public class SchedulerFactoryBean
 
 	private List triggers;
 
+
+	private SchedulerListener[] schedulerListeners;
+
+	private JobListener[] globalJobListeners;
+
+	private JobListener[] jobListeners;
+
+	private TriggerListener[] globalTriggerListeners;
+
+	private TriggerListener[] triggerListeners;
+
+
 	private boolean autoStartup = true;
 
 	private int startupDelay = 0;
 
 	private boolean waitForJobsToCompleteOnShutdown = false;
+
 
 	private Scheduler scheduler;
 
@@ -221,6 +244,7 @@ public class SchedulerFactoryBean
 		this.transactionManager = transactionManager;
 	}
 
+
 	/**
 	 * Register objects in the Scheduler context via a given Map.
 	 * These objects will be available to any Job that runs in this Scheduler.
@@ -258,6 +282,7 @@ public class SchedulerFactoryBean
 	public void setApplicationContextSchedulerContextKey(String applicationContextSchedulerContextKey) {
 		this.applicationContextSchedulerContextKey = applicationContextSchedulerContextKey;
 	}
+
 
 	/**
 	 * Set whether any jobs defined on this SchedulerFactoryBean should overwrite
@@ -336,6 +361,56 @@ public class SchedulerFactoryBean
 	public void setTriggers(Trigger[] triggers) {
 		this.triggers = Arrays.asList(triggers);
 	}
+
+
+	/**
+	 * Specify Quartz SchedulerListeners to be registered with the Scheduler.
+	 */
+	public void setSchedulerListeners(SchedulerListener[] schedulerListeners) {
+		this.schedulerListeners = schedulerListeners;
+	}
+
+	/**
+	 * Specify global Quartz JobListeners to be registered with the Scheduler.
+	 * Such JobListeners will apply to all Jobs in the Scheduler.
+	 */
+	public void setGlobalJobListeners(JobListener[] globalJobListeners) {
+		this.globalJobListeners = globalJobListeners;
+	}
+
+	/**
+	 * Specify named Quartz JobListeners to be registered with the Scheduler.
+	 * Such JobListeners will only apply to Jobs that explicitly activate
+	 * them via their name.
+	 * @see org.quartz.JobListener#getName
+	 * @see org.quartz.JobDetail#addJobListener
+	 * @see JobDetailBean#setJobListenerNames
+	 */
+	public void setJobListeners(JobListener[] jobListeners) {
+		this.jobListeners = jobListeners;
+	}
+
+	/**
+	 * Specify global Quartz TriggerListeners to be registered with the Scheduler.
+	 * Such TriggerListeners will apply to all Triggers in the Scheduler.
+	 */
+	public void setGlobalTriggerListeners(TriggerListener[] globalTriggerListeners) {
+		this.globalTriggerListeners = globalTriggerListeners;
+	}
+
+	/**
+	 * Specify named Quartz TriggerListeners to be registered with the Scheduler.
+	 * Such TriggerListeners will only apply to Triggers that explicitly activate
+	 * them via their name.
+	 * @see org.quartz.TriggerListener#getName
+	 * @see org.quartz.Trigger#addTriggerListener
+	 * @see CronTriggerBean#setTriggerListenerNames
+	 * @see SimpleTriggerBean#setTriggerListenerNames
+	 */
+	public void setTriggerListeners(TriggerListener[] triggerListeners) {
+		this.triggerListeners = triggerListeners;
+	}
+
 
 	/**
 	 * Set whether to automatically start the scheduler after initialization.
@@ -437,6 +512,7 @@ public class SchedulerFactoryBean
 			this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
 		}
 
+		registerListeners();
 		registerJobsAndTriggers();
 
 		// start Scheduler if demanded
@@ -465,6 +541,37 @@ public class SchedulerFactoryBean
 		}
 		else {
 			return schedulerFactory.getScheduler();
+		}
+	}
+
+	/**
+	 * Register all specified listeners with the Scheduler.
+	 */
+	private void registerListeners() throws SchedulerException {
+		if (this.schedulerListeners != null) {
+			for (int i = 0; i < this.schedulerListeners.length; i++) {
+				this.scheduler.addSchedulerListener(this.schedulerListeners[i]);
+			}
+		}
+		if (this.globalJobListeners != null) {
+			for (int i = 0; i < this.globalJobListeners.length; i++) {
+				this.scheduler.addGlobalJobListener(this.globalJobListeners[i]);
+			}
+		}
+		if (this.jobListeners != null) {
+			for (int i = 0; i < this.jobListeners.length; i++) {
+				this.scheduler.addJobListener(this.jobListeners[i]);
+			}
+		}
+		if (this.globalTriggerListeners != null) {
+			for (int i = 0; i < this.globalTriggerListeners.length; i++) {
+				this.scheduler.addGlobalTriggerListener(this.globalTriggerListeners[i]);
+			}
+		}
+		if (this.triggerListeners != null) {
+			for (int i = 0; i < this.triggerListeners.length; i++) {
+				this.scheduler.addTriggerListener(this.triggerListeners[i]);
+			}
 		}
 	}
 
