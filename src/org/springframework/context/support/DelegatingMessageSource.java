@@ -32,6 +32,7 @@ import org.springframework.context.NoSuchMessageException;
  *
  * @author Juergen Hoeller
  * @since 1.1.5
+ * @see AbstractApplicationContext
  */
 public class DelegatingMessageSource implements HierarchicalMessageSource {
 
@@ -68,6 +69,9 @@ public class DelegatingMessageSource implements HierarchicalMessageSource {
 			return this.parentMessageSource.getMessage(resolvable, locale);
 		}
 		else {
+			if (resolvable.getDefaultMessage() != null) {
+				return resolvable.getDefaultMessage();
+			}
 			String[] codes = resolvable.getCodes();
 			String code = (codes != null && codes.length > 0 ? codes[0] : null);
 			throw new NoSuchMessageException(code, locale);
