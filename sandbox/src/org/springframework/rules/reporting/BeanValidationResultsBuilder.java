@@ -22,20 +22,27 @@ import java.util.Map;
 
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
+import org.springframework.rules.predicates.beans.BeanPropertyExpression;
+import org.springframework.rules.values.AspectAccessStrategy;
 
 /**
  * @author Keith Donald
  */
 public class BeanValidationResultsBuilder extends ValidationResultsBuilder
         implements BeanValidationResults {
+    private Object bean;
+    
     private String currentProperty;
+
+    private Object currentPropertyValue;
+
     private Map beanResults = new HashMap();
-    private GetProperty getProperty;
 
     public BeanValidationResultsBuilder(Object bean) {
-        getProperty = new GetProperty(bean);
+        super();
+        this.bean = bean;
     }
-
+    
     public Map getResults() {
         return Collections.unmodifiableMap(beanResults);
     }
@@ -56,34 +63,43 @@ public class BeanValidationResultsBuilder extends ValidationResultsBuilder
     protected void constraintViolated(UnaryPredicate constraint) {
         if (logger.isDebugEnabled()) {
             logger.debug("[Done] collecting results for property '"
-                    + getPropertyName() + "'.  Constraints violated: ["
+                    + getCurrentPropertyName() + "'.  Constraints violated: ["
                     + constraint + "]");
         }
-        PropertyResults results = new PropertyResults(getPropertyName(),
-                getProperty.evaluate(getPropertyName()), constraint);
-        beanResults.put(getPropertyName(), results);
+        PropertyResults results = new PropertyResults(getCurrentPropertyName(),
+                getCurrentPropertyValue(), constraint);
+        beanResults.put(getCurrentPropertyName(), results);
     }
 
     protected void constraintSatisfied() {
         if (logger.isDebugEnabled()) {
             logger.debug("[Done] collecting results for property '"
-                    + getPropertyName() + "'.  All constraints met.");
+                    + getCurrentPropertyName() + "'.  All constraints met.");
         }
     }
 
-    /**
-     * @return Returns the propertyName.
-     */
-    public String getPropertyName() {
+    public String getCurrentPropertyName() {
         return currentProperty;
     }
 
-    /**
-     * @param propertyName
-     *            the propertyName to set.
-     */
-    public void setPropertyName(String propertyName) {
-        this.currentProperty = propertyName;
-        clear();
+    public Object getCurrentPropertyValue() {
+        return currentPropertyValue;
     }
+
+    public void setCurrentBeanPropertyExpression(
+            BeanPropertyExpression expression) {
+        this.currentProperty = expression.getPropertyName();
+        this.currentPropertyValue = getPropertyValue(this.currentProperty);
+        super.clear();
+    }
+    
+    private Object getPropertyValue(String propertyName) {
+        if (bean instanceof AspectAccessStrategy) {
+            return ((AspectAccessStrategy)bean).getValue(propertyName);
+        }
+        else {
+            return new GetProperty(bean).evaluate(propertyName);
+        }
+    }
+
 }
