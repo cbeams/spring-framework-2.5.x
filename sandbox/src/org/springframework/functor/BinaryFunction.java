@@ -4,6 +4,8 @@
  */
 package org.springframework.functor;
 
+import java.io.Serializable;
+
 /**
  * A function object that evaluates two arguments and returns a single result.
  * <p>
@@ -13,7 +15,7 @@ package org.springframework.functor;
  * 
  * @author Keith Donald
  */
-public interface BinaryFunction {
+public interface BinaryFunction extends Serializable {
 
     /**
      * Evaluate the function with the provided arguments, returning the result.
