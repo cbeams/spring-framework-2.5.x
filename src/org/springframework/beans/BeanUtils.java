@@ -16,7 +16,7 @@ import java.util.List;
  * Provides e.g. methods for sorting lists of beans by any property.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.8 2003-11-22 15:03:25 johnsonr Exp $
+ * @version $Id: BeanUtils.java,v 1.9 2003-11-23 22:42:05 jhoeller Exp $
  */
 public abstract class BeanUtils {
 
@@ -32,10 +32,10 @@ public abstract class BeanUtils {
 			return clazz.newInstance();
 		}
 		catch (InstantiationException ex) {
-			throw new FatalBeanException("Could not instantiate [" + clazz + "]; Is it an interface or an abstract class? Does it have a no-arg constructor?", ex);
+			throw new FatalBeanException("Could not instantiate class [" + clazz.getName() + "]; Is it an interface or an abstract class? Does it have a no-arg constructor?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not instantiate [" + clazz + "]; has class definition changed? Is there a public no-arg constructor?", ex);
+			throw new FatalBeanException("Could not instantiate class [" + clazz.getName() + "]; has class definition changed? Is there a public no-arg constructor?", ex);
 		}
 	}
 
@@ -53,13 +53,13 @@ public abstract class BeanUtils {
 			throw new FatalBeanException("Illegal arguments when trying to instantiate constructor: " + constructor, ex);
 		}
 		catch (InstantiationException ex) {
-			throw new FatalBeanException("Could not instantiate [" + constructor.getDeclaringClass() + "]; is it an interface or an abstract class?", ex);
+			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() + "]; is it an interface or an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Could not instantiate [" + constructor.getDeclaringClass() + "]; has class definition changed? Is there a public constructor?", ex);
+			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() + "]; has class definition changed? Is there a public constructor?", ex);
 		}
 		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Could not instantiate [" + constructor.getDeclaringClass() + "]; constructor threw exception", ex.getTargetException());
+			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() + "]; constructor threw exception", ex.getTargetException());
 		}
 	}
 
