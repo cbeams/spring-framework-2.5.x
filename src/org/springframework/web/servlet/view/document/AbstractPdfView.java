@@ -64,9 +64,9 @@ public abstract class AbstractPdfView extends AbstractView {
 		// The following simple method doesn't work in IE, which
 		// needs to know the content length.
 
-		// PdfWriter.getInstance(document, response.getOutputStream());
+		// PdfWriter writer = PdfWriter.getInstance(document, response.getOutputStream());
 		// document.open();
-		// doPdfDocument(model, document);
+		// buildPdfDocument(model, document, writer, request, response);
 		// document.close();
 
 		// See http://www.lowagie.com/iText/faq.html#msie
@@ -77,6 +77,8 @@ public abstract class AbstractPdfView extends AbstractView {
 		PdfWriter writer = PdfWriter.getInstance(document, baos);
 
 		writer.setViewerPreferences(getViewerPreferences());
+		buildPdfMetadata(model, document, request);
+
 		document.open();
 		buildPdfDocument(model, document, writer, request, response);
 		document.close();
@@ -113,14 +115,39 @@ public abstract class AbstractPdfView extends AbstractView {
 	}
 
 	/**
-	 * Subclasses must implement this method to create an iText PDF document,
+	 * Populate the iText Document's meta fields (author, title, etc.).
+	 * <br>Default is an empty implementation. Subclasses may override this method
+	 * to add meta fields such as title, subject, author, creator, keywords, etc.
+	 * This method is called after assigning a PdfWriter to the Document and
+	 * before calling <code>document.open()</code>.
+	 * @param model provides the model, in case meta information must be populated from it
+	 * @param document the iText document being populated
+	 * @param request in case we need locale etc. Shouldn't look at attributes.
+	 * @see com.lowagie.text.Document#addTitle
+	 * @see com.lowagie.text.Document#addSubject
+	 * @see com.lowagie.text.Document#addKeywords
+	 * @see com.lowagie.text.Document#addAuthor
+	 * @see com.lowagie.text.Document#addCreator
+	 * @see com.lowagie.text.Document#addProducer
+	 * @see com.lowagie.text.Document#addCreationDate
+	 * @see com.lowagie.text.Document#addHeader
+	*/
+	protected void buildPdfMetadata(Map model, Document document, HttpServletRequest request) {
+	}
+
+	/**
+	 * Subclasses must implement this method to build an iText PDF document,
 	 * given the model.
+	 * @param model the model Map
+	 * @param document the iText Document to use
+	 * @param writer the PdfWriter to use
 	 * @param request in case we need locale etc. Shouldn't look at attributes.
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 * @throws Exception any exception that occured during document building
 	 */
 	protected abstract void buildPdfDocument(
-			Map model, Document pdfDoc, PdfWriter writer, HttpServletRequest request, HttpServletResponse response)
+			Map model, Document document, PdfWriter writer,
+			HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 
 }
