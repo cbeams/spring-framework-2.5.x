@@ -25,7 +25,7 @@ import org.springframework.util.comparator.NullSafeComparator;
 /**
  * A interface for objects that are enumerations. Each enum instance has the
  * following characteristics:
- *
+ * 
  * <p>
  * A type that identifies the enum's class. For example, "fileFormat".
  * <p>
@@ -37,69 +37,68 @@ import org.springframework.util.comparator.NullSafeComparator;
  * <p>
  * A uniquely identifying key that identifies the enum in the context of all
  * other enums (of potentially different types.) For example, "fileFormat.CSV".
- *
+ * 
  * @author Keith Donald
  */
 public interface CodedEnum extends MessageSourceResolvable, Comparable {
 
-	/**
-	 * Comparator that sorts enumerations by <code>CODE_ORDER</code>
-	 */
-	public static final Comparator CODE_ORDER = new Comparator() {
-		public int compare(Object o1, Object o2) {
-			Object c1 = ((CodedEnum) o1).getCode();
-			Object c2 = ((CodedEnum) o2).getCode();
-			return ComparableComparator.instance().compare(c1, c2);
-		}
-	};
+    /**
+     * Comparator that sorts enumerations by <code>CODE_ORDER</code>
+     */
+    public static final Comparator CODE_ORDER = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            Object c1 = ((CodedEnum)o1).getCode();
+            Object c2 = ((CodedEnum)o2).getCode();
+            return ComparableComparator.instance().compare(c1, c2);
+        }
+    };
 
-	/**
-	 * Comparator that sorts enumerations by <code>LABEL_ORDER</code>
-	 */
-	public static final Comparator LABEL_ORDER = new Comparator() {
-		public int compare(Object o1, Object o2) {
-			CodedEnum e1 = (CodedEnum) o1;
-			CodedEnum e2 = (CodedEnum) o2;
-			Comparator c = new NullSafeComparator(String.CASE_INSENSITIVE_ORDER);
-			return c.compare(e1.getLabel(), e2.getLabel());
-		}
-	};
+    /**
+     * Comparator that sorts enumerations by <code>LABEL_ORDER</code>
+     */
+    public static final Comparator LABEL_ORDER = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            CodedEnum e1 = (CodedEnum)o1;
+            CodedEnum e2 = (CodedEnum)o2;
+            Comparator c = new NullSafeComparator(String.CASE_INSENSITIVE_ORDER);
+            return c.compare(e1.getLabel(), e2.getLabel());
+        }
+    };
 
-	/**
-	 * Comparator that sorts enumerations by <code>LABEL_ORDER</code>, then
-	 * natural order.
-	 */
-	public static final Comparator DEFAULT_ORDER = new CompoundComparator(
-			new Comparator[]{LABEL_ORDER, CODE_ORDER});
+    /**
+     * Comparator that sorts enumerations by <code>LABEL_ORDER</code>, then
+     * natural order.
+     */
+    public static final Comparator DEFAULT_ORDER = new CompoundComparator(new Comparator[] { LABEL_ORDER, CODE_ORDER });
 
-	/**
-	 * Returns this enumeration's type. Each type should be unique.
-	 *
-	 * @return The type.
-	 */
-	public String getType();
+    /**
+     * Returns this enumeration's type. Each type should be unique.
+     * 
+     * @return The type.
+     */
+    public String getType();
 
-	/**
-	 * Returns this enumeration's code. Each code should be unique within
-	 * enumeration's of the same type.
-	 *
-	 * @return The code.
-	 */
-	public Object getCode();
+    /**
+     * Returns this enumeration's code. Each code should be unique within
+     * enumeration's of the same type.
+     * 
+     * @return The code.
+     */
+    public Object getCode();
 
-	/**
-	 * Returns a descriptive, optional label.
-	 *
-	 * @return The label.
-	 */
-	public String getLabel();
+    /**
+     * Returns a descriptive, optional label.
+     * 
+     * @return The label.
+     */
+    public String getLabel();
 
-	/**
-	 * Returns a uniquely indentifying key string. A key generally consists of
-	 * the <type>.
-	 * <code> composite and should globally uniquely identify this enumeration.
-	 *
-	 * @return The unique key.
-	 */
-	public String getKey();
+    /**
+     * Returns a uniquely indentifying key string. A key generally consists of
+     * the <type>.
+     * <code> composite and should globally uniquely identify this enumeration.
+     *
+     * @return The unique key.
+     */
+    public String getKey();
 }

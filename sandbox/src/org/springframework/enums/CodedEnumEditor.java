@@ -25,76 +25,71 @@ import org.springframework.util.StringUtils;
 /**
  * Property Editor converts the string form of a CodedEnum into a CodedEnum
  * instance using a CodedEnumResolver.
- *
+ * 
  * @author Keith Donald
  */
 public class CodedEnumEditor extends PropertyEditorSupport {
 
-	private Locale locale = Locale.getDefault();
+    private Locale locale = Locale.getDefault();
 
-	private CodedEnumResolver resolver = StaticCodedEnumResolver.instance();
+    private CodedEnumResolver resolver = StaticCodedEnumResolver.instance();
 
-	/**
-	 * Set the resolver to used to lookup enums.
-	 *
-	 * @param resolver
-	 *            the coded enum resolver
-	 */
-	public void setEnumResolver(CodedEnumResolver resolver) {
-		this.resolver = resolver;
-	}
+    /**
+     * Set the resolver to used to lookup enums.
+     * 
+     * @param resolver the coded enum resolver
+     */
+    public void setEnumResolver(CodedEnumResolver resolver) {
+        this.resolver = resolver;
+    }
 
-	/**
-	 * Sets the locale to use when resolving enums.
-	 *
-	 * @param locale
-	 *            the locale
-	 */
-	public void setLocale(Locale locale) {
-		this.locale = locale;
-	}
+    /**
+     * Sets the locale to use when resolving enums.
+     * 
+     * @param locale the locale
+     */
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
 
-	private Locale getLocale() {
-		return Locale.getDefault();
-	}
+    private Locale getLocale() {
+        return Locale.getDefault();
+    }
 
-	public void setAsText(String text) throws IllegalArgumentException {
-		String[] keyParts = StringUtils.delimitedListToStringArray(text, ".");
-		Assert.isTrue(keyParts.length == 2,
-				"Enum string key must in the format '<type>.<code>'");
+    public void setAsText(String text) throws IllegalArgumentException {
+        String[] keyParts = StringUtils.delimitedListToStringArray(text, ".");
+        Assert.isTrue(keyParts.length == 2, "Enum string key must in the format '<type>.<code>'");
 
-		Object code;
-		String strCode = keyParts[1];
-		if (strCode.length() == 1) {
-			char c = strCode.charAt(0);
-			if (Character.isLetter(c)) {
-				code = new Character(c);
-			}
-			else if (Character.isDigit(c)) {
-				code = new Integer(c);
-			}
-			else {
-				throw new IllegalArgumentException("Invalid enum code '"
-						+ strCode + "'");
-			}
-		}
-		else {
-			try {
-				code = new Integer(strCode);
-			}
-			catch (NumberFormatException e) {
-				code = strCode;
-			}
-		}
-		CodedEnum enum = resolver.getEnum(keyParts[0], code, getLocale());
-		Assert.notNull(enum, "No enum with string key '" + text
-				+ "' was found.");
-		setValue(enum);
-	}
+        Object code;
+        String strCode = keyParts[1];
+        if (strCode.length() == 1) {
+            char c = strCode.charAt(0);
+            if (Character.isLetter(c)) {
+                code = new Character(c);
+            }
+            else if (Character.isDigit(c)) {
+                code = new Integer(c);
+            }
+            else {
+                throw new IllegalArgumentException("Invalid enum code '" + strCode + "'");
+            }
+        }
+        else {
+            try {
+                code = new Integer(strCode);
+            }
+            catch (NumberFormatException e) {
+                code = strCode;
+            }
+        }
+        CodedEnum enum = resolver.getEnum(keyParts[0], code, getLocale());
+        Assert.notNull(enum, "No enum with string key '" + text + "' was found.");
+        setValue(enum);
+    }
 
-	public String getAsText() {
-		CodedEnum enum = (CodedEnum) getValue();
-		return enum.getKey();
-	}
+    public String getAsText() {
+        CodedEnum enum = (CodedEnum)getValue();
+        return enum.getKey();
+    }
 
 }

@@ -29,80 +29,73 @@ import org.springframework.util.closure.support.Block;
 
 /**
  * Resolves statically (in java code) defined enumerations.
- *
+ * 
  * @author Keith Donald
  */
 public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 
-	private static final StaticCodedEnumResolver INSTANCE = new StaticCodedEnumResolver();
+    private static final StaticCodedEnumResolver INSTANCE = new StaticCodedEnumResolver();
 
-	public static StaticCodedEnumResolver instance() {
-		return INSTANCE;
-	}
+    public static StaticCodedEnumResolver instance() {
+        return INSTANCE;
+    }
 
-	/**
-	 * Call to register all the statically defined enumerations for a specific
-	 * enumeration <code>Class</code>.
-	 * <p>
-	 * Iterates over the static fields of the class and adds all instances of
-	 * <code>CodedEnum</code> to the list resolvable by this resolver.
-	 *
-	 * @param clazz
-	 *            The enum class.
-	 */
-	public void registerStaticEnums(final Class clazz) {
-		if (logger.isDebugEnabled()) {
-			logger
-					.debug("Registering statically defined coded enums for class "
-					+ clazz);
-		}
-		new CodedEnumFieldValueGenerator(clazz).run(new Block() {
-			protected void handle(Object value) {
-				add((CodedEnum) value);
-			}
-		});
-	}
+    /**
+     * Call to register all the statically defined enumerations for a specific
+     * enumeration <code>Class</code>.
+     * <p>
+     * Iterates over the static fields of the class and adds all instances of
+     * <code>CodedEnum</code> to the list resolvable by this resolver.
+     * 
+     * @param clazz The enum class.
+     */
+    public void registerStaticEnums(final Class clazz) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Registering statically defined coded enums for class " + clazz);
+        }
+        new CodedEnumFieldValueGenerator(clazz).run(new Block() {
+            protected void handle(Object value) {
+                add((CodedEnum)value);
+            }
+        });
+    }
 
-	/**
-	 * Generator that generates a list of static field values that can be
-	 * processed.
-	 *
-	 * @author Keith Donald
-	 */
-	private static class CodedEnumFieldValueGenerator implements ProcessTemplate {
+    /**
+     * Generator that generates a list of static field values that can be
+     * processed.
+     * 
+     * @author Keith Donald
+     */
+    private static class CodedEnumFieldValueGenerator implements ProcessTemplate {
 
-		private static final Log logger = LogFactory
-				.getLog(CodedEnumFieldValueGenerator.class);
+        private static final Log logger = LogFactory.getLog(CodedEnumFieldValueGenerator.class);
 
-		private Class clazz;
+        private Class clazz;
 
-		public CodedEnumFieldValueGenerator(Class clazz) {
-			Assert.notNull(clazz, "clazz is required");
-			this.clazz = clazz;
-		}
+        public CodedEnumFieldValueGenerator(Class clazz) {
+            Assert.notNull(clazz, "clazz is required");
+            this.clazz = clazz;
+        }
 
-		public void run(Closure fieldValueCallback) {
-			Field[] fields = clazz.getFields();
-			for (int i = 0; i < fields.length; i++) {
-				Field field = fields[i];
-				if (Modifier.isStatic(field.getModifiers())
-						&& Modifier.isPublic(field.getModifiers())) {
-					if (CodedEnum.class.isAssignableFrom(field.getType())) {
-						try {
-							Object value = field.get(null);
-							Assert
-									.isTrue(CodedEnum.class.isInstance(value),
-											"Field value must be a CodedEnum instance.");
-							fieldValueCallback.call(value);
-						}
-						catch (IllegalAccessException e) {
-							logger.warn(
-									"Unable to access field value " + field, e);
-						}
-					}
-				}
-			}
-		}
-	}
+        public void run(Closure fieldValueCallback) {
+            Field[] fields = clazz.getFields();
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
+                    if (CodedEnum.class.isAssignableFrom(field.getType())) {
+                        try {
+                            Object value = field.get(null);
+                            Assert.isTrue(CodedEnum.class.isInstance(value),
+                                    "Field value must be a CodedEnum instance.");
+                            fieldValueCallback.call(value);
+                        }
+                        catch (IllegalAccessException e) {
+                            logger.warn("Unable to access field value " + field, e);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 }

@@ -23,46 +23,39 @@ import java.util.Map;
  * Interface for looking up <code>CodedEnum</code> instances. If you require
  * localized enumerations, use the Locale parameter to specify the locale to
  * use.
- *
+ * 
  * @author Keith Donald
  */
 public interface CodedEnumResolver {
 
-	/**
-	 * Returns a list of enumerations of a particular type. Each element in the
-	 * list should be an instance of CodedEnum.
-	 *
-	 * @param type
-	 *            the enum type
-	 * @param locale
-	 *            the locale
-	 * @return A list of localized enumeration instances for the provided type.
-	 */
-	public List getEnumsAsList(String type, Locale locale);
+    /**
+     * Returns a list of enumerations of a particular type. Each element in the
+     * list should be an instance of CodedEnum.
+     * 
+     * @param type the enum type
+     * @param locale the locale
+     * @return A list of localized enumeration instances for the provided type.
+     */
+    public List getEnumsAsList(String type, Locale locale);
 
-	/**
-	 * Returns a map of enumerations of a particular type. Each element in the
-	 * map should be a key->value pair, where the key is the enum code, and the
-	 * value is the <code>CodedEnum</code> instance.
-	 *
-	 * @param type
-	 *            the enum type
-	 * @param locale
-	 *            the locale
-	 * @return A map of localized enumeration instances.
-	 */
-	public Map getEnumsAsMap(String type, Locale locale);
+    /**
+     * Returns a map of enumerations of a particular type. Each element in the
+     * map should be a key->value pair, where the key is the enum code, and the
+     * value is the <code>CodedEnum</code> instance.
+     * 
+     * @param type the enum type
+     * @param locale the locale
+     * @return A map of localized enumeration instances.
+     */
+    public Map getEnumsAsMap(String type, Locale locale);
 
-	/**
-	 * Resolves a single <code>CodedEnum</code> by its identifying code.
-	 *
-	 * @param type
-	 *            the enum type
-	 * @param code
-	 *            the enum code
-	 * @param locale
-	 *            the locale
-	 * @return The enum, or <code>null</code> if not found.
-	 */
-	public CodedEnum getEnum(String type, Object code, Locale locale);
+    /**
+     * Resolves a single <code>CodedEnum</code> by its identifying code.
+     * 
+     * @param type the enum type
+     * @param code the enum code
+     * @param locale the locale
+     * @return The enum, or <code>null</code> if not found.
+     */
+    public CodedEnum getEnum(String type, Object code, Locale locale);
 }

@@ -24,91 +24,87 @@ import org.springframework.util.StringUtils;
 
 /**
  * Abstract base superclass for CodedEnum implementations.
- *
+ * 
  * @author Keith Donald
  */
-public abstract class AbstractCodedEnum implements CodedEnum,
-		MessageSourceResolvable, Serializable, Comparable {
+public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResolvable, Serializable, Comparable {
 
-	private Comparable code;
+    private Comparable code;
 
-	private String label;
+    private String label;
 
-	protected AbstractCodedEnum(Comparable code) {
-		this(code, null);
-	}
+    protected AbstractCodedEnum(Comparable code) {
+        this(code, null);
+    }
 
-	protected AbstractCodedEnum(Comparable code, String label) {
-		Assert.notNull(code, "code is required");
-		this.code = code;
-		this.label = label;
-	}
+    protected AbstractCodedEnum(Comparable code, String label) {
+        Assert.notNull(code, "code is required");
+        this.code = code;
+        this.label = label;
+    }
 
-	public Object getCode() {
-		return code;
-	}
+    public Object getCode() {
+        return code;
+    }
 
-	public String getKey() {
-		return getType() + "." + getCode();
-	}
+    public String getKey() {
+        return getType() + "." + getCode();
+    }
 
-	public String getLabel() {
-		return label;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public boolean equals(Object o) {
-		if (!(o instanceof AbstractCodedEnum)) {
-			return false;
-		}
-		AbstractCodedEnum e = (AbstractCodedEnum) o;
-		return this.code.equals(e.code) && this.getType().equals(e.getType());
-	}
+    public boolean equals(Object o) {
+        if (!(o instanceof AbstractCodedEnum)) {
+            return false;
+        }
+        AbstractCodedEnum e = (AbstractCodedEnum)o;
+        return this.code.equals(e.code) && this.getType().equals(e.getType());
+    }
 
-	public int compareTo(Object o) {
-		AbstractCodedEnum e = (AbstractCodedEnum) o;
-		Assert.isTrue(getType().equals(e.getType()),
-				"You may only compare enumerations of the same type.");
-		return code.compareTo(e.code);
-	}
+    public int compareTo(Object o) {
+        AbstractCodedEnum e = (AbstractCodedEnum)o;
+        Assert.isTrue(getType().equals(e.getType()), "You may only compare enumerations of the same type.");
+        return code.compareTo(e.code);
+    }
 
-	public int hashCode() {
-		return code.hashCode() + getType().hashCode();
-	}
+    public int hashCode() {
+        return code.hashCode() + getType().hashCode();
+    }
 
-	/**
-	 * The enumeration key is used as the message key for internationalizing
-	 * enums.
-	 *
-	 * @see org.springframework.context.MessageSourceResolvable#getCodes()
-	 */
-	public String[] getCodes() {
-		return new String[]{getKey()};
-	}
+    /**
+     * The enumeration key is used as the message key for internationalizing
+     * enums.
+     * 
+     * @see org.springframework.context.MessageSourceResolvable#getCodes()
+     */
+    public String[] getCodes() {
+        return new String[] { getKey() };
+    }
 
-	public Object[] getArguments() {
-		return null;
-	}
+    public Object[] getArguments() {
+        return null;
+    }
 
-	public String getType() {
-		String classNameAsProperty = ClassUtils
-				.getShortNameAsProperty(getClass());
-		// unqualify inner class dot separator - leaving class name
-		return StringUtils.delimitedListToStringArray(classNameAsProperty, ".")[0];
-	}
+    public String getType() {
+        String classNameAsProperty = ClassUtils.getShortNameAsProperty(getClass());
+        // unqualify inner class dot separator - leaving class name
+        return StringUtils.delimitedListToStringArray(classNameAsProperty, ".")[0];
+    }
 
-	public String getDefaultMessage() {
-		if (label != null) {
-			return getLabel();
-		}
-		else {
-			return String.valueOf(getCode());
-		}
-	}
+    public String getDefaultMessage() {
+        if (label != null) {
+            return getLabel();
+        }
+        else {
+            return String.valueOf(getCode());
+        }
+    }
 
-	public String toString() {
-		String enumStr = (label != null ? (getLabel() + "(" + getCode() + ")")
-				: String.valueOf(getCode()));
-		return getType() + "." + enumStr;
-	}
+    public String toString() {
+        String enumStr = (label != null ? (getLabel() + "(" + getCode() + ")") : String.valueOf(getCode()));
+        return getType() + "." + enumStr;
+    }
 
 }
