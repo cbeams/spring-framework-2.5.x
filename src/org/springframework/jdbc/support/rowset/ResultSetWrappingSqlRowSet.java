@@ -46,7 +46,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * @see java.sql.ResultSet
  * @see javax.sql.rowset.CachedRowSet
  */
-public class SqlRowSetImpl implements SqlRowSet {
+public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 
 	private final ResultSet resultSet;
 
@@ -54,19 +54,19 @@ public class SqlRowSetImpl implements SqlRowSet {
 
 
 	/**
-	 * Create a new SqlRowSetImpl for the given ResultSet.
+	 * Create a new ResultSetWrappingSqlRowSet for the given ResultSet.
 	 * @param resultSet a disconnected ResultSet to wrap
 	 * (usually a <code>javax.sql.rowset.CachedRowSet</code>)
 	 * @throws InvalidResultSetAccessException if extracting
 	 * the ResultSetMetaData failed
 	 * @see javax.sql.rowset.CachedRowSet
 	 * @see java.sql.ResultSet#getMetaData
-	 * @see SqlRowSetMetaDataImpl
+	 * @see ResultSetWrappingSqlRowSetMetaData
 	 */
-	public SqlRowSetImpl(ResultSet resultSet) throws InvalidResultSetAccessException {
+	public ResultSetWrappingSqlRowSet(ResultSet resultSet) throws InvalidResultSetAccessException {
 		this.resultSet = resultSet;
 		try {
-			this.rowSetMetaData = new SqlRowSetMetaDataImpl(resultSet.getMetaData());
+			this.rowSetMetaData = new ResultSetWrappingSqlRowSetMetaData(resultSet.getMetaData());
 		}
 		catch (SQLException se) {
 			throw new InvalidResultSetAccessException(se);
@@ -89,9 +89,6 @@ public class SqlRowSetImpl implements SqlRowSet {
 		return this.rowSetMetaData;
 	}
 	
-	
-	// ResultSet/RowSet methods supported to retrieve data
-	
 	/**
 	 * @see java.sql.ResultSet#findColumn(String)
 	 */
@@ -103,7 +100,10 @@ public class SqlRowSetImpl implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
+
+	// RowSet methods for extracting data values
+
 	/**
 	 * @see java.sql.ResultSet#getBigDecimal(int)
 	 */
@@ -367,18 +367,6 @@ public class SqlRowSetImpl implements SqlRowSet {
 	}
 	
 	/**
-	 * @see java.sql.ResultSet#getRow()
-	 */
-	public int getRow() throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getRow();
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
-	}
-
-	/**
 	 * @see java.sql.ResultSet#getShort(int)
 	 */
 	public short getShort(int columnIndex) throws InvalidResultSetAccessException {
@@ -524,20 +512,8 @@ public class SqlRowSetImpl implements SqlRowSet {
 		}
 	}
 
-	/**
-	 * @see java.sql.ResultSet#getType()
-	 */
-	public int getType() throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getType();
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
-	}
-	
 
-	// ResultSet/RowSet navigation
+	// RowSet navigation methods
 	
 	/**
 	 * @see java.sql.ResultSet#absolute(int)
@@ -581,6 +557,18 @@ public class SqlRowSetImpl implements SqlRowSet {
 	public boolean first() throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.first();
+		}
+		catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+	}
+
+	/**
+	 * @see java.sql.ResultSet#getRow()
+	 */
+	public int getRow() throws InvalidResultSetAccessException {
+		try {
+			return this.resultSet.getRow();
 		}
 		catch (SQLException se) {
 			throw new InvalidResultSetAccessException(se);

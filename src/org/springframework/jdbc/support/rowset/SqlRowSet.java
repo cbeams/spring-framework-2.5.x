@@ -53,9 +53,6 @@ public interface SqlRowSet {
 	 */
 	SqlRowSetMetaData getMetaData();
 
-
-	// ResultSet/RowSet methods supported to retrieve data
-
 	/**
 	 * Maps the given column name to its column index.
 	 * @param columnName the name of the column
@@ -63,6 +60,9 @@ public interface SqlRowSet {
 	 * @see java.sql.ResultSet#findColumn(String)
 	 */
 	int findColumn(String columnName) throws InvalidResultSetAccessException;
+
+
+	// RowSet methods for extracting data values
 
 	/**
 	 * Retrieves the value of the indicated column in the current row as
@@ -267,13 +267,6 @@ public interface SqlRowSet {
 	Object getObject(String columnName) throws InvalidResultSetAccessException;
 
 	/**
-	 * Retrieves the current row number.
-	 * @return the current row number
-	 * @see java.sql.ResultSet#getRow()
-	 */
-	int getRow() throws InvalidResultSetAccessException;
-
-	/**
 	 * Retrieves the value of the indicated column in the current row as
 	 * a short.
 	 * @param columnIndex the column index
@@ -385,15 +378,8 @@ public interface SqlRowSet {
 	 */
 	Timestamp getTimestamp(String columnName) throws InvalidResultSetAccessException;
 
-	/**
-	 * Retrieves the type of the wrapped RowSet Object.
-	 * @return the RowSet type
-	 * @see java.sql.ResultSet#getType()
-	 */
-	int getType() throws InvalidResultSetAccessException;
 
-
-	// ResultSet/RowSet navigation
+	// RowSet navigation methods
 
 	/**
 	 * Moves the cursor to the given row number in the RowSet, just after the last row.
@@ -421,6 +407,13 @@ public interface SqlRowSet {
 	 * @see java.sql.ResultSet#first()
 	 */
 	boolean first() throws InvalidResultSetAccessException;
+
+	/**
+	 * Retrieves the current row number.
+	 * @return the current row number
+	 * @see java.sql.ResultSet#getRow()
+	 */
+	int getRow() throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieves whether the cursor is after the last row of this RowSet.

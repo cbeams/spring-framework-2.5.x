@@ -23,21 +23,38 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * Default implementation of Spring's SqlRowSetMetaData interface.
- * Used by SqlRowSetImpl.
+ * Used by ResultSetWrappingSqlRowSet.
+ *
+ * <p>This implementation wraps a <code>javax.sql.ResultSetMetaData</code>
+ * instance, catching any SQLExceptions and translating them to the
+ * appropriate Spring DataAccessException.
+ *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 1.2
- * @see SqlRowSetImpl#getMetaData
+ * @see ResultSetWrappingSqlRowSet#getMetaData
  */
-public class SqlRowSetMetaDataImpl implements SqlRowSetMetaData {
+public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 
 	private final ResultSetMetaData resultSetMetaData;
 
 	private String[] columnNames;
 
-	public SqlRowSetMetaDataImpl(ResultSetMetaData resultSetMetaData) {
+
+	/**
+	 * Create a new ResultSetWrappingSqlRowSetMetaData object
+	 * for the given ResultSetMetaData instance.
+	 * @param resultSetMetaData a disconnected ResultSetMetaData instance
+	 * to wrap (usually a <code>javax.sql.RowSetMetaData</code> instance)
+	 * @see java.sql.ResultSet#getMetaData
+	 * @see javax.sql.RowSetMetaData
+	 * @see ResultSetWrappingSqlRowSet#getMetaData
+	 */
+	public ResultSetWrappingSqlRowSetMetaData(ResultSetMetaData resultSetMetaData) {
 		this.resultSetMetaData = resultSetMetaData;
 	}
-	
+
+
 	public String getCatalogName(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getCatalogName(column);
@@ -69,7 +86,7 @@ public class SqlRowSetMetaDataImpl implements SqlRowSetMetaData {
 		if (this.columnNames == null) {
 			this.columnNames = new String[getColumnCount()];
 			for (int i = 0; i < getColumnCount(); i++) {
-				this.columnNames[i] = getColumnName(i+1);
+				this.columnNames[i] = getColumnName(i + 1);
 			}
 		}
 		return this.columnNames;
