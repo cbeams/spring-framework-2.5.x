@@ -20,6 +20,8 @@ package org.springframework.jdbc.core;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.springframework.dao.DataAccessException;
+
 /** 
  * Callback interface used by the JdbcTemplate class's doWithResultSetXXXX() methods.
  * Implementations of this interface perform the actual work of extracting results,
@@ -31,7 +33,7 @@ import java.sql.SQLException;
  *
  * @author Rod Johnson
  * @since April 24, 2003
- * @version $Id: ResultSetExtractor.java,v 1.3 2004-03-18 02:46:08 trisberg Exp $
+ * @version $Id: ResultSetExtractor.java,v 1.4 2004-04-28 07:20:33 jhoeller Exp $
  * @see JdbcTemplate
  * @see RowCallbackHandler
  */
@@ -45,7 +47,8 @@ public interface ResultSetExtractor {
 	 * @return an arbitrary result object
 	 * @throws SQLException if a SQLException is encountered getting column
 	 * values or navigating (that is, there's no need to catch SQLException)
+	 * @throws DataAccessException in case of custom exceptions
 	 */
-	Object extractData(ResultSet rs) throws SQLException;
+	Object extractData(ResultSet rs) throws SQLException, DataAccessException;
 
 }

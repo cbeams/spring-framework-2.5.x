@@ -19,6 +19,8 @@ package org.springframework.jdbc.core;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 
+import org.springframework.dao.DataAccessException;
+
 /**
  * Generic callback interface for code that operates on a CallableStatement.
  * Allows to execute any number of operations on a single CallableStatement,
@@ -58,8 +60,10 @@ public interface CallableStatementCallback {
 	 *
 	 * @param cs active JDBC CallableStatement
 	 * @return a result object, or null if none
-	 * @throws SQLException in case of errors
+	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
+	 * into a DataAccessException by a SQLExceptionTranslator
+	 * @throws DataAccessException in case of custom exceptions
 	 */
-	Object doInCallableStatement(CallableStatement cs) throws SQLException;
+	Object doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException;
 
 }

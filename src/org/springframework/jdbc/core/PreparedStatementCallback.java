@@ -19,6 +19,8 @@ package org.springframework.jdbc.core;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.springframework.dao.DataAccessException;
+
 /**
  * Generic callback interface for code that operates on a PreparedStatement.
  * Allows to execute any number of operations on a single PreparedStatement,
@@ -59,10 +61,12 @@ public interface PreparedStatementCallback {
 	 *
 	 * @param ps active JDBC PreparedStatement
 	 * @return a result object, or null if none
-	 * @throws SQLException in case of errors
+	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
+	 * into a DataAccessException by a SQLExceptionTranslator
+	 * @throws DataAccessException in case of custom exceptions
 	 * @see JdbcTemplate#queryForObject(String, Object[], Class)
 	 * @see JdbcTemplate#queryForList(String, Object[])
 	 */
-	Object doInPreparedStatement(PreparedStatement ps) throws SQLException;
+	Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException;
 
 }
