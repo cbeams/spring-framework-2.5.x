@@ -15,35 +15,34 @@ import org.springframework.jndi.JndiTemplate;
  * Effectively a mock object.
  * @author Rod Johnson
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
- * @version $Id: ExpectedLookupTemplate.java,v 1.1.1.1 2003-08-14 16:20:34 trisberg Exp $
+ * @version $Id: ExpectedLookupTemplate.java,v 1.2 2003-08-22 12:20:45 jhoeller Exp $
  */
 public class ExpectedLookupTemplate extends JndiTemplate {
 
-	private String jndiName;
+	private final String jndiName;
 
-	private Object o;
+	private final Object object;
 
 	/**
-	 * Construct a new JndiTemplate that will always
-	 * return the given object, but honour only requests for the
-	 * given name.
-	 * @param name name client is expected to look up
-	 * @param o object that will be returned
+	 * Construct a new JndiTemplate that will always return the
+	 * given object, but honour only requests for the given name.
+	 * @param name the name the client is expected to look up
+	 * @param object the object that will be returned
 	 */
-	public ExpectedLookupTemplate(String name, Object o) {
+	public ExpectedLookupTemplate(String name, Object object) {
 		this.jndiName = name;
-		this.o = o;
+		this.object = object;
 	}
 
 	/**
 	 * If the name is the expected name specified in the constructor,
-	 * return the object provided in the constructor. If
-	 * the name is unexpected, throw an exception.
-	 * @see org.springframework.jndi.JndiTemplate#lookup(java.lang.String)
+	 * return the object provided in the constructor. If the name is
+	 * unexpected, a respective NamingException gets thrown.
 	 */
 	public Object lookup(String name) throws NamingException {
 		if (!name.equals(jndiName))
-			throw new UnsupportedOperationException("unexpected JNDI name");
-		return o;
+			throw new NamingException("unexpected JNDI name");
+		return object;
 	}
+
 }

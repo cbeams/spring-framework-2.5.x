@@ -15,7 +15,8 @@ import org.springframework.beans.factory.InitializingBean;
  * Convenient superclass for JNDI-based Service Locators. Subclasses are
  * JavaBeans, exposing a jndiName property. This may or may not include
  * the "java:comp/env/" prefix expected by J2EE applications. If it doesn't,
- * it will be prepended.
+ * the container prefix will be prepended if the "inContainer" property is
+ * true (the default) and no other scheme like "java:" is given.
  *
  * <p>Subclasses must implement the located() method to cache the results
  * of the JNDI lookup. They don't need to worry about error handling.
@@ -23,7 +24,8 @@ import org.springframework.beans.factory.InitializingBean;
  * <p><b>Assumptions: </b>The resource obtained from JNDI can be cached.
  *
  * @author Rod Johnson
- * @version $Id: AbstractJndiLocator.java,v 1.1.1.1 2003-08-14 16:20:34 trisberg Exp $
+ * @version $Id: AbstractJndiLocator.java,v 1.2 2003-08-22 12:20:36 jhoeller Exp $
+ * @see #setInContainer
  */
 public abstract class AbstractJndiLocator implements InitializingBean {
 
@@ -93,6 +95,7 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 	 * Set if the lookup occurs in a J2EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. Default is true.
+	 * <p>Note: Will only get applied if no other scheme like "java:" is given.
 	 */
 	public void setInContainer(boolean inContainer) {
 		this.inContainer = inContainer;
@@ -109,7 +112,8 @@ public abstract class AbstractJndiLocator implements InitializingBean {
 		if (this.jndiName == null || this.jndiName.equals("")) {
 			throw new IllegalArgumentException("Property 'jndiName' must be set on " + getClass().getName());
 		}
-		if (this.inContainer && !this.jndiName.startsWith(CONTAINER_PREFIX)) {
+		// prepend container prefix if not already specified and no other scheme given
+		if (this.inContainer && !this.jndiName.startsWith(CONTAINER_PREFIX) && this.jndiName.indexOf(':') == -1) {
 			this.jndiName = CONTAINER_PREFIX + this.jndiName;
 		}
 		Object o = lookup(this.jndiName);
