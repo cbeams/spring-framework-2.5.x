@@ -84,7 +84,7 @@
 				vendor codes and based on the DatabaseProductName taken from the DatabaseMetaData, the codes for the current database are used.
 				</para>
 				<para>
-				The <literal>SQLErrorCodeSQLExceptionTranslator</literal>  applies the following matching rules:
+				The <literal>SQLErrorCodeSQLExceptionTranslator</literal> applies the following matching rules:
 				<itemizedlist spacing="compact">
 				<listitem>
 				<para>
@@ -105,6 +105,41 @@
 				</listitem>
 				</itemizedlist>
        </para>
+			<para>
+				<literal>SQLErrorCodeSQLExceptionTranslator</literal> can be extended the following way:
+				<programlisting><![CDATA[
+public class MySQLErrorCodesTransalator extends SQLErrorCodeSQLExceptionTranslator {
+  protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
+    if (sqlex.getErrorCode() == -12345)
+      return new DeadlockLoserDataAccessException(task, sqlex);
+    return null;
+  }
+}
+				]]></programlisting>
+				In this example the specific error code '-12345' is translated and any other errors are simply left to be translated 
+				by the default translator implementation.  To use this custom translator, it is necessary to pass it to the 
+				<literal>JdbcTemplate</literal> using the method <literal>setExceptionTranslator</literal> and to use this 
+				<literal>JdbcTemplate</literal> for all of the data access processing where this translator is needed. 
+				Here is an example of how this custom translator can be used:
+				<programlisting><![CDATA[
+    // create a JdbcTemplate and set data source
+    JdbcTemplate jt = new JdbcTemplate();
+    jt.setDataSource(dataSource);
+    // create a custom translator and set the datasource for the default translation lookup
+    MySQLErrorCodesTransalator tr = new MySQLErrorCodesTransalator(); 
+    tr.setDataSource(dataSource);
+    jt.setExceptionTranslator(tr);
+    // use the JdbcTemplate for this SqlUpdate
+    SqlUpdate su = new SqlUpdate();
+    su.setJdbcTemplate(jt);
+    su.setSql("update orders set shipping_charge = shipping_charge * 1.05");
+    su.compile();
+    su.update();
+				]]></programlisting>
+				The custom translator is passed a data source because we still want the default translation to use the meta data information
+				to look up the error codes in <literal>sql-error-codes.xml</literal>.
+				specified
+			</para>
 
 			</sect2>
 
