@@ -20,7 +20,7 @@
 <!ELEMENT webflow ( (action-state | view-state | subflow-state | end-state)+ )>
 
 <!--
-	Unique id of the web flow.
+	Unique identifier of the web flow; should be unique to all other webflows.
 -->
 <!ATTLIST webflow id ID #REQUIRED>
 
@@ -37,51 +37,53 @@
 <!ELEMENT action-state ( action+, transition+ )>
 
 <!--
-	Unique id of an action state.
+	Unique identifier of an action state; must be unique to this flow.
 -->
 <!ATTLIST action-state id ID #REQUIRED>
 
 <!--
-	Defines a single action that should be executed when the action state is entered.
+	Defines a single Action to be be executed when the action state is entered.
 -->
 <!ELEMENT action ( property* )>
 
 <!--
-	Identifier of the action implementation exported in the configured registry.
-	This is similar to the <ref bean="myBean"/> notation of the Spring beans DTD.
+	Identifier of the action implementation exported in the configured registry, typically
+	the Spring Bean Factory.  This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
 -->
 <!ATTLIST action bean CDATA #IMPLIED>
 
 <!--
 	Fully qualified class of the Action implementation. An instance of the
-	class will be instantiated and possibly auto-wired depending on the value of the
+	class will be instantiated and possibly autowired depending on the value of the
 	autowire attribute.
 -->
 <!ATTLIST action class CDATA #IMPLIED>
 	
 <!--
-	Autowiring options for use when instantiating the action implementation with the class attribute.
+	Dependency (aka collaborator) autowiring options for use when instantiating the action 
+	mplementation with the class attribute.
 -->
 <!ATTLIST action autowire (no | byName | byType | constructor | autodetect | default) "default">
 
 <!--
-	Fully qualified implementation class of the action exported in the configured registry.
-	For "by type" action lookup to work, there must be exactly one action implementation
+	Fully qualified implementation class of the Action exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one Action implementation
 	exported of that type.
 -->
 <!ATTLIST action classref CDATA #IMPLIED>
 
 <!--
-	Name of the action. This is optional. When not specified, the action will
-	not have any name and the events signaled by the action will not get the
-	action name prepended to them. An action with a name is also referred to
-	as a named action.
+	Optional name qualifier for the action. When specified, the action will
+	qualify execution result event identifiers by this name.
 -->
 <!ATTLIST action name CDATA #IMPLIED>
 
 <!--
-	Property associated with an action in an action state. This allows
-	basic action state specific parametrization of an action.
+	A property associated with an action in an action state.  Properties are simple strings that 
+	allow you to annotate the action in the context of the state it is being linked with.
+	For example, the 'caption' property might serve a GUI tooltip or logging statement.
+	The 'executeMethodName'	property my specify a target method to invoke on the action instance.
 -->
 <!ELEMENT property ( value? )>
 
@@ -91,12 +93,12 @@
 <!ATTLIST property name CDATA #REQUIRED>
 
 <!--
-	A short-cut alternative to a child element "value".
+	A short-cut alternative to an explicit child 'value' element.
 -->
 <!ATTLIST property value CDATA #IMPLIED>
 
 <!--
-	Contains a property value.
+	The value of the property
 -->
 <!ELEMENT value ( #PCDATA )>
 
@@ -107,13 +109,13 @@
 <!ELEMENT view-state ( transition+ )>
 
 <!--
-	Unique id of a view state.
+	Unique identifier of an view state; must be unique to this flow.
 -->
 <!ATTLIST view-state id ID #REQUIRED>
 
 <!--
-	Name of the view that will be rendered. This is optional. When
-	not present, this view state will be a marker view state.
+	Optional name of the view that will be rendered when the view state is entered.
+	When not present, this view state will be a marker view state.
 	A marker view state does not actually render a view, but just returns
 	control to the client. Use a marker view state when an action has
 	already generated the response.
@@ -121,24 +123,15 @@
 <!ATTLIST view-state view CDATA #IMPLIED>
 
 <!--
-	Defines a transition to another state.
+	Defines a transition from one state to another.  Transitions define the supported 
+	paths through the flow.
 -->
 <!ELEMENT transition EMPTY>
 
 <!--
-	The id of the event that will trigger this transition.
-	
-	The event identifier is of the form "[actionName'.']event". So
-	the name of the event that will trigger the transition is prepended with
-	the name of the action that signals the event. Both are concatenated using
-	a dot. So when you have an action with name "myAction" that signals an
-	event "success", the event on which the corresponding transition will
-	fire should be "myAction.success".
-	
-	For the events signaled by an action that does not have a name, or events
-	signaled in a view state or a subflow state, the transition event is simply
-	the name of the event that triggers the transition ("success" in the
-	previous example).
+	The identifier of the event that can trigger this transition.  A event describes something
+	that happens e.g "submit", "back", "success", "error".
+	Note: in the future, custom transitional expressions will be definable from this element.
 -->
 <!ATTLIST transition on CDATA #REQUIRED>
 
@@ -148,51 +141,50 @@
 <!ATTLIST transition to IDREF #REQUIRED>
 
 <!--
-	Defines a sub flow state: a state where a sub flow is spawned. When the
-	sub flow reaches an end state, the corresponding transition in this state
-	is triggered to continue the flow.
+	Defines a sub flow state: a state that spawns sub flow when entered. When the
+	sub flow completes execution (reaches a end state), the result of subflow execution
+	will be used as grounds for a transition out of this state.
 -->
 <!ELEMENT subflow-state ( attribute-mapper?, transition+ )>
 
 <!--
-	Unique id of a sub flow state.
+	Unique identifier of a subflow state; must be unique to this flow.
 -->
 <!ATTLIST subflow-state id ID #REQUIRED>
 
 <!--
-	Name (unique bean id) of the sub flow that will be spawned.
+	Reference to the id of the webflow to be spawned when this subflow state is entered.
 -->
 <!ATTLIST subflow-state flow CDATA #REQUIRED>
 
 <!--
-	Defines an optional FlowAttributeMapper that will map data to and from
-	the spawned sub flow.
+	An optional mapper that will map attributes from the parent flow to/from the spawned subflow. 
 -->
 <!ELEMENT attribute-mapper EMPTY>
 
 <!--
 	Identifier of the flow attribute mapper implementation exported in the
-	configured registry. This is similar to the <ref bean="myBean"/>
+	configured registry, typically a Spring Bean Factory. This is similar to the <ref bean="myBean"/>
 	notation of the Spring beans DTD.
 -->
 <!ATTLIST attribute-mapper bean CDATA #IMPLIED>
 
 <!--
 	Fully qualified class of the flow attribute mapper implementation. An
-	instance of the class will be instantiated and possibly auto-wired
+	instance of the class will be instantiated and possibly autowired
 	depending on the value of the autowire attribute.
 -->
 <!ATTLIST attribute-mapper class CDATA #IMPLIED>
 	
 <!--
-	Autowiring options for use when instantiating the flow attribute mapper
+	Dependency (collaborator) autowiring options for use when instantiating the flow attribute mapper
 	implementation with the class attribute.
 -->
 <!ATTLIST attribute-mapper autowire (no | byName | byType | constructor | autodetect | default) "default">
 
 <!--
 	Fully qualified implementation class of the flow attribute mapper exported
-	in the configured registry. For "by type" mapper lookup to work, there must
+	in the configured registry. For this "by type" mapper lookup to work, there must
 	be exactly one mapper implementation exported of that type.
 -->
 <!ATTLIST attribute-mapper classref CDATA #IMPLIED>
@@ -203,16 +195,14 @@
 <!ELEMENT end-state EMPTY>
 
 <!--
-	Unique id of an end state.
+	Unique identifier of a end state; must be unique to this flow.
 -->
 <!ATTLIST end-state id ID #REQUIRED>
 
 <!--
-	Name of the view that will be rendered when this state is reached
-	and when there is no parent flow to continue. This is optional. When
-	not present, this state will be a market end state.
-	A marker end state does not actually render a view, but just returns
-	control to the client. Use a marker end state when an action has
-	already generated the response.
+	Optional name of the view that will be rendered when this state is reached
+	and when there is no parent flow to continue. When not present, this state will be a marker end state.
+	A marker end state does not actually render a view, but just returns control to the client.
+	Use a marker end state when another object is expected to generate the response.
 -->
 <!ATTLIST end-state view CDATA #IMPLIED>
