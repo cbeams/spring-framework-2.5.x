@@ -8,7 +8,6 @@
     <classpathentry exported="true" kind="lib" path="lib/j2ee/servlet.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/j2ee/jdbc2_0-stdext.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
-    <classpathentry exported="true" kind="lib" path="lib/log4j/commons-logging.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/log4j/log4j-1.2.8.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/hibernate/dom4j.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
@@ -42,5 +41,6 @@
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-dbcp.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-digester.jar"/>
     <classpathentry kind="lib" path="lib/jakarta-commons/commons-lang.jar"/>
+    <classpathentry kind="lib" path="lib/jakarta-commons/commons-logging.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
