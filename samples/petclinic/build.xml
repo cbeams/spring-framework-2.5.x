@@ -36,7 +36,7 @@
 			<include name="servlet.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/ojb">
-			<include name="db-ojb-1.0.0.jar"/>
+			<include name="db-ojb-1.0.1.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
