@@ -18,7 +18,20 @@ package org.springframework.rules.predicates;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.reporting.TypeResolvableSupport;
 
+/**
+ * Convenient abstract super class for predicates whose type's are resolvable,
+ * useful for mapping the type to a i18n message in a message source.
+ * 
+ * @author Keith Donald
+ */
 public abstract class TypeResolvableUnaryPredicate extends
         TypeResolvableSupport implements UnaryPredicate {
 
+    public TypeResolvableUnaryPredicate() {
+        super();
+    }
+
+    public TypeResolvableUnaryPredicate(String type) {
+        super(type);
+    }
 }
