@@ -6,14 +6,14 @@
 package org.springframework.aop.framework;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.List;
 
 import net.sf.cglib.CodeGenerationException;
 import net.sf.cglib.Enhancer;
+import net.sf.cglib.MethodFilter;
 import net.sf.cglib.MethodInterceptor;
 import net.sf.cglib.MethodProxy;
 
@@ -24,41 +24,32 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.TargetSource;
 
 /**
- * InvocationHandler implementation for the Spring AOP framework,
- * based on CGLIB1 proxies.
+ * CGLIB AopProxy implementation for the Spring AOP framework.
+ * Also implements the CGLIB MethodInterceptor and MethodFilter
+ * interfaces.
  *
  * <p>Objects of this type should be obtained through proxy factories,
  * configured by a AdvisedSupport implementation. This class is internal
  * to the Spring framework and need not be used directly by client code.
  *
- * <p>Proxies created using this class can be threadsafe if the
+ * <p>Proxies created using this class are threadsafe if the
  * underlying (target) class is threadsafe.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: Cglib1AopProxy.java,v 1.2 2003-12-01 18:42:00 johnsonr Exp $
+ * @version $Id: Cglib1AopProxy.java,v 1.3 2003-12-02 22:15:03 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
-class Cglib1AopProxy implements AopProxy, MethodInterceptor {
+class Cglib1AopProxy implements AopProxy, MethodInterceptor, MethodFilter {
 	
 	/**
-	 * Invoke the target directly via reflection
+	 * Invoke the target using CGLIB MethodProxy
 	 * @return
 	 */
 	public static Object invokeJoinpointUsingMethodProxy(Object target, Method m, Object[] args, MethodProxy methodProxy) throws Throwable {
-		//	Use reflection to invoke the method
 		 try {
 			 Object rval = methodProxy.invoke(target, args);
 			 return rval;
-		 }
-		 catch (InvocationTargetException ex) {
-			 // Invoked method threw a checked exception. 
-			 // We must rethrow it. The client won't see the interceptor
-			 Throwable t = ex.getTargetException();
-			 throw t;
-		 }
-		 catch (IllegalArgumentException ex) {
-			throw new AspectException("AOP configuration seems to be invalid: tried calling " + m + " on [" + target + "]: " +  ex);
 		 }
 		 catch (IllegalAccessException ex) {
 			 throw new AspectException("Couldn't access method " + m, ex);
@@ -86,14 +77,12 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 			throw new AopConfigException("Either an interface or a target is required for proxy creation");
 		}
 	}
-	
-	
+		
 	
 	/**
-	 * Implementation of InvocationHandler.invoke.
+	 * Implementation of MethodInterceptor.
 	 * Callers will see exactly the exception thrown by the target, unless a hook
 	 * method throws an exception.
-	 *
 	 * @see net.sf.cglib.MethodInterceptor#intercept(java.lang.Object, java.lang.reflect.Method, java.lang.Object[], net.sf.cglib.MethodProxy)
 	 */
 	public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
@@ -115,7 +104,8 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 				// What if equals throws exception!?
 
 				// This class implements the equals() method itself
-				return method.invoke(this, args);
+				// We don't need to use reflection
+				return new Boolean(equals(args[0]));
 			}
 			else if (Advised.class.equals(method.getDeclaringClass())) {
 				// Service invocations on ProxyConfig with the proxy config
@@ -167,7 +157,6 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 				
 				// If we get here, we need to create a MethodInvocation
 				retVal = invocation.proceed();
-				
 			}
 			
 			// Massage return value if necessary
@@ -198,7 +187,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 			//	advised.getMethodInvocationFactory().release(invocation);
 			//}
 		}
-	}
+	}	// intercept
 	
 
 	/**
@@ -223,14 +212,26 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 	
 	protected Object createProxy() {
 		try {
-			return Enhancer.enhance(advised.getTargetSource().getTargetClass(), AopProxyUtils.completeProxiedInterfaces(advised),
-				this
+			return Enhancer.enhance(advised.getTargetSource().getTargetClass(), 
+				AopProxyUtils.completeProxiedInterfaces(advised),
+				this,
+				null, 	// ClassLoader: use default
+				null,	// Don't worry about serialization and writeReplace for now
+				this	// MethodFilter
 			);
 		}
 		catch (CodeGenerationException ex) {
 			throw new AspectException("Couldn't generate CGLIB subclass of class '" + advised.getTargetSource().getTargetClass() + "': " +
 					"Common causes of this problem include using a final class, or a non-visible class", ex);
 		}
+	}
+	
+	/**
+	 * Exclude finalize() method.
+	 * @see net.sf.cglib.MethodFilter#accept(java.lang.reflect.Member)
+	 */
+	public boolean accept(Member member) {
+		return !(member.getName().equals("finalize") && member.getDeclaringClass() == Object.class);
 	}
 	
 
@@ -248,32 +249,22 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 		if (other == this)
 			return true;
 		
-		Cglib1AopProxy aopr2 = null;
+		Cglib1AopProxy otherCglibProxy = null;
 		if (other instanceof Cglib1AopProxy) {
-			aopr2 = (Cglib1AopProxy) other;
+			otherCglibProxy = (Cglib1AopProxy) other;
 		}
 		else if (Proxy.isProxyClass(other.getClass())) {
 			InvocationHandler ih = Proxy.getInvocationHandler(other);
 			if (!(ih instanceof Cglib1AopProxy))
 				return false;
-			aopr2 = (Cglib1AopProxy) ih; 
+			otherCglibProxy = (Cglib1AopProxy) ih; 
 		}
 		else {
 			// Not a valid comparison
 			return false;
 		}
 		
-		// If we get here, aopr2 is the other AopProxy
-		if (this == aopr2)
-			return true;
-			
-		if (!Arrays.equals(aopr2.advised.getProxiedInterfaces(), this.advised.getProxiedInterfaces()))
-			return false;
-		
-		if (!Arrays.equals(aopr2.advised.getAdvisors(), this.advised.getAdvisors()))
-			return false;
-			
-		return true;
+		return AopProxyUtils.equalsInProxy(advised, otherCglibProxy.advised);
 	}
 
 }
