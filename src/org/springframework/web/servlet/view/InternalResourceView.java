@@ -66,6 +66,9 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		// expose the model object as request attributes
 		exposeModelAsRequestAttributes(model, request);
 
+		// expose helpers as request attributes, if any
+		exposeHelpers(request);
+
 		// determine the path for the request dispatcher
 		String dispatcherPath = prepareForRendering(request, response);
 
@@ -95,25 +98,35 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	/**
 	 * Expose the model objects in the given map as request attributes.
 	 * Names will be taken from the map.
+	 * <p>Called by renderMergedOutputModel.
 	 * This method is suitable for all resources reachable by RequestDispatcher.
 	 * @param model Map of model objects to expose
 	 * @param request current HTTP request
+	 * @see #renderMergedOutputModel
 	 */
-	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws ServletException {
+	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws Exception {
 		if (model != null) {
-			Iterator it = model.keySet().iterator();
+			Iterator it = model.entrySet().iterator();
 			while (it.hasNext()) {
-				Object key = it.next();
-				if (!(key instanceof String)) {
-					throw new ServletException("Invalid key [" + key + "] in model Map - only Strings allowed as model keys");
+				Map.Entry entry = (Map.Entry) it.next();
+				if (!(entry.getKey() instanceof String)) {
+					throw new ServletException(
+							"Invalid key [" + entry.getKey() + "] in model Map - only Strings allowed as model keys");
 				}
-				String modelName = (String) key;
-				Object modelValue = model.get(modelName);
+				String modelName = (String) entry.getKey();
+				Object modelValue = entry.getValue();
 				if (modelValue != null) {
 					request.setAttribute(modelName, modelValue);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Added model object '" + modelName + "' of type [" + modelValue.getClass().getName() +
-						    "] to request in InternalResourceView '" + getBeanName() + "' ");
+						    "] to request in InternalResourceView '" + getBeanName() + "'");
+					}
+				}
+				else {
+					request.removeAttribute(modelName);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Removed model object '" + modelName +
+								"' from request in InternalResourceView '" + getBeanName() + "'");
 					}
 				}
 			}
@@ -121,6 +134,20 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		else {
 			logger.debug("Model is null. Nothing to expose to request.");
 		}
+	}
+
+	/**
+	 * Expose helpers unique to each rendering operation. This is necessary so that
+	 * different rendering operations can't overwrite each other's contexts etc.
+	 * <p>Called by renderMergedTemplateModel. The default implementation is empty.
+	 * This method can be overridden to add custom helpers as request attributes.
+	 * @param request current HTTP request
+	 * @throws Exception if there's a fatal error while we're adding attributes
+	 * @see #renderMergedOutputModel
+	 * @see JstlView#exposeHelpers
+	 * @see org.springframework.web.servlet.view.tiles.TilesJstlView#exposeHelpers
+	 */
+	protected void exposeHelpers(HttpServletRequest request) throws Exception {
 	}
 
 	/**
@@ -136,7 +163,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @see #getUrl
 	 * @see org.springframework.web.servlet.view.tiles.TilesView#prepareForRendering
 	 */
-	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 		return getUrl();
 	}
 

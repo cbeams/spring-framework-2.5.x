@@ -16,10 +16,7 @@
 
 package org.springframework.web.servlet.view.tiles;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletException;
 
 import org.springframework.web.servlet.support.JstlUtils;
 
@@ -40,8 +37,7 @@ import org.springframework.web.servlet.support.JstlUtils;
  */
 public class TilesJstlView extends TilesView {
 
-	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws ServletException {
-		super.exposeModelAsRequestAttributes(model, request);
+	protected void exposeHelpers(HttpServletRequest request) throws Exception {
 		JstlUtils.exposeLocalizationContext(request, getApplicationContext());
 	}
 

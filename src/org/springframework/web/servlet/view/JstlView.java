@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Map;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.servlet.support.JstlUtils;
@@ -40,8 +37,8 @@ import org.springframework.web.servlet.support.JstlUtils;
  */
 public class JstlView extends InternalResourceView {
 
-	protected void exposeModelAsRequestAttributes(Map model, HttpServletRequest request) throws ServletException {
-		super.exposeModelAsRequestAttributes(model, request);
+	protected void exposeHelpers(HttpServletRequest request) throws Exception {
 		JstlUtils.exposeLocalizationContext(request, getApplicationContext());
 	}
+
 }
