@@ -105,9 +105,8 @@ public class SubFlowState extends TransitionableState {
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("No attributes mapper is configured for this subflow state '" + getId()
-						+ "'; as a result, no attributes in the parent flow '"
-						+ sessionExecution.getActiveFlowId() + "' scope will be passed to the spawned subflow '"
-						+ subFlow.getId() + "'");
+						+ "'; as a result, no attributes in the parent flow '" + sessionExecution.getActiveFlowId()
+						+ "' scope will be passed to the spawned subflow '" + subFlow.getId() + "'");
 			}
 			subFlowAttributes = new HashMap(1);
 		}
@@ -147,11 +146,6 @@ public class SubFlowState extends TransitionableState {
 		if (!StringUtils.hasText(this.attributesMapperId)) {
 			return null;
 		}
-		try {
-			return flow.getFlowDao().getFlowAttributesMapper(this.attributesMapperId);
-		}
-		catch (NoSuchBeanDefinitionException e) {
-			throw new NoSuchFlowAttributesMapperException(flow, this, e);
-		}
+		return flow.getFlowDao().getFlowAttributesMapper(this.attributesMapperId);
 	}
 }

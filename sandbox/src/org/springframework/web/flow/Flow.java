@@ -35,9 +35,9 @@ import org.springframework.util.closure.support.Block;
 /**
  * Singleton definition of a web flow.
  * 
- * At a high level, a Flow captures the definition of a logical page flow within
- * a web application. A logical page flow typically fulfills a business process
- * that takes place over a series of steps (modeled as states.)
+ * At a high level, a Flow captures the definition (configuration) of a logical
+ * page flow within a web application. A logical page flow typically fulfills a
+ * business process that takes place over a series of steps (modeled as states.)
  * 
  * Structurally, a Flow is composed of a set of states. A state is a point in
  * the flow where something happens; for instance, showing a view, executing an
@@ -51,13 +51,13 @@ import org.springframework.util.closure.support.Block;
  * 
  * When a start event is signaled by a requesting client, a new
  * <code>FlowSession</code> is created, which tracks a single client instance
- * of this flow. A HTTP-session-scoped <code>FlowSessionExecutionStack</code>
+ * of this flow. A HTTP-session-scoped <code>FlowSessionExecution</code>
  * provides a call stack that tracks the current state of this flow session's
  * execution, including any subflows that have been spawned.
  * 
  * To give you an example of what a web flow definition might look like, the
  * following piece of java code defines a web flow equivalent to the work flow
- * implemented by a simple form controller:
+ * implemented by Spring MVC's simple form controller:
  * <p>
  * 
  * <pre>
@@ -66,20 +66,20 @@ import org.springframework.util.closure.support.Block;
  *   public static final String PERSON_DETAILS = "personDetails";
  * 
  *   public EditPersonDetailsFlow() {
- *      super("editPersonDetails");
+ *      super(PERSON_DETAILS);
  *   }
  *
  *   protected void init() {
  *      add(createGetState(PERSON_DETAILS));
  *      add(createViewState(PERSON_DETAILS));
- *      add(createSubmitState(PERSON_DETAILS));
+ *      add(createBindAndValidateState(PERSON_DETAILS));
  *      add(createDefaultEndState());
  *   }
  * </pre>
  * 
  * What this does is add 4 states to the "EditPersonDetailsFlow"--a "get action"
- * state (the start state), a "view" state, a "submit action" state, and a end
- * marker state.
+ * state (the start state), a "view" state, a "bind and validate" action state,
+ * and a end marker state.
  * 
  * The first state, an action state, will be indentified as 'personDetails.get'.
  * This action state will automatically be configured with the following
@@ -90,48 +90,52 @@ import org.springframework.util.closure.support.Block;
  * entered. In this example, the <code>ActionBean</code> will go out to the DB ,
  * load the Person, and put it in the Flow's data model.
  * <li>An "success" transition to a default view state, called
- * 'personDetails.view'. This means if the <code>ActionBean</code> returns a
- * "success" event, the 'viewPersonDetails' state will be transitioned to.
+ * 'personDetails.view'. This means when <code>ActionBean</code> returns a
+ * "success" result event (aka outcome), the 'viewPersonDetails' state will be
+ * transitioned to.
  * <li>It will act as the start state for this flow.
  * </ol>
  * 
  * The second state, a view state, will be identified as 'personDetails.view'.
  * This view state will automatically be configured with the following defaults:
  * <ol>
- * <li>A view name called 'viewPersonDetails' - this is the logical name of a
+ * <li>A view name called 'personDetails.view' - this is the logical name of a
  * view resource. This logical view name gets mapped to a physical view resource
  * (jsp, etc.) by the calling front controller.
- * <li>A "submit" transition to a submit action state, indentified by the
- * default ID 'personDetails.submit'. This means when a 'submit' event is
- * signaled by the view (for example, on a submit button click), the submit
- * action state will be entered and the
- * <code>personDetails.submit</code> <code>ActionBean</code> will be
- * executed. This example assumes personDetails.submit is an
- * <code>ActionBean</code> that does data binding, validation, and save/update
- * DAO invocation.
+ * <li>A "submit" transition to a bind and validate action state, indentified
+ * by the default ID 'personDetails.bindAndValidate'. This means when a 'submit'
+ * event is signaled by the view (for example, on a submit button click), the
+ * bindAndValidate action state will be entered and the '
+ * <code>personDetails.bindAndValidate</code>'<code>ActionBean</code> will
+ * be executed.
  * </ol>
  * 
  * The third state, an action state, will be indentified as
- * 'personDetails.submit'. This action state will automatically be configured
- * with the following defaults:
+ * 'personDetails.bindAndValidate'. This action state will automatically be
+ * configured with the following defaults:
  * <ol>
- * <li>A action bean named 'personDetails.submit' - this is the name of the
- * <code>ActionBean</code> instance that will execute when this state is
- * entered. In this example, the <code>ActionBean</code> will bind form input
- * to a backing Person form object, validate it, and update the DB.
+ * <li>A action bean named 'personDetails.bindAndValidate' - this is the name
+ * of the <code>ActionBean</code> instance that will execute when this state
+ * is entered. In this example, the <code>ActionBean</code> will bind form
+ * input to a backing Person form object, validate it, and update the DB.
  * <li>A "success" transition to a default end state, called 'finish'. This
  * means if the <code>ActionBean</code> returns a "success" event, the
- * 'finish' end state will be transitioned to.
+ * 'finish' end state will be transitioned to and the flow will terminate.
  * </ol>
  * 
  * The fourth and last state, a end state, will be indentified with the default
  * end state ID 'finish'. This end state is a marker that signals the end of the
- * flow. It can optionally be configured with a logical view name to forward to.
- * It will also trigger a state transition in a resuming parent flow, if this
- * flow was participating as a 'subflow' within a nested flow.
+ * flow. When entered, the flow terminates, and if this flow is acting as a root
+ * flow in the current flow session execution, any flow-allocated resources will
+ * be cleaned up. A end state can optionally be configured with a logical view
+ * name to forward to when entered. It will also trigger a state transition in a
+ * resuming parent flow, if this flow was participating as a spawned 'subflow'
+ * within a suspended parent flow.
  * 
  * This class is directly instantitable as it is fully configurable for use -
- * either externally or via a specific subclass.
+ * either externally or via a specific subclass. It has been designed with
+ * minimal dependencies on other parts of Spring, easily usable in a standalone
+ * fashion.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -342,9 +346,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param dao
 	 */
 	public void setFlowDao(FlowDao dao) {
-		Assert
-				.notNull(dao,
-						"The flow data access object is required for loading subflows, action state action beans, and attribute mappers");
 		this.flowDao = dao;
 	}
 
@@ -360,28 +361,48 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return id.hashCode();
 	}
 
+	/**
+	 * @param listener
+	 */
 	public void addFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
 		this.flowSessionExecutionListeners.add(listener);
 	}
 
+	/**
+	 * @param listener
+	 */
 	public void removeFlowSessionExecutionListener(FlowSessionExecutionListener listener) {
 		this.flowSessionExecutionListeners.remove(listener);
 	}
 
+	/**
+	 * @return
+	 */
 	public int getFlowSessionExecutionListenerCount() {
 		return flowSessionExecutionListeners.getListenerCount();
 	}
 
+	/**
+	 * @param listenerClass
+	 * @return
+	 */
 	public boolean isFlowSessionExecutionListenerAdded(Class listenerClass) {
 		Assert.isTrue(FlowSessionExecutionListener.class.isAssignableFrom(listenerClass),
 				"Listener class must be a FlowSessionExecutionListener");
 		return this.flowSessionExecutionListeners.isAdded(listenerClass);
 	}
 
+	/**
+	 * @param listener
+	 * @return
+	 */
 	public boolean isFlowSessionExecutionListenerAdded(FlowSessionExecutionListener listener) {
 		return this.flowSessionExecutionListeners.isAdded(listener);
 	}
 
+	/**
+	 * @return
+	 */
 	public ProcessTemplate getFlowSessionExecutionListenerIterator() {
 		return flowSessionExecutionListeners;
 	}
@@ -409,12 +430,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return this.flowDao;
 	}
 
-	/**
-	 *  
-	 */
 	private void assertFlowDaoSet() {
 		Assert.notNull(flowDao,
-				"The flow DAO reference is required to load subflows and action beans - programmer error?");
+				"The flow DAO reference you asked for is required to lookup subflow, action bean, and attributes mapper services; "
+						+ "however, it is not set on this flow definiton -- programmer error?");
 	}
 
 	/**
@@ -779,6 +798,22 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	// flow config factory methods
+
+	protected Flow spawnFlow(Class flowImplementationClass) {
+		return getFlowDao().getFlow(flowImplementationClass);
+	}
+
+	protected ActionBean useActionBean(Class actionBeanImplementationClass) {
+		return getFlowDao().getActionBean(actionBeanImplementationClass);
+	}
+
+	protected FlowAttributesMapper useAttributesMapper(String attributesMapperBeanNamePrefix) {
+		return getFlowDao().getFlowAttributesMapper(attributesMapper(attributesMapperBeanNamePrefix));
+	}
+
+	protected FlowAttributesMapper useAttributesMapper(Class flowAttributesMapperImplementationClass) {
+		return getFlowDao().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
+	}
 
 	/**
 	 * @param stateIdPrefix

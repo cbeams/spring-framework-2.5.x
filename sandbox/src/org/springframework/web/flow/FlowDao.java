@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import org.springframework.beans.BeansException;
-
 /**
  * DAO interface used by flows to retrieve needed artifacts
  * <p>
@@ -30,26 +28,47 @@ import org.springframework.beans.BeansException;
 public interface FlowDao {
 
 	/**
-	 * Returns the specified ActionBean by Id
-	 * 
-	 * @param actionBeanId the action bean id
-	 * @return The action bean
+	 * @param actionBeanId
+	 * @return
+	 * @throws NoSuchActionBeanException
 	 */
-	public ActionBean getActionBean(String actionBeanId) throws BeansException;
+	public ActionBean getActionBean(String actionBeanId) throws FlowServiceLookupException;
 
 	/**
-	 * Returns the specified Flow by Id
-	 * 
-	 * @param flowId the flow id
-	 * @return The mapper
+	 * @param actionBeanImplementationClass
+	 * @return
+	 * @throws FlowServiceLookupException
 	 */
-	public Flow getFlow(String flowId) throws BeansException;
+	public ActionBean getActionBean(Class actionBeanImplementationClass) throws FlowServiceLookupException;
 
 	/**
-	 * Returns the Sub Flow attributes mapper by Id
-	 * 
-	 * @param subFlowAttributesMapperId the attributes mapper id
-	 * @return The mapper
+	 * @param flowDefinitionId
+	 * @return
+	 * @throws FlowServiceLookupException
 	 */
-	public FlowAttributesMapper getFlowAttributesMapper(String subFlowAttributesMapperId) throws BeansException;
+	public Flow getFlow(String flowDefinitionId) throws FlowServiceLookupException;
+
+	/**
+	 * @param flowDefinitionImplementationClass
+	 * @return
+	 * @throws FlowServiceLookupException
+	 */
+	public Flow getFlow(Class flowDefinitionImplementationClass) throws FlowServiceLookupException;
+
+	/**
+	 * @param flowAttributesMapperId
+	 * @return
+	 * @throws FlowServiceLookupException
+	 */
+	public FlowAttributesMapper getFlowAttributesMapper(String flowAttributesMapperId)
+			throws FlowServiceLookupException;
+
+	/**
+	 * @param subFlowAttributesMapperId
+	 * @return
+	 * @throws FlowServiceLookupException
+	 */
+	public FlowAttributesMapper getFlowAttributesMapper(Class flowAttributesMapperImplementationClass)
+			throws FlowServiceLookupException;
+
 }

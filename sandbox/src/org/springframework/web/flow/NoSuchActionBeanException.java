@@ -6,22 +6,40 @@ package org.springframework.web.flow;
 /**
  * @author Keith Donald
  */
-public class NoSuchActionBeanException extends FlowNavigationException {
-	private ActionState state;
+public class NoSuchActionBeanException extends FlowServiceLookupException {
+	private NoSuchActionBeanException(String actionBeanId) {
+		super(actionBeanId);
+	}
+
+	private NoSuchActionBeanException(Class actionBeanImplementationClass) {
+		super(actionBeanImplementationClass);
+	}
 
 	/**
-	 * @param flow
-	 * @param state
+	 * @param serviceId
 	 * @param cause
 	 */
-	public NoSuchActionBeanException(Flow flow, ActionState state, Throwable cause) {
-		super(flow, cause);
-		this.state = state;
+	public NoSuchActionBeanException(String serviceId, Throwable cause) {
+		super(serviceId, cause);
+	}
+
+	/**
+	 * @param serviceImplementationClass
+	 * @param cause
+	 */
+	public NoSuchActionBeanException(Class serviceImplementationClass, Throwable cause) {
+		super(serviceImplementationClass, cause);
 	}
 
 	public String getMessage() {
-		return "No action bean was found with id '" + state.getActionBeanName() + "' for action state '" + state.getId()
-				+ "' of flow '" + getFlow().getId() + "' -- programmer error?";
+		if (isServiceIdLookupFailure()) {
+			return "No action bean was found with id '" + getServiceId()
+					+ "' -- make sure there is a single ActionBean implementation exported in the context with this id";
+		}
+		else {
+			return "No action bean was found of implementation '" + getServiceImplementationClass()
+					+ "'; make sure there is a single ActionBrean implementation of this type exported in the context";
+		}
 	}
 
 }

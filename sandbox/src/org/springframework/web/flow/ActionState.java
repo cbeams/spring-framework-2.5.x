@@ -23,7 +23,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -214,14 +213,9 @@ public class ActionState extends TransitionableState {
 					return holder.actionBean;
 				}
 				else {
-					try {
-						ActionBean actionBean = (ActionBean)flow.getFlowDao().getActionBean(holder.actionBeanName);
-						Assert.notNull(actionBean, "The action bean retrieved from the registry must not be null");
-						return actionBean;
-					}
-					catch (NoSuchBeanDefinitionException e) {
-						throw new NoSuchActionBeanException(flow, ActionState.this, e);
-					}
+					ActionBean actionBean = (ActionBean)flow.getFlowDao().getActionBean(holder.actionBeanName);
+					Assert.notNull(actionBean, "The action bean retrieved from the registry must not be null");
+					return actionBean;
 				}
 			}
 
