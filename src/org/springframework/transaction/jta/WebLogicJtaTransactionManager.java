@@ -38,8 +38,9 @@ import org.springframework.transaction.TransactionUsageException;
  * through a standard JtaTransactionManager definition with a corresponding
  * "transactionManagerName" property value.
  *
- * <p>Currently tested on BEA WebLogic 8.1 SP2 and 7.0 SP2. Thanks to
- * Eugene Kuleshov for tracking down and reporting the "forceResume" issue!
+ * <p>Currently tested on BEA WebLogic 8.1 SP2. On WebLogic 7.0 SP2, "forceResume"
+ * unfortunately fails with a mysterious, WebLogic-internal NullPointerException.
+ * Thanks to Eugene Kuleshov for tracking down and reporting this issue!
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -67,12 +68,15 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	public WebLogicJtaTransactionManager() {
 		setTransactionManagerName(DEFAULT_TRANSACTION_MANAGER_NAME);
 		try {
-			Class transactionManagerClass = getClass().getClassLoader().loadClass(TRANSACTION_MANAGER_CLASS_NAME);
-			this.forceResumeMethod = transactionManagerClass.getMethod("forceResume", new Class[] {Transaction.class});
+			Class transactionManagerClass =
+			    getClass().getClassLoader().loadClass(TRANSACTION_MANAGER_CLASS_NAME);
+			this.forceResumeMethod =
+			    transactionManagerClass.getMethod("forceResume", new Class[] {Transaction.class});
 		}
 		catch (Exception ex) {
 			throw new TransactionUsageException(
-					"Couldn't initialize WebLogicJtaTransactionManager because WebLogic API classes are not available", ex);
+					"Couldn't initialize WebLogicJtaTransactionManager because WebLogic API classes are not available",
+			    ex);
 		}
 	}
 
