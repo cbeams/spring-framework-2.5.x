@@ -6,13 +6,12 @@
 package org.springframework.aop.framework;
 
 import junit.framework.TestCase;
-import org.aopalliance.intercept.Interceptor;
 
+import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.NopInterceptor;
-import org.springframework.aop.support.DefaultBeforeAdvisor;
-import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
-import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
@@ -23,7 +22,7 @@ import org.springframework.util.StringUtils;
  * Also tests AdvisedSupport superclass.
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Id: ProxyFactoryTests.java,v 1.12 2004-02-02 11:51:13 jhoeller Exp $
+ * @version $Id: ProxyFactoryTests.java,v 1.13 2004-02-22 09:48:54 johnsonr Exp $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -50,7 +49,7 @@ public class ProxyFactoryTests extends TestCase {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
 		NopInterceptor nop = new NopInterceptor();
-		Advisor advisor = new DefaultBeforeAdvisor(new CountingBeforeAdvice());
+		Advisor advisor = new DefaultPointcutAdvisor(new CountingBeforeAdvice());
 		Advised advised = (Advised) pf.getProxy();
 		// Can use advised and ProxyFactory interchangeably
 		advised.addInterceptor(nop);
@@ -60,7 +59,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertEquals(0, pf.indexOf(nop));
 		assertEquals(-1, advised.indexOf((Advisor) null));
 		assertEquals(1, pf.indexOf(advisor));
-		assertEquals(-1, advised.indexOf(new DefaultInterceptionAroundAdvisor(null)));
+		assertEquals(-1, advised.indexOf(new DefaultPointcutAdvisor(null)));
 	}
 	
 	public void testRemoveAdvisorByReference() {
@@ -68,7 +67,7 @@ public class ProxyFactoryTests extends TestCase {
 		ProxyFactory pf = new ProxyFactory(target);
 		NopInterceptor nop = new NopInterceptor();
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
-		Advisor advisor = new DefaultBeforeAdvisor(cba);
+		Advisor advisor = new DefaultPointcutAdvisor(cba);
 		pf.addInterceptor(nop);
 		pf.addAdvisor(advisor);
 		ITestBean proxied = (ITestBean) pf.getProxy();
@@ -80,7 +79,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertEquals(5, proxied.getAge());
 		assertEquals(1, cba.getCalls());
 		assertEquals(2, nop.getCount());
-		assertFalse(pf.removeAdvisor(new DefaultBeforeAdvisor(null)));
+		assertFalse(pf.removeAdvisor(new DefaultPointcutAdvisor(null)));
 	}
 	
 	
@@ -89,7 +88,7 @@ public class ProxyFactoryTests extends TestCase {
 		ProxyFactory pf = new ProxyFactory(target);
 		NopInterceptor nop = new NopInterceptor();
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
-		Advisor advisor = new DefaultBeforeAdvisor(cba);
+		Advisor advisor = new DefaultPointcutAdvisor(cba);
 		pf.addInterceptor(nop);
 		pf.addAdvisor(advisor);
 		NopInterceptor nop2 = new NopInterceptor();
@@ -138,8 +137,8 @@ public class ProxyFactoryTests extends TestCase {
 		NopInterceptor nop = new NopInterceptor();
 		CountingBeforeAdvice cba1 = new CountingBeforeAdvice();
 		CountingBeforeAdvice cba2 = new CountingBeforeAdvice();
-		Advisor advisor1 = new DefaultBeforeAdvisor(cba1);
-		Advisor advisor2 = new DefaultBeforeAdvisor(cba2);
+		Advisor advisor1 = new DefaultPointcutAdvisor(cba1);
+		Advisor advisor2 = new DefaultPointcutAdvisor(cba2);
 		pf.addAdvisor(advisor1);
 		pf.addInterceptor(nop);
 		ITestBean proxied = (ITestBean) pf.getProxy();
@@ -159,7 +158,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertEquals(1, cba1.getCalls());
 		assertEquals(2, nop.getCount());
 		assertEquals(1, cba2.getCalls());
-		assertFalse(pf.replaceAdvisor(new DefaultBeforeAdvisor(null), advisor1));
+		assertFalse(pf.replaceAdvisor(new DefaultPointcutAdvisor(null), advisor1));
 	}
 
 	public static class Concrete {
@@ -203,7 +202,7 @@ public class ProxyFactoryTests extends TestCase {
 		
 		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
 		
-		factory.addAdvisor(0, new DefaultInterceptionIntroductionAdvisor(ti, TimeStamped.class));
+		factory.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
 		
 		System.out.println(StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), "/"));
 		

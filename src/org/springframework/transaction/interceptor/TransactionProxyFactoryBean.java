@@ -3,7 +3,6 @@ package org.springframework.transaction.interceptor;
 import java.util.Properties;
 
 import org.aopalliance.intercept.AspectException;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
@@ -12,7 +11,7 @@ import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.framework.support.AopUtils;
-import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -45,7 +44,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.20 2004-02-11 17:11:05 jhoeller Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.21 2004-02-22 09:48:50 johnsonr Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -167,7 +166,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		}
 
 		if (this.pointcut != null) {
-			Advisor advice = new DefaultInterceptionAroundAdvisor(this.pointcut, transactionInterceptor);
+			Advisor advice = new DefaultPointcutAdvisor(this.pointcut, transactionInterceptor);
 			proxyFactory.addAdvisor(advice);
 		}
 		else {

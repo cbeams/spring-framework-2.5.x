@@ -14,17 +14,13 @@ import java.util.Set;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.InterceptionAroundAdvisor;
-import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.ThrowsAdvice;
-import org.springframework.aop.support.DefaultBeforeAdvisor;
-import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
-import org.springframework.aop.support.DefaultThrowsAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.StringUtils;
 
@@ -39,7 +35,7 @@ import org.springframework.util.StringUtils;
  * methods, which are provided by subclasses.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.23 2004-01-25 19:44:25 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.24 2004-02-22 09:48:50 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -207,15 +203,15 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		if (interceptor instanceof IntroductionInterceptor) {
 			throw new AopConfigException("IntroductionInterceptors may only be added as part of IntroductionAdvice");
 		}
-		addAdvisor(pos, new DefaultInterceptionAroundAdvisor(interceptor));
+		addAdvisor(pos, new DefaultPointcutAdvisor(interceptor));
 	}
 	
 	public void addBeforeAdvice(final MethodBeforeAdvice ba) {
-		addAdvisor(new DefaultBeforeAdvisor(Pointcut.TRUE, ba));
+		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ba));
 	}
 	
 	public void addThrowsAdvice(final ThrowsAdvice throwsAdvice) {
-		addAdvisor(new DefaultThrowsAdvisor(throwsAdvice));
+		addAdvisor(new DefaultPointcutAdvisor(throwsAdvice));
 	}
 	
 	/**
@@ -229,11 +225,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	public int indexOf(Interceptor interceptor) {
 		for (int i = 0; i < this.advisors.size(); i++) {
-			Advisor advice = (Advisor) this.advisors.get(i);
-			if (advice instanceof InterceptionAroundAdvisor && ((InterceptionAroundAdvisor) advice).getInterceptor() == interceptor) {
-				return i;
-			}
-			else if (advice instanceof InterceptionIntroductionAdvisor && ((InterceptionIntroductionAdvisor) advice).getIntroductionInterceptor() == interceptor) {
+			Advisor advisor = (Advisor) this.advisors.get(i);
+			if (advisor.getAdvice() == interceptor) {
 				return i;
 			}
 		}
@@ -353,8 +346,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	public void addAdvisor(int pos, Advisor advisor) {
-		if (advisor instanceof InterceptionIntroductionAdvisor) {
-			addAdvisor(pos, (InterceptionIntroductionAdvisor) advisor);
+		if (advisor instanceof IntroductionAdvisor) {
+			addAdvisor(pos, (IntroductionAdvisor) advisor);
 		}
 		else {
 			addAdvisorInternal(pos, advisor);
@@ -407,8 +400,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		if (this.advisors.size() == 0)
 			return false;
 		for (int i = 0; i < this.advisors.size(); i++) {
-			InterceptionAroundAdvisor advice = (InterceptionAroundAdvisor) this.advisors.get(i);
-			if (advice.getInterceptor() == mi)
+			Advisor advice = (Advisor) this.advisors.get(i);
+			if (advice.getAdvice() == mi)
 				return true;
 		}
 		return false;
@@ -424,8 +417,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			return 0;
 		int count = 0;
 		for (int i = 0; i < this.advisors.size(); i++) {
-			InterceptionAroundAdvisor advice = (InterceptionAroundAdvisor) this.advisors.get(i);
-			if (interceptorClass.isAssignableFrom(advice.getInterceptor().getClass()))
+			Advisor advisor = (Advisor) this.advisors.get(i);
+			if (interceptorClass.isAssignableFrom(advisor.getAdvice().getClass()))
 				++count;
 		}
 		return count;

@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.InterceptionIntroductionAdvisor;
+import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.AopConfigException;
 
@@ -17,19 +17,19 @@ import org.springframework.aop.framework.AopConfigException;
  * Simple IntroductionAdvisor implementation that by default applies to any class.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: DefaultInterceptionIntroductionAdvisor.java,v 1.1 2004-01-21 20:21:35 johnsonr Exp $
+ * @version $Id: DefaultIntroductionAdvisor.java,v 1.1 2004-02-22 09:48:24 johnsonr Exp $
  */
-public class DefaultInterceptionIntroductionAdvisor implements InterceptionIntroductionAdvisor, ClassFilter {
+public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter {
 	
 	private IntroductionInterceptor interceptor;
 	
 	private Set interfaces = new HashSet();
 	
-	public DefaultInterceptionIntroductionAdvisor(IntroductionInterceptor interceptor) {
+	public DefaultIntroductionAdvisor(IntroductionInterceptor interceptor) {
 		this.interceptor = interceptor;
 	}
 	
-	public DefaultInterceptionIntroductionAdvisor(IntroductionInterceptor interceptor, Class clazz) throws AopConfigException {
+	public DefaultIntroductionAdvisor(IntroductionInterceptor interceptor, Class clazz) throws AopConfigException {
 		this(interceptor);
 		addInterface(clazz);
 	}
@@ -37,7 +37,7 @@ public class DefaultInterceptionIntroductionAdvisor implements InterceptionIntro
 	/**
 	 * Wrap this interceptor and introduce all interfaces.
 	 */
-	public DefaultInterceptionIntroductionAdvisor(DelegatingIntroductionInterceptor dii) {
+	public DefaultIntroductionAdvisor(DelegatingIntroductionInterceptor dii) {
 		this((IntroductionInterceptor) dii);
 		for (int i = 0; i < dii.getIntroducedInterfaces().length; i++) {
 			Class intf = dii.getIntroducedInterfaces()[i];
@@ -53,7 +53,7 @@ public class DefaultInterceptionIntroductionAdvisor implements InterceptionIntro
 		return this;
 	}
 
-	public IntroductionInterceptor getIntroductionInterceptor() {
+	public Object getAdvice() {
 		return interceptor;
 	}
 
@@ -77,8 +77,8 @@ public class DefaultInterceptionIntroductionAdvisor implements InterceptionIntro
 			 if (!getInterfaces()[i].isInterface()) {
 				 throw new AopConfigException("Class '" + getInterfaces()[i].getName() + "' is not an interface; cannot be used in an introduction");
 			 }
-			  if (!getIntroductionInterceptor().implementsInterface(getInterfaces()[i])) {
-				 throw new AopConfigException("IntroductionInterceptor [" + getIntroductionInterceptor() + "] " +
+			  if (!interceptor.implementsInterface(getInterfaces()[i])) {
+				 throw new AopConfigException("IntroductionInterceptor [" + interceptor + "] " +
 						 "does not implement interface '" + getInterfaces()[i].getName() + "' specified in introduction advice");
 			  }
 		  }

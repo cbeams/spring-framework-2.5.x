@@ -17,15 +17,15 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.InterceptionIntroductionAdvisor;
+import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
-import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
-import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
@@ -41,7 +41,7 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.22 2004-02-02 11:51:13 jhoeller Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.23 2004-02-22 09:48:54 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -231,7 +231,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		// add to front of interceptor chain
 		int oldCount = config.getAdvisors().length;
-		config.addAdvisor(0, new DefaultInterceptionIntroductionAdvisor(ti, TimeStamped.class));
+		config.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
 		
 		assertTrue(config.getAdvisors().length == oldCount + 1);
 	
@@ -295,7 +295,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		ti.setTime(time);
 		// Add to head of interceptor chain
 		int oldCount = config.getAdvisors().length;
-		config.addAdvisor(0, new DefaultInterceptionIntroductionAdvisor(ti, TimeStamped.class));
+		config.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
 		assertTrue(config.getAdvisors().length == oldCount + 1);
 		
 		TimeStamped ts = (TimeStamped) factory.getBean("test2");
@@ -488,7 +488,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
 	 */
-	public static class PointcutForVoid extends DynamicMethodMatcherPointcutAroundAdvisor {
+	public static class PointcutForVoid extends DynamicMethodMatcherPointcutAdvisor {
 		
 		public static List methodNames = new LinkedList();
 		
@@ -537,7 +537,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		}
 	}
 	
-	public static class GlobalIntroductionAdvice implements InterceptionIntroductionAdvisor {
+	public static class GlobalIntroductionAdvice implements IntroductionAdvisor {
 		
 		private IntroductionInterceptor gi = new GlobalAspectInterfaceInterceptor();
 
@@ -545,7 +545,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 			return ClassFilter.TRUE;
 		}
 
-		public IntroductionInterceptor getIntroductionInterceptor() {
+		public Object getAdvice() {
 			return this.gi;
 		}
 

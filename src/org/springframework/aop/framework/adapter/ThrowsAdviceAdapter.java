@@ -8,22 +8,14 @@ package org.springframework.aop.framework.adapter;
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.ThrowsAdvice;
-import org.springframework.aop.ThrowsAdvisor;
-import org.springframework.aop.support.DefaultThrowsAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceAdapter.java,v 1.1 2003-12-11 14:51:37 johnsonr Exp $
+ * @version $Id: ThrowsAdviceAdapter.java,v 1.2 2004-02-22 09:48:55 johnsonr Exp $
  */
 class ThrowsAdviceAdapter implements AdvisorAdapter {
-
-	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvisor(org.springframework.aop.Advisor)
-	 */
-	public boolean supportsAdvisor(Advisor advisor) {
-		return advisor instanceof ThrowsAdvisor;
-	}
 
 	/**
 	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice(java.lang.Object)
@@ -36,14 +28,14 @@ class ThrowsAdviceAdapter implements AdvisorAdapter {
 	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#wrap(java.lang.Object)
 	 */
 	public Advisor wrap(Object advice) {
-		return new DefaultThrowsAdvisor((ThrowsAdvice) advice);
+		return new DefaultPointcutAdvisor((ThrowsAdvice) advice);
 	}
 
 	/**
 	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#getInterceptor(org.springframework.aop.Advisor)
 	 */
 	public Interceptor getInterceptor(Advisor advisor) {
-		return new ThrowsAdviceInterceptor(((ThrowsAdvisor) advisor).getThrowsAdvice());
+		return new ThrowsAdviceInterceptor(advisor.getAdvice());
 	}
 
 }

@@ -18,7 +18,7 @@ import org.springframework.beans.TestBean;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ControlFlowPointcutTests.java,v 1.1 2003-12-07 10:19:10 johnsonr Exp $
+ * @version $Id: ControlFlowPointcutTests.java,v 1.2 2004-02-22 09:48:56 johnsonr Exp $
  */
 public class ControlFlowPointcutTests extends TestCase {
 	
@@ -33,7 +33,7 @@ public class ControlFlowPointcutTests extends TestCase {
 		ControlFlowPointcut cflow = new ControlFlowPointcut(One.class, "getAge");
 		ProxyFactory pf = new ProxyFactory(target);
 		ITestBean proxied = (ITestBean) pf.getProxy();
-		pf.addAdvisor(new DefaultInterceptionAroundAdvisor(cflow, nop));
+		pf.addAdvisor(new DefaultPointcutAdvisor(cflow, nop));
 		
 		// Not advised, not under One
 		assertEquals(target.getAge(), proxied.getAge());
@@ -69,7 +69,7 @@ public class ControlFlowPointcutTests extends TestCase {
 		Pointcut settersUnderOne = Pointcuts.intersection(settersPc, cflow);
 		ProxyFactory pf = new ProxyFactory(target);
 		ITestBean proxied = (ITestBean) pf.getProxy();
-		pf.addAdvisor(new DefaultInterceptionAroundAdvisor(settersUnderOne, nop));
+		pf.addAdvisor(new DefaultPointcutAdvisor(settersUnderOne, nop));
 	
 		// Not advised, not under One
 		target.setAge(16);

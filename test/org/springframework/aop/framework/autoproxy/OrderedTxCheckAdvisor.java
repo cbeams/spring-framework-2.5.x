@@ -8,7 +8,7 @@ package org.springframework.aop.framework.autoproxy;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.framework.CountingBeforeAdvice;
-import org.springframework.aop.support.StaticMethodMatcherPointcutBeforeAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.NoTransactionException;
@@ -21,9 +21,9 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * method invocations and check for presence of transaction context.
  * <br>Matches setters.
  * @author Rod Johnson
- * @version $Id: OrderedTxCheckAdvisor.java,v 1.1 2004-01-13 14:00:26 johnsonr Exp $
+ * @version $Id: OrderedTxCheckAdvisor.java,v 1.2 2004-02-22 09:48:55 johnsonr Exp $
  */
-public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutBeforeAdvisor implements Ordered, InitializingBean {
+public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implements Ordered, InitializingBean {
 
 	/** Unordered by default */
 	private int order = Integer.MAX_VALUE;
@@ -80,14 +80,14 @@ public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutBeforeAdvi
 	}
 
 	public CountingBeforeAdvice getCountingBeforeAdvice() {
-		return (CountingBeforeAdvice) getBeforeAdvice();
+		return (CountingBeforeAdvice) getAdvice();
 	}
 
 	/**
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
 	 */
 	public void afterPropertiesSet() throws Exception {
-		setBeforeAdvice(new TxCountingBeforeAdvice());
+		setAdvice(new TxCountingBeforeAdvice());
 	}
 
 	/**

@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.aopalliance.intercept.AspectException;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.InterceptionIntroductionAdvisor;
+import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 
@@ -16,7 +16,7 @@ import org.springframework.aop.PointcutAdvisor;
  * Utility methods used by the AOP framework.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.12 2004-01-13 13:58:42 johnsonr Exp $
+ * @version $Id: AopUtils.java,v 1.13 2004-02-22 09:48:53 johnsonr Exp $
  */
 public abstract class AopUtils {
 	
@@ -164,8 +164,8 @@ public abstract class AopUtils {
 	}
 	
 	public static boolean canApply(Advisor advisor, Class targetClass, Class[] proxyInterfaces) {
-		if (advisor instanceof InterceptionIntroductionAdvisor) {
-			return ((InterceptionIntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
+		if (advisor instanceof IntroductionAdvisor) {
+			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
 		else if (advisor instanceof PointcutAdvisor) {
 			PointcutAdvisor pca = (PointcutAdvisor) advisor;

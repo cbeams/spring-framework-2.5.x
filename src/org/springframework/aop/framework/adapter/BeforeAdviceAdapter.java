@@ -7,23 +7,15 @@ package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.BeforeAdvisor;
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.aop.support.DefaultBeforeAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BeforeAdviceAdapter.java,v 1.1 2003-12-11 14:51:37 johnsonr Exp $
+ * @version $Id: BeforeAdviceAdapter.java,v 1.2 2004-02-22 09:48:55 johnsonr Exp $
  */
 class BeforeAdviceAdapter implements AdvisorAdapter {
-
-	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvisor(org.springframework.aop.Advisor)
-	 */
-	public boolean supportsAdvisor(Advisor advisor) {
-		return advisor instanceof BeforeAdvisor;
-	}
 
 	/**
 	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice(java.lang.Object)
@@ -36,15 +28,14 @@ class BeforeAdviceAdapter implements AdvisorAdapter {
 	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#wrap(java.lang.Object)
 	 */
 	public Advisor wrap(Object advice) {
-		return new DefaultBeforeAdvisor((MethodBeforeAdvice) advice);
+		return new DefaultPointcutAdvisor((MethodBeforeAdvice) advice);
 	}
 
 	/**
 	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#getInterceptor(org.springframework.aop.Advisor)
 	 */
 	public Interceptor getInterceptor(Advisor advisor) {
-		BeforeAdvisor ba = (BeforeAdvisor) advisor;
-		MethodBeforeAdvice advice = (MethodBeforeAdvice) ba.getBeforeAdvice();
+		MethodBeforeAdvice advice = (MethodBeforeAdvice) advisor.getAdvice();
 		return new MethodBeforeAdviceInterceptor(advice) ;
 	}
 

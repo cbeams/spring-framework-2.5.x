@@ -20,20 +20,9 @@ import org.springframework.aop.Advisor;
  * do so only if you need to introduce more Advisor or Advice types to
  * Spring.
  * @author Rod Johnson
- * @version $Id: AdvisorAdapter.java,v 1.2 2003-12-11 17:24:51 johnsonr Exp $
+ * @version $Id: AdvisorAdapter.java,v 1.3 2004-02-22 09:48:55 johnsonr Exp $
  */
 public interface AdvisorAdapter {
-	
-	/**
-	 * Does this adapter understand this Advisor? Is it valid to invoke
-	 * the getInterceptor() method with this advisor as an argument.
-	 * Most implementations will support only a single Advisor type,
-	 * and simply do an <code>instanceof</code> test here.
-	 * @param advisor advisor to test
-	 * @return whether it's valid to invoke the getInterceptor() method
-	 * on this object with the advisor as argument
-	 */
-	boolean supportsAdvisor(Advisor advisor);
 	
 	/**
 	 * Does this adapter understand this advice object? 

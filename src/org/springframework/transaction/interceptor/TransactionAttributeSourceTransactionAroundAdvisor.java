@@ -8,7 +8,7 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.core.Ordered;
 
 /**
@@ -20,9 +20,9 @@ import org.springframework.core.Ordered;
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  * @author Rod Johnson
- * @version $Id: TransactionAttributeSourceTransactionAroundAdvisor.java,v 1.3 2004-01-13 13:56:02 johnsonr Exp $
+ * @version $Id: TransactionAttributeSourceTransactionAroundAdvisor.java,v 1.4 2004-02-22 09:48:50 johnsonr Exp $
  */
-public class TransactionAttributeSourceTransactionAroundAdvisor extends StaticMethodMatcherPointcutAroundAdvisor implements Ordered {
+public class TransactionAttributeSourceTransactionAroundAdvisor extends StaticMethodMatcherPointcutAdvisor implements Ordered {
 	
 	/**
 	 * Most advice will want to run within a transaction context,

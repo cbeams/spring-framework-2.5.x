@@ -14,8 +14,8 @@
 	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor">
 	</bean>
 	
-	<bean id="settersAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAroundAdvisor">
-		<property name="interceptor"><ref local="nopInterceptor"/></property>
+	<bean id="settersAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="advice"><ref local="nopInterceptor"/></property>
 		<property name="pattern"><value>.*get.*</value></property>
 	</bean>
 	
@@ -31,8 +31,8 @@
 	
 	
 	<!-- Illustrates use of multiple patterns -->
-	<bean id="settersAndAbsquatulateAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAroundAdvisor">
-		<property name="interceptor"><ref local="nopInterceptor"/></property>
+	<bean id="settersAndAbsquatulateAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="advice"><ref local="nopInterceptor"/></property>
 		<property name="patterns">
 			<list>
 				<value>.*get.*</value>

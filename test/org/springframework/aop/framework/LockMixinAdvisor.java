@@ -5,14 +5,14 @@
  
 package org.springframework.aop.framework;
 
-import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 
 /**
  * Advisor for use with a LockMixin. Applies to all classes.
  * @author Rod Johnson
- * @version $Id: LockMixinAdvisor.java,v 1.2 2004-01-21 20:21:34 johnsonr Exp $
+ * @version $Id: LockMixinAdvisor.java,v 1.3 2004-02-22 09:48:53 johnsonr Exp $
  */
-public class LockMixinAdvisor extends DefaultInterceptionIntroductionAdvisor {
+public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 	
 	public LockMixinAdvisor() {
 		super(new LockMixin(), Lockable.class);

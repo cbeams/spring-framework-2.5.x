@@ -9,9 +9,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.aop.InterceptionIntroductionAdvisor;
+import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.DisposableBean;
  * <p>Cleanup is performed in the destroy() method from DisposableBean.
  *
  * @author Rod Johnson
- * @version $Id: ThreadLocalTargetSource.java,v 1.6 2004-01-21 20:21:35 johnsonr Exp $
+ * @version $Id: ThreadLocalTargetSource.java,v 1.7 2004-02-22 09:48:50 johnsonr Exp $
  */
 public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource implements ThreadLocalTargetSourceStats, DisposableBean {
 	
@@ -121,9 +121,9 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource
 	 * Return an introduction advisor mixin that allows the AOP proxy to be
 	 * case to ThreadLocalInvokerStats.
 	 */
-	public InterceptionIntroductionAdvisor getStatsMixin() {
+	public IntroductionAdvisor getStatsMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
-		return new DefaultInterceptionIntroductionAdvisor(dii, ThreadLocalTargetSourceStats.class);
+		return new DefaultIntroductionAdvisor(dii, ThreadLocalTargetSourceStats.class);
 	}
 
 }

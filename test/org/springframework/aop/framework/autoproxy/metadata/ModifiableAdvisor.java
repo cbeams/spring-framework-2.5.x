@@ -13,16 +13,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.metadata.Attributes;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ModifiableAdvisor.java,v 1.3 2004-01-21 20:21:36 johnsonr Exp $
+ * @version $Id: ModifiableAdvisor.java,v 1.4 2004-02-22 09:48:56 johnsonr Exp $
  */
-public class ModifiableAdvisor extends DefaultInterceptionIntroductionAdvisor implements InitializingBean {
+public class ModifiableAdvisor extends DefaultIntroductionAdvisor implements InitializingBean {
 
 	protected final Log log = LogFactory.getLog(getClass());
 	

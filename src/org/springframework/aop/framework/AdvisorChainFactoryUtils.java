@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.InterceptionIntroductionAdvisor;
+import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
@@ -22,7 +22,7 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
  * definitive way of working out an advice chain for a Method, given an
  * AdvisedSupport object.
  * @author Rod Johnson
- * @version $Id: AdvisorChainFactoryUtils.java,v 1.5 2003-12-11 14:53:13 johnsonr Exp $
+ * @version $Id: AdvisorChainFactoryUtils.java,v 1.6 2004-02-22 09:48:50 johnsonr Exp $
  */
 public abstract class AdvisorChainFactoryUtils {
 
@@ -58,10 +58,11 @@ public abstract class AdvisorChainFactoryUtils {
 					}
 				}
 			}
-			else if (advisor instanceof InterceptionIntroductionAdvisor) {
-				InterceptionIntroductionAdvisor ia = (InterceptionIntroductionAdvisor) advisor;
+			else if (advisor instanceof IntroductionAdvisor) {
+				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
 				if (ia.getClassFilter().matches(targetClass)) {
-					interceptors.add(ia.getIntroductionInterceptor());
+					MethodInterceptor interceptor = (MethodInterceptor) GlobalAdvisorAdapterRegistry.getInstance().getInterceptor(advisor);
+					interceptors.add(interceptor);
 				}
 			}
 		}	// for

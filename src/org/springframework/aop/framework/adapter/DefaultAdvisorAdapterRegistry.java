@@ -9,14 +9,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.intercept.Interceptor;
-
 import org.springframework.aop.Advisor;
-import org.springframework.aop.InterceptionAroundAdvisor;
-import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * @author Rod Johnson
- * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.4 2004-02-11 17:18:17 jhoeller Exp $
+ * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.5 2004-02-22 09:48:55 johnsonr Exp $
  */
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 	
@@ -34,7 +32,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 			return (Advisor) advice;
 		}
 		if (advice instanceof Interceptor) {
-			return new DefaultInterceptionAroundAdvisor((Interceptor) advice);
+			return new DefaultPointcutAdvisor((Interceptor) advice);
 		}
 		for (int i = 0; i < this.adapters.size(); i++) {
 			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
@@ -46,12 +44,13 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 	}
 
 	public Interceptor getInterceptor(Advisor advisor) throws UnknownAdviceTypeException {
-		if (advisor instanceof InterceptionAroundAdvisor) {
-			return ((InterceptionAroundAdvisor) advisor).getInterceptor();
+		Object advice = advisor.getAdvice();
+		if (advice instanceof Interceptor) {
+			return (Interceptor) advice;
 		}
 		for (int i = 0; i < this.adapters.size(); i++) {
 			AdvisorAdapter adapter = (AdvisorAdapter) this.adapters.get(i);
-			if (adapter.supportsAdvisor(advisor)) {
+			if (adapter.supportsAdvice(advice)) {
 				return adapter.getInterceptor(advisor);
 			}
 		}

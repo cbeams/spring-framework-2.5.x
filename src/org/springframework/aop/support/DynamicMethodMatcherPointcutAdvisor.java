@@ -1,34 +1,32 @@
 package org.springframework.aop.support;
 
-import org.aopalliance.intercept.Interceptor;
-
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.aop.PointcutAdvisor;
 
 /**
  * Convenient superclass for Advisors that are also dynamic pointcuts.
  * @author Rod Johnson
  */
-public abstract class DynamicMethodMatcherPointcutAroundAdvisor extends DynamicMethodMatcher
-    implements InterceptionAroundAdvisor, Pointcut {
+public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodMatcher
+    implements PointcutAdvisor, Pointcut {
 
-	private Interceptor interceptor;
+	private Object advice;
 	
-	protected DynamicMethodMatcherPointcutAroundAdvisor() {
+	protected DynamicMethodMatcherPointcutAdvisor() {
 	}
 
-	protected DynamicMethodMatcherPointcutAroundAdvisor(Interceptor interceptor) {
-		this.interceptor = interceptor;
+	protected DynamicMethodMatcherPointcutAdvisor(Object advice) {
+		this.advice = advice;
 	}
 	
-	public void setInterceptor(Interceptor interceptor) {
-		this.interceptor = interceptor;
+	public void setAdvice(Object advice) {
+		this.advice = advice;
 	}
 	
-	public Interceptor getInterceptor() {
-		return interceptor;
+	public Object getAdvice() {
+		return advice;
 	}
 
 	public boolean isPerInstance() {

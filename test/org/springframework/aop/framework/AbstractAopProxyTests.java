@@ -18,21 +18,14 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.AfterReturningAdvisor;
-import org.springframework.aop.BeforeAdvisor;
-import org.springframework.aop.InterceptionAroundAdvisor;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodAfterReturningAdvice;
-import org.springframework.aop.ThrowsAdvisor;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.NopInterceptor;
-import org.springframework.aop.support.DefaultAfterReturningAdvisor;
-import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
-import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
-import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
-import org.springframework.aop.support.StaticMethodMatcherPointcutAfterReturningAdvisor;
-import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
-import org.springframework.aop.support.StaticMethodMatcherPointcutBeforeAdvisor;
-import org.springframework.aop.support.StaticMethodMatcherPointcutThrowsAdvisor;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
@@ -42,7 +35,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.18 2004-01-25 22:29:03 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.19 2004-02-22 09:48:54 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -156,8 +149,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		TestBean target1 = new TestBean();
 		target1.setAge(age1);
 		ProxyFactory pf1 = new ProxyFactory(target1);
-		pf1.addAdvisor(new DefaultInterceptionAroundAdvisor(new NopInterceptor()));
-		pf1.addAdvisor(new DefaultInterceptionIntroductionAdvisor(new TimestampIntroductionInterceptor()));
+		pf1.addAdvisor(new DefaultPointcutAdvisor(new NopInterceptor()));
+		pf1.addAdvisor(new DefaultPointcutAdvisor(new TimestampIntroductionInterceptor()));
 		ITestBean tb = (ITestBean) target1;
 		
 		assertEquals(age1, tb.getAge());
@@ -616,7 +609,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		
 		Advised config = (Advised) t;
 		assertEquals("Have 1 advisor", 1, config.getAdvisors().length);
-		assertEquals(di, ((InterceptionAroundAdvisor) config.getAdvisors()[0]).getInterceptor());
+		assertEquals(di, config.getAdvisors()[0].getAdvice());
 		NopInterceptor di2 = new NopInterceptor();
 		config.addInterceptor(1, di2);
 		t.getName();
@@ -669,7 +662,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		target.setAge(21);
 		ProxyFactory pc = new ProxyFactory(target);
 		try {
-			pc.addAdvisor(0, new DefaultInterceptionIntroductionAdvisor(new TimestampIntroductionInterceptor(), ITestBean.class));
+			pc.addAdvisor(0, new DefaultIntroductionAdvisor(new TimestampIntroductionInterceptor(), ITestBean.class));
 			fail("Shouldn't be able to add introduction advice introducing an unimplemented interface");
 		}
 		catch (AopConfigException ex) {
@@ -689,7 +682,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		target.setAge(21);
 		ProxyFactory pc = new ProxyFactory(target);
 		try {
-			pc.addAdvisor(0, new DefaultInterceptionIntroductionAdvisor(new TimestampIntroductionInterceptor(), TestBean.class));
+			pc.addAdvisor(0, new DefaultIntroductionAdvisor(new TimestampIntroductionInterceptor(), TestBean.class));
 			fail("Shouldn't be able to add introduction advice that introduces a class, rather than an interface");
 		}
 		catch (AopConfigException ex) {
@@ -708,7 +701,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		
 		TestBean target2 = new TestBean();
 		ProxyFactory pf2 = new ProxyFactory(target2);
-		pf2.addAdvisor(new DefaultInterceptionIntroductionAdvisor(new TimestampIntroductionInterceptor()));
+		pf2.addAdvisor(new DefaultIntroductionAdvisor(new TimestampIntroductionInterceptor()));
 		ITestBean proxy2 = (ITestBean) createProxy(pf2);
 		
 		HashMap h = new HashMap();
@@ -754,7 +747,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		
 		pc.removeListener(l);
 		assertEquals(2, l.adviceChanges);
-		pc.addAdvisor(new DefaultInterceptionAroundAdvisor(new NopInterceptor()));
+		pc.addAdvisor(new DefaultPointcutAdvisor(new NopInterceptor()));
 		// No longer counting
 		assertEquals(2, l.adviceChanges);
 	}
@@ -829,7 +822,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	 * Fires on setter methods that take a string. Replaces null arg
 	 * with ""
 	 */
-	public static class StringSetterNullReplacementAdvice extends DynamicMethodMatcherPointcutAroundAdvisor {
+	public static class StringSetterNullReplacementAdvice extends DynamicMethodMatcherPointcutAdvisor {
 		
 		private static MethodInterceptor cleaner = new MethodInterceptor() {
 			public Object invoke(MethodInvocation mi) throws Throwable {
@@ -932,13 +925,13 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		Overloads target = new Overloads();
 		ProxyFactory pc = new ProxyFactory(target);
 		NopInterceptor overLoadVoids = new NopInterceptor();
-		pc.addAdvisor(new StaticMethodMatcherPointcutAroundAdvisor(overLoadVoids) {
+		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadVoids) {
 			public boolean matches(Method m, Class targetClass) {
 				return m.getName().equals("overload") && m.getParameterTypes().length == 0;
 			}
 		});
 		NopInterceptor overLoadInts = new NopInterceptor();
-		pc.addAdvisor(new StaticMethodMatcherPointcutAroundAdvisor(overLoadInts) {
+		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadInts) {
 			public boolean matches(Method m, Class targetClass) {
 				return m.getName().equals("overload") && m.getParameterTypes().length == 1 &&
 					m.getParameterTypes()[0].equals(int.class);
@@ -960,7 +953,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 	
 	
-	protected static class TestDynamicPointcutAdvice extends DynamicMethodMatcherPointcutAroundAdvisor {
+	protected static class TestDynamicPointcutAdvice extends DynamicMethodMatcherPointcutAdvisor {
 		
 		private String pattern;
 		public int count;
@@ -989,7 +982,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 	}
 	
-	protected static class TestStaticPointcutAdvice extends StaticMethodMatcherPointcutAroundAdvisor {
+	protected static class TestStaticPointcutAdvice extends StaticMethodMatcherPointcutAdvisor {
 		
 		private String pattern;
 		private int count;
@@ -1074,6 +1067,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(pfa.getAdvisors().length, pfb.getAdvisors().length);
 	
 		assertTrue(a.equals(b));
+		assertTrue(i1.equals(i2));
 		assertTrue(proxyA.equals(proxyB));
 		//assertTrue(a.equals(proxyA));
 		assertFalse(proxyA.equals(a));
@@ -1090,7 +1084,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	
 	public void testBeforeAdvisorIsInvoked() {
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
-		BeforeAdvisor matchesNoArgs = new StaticMethodMatcherPointcutBeforeAdvisor(cba) {
+		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cba) {
 			public boolean matches(Method m, Class targetClass) {
 				return m.getParameterTypes().length == 0;
 			}
@@ -1164,7 +1158,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			}
 		};
 		SummingAfterAdvice aa = new SummingAfterAdvice();
-		AfterReturningAdvisor matchesInt = new StaticMethodMatcherPointcutAfterReturningAdvisor(aa) {
+		Advisor matchesInt = new StaticMethodMatcherPointcutAdvisor(aa) {
 			public boolean matches(Method m, Class targetClass) {
 				return m.getReturnType() == int.class;
 			}
@@ -1191,7 +1185,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	
 	public void testAfterReturningAdvisorIsNotInvokedOnException() {
 		CountingAfterReturningAdvice car = new CountingAfterReturningAdvice();
-		AfterReturningAdvisor advisor = new DefaultAfterReturningAdvisor(car);
+		Advisor advisor = new DefaultPointcutAdvisor(car);
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addInterceptor(new NopInterceptor());
@@ -1219,7 +1213,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	public void testThrowsAdvisorIsInvoked() throws Throwable {
 		// Reacts to ServletException and RemoteException
 		ThrowsAdviceInterceptorTests.MyThrowsHandler th = new ThrowsAdviceInterceptorTests.MyThrowsHandler();
-		ThrowsAdvisor matchesEchoInvocations = new StaticMethodMatcherPointcutThrowsAdvisor(th) {
+		Advisor matchesEchoInvocations = new StaticMethodMatcherPointcutAdvisor(th) {
 			public boolean matches(Method m, Class targetClass) {
 				return m.getName().startsWith("echo");
 			}
