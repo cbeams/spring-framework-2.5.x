@@ -38,7 +38,6 @@ import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
-import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -61,7 +60,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.59 2004-06-27 14:38:13 johnsonr Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.60 2004-07-01 20:59:28 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
@@ -610,12 +609,13 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * instantiation within this class is performed by this method.
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
-	 * @param args arguments to use if creating a prototype using explicit arguments to a static
-	 * factory method. This parameter must be null except in this case.
+	 * @param args arguments to use if creating a prototype using explicit arguments
+	 * to a static factory method. This parameter must be null except in this case.
 	 * @return a new instance of the bean
 	 * @throws BeansException in case of errors
 	 */
-	protected abstract Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeansException;
+	protected abstract Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition,
+																			 Object[] args) throws BeansException;
 
 	/**
 	 * Destroy the given bean. Must destroy beans that depend on the given
