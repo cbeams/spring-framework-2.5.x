@@ -86,7 +86,7 @@ public class Person extends Entity {
 	}
 
 	/** Setter for property telephone.
-	 * @param tel New value of property telephone.
+	 * @param telephone New value of property telephone.
 	 */
 	public void setTelephone(String telephone) {
 		this.telephone = telephone;
