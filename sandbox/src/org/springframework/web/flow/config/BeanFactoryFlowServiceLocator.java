@@ -1,7 +1,7 @@
 /*
  * Copyright 2004-2005 the original author or authors.
  */
-package org.springframework.web.flow.support;
+package org.springframework.web.flow.config;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -11,10 +11,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.flow.ActionBean;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
-import org.springframework.web.flow.FlowServiceLocator;
-import org.springframework.web.flow.FlowServiceLookupException;
-import org.springframework.web.flow.NoSuchActionBeanException;
-import org.springframework.web.flow.NoSuchFlowDefinitionException;
 
 /**
  * A flow service locator that uses a Spring bean factory to lookup services.

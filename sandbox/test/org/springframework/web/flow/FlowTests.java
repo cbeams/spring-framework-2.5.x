@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.flow.action.AbstractActionBean;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
+import org.springframework.web.flow.config.FlowServiceLocator;
 
 /**
  * @author Keith Donald

@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.config;
+package org.springframework.web.flow;
 
 import java.util.Iterator;
 
-import org.springframework.web.flow.AbstractState;
-import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowNavigationException;
 
 /**
  * Thrown when a state could not be found in a flow, on lookup by

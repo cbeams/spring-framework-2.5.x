@@ -26,7 +26,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.support.AbstractConstraint;
-import org.springframework.web.flow.config.NoSuchFlowStateException;
 
 /**
  * @author Keith Donald
