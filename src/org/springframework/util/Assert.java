@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.util;
 
 import java.util.Collection;
@@ -41,7 +42,6 @@ import java.util.Map;
  *
  * Mainly for internal use within the framework; consider Jakarta's Commons Lang
  * >= 2.0 for a more comprehensive suite of assertion utilities.
- *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
@@ -246,29 +246,29 @@ public abstract class Assert {
 	 * @see Class#isInstance
 	 */
 	public static void isInstanceOf(Class clazz, Object obj) {
-        isInstanceOf(clazz, obj, "");
+		isInstanceOf(clazz, obj, "");
 	}
-    
-    /**
-     * Assert that the provided object is an instance of the provided class.
-     * <pre>
-     * Assert.instanceOf(Foo.class, foo);</pre>
-     * @param clazz the required class
-     * @param obj the object to check
-     * @param message a message which will be prepended to the message produced by
-     * the function itself, and which may be used to provide context. It should
-     * normally end in a ":" or ". " so that the function generate message looks
-     * ok when prepended to it.
-     * @throws IllegalArgumentException if the object is not an instance of clazz
-     * @see Class#isInstance
-     */
-    public static void isInstanceOf(Class clazz, Object obj, String message) {
-        Assert.notNull(clazz, "The clazz to perform the instanceof assertion cannot be null");
-        Assert.isTrue(clazz.isInstance(obj), message + 
-                "Object of class '" + (obj != null ? obj.getClass().getName() : "[null]") +
-                "' must be an instance of '" + clazz.getName() + "'");
-    }
-    
+
+	/**
+	 * Assert that the provided object is an instance of the provided class.
+	 * <pre>
+	 * Assert.instanceOf(Foo.class, foo);</pre>
+	 * @param clazz the required class
+	 * @param obj the object to check
+	 * @param message a message which will be prepended to the message produced by
+	 * the function itself, and which may be used to provide context. It should
+	 * normally end in a ":" or ". " so that the function generate message looks
+	 * ok when prepended to it.
+	 * @throws IllegalArgumentException if the object is not an instance of clazz
+	 * @see Class#isInstance
+	 */
+	public static void isInstanceOf(Class clazz, Object obj, String message) {
+		Assert.notNull(clazz, "The clazz to perform the instanceof assertion cannot be null");
+		Assert.isTrue(clazz.isInstance(obj), message +
+				"Object of class '" + (obj != null ? obj.getClass().getName() : "[null]") +
+				"' must be an instance of '" + clazz.getName() + "'");
+	}
+
 
 	/**
 	 * Assert a boolean expression, throwing <code>IllegalStateException</code>
