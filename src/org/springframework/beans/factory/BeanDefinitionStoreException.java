@@ -28,6 +28,10 @@ import org.springframework.core.io.Resource;
  */
 public class BeanDefinitionStoreException extends FatalBeanException {
 
+	private String resourceDescription;
+
+	private String beanName;
+
 	/**
 	 * Create a new BeanDefinitionStoreException.
 	 * @param msg the detail message
@@ -89,6 +93,23 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg, Throwable ex) {
 		super("Error registering bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, ex);
+		this.resourceDescription = resourceDescription;
+		this.beanName = beanName;
+	}
+
+	/**
+	 * Return the description of the resource that the bean
+	 * definition came from, if any.
+	 */
+	public String getResourceDescription() {
+		return resourceDescription;
+	}
+
+	/**
+	 * Return the name of the bean requested, if any.
+	 */
+	public String getBeanName() {
+		return beanName;
 	}
 
 }

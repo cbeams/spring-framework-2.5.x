@@ -219,6 +219,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			fail("Shouldn't succeed with type mismatch");
 		}
 		catch (BeanCreationException wex) {
+			assertEquals("typeMismatch", wex.getBeanName());
 			assertTrue(wex.getCause() instanceof PropertyAccessExceptionsException);
 			PropertyAccessExceptionsException ex = (PropertyAccessExceptionsException) wex.getCause();
 			// Further tests

@@ -25,6 +25,10 @@ import org.springframework.beans.FatalBeanException;
  */
 public class BeanCreationException extends FatalBeanException {
 
+	private String resourceDescription;
+
+	private String beanName;
+
 	/**
 	 * Create a new BeanCreationException.
 	 * @param msg the detail message
@@ -82,6 +86,23 @@ public class BeanCreationException extends FatalBeanException {
 	 */
 	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable ex) {
 		super("Error creating bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, ex);
+		this.resourceDescription = resourceDescription;
+		this.beanName = beanName;
+	}
+
+	/**
+	 * Return the description of the resource that the bean
+	 * definition came from, if any.
+	 */
+	public String getResourceDescription() {
+		return resourceDescription;
+	}
+
+	/**
+	 * Return the name of the bean requested, if any.
+	 */
+	public String getBeanName() {
+		return beanName;
 	}
 
 }

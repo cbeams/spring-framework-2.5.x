@@ -281,6 +281,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
 		}
 		catch (BeanDefinitionStoreException ex) {
+			assertEquals("kerry", ex.getBeanName());
 			// expected
 		}
 	}
@@ -312,6 +313,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			fail("Should have thrown BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {
+			assertEquals("test", ex.getBeanName());
 			// expected
 		}
 	}
@@ -700,7 +702,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			fail("Should have thrown BeanCreationException");
 		}
 		catch (BeanCreationException ex) {
-			ex.printStackTrace();
+			assertEquals("test", ex.getBeanName());
 			assertTrue(ex.getMessage().toLowerCase().indexOf("interface") != -1);
 		}
 	}
@@ -713,7 +715,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			fail("Should have thrown BeanCreationException");
 		}
 		catch (BeanCreationException ex) {
-			ex.printStackTrace();
+			assertEquals("test", ex.getBeanName());
 			assertTrue(ex.getMessage().toLowerCase().indexOf("abstract") != -1);
 		}
 	}

@@ -344,6 +344,8 @@ public class XmlBeanFactoryTests extends TestCase {
 			fail();
 		}
 		catch (BeanCreationException ex) {
+			assertTrue(ex.getResourceDescription().indexOf("initializers.xml") != -1);
+			assertEquals("init-method2", ex.getBeanName());
 			assertTrue(ex.getCause() instanceof ServletException);
 		}
 	}
@@ -749,6 +751,8 @@ public class XmlBeanFactoryTests extends TestCase {
 			// should have thrown BeanDefinitionStoreException
 		}
 		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.getResourceDescription().indexOf("classNotFound.xml") != -1);
+			assertEquals("classNotFound", ex.getBeanName());
 			assertTrue(ex.getCause() instanceof ClassNotFoundException);
 			// expected
 		}

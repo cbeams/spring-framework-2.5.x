@@ -89,7 +89,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 				return ((FactoryBean) bean).getObject();
 			}
 			catch (Exception ex) {
-				throw new BeanCreationException("FactoryBean threw exception on object creation", ex);
+				throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 			}
 		}
 		return bean;
