@@ -18,10 +18,11 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.LogFactory;
+import org.springframework.core.JdkVersion;
 
 /**
  * AdvisorChainFactory implementation that caches by method.
@@ -30,31 +31,24 @@ import org.apache.commons.logging.LogFactory;
  * Method.hashCode() call. On J2SE 1.3, falls back to using java.util.HashMap.
  *
  * @author Rod Johnson
- * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.5 2004-05-18 08:03:30 jhoeller Exp $
+ * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.6 2004-05-26 10:41:13 jhoeller Exp $
  * @see java.util.IdentityHashMap
  * @see java.util.HashMap
  * @see java.lang.reflect.Method#hashCode
  */
 public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFactory {
 
-	public static final String IDENTITY_HASH_MAP_CLASS_NAME = "java.util.IdentityHashMap";
-
 	private final Map methodCache = createMap();
 	
 	private Map createMap() {
 		// Use IdentityHashMap, introduced in J2SE 1.4, which is a lot faster
-		// as we want to compare Method keys by reference.
-		// The reason we do this via reflection rather than using new is to avoid
-		// a dependence in this class that will break it under J2SE 1.3.
-		try {
-			Class clazz = Class.forName(IDENTITY_HASH_MAP_CLASS_NAME);
-			return (Map) clazz.newInstance();
-		}
-		catch (Exception ex) {
-			// will only happen on J2SE < 1.4
-			LogFactory.getLog(getClass()).debug("Falling back to java.util.HashMap (J2SE < 1.4 ?): couldn't create " +
-																					"an IdentityHashMap using reflection (" + ex.getMessage() + ")");
+		// as we want to compare Method keys by reference. If not available,
+		// fall back to standard HashMap.
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return new HashMap();
+		}
+		else {
+			return new IdentityHashMap();
 		}
 	}
 	
