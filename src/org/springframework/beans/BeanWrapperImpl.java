@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.27 2004-03-04 21:34:42 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.28 2004-03-08 10:06:27 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -77,12 +77,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// Register default editors in this class, for restricted environments.
 		// We're not using the JRE's PropertyEditorManager to avoid potential
 		// SecurityExceptions when running in a SecurityManager.
-		defaultEditors.put(Class.class, new ClassEditor());
-		defaultEditors.put(File.class, new FileEditor());
-		defaultEditors.put(Locale.class, new LocaleEditor());
-		defaultEditors.put(Properties.class, new PropertiesEditor());
-		defaultEditors.put(String[].class, new StringArrayPropertyEditor());
-		defaultEditors.put(URL.class, new URLEditor());
+		defaultEditors.put(Class.class, ClassEditor.class);
+		defaultEditors.put(File.class, FileEditor.class);
+		defaultEditors.put(Locale.class, LocaleEditor.class);
+		defaultEditors.put(Properties.class, PropertiesEditor.class);
+		defaultEditors.put(String[].class, StringArrayPropertyEditor.class);
+		defaultEditors.put(URL.class, URLEditor.class);
 	}
 
 
@@ -700,7 +700,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				if (newValue instanceof String) {
 					if (pe == null) {
 						// no custom editor -> check BeanWrapper's default editors
-						pe = (PropertyEditor) defaultEditors.get(requiredType);
+						pe = findDefaultEditor(requiredType);
 						if (pe == null) {
 							// no BeanWrapper default editor -> check standard JavaBean editors
 							pe = PropertyEditorManager.findEditor(requiredType);
@@ -744,6 +744,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 
 		return newValue;
+	}
+
+	private PropertyEditor findDefaultEditor(Class type) {
+		Class editorClass = (Class) defaultEditors.get(type);
+		if (editorClass != null) {
+			return (PropertyEditor) BeanUtils.instantiateClass(editorClass);
+		}
+		else {
+			return null;
+		}
 	}
 
 
