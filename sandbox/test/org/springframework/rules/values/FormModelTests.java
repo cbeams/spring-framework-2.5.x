@@ -1,6 +1,6 @@
 /*
  * $Header: /usr/local/cvs/module/src/java/File.java,v 1.7 2004/01/16 22:23:11
- * keith Exp $ $Revision: 1.3 $ $Date: 2004-08-26 05:34:10 $
+ * keith Exp $ $Revision: 1.4 $ $Date: 2004-08-28 05:31:52 $
  * 
  * Copyright Computer Science Innovations (CSI), 2004. All rights reserved.
  */
@@ -15,15 +15,16 @@ public class FormModelTests extends TestCase {
         contact.setAddress(new Address());
         c.setPrimaryContact(contact);
 
-        ValidatingFormModel model = new ValidatingFormModel(c);
+        DefaultFormModel model = new DefaultFormModel(c);
         model.setBufferChangesDefault(false);
-        ValueModel city = model.add("primaryContact");
+        ValueModel city = model.add("primaryContact.address.city");
         city.addValueListener(new ValueListener() {
             public void valueChanged() {
                 System.out.println("city changed");
             }
         });
         ValueModel addr = model.add("primaryContact.address");
+        System.out.println(addr.getClass());
         addr.set(new Address());
     }
 

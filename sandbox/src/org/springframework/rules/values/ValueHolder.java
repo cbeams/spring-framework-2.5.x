@@ -16,6 +16,7 @@
 package org.springframework.rules.values;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ToStringBuilder;
 
 /**
  * A simple value model that contains a single value. Notifies listeners when
@@ -42,5 +43,9 @@ public class ValueHolder extends AbstractValueModel {
         if (ObjectUtils.nullSafeEquals(this.value, value)) { return; }
         this.value = value;
         fireValueChanged();
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this).append("value", get()).toString();
     }
 }

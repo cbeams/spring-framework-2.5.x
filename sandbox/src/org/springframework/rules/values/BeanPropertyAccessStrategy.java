@@ -62,18 +62,20 @@ public class BeanPropertyAccessStrategy implements
     public BeanPropertyAccessStrategy(final ValueModel beanHolder) {
         Assert.notNull(beanHolder);
         this.beanWrapper = new BeanWrapperImpl();
+        this.beanHolder = beanHolder;
         if (beanHolder.get() != null) {
             beanWrapper.setWrappedInstance(beanHolder.get());
         }
-        this.beanHolder = beanHolder;
         if (logger.isDebugEnabled()) {
-            logger.debug("[Bean accessor attaching to mutable bean holder.]");
+            logger.debug("[Subscribing to mutable bean holder; bean value="
+                    + beanHolder.get() + "]");
         }
         this.beanHolder.addValueListener(new ValueListener() {
             public void valueChanged() {
                 if (logger.isDebugEnabled()) {
                     logger
-                            .debug("[Updating the enclosed bean wrapper's target object]");
+                            .debug("[Updating the enclosed bean wrapper's target object; new value='"
+                                    + beanHolder.get() + "']");
                 }
                 if (beanHolder.get() != null) {
                     beanWrapper.setWrappedInstance(beanHolder.get());
@@ -86,8 +88,13 @@ public class BeanPropertyAccessStrategy implements
             String nestedPropertyName, final BeanPropertyAccessStrategy parent) {
         this(nestedDomainObjectHolder);
         this.nestedPath = nestedPropertyName;
+        if (logger.isDebugEnabled()) {
+            logger.debug("[Subscribing to parent bean holder; value="
+                    + parent.getDomainObject() + "]");
+        }
         parent.getDomainObjectHolder().addValueListener(new ValueListener() {
             public void valueChanged() {
+                System.out.println("parent value changed");
                 beanHolder.set(parent.getPropertyValue(getFinalPath(parent,
                         nestedPath)));
             }

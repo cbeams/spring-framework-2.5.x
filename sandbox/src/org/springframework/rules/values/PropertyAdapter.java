@@ -34,7 +34,8 @@ public class PropertyAdapter extends AbstractValueModel {
         if (propertyAccessStrategy.getDomainObjectHolder() != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("[Property adapter for property '" + propertyName
-                        + "' attaching to mutable domain object holder.]");
+                        + "' subscribing to domain object holder; value="
+                        + propertyAccessStrategy.getDomainObject() + "]");
             }
             propertyAccessStrategy.getDomainObjectHolder().addValueListener(
                     new ValueListener() {
@@ -43,9 +44,10 @@ public class PropertyAdapter extends AbstractValueModel {
                                 logger
                                         .debug("[Notifying any dependents for '"
                                                 + PropertyAdapter.this.propertyName
-                                                + "' the '"
-                                                + PropertyAdapter.this.propertyName
-                                                + "' aspect value may have changed; target domain object changed]");
+                                                + "' that the value may have changed; target domain object changed, new value="
+                                                + PropertyAdapter.this.propertyAccessStrategy
+                                                        .getDomainObject()
+                                                + "]");
                             }
                             PropertyAdapter.this.fireValueChanged();
                         }
@@ -71,6 +73,7 @@ public class PropertyAdapter extends AbstractValueModel {
 
     public void set(Object value) {
         propertyAccessStrategy.setPropertyValue(propertyName, value);
+        fireValueChanged();
     }
 
     public String toString() {
