@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow.action;
 
-
 /**
  * Exception thrown if a form object could not be retrieved via its identifier.
  * Provides information about the persistent class and the identifier.
@@ -29,7 +28,7 @@ public class FormObjectRetrievalFailureException extends RuntimeException {
 	private Object formObjectClass;
 
 	/**
-	 * Create a new ObjectRetrievalFailureException for the given object,
+	 * Create a new FormObjectRetrievalFailureException for the given object,
 	 * with the default "not found" message.
 	 * @param formObjectClass the persistent class
 	 * @param formObjectName the ID of the object that should have been retrieved
@@ -56,7 +55,7 @@ public class FormObjectRetrievalFailureException extends RuntimeException {
 	}
 
 	/**
-	 * Create a new ObjectRetrievalFailureException for the given object,
+	 * Create a new FormObjectRetrievalFailureException for the given object,
 	 * with the default "not found" message.
 	 * @param formObjectClassName the name of the persistent class
 	 * @param formObjectName the ID of the object that should have been retrieved
@@ -68,7 +67,7 @@ public class FormObjectRetrievalFailureException extends RuntimeException {
 	}
 
 	/**
-	 * Create a new ObjectRetrievalFailureException for the given object,
+	 * Create a new FormObjectRetrievalFailureException for the given object,
 	 * with the given explicit message and exception.
 	 * @param formObjectClassName the name of the persistent class
 	 * @param formObjectName the ID of the object that should have been retrieved
@@ -105,5 +104,4 @@ public class FormObjectRetrievalFailureException extends RuntimeException {
 	public Object getFormObjectName() {
 		return formObjectName;
 	}
-
 }

@@ -18,8 +18,6 @@ package org.springframework.web.flow.action;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowConstants;
@@ -100,8 +98,8 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Pre-action-execution hook, subclasses may override. If this method
-	 * returns a non-<code>null</code> value, the
-	 * <code>doExecuteAction()</code> method will <b>not</b> be called and
+	 * returns a non- <code>null</code> value, the
+	 * <code>doExecuteAction()</code> method will <b>not </b> be called and
 	 * the returned value will be used to select a transition to trigger in the
 	 * calling action state. If this method returns <code>null</code>,
 	 * <code>doExecuteAction()</code> will be called to obtain an action
@@ -111,11 +109,11 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param request The http request
 	 * @param response The http response
 	 * @param context The flow data context
-	 * @return The non-<code>null</code> action result, in which case the
+	 * @return The non- <code>null</code> action result, in which case the
 	 *         <code>doExecuteAction()</code> will not be called. Or
 	 *         <code>null</code> if the <code>doExecuteAction()</code>
 	 *         method should be called to obtain the action result.
-	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
 	protected Event onPreExecute(FlowExecutionContext context) throws Exception {
@@ -129,7 +127,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param response The http response
 	 * @param context The flow data context
 	 * @return The action result
-	 * @throws Exception An <b>unrecoverable</b> exception occured, either
+	 * @throws Exception An <b>unrecoverable </b> exception occured, either
 	 *         checked or unchecked
 	 */
 	protected abstract Event doExecuteAction(FlowExecutionContext context) throws Exception;

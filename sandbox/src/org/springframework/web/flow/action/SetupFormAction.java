@@ -78,7 +78,7 @@ public class SetupFormAction extends BindAndValidateAction {
 			}
 			binder.bind(new MutablePropertyValues(context.getEvent().getParameters()));
 		}
-		new FormObjectAccessor(context).exposeBindExceptionErrors(binder.getErrors());
+		new FormObjectAccessor(context).exposeBindExceptionErrors(binder.getErrors(), getFormObjectScope());
 		exposeViewPlaceholders(context);
 		try {
 			setupReferenceData(context);

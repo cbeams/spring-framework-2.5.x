@@ -18,6 +18,7 @@ package org.springframework.web.flow.action;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.ScopeType;
 
 /**
  * Convenience wrapper that encapsulates logic on how to retrieve and expose
@@ -56,7 +57,7 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         context
 	 */
-	protected Object getFormObject() throws IllegalStateException {
+	public Object getFormObject() throws IllegalStateException {
 		return getFormObject(FORM_OBJECT_ATTRIBUTE_NAME);
 	}
 
@@ -70,7 +71,7 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         context or is not of the required type
 	 */
-	protected Object getFormObject(Class formObjectClass) throws IllegalStateException {
+	public Object getFormObject(Class formObjectClass) throws IllegalStateException {
 		return getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, formObjectClass);
 	}
 
@@ -82,7 +83,7 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the Errors instance is not found in the
 	 *         context
 	 */
-	protected Errors getFormErrors() throws IllegalStateException {
+	public Errors getFormErrors() throws IllegalStateException {
 		return (Errors)this.context.requestScope()
 				.getRequiredAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE_NAME, Errors.class);
 	}
@@ -95,7 +96,7 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         context
 	 */
-	protected Object getFormObject(String formObjectName) throws IllegalStateException {
+	public Object getFormObject(String formObjectName) throws IllegalStateException {
 		return this.context.requestScope().getRequiredAttribute(formObjectName);
 	}
 
@@ -109,7 +110,7 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         context or is not of the required type
 	 */
-	protected Object getFormObject(String formObjectName, Class formObjectClass) throws IllegalStateException {
+	public Object getFormObject(String formObjectName, Class formObjectClass) throws IllegalStateException {
 		return this.context.requestScope().getRequiredAttribute(formObjectName, formObjectClass);
 	}
 
@@ -123,38 +124,44 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the Errors instance is not found in the
 	 *         context
 	 */
-	protected Errors getFormErrors(String formObjectErrorsName) throws IllegalStateException {
+	public Errors getFormErrors(String formObjectErrorsName) throws IllegalStateException {
 		return (Errors)this.context.requestScope().getRequiredAttribute(
 				BindException.ERROR_KEY_PREFIX + formObjectErrorsName, Errors.class);
 	}
 
 	/**
-	 * Expose a <i>new</i> errors instance in the flow context for the form
+	 * Expose a <i>new </i> errors instance in the flow context for the form
 	 * object using name {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
 	 * 
 	 * @param context The flow context
 	 * @param formObject The form object to expose an errors instance for
 	 */
-	protected void exposeErrors(Object formObject) {
-		exposeErrors(formObject, FORM_OBJECT_ATTRIBUTE_NAME);
+	public void exposeErrors(Object formObject, ScopeType scope) {
+		exposeErrors(formObject, FORM_OBJECT_ATTRIBUTE_NAME, scope);
 	}
 
 	/**
-	 * Expose a <i>new</i> errors instance in the flow context for the form
+	 * Expose a <i>new </i> errors instance in the flow context for the form
 	 * object with the specified form object name.
 	 * @param context The flow context
 	 * @param formObject The form object
 	 * @param formObjectName The name of the form object
 	 */
-	protected void exposeErrors(Object formObject, String formObjectName) {
-		exposeBindExceptionErrors(new BindException(formObject, formObjectName));
+	public void exposeErrors(Object formObject, String formObjectName, ScopeType scope) {
+		exposeBindExceptionErrors(new BindException(formObject, formObjectName), scope);
 	}
 
 	/**
 	 * Internal helper to expose form object error information.
+	 * @param errors the errors instance
 	 */
-	protected void exposeBindExceptionErrors(BindException errors) {
-		this.context.requestScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
+	public void exposeBindExceptionErrors(BindException errors, ScopeType scope) {
+		if (scope == ScopeType.FLOW) {
+			this.context.flowScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
+		}
+		else {
+			this.context.requestScope().setAttribute(FORM_OBJECT_ATTRIBUTE_NAME, errors.getTarget());
+		}
 		this.context.requestScope().setAttribute(FORM_OBJECT_ERRORS_ATTRIBUTE_NAME, errors);
 		this.context.requestScope().setAttributes(errors.getModel());
 	}

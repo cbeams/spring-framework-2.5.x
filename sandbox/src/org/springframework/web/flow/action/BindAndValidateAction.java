@@ -27,18 +27,19 @@ import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionContext;
+import org.springframework.web.flow.ScopeType;
 
 /**
  * Base binding and validation action, which may be used as is, or specialized
  * as needed.
  * 
  * <p>
- * <b>Exposed configuration properties:</b><br>
+ * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
  * <tr>
- * <td><b>name</b></td>
- * <td><b>default</b></td>
- * <td><b>description</b></td>
+ * <td><b>name </b></td>
+ * <td><b>default </b></td>
+ * <td><b>description </b></td>
  * </tr>
  * <tr>
  * <td>formObjectName</td>
@@ -47,36 +48,36 @@ import org.springframework.web.flow.FlowExecutionContext;
  * </tr>
  * <tr>
  * <td>formObjectClass</td>
- * <td><i>null</i></td>
+ * <td><i>null </i></td>
  * <td>Set the formObject class for this controller. An instance of this class
  * gets populated and validated on each request.</td>
  * </tr>
  * <tr>
  * <td>propertyEditorRegistrar</td>
- * <td><i>null</i></td>
+ * <td><i>null </i></td>
  * <td>Set a property editor registration strategy for this action's data
  * binders.</td>
  * </tr>
  * <tr>
  * <td>validator(s)</td>
- * <td><i>empty</i></td>
+ * <td><i>empty </i></td>
  * <td>Set the validator(s) for this controller. Each validator must support
  * the specified formObject class.</td>
  * </tr>
  * <tr>
  * <td>validateOnBinding</td>
- * <td><i>true</i></td>
+ * <td><i>true </i></td>
  * <td>Set if the Validator should get applied when binding.</td>
  * </tr>
  * <tr>
  * <td>createFormObjectPerRequest</td>
- * <td><i>false</i></td>
+ * <td><i>false </i></td>
  * <td>Set if we create a new form object instance everytime this action is
  * invoked.</td>
  * </tr>
  * <tr>
  * <td>messageCodesResolver</td>
- * <td><i>null</i></td>
+ * <td><i>null </i></td>
  * <td>Set the strategy to use for resolving errors into message codes.</td>
  * </tr>
  * </table>
@@ -96,7 +97,7 @@ public class BindAndValidateAction extends AbstractAction {
 
 	private boolean validateOnBinding = true;
 
-	private boolean createFormObjectPerRequest = false;
+	private ScopeType formObjectScope = ScopeType.REQUEST;
 
 	private MessageCodesResolver messageCodesResolver;
 
@@ -149,7 +150,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * Set the primary validator for this action. The Validator must support the
 	 * specified formObject class. If there are one or more existing validators
 	 * set already when this method is called, only the specified validator will
-	 * be kept. Use {@link #setValidators(Validator[])} to set multiple
+	 * be kept. Use {@link #setValidators(Validator[])}to set multiple
 	 * validators.
 	 */
 	public void setValidator(Validator validator) {
@@ -191,16 +192,16 @@ public class BindAndValidateAction extends AbstractAction {
 	 * then cached in flow-scope afterwards.
 	 * @return true or false
 	 */
-	public boolean isCreateFormObjectPerRequest() {
-		return createFormObjectPerRequest;
+	public ScopeType getFormObjectScope() {
+		return this.formObjectScope;
 	}
 
 	/**
 	 * Set if we create a new form object instance everytime this action is
 	 * invoked.
 	 */
-	public final void setCreateFormObjectPerRequest(boolean createNewFormObjectPerRequest) {
-		this.createFormObjectPerRequest = createNewFormObjectPerRequest;
+	public final void setFormObjectScope(ScopeType scopeType) {
+		this.formObjectScope = scopeType;
 	}
 
 	/**
@@ -236,7 +237,7 @@ public class BindAndValidateAction extends AbstractAction {
 		Object formObject = loadRequiredFormObject(context);
 		DataBinder binder = createBinder(context, formObject);
 		Event result = bindAndValidate(context, binder);
-		new FormObjectAccessor(context).exposeBindExceptionErrors(binder.getErrors());
+		new FormObjectAccessor(context).exposeBindExceptionErrors(binder.getErrors(), getFormObjectScope());
 		if (result != null) {
 			return result;
 		}
@@ -307,7 +308,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 */
 	protected Object loadFormObject(FlowExecutionContext context) throws FormObjectRetrievalFailureException,
 			ServletRequestBindingException {
-		if (!isCreateFormObjectPerRequest() && context.flowScope().containsAttribute(getFormObjectName())) {
+		if (getFormObjectScope() == ScopeType.FLOW && context.flowScope().containsAttribute(getFormObjectName())) {
 			Object formObject = context.flowScope().getAttribute(getFormObjectName(), getFormObjectClass());
 			if (logger.isDebugEnabled()) {
 				logger.debug("Binding to existing form object '" + getFormObjectName() + "' in flow scope by name");
