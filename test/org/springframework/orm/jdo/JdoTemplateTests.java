@@ -20,11 +20,12 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @version $Id: JdoTemplateTests.java,v 1.4 2003-11-05 09:48:25 jhoeller Exp $
+ * @version $Id: JdoTemplateTests.java,v 1.5 2003-11-05 20:33:07 jhoeller Exp $
  */
 public class JdoTemplateTests extends TestCase {
 
@@ -54,7 +55,7 @@ public class JdoTemplateTests extends TestCase {
 
 		JdoTemplate jt = new JdoTemplate(pmf);
 		jt.setAllowCreate(false);
-		PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(pmf, new PersistenceManagerHolder(pm));
+		TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
 		final List l = new ArrayList();
 		l.add("test");
 		List result = (List) jt.execute(new JdoCallback() {
@@ -63,7 +64,7 @@ public class JdoTemplateTests extends TestCase {
 			}
 		});
 		assertTrue("Correct result list", result == l);
-		PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(pmf);
+		TransactionSynchronizationManager.unbindResource(pmf);
 		pmfControl.verify();
 		pmControl.verify();
 	}
@@ -115,7 +116,7 @@ public class JdoTemplateTests extends TestCase {
 		jt.setJdoDialect(dialect);
 		jt.setFlushEager(true);
 		jt.setAllowCreate(false);
-		PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(pmf, new PersistenceManagerHolder(pm));
+		TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
 		final List l = new ArrayList();
 		l.add("test");
 		List result = (List) jt.execute(new JdoCallback() {
@@ -124,7 +125,7 @@ public class JdoTemplateTests extends TestCase {
 			}
 		});
 		assertTrue("Correct result list", result == l);
-		PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(pmf);
+		TransactionSynchronizationManager.unbindResource(pmf);
 		pmfControl.verify();
 		pmControl.verify();
 		txControl.verify();

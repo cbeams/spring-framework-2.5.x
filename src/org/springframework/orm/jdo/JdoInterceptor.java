@@ -5,6 +5,8 @@ import javax.jdo.PersistenceManager;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 /**
  * This interceptor binds a new JDO PersistenceManager to the thread before a method
  * call, closing and removing it afterwards in case of any method outcome.
@@ -62,14 +64,13 @@ public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		boolean existingTransaction = false;
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true);
-		if (PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(getPersistenceManagerFactory())) {
+		if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
 			logger.debug("Found thread-bound PersistenceManager for JDO interceptor");
 			existingTransaction = true;
 		}
 		else {
 			logger.debug("Using new PersistenceManager for JDO interceptor");
-			PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(getPersistenceManagerFactory(),
-			                                                                         new PersistenceManagerHolder(pm));
+			TransactionSynchronizationManager.bindResource(getPersistenceManagerFactory(), new PersistenceManagerHolder(pm));
 		}
 		try {
 			Object retVal = methodInvocation.proceed();
@@ -81,7 +82,7 @@ public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 				logger.debug("Not closing pre-bound JDO PersistenceManager after interceptor");
 			}
 			else {
-				PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(getPersistenceManagerFactory());
+				TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
 				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
 			}
 		}

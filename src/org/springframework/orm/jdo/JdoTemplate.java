@@ -5,6 +5,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Helper class that simplifies JDO data access code, and converts
@@ -108,7 +109,7 @@ public class JdoTemplate extends JdoAccessor {
 	 */
 	public Object execute(JdoCallback action) throws DataAccessException {
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), this.allowCreate);
-		boolean existingTransaction = PersistenceManagerFactoryUtils.isPersistenceManagerBoundToThread(pm, getPersistenceManagerFactory());
+		boolean existingTransaction = TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory());
 		try {
 			Object result = action.doInJdo(pm);
 			flushIfNecessary(pm, existingTransaction);

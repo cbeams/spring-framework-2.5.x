@@ -13,6 +13,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * PlatformTransactionManager implementation for single JDBC data sources.
@@ -87,9 +88,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	protected Object doGetTransaction() {
-		if (DataSourceUtils.getThreadObjectManager().hasThreadObject(this.dataSource)) {
+		if (TransactionSynchronizationManager.hasResource(this.dataSource)) {
 			// existing transaction -> use it
-			ConnectionHolder holder = (ConnectionHolder) DataSourceUtils.getThreadObjectManager().getThreadObject(this.dataSource);
+			ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
 			return new DataSourceTransactionObject(holder);
 		}
 		else {
@@ -101,7 +102,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	protected boolean isExistingTransaction(Object transaction) {
 		// standard DataSource -> check existence of thread connection
-		return DataSourceUtils.getThreadObjectManager().hasThreadObject(this.dataSource);
+		return TransactionSynchronizationManager.hasResource(this.dataSource);
 	}
 
 	/**
@@ -139,7 +140,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			}
 
 			// bind the connection holder to the thread
-			DataSourceUtils.getThreadObjectManager().bindThreadObject(this.dataSource, txObject.getConnectionHolder());
+			TransactionSynchronizationManager.bindResource(this.dataSource, txObject.getConnectionHolder());
 		}
 		catch (SQLException ex) {
 			throw new CannotCreateTransactionException("Could not configure connection", ex);
@@ -183,7 +184,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 
 		// remove the connection holder from the thread
-		DataSourceUtils.getThreadObjectManager().removeThreadObject(this.dataSource);
+		TransactionSynchronizationManager.unbindResource(this.dataSource);
+		
 		// reset connection
 		Connection con = txObject.getConnectionHolder().getConnection();
 

@@ -2,18 +2,23 @@ package org.springframework.orm.hibernate;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
+import net.sf.hibernate.JDBCException;
 
 import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
+
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * @author Juergen Hoeller
@@ -83,7 +88,7 @@ public class HibernateInterceptorTests extends TestCase {
 		sfControl.replay();
 		sessionControl.replay();
 
-		SessionFactoryUtils.getThreadObjectManager().bindThreadObject(sf, new SessionHolder(session));
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		HibernateInterceptor interceptor = new HibernateInterceptor();
 		interceptor.setSessionFactory(sf);
 		try {
@@ -91,6 +96,9 @@ public class HibernateInterceptorTests extends TestCase {
 		}
 		catch (Throwable t) {
 			fail("Should not have thrown Throwable: " + t.getMessage());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
 		}
 
 		sfControl.verify();
@@ -107,7 +115,7 @@ public class HibernateInterceptorTests extends TestCase {
 		sfControl.replay();
 		sessionControl.replay();
 
-		SessionFactoryUtils.getThreadObjectManager().bindThreadObject(sf, new SessionHolder(session));
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		HibernateInterceptor interceptor = new HibernateInterceptor();
 		interceptor.setFlushMode(HibernateInterceptor.FLUSH_EAGER);
 		interceptor.setSessionFactory(sf);
@@ -116,6 +124,39 @@ public class HibernateInterceptorTests extends TestCase {
 		}
 		catch (Throwable t) {
 			fail("Should not have thrown Throwable: " + t.getMessage());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testInterceptorWithFlushingFailure() throws Throwable {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		SQLException sqlex = new SQLException("argh", "27");
+		session.flush();
+		sessionControl.setThrowable(new JDBCException(sqlex), 1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateInterceptor interceptor = new HibernateInterceptor();
+		interceptor.setSessionFactory(sf);
+		try {
+			interceptor.invoke(new TestInvocation(sf));
+			fail("Should have thrown DataIntegrityViolationException");
+		}
+		catch (DataIntegrityViolationException ex) {
+			// expected
+			assertEquals(sqlex, ex.getRootCause());
 		}
 
 		sfControl.verify();
@@ -163,7 +204,7 @@ public class HibernateInterceptorTests extends TestCase {
 		}
 
 		public Object proceed() throws Throwable {
-			if (!SessionFactoryUtils.getThreadObjectManager().hasThreadObject(this.sessionFactory)) {
+			if (!TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
 				throw new IllegalStateException("Session not bound");
 			}
 			return null;

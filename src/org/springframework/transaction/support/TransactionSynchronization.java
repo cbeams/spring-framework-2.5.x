@@ -26,7 +26,7 @@ public interface TransactionSynchronization {
 	int STATUS_UNKNOWN = 2;
 
 	/**
-	 * Invoked before transaction commit.
+	 * Invoked before transaction commit (before "beforeCompletion").
 	 * Can e.g. flush of transactional sessions to the database.
 	 * <p>Note that exceptions will get propagated to the commit caller
 	 * and cause a rollback of the transaction.
@@ -35,7 +35,16 @@ public interface TransactionSynchronization {
 	void beforeCommit() throws RuntimeException;
 
 	/**
-	 * Invoked after transaction completion.
+	 * Invoked before transaction commit/rollback (after "beforeCommit").
+	 * Can e.g. perform proper resource cleanup.
+	 * <p>Note that exceptions will get propagated to the commit caller
+	 * and cause a rollback of the transaction.
+	 * @throws RuntimeException in case of errors
+	 */
+	void beforeCompletion() throws RuntimeException;
+
+	/**
+	 * Invoked after transaction commit/rollback.
 	 * Can e.g. perform proper resource cleanup.
 	 * <p>Note that exceptions will get propagated to the commit or rollback
 	 * caller, although they will not influence the outcome of the transaction.

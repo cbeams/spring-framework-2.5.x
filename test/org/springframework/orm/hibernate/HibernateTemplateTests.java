@@ -26,6 +26,7 @@ import org.easymock.MockControl;
 import org.springframework.beans.TestBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Juergen Hoeller
@@ -124,7 +125,7 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setAllowCreate(false);
-		SessionFactoryUtils.getThreadObjectManager().bindThreadObject(sf, new SessionHolder(session));
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
@@ -133,7 +134,7 @@ public class HibernateTemplateTests extends TestCase {
 			}
 		});
 		assertTrue("Correct result list", result == l);
-		SessionFactoryUtils.getThreadObjectManager().removeThreadObject(sf);
+		TransactionSynchronizationManager.unbindResource(sf);
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -151,7 +152,7 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setFlushModeName("FLUSH_EAGER");
 		ht.setAllowCreate(false);
-		SessionFactoryUtils.getThreadObjectManager().bindThreadObject(sf, new SessionHolder(session));
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
@@ -160,7 +161,7 @@ public class HibernateTemplateTests extends TestCase {
 			}
 		});
 		assertTrue("Correct result list", result == l);
-		SessionFactoryUtils.getThreadObjectManager().removeThreadObject(sf);
+		TransactionSynchronizationManager.unbindResource(sf);
 		sfControl.verify();
 		sessionControl.verify();
 	}

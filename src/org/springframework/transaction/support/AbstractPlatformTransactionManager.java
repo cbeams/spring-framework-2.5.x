@@ -107,7 +107,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			// create new transaction
 			doBegin(transaction, definition);
 			if (this.transactionSynchronization) {
-				TransactionSynchronizationManager.init();
+				TransactionSynchronizationManager.initSynchronization();
 			}
 			return new TransactionStatus(transaction, true);
 		}
@@ -136,6 +136,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			try {
 				logger.debug("Triggering beforeCommit synchronization");
 				TransactionSynchronizationManager.triggerBeforeCommit();
+				logger.debug("Triggering beforeCompletion synchronization");
+				TransactionSynchronizationManager.triggerBeforeCompletion();
 				logger.debug("Initiating transaction commit");
 				doCommit(status);
 				triggerAfterCompletion(TransactionSynchronization.STATUS_COMMITTED, null);
@@ -166,7 +168,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			finally {
 				cleanupAfterCompletion(status.getTransaction());
-				TransactionSynchronizationManager.clear();
+				TransactionSynchronizationManager.clearSynchronization();
 			}
 		}
 	}
@@ -180,6 +182,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	public void rollback(TransactionStatus status) throws TransactionException {
 		if (status.isNewTransaction()) {
 			try {
+				logger.debug("Triggering beforeCompletion synchronization");
+				TransactionSynchronizationManager.triggerBeforeCompletion();
+				logger.debug("Initiating transaction rollback");
 				doRollback(status);
 				triggerAfterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK, null);
 			}
@@ -189,7 +194,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			finally {
 				cleanupAfterCompletion(status.getTransaction());
-				TransactionSynchronizationManager.clear();
+				TransactionSynchronizationManager.clearSynchronization();
 			}
 		}
 		else if (status.getTransaction() != null) {

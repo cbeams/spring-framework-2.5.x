@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.easymock.MockControl;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.JdbcTestCase;
@@ -26,14 +27,14 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.datasource.ConnectionHolder;
-import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Tests for StoredProcedure class
  * @author Thomas Risberg
  * @author Trevor Cook
  * @author Rod Johnson
- * @version $Id: StoredProcedureTestSuite.java,v 1.7 2003-11-03 17:07:45 johnsonr Exp $
+ * @version $Id: StoredProcedureTestSuite.java,v 1.8 2003-11-05 20:33:06 jhoeller Exp $
  */
 public class StoredProcedureTestSuite extends JdbcTestCase {
 
@@ -54,9 +55,6 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		mockCallable = (CallableStatement) ctrlCallable.getMock();
 	}
 
-	/**
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
@@ -64,9 +62,6 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		}
 	}
 
-	/**
-	 * @see org.springframework.jdbc.object.JdbcTestCase#replay()
-	 */
 	protected void replay() {
 		super.replay();
 		ctrlCallable.replay();
@@ -145,15 +140,15 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 
 		replay();
 
-		DataSourceUtils.getThreadObjectManager().bindThreadObject(
+		TransactionSynchronizationManager.bindResource(
 			mockDataSource,
 			new ConnectionHolder(mockConnection));
 
 		try {
 			testAddInvoice(1106, 3);
-		} finally {
-			DataSourceUtils.getThreadObjectManager().removeThreadObject(
-				mockDataSource);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(mockDataSource);
 		}
 	}
 
@@ -402,12 +397,9 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 	}
 
 	private class NullArg extends StoredProcedure {
+
 		public static final String SQL = "takes_null";
-		/**
-		 * Constructor for AddInvoice.
-		 * @param cf
-		 * @param name
-		 */
+
 		public NullArg(DataSource ds) {
 			setDataSource(ds);
 			setSql(SQL);

@@ -8,23 +8,23 @@ import javax.sql.DataSource;
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
+import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
-import net.sf.hibernate.JDBCException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.datasource.ConnectionHolder;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.core.SQLExceptionTranslator;
 import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
+import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * PlatformTransactionManager implementation for single Hibernate session
@@ -198,14 +198,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	protected Object doGetTransaction() throws CannotCreateTransactionException, TransactionException {
-		if (SessionFactoryUtils.getThreadObjectManager().hasThreadObject(this.sessionFactory)) {
+		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
 			logger.debug("Found thread-bound session for Hibernate transaction");
-			SessionHolder sessionHolder = (SessionHolder) SessionFactoryUtils.getThreadObjectManager().getThreadObject(this.sessionFactory);
+			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(this.sessionFactory);
 			return new HibernateTransactionObject(sessionHolder, false);
 		}
 		else {
 			logger.debug("Opening new session for Hibernate transaction");
-			Session session = SessionFactoryUtils.getSession(this.sessionFactory, this.entityInterceptor);
+			Session session = SessionFactoryUtils.getSession(this.sessionFactory, this.entityInterceptor,
+																											 this.jdbcExceptionTranslator);
 			return new HibernateTransactionObject(new SessionHolder(session), true);
 		}
 	}
@@ -250,7 +251,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// bind the session holder to the thread
 			if (txObject.isNewSessionHolder()) {
-				SessionFactoryUtils.getThreadObjectManager().bindThreadObject(this.sessionFactory, txObject.getSessionHolder());
+				TransactionSynchronizationManager.bindResource(this.sessionFactory, txObject.getSessionHolder());
 			}
 
 			// register the Hibernate Session's JDBC Connection for the DataSource, if set
@@ -259,7 +260,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(definition.getTimeout());
 				}
-				DataSourceUtils.getThreadObjectManager().bindThreadObject(this.dataSource, conHolder);
+				TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
 			}
 		}
 		catch (SQLException ex) {
@@ -328,12 +329,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		// remove the JDBC connection holder from the thread, if set
 		if (this.dataSource != null) {
-			DataSourceUtils.getThreadObjectManager().removeThreadObject(this.dataSource);
+			TransactionSynchronizationManager.unbindResource(this.dataSource);
 		}
 
 		// remove the session holder from the thread
 		if (txObject.isNewSessionHolder()) {
-			SessionFactoryUtils.getThreadObjectManager().removeThreadObject(this.sessionFactory);
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		}
 
 		try {

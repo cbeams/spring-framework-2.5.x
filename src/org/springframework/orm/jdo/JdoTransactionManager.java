@@ -18,6 +18,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * PlatformTransactionManager implementation for single JDO persistence manager factories.
@@ -126,13 +127,13 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected Object doGetTransaction() throws CannotCreateTransactionException, TransactionException {
-		if (PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(this.persistenceManagerFactory)) {
-			logger.debug("Found thread-bound PersistenceManager for JDO transaction");
-			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) PersistenceManagerFactoryUtils.getThreadObjectManager().getThreadObject(this.persistenceManagerFactory);
+		if (TransactionSynchronizationManager.hasResource(this.persistenceManagerFactory)) {
+			logger.debug("Found thread-bound persistence manager for JDO transaction");
+			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(this.persistenceManagerFactory);
 			return new JdoTransactionObject(pmHolder, false);
 		}
 		else {
-			logger.debug("Using new PersistenceManager for JDO transaction");
+			logger.debug("Using new persistence manager for JDO transaction");
 			PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.persistenceManagerFactory, true);
 			return new JdoTransactionObject(new PersistenceManagerHolder(pm), true);
 		}
@@ -160,8 +161,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			PersistenceManager pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
 			pm.currentTransaction().begin();
 			if (txObject.isNewPersistenceManagerHolder()) {
-				PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(
-						this.persistenceManagerFactory, txObject.getPersistenceManagerHolder());
+				TransactionSynchronizationManager.bindResource(this.persistenceManagerFactory, txObject.getPersistenceManagerHolder());
 			}
 
 			// register the JDO PersistenceManager's JDBC Connection for the DataSource, if set
@@ -170,7 +170,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(definition.getTimeout());
 				}
-				DataSourceUtils.getThreadObjectManager().bindThreadObject(this.dataSource, conHolder);
+				TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
 			}
 		}
 		catch (JDOException ex) {
@@ -221,23 +221,23 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 		// remove the JDBC connection holder from the thread, if set
 		if (this.dataSource != null) {
-			DataSourceUtils.getThreadObjectManager().removeThreadObject(this.dataSource);
+			TransactionSynchronizationManager.unbindResource(this.dataSource);
 		}
 
 		// remove the persistence manager holder from the thread
 		if (txObject.isNewPersistenceManagerHolder()) {
-			PersistenceManagerFactoryUtils.getThreadObjectManager().removeThreadObject(this.persistenceManagerFactory);
+			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
 			try {
 				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(
 				    txObject.getPersistenceManagerHolder().getPersistenceManager(), this.persistenceManagerFactory);
 			}
 			catch (CleanupFailureDataAccessException ex) {
 				// just log it, to keep a transaction-related exception
-				logger.error("Could not close JDO PersistenceManager after transaction", ex);
+				logger.error("Could not close JDO persistence manager after transaction", ex);
 			}
 		}
 		else {
-			logger.debug("Not closing pre-bound JDO PersistenceManager after transaction");
+			logger.debug("Not closing pre-bound JDO persistence manager after transaction");
 		}
 	}
 

@@ -14,6 +14,8 @@ import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
 
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 /**
  * @author Juergen Hoeller
  */
@@ -52,7 +54,7 @@ public class JdoInterceptorTests extends TestCase {
 		pmfControl.replay();
 		pmControl.replay();
 
-		PersistenceManagerFactoryUtils.getThreadObjectManager().bindThreadObject(pmf, new PersistenceManagerHolder(pm));
+		TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
 		JdoInterceptor interceptor = new JdoInterceptor();
 		interceptor.setPersistenceManagerFactory(pmf);
 		try {
@@ -76,7 +78,7 @@ public class JdoInterceptorTests extends TestCase {
 		}
 
 		public Object proceed() throws Throwable {
-			if (!PersistenceManagerFactoryUtils.getThreadObjectManager().hasThreadObject(this.persistenceManagerFactory)) {
+			if (!TransactionSynchronizationManager.hasResource(this.persistenceManagerFactory)) {
 				throw new IllegalStateException("PersistenceManager not bound");
 			}
 			return null;
