@@ -2,6 +2,7 @@ package org.springframework.validation;
 
 import java.beans.BeanInfo;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -70,6 +71,11 @@ public class BeanValidatorTestSuite extends TestCase {
         Pet pet = getPet();
         BindException b = new BindException(pet, "pet");
         getBeanValidationService().validate(pet, b);
+        assertEquals(3, b.getErrorCount());
+        Iterator i = b.getAllErrors().iterator();
+        while (i.hasNext()) {
+            System.out.println(i.next());
+        }
     }
 
     public Pet getPet() {

@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.ArrayUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringBuilder;
@@ -21,26 +22,32 @@ import org.springframework.validation.PropertyValidationRule;
  * 
  * @author Keith Donald
  */
-public abstract class AbstractPropertyValidationRule implements
-        PropertyValidationRule {
-    protected static Log logger = LogFactory
-            .getLog(PropertyValidationRule.class);
+public abstract class AbstractPropertyValidationRule
+    implements PropertyValidationRule {
+    protected static Log logger =
+        LogFactory.getLog(PropertyValidationRule.class);
 
     private String TYPING_HINT_PREFIX = "typingHints.";
     private String ERROR_PREFIX = "errors.";
 
+    public abstract boolean validate(Object context, Object value);
+    
     public MessageSourceResolvable createTypingHint(String propertyNamePath) {
         return new DefaultMessageSourceResolvable(
-                new String[] { getTypingHintCode() }, getTypingHintArguments());
+            new String[] { getTypingHintCode()},
+            getTypingHintArguments());
     }
 
     public MessageSourceResolvable createErrorMessage(String propertyNamePath) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Creating resolvable error message for property '"
-                    + propertyNamePath + "'");
+            logger.debug(
+                "Creating resolvable error message for property '"
+                    + propertyNamePath
+                    + "'");
         }
-        DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
-                new String[] { getErrorCode() },
+        DefaultMessageSourceResolvable resolvable =
+            new DefaultMessageSourceResolvable(
+                new String[] { getErrorCode()},
                 getErrorArguments(propertyNamePath));
         if (logger.isDebugEnabled()) {
             logger.debug("Resolvable error message is " + resolvable);
@@ -49,12 +56,18 @@ public abstract class AbstractPropertyValidationRule implements
     }
 
     public void invokeRejectValue(Errors errors, String nestedPath) {
-        errors.rejectValue(nestedPath, getErrorCode(), getErrorArguments(errors
-                .getObjectName()
-                + '.' + nestedPath), null);
+        Assert.notNull(errors);
+        Assert.notNull(nestedPath);
+        String objectName = errors.getObjectName();
+        errors.rejectValue(
+            nestedPath,
+            getErrorCode(),
+            getErrorArguments(
+                (objectName != null
+                    ? objectName + '.' + nestedPath
+                    : nestedPath)),
+            null);
     }
-
-    public abstract boolean validate(Object context, Object value);
 
     /**
      * Returns the rule type, used to lookup rule messages. By default, the
@@ -126,42 +139,47 @@ public abstract class AbstractPropertyValidationRule implements
      * path. The following message codes are tried:
      * 
      * <pre>
-     *  [objectPrefix].[propertyName]
-     *  [propertyName]
+     *  [objectPrefix].[propertyName] [propertyName]
      * </pre>
      * 
      * For example: name.lastName would correspond to codes:
      * 
      * <pre>
-     *  name.lastName
-     *  lastName
+     *  name.lastName lastName
      * </pre>
      * 
      * @return The resolvable property name message.
      */
-    protected MessageSourceResolvable buildPropertyMessageSourceResolvable(
-            String propertyNamePath) {
-        int index = propertyNamePath.lastIndexOf('.');
+    protected MessageSourceResolvable buildPropertyMessageSourceResolvable(String propertyNamePath) {
         String[] propertyCodes;
         String propertyName;
-        if (index == -1) {
+        String[] tokens =
+            StringUtils.delimitedListToStringArray(propertyNamePath, ".");
+        if (tokens.length == 1) {
             propertyName = propertyNamePath;
             propertyCodes = new String[] { propertyName };
         } else {
-            propertyName = propertyNamePath.substring(index + 1);
-            propertyCodes = new String[] { propertyNamePath, propertyName };
+            propertyName = tokens[tokens.length - 1];
+            String beanPropertyPath = tokens[tokens.length - 2];
+            propertyCodes =
+                new String[] {
+                    propertyNamePath,
+                    beanPropertyPath + '.' + propertyName,
+                    propertyName };
         }
-        DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
-                propertyCodes, null, null);
+        DefaultMessageSourceResolvable resolvable =
+            new DefaultMessageSourceResolvable(propertyCodes, null, null);
         return resolvable;
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("type", getType()).append(
-                "errorCode", getErrorCode()).append("errorArguments",
-                getErrorArguments()).append("typingHintCode",
-                getTypingHintCode()).append("typingHintArguments",
-                getTypingHintArguments()).toString();
+        return new ToStringBuilder(this)
+            .append("type", getType())
+            .append("errorCode", getErrorCode())
+            .append("errorArguments", getErrorArguments())
+            .append("typingHintCode", getTypingHintCode())
+            .append("typingHintArguments", getTypingHintArguments())
+            .toString();
     }
 
 }
