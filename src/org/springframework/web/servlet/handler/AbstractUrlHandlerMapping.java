@@ -30,7 +30,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+	private boolean lazyInitHandlers = false;
+
 	private Map handlerMap = new HashMap();
+
 
 	/**
 	 * Set if URL lookup should always use full path within current servlet
@@ -67,6 +70,21 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
+
+	/**
+	 * Set whether to lazily initialize handlers. Only applicable to
+	 * singleton handlers, as prototypes are always lazily initialized.
+	 * Default is false, as eager initialization allows for more efficiency
+	 * through referencing the controller objects directly.
+	 * <p>If you want to allow your controllers to be lazily initialized,
+	 * make them "lazy-init" and set this flag to true. Just making them
+	 * "lazy-init" will not work, as they are initialized through the
+	 * references from the handler mapping in this case.
+	 */
+	public void setLazyInitHandlers(boolean lazyInitHandlers) {
+		this.lazyInitHandlers = lazyInitHandlers;
+	}
+
 
 	/**
 	 * Look up a handler for the URL path of the given request.
@@ -117,7 +135,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 
 		// eagerly resolve handler if referencing singleton via name
-		if (handler instanceof String) {
+		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
 			if (getApplicationContext().isSingleton(handlerName)) {
 				handler = getApplicationContext().getBean(handlerName);
