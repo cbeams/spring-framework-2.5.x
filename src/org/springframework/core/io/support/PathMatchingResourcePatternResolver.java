@@ -281,7 +281,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		URLConnection con = rootDirResource.getURL().openConnection();
 		if (!(con instanceof JarURLConnection)) {
 			throw new IOException("Cannot perform jar file search for [" + rootDirResource +
-					"]: did not return java.net.JarURLConnection; connection was [" + con + "]");
+					"]: connection [" + con + "] is not an instance of [java.net.JarURLConnection]");
 		}
 		JarURLConnection jarCon = (JarURLConnection) con;
 		JarFile jarFile = jarCon.getJarFile();
@@ -290,6 +290,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			logger.debug("Looking for matching resources in jar file [" + jarFileUrl + "]");
 		}
 		String rootEntryPath = jarCon.getJarEntry().getName();
+		if (rootEntryPath.endsWith("/")) {
+			// Root entry path must not end with slash to allow for proper matching.
+			// The Sun JRE does not return a slash here, but BEA JRockit does.
+			rootEntryPath = rootEntryPath.substring(0, rootEntryPath.length() - 1);
+		}
 		String jarFileUrlPrefix = "jar:" + jarFileUrl.toExternalForm() + "!/";
 		Set result = new HashSet();
 		for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
