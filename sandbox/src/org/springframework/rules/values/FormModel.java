@@ -21,25 +21,17 @@ import java.util.Map;
  * @author Keith Donald
  */
 public interface FormModel {
-    public void addValidationListener(ValidationListener listener);
-
-    public void removeValidationListener(ValidationListener listener);
-
-    public void addValueListener(String formProperty, ValueListener listener);
-
-    public void removeValueListener(String formProperty, ValueListener listener);
+    public ValueModel getFormObjectHolder();
 
     public Object getFormObject();
 
-    public ValueModel getFormObjectHolder();
+    public ValueModel getDisplayValueModel(String formProperty);
+
+    public ValueModel getValueModel(String formProperty);
 
     public String getDisplayValue(String formProperty);
-    
-    public Object getValue(String formProperty);
 
-    public ValueModel getDisplayValueModel(String formProperty);
-    
-    public ValueModel getValueModel(String formProperty);
+    public Object getValue(String formProperty);
 
     public Map getErrors();
 
@@ -48,9 +40,21 @@ public interface FormModel {
     public boolean isDirty();
 
     public boolean getBufferChanges();
-    
+
     public void commit();
 
     public void revert();
+
+    public void addValidationListener(ValidationListener listener);
+
+    public void removeValidationListener(ValidationListener listener);
+
+    public void addValueListener(String formProperty, ValueListener listener);
+
+    public void removeValueListener(String formProperty, ValueListener listener);
+
+    public void addCommitListener(CommitListener listener);
+
+    public void removeCommitListener(CommitListener listener);
 
 }

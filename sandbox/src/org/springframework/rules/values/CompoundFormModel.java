@@ -131,6 +131,14 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                 });
     }
 
+    public void addCommitListener(CommitListener listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void removeCommitListener(CommitListener listener) {
+        throw new UnsupportedOperationException();
+    }
+
     public void addValidationListener(ValidationListener listener,
             String childModelName) {
         FormModel model = getChildFormModel(childModelName);

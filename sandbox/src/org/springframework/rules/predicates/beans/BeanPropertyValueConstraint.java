@@ -62,6 +62,6 @@ public class BeanPropertyValueConstraint extends AbstractBeanPropertyExpression
     }
 
     public String toString() {
-        return super.toString() + " *must be* " + valueConstraint.toString();
+        return valueConstraint.toString();
     }
 }

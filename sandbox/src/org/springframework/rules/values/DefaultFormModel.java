@@ -17,8 +17,10 @@ package org.springframework.rules.values;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +41,8 @@ public class DefaultFormModel implements MutableFormModel {
     private Map formValueModels = new HashMap();
 
     private boolean bufferChanges = true;
+
+    private Set commitListeners;
 
     public DefaultFormModel(Object domainObject) {
         this(new BeanPropertyAccessStrategy(domainObject));
@@ -86,6 +90,21 @@ public class DefaultFormModel implements MutableFormModel {
 
     public void setBufferChangesDefault(boolean bufferChanges) {
         this.bufferChanges = bufferChanges;
+    }
+
+    public void addCommitListener(CommitListener listener) {
+        getOrCreateCommitListeners().add(listener);
+    }
+
+    public void removeCommitListener(CommitListener listener) {
+        getOrCreateCommitListeners().remove(listener);
+    }
+
+    private Set getOrCreateCommitListeners() {
+        if (this.commitListeners == null) {
+            this.commitListeners = new HashSet(6);
+        }
+        return commitListeners;
     }
 
     public void addValidationListener(ValidationListener listener) {
@@ -280,8 +299,28 @@ public class DefaultFormModel implements MutableFormModel {
         if (bufferChanges) {
             if (hasErrors()) { throw new IllegalStateException(
                     "Form has errors; submit not allowed."); }
-            commitTrigger.set(Boolean.TRUE);
-            commitTrigger.set(null);
+            if (preEditCommit()) {
+                commitTrigger.set(Boolean.TRUE);
+                commitTrigger.set(null);
+                postEditCommit();
+            }
+        }
+    }
+
+    protected boolean preEditCommit() {
+        if (commitListeners == null) { return true; }
+        for (Iterator i = commitListeners.iterator(); i.hasNext();) {
+            CommitListener l = (CommitListener)i.next();
+            if (!l.preEditCommitted(getFormObject())) { return false; }
+        }
+        return true;
+    }
+
+    protected void postEditCommit() {
+        if (commitListeners == null) { return; }
+        for (Iterator i = commitListeners.iterator(); i.hasNext();) {
+            CommitListener l = (CommitListener)i.next();
+            l.postEditCommitted(getFormObject());
         }
     }
 

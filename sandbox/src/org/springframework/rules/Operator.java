@@ -21,15 +21,12 @@ import org.springframework.enums.StringCodedEnum;
  * @author keith
  */
 public abstract class Operator extends StringCodedEnum {
-    private String symbol;
-    
     protected Operator(String code, String symbol) {
-        super(code);
-        this.symbol = symbol;
+        super(code, symbol);
     }
     
     public String getSymbol() {
-        return symbol;
+        return getLabel();
     }
     
     public Operator negation() {

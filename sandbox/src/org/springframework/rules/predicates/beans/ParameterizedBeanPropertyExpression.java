@@ -47,9 +47,6 @@ public class ParameterizedBeanPropertyExpression implements
                 propertyName, valueConstraint);
     }
 
-    /**
-     * @see org.springframework.rules.predicates.beans.BeanPropertyExpression#getPropertyName()
-     */
     public String getPropertyName() {
         return parameterizedExpression.getPropertyName();
     }
@@ -78,6 +75,6 @@ public class ParameterizedBeanPropertyExpression implements
     }
 
     public String toString() {
-        return super.toString() + " " + parameterizedExpression.toString();
+        return getPropertyName() + " " + parameterizedExpression.toString();
     }
 }

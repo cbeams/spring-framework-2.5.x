@@ -35,6 +35,7 @@ import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
+import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 import org.springframework.util.Assert;
@@ -70,7 +71,12 @@ public class DefaultMessageTranslator implements Visitor {
     }
 
     public String getMessage(UnaryPredicate constraint) {
-        return buildMessage(null, null, constraint, Locale.getDefault());
+        String objectName = null;
+        if (constraint instanceof BeanPropertyExpression) {
+            objectName = ((BeanPropertyExpression)constraint).getPropertyName();
+        }
+        String message = buildMessage(objectName, null, constraint, Locale.getDefault());
+        return message;
     }
 
     public String getMessage(String objectName, UnaryPredicate constraint) {
