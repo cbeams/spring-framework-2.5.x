@@ -114,9 +114,9 @@ import org.springframework.core.io.UrlResource;
  *         class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
  *       &lt;list>
- *         &lt;value>com.mycompany.myapp.util.applicationContext.xml&lt;/value>
- *         &lt;value>com.mycompany.myapp.dataaccess.applicationContext.xml&lt;/value>
- *         &lt;value>com.mycompany.myapp.dataaccess.services.xml&lt;/value>
+ *         &lt;value>com/mycompany/myapp/util/applicationContext.xml&lt;/value>
+ *         &lt;value>com/mycompany/myapp/dataaccess/applicationContext.xml&lt;/value>
+ *         &lt;value>com/mycompany/myapp/dataaccess/services.xml&lt;/value>
  *       &lt;/list>
  *     &lt;/constructor-arg>
  *   &lt;/bean>
@@ -141,7 +141,7 @@ import org.springframework.core.io.UrlResource;
  *   &lt;bean id="com.mycompany.myapp.util" lazy-init="true"
  *         class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
- *       &lt;value>com.mycompany.myapp.util.applicationContext.xml&lt;/value>
+ *       &lt;value>com/mycompany/myapp/util/applicationContext.xml&lt;/value>
  *     &lt;/constructor-arg>
  *   &lt;/bean>
  * 
@@ -149,7 +149,7 @@ import org.springframework.core.io.UrlResource;
  *   &lt;bean id="com.mycompany.myapp.dataaccess" lazy-init="true"
  *         class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
- *       &lt;list>&lt;value>com.mycompany.myapp.dataaccess.applicationContext.xml&lt;/value>&lt;/list>
+ *       &lt;list>&lt;value>com/mycompany/myapp/dataaccess/applicationContext.xml&lt;/value>&lt;/list>
  *     &lt;/constructor-arg>
  *     &lt;constructor-arg>
  *       &lt;ref bean="com.mycompany.myapp.util"/>
@@ -160,7 +160,7 @@ import org.springframework.core.io.UrlResource;
  *   &lt;bean id="com.mycompany.myapp.services" lazy-init="true"
  *         class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
- *       &lt;list>&lt;value>com.mycompany.myapp.dataaccess.services.xml&lt;/value>&lt;/value>
+ *       &lt;list>&lt;value>com/mycompany/myapp/dataaccess.services.xml&lt;/value>&lt;/value>
  *     &lt;/constructor-arg>
  *     &lt;constructor-arg>
  *       &lt;ref bean="com.mycompany.myapp.dataaccess"/>
@@ -199,7 +199,7 @@ import org.springframework.core.io.UrlResource;
  *   &lt;bean id="com.mycompany.myapp.util" lazy-init="true"
  *        class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
- *       &lt;value>com.mycompany.myapp.util.applicationContext.xml&lt;/value>
+ *       &lt;value>com/mycompany/myapp/util/applicationContext.xml&lt;/value>
  *     &lt;/constructor-arg>
  *   &lt;/bean>
  * &lt;/beans>
@@ -215,7 +215,7 @@ import org.springframework.core.io.UrlResource;
  *   &lt;bean id="com.mycompany.myapp.dataaccess" lazy-init="true"
  *        class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
- *       &lt;list>&lt;value>com.mycompany.myapp.dataaccess.applicationContext.xml&lt;/value>&lt;/list>
+ *       &lt;list>&lt;value>com/mycompany/myapp/dataaccess/applicationContext.xml&lt;/value>&lt;/list>
  *     &lt;/constructor-arg>
  *     &lt;constructor-arg>
  *       &lt;ref bean="com.mycompany.myapp.util"/>
@@ -234,7 +234,7 @@ import org.springframework.core.io.UrlResource;
  *   &lt;bean id="com.mycompany.myapp.services" lazy-init="true"
  *        class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
- *       &lt;list>&lt;value>com.mycompany.myapp.dataaccess.services.xml&lt;/value>&lt;/list>
+ *       &lt;list>&lt;value>com/mycompany/myapp/dataaccess/services.xml&lt;/value>&lt;/list>
  *     &lt;/constructor-arg>
  *     &lt;constructor-arg>
  *       &lt;ref bean="com.mycompany.myapp.dataaccess"/>
@@ -263,7 +263,7 @@ import org.springframework.core.io.UrlResource;
  * </pre>
  *   
  * @author Colin Sampaleanu
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
