@@ -23,9 +23,24 @@ import org.springframework.samples.countries.dao.IDaoCountry;
  */
 public class CountriesController extends MultiActionController {
 	static final private String COUNTRIES_ATTR = "countries";
+	static final private String HOME_VIEW = "homeView";
+	static final private String CONFIG_VIEW = "configView";
+	static final private String MAIN_VIEW = "countries_mainView";
+	static final private String DETAIL_VIEW = "countries_detailView";
+	static final private String EXCEL_VIEW = "countries_excelView";
+	static final private String PDF_VIEW = "countries_pdfView";
+	static final private String COPY_VIEW = "copyView";
 
 	private IDaoCountry daoCountry;
 	private IDaoCountry secondDaoCountry;
+
+	private String homeView = HOME_VIEW;
+	private String configView = CONFIG_VIEW;
+	private String mainView = MAIN_VIEW;
+	private String detailView = DETAIL_VIEW;
+	private String excelView = EXCEL_VIEW;
+	private String pdfView = PDF_VIEW;
+	private String copyView = COPY_VIEW;
 
 	// handlers
     
@@ -36,7 +51,7 @@ public class CountriesController extends MultiActionController {
 	 * @return a ModelAndView to render the response
 	 */
 	public ModelAndView handleHome(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		return new ModelAndView("homeView");
+		return new ModelAndView(homeView);
 	}
 
 	/**
@@ -46,7 +61,7 @@ public class CountriesController extends MultiActionController {
 	 * @return a ModelAndView to render the response
 	 */
 	public ModelAndView handleConfig(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-		return new ModelAndView("configView");
+		return new ModelAndView(configView);
 	}
 
 	/**
@@ -67,7 +82,7 @@ public class CountriesController extends MultiActionController {
 		listHolder.setLocale(RequestContextUtils.getLocale(request));
 		boolean forceRefresh = request.getParameter("forceRefresh") != null;
 		listHolder.refresh(forceRefresh);
-		return new ModelAndView("countries_mainView", ex.getModel());
+		return new ModelAndView(mainView, ex.getModel());
 	}
 
 	/**
@@ -79,7 +94,7 @@ public class CountriesController extends MultiActionController {
 	public ModelAndView handleDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		Locale locale = RequestContextUtils.getLocale(request);
 		ICountry country = daoCountry.getCountry(request.getParameter("code"), locale);
-		return new ModelAndView("countries_detailView", "country", country);
+		return new ModelAndView(detailView, "country", country);
 	}
 
 	/**
@@ -93,7 +108,7 @@ public class CountriesController extends MultiActionController {
 		if (null == listHolder) {
 			return handleMain(request, response);
 		}
-		return new ModelAndView("countries_excelView", "countries", listHolder);
+		return new ModelAndView(excelView, "countries", listHolder);
 	}
 
 	/**
@@ -107,7 +122,7 @@ public class CountriesController extends MultiActionController {
 		if (null == listHolder) {
 			return handleMain(request, response);
 		}
-		return new ModelAndView("countries_pdfView", "countries", listHolder);
+		return new ModelAndView(pdfView, "countries", listHolder);
 	}
 
 	/**
@@ -133,7 +148,7 @@ public class CountriesController extends MultiActionController {
 				logger.error("No secondDao is configured. You cannot copy in a database.");
 			}
 		} finally {
-			return new ModelAndView("copyView", "copyMade", Boolean.valueOf(copyMade));
+			return new ModelAndView(copyView, "copyMade", Boolean.valueOf(copyMade));
 		}
 	}
 
@@ -141,13 +156,33 @@ public class CountriesController extends MultiActionController {
 	public IDaoCountry getSecondDaoCountry() {
 		return secondDaoCountry;
 	}
-
 	public void setDaoCountry(IDaoCountry daoCountry) {
 		this.daoCountry = daoCountry;
 	}
 
 	public void setSecondDaoCountry(IDaoCountry country) {
 		secondDaoCountry = country;
+	}
+	public void setConfigView(String string) {
+		configView = string;
+	}
+	public void setDetailView(String string) {
+		detailView = string;
+	}
+	public void setExcelView(String string) {
+		excelView = string;
+	}
+	public void setHomeView(String string) {
+		homeView = string;
+	}
+	public void setMainView(String string) {
+		mainView = string;
+	}
+	public void setPdfView(String string) {
+		pdfView = string;
+	}
+	public void setCopyView(String string) {
+		copyView = string;
 	}
 
 	// Embedded classes

@@ -123,6 +123,15 @@
 		<property name="daoCountry"><ref external="daoCountry"/></property>
 		<!-- Uncomment for MEMORY+DATABASE IMPLEMENTATION scenario 2 -->
 		<!-- <property name="secondDaoCountry"><ref external="secondDaoCountry"/></property> -->
+		<!-- Possibility to redefine the view names without changing java code
+		<property name="homeView"><value>homeView</value></property>
+		<property name="configView"><value>configView</value></property>
+		<property name="mainView"><value>countries_mainView</value></property>
+		<property name="detailView"><value>countries_detailView</value></property>
+		<property name="excelView"><value>countries_excelView</value></property>
+		<property name="pdfView"><value>countries_pdfView</value></property>
+		<property name="copyView"><value>copyView</value></property>
+		-->
 	</bean>
 	
 	
