@@ -70,7 +70,7 @@ public class DefaultConversionServiceTests extends TestCase {
 	public void testLabeledEnumConversionNoSuchEnum() {
 		DefaultConversionService service = new DefaultConversionService();
 		service.afterPropertiesSet();
-		service.addConverter(new TextToLabeledEnumConverter(MyEnum.class));
+		service.addConverter(new TextToLabeledEnumConverter(MyEnum.class, service.getFormatterLocator()));
 		ConversionExecutor executor = service.getConversionExecutor(String.class, MyEnum.class);
 		try {
 			MyEnum myEnum = (MyEnum)executor.execute("My Invalid Label");
@@ -83,7 +83,7 @@ public class DefaultConversionServiceTests extends TestCase {
 	public void testValidLabeledEnumConversion() {
 		DefaultConversionService service = new DefaultConversionService();
 		service.afterPropertiesSet();
-		service.addConverter(new TextToLabeledEnumConverter(MyEnum.class));
+		service.addConverter(new TextToLabeledEnumConverter(MyEnum.class, service.getFormatterLocator()));
 		ConversionExecutor executor = service.getConversionExecutor(String.class, MyEnum.class);
 		MyEnum myEnum = (MyEnum)executor.execute("My Label 1");
 		assertEquals(MyEnum.ONE, myEnum);

@@ -16,7 +16,6 @@
 package org.springframework.binding.convert.support;
 
 import org.springframework.binding.format.FormatterLocator;
-import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
 
 /**
  * A converter that delegates to a formatter to perform the conversion.
@@ -25,11 +24,7 @@ import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
  * @author Keith Donald
  */
 public abstract class AbstractFormattingConverter extends AbstractConverter {
-	private FormatterLocator formatterLocator = new ThreadLocalFormatterLocator();
-
-	protected AbstractFormattingConverter() {
-
-	}
+	private FormatterLocator formatterLocator;
 
 	protected AbstractFormattingConverter(FormatterLocator formatterLocator) {
 		setFormatterLocator(formatterLocator);

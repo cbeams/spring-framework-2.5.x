@@ -15,6 +15,8 @@
  */
 package org.springframework.binding.convert.support;
 
+import org.springframework.binding.format.FormatterLocator;
+
 /**
  * Converter that converts textual representations of <coded>CodedEnum</code>
  * instances to a specific instance of <code>LabeledEnum</code>
@@ -24,11 +26,12 @@ public class TextToLabeledEnumConverter extends AbstractFormattingConverter {
 
 	private Class[] labeledEnumClasses;
 
-	public TextToLabeledEnumConverter(Class labeledEnumClasses) {
-		this(new Class[] { labeledEnumClasses });
+	public TextToLabeledEnumConverter(Class labeledEnumClasses, FormatterLocator formatterLocator) {
+		this(new Class[] { labeledEnumClasses }, formatterLocator);
 	}
 
-	public TextToLabeledEnumConverter(Class[] labeledEnumClasses) {
+	public TextToLabeledEnumConverter(Class[] labeledEnumClasses, FormatterLocator formatterLocator) {
+		super(formatterLocator);
 		this.labeledEnumClasses = labeledEnumClasses;
 	}
 
