@@ -17,11 +17,15 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +33,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -38,33 +43,45 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 
 /**
- * Abstract superclass for BeanFactory implementations.
- * Implements the ConfigurableBeanFactory SPI interface.
+ * Abstract superclass for BeanFactory implementations, implementing the
+ * ConfigurableBeanFactory SPI interface. Does <i>not</i> assume a listable
+ * bean factory: can therefore also be used as base class for bean factory
+ * implementations which fetch bean definitions from a variety of backend
+ * resources (where bean definition access is an expensive operation).
  *
  * <p>This class provides singleton/prototype determination, singleton cache,
- * aliases, FactoryBean handling, and bean definition merging for child bean
- * definitions. It also allows for management of a bean factory hierarchy,
- * implementing the HierarchicalBeanFactory interface.
+ * aliases, FactoryBean handling, bean definition merging for child bean definitions,
+ * and bean destruction (DisposableBean interface, custom destroy methods).
+ * Furthermore, it can manage a bean factory hierarchy, through implementing the
+ * HierarchicalBeanFactory interface (superinterface of ConfigurableBeanFactory).
  *
  * <p>The main template methods to be implemented by subclasses are
- * getBeanDefinition and createBean, retrieving a bean definition for
- * a given bean name respectively creating a bean instance for a given
- * bean definition.
+ * <code>getBeanDefinition</code> and <code>createBean</code>, retrieving a bean
+ * definition for a given bean name respectively creating a bean instance for a
+ * given bean definition. Default implementations for those can be found in
+ * DefaultListableBeanFactory respectively AbstractAutowireCapableBeanFactory.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
  * @see #getBeanDefinition
  * @see #createBean
- * @see #destroyBean
+ * @see org.springframework.beans.factory.HierarchicalBeanFactory
+ * @see org.springframework.beans.factory.DisposableBean
+ * @see RootBeanDefinition
+ * @see ChildBeanDefinition
+ * @see AbstractAutowireCapableBeanFactory#createBean
+ * @see DefaultListableBeanFactory#getBeanDefinition
  */
 public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
@@ -81,6 +98,14 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * while instantiating a bean, to be able to detect circular references.
 	 */
 	private static final Object CURRENTLY_IN_CREATION = new Object();
+
+	static {
+		// Eagerly load the DisposableBean and DestructionAwareBeanPostProcessor
+		// classes to avoid weird classloader issues on application shutdown in
+		// WebLogic 8.1. (Reported by Andreas Senft and Eric Ma.)
+		DisposableBean.class.getName();
+		DestructionAwareBeanPostProcessor.class.getName();
+	}
 
 
 	/** Logger available to subclasses */
@@ -104,6 +129,20 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Cache of singletons: bean name --> bean instance */
 	private final Map singletonCache = Collections.synchronizedMap(new HashMap());
 
+	/**
+	 * Map that holds further beans created by this factory that implement
+	 * the DisposableBean interface, to be destroyed on destroySingletons.
+	 * Keyed by inner bean name.
+	 * @see #destroySingletons
+	 */
+	private final Map disposableBeans = Collections.synchronizedMap(new HashMap());
+
+	/**
+	 * Map that holds dependent bean names for per bean name.
+	 * @see #registerDependentBean
+	 */
+	private final Map dependentBeanMap = Collections.synchronizedMap(new HashMap());
+
 
 	/**
 	 * Create a new AbstractBeanFactory.
@@ -124,7 +163,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 
 	//---------------------------------------------------------------------
-	// Implementation of BeanFactory
+	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
 
 	/**
@@ -308,7 +347,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 
 	//---------------------------------------------------------------------
-	// Implementation of HierarchicalBeanFactory
+	// Implementation of HierarchicalBeanFactory interface
 	//---------------------------------------------------------------------
 
 	public BeanFactory getParentBeanFactory() {
@@ -317,7 +356,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ConfigurableBeanFactory
+	// Implementation of ConfigurableBeanFactory interface
 	//---------------------------------------------------------------------
 
 	public void setParentBeanFactory(BeanFactory parentBeanFactory) {
@@ -373,6 +412,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 	}
 
+	/**
+	 * Initialize the given BeanWrapper with the custom editors registered
+	 * with this factory.
+	 * @param bw the BeanWrapper to initialize
+	 */
+	protected void initBeanWrapper(BeanWrapper bw) {
+		for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
+			Class clazz = (Class) it.next();
+			bw.registerCustomEditor(clazz, (PropertyEditor) this.customEditors.get(clazz));
+		}
+	}
+
 	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
 		synchronized (this.singletonCache) {
 			Object oldObject = this.singletonCache.get(beanName);
@@ -404,6 +455,58 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		this.singletonCache.remove(beanName);
 	}
 
+	/**
+	 * Return the names of beans in the singleton cache that match the given
+	 * object type (including subclasses). Will <i>not</i> consider FactoryBeans
+	 * as the type of their created objects is not known before instantiation.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * @param type class or interface to match, or null for all bean names
+	 * @return the names of beans in the singleton cache that match the given
+	 * object type (including subclasses), or an empty array if none
+	 */
+	public String[] getSingletonNames(Class type) {
+		synchronized (this.singletonCache) {
+			Set matches = new HashSet();
+			Iterator it = this.singletonCache.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String beanName = (String) entry.getKey();
+				Object bean = entry.getValue();
+				if (type == null || type.isAssignableFrom(bean.getClass())) {
+					matches.add(beanName);
+				}
+			}
+			return (String[]) matches.toArray(new String[matches.size()]);
+		}
+	}
+
+	/**
+	 * Register a dependent bean for the given bean,
+	 * to be destroyed before the given bean is destroyed.
+	 * @param beanName the name of the bean
+	 * @param dependentBeanName the name of the dependent bean
+	 */
+	protected void registerDependentBean(String beanName, String dependentBeanName) {
+		synchronized (this.dependentBeanMap) {
+			List dependencies = (List) this.dependentBeanMap.get(beanName);
+			if (dependencies == null) {
+				dependencies = new LinkedList();
+				this.dependentBeanMap.put(beanName, dependencies);
+			}
+			dependencies.add(dependentBeanName);
+		}
+	}
+
+	/**
+	 * Add the given bean to the list of further disposable beans in this factory.
+	 * Typically used for inner beans which are not registered in the singleton cache.
+	 * @param beanName the name of the bean
+	 * @param bean the bean instance
+	 */
+	protected void addDisposableBean(String beanName, DisposableBean bean) {
+		this.disposableBeans.put(beanName, bean);
+	}
+
 	public void destroySingletons() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Destroying singletons in factory {" + this + "}");
@@ -414,6 +517,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				destroySingleton((String) it.next());
 			}
 		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Destroying inner beans in factory {" + this + "}");
+		}
+		synchronized (this.disposableBeans) {
+			for (Iterator it = new HashSet(this.disposableBeans.keySet()).iterator(); it.hasNext();) {
+				destroyDisposableBean((String) it.next());
+			}
+		}
 	}
 
 	/**
@@ -422,10 +534,23 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param beanName name of the bean
 	 * @see #destroyBean
 	 */
-	protected final void destroySingleton(String beanName) {
+	private void destroySingleton(String beanName) {
 		Object singletonInstance = this.singletonCache.remove(beanName);
 		if (singletonInstance != null) {
 			destroyBean(beanName, singletonInstance);
+		}
+	}
+
+	/**
+	 * Fetch the given bean from the list of further DisposableBeans and destroy it.
+	 * Delegates to destroyBean if a corresponding bean instance is found.
+	 * @param beanName the name of the DisposableBean
+	 * @see #destroyBean
+	 */
+	private void destroyDisposableBean(String beanName) {
+		Object innerBeanInstance = this.disposableBeans.remove(beanName);
+		if (innerBeanInstance != null) {
+			destroyBean(beanName, innerBeanInstance);
 		}
 	}
 
@@ -435,10 +560,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	//---------------------------------------------------------------------
 
 	/**
+	 * Return whether this name is a factory dereference
+	 * (beginning with the factory dereference prefix).
+	 */
+	private boolean isFactoryDereference(String name) {
+		return name.startsWith(FACTORY_BEAN_PREFIX);
+	}
+
+	/**
 	 * Return the bean name, stripping out the factory dereference prefix if necessary,
 	 * and resolving aliases to canonical names.
 	 */
-	protected String transformedBeanName(String name) throws NoSuchBeanDefinitionException {
+	private String transformedBeanName(String name) throws NoSuchBeanDefinitionException {
 		if (name == null) {
 			throw new NoSuchBeanDefinitionException(name, "Cannot get bean with null name");
 		}
@@ -451,47 +584,59 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Return whether this name is a factory dereference
-	 * (beginning with the factory dereference prefix).
+	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
+	 * Will ask the parent bean factory if not found in this instance.
+	 * @return a merged RootBeanDefinition with overridden properties
 	 */
-	protected boolean isFactoryDereference(String name) {
-		return name.startsWith(FACTORY_BEAN_PREFIX);
-	}
-
-	/**
-	 * Initialize the given BeanWrapper with the custom editors registered
-	 * with this factory.
-	 * @param bw the BeanWrapper to initialize
-	 */
-	protected void initBeanWrapper(BeanWrapper bw) {
-		for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
-			Class clazz = (Class) it.next();
-			bw.registerCustomEditor(clazz, (PropertyEditor) this.customEditors.get(clazz));
+	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
+	    throws BeansException {
+		try {
+			return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {
+				return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
+			}
+			else {
+				throw ex;
+			}
 		}
 	}
 
 	/**
-	 * Return the names of beans in the singleton cache that match the given
-	 * object type (including subclasses). Will <i>not</i> consider FactoryBeans
-	 * as the type of their created objects is not known before instantiation.
-	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * @param type class or interface to match, or null for all bean names
-	 * @return the names of beans in the singleton cache that match the given
-	 * object type (including subclasses), or an empty array if none
+	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
+	 * @return a merged RootBeanDefinition with overridden properties
 	 */
-	public String[] getSingletonNames(Class type) {
-		synchronized (this.singletonCache) {
-			Set keys = this.singletonCache.keySet();
-			Set matches = new HashSet();
-			Iterator itr = keys.iterator();
-			while (itr.hasNext()) {
-				String name = (String) itr.next();
-				Object singletonObject = this.singletonCache.get(name);
-				if (type == null || type.isAssignableFrom(singletonObject.getClass())) {
-					matches.add(name);
+	protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd) {
+		if (bd instanceof RootBeanDefinition) {
+			return (RootBeanDefinition) bd;
+		}
+
+		else if (bd instanceof ChildBeanDefinition) {
+			ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
+			RootBeanDefinition pbd = null;
+			if (!beanName.equals(cbd.getParentName())) {
+				pbd = getMergedBeanDefinition(cbd.getParentName(), true);
+			}
+			else {
+				if (getParentBeanFactory() instanceof AbstractBeanFactory) {
+					pbd = ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(cbd.getParentName(), true);
+				}
+				else {
+					throw new NoSuchBeanDefinitionException(cbd.getParentName(),
+							"Parent name '" + cbd.getParentName() + "' is equal to bean name '" + beanName +
+							"' - cannot be resolved without an AbstractBeanFactory parent");
 				}
 			}
-			return (String[]) matches.toArray(new String[matches.size()]);
+
+			// deep copy with overridden values
+			RootBeanDefinition rbd = new RootBeanDefinition(pbd);
+			rbd.overrideFrom(cbd);
+			return rbd;
+		}
+		else {
+			throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
+					"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition");
 		}
 	}
 
@@ -544,61 +689,134 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
-	 * Will ask the parent bean factory if not found in this instance.
-	 * @return a merged RootBeanDefinition with overridden properties
+	 * Destroy the given bean. Must destroy beans that depend on the given
+	 * bean before the bean itself. Should not throw any exceptions.
+	 * @param beanName name of the bean
+	 * @param bean the bean instance to destroy
 	 */
-	public RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
-	    throws BeansException {
+	protected void destroyBean(String beanName, Object bean) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieving dependent beans for bean '" + beanName + "'");
+		}
+		List dependencies = (List) this.dependentBeanMap.remove(beanName);
+		if (dependencies != null) {
+			for (Iterator it = dependencies.iterator(); it.hasNext();) {
+				String dependentBeanName = (String) it.next();
+				if (containsBean(dependentBeanName)) {
+					// registered singleton
+					destroySingleton(dependentBeanName);
+				}
+				else {
+					// disposable inner bean
+					destroyDisposableBean(dependentBeanName);
+				}
+			}
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
+		}
+		for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
+			Object beanProcessor = getBeanPostProcessors().get(i);
+			if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
+				((DestructionAwareBeanPostProcessor) beanProcessor).postProcessBeforeDestruction(bean, beanName);
+			}
+		}
+
+		invokeDestroyMethods(beanName, bean);
+	}
+
+	/**
+	 * Give a bean a chance to react to the shutdown of the bean factory.
+	 * This means checking whether the bean implements DisposableBean or defines
+	 * a custom destroy method, and invoking the necessary callback(s) if it does.
+	 * <p>Called by destroyBean.
+	 * @param beanName the bean has in the factory. Used for debug output.
+	 * @param bean new bean instance we may need to notify of destruction
+	 * @see #invokeCustomDestroyMethod
+	 * @see #destroyBean
+	 */
+	protected void invokeDestroyMethods(String beanName, Object bean) {
+		if (bean instanceof DisposableBean) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking destroy() on bean with name '" + beanName + "'");
+			}
+			try {
+				((DisposableBean) bean).destroy();
+			}
+			catch (Throwable ex) {
+				logger.error("destroy() on bean with name '" + beanName + "' threw an exception", ex);
+			}
+		}
+
 		try {
-			return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
+			RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
+			if (mergedBeanDefinition.getDestroyMethodName() != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Invoking custom destroy method '" + mergedBeanDefinition.getDestroyMethodName() +
+							"' on bean with name '" + beanName + "'");
+				}
+				invokeCustomDestroyMethod(beanName, bean, mergedBeanDefinition.getDestroyMethodName());
+			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {
-				return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
-			}
-			else {
-				throw ex;
-			}
+			// Ignore: probably from a manually registered singleton.
 		}
 	}
 
 	/**
-	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
-	 * @return a merged RootBeanDefinition with overridden properties
+	 * Invoke the specified custom destroy method on the given bean.
+	 * Called by invokeDestroyMethods.
+	 * <p>This implementation invokes a no-arg method if found, else checking
+	 * for a method with a single boolean argument (passing in "true",
+	 * assuming a "force" parameter), else logging an error.
+	 * <p>Can be overridden in subclasses for custom resolution of destroy
+	 * methods with arguments.
+	 * @param beanName the bean has in the factory. Used for debug output.
+	 * @param bean new bean instance we may need to notify of destruction
+	 * @param destroyMethodName the name of the custom destroy method
+	 * @see #invokeDestroyMethods
 	 */
-	protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd) {
-		if (bd instanceof RootBeanDefinition) {
-			return (RootBeanDefinition) bd;
-		}
-
-		else if (bd instanceof ChildBeanDefinition) {
-			ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
-			RootBeanDefinition pbd = null;
-			if (!beanName.equals(cbd.getParentName())) {
-				pbd = getMergedBeanDefinition(cbd.getParentName(), true);
-			}
-			else {
-				if (getParentBeanFactory() instanceof AbstractBeanFactory) {
-					pbd = ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(cbd.getParentName(), true);
-				}
-				else {
-					throw new NoSuchBeanDefinitionException(cbd.getParentName(),
-							"Parent name '" + cbd.getParentName() + "' is equal to bean name '" + beanName +
-							"' - cannot be resolved without an AbstractBeanFactory parent");
-				}
-			}
-
-			// deep copy with overridden values
-			RootBeanDefinition rbd = new RootBeanDefinition(pbd);
-			rbd.overrideFrom(cbd);
-			return rbd;
+	protected void invokeCustomDestroyMethod(String beanName, Object bean, String destroyMethodName) {
+		Method destroyMethod =
+				BeanUtils.findDeclaredMethodWithMinimalParameters(bean.getClass(), destroyMethodName);
+		if (destroyMethod == null) {
+			logger.error("Couldn't find a destroy method named '" + destroyMethodName +
+					"' on bean with name '" + beanName + "'");
 		}
 		else {
-			throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
-					"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition");
+			Class[] paramTypes = destroyMethod.getParameterTypes();
+			if (paramTypes.length > 1) {
+				logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
+						"' has more than one parameter - not supported as destroy method");
+			}
+			else if (paramTypes.length == 1 && !paramTypes[0].equals(boolean.class)) {
+				logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
+						"' has a non-boolean parameter - not supported as destroy method");
+			}
+			else {
+				Object[] args = new Object[paramTypes.length];
+				if (paramTypes.length == 1) {
+					args[0] = Boolean.TRUE;
+				}
+				if (!Modifier.isPublic(destroyMethod.getModifiers())) {
+					destroyMethod.setAccessible(true);
+				}
+				try {
+					destroyMethod.invoke(bean, args);
+				}
+				catch (InvocationTargetException ex) {
+					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
+							"' of bean with name '" + beanName + "'", ex.getTargetException());
+				}
+				catch (Throwable ex) {
+					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
+							"' of bean with name '" + beanName + "'", ex);
+				}
+			}
 		}
 	}
+
 
 	//---------------------------------------------------------------------
 	// Abstract methods to be implemented by concrete subclasses
@@ -612,7 +830,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @return if this bean factory contains a bean definition with the given name
 	 * @see #containsBean
 	 */
-	public abstract boolean containsBeanDefinition(String beanName);
+	protected abstract boolean containsBeanDefinition(String beanName);
 
 	/**
 	 * Return the bean definition for the given bean name.
@@ -644,13 +862,5 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected abstract Object createBean(
 			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeansException;
-
-	/**
-	 * Destroy the given bean. Must destroy beans that depend on the given
-	 * bean before the bean itself. Should not throw any exceptions.
-	 * @param beanName name of the bean
-	 * @param bean the bean instance to destroy
-	 */
-	protected abstract void destroyBean(String beanName, Object bean);
 
 }
