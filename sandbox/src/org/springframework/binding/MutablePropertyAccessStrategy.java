@@ -34,7 +34,7 @@ import org.springframework.binding.value.ValueModel;
  * be changed and subscribed to for modification, and
  * <li>adding listeners for changes on particular properties.
  * </ul>
- * 
+ * EXPERIMENTAL - not yet fit for general use
  * @author Keith Donald
  */
 public interface MutablePropertyAccessStrategy extends PropertyAccessStrategy,

@@ -18,7 +18,7 @@ package org.springframework.binding;
 /**
  * Simple interface for accessing metadata about a particular property.
  * 
- * @EXPERIMENTAL - not yet fit for general use
+ * EXPERIMENTAL - not yet fit for general use
  * @author Keith Donald
  */
 public interface PropertyMetadataAccessStrategy {

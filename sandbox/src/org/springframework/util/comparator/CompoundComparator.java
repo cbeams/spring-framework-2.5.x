@@ -53,7 +53,7 @@ public class CompoundComparator implements Comparator, Serializable {
      * Construct a CompoundComparator from the Comparators in the provided
      * array. All Comparators will default to the forward sort order.
      * 
-     * @param list
+     * @param comparators
      *            the list of comparators
      */
     public CompoundComparator(Comparator[] comparators) {

@@ -8,7 +8,7 @@ import java.util.Map;
 import org.springframework.beans.PropertyAccessException;
 
 /**
- * @EXPERIMENTAL - not yet fit for general use
+ * EXPERIMENTAL - not yet fit for general use
  */
 public interface PropertyAccessor {
 	public Map getPropertyValues();

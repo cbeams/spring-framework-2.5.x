@@ -36,10 +36,19 @@ public class Styler {
 
 	private ConversionExecutor toStringExecutor;
 
+	/**
+	 * Construct a styler using the configured conversion executor to style string
+	 * values from object form.
+	 * @param toStringExecutor
+	 */
 	public Styler(ConversionExecutor toStringExecutor) {
 		this.toStringExecutor = toStringExecutor;
 	}
 
+	/**
+	 * Load the global styler instance.
+	 * @param styler the styler
+	 */
 	public static void load(Styler styler) {
 		INSTANCE = styler;
 	}
@@ -58,23 +67,23 @@ public class Styler {
 	/**
 	 * Static accessor that calls the default styler's style method.
 	 * 
-	 * @param o the argument to style
+	 * @param value the argument to style
 	 * @return The styled string.
 	 */
-	public static String call(Object o) {
-		return (String)INSTANCE.style(o);
+	public static String call(Object value) {
+		return (String)INSTANCE.style(value);
 	}
 
 	/**
 	 * Styles the string form of this object.
 	 * 
-	 * @param o The object to be styled.
+	 * @param value The object to be styled.
 	 * @return The styled string.
 	 */
-	public String style(Object source) {
-		if (source == null) {
+	public String style(Object value) {
+		if (value == null) {
 			return "[null]";
 		}
-		return (String)this.toStringExecutor.call(source);
+		return (String) this.toStringExecutor.call(value);
 	}
 }

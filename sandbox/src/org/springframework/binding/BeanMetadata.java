@@ -18,7 +18,7 @@ package org.springframework.binding;
 import java.util.Collection;
 
 /**
- * @EXPERIMENTAL - not yet fit for general use
+ * EXPERIMENTAL - not yet fit for general use
  * @author Keith Donald
  */
 public interface BeanMetadata {

@@ -26,6 +26,7 @@ import org.springframework.binding.value.support.ValueHolder;
 import org.springframework.util.StringUtils;
 
 /**
+ * EXPERIMENTAL - not yet fit for general use
  * @author Keith Donald
  */
 public class AbstractBeanAccessor implements PropertyAccessor {

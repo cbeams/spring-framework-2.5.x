@@ -10,7 +10,7 @@ import net.sf.hibernate.mapping.Constraint;
 import org.springframework.binding.value.support.TypeConverter;
 
 /**
- * @EXPERIMENTAL - not yet fit for general use
+ * EXPERIMENTAL - not yet fit for general use
  * @author Keith Donald
  */
 public interface PropertyMetadata {

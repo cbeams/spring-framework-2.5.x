@@ -20,6 +20,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
+ * EXPERIMENTAL - not yet fit for general use
  * @author Keith Donald
  */
 public class DefaultBeanMetadata implements BeanMetadata {

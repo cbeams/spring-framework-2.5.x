@@ -165,7 +165,7 @@ public class ToStringCreator {
 
 	/**
 	 * Append the provided string
-	 * @param string The string to append
+	 * @param value The value to append
 	 * @return this, to support call-chaining.
 	 */
 	public ToStringCreator append(Object value) {
@@ -282,7 +282,6 @@ public class ToStringCreator {
 		 * @param buffer buffer to print to.
 		 * @param fieldName The name of the field.
 		 * @param value The field value.
-		 * @return The pretty-printed string.
 		 */
 		public void styleField(StringBuffer buffer, String fieldName, Object value);
 

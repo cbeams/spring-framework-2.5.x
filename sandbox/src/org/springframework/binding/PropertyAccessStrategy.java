@@ -23,9 +23,8 @@ import org.springframework.beans.FatalBeanException;
  * implementations could access different backing objects such as a javabean
  * <code>(BeanPropertyAccessStrategy)</code>, hashmap, rowset, or other data
  * structure.
- * 
+ * EXPERIMENTAL - not yet fit for general use
  * @author Keith Donald
- * @EXPERIMENTAL - not yet fit for general use
  */
 public interface PropertyAccessStrategy {
 
