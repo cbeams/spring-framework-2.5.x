@@ -34,6 +34,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Juergen Hoeller
  * @since 02.07.2004
+ * @see PersistenceBrokerTemplate
+ * @see PersistenceBrokerTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public abstract class OjbFactoryUtils {
 
@@ -43,18 +46,15 @@ public abstract class OjbFactoryUtils {
 	 * example when using PersistenceBrokerTransactionManager. Will
 	 * create a new PersistenceBroker else.
 	 * @param pbKey PBKey to create the PersistenceBroker for
-	 * @return the PersistenceManager
-	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be created
+	 * @return the PersistenceBroker
+	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
 	 */
-	public static PersistenceBroker getPersistenceBroker(PBKey pbKey)
-	    throws DataAccessResourceFailureException {
-
+	public static PersistenceBroker getPersistenceBroker(PBKey pbKey) throws DataAccessResourceFailureException {
 		PersistenceBrokerHolder pbHolder =
-		    (PersistenceBrokerHolder) TransactionSynchronizationManager.getResource(pbKey);
+				(PersistenceBrokerHolder) TransactionSynchronizationManager.getResource(pbKey);
 		if (pbHolder != null) {
 			return pbHolder.getPersistenceBroker();
 		}
-
 		try {
 			PersistenceBroker pb = PersistenceBrokerFactory.createPersistenceBroker(pbKey);
 			if (TransactionSynchronizationManager.isSynchronizationActive()) {
