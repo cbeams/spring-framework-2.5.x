@@ -12,14 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.dao;
 
 /**
- * Exception thrown on failure to complete a transaction in serialized mode due to update conflicts. 
- * This exception will be thrown either by O/R mapping tools or by custom DAO implementations.
- * It is also thrown by Spring's SQLException translation support.
+ * Exception thrown on failure to complete a transaction in serialized mode
+ * due to update conflicts.
  * @author Rod Johnson
  */
 public class CannotSerializeTransactionException extends PessimisticLockingFailureException {

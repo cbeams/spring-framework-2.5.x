@@ -12,20 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.dao;
 
 /**
- * Exception thrown on concurrency failure. This exception should be
- * sublassed to indicate the type of failure - optimistic locking,
- * failure to acquire lock, etc.
+ * Exception thrown on concurrency failure.
  *
- * <p>This exception will be thrown either by O/R mapping tools
- * or by custom DAO implementations.
+ * <p>This exception should be subclassed to indicate the type of failure:
+ * optimistic locking, failure to acquire lock, etc.
  *
  * @author Thomas Risberg
  * @since 1.1
+ * @see OptimisticLockingFailureException
+ * @see PessimisticLockingFailureException
+ * @see CannotAcquireLockException
+ * @see DeadlockLoserDataAccessException
  */
 public class ConcurrencyFailureException extends DataAccessException {
 

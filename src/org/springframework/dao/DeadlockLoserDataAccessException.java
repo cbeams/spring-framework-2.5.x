@@ -19,8 +19,6 @@ package org.springframework.dao;
 /**
  * Generic exception thrown when the current process was
  * a deadlock loser, and its transaction rolled back.
- * This exception will be thrown either by O/R mapping tools or by custom DAO implementations.
- * It is also thrown by Spring's SQLException translation support.
  * @author Rod Johnson
  */
 public class DeadlockLoserDataAccessException extends PessimisticLockingFailureException {

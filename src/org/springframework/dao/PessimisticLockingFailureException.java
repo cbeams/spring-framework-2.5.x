@@ -12,15 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.dao;
 
 /**
- * Exception thrown on an optimistic locking violation. This exception will
- * be thrown either by O/R mapping tools or by custom DAO implementations.  
- * It is also thrown by Spring's SQLException translation support.
+ * Exception thrown on a pessimistic locking violation.
+ * Thrown by Spring's SQLException translation mechanism
+ * if a corresponding database error is encountered.
+ *
+ * <p>Serves as superclass for more specific exceptions, like
+ * CannotAcquireLockException and DeadlockLoserDataAccessException.
+ *
  * @author Thomas Risberg
+ * @since 1.2
+ * @see CannotAcquireLockException
+ * @see DeadlockLoserDataAccessException
+ * @see OptimisticLockingFailureException
  */
 public class PessimisticLockingFailureException extends ConcurrencyFailureException {
 

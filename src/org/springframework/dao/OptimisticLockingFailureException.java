@@ -12,14 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.dao;
 
 /**
- * Exception thrown on an optimistic locking violation. This exception will
- * be thrown either by O/R mapping tools or by custom DAO implementations.
+ * Exception thrown on an optimistic locking violation.
+ *
+ * <p>This exception will be thrown either by O/R mapping tools
+ * or by custom DAO implementations. Optimistic locking failure
+ * is typically <i>not</i> detected by the database itself.
+ *
  * @author Rod Johnson
+ * @see PessimisticLockingFailureException
  */
 public class OptimisticLockingFailureException extends ConcurrencyFailureException {
 

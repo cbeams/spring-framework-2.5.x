@@ -19,11 +19,6 @@ package org.springframework.dao;
 /**
  * Exception thrown on failure to aquire a lock during an update,
  * for example during a "select for update" statement.
- *
- * <p>This exception will be thrown either by O/R mapping tools or
- * by custom DAO implementations.
- * It is also thrown by Spring's SQLException translation support.
- *
  * @author Rod Johnson
  */
 public class CannotAcquireLockException extends PessimisticLockingFailureException {
