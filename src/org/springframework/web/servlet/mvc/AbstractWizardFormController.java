@@ -57,14 +57,16 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>The page can only be changed if it validates correctly, except if a
  * "dirty back" or "dirty forward" is allowed. At finish, all pages get
- * validated again to guarantee a consistent state. Note that a validator's
- * default validate method is not executed when using this class! Rather,
- * the validatePage implementation should call special validateXXX methods
- * that the validator needs to provide, validating certain pieces of the
- * object. These can be combined to validate the elements of individual pages.
+ * validated again to guarantee a consistent state.
+ *
+ * <p>Note that a validator's default validate method is not executed when using
+ * this class! Rather, the <code>validatePage</code> implementation should call
+ * special <code>validateXXX</code> methods that the validator needs to provide,
+ * validating certain pieces of the object. These can be combined to validate
+ * the elements of individual pages.
  *
  * <p>Note: Page numbering starts with 0, to be able to pass an array
- * consisting of the respective view names to setPages.
+ * consisting of the corresponding view names to the "pages" bean property.
  *
  * @author Juergen Hoeller
  * @since 25.04.2003
@@ -299,7 +301,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Prepare the form model and view, including reference and error data,
 	 * for the given page. Can be used in processFinish implementations,
-	 * to show the respective page in case of validation errors.
+	 * to show the corresponding page in case of validation errors.
 	 * @param request current HTTP request
 	 * @param errors validation errors holder
 	 * @param page number of page to show
@@ -385,8 +387,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected final ModelAndView processFormSubmission(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {
+
 		int currentPage = getCurrentPage(request);
-		// remove page session attribute, provide copy as request attribute
+		// Remove page session attribute, provide copy as request attribute.
 		request.getSession().removeAttribute(getPageSessionAttributeName());
 		request.setAttribute(getPageSessionAttributeName(), new Integer(currentPage));
 
@@ -406,7 +409,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			return validatePagesAndFinish(request, response, command, errors, currentPage);
 		}
 
-		// normal submit: validate current page and show specified target page
+		// Normal submit: validate current page and show specified target page.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
 		}
@@ -520,26 +523,26 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Validate all pages and process finish.
-	 * If there are page validation errors, show the respective view page.
+	 * If there are page validation errors, show the corresponding view page.
 	 */
 	private ModelAndView validatePagesAndFinish(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors,
 			int currentPage) throws Exception {
 
-		// in case of binding errors  -> show current page
-		if (errors.getErrorCount() - errors.getGlobalErrorCount() > 0) {
-				return showPage(request, errors, currentPage);
+		// In case of binding errors -> show current page.
+		if (errors.hasErrors()) {
+			return showPage(request, errors, currentPage);
 		}
 
-		// in case of field errors on a page -> show the page
+		// In case of field errors on a page -> show the page.
 		for (int page = 0; page < this.pages.length; page++) {
 			validatePage(command, errors, page, true);
-			if (errors.getErrorCount() - errors.getGlobalErrorCount() > 0) {
+			if (errors.hasErrors()) {
 				return showPage(request, errors, page);
 			}
 		}
 
-		// no field errors -> maybe global errors, or none at all
+		// No remaining errors -> proceed with finish.
 		return processFinish(request, response, command, errors);
 	}
 
@@ -547,10 +550,10 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Template method for custom validation logic for individual pages.
 	 * Default implementation calls validatePage(command, errors, page).
-	 * <p>Implementations will typically call fine-granular validateXXX methods of this
-	 * instance's validator, combining them to validation of the respective pages.
-	 * The validator's default <code>validate</code> method will not be called by a
-	 * wizard form controller!
+	 * <p>Implementations will typically call fine-granular <code>validateXXX</code>
+	 * methods of this instance's Validator, combining them to validation of the
+	 * corresponding pages. The Validator's default <code>validate</code> method
+	 * will not be called by a wizard form controller!
 	 * @param command form object with the current wizard state
 	 * @param errors validation errors holder
 	 * @param page number of page to validate
@@ -567,7 +570,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Template method for custom validation logic for individual pages.
 	 * Default implementation is empty.
 	 * <p>Implementations will typically call fine-granular validateXXX methods of this
-	 * instance's validator, combining them to validation of the respective pages.
+	 * instance's validator, combining them to validation of the corresponding pages.
 	 * The validator's default <code>validate</code> method will not be called by a
 	 * wizard form controller!
 	 * @param command form object with the current wizard state
