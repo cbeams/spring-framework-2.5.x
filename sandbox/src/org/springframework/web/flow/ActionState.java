@@ -29,6 +29,8 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public class ActionState extends TransitionableState {
+    
+    public static final String STATE_ID_ATTRIBUTE = "_stateId";
 
 	private Set actionBeanNames;
 
@@ -89,7 +91,9 @@ public class ActionState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing action bean with name '" + actionBeanName + "'");
 			}
-			ActionBeanEvent event = actionBean.execute(request, response, sessionExecutionStack);
+			sessionExecutionStack.setAttribute(STATE_ID_ATTRIBUTE, getId());
+            ActionBeanEvent event = actionBean.execute(request, response, sessionExecutionStack);
+            sessionExecutionStack.setAttribute(STATE_ID_ATTRIBUTE, null);
 			if (triggersTransition(event, flow)) {
 				return getTransition(event, flow).execute(flow, sessionExecutionStack, request, response);
 			}
