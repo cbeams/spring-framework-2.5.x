@@ -31,7 +31,7 @@ import org.springframework.aop.TargetSource;
  * at the time of serialization.
  *
  * @author Rod Johnson
- * @version $Id: HotSwappableTargetSource.java,v 1.8 2004-07-25 13:42:52 johnsonr Exp $
+ * @version $Id: HotSwappableTargetSource.java,v 1.9 2004-08-03 13:37:18 johnsonr Exp $
  */
 public class HotSwappableTargetSource implements TargetSource, Serializable {
 
@@ -98,6 +98,11 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 		}
 		HotSwappableTargetSource otherTargetSource = (HotSwappableTargetSource) other;
 		return otherTargetSource.target == this.target || otherTargetSource.target.equals(this.target);
+	}
+	
+	public String toString() {
+		return "Swappable TargetSource (" + getClass().getName() + "): " +
+		 	((target != null) ? "targetClass=" + target.getClass() : "UNITIALIZED");
 	}
 
 }
