@@ -56,12 +56,13 @@ public interface JdoOperations {
 	 * result object, i.e. a domain object or a collection of domain objects.
 	 * <p>Note: Callback code is not supposed to handle transactions itself!
 	 * Use an appropriate transaction manager like JdoTransactionManager.
-	 * @param action action object that specifies the JDO action
+	 * @param action callback object that specifies the JDO action
 	 * @return a result object returned by the action, or null
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see JdoTransactionManager
 	 * @see org.springframework.dao
 	 * @see org.springframework.transaction
+	 * @see javax.jdo.PersistenceManager
 	 */
 	Object execute(JdoCallback action) throws DataAccessException;
 
@@ -69,8 +70,8 @@ public interface JdoOperations {
 	 * Execute the specified action assuming that the result object is a
 	 * Collection. This is a convenience method for executing JDO queries
 	 * within an action.
-	 * @param action action object that specifies the JDO action
-	 * @return a result object returned by the action, or null
+	 * @param action callback object that specifies the JDO action
+	 * @return a Collection result returned by the action, or null
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 */
 	Collection executeFind(JdoCallback action) throws DataAccessException;

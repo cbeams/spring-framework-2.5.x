@@ -60,7 +60,7 @@ import org.springframework.dao.DataAccessException;
 public interface HibernateOperations {
 
 	/**
-	 * Execute the action specified by the given action object within a session.
+	 * Execute the action specified by the given action object within a Session.
 	 * Application exceptions thrown by the action object get propagated to the
 	 * caller (can only be unchecked). Hibernate exceptions are transformed into
 	 * appropriate DAO ones. Allows for returning a result object, i.e. a domain
@@ -75,6 +75,7 @@ public interface HibernateOperations {
 	 * @see HibernateTransactionManager
 	 * @see org.springframework.dao
 	 * @see org.springframework.transaction
+	 * @see net.sf.hibernate.Session
 	 */
 	Object execute(HibernateCallback action) throws DataAccessException;
 
@@ -82,8 +83,8 @@ public interface HibernateOperations {
 	 * Execute the specified action assuming that the result object is a List.
 	 * This is a convenience method for executing Hibernate find calls or
 	 * queries within an action.
-	 * @param action action object that specifies the Hibernate action
-	 * @return a result object returned by the action, or null
+	 * @param action calback object that specifies the Hibernate action
+	 * @return a List result returned by the action, or null
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	List executeFind(HibernateCallback action) throws DataAccessException;
