@@ -36,20 +36,14 @@ import org.springframework.util.ClassUtils;
  * instance. For example:
  * 
  * <pre>
- * 
- *  
- *   
- *        &lt;bean id=&quot;serviceLocatorLoader&quot;
- *              class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
- *          &lt;constructor-arg index=&quot;0&quot;&gt;
- *            &lt;listgt;
- *              &lt;valuegt;consoleServices&lt;/value&gt;
- *            &lt;/list&gt;
- *          &lt;/constructor-arg&gt;        
- *        &lt;/bean&gt;
- *    
- *   
- *  
+ *    &lt;bean id=&quot;serviceLocatorLoader&quot;
+ *          class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
+ *      &lt;constructor-arg index=&quot;0&quot;&gt;
+ *        &lt;listgt;
+ *          &lt;value&gt;consoleServices&lt;/value&gt;
+ *        &lt;/list&gt;
+ *      &lt;/constructor-arg&gt;        
+ *    &lt;/bean&gt;
  * </pre>
  * 
  * ... will call the static <code>load</code> method on the
@@ -64,22 +58,14 @@ import org.springframework.util.ClassUtils;
  * </ol>
  * 
  * <pre>
- * 
- *  
- *   
- *       &lt;pre&gt;
- *        &lt;bean id=&quot;serviceLocatorLoader&quot;
- *              class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
- *          &lt;constructor-arg index=&quot;0&quot;&gt;
- *            &lt;listgt;
- *              &lt;valuegt;consoleServices@com.acme.ConsoleServicesSingletonLocator&lt;/value&gt;
- *            &lt;/list&gt;
- *          &lt;/constructor-arg&gt;        
- *        &lt;/bean&gt;
- *       &lt;/pre&gt;
- *    
- *   
- *  
+ *    &lt;bean id=&quot;serviceLocatorLoader&quot;
+ *          class=&quot;com.csi.commons.utils.beans.SingletonServiceLocatorLoader&quot;&gt;
+ *      &lt;constructor-arg index=&quot;0&quot;&gt;
+ *        &lt;listgt;
+ *          &lt;value&gt;consoleServices@com.acme.ConsoleServicesSingletonLocator&lt;/value&gt;
+ *        &lt;/list&gt;
+ *      &lt;/constructor-arg&gt;        
+ *    &lt;/bean&gt;
  * </pre>
  * 
  * ... will call the static <code>load</code> method on the
