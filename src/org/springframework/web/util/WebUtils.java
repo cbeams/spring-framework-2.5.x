@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -218,6 +219,26 @@ public abstract class WebUtils {
 
 
 	/**
+	 * Expose the given Map as request attributes, using the keys as attribute names
+	 * and the values as corresponding attribute values. Keys need to be Strings.
+	 * @param request current HTTP request
+	 * @param attributes the attributes Map
+	 * @throws IllegalArgumentException if an invalid key is found in the Map
+	 */
+	public static void exposeRequestAttributes(ServletRequest request, Map attributes)
+			throws IllegalArgumentException {
+		Iterator it = attributes.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry) it.next();
+			if (!(entry.getKey() instanceof String)) {
+				throw new IllegalArgumentException(
+						"Invalid key [" + entry.getKey() + "] in attributes Map - only Strings allowed as attribute keys");
+			}
+			request.setAttribute((String) entry.getKey(), entry.getValue());
+		}
+	}
+
+	/**
 	 * Retrieve the first cookie with the given name. Note that multiple
 	 * cookies can have the same name but different paths or domains.
 	 * @param name cookie name
@@ -232,6 +253,28 @@ public abstract class WebUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Check if a specific input type="submit" parameter was sent in the request,
+	 * either via a button (directly with name) or via an image (name + ".x" or
+	 * name + ".y").
+	 * @param request current HTTP request
+	 * @param name name of the parameter
+	 * @return if the parameter was sent
+	 * @see #SUBMIT_IMAGE_SUFFIXES
+	 */
+	public static boolean hasSubmitParameter(ServletRequest request, String name) {
+		if (request.getParameter(name) != null) {
+			return true;
+		}
+		for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
+			String suffix = SUBMIT_IMAGE_SUFFIXES[i];
+			if (request.getParameter(name + suffix) != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -273,28 +316,6 @@ public abstract class WebUtils {
 			}
 		}
 		return params;
-	}
-
-	/**
-	 * Check if a specific input type="submit" parameter was sent in the request,
-	 * either via a button (directly with name) or via an image (name + ".x" or
-	 * name + ".y").
-	 * @param request current HTTP request
-	 * @param name name of the parameter
-	 * @return if the parameter was sent
-	 * @see #SUBMIT_IMAGE_SUFFIXES
-	 */
-	public static boolean hasSubmitParameter(ServletRequest request, String name) {
-		if (request.getParameter(name) != null) {
-			return true;
-		}
-		for (int i = 0; i < SUBMIT_IMAGE_SUFFIXES.length; i++) {
-			String suffix = SUBMIT_IMAGE_SUFFIXES[i];
-			if (request.getParameter(name + suffix) != null) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }
