@@ -1,12 +1,13 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.63 2003-12-12 19:49:16 jhoeller Exp $
+$Id: changelog.txt,v 1.64 2003-12-14 16:49:13 johnsonr Exp $
 
 
 Changes in version 1.0 M4 (XX.12.2003)
 --------------------------------------
 
 Package org.springframework.aop
+* moved auto proxy creator implementations into new org.springframework.aop.framework.autoproxy package
 * introduced ProxyConfig base class for ProxyFactoryBean etc, specifying common AOP proxy settings
 * introduced Before and Throws advice, in addition to interception Around advice
 * replaced InvokerInterceptor and ProxyInterceptor interface by TargetSource interface
@@ -106,6 +107,13 @@ Package org.springframework.web
 * renamed org.springframework.web.servlet.view.velocity.VelocityConfiguration to VelocityConfig
 * removed "exposeDateFormatter" and "exposeCurrencyFormatter" properties in VelocityView
 * added "dateToolAttribute" to VelocityView, for exposing a DateTool instance (DateTool is from Velocity Tools)
+
+Package org.springframework.metadata and supporting packages
+* New package providing a facade to source-level and other attribute metadata
+* Integration with Jakarta Commons Attributes
+* Added metadata-driven autoproxying to allow for .NET-style attribute-driven declarative services.
+See the org.springframework.aop.framework.autoproxy.metadata package for tests illustrating this,
+using Commons Attributes to drive declarative transaction management, pooling and other services.
 
 
 Changes in version 1.0 M3 (25.11.2003)
