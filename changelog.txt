@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.138 2004-04-30 15:41:53 jhoeller Exp $
+$Id: changelog.txt,v 1.139 2004-05-02 14:47:56 jhoeller Exp $
 
 
 Changes in version 1.0.2 (16.5.2003)
@@ -20,19 +20,23 @@ Package org.springframework.context
 * added ResourceMapFactoryBean class to context.support, for resolving properties into a Map with Resource values
 * fixed AbstractMessageSource's parent checks to correctly respect the child's "useCodeAsDefaultMessage" setting
 * AbstractApplicationContext uses ResourceEditor with ResourceLoader argument rather than former ContextResourceEditor
-* AbstractApplicationContext supports config location patterns for all locations that are resolvable to java.io.File
+* removed AbstractApplicationContext's "resolveConfigLocations" method, superseded by ResourcePatternResolver mechanism
+* added "getResourcePatternResolver" callback to AbstractXmlApplicationContext, for resolving config location patterns
+* AbstractXmlApplicationContext uses default PathMatchingResourcePatternResolver for Ant-style config location patterns
 
 Package org.springframework.core
 * reworked ResourceEditor to take ResourceLoader argument in overloaded constructor
+* added ResourcePatternResolver strategy interface, for resolving a location pattern into Resource objects
+* added PathMatchingResourcePatternResolver implementation, supporting Ant-style path patterns via PathMatcher utility
 
 Package org.springframework.jdbc
 * fixed a NPE in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have DataSource set
 * added "query(sql, args, resultSetExtractor)" method to JdbcOperations interface and JdbcTemplate class
 * added "query(sql, args, argTypes, resultSetExtractor)" method to JdbcOperations interface and JdbcTemplate class
+* changed JdbcTemplate queryForList to return List of LinkedHashMap if JDK version >1.3 (to preserve column order)
 * added LobRetrievalFailureException, typically wrapping an IOException thrown by stream access methods
 * added AbstractLobStreamingResultSetExtractor, offering conversion of IOException to LobRetrievalFailureException
 * added AbstractLobCreatingPreparedStatementCallback, offering convenient usage of a LobCreator for LOB updates
-* changed JdbcTemplate queryForList to return List of LinkedHashMap if version > JDK1.3 - LinkedHasMap will preserve column order
 
 Package org.springframework.mock
 * factored out JNDI mock objects from org.springframework.jndi.support (source tree) to separate mock source tree
@@ -69,9 +73,10 @@ Package org.springframework.web
 * added "initBeanWrapper" callback to HttpServletBean, to allow for registering custom editors
 * refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
 * deprecated BaseCommandController's "onBind(request, command)" method in favor of "onBind(request, command, errors)"
-* deprecated SimpleFormController's "onSubmit(command)" method in favor of "onSubmit(command, errors)"
+* AbstractWizardFormController's checks for page-specific binding errors, showing the corresponding page again
+* AbstractWizardFormController's "getCurrentPage" method can be invoked from "processFinish" implementations
 * reworked JSP tag implementations to implement the TryCatchFinally interface for eager resource cleanup
-* factored out common code from DelegationActionProxy to DelegatingActionUtils
+* factored out common Struts Action delegation code from DelegationActionProxy to DelegatingActionUtils
 * added DelegatingRequestProcessor and DelegatingTilesRequestProcessor as alternatives to DelegatingActionProxy
 
 
