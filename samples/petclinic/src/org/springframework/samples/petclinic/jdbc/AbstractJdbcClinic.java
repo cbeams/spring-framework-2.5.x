@@ -107,7 +107,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 			List vetSpecialtiesIds = this.vetSpecialtiesQuery.execute(vet.getId());
 			Iterator vsi = vetSpecialtiesIds.iterator();
 			while (vsi.hasNext()) {
-				long specialtyId = ((Integer) vsi.next()).longValue();
+				int specialtyId = ((Integer) vsi.next()).intValue();
 				Specialty specialty = (Specialty) EntityUtils.getById(specialties, Specialty.class, specialtyId);
 				vet.addSpecialty(specialty);
 			}

@@ -33,7 +33,7 @@ public class EditOwnerForm extends AbstractClinicForm {
 		// delegate the update to the Business layer
 		getClinic().storeOwner(owner);
 
-		return new ModelAndView(getSuccessView(), "ownerId", Long.toString(owner.getId()));
+		return new ModelAndView(getSuccessView(), "ownerId", Integer.toString(owner.getId()));
 	}
 
 }

@@ -34,7 +34,7 @@ public class AddVisitForm extends AbstractClinicForm {
 		Visit visit = (Visit) command;
 		// delegate the insert to the Business layer
 		getClinic().storeVisit(visit);
-		return new ModelAndView(getSuccessView(), "ownerId", Long.toString(visit.getPet().getOwner().getId()));
+		return new ModelAndView(getSuccessView(), "ownerId", Integer.toString(visit.getPet().getOwner().getId()));
 	}
 
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)

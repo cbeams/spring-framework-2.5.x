@@ -3,8 +3,8 @@ package org.springframework.samples.petclinic.util;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.springframework.samples.petclinic.Entity;
 import org.springframework.orm.ObjectRetrievalFailureException;
+import org.springframework.samples.petclinic.Entity;
 
 /**
  * Utility methods for handling entities.
@@ -26,7 +26,7 @@ public abstract class EntityUtils {
 	 * @return the found entity
 	 * @throws ObjectRetrievalFailureException if the entity was not found
 	 */
-	public static Entity getById(Collection entities, Class entityClass, long entityId)
+	public static Entity getById(Collection entities, Class entityClass, int entityId)
 	    throws ObjectRetrievalFailureException {
 		for (Iterator it = entities.iterator(); it.hasNext();) {
 			Entity entity = (Entity) it.next();
@@ -34,7 +34,7 @@ public abstract class EntityUtils {
 				return entity;
 			}
 		}
-		throw new ObjectRetrievalFailureException(entityClass, new Long(entityId));
+		throw new ObjectRetrievalFailureException(entityClass, new Integer(entityId));
 	}
 
 }
