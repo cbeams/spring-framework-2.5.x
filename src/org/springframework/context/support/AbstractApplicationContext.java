@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
+import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -239,9 +241,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		refreshBeanFactory();
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
-		// configure the bean factory with context semantics
+		// configure the bean factory with context-specific editors
 		beanFactory.registerCustomEditor(Resource.class, new ResourceEditor(this));
+		beanFactory.registerCustomEditor(URL.class, new URLEditor(new ResourceEditor(this)));
 		beanFactory.registerCustomEditor(InputStream.class, new InputStreamEditor(new ResourceEditor(this)));
+
+		// configure the bean factory with context semantics
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		beanFactory.ignoreDependencyType(ResourceLoader.class);
 		beanFactory.ignoreDependencyType(ApplicationContext.class);
@@ -256,10 +261,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		if (getBeanDefinitionCount() == 0) {
-			logger.warn("No beans defined in ApplicationContext [" + getDisplayName() + "]");
+			logger.warn("No beans defined in application context [" + getDisplayName() + "]");
 		}
 		else {
-			logger.info(getBeanDefinitionCount() + " beans defined in ApplicationContext [" + getDisplayName() + "]");
+			logger.info(getBeanDefinitionCount() + " beans defined in application context [" + getDisplayName() + "]");
 		}
 
 		// invoke factory processors registered as beans in the context
@@ -351,7 +356,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No MessageSource found for context [" + getDisplayName() + "]: using empty default");
+			logger.info("No message source found for context [" + getDisplayName() + "]: using empty default");
 			// use empty message source to be able to accept getMessage calls
 			this.messageSource = new StaticMessageSource();
 		}
@@ -417,7 +422,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Destroy all cached singletons in this context,
 		// invoking DisposableBean.destroy and/or "destroy-method".
-		getBeanFactory().destroySingletons();
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (beanFactory != null) {
+			beanFactory.destroySingletons();
+		}
 
 		// publish corresponding event
 		publishEvent(new ContextClosedEvent(this));
