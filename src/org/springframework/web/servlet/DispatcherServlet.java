@@ -79,7 +79,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.27 2004-02-06 18:04:44 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.28 2004-03-12 14:47:57 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -490,7 +490,8 @@ public class DispatcherServlet extends FrameworkServlet {
 				return ha;
 			}
 		}
-		throw new ServletException("No adapter for handler [" + handler + "]");
+		throw new ServletException("No adapter for handler [" + handler +
+		                           "]: Does your handler implement a supported interface like Controller?");
 	}
 
 	/**
