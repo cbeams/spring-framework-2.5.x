@@ -105,7 +105,7 @@ Courier: </td><td><c:out value="${order.courier}"/>
   </tr>
 <c:forEach var="lineItem" items="${order.lineItems}">
   <tr bgcolor="#FFFF88">
-  <td><b><a href="<c:url value="/shop/addItemToCart.do"><c:param name="workingItemId" value="${lineItem.itemId}"/></c:url>">
+  <td><b><a href="<c:url value="/shop/viewItem.do"><c:param name="itemId" value="${lineItem.itemId}"/></c:url>">
     <font color="BLACK"><c:out value="${lineItem.itemId}"/></font>
   </a></b></td>
   <td>
@@ -120,7 +120,7 @@ Courier: </td><td><c:out value="${order.courier}"/>
   <td align="right"><fmt:formatNumber value="${lineItem.unitPrice}" pattern="$#,##0.00"/></td>
   <td align="right"><fmt:formatNumber value="${lineItem.totalPrice}" pattern="$#,##0.00"/></td>
   </tr>
-</c:forEach>>
+</c:forEach>
   <tr bgcolor="#FFFF88">
   <td colspan="5" align="right"><b>Total: <fmt:formatNumber value="${order.totalPrice}" pattern="$#,##0.00"/></b></td>
   </tr>
