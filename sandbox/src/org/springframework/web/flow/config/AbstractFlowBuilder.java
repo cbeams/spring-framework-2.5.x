@@ -98,7 +98,7 @@ import org.springframework.web.flow.ViewState;
  * customerDetails.bindAndValidate</code>. This action state will
  * automatically be configured with the following defaults:
  * <ol>
- * <li>A action bean named <code>customerDetails.bindAndValidate</code>-
+ * <li>An action bean named <code>customerDetails.bindAndValidate</code>-
  * this is the name of the <code>Action</code> implementation exported in the
  * application context that will execute when this state is entered. In this
  * example, the <code>Action</code> will bind form input in the HTTP request
