@@ -30,12 +30,12 @@
 		<fileset dir="${lib.dir}">
 			<include name="*.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-logging.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="servlet.jar"/>
 			<include name="jdbc2_0-stdext.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/log4j">
-			<include name="commons-logging.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/itext-pdf">
 			<include name="*.jar"/>
@@ -97,12 +97,14 @@
 		<jar jarfile="${weblib.dir}/countries.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
+			<fileset dir="${spring.root}/lib/jakarta-commons">
+				<include name="commons-logging.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/jstl">
 				<include name="jstl.jar"/>
 				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/log4j">
-				<include name="commons-logging.jar"/>
 				<include name="log4j*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
@@ -151,14 +153,6 @@
 			<exclude name="**/.*"/>
 		</war>
 
-		<!--
-		<copy todir="${deploy.dir}" preservelastmodified="true">
-			<fileset dir="${dist.dir}">
-				<include name="*.war"/>
-			</fileset>
-		</copy>
-		-->
-		
 	</target>
 
 

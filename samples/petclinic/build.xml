@@ -29,15 +29,15 @@
 		<fileset dir="${lib.dir}">
 			<include name="*.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-logging.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="servlet.jar"/>
 			<include name="jdbc2_0-stdext.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/log4j">
-			<include name="commons-logging.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/dist">
-			<include name="spring-full*.jar"/>
+			<include name="spring.jar"/>
 		</fileset>
 
 	</path>
@@ -94,16 +94,18 @@
 				<include name="hsqldb.jar"/>
 				<include name="mysql*.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/jakarta-commons">
+				<include name="commons-logging.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/jstl">
 				<include name="jstl.jar"/>
 				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/log4j">
-				<include name="commons-logging.jar"/>
 				<include name="log4j*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
-				<include name="spring-full*.jar"/>
+				<include name="spring.jar"/>
 			</fileset>
 		</copy>
 
