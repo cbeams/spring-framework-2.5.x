@@ -44,4 +44,8 @@ public class PersistenceBrokerTransactionObject extends JdbcTransactionObjectSup
 		return persistenceBrokerHolder;
 	}
 
+	public boolean isRollbackOnly() {
+		return getPersistenceBrokerHolder().isRollbackOnly();
+	}
+
 }

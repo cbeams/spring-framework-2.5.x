@@ -306,10 +306,6 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected boolean isRollbackOnly(Object transaction) {
-		return ((JdoTransactionObject) transaction).getPersistenceManagerHolder().isRollbackOnly();
-	}
-
 	protected void doCommit(DefaultTransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		if (status.isDebug()) {

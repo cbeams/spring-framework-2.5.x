@@ -29,6 +29,7 @@ import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.TransactionUsageException;
+import org.springframework.transaction.support.SmartTransactionObject;
 
 /**
  * Convenient base class for JDBC-aware transaction objects.
@@ -46,7 +47,7 @@ import org.springframework.transaction.TransactionUsageException;
  * @since 18.06.2004
  * @see java.sql.Savepoint
  */
-public abstract class JdbcTransactionObjectSupport implements SavepointManager {
+public abstract class JdbcTransactionObjectSupport implements SavepointManager, SmartTransactionObject {
 
 	protected static final Log logger = LogFactory.getLog(DataSourceTransactionObject.class);
 
@@ -97,17 +98,9 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager {
 	}
 
 
-	protected ConnectionHolder getConnectionHolderForSavepoint() throws TransactionException {
-		if (!isSavepointAllowed()) {
-			throw new NestedTransactionNotSupportedException(
-					"Transaction manager does not allow nested transactions");
-		}
-		if (getConnectionHolder() == null) {
-			throw new TransactionUsageException("Cannot create nested transaction if not exposing " +
-																					"a JDBC transaction");
-		}
-		return getConnectionHolder();
-	}
+	//---------------------------------------------------------------------
+	// Implementation of SavepointManager
+	//---------------------------------------------------------------------
 
 	/**
 	 * This implementation creates a JDBC 3.0 Savepoint and returns it.
@@ -160,6 +153,18 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager {
 		catch (SQLException ex) {
 			logger.info("Could not explicitly release JDBC savepoint", ex);
 		}
+	}
+
+	protected ConnectionHolder getConnectionHolderForSavepoint() throws TransactionException {
+		if (!isSavepointAllowed()) {
+			throw new NestedTransactionNotSupportedException(
+					"Transaction manager does not allow nested transactions");
+		}
+		if (getConnectionHolder() == null) {
+			throw new TransactionUsageException("Cannot create nested transaction if not exposing " +
+																					"a JDBC transaction");
+		}
+		return getConnectionHolder();
 	}
 
 }

@@ -49,10 +49,6 @@ public class CountingTxManager extends AbstractPlatformTransactionManager {
 	    throws TransactionException {
 	}
 
-	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
-		return false;
-	}
-
 	protected void doCommit(DefaultTransactionStatus status) {
 		++commits;
 		--inflight;

@@ -25,6 +25,7 @@ import java.util.List;
 import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.Constants;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -343,14 +344,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * transactions and programmatic rollback requests.
 	 * Delegates to isRollbackOnly, doCommit and rollback.
 	 * @see org.springframework.transaction.TransactionStatus#isRollbackOnly
-	 * @see #isRollbackOnly
 	 * @see #doCommit
 	 * @see #rollback
 	 */
 	public final void commit(TransactionStatus status) throws TransactionException {
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-		if (status.isRollbackOnly() ||
-		    (defStatus.getTransaction() != null && isRollbackOnly(defStatus.getTransaction()))) {
+		if (status.isRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Transactional code has requested rollback");
 			}
@@ -657,16 +656,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	protected abstract void doResume(Object transaction, Object suspendedResources)
 	    throws TransactionException;
-
-	/**
-	 * Check if the given transaction object indicates a rollback-only,
-	 * assumably from a nested transaction (else, the TransactionStatus
-	 * of this transaction would have indicated rollback-only).
-	 * @param transaction transaction object returned by doGetTransaction
-	 * @return if the transaction has to result in a rollback
-	 * @throws TransactionException in case of creation or system errors
-	 */
-	protected abstract boolean isRollbackOnly(Object transaction) throws TransactionException;
 
 	/**
 	 * Perform an actual commit on the given transaction.

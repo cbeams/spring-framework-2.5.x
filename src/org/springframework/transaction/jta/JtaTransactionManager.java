@@ -42,7 +42,6 @@ import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSuspensionNotSupportedException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
@@ -370,14 +369,15 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 
 	/**
-	 * This implementation returns the JTA UserTransaction instance.
+	 * This implementation returns a JtaTransactionObject instance for the
+	 * JTA UserTransaction.
 	 * <p>Note that JtaTransactionManager doesn't need a transaction object,
 	 * as it will access the JTA UserTransaction respectively TransactionManager
 	 * singletons that it holds directly. Therefore, any transaction object
-	 * that's useful for identification purposes will do.
+	 * that's useful for status and identification purposes will do.
 	 */
 	protected Object doGetTransaction() {
-		return getUserTransaction();
+		return new JtaTransactionObject(getUserTransaction());
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
@@ -436,9 +436,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	 * @see #getUserTransaction
 	 * @see #getTransactionManager
 	 */
-	protected void applyIsolationLevel(int isolationLevel) throws InvalidIsolationLevelException, SystemException {
+	protected void applyIsolationLevel(int isolationLevel)
+	    throws InvalidIsolationLevelException, SystemException {
 		if (isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
-			throw new InvalidIsolationLevelException("JtaTransactionManager does not support custom isolation levels");
+			throw new InvalidIsolationLevelException(
+			    "JtaTransactionManager does not support custom isolation levels");
 		}
 	}
 
@@ -493,19 +495,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	 * @throws SystemException if thrown by JTA methods
 	 * @see #getTransactionManager
 	 */
-	protected void doJtaResume(Transaction suspendedTransaction) throws InvalidTransactionException, SystemException {
+	protected void doJtaResume(Transaction suspendedTransaction)
+	    throws InvalidTransactionException, SystemException {
 		getTransactionManager().resume(suspendedTransaction);
 	}
 
-
-	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
-		try {
-			return (getUserTransaction().getStatus() == Status.STATUS_MARKED_ROLLBACK);
-		}
-		catch (SystemException ex) {
-			throw new TransactionSystemException("JTA failure on getStatus", ex);
-		}
-	}
 
 	protected void doCommit(DefaultTransactionStatus status) {
 		logger.debug("Committing JTA transaction");
@@ -562,9 +556,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			ois.defaultReadObject();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize JtaTransactionManager: " +
-																"Check that JTA and Spring transaction libraries are available on the client side",
-																ex);
+			throw new AspectException(
+			    "Failed to deserialize JtaTransactionManager: Check that JTA and Spring " +
+			    "transaction libraries are available on the client side", ex);
 		}
 
 		// do client-side JNDI lookup

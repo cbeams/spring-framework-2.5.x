@@ -195,11 +195,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
 	}
 
-	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
-		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
-		return txObject.getConnectionHolder().isRollbackOnly();
-	}
-
 	protected void doCommit(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		Connection con = txObject.getConnectionHolder().getConnection();

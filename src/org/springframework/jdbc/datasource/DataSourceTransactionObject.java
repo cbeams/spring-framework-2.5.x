@@ -43,4 +43,8 @@ public class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
 		return mustRestoreAutoCommit;
 	}
 
+	public boolean isRollbackOnly() {
+		return getConnectionHolder().isRollbackOnly();
+	}
+
 }

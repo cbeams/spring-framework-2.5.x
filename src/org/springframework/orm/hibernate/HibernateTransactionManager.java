@@ -433,10 +433,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
-	protected boolean isRollbackOnly(Object transaction) {
-		return ((HibernateTransactionObject) transaction).getSessionHolder().isRollbackOnly();
-	}
-
 	protected void doCommit(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {

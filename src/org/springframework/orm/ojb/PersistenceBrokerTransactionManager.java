@@ -237,10 +237,6 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		}
 	}
 
-	protected boolean isRollbackOnly(Object transaction) {
-		return ((PersistenceBrokerTransactionObject) transaction).getPersistenceBrokerHolder().isRollbackOnly();
-	}
-
 	protected void doCommit(DefaultTransactionStatus status) {
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) status.getTransaction();
 		if (status.isDebug()) {

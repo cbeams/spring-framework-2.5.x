@@ -68,4 +68,8 @@ public class JdoTransactionObject extends JdbcTransactionObjectSupport {
 		return transactionData;
 	}
 
+	public boolean isRollbackOnly() {
+		return getPersistenceManagerHolder().isRollbackOnly();
+	}
+
 }

@@ -194,11 +194,6 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 		TransactionSynchronizationManager.bindResource(getConnectionFactory(), conHolder);
 	}
 
-	protected boolean isRollbackOnly(Object transaction) {
-		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
-		return txObject.getConnectionHolder().isRollbackOnly();
-	}
-
 	protected void doCommit(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
 		try {

@@ -16,6 +16,8 @@
 
 package org.springframework.jms.connection;
 
+import org.springframework.transaction.support.SmartTransactionObject;
+
 /**
  * JMS transaction object, representing a ConnectionHolder.
  * Used as transaction object by JmsTransactionManager.
@@ -26,7 +28,7 @@ package org.springframework.jms.connection;
  * @since 1.1
  * @see JmsTransactionManager
  */
-public class JmsTransactionObject {
+public class JmsTransactionObject implements SmartTransactionObject {
 
 	private ConnectionHolder connectionHolder;
 
@@ -36,6 +38,10 @@ public class JmsTransactionObject {
 
 	public ConnectionHolder getConnectionHolder() {
 		return connectionHolder;
+	}
+
+	public boolean isRollbackOnly() {
+		return getConnectionHolder().isRollbackOnly();
 	}
 
 }

@@ -73,9 +73,9 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	 * Caching it in here can prevent repeated calls to ask the logging system whether
 	 * debug logging should be enabled.
 	 */
-	public DefaultTransactionStatus(Object transaction, boolean newTransaction,
-																	boolean newSynchronization, boolean readOnly,
-	                                boolean debug, Object suspendedResources) {
+	public DefaultTransactionStatus(
+	    Object transaction, boolean newTransaction, boolean newSynchronization,
+	    boolean readOnly, boolean debug, Object suspendedResources) {
 		this.transaction = transaction;
 		this.newTransaction = newTransaction;
 		this.newSynchronization = newSynchronization;
@@ -127,8 +127,16 @@ public class DefaultTransactionStatus implements TransactionStatus {
 		this.rollbackOnly = true;
 	}
 
+	/**
+	 * Determine the rollbackOnly flag via checking both this TransactionStatus
+	 * and the transaction object, provided that the latter implements the
+	 * SmartTransactionObject interface.
+	 * @see SmartTransactionObject#isRollbackOnly
+	 */
 	public boolean isRollbackOnly() {
-		return rollbackOnly;
+		return (this.rollbackOnly ||
+		    ((this.transaction instanceof SmartTransactionObject) &&
+		     ((SmartTransactionObject) this.transaction).isRollbackOnly()));
 	}
 
 
@@ -155,29 +163,9 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	}
 
 
-	/**
-	 * Return whether the underlying transaction implements the
-	 * SavepointManager interface.
-	 * @see #getTransaction
-	 * @see org.springframework.transaction.SavepointManager
-	 */
-	public boolean isTransactionSavepointManager() {
-		return (getTransaction() instanceof SavepointManager);
-	}
-
-	/**
-	 * Return the underlying transaction as SavepointManager,
-	 * if possible.
-	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
-	 * if the underlying transaction does not support savepoints
-	 */
-	protected SavepointManager getSavepointManager() {
-		if (!isTransactionSavepointManager()) {
-			throw new NestedTransactionNotSupportedException("Transaction object [" + getTransaction() +
-																											 "] does not support savepoints");
-		}
-		return (SavepointManager) getTransaction();
-	}
+	//---------------------------------------------------------------------
+	// Implementation of SavepointManager
+	//---------------------------------------------------------------------
 
 	/**
 	 * This implementation delegates to the transaction object
@@ -211,7 +199,6 @@ public class DefaultTransactionStatus implements TransactionStatus {
 		getSavepointManager().releaseSavepoint(savepoint);
 	}
 
-
 	/**
 	 * Create a savepoint and hold it for the transaction.
 	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
@@ -239,6 +226,30 @@ public class DefaultTransactionStatus implements TransactionStatus {
 			throw new TransactionUsageException("No savepoint associated with current transaction");
 		}
 		getSavepointManager().releaseSavepoint(getSavepoint());
+	}
+
+	/**
+	 * Return the underlying transaction as SavepointManager,
+	 * if possible.
+	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
+	 * if the underlying transaction does not support savepoints
+	 */
+	protected SavepointManager getSavepointManager() {
+		if (!isTransactionSavepointManager()) {
+			throw new NestedTransactionNotSupportedException(
+			    "Transaction object [" + getTransaction() + "] does not support savepoints");
+		}
+		return (SavepointManager) getTransaction();
+	}
+
+	/**
+	 * Return whether the underlying transaction implements the
+	 * SavepointManager interface.
+	 * @see #getTransaction
+	 * @see org.springframework.transaction.SavepointManager
+	 */
+	public boolean isTransactionSavepointManager() {
+		return (getTransaction() instanceof SavepointManager);
 	}
 
 }

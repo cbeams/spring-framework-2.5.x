@@ -67,4 +67,8 @@ public class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 		return previousFlushMode;
 	}
 
+	public boolean isRollbackOnly() {
+		return getSessionHolder().isRollbackOnly();
+	}
+
 }

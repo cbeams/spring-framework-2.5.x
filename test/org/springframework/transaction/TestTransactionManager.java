@@ -63,16 +63,11 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.begin = true;
 	}
 
-	protected Object doSuspend(Object transaction) throws TransactionException {
+	protected Object doSuspend(Object transaction) {
 		return null;
 	}
 
-	protected void doResume(Object transaction, Object suspendedResources)
-	    throws TransactionException {
-	}
-
-	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
-		return false;
+	protected void doResume(Object transaction, Object suspendedResources) {
 	}
 
 	protected void doCommit(DefaultTransactionStatus status) {
