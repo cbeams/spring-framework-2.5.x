@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.58 2004-05-18 08:06:11 jhoeller Exp $
+    $Id: build.xml,v 1.59 2004-05-23 22:02:34 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -451,9 +451,10 @@
 
 
 	<!--
-		Run test suite. This and Clover test target take their includes and excludes
-		from build.properties. However it's possible to run specific tests by passing in
-		the test.includes and (optionally) test.excludes properties through the command line, as below:
+		Run test suite. This and clover.tests take their includes and excludes from
+		build.properties. However it's possible to run specific tests by passing in
+		the test.includes and (optionally) test.excludes properties through the
+		command line, as below:
 			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
 	-->
 	<target name="tests" depends="buildtests" description="Run tests">
@@ -556,20 +557,26 @@
 
 	<target name="clover.tests" depends="buildtests,clover.build" description="Run Clover tests">
 
-		<junit printsummary="yes" haltonfailure="yes">
+		<property name="reports.dir" value="${target.junit.reports.dir}"/>
+
+		<mkdir dir="${reports.dir}"/>
+
+		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<!-- Must go first to ensure the jndi.properties takes precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
 			<classpath location="${target.clover.dir}"/>
 
 			<!-- Need files loaded as resources -->
 			<classpath location="${test.dir}"/>
 			
-			<classpath location="${dist.dir}/spring-mock.jar"/>
-
 			<classpath refid="all-libs"/>
 
-			<batchtest fork="yes">
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${reports.dir}">
 				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
 			</batchtest>
 
@@ -584,7 +591,7 @@
 	-->
 	<target name="clover.swing" depends="clover.tests" description="Run Clover tests and bring up Swing coverage viewer">
 
-		<echo>Launching coverage viewer</echo>
+		<echo>Launching Clover coverage viewer</echo>
 
 		<java classname="com.cortexeb.tools.clover.reporters.jfc.Viewer" fork="yes">
 			<arg value="${clover.initstring}"/>
