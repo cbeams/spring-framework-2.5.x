@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
  * class loading problems in J2EE applications with multiple deployment modules.
  * For example, loading a class by name won't work in some application servers
  * if the class is used in a WAR but was loaded by the EJB class loader and the
- * class to be loaded is in the WAR. (This class would use the EJB classloader,
+ * class to be loaded is in the WAR. (This class would use the EJB class loader,
  * which couldn't see the required class.) We don't attempt to solve such problems
  * by obtaining the classloader at runtime, because this violates the EJB
  * programming restrictions.
@@ -57,13 +57,13 @@ import org.springframework.util.StringUtils;
  * registerCustomEditor method to register an editor for the particular instance.
  *
  * <p>Collections custom property editors can be written against comma delimited String
- * as String arrays are converted in such a format if the array itself is not assignable.</p>
+ * as String arrays are converted in such a format if the array itself is not assignable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.13 2003-11-12 19:09:53 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.14 2003-11-21 09:55:42 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -307,7 +307,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	private String getFinalPath(String nestedPath) {
 		String finalPath = nestedPath.substring(nestedPath.lastIndexOf(NESTED_PROPERTY_SEPARATOR) + 1);
-		if (logger.isDebugEnabled()) {
+		if (logger.isDebugEnabled() && !nestedPath.equals(finalPath)) {
 			logger.debug("Final path in nested property value '" + nestedPath + "' is '" + finalPath + "'");
 		}
 		return finalPath;
@@ -536,11 +536,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 				return;
 			}
 			catch (NullValueInNestedPathException ex) {
-				// Let this through
+				// let this through
 				throw ex;
 			}
 			catch (FatalBeanException ex) {
-				// Error in the nested path
+				// error in the nested path
 				throw new NotWritablePropertyException(pv.getName(), getWrappedClass());
 			}
 		}
@@ -556,7 +556,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 		try {
 			if (readMethod != null && this.eventPropagationEnabled) {
-				// Can only find existing value if it's a readable property
+				// can only find existing value if it's a readable property
 				try {
 					oldValue = readMethod.invoke(this.object, new Object[]{});
 				}
@@ -570,7 +570,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				}
 			}
 
-			// Old value may still be null
+			// old value may still be null
 			propertyChangeEvent = createPropertyChangeEventWithTypeConversionIfNecessary(
 					pv.getName(), oldValue, pv.getValue(), pd.getPropertyType());
 
@@ -587,15 +587,23 @@ public class BeanWrapperImpl implements BeanWrapper {
 																					 pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
 			}
 
-			// Make the change
-			if (logger.isDebugEnabled())
+			if (logger.isDebugEnabled()) {
 				logger.debug("About to invoke write method [" + writeMethod +
 				             "] on object of class [" + object.getClass().getName() + "]");
+			}
 			writeMethod.invoke(this.object, new Object[] {propertyChangeEvent.getNewValue()});
-			if (logger.isDebugEnabled())
-				logger.debug("Invoked write method [" + writeMethod + "] ok");
+			if (logger.isDebugEnabled()) {
+				String msg = "Invoked write method [" + writeMethod + "] with value ";
+				// only cause toString invocation of new value in case of simple property
+				if (propertyChangeEvent.getNewValue() == null || BeanUtils.isSimpleProperty(pd.getPropertyType())) {
+					logger.debug(msg + "[" + propertyChangeEvent.getNewValue() + "]");
+				}
+				else {
+					logger.debug(msg + "of type [" + pd.getPropertyType().getName() + "]");
+				}
+			}
 
-			// If we get here we've changed the property OK and can broadcast it
+			// if we get here we've successfully changed the property and can broadcast it
 			if (this.eventPropagationEnabled) {
 				this.propertyChangeSupport.firePropertyChange(propertyChangeEvent);
 			}
