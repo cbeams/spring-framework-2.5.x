@@ -26,6 +26,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 /**
  * Resource implementation for ServletContext resources,
@@ -79,8 +80,8 @@ public class ServletContextResource extends AbstractResource {
 	public URL getURL() throws IOException {
 		URL url = this.servletContext.getResource(this.path);
 		if (url == null) {
-			throw new FileNotFoundException(getDescription() + " cannot be resolved to URL " +
-																			"because it does not exist");
+			throw new FileNotFoundException(
+					getDescription() + " cannot be resolved to URL because it does not exist");
 		}
 		return url;
 	}
@@ -93,28 +94,20 @@ public class ServletContextResource extends AbstractResource {
 	public File getFile() throws IOException {
 		String realPath = this.servletContext.getRealPath(this.path);
 		if (realPath == null) {
-			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path - " +
-																			"web application archive not expanded?");
+			throw new FileNotFoundException(
+					getDescription() + " cannot be resolved to absolute file path - " +
+					"web application archive not expanded?");
 		}
 		return new File(realPath);
 	}
 
 	public Resource createRelative(String relativePath) throws IOException {
-		int packageIndex = this.path.indexOf('/');
-		if (packageIndex != -1) {
-			String packagePath = this.path.substring(0, packageIndex);
-			if (!relativePath.startsWith("/")) {
-				packagePath += "/";
-			}
-			return new ServletContextResource(this.servletContext, packagePath + relativePath);
-		}
-		else {
-			return new ServletContextResource(this.servletContext, relativePath);
-		}
+		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
+		return new ServletContextResource(this.servletContext, pathToUse);
 	}
 
 	public String getFilename() {
-		return new File(this.path).getName();
+		return StringUtils.getFilename(this.path);
 	}
 
 	public String getDescription() {

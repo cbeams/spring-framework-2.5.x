@@ -25,6 +25,8 @@ import java.net.URL;
 import javax.portlet.PortletContext;
 
 import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 /**
  * Resource implementation for PortletContext resources,
@@ -71,8 +73,8 @@ public class PortletContextResource extends AbstractResource {
 	public URL getURL() throws IOException {
 		URL url = this.portletContext.getResource(this.path);
 		if (url == null) {
-			throw new FileNotFoundException(getDescription() + " cannot be resolved to URL " +
-																			"because it does not exist");
+			throw new FileNotFoundException(
+					getDescription() + " cannot be resolved to URL because it does not exist");
 		}
 		return url;
 	}
@@ -85,10 +87,19 @@ public class PortletContextResource extends AbstractResource {
 	public File getFile() throws IOException {
 		String realPath = this.portletContext.getRealPath(this.path);
 		if (realPath == null) {
-			throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path - " +
-																			"portlet application archive not expanded?");
+			throw new FileNotFoundException(
+					getDescription() + " cannot be resolved to absolute file path - portlet application archive not expanded?");
 		}
 		return new File(realPath);
+	}
+
+	public Resource createRelative(String relativePath) throws IOException {
+		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
+		return new PortletContextResource(this.portletContext, pathToUse);
+	}
+
+	public String getFilename() {
+		return StringUtils.getFilename(this.path);
 	}
 
 	public String getDescription() {
