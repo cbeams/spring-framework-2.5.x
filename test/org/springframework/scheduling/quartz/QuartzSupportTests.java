@@ -121,9 +121,9 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.verify();
 	}
 	
-	public void testMethodInvocationWithConcurrency() throws Exception {
+	/*public void testMethodInvocationWithConcurrency() throws Exception {
 		methodInvokingConcurrency(true);
-	}
+	}*/
 	
 	// We can't test both since Quartz somehow seems to keep things in memory
 	// enable both and one of them will fail (order doesn't matter).
