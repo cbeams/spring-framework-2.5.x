@@ -68,9 +68,6 @@
 	<classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
 	<classpathentry kind="lib" path="lib/itext/itext-1.02b.jar"/>
 	<classpathentry kind="lib" path="lib/aopalliance/aopalliance.jar"/>
-	<classpathentry kind="lib" path="lib/mockobjects/mockobjects-core-0.09.jar"/>
-	<classpathentry kind="lib" path="lib/mockobjects/mockobjects-jdk1.3-0.09.jar"/>
-	<classpathentry kind="lib" path="lib/mockobjects/mockobjects-jdk1.3-j2ee1.3-0.09.jar"/>
 	<classpathentry kind="lib" path="lib/axis/saaj.jar"/>
 	<classpathentry kind="lib" path="lib/axis/wsdl4j.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/ehcache.jar"/>
