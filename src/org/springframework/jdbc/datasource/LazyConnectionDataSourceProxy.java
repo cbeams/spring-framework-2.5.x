@@ -95,8 +95,9 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	/**
 	 * Set the default auto-commit mode to expose when no target Connection
 	 * has been fetched yet (-> actual JDBC Connection default not known yet).
-	 * <p>Default gets determined by checking a target Connection on startup.
-	 * Fallback default (in case of connect failure on startup) is true.
+	 * <p>If not specified, the default gets determined by checking a target
+	 * Connection on startup. If that check fails, the default will be determined
+	 * lazily on first access of a Connection.
 	 * @see java.sql.Connection#getAutoCommit
 	 */
 	public void setDefaultAutoCommit(boolean defaultAutoCommit) {
@@ -106,10 +107,10 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	/**
 	 * Set the default transaction isolation level to expose when no target Connection
 	 * has been fetched yet (-> actual JDBC Connection default not known yet).
-	 * <p>Default gets determined by checking a target Connection on startup.
-	 * Fallback default (in case of connect failure on startup) is READ_COMMITTED.
+	 * <p>If not specified, the default gets determined by checking a target
+	 * Connection on startup. If that check fails, the default will be determined
+	 * lazily on first access of a Connection.
 	 * @see java.sql.Connection#getTransactionIsolation
-	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
 	 */
 	public void setDefaultTransactionIsolation(int defaultTransactionIsolation) {
 		this.defaultTransactionIsolation = new Integer(defaultTransactionIsolation);
@@ -124,12 +125,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 			try {
 				Connection con = getTargetDataSource().getConnection();
 				try {
-					if (this.defaultAutoCommit == null) {
-						this.defaultAutoCommit = new Boolean(con.getAutoCommit());
-					}
-					if (this.defaultTransactionIsolation == null) {
-						this.defaultTransactionIsolation = new Integer(con.getTransactionIsolation());
-					}
+					checkDefaultConnectionProperties(con);
 				}
 				finally {
 					con.close();
@@ -139,6 +135,39 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				logger.warn("Could not retrieve default auto-commit and transaction isolation settings", ex);
 			}
 		}
+	}
+
+	/**
+	 * Check the default connection properties (auto-commit, transaction isolation),
+	 * keeping them to be able to expose them correctly without fetching an actual
+	 * JDBC Connection from the target DataSource.
+	 * <p>This will be invoked once on startup, but also for each retrieval of a
+	 * target Connection. If the check failed on startup (because the database was
+	 * down), we'll lazily retrieve those settings.
+	 * @param con the Connection to use for checking
+	 * @throws SQLException if thrown by Connection methods
+	 */
+	protected synchronized void checkDefaultConnectionProperties(Connection con) throws SQLException {
+		if (this.defaultAutoCommit == null) {
+			this.defaultAutoCommit = new Boolean(con.getAutoCommit());
+		}
+		if (this.defaultTransactionIsolation == null) {
+			this.defaultTransactionIsolation = new Integer(con.getTransactionIsolation());
+		}
+	}
+
+	/**
+	 * Expose the default auto-commit value.
+	 */
+	protected Boolean defaultAutoCommit() {
+		return defaultAutoCommit;
+	}
+
+	/**
+	 * Expose the default transaction isolation value.
+	 */
+	protected Integer defaultTransactionIsolation() {
+		return defaultTransactionIsolation;
 	}
 
 
@@ -164,10 +193,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * @see DataSourceUtils#doCloseConnectionIfNecessary
 	 */
 	protected Connection getLazyConnectionProxy(DataSource dataSource) {
-		return (Connection) Proxy.newProxyInstance(
-				ConnectionProxy.class.getClassLoader(),
-				new Class[] {ConnectionProxy.class},
-				new LazyConnectionInvocationHandler(dataSource, this.defaultAutoCommit, this.defaultTransactionIsolation));
+		return (Connection) Proxy.newProxyInstance(ConnectionProxy.class.getClassLoader(),
+				new Class[] {ConnectionProxy.class}, new LazyConnectionInvocationHandler());
 	}
 
 
@@ -175,9 +202,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 * Invocation handler that defers fetching an actual JDBC Connection
 	 * until first creation of a Statement.
 	 */
-	private static class LazyConnectionInvocationHandler implements InvocationHandler {
-
-		private final DataSource dataSource;
+	private class LazyConnectionInvocationHandler implements InvocationHandler {
 
 		private Connection target;
 
@@ -185,18 +210,13 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 		private Integer transactionIsolation;
 
-		private Integer defaultTransactionIsolation;
-
 		private Boolean autoCommit;
 
 		private boolean closed = false;
 
-		public LazyConnectionInvocationHandler(DataSource dataSource, Boolean autoCommit, Integer transactionIsolation) {
-			this.dataSource = dataSource;
-			this.autoCommit = (autoCommit != null ? autoCommit : Boolean.TRUE);
-			this.transactionIsolation = (transactionIsolation != null ?
-					transactionIsolation : new Integer(Connection.TRANSACTION_READ_COMMITTED));
-			this.defaultTransactionIsolation = this.transactionIsolation;
+		public LazyConnectionInvocationHandler() {
+			this.autoCommit = defaultAutoCommit();
+			this.transactionIsolation = defaultTransactionIsolation();
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -220,14 +240,22 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 					return null;
 				}
 				else if (method.getName().equals("getTransactionIsolation")) {
-					return this.transactionIsolation;
+					if (this.transactionIsolation != null) {
+						return this.transactionIsolation;
+					}
+					// Else fetch actual Connection and check there,
+					// because we didn't have a default specified.
 				}
 				else if (method.getName().equals("setTransactionIsolation")) {
 					this.transactionIsolation = (Integer) args[0];
 					return null;
 				}
 				else if (method.getName().equals("getAutoCommit")) {
-					return this.autoCommit;
+					if (this.autoCommit != null) {
+						return this.autoCommit;
+					}
+					// Else fetch actual Connection and check there,
+					// because we didn't have a default specified.
 				}
 				else if (method.getName().equals("setAutoCommit")) {
 					this.autoCommit = (Boolean) args[0];
@@ -286,18 +314,24 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		protected Connection getTargetConnection() throws SQLException {
 			if (this.target == null) {
 				// Fetch physical Connection from DataSource.
-				this.target = this.dataSource.getConnection();
+				this.target = getTargetDataSource().getConnection();
+
+				// If we still lack default connection properties, check them now.
+				checkDefaultConnectionProperties(this.target);
+
 				// Apply kept transaction settings, if any.
 				if (this.readOnly.booleanValue()) {
 					this.target.setReadOnly(this.readOnly.booleanValue());
 				}
-				if (!this.transactionIsolation.equals(this.defaultTransactionIsolation)) {
+				if (this.transactionIsolation != null &&
+						!this.transactionIsolation.equals(defaultTransactionIsolation())) {
 					this.target.setTransactionIsolation(this.transactionIsolation.intValue());
 				}
-				if (this.autoCommit.booleanValue() != this.target.getAutoCommit()) {
+				if (this.autoCommit != null && this.autoCommit.booleanValue() != this.target.getAutoCommit()) {
 					this.target.setAutoCommit(this.autoCommit.booleanValue());
 				}
 			}
+
 			return this.target;
 		}
 	}

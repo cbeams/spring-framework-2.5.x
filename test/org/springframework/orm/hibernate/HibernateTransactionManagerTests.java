@@ -1196,7 +1196,11 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 	public void testTransactionCommitWithNonExistingDatabaseAndLazyConnection() throws HibernateException, IOException {
 		DriverManagerDataSource dsTarget = new DriverManagerDataSource();
-		final LazyConnectionDataSourceProxy ds = new LazyConnectionDataSourceProxy(dsTarget);
+		final LazyConnectionDataSourceProxy ds = new LazyConnectionDataSourceProxy();
+		ds.setTargetDataSource(dsTarget);
+		ds.setDefaultAutoCommit(true);
+		ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setDataSource(ds);
 		lsfb.afterPropertiesSet();
