@@ -50,6 +50,8 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -221,14 +223,25 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 */
 	protected void importBeanDefinitionResource(Element ele) {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
-		try {
-			Resource relativeResource = this.resource.createRelative(location);
-			this.beanDefinitionReader.loadBeanDefinitions(relativeResource);
+		Resource relativeResource = null;
+		if (ResourceUtils.isUrl(location)) {
+			ResourceLoader resourceLoader = this.beanDefinitionReader.getResourceLoader();
+			if (resourceLoader == null) {
+				throw new BeanDefinitionStoreException(
+						"Cannot import bean definitions from location [" + location + "]: no resource loader available");
+			}
+			relativeResource = resourceLoader.getResource(location);
 		}
-		catch (IOException ex) {
-			throw new BeanDefinitionStoreException(
-					"Invalid relative resource location [" + location + "] to import bean definitions from", ex);
+		else {
+			try {
+				relativeResource = this.resource.createRelative(location);
+			}
+			catch (IOException ex) {
+				throw new BeanDefinitionStoreException(
+						"Invalid relative resource location [" + location + "] to import bean definitions from", ex);
+			}
 		}
+		this.beanDefinitionReader.loadBeanDefinitions(relativeResource);
 	}
 
 	/**
