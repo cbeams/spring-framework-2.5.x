@@ -31,7 +31,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 /**
  *
  * @author Rod Johnson
-* @version $Id: XmlBeanFactoryTestSuite.java,v 1.4 2003-09-06 11:21:38 johnsonr Exp $
+* @version $Id: XmlBeanFactoryTestSuite.java,v 1.5 2003-09-11 10:13:49 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -416,7 +416,6 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 			fail();
 		}
 		catch (MethodInvocationException ex) {
-			System.err.println("Root cause is " + ex.getRootCause());
 			assertTrue(ex.getRootCause() instanceof ServletException);
 		}
 	}
