@@ -137,7 +137,7 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 
 	private String remoteUser;
 
-	private final Set	roles = new HashSet();
+	private final Set	userRoles = new HashSet();
 
 	private Principal userPrincipal;
 
@@ -621,12 +621,20 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 		return remoteUser;
 	}
 
+	/**
+	 * @deprecated in favor of addUserRole
+	 * @see #addUserRole
+	 */
 	public void addRole(String role) {
-		this.roles.add(role);
+		addUserRole(role);
+	}
+
+	public void addUserRole(String role) {
+		this.userRoles.add(role);
 	}
 
 	public boolean isUserInRole(String role) {
-		return this.roles.contains(role);
+		return this.userRoles.contains(role);
 	}
 
 	public void setUserPrincipal(Principal userPrincipal) {
