@@ -1,34 +1,37 @@
 package org.springframework.web.servlet.handler;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-import org.springframework.util.StringUtils;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.util.StringUtils;
 
 /**
- * Implementation of the HandlerMapping interface to map from URLs
- * to beans. This is the default implementation used by the
- * DispatcherServlet, but is somewhat naive. A SimpleUrlHandlerMapping
- * or a custom handler mapping should be used by preference.
+ * Implementation of the HandlerMapping interface to map from URLs to beans with names
+ * that start with a slash ("/"), similar to how Struts maps URLs to action names.
+ * This is the default implementation used by the DispatcherServlet, but somewhat naive.
+ * A SimpleUrlHandlerMapping or a custom handler mapping should be used by preference.
  *
- * <p>The mapping is from URL to bean name. Thus an incoming URL
- * "/foo" would map to a handler named "/foo", or to "/foo /foo2"
- * in case of multiple mappings to a single handler.
- * Note: In XML definitions, you'll need to use an alias "name=/foo"
- * in the bean definition, as the XML id may not contain slashes.
+ * <p>The mapping is from URL to bean name. Thus an incoming URL "/foo" would map
+ * to a handler named "/foo", or to "/foo /foo2" in case of multiple mappings to
+ * a single handler. Note: In XML definitions, you'll need to use an alias
+ * name="/foo" in the bean definition, as the XML id may not contain slashes.
  *
- * <p>Supports direct matches (given "/test" -> registered "/test")
- * and "*" matches (given "/test" -> registered "/t*").
+ * <p>Supports direct matches (given "/test" -> registered "/test") and "*" matches
+ * (given "/test" -> registered "/t*"). Note that the default is to map within the
+ * current servlet mapping if applicable; see alwaysUseFullPath property for details.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #setAlwaysUseFullPath
  * @see SimpleUrlHandlerMapping
  */
 public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	
 	public void initApplicationContext() throws ApplicationContextException {
-		logger.debug("Looking for URL mappings...");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking for URL mappings in application context: " + getApplicationContext());
+		}
 		String[] urlMaps = getApplicationContext().getBeanDefinitionNames();
 
 		// take anything beginning with a slash in the bean name

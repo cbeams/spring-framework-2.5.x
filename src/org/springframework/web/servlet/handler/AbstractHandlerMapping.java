@@ -18,8 +18,10 @@ import org.springframework.web.servlet.HandlerMapping;
  * @author Juergen Hoeller
  * @since 07.04.2003
  * @see #getHandlerInternal
+ * @see org.springframework.web.servlet.HandlerInterceptor
  */
-public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport implements HandlerMapping, Ordered {
+public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
+    implements HandlerMapping, Ordered {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -28,6 +30,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private Object defaultHandler = null;
 
 	private HandlerInterceptor[] interceptors;
+
 
 	public final void setOrder(int order) {
 	  this.order = order;
@@ -38,16 +41,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Set the default handler.
+	 * Set the default handler for this handler mapping.
 	 * @param defaultHandler default handler instance, or null if none
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
-		logger.info("Default mapping is to controller [" + this.defaultHandler + "]");
+		logger.info("Default mapping to handler [" + this.defaultHandler + "]");
 	}
 
 	/**
-	 * Return the default handler.
+	 * Return the default handler for this handler mapping.
 	 * @return the default handler instance, or null if none
 	 */
 	protected final Object getDefaultHandler() {
@@ -63,11 +66,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		this.interceptors = interceptors;
 	}
 
+
 	/**
 	 * Look up a handler for the given request, falling back to the default
 	 * handler if no specific one is found.
 	 * @param request current HTTP request
 	 * @return the looked up handler instance, or the default handler
+	 * @see #getHandlerInternal
 	 */
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws ServletException {
 		Object handler = getHandlerInternal(request);
@@ -82,10 +87,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Lookup a handler for the given request, returning null if no specific
-	 * one is found. This method is evaluated by getHandler, a null return
-	 * value will lead to the default handler, if one is set.
+	 * one is found. This method is called by getHandler, a null return value
+	 * will lead to the default handler, if one is set.
 	 * @param request current HTTP request
 	 * @return the looked up handler instance, or null
+	 * @throws ServletException if there is an internal error
 	 */
 	protected abstract Object getHandlerInternal(HttpServletRequest request) throws ServletException;
 
