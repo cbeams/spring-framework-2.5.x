@@ -9,28 +9,28 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Callback interface used by the 
- * JdbcTemplate class. This interface sets values on a
- * a PreparedStatement provided by the
+ * Callback interface used by the JdbcTemplate class.
+ *
+ * <p>This interface sets values on a PreparedStatement provided by the
  * JdbcTemplate class for each of a number of updates in a batch using the
- * same SQL. Implementations are responsible
- * for setting any necessary parameters. SQL with placeholders
- * will already have been supplied.
- * Implementations <i>do not</i> need to concern themselves
- * with SQLExceptions that may be thrown from operations they
- * attempt. The JdbcTemplate class will catch and handle
- * SQLExceptions appropriately.
- * @version $Id: BatchPreparedStatementSetter.java,v 1.1.1.1 2003-08-14 16:20:26 trisberg Exp $
+ * same SQL. Implementations are responsible for setting any necessary
+ * parameters. SQL with placeholders will already have been supplied.
+ *
+ * <p>Implementations <i>do not</i> need to concern themselves with
+ * SQLExceptions that may be thrown from operations they attempt.
+ * The JdbcTemplate class will catch and handle SQLExceptions appropriately.
+ *
+ * @version $Id: BatchPreparedStatementSetter.java,v 1.2 2004-01-04 23:43:42 jhoeller Exp $
  * @author Rod Johnson
  * @since March 2, 2003
+ * @see JdbcTemplate#batchUpdate(String, BatchPreparedStatementSetter)
  */
 public interface BatchPreparedStatementSetter {
 
 	/** 
-	* Set values on the given PreparedStatement
+	* Set values on the given PreparedStatement.
 	* @param ps PreparedStatement we'll invoke setter methods on
-	* @param i index of the statement we're issuing in the batch,
-	* from 0
+	* @param i index of the statement we're issuing in the batch, starting from 0
 	* @throws SQLException there is no need to catch SQLExceptions
 	* that may be thrown in the implementation of this method.
 	* The JdbcTemplate class will handle them.
@@ -38,7 +38,7 @@ public interface BatchPreparedStatementSetter {
 	void setValues(PreparedStatement ps, int i) throws SQLException;
 	
 	/** 
-	 * Return the size of the batch
+	 * Return the size of the batch.
 	 */ 
 	int getBatchSize();
 

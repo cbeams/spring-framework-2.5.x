@@ -17,16 +17,6 @@
 		</property>
 	</bean>
 
-	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-		<property name="mappings">
-			<props>
-				<prop key="/*.html">viewController</prop>
-			</props>
-		</property>
-	</bean>
-
-	<bean id="viewController" class="org.springframework.web.servlet.mvc.FileNameViewController"/>
-
 	<bean id="feedConfigurer" class="org.springframework.samples.tiles.NewsFeedConfigurer">
 		<property name="feeds">
 			<props>
@@ -36,5 +26,15 @@
 			</props>
 		</property>
 	</bean>
+
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/*.html">viewController</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="viewController" class="org.springframework.web.servlet.mvc.FileNameViewController"/>
 
 </beans>

@@ -17,27 +17,27 @@ package org.springframework.util;
  * 
  * @author Rod Johnson
  * @since November 21, 2000
- * @version $Id: ResponseTimeMonitor.java,v 1.1.1.1 2003-08-14 16:20:46 trisberg Exp $
+ * @version $Id: ResponseTimeMonitor.java,v 1.2 2004-01-04 23:43:42 jhoeller Exp $
  */
 public interface ResponseTimeMonitor {
 
-	/** Return the number of accesses to this resource.
-	 * @return the number of accesses to this resource
+	/**
+	 * Return the number of accesses to this resource.
 	 */
 	int getAccessCount();
 
-	/** Return the average response time in milliseconds.
-	 * @return the average response time in milliseconds
+	/**
+	 * Return the average response time in milliseconds.
 	 */
 	int getAverageResponseTimeMillis();
 
-	/** Return the best (quickest) response time in milliseconds.
-	 * @return the best (quickest) response time in milliseconds
+	/**
+	 * Return the best (quickest) response time in milliseconds.
 	 */
 	int getBestResponseTimeMillis();
 
-	/** Return the worst (slowest) response time in milliseconds.
-	 * @return the worst (slowest) response time in milliseconds
+	/**
+	 * Return the worst (slowest) response time in milliseconds.
 	 */
 	int getWorstResponseTimeMillis();
 

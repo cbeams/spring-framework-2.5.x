@@ -40,7 +40,7 @@
 	  - directory of this web app, for usage in log file paths.
 	  - This web app specifies "countries.root" (see log4j.properties file).
 	  -->
-	<!-- Leave the listener commented if using JBoss -->
+	<!-- Leave the listener commented-out if using JBoss -->
 	<!--
 	<listener>
 		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
@@ -125,7 +125,7 @@
 
 	<!--
 		- Reference to Countries database.
-		- Only needed if not using a local DataSource.
+		- Only needed if not using a local DataSource but a JNDI one instead.
 		-->
 	<!--
 	<resource-ref>

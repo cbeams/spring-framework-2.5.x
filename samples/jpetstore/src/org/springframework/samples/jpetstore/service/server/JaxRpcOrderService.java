@@ -22,7 +22,8 @@ import org.springframework.samples.jpetstore.service.RemoteOrderService;
  * @author Juergen Hoeller
  * @since 26.12.2003
  */
-public class JaxRpcOrderService extends ServletEndpointSupport implements RemoteOrderService {
+public class JaxRpcOrderService extends ServletEndpointSupport
+		implements RemoteOrderService, OrderService {
 
 	private OrderService orderService;
 

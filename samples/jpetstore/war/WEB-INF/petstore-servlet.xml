@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
+<!--
+  - DispatcherServlet application context for the Spring web MVC
+	- implementation of JPetStore's web tier.
+	-->
 <beans>
+
+	<!-- ========================= VIEW DEFINITIONS ========================= -->
 
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="viewClass"><value>org.springframework.web.servlet.view.JstlView</value></property>
@@ -9,6 +15,8 @@
 		<property name="suffix"><value>.jsp</value></property>
 	</bean>
 
+
+	<!-- ========================= DEFINITIONS OF PUBLIC CONTROLLERS ========================= -->
 
 	<bean id="defaultHandlerMapping" class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
 
@@ -65,7 +73,7 @@
 	</bean>
 
 
-	<bean id="signonInterceptor" class="org.springframework.samples.jpetstore.web.spring.SignonInterceptor"/>
+	<!-- ========================= DEFINITIONS OF PROTECTED CONTROLLERS ========================= -->
 
 	<bean id="secureHandlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="interceptors">
@@ -75,30 +83,32 @@
 		</property>
 		<property name="urlMap">
 			<map>
-				<entry key="/shop/editAccount.do"><ref bean="secure_editAccount"/></entry>
-				<entry key="/shop/listOrders.do"><ref bean="secure_listOrders"/></entry>
-				<entry key="/shop/newOrder.do"><ref bean="secure_newOrder"/></entry>
-				<entry key="/shop/viewOrder.do"><ref bean="secure_viewOrder"/></entry>
+				<entry key="/shop/editAccount.do"><ref local="secure_editAccount"/></entry>
+				<entry key="/shop/listOrders.do"><ref local="secure_listOrders"/></entry>
+				<entry key="/shop/newOrder.do"><ref local="secure_newOrder"/></entry>
+				<entry key="/shop/viewOrder.do"><ref local="secure_viewOrder"/></entry>
 			</map>
 		</property>
 	</bean>
 
-	<bean name="secure_editAccount" class="org.springframework.samples.jpetstore.web.spring.AccountFormController">
+	<bean id="signonInterceptor" class="org.springframework.samples.jpetstore.web.spring.SignonInterceptor"/>
+
+	<bean id="secure_editAccount" class="org.springframework.samples.jpetstore.web.spring.AccountFormController">
 		<property name="petStore"><ref bean="petStore"/></property>
 		<property name="validator"><ref bean="accountValidator"/></property>
 		<property name="successView"><value>index</value></property>
 	</bean>
 
-	<bean name="secure_listOrders" class="org.springframework.samples.jpetstore.web.spring.ListOrdersController">
+	<bean id="secure_listOrders" class="org.springframework.samples.jpetstore.web.spring.ListOrdersController">
 		<property name="petStore"><ref bean="petStore"/></property>
 	</bean>
 
-	<bean name="secure_newOrder" class="org.springframework.samples.jpetstore.web.spring.OrderFormController">
+	<bean id="secure_newOrder" class="org.springframework.samples.jpetstore.web.spring.OrderFormController">
 		<property name="petStore"><ref bean="petStore"/></property>
 		<property name="validator"><ref bean="orderValidator"/></property>
 	</bean>
 
-	<bean name="secure_viewOrder" class="org.springframework.samples.jpetstore.web.spring.ViewOrderController">
+	<bean id="secure_viewOrder" class="org.springframework.samples.jpetstore.web.spring.ViewOrderController">
 		<property name="petStore"><ref bean="petStore"/></property>
 	</bean>
 

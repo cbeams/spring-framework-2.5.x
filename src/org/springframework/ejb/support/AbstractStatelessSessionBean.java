@@ -32,7 +32,7 @@ import org.springframework.beans.factory.support.BootstrapException;
  * eliminating a common cause of EJB deployment failure.
  *
  * @author Rod Johnson
- * @version $Id: AbstractStatelessSessionBean.java,v 1.2 2003-11-14 20:19:33 colins Exp $
+ * @version $Id: AbstractStatelessSessionBean.java,v 1.3 2004-01-04 23:43:42 jhoeller Exp $
  */
 public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 
@@ -42,10 +42,9 @@ public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 	 * <p>Don't override it (although it can't be made final): code initialization
 	 * in onEjbCreate(), which is called when the BeanFactory is available.
 	 * <p>Unfortunately we can't load the BeanFactory in setSessionContext(),
-	 * as ResourceManager access isn't permitted and the BeanFactory may require it.
+	 * as resource manager access isn't permitted and the BeanFactory may require it.
 	 */
 	public void ejbCreate() throws CreateException {
-
 		try {
 			loadBeanFactory();
 		}

@@ -20,14 +20,14 @@ import java.sql.SQLException;
  * The JdbcTemplate class will catch and handle SQLExceptions appropriately.
  *
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreator.java,v 1.4 2003-12-05 17:03:13 jhoeller Exp $
+ * @version $Id: PreparedStatementCreator.java,v 1.5 2004-01-04 23:43:42 jhoeller Exp $
+ * @see JdbcTemplate#update(PreparedStatementCreator)
  */
 public interface PreparedStatementCreator {
 
 	/** 
 	 * Create a statement in this connection. Allows implementations to use
-	 * PreparedStatements. Only invoked if no SQL is passed into the
-	 * ResultSetHandler. The ResultSetHandler will close this statement.
+	 * PreparedStatements. The JdbcTemplate will close the created statement.
 	 * @param con Connection to use to create statement
 	 * @return a prepared statement
 	 * @throws SQLException there is no need to catch SQLExceptions

@@ -64,7 +64,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.18 2003-12-21 16:20:34 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.19 2004-01-04 23:43:42 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -384,9 +384,9 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	}
 
 	/**
-	 * Issue an update using a PreparedStatementCreator to provide SQL and any required
-	 * parameters
-	 * @param psc helper: callback object that provides SQL and any necessary parameters
+	 * Issue an update using a PreparedStatementCreator to provide SQL and any
+	 * required parameters.
+	 * @param psc callback object that provides SQL and any necessary parameters
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
@@ -395,8 +395,8 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	}
 
 	/**
-	 * Issue multiple updates using multiple PreparedStatementCreators to provide SQL
-	 * and any required parameters.
+	 * Issue multiple updates using multiple PreparedStatementCreators to provide
+	 * SQL and any required parameters.
 	 * @param pscs array of callback objects that provide SQL and any necessary parameters
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
@@ -411,22 +411,22 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
-			int[] retvals = new int[pscs.length];
-			for (index = 0; index < retvals.length; index++) {
+			int[] retVals = new int[pscs.length];
+			for (index = 0; index < retVals.length; index++) {
 				ps = pscs[index].createPreparedStatement(conToUse);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing SQL update using PreparedStatement [" + pscs[index] + "]");
 				}
-				retvals[index] = ps.executeUpdate();
+				retVals[index] = ps.executeUpdate();
 				if (logger.isDebugEnabled()) {
-					logger.debug("SQL update affected " + retvals[index] + " rows");
+					logger.debug("SQL update affected " + retVals[index] + " rows");
 				}
 				ps.close();
 			}
 
 			// Don't worry about warnings, as we're more likely to get exception on updates
 			// (for example on data truncation)
-			return retvals;
+			return retVals;
 		}
 		catch (SQLException ex) {
 			if (ps != null) {
@@ -447,12 +447,12 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 
 	/**
 	 * Issue an update using a PreparedStatementSetter to set bind parameters,
-	 * with given SQL. Simpler than using a PreparedStatementCreator
-	 * as this method will create the PreparedStatement: the
-	 * PreparedStatementSetter has only to set parameters.
+	 * with given SQL. Simpler than using a PreparedStatementCreator as this
+	 * method will create the PreparedStatement: The PreparedStatementSetter
+	 * just needs to set parameters.
 	 * @param sql SQL, containing bind parameters
 	 * @param pss helper that sets bind parameters. If this is null
-	 * we run an update with static SQL
+	 * we run an update with static SQL.
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
@@ -479,12 +479,12 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 * set values on a PreparedStatement created by this method
 	 * @param sql defining PreparedStatement that will be reused.
 	 * All statements in the batch will use the same SQL.
-	 * @param setter object to set parameters on the
+	 * @param pss object to set parameters on the
 	 * PreparedStatement created by this method
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	public int[] batchUpdate(String sql, BatchPreparedStatementSetter setter) throws DataAccessException {
+	public int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
 		try {
@@ -499,14 +499,14 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			if (this.nativeJdbcExtractor != null) {
 				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
 			}
-			int batchSize = setter.getBatchSize();
+			int batchSize = pss.getBatchSize();
 			for (int i = 0; i < batchSize; i++) {
-				setter.setValues(psToUse, i);
+				pss.setValues(psToUse, i);
 				ps.addBatch();
 			}
-			int[] retvals = ps.executeBatch();
+			int[] retVals = ps.executeBatch();
 			ps.close();
-			return retvals;
+			return retVals;
 		}
 		catch (SQLException ex) {
 			if (ps != null) {
@@ -517,7 +517,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 				}
 			}
 			throw getExceptionTranslator().translate(
-			    "processing batch update with size=" + setter.getBatchSize() + "; update was [" + sql + "]",
+			    "processing batch update with size=" + pss.getBatchSize() + "; update was [" + sql + "]",
 			    sql, ex);
 		}
 		finally {
@@ -647,8 +647,9 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		int rsIndx = 0;
 		do {
 			SqlParameter p = null;
-			if (parameters != null && parameters.size() > rsIndx)
+			if (parameters != null && parameters.size() > rsIndx) {
 				p = (SqlParameter) parameters.get(rsIndx);
+			}
 			if (p != null && p instanceof SqlReturnResultSet) {
 				ResultSet rs = null;
 				rs = cs.getResultSet();
@@ -719,9 +720,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 */
 	private static final class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
 
-		/**
-		 * RowCallbackHandler to use to extract data
-		 */
+		/** RowCallbackHandler to use to extract data */
 		private RowCallbackHandler callbackHandler;
 
 		/**
@@ -732,18 +731,15 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			this.callbackHandler = callbackHandler;
 		}
 
+		public RowCallbackHandler getCallbackHandler() {
+			return callbackHandler;
+		}
+
 		public void extractData(ResultSet rs) throws SQLException {
 			while (rs.next()) {
 				this.callbackHandler.processRow(rs);
 			}
 		}
-		/**
-		 * @return Returns the callbackHandler.
-		 */
-		public RowCallbackHandler getCallbackHandler() {
-			return callbackHandler;
-		}
-
 	}
 
 }

@@ -4,10 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Resource implementations for URLs.
+ * Resource implementation for java.net.URL locators.
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see java.net.URL
@@ -24,6 +25,14 @@ public class UrlResource extends AbstractResource {
 	 */
 	public UrlResource(URL url) {
 		this.url = url;
+	}
+
+	/**
+	 * Create a new UrlResource.
+	 * @param path a URL path
+	 */
+	public UrlResource(String path) throws MalformedURLException {
+		this.url = new URL(path);
 	}
 
 	public InputStream getInputStream() throws IOException {

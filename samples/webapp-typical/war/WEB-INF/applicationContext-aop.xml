@@ -169,7 +169,6 @@
 	<bean id="exampleBusinessObjectV2" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="myTransactionManager"/></property>
 		<property name="target"><ref local="exampleBusinessObjectTarget"/></property>
-		<property name="proxyInterfacesOnly"><value>true</value></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="myBusiness*">PROPAGATION_REQUIRED</prop>

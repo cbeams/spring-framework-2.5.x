@@ -65,6 +65,7 @@
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="jdbc2_0-stdext.jar"/>
+			<include name="jta.jar"/>
 			<include name="servlet.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
@@ -148,13 +149,14 @@
 				<include name="hibernate2.jar"/>
 				<include name="odmg.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/j2ee">
+				<include name="jstl.jar"/>
+				<include name="jta.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-collections.jar"/>
 				<include name="commons-lang.jar"/>
 				<include name="commons-logging.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/j2ee">
-				<include name="jstl.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>

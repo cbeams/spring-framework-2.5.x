@@ -1,17 +1,21 @@
 =========================================
 == Spring Countries sample application ==
 =========================================
+
 @author Jean-Pierre Pawlak
+
+
+1. BUILD AND DEPLOYMENT
 
 This directory contains the web app source.
 For deployment, it needs to be built with Apache Ant.
 The only requirements are JDK >=1.3 and Ant >=1.5.
 
 Run "ant.bat" in this directory for available targets (e.g. "ant build",
-"ant warfile"). Note that to start Ant this way, you'll need an XML
-parser in your classpath (e.g. in jre/lib/ext; included in JDK 1.4).
-You can use "warfile.bat" as a shortcut for war file creation.
-The war file will be created in the 'dist' directory.
+"ant warfile"). Note that to start Ant this way, you'll need an XML parser
+in your classpath (e.g. in "%JAVA_HOME%/jre/lib/ext"; included in JDK 1.4).
+You can use "warfile.bat" as a shortcut for WAR file creation.
+The WAR file will be created in the "dist" directory.
 
 Note on enabling Log4J:
 - Log4J is disabled by default, due to JBoss issues
@@ -19,16 +23,14 @@ Note on enabling Log4J:
 - uncomment the root category in war/WEB-INF/classes/log4j.properties
 - uncomment the Log4J listener in war/WEB-INF/web.xml
 
+
+2. SCENARIOS
+
 Default scenario
 ----------------
 
 The application is configured for the first scenario, generating data
-in memory. This will normally run as is in most application servers.
-
-For the additional scenarios, you find the instructions for JBoss 3.2.x
-below. For other servers you will to have to create the database mapping
-between the server and the application by binding the JNDI locations
-as does the file jboss-web.xml for JBoss.
+in memory. This will normally run as-is in most application servers.
 
 Moving to scenario 2
 --------------------
@@ -38,19 +40,9 @@ So, you will be able, using the application, to read the data from
 the memoryDao and write into the databaseDao.
 The main goal of this scenario is to put the countries data in your database.
 
-Two databases have been tested HSql and MySql.
+Two databases have been tested: HSQLDB and MySQL.
 Switching from one to the other is only a matter of mapping the right database
 to the application known JNDI location.
-For JBoss, this is done in 'jboss-web.xml'. This file can be found in sa/jboss
-and has to be copied under war/WEB-INF. Inside the file uncomment the setting 
-for the database of your choice and comment the other.
-
-Jboss must be able to drive the connections. For this, you will:
-1) copy the mySql driver from jdbc directory to <JBOSS_HOME>/default/lib 
-(if you use the default configuration, obviously). The hsql driver should 
-be there, so you don't need to copy it. 
-2) copy the database services in the JBoss deploy directory. For Jboss3.2.x,
-you will find the two files under/sa/jboss/3.2.x.
 
 Now that the server is set up, we will change the application configuration.
 Just two little changes have to be made.
@@ -58,9 +50,6 @@ Just two little changes have to be made.
 You are so just defining a "secondDaoCountry" bean and its "dataSource" bean.
 2) in war/WEB-INF/countries-servlet.xml: uncomment the property "secondDaoCountry"
 near the end of the file.
-3) Obviously, you will stick with the default 'J2EE' Jdbc definition.
-4) In jboss-service.xml, for avoiding "MessageCache" error logs, set
-	<attribute name="RecursiveSearch">True</attribute>
 
 Now that all is set, rebuild the war file with the ant command and deploy the 
 new generated war file.
@@ -93,15 +82,3 @@ the simple switching between two DAOs implementing the same interface.
 For the rest, the focus is on the web part of the framework. Nevertheless, the
 current demo doesn't show the user input nor the validation process.
 
-Additional note
----------------
-Depending on your setting preferences, you have two strategies introduced:
-
-- In Petclinic:
-You define both databases in web.xml, jboss-web.xml (app. server binding) and
-in the app. server itself.
-Switching between databases is done in Spring 'applicationContext.xml' file.
-
-- In Countries:
-On the application side, only one configuration is known. The switching is done 
-in the binding with the app. server (jboss-web.xml in the case of Jboss).

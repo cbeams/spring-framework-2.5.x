@@ -6,6 +6,7 @@
 
 	<property name="war.dir" value="war"/>
 	<property name="src.dir" value="src"/>
+	<property name="client.dir" value="client"/>
 	<property name="build.dir" value=".classes"/>
 	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
 	<property name="dist.dir" value="dist"/>
@@ -117,7 +118,6 @@
 				<include name="commons-collections.jar"/>
 				<include name="commons-dbcp.jar"/>
 				<include name="commons-digester.jar"/>
-				<include name="commons-collections.jar"/>
 				<include name="commons-discovery.jar"/>
 				<include name="commons-lang.jar"/>
 				<include name="commons-logging.jar"/>
@@ -138,7 +138,7 @@
 			</fileset>
 		</copy>
 
-		<copy file="${weblib.dir}/jpetstore.jar" tofile="client/jpetstore.jar"/>
+		<copy file="${weblib.dir}/jpetstore.jar" tofile="${client.dir}/jpetstore.jar"/>
 
 	</target>
 

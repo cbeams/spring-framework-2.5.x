@@ -55,8 +55,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <li>the delegating try/catch blocks.
  * </ul>
  *
- * <p>Note: This class, like all of Spring's Hibernate support, requires
- * Hibernate 2.0 (initially developed with RC1).
+ * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
  *
  * @author Juergen Hoeller
  * @since 13.06.2003

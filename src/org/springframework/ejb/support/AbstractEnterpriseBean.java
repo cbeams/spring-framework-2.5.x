@@ -9,6 +9,7 @@ import javax.ejb.EnterpriseBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanFactoryLoader;
@@ -30,20 +31,21 @@ import org.springframework.beans.factory.support.BootstrapException;
  * EJB lifecycle methods, as this violates the EJB specification.
  *
  * @author Rod Johnson
- * @version $Id: AbstractEnterpriseBean.java,v 1.4 2003-12-12 19:22:13 colins Exp $
+ * @version $Id: AbstractEnterpriseBean.java,v 1.5 2004-01-04 23:43:42 jhoeller Exp $
  */
 abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
 	/**
-	 * Logger, available to subclasses. Not final since Stateful session beans will have
-	 * to remove it and restore it in ejbPassivae/ejbActivate */
+	 * Logger, available to subclasses. Not final since stateful session beans
+	 * will have to remove it and restore it in ejbPassivate/ejbActivate.
+	 */
 	protected Log logger = LogFactory.getLog(getClass());
+
+	/** Helper strategy that knows how to load Spring BeanFactory */
+	private BeanFactoryLoader beanFactoryLoader;
 
 	/** Spring BeanFactory that provides the namespace for this EJB */
 	private BeanFactory beanFactory;
-
-	/** Helper Strategy that knows how to load Spring BeanFactory */
-	private BeanFactoryLoader beanFactoryLoader;
 
 	/**
 	 * Load a Spring BeanFactory namespace.

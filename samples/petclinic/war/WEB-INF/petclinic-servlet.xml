@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
+<!--
+  - DispatcherServlet application context for Petclinic's web tier.
+	-->
 <beans>
 
 	<!-- ========================= MAPPING DEFINITIONS ========================= -->
@@ -11,9 +14,9 @@
 	  - localized "views_xx" classpath files, i.e. "/WEB-INF/classes/views.properties"
 	  - or "/WEB-INF/classes/views_de.properties".
 	  -
-	  - Symbolic View names returned by Controllers will be resolved by this bean
+	  - Symbolic view names returned by Controllers will be resolved by this bean
 	  - using the respective properties file, which defines arbitrary mappings between
-	  - View names and resources.
+	  - view names and resources.
 	  -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
 		<property name="basename"><value>views</value></property>
@@ -53,6 +56,7 @@
 		</property>
 	</bean>
 
+
 	<!-- ========================= CONTROLLER DEFINITIONS ========================= -->
 
 	<!--
@@ -90,15 +94,10 @@
 	</bean>
 
 	<!--
-	  - This bean is an implementation of the Validator interface.
-	  - It is used by the "addOwnerForm" and "editOwnerForm" beans.
-	  -->
-	<bean id="ownerValidator" class="org.springframework.samples.petclinic.validation.OwnerValidator"/>
-		<!--
 	  - This bean is a SimpleFormController that manages the addOwner use case.
 	  - It uses the "ownerValidator" and "clinic" beans.
 	  -->
-  	<bean id="addOwnerForm" class="org.springframework.samples.petclinic.web.AddOwnerForm">
+	<bean id="addOwnerForm" class="org.springframework.samples.petclinic.web.AddOwnerForm">
 		<property name="formView"><value>ownerForm</value></property>
 		<property name="successView"><value>ownerRedirect</value></property>
 		<property name="validator"><ref local="ownerValidator"/></property>
@@ -116,8 +115,11 @@
 		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
-	<!-- Validator for petForm, implementing Spring's Validator interface. -->
-	<bean id="petValidator" class="org.springframework.samples.petclinic.validation.PetValidator"/>
+	<!--
+	  - This bean is an implementation of the Validator interface.
+	  - It is used by the "addOwnerForm" and "editOwnerForm" beans.
+	  -->
+	<bean id="ownerValidator" class="org.springframework.samples.petclinic.validation.OwnerValidator"/>
 
 	<!--
 	  - This bean is a SimpleFormController that manages the addPet use case.
@@ -141,8 +143,10 @@
 		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
 
-	<!-- Validator for visitForm, implementing Spring's Validator interface. -->
-	<bean id="visitValidator" class="org.springframework.samples.petclinic.validation.VisitValidator"/>
+	<!--
+		- Validator for petForm, implementing Spring's Validator interface.
+ 		-->
+	<bean id="petValidator" class="org.springframework.samples.petclinic.validation.PetValidator"/>
 
 	<!--
 	  - This bean is a SimpleFormController that manages the addVisit use case.
@@ -154,5 +158,10 @@
 		<property name="validator"><ref local="visitValidator"/></property>
 		<property name="clinic"><ref bean="clinic"/></property>
 	</bean>
+
+	<!--
+		- Validator for visitForm, implementing Spring's Validator interface.
+ 		-->
+	<bean id="visitValidator" class="org.springframework.samples.petclinic.validation.VisitValidator"/>
 
 </beans>
