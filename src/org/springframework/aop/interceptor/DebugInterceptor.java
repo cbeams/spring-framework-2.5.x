@@ -20,31 +20,43 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * AOP Alliance MethodInterceptor that can be introduced in a chain to display
- * verbose information about intercepted invocations to the console.
+ * verbose information about intercepted invocations to the logger.
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class DebugInterceptor implements MethodInterceptor, Serializable {
 	
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private int count;
 
-	/**
-	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(MethodInvocation)
-	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		++count;
-		System.out.println("Debug interceptor: count=" + count +
-			" invocation=[" + invocation + "]");
-		Object rval = invocation.proceed();
-		System.out.println("Debug interceptor: next returned");
-		return rval;
+		++this.count;
+		if (logger.isDebugEnabled()) {
+			logger.debug("Before invocation (count=" + this.count + "): " + invocation);
+		}
+		try {
+			Object rval = invocation.proceed();
+			if (logger.isInfoEnabled()) {
+				logger.debug("Invocation successfully returned (count=" + this.count + "): " + invocation);
+			}
+			return rval;
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invocation threw exception (count=" + this.count + "): " + invocation, ex);
+			}
+			throw ex;
+		}
 	}
 	
 	/**
-	 * Return the number of times this interceptor has been invoked
-	 * @return the number of times this interceptor has been invoked
+	 * Return the number of times this interceptor has been invoked.
 	 */
 	public int getCount() {
 		return this.count;

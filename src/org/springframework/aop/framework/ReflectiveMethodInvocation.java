@@ -18,6 +18,7 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 import org.aopalliance.aop.AspectException;
@@ -25,7 +26,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Spring implementation of AOP Alliance MethodInvocation interface.
+ * Spring's implementation of AOP Alliance MethodInvocation interface.
  *
  * <p>Invokes the target object using reflection. Subclasses can override the
  * invokeJoinpoint() method to change this behavior, so this is also a useful
@@ -36,25 +37,26 @@ import org.aopalliance.intercept.MethodInvocation;
  * 
  * @author Rod Johnson
  * @see #invokeJoinpoint
+ * @see #proceed
  * @see #invocableClone
  */
 public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 
-	protected Object proxy;
+	protected final Object proxy;
 
-	protected Object target;
+	protected final Object target;
 
-	protected Method method;
+	protected final Method method;
 	
 	protected Object[] arguments;
 	
-	private Class targetClass;
+	private final Class targetClass;
 
 	/**
 	 * List of MethodInterceptor and InterceptorAndDynamicMethodMatcher
 	 * that need dynamic checks.
 	 */
-	protected List interceptorsAndDynamicMethodMatchers;
+	protected final List interceptorsAndDynamicMethodMatchers;
 	
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
@@ -71,7 +73,8 @@ public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 	 * as was possibly statically. Passing an array might be about 10% faster, but would complicate
 	 * the code. And it would work only for static pointcuts.
 	 */
-	public ReflectiveMethodInvocation(Object proxy, Object target, Method method, Object[] arguments,
+	public ReflectiveMethodInvocation(
+	    Object proxy, Object target, Method method, Object[] arguments,
 	    Class targetClass, List interceptorsAndDynamicMethodMatchers) {
 		this.proxy = proxy;
 		this.target = target;
@@ -154,9 +157,9 @@ public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 	 * Create a clone of this object. If cloning is done before proceed() is invoked on this
 	 * object, proceed() can be invoked once per clone to invoke the joinpoint (and the rest
 	 * of the advice chain) more than once.
-	 * <br>This method returns a shallow copy, except for the argument array, which is
-	 * deep-copied to allow for independent modification. We want a shallow copy in this case: we
-	 * want to use the same interceptor-chain and other object references, but we want an
+	 * <p>This method returns a shallow copy, except for the argument array, which is
+	 * deep-copied to allow for independent modification. We want a shallow copy in this case:
+	 * We want to use the same interceptor-chain and other object references, but we want an
 	 * independent value for the current interceptor index. 
 	 * @see java.lang.Object#clone()
 	 * @return an invocable clone of this invocation. proceed() can be called once per clone.
@@ -179,8 +182,10 @@ public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 	public String toString() {
 		// Don't do toString on target, it may be proxied.
 		// toString on args may also fail.
-		StringBuffer sb = new StringBuffer("Invocation: method=[");
-		sb.append(this.method).append("] ").append("args=").append(this.arguments).append("] ");
+		StringBuffer sb = new StringBuffer("Invocation: method '");
+		sb.append(this.method.getName()).append("', ").append("arguments ");
+		sb.append(this.arguments != null ? Arrays.asList(this.arguments).toString() : "[]");
+		sb.append("; ");
 		if (this.target == null) {
 			sb.append("target is null");
 		}
