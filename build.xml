@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.6 2003-09-20 15:02:06 johnsonr Exp $
+    $Id: build.xml,v 1.7 2003-10-21 08:05:45 jhoeller Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -218,6 +218,11 @@
 				<include name="src/**"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/aop-alliance/**"/>
+				<include name="lib/cglib/cglib-asm.jar"/>
+				<include name="lib/hibernate/**"/>
+				<include name="lib/jakarta-commons/commons-beanutils.jar"/>
+				<include name="lib/jakarta-commons/commons-collections.jar"/>
+				<include name="lib/jakarta-commons/commons-lang.jar"/>
 				<include name="lib/jakarta-commons/commons-logging.jar"/>
 				<include name="lib/j2ee/servlet.jar"/>
 				<include name="lib/j2ee/jdbc2_0-stdext.jar"/>
@@ -229,6 +234,7 @@
 				<include name="samples/skeletons/**"/>
 				<include name="samples/countries/**"/>
 				<include name="samples/petclinic/**"/>
+				<include name="samples/tiles-example/**"/>
 				<include name="*.txt"/>
 			</zipfileset>
 		</zip>
