@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
@@ -45,15 +46,30 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 
 	private HttpInvokerRequestExecutor httpInvokerRequestExecutor = new SimpleHttpInvokerRequestExecutor();
 
+	/**
+	 * Set the HttpInvokerRequestExecutor implementation to use for executing
+	 * remote invocations. Default is SimpleHttpInvokerRequestExecutor.
+	 * <p>Alternatively, consider CommonsHttpInvokerRequestExecutor for more
+	 * sophisticated needs.
+	 * @see SimpleHttpInvokerRequestExecutor
+	 * @see CommonsHttpInvokerRequestExecutor
+	 */
 	public void setHttpInvokerRequestExecutor(HttpInvokerRequestExecutor httpInvokerRequestExecutor) {
 		this.httpInvokerRequestExecutor = httpInvokerRequestExecutor;
 	}
 
+	/**
+	 * Return the HttpInvokerRequestExecutor used by this remote accessor.
+	 */
 	public HttpInvokerRequestExecutor getHttpInvokerRequestExecutor() {
 		return httpInvokerRequestExecutor;
 	}
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
+			return "HTTP invoker proxy for service URL [" + getServiceUrl() + "]";
+		}
+
 		RemoteInvocation invocation = createRemoteInvocation(methodInvocation);
 		RemoteInvocationResult result = null;
 		try {

@@ -16,9 +16,9 @@
 
 package org.springframework.remoting.rmi;
 
+import java.lang.reflect.InvocationTargetException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.StubNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -155,6 +155,38 @@ public class RmiSupportTests extends TestCase {
 		assertEquals(String.class, inv.getParameterTypes()[0]);
 	}
 
+	public void testRmiInvokerWithSpecialLocalMethods() throws Exception {
+		String serviceUrl = "rmi://localhost:1090/test";
+		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
+			protected Remote lookupStub() throws Exception {
+				return new RmiInvocationHandler() {
+					public Object invoke(RemoteInvocation invocation)
+							throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+						throw new RemoteException();
+					}
+				};
+			}
+		};
+		factory.setServiceInterface(IBusinessBean.class);
+		factory.setServiceUrl(serviceUrl);
+		factory.afterPropertiesSet();
+		IBusinessBean proxy = (IBusinessBean) factory.getObject();
+
+		// shouldn't go through to remote service
+		assertTrue(proxy.toString().indexOf("RMI invoker") != -1);
+		assertTrue(proxy.toString().indexOf(serviceUrl) != -1);
+		assertEquals(proxy.hashCode(), proxy.hashCode());
+		assertTrue(proxy.equals(proxy));
+
+		// should go through
+		try {
+			proxy.setName("test");
+			fail("Should have thrown RemoteAccessException");
+		}
+		catch (RemoteAccessException ex) {
+			// expected
+		}
+	}
 
 
 	public static interface IBusinessBean {

@@ -26,6 +26,7 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
@@ -290,6 +291,11 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 */
 	protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
 	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
+			return "RMI invoker proxy for service URL [" + getServiceUrl() + "]";
+		}
+
 		return invocationHandler.invoke(createRemoteInvocation(methodInvocation));
 	}
 
