@@ -68,7 +68,7 @@ import org.springframework.web.flow.RequestContext;
  * <td>Set the delegate object holding the action execution methods.</td>
  * </tr>
  * <tr>
- * <td>methodNameResolver</td>
+ * <td>executeMethodNameResolver</td>
  * <td><i>{@link MultiAction.CurrentStateActionExecuteMethodNameResolver current state}</i></td>
  * <td>Set the strategy used to resolve the name of an action execution method.</td>
  * </tr>
@@ -82,7 +82,7 @@ import org.springframework.web.flow.RequestContext;
 public class MultiAction extends AbstractAction {
 
 	/**
-	 * A configurable delegate that may handle execution requests--useful for
+	 * A configurable delegate that may handle execution requests -- useful for
 	 * invoking legacy code.
 	 */
 	private Object delegate = this;
@@ -90,7 +90,8 @@ public class MultiAction extends AbstractAction {
 	/**
 	 * The action execute method name resolver strategy.
 	 */
-	private ActionExecuteMethodNameResolver executeMethodNameResolver = new CurrentStateActionExecuteMethodNameResolver();
+	private ActionExecuteMethodNameResolver executeMethodNameResolver =
+		new CurrentStateActionExecuteMethodNameResolver();
 
 	/**
 	 * The resolved action execute method cache.
@@ -104,7 +105,7 @@ public class MultiAction extends AbstractAction {
 			catch (NoSuchMethodException e) {
 				throw new ActionExecutionException(
 						"Unable to resolve action execute method with signature 'public Event " + executeMethodName
-								+ "(RequestContext.class)' - make sure this method name is correct "
+								+ "(RequestContext context)' - make sure the method name is correct "
 								+ "and such a method is defined in this action implementation", e);
 			}
 		}
@@ -126,9 +127,9 @@ public class MultiAction extends AbstractAction {
 	}
 
 	protected Event doExecuteAction(RequestContext context) throws Exception {
-		String actionExecutionMethodName = this.executeMethodNameResolver.getMethodName(context);
+		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context);
 		try {
-			Method actionExecuteMethod = getActionExecuteMethod(actionExecutionMethodName);
+			Method actionExecuteMethod = getActionExecuteMethod(actionExecuteMethodName);
 			Object result = actionExecuteMethod.invoke(getDelegate(), new Object[] { context });
 			if (result != null) {
 				Assert.isInstanceOf(Event.class, result,
@@ -167,8 +168,8 @@ public class MultiAction extends AbstractAction {
 	 * Find the action execution method with given name on the delegate object
 	 * using reflection.
 	 */
-	protected Method getActionExecuteMethod(String actionExecutionMethodName) {
-		return (Method)this.executeMethodCache.get(actionExecutionMethodName);
+	protected Method getActionExecuteMethod(String actionExecuteMethodName) {
+		return (Method)this.executeMethodCache.get(actionExecuteMethodName);
 	}
 
 	/**
