@@ -5,15 +5,12 @@
 
 package org.springframework.dao;
 
-
 /**
- * Root for exceptions thrown when we use a data access
- * resource incorrectly. Thrown for example on specifying bad SQL
- * when using a RDBMS.
- * Resource-specific subclasses will probably be supplied by
- * data access packages.
+ * Root for exceptions thrown when we use a data access resource incorrectly.
+ * Thrown for example on specifying bad SQL when using a RDBMS.
+ * Resource-specific subclasses will probably be supplied by data access packages.
  * @author Rod Johnson
- * @version $Id: InvalidDataAccessResourceUsageException.java,v 1.2 2003-11-02 12:53:02 johnsonr Exp $
+ * @version $Id: InvalidDataAccessResourceUsageException.java,v 1.3 2004-02-11 01:06:33 jhoeller Exp $
  */
 public class InvalidDataAccessResourceUsageException extends DataAccessException {
 	

@@ -6,10 +6,10 @@ import java.sql.Connection;
  * Interface for classes that define transaction properties.
  * Base interface for TransactionAttribute.
  *
- * <p>Note that isolation level, timeout, and read-only settings will only
- * get applied when starting a new transaction. As only propagation behavior
- * PROPAGATION_REQUIRED can actually cause that, it doesn't make sense to
- * specify isolation level or timeout else. Furthermore, not all transaction
+ * <p>Note that isolation level, timeout and read-only settings will only
+ * get applied when starting a new transaction. As only PROPAGATION_REQUIRED
+ * and PROPAGATION_REQUIRES_NEW can actually cause that, it doesn't make sense
+ * to specify any of those settings else. Furthermore, not all transaction
  * managers will support those features and thus throw respective exceptions
  * when given non-default values.
  *
@@ -33,7 +33,7 @@ public interface TransactionDefinition {
 	int PROPAGATION_REQUIRED = 0;
 
 	/**
-	 * Support a current transaction, execute non-transactional if none exists.
+	 * Support a current transaction, execute non-transactionally if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 */
 	int PROPAGATION_SUPPORTS = 1;
@@ -45,19 +45,19 @@ public interface TransactionDefinition {
 	int PROPAGATION_MANDATORY = 2;
 
 	/**
-	 * Create a new transaction, suspending the current one if one exists.
+	 * Create a new transaction, suspending the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 */
 	int PROPAGATION_REQUIRES_NEW = 3;
 
 	/**
-	 * Execute non-transactional, suspending the current one if one exists.
+	 * Execute non-transactionally, suspending the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 */
 	int PROPAGATION_NOT_SUPPORTED = 4;
 
 	/**
-	 * Execute non-transactional, throw an exception if a transaction exists.
+	 * Execute non-transactionally, throw an exception if a transaction exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 */
 	int PROPAGATION_NEVER = 5;
@@ -96,8 +96,9 @@ public interface TransactionDefinition {
 	/**
 	 * Return the isolation level.
 	 * Must return one of the ISOLATION constants.
-	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED.
-	 * Note that a transaction manager that does not support custom isolation levels
+	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED or
+	 * PROPAGATION_REQUIRES_NEW.
+	 * <p>Note that a transaction manager that does not support custom isolation levels
 	 * will throw an exception when given any other level than ISOLATION_DEFAULT.
 	 * @see #ISOLATION_DEFAULT
 	 */
@@ -106,8 +107,9 @@ public interface TransactionDefinition {
 	/**
 	 * Return the transaction timeout.
 	 * Must return a number of seconds, or TIMEOUT_DEFAULT.
-	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED.
-	 * Note that a transaction manager that does not support timeouts will
+	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED or
+	 * PROPAGATION_REQUIRES_NEW.
+	 * <p>Note that a transaction manager that does not support timeouts will
 	 * throw an exception when given any other timeout than TIMEOUT_DEFAULT.
 	 * @see #TIMEOUT_DEFAULT
 	 */
@@ -117,8 +119,9 @@ public interface TransactionDefinition {
 	 * Return whether to optimize as read-only transaction.
 	 * This just serves as hint for the actual transaction subsystem,
 	 * it will <i>not necessarily</i> cause failure of write accesses.
-	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED.
-	 * A transaction manager that cannot interpret the read-only hint
+	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED or
+	 * PROPAGATION_REQUIRES_NEW.
+	 * <p>A transaction manager that cannot interpret the read-only hint
 	 * will <i>not</i> throw an exception when given readOnly=true.
 	 */
 	boolean isReadOnly();
