@@ -17,11 +17,9 @@
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.NumberFormat;
-import java.text.ParseException;
 
+import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -63,6 +61,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * @param numberClass Number subclass to generate
 	 * @param allowEmpty if empty strings should be allowed
 	 * @throws IllegalArgumentException if an invalid numberClass has been specified
+	 * @see org.springframework.util.NumberUtils#parseNumber(String, Class)
 	 * @see Integer#valueOf
 	 * @see Integer#toString
 	 */
@@ -86,6 +85,9 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * @param numberFormat NumberFormat to use for parsing and rendering
 	 * @param allowEmpty if empty strings should be allowed
 	 * @throws IllegalArgumentException if an invalid numberClass has been specified
+	 * @see org.springframework.util.NumberUtils#parseNumber(String, Class, java.text.NumberFormat)
+	 * @see java.text.NumberFormat#parse
+	 * @see java.text.NumberFormat#format
 	 */
 	public CustomNumberEditor(Class numberClass, NumberFormat numberFormat, boolean allowEmpty)
 	    throws IllegalArgumentException {
@@ -104,69 +106,12 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 
 		// use given NumberFormat for parsing text
 		else if (this.numberFormat != null) {
-			try {
-				Number number = this.numberFormat.parse(text);
-				if (this.numberClass.isInstance(number)) {
-					setValue(number);
-				}
-				else if (this.numberClass.equals(Short.class)) {
-					setValue(new Short(number.shortValue()));
-				}
-				else if (this.numberClass.equals(Integer.class)) {
-					setValue(new Integer(number.intValue()));
-				}
-				else if (this.numberClass.equals(Long.class)) {
-					setValue(new Long(number.longValue()));
-				}
-				else if (this.numberClass.equals(BigInteger.class)) {
-					setValue(BigInteger.valueOf(number.longValue()));
-				}
-				else if (this.numberClass.equals(Float.class)) {
-					setValue(new Float(number.floatValue()));
-				}
-				else if (this.numberClass.equals(Double.class)) {
-					setValue(new Double(number.doubleValue()));
-				}
-				else if (this.numberClass.equals(BigDecimal.class)) {
-					setValue(new BigDecimal(Double.toString(number.doubleValue())));
-				}
-				else {
-					throw new IllegalArgumentException(
-							"Cannot convert [" + text + "] into value of class [" + this.numberClass.getName() + "]");
-				}
-			}
-			catch (ParseException ex) {
-				throw new IllegalArgumentException("Cannot parse number: " + ex.getMessage());
-			}
+			setValue(NumberUtils.parseNumber(text, this.numberClass, this.numberFormat));
 		}
 
 		// use default valueOf methods for parsing text
 		else {
-			if (this.numberClass.equals(Short.class)) {
-				setValue(Short.valueOf(text));
-			}
-			else if (this.numberClass.equals(Integer.class)) {
-				setValue(Integer.valueOf(text));
-			}
-			else if (this.numberClass.equals(Long.class)) {
-				setValue(Long.valueOf(text));
-			}
-			else if (this.numberClass.equals(BigInteger.class)) {
-				setValue(new BigInteger(text));
-			}
-			else if (this.numberClass.equals(Float.class)) {
-				setValue(Float.valueOf(text));
-			}
-			else if (this.numberClass.equals(Double.class)) {
-				setValue(Double.valueOf(text));
-			}
-			else if (this.numberClass.equals(BigDecimal.class)) {
-				setValue(new BigDecimal(text));
-			}
-			else {
-				throw new IllegalArgumentException(
-						"Cannot convert [" + text + "] to [" + this.numberClass.getName() + "]");
-			}
+			setValue(NumberUtils.parseNumber(text, this.numberClass));
 		}
 	}
 

@@ -16,8 +16,6 @@
 
 package org.springframework.jdbc.core;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -49,6 +47,7 @@ import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.util.NumberUtils;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -82,9 +81,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @author Yann Caroff
  * @author Thomas Risberg
- * @author Isabelle Muszynski
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -245,8 +242,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			public Object doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = null;
 				try {
-					if (getFetchSize() > 0)
+					if (getFetchSize() > 0) {
 						stmt.setFetchSize(getFetchSize());
+					}
 					rs = stmt.executeQuery(sql);
 					ResultSet rsToUse = rs;
 					if (nativeJdbcExtractor != null) {
@@ -345,8 +343,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("executing PreparedStatementCallback [" + psc + "]",
-																							 getSql(psc), ex);
+			throw getExceptionTranslator().translate(
+					"executing PreparedStatementCallback [" + psc + "]", getSql(psc), ex);
 		}
 		finally {
 			if (psc instanceof ParameterDisposer) {
@@ -573,7 +571,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 						if (dbmd != null) {
 							if (dbmd.supportsBatchUpdates()) {
 								if (logger.isDebugEnabled()) {
-									logger.debug("Batch Updates supported for [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "]");
+									logger.debug("Batch updates supported for [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "]");
 								}
 								supportsBatchUpdates = true;
 							}
@@ -585,7 +583,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 						}
 					}
 					catch (AbstractMethodError ame) {
-						logger.warn("Driver does not support JDBC 2.0 method supportsBatchUpdatres [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "]");
+						logger.warn("Driver [" + dbmd.getDriverName() + " " + dbmd.getDriverVersion() + "] does not support JDBC 2.0 'supportsBatchUpdates' method");
 					}
 					if (supportsBatchUpdates) {
 						for (int i = 0; i < batchSize; i++) {
@@ -642,8 +640,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate("executing CallableStatementCallback [" + csc + "]",
-																							 getSql(csc), ex);
+			throw getExceptionTranslator().translate(
+					"executing CallableStatementCallback [" + csc + "]", getSql(csc), ex);
 		}
 		finally {
 			if (csc instanceof ParameterDisposer) {
@@ -664,8 +662,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				boolean retVal = cs.execute();
 				int updateCount = cs.getUpdateCount();
 				if (logger.isDebugEnabled()) {
-					logger.debug("CallableStatement.execute returned [" + retVal + "]");
-					logger.debug("CallableStatement.getUpdateCount returned [" + updateCount + "]");
+					logger.debug("CallableStatement.execute() returned '" + retVal + "'");
+					logger.debug("CallableStatement.getUpdateCount() returned " + updateCount);
 				}
 				Map returnedResults = new HashMap();
 				if (retVal || updateCount != -1) {
@@ -683,7 +681,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * @param parameters Parameter list for the stored procedure
 	 * @return Map that contains returned results
 	 */
-	protected Map extractReturnedResultSets(CallableStatement cs, List parameters, int updateCount) throws SQLException {
+	protected Map extractReturnedResultSets(CallableStatement cs, List parameters, int updateCount)
+			throws SQLException {
 		Map returnedResults = new HashMap();
 		int rsIndex = 0;
 		boolean moreResults; 
@@ -699,14 +698,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				}
 				else {
 					logger.warn("ResultSet returned from stored procedure but a corresponding " +
-											"SqlReturnResultSet parameter was not declared");
+							"SqlReturnResultSet parameter was not declared");
 				}
 				rsIndex++;
 			}
 			moreResults = cs.getMoreResults();
 			updateCount = cs.getUpdateCount();
 			if (logger.isDebugEnabled()) {
-				logger.debug("CallableStatement.getUpdateCount returned [" + updateCount + "]");
+				logger.debug("CallableStatement.getUpdateCount() returned " + updateCount);
 			}
 		}
 		while (moreResults || updateCount != -1);
@@ -728,7 +727,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			if (param instanceof SqlOutParameter) {
 				SqlOutParameter outParam = (SqlOutParameter) param;
 				if (outParam.isReturnTypeSupported()) {
-					Object out = outParam.getSqlReturnType().getTypeValue(cs, sqlColIndex, outParam.getSqlType(), outParam.getTypeName());
+					Object out = outParam.getSqlReturnType().getTypeValue(
+							cs, sqlColIndex, outParam.getSqlType(), outParam.getTypeName());
 					returnedResults.put(outParam.getName(), out);
 				}
 				else {
@@ -739,8 +739,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 						}
 						else {
 							logger.warn("ResultSet returned from stored procedure but a corresponding " +
-													"SqlOutParameter with a RowCallbackHandler was not declared");
-							returnedResults.put(outParam.getName(), "ResultSet was returned but not processed.");
+									"SqlOutParameter with a RowCallbackHandler was not declared");
+							returnedResults.put(outParam.getName(), "ResultSet was returned but not processed");
 						}
 					}
 					else {
@@ -1003,7 +1003,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 			this.requiredType = requiredType;
 		}
 
-		public Object extractData(ResultSet rs) throws SQLException {
+		public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int nrOfColumns = rsmd.getColumnCount();
 			if (nrOfColumns != 1) {
@@ -1018,56 +1018,22 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				throw new IncorrectResultSizeDataAccessException("Expected single row but found more than one", 1, -1);
 			}
 			if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
-				if (String.class == this.requiredType) {
+				if (String.class.equals(this.requiredType)) {
 					result = result.toString();
 				} 
 				else if (Number.class.isAssignableFrom(this.requiredType) && Number.class.isInstance(result)) {
 					try {
-						if (Byte.class.isAssignableFrom(this.requiredType)) {
-							result = new Byte(((Number) result).byteValue());
-						}
-						else if (Short.class.isAssignableFrom(this.requiredType)) {
-							result = new Short(((Number) result).shortValue());
-						}
-						else if (Integer.class.isAssignableFrom(this.requiredType)) {
-							result = new Integer(((Number) result).intValue());
-						}
-						else if (Long.class.isAssignableFrom(this.requiredType)) {
-							result = new Long(((Number) result).longValue());
-						}
-						else if (Float.class.isAssignableFrom(this.requiredType)) {
-							result = new Float(((Number) result).floatValue());
-						}
-						else if (Double.class.isAssignableFrom(this.requiredType)) {
-							result = new Double(((Number) result).doubleValue());
-						}
-						else if (BigDecimal.class.isAssignableFrom(this.requiredType)) {
-							result = new BigDecimal(((Number) result).doubleValue());
-						}
-						else if (BigInteger.class.isAssignableFrom(this.requiredType)) {
-							result = new BigInteger(result.toString());
-						}
-						else {
-							throw new NumberFormatException(
-									"Could not convert [" + result + "] to required type [" + this.requiredType.getName() + "]");
-						}
+						result = NumberUtils.convertNumberToTargetClass(((Number) result), this.requiredType);
 					}
-					catch (NumberFormatException ne) {
-						throw new TypeMismatchDataAccessException(
-								"Result object (db-type=\"" + rsmd.getColumnTypeName(1)
-										+ "\" value=\"" + result + "\") is of type ["
-										+ rsmd.getColumnClassName(1)
-										+ "] and could not be converted to required type ["
-										+ this.requiredType.getName() + "]");
+					catch (IllegalArgumentException ex) {
+						throw new TypeMismatchDataAccessException(ex.getMessage());
 					}
 				}
 				else {
 					throw new TypeMismatchDataAccessException(
-							"Result object (db-type=\"" + rsmd.getColumnTypeName(1)
-									+ "\" value=\"" + result + "\") is of type ["
-									+ rsmd.getColumnClassName(1)
-									+ "] and not of required type ["
-									+ this.requiredType.getName() + "]");
+							"Result object with column type '" + rsmd.getColumnTypeName(1) +
+							"' and value [" + result + "] is of type [" + rsmd.getColumnClassName(1) +
+							"] and could not be converted to required type [" + this.requiredType.getName() + "]");
 				}
 			}
 			return result;

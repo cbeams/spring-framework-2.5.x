@@ -54,8 +54,8 @@ public class CustomEditorTests extends TestCase {
 			pvs.addPropertyValue(new PropertyValue("spouse", tbString));
 			bw.setPropertyValues(pvs);
 			assertTrue("spouse is non-null", t.getSpouse() != null);
-			assertTrue("spouse name is Kerry and age is 34", t.getSpouse().getName().equals("Kerry") && t.getSpouse().getAge() == 34);
-			//assertTrue("Event source is correct", l.getEventCount() == 3);
+			assertTrue("spouse name is Kerry and age is 34",
+					t.getSpouse().getName().equals("Kerry") && t.getSpouse().getAge() == 34);
 		}
 		catch (BeansException ex) {
 			fail("Shouldn't throw exception when everything is valid: " + ex.getMessage());
@@ -277,7 +277,7 @@ public class CustomEditorTests extends TestCase {
 			bw.setPropertyValue("float2", "8,1");
 			bw.setPropertyValue("double1", "5,1");
 			bw.setPropertyValue("double2", "6,1");
-			bw.setPropertyValue("bigDecimal", "4");
+			bw.setPropertyValue("bigDecimal", "4,5");
 		}
 		catch (BeansException ex) {
 			fail("Should not throw BeansException: " + ex.getMessage());
@@ -305,8 +305,8 @@ public class CustomEditorTests extends TestCase {
 		assertTrue("Correct double1 value", tb.getDouble1() == 5.1);
 		assertTrue("Correct double2 value", new Double("6.1").equals(bw.getPropertyValue("double2")));
 		assertTrue("Correct double2 value", new Double("6.1").equals(tb.getDouble2()));
-		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(bw.getPropertyValue("bigDecimal")));
-		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(tb.getBigDecimal()));
+		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(bw.getPropertyValue("bigDecimal")));
+		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(tb.getBigDecimal()));
 	}
 
 	public void testNumberEditorsWithAllowEmpty() {
