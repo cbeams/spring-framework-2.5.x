@@ -162,6 +162,11 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 			this.propertyPath = this.beanName.substring(dotIndex + 1);
 		}
 
+		else if (this.propertyPath == null) {
+			// either targetObject or targetBeanName specified
+			throw new IllegalArgumentException("propertyPath is required");
+		}
+
 		if (this.targetBeanWrapper == null && this.beanFactory.isSingleton(this.targetBeanName)) {
 			// Eagerly fetch singleton target bean, and determine result type.
 			this.targetBeanWrapper = new BeanWrapperImpl(this.beanFactory.getBean(this.targetBeanName));
