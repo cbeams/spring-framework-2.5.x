@@ -53,7 +53,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.CollectionFactory;
 
 /**
- * Abstract bean factory superclass that implements default bean creation,
+ * Abstract BeanFactory superclass that implements default bean creation,
  * with the full capabilities specified by the RootBeanDefinition class.
  * Implements the AutowireCapableBeanFactory interface. Like the base class
  * AbstractBeanFactory, this superclass does not assume a listable bean factory.
@@ -81,6 +81,8 @@ import org.springframework.core.CollectionFactory;
  * @see AbstractBeanFactory#createBean
  * @see RootBeanDefinition
  * @see DefaultListableBeanFactory
+ * @see org.springframework.beans.factory.ListableBeanFactory
+ * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
     implements AutowireCapableBeanFactory {
@@ -495,8 +497,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object beanInstance = this.instantiationStrategy.instantiate(
 				mergedBeanDefinition, beanName, this, constructorToUse, argsToUse);
 		bw.setWrappedInstance(beanInstance);
-		if (logger.isInfoEnabled()) {
-			logger.info("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
 		}
 		return bw;
 	}
@@ -608,8 +610,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (mergedBeanDefinition.isSingleton()) {
 					registerDependentBean(autowiredBeanName, beanName);
 				}
-				if (logger.isInfoEnabled()) {
-					logger.info("Autowiring by type from bean name '" + beanName +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Autowiring by type from bean name '" + beanName +
 							"' via constructor to bean named '" + matchingBeans.keySet().iterator().next() + "'");
 				}
 			}

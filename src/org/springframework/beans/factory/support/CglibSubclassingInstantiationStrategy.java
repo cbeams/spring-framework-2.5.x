@@ -41,11 +41,12 @@ import org.springframework.beans.factory.BeanFactory;
  * However, the core IoC container will still run without CGLIB being available.
  *
  * @author Rod Johnson
+ * @since 1.1
  */
 public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationStrategy {
 
 	/**
-	 * Index in the CGLIB callback array for passthrough behaviour,
+	 * Index in the CGLIB callback array for passthrough behavior,
 	 * in which case the subclass won't override the original class.
 	 */
 	private static final int PASSTHROUGH = 0;
@@ -63,13 +64,15 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	private static final int METHOD_REPLACER = 2;
 
 
-	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
+	protected Object instantiateWithMethodInjection(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// must generate CGLIB subclass
 		return new CglibSubclassCreator(beanDefinition, owner).instantiate(null, null);
 	}
 
-	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-													Constructor ctor, Object[] args) {
+	protected Object instantiateWithMethodInjection(
+			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+			Constructor ctor, Object[] args) {
 		return new CglibSubclassCreator(beanDefinition, owner).instantiate(ctor, args);
 	}
 
@@ -79,11 +82,11 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	 */
 	private static class CglibSubclassCreator {
 
-		private static final Log logger = LogFactory.getLog(CglibSubclassCreator.class);
+		private static final Log logger = LogFactory.getLog(CglibSubclassingInstantiationStrategy.class);
 
-		private RootBeanDefinition beanDefinition;
+		private final RootBeanDefinition beanDefinition;
 
-		private BeanFactory owner;
+		private final BeanFactory owner;
 
 		public CglibSubclassCreator(RootBeanDefinition beanDefinition, BeanFactory owner) {
 			this.beanDefinition = beanDefinition;
@@ -91,12 +94,12 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		}
 
 		/**
-		 * Create a new instance of a dynamically generated subclasses implementing the required
-		 * lookups
-		 * @param ctor constructor to use. If this is null, use the no-arg constructor (no
-		 * paramterization, or Setter Injection)
-		 * @param args arguments to use for the constructor. Ignored if the ctor parameter is
-		 * null
+		 * Create a new instance of a dynamically generated subclasses implementing the
+		 * required lookups.
+		 * @param ctor constructor to use. If this is null, use the no-arg constructor
+		 * (no parameterization, or Setter Injection)
+		 * @param args arguments to use for the constructor.
+		 * Ignored if the ctor parameter is null.
 		 * @return new instance of the dynamically generated class
 		 */
 		public Object instantiate(Constructor ctor, Object[] args) {
@@ -113,7 +116,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 					enhancer.create() : 
 					enhancer.create(ctor.getParameterTypes(), args);
 		}
-		
+
+
 		/**
 		 * Class providing hashCode and equals methods required by CGLIB to
 		 * ensure that CGLIB doesn't generate a distinct class per bean.
@@ -150,7 +154,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 				return owner.getBean(lo.getBeanName());
 			}			
 		}
-		
+
+
 		/**
 		 * CGLIB MethodInterceptor to override methods, replacing them with a call
 		 * to a generic MethodReplacer
@@ -171,20 +176,19 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 */
 		private class CallbackFilterImpl extends CglibIdentitySupport implements CallbackFilter {
 			
-			private Set methodNames = new HashSet();
+			private final Set methodNames = new HashSet();
 
 			public int accept(Method method) {
-				
-				if (!methodNames.contains(method.getName())) {
-					methodNames.add(method.getName());
+				if (!this.methodNames.contains(method.getName())) {
+					this.methodNames.add(method.getName());
 				}
 				else {
 					beanDefinition.getMethodOverrides().addOverloadedMethodName(method.getName());
 				}
 				
 				MethodOverride methodOverride = beanDefinition.getMethodOverrides().getOverride(method);
-				if (logger.isInfoEnabled()) {
-					logger.info("Override for '" + method.getName() + "' is [" + methodOverride + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Override for '" + method.getName() + "' is [" + methodOverride + "]");
 				}
 				if (methodOverride == null) {
 					return PASSTHROUGH;

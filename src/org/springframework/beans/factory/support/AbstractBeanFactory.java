@@ -596,8 +596,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Destroying inner beans in factory {" + this + "}");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Destroying inner beans in factory {" + this + "}");
 		}
 		synchronized (this.disposableBeans) {
 			for (Iterator it = new HashSet(this.disposableBeans.keySet()).iterator(); it.hasNext();) {
