@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -31,9 +33,9 @@ import org.springframework.aop.Pointcut;
  * method for this.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: ComposablePointcut.java,v 1.5 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: ComposablePointcut.java,v 1.6 2004-07-25 12:19:31 johnsonr Exp $
  */
-public class ComposablePointcut implements Pointcut {
+public class ComposablePointcut implements Pointcut, Serializable {
 	
 	private ClassFilter classFilter;
 	

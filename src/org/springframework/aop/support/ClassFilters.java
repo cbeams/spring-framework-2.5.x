@@ -16,13 +16,15 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
+
 import org.springframework.aop.ClassFilter;
 
 /**
  * Static methods useful for composing ClassFilters.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: ClassFilters.java,v 1.3 2004-05-23 20:50:29 jhoeller Exp $
+ * @version $Id: ClassFilters.java,v 1.4 2004-07-25 12:19:31 johnsonr Exp $
  */
 public abstract class ClassFilters {
 
@@ -35,7 +37,7 @@ public abstract class ClassFilters {
 	}
 	
 	
-	private static class UnionClassFilter implements ClassFilter {
+	private static class UnionClassFilter implements ClassFilter, Serializable {
 		
 		private ClassFilter[] filters;
 		
@@ -51,10 +53,9 @@ public abstract class ClassFilters {
 			}
 			return false;
 		}
-		
 	}
 	
-	private static class IntersectionClassFilter implements ClassFilter {
+	private static class IntersectionClassFilter implements ClassFilter, Serializable {
 		
 		private ClassFilter[] filters;
 		
@@ -70,7 +71,6 @@ public abstract class ClassFilters {
 			}
 			return true;
 		}
-	
 	}
 
 }

@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.ClassFilter;
@@ -27,9 +28,9 @@ import org.springframework.aop.Pointcut;
  * OR the MethodMatchers: we need to check that each MethodMatcher's
  * ClassFilter was happy as well.
  * @author Rod Johnson
- * @version $Id: UnionPointcut.java,v 1.2 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: UnionPointcut.java,v 1.3 2004-07-25 12:19:31 johnsonr Exp $
  */
-class UnionPointcut implements Pointcut {
+class UnionPointcut implements Pointcut, Serializable {
 	
 	private final Pointcut a;
 
