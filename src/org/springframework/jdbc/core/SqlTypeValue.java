@@ -28,25 +28,6 @@ import java.sql.SQLException;
  * Connection via the given statement object, if that should be needed to create any
  * database-specific objects.
  *
- * <p>A usage example from a StoredProcedure:
- *
- * <pre>
- * proc.declareParameter(new SqlParameter("myarray", Types.ARRAY, "NUMBERS"));
- * 
- * ...
- * 
- * Map in = new HashMap();
- * in.put("myarray", new SqlTypeValue() {
- *   public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
- *       throws SQLException {
- *	   oracle.sql.ArrayDescriptor desc = new oracle.sql.ArrayDescriptor(typeName, ps.getConnection());
- *	   oracle.sql.ARRAY nums = new oracle.sql.ARRAY(desc, ps.getConnection(), seats);
- *	   ps.setObject(paramIndex, nums, sqlType);
- *   }
- * });
- * Map out = execute(in);
- * </pre>
- *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 24.06.2004
