@@ -6,10 +6,12 @@ import java.sql.Connection;
  * Interface for classes that define transaction properties.
  * Base interface for TransactionAttribute.
  *
- * <p>Note that isolation level and timeout settings will only get
- * applied when starting a new transaction. As only propagation behavior
- * "required" can actually cause that, it doesn't make sense to specify
- * the isolation level or timeout else.
+ * <p>Note that isolation level, timeout, and read-only settings will only
+ * get applied when starting a new transaction. As only propagation behavior
+ * PROPAGATION_REQUIRED can actually cause that, it doesn't make sense to
+ * specify isolation level or timeout else. Furthermore, not all transaction
+ * managers will support those features and thus throw respective exceptions
+ * when given non-default values.
  *
  * @author Juergen Hoeller
  * @since 08.05.2003
@@ -56,7 +58,10 @@ public interface TransactionDefinition {
 
 	int ISOLATION_SERIALIZABLE     = Connection.TRANSACTION_SERIALIZABLE;
 
-	/** Use default timeout of the underlying transaction system */
+	/**
+	 * Use default timeout of the underlying transaction system,
+	 * respectively none if timeouts are not supported. 
+	 */
 	int TIMEOUT_DEFAULT = -1;
 
 	/**
@@ -70,6 +75,8 @@ public interface TransactionDefinition {
 	 * Return the isolation level.
 	 * Must return one of the ISOLATION constants.
 	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED.
+	 * Note that a transaction manager that does not support custom isolation levels
+	 * will throw an exception when given any other level than ISOLATION_DEFAULT.
 	 * @see #ISOLATION_DEFAULT
 	 */
 	int getIsolationLevel();
@@ -78,10 +85,20 @@ public interface TransactionDefinition {
 	 * Return the transaction timeout.
 	 * Must return a number of seconds, or TIMEOUT_DEFAULT.
 	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED.
+	 * Note that a transaction manager that does not support timeouts will
+	 * throw an exception when given any other timeout than TIMEOUT_DEFAULT.
 	 * @see #TIMEOUT_DEFAULT
 	 */
 	public int getTimeout();
 
+	/**
+	 * Return whether to optimize as read-only transaction.
+	 * This just serves as hint for the actual transaction subsystem,
+	 * it will <i>not necessarily</i> cause failure of write accesses.
+	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED.
+	 * A transaction manager that cannot interpret the read-only hint
+	 * will <i>not</i> throw an exception when given readOnly=true.
+	 */
 	public boolean isReadOnly();
 
 }
