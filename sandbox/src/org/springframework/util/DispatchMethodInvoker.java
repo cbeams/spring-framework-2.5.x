@@ -144,6 +144,17 @@ public class DispatchMethodInvoker {
 		return parameterTypes;
 	}
 
+	protected String getParameterTypesString() {
+		StringBuffer parameterTypesString = new StringBuffer();
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypesString.append(parameterTypes[i]);
+			if (i < parameterTypes.length - 1) {
+				parameterTypesString.append(',');
+			}
+		}
+		return parameterTypesString.toString();
+	}
+	
 	/**
 	 * Returns the expected return type of the dispatch methods.
 	 * @return the expected return type, or null if void
@@ -152,6 +163,9 @@ public class DispatchMethodInvoker {
 		return returnType;
 	}
 
+	protected String getReturnTypeString() {
+		return (returnType != null ? returnType.getName() : "void");
+	}
 	/**
 	 * Returns a optional description of the type of method resolved by this cache.
 	 * @return the method type description
@@ -161,14 +175,7 @@ public class DispatchMethodInvoker {
 	}
 
 	protected String getSignature(String methodName) {
-		StringBuffer parameterTypesString = new StringBuffer();
-		for (int i = 0; i < parameterTypes.length; i++) {
-			parameterTypesString.append(parameterTypes[i]);
-			if (i < parameterTypes.length) {
-				parameterTypesString.append(',');
-			}
-		}
-		return "public " + getReturnType() + " " + methodName + "(" + parameterTypesString + ");";
+		return "public " + getReturnTypeString() + " " + methodName + "(" + getParameterTypesString() + ");";
 	}
 	
 	/**
