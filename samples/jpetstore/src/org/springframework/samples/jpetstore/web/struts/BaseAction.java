@@ -16,8 +16,8 @@ public abstract class BaseAction extends Action {
 	public void setServlet(ActionServlet actionServlet) {
 		super.setServlet(actionServlet);
 		ServletContext servletContext = actionServlet.getServletContext();
-		WebApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-		this.petStore = (PetStoreFacade) applicationContext.getBean("petStore");
+		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
+		this.petStore = (PetStoreFacade) wac.getBean("petStore");
 	}
 
 	protected PetStoreFacade getPetStore() {
