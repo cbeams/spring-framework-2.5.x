@@ -84,6 +84,14 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		}
 		fireRequestSubmitted(request);
 		TransitionableState state = getActiveFlow().getRequiredTransitionableState(stateId);
+		if (!state.equals(getCurrentState())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Event '" + eventId + "' in state '" + state.getId()
+						+ "' was signaled by client; however the current flow execution state is '"
+						+ getCurrentStateId() + "'; updating current state to '" + state.getId() + "'");
+			}
+			setCurrentState(state);
+		}
 		ModelAndView view = state.execute(eventId, this, request, response);
 		fireRequestProcessed(request);
 		return view;

@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -54,10 +55,6 @@ public class EndState extends AbstractState {
 
 	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		ModelAndView descriptor = null;
-		if (getViewName() != null) {
-			descriptor = new ModelAndView(getViewName(), sessionExecution.getAttributes());
-		}
 		FlowSession endingFlowSession = sessionExecution.endActiveSession();
 		Assert.isTrue(endingFlowSession.getCurrentState().equals(this),
 				"The ending flow session's current state should always equal this end state, but it doesn't "
@@ -68,7 +65,7 @@ public class EndState extends AbstractState {
 		if (sessionExecution.isActive()) {
 			// session execution is still active, resume in parent
 			if (logger.isDebugEnabled()) {
-				logger.debug("Resuming parent flow '" + sessionExecution.getQualifiedActiveFlowId() + "' in state '"
+				logger.debug("Resuming parent flow '" + sessionExecution.getActiveFlowId() + "' in state '"
 						+ sessionExecution.getCurrentStateId() + "'");
 			}
 			Flow resumingParentFlow = sessionExecution.getActiveFlow();
@@ -91,19 +88,27 @@ public class EndState extends AbstractState {
 							+ resumingParentFlow.getId() + "'");
 				}
 			}
-			// treat the returned end state as a transitional event in the
+			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
-			String eventId = endingFlowSession.getCurrentStateId();
-			descriptor = resumingState.execute(eventId, sessionExecution, request, response);
+			return resumingState.execute(getId(), sessionExecution, request, response);
 		}
 		else {
+			// entire flow execution has ended, return ending view if applicable
 			if (logger.isDebugEnabled()) {
 				logger.debug("Session execution for root flow '" + getFlow().getId() + "' has ended");
 			}
+			if (StringUtils.hasText(getViewName())) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Returning view name '" + viewName + "' to render");
+				}
+				return new ModelAndView(viewName, endingFlowSession.getAttributes());
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Returning a view descriptor null object; no view to render");
+				}
+				return null;
+			}
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Returning view descriptor '" + descriptor + "'");
-		}
-		return descriptor;
 	}
 }

@@ -81,13 +81,13 @@ public abstract class TransitionableState extends AbstractState {
 	 */
 	protected ModelAndView execute(String eventId, FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) throws CannotExecuteStateTransitionException {
-		updateCurrentStateIfNeccessary(eventId, sessionExecution);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '" + getFlow().getId()
 					+ "' signaled");
 		}
+		Transition transition = getTransition(eventId);
 		sessionExecution.setLastEventId(eventId);
-		ModelAndView viewDescriptor = getTransition(eventId).execute(sessionExecution, request, response);
+		ModelAndView viewDescriptor = transition.execute(sessionExecution, request, response);
 		if (logger.isDebugEnabled()) {
 			if (sessionExecution.isActive()) {
 				logger.debug("Event '" + eventId + "' within state '" + this + "' for flow '" + getFlow().getId()
@@ -127,17 +127,6 @@ public abstract class TransitionableState extends AbstractState {
 			}
 		}
 		throw new EventNotSupportedException(this, eventId);
-	}
-
-	protected void updateCurrentStateIfNeccessary(String eventId, FlowExecutionStack sessionExecution) {
-		if (!this.equals(sessionExecution.getCurrentState())) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Event '" + eventId + "' in state '" + getId()
-						+ "' was signaled by client; however the current flow session execution state is '"
-						+ sessionExecution.getCurrentStateId() + "'; updating current state to '" + getId() + "'");
-			}
-			sessionExecution.setCurrentState(this);
-		}
 	}
 
 	protected void createToString(ToStringCreator creator) {

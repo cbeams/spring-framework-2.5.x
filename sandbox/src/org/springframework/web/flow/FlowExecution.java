@@ -66,15 +66,4 @@ public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAcces
 	public ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
 			HttpServletResponse response);
 
-	/**
-	 * Spawn the specified flow as a subflow of this flow execution, passing the
-	 * subflow the input provided.
-	 * @param flow The subfow definition.
-	 * @param input Subflow model input attributes.
-	 * @param request The current request
-	 * @param response The current response
-	 * @return The next model and view descriptor to display for this flow.
-	 */
-	public ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response);
-
 }
