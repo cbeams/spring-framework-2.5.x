@@ -125,6 +125,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @param beanName the name of the bean to check
 	 * @param type class or interface to match, or null for all bean names
 	 * @return whether the type matches
+	 * @see RootBeanDefinition#hasBeanClass
+	 * @see RootBeanDefinition#getBeanClass
 	 */
 	private boolean isBeanDefinitionTypeMatch(String beanName, Class type) {
 		if (type == null) {
@@ -153,7 +155,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!rbd.isAbstract() && rbd.hasBeanClass() && (includePrototypes || rbd.isSingleton())) {
 				if (FactoryBean.class.isAssignableFrom(rbd.getBeanClass())) {
 					if (includeFactoryBeans && (includePrototypes || isSingleton(beanName)) &&
-						(type == null || type.isAssignableFrom(getType(beanName)))) {
+							isBeanTypeMatch(beanName, type)) {
 						addBeanToResultMap(beanName, result);
 					}
 				}
@@ -167,8 +169,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (int i = 0; i < singletonNames.length; i++) {
 			String beanName = singletonNames[i];
 			if (!containsBeanDefinition(beanName) && isSingleton(beanName) &&
-					(type == null || type.isAssignableFrom(getType(beanName))) &&
-					(includeFactoryBeans || !isFactoryBean(beanName))) {
+					isBeanTypeMatch(beanName, type) && (includeFactoryBeans || !isFactoryBean(beanName))) {
 				// Directly registered singleton with correct type.
 				// Needed to check "singleton" flag to cover FactoryBeans.
 				addBeanToResultMap(beanName, result);
@@ -176,6 +177,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		return result;
+	}
+
+	/**
+	 * Check whether the specified bean matches the given type.
+	 * @param beanName the name of the bean to check
+	 * @param type the type to check for
+	 * @return whether the bean matches the given type
+	 * @see #getType
+	 */
+	private boolean isBeanTypeMatch(String beanName, Class type) {
+		if (type == null) {
+			return true;
+		}
+		Class beanType = getType(beanName);
+		return (beanType != null && type.isAssignableFrom(beanType));
 	}
 
 	/**
@@ -243,6 +259,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public void registerBeanDefinition(String name, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
+
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
 				((AbstractBeanDefinition) beanDefinition).validate();
@@ -252,6 +269,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"Validation of bean definition with name failed", ex);
 			}
 		}
+
 		Object oldBeanDefinition = this.beanDefinitionMap.get(name);
 		if (oldBeanDefinition != null) {
 			if (!this.allowBeanDefinitionOverriding) {
@@ -270,6 +288,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.beanDefinitionNames.add(name);
 		}
 		this.beanDefinitionMap.put(name, beanDefinition);
+
+		// Remove corresponding bean from singleton cache, if any.
+		// Shouldn't usually be necessary, rather just meant for overriding
+		// a context's default beans (e.g. the default StaticMessageSource
+		// in a StaticApplicationContext).
+		removeSingleton(name);
 	}
 
 
