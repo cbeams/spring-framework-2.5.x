@@ -28,7 +28,7 @@ import org.springframework.beans.PropertyValues;
  * <p>This servlet leaves request handling to subclasses, inheriting the
  * default behaviour of HttpServlet.
  *
- * <p>This servlet superclass has no dependency on the application context.
+ * <p>This servlet superclass has no dependency on a Spring application context.
  *
  * @author Rod Johnson
  * @see #initServletBean
@@ -38,8 +38,8 @@ public abstract class HttpServletBean extends HttpServlet {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** 
-	 * May be null. List of required properties (Strings) that must
-	 * be supplied as config parameters to this servlet.
+	 * List of required properties (Strings) that must be supplied as
+	 * config parameters to this servlet.
 	 */
 	private List requiredProperties = new ArrayList();
 
@@ -49,8 +49,8 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * and must be supplied as a config parameter.
 	 * @param property name of the required property
 	 */
-	protected final void addRequiredProperty(String property) {
-		requiredProperties.add(property);
+	protected final void setRequiredProperty(String property) {
+		this.requiredProperties.add(property);
 	}
 	
 	/**
@@ -64,14 +64,14 @@ public abstract class HttpServletBean extends HttpServlet {
 
 		// set bean properties
 		try {
-			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
+			String[] reqPropArray = (String[]) this.requiredProperties.toArray(new String[this.requiredProperties.size()]);
+			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), reqPropArray);
 			BeanWrapper bw = new BeanWrapperImpl(this);
 			bw.setPropertyValues(pvs);
 		}
 		catch (BeansException ex) {
-			String msg = "Failed to set bean properties on servlet '" + getServletName() + "': " + ex.getMessage();
-			logger.error(msg, ex);
-			throw new ServletException(msg, ex);
+			logger.error("Failed to set bean properties on servlet '" + getServletName() + "'", ex);
+			throw ex;
 		}
 
 		// let subclasses do whatever initialization they like

@@ -15,7 +15,7 @@ import org.springframework.util.StringUtils;
  * to support deep copy and construction from a Map.
  * @author Rod Johnson
  * @since 13 May 2001
- * @version $Id: MutablePropertyValues.java,v 1.3 2003-11-05 11:27:49 jhoeller Exp $
+ * @version $Id: MutablePropertyValues.java,v 1.4 2004-02-27 13:05:45 jhoeller Exp $
  */
 public class MutablePropertyValues implements PropertyValues {
 	
@@ -90,6 +90,14 @@ public class MutablePropertyValues implements PropertyValues {
 		addPropertyValue(new PropertyValue(propertyName, propertyValue));
 	}
 
+	public void removePropertyValue(PropertyValue pv) {
+		this.propertyValuesList.remove(pv);
+	}
+
+	public void removePropertyValue(String propertyName) {
+		removePropertyValue(getPropertyValue(propertyName));
+	}
+
 	/**
 	 * Modify a PropertyValue object held in this object.
 	 * Indexed from 0.
@@ -105,8 +113,9 @@ public class MutablePropertyValues implements PropertyValues {
 	public PropertyValue getPropertyValue(String propertyName) {
 		for (int i = 0; i < this.propertyValuesList.size(); i++) {
 			PropertyValue pv = (PropertyValue) this.propertyValuesList.get(i);
-			if (pv.getName().equals(propertyName))
+			if (pv.getName().equals(propertyName)) {
 				return pv;
+			}
 		}
 		return null;
 	}

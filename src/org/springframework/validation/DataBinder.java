@@ -18,9 +18,24 @@ import org.springframework.beans.PropertyValues;
 
 /**
  * Binder that allows for binding property values to a target object.
+ * The binding process can be customized through specifying allowed fields,
+ * required fields, and custom editors.
+ *
+ * <p>The binding results can be examined via the Errors interface,
+ * available as BindException instance. Missing field errors and property
+ * access exceptions will be converted to FieldErrors, collected in the
+ * Errors instance. Custom validation errors can be added afterwards.
+ *
+ * <p>This generic data binder can be used in any sort of environment.
+ * It is heavily used by Spring's web binding features, via the subclass
+ * ServletRequestDataBinder.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.8 2004-02-19 07:13:34 jhoeller Exp $
+ * @version $Id: DataBinder.java,v 1.9 2004-02-27 13:05:21 jhoeller Exp $
+ * @see #bind
+ * @see #getErrors
+ * @see org.springframework.web.bind.ServletRequestDataBinder
  */
 public class DataBinder {
 
@@ -126,21 +141,26 @@ public class DataBinder {
 	 * This call can create field errors, representing basic binding
 	 * errors like a required field (code "required"), or type mismatch
 	 * between value and bean property (code "typeMismatch").
-	 * @param pvs property values to bind
+	 * <p>Note that the given PropertyValues should be a throwaway instance:
+	 * For efficiency, it will be modified to just contain allowed fields if it
+	 * implements the MutablePropertyValues interface; else, an internal mutable
+	 * copy will be created for this purpose. Pass in a copy of the PropertyValues
+	 * if you want your original instance to stay unmodified in any case.
+	 * @param pvs property values to bind.
 	 */
 	public void bind(PropertyValues pvs) {
 		// check for fields to bind
-		if (this.allowedFields != null) {
-			PropertyValue[] pvArray = pvs.getPropertyValues();
-			List allowedFieldsList = Arrays.asList(this.allowedFields);
-			MutablePropertyValues mpvs = new MutablePropertyValues();
-			for (int i = 0; i < pvArray.length; i++) {
-				if (allowedFieldsList.contains(pvArray[i].getName())) {
-					mpvs.addPropertyValue(pvArray[i]);
-				}
+		PropertyValue[] pvArray = pvs.getPropertyValues();
+		List allowedFieldsList = (this.allowedFields != null) ? Arrays.asList(this.allowedFields) : null;
+		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues) ?
+		    (MutablePropertyValues) pvs : new MutablePropertyValues(pvs);
+		for (int i = 0; i < pvArray.length; i++) {
+			String field = pvArray[i].getName();
+			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
+				mpvs.removePropertyValue(pvArray[i]);
 			}
-			pvs = mpvs;
 		}
+		pvs = mpvs;
 
 		// check for missing fields
 		if (this.requiredFields != null) {
@@ -169,6 +189,31 @@ public class DataBinder {
 													 exs[i].getLocalizedMessage()));
 			}
 		}
+	}
+
+	/**
+	 * Return if the given field is allowed for binding.
+	 * Invoked for each passed-in property value.
+	 * <p>The default implementation checks for "xxx*" and "*xxx" matches.
+	 * Can be overridden in subclasses.
+	 * <p>If the field is found in the allowedFields array as direct match,
+	 * this method will not be invoked.
+	 * @param field the field to check
+	 * @return if the field is allowed
+	 * @see #setAllowedFields
+	 */
+	protected boolean isAllowed(String field) {
+		if (this.allowedFields != null) {
+			for (int i = 0; i < this.allowedFields.length; i++) {
+				String allowed = this.allowedFields[i];
+				if ((allowed.endsWith("*") && field.startsWith(allowed.substring(0, allowed.length() - 1))) ||
+						(allowed.startsWith("*") && field.endsWith(allowed.substring(1, allowed.length())))) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
 	}
 
 	/**
