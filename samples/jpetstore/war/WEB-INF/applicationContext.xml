@@ -69,7 +69,7 @@
 		 definitions could have been separate, but this is cleaner as there
 		 is no need to ever access the unwrapped object.
 		 Note that we override the transaction propagation settings from the
-		 base 'proxyTxProxy' definition -->
+		 parent 'baseTxProxy' definition -->
 	<bean id="petStore" parent="baseTxProxy">
 		<property name="target">
 			<bean class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
