@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.30 2004-01-07 02:48:21 colins Exp $
+    $Id: build.xml,v 1.31 2004-01-13 18:14:58 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -263,7 +263,7 @@
 		<javadoc sourcepath="src" destdir="${javadocs.dir}" windowtitle="Spring Framework"
 			defaultexcludes="yes"	author="true" version="true" use="true">
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Rod Johnson and Spring contributors 2001-2003.</i>]]></bottom>
+			<bottom><![CDATA[<i>Copyright (C) 2003-2004 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
