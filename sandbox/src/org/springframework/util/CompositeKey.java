@@ -35,7 +35,7 @@ public class CompositeKey {
         Assert.isTrue(
             parts.size() > 1,
             "A composite key by definition has more than one key.");
-        this.parts = new HashSet(parts);
+        this.parts = new LinkedHashSet(parts);
     }
 
     /**
