@@ -17,29 +17,24 @@ import org.apache.velocity.app.VelocityEngine;
 import org.springframework.core.io.Resource;
 
 /**
- * Factory that configures a VelocityEngine in a Spring application context.
- * Typically, you will either use VelocityEngineFactoryBean for preparing a
+ * Factory that configures a VelocityEngine. Can be used standalone, but
+ * typically you will either use VelocityEngineFactoryBean for preparing a
  * VelocityEngine as bean reference, or VelocityConfigurer for web views.
  *
  * <p>The optional "configLocation" property sets the location of the Velocity
- * properties file, within the current application. The factory needs to run in
- * an application context to be able to load such a context resource.
- *
- * <p>Velocity properties can be overridden via "velocityProperties", or even
- * completely specified locally, avoiding the need for an external properties file.
- * This is the only way available when not running in an application context.
+ * properties file, within the current application. Velocity properties can be
+ * overridden via "velocityProperties", or even completely specified locally,
+ * avoiding the need for an external properties file.
  *
  * <p>The "resourceLoaderPath" property can be used to specify the Velocity
- * resource loader path, relative to the application context. Like "configLocation",
- * this is just available in an application context.
+ * resource loader path via Spring's Resource abstraction, possibly relative
+ * to the Spring application context.
  *
  * <p>If "overrideLogging" is true (the default), the VelocityEngine will be configured
  * to log via Commons Logging, i.e. using CommonsLoggingLogSystem as log system.
  *
- * <p>The simplest way to use this class in an application context is to specify just
- * a "resourceLoaderPath": the VelocityEngine does not need any more configuration then.
- * Outside an application context, locally defined "velocityProperties" that indicate
- * the resource loader to use achieve the same.
+ * <p>The simplest way to use this class is to specify just a "resourceLoaderPath":
+ * The VelocityEngine does not need any further configuration then.
  *
  * @author Juergen Hoeller
  * @see #setConfigLocation
@@ -66,18 +61,19 @@ public class VelocityEngineFactory {
 
 
 	/**
-	 * Set location of the Velocity config file. Default value is
-	 * is determined by getDefaultFileLocation, which will be applied
-	 * <i>only</i> if "velocityProperties" is not set.
-	 * @see #setVelocityProperties
+	 * Set location of the Velocity config file. Default value is determined
+	 * by getDefaultFileLocation, which will be applied <i>only</i> if neither
+	 * "configLocation" nor "velocityProperties" nor "resourceLoaderPath" is set.
 	 * @see #getDefaultConfigLocation
+	 * @see #setVelocityProperties
+	 * @see #setResourceLoaderPath
 	 */
 	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
 	}
 
 	/**
-	 * Set Velocity properties, like "resource loader".
+	 * Set Velocity properties, like "file.resource.loader.path".
 	 * <p>Can be used to override values in a Velocity config file,
 	 * or to specify all necessary properties locally.
 	 * @see #setConfigLocation
@@ -87,11 +83,13 @@ public class VelocityEngineFactory {
 	}
 
 	/**
-	 * Set the Velocity resource loader path, relative to the ApplicationContext.
-	 * Only applicable when this factory runs in an ApplicationContext.
+	 * Set the Velocity resource loader path via a Resource.
+	 * <p>When populated via a String, standard URLs like "file:" and "classpath:"
+	 * pseudo URLs are supported, as understood by ResourceEditor. Allows for
+	 * relative paths when running in an ApplicationContext.
 	 * <p>Will define a path for the default Velocity resource loader with the name
-	 * "file", of type org.apache.velocity.runtime.resource.loader.FileResourceLoader,
-	 * appending the given path to the application context resource base.
+	 * "file", of type org.apache.velocity.runtime.resource.loader.FileResourceLoader.
+	 * @see org.springframework.core.io.ResourceEditor
 	 * @see org.springframework.context.ApplicationContext#getResource
 	 * @see org.apache.velocity.runtime.resource.loader.FileResourceLoader
 	 */
@@ -100,9 +98,9 @@ public class VelocityEngineFactory {
 	}
 
 	/**
-	 * If Velocity should log via Commons Logging, i.e. if Velocity's
-	 * log system should be set to CommonsLoggingLogSystem.
-	 * Default value is true.
+	 * If Velocity should log via Commons Logging, i.e. if Velocity's log system
+	 * should be set to CommonsLoggingLogSystem. Default value is true.
+	 * @see CommonsLoggingLogSystem
 	 */
 	public void setOverrideLogging(boolean overrideLogging) {
 		this.overrideLogging = overrideLogging;
@@ -113,19 +111,14 @@ public class VelocityEngineFactory {
 	 * Prepare the VelocityEngine instance.
 	 * @throws VelocityInitializationException on Velocity initialization failure
 	 */
-	public void initVelocityEngine() throws VelocityInitializationException {
+	public synchronized void initVelocityEngine() throws VelocityInitializationException {
 		this.velocityEngine = newVelocityEngine();
 		Properties props = new Properties();
 
 		// try default config location as fallback
 		Resource actualLocation = this.configLocation;
 		if (this.configLocation == null && this.velocityProperties == null && this.resourceLoaderPath == null) {
-			try {
-				actualLocation = getDefaultConfigLocation();
-			}
-			catch (IOException ex) {
-				throw new VelocityInitializationException("Default Velocity config file not found", ex);
-			}
+			actualLocation = getDefaultConfigLocation();
 		}
 
 		try {
@@ -188,7 +181,7 @@ public class VelocityEngineFactory {
 	 * "velocityProperties" nor "resourceLoaderPath" is set, this will be used as
 	 * config location. Default is none: can be overridden in subclasses.
 	 */
-	protected Resource getDefaultConfigLocation() throws IOException {
+	protected Resource getDefaultConfigLocation() {
 		return null;
 	}
 
