@@ -216,9 +216,12 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simple onSubmit version. Called by the default implementation of
-	 * the onSubmit version with all parameters.
-	 * <p>Default implementation prepares success view.
+	 * Simple onSubmit version. Called by the default implementation of the onSubmit
+	 * version with all parameters.
+	 * <p>Default implementation prepares success view, with command object as model
+	 * attribute. Does <i>not</i> put an Errors instance into the model: Override the
+	 * all-parameter onSubmit and take the model from <code>errors.getModel()</code>
+	 * to provide an Errors instance, as expected by the "spring:bind" tag.
 	 * @param command form object with request parameters bound onto it
 	 * @return the prepared model and view, or null
 	 * @throws Exception in case of errors
