@@ -26,7 +26,6 @@ import org.springframework.beans.factory.InitializingBean;
 /**
  * Simple factory for shared List instances. Allows for central setup
  * of Lists via the "list" element in XML bean definitions.
- * @author Hans Gilde
  * @author Juergen Hoeller
  * @since 09.12.2003
  */

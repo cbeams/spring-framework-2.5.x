@@ -26,7 +26,6 @@ import org.springframework.beans.factory.InitializingBean;
 /**
  * Simple factory for shared Map instances. Allows for central setup
  * of Maps via the "map" element in XML bean definitions.
- * @author Hans Gilde
  * @author Juergen Hoeller
  * @since 09.12.2003
  */
