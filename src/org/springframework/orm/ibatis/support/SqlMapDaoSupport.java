@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.ibatis.support;
 
@@ -29,12 +29,20 @@ import org.springframework.orm.ibatis.SqlMapTemplate;
  * Convenient super class for iBATIS SqlMap data access objects.
  * Requires a SqlMap to be set, providing a SqlMapTemplate
  * based on it to subclasses.
+ *
+ * <p>Instead of a plain SqlMap, you can also pass a preconfigured
+ * SqlMapTemplate instance in. This allows you to share your
+ * SqlMapTemplate configuration for all your DAOs, for example
+ * a custom SQLExceptionTranslator to use.
+ *
  * @author Juergen Hoeller
  * @since 29.11.2003
  * @see #setSqlMap
+ * @see #setSqlMapTemplate
  * @see org.springframework.orm.ibatis.SqlMapTemplate
+ * @see org.springframework.orm.ibatis.SqlMapTemplate#setExceptionTranslator
  */
-public class SqlMapDaoSupport implements InitializingBean {
+public abstract class SqlMapDaoSupport implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.ibatis.support;
 
@@ -29,12 +29,20 @@ import org.springframework.orm.ibatis.SqlMapClientTemplate;
  * Convenient super class for iBATIS SqlMapClient data access objects.
  * Requires a SqlMapClient to be set, providing a SqlMapClientTemplate
  * based on it to subclasses.
+ *
+ * <p>Instead of a plain SqlMapClient, you can also pass a preconfigured
+ * SqlMapClientTemplate instance in. This allows you to share your
+ * SqlMapClientTemplate configuration for all your DAOs, for example
+ * a custom SQLExceptionTranslator to use.
+ *
  * @author Juergen Hoeller
- * @since 29.11.2003
+ * @since 24.02.2004
  * @see #setSqlMapClient
+ * @see #setSqlMapClientTemplate
  * @see org.springframework.orm.ibatis.SqlMapClientTemplate
+ * @see org.springframework.orm.ibatis.SqlMapClientTemplate#setExceptionTranslator
  */
-public class SqlMapClientDaoSupport implements InitializingBean {
+public abstract class SqlMapClientDaoSupport implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
