@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.ApplicationEvent;
@@ -54,6 +53,7 @@ import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -73,17 +73,20 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=localeHandler\n/locale.do=localeHandler\nloc.do=anotherLocaleHandler"));
+		pvs.addPropertyValue(
+				"mappings", "/view.do=viewHandler\n/locale.do=localeHandler\nloc.do=anotherLocaleHandler");
 		registerSingleton("myUrlMapping1", SimpleUrlHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=localeHandler\n/unknown.do=unknownHandler\nservlet.do=myServlet"));
-		pvs.addPropertyValue(new PropertyValue("order", "2"));
+		pvs.addPropertyValue(
+				"mappings", "/form.do=localeHandler\n/unknown.do=unknownHandler\nservlet.do=myServlet");
+		pvs.addPropertyValue("order", "2");
 		registerSingleton("myUrlMapping2", SimpleUrlHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("mappings", "/form.do=formHandler\n/head.do=headController\nbody.do=bodyController"));
-		pvs.addPropertyValue(new PropertyValue("order", "1"));
+		pvs.addPropertyValue(
+				"mappings", "/form.do=formHandler\n/head.do=headController\nbody.do=bodyController");
+		pvs.addPropertyValue("order", "1");
 		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
 
 		registerSingleton("myDummyAdapter", MyDummyAdapter.class);
@@ -91,18 +94,22 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("standardHandlerAdapter", SimpleControllerHandlerAdapter.class);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("order", new Integer(0)));
-		pvs.addPropertyValue(new PropertyValue("basename", "org.springframework.web.servlet.complexviews"));
+		pvs.addPropertyValue("order", new Integer(0));
+		pvs.addPropertyValue("basename", "org.springframework.web.servlet.complexviews");
 		registerSingleton("viewResolver", ResourceBundleViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("suffix", ".jsp"));
+		pvs.addPropertyValue("suffix", ".jsp");
 		registerSingleton("viewResolver2", InternalResourceViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("commandClass", "org.springframework.beans.TestBean"));
-		pvs.addPropertyValue(new PropertyValue("formView", "form"));
+		pvs.addPropertyValue("commandClass", "org.springframework.beans.TestBean");
+		pvs.addPropertyValue("formView", "form");
 		registerSingleton("formHandler", SimpleFormController.class, pvs);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("viewName", "form");
+		registerSingleton("viewHandler", ParameterizableViewController.class, pvs);
 
 		registerSingleton("localeHandler", ComplexLocaleChecker.class);
 		registerSingleton("anotherLocaleHandler", ComplexLocaleChecker.class);
@@ -269,8 +276,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			return true;
 		}
 
-		public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-													 ModelAndView modelAndView) throws ServletException {
+		public void postHandle(
+				HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
+				throws ServletException {
 			if (request.getAttribute("test2x") != null) {
 				throw new ServletException("Wrong interceptor order");
 			}
@@ -280,8 +288,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			request.removeAttribute("test1x");
 		}
 
-		public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-																Object handler, Exception ex) throws ServletException {
+		public void afterCompletion(
+				HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+				throws ServletException {
 			if (request.getAttribute("test2y") != null) {
 				throw new ServletException("Wrong interceptor order");
 			}
@@ -309,6 +318,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		public void postHandle(
 				HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
 				throws ServletException {
+			if (request.getParameter("noView") != null) {
+				modelAndView.clear();
+			}
 			if (request.getAttribute("test1x") == null) {
 				throw new ServletException("Wrong interceptor order");
 			}

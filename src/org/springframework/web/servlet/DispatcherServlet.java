@@ -692,7 +692,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 
 			// Did the handler return a view to render?
-			if (mv != null) {
+			if (mv != null && !mv.isEmpty()) {
 				render(mv, processedRequest, response);
 			}
 			else {
@@ -859,6 +859,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected ModelAndView processHandlerException(
 			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
+
 		ModelAndView exMv = null;
 		for (Iterator it = this.handlerExceptionResolvers.iterator(); exMv == null && it.hasNext();) {
 			HandlerExceptionResolver resolver = (HandlerExceptionResolver) it.next();

@@ -208,7 +208,30 @@ public class ModelAndView {
 		getModel().putAll(modelMap);
 		return this;
 	}
-	
+
+	/**
+	 * Clear the state of this ModelAndView object.
+	 * The object will be empty afterwards.
+	 * <p>Can be used to suppress rendering of a given ModelAndView object
+	 * in the <code>postHandle</code> method of a HandlerInterceptor.
+	 * @see #isEmpty
+	 * @see HandlerInterceptor#postHandle
+	 */
+	public void clear() {
+		this.view = null;
+		this.viewName = null;
+		this.model = null;
+	}
+
+	/**
+	 * Return whether this ModelAndView object is empty,
+	 * i.e. whether it does not hold any view and does not contain a model.
+	 * @see #clear
+	 */
+	public boolean isEmpty() {
+		return (this.view == null && this.viewName == null && this.model == null);
+	}
+
 
 	/**
 	 * Return diagnostic information about this model and view.

@@ -166,6 +166,23 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Correct message", "default &#38;".equals(rc.getMessage("testa", null, "default &", true)));
 	}
 
+	public void testParameterizableViewController() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/view.do");
+		request.addUserRole("role1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertTrue("forwarded to form", "myform.jsp".equals(response.getForwardedUrl()));
+	}
+
+	public void testHandlerInterceptorSuppressesView() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/view.do");
+		request.addUserRole("role1");
+		request.addParameter("noView", "true");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertTrue("Not forwarded", response.getForwardedUrl() == null);
+	}
+
 	public void testLocaleRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
@@ -224,7 +241,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testAnotherLocaleRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		assertEquals(99, complexDispatcherServlet.getLastModified(request));
 		complexDispatcherServlet.service(request, response);
@@ -240,7 +257,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testExistingMultipartRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ComplexWebApplicationContext.MockMultipartResolver multipartResolver =
 				(ComplexWebApplicationContext.MockMultipartResolver)
@@ -255,7 +272,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testMultipartResolutionFailed() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.setAttribute("fail", Boolean.TRUE);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -269,7 +286,7 @@ public class DispatcherServletTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addParameter("abort", "true");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
@@ -284,7 +301,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testModelAndViewDefiningException() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.addParameter("fail", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
@@ -300,7 +317,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testSimpleMappingExceptionResolverWithSpecificHandler1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.addParameter("access", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -312,7 +329,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testSimpleMappingExceptionResolverWithSpecificHandler2() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.addParameter("servlet", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -324,7 +341,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testSimpleMappingExceptionResolverWithAllHandlers1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/loc.do");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.addParameter("access", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -336,7 +353,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testSimpleMappingExceptionResolverWithAllHandlers2() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/loc.do");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.addParameter("servlet", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -348,7 +365,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testSimpleMappingExceptionResolverWithDefaultErrorView() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.addParameter("exception", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -360,7 +377,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testLocaleChangeInterceptor1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.GERMAN);
-		request.addRole("role2");
+		request.addUserRole("role2");
 		request.addParameter("locale", "en");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -372,7 +389,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testLocaleChangeInterceptor2() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.GERMAN);
-		request.addRole("role2");
+		request.addUserRole("role2");
 		request.addParameter("locale", "en");
 		request.addParameter("locale2", "en_CA");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -383,7 +400,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testThemeChangeInterceptor1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.addParameter("theme", "mytheme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -395,7 +412,7 @@ public class DispatcherServletTests extends TestCase {
 	public void testThemeChangeInterceptor2() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
-		request.addRole("role1");
+		request.addUserRole("role1");
 		request.addParameter("theme", "mytheme");
 		request.addParameter("theme2", "theme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
