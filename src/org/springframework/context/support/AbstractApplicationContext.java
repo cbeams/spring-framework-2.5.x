@@ -78,7 +78,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -100,6 +100,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+
+	static {
+		// Eagerly load the ContextClosedEvent class to avoid weird classloader issues
+		// on application shutdown in WebLogic 8.1. (Reported by Dustin Woods.)
+		ContextClosedEvent.class.getName();
+	}
 
 
 	//---------------------------------------------------------------------
