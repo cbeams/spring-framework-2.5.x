@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.38 2003-11-05 20:36:58 jhoeller Exp $
+$Id: changelog.txt,v 1.39 2003-11-07 16:59:10 jhoeller Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
@@ -28,11 +28,13 @@ Changes in version 1.0 M3 (XX.11.2003)
 * split ApplicationContext interface into ApplicationContext client interface and ConfigurableApplicationContext SPI
 * added support for placeholders in bean reference names to PropertyPlaceholderConfigurer
 * added support for cross-referencing placeholders in placeholder values to PropertyPlaceholderConfigurer
+* added "port" property to JavaMailSenderImpl
 * moved commit exception handling from concrete implementations up to the generic AbstractPlatformTransactionManager
 * added "rollbackOnCommitFailure" bean property to AbstractPlatformTransactionManager
 * added "cleanupAfterCompletion" template method to AbstractPlatformTransactionManager
 * reworked commit exception handling in HibernateTransactionManager and JdoTransactionManager
-* reworked cleanup code in DataSourceTransactionManager, HibernateTransactionManager, and JdoTransactionManager
+* reworked cleanup code in DataSourceTransactionManager/HibernateTransactionManager/JdoTransactionManager
+* fixed PROPAGATION_SUPPORTS handling in DataSourceTransactionManager/HibernateTransactionManager/JdoTransactionManager
 * dissolved ThreadObjectManager and put resource binding (for JDBC/JDO/Hibernate) in TransactionSynchronizationManager
 * added transaction synchronization support for JDBC and JDO to always return the same resources in a JTA transaction
 * added setter methods for data access templates to JdbcDaoSupport, HibernateDaoSupport, and JdoDaoSupport
@@ -41,6 +43,7 @@ Changes in version 1.0 M3 (XX.11.2003)
 * reworked JdbcBeanFactory to extend ListableBeanFactoryImpl instead of using a refreshable delegate
 * made LocalSessionFactoryBean and LocalPersistenceManagerFactoryBean methods non-final
 * reworked HibernateAccessor/HibernateTemplate/HibernateInterceptor flush handling
+* throw HibernateObjectRetrievalFailedException on Hibernate's ObjectDeletedException
 * added "jdbcExceptionTranslator" property to HibernateTemplate, allowing to set a SQLExceptionTranslator for SQL ex's
 * added "jdbcExceptionTranslator" property to HibernateTransactionManager, applied to flushing failures on commit
 * added "jdbcExceptionTranslator" parameter to SessionFactoryUtils.getSession, applied to transaction synchronizations
