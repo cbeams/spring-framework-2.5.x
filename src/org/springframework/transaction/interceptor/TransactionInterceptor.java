@@ -28,7 +28,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.16 2004-01-26 18:03:44 jhoeller Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.17 2004-02-04 17:10:13 jhoeller Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -104,10 +104,6 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		return transactionAttributeSource;
 	}
 
-	/**
-	 * Validate required properties
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
 	public void afterPropertiesSet() {
 		if (this.transactionManager == null) {
 			throw new IllegalArgumentException("transactionManager is required");
@@ -123,30 +119,32 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		// as well as the method, which may be from an interface
 		Class targetClass = (invocation.getThis() != null) ? invocation.getThis().getClass() : null;
 		
-		// If the transaction attribute is null, the method is non-transactional
+		// if the transaction attribute is null, the method is non-transactional
 		TransactionAttribute transAtt = this.transactionAttributeSource.getTransactionAttribute(invocation.getMethod(), targetClass);
 		TransactionStatus status = null;
 		TransactionStatus oldTransactionStatus = null;
 		
-		// Create transaction if necessary
+		// create transaction if necessary
 		if (transAtt != null) {
-			// We need a transaction for this method
+			// we need a transaction for this method
 			if (logger.isDebugEnabled()) {
-				logger.debug("Getting transaction for method '" + invocation.getMethod().getName() + "'");
+				logger.debug("Getting transaction for method '" + invocation.getMethod().getName() +
+				             "' in class [" + invocation.getMethod().getDeclaringClass().getName() + "]");
 			}
 			
-			// The transaction manager will flag an error if an incompatible tx already exists
+			// the transaction manager will flag an error if an incompatible tx already exists
 			status = this.transactionManager.getTransaction(transAtt);
 			
-			// Make the TransactionStatus available to callees
+			// make the TransactionStatus available to callees
 			oldTransactionStatus = (TransactionStatus) currentTransactionStatus.get();
 			currentTransactionStatus.set(status);
 		}
 		else {
-			// It isn't a transactional method
+			// it isn't a transactional method
 			if (logger.isDebugEnabled())
 				logger.debug("Don't need to create transaction for method '" + invocation.getMethod().getName() +
-				             "': this method isn't transactional");
+				             "' in class [" + invocation.getMethod().getDeclaringClass().getName() +
+				             "]: this method isn't transactional");
 		}
 
 		// Invoke the next interceptor in the chain.
@@ -156,7 +154,7 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 			retVal = invocation.proceed();
 		}
 		catch (Throwable ex) {
-			// Target invocation exception
+			// target invocation exception
 			if (status != null) {
 				onThrowable(invocation, transAtt, status, ex);
 			}
@@ -164,13 +162,14 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		}
 		finally {
 			if (transAtt != null) {
-				// Use stack to restore old transaction status if one was set
+				// use stack to restore old transaction status if one was set
 				currentTransactionStatus.set(oldTransactionStatus);
 			}
 		}
 		if (status != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking commit for transaction on method '" + invocation.getMethod().getName() + "'");
+				logger.debug("Invoking commit for transaction on method '" + invocation.getMethod().getName() +
+				             "' in class [" + invocation.getMethod().getDeclaringClass().getName() + "]");
 			}
 			this.transactionManager.commit(status);
 		}
@@ -185,7 +184,8 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	                         TransactionStatus status, Throwable ex) {
 		if (txAtt.rollbackOn(ex)) {
 			logger.info("Invoking rollback for transaction on method '" + invocation.getMethod().getName() +
-									"' due to throwable [" + ex + "]");
+									"' in class [" + invocation.getMethod().getDeclaringClass().getName() +
+			            "] due to throwable [" + ex + "]");
 			try {
 				this.transactionManager.rollback(status);
 			}
@@ -196,8 +196,9 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		}
 		else {
 			if (logger.isDebugEnabled())
-				logger.debug("Method '"	+ invocation.getMethod().getName()+ "' threw throwable ["	+ ex +
-				             "] but this does not force transaction rollback");
+				logger.debug("Method '"	+ invocation.getMethod().getName()+ "' in class [" +
+				             invocation.getMethod().getDeclaringClass().getName() +
+				             "] threw throwable [" + ex +	"] but this does not force transaction rollback");
 			// Will still roll back if rollbackOnly is true
 			this.transactionManager.commit(status);
 		}
