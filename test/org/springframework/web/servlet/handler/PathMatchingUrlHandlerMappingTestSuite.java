@@ -119,7 +119,6 @@ public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
 
-
 		req = new MockHttpServletRequest(null, "GET", "/administrator/testing/longer/bla");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
@@ -193,7 +192,13 @@ public class PathMatchingUrlHandlerMappingTestSuite extends TestCase {
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
 
+		req = new MockHttpServletRequest(null, "GET", "/test't est/path'm atching.html");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
 
+		req = new MockHttpServletRequest(null, "GET", "/test%26t%20est/path%26m%20atching.html");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
 	}
 
 	public void testDefaultMapping() throws Exception {

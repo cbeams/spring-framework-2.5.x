@@ -1,6 +1,8 @@
 package org.springframework.web.util;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +13,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -20,6 +25,8 @@ import org.springframework.beans.BeanUtils;
  * @author Juergen Hoeller
  */
 public abstract class WebUtils {
+
+	private static final Log logger = LogFactory.getLog(WebUtils.class);
 
 	/**
 	 * Web app root key parameter at the servlet context level
@@ -44,6 +51,8 @@ public abstract class WebUtils {
 	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
 	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.context_path";
 	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.servlet_path";
+
+	public static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";
 
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
@@ -140,6 +149,30 @@ public abstract class WebUtils {
 	}
 
 	/**
+	 * Decode the given source string with a URLEncoder. The encoding will be taken
+	 * from the request, falling back to the default "ISO-8859-1".
+	 * @param request current HTTP request
+	 * @param source the String to decode
+	 * @return the decoded String
+	 * @see #DEFAULT_CHARACTER_ENCODING
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding
+	 * @see java.net.URLDecoder
+	 */
+	public static String decodeRequestString(ServletRequest request, String source) {
+		String enc = request.getCharacterEncoding();
+		if (enc == null) {
+			enc = DEFAULT_CHARACTER_ENCODING;
+		}
+		try {
+			return URLDecoder.decode(source, enc);
+		}
+		catch (UnsupportedEncodingException ex) {
+			logger.warn("Could not decode request string [" + source + "] with encoding '" + enc + "'");
+			return source;
+		}
+	}
+
+	/**
 	 * Retrieve the first cookie with the given name. Note that multiple
 	 * cookies can have the same name but different paths or domains.
 	 * @param name cookie name
@@ -165,21 +198,56 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Return the correct request URI for the given request.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
+	 * Return the request URI for the given request, regarding an include request
+	 * URL if called within a RequestDispatcher include.
+	 * <p>As the value returned by request.getRequestURI() is <i>not</i> decoded by
+	 * the servlet container, this method will decode it.
 	 * <p>The URI that the web container resolves <i>should</i> be correct, but some
 	 * containers like JBoss/Jetty incorrectly include ";" strings like ";jsessionid"
 	 * in the URI. This method cuts off such incorrect appendices.
 	 * @param request current HTTP request
-	 * @return the correct request URI
+	 * @return the request URI
 	 */
 	public static String getRequestUri(HttpServletRequest request) {
 		String uri = (String) request.getAttribute(INCLUDE_URI_REQUEST_ATTRIBUTE);
 		if (uri == null) {
 			uri = request.getRequestURI();
 		}
+		uri = decodeRequestString(request, uri);
 		int semicolonIndex = uri.indexOf(';');
 		return (semicolonIndex != -1 ? uri.substring(0, semicolonIndex) : uri);
+	}
+
+	/**
+	 * Return the context path for the given request, regarding an include request
+	 * URL if called within a RequestDispatcher include.
+	 * <p>As the value returned by request.getContextPath() is <i>not</i> decoded by
+	 * the servlet container, this method will decode it.
+	 * @param request current HTTP request
+	 * @return the context path
+	 */
+	public static String getContextPath(HttpServletRequest request) {
+		String contextPath = (String) request.getAttribute(INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE);
+		if (contextPath == null) {
+			contextPath = request.getContextPath();
+		}
+		return decodeRequestString(request, contextPath);
+	}
+
+	/**
+	 * Return the servlet path for the given request, regarding an include request
+	 * URL if called within a RequestDispatcher include.
+	 * <p>As the value returned by request.getServletPath() is already decoded by
+	 * the servlet container, this method will not attempt to decode it.
+	 * @param request current HTTP request
+	 * @return the servlet path
+	 */
+	public static String getServletPath(HttpServletRequest request) {
+		String servletPath = (String) request.getAttribute(INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE);
+		if (servletPath == null) {
+			servletPath = request.getServletPath();
+		}
+		return decodeRequestString(request, servletPath);
 	}
 
 	/**
@@ -189,11 +257,7 @@ public abstract class WebUtils {
 	 * @return the path within the web application
 	 */
 	public static String getPathWithinApplication(HttpServletRequest request) {
-		String contextPath = (String) request.getAttribute(INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE);
-		if (contextPath == null) {
-			contextPath = request.getContextPath();
-		}
-		return getRequestUri(request).substring(contextPath.length());
+		return getRequestUri(request).substring(getContextPath(request).length());
 	}
 
 	/**
@@ -208,11 +272,7 @@ public abstract class WebUtils {
 	 * @return the path within the servlet mapping, or ""
 	 */
 	public static String getPathWithinServletMapping(HttpServletRequest request) {
-		String servletPath = (String) request.getAttribute(INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE);
-		if (servletPath == null) {
-			servletPath = request.getServletPath();
-		}
-		return getPathWithinApplication(request).substring(servletPath.length());
+		return getPathWithinApplication(request).substring(getServletPath(request).length());
 	}
 
 	/**
@@ -233,23 +293,12 @@ public abstract class WebUtils {
 		}
 		// else use path within current servlet mapping if applicable
 		String rest = WebUtils.getPathWithinServletMapping(request);
-		if (!"".equals(rest))
+		if (!"".equals(rest)) {
 			return rest;
-		else
+		}
+		else {
 			return WebUtils.getPathWithinApplication(request);
-	}
-
-	/**
-	 * Given a servlet path string, determine the directory within the WAR
-	 * this belongs to, ending with a /. For example, /cat/dog/test.html would be
-	 * returned as /cat/dog/. /test.html would be returned as /
-	 */
-	public static String getDirectoryForServletPath(String servletPath) {
-		// Arg will be of form /dog/cat.jsp. We want to see /dog/
-		if (servletPath == null || servletPath.indexOf("/") == -1)
-			return "/";
-		String left = servletPath.substring(0, servletPath.lastIndexOf("/") + 1);
-		return left;
+		}
 	}
 
 	/**

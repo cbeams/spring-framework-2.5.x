@@ -29,6 +29,7 @@
 				/reservation.html=mainController
 				/payment.html=mainController
 				/confirmation.html=mainController
+				/test%26t%20est/path%26m%20atching.html=mainController
 				*=starController
 			</value>
 		</property>
