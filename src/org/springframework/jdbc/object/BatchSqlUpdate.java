@@ -17,7 +17,10 @@ package org.springframework.jdbc.object;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -51,7 +54,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 	private final LinkedList parameterQueue = new LinkedList();
 
-	private final LinkedList rowsAffected = new LinkedList();
+	private final List rowsAffected = new ArrayList();
 
 
 	/**
@@ -199,8 +202,9 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 */
 	public int[] getRowsAffected() {
 		int[] result = new int[this.rowsAffected.size()];
-		for (int i = 0; i < this.rowsAffected.size(); i++) {
-			Integer rowCount = (Integer) this.rowsAffected.get(i);
+		int i = 0;
+		for (Iterator it = this.rowsAffected.iterator(); it.hasNext(); i++) {
+			Integer rowCount = (Integer) it.next();
 			result[i] = rowCount.intValue();
 		}
 		return result;
