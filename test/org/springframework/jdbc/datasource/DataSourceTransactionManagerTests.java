@@ -30,6 +30,8 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -47,111 +49,206 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class DataSourceTransactionManagerTests extends TestCase {
 	
-	public void testTransactionCommitRestoringAutoCommitToTrue() throws Exception {
-		doTestTransactionCommitRestoringAutoCommit(true);
+	public void testTransactionCommitWithAutoCommitTrue() throws Exception {
+		doTestTransactionCommitRestoringAutoCommit(true, false, false);
 	}
 	
-	public void testTransactionCommitWithAutoCommitToFalse() throws Exception {
-		doTestTransactionCommitRestoringAutoCommit(false);
+	public void testTransactionCommitWithAutoCommitFalse() throws Exception {
+		doTestTransactionCommitRestoringAutoCommit(false, false, false);
 	}
 
-	private void doTestTransactionCommitRestoringAutoCommit(final boolean autoCommit) throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		con.getAutoCommit();
-		conControl.setReturnValue(autoCommit, 1);
-		if (autoCommit) {
-			// Must disable autocommit
-			con.setAutoCommit(false);
-			conControl.setVoidCallable(1);
-		}
-		con.commit();
-		conControl.setVoidCallable(1);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		if (autoCommit) {
-			// must restore autoCommit
-			con.setAutoCommit(true);
-			conControl.setVoidCallable(1);
-		}
-		con.close();
-		conControl.setVoidCallable(1);
+	public void testTransactionCommitWithAutoCommitTrueAndLazyConnection() throws Exception {
+		doTestTransactionCommitRestoringAutoCommit(true, true, false);
+	}
+
+	public void testTransactionCommitWithAutoCommitFalseAndLazyConnection() throws Exception {
+		doTestTransactionCommitRestoringAutoCommit(false, true, false);
+	}
+
+	public void testTransactionCommitWithAutoCommitTrueAndLazyConnectionAndStatementCreated() throws Exception {
+		doTestTransactionCommitRestoringAutoCommit(true, true, true);
+	}
+
+	public void testTransactionCommitWithAutoCommitFalseAndLazyConnectionAndStatementCreated() throws Exception {
+		doTestTransactionCommitRestoringAutoCommit(false, true, true);
+	}
+
+	private void doTestTransactionCommitRestoringAutoCommit(
+			boolean autoCommit, boolean lazyConnection, final boolean createStatement)
+			throws Exception {
 
 		MockControl dsControl = MockControl.createControl(DataSource.class);
-		final DataSource ds = (DataSource) dsControl.getMock();
-		ds.getConnection();
-		dsControl.setReturnValue(con, 1);
+		DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
+
+		if (lazyConnection) {
+			ds.getConnection();
+			dsControl.setReturnValue(con, 1);
+			con.getAutoCommit();
+			conControl.setReturnValue(autoCommit, 1);
+			con.getTransactionIsolation();
+			conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED, 1);
+			con.close();
+			conControl.setVoidCallable(1);
+		}
+
+		if (!lazyConnection || createStatement) {
+			ds.getConnection();
+			dsControl.setReturnValue(con, 1);
+			con.getAutoCommit();
+			conControl.setReturnValue(autoCommit, 1);
+			if (autoCommit) {
+				// Must disable autocommit
+				con.setAutoCommit(false);
+				conControl.setVoidCallable(1);
+			}
+			if (createStatement) {
+				con.createStatement();
+				conControl.setReturnValue(null, 1);
+			}
+			con.commit();
+			conControl.setVoidCallable(1);
+			con.isReadOnly();
+			conControl.setReturnValue(false, 1);
+			if (autoCommit) {
+				// must restore autoCommit
+				con.setAutoCommit(true);
+				conControl.setVoidCallable(1);
+			}
+			con.close();
+			conControl.setVoidCallable(1);
+		}
+
 		conControl.replay();
 		dsControl.replay();
 
-		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final DataSource dsToUse = (lazyConnection ? new LazyConnectionDataSourceProxy(ds) : ds);
+		PlatformTransactionManager tm = new DataSourceTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
-		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(dsToUse));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
 				assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue("Is new transaction", status.isNewTransaction());
+				Connection tCon = DataSourceUtils.getConnection(dsToUse);
+				try {
+					if (createStatement) {
+						tCon.createStatement();
+						assertEquals(con, new CommonsDbcpNativeJdbcExtractor().getNativeConnection(tCon));
+					}
+				}
+				catch (SQLException ex) {
+					throw new UncategorizedSQLException("", "", ex);
+				}
 			}
 		});
 
-		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(dsToUse));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
 		conControl.verify();
 		dsControl.verify();
 	}
 	
-	public void testTransactionRollbackRestoringAutoCommitToTrue() throws Exception  {
-		doTestTransactionRollbackRestoringAutoCommit(true);
+	public void testTransactionRollbackWithAutoCommitTrue() throws Exception  {
+		doTestTransactionRollbackRestoringAutoCommit(true, false, false);
 	}
 	
 	public void testTransactionRollbackWithAutoCommitFalse() throws Exception  {
-		doTestTransactionRollbackRestoringAutoCommit(false);
+		doTestTransactionRollbackRestoringAutoCommit(false, false, false);
 	}
 
-	private void doTestTransactionRollbackRestoringAutoCommit(final boolean autoCommit) throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		con.getAutoCommit();
-		conControl.setReturnValue(autoCommit, 1);
-		if (autoCommit) {
-			// Must disable autocommit
-			con.setAutoCommit(false);
-			conControl.setVoidCallable(1);
-		}
-		con.rollback();
-		conControl.setVoidCallable(1);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		if (autoCommit) {
-			// Must restore autocommit
-			con.setAutoCommit(true);
-			conControl.setVoidCallable(1);
-		}
-		con.close();
-		conControl.setVoidCallable(1);
+	public void testTransactionRollbackWithAutoCommitTrueAndLazyConnection() throws Exception  {
+		doTestTransactionRollbackRestoringAutoCommit(true, true, false);
+	}
+
+	public void testTransactionRollbackWithAutoCommitFalseAndLazyConnection() throws Exception  {
+		doTestTransactionRollbackRestoringAutoCommit(false, true, false);
+	}
+
+	public void testTransactionRollbackWithAutoCommitTrueAndLazyConnectionAndCreateStatement() throws Exception  {
+		doTestTransactionRollbackRestoringAutoCommit(true, true, true);
+	}
+
+	public void testTransactionRollbackWithAutoCommitFalseAndLazyConnectionAndCreateStatement() throws Exception  {
+		doTestTransactionRollbackRestoringAutoCommit(false, true, true);
+	}
+
+	private void doTestTransactionRollbackRestoringAutoCommit(
+			boolean autoCommit, boolean lazyConnection, final boolean createStatement) throws Exception {
 
 		MockControl dsControl = MockControl.createControl(DataSource.class);
-		final DataSource ds = (DataSource) dsControl.getMock();
-		ds.getConnection();
-		dsControl.setReturnValue(con, 1);
+		DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+
+		if (lazyConnection) {
+			ds.getConnection();
+			dsControl.setReturnValue(con, 1);
+			con.getAutoCommit();
+			conControl.setReturnValue(autoCommit, 1);
+			con.getTransactionIsolation();
+			conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED, 1);
+			con.close();
+			conControl.setVoidCallable(1);
+		}
+
+		if (!lazyConnection || createStatement) {
+			ds.getConnection();
+			dsControl.setReturnValue(con, 1);
+			con.getAutoCommit();
+			conControl.setReturnValue(autoCommit, 1);
+			if (autoCommit) {
+				// Must disable autocommit
+				con.setAutoCommit(false);
+				conControl.setVoidCallable(1);
+			}
+			if (createStatement) {
+				con.createStatement();
+				conControl.setReturnValue(null, 1);
+			}
+			con.rollback();
+			conControl.setVoidCallable(1);
+			con.isReadOnly();
+			conControl.setReturnValue(false, 1);
+			if (autoCommit) {
+				// Must restore autocommit
+				con.setAutoCommit(true);
+				conControl.setVoidCallable(1);
+			}
+			con.close();
+			conControl.setVoidCallable(1);
+		}
+
 		conControl.replay();
 		dsControl.replay();
 
-		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		final DataSource dsToUse = (lazyConnection ? new LazyConnectionDataSourceProxy(ds) : ds);
+		PlatformTransactionManager tm = new DataSourceTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
-		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(dsToUse));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		final RuntimeException ex = new RuntimeException("Application exception");
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
 					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue("Is new transaction", status.isNewTransaction());
+					Connection con = DataSourceUtils.getConnection(dsToUse);
+					if (createStatement) {
+						try {
+							con.createStatement();
+						}
+						catch (SQLException ex) {
+							throw new UncategorizedSQLException("", "", ex);
+						}
+					}
 					throw ex;
 				}
 			});
@@ -397,10 +494,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testTransactionWithIsolation() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		final Connection con = (Connection) conControl.getMock();
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
+
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
 		con.getTransactionIsolation();
@@ -411,7 +509,6 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(true, 1);
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
-		
 		con.commit();
 		conControl.setVoidCallable(1);
 		con.setAutoCommit(true);
@@ -422,6 +519,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
+
 		conControl.replay();
 		dsControl.replay();
 
@@ -442,19 +540,19 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testTransactionWithTimeout() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		final Connection con = (Connection) conControl.getMock();
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
 		MockControl psControl = MockControl.createControl(PreparedStatement.class);
 		PreparedStatement ps = (PreparedStatement) psControl.getMock();
+
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
 		con.getAutoCommit();
 		conControl.setReturnValue(true, 1);
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
-				
 		con.prepareStatement("some SQL statement");
 		conControl.setReturnValue(ps, 1);
 		ps.setQueryTimeout(10);
@@ -467,9 +565,10 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		con.close();
 		conControl.setVoidCallable(1);
+
+		psControl.replay();
 		conControl.replay();
 		dsControl.replay();
-		psControl.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -494,9 +593,57 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		psControl.verify();
 	}
 
+	public void testTransactionAwareDataSourceProxy() throws Exception {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
+
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		con.getAutoCommit();
+		conControl.setReturnValue(true, 1);
+		con.setAutoCommit(false);
+		conControl.setVoidCallable(1);
+		con.commit();
+		conControl.setVoidCallable(1);
+		con.setAutoCommit(true);
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		conControl.replay();
+		dsControl.replay();
+
+		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				// something transactional
+				assertEquals(con, DataSourceUtils.getConnection(ds));
+				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
+				try {
+					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
+					assertEquals(con, new CommonsDbcpNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
+					// should be ignored
+					dsProxy.getConnection().close();
+				}
+				catch (SQLException ex) {
+					throw new UncategorizedSQLException("", "", ex);
+				}
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		conControl.verify();
+		dsControl.verify();
+	}
+
 	/**
-	 * Test behaviour if the first operation on a connection (getAutoCommit) throws SQLException
-	 * @throws Exception
+	 * Test behavior if the first operation on a connection (getAutoCommit) throws SQLException.
 	 */
 	public void testTransactionWithExceptionOnBegin() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);

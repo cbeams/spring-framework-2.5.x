@@ -251,7 +251,20 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * If set, this will override corresponding settings in Hibernate properties.
 	 * <p>Note: If this is set, the Hibernate settings should not define
 	 * a connection provider to avoid meaningless double configuration.
+	 * <p>If using HibernateTransactionManager as transaction strategy, consider
+	 * proxying your target DataSource with a LazyConnectionDataSourceProxy.
+	 * This defers fetching of an actual JDBC Connection until the first JDBC
+	 * Statement gets executed, even within JDBC transactions (as performed by
+	 * HibernateTransactionManager). Such lazy fetching is particularly beneficial
+	 * for read-only operations, in particular if the chances of resolving the
+	 * result in the second-level cache are high.
+	 * <p>As JTA and transactional JNDI DataSources already provide lazy enlisting
+	 * of JDBC Connections, LazyConnectionDataSourceProxy does not add value with
+	 * JTA (i.e. Spring's JtaTransactionManager) as transaction strategy.
 	 * @see LocalDataSourceConnectionProvider
+	 * @see HibernateTransactionManager
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
