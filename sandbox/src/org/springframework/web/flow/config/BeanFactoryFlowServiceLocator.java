@@ -42,6 +42,10 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	 * @return The bean factory used to lookup services.
 	 */
 	protected BeanFactory getBeanFactory() {
+		if (this.beanFactory == null) {
+			throw new IllegalStateException(
+					"The bean factory reference has not yet been set for this BeanFactoryServiceLocator - call setBeanFactory(bf)");
+		}
 		return beanFactory;
 	}
 
