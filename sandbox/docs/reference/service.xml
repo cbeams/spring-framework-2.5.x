@@ -10,9 +10,9 @@
         </para>
         <para>
         The server package introduces a ServiceBean interface that contains intialize, start, stop, and
-        destory lifecycle methods.  Classes that implement this interface can register with an a ServiceManager using the normal Spring mechanisms.
+        destory lifecycle methods.  Classes that implement this interface can register with a ServiceManager using the normal Spring configuration mechanism.
         The ServiceManager is a composite ServiceBean.  Calling a lifecycle method on the ServiceManager will call the lifecycle method on all its
-        registered ServiceBeans.  The order in which ServiceBeans are called is the order they are listed in the spring application configuration file.
+        registered ServiceBeans.  The order in which ServiceBeans are called is the order in which they are listed in the spring application configuration file.
         </para>
     </sect1>
     
