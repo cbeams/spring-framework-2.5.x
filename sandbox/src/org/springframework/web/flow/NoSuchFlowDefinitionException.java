@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow;
 
-
 /**
  * Thrown when a flow definition cannot be found.
  * 
@@ -70,5 +69,4 @@ public class NoSuchFlowDefinitionException extends ServiceLookupException {
 					+ "'; make sure there is a single Flow implementation of this type exported in the context";
 		}
 	}
-
 }

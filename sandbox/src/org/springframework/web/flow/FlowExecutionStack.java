@@ -40,10 +40,6 @@ import org.springframework.web.servlet.ModelAndView;
  * Default implementation of FlowExecution that uses a stack-based data
  * structure to manage flow executions.
  * <p>
- * A flow execution is managed by a client object, typically a web controller.
- * As a result, this client object is responsable for the creation and
- * maintenance of the flow execution.
- * <p>
  * This implementation of FlowExecution is Serializable so it can be safely
  * stored in an HTTP session.
  * 
@@ -55,7 +51,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	protected final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	/**
-	 * The unique, randomly machine generated flow execution identifier.
+	 * The unique, random machine-generated flow execution identifier.
 	 */
 	private String id;
 
@@ -192,7 +188,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	/**
 	 * Set the last event id processed by this flow execution. This will also
-	 * update the last event timestamp.
+	 * update the last event timestamp, which management clients can use to
+	 * monitor the activity of this execution to detect idle status.
 	 * @param eventId The last event id to set
 	 */
 	public void setLastEventId(String eventId) {
@@ -270,6 +267,13 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return this.rootFlow.getStartState().enter(this, request, response);
 	}
 
+	/*
+	 * Note: this entry point implementation is synchronized, locked on a per
+	 * client (session) basis for this flow execution. Synchronization prevents
+	 * a client from being able to signal other events before previously
+	 * signaled ones have processed in-full, preventing possible race
+	 * conditions.
+	 */
 	public synchronized ModelAndView signalEvent(String eventId, String stateId, HttpServletRequest request,
 			HttpServletResponse response) {
 		assertActive();
