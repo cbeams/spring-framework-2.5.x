@@ -15,8 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Properties;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -33,8 +32,13 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  */
 public class ActionStateAction {
-	
+
 	// predefined properties
+
+	/**
+	 * The name of a named action.
+	 */
+	public static final String NAME_PROPERTY = "name";
 
 	/**
 	 * The action caption (short description / tooltip) property.
@@ -47,10 +51,10 @@ public class ActionStateAction {
 	public static final String DESCRIPTION_PROPERTY = "description";
 
 	/**
-	 * The name of a named action.
+	 * Property storing ther name of the method that should be handle action
+	 * execution.
 	 */
-	public static final String NAME_PROPERTY = "name";
-
+	public static final String EXECUTE_METHOD_NAME_PROPERTY = "executeMethodName";
 
 	/**
 	 * The owning state that executes the action when entered.
@@ -63,14 +67,14 @@ public class ActionStateAction {
 	private Action targetAction;
 
 	/**
-	 * Contextual properties about the configured action's use within the
-	 * owning state.
+	 * Contextual properties about the configured action's use within the owning
+	 * state.
 	 */
-	private Map properties;
+	private Properties properties;
 
 	/**
-	 * Creates a new action state action-info object for the specified
-	 * action. No contextual properties are provided.
+	 * Creates a new action state action-info object for the specified action.
+	 * No contextual properties are provided.
 	 * @param state the owning state
 	 * @param targetAction the action
 	 */
@@ -79,26 +83,26 @@ public class ActionStateAction {
 	}
 
 	/**
-	 * Creates a new action state action-info object for the specified
-	 * action. The map of properties is provided.
+	 * Creates a new action state action-info object for the specified action.
+	 * The map of properties is provided.
 	 * @param state the owning state
 	 * @param targetAction the action
 	 * @param properties the properties describing usage of the action
 	 */
-	public ActionStateAction(ActionState state, Action targetAction, Map properties) {
+	public ActionStateAction(ActionState state, Action targetAction, Properties properties) {
 		Assert.notNull(state, "The action state is required");
 		this.state = state;
 		setTargetAction(targetAction);
 		if (properties != null) {
-			this.properties = new HashMap(properties);
+			this.properties = new Properties(properties);
 		}
 	}
-	
+
 	/**
-	 * Creates a new action state action-info object for the specified
-	 * action. No contextual properties are provided. The owning state is
-	 * not yet specified so this object should be associated with a
-	 * state later on using the <code>setState()</code> method.
+	 * Creates a new action state action-info object for the specified action.
+	 * No contextual properties are provided. The owning state is not yet
+	 * specified so this object should be associated with a state later on using
+	 * the <code>setState()</code> method.
 	 * @param targetAction the action
 	 */
 	public ActionStateAction(Action targetAction) {
@@ -106,17 +110,17 @@ public class ActionStateAction {
 	}
 
 	/**
-	 * Creates a new action state action-info object for the specified
-	 * action. The map of properties is provided. The owning state is
-	 * not yet specified so this object should be associated with a
-	 * state later on using the <code>setState()</code> method.
+	 * Creates a new action state action-info object for the specified action.
+	 * The map of properties is provided. The owning state is not yet specified
+	 * so this object should be associated with a state later on using the
+	 * <code>setState()</code> method.
 	 * @param targetAction the action
 	 * @param properties the properties describing usage of the action
 	 */
-	public ActionStateAction(Action targetAction, Map properties) {
+	public ActionStateAction(Action targetAction, Properties properties) {
 		setTargetAction(targetAction);
 		if (properties != null) {
-			this.properties = new HashMap(properties);
+			this.properties = new Properties(properties);
 		}
 	}
 
@@ -156,6 +160,15 @@ public class ActionStateAction {
 	}
 
 	/**
+	 * Sets the name of a named action. This is optional and can be
+	 * <code>null</code>.
+	 * @param name the action name
+	 */
+	public void setName(String name) {
+		setProperty(NAME_PROPERTY, name);
+	}
+
+	/**
 	 * Sets the short description for the action in the owning action state.
 	 * @param caption the caption
 	 */
@@ -172,12 +185,30 @@ public class ActionStateAction {
 	}
 
 	/**
-	 * Sets the name of a named action. This is optional and can be
-	 * <code>null</code>.
-	 * @param name the action name
+	 * Sets the name of the handler method on the target action instance to
+	 * invoke when this action is executed.
+	 * @param executeMethodName the method name, with the signature
+	 *        <code>Event ${methodName}(RequestContext context)</code>
 	 */
-	public void setName(String name) {
-		setProperty(NAME_PROPERTY, name);
+	public void setExecuteMethodName(String executeMethodName) {
+		setProperty(EXECUTE_METHOD_NAME_PROPERTY, executeMethodName);
+	}
+
+	/**
+	 * Returns the name of a named action, or <code>null</code> if the action
+	 * is unnamed in the owning state. Used when mapping action result events to
+	 * transitions.
+	 */
+	public String getName() {
+		return (String)getProperty(NAME_PROPERTY);
+	}
+
+	/**
+	 * Returns whether or not the wrapped target action is a named action in the
+	 * owning action state.
+	 */
+	public boolean isNamed() {
+		return StringUtils.hasText(getName());
 	}
 
 	/**
@@ -195,21 +226,12 @@ public class ActionStateAction {
 	}
 
 	/**
-	 * Returns the name of a named action, or <code>null</code> if the action
-	 * is unnamed in the owning state. Often used when mapping action result
-	 * events to transitions. Also used for dispatching multi-action executions
-	 * to target methods on the configured Action object.
+	 * Returns the name of the handler method to invoke on the target action
+	 * instance to handle action execution for this state.
+	 * @return the execute method name
 	 */
-	public String getName() {
-		return (String)getProperty(NAME_PROPERTY);
-	}
-	
-	/**
-	 * Returns whether or not the wrapped target action is a named action in
-	 * the owning action state.
-	 */
-	public boolean isNamed() {
-		return StringUtils.hasText(getName());
+	public String getExecuteMethodName() {
+		return (String)getProperty(EXECUTE_METHOD_NAME_PROPERTY);
 	}
 
 	/**
@@ -218,17 +240,17 @@ public class ActionStateAction {
 	 * @param propertyName the property name
 	 * @return the property value, or <code>null</code> if not found
 	 */
-	public Object getProperty(String propertyName) {
-		return getProperties().get(propertyName);
+	public String getProperty(String propertyName) {
+		return (String)getProperties().get(propertyName);
 	}
 
 	/**
 	 * Returns the properties associated with the target action in the owning
 	 * state.
 	 */
-	protected Map getProperties() {
+	protected Properties getProperties() {
 		if (properties == null) {
-			this.properties = new HashMap();
+			this.properties = new Properties();
 		}
 		return properties;
 	}
@@ -238,8 +260,8 @@ public class ActionStateAction {
 	 * @param propertyName the property name
 	 * @param value the property value
 	 */
-	public void setProperty(String propertyName, Object value) {
-		getProperties().put(propertyName, value);
+	public void setProperty(String propertyName, String value) {
+		getProperties().setProperty(propertyName, value);
 	}
 
 	public String toString() {

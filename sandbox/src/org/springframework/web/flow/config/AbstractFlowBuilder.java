@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow.config;
 
-import java.util.Map;
+import java.util.Properties;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -48,23 +48,23 @@ import org.springframework.web.flow.ViewState;
  * 	}
  * 
  * public void buildStates() {
- *                // get customer information
- *                addActionState(&quot;getDetails&quot;,
- *                    action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *                    on(success(), &quot;viewDetails&quot;));
- *                // view customer information               
- *                addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *                    on(submit(), &quot;bindAndValidate&quot;);
- *                // bind and validate customer information updates 
- *                addActionState(&quot;bindAndValidate&quot;,
- *                    action(&quot;customer.Detail.bindAndValidate&quot;),
- *                    new Transition[] {
- *                        on(error(), &quot;viewDetails&quot;),
- *                        on(success(), &quot;finish&quot;)
- *                    }
- *                // finish
- *                addEndState(&quot;finish&quot;);
- *              }}
+ *                  // get customer information
+ *                  addActionState(&quot;getDetails&quot;,
+ *                      action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *                      on(success(), &quot;viewDetails&quot;));
+ *                  // view customer information               
+ *                  addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *                      on(submit(), &quot;bindAndValidate&quot;);
+ *                  // bind and validate customer information updates 
+ *                  addActionState(&quot;bindAndValidate&quot;,
+ *                      action(&quot;customer.Detail.bindAndValidate&quot;),
+ *                      new Transition[] {
+ *                          on(error(), &quot;viewDetails&quot;),
+ *                          on(success(), &quot;finish&quot;)
+ *                      }
+ *                  // finish
+ *                  addEndState(&quot;finish&quot;);
+ *                }}
  * 
  * </pre>
  * 
@@ -420,27 +420,40 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Creates an named action state action suitable for adding to exactly one action
-	 * state.
+	 * Creates an named action state action suitable for adding to exactly one
+	 * action state.
 	 * @param name the action name
 	 * @param action the action
 	 * @return the action state action
 	 */
-	protected ActionStateAction name(String name, Action action) {
+	protected ActionStateAction name(Action action, String name) {
 		ActionStateAction stateAction = new ActionStateAction(action);
 		stateAction.setName(name);
 		return stateAction;
 	}
 
 	/**
+	 * Creates an action state action that has a property that indicates which
+	 * method should be invoked on the target action when the state is entered.
+	 * @param executeMethodName the method name, with the signature
+	 *        <code>Event ${methodName}(RequestContext context)</code>
+	 * @return the action state action
+	 */
+	protected ActionStateAction method(String executeMethodName, Action action) {
+		ActionStateAction stateAction = new ActionStateAction(action);
+		stateAction.setExecuteMethodName(executeMethodName);
+		return stateAction;
+	}
+
+	/**
 	 * Creates an action state action suitable for adding to exactly one action
-	 * state, wrapping the specified target action and annoated with te
+	 * state, wrapping the specified target action and annoated with the
 	 * specified properties.
 	 * @param action the action
 	 * @param properties the action state properties
 	 * @return the action state action
 	 */
-	protected ActionStateAction annotate(Action action, Map properties) {
+	protected ActionStateAction annotate(Action action, Properties properties) {
 		return new ActionStateAction(action, properties);
 	}
 
