@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Convenient class for simulating attributes.
  * @author Rod Johnson
- * @version $Id: MapAttributes.java,v 1.1 2003-12-12 16:54:29 johnsonr Exp $
+ * @version $Id: MapAttributes.java,v 1.1 2003-12-15 14:46:34 johnsonr Exp $
  */
 public class MapAttributes extends AbstractAttributes {
 	
