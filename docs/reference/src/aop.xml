@@ -413,7 +413,7 @@
 
           <para><programlisting>&lt;bean id="settersAndAbsquatulateAdvisor" 
     class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"&gt;
-    &lt;property name="advisor"&gt;
+    &lt;property name="advice"&gt;
         &lt;ref local="beanNameOfAopAllianceInterceptor"/&gt;
     &lt;/property&gt;
     &lt;property name="patterns"&gt;
