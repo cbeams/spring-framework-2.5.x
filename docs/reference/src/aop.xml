@@ -88,6 +88,10 @@
     		The commonest case is to create 
     	</para>
 
+		<para>
+    		The JPetStore sample application shipped with Spring shows the use of
+    		the TransactionProxyFactoryBean.
+    	</para>
     </sect1>
     
     
@@ -96,59 +100,111 @@
     	
     	<sect2 id="aop-autoproxy-1">
     		<title>Using the "autoproxy" facility</title>
-
+			<para>
+			So far we've considered explicit creation of AOP proxies using a
+			ProxyFactoryBean or similar factory bean.
+			</para>
+			<para>
+				Spring also allows us to use "autoproxy" bean definitions, which can automatically
+				proxy selected bean definitions.
+			</para>
+			<para>
+				This is built on Spring bean postProcessor infrastructure (REF). 
+			</para>
+    	</sect2>
+    	
+    	<sect2 id="aop-autoproxy-choices">
+    		<title>Autoproxy bean definitions</title>
+			<para>
+			Talk about bean name etc.
+			</para>
     	</sect2>
     	
     	
     	<sect2 id="aop-autoproxy-metadata">
     		<title>Using metadata-driven autoproxying</title>
-
+			<para>
+			A particularly important type of autoproxying is driven by metadata.
+			This produces a similar programming model to .NET ServicedComponents.
+			Instead of using XML deployment descriptors as in EJB, configuration for transaction management
+			and other enterprise services is held in source-level attributes.
+		</para>
+		
+		<para>
+			In this case, you use the AdvisorAutoProxyCreator, in combination with
+			Advisors that understand metadata attributes.
+			SHOW EXAMPLE
+		</para>
+		
+		<para>
+    		The <literal>/attributes</literal> directory of the JPetStore sample application
+    		shows the use of attribute-driven autoproxying. In this case, there's no need
+    		to use the TransactionProxyFactoryBean. Simply defining transactional attributes
+    		on business objects is sufficient, because of the use of PP and pointcuts
+    		EXAMPLE
+    	</para>
+		
     	</sect2>
     	
 
     </sect1>
     
-    
-    <sect1 id="aop-advanced">
-    	<title>Advanced capabilities</title>
     	
-    	<sect2 id="aop-targetsource">
-    		<title>Using custom TargetSources</title>
-    		
-    		<para>
-    		define concept
-    		</para>
-    		
-    		<para>
-    			TargetSources can be used to support pooling, etc.
-    		</para>
+	<sect1 id="aop-targetsource">
+		<title>Using TargetSources</title>
+		
+		<para>
+		define concept
+		</para>
+		
+		<para>
+			TargetSources can be used to support pooling, etc.
+		</para>
+		
+		<sect2 id="aop-ts-swap">
+    		<title>Hot swappable target sources</title>
 
     	</sect2>
     	
-    	
-    	<sect2 id="aop-extensibility">
-    		<title>Defining new advice and advisor types</title>
-    		
-    		<para>
-    		Spring AOP is designed to be highly extensible. While the interception implementation
-    		strategy is presently used internally in all cases, it is possible to support
-    		arbitrary advice types in addition to interception around advice, before and throws advice
-    		(which are supported out of the box).
-    		</para>
-    	
-    		<para>
-    		The org.springframework.aop.framework.adapter package is an SPI package allowing
-    		support for new custom advice types to be added without changing the core
-    		framework.
-    		</para>
-    		
-    		<para>
-    		Please refer to this package's Javadocs for further information.
-    		</para>
+    	<sect2 id="aop-ts-pool">
+    		<title>Pooling target sources</title>
 
     	</sect2>
     	
+    	<sect2 id="aop-ts-prototype">
+    		<title>"Prototype" target sources</title>
 
-    </sect1>
+    	</sect2>
+    	
+    	<sect2 id="aop-ts-set">
+    		<title>Specifying target source when creating proxies</title>
+
+    	</sect2>
+
+	</sect1>
+    	
+    	
+    <sect1 id="aop-extensibility">
+		<title>Defining new advice and advisor types</title>
+		
+		<para>
+		Spring AOP is designed to be highly extensible. While the interception implementation
+		strategy is presently used internally in all cases, it is possible to support
+		arbitrary advice types in addition to interception around advice, before and throws advice
+		(which are supported out of the box).
+		</para>
+	
+		<para>
+		The <literal>org.springframework.aop.framework.adapter</literal> package is an SPI package allowing
+		support for new custom advice types to be added without changing the core
+		framework.
+		</para>
+		
+		<para>
+		Please refer to this package's Javadocs for further information.
+		</para>
+
+	</sect1>
+    	
 
 </chapter>
