@@ -129,6 +129,16 @@
 
 <!--
 	Event that will trigger this transition.
+	
+	The event name is of the form "[actionName'.']event". So
+	the name of the event that will trigger the transition is prepended with
+	the name of the action that signals the event. Both are concatenated using
+	a dot. So when you have an action with name "myAction" that signals an
+	event "ok", the event of the corresponding transition should be "myAction.ok".
+	
+	For the events signaled by an action that does not have a name, or events
+	signaled in a view state or a subflow state, the transition event is simply
+	the name of the event that triggers the transition ("ok" in the previous example).
 -->
 <!ATTLIST transition event CDATA #REQUIRED>
 
@@ -143,6 +153,15 @@
 <!ELEMENT action EMPTY>
 
 <!--
-	Name (bean id) of the action.
+	Name of the action. This is optional. When not specified, the action will
+	not have any name and the events signaled by the action will not get the
+	action name prepended to them.
 -->
-<!ATTLIST action name CDATA #REQUIRED>
+<!ATTLIST action name CDATA #IMPLIED>
+
+<!--
+	Id of the bean definition of the action in the application context
+	hierarchy linked with the flow. This is similar to the <ref bean="myBean"/>
+	notation of the Spring beans DTD.
+-->
+<!ATTLIST action bean CDATA #REQUIRED>

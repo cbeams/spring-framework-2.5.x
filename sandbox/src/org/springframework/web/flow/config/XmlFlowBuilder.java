@@ -44,6 +44,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String ACTION_ELEMENT = "action";
 
 	private static final String NAME_ATTRIBUTE = "name";
+	
+	private static final String BEAN_ATTRIBUTE = "bean";
 
 	private static final String VIEW_STATE_ELEMENT = "view-state";
 
@@ -191,9 +193,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	protected void parseAndAddActionState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
+		String[] actionNames = parseActionNames(element);
 		Action[] actions = parseActions(element);
 		Transition[] transitions = parseTransitions(element);
-		new ActionState(flow, id, actions, transitions);
+		new ActionState(flow, id, actionNames, actions, transitions);
 	}
 
 	protected void parseAndAddViewState(Flow flow, Element element) {
@@ -220,6 +223,28 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String viewName = parseViewName(element);
 		new EndState(flow, id, viewName);
 	}
+	
+	protected String[] parseActionNames(Element element) {
+		List actionNames = new LinkedList();
+		
+		NodeList childNodeList = element.getChildNodes();
+		for (int i=0; i < childNodeList.getLength(); i++) {
+			Node childNode = childNodeList.item(i);
+			if (childNode instanceof Element) {
+				Element childElement = (Element)childNode;
+				if (ACTION_ELEMENT.equals(childElement.getNodeName())) {
+					if (childElement.hasAttribute(NAME_ATTRIBUTE)) {
+						actionNames.add(childElement.getAttribute(NAME_ATTRIBUTE));
+					}
+					else {
+						actionNames.add(null);
+					}
+				}
+			}
+		}
+		
+		return (String[])actionNames.toArray(new String[actionNames.size()]);
+	}
 
 	protected Action[] parseActions(Element element) {
 		List actions = new LinkedList();
@@ -238,8 +263,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 
 	protected Action parseAction(Element element) {
-		String actionName = element.getAttribute(NAME_ATTRIBUTE);
-		return getFlowServiceLocator().getAction(actionName);
+		String bean = element.getAttribute(BEAN_ATTRIBUTE);
+		return getFlowServiceLocator().getAction(bean);
 	}
 
 	protected Transition[] parseTransitions(Element element) {
