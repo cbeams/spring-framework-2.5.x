@@ -33,28 +33,27 @@ import org.springframework.ui.jasperreports.JasperReportsUtils;
 /**
  * Extends <code>AbstractJasperReportsView</code> to provide basic rendering logic for
  * views that are fixed format, i.e. always PDF or always HTML.
- * <p/>
+ *
  * <p>Subclasses need to implement two template methods: <code>createExporter</code>
  * to create a JasperReports exporter for a specific output format, and
  * <code>useWriter</code> to determine whether to write text or binary content.
- * <p/>
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @since 1.1.5
  * @see #createExporter()
  * @see #useWriter() 
  */
 public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasperReportsView {
 
+	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
+
 	/**
-	 * Subclasses should implement this method to perform the actual rendering process.
-	 *
-	 * @param report the <code>JasperReport</code> to render
-	 * @param parameters the map containing report parameters
-	 * @param dataSource the <code>JRDataSource</code> containing the report data
-	 * @param response the HTTP response the report should be rendered to
-	 * @throws Exception if rendering failed
+	 * Perform rendering for a single Jasper Reports exporter,
+	 * i.e. a pre-defined output format.
 	 */
-	protected void renderReport(JasperReport report, Map parameters, JRDataSource dataSource, HttpServletResponse response)
+	protected void renderReport(
+			JasperReport report, Map parameters, JRDataSource dataSource, HttpServletResponse response)
 			throws Exception {
 
 		// Prepare report for rendering.
@@ -73,7 +72,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		else {
 			// Render report into local OutputStream.
 			// IE workaround: write into byte array first.
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
 			JasperReportsUtils.render(exporter, print, baos);
 
 			// Write content length (determined via byte array).
@@ -91,7 +90,6 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * which will be used to render the report to the HTTP response.
 	 * <p>The <code>useWriter</code> method determines whether the
 	 * output will be written as text or as binary content.
-	 *
 	 * @see #useWriter
 	 */
 	protected abstract JRAbstractExporter createExporter();
@@ -100,9 +98,9 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * Return whether to use a <code>java.io.Writer</code> to write text content
 	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
 	 * to write binary content to the response.
-	 *
 	 * @see javax.servlet.ServletResponse#getWriter
 	 * @see javax.servlet.ServletResponse#getOutputStream
 	 */
 	protected abstract boolean useWriter();
+
 }
