@@ -3,6 +3,8 @@
  */
 package org.springframework.binding;
 
+import org.springframework.binding.format.Formatter;
+
 /**
  * A service locator that process access to a registry storing shared type
  * converters and value formatters.

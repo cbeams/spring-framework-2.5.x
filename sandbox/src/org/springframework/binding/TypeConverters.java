@@ -7,7 +7,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.binding.formatters.NumberFormatter;
+import org.springframework.binding.format.Formatter;
+import org.springframework.binding.format.NumberFormatter;
 import org.springframework.core.io.Resource;
 
 /**
