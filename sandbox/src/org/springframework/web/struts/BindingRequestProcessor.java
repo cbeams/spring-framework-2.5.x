@@ -114,6 +114,7 @@ public class BindingRequestProcessor extends RequestProcessor {
 		if (form instanceof BindingActionForm) {
 			BindingActionForm baf = (BindingActionForm)form;
 			if (baf.hasErrors()) {
+				// add global action error instances from the Spring object errors collection
 				ActionErrors errors = (ActionErrors)request.getAttribute(Globals.ERROR_KEY);
 				if (errors == null) {
 					request.setAttribute(Globals.ERROR_KEY, baf.getActionErrors());

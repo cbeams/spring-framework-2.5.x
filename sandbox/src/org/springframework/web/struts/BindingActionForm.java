@@ -35,7 +35,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
 /**
- * A Struts action form adapter that uses Spring's more complete and advanced
+ * A thin Struts action form adapter that delegates to Spring's more complete and advanced
  * data binder and bind exception object underneath the covers to bind to POJOs
  * and manage rejected values.
  * <p>

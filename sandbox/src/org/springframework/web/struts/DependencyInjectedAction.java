@@ -43,12 +43,12 @@ public abstract class DependencyInjectedAction extends TemplateAction {
 					"Cannot use this Action except with a ConfigurableWebApplicationContext");
 
 			// Now we can autowire ourselves
-			ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext)getWebApplicationContext();
-			AutowireCapableBeanFactory acbf = cwac.getBeanFactory();
+			ConfigurableWebApplicationContext context = (ConfigurableWebApplicationContext)getWebApplicationContext();
+			AutowireCapableBeanFactory beanFactory = context.getBeanFactory();
 
 			// We can't perform dependency checking because of the inherited
 			// setServlet method (this method)
-			acbf.autowireBeanProperties(this, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
+			beanFactory.autowireBeanProperties(this, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 		}
 	}
 
