@@ -5,17 +5,42 @@
  
 package org.springframework.aop.framework;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Convenience superclass for configuration to do with creating proxies.
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.2 2003-12-01 18:28:24 johnsonr Exp $
+ * @version $Id: ProxyConfig.java,v 1.3 2003-12-02 09:36:46 johnsonr Exp $
  */
 public class ProxyConfig {
+	
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean proxyTargetClass;
 	
 	private boolean enableCglibSubclassOptimizations;
+	
+	/**
+	 * Should proxies obtained from this configuration expose
+	 * Invocation for the AopContext class to retrieve for targets?
+	 * The default is false, as enabling this property may
+	 * impair performance.
+	 */
+	private boolean exposeInvocation;
 
+	private boolean exposeProxy;
+
+	
+	public ProxyConfig() {
+	}
+
+	public void copyFrom(ProxyConfig other) {
+		this.enableCglibSubclassOptimizations = other.getEnableCglibSubclassOptimizations();
+		this.proxyTargetClass = other.proxyTargetClass;
+		this.exposeInvocation = other.exposeInvocation;
+		this.exposeProxy = other.exposeProxy;
+	}
 
 	public boolean getProxyTargetClass() {
 		return this.proxyTargetClass;
@@ -53,10 +78,37 @@ public class ProxyConfig {
 	public void setEnableCglibSubclassOptimizations(boolean enableCglibSubclassOptimizations) {
 		this.enableCglibSubclassOptimizations = enableCglibSubclassOptimizations;
 	}
+
+
+	/**
+	 * Set whether the AopContext class will be usable by target objects.
+	 * @param exposeInvocation The exposeInvocation to set
+	 */
+	public final void setExposeInvocation(boolean exposeInvocation) {
+		this.exposeInvocation = exposeInvocation;
+	}
+
+	/**
+	 * Return whether the AopContext class will be usable by target objects.
+	 */
+	public final boolean getExposeInvocation() {
+		return exposeInvocation;
+	}
+
+	public final boolean getExposeProxy() {
+		return this.exposeProxy;
+	}
+
+	public final void setExposeProxy(boolean exposeProxy) {
+		this.exposeProxy = exposeProxy;
+	}
 	
-	public void copyFrom(ProxyConfig other) {
-		this.enableCglibSubclassOptimizations = other.getEnableCglibSubclassOptimizations();
-		this.proxyTargetClass = other.proxyTargetClass;
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("exposeProxy=" + exposeProxy + "; ");
+		sb.append("exposeInvocation=" + exposeInvocation + "; ");
+		sb.append("enableCglibSubclassOptimizations=" + enableCglibSubclassOptimizations + "; ");
+		return sb.toString();
 	}
 
 }

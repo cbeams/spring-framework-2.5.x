@@ -13,8 +13,6 @@ import java.util.Set;
 
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.InterceptionAroundAdvisor;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
@@ -33,7 +31,7 @@ import org.springframework.util.StringUtils;
  * and Advisors, but doesn't actually implement AOP proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.11 2003-12-01 18:28:24 johnsonr Exp $
+ * @version $Id: AdvisedSupport.java,v 1.12 2003-12-02 09:36:46 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -58,9 +56,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		public void releaseTarget(Object target) {
 		}
 	};
-	
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 
 	/** 
@@ -80,17 +75,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	private TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
-	/**
-	 * Should proxies obtained from this configuration expose
-	 * Invocation for the AopContext class to retrieve for targets?
-	 * The default is false, as enabling this property may
-	 * impair performance.
-	 */
-	private boolean exposeInvocation;
-	
-	private boolean exposeProxy;
-	
-	private AdvisorChainFactory advisorChainFactory;
 	
 	private MethodInvocationFactory methodInvocationFactory;
 	
@@ -103,6 +87,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/** List of AdvisedSupportListener */
 	private LinkedList listeners = new LinkedList();
 	
+	private AdvisorChainFactory advisorChainFactory;
+	
 
 	/**
 	 * No arg constructor to allow use as a Java bean.
@@ -110,11 +96,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public AdvisedSupport() {
 		setAdvisorChainFactory(new HashMapCachingAdvisorChainFactory());
 		setMethodInvocationFactory(new SimpleMethodInvocationFactory());
-	}
-	
-	public AdvisedSupport(AdvisorChainFactory advisorChainFactory, MethodInvocationFactory methodInvocationFactory) {
-		setMethodInvocationFactory(methodInvocationFactory);
-		setAdvisorChainFactory(advisorChainFactory);
 	}
 	
 	/**
@@ -135,11 +116,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		listeners.remove(l);
 	}
 
-	public void setAdvisorChainFactory(AdvisorChainFactory advisorChainFactory) {
-		this.advisorChainFactory = advisorChainFactory;
-		addListener(advisorChainFactory);
-	}
-	
 	public void setTargetSource(TargetSource ts) {
 		if (isActive() && getEnableCglibSubclassOptimizations()) {
 			throw new AopConfigException("Can't change target with an optimized CGLIB proxy: it has it's own target");
@@ -158,14 +134,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return this.targetSource;
 	}
 	
+	public void setAdvisorChainFactory(AdvisorChainFactory advisorChainFactory) {
+		this.advisorChainFactory = advisorChainFactory;
+		addListener(advisorChainFactory);
+	}
+
 	/**
 	 * Return the AdvisorChainFactory associated with this ProxyConfig.
 	 */
 	public final AdvisorChainFactory getAdvisorChainFactory() {
 		return this.advisorChainFactory;
 	}
-
-
+	
 	/**
 	 * @return Returns the methodInvocationFactory.
 	 */
@@ -190,9 +170,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
 		copyFrom(other);
-		this.exposeInvocation = other.exposeInvocation;
 		this.targetSource = other.targetSource;
-		this.exposeProxy = other.exposeProxy;
 		setInterfaces((Class[]) other.interfaces.toArray(new Class[other.interfaces.size()]));
 		this.advisors = new LinkedList();
 		for (int i = 0; i < other.advisors.size(); i++) {
@@ -203,35 +181,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 
 	/**
-	 * Set whether the AopContext class will be usable by target objects.
-	 * @param exposeInvocation The exposeInvocation to set
-	 */
-	public final void setExposeInvocation(boolean exposeInvocation) {
-		this.exposeInvocation = exposeInvocation;
-	}
-
-	/**
-	 * Return whether the AopContext class will be usable by target objects.
-	 */
-	public final boolean getExposeInvocation() {
-		return exposeInvocation;
-	}
-	
-	public final boolean getExposeProxy() {
-		return this.exposeProxy;
-	}
-	
-	public final void setExposeProxy(boolean exposeProxy) {
-		this.exposeProxy = exposeProxy;
-	}
-	
-	/**
 	 * @return true if when there's no advice for a method, a final InvokerInterceptor
 	 * can be optimized out. This can't be done if the proxy or invocation is
 	 * exposed, as users might have written code that expects to get them.
 	 */
 	public final boolean canOptimizeOutEmptyAdviceChain() {
-		return !(exposeInvocation || exposeProxy);
+		return !(getExposeInvocation() || getExposeProxy());
 	}
 	
 	public void addInterceptor(Interceptor interceptor) {
@@ -488,8 +443,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		sb.append(this.interfaces.size() + " interfaces=[" + StringUtils.collectionToCommaDelimitedString(this.interfaces) + "]; ");
 		sb.append(this.advisors.size() + " pointcuts=[" + StringUtils.collectionToCommaDelimitedString(this.advisors) + "]; ");
 		sb.append("targetSource=[" + this.targetSource + "]; ");
-		sb.append("exposeInvocation=" + exposeInvocation + "; ");
-		sb.append("methodInvocationFactory=" + this.advisorChainFactory);
+		sb.append("advisorChainFactory=" + advisorChainFactory);
+		sb.append(super.toString());
 		return sb.toString();
 	}
 
