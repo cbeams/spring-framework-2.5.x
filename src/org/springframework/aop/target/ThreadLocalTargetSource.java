@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.SimpleIntroductionAdvisor;
+import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.DisposableBean;
  * <p>Cleanup is performed in the destroy() method from DisposableBean.
  *
  * @author Rod Johnson
- * @version $Id: ThreadLocalTargetSource.java,v 1.5 2003-12-14 23:02:23 johnsonr Exp $
+ * @version $Id: ThreadLocalTargetSource.java,v 1.6 2004-01-21 20:21:35 johnsonr Exp $
  */
 public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource implements ThreadLocalTargetSourceStats, DisposableBean {
 	
@@ -123,7 +123,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeTargetSource
 	 */
 	public InterceptionIntroductionAdvisor getStatsMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
-		return new SimpleIntroductionAdvisor(dii, ThreadLocalTargetSourceStats.class);
+		return new DefaultInterceptionIntroductionAdvisor(dii, ThreadLocalTargetSourceStats.class);
 	}
 
 }

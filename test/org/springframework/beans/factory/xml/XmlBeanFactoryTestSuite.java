@@ -35,7 +35,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.31 2004-01-20 11:26:44 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.32 2004-01-21 20:21:35 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 	
@@ -301,6 +301,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testBuildCollectionFromMixtureOfReferencesAndValues() throws Exception {
+		// Ensure that a test runner like Eclipse, that keeps the same JVM up,
+		// will get fresh static values
+		MixedCollectionBean.resetStaticState();
+		
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		//assertTrue("5 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 5);

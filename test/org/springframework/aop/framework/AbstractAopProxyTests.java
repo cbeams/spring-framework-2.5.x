@@ -28,7 +28,7 @@ import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.DefaultAfterReturningAdvisor;
 import org.springframework.aop.support.DefaultInterceptionAroundAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAroundAdvisor;
-import org.springframework.aop.support.SimpleIntroductionAdvisor;
+import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAfterReturningAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcutBeforeAdvisor;
@@ -42,7 +42,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.16 2004-01-12 16:56:48 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.17 2004-01-21 20:21:34 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -157,7 +157,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		target1.setAge(age1);
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		pf1.addAdvisor(new DefaultInterceptionAroundAdvisor(new NopInterceptor()));
-		pf1.addAdvisor(new SimpleIntroductionAdvisor(new TimestampIntroductionInterceptor()));
+		pf1.addAdvisor(new DefaultInterceptionIntroductionAdvisor(new TimestampIntroductionInterceptor()));
 		ITestBean tb = (ITestBean) target1;
 		
 		assertEquals(age1, tb.getAge());
@@ -668,7 +668,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		target.setAge(21);
 		ProxyFactory pc = new ProxyFactory(target);
 		try {
-			pc.addAdvisor(0, new SimpleIntroductionAdvisor(new TimestampIntroductionInterceptor(), ITestBean.class));
+			pc.addAdvisor(0, new DefaultInterceptionIntroductionAdvisor(new TimestampIntroductionInterceptor(), ITestBean.class));
 			fail("Shouldn't be able to add introduction advice introducing an unimplemented interface");
 		}
 		catch (AopConfigException ex) {
@@ -688,7 +688,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		target.setAge(21);
 		ProxyFactory pc = new ProxyFactory(target);
 		try {
-			pc.addAdvisor(0, new SimpleIntroductionAdvisor(new TimestampIntroductionInterceptor(), TestBean.class));
+			pc.addAdvisor(0, new DefaultInterceptionIntroductionAdvisor(new TimestampIntroductionInterceptor(), TestBean.class));
 			fail("Shouldn't be able to add introduction advice that introduces a class, rather than an interface");
 		}
 		catch (AopConfigException ex) {
@@ -707,7 +707,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		
 		TestBean target2 = new TestBean();
 		ProxyFactory pf2 = new ProxyFactory(target2);
-		pf2.addAdvisor(new SimpleIntroductionAdvisor(new TimestampIntroductionInterceptor()));
+		pf2.addAdvisor(new DefaultInterceptionIntroductionAdvisor(new TimestampIntroductionInterceptor()));
 		ITestBean proxy2 = (ITestBean) createProxy(pf2);
 		
 		HashMap h = new HashMap();

@@ -6,7 +6,7 @@
 package org.springframework.aop.target;
 
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.SimpleIntroductionAdvisor;
+import org.springframework.aop.support.DefaultInterceptionIntroductionAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.DisposableBean;
  * a destroy() method to close down their pool.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPoolingTargetSource.java,v 1.4 2003-12-30 01:07:12 jhoeller Exp $
+ * @version $Id: AbstractPoolingTargetSource.java,v 1.5 2004-01-21 20:21:35 johnsonr Exp $
  */
 public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTargetSource implements PoolingConfig, DisposableBean {
 	
@@ -96,9 +96,9 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeTarge
 	 * @return an IntroductionAdvisor that providing a mixin
 	 * exposing statistics about the pool maintained by this object
 	 */
-	public SimpleIntroductionAdvisor getPoolingConfigMixin() {
+	public DefaultInterceptionIntroductionAdvisor getPoolingConfigMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
-		return new SimpleIntroductionAdvisor(dii, PoolingConfig.class);
+		return new DefaultInterceptionIntroductionAdvisor(dii, PoolingConfig.class);
 	}
 
 }
