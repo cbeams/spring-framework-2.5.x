@@ -123,6 +123,137 @@ public interface MimeMessagePreparator {
 }
 			]]></programlisting>
 		</para>
+		<sect1 id="mail-usage">
+		<title>Using Spring mail abstraction</title>
+		
+		<para>
+			Let's assume there is a businness interface called <literal>OrderManager</literal>
+			
+			<programlisting><![CDATA[
+public interface OrderManager {
+	
+	void placeOrder(Order order);
+}
+			
+			]]></programlisting>
+			
+			and there is a use case that says that an email message with order number would
+			need to be generated and sent to a customer placing that order.
+			So for this purpose we want to use <literal>MailSender</literal> and
+			<literal>SimpleMailMessage</literal>
+			</para>
+			
+			<para>
+				<emphasis>Please note that as usual, we work with interfaces in the business code and let Spring IoC container
+				take care of wiring of all the collaborators for us.</emphasis>
+			</para>
+			
+			<para>
+				Here is the implementation of <literal>OrderManager</literal>
+				
+				<programlisting><![CDATA[
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+
+public class OrderManagerImpl implements OrderManager {
+
+	private MailSender mailSender;
+	private SimpleMailMessage message;
+
+	public void setMailSender(MailSender mailSender) {
+		this.mailSender = mailSender;
+	}
+
+	public void setMessage(SimpleMailMessage message) {
+		this.message = message;
+	}
+
+	public void placeOrder(Order order) {
+
+		//... * Do the businness calculations....
+		//... * Call the collaborators to persist the order
+
+		//Create a threadsafe "sandbox" of the message
+		SimpleMailMessage msg = new SimpleMailMessage(this.message);
+		msg.setTo(order.getCustomer().getEmailAddress());
+		msg.setText(
+			"Dear "
+				+ order.getCustomer().getFirstName()
+				+ order.getCustomer().getLastName()
+				+ ", thank you for placing order. Your order number is "
+				+ order.getOrderNumber());
+		try{
+			mailSender.send(msg);
+		}
+		catch(MailException ex) {
+			//log it and go on
+			System.err.println(ex.getMessage());			
+		}
+	}
+}
+			]]></programlisting>
+			
+			Here is the implementation of <literal>OrderManager</literal> using <literal>MimeMessagePreparator</literal>
+			callback interface. Please note that the mailSender property is of type <literal>JavaMailSender</literal>
+			in this case in order to be able to use JavaMail MimeMessage:
+			<programlisting><![CDATA[
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
+import javax.mail.internet.MimeMessage;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessagePreparator;
+
+public class OrderManagerImpl implements OrderManager {
+
+	private JavaMailSender mailSender;
+	private SimpleMailMessage message;
+
+	public void setMailSender(JavaMailSender mailSender) {
+		this.mailSender = mailSender;
+	}
+
+	public void placeOrder(final Order order) {
+
+		//... * Do the businness calculations....
+		//... * Call the collaborators to persist the order
+		
+		
+		MimeMessagePreparator preparator = new MimeMessagePreparator() {
+			public void prepare(MimeMessage mimeMessage) throws MessagingException {
+				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(order.getCustomer().getEmailAddress()));
+				mimeMessage.setFrom(new InternetAddress("mail@mycompany.com"));
+				mimeMessage.setText(
+					"Dear "
+						+ order.getCustomer().getFirstName()
+						+ order.getCustomer().getLastName()
+						+ ", thank you for placing order. Your order number is "
+						+ order.getOrderNumber());
+			}
+		};
+		try{
+			mailSender.send(preparator);
+		}
+		catch(MailException ex) {
+			//log it and go on
+			System.err.println(ex.getMessage());			
+		}
+	}
+}
+			]]></programlisting>
+			</para>
+			
+			<para>
+				If you want to use JavaMail MimeMessage to the full power you have <literal>MimeMessagePreparator</literal> at
+				your fingertips
+			</para>
+			
+			
+				
 		
 </chapter>
 
