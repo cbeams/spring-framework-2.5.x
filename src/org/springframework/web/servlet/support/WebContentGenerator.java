@@ -14,7 +14,7 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * Convenient superclass for any kind of web content generator,
  * like AbstractController and WebContentInterceptor.
  *
- * <p>Supports HTTP cache control options. The usage of respective
+ * <p>Supports HTTP cache control options. The usage of corresponding
  * HTTP headers can be determined via the "useExpiresHeader" and
  * "userCacheControlHeader" properties.
  *
@@ -23,7 +23,7 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * @see #setUseExpiresHeader
  * @see #setUseCacheControlHeader
  */
-public class WebContentGenerator extends WebApplicationObjectSupport {
+public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	public static final String METHOD_GET = "GET";
 
@@ -36,7 +36,7 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
-	/** Set of supported methods (GET, POST, etc). GET and POST by default. */
+	/** Set of supported methods. GET and POST by default. */
 	private Set	supportedMethods;
 
 	private boolean requireSession = false;
@@ -60,7 +60,7 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Set the HTTP methods that this controller should support.
+	 * Set the HTTP methods that this content generator should support.
 	 * Default is GET and POST.
 	 */
 	public final void setSupportedMethods(String[] supportedMethodsArray) {
@@ -141,7 +141,7 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Prevent the response being cached.
+	 * Prevent the response from being cached.
 	 * See www.mnot.net.cache docs.
 	 */
 	protected final void preventCaching(HttpServletResponse response) {
@@ -184,22 +184,22 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header
-			String hval = "max-age=" + seconds;
+			String headerValue = "max-age=" + seconds;
 			if (mustRevalidate) {
-				hval += ", must-revalidate";
+				headerValue += ", must-revalidate";
 			}
-			response.setHeader(HEADER_CACHE_CONTROL, hval);
+			response.setHeader(HEADER_CACHE_CONTROL, headerValue);
 		}
 	}
 
 	/**
-	 * Apply the given cache seconds and generate respective HTTP headers,
+	 * Apply the given cache seconds and generate corresponding HTTP headers,
 	 * i.e. allow caching for the given number of seconds in case of a positive
 	 * value, prevent caching if given a 0 value, do nothing else.
 	 * Does not tell the browser to revalidate the resource.
 	 * @param response current HTTP response
 	 * @param seconds positive number of seconds into the future that the
-	 * response should be cacheable for, 0 to prevent caching,
+	 * response should be cacheable for, 0 to prevent caching
 	 * @see #cacheForSeconds(javax.servlet.http.HttpServletResponse, int, boolean)
 	 */
 	protected final void applyCacheSeconds(HttpServletResponse response, int seconds) {
@@ -211,8 +211,8 @@ public class WebContentGenerator extends WebApplicationObjectSupport {
 	 * i.e. allow caching for the given number of seconds in case of a positive
 	 * value, prevent caching if given a 0 value, do nothing else.
 	 * @param response current HTTP response
-	 * @param seconds number of seconds into the future that the response
-	 * should be cacheable for
+	 * @param seconds positive number of seconds into the future that the
+	 * response should be cacheable for, 0 to prevent caching
 	 * @param mustRevalidate whether the client should revalidate the resource
 	 * (typically only necessary for controllers with last-modified support)
 	 */
