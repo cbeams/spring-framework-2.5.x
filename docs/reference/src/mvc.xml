@@ -851,7 +851,7 @@ public class SampleDelegate {
                 <programlisting><![CDATA[
 package samnples;
 
-public class TimeBasedAccessInterceptor implements HandlerInterceptor {
+public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
     private int openingTime;    
     private int closingTime;    
@@ -874,20 +874,7 @@ public class TimeBasedAccessInterceptor implements HandlerInterceptor {
             response.sendRedirect("http://host.com/outsideOfficeHours.html");
             return false;
         }
-    }
-    
-    public void postHandle(
-            HttpServletRequest request, 
-            HttpServletResponse response,
-            Object handler)
-    throws Exception {     // do nothing      }
-    
-    public void afterCompletion(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Object handler, 
-            Exception ex) 
-    throws Exception {     // do nothing      }
+    }    
 }
                 ]]></programlisting>
                 Any request coming in, will be intercepted by the
@@ -896,15 +883,267 @@ public class TimeBasedAccessInterceptor implements HandlerInterceptor {
                 to a static html file, saying for instance he can only access
                 the website during office hours.
             </para>
+            <para>
+                As you can see, Spring has an adapter to make it easy for
+                you to extend the <literal>HandlerInterceptor</literal>.
+            </para>
         </sect2>
 	</sect1>
 	
 	<sect1 id="mvc-viewresolver">
 		<title>Views and resolving them</title>
+        <para>
+            No MVC framework for web applications without a way to address
+            views. Spring provides view resolvers, which enable you to
+            - without tying yourself to a specific view technology - render
+            models in a browser. Out-of-the-box, Spring enables you to use
+            for example Java Server Pages, Velocity templates and XSLT views.
+        </para>
+        <para>
+            The two classes which are important to the way Spring handles views
+            are the <literal>ViewResolver</literal> and the <literal>View</literal>.
+            The <literal>View</literal> interface addresses the preparation of
+            the request and hands the request over to one of the view technologies.
+            The <literal>ViewResolver</literal> provides a mapping between
+            view names and actual views.
+        </para>
+        
+        <sect2 id="mvc-viewresolver-resolver">
+            <title>ViewResolvers</title>
+            <para>
+                As discussed before, all controllers in the SpringWeb framework,
+                return a <literal>ModelAndView</literal> instance. Views in Spring
+                are addressed by a view name and are resolved by a viewresolver.
+                Spring comes with a couple of view resolvers. We'll list most
+                of them as provided by the Spring framework and then provide a couple
+                of examples.
+            </para>
+            <table frame="all">
+                <title>View resolvers</title>
+                <tgroup cols="2">
+                    <colspec colname="c1" colwidth="1*"/>
+                    <colspec colname="c2" colwidth="2*"/>
+                    <thead>
+                        <row>
+                            <entry>ViewResolver</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>AbstractCachingViewResolver</entry>
+                            <entry>Abstract view resolver taking care of caching views.
+                                Lots of views need preparation before they can be used,
+                                extending from this viewresolver enables caching of views</entry>
+                        </row>
+                        <row>
+                            <entry>ResourceBundleViewResolver</entry>
+                            <entry>Implementation of ViewResolver that uses bean definitions in a 
+                                ResourceBundle, specified by the bundle basename. The bundle is 
+                                typically defined in a properties file, located in the classpath</entry>
+                        </row>
+                        <row>
+                            <entry>UrlBasedViewResolver</entry>
+                            <entry>Simple implementation of ViewResolver that allows for direct 
+                                resolution of symbolic view names to URLs, without explicit 
+                                mapping definition. This is appropriate if your symbolic names
+                                match the names of your view resources in a straightforward 
+                                manner, without the need for arbitrary mappings</entry>                            
+                        </row>
+                        <row>
+                            <entry>InternalResourceViewResolver</entry>
+                            <entry>Convenience subclass of UrlBasedViewResolver that supports 
+                                InternalResourceView (i.e. Servlets and JSPs), and subclasses
+                                like JstlView and TilesView. The view class for all views
+                                generated by this resolver can be specified via setViewClass.
+                                See UrlBasedViewResolver's javadocs for details</entry>
+                        </row>
+                        <row>
+                            <entry>VelocityViewResolver</entry>
+                            <entry>Convenience subclass of UrlBasedViewResolver that supports 
+                                VelocityView (i.e. Velocity templates) and custom subclasses of it</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <para>
+                When having JSP for a view technology you can use the for example the
+                <literal>UrlBasedViewResolver</literal>. This view resolver translates
+                view names to a URL and hands the request over the RequestDispatcher to
+                render the view.
+                <programlisting><![CDATA[
+                <bean id="viewResolver" 
+                    class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+                    <property name="prefix"><value>/WEB-INF/jsp/</value></property>
+                    <property name="suffix"><value>.jsp</value></property>
+                </bean>
+                ]]></programlisting>
+                When returning <literal>test</literal> as a viewname, this view resolver will
+                hand the request over to the RequestDispatcher that'll send the
+                request to <literal>/WEB-INF/jsp/test.jsp</literal>.
+            </para>
+            <para>
+                When mixing different view technologies in a webapplications, you
+                can use the ResourceBundleViewResolver:
+                <programlisting><![CDATA[
+                <bean id="viewResolver"
+                    class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+                    <property name="baseName"><value>views</value></property>
+                    <property name="defaultParentView"><value>parentView</value></property
+                ]]></programlisting>
+            </para>
+        </sect2>
 	</sect1>
 	
 	<sect1 id="mvc-localeresolver">
 		<title>Using locales</title>
+        <para>
+            Most parts of Spring's architecture support internalization, just
+            as the Spring web framework does. SpringWEB enables you to automatically
+            resolve messages using the client's locale. This is done through
+            the so-called <literal>LocaleResolver</literal>, that exists in a couple
+            of useful forms. Defining a localeresolver is pretty simple, just stick
+            it in your webapplication context and you're done. You have to make a 
+            decision where to retrieve the locale from however. There are a couple
+            of localeresolver to choose from.
+        </para>
+        <para>
+            Besides the resolving locales, you can also attach an interceptor to
+            the handlermapping (see <xref linkend="mvc-handlermapping-interceptor"/> for more info on that),
+            to change the locale based on for instance a parameter occurring in the
+            request.
+        </para>
+        <para>
+            When a request comes in, the DispatcherServlet looks for a locale resolver
+            and if it finds one it tries to use it and set the locale. Using the
+            <literal>RequestContext.getLocale()</literal> method, you can always
+            retrieve the locale that was resolved by the locale resolver.
+        </para>
+        <para>
+            Locale resolvers and interceptors are all defined in the
+            <literal>org.springframework.web.servlet.i18n</literal> package.            
+        </para>
+        
+        <sect2 id="mvc-localeresolver-acceptheader">
+            <title><literal>AcceptHeaderLocaleResolver</literal></title>
+            <para>
+                This locale resolver inspect the <literal>accept-language</literal>
+                header in the request that was sent by the browser of the client.
+                Usually this header field contains the locale of the client's
+                operating system.
+            </para>
+        </sect2>
+        
+        <sect2 id="mvc-localeresolver-cookie">
+            <title><literal>CookieLocaleResolver</literal></title>
+            <para>
+                This locale resolver inspect a Cookie that might exist on the
+                client, to see if there's a locale specified. If so, it uses
+                that specific locale. Using the properties of this locale resolver,
+                you can specify the name of the cookie, as well as the maximum age.
+                <programlisting><![CDATA[
+<bean id="localeResolver">
+    <property name="cookieName"><value>clientlanguage</value></property>
+    <!-- in seconds. If set to -1, the cookie is not persisted (deleted when browser shuts down) -->
+    <property name="cookieMaxAge"><value>100000</value></property>
+</bean>
+                ]]></programlisting>
+                This is an example of defining a CookieLocaleResolver.
+            </para>
+            <table frame="all">
+                <title>Special beans in the WebApplicationContext</title>
+                <tgroup cols="3">
+                    <colspec colname="c1" colwidth="1*"/>
+                    <colspec colname="c2" colwidth="1*"/>
+                    <colspec colname="c3" colwidth="3*"/>
+                    <thead>
+                        <row>
+                            <entry>Property</entry>
+                            <entry>Default</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>cookieName</entry>
+                            <entry>classname + LOCALE</entry>
+                            <entry>The name of the cookie</entry>
+                        </row>
+                        <row>
+                            <entry>cookieMaxAge</entry>
+                            <entry>Integer.MAX_INT</entry>
+                            <entry>The maximum time a cookie will stay persistent on the client. If -1 is specified,
+                                the cookie will not be persisted, at least, only until the client shuts down
+                                his or her browser</entry>
+                        </row>
+                        <row>
+                            <entry>cookiePath</entry>
+                            <entry>/</entry>
+                            <entry>Using this parameter, you can limit the visibility of the cookie
+                                to a certain part of your site. When cookiePath is specified, the
+                                cookie will only be visible to that path, and the paths below
+                            </entry>
+                        </row>
+                        
+                    </tbody>
+                </tgroup>
+            </table>
+            
+        </sect2>
+        
+        <sect2 id="mvc-localeresolver-session">
+            <title><literal>SessionLocaleResolver</literal></title>
+            <para>
+                Besides the CookieLocaleResolver and the AcceptHeaderLocaleResolver,
+                you can also use the <literal>SessionLocaleResolver</literal> to
+                retrieve locales from the session that might be associated to the
+                user's request.
+            </para>
+        </sect2>    
+        
+        <sect2 id="mvc-localeresolver-interceptor">
+            <title><literal>LocaleChangeInterceptor</literal></title>
+            <para>
+                You can build in changing of locales using the
+                <literal>LocaleChangeInterceptor</literal>. This interceptor
+                needs to be added to one of the handler mappings (see 
+                <xref linkend="mvc-handlermapping"/>) and it will detect a parameter
+                in the request and changes the locale (call <literal>setLocale()</literal>
+                on the LocaleResolver that also exists in the context).
+                <programlisting><![CDATA[
+<bean 
+        id="localeChangeInterceptor" 
+        class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+    <property name="paramName"><value>siteLanguage</value></property>
+</bean>
+        
+<bean
+        id="localeResolver"
+        class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>
+         
+<bean 
+        id="urlMapping" 
+        class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"> 
+    <property name="interceptors">
+        <list>
+            <ref local="localeChangeInterceptor"/>
+        </list>
+    </property>
+    <property name="mappings">
+        <props>
+            <prop key="/**/*.view">someController</prop>
+        </props>
+    </property>
+</bean>
+                ]]></programlisting>             
+                
+                All calls to all *.view resources containing a parameter
+                named <literal>siteLanguage</literal> will now change the locale.
+                So a call to <literal>http://www.sf.net/home.view?siteLanguage=nl</literal>
+                will change the site language to Dutch.
+            </para>
+        </sect2>
+            
 	</sect1>
 	
 	<sect1 id="mvc-themeresolver">
@@ -990,7 +1229,7 @@ public class TimeBasedAccessInterceptor implements HandlerInterceptor {
 			</para>
 		</sect2>
 		
-		<sect2 id="mvc.multipart-forms">
+		<sect2 id="mvc-multipart-forms">
 			<title>Handling a fileupload in a form</title>
 			<para>
 				After the MultipartResolver has finished doing its jobs, the request will be processed as any other.
