@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: BeanWrapperTestSuite.java,v 1.14 2004-03-18 03:01:16 trisberg Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.15 2004-03-18 14:56:18 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -824,6 +824,60 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals("listname2", bw.getPropertyValue("list[1].nestedIndexedBean.list[1].name"));
 		assertEquals("mapname1", bw.getPropertyValue("map['key1'].nestedIndexedBean.map[key1].name"));
 		assertEquals("mapname0", bw.getPropertyValue("map[key2].nestedIndexedBean.map[\"key2\"].name"));
+	}
+
+	public void testIndexedPropertiesWithDirectAccess() {
+		IndexedTestBean bean = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		TestBean tb0 = bean.getArray()[0];
+		TestBean tb1 = bean.getArray()[1];
+		TestBean tb2 = ((TestBean) bean.getList().get(0));
+		TestBean tb3 = ((TestBean) bean.getList().get(1));
+		TestBean tb4 = ((TestBean) bean.getMap().get("key1"));
+		TestBean tb5 = ((TestBean) bean.getMap().get("key2"));
+		assertEquals(tb0, bw.getPropertyValue("array[0]"));
+		assertEquals(tb1, bw.getPropertyValue("array[1]"));
+		assertEquals(tb2, bw.getPropertyValue("list[0]"));
+		assertEquals(tb3, bw.getPropertyValue("list[1]"));
+		assertEquals(tb4, bw.getPropertyValue("map[key1]"));
+		assertEquals(tb5, bw.getPropertyValue("map[key2]"));
+		assertEquals(tb4, bw.getPropertyValue("map['key1']"));
+		assertEquals(tb5, bw.getPropertyValue("map[\"key2\"]"));
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0]", tb5);
+		pvs.addPropertyValue("array[1]",tb4);
+		pvs.addPropertyValue("list[0]", tb3);
+		pvs.addPropertyValue("list[1]", tb2);
+		pvs.addPropertyValue("list[2]",tb0);
+		pvs.addPropertyValue("list[4]",tb1);
+		pvs.addPropertyValue("map[key1]", tb1);
+		pvs.addPropertyValue("map['key2']", tb0);
+		pvs.addPropertyValue("map[key5]", tb4);
+		pvs.addPropertyValue("map['key9']", tb5);
+		bw.setPropertyValues(pvs);
+		assertEquals(tb5, bean.getArray()[0]);
+		assertEquals(tb4, bean.getArray()[1]);
+		assertEquals(tb3, ((TestBean) bean.getList().get(0)));
+		assertEquals(tb2, ((TestBean) bean.getList().get(1)));
+		assertEquals(tb0, ((TestBean) bean.getList().get(2)));
+		assertEquals(null, ((TestBean) bean.getList().get(3)));
+		assertEquals(tb1, ((TestBean) bean.getList().get(4)));
+		assertEquals(tb1, ((TestBean) bean.getMap().get("key1")));
+		assertEquals(tb0, ((TestBean) bean.getMap().get("key2")));
+		assertEquals(tb4, ((TestBean) bean.getMap().get("key5")));
+		assertEquals(tb5, ((TestBean) bean.getMap().get("key9")));
+		assertEquals(tb5, bw.getPropertyValue("array[0]"));
+		assertEquals(tb4, bw.getPropertyValue("array[1]"));
+		assertEquals(tb3, bw.getPropertyValue("list[0]"));
+		assertEquals(tb2, bw.getPropertyValue("list[1]"));
+		assertEquals(tb0, bw.getPropertyValue("list[2]"));
+		assertEquals(null, bw.getPropertyValue("list[3]"));
+		assertEquals(tb1, bw.getPropertyValue("list[4]"));
+		assertEquals(tb1, bw.getPropertyValue("map[\"key1\"]"));
+		assertEquals(tb0, bw.getPropertyValue("map['key2']"));
+		assertEquals(tb4, bw.getPropertyValue("map[\"key5\"]"));
+		assertEquals(tb5, bw.getPropertyValue("map['key9']"));
 	}
 
 	public void testArrayToArrayConversion() throws PropertyVetoException {

@@ -363,12 +363,14 @@ public class FormControllerTestSuite extends TestCase {
 		request.addParameter("array[1].age", "name2");
 		request.addParameter("list[0].name", "name1");
 		request.addParameter("list[1].age", "name0");
+		request.addParameter("list[2]", "listobj");
+		request.addParameter("map[key1]", "mapobj1");
+		request.addParameter("map[key3]", "mapobj2");
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name: expected '" + formView + "', not '" + mv.getViewName() + "'",
 		mv.getViewName().equals(formView));
 
-		// Has bean
 		IndexedTestBean bean = (IndexedTestBean) mv.getModel().get(mc.getCommandName());
 		assertTrue("model is non null", bean != null);
 		assertEquals("name3", bean.getArray()[0].getName());
@@ -382,6 +384,10 @@ public class FormControllerTestSuite extends TestCase {
 		FieldError fe2 = errors.getFieldError("list[1].age");
 		assertTrue("Saved invalid value", fe2.getRejectedValue().equals("name0"));
 		assertTrue("Correct field", fe2.getField().equals("list[1].age"));
+
+		assertEquals("listobj", bean.getList().get(2));
+		assertEquals("mapobj1", bean.getMap().get("key1"));
+		assertEquals("mapobj2", bean.getMap().get("key3"));
 	}
 
 

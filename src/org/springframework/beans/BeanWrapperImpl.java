@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.30 2004-03-18 02:46:12 trisberg Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.31 2004-03-18 14:56:18 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -212,7 +212,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	private synchronized void doRegisterCustomEditor(Class requiredType, String propertyName, PropertyEditor propertyEditor) {
+	private void doRegisterCustomEditor(Class requiredType, String propertyName, PropertyEditor propertyEditor) {
 		if (this.customEditors == null) {
 			this.customEditors = new HashMap();
 		}
@@ -243,7 +243,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	private synchronized PropertyEditor doFindCustomEditor(Class requiredType, String propertyName) {
+	private PropertyEditor doFindCustomEditor(Class requiredType, String propertyName) {
 		if (this.customEditors == null) {
 			return null;
 		}
@@ -334,7 +334,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	private List getBeanWrappersForPropertyPath(String propertyPath) {
 		List beanWrappers = new ArrayList();
 		int pos = propertyPath.indexOf(NESTED_PROPERTY_SEPARATOR);
-		// Handle nested properties recursively
+		// handle nested properties recursively
 		if (pos > -1) {
 			String nestedProperty = propertyPath.substring(0, pos);
 			String nestedPath = propertyPath.substring(pos + 1);
@@ -451,13 +451,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 			BeanWrapper nestedBw = getBeanWrapperForPropertyPath(propertyName);
 			return nestedBw.getPropertyValue(getFinalPath(propertyName));
 		}
-
 		String[] tokens = getPropertyNameTokens(propertyName);
-		String canonicalName = tokens[0];
-		String actualName = tokens[1];
-		String key = tokens[2];
-
-		return getPropertyValue(canonicalName, actualName, key);
+		return getPropertyValue(tokens[0], tokens[1], tokens[2]);
 	}
 
 	private Object getPropertyValue(String propertyName, String actualName, String key) {
@@ -524,64 +519,108 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 			catch (FatalBeanException ex) {
 				// error in the nested path
-				throw new NotWritablePropertyException(propertyName, getWrappedClass());
+				throw new NotWritablePropertyException(propertyName, getWrappedClass(), ex);
 			}
 		}
+		String[] tokens = getPropertyNameTokens(propertyName);
+		setPropertyValue(tokens[0], tokens[1], tokens[2], value);
+	}
 
-		if (!isWritableProperty(propertyName)) {
-			throw new NotWritablePropertyException(propertyName, getWrappedClass());
-		}
-		PropertyDescriptor pd = getPropertyDescriptor(propertyName);
-		Method writeMethod = pd.getWriteMethod();
-		Object newValue = null;
-
-		try {
-			// old value may still be null
-			newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, pd.getPropertyType());
-
-			if (pd.getPropertyType().isPrimitive() &&
-					(newValue == null || "".equals(newValue))) {
-				throw new IllegalArgumentException("Invalid value [" + value + "] for property '" +
-							pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
+	private void setPropertyValue(String propertyName, String actualName, String key, Object value)
+			throws BeansException {
+		if (key != null) {
+			Object propValue = getPropertyValue(actualName);
+			if (propValue == null) {
+				throw new FatalBeanException("Cannot access indexed value in property referenced in indexed property path '" +
+																		 propertyName + "': returned null");
 			}
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("About to invoke write method [" + writeMethod +
-				             "] on object of class [" + object.getClass().getName() + "]");
+			else if (propValue.getClass().isArray()) {
+				Object[] array = (Object[]) propValue;
+				array[Integer.parseInt(key)] = value;
 			}
-
-			writeMethod.invoke(this.object, new Object[] { newValue });
-			if (logger.isDebugEnabled()) {
-				String msg = "Invoked write method [" + writeMethod + "] with value ";
-				// only cause toString invocation of new value in case of simple property
-				if (newValue == null || BeanUtils.isSimpleProperty(pd.getPropertyType())) {
-					logger.debug(msg + "[" + newValue + "]");
+			else if (propValue instanceof List) {
+				List list = (List) propValue;
+				int index = Integer.parseInt(key);
+				if (index < list.size()) {
+					list.set(index, value);
 				}
-				else {
-					logger.debug(msg + "of type [" + pd.getPropertyType().getName() + "]");
+				else if (index >= list.size()) {
+					for (int i = list.size(); i < index; i++) {
+						try {
+							list.add(null);
+						}
+						catch (NullPointerException ex) {
+							throw new FatalBeanException("Cannot set element with index " + index + " in List of size " +
+																					 list.size() + ", accessed using property path '" + propertyName +
+																					 "': List does not support filling up gaps with null elements");
+						}
+					}
+					list.add(value);
 				}
 			}
-		}
-		catch (InvocationTargetException ex) {
-			// TODO could consider getting rid of PropertyChangeEvents as exception parameters
-			// as they can never contain anything but null for the old value as we no longer
-			// support event propagation.
-			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
-																																				null, newValue);
-			if (ex.getTargetException() instanceof ClassCastException) {
-				throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
+			else if (propValue instanceof Map) {
+				Map map = (Map) propValue;
+				map.put(key, value);
 			}
 			else {
-				throw new MethodInvocationException(ex.getTargetException(), propertyChangeEvent);
+				throw new FatalBeanException("Property referenced in indexed property path '" + propertyName +
+																		 "' is neither an array nor a List nor a Map; returned value was [" + value + "]");
 			}
 		}
-		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to set property [" + value + "] threw exception", ex);
-		}
-		catch (IllegalArgumentException ex) {
-			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
-																																				null, newValue);
-			throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
+		else {
+			if (!isWritableProperty(propertyName)) {
+				throw new NotWritablePropertyException(propertyName, getWrappedClass());
+			}
+			PropertyDescriptor pd = getPropertyDescriptor(propertyName);
+			Method writeMethod = pd.getWriteMethod();
+			Object newValue = null;
+			try {
+				// old value may still be null
+				newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value, pd.getPropertyType());
+
+				if (pd.getPropertyType().isPrimitive() &&
+						(newValue == null || "".equals(newValue))) {
+					throw new IllegalArgumentException("Invalid value [" + value + "] for property '" +
+								pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
+				}
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("About to invoke write method [" + writeMethod +
+											 "] on object of class [" + object.getClass().getName() + "]");
+				}
+				writeMethod.invoke(this.object, new Object[] { newValue });
+				if (logger.isDebugEnabled()) {
+					String msg = "Invoked write method [" + writeMethod + "] with value ";
+					// only cause toString invocation of new value in case of simple property
+					if (newValue == null || BeanUtils.isSimpleProperty(pd.getPropertyType())) {
+						logger.debug(msg + "[" + newValue + "]");
+					}
+					else {
+						logger.debug(msg + "of type [" + pd.getPropertyType().getName() + "]");
+					}
+				}
+			}
+			catch (InvocationTargetException ex) {
+				// TODO could consider getting rid of PropertyChangeEvents as exception parameters
+				// as they can never contain anything but null for the old value as we no longer
+				// support event propagation.
+				PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
+																																					null, newValue);
+				if (ex.getTargetException() instanceof ClassCastException) {
+					throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
+				}
+				else {
+					throw new MethodInvocationException(ex.getTargetException(), propertyChangeEvent);
+				}
+			}
+			catch (IllegalAccessException ex) {
+				throw new FatalBeanException("Illegal attempt to set property [" + value + "] threw exception", ex);
+			}
+			catch (IllegalArgumentException ex) {
+				PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
+																																					null, newValue);
+				throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
+			}
 		}
 	}
 
