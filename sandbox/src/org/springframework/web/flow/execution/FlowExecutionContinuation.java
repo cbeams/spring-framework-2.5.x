@@ -22,7 +22,10 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.flow.FlowExecution;
 
 /**
@@ -34,15 +37,19 @@ import org.springframework.web.flow.FlowExecution;
 public class FlowExecutionContinuation implements Serializable {
 	
 	private byte[] data;
+	private boolean compressed;
 	
 	/**
 	 * Create a new flow execution continuation using given data,
 	 * which should be a serialized representation of a 
 	 * <code>FlowExecution</code> object.
 	 * @param data serialized flow execution data
+	 * @param compressed indicates whether or not given data is compressed
+	 *        (using GZIP compression)
 	 */
-	public FlowExecutionContinuation(byte[] data) {
+	public FlowExecutionContinuation(byte[] data, boolean compressed) {
 		this.data = data;
+		this.compressed = compressed;
 	}
 	
 	/**
@@ -50,14 +57,23 @@ public class FlowExecutionContinuation implements Serializable {
 	 * @param flowExecution the flow execution to wrap
 	 * @throws FlowExecutionStorageException when the flow execution cannot
 	 *         be serialized
+	 * @param compress indicates whether or not the flow execution continuation
+	 *        should compress its state.
 	 */
-	public FlowExecutionContinuation(FlowExecution flowExecution) throws FlowExecutionStorageException {
+	public FlowExecutionContinuation(FlowExecution flowExecution, boolean compress)
+			throws FlowExecutionStorageException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
 			oos.writeObject(flowExecution);
 			oos.flush();
-			this.data = baos.toByteArray();
+			if (compress) {
+				this.data = compress(baos.toByteArray());
+			}
+			else {
+				this.data = baos.toByteArray();
+			}
+			this.compressed = compress;
 		}
 		catch (NotSerializableException e) {
 			throw new FlowExecutionStorageException(
@@ -72,11 +88,11 @@ public class FlowExecutionContinuation implements Serializable {
 	/**
 	 * Returns a clone of the flow execution wrapped by this object.
 	 * @throws FlowExecutionStorageException when the flow execution cannot
-	 *         be restored.
+	 *         be restored
 	 */
 	public FlowExecution getFlowExecution() throws FlowExecutionStorageException {
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(getData(true)));
 			return (FlowExecution)ois.readObject();
 		}
 		catch (IOException e) {
@@ -92,9 +108,54 @@ public class FlowExecutionContinuation implements Serializable {
 	/**
 	 * Returns the binary representation of the flow execution continuation.
 	 * This is actually a serialized version of the continuation.
+	 * @param decompress indicates whether or not the data should be decompressed
+	 *        (when it's compressed) before returning it
 	 * @return the serialized flow execution data
+	 * @throws FlowExecutionStorageException when the flow execution data
+	 *         cannot be obtained
 	 */
-	public byte[] getData() {
-		return data;
+	public byte[] getData(boolean decompress) throws FlowExecutionStorageException {
+		if (isCompressed() && decompress) {
+			try {
+				return decompress(data);
+			}
+			catch (IOException e) {
+				throw new FlowExecutionStorageException(
+						"Cannot decompress flow execution continuation data -- this should not happen!", e);
+			}
+		}
+		else {
+			return data;
+		}
+	}
+	
+	/**
+	 * Returns whether or not this flow execution continuation is compressed.
+	 */
+	public boolean isCompressed() {
+		return compressed;
+	}
+	
+	/**
+	 * Internal helper method to compress given data using GZIP compression.
+	 */
+	private byte[] compress(byte[] dataToCompress) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		GZIPOutputStream gzipos = new GZIPOutputStream(baos);
+		gzipos.write(dataToCompress);
+		gzipos.flush();
+		gzipos.close();
+		return baos.toByteArray();
+	}
+	
+	/**
+	 * Internal helper method to decompress given data using GZIP decompression.
+	 */
+	private byte[] decompress(byte[] dataToDecompress) throws IOException {
+		GZIPInputStream gzipin = new GZIPInputStream(new ByteArrayInputStream(dataToDecompress));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		FileCopyUtils.copy(gzipin, baos);
+		gzipin.close();
+		return baos.toByteArray();
 	}
 }

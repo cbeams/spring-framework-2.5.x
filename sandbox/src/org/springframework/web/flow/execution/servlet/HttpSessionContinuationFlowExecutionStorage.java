@@ -42,6 +42,22 @@ import org.springframework.web.util.WebUtils;
  */
 public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlowExecutionStorage {
 
+	private boolean compress = false;
+	
+	/**
+	 * Returns whether or not continuations should be compressed.
+	 */
+	public boolean isCompress() {
+		return compress;
+	}
+	
+	/**
+	 * Set whether or not continuations should be compressed.
+	 */
+	public void setCompress(boolean compress) {
+		this.compress = compress;
+	}
+
 	public FlowExecution load(String id, Event requestingEvent) throws NoSuchFlowExecutionException,
 			FlowExecutionStorageException {
 		try {
@@ -58,11 +74,15 @@ public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlow
 			throws FlowExecutionStorageException {
 		// generate a new id for each continuation!
 		id = createId();
-		getHttpSession(requestingEvent).setAttribute(id, new FlowExecutionContinuation(flowExecution));
+		getHttpSession(requestingEvent).setAttribute(id, new FlowExecutionContinuation(flowExecution, isCompress()));
 		return id;
 	}
 
 	public void remove(String id, Event requestingEvent) throws FlowExecutionStorageException {
-		getHttpSession(requestingEvent).removeAttribute(id);
+		// nothing to do
+		// note that we shouldn't remove the identified flow execution continuation
+		// because that id actually identifies the 'previous' flow execution, not the
+		// one that has ended (because that one is never saved so doesn't even have
+		// an id!)
 	}
 }

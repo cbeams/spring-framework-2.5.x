@@ -53,6 +53,22 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * @author Erwin Vervaet
  */
 public class ClientContinuationFlowExecutionStorage implements FlowExecutionStorage {
+	
+	private boolean compress = false;
+	
+	/**
+	 * Returns whether or not continuations should be compressed.
+	 */
+	public boolean isCompress() {
+		return compress;
+	}
+	
+	/**
+	 * Set whether or not continuations should be compressed.
+	 */
+	public void setCompress(boolean compress) {
+		this.compress = compress;
+	}
 
 	public FlowExecution load(String id, Event requestingEvent) throws NoSuchFlowExecutionException,
 			FlowExecutionStorageException {
@@ -77,7 +93,7 @@ public class ClientContinuationFlowExecutionStorage implements FlowExecutionStor
 	 * execution.
 	 */
 	protected FlowExecution decode(String data) {
-		return new FlowExecutionContinuation(Base64.decodeBase64(data.getBytes())).getFlowExecution();
+		return new FlowExecutionContinuation(Base64.decodeBase64(data.getBytes()), isCompress()).getFlowExecution();
 	}
 
 	/**
@@ -88,7 +104,7 @@ public class ClientContinuationFlowExecutionStorage implements FlowExecutionStor
 	 * class just does a BASE64 encoding of the serialized flow execution.
 	 */
 	protected String encode(FlowExecution flowExecution) {
-		byte[] data = new FlowExecutionContinuation(flowExecution).getData();
+		byte[] data = new FlowExecutionContinuation(flowExecution, isCompress()).getData(false);
 		return new String(Base64.encodeBase64(data));
 	}
 }
