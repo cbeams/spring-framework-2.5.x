@@ -38,8 +38,8 @@ public class Transition implements Serializable {
 	private String toState;
 
 	public Transition(String id, String toState) {
-		Assert.notNull(id, "The id is required");
-		Assert.notNull(toState, "The state is required");
+		Assert.notNull(id, "The id property is required");
+		Assert.notNull(toState, "The toState property is required");
 		this.id = id;
 		this.toState = toState;
 	}
@@ -55,14 +55,14 @@ public class Transition implements Serializable {
 	public ViewDescriptor execute(Flow flow, TransitionableState fromState, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
 		assertActiveFlow(sessionExecution, flow);
-		assertCurrentState(sessionExecution, fromState);
+		updateCurrentStateIfNeccessary(sessionExecution, fromState);
 		String qualifiedActiveFlowId = null;
 		if (logger.isDebugEnabled()) {
 			qualifiedActiveFlowId = sessionExecution.getQualifiedActiveFlowId();
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Event '" + getId() + "' within state '" + fromState.getId() + "' for flow '"
-					+ qualifiedActiveFlowId + "' was signaled; processing...");
+					+ qualifiedActiveFlowId + "' signaled; processing...");
 		}
 		sessionExecution.setLastEventId(getId());
 
@@ -85,13 +85,13 @@ public class Transition implements Serializable {
 
 			if (logger.isDebugEnabled()) {
 				if (sessionExecution.isActive()) {
-					logger.debug("Event '" + getId() + "' within now previous state '" + fromState.getId()
+					logger.debug("Event '" + getId() + "' within last state '" + fromState.getId()
 							+ "' for flow '" + qualifiedActiveFlowId
 							+ "' was processed; as a result, the new state is '" + sessionExecution.getCurrentStateId()
 							+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
 				}
 				else {
-					logger.debug("Event '" + getId() + "' within now previous state '" + fromState.getId()
+					logger.debug("Event '" + getId() + "' within last state '" + fromState.getId()
 							+ "' for flow '" + qualifiedActiveFlowId
 							+ "' was processed; as a result, flow session execution has ended");
 				}
@@ -105,17 +105,22 @@ public class Transition implements Serializable {
 
 	protected void assertActiveFlow(FlowSessionExecution sessionExecution, Flow flow) {
 		if (!flow.getId().equals(sessionExecution.getActiveFlowId())) {
-			throw new IllegalStateException("Assertion failed - the flow parameter ID '" + flow.getId()
+			throw new IllegalStateException("Assertion failed - the flow ID '" + flow.getId()
 					+ "' must equal the active flow ID '" + sessionExecution.getActiveFlowId()
 					+ "' for this flow session execution");
 		}
 	}
 
-	protected void assertCurrentState(FlowSessionExecution sessionExecution, TransitionableState fromState) {
+	protected void updateCurrentStateIfNeccessary(FlowSessionExecutionStack sessionExecution,
+			TransitionableState fromState) {
 		if (!fromState.getId().equals(sessionExecution.getCurrentStateId())) {
-			throw new IllegalStateException("Assertion failed - the from state parameter ID '" + fromState.getId()
-					+ "' must equal the current state ID '" + sessionExecution.getCurrentStateId()
-					+ "' for this flow session execution");
+			if (logger.isInfoEnabled()) {
+				logger.info("Event '" + getId() + "' in state '" + fromState.getId()
+						+ "' was signaled by client; however the current flow session execution state is '"
+						+ sessionExecution.getCurrentStateId() + "'; updating current state to '" + fromState.getId()
+						+ "'");
+			}
+			sessionExecution.setCurrentStateId(fromState.getId());
 		}
 	}
 

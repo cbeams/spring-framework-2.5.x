@@ -695,9 +695,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 		Assert.isTrue(sessionExecution.isActive(),
 				"The currently executing flow stack is not active - this should not happen");
 		Flow activeFlow = getActiveFlow(sessionExecution);
-		TransitionableState currentState = activeFlow.getRequiredTransitionableState(stateId);
-		ViewDescriptor viewDescriptor = currentState.execute(eventId, activeFlow,
-				(FlowSessionExecutionStack)sessionExecution, request, response);
+		TransitionableState state = activeFlow.getRequiredTransitionableState(stateId);
+		ViewDescriptor viewDescriptor = state.execute(eventId, activeFlow, (FlowSessionExecutionStack)sessionExecution,
+				request, response);
 		return viewDescriptor;
 	}
 
@@ -2047,7 +2047,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public String attributesMapper(String attributesMapperBeanNamePrefix) {
 		if (!attributesMapperBeanNamePrefix.endsWith(ATTRIBUTES_MAPPER_ID_SUFFIX)) {
 			return attributesMapperBeanNamePrefix + "." + ATTRIBUTES_MAPPER_ID_SUFFIX;
-		} else {
+		}
+		else {
 			return attributesMapperBeanNamePrefix;
 		}
 	}
