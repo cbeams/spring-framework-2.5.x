@@ -42,13 +42,12 @@ import java.sql.Statement;
  * flags to true. If none of the statement types is wrapped - or you solely need
  * Connection unwrapping in the first place -, the defaults are fine.
  *
- * <p>This is the default extractor used by OracleLobHandler, which just needs
- * Connection unwrapping via the <code>getNativeConnectionFromStatement</code>
- * method. This usage of SimpleNativeJdbcExtractor will work with almost any
- * connection pool; this is why OracleLobHandler uses it as default. Known to
- * work are, for example:
+ * <p>SimpleNativeJdbcExtractor is a common choice for use with OracleLobHandler,
+ * which just needs Connection unwrapping via the
+ * <code>getNativeConnectionFromStatement</code> method. This usage will work
+ * with almost any connection pool. Known to work are, for example:
  * <ul>
- * <li>Resin 2.1 and 3.0
+ * <li>Resin (2.1 and 3.0)
  * <li>C3P0
  * <li>Jakarta Commons DBCP
  * </ul>

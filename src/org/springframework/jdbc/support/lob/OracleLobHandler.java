@@ -43,7 +43,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
-import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -102,7 +101,7 @@ public class OracleLobHandler implements LobHandler {
 
 	private final Map modeReadWriteConstants = new HashMap(2);
 
-	private NativeJdbcExtractor nativeJdbcExtractor = new SimpleNativeJdbcExtractor();
+	private NativeJdbcExtractor nativeJdbcExtractor;
 
 	private Boolean cache = Boolean.TRUE;
 
@@ -142,10 +141,9 @@ public class OracleLobHandler implements LobHandler {
 	 * method, namely <code>getNativeConnectionFromStatement</code> with a
 	 * PreparedStatement argument (falling back to a
 	 * <code>PreparedStatement.getConnection()</code> call if no extractor is set).
-	 * <p>The default is a SimpleNativeJdbcExtractor, whose Connection unwrapping
-	 * will work with almost any connection pool (see SimpleNativeJdbcExtractor's
-	 * javadoc for details). Override this if you need an adapter for a special pool,
-	 * or if you use a shared NativeJdbcExtractor instance in your application.
+	 * <p>A common choice is SimpleNativeJdbcExtractor, whose Connection unwrapping
+	 * (which is what OracleLobHandler needs) will work with almost any connection
+	 * pool. See SimpleNativeJdbcExtractor's javadoc for details.
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor#getNativeConnectionFromStatement
 	 * @see org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor
 	 * @see oracle.jdbc.OracleConnection
