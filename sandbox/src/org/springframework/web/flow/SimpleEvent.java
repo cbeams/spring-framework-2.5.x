@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * 
  * @see org.springframework.web.flow.Action
  * @see org.springframework.web.flow.State
+ * @see org.springframework.web.flow.EndState
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

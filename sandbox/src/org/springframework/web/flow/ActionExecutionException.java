@@ -26,6 +26,9 @@ import org.springframework.core.NestedRuntimeException;
  */
 public class ActionExecutionException extends NestedRuntimeException {
 
+	/**
+	 * The action that threw an exception while executing.
+	 */
 	private ActionState.NamedAction action;
 
 	/**

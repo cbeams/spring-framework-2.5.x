@@ -285,8 +285,8 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Specialization of State's <code>doEnterState</code> template
-	 * method that executes behaviour specific to this state type in polymorphic
+	 * Specialization of State's <code>doEnterState</code> template method
+	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
 	 * This implementation iterates over each configured <code>Action</code>
@@ -315,9 +315,10 @@ public class ActionState extends TransitionableState {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-								+ eventIds[executionCount] + "' -- "
-								+ "I will proceed to the next action in the chain");
+						logger
+								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+										+ eventIds[executionCount] + "' -- "
+										+ "I will proceed to the next action in the chain");
 					}
 				}
 			}
@@ -338,8 +339,8 @@ public class ActionState extends TransitionableState {
 		else {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
 					"No actions were executed, thus I cannot execute any state transition "
-					+ "-- programmer configuration error; "
-					+ "make sure you add at least one action to this state"));
+							+ "-- programmer configuration error; "
+							+ "make sure you add at least one action to this state"));
 		}
 	}
 
@@ -356,7 +357,7 @@ public class ActionState extends TransitionableState {
 
 		protected final Log logger = LogFactory.getLog(NamedAction.class);
 
-		private ActionState actionState;
+		private ActionState state;
 
 		private String name;
 
@@ -364,29 +365,38 @@ public class ActionState extends TransitionableState {
 
 		/**
 		 * Create a new action wrapper.
-		 * @param actionState the state containing the action
+		 * @param state the state containing the action
 		 * @param name the name of the action, or null if it's unnamed
 		 * @param action the action to wrap
 		 */
-		public NamedAction(ActionState actionState, String name, Action action) {
-			Assert.notNull(actionState, "The owning action state is required");
+		public NamedAction(ActionState state, String name, Action action) {
+			Assert.notNull(state, "The owning action state is required");
 			Assert.notNull(action, "The action is required");
-			this.actionState = actionState;
+			this.state = state;
 			this.name = name;
 			this.action = action;
 		}
 
 		/**
+		 * Returns the state that manages and invokes this named action
+		 * instance.
+		 * @return the action state
+		 */
+		public ActionState getState() {
+			return state;
+		}
+
+		/**
 		 * Returns the name of the wrapped action, or null when it's unnamed.
 		 */
-		protected String getName() {
+		public String getName() {
 			return name;
 		}
 
 		/**
 		 * Returns the wrapped action.
 		 */
-		protected Action getAction() {
+		public Action getAction() {
 			return action;
 		}
 
@@ -410,7 +420,7 @@ public class ActionState extends TransitionableState {
 				return getEvent(action.execute(context));
 			}
 			catch (Exception e) {
-				throw new ActionExecutionException(actionState, this, e);
+				throw new ActionExecutionException(this, e);
 			}
 		}
 
@@ -435,14 +445,14 @@ public class ActionState extends TransitionableState {
 		}
 
 		/**
-		 * Wrapper to wrap an event as an event signaled by a named action. 
+		 * Wrapper to wrap an event as an event signaled by a named action.
 		 */
 		private static class ActionNameQualifiedEvent extends Event {
-			
+
 			private String actionName;
 
 			private Event resultEvent;
-			
+
 			public ActionNameQualifiedEvent(String actionName, Event resultEvent) {
 				super(resultEvent.getSource());
 				this.actionName = actionName;
@@ -460,7 +470,7 @@ public class ActionState extends TransitionableState {
 			public String getStateId() {
 				return resultEvent.getStateId();
 			}
-			
+
 			public Object getParameter(String parameterName) {
 				return resultEvent.getParameter(parameterName);
 			}
