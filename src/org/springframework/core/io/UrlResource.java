@@ -58,6 +58,10 @@ public class UrlResource extends AbstractResource {
 		return this.url.openStream();
 	}
 
+	public URL getURL() throws IOException {
+		return this.url;
+	}
+
 	public File getFile() throws IOException {
 		if (PROTOCOL_FILE.equals(this.url.getProtocol())) {
 			return new File(URLDecoder.decode(this.url.getFile()));
