@@ -27,10 +27,8 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
-import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
  * Interceptor for accessing a Burlap service.
@@ -56,59 +54,42 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * @see BurlapProxyFactoryBean
  * @see com.caucho.burlap.client.BurlapProxyFactory
  */
-public class BurlapClientInterceptor extends UrlBasedRemoteAccessor
-    implements MethodInterceptor, InitializingBean {
+public class BurlapClientInterceptor extends CauchoRemoteAccessor implements MethodInterceptor {
 
-	private final BurlapProxyFactory proxyFactory = new BurlapProxyFactory();
+	private BurlapProxyFactory proxyFactory;
 
 	private Object burlapProxy;
 
 
 	/**
-	 * Set the username that this factory should use to access the remote service.
-	 * Default is none.
-	 * <p>The username will be sent by Burlap via HTTP Basic Authentication.
-	 * @see com.caucho.burlap.client.BurlapProxyFactory#setUser
+	 * Set the BurlapProxyFactory instance to use.
+	 * If not specified, a default BurlapProxyFactory will be created.
+	 * <p>Allows to use an externally configured factory instance,
+	 * in particular a custom BurlapProxyFactory subclass.
 	 */
-	public void setUsername(String username) {
-		this.proxyFactory.setUser(username);
+	public void setProxyFactory(BurlapProxyFactory proxyFactory) {
+		this.proxyFactory = proxyFactory;
 	}
 
 	/**
-	 * Set the password that this factory should use to access the remote service.
-	 * Default is none.
-	 * <p>The password will be sent by Burlap via HTTP Basic Authentication.
-	 * @see com.caucho.burlap.client.BurlapProxyFactory#setPassword
-	 */
-	public void setPassword(String password) {
-		this.proxyFactory.setPassword(password);
-	}
-
-	/**
-	 * Set whether overloaded methods should be enabled for remote invocations.
-	 * Default is false.
-	 * @see com.caucho.burlap.client.BurlapProxyFactory#setOverloadEnabled
-	 */
-	public void setOverloadEnabled(boolean overloadEnabled) {
-		this.proxyFactory.setOverloadEnabled(overloadEnabled);
-	}
-
-
-	public void afterPropertiesSet() throws MalformedURLException {
-		prepare();
-	}
-
-	/**
-	 * Create the underlying Burlap proxy for this interceptor.
-	 * @throws MalformedURLException if thrown by Burlap API
+	 * Initialize the Burlap proxy for this interceptor.
 	 */
 	public void prepare() throws MalformedURLException {
-		if (getServiceInterface() == null) {
-			throw new IllegalArgumentException("serviceInterface is required");
+		super.prepare();
+
+		if (this.proxyFactory == null) {
+			this.proxyFactory = new BurlapProxyFactory();
 		}
-		if (getServiceUrl() == null) {
-			throw new IllegalArgumentException("serviceUrl is required");
+		if (getUsername() != null) {
+			this.proxyFactory.setUser(getUsername());
 		}
+		if (getPassword() != null) {
+			this.proxyFactory.setPassword(getPassword());
+		}
+		if (isOverloadEnabled()) {
+			this.proxyFactory.setOverloadEnabled(isOverloadEnabled());
+		}
+
 		this.burlapProxy = createBurlapProxy(this.proxyFactory);
 	}
 

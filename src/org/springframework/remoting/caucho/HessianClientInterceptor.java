@@ -27,10 +27,8 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
-import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
  * Interceptor for accessing a Hessian service.
@@ -56,59 +54,42 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * @see HessianProxyFactoryBean
  * @see com.caucho.hessian.client.HessianProxyFactory
  */
-public class HessianClientInterceptor extends UrlBasedRemoteAccessor
-    implements MethodInterceptor, InitializingBean {
+public class HessianClientInterceptor extends CauchoRemoteAccessor implements MethodInterceptor {
 
-	private final HessianProxyFactory proxyFactory = new HessianProxyFactory();
+	private HessianProxyFactory proxyFactory;
 
 	private Object hessianProxy;
 
 
 	/**
-	 * Set the username that this factory should use to access the remote service.
-	 * Default is none.
-	 * <p>The username will be sent by Hessian via HTTP Basic Authentication.
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setUser
+	 * Set the HessianProxyFactory instance to use.
+	 * If not specified, a default HessianProxyFactory will be created.
+	 * <p>Allows to use an externally configured factory instance,
+	 * in particular a custom HessianProxyFactory subclass.
 	 */
-	public void setUsername(String username) {
-		this.proxyFactory.setUser(username);
+	public void setProxyFactory(HessianProxyFactory proxyFactory) {
+		this.proxyFactory = proxyFactory;
 	}
 
 	/**
-	 * Set the password that this factory should use to access the remote service.
-	 * Default is none.
-	 * <p>The password will be sent by Hessian via HTTP Basic Authentication.
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setPassword
-	 */
-	public void setPassword(String password) {
-		this.proxyFactory.setPassword(password);
-	}
-
-	/**
-	 * Set whether overloaded methods should be enabled for remote invocations.
-	 * Default is false.
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setOverloadEnabled
-	 */
-	public void setOverloadEnabled(boolean overloadEnabled) {
-		this.proxyFactory.setOverloadEnabled(overloadEnabled);
-	}
-
-
-	public void afterPropertiesSet() throws MalformedURLException {
-		prepare();
-	}
-
-	/**
-	 * Create the underlying Hessian proxy for this interceptor.
-	 * @throws MalformedURLException if thrown by Hessian API
+	 * Initialize the Hessian proxy for this interceptor.
 	 */
 	public void prepare() throws MalformedURLException {
-		if (getServiceInterface() == null) {
-			throw new IllegalArgumentException("serviceInterface is required");
+		super.prepare();
+
+		if (this.proxyFactory == null) {
+			this.proxyFactory = new HessianProxyFactory();
 		}
-		if (getServiceUrl() == null) {
-			throw new IllegalArgumentException("serviceUrl is required");
+		if (getUsername() != null) {
+			this.proxyFactory.setUser(getUsername());
 		}
+		if (getPassword() != null) {
+			this.proxyFactory.setPassword(getPassword());
+		}
+		if (isOverloadEnabled()) {
+			this.proxyFactory.setOverloadEnabled(isOverloadEnabled());
+		}
+
 		this.hessianProxy = createHessianProxy(this.proxyFactory);
 	}
 
