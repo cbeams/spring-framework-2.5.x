@@ -20,13 +20,11 @@ public class RequiredIfTrue implements UnaryPredicate {
     private UnaryPredicate predicate;
 
     /**
-     * Tests that the property is required if the provided predicate is
+     * Tests that the property is present if the provided predicate is
      * satisified.
      * 
-     * @param otherPropertyNames
-     *            one or more other properties, delimited by commas.
-     * @param operator
-     *            the logical operator, either AND or OR.
+     * @param predicate
+     *            the condition
      */
     public RequiredIfTrue(UnaryPredicate predicate) {
         Assert.notNull(predicate);
@@ -43,7 +41,7 @@ public class RequiredIfTrue implements UnaryPredicate {
     }
 
     /**
-     * The property name which may be required if other properties are present.
+     * The property name which is required if the set condition is true.
      * 
      * @param propertyName
      *            The property name
@@ -53,6 +51,11 @@ public class RequiredIfTrue implements UnaryPredicate {
         this.propertyName = propertyName;
     }
 
+    /**
+     * Tests the RequiredIfTrue condition.
+     * 
+     * @see org.springframework.functor.UnaryPredicate#test(java.lang.Object)
+     */
     public boolean test(Object bean) {
         Assert.notNull(propertyName);
         if (predicate.test(bean)) {

@@ -8,7 +8,7 @@ import org.springframework.functor.BinaryOperator;
 import org.springframework.functor.BinaryPredicate;
 import org.springframework.functor.PredicateFactory;
 import org.springframework.functor.UnaryPredicate;
-import org.springframework.functor.functions.StringLengthFunction;
+import org.springframework.functor.functions.StringLength;
 import org.springframework.functor.predicates.Range;
 
 /**
@@ -40,7 +40,7 @@ public class StringLengthConstraint implements UnaryPredicate {
         UnaryPredicate lengthConstraint = PredicateFactory.bind(
                 comparer, new Integer(length));
         this.predicate = PredicateFactory.attachResultTester(
-                lengthConstraint, StringLengthFunction.instance());
+                lengthConstraint, StringLength.instance());
     }
 
     /**
@@ -53,7 +53,7 @@ public class StringLengthConstraint implements UnaryPredicate {
         UnaryPredicate rangeConstraint = new Range(new Integer(min),
                 new Integer(max));
         this.predicate = PredicateFactory.attachResultTester(
-                rangeConstraint, StringLengthFunction.instance());
+                rangeConstraint, StringLength.instance());
     }
 
     public boolean test(Object value) {
