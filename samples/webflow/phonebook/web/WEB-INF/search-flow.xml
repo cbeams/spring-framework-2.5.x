@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
+	"http://www.springframework.org/dtd/web-flow.dtd">
+
+<web-flow id="person.Search" start-state="criteria.view">
+
+	<view-state id="criteria.view">
+		<transition event="submit" to="criteria.bindAndValidate"/>
+	</view-state>
+
+	<action-state id="criteria.bindAndValidate">
+		<action bean="person.Search.criteria.bindAndValidate"/>
+		<transition event="success" to="query"/>
+		<transition event="error" to="criteria.view"/>
+	</action-state>
+	
+	<action-state id="query">
+		<action bean="person.Search.query"/>
+		<transition event="success" to="results.view"/>
+	</action-state>
+	
+	<view-state id="results.view">
+		<transition event="newSearch" to="criteria.view"/>
+		<transition event="select" to="person.setUserId"/>
+	</view-state>
+
+	<action-state id="person.setUserId">
+		<action bean="person.Search.setUserId"/>
+		<transition event="success" to="person.Detail"/>
+		<transition event="error" to="error"/>
+	</action-state>
+	
+	<sub-flow-state id="person.Detail" flow="person.Detail" attributes-mapper="idMapper">
+		<transition event="finish" to="results"/>
+		<transition event="error" to="error"/>
+	</sub-flow-state>
+	
+	<end-state id="error" view="error.view"/>
+	
+</web-flow>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
+	"http://www.springframework.org/dtd/web-flow.dtd">
+
+<web-flow id="person.Detail" start-state="detail.get">
+
+	<action-state id="detail.get">
+		<action bean="person.Detail.get"/>
+		<transition event="success" to="detail.view"/>
+		<transition event="error" to="error"/>
+	</action-state>
+
+	<view-state id="detail.view">
+		<transition event="back" to="finish"/>
+		<transition event="select" to="setCollegueId"/>
+	</view-state>
+
+	<action-state id="setCollegueId">
+		<action bean="person.Detail.setCollegueId"/>
+		<transition event="success" to="collegue.detail"/>
+		<transition event="error" to="error"/>
+	</action-state>
+	
+	<sub-flow-state id="collegue.detail" flow="person.detail" attributes-mapper="collegueId.modelMapper">
+		<transition event="finish" to="detail"/>
+		<transition event="error" to="error"/>
+	</sub-flow-state>
+	
+	<end-state id="finish"/>
+	<end-state id="error"/>
+	
+</web-flow>

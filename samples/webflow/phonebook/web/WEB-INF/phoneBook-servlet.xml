@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
+		<property name="suffix"><value>.jsp</value></property>
+	</bean>
+	
+	<!-- search flow -->
+
+	<bean id="searchFrontController" name="/search.htm" class="org.springframework.web.flow.mvc.FlowController">
+		<property name="cacheSeconds"><value>0</value></property>
+		<property name="flow"><ref bean="search.flow"/></property>
+	</bean>
+	
+	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+				<property name="resource"><value>/WEB-INF/search-flow.xml</value></property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="person.Search.criteria.bindAndValidate" class="org.springframework.web.flow.action.BindAndValidateAction">
+		<property name="formObjectName"><value>query</value></property>
+		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.PhoneBookQuery</value></property>
+		<property name="validator">
+			<bean id="queryValidator" class="org.springframework.samples.phonebook.web.flow.PhoneBookQueryValidator">
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="person.Search.query" class="org.springframework.samples.phonebook.web.flow.QueryAction">
+		<property name="phoneBook"><ref bean="phoneBook"/></property>
+	</bean>
+
+	<bean id="person.Search.setUserId" class="org.springframework.web.flow.action.BindAndValidateAction">
+		<property name="formObjectName"><value>id</value></property>
+		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.UserId</value></property>
+	</bean>
+
+	<bean id="id.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">
+		<property name="inputMappings">
+			<list>
+				<value>id</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- detail flow -->
+
+	<bean id="detailFrontController" name="/detail.htm" class="org.springframework.web.flow.mvc.FlowController">
+		<property name="cacheSeconds"><value>0</value></property>
+		<property name="flow"><ref bean="person.Detail"/></property>
+	</bean>
+	
+	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+				<property name="resource"><value>/WEB-INF/detail-flow.xml</value></property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.GetPersonAction">
+		<property name="phoneBook"><ref bean="phoneBook"/></property>
+	</bean>
+
+	<bean id="person.Detail.setCollegueId" class="org.springframework.web.flow.action.BindAndValidateAction">
+		<property name="formObjectName"><value>colleagueId</value></property>
+		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.UserId</value></property>
+	</bean>
+
+	<bean id="collegueId.modelMapper" class="org.springframework.web.flow.support.ParameterizableFlowModelMapper">
+		<property name="inputMappings">
+			<map>
+				<entry key="colleagueId"><value>id</value></entry>
+			</map>
+		</property>
+	</bean>
+	
+</beans>
