@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassLoaderUtils;
@@ -55,6 +56,14 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	 */
 	public void setProperties(Properties properties) {
 		this.properties = properties;
+	}
+
+	/**
+	 * Set if a singleton should be created, or a new object
+	 * on each request else. Default is true.
+	 */
+	public void setSingleton(boolean singleton) {
+		this.singleton = singleton;
 	}
 
 	/**
@@ -115,14 +124,6 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 
 	public boolean isSingleton() {
 		return singleton;
-	}
-
-	/**
-	 * Set if a singleton should be created, or a new object
-	 * on each request else. Default is true.
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
 	}
 
 }

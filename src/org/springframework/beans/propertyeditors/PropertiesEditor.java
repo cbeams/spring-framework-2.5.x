@@ -19,15 +19,15 @@ import java.util.Properties;
  * Each property must be on a new line.
  *
  * @author Rod Johnson
- * @version $Id: PropertiesEditor.java,v 1.2 2003-10-04 09:49:05 jhoeller Exp $
+ * @version $Id: PropertiesEditor.java,v 1.3 2003-12-19 11:37:03 jhoeller Exp $
  * @see org.springframework.beans.BeanWrapperImpl
+ * @see java.util.Properties#load
  */
 public class PropertiesEditor extends PropertyEditorSupport {
 	
 	/**
-	 * Any of these characters, if they're first after whitespace
-	 * or first on a line, mean that the line is a comment and should
-	 * be ignored.
+	 * Any of these characters, if they're first after whitespace or first
+	 * on a line, mean that the line is a comment and should be ignored.
 	 */
 	private final static String COMMENT_MARKERS = "#!";
 	
@@ -35,13 +35,9 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	 * @see java.beans.PropertyEditor#setAsText(String)
 	 */
 	public void setAsText(String s) throws IllegalArgumentException {
-		if (s == null)
-			throw new IllegalArgumentException("Cannot set properties to null");
-		Properties props = load(s);
-		setValue(props);
-	}
-	
-	private Properties load(String s) {
+		if (s == null) {
+			throw new IllegalArgumentException("Cannot set Properties to null");
+		}
 		Properties props = new Properties();
 		try {
 			props.load(new ByteArrayInputStream(s.getBytes()));
@@ -51,14 +47,14 @@ public class PropertiesEditor extends PropertyEditorSupport {
 			// Shouldn't happen
 			throw new IllegalArgumentException("Failed to read String");
 		}
-		return props;
+		setValue(props);
 	}
-
+	
 	/**
-	 * Remove comment lines. We shouldn't need to do this,
-	 * according to java.util.Properties documentation, but
-	 * if we don't we end up with properties like "#this=is a comment"
-	 * if we have whitespace before the comment marker.
+	 * Remove comment lines. We shouldn't need to do this, according to
+	 * java.util.Properties documentation, but if we don't we end up with
+	 * properties like "#this=is a comment" if we have whitespace before
+	 * the comment marker.
 	 */
 	private void dropComments(Properties props) {
 		Iterator keys = props.keySet().iterator();
