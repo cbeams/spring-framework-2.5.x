@@ -44,7 +44,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private FlowExecutionStack flowExecution;
 
-	private Scope requestAttributes = new Scope(ScopeType.REQUEST);
+	private Scope requestScope = new Scope(ScopeType.REQUEST);
 
 	/**
 	 * Create a new request context.
@@ -92,7 +92,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	public Scope getRequestScope() {
-		return this.requestAttributes;
+		return this.requestScope;
 	}
 
 	public Scope getFlowScope() {

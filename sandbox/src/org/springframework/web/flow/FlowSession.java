@@ -75,7 +75,7 @@ public class FlowSession implements Serializable {
 	/**
 	 * The session data model ("flow scope").
 	 */
-	private Scope attributes = new Scope(ScopeType.FLOW);
+	private Scope flowScope = new Scope(ScopeType.FLOW);
 
 	/**
 	 * Set only on deserialization so this object can be fully reconstructed.
@@ -104,7 +104,7 @@ public class FlowSession implements Serializable {
 		Assert.notNull(flow, "The flow is required");
 		this.flow = flow;
 		if (input != null) {
-			this.attributes.setAttributes(input);
+			this.flowScope.setAttributes(input);
 		}
 	}
 
@@ -163,7 +163,7 @@ public class FlowSession implements Serializable {
 	 * @return the flow scope
 	 */
 	public Scope getFlowScope() {
-		return this.attributes;
+		return this.flowScope;
 	}
 
 	// custom serialization
@@ -172,14 +172,14 @@ public class FlowSession implements Serializable {
 		out.writeObject(this.flow.getId());
 		out.writeObject(this.currentState.getId());
 		out.writeObject(this.status);
-		out.writeObject(this.attributes);
+		out.writeObject(this.flowScope);
 	}
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		this.flowId = (String)in.readObject();
 		this.currentStateId = (String)in.readObject();
 		this.status = (FlowSessionStatus)in.readObject();
-		this.attributes = (Scope)in.readObject();
+		this.flowScope = (Scope)in.readObject();
 	}
 
 	/**
@@ -203,7 +203,7 @@ public class FlowSession implements Serializable {
 
 	public String toString() {
 		return new ToStringCreator(this).append("flow", flow).append("currentState", currentState).append(
-				"attributesCount", (attributes != null ? attributes.size() : 0)).append("attributes", attributes)
+				"attributesCount", (flowScope != null ? flowScope.size() : 0)).append("attributes", flowScope)
 				.toString();
 	}
 }
