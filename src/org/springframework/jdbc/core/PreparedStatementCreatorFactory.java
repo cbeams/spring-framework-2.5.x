@@ -186,8 +186,9 @@ public class PreparedStatementCreatorFactory {
 		public PreparedStatementCreatorImpl(List parameters) {
 			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size())
-				throw new InvalidDataAccessApiUsageException("SQL=[" + sql + "]: given " + this.parameters.size() +
-				                                             " parameter but expected " + declaredParameters.size());
+				throw new InvalidDataAccessApiUsageException(
+						"SQL [" + sql + "]: given " + this.parameters.size() +
+						" parameters but expected " + declaredParameters.size());
 		}
 		
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -202,8 +203,9 @@ public class PreparedStatementCreatorFactory {
 					}
 				}
 				catch (AbstractMethodError ex) {
-					throw new InvalidDataAccessResourceUsageException("The JDBC driver is not compliant to JDBC 3.0 and thus " +
-																														"does not support retrieval of auto generated keys", ex);
+					throw new InvalidDataAccessResourceUsageException(
+							"The JDBC driver is not compliant to JDBC 3.0 and thus " +
+							"does not support retrieval of auto-generated keys", ex);
 				}
 			}
 			else if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {

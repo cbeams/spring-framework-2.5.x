@@ -48,25 +48,26 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 */
 	protected final void compileInternal() {
 		// validate parameter count
-		int bindVarCount = 0;
 		try {
-			bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', "'\"");
+			int bindVarCount = JdbcUtils.countParameterPlaceholders(getSql(), '?', "'\"");
+			if (bindVarCount != getDeclaredParameters().size()) {
+				throw new InvalidDataAccessApiUsageException(
+						"SQL '" + getSql() + "' requires " + bindVarCount + " bind variables, but " +
+						getDeclaredParameters().size() + " variables were declared for this object");
+			}
 		}
 		catch (IllegalArgumentException ex) {
 			// transform JDBC-agnostic error to data access error
 			throw new InvalidDataAccessApiUsageException(ex.getMessage());
 		}
-		if (bindVarCount != getDeclaredParameters().size())
-			throw new InvalidDataAccessApiUsageException(
-					"SQL '" + getSql() + "' requires " + bindVarCount + " bind variables, but " +
-					getDeclaredParameters().size() + " variables were declared for this object");
 
 		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
 		this.preparedStatementFactory.setResultSetType(getResultSetType());
 		this.preparedStatementFactory.setUpdatableResults(isUpdatableResults());
 		this.preparedStatementFactory.setReturnGeneratedKeys(isReturnGeneratedKeys());
-		if (getGeneratedKeysColumnNames() != null)
+		if (getGeneratedKeysColumnNames() != null) {
 			this.preparedStatementFactory.setGeneratedKeysColumnNames(getGeneratedKeysColumnNames());
+		}
 		this.preparedStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
 
 		onCompileInternal();
@@ -91,7 +92,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 
 	/**
 	 * Return a PreparedStatementSetter to perform an operation
-	 * with thhe given parameters.
+	 * with the given parameters.
 	 * @param params parameter array. May be null.
 	 */
 	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.datasource;
 
@@ -201,7 +201,7 @@ public abstract class DataSourceUtils {
 	 */
 	public static Integer prepareConnectionForTransaction(Connection con, TransactionDefinition definition)
 			throws SQLException {
-		Assert.notNull(con, "No Connection specified");
+		Assert.notNull(con, "No connection specified");
 
 		// apply read-only
 		if (definition.isReadOnly()) {
@@ -240,7 +240,7 @@ public abstract class DataSourceUtils {
 	 * @see #prepareConnectionForTransaction
 	 */
 	public static void resetConnectionAfterTransaction(Connection con, Integer previousIsolationLevel) {
-		Assert.notNull(con, "No Connection specified");
+		Assert.notNull(con, "No connection specified");
 		try {
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (previousIsolationLevel != null) {
@@ -271,7 +271,7 @@ public abstract class DataSourceUtils {
 	 * @see java.sql.Statement#setQueryTimeout
 	 */
 	public static void applyTransactionTimeout(Statement stmt, DataSource dataSource) throws SQLException {
-		Assert.notNull(stmt, "No Statement specified");
+		Assert.notNull(stmt, "No statement specified");
 		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (holder != null && holder.hasTimeout()) {
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
