@@ -19,14 +19,13 @@ import java.text.ParseException;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.util.closure.Closure;
 
 /**
  * Base template class for all formatters (also implements type converter for
  * those who need general type conversion.)
  * @author Keith Donald
  */
-public abstract class AbstractFormatter implements Formatter, Closure {
+public abstract class AbstractFormatter implements Formatter {
 
 	private Class valueClass;
 
@@ -106,10 +105,6 @@ public abstract class AbstractFormatter implements Formatter, Closure {
 
 	public boolean isAllowEmpty() {
 		return allowEmpty;
-	}
-	
-	public Object call(Object argument) {
-		return formatValue(argument);
 	}
 
 }

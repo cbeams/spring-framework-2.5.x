@@ -10,6 +10,8 @@ package org.springframework.binding.format;
  * @author Keith Donald
  */
 public interface FormatterSource {
+	public DateFormatter getDateFormatter(String encodedFormat);
+	
 	public DateFormatter getDateFormatter();
 
 	public DateFormatter getDateFormatter(Style style);
