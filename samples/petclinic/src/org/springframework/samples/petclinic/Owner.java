@@ -1,13 +1,14 @@
 package org.springframework.samples.petclinic;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-import org.springframework.beans.PropertyComparator;
 import org.springframework.beans.MutableSortDefinition;
+import org.springframework.beans.PropertyComparator;
 
 /**
  * Simple JavaBean domain object representing an owner.
@@ -36,7 +37,8 @@ public class Owner extends Person {
 		return Collections.unmodifiableList(sortedPets);
 	}
 
-	/** Method to add a pet to the List of pets.
+	/**
+	 * Add a pet to the List of pets.
 	 * @param pet New pet to be added to the List of pets
 	 */
 	public void addPet(Pet pet) {
@@ -44,13 +46,23 @@ public class Owner extends Person {
 		pet.setOwner(this);
 	}
 
-	/** Method to test whether an <code>Owner</code> already has
-	 * a <code>Pet</code> with a particular name (case-insensitive).
+	/**
+	 * Return the Pet with the given name,
+	 * or null if none found for this Owner.
 	 * @param name to test
 	 * @return true if pet name is already in use
 	 */
 	public Pet getPet(String name) {
-		return (Pet) NamedEntity.getByName(getPetsInternal(), Pet.class, name, true);
+		name = name.toLowerCase();
+		for (Iterator it = getPetsInternal().iterator(); it.hasNext();) {
+			Pet pet = (Pet) it.next();
+			String compName = pet.getName();
+			compName = compName.toLowerCase();
+			if (compName.equals(name)) {
+				return pet;
+			}
+		}
+		return null;
 	}
 
 }

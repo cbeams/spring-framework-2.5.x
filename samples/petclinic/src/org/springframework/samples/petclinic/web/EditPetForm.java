@@ -6,10 +6,9 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.samples.petclinic.Entity;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
-
+import org.springframework.samples.petclinic.util.EntityUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.servlet.ModelAndView;
@@ -42,7 +41,7 @@ public class EditPetForm extends AbstractClinicForm {
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors) {
 		Pet pet = (Pet) command;
 		long typeId = Long.parseLong(request.getParameter("typeId"));
-		pet.setType((PetType) Entity.getById(getClinic().getPetTypes(), PetType.class, typeId));
+		pet.setType((PetType) EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
 	}
 
 	/** Method updates an existing Pet. */

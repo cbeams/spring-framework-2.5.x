@@ -8,14 +8,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.samples.petclinic.Entity;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
-
+import org.springframework.samples.petclinic.util.EntityUtils;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.validation.BindException;
 
 /**
  * JavaBean form controller that is used to add a new <code>Pet</code> to the system.
@@ -45,7 +44,7 @@ public class AddPetForm extends AbstractClinicForm {
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors) {
 		Pet pet = (Pet) command;
 		long typeId = Long.parseLong(request.getParameter("typeId"));
-		pet.setType((PetType) Entity.getById(getClinic().getPetTypes(), PetType.class, typeId));
+		pet.setType((PetType) EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
 	}
 
 	/** Method inserts a new <code>Pet</code>. */

@@ -29,6 +29,7 @@ import org.springframework.samples.petclinic.PetType;
 import org.springframework.samples.petclinic.Specialty;
 import org.springframework.samples.petclinic.Vet;
 import org.springframework.samples.petclinic.Visit;
+import org.springframework.samples.petclinic.util.EntityUtils;
 
 /**
  * Base class for JDBC implementations of the Clinic interface.
@@ -190,7 +191,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 			Iterator vsi = vetSpecialtiesIds.iterator();
 			while (vsi.hasNext()) {
 				long specialtyId = ((Long) vsi.next()).longValue();
-				Specialty specialty = (Specialty) Entity.getById(specialties, Specialty.class, specialtyId);
+				Specialty specialty = (Specialty) EntityUtils.getById(specialties, Specialty.class, specialtyId);
 				vet.addSpecialty(specialty);
 			}
 		}
@@ -280,7 +281,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	 * @param pet
 	 */
 	protected void loadVisits(JdbcPet pet) {
-		pet.setType((PetType) Entity.getById(getPetTypes(), PetType.class, pet.getTypeId()));
+		pet.setType((PetType) EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
 		List visits = visitsQuery.execute(pet.getId());
 		Iterator vi = visits.iterator();
 		while (vi.hasNext()) {
