@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
  * <p><i>Note that this class has been deprecated for containers implementing
  * Servlet API 2.4 or higher in favour of Log4jConfigListener.</i><br>
  * According to Servlet 2.4, listeners must be initialized before load-on-startup
- * servlets. Many Servlet 2.3 containers already enforce this behaviour
+ * servlets. Many Servlet 2.3 containers already enforce this behavior
  * (see ContextLoaderServlet javadoc for details). If you use such a container,
  * this servlet can be replaced with Log4jConfigListener. Else or if working
  * with a Servlet 2.2 container, stick with this servlet.
@@ -59,13 +59,15 @@ public class Log4jConfigServlet extends HttpServlet {
 	 * ever be created in web.xml. That's why a correctly invoked Servlet 2.3
 	 * listener is much more appropriate for initialization work ;-)
 	 */
-	public void doService(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		getServletContext().log("Attempt to call service method on Log4jConfigServlet as " + request.getRequestURI() + " was ignored");
+	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		getServletContext().log("Attempt to call service method on Log4jConfigServlet as [" +
+														request.getRequestURI() + "] was ignored");
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
 	public String getServletInfo() {
-		return "Log4jConfigServlet for Servlet API 2.2/2.3 (deprecated in favour of Log4jConfigListener for Servlet API 2.4)";
+		return "Log4jConfigServlet for Servlet API 2.2/2.3 " +
+				"(deprecated in favor of Log4jConfigListener for Servlet API 2.4)";
 	}
 
 }
