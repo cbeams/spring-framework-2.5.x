@@ -5,7 +5,6 @@
 
 package org.springframework.beans;
 
-import java.beans.IndexedPropertyDescriptor;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -61,7 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.8 2003-10-23 10:21:02 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.9 2003-10-23 18:44:19 uid112313 Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -638,31 +637,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	/**
-	 * Get the value of an indexed property.
-	 * @param propertyName name of the property to get value of
-	 * @param index index from 0 of the property
-	 * @return the value of the property
-	 * @throws BeansException if there's a fatal exception
-	 */
-	public Object getIndexedPropertyValue(String propertyName, int index) throws BeansException {
-		PropertyDescriptor pd = getPropertyDescriptor(propertyName);
-		if (!(pd instanceof IndexedPropertyDescriptor))
-			throw new FatalBeanException("Cannot get indexed property value for '" + propertyName
-																	 + "': this property is not an indexed property", null);
-		Method m = ((IndexedPropertyDescriptor) pd).getIndexedReadMethod();
-		if (m == null)
-			throw new FatalBeanException("Cannot get indexed property '" + propertyName
-																	 + "': not readable", null);
-		try {
-			return m.invoke(object, new Object[]{new Integer(index)});
-		}
-		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Getter for indexed property '" + propertyName + "' threw exception", ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to get indexed property '" + propertyName + "' threw exception", ex);
-		}
+	public PropertyDescriptor[] getPropertyDescriptors() {
+		return cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
 	}
 
 	/**
@@ -723,10 +699,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 		catch (IllegalArgumentException ex) {
 			throw new FatalBeanException("Illegal argument to method '" + methodName + "' threw exception", ex);
 		}
-	}
-
-	public PropertyDescriptor[] getPropertyDescriptors() {
-		return cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
 	}
 
 	//---------------------------------------------------------------------
