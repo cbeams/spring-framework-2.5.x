@@ -3,7 +3,7 @@
 <!DOCTYPE web-app PUBLIC
 	"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
 	"http://java.sun.com/dtd/web-app_2_3.dtd">
-  
+
 <web-app>
 
 	<display-name>Countries</display-name>
@@ -46,10 +46,13 @@
 		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
 	</listener>
 	-->
-	
+
 	<!--
 	  - Loads the root application context of this web app at startup,
 	  - by default from "/WEB-INF/applicationContext.xml".
+		- Note that it is preferable to use ContextLoaderListener in a servlet container
+		- that follows the Servlet 2.4 initialization order (most Servlet 2.3 containers do).
+		-
 	  - Use WebApplicationContextUtils.getWebApplicationContext(servletContext)
 	  - to access it anywhere in the web application, outside of the framework.
 	  -
@@ -57,9 +60,11 @@
 	  - This means that its beans are automatically available in these child contexts,
 	  - both for getBean(name) calls and (external) bean references.
 	  -->
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
+	<servlet>
+		<servlet-name>context</servlet-name>
+		<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
 	<!--
 	  - Servlet that dispatches request to registered handlers (Controller implementations).
@@ -70,12 +75,12 @@
 	  - Note that this web app has a shared root application context, serving as parent
 	  - of all DispatcherServlet contexts.
 	  -->
-  <servlet>
-    <servlet-name>countries</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  
+	<servlet>
+		<servlet-name>countries</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
 	<!--
 	  - Maps the petclinic dispatcher to *.htm. All handler mappings in
 	  - petclinic-servlet.xml will by default be applied to this subpath.
@@ -84,54 +89,46 @@
 	  -
 	  - A single dispatcher could get mapped to multiple paths, like any servlet.
 	  -->
-  <servlet-mapping>
-    <servlet-name>countries</servlet-name>
-    <url-pattern>*.htm</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>countries</servlet-name>
+		<url-pattern>*.htm</url-pattern>
+	</servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>countries</servlet-name>
-    <url-pattern>*.pdf</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>countries</servlet-name>
+		<url-pattern>*.pdf</url-pattern>
+	</servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>countries</servlet-name>
-    <url-pattern>*.xls</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>countries</servlet-name>
+		<url-pattern>*.xls</url-pattern>
+	</servlet-mapping>
 
-  <session-config>
-    <session-timeout>10</session-timeout>
-  </session-config>
-
-	<!--
-	  - Redirects to "home.htm" for dispatcher handling 
-	  -->
-  <welcome-file-list>
-    <welcome-file>index.jsp</welcome-file>
-  </welcome-file-list>
+	<session-config>
+		<session-timeout>10</session-timeout>
+	</session-config>
 
 	<!--
-	  - Errors pages 
+	  - Redirects to "home.htm" for dispatcher handling
 	  -->
-  <error-page>
-    <error-code>404</error-code>
-    <location>/notfound.htm</location>
-  </error-page>
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
 
 	<!--
-	  - Defines the Spring tag library.
+	  - Errors pages
 	  -->
-  <taglib>
-		<taglib-uri>/spring</taglib-uri>
-		<taglib-location>/WEB-INF/views/spring.tld</taglib-location>
-  </taglib>
+	<error-page>
+		<error-code>404</error-code>
+		<location>/notfound.htm</location>
+	</error-page>
 
-  <resource-ref>
-    <description>Resource reference to RDBMS</description>
-    <res-ref-name>jdbc/countries-ds</res-ref-name>
-    <res-type>javax.sql.DataSource</res-type>
-    <res-auth>Container</res-auth>
-    <res-sharing-scope>Shareable</res-sharing-scope>
-  </resource-ref>
+	<resource-ref>
+		<description>Resource reference to RDBMS</description>
+		<res-ref-name>jdbc/countries-ds</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
 
 </web-app>

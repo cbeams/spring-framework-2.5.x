@@ -56,15 +56,18 @@
 	  - This web app specifies "petclinic.root" (see log4j.properties file).
 	  -->
 	<!-- Comment the listener if using JBoss -->
-	<!-- 
+	<!--
 	<listener>
 		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
 	</listener>
 	-->
-	
+
 	<!--
 	  - Loads the root application context of this web app at startup,
 	  - by default from "/WEB-INF/applicationContext.xml".
+		- Note that it is preferable to use ContextLoaderListener in a servlet container
+		- that follows the Servlet 2.4 initialization order (most Servlet 2.3 containers do).
+		-
 	  - Use WebApplicationContextUtils.getWebApplicationContext(servletContext)
 	  - to access it anywhere in the web application, outside of the framework.
 	  -
@@ -72,9 +75,11 @@
 	  - This means that its beans are automatically available in these child contexts,
 	  - both for getBean(name) calls and (external) bean references.
     -->
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
+	<servlet>
+		<servlet-name>context</servlet-name>
+		<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
 	<!--
 	  - Servlet that dispatches request to registered handlers (Controller implementations).
@@ -119,29 +124,20 @@
 		<location>/WEB-INF/jsp/uncaughtException.jsp</location>
 	</error-page>
 
-	<!--
-	  - Defines the Spring tag library.
-	  - JSPs can import it like this: <%@ taglib uri="/spring" prefix="spring" %>
-	  -->
-	<taglib>
-		<taglib-uri>/spring</taglib-uri>
-		<taglib-location>/WEB-INF/spring.tld</taglib-location>
-	</taglib>
+	<resource-ref>
+		<description>Resource reference to RDBMS</description>
+		<res-ref-name>jdbc/petclinicHSQL</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
 
-  <resource-ref>
-    <description>Resource reference to RDBMS</description>
-    <res-ref-name>jdbc/petclinicHSQL</res-ref-name>
-    <res-type>javax.sql.DataSource</res-type>
-    <res-auth>Container</res-auth>
-    <res-sharing-scope>Shareable</res-sharing-scope>
-  </resource-ref>
-  
-  <resource-ref>
-    <description>Resource reference to RDBMS</description>
-    <res-ref-name>jdbc/petclinicMYSQL</res-ref-name>
-    <res-type>javax.sql.DataSource</res-type>
-    <res-auth>Container</res-auth>
-    <res-sharing-scope>Shareable</res-sharing-scope>
-  </resource-ref>
+	<resource-ref>
+		<description>Resource reference to RDBMS</description>
+		<res-ref-name>jdbc/petclinicMYSQL</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
 
 </web-app>

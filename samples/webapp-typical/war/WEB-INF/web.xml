@@ -107,15 +107,6 @@
   </servlet-mapping>
 
 	<!--
-	  - Defines the Spring tag library.
-    - JSPs can import it like this: <%@ taglib uri="/spring" prefix="spring" %>
-	  -->
-	<taglib>
-		<taglib-uri>/spring</taglib-uri>
-		<taglib-location>/WEB-INF/spring.tld</taglib-location>
-	</taglib>
-
-	<!--
 		- Standard J2EE resource reference to a JNDI DataSource.
 	  - Must match the DataSource defined in the application context.
 	  -->
