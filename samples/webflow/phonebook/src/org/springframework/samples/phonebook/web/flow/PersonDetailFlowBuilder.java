@@ -40,16 +40,16 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 	private ConversionService conversionService;
 
-	protected ConversionExecutor getConversionExecutor(Class targetClass) {
-		return conversionService.getConversionExecutor(String.class, targetClass);
-	}
-
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	protected String flowId() {
 		return PERSON_DETAIL;
+	}
+
+	protected ConversionExecutor getConversionExecutor(Class targetClass) {
+		return conversionService.getConversionExecutor(String.class, targetClass);
 	}
 
 	public void buildStates() throws FlowBuilderException {
