@@ -18,14 +18,18 @@ import org.springframework.util.StopWatch;
  * e.g. for order ID 1000: 'client 1000' for a single call per service or
  * 'client 1000 10' for 10 calls each".
  *
- * <p>Reads in the application context from "clientContext.xml", calling
- * all OrderService proxies defined in it. See that file for details.
+ * <p>Reads in the application context from a "clientContext.xml" file in
+ * the VM execution directory, calling all OrderService proxies defined in it.
+ * See that file for details.
  *
  * @author Juergen Hoeller
  * @since 26.12.2003
  * @see org.springframework.samples.jpetstore.domain.logic.OrderService
  */
 public class OrderServiceClient {
+
+	public static final String CLIENT_CONTEXT_CONFIG_LOCATION = "clientContext.xml";
+
 
 	private final ListableBeanFactory beanFactory;
 
@@ -35,7 +39,7 @@ public class OrderServiceClient {
 
 	public void invokeOrderServices(int orderId, int nrOfCalls) {
 		StopWatch stopWatch = new StopWatch(nrOfCalls + " OrderService call(s)");
-		Map orderServices = this.beanFactory.getBeansOfType(OrderService.class, true, true);
+		Map orderServices = this.beanFactory.getBeansOfType(OrderService.class);
 		for (Iterator it = orderServices.keySet().iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
 			OrderService orderService = (OrderService) orderServices.get(beanName);
@@ -58,20 +62,22 @@ public class OrderServiceClient {
 	}
 
 	protected void printOrder(Order order) {
-		System.out.println("Got order with order ID " + order.getOrderId() + " and order date " + order.getOrderDate());
+		System.out.println("Got order with order ID " + order.getOrderId() +
+				" and order date " + order.getOrderDate());
 		System.out.println("Shipping address is: " + order.getShipAddress1());
 		for (Iterator lineItems = order.getLineItems().iterator(); lineItems.hasNext();) {
 			LineItem lineItem = (LineItem) lineItems.next();
 			System.out.println("LineItem " + lineItem.getLineNumber() + ": " + lineItem.getQuantity() +
-												 " piece(s) of item " + lineItem.getItemId());
+					" piece(s) of item " + lineItem.getItemId());
 		}
 	}
 
 
 	public static void main(String[] args) {
 		if (args.length == 0 || "".equals(args[0])) {
-			System.out.println("You need to specify an order ID and optionally a number of calls, e.g. for order ID 1000: " +
-												 "'client 1000' for a single call per service or 'client 1000 10' for 10 calls each");
+			System.out.println(
+					"You need to specify an order ID and optionally a number of calls, e.g. for order ID 1000: " +
+					"'client 1000' for a single call per service or 'client 1000 10' for 10 calls each");
 		}
 		else {
 			int orderId = Integer.parseInt(args[0]);
@@ -79,7 +85,7 @@ public class OrderServiceClient {
 			if (args.length > 1 && !"".equals(args[1])) {
 				nrOfCalls = Integer.parseInt(args[1]);
 			}
-			ListableBeanFactory beanFactory = new FileSystemXmlApplicationContext("clientContext.xml");
+			ListableBeanFactory beanFactory = new FileSystemXmlApplicationContext(CLIENT_CONTEXT_CONFIG_LOCATION);
 			OrderServiceClient client = new OrderServiceClient(beanFactory);
 			client.invokeOrderServices(orderId, nrOfCalls);
 		}
