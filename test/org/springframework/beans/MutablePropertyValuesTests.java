@@ -16,6 +16,12 @@
 
 package org.springframework.beans;
 
+/**
+ * Test for MutablePropertyValues.
+ * 
+ * @author Rod Johnson
+ * @version $Id: MutablePropertyValuesTests.java,v 1.5 2004-07-08 15:54:19 johnsonr Exp $
+ */
 public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 
 	public void testValid() throws Exception {
@@ -24,6 +30,12 @@ public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
 		pvs.addPropertyValue(new PropertyValue("age", "50"));
 		testTony(pvs);
+		
+		MutablePropertyValues deepCopy = new MutablePropertyValues(pvs);
+		testTony(deepCopy);
+		deepCopy.setPropertyValueAt(new PropertyValue("name", "Gordon"), 0);
+		testTony(pvs);
+		assertEquals("Gordon", deepCopy.getPropertyValue("name").getValue());
 	}
 
 	public void addOrOverride() throws Exception {
