@@ -29,7 +29,7 @@ import org.springframework.core.io.UrlResource;
 
 /**
  * ResourcePatternResolver which can retrieve multiple class path resources
- * with the same name. For example, "classpath:/beans.xml" will find all
+ * with the same name. For example, "classpath*:/beans.xml" will find all
  * beans.xml files in the class path, be it in "classes" directories or in
  * JAR files. This is particularly useful for auto-detecting config files.
  *
@@ -70,9 +70,9 @@ public class ClassPathResourcePatternResolver implements ResourcePatternResolver
 		List result = new ArrayList();
 
 		// check for class path resource (multiple resources for same name possible)
-		if (locationPattern.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX)) {
+		if (locationPattern.startsWith(CLASSPATH_URL_PREFIX)) {
 			Enumeration resourceUrls = Thread.currentThread().getContextClassLoader().getResources(
-					locationPattern.substring(ResourceLoader.CLASSPATH_URL_PREFIX.length()));
+					locationPattern.substring(CLASSPATH_URL_PREFIX.length()));
 			while (resourceUrls.hasMoreElements()) {
 				URL url = (URL) resourceUrls.nextElement();
 				result.add(new UrlResource(url));

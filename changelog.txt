@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.174 2004-06-25 10:01:30 jhoeller Exp $
+$Id: changelog.txt,v 1.175 2004-06-25 13:16:27 jhoeller Exp $
 
 
 Changes in version 1.1 RC1 (11.7.2004)
@@ -37,6 +37,8 @@ Package org.springframework.context
 * AbstractApplicationContext auto-detects an "applicationEventMulticaster" bean, using it instead of the default
 
 Package org.springframework.core
+* fixed UrlResource to correctly return the underlying URL on "getURL"
+* defined "classpath*:" prefix in ResourcePatternResolver interface, for retrieving all matching class path resources
 * added ClassPathResourcePatternResolver which can retrieve multiple class path resources with the same name
 * PathMatchingResourcePatternResolver derives from ClassPathResourcePatternResolver to inherit its behavior
 
