@@ -54,8 +54,7 @@ public class StringLengthConstraint implements UnaryPredicate {
         Assert.isTrue(length > 0);
         BinaryPredicate comparer = operator.getPredicate();
         Constraints constraints = Constraints.instance();
-        UnaryPredicate lengthConstraint = constraints.bind(comparer,
-                new Integer(length));
+        UnaryPredicate lengthConstraint = constraints.bind(comparer, length);
         this.lengthConstraint = constraints.onResult(StringLength.instance(),
                 lengthConstraint);
     }
@@ -70,8 +69,7 @@ public class StringLengthConstraint implements UnaryPredicate {
      */
     public StringLengthConstraint(int min, int max) {
         Assert.isTrue(min <= max);
-        UnaryPredicate rangeConstraint = new Range(new Integer(min),
-                new Integer(max));
+        UnaryPredicate rangeConstraint = new Range(min, max);
         this.lengthConstraint = Constraints.instance().onResult(
                 StringLength.instance(), rangeConstraint);
     }

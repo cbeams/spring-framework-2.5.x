@@ -31,7 +31,6 @@ import org.springframework.util.ToStringBuilder;
  * @author Keith Donald
  */
 public final class Range implements Serializable, UnaryPredicate {
-
     private UnaryPredicate rangeConstraint;
 
     /**
@@ -51,6 +50,27 @@ public final class Range implements Serializable, UnaryPredicate {
         UnaryPredicate minimum = c.bind(GreaterThanEqualTo.instance(), min);
         UnaryPredicate maximum = c.bind(LessThanEqualTo.instance(), max);
         this.rangeConstraint = c.and(minimum, maximum);
+    }
+
+    /**
+     * Convenience constructor for <code>int</code> ranges.
+     */
+    public Range(int min, int max) {
+        this(new Integer(min), new Integer(max));
+    }
+
+    /**
+     * Convenience constructor for <code>float</code> ranges.
+     */
+    public Range(float min, float max) {
+        this(new Float(min), new Float(max));
+    }
+
+    /**
+     * Convenience constructor for <code>double</code> ranges.
+     */
+    public Range(double min, double max) {
+        this(new Double(min), new Double(max));
     }
 
     /**
