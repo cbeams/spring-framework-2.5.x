@@ -50,10 +50,6 @@ public abstract class ValidationResultsBuilder {
         add(not);
     }
 
-    public UnaryPredicate peek() {
-        return (UnaryPredicate)levels.peek();
-    }
-
     private void add(UnaryPredicate predicate) {
         if (top != null) {
             if (top instanceof UnaryNot) {
@@ -82,11 +78,15 @@ public abstract class ValidationResultsBuilder {
                 logger.debug("Adding constraint [" + constraint + "]");
             }
             ((CompoundUnaryPredicate)this.top).add(constraint);
-        } else {
+        } else if (this.top instanceof UnaryNot) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Negating constraint [" + constraint + "]");
             }
             ((UnaryNot)this.top).setPredicate(constraint);
+        } else if (this.top == null) {
+            constraintViolated(constraint);
+        } else {
+            throw new IllegalArgumentException(constraint.toString());
         }
     }
 
@@ -118,6 +118,17 @@ public abstract class ValidationResultsBuilder {
     protected void clear() {
         levels.clear();
         top = null;
+    }
+
+    public boolean negated() {
+        if (levels.size() == 0) {
+            return false;
+        }
+        return peek() instanceof UnaryNot;
+    }
+    
+    private UnaryPredicate peek() {
+        return (UnaryPredicate)levels.peek();
     }
 
     protected abstract void constraintViolated(UnaryPredicate constraint);

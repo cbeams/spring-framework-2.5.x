@@ -64,24 +64,31 @@ public class DefaultMessageTranslator implements Visitor {
     }
 
     public String getMessage(UnaryPredicate constraint) {
-        return buildMessage(null, constraint, Locale.getDefault());
+        return buildMessage(null, null, constraint, Locale.getDefault());
     }
 
     public String getMessage(String objectName, UnaryPredicate constraint) {
-        return buildMessage(objectName, constraint, Locale.getDefault());
+        return buildMessage(objectName, null, constraint, Locale.getDefault());
     }
 
     public String getMessage(String objectName, Object rejectedValue,
             UnaryPredicate constraint) {
-        return buildMessage(objectName, constraint, Locale.getDefault());
+        return buildMessage(objectName, rejectedValue, constraint, Locale
+                .getDefault());
+    }
+
+    public String getMessage(String objectName, ValidationResults results) {
+        return buildMessage(objectName, results.getRejectedValue(), results
+                .getViolatedConstraint(), Locale.getDefault());
     }
 
     public String getMessage(PropertyResults results) {
         return buildMessage(results.getPropertyName(), results
-                .getViolatedConstraint(), Locale.getDefault());
+                .getRejectedValue(), results.getViolatedConstraint(), Locale
+                .getDefault());
     }
 
-    private String buildMessage(String objectName, 
+    private String buildMessage(String objectName, Object rejectedValue,
             UnaryPredicate constraint, Locale locale) {
         StringBuffer buf = new StringBuffer(255);
         MessageSourceResolvable[] args = resolveArguments(constraint);
@@ -91,7 +98,9 @@ public class DefaultMessageTranslator implements Visitor {
         if (objectName != null) {
             buf.append(messages.getMessage(resolvableObjectName(objectName),
                     locale));
-            if (args.length > 0) {
+            buf.append(' ');
+            if (rejectedValue != null) {
+                buf.append("'" + rejectedValue + "'");
                 buf.append(' ');
             }
         }
@@ -101,6 +110,7 @@ public class DefaultMessageTranslator implements Visitor {
             buf.append(' ');
         }
         buf.append(messages.getMessage(args[args.length - 1], locale));
+        buf.append(".");
         return buf.toString();
     }
 
@@ -189,7 +199,7 @@ public class DefaultMessageTranslator implements Visitor {
         Object[] args = new Object[] { resolvable };
         add(getMessageCode(constraint), args, constraint.toString());
     }
-    
+
     void visit(UnaryFunctionResultConstraint c) {
         visitorSupport.invokeVisit(this, c.getPredicate());
     }

@@ -39,7 +39,7 @@ public class ValidationResultsCollector implements Visitor {
     private ValidationResultsBuilder resultsBuilder;
     private ValidationResults results;
     private boolean collectAllErrors;
-    
+
     private Object argument;
 
     public ValidationResultsCollector() {
@@ -139,10 +139,14 @@ public class ValidationResultsCollector implements Visitor {
     Boolean visit(UnaryFunctionResultConstraint ofConstraint) {
         UnaryFunction f = ofConstraint.getFunction();
         this.argument = f.evaluate(argument);
-        return (Boolean)visitorSupport.invokeVisit(this, ofConstraint.getPredicate());
+        return (Boolean)visitorSupport.invokeVisit(this, ofConstraint
+                .getPredicate());
     }
 
     boolean visit(UnaryPredicate constraint) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Testing constraint [" + constraint + "]");
+        }
         boolean result = constraint.test(argument);
         result = applyAnyNegation(result);
         if (!result) {
@@ -156,7 +160,7 @@ public class ValidationResultsCollector implements Visitor {
     }
 
     protected boolean applyAnyNegation(boolean result) {
-        boolean negated = resultsBuilder.peek() instanceof UnaryNot;
+        boolean negated = resultsBuilder.negated();
         if (logger.isDebugEnabled()) {
             if (negated) {
                 logger.debug("[negate result]");

@@ -15,6 +15,8 @@
  */
 package org.springframework.rules.predicates;
 
+import java.util.Collection;
+
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +40,8 @@ public class Required implements UnaryPredicate {
                 if (StringUtils.hasText((String)argument)) {
                     return true;
                 }
+            } else if (argument instanceof Collection) {
+                return ((Collection)argument).size() > 0;
             } else {
                 return true;
             }
