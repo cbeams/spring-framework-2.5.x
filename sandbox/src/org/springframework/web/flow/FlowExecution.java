@@ -50,12 +50,12 @@ public interface FlowExecution extends FlowExecutionMBean {
 	 * @return the next model and view descriptor to display for this flow
 	 *         execution, this returns control to the client and requests that a
 	 *         view be rendered with model data
-	 * @throws NoSuchTransitionException if the signaled event does not map to
+	 * @throws NoMatchingTransitionException if the signaled event does not map to
 	 *         any state transitions in the current state
 	 * @throws IllegalStateException if the flow execution is not active and
 	 *         thus is no longer (or not yet) processing events
 	 */
-	public ViewDescriptor signalEvent(Event event) throws NoSuchTransitionException, IllegalStateException;
+	public ViewDescriptor signalEvent(Event event) throws NoMatchingTransitionException, IllegalStateException;
 
 	/**
 	 * Called by a client to restore this flow execution's state after

@@ -254,7 +254,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		return viewDescriptor;
 	}
 
-	public synchronized ViewDescriptor signalEvent(Event event) throws NoSuchTransitionException,
+	public synchronized ViewDescriptor signalEvent(Event event) throws NoMatchingTransitionException,
 			IllegalStateException {
 		assertActive();
 		String eventId = event.getId();

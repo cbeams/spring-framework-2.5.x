@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
- * A local parameter object that allows for storing arbitrary properties about a
+ * A action-state-local parameter object that allows for storing arbitrary properties about a
  * target <code>Action</code> implementation for use within exactly one
  * <code>ActionState</code> definition.
  * <p>

@@ -128,15 +128,15 @@ public abstract class TransitionableState extends State {
 	/**
 	 * Get a transition in this state for given flow execution request context.
 	 * Throws and exception when when there is no corresponding transition.
-	 * @throws NoSuchTransitionException when the transition cannot be found
+	 * @throws NoMatchingTransitionException when the transition cannot be found
 	 */
-	public Transition getRequiredTransition(RequestContext context) throws NoSuchTransitionException {
+	public Transition getRequiredTransition(RequestContext context) throws NoMatchingTransitionException {
 		Transition transition = getTransition(context);
 		if (transition != null) {
 			return transition;
 		}
 		else {
-			throw new NoSuchTransitionException(this, context.getLastEvent());
+			throw new NoMatchingTransitionException(this, context);
 		}
 	}
 
@@ -169,12 +169,12 @@ public abstract class TransitionableState extends State {
 	 * @param context a flow execution context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the transition execution
-	 * @throws NoSuchTransitionException when no transition can be found
+	 * @throws NoMatchingTransitionException when no transition can be found
 	 * @throws CannotExecuteStateTransitionException if a state transition could
 	 *         not be executed
 	 */
 	public ViewDescriptor executeTransition(StateContext context)
-			throws NoSuchTransitionException, CannotExecuteStateTransitionException {
+			throws NoMatchingTransitionException, CannotExecuteStateTransitionException {
 		Transition transition = getRequiredTransition(context);
 		return transition.execute(context);
 	}
