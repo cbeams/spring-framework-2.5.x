@@ -32,7 +32,7 @@ import org.springframework.beans.PropertyValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.9 2004-02-27 13:05:21 jhoeller Exp $
+ * @version $Id: DataBinder.java,v 1.10 2004-03-01 09:33:58 jhoeller Exp $
  * @see #bind
  * @see #getErrors
  * @see org.springframework.web.bind.ServletRequestDataBinder
@@ -50,10 +50,10 @@ public class DataBinder {
 	/**
 	 * Create a new DataBinder instance.
 	 * @param target target object to bind onto
-	 * @param name name of the target object
+	 * @param objectName name of the target object
 	 */
-	public DataBinder(Object target, String name) {
-		this.errors = createErrors(target, name);
+	public DataBinder(Object target, String objectName) {
+		this.errors = createErrors(target, objectName);
 	}
 
 	/**
@@ -61,12 +61,26 @@ public class DataBinder {
 	 * Can be overridden in subclasses to.
 	 * Needs to be a subclass of BindException.
 	 * @param target target object to bind onto
-	 * @param name name of the target object
+	 * @param objectName name of the target object
 	 * @return the Errors instance
 	 * @see #close
 	 */
-	protected BindException createErrors(Object target, String name) {
-		return new BindException(target, name);
+	protected BindException createErrors(Object target, String objectName) {
+		return new BindException(target, objectName);
+	}
+
+	/**
+	 * Return the wrapped target object.
+	 */
+	public Object getTarget() {
+		return this.errors.getTarget();
+	}
+
+	/**
+	 * Return the name of the bound object.
+	 */
+	public String getObjectName() {
+		return this.errors.getObjectName();
 	}
 
 	/**
