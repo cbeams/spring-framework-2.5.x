@@ -18,18 +18,26 @@ import org.springframework.context.ApplicationContextException;
 public interface ConfigurableApplicationContext extends ApplicationContext {
 
 	/**
+	 * Set the parent of this application context.
+	 * <p>Note that the parent shouldn't be changed: It should only be set outside
+	 * a constructor if it isn't available when an object of this class is created,
+	 * for example in case of WebApplicationContext setup.
+	 * @param parent the parent context
+	 * @see org.springframework.web.context.ConfigurableWebApplicationContext
+	 */
+	void setParent(ApplicationContext parent);
+
+	/**
 	 * Load or refresh the persistent representation of the configuration,
-	 * which might for example be an XML file, properties file or
-	 * relational database schema.
+	 * which might an XML file, properties file, or relational database schema.
 	 * @throws ApplicationContextException if the config cannot be loaded
 	 * @throws BeansException if the bean factory could not be initialized
 	 */
 	void refresh() throws BeansException;
 
 	/**
-	 * Close this application context, releasing all resources and locks
-	 * that the implementation might hold. This includes disposing all
-	 * cached singleton beans.
+	 * Close this application context, releasing all resources and locks that the
+	 * implementation might hold. This includes disposing all cached singleton beans.
 	 * <p>Note: Does <i>not</i> invoke close on a parent context.
 	 * @throws ApplicationContextException if there were fatal errors
 	 */
