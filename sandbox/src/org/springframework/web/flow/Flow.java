@@ -1396,7 +1396,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param stateId
 	 * @return
 	 */
-	public Transition[] onAnyEndEvent(String stateId) {
+	public Transition[] onDefaultEndEvents(String stateId) {
 		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() }, stateId);
 	}
 
@@ -1404,7 +1404,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param viewStateIdPrefix
 	 * @return
 	 */
-	public Transition[] onAnyEndEventView(String viewStateIdPrefix) {
+	public Transition[] onDefaultEndEventsView(String viewStateIdPrefix) {
 		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() },
 				view(viewStateIdPrefix));
 	}
@@ -1413,7 +1413,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param viewStateIdPrefix
 	 * @return
 	 */
-	public Transition[] onAnyEndEventGet(String getStateIdPrefix) {
+	public Transition[] onDefaultEndEventsGet(String getStateIdPrefix) {
 		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() },
 				get(getStateIdPrefix));
 	}
