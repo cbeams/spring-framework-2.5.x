@@ -2,13 +2,16 @@ package org.springframework.ui.velocity;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.VelocityException;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility class for working with a VelocityEngine.
@@ -34,7 +37,9 @@ public abstract class VelocityEngineUtils {
 	public static void mergeTemplate(VelocityEngine velocityEngine, String templateLocation, Map model,
 	                                 Writer writer) throws VelocityException {
 		try {
-			velocityEngine.mergeTemplate(templateLocation, new VelocityContext(model), writer);
+			VelocityContext velocityContext = new VelocityContext();
+			exposeModelAsContextAttributes(model, velocityContext);
+			velocityEngine.mergeTemplate(templateLocation, velocityContext, writer);
 		}
 		catch (VelocityException ex) {
 			throw ex;
@@ -60,6 +65,31 @@ public abstract class VelocityEngineUtils {
 		StringWriter result = new StringWriter();
 		mergeTemplate(velocityEngine, templateLocation, model, result);
 		return result.toString();
+	}
+	
+	/**
+	 * Expose the models in the given map as Velocity context attributes.
+	 * Names will be taken from the map and fixed for Velocity compliance as required.
+	 * @param model Map of model data to expose
+	 * @param velocityContext VelocityContext to add data to
+	 */
+	public static void exposeModelAsContextAttributes(Map model, Context velocityContext) {
+		if (model != null) {
+			Iterator itr = model.keySet().iterator();
+			while (itr.hasNext()) {
+				String modelName = (String) itr.next();
+				Object modelObject = model.get(modelName);
+				modelName = StringUtils.replace(modelName, ".", "_");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Added model attribute with name [" + modelName + "] and value [" + modelObject +
+											 "] to Velocity context");
+				}
+				velocityContext.put(modelName, modelObject);
+			}
+		}
+		else {
+			logger.debug("Model is null. Nothing to expose to Velocity context");
+		}
 	}
 
 }

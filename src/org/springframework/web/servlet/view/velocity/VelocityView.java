@@ -5,13 +5,9 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,7 +18,6 @@ import org.apache.velocity.app.tools.VelocityFormatter;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
-import org.apache.velocity.io.VelocityWriter;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.apache.velocity.util.SimplePool;
@@ -30,7 +25,7 @@ import org.apache.velocity.util.SimplePool;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.util.StringUtils;
+import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
@@ -65,7 +60,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityView.java,v 1.21 2004-02-23 18:00:50 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.22 2004-03-04 00:10:31 davison Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  */
@@ -87,7 +82,7 @@ public class VelocityView extends AbstractUrlBasedView {
 	/** Cache of writers */
 	private SimplePool writerPool;
 
-	/** The encoding to use when generating outputing */
+	/** The encoding to use when generating output */
 	private String encoding = null;
 
 	/** Instance of the VelocityEngine */
@@ -146,9 +141,9 @@ public class VelocityView extends AbstractUrlBasedView {
 
 
 	/**
- 	* Invoked on startup. Looks for a single VelocityConfig bean to
- 	* find the relevant VelocityEngine for this factory.
- 	*/
+ 	 * Invoked on startup. Looks for a single VelocityConfig bean to
+ 	 * find the relevant VelocityEngine for this factory.
+ 	 */
 	protected void initApplicationContext() throws ApplicationContextException {
 		super.initApplicationContext();
 
@@ -217,7 +212,7 @@ public class VelocityView extends AbstractUrlBasedView {
 
 		response.setContentType(getContentType());
 		Context velocityContext = new VelocityContext();
-		exposeModelAsContextAttributes(model, velocityContext);
+		VelocityEngineUtils.exposeModelAsContextAttributes(model, velocityContext);
 		exposeHelpers(velocityContext, request);
 
 		if (this.velocityFormatterAttribute != null) {
@@ -241,40 +236,6 @@ public class VelocityView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Expose the models in the given map as Velocity context attributes.
-	 * Names will be taken from the map.
-	 * @param model Map of model data to expose
-	 * @param velocityContext VelocityContext to add data to
-	 */
-	private void exposeModelAsContextAttributes(Map model, Context velocityContext) {
-		if (model != null) {
-			Iterator itr = model.keySet().iterator();
-			while (itr.hasNext()) {
-				String modelName = (String) itr.next();
-				Object modelObject = model.get(modelName);
-				modelName = transformModelNameIfNecessary(modelName);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Added model attribute with name '" + modelName + "' and value [" + modelObject +
-											 "] to Velocity context in view '" + getBeanName() + "'");
-				}
-				velocityContext.put(modelName, modelObject);
-			}
-		}
-		else {
-			logger.debug("Model is null. Nothing to expose to Velocity context in view with name '" + getBeanName() + "'");
-		}
-	}
-
-	/**
-	 * If necessary, transform the model name into a legal Velocity model name.
-	 * Velocity can't cope with ".s" in a variable name, so we change them to "_s".
-	 * @param modelName
-	 */
-	protected String transformModelNameIfNecessary(String modelName) {
-		return StringUtils.replace(modelName, ".", "_");
-	}
-
-	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
 	 * <p>Called by renderMergedOutputModel. The default implementations is empty.
@@ -289,36 +250,13 @@ public class VelocityView extends AbstractUrlBasedView {
 
 	/**
 	 * Merge the template with the context.
-	 * Based on code from the VelocityServlet.
+	 * Can be overridden if custom behaviour needs to be defined.
 	 * @param template template object returned by the handleRequest() method
 	 * @param context context the Velocity context
 	 * @param response servlet reponse (use this to get the OutputStream or Writer)
 	 */
 	protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
-		ServletOutputStream output = response.getOutputStream();
-		VelocityWriter vw = null;
-		try {
-			vw = (VelocityWriter) this.writerPool.get();
-			if (vw == null) {
-				vw = new VelocityWriter(new OutputStreamWriter(output, this.encoding), OUTPUT_BUFFER_SIZE, true);
-			}
-			else {
-				vw.recycle(new OutputStreamWriter(output, this.encoding));
-			}
-			template.merge(context, vw);
-		}
-		finally {
-			try {
-				if (vw != null) {
-					vw.flush();
-					this.writerPool.put(vw);
-					output.close();
-				}
-			}
-			catch (IOException ex) {
-				// do nothing
-			}
-		}
+		template.merge(context, response.getWriter());
 	}
 
 
