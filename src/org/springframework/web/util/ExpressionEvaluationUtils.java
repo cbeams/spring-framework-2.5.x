@@ -18,26 +18,68 @@ package org.springframework.web.util;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.el.ELException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 
 /**
- * Convenience methods for easy access to the JSP Expression Language
- * evaluator of Jakarta's JSTL implementation.
+ * Convenience methods for easy access to the JSP 2.0 ExpressionEvaluator or
+ * the ExpressionEvaluatorManager of Jakarta's JSTL implementation.
+ *
+ * <p>Automatically detects JSP 2.0 or Jakarta JSTL; falls back to throwing
+ * an exception on actual EL expressions if none of the two is available.
  *
  * <p>The evaluation methods check if the value contains "${"
  * before invoking the EL evaluator, treating the value as "normal"
- * expression (i.e. conventional String) else.
+ * expression (that is, a conventional String) else.
  *
- * <p>Note: The evaluation methods do not have a runtime dependency
- * on Jakarta's JSTL implementation, as long as they don't receive
- * actual EL expressions.
+ * <p>Note: The evaluation methods do not have a runtime dependency on
+ * JSP 2.0 or on Jakarta's JSTL implementation, as long as they don't
+ * receive actual EL expressions.
  *
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @since 11.07.2003
+ * @see javax.servlet.jsp.el.ExpressionEvaluator
+ * @see org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager
  */
 public abstract class ExpressionEvaluationUtils {
+
+	private static final String JSP_20_CLASS_NAME =
+			"javax.servlet.jsp.el.ExpressionEvaluator";
+
+	private static final String JAKARTA_JSTL_CLASS_NAME =
+			"org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager";
+
+	private static final Log logger = LogFactory.getLog(ExpressionEvaluationUtils.class);
+
+	private static ExpressionEvaluationHelper helper;
+
+	static {
+		try {
+			Class.forName(JSP_20_CLASS_NAME);
+			// JSP 2.0 available
+			helper = new Jsp20ExpressionEvaluationHelper();
+			logger.info("Using JSP 2.0 ExpressionEvaluator");
+		}
+		catch (ClassNotFoundException ex) {
+			// JSP 2.0 not available -> try Jakarta JSTL
+			try {
+				Class.forName(JAKARTA_JSTL_CLASS_NAME);
+				// JSP 2.0 available
+				helper = new JakartaExpressionEvaluationHelper();
+				logger.info("Using Jakarta JSTL ExpressionEvaluatorManager");
+			}
+			catch (ClassNotFoundException ex2) {
+				// neither JSP 2.0 nor Jakarta JSTL available -> no EL support
+				helper = new NoExpressionEvaluationHelper();
+				logger.info("JSP expression evaluation not available");
+			}
+		}
+	}
+
 
 	/**
 	 * Check if the given expression value is an EL expression.
@@ -60,10 +102,12 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	public static Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
 	    throws JspException {
-		if (isExpressionLanguage(attrValue))
-			return ExpressionEvaluationHelper.evaluate(attrName, attrValue, resultClass, pageContext);
-		else
+		if (isExpressionLanguage(attrValue)) {
+			return helper.evaluate(attrName, attrValue, resultClass, pageContext);
+		}
+		else {
 			return attrValue;
+		}
 	}
 
 	/**
@@ -76,10 +120,12 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	public static String evaluateString(String attrName, String attrValue, PageContext pageContext)
 	    throws JspException {
-		if (isExpressionLanguage(attrValue))
-			return (String) ExpressionEvaluationHelper.evaluate(attrName, attrValue, String.class, pageContext);
-		else
+		if (isExpressionLanguage(attrValue)) {
+			return (String) helper.evaluate(attrName, attrValue, String.class, pageContext);
+		}
+		else {
 			return attrValue;
+		}
 	}
 
 	/**
@@ -92,10 +138,12 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	public static int evaluateInteger(String attrName, String attrValue, PageContext pageContext)
 	    throws JspException {
-		if (isExpressionLanguage(attrValue))
-			return ((Integer) ExpressionEvaluationHelper.evaluate(attrName, attrValue, Integer.class, pageContext)).intValue();
-		else
+		if (isExpressionLanguage(attrValue)) {
+			return ((Integer) helper.evaluate(attrName, attrValue, Integer.class, pageContext)).intValue();
+		}
+		else {
 			return Integer.parseInt(attrValue);
+		}
 	}
 
 	/**
@@ -108,10 +156,42 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	public static boolean evaluateBoolean(String attrName, String attrValue, PageContext pageContext)
 	    throws JspException {
-		if (isExpressionLanguage(attrValue))
-			return ((Boolean) ExpressionEvaluationHelper.evaluate(attrName, attrValue, Boolean.class, pageContext)).booleanValue();
-		else
+		if (isExpressionLanguage(attrValue)) {
+			return ((Boolean) helper.evaluate(attrName, attrValue, Boolean.class, pageContext)).booleanValue();
+		}
+		else {
 			return Boolean.valueOf(attrValue).booleanValue();
+		}
+	}
+
+
+	/**
+	 * Internal interface for evaluating a JSP EL expression.
+	 */
+	private static interface ExpressionEvaluationHelper {
+
+		public Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
+				throws JspException;
+	}
+
+
+	/**
+	 * Actual invocation of the JSP 2.0 ExpressionEvaluator.
+	 * In separate inner class to avoid runtime dependency on JSP 2.0,
+	 * for evaluation of non-EL expressions.
+	 */
+	private static class Jsp20ExpressionEvaluationHelper implements ExpressionEvaluationHelper {
+
+		public Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
+		    throws JspException {
+			try {
+				return pageContext.getExpressionEvaluator().evaluate(
+						attrValue, resultClass, pageContext.getVariableResolver(), null);
+			}
+			catch (ELException ex) {
+				throw new JspException("Parsing of JSP EL expression \"" + attrValue + "\" failed", ex);
+			}
+		}
 	}
 
 
@@ -120,11 +200,25 @@ public abstract class ExpressionEvaluationUtils {
 	 * In separate inner class to avoid runtime dependency on Jakarta's
 	 * JSTL implementation, for evaluation of non-EL expressions.
 	 */
-	private static class ExpressionEvaluationHelper {
+	private static class JakartaExpressionEvaluationHelper implements ExpressionEvaluationHelper {
 
-		private static Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
+		public Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
 		    throws JspException {
 			return ExpressionEvaluatorManager.evaluate(attrName, attrValue, resultClass, pageContext);
+		}
+	}
+
+
+	/**
+	 * Fallback ExpressionEvaluationHelper:
+	 * always throws an exception in case of an actual EL expression.
+	 */
+	private static class NoExpressionEvaluationHelper implements ExpressionEvaluationHelper {
+
+		public Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
+				throws JspException {
+			throw new JspException(
+					"Neither JSP 2.0 nor Jakarta JSTL available - cannot parse JSP EL expression \"" + attrValue + "\"");
 		}
 	}
 
