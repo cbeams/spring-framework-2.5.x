@@ -23,8 +23,9 @@ import java.util.Set;
 
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.IntroductionAdvice;
+import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.IntroductionInfo;
 import org.springframework.core.Ordered;
 
 /**
@@ -36,11 +37,20 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 
 	private int order = Integer.MAX_VALUE;
 
-	private IntroductionAdvice advice;
+	private Advice advice;
 	
 	private Set interfaces = new HashSet();
 	
-	public DefaultIntroductionAdvisor(IntroductionAdvice advice, Class clazz) {
+	public DefaultIntroductionAdvisor(Advice advice) {
+		if (advice instanceof IntroductionInfo) {
+			init(advice, (IntroductionInfo) advice);
+		}
+		else {
+			this.advice = advice;
+		}
+	}
+	
+	public DefaultIntroductionAdvisor(DynamicIntroductionAdvice advice, Class clazz) {
 		this.advice = advice;
 		addInterface(clazz);
 	}
@@ -48,9 +58,13 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	/**
 	 * Wrap the given interceptor and introduce all interfaces.
 	 */
-	public DefaultIntroductionAdvisor(IntroductionAdviceSupport introductionAdviceSupport) {
-		this.advice = introductionAdviceSupport;
-		Class[] introducedInterfaces = introductionAdviceSupport.getIntroducedInterfaces();
+	public DefaultIntroductionAdvisor(Advice advice, IntroductionInfo introductionInfo) {
+		init(advice, introductionInfo);
+	}
+		
+	private void init(Advice advice, IntroductionInfo introductionInfo) {
+		this.advice = advice;
+		Class[] introducedInterfaces = introductionInfo.getInterfaces();
 		if (introducedInterfaces.length == 0) {
 			throw new IllegalArgumentException("IntroductionAdviceSupport implements no interfaces");
 		}
@@ -101,8 +115,9 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 			 throw new IllegalArgumentException("Class '" + intf.getName() +
 																					"' is not an interface; cannot be used in an introduction");
 			}
-			if (!this.advice.implementsInterface(intf)) {
-			 throw new IllegalArgumentException("IntroductionInterceptor [" + this.advice + "] " +
+			
+			if (advice instanceof DynamicIntroductionAdvice && !((DynamicIntroductionAdvice) this.advice).implementsInterface(intf)) {
+			 throw new IllegalArgumentException("IntroductionAdvice [" + this.advice + "] " +
 					 "does not implement interface '" + intf.getName() + "' specified in introduction advice");
 			}
 		}

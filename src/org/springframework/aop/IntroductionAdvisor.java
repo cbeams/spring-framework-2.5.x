@@ -29,7 +29,7 @@ package org.springframework.aop;
  * @since 04-Apr-2003
  * @see org.springframework.aop.IntroductionInterceptor
  */
-public interface IntroductionAdvisor extends Advisor {
+public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 	
 	/**
 	 * Return the filter determining which target classes this introduction
@@ -37,11 +37,6 @@ public interface IntroductionAdvisor extends Advisor {
 	 * matching doesn't make sense to introductions.
 	 */
 	ClassFilter getClassFilter();
-	
-	/**
-	 * Return the additional interfaces introduced by this Advisor.
-	 */
-	Class[] getInterfaces();
 	
 	/**
 	 * Can the advised interfaces be implemented by the 

@@ -16,18 +16,30 @@
 
 package org.springframework.aop;
 
-import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.aop.Advice;
 
-/**
- * Subinterface of AOP Alliance MethodInterceptor that allows additional interfaces
- * to be implemented by the interceptor, and available via a proxy using that
+/** 
+ * Subinterface of AOP Alliance Advice that allows additional interfaces
+ * to be implemented by an Advice, and available via a proxy using that
  * interceptor. This is a fundamental AOP concept called <b>introduction</b>.
  *
  * <p>Introductions are often <b>mixins</b>, enabling the building of composite
  * objects that can achieve many of the goals of multiple inheritance in Java.
- *
+ * <p>
+ * Compared to IntroductionInfo, this interface allows an advice to implement
+ * a range of interfaces that is not necessarily known in advance.
+ * Thus an IntroductionAdvisor can be used to specify which interfaces
+ * will be exposed in an advised object.
+ * @see org.springframework.aop.IntroductionInfo
  * @author Rod Johnson
+ * @since 1.1.1
  */
-public interface IntroductionInterceptor extends MethodInterceptor, DynamicIntroductionAdvice {
+public interface DynamicIntroductionAdvice extends Advice {
+	
+	/**
+	 * Does this IntroductionInterceptor implement the given interface?
+	 * @param intf interface to check
+	 */
+	boolean implementsInterface(Class intf);
 
 }

@@ -16,23 +16,22 @@
 
 package org.springframework.aop;
 
-import org.aopalliance.aop.Advice;
-
-/** 
- * Subinterface of AOP Alliance Advice that allows additional interfaces
- * to be implemented by an Advice, and available via a proxy using that
- * interceptor. This is a fundamental AOP concept called <b>introduction</b>.
- *
- * <p>Introductions are often <b>mixins</b>, enabling the building of composite
- * objects that can achieve many of the goals of multiple inheritance in Java.
+/**
+ * Interface supplying the information necessary to describe an introduction.
+ * IntroductionAdvisors must implement this interface.
+ * If an Advice implements this, it may be used
+ * as an introduction without an IntroductionAdvisor.
+ * In this case, the advice is self-describing, providing not only
+ * the necessary behaviour, but describing the interfaces it
+ * introduces.
+ * @since 1.1.1
  * @author Rod Johnson
  */
-public interface IntroductionAdvice extends Advice {
+public interface IntroductionInfo {
 	
 	/**
-	 * Does this IntroductionInterceptor implement the given interface?
-	 * @param intf interface to check
+	 * Return the additional interfaces introduced by this Advisor or Advice.
 	 */
-	boolean implementsInterface(Class intf);
+	Class[] getInterfaces();
 
 }

@@ -27,16 +27,17 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
-import org.springframework.aop.IntroductionInterceptor;
+import org.springframework.aop.IntroductionInfo;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -250,19 +251,27 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 	
 	/**
-	 * Cannot add IntroductionInterceptors this way.
+	 * Cannot add introductions this way unless the advice implements IntroductionInfo.
 	 */
 	public void addAdvice(int pos, Advice advice) throws AopConfigException {
-		if (advice instanceof Interceptor) {
-			if (!(advice instanceof MethodInterceptor)) {
-				throw new AopConfigException(getClass().getName() + " only handles MethodInterceptors");
-			}
-			if (advice instanceof IntroductionInterceptor) {
-				throw new AopConfigException("IntroductionInterceptors may only be added as part of IntroductionAdvice");
-			}
+		if (advice instanceof Interceptor && !(advice instanceof MethodInterceptor)) {
+			throw new AopConfigException(getClass().getName() + " only handles AOP Alliance MethodInterceptors");
 		}
-		addAdvisor(pos, new DefaultPointcutAdvisor(advice));
+		
+		if (advice instanceof IntroductionInfo) {
+			// We don't need an IntroductionAdvisor for this kind of introduction:
+			// it's fully self-describing
+			addAdvisor(pos, new DefaultIntroductionAdvisor(advice, (IntroductionInfo) advice));
+		}
+		else if (advice instanceof DynamicIntroductionAdvice) {
+			// We need an IntroductionAdvisor for this kind of introduction
+			throw new AopConfigException("DynamicIntroductionAdvice may only be added as part of IntroductionAdvisor");
+		}
+		else {
+			addAdvisor(pos, new DefaultPointcutAdvisor(advice));
+		}
 	}
+	
 	
 	/**
 	 * Convenience method to remove an interceptor.

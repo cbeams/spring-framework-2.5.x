@@ -27,7 +27,7 @@ import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.IntroductionAdvice;
+import org.springframework.aop.IntroductionInfo;
 
 /**
  * Support for implementations of IntroductionAdvice.
@@ -39,7 +39,7 @@ import org.springframework.aop.IntroductionAdvice;
  * not be added.
  * @author Rod Johnson
  */
-public class IntroductionAdviceSupport implements IntroductionAdvice, Serializable {
+public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 
 	protected transient Log logger = LogFactory.getLog(getClass());
 
@@ -57,13 +57,13 @@ public class IntroductionAdviceSupport implements IntroductionAdvice, Serializab
 		this.publishedInterfaces.remove(intf);
 	}
 
-	public Class[] getIntroducedInterfaces() {
+	public Class[] getInterfaces() {
 		return (Class[]) this.publishedInterfaces.toArray(new Class[this.publishedInterfaces.size()]);
 	}
 
 	/**
 	 * Implementation of IntroductionAdvice method
-	 * @see org.springframework.aop.IntroductionAdvice#implementsInterface(java.lang.Class)
+	 * @see org.springframework.aop.DynamicIntroductionAdvice#implementsInterface(java.lang.Class)
 	 */
 	public boolean implementsInterface(Class intf) {
 		for (Iterator it = this.publishedInterfaces.iterator(); it.hasNext();) {

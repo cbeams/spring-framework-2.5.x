@@ -17,7 +17,7 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.IntroductionAdvice;
+import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.AopProxyUtils;
 
@@ -41,7 +41,7 @@ import org.springframework.aop.framework.AopProxyUtils;
  *
  * @author Rod Johnson
  */
-public class DelegatingIntroductionInterceptor extends IntroductionAdviceSupport implements IntroductionInterceptor {
+public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport implements IntroductionInterceptor {
 		
 	/**
 	 * Object that actually implements the interfaces.
@@ -79,7 +79,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionAdviceSupport
 		implementInterfacesOnObject(delegate);
 		// We don't want to expose the control interface
 		suppressInterface(IntroductionInterceptor.class);
-		suppressInterface(IntroductionAdvice.class);
+		suppressInterface(DynamicIntroductionAdvice.class);
 	}
 		
 	
