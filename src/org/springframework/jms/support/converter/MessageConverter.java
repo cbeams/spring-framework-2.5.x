@@ -20,12 +20,11 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
-import org.springframework.jms.support.converter.MessageConversionException;
-
 /**
  * Strategy interface that specifies a MessageConverter
  * between Java objects and JMS messages.
  * @author Mark Pollack
+ * @author Juergen Hoeller
  */
 public interface MessageConverter {
 
@@ -46,6 +45,6 @@ public interface MessageConverter {
 	 * @return the converted Java object
 	 * @throws org.springframework.jms.support.converter.MessageConversionException in case of conversion failure
 	 */
-	Object fromMessage(Message message) throws MessageConversionException;
+	Object fromMessage(Message message) throws JMSException, MessageConversionException;
 
 }
