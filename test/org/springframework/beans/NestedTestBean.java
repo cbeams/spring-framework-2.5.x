@@ -12,12 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Simple nested test bean used for testing bean factories, AOP framework etc.
@@ -35,12 +32,12 @@ public class NestedTestBean implements INestedTestBean {
 		setCompany(company);
 	}
 
-	public String getCompany() {
-		return company;
+	public void setCompany(String company) {
+		this.company = (company != null ? company : "");
 	}
 
-	public void setCompany(String company) {
-		this.company = company;
+	public String getCompany() {
+		return company;
 	}
 
 	public boolean equals(Object obj) {
@@ -48,11 +45,11 @@ public class NestedTestBean implements INestedTestBean {
 			return false;
 		}
 		NestedTestBean ntb = (NestedTestBean) obj;
-		return new EqualsBuilder().append(company, ntb.company).isEquals();
+		return this.company.equals(ntb.company);
 	}
 
 	public int hashCode() {
-		return new HashCodeBuilder(23, 91).append(company).toHashCode();
+		return this.company.hashCode();
 	}
 
 }
