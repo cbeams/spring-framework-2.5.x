@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -41,6 +42,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
+import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -57,7 +59,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.38 2004-07-24 10:52:35 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.39 2004-07-26 14:25:48 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -1148,6 +1150,57 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(age + 2, it.haveBirthday());
 		// Return the final age produced by 3 birthdays
 		assertEquals(age + 3, it.getAge());
+	}
+	
+	/**
+	 * We want to change the arguments on a clone: it shouldn't affect the original
+	 * @throws Throwable
+	 */
+	public void testCanChangeArgumentsIndependentlyOnClonedInvocation() throws Throwable {
+		TestBean tb = new TestBean();
+		ProxyFactory pc = new ProxyFactory(tb);
+		pc.addInterface(ITestBean.class);
+		
+		/**
+		 * Changes the name, then changes it back
+		 */
+		MethodInterceptor nameReverter = new MethodInterceptor() {
+			public Object invoke(MethodInvocation mi) throws Throwable {
+				MethodInvocation clone = ((ReflectiveMethodInvocation) mi).invocableClone();
+				String oldName = ((ITestBean) mi.getThis()).getName();
+				clone.getArguments()[0] = oldName;
+				// Original method invocation should be unaffected by changes to argument list of clone
+				mi.proceed();
+				return clone.proceed();
+			}
+		};
+		
+		class NameSaver implements MethodInterceptor { 
+			private List names = new LinkedList();
+			
+			public Object invoke(MethodInvocation mi) throws Throwable {
+				names.add(mi.getArguments()[0]);
+				return mi.proceed();
+			}
+		};
+		NameSaver saver = new NameSaver();
+		
+		pc.addAdvisor(new DefaultPointcutAdvisor(Pointcuts.SETTERS, nameReverter));
+		pc.addAdvisor(new DefaultPointcutAdvisor(Pointcuts.SETTERS, saver));
+		ITestBean it = (ITestBean) createProxy(pc);
+		
+		String name1 = "tony";
+		String name2 = "gordon";
+		
+		tb.setName(name1);
+		assertEquals(name1, tb.getName());
+		
+		it.setName(name2);
+		// NameReverter saved it back
+		assertEquals(name1, it.getName());
+		assertEquals(2, saver.names.size());
+		assertEquals(name2, saver.names.get(0));
+		assertEquals(name1, saver.names.get(1));
 	}
 	
 	public static interface IOverloads {

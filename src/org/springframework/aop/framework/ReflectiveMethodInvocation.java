@@ -34,7 +34,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * It's possible to clone an invocation, to invoke proceed() repeatedly
  * (once per clone), using the invocableClone() method.
  * @author Rod Johnson
- * @version $Id: ReflectiveMethodInvocation.java,v 1.6 2004-07-10 06:39:38 johnsonr Exp $
+ * @version $Id: ReflectiveMethodInvocation.java,v 1.7 2004-07-26 14:25:44 johnsonr Exp $
  * @see #invokeJoinpoint
  */
 public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
@@ -164,7 +164,8 @@ public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 	 * Create a clone of this object. If cloning is done before proceed() is invoked on this
 	 * object, proceed() can be invoked once per clone to invoke the joinpoint (and the rest
 	 * of the advice chain) more than once.
-	 * <br>This method returns a shallow copy. This is what we want in this case: we
+	 * <br>This method returns a shallow copy, except for the argument array, which is
+	 * deep-copied to allow for independent modification. We want a shallow copy in this case: we
 	 * want to use the same interceptor-chain and other object references, but we want an
 	 * independent value for the current interceptor index. 
 	 * @see java.lang.Object#clone()
@@ -172,7 +173,13 @@ public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {
 	 */
 	public MethodInvocation invocableClone() {
 		try {
-			return (MethodInvocation) clone();
+			ReflectiveMethodInvocation clone = (ReflectiveMethodInvocation) clone();
+			// Deep copy arguments
+			if (this.arguments != null) {
+				clone.arguments = new Object[this.arguments.length];
+				System.arraycopy(this.arguments, 0, clone.arguments, 0, this.arguments.length);
+			}
+			return clone;
 		}
 		catch (CloneNotSupportedException ex) {
 			throw new AspectException("Should be able to clone object of " + getClass(), ex);
