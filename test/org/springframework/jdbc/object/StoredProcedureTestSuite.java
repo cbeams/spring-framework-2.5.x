@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Thomas Risberg
  * @author Trevor Cook
  * @author Rod Johnson
- * @version $Id: StoredProcedureTestSuite.java,v 1.12 2004-02-20 12:04:48 trisberg Exp $
+ * @version $Id: StoredProcedureTestSuite.java,v 1.13 2004-03-17 08:49:17 jhoeller Exp $
  */
 public class StoredProcedureTestSuite extends JdbcTestCase {
 
@@ -111,6 +111,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Integer(4));
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -133,6 +135,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getObject(3);
 		ctrlCallable.setReturnValue(new Integer(4));
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -168,6 +172,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ctrlCallable.setReturnValue(false, 1);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue(new Integer(5), 1);
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable(1);
 		// Must call this here as we're not using setUp()/tearDown() mechanism
@@ -223,6 +229,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue(new Integer(4));
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -247,6 +255,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ctrlCallable.setVoidCallable();
 		mockCallable.execute();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -319,6 +329,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
@@ -369,6 +381,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ctrlCallable.setReturnValue(mockResultSet);
 		mockCallable.getMoreResults();
 		ctrlCallable.setReturnValue(false);
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
@@ -401,6 +415,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ctrlCallable.setReturnValue(false);
 		mockCallable.getObject(2);
 		ctrlCallable.setReturnValue("OK");
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 

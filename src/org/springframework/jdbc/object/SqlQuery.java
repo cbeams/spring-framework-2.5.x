@@ -27,7 +27,7 @@ import org.springframework.jdbc.core.ResultReader;
  *
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
- * @version $Id: SqlQuery.java,v 1.4 2004-01-04 21:32:56 jhoeller Exp $
+ * @version $Id: SqlQuery.java,v 1.5 2004-03-17 08:49:16 jhoeller Exp $
  */
 public abstract class SqlQuery extends SqlOperation {
 
@@ -98,12 +98,11 @@ public abstract class SqlQuery extends SqlOperation {
 	public List execute(final Object[] parameters, Map context) throws DataAccessException {
 		validateParameters(parameters);
 		ResultReader rr = newResultReader(this.rowsExpected, parameters, context);
-		getJdbcTemplate().query(newPreparedStatementCreator(parameters), rr);
-		return rr.getResults();
+		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rr);
 	}
 
 	/**
-	 * Convenient method to execute without context
+	 * Convenient method to execute without context.
 	 * @param parameters parameters, as to JDO queries. Primitive parameters must
 	 * be represented by their Object wrapper type. The ordering of parameters is
 	 * significant.
@@ -113,7 +112,7 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute without parameters
+	 * Convenient method to execute without parameters.
 	 * @param context The contextual information for object creation
 	 */
 	public List execute(Map context) throws DataAccessException {
@@ -121,14 +120,14 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute without parameters nor context
+	 * Convenient method to execute without parameters nor context.
 	 */
 	public List execute() throws DataAccessException {
 		return execute((Object[]) null);
 	}
 
 	/**
-	 * Convenient method to execute with a single int parameter and context
+	 * Convenient method to execute with a single int parameter and context.
 	 * @param p1 single int parameter
 	 * @param context The contextual information for object creation
 	 */
@@ -137,7 +136,7 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute with a single int parameter
+	 * Convenient method to execute with a single int parameter.
 	 * @param p1 single int parameter
 	 */
 	public List execute(int p1) throws DataAccessException {
@@ -145,7 +144,7 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute with two int parameters and context
+	 * Convenient method to execute with two int parameters and context.
 	 * @param p1 first int parameter
 	 * @param p2 second int parameter
 	 * @param context The contextual information for object creation
@@ -155,7 +154,7 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute with two int parameters
+	 * Convenient method to execute with two int parameters.
 	 * @param p1 first int parameter
 	 * @param p2 second int parameter
 	 */
@@ -164,7 +163,7 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute with a single long parameter and context
+	 * Convenient method to execute with a single long parameter and context.
 	 * @param p1 single long parameter
 	 * @param context The contextual information for object creation
 	 */
@@ -173,7 +172,7 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute with a single long parameter
+	 * Convenient method to execute with a single long parameter.
 	 * @param p1 single long parameter
 	 */
 	public List execute(long p1) throws DataAccessException {
@@ -181,7 +180,7 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute with a single String parameter and context
+	 * Convenient method to execute with a single String parameter and context.
 	 * @param p1 single String parameter
 	 * @param context The contextual information for object creation
 	 */
@@ -190,7 +189,7 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenient method to execute with a single String parameter
+	 * Convenient method to execute with a single String parameter.
 	 * @param p1 single String parameter
 	 */
 	public List execute(String p1) throws DataAccessException {
@@ -216,63 +215,67 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 	/**
-	 * Convenience method to find a single object without context
+	 * Convenience method to find a single object without context.
 	 */
 	public Object findObject(Object[] parameters) throws DataAccessException {
 		return findObject(parameters, null);
 	}
 
 	/**
-	 * Convenience method to find a single object given a single int parameter and a context
+	 * Convenience method to find a single object given a single int parameter
+	 * and a context.
 	 */
 	public Object findObject(int p1, Map context) throws DataAccessException {
 		return findObject(new Object[]{new Integer(p1)}, context);
 	}
 
 	/**
-	 * Convenience method to find a single object given a single int parameter
+	 * Convenience method to find a single object given a single int parameter.
 	 */
 	public Object findObject(int p1) throws DataAccessException {
 		return findObject(p1, null);
 	}
 
 	/**
-	 * Convenience method to find a single object given two int parameters and a context
+	 * Convenience method to find a single object given two int parameters
+	 * and a context.
 	 */
 	public Object findObject(int p1, int p2, Map context) throws DataAccessException {
 		return findObject(new Object[]{new Integer(p1), new Integer(p2)}, context);
 	}
 
 	/**
-	 * Convenience method to find a single object given two int parameters
+	 * Convenience method to find a single object given two int parameters.
 	 */
 	public Object findObject(int p1, int p2) throws DataAccessException {
 		return findObject(p1, p2, null);
 	}
 
 	/**
-	 * Convenience method to find a single object given a single String parameter and a context
+	 * Convenience method to find a single object given a single String parameter
+	 * and a context.
 	 */
 	public Object findObject(String p1, Map context) throws DataAccessException {
 		return findObject(new Object[]{p1}, context);
 	}
 
 	/**
-	 * Convenience method to find a single object given a single String parameter
+	 * Convenience method to find a single object given a single String parameter.
 	 */
 	public Object findObject(String p1) throws DataAccessException {
 		return findObject(p1, null);
 	}
 
 	/**
-	 * Convenience method to find a single object given a single long parameter and a context
+	 * Convenience method to find a single object given a single long parameter
+	 * and a context.
 	 */
 	public Object findObject(long p1, Map context) throws DataAccessException {
 		return findObject(new Object[]{new Long(p1)}, context);
 	}
 
 	/**
-	 * Convenience method to find a single object given a single long parameter
+	 * Convenience method to find a single object given a single long parameter.
 	 */
 	public Object findObject(long p1) throws DataAccessException {
 		return findObject(p1, null);
@@ -285,13 +288,14 @@ public abstract class SqlQuery extends SqlOperation {
 
 	/**
 	 * Subclasses must implement this method to save a List of objects
-	 * returned by the execute() method.
+	 * returned by the execute method.
 	 * @param rowsExpected If 0, we don't know how many rows to expect.
 	 * This parameter can be ignored, but may help some implementations
 	 * choose the most efficient Collection type: e.g. ArrayList
 	 * instead of LinkedList for large result sets.
 	 * @param parameters parameters to the execute() method, in case subclass is interested.
 	 * May be null if there were no parameters.
+	 * @see #execute
 	 */
 	protected abstract ResultReader newResultReader(int rowsExpected, Object[] parameters, Map context);
 

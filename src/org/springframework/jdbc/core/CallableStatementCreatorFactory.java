@@ -5,11 +5,10 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,11 +25,15 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  */
 public class CallableStatementCreatorFactory { 
 
-	/** The Sql call string, which won't change when the parameters change. */
+	/** The SQL call string, which won't change when the parameters change. */
 	private final String callString;
 
 	/** List of SqlParameter objects. May not be null. */
 	private List declaredParameters = new LinkedList();
+
+	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+
+	private boolean updatableResults = false;
 
 	/**
 	 * Create a new factory. Will need to add parameters
@@ -42,7 +45,7 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Create a new factory with sql and the given parameters.
-	 * @param callString SQL string
+	 * @param callString the SQL call string
 	 * @param declaredParameters list of SqlParameter objects
 	 */
 	public CallableStatementCreatorFactory(String callString, List declaredParameters) {
@@ -54,10 +57,30 @@ public class CallableStatementCreatorFactory {
 	 * Add a new declared parameter.
 	 * Order of parameter addition is significant.
 	 */
-	public void addParameter(SqlParameter p) {
-		this.declaredParameters.add(p);
+	public void addParameter(SqlParameter param) {
+		this.declaredParameters.add(param);
 	}
 		
+	/**
+	 * Set whether to use prepared statements that return a
+	 * specific type of ResultSet.
+	 * @param resultSetType the ResultSet type
+	 * @see java.sql.ResultSet#TYPE_FORWARD_ONLY
+	 * @see java.sql.ResultSet#TYPE_SCROLL_INSENSITIVE
+	 * @see java.sql.ResultSet#TYPE_SCROLL_SENSITIVE
+	 */
+	public void setResultSetType(int resultSetType) {
+		this.resultSetType = resultSetType;
+	}
+
+	/**
+	 * Set whether to use prepared statements capable of returning
+	 * updatable ResultSets.
+	 */
+	public void setUpdatableResults(boolean updatableResults) {
+		this.updatableResults = updatableResults;
+	}
+
 	/**
 	 * Return a new CallableStatementCreator instance given this parameters.
 	 * @param inParams List of parameters. May be null.
@@ -78,9 +101,10 @@ public class CallableStatementCreatorFactory {
 	/**
 	 * CallableStatementCreator implementation returned by this class.
 	 */
-	private class CallableStatementCreatorImpl implements CallableStatementCreator {
+	private class CallableStatementCreatorImpl implements CallableStatementCreator, SqlProvider {
 
 		private Map inParameters;
+
 		private ParameterMapper inParameterMapper;
 		
 		/**
@@ -110,7 +134,14 @@ public class CallableStatementCreatorFactory {
 				}
 			}
 
-			CallableStatement cs = con.prepareCall(callString);
+			CallableStatement cs = null;
+			if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
+				cs = con.prepareCall(callString);
+			}
+			else {
+				cs = con.prepareCall(callString, resultSetType,
+														 updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
+			}
 
 			int sqlColIndx = 1;
 			for (int i = 0; i < declaredParameters.size(); i++) {
@@ -156,11 +187,19 @@ public class CallableStatementCreatorFactory {
 			return cs;
 		}
 
+		public String getSql() {
+			return callString;
+		}
+
 		public String toString() {
-			StringBuffer sbuf = new StringBuffer("CallableStatementCreatorFactory.CallableStatementCreatorImpl: sql={" + callString + "}: params={");
-			if (inParameters != null)
-				sbuf.append(inParameters.toString());
-			return sbuf.toString() + "}";
+			StringBuffer buf = new StringBuffer("CallableStatementCreatorFactory.CallableStatementCreatorImpl: sql=[");
+			buf.append(callString);
+			buf.append("]: params=[");
+			if (inParameters != null) {
+				buf.append(inParameters.toString());
+			}
+			buf.append(']');
+			return buf.toString();
 		}
 	}
 

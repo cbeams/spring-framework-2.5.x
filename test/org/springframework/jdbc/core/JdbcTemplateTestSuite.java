@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.easymock.MockControl;
+
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -34,7 +35,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.19 2004-03-10 08:25:43 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.20 2004-03-17 08:49:16 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -76,6 +77,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
 		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -482,6 +485,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
 		mockStatement.executeUpdate(sql);
 		ctrlStatement.setReturnValue(rowsAffected);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -539,6 +544,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		Statement mockStatement = (Statement) ctrlStatement.getMock();
 		mockStatement.executeUpdate(sql);
 		ctrlStatement.setReturnValue(rowsAffected);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
 
@@ -558,19 +565,17 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlStatement.verify();
 	}
 
-	/**
-	 * Check that a successful bulk update works
-	 * @throws Exception
-	 */
 	public void testBatchUpdate() throws Exception {
 		final String sql =
 			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 
 		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
+				MockControl.createControl(PreparedStatement.class);
 		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
+				(PreparedStatement) ctrlPreparedStatement.getMock();
+		mockPreparedStatement.getConnection();
+		ctrlPreparedStatement.setReturnValue(mockConnection);
 		mockPreparedStatement.setInt(1, ids[0]);
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.addBatch();
@@ -581,13 +586,27 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeBatch();
 		ctrlPreparedStatement.setReturnValue(ids);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MySQL");
+		mockDatabaseMetaData.getDriverVersion();
+		ctrlDatabaseMetaData.setReturnValue("1.2.3");
+		mockDatabaseMetaData.supportsBatchUpdates();
+		ctrlDatabaseMetaData.setReturnValue(true);
+
 		mockConnection.prepareStatement(sql);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.getMetaData();
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
 
 		ctrlPreparedStatement.replay();
+		ctrlDatabaseMetaData.replay();
 		replay();
 
 		BatchPreparedStatementSetter setter =
@@ -607,6 +626,69 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 
 		ctrlPreparedStatement.verify();
+		ctrlDatabaseMetaData.verify();
+	}
+
+	public void testBatchUpdateWithNoBatchSupport() throws Exception {
+		final String sql =
+			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final int[] ids = new int[] { 100, 200 };
+
+		MockControl ctrlPreparedStatement =
+				MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement =
+				(PreparedStatement) ctrlPreparedStatement.getMock();
+		mockPreparedStatement.getConnection();
+		ctrlPreparedStatement.setReturnValue(mockConnection);
+		mockPreparedStatement.setInt(1, ids[0]);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(ids[0]);
+		mockPreparedStatement.setInt(1, ids[1]);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(ids[1]);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MySQL");
+		mockDatabaseMetaData.getDriverVersion();
+		ctrlDatabaseMetaData.setReturnValue("1.2.3");
+		mockDatabaseMetaData.supportsBatchUpdates();
+		ctrlDatabaseMetaData.setReturnValue(false);
+
+		mockConnection.prepareStatement(sql);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.getMetaData();
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
+
+		ctrlPreparedStatement.replay();
+		ctrlDatabaseMetaData.replay();
+		replay();
+
+		BatchPreparedStatementSetter setter =
+			new BatchPreparedStatementSetter() {
+			public void setValues(PreparedStatement ps, int i)
+				throws SQLException {
+				ps.setInt(1, ids[i]);
+			}
+			public int getBatchSize() {
+				return ids.length;
+			}
+		};
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		int[] actualRowsAffected = template.batchUpdate(sql, setter);
+		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+
+		ctrlPreparedStatement.verify();
+		ctrlDatabaseMetaData.verify();
 	}
 
 	/**
@@ -623,6 +705,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			MockControl.createControl(PreparedStatement.class);
 		PreparedStatement mockPreparedStatement =
 			(PreparedStatement) ctrlPreparedStatement.getMock();
+		mockPreparedStatement.getConnection();
+		ctrlPreparedStatement.setReturnValue(mockConnection);
 		mockPreparedStatement.setInt(1, ids[0]);
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.addBatch();
@@ -636,10 +720,22 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MySQL");
+		mockDatabaseMetaData.getDriverVersion();
+		ctrlDatabaseMetaData.setReturnValue("1.2.3");
+		mockDatabaseMetaData.supportsBatchUpdates();
+		ctrlDatabaseMetaData.setReturnValue(true);
+
 		mockConnection.prepareStatement(sql);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.getMetaData();
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
 
 		ctrlPreparedStatement.replay();
+		ctrlDatabaseMetaData.replay();
 		replay();
 
 		BatchPreparedStatementSetter setter =
@@ -663,6 +759,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		}
 
 		ctrlPreparedStatement.verify();
+		ctrlDatabaseMetaData.verify();
 	}
 
 	public void testCouldntGetConnectionInOperationOrLazilyInstantiatedExceptionTranslator() throws SQLException {
@@ -816,6 +913,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
 		ctrlPreparedStatement.setReturnValue(expectedRowsUpdated);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
@@ -1067,8 +1166,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlResultSet.verify();
 		ctrlStatement.verify();
 	}
-	
-	
+
 	/**
 	 * Test that we see an SQLException translated using Error Code.
 	 * If we provide the SQLExceptionTranslator, we shouldn't use a connection
@@ -1181,6 +1279,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 		MockControl ctrlCallableStatement =	MockControl.createControl(CallableStatement.class);
 		final CallableStatement mockCallableStatement =	(CallableStatement) ctrlCallableStatement.getMock();
+		mockCallableStatement.getWarnings();
+		ctrlCallableStatement.setReturnValue(null);
 		mockCallableStatement.close();
 		ctrlCallableStatement.setVoidCallable();
 		MockControl ctrlCallableStatement2 =	MockControl.createControl(CallableStatement.class);
@@ -1236,14 +1336,14 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			}
 		});
 
-		template.doWithResultSetFromStaticQuery("my query",	new ResultSetExtractor() {
+		template.query("my query",	new ResultSetExtractor() {
 			public Object extractData(ResultSet rs2) throws SQLException {
 				assertEquals(mockResultSet, rs2);
 				return null;
 			}
 		});
 
-		template.doWithResultSetFromPreparedQuery(new PreparedStatementCreator() {
+		template.query(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
 				return mockPreparedStatement;
 			}
@@ -1322,7 +1422,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 
 		try {
-			template.doWithResultSetFromStaticQuery("my query",	new ResultSetExtractor() {
+			template.query("my query",	new ResultSetExtractor() {
 				public Object extractData(ResultSet rs) throws SQLException {
 					throw new InvalidDataAccessApiUsageException("");
 				}
@@ -1334,9 +1434,12 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		}
 
 		try {
-			template.doWithResultSetFromPreparedQuery(new PreparedStatementCreator() {
+			template.query(new PreparedStatementCreator() {
 				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 					return con.prepareStatement("my query");
+				}
+				public String getSql() {
+					return null;
 				}
 			}, new ResultSetExtractor() {
 				public Object extractData(ResultSet rs2) throws SQLException {
@@ -1426,10 +1529,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ResultSet mockResultSet;
 		MockControl ctrlStatement;
 		Statement mockStatement;
-		MockControl ctrlResultSet2;
-		ResultSet mockResultSet2;
-		MockControl ctrlPreparedStatement;
-		PreparedStatement mockPreparedStatement;
 
 		try {
 			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
@@ -1489,10 +1588,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ResultSet mockResultSet;
 		MockControl ctrlStatement;
 		Statement mockStatement;
-		MockControl ctrlResultSet2;
-		ResultSet mockResultSet2;
-		MockControl ctrlPreparedStatement;
-		PreparedStatement mockPreparedStatement;
 
 		try {
 			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
@@ -1552,10 +1647,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ResultSet mockResultSet;
 		MockControl ctrlStatement;
 		Statement mockStatement;
-		MockControl ctrlResultSet2;
-		ResultSet mockResultSet2;
-		MockControl ctrlPreparedStatement;
-		PreparedStatement mockPreparedStatement;
 
 		try {
 			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
@@ -1615,10 +1706,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ResultSet mockResultSet;
 		MockControl ctrlStatement;
 		Statement mockStatement;
-		MockControl ctrlResultSet2;
-		ResultSet mockResultSet2;
-		MockControl ctrlPreparedStatement;
-		PreparedStatement mockPreparedStatement;
 
 		try {
 			ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
@@ -1686,7 +1773,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 	}
 
 
-	private static class Dispatcher implements PreparedStatementCreator {
+	private static class Dispatcher implements PreparedStatementCreator, SqlProvider {
 
 		private int id;
 		private String sql;
@@ -1701,6 +1788,10 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);
 			return ps;
+		}
+
+		public String getSql() {
+			return sql;
 		}
 	}
 

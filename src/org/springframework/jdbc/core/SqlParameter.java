@@ -8,8 +8,8 @@ package org.springframework.jdbc.core;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Object to represent a SQL parameter definition.
@@ -77,6 +77,7 @@ public class SqlParameter {
 		return l;
 	}
 
+
 	/**
 	 * Implementation of ResultReader that calls the supplied
 	 * RowMapper class's mapRow() method for each row.  
@@ -85,7 +86,7 @@ public class SqlParameter {
 	 * This class should also be able to be reused when we implement 
 	 * functionality to retrieve generated keys for insert statements.
 	 */
-	class ResultReaderStoredProcImpl implements ResultReader {
+	protected static class ResultReaderStoredProcImpl implements ResultReader {
 
 		/** List to save results in */
 		private List results;
@@ -99,18 +100,18 @@ public class SqlParameter {
 		/**
 		 * Use an array results. More efficient if we know how many results to expect.
 		 */
-		ResultReaderStoredProcImpl(int rowsExpected, RowMapper rowMapper) {
-			// Use the more efficient collection if we know how many rows to expect
+		public ResultReaderStoredProcImpl(int rowsExpected, RowMapper rowMapper) {
+			// use the more efficient collection if we know how many rows to expect
 			this.results = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
 			this.rowMapper = rowMapper;
 		}
 
 		public void processRow(ResultSet rs) throws SQLException {
-			results.add(rowMapper.mapRow(rs, rowNum++));
+			this.results.add(this.rowMapper.mapRow(rs, this.rowNum++));
 		}
 
 		public List getResults() {
-			return results;
+			return this.results;
 		}
 	}
 

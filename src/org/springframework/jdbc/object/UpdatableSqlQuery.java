@@ -76,7 +76,7 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 	 * Implementation of ResultReader that calls the enclosing
 	 * class's updateRow() method for each row.
 	 */
-	private class ResultReaderImpl implements ResultReader {
+	protected class ResultReaderImpl implements ResultReader {
 
 		/** List to save results in */
 		private List results;
@@ -89,18 +89,18 @@ public abstract class UpdatableSqlQuery extends SqlQuery {
 		 * Use an array results. More efficient if we know how many results to expect.
 		 */
 		public ResultReaderImpl(int rowsExpected, Map context) {
-			// Use the more efficient collection if we know how many rows to expect
+			// use the more efficient collection if we know how many rows to expect
 			this.results = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
 			this.context = context;
 		}
 
 		public void processRow(ResultSet rs) throws SQLException {
-			results.add(updateRow(rs, rowNum++, context));
+			this.results.add(updateRow(rs, this.rowNum++, this.context));
 			rs.updateRow();
 		}
 
 		public List getResults() {
-			return results;
+			return this.results;
 		}
 	}
 

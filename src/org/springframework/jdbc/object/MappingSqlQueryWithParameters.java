@@ -80,14 +80,15 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 	 * Subclasses can simply not catch SQLExceptions, relying on the
 	 * framework to clean up.
 	 */
-	protected abstract Object mapRow(ResultSet rs, int rowNum, Object[] parameters, Map context) throws SQLException;
+	protected abstract Object mapRow(ResultSet rs, int rowNum, Object[] parameters, Map context)
+			throws SQLException;
 
 
 	/**
 	 * Implementation of ResultReader that calls the enclosing
 	 * class's mapRow() method for each row.
 	 */
-	private class ResultReaderImpl implements ResultReader {
+	protected class ResultReaderImpl implements ResultReader {
 
 		/** List to save results in */
 		private List results;
@@ -102,18 +103,18 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 		 * Use an array results. More efficient if we know how many results to expect.
 		 */
 		public ResultReaderImpl(int rowsExpected, Object[] parameters, Map context) {
-			// Use the more efficient collection if we know how many rows to expect
+			// use the more efficient collection if we know how many rows to expect
 			this.results = (rowsExpected > 0) ? (List) new ArrayList(rowsExpected) : (List) new LinkedList();
 			this.params = parameters;
 			this.context = context;
 		}
 
 		public void processRow(ResultSet rs) throws SQLException {
-			results.add(mapRow(rs, rowNum++, params, context));
+			this.results.add(mapRow(rs, this.rowNum++, this.params, this.context));
 		}
 
 		public List getResults() {
-			return results;
+			return this.results;
 		}
 	}
 

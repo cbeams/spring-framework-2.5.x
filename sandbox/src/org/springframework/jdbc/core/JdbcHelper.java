@@ -29,7 +29,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  *
  * @author Rod Johnson
  * @since May 30, 2001
- * @version $Id: JdbcHelper.java,v 1.1 2004-02-17 17:21:24 jhoeller Exp $
+ * @version $Id: JdbcHelper.java,v 1.2 2004-03-17 08:52:32 jhoeller Exp $
  */
 public class JdbcHelper {
 
@@ -105,7 +105,7 @@ public class JdbcHelper {
 	 */
 	public Object[] getIDs(final String sql, final Class requiredType, final Object[] params) throws DataAccessException {
 
-		class IDsHandler extends RowCountCallbackHandler implements PreparedStatementCreator {
+		class IDsHandler extends RowCountCallbackHandler implements PreparedStatementCreator, SqlProvider {
 
 			private List l = new LinkedList();
 
@@ -118,6 +118,10 @@ public class JdbcHelper {
 						ps.setObject(i + 1, params[i]);
 					}
 				return ps;
+			}
+
+			public String getSql() {
+				return sql;
 			}
 
 			protected void processRow(ResultSet rs, int rowNum) throws SQLException {
