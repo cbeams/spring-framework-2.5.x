@@ -16,7 +16,7 @@ import org.springframework.beans.PropertyVetoExceptionsException;
 /**
  * Binder that allows for binding property values to a target object.
  * @author Rod Johnson
- * @version $Id: DataBinder.java,v 1.4 2003-11-25 14:19:29 johnsonr Exp $
+ * @version $Id: DataBinder.java,v 1.5 2003-12-10 09:03:12 jhoeller Exp $
  */
 public class DataBinder {
 
@@ -81,7 +81,7 @@ public class DataBinder {
 	 * @param propertyEditor editor to register
 	 */
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		registerCustomEditor(requiredType, null, propertyEditor);
+		this.errors.getBeanWrapper().registerCustomEditor(requiredType, propertyEditor);
 	}
 
 	/**
