@@ -104,10 +104,19 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager {
 	 */
 	public Object createSavepoint() throws TransactionException {
 		Connection con = getConnectionHolderForSavepoint().getConnection();
+		boolean currentDriverSupportsSavepoints = false;
 		try {
-			if (!savepointClassAvailable || !con.getMetaData().supportsSavepoints()) {
+			currentDriverSupportsSavepoints = con.getMetaData().supportsSavepoints();
+		}
+		catch (Throwable t) {
+			logger.error("JDBC driver does not support JDBC 3.0 syntax", t);
+			throw new NestedTransactionNotSupportedException("Cannot create a nested transaction because " +			
+					"your JDBC driver is not a JDBC 3.0 driver");
+		}
+		try {
+			if (!savepointClassAvailable || !currentDriverSupportsSavepoints) {
 				throw new NestedTransactionNotSupportedException("Cannot create a nested transaction because " +
-																												 "savepoints are not supported by your JDBC driver");
+						"savepoints are not supported by your JDBC driver");
 			}
 			return con.setSavepoint();
 		}
