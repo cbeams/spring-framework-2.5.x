@@ -20,11 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +29,6 @@ import org.springframework.util.DefaultObjectStyler;
 import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.ProcessTemplate;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Singleton definition of a web flow.
@@ -144,13 +139,13 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Colin Sampaleanu
  * @see FlowExecutionFactory
  */
-public class Flow implements FlowExecutionFactory, Serializable {
+public class Flow implements Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String id;
 
-	private StartStateMarker startState;
+	private TransitionableState startState;
 
 	private Set states = new LinkedHashSet(6);
 
@@ -268,7 +263,10 @@ public class Flow implements FlowExecutionFactory, Serializable {
 		state.setFlow(this);
 		this.states.add(state);
 		if (firstAdd) {
-			setStartState((TransitionableState)statesIterator().next());
+			AbstractState firstState = (AbstractState)statesIterator().next();
+			if (firstState.isTransitionable()) {
+				setStartState((TransitionableState)firstState);
+			}
 		}
 	}
 
@@ -299,7 +297,7 @@ public class Flow implements FlowExecutionFactory, Serializable {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting start state for flow '" + getId() + "' as '" + state + "'");
 		}
-		this.startState = new StartStateMarker(this, state);
+		this.startState = state;
 	}
 
 	/**
@@ -373,18 +371,8 @@ public class Flow implements FlowExecutionFactory, Serializable {
 	 * @return
 	 * @throws IllegalStateException
 	 */
-	protected StartStateMarker getStartStateMarker() throws IllegalStateException {
-		Assert.state(startState != null, "No state has been marked as the start state for this flow '" + getId()
-				+ "' -- programmer error?");
-		return startState;
-	}
-
-	/**
-	 * @return
-	 * @throws IllegalStateException
-	 */
 	public TransitionableState getStartState() throws IllegalStateException {
-		return getStartStateMarker().getStartState();
+		return startState;
 	}
 
 	public String[] getStateIds() {
@@ -394,55 +382,6 @@ public class Flow implements FlowExecutionFactory, Serializable {
 			stateIds.add(((AbstractState)it.next()).getId());
 		}
 		return (String[])stateIds.toArray(new String[0]);
-	}
-
-	/*
-	 * see #FlowEventProcessor.start
-	 */
-	public FlowExecutionStartResult start(HttpServletRequest request, HttpServletResponse response, Map inputAttributes)
-			throws IllegalStateException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("A new session for flow '" + getId() + "' was requested; processing...");
-		}
-		return getStartStateMarker().start(request, response, inputAttributes);
-	}
-
-	/*
-	 * see #FlowEventProcessor.resume
-	 */
-	public FlowExecutionStartResult resume(String stateId, HttpServletRequest request, HttpServletResponse response,
-			Map inputAttributes) throws IllegalStateException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("A new session resuming in state '" + stateId + "' for flow '" + getId()
-					+ "' was requested; processing...");
-		}
-		TransitionableState state = getRequiredTransitionableState(stateId);
-		return new StartStateMarker(this, state).start(request, response, inputAttributes);
-	}
-
-	/**
-	 * @param sessionExecutionStack
-	 * @param request
-	 * @param response
-	 * @param subFlowAttributes
-	 * @return
-	 */
-	public ModelAndView spawnIn(FlowExecutionStack sessionExecution, HttpServletRequest request,
-			HttpServletResponse response, Map inputAttributes) {
-		return getStartStateMarker().startIn(sessionExecution, request, response, inputAttributes);
-	}
-
-	/**
-	 * @param sessionExecutionStack
-	 * @param request
-	 * @param response
-	 * @param subFlowAttributes
-	 * @return
-	 */
-	public ModelAndView spawnIn(FlowExecutionStack sessionExecution, String stateId, HttpServletRequest request,
-			HttpServletResponse response, Map inputAttributes) {
-		TransitionableState state = getRequiredTransitionableState(stateId);
-		return new StartStateMarker(this, state).startIn(sessionExecution, request, response, inputAttributes);
 	}
 
 	public String toString() {
