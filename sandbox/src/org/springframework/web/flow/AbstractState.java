@@ -36,7 +36,8 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>
  * Subclasses should override the <code>doEnterState</code> method to execute
  * the action that should occur when this state is entered, acting on its
- * configuration information.
+ * configuration information. The ability to plugin custom state types that
+ * execute different behaivior polymorphically is the classic GoF State pattern.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -168,7 +169,7 @@ public abstract class AbstractState implements Serializable {
 
 	/**
 	 * Subclasses may override this hook method to insert stringfy their
-	 * internal state.  This default implementation does nothing.
+	 * internal state. This default implementation does nothing.
 	 * @param creator The toString creator, to stringify properties.
 	 */
 	protected void createToString(ToStringCreator creator) {

@@ -22,17 +22,20 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A simple interface for accessing attributes - helps prevent accidental
- * misuse/manipulation of more enabling interfaces like Map, for example --
- * through better encapsulation.
- * 
+ * A interface that provides access to a data model.
  * <p>
- * The attributes stored in the flow model are accessed using this interface.
- * 
+ * This is a simple interface for accessing model attributes. It helps prevent
+ * accidental misuse and manipulation of more enabling interfaces like Map, for
+ * example, through better encapsulation. It also adds a number of helpful
+ * methods related to data model access.
  * <p>
- * Implementers of this interface (e.g. the flow model) can have an 
- * <i>active transaction</i> and provide methods to check if an incoming
- * HTTP request is participating in that transaction.
+ * Note: the attributes stored in the flow model (flow execution scope) are
+ * accessed using this common interface.
+ * <p>
+ * Implementers of this interface (e.g <code>FlowExecutionStack</code>,
+ * <code>FlowSession</code>) may also support <b>transaction tokens </b> and
+ * provide methods to check if an incoming HTTP request is participating in an
+ * application transaction.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -98,19 +101,19 @@ public interface AttributesAccessor {
 	 *         wrong type.
 	 */
 	public void assertAttributePresent(String attributeName, Class requiredType) throws IllegalStateException;
-	
+
 	/**
-	 * Assert that given request is participating in the active transaction
-	 * of the model.
+	 * Assert that given request is participating in the active transaction of
+	 * the model.
 	 * @param request The current HTTP request
-	 * @param reset indicates whether or not the transaction should end 
-	 *        after checking it
+	 * @param reset indicates whether or not the transaction should end after
+	 *        checking it
 	 * @throws IllegalStateException The request is not participating in the
-	 *         active transaction of the model or there is no transaction
-	 *         active in the model 
+	 *         active transaction of the model or there is no transaction active
+	 *         in the model
 	 */
 	public void assertInTransaction(HttpServletRequest request, boolean reset) throws IllegalStateException;
-	
+
 	/**
 	 * Does the attribute by the provided name exist in this model?
 	 * @param attributeName the attribute name
@@ -129,10 +132,10 @@ public interface AttributesAccessor {
 	/**
 	 * Is given request participating in the active transaction of the model?
 	 * @param request The current HTTP request
-	 * @param reset indicates whether or not the transaction should end 
-	 *        after checking it
-	 * @return True when the request is participating in the
-	 *         active transaction of the model, false otherwise
+	 * @param reset indicates whether or not the transaction should end after
+	 *        checking it
+	 * @return True when the request is participating in the active transaction
+	 *         of the model, false otherwise
 	 */
 	public boolean inTransaction(HttpServletRequest request, boolean reset);
 
