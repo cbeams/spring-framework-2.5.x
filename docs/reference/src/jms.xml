@@ -56,11 +56,11 @@
 
     <para>This interface simplifies the use of the JMS by handling the 
     creation and release of resources, much like the 
-    <literal>JdbcTemplate</literal> does for JDBC.  This interface
+    <literal>JdbcTemplate</literal> does for JDBC.  The interface
     has implementations for both the JMS 1.0.2 and 1.1 APIs, namely
-    <literal>JmsTemplate102</literal> and <literal>JmsTemplate11</literal>.
-    This interface offers various convience methods for the sending of
-    messages, consuming a  message synchronously, and exposing the
+    <literal>JmsTemplate102</literal> and <literal>JmsTemplate11</literal>,
+    and offers various convience methods for the sending of
+    messages, consuming a message synchronously, and exposing the
     JMS session and message producer to the user.<para>
     <!-- TODO see if sendRequestReply makes it into 1.1 -->
     </para>
@@ -76,18 +76,75 @@
     <!-- TODO change name of JmsSenderCallback to something more meaningful. -->
     </para>
     <para>
-    The JMS API exposes delivery mode, priority, and time to live as 
-    quality of service (QOS) parameters when sending a message.  These QOS
-    parameters 
+    The JMS API exposes two types of send methods, one that takes 
+    delivery mode, priority, and time-to-live as quality of service 
+    (QOS) parameters and one that takes no QOS parameters and uses
+    default values.  Since there are many send methods in JmsTemplate, 
+    the setting of the QOS parameters has been exposed in the 
+    JmsTemplate as bean properties to avoid duplication in the number 
+    of send methods. 
+    </para>
+    <para>
+    Some JMS providers allow the setting of these default 
+    values administratively through the configuration of the 
+    ConnectionFactory.
+    This has the effect that a call to MessageProducer's send method
+    <literal>send(Destination destination, Message message)</literal>
+    will use QOS different default values than those specified in the
+    JMS specification.   Therefore, in order to to provide consistent
+    managment of the QOS values, the JmsTemplate must be specifically
+    enabled to use QOS values by setting the boolean property
+    <literal>isExplicitQosEnabled</literal> to true.  
     </para>    
+
+
+    <sect2>
+      <title>ConnectionFactory</title>
+      <para>The implementations of the JmsTemplate require a reference 
+      to a ConnectionFactory.  The ConnectionFactory is part of the JMS
+      specification and serves as the entry point for working with JMS.
+      It is used by the client application as a factory to 
+      create connections with the JMS provider and encapsulaes various 
+      configuration parameters, many of which are vendor specific such 
+      as SSL configuration options.
+
+      The ConnectionFactory interface allows the container or a framework
+      to provide a managed implementation that provides pooling of
+      connection/sessions and declarative transaction management.  
+      In order to obtain these features, 
+      J2EE providers will typically require that you declare a 
+      JMS connection factory as a <literal>resource-ref</literal>
+      inside the EJB or servlet deployment descriptors.  To ensure
+      the use of these features with the JmsTemplate, the client
+      application should ensure that it references the managed 
+      implementation of the ConnectionFactory. 
+      <!-- TODO give examples -->
+      </para>
+      <para>The use of a managed connection factory results in somewhat
+      awkwared usage of the JMS API inside an EJB when creating a 
+      <literal>Session</literal>.  This is because the values for 
+      transaction enabled and session acknowlegment mode are ignored when
+      calling the managed connection's
+      <literal>createSession(boolean transacted, int acknowledgeMode)
+      </literal> method.
+      For use with an unmanaged JMS API, <literal>JmsTemplate102</literal>
+      and <literal>JmsTemplate11</literal> allow you to specify these values
+      though the use of the properties <literal>SessionTransacted</literal>
+      and <literal>SessionAcknowledgeMode</literal>.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Dynamic Destinations</title>
+      <!-- Talk about dynamic destination and the JmsAdmin interface -->
+    </sect2> 
   </sect1>  
 
-  <sect1>
-    <title>ConnectionFactory</title>
-  </sect1>
+
 
   <sect1>
     <title>Using the JmsTemplate</title>
+    <!-- Go over the various send methods and callback -->
+    <!-- Go over setting the domain flag isPubSubEnabled -->
   </sect1>
 
   <sect1>
