@@ -15,6 +15,10 @@
  */
 package org.springframework.rules.factory;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.rules.BinaryFunction;
@@ -47,6 +51,8 @@ import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.beans.NegatedBeanPropertyExpression;
 import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
+import org.springframework.rules.values.BeanPropertyAccessStrategy;
+import org.springframework.rules.values.MutablePropertyAccessStrategy;
 
 /**
  * A factory for easing the construction and composition of predicates.
@@ -643,6 +649,54 @@ public class Constraints {
         BeanPropertiesExpression max = new BeanPropertiesExpression(
                 propertyName, LessThanEqualTo.instance(), maxPropertyName);
         return new CompoundBeanPropertyExpression(new UnaryAnd(min, max));
+    }
+
+    public BeanPropertyExpression unique(String propertyName) {
+        return new UniquePropertyValueCollectionConstraint(propertyName);
+    }
+
+    private static class UniquePropertyValueCollectionConstraint implements
+            BeanPropertyExpression {
+        private String propertyName;
+
+        private Map distinctTable;
+
+        public UniquePropertyValueCollectionConstraint(String propertyName) {
+            this.propertyName = propertyName;
+        }
+
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        public boolean test(Object o) {
+            Collection c = (Collection)o;
+            distinctTable = new HashMap((int)(c.size() * .75));
+            Iterator it = c.iterator();
+            MutablePropertyAccessStrategy accessor = null;
+            while (it.hasNext()) {
+                Object bean = it.next();
+                if (accessor == null) {
+                    accessor = createPropertyAccessStrategy(bean);
+                } else {
+                    accessor.getDomainObjectHolder().set(bean);
+                }
+                Object value = accessor.getValue(propertyName);
+                Integer hashCode = new Integer(value.hashCode());
+                if (distinctTable.containsKey(hashCode)) {
+                    return false;
+                } else {
+                    distinctTable.put(hashCode, value);
+                }
+            }
+            return true;
+        }
+        
+        protected MutablePropertyAccessStrategy createPropertyAccessStrategy(Object o) {
+            return new BeanPropertyAccessStrategy(o);
+        }
+
+
     }
 
 }

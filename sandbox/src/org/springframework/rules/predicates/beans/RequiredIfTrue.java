@@ -16,7 +16,6 @@
 package org.springframework.rules.predicates.beans;
 
 import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.Required;
 import org.springframework.rules.values.PropertyAccessStrategy;
 import org.springframework.util.Assert;
@@ -62,18 +61,6 @@ public class RequiredIfTrue extends AbstractBeanPropertyExpression implements
         if (predicate.test(domainObjectAccessStrategy)) {
             return Required.instance().test(
                     domainObjectAccessStrategy.getValue(getPropertyName()));
-        }
-        else {
-            return true;
-        }
-    }
-
-    protected boolean testJavaBean(Object bean) {
-        Assert.notNull(propertyName);
-        if (predicate.test(bean)) {
-            GetProperty getProperty = new GetProperty(bean);
-            return Required.instance().test(
-                    getProperty.evaluate(getPropertyName()));
         }
         else {
             return true;

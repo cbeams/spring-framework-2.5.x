@@ -16,7 +16,6 @@
 package org.springframework.rules.predicates.beans;
 
 import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.Required;
 import org.springframework.rules.values.PropertyAccessStrategy;
 
@@ -42,12 +41,6 @@ public class PropertyPresent extends AbstractBeanPropertyExpression implements
     protected boolean test(PropertyAccessStrategy domainObjectAccessStrategy) {
         return Required.instance().test(
                 domainObjectAccessStrategy.getValue(getPropertyName()));
-    }
-
-    protected boolean testJavaBean(Object bean) {
-        GetProperty getProperty = new GetProperty(bean);
-        return Required.instance()
-                .test(getProperty.evaluate(getPropertyName()));
     }
 
     public String toString() {

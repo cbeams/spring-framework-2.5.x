@@ -4,6 +4,7 @@
  */
 package org.springframework.rules.predicates.beans;
 
+import org.springframework.rules.values.BeanPropertyAccessStrategy;
 import org.springframework.rules.values.PropertyAccessStrategy;
 import org.springframework.util.Assert;
 
@@ -17,9 +18,8 @@ public abstract class AbstractBeanPropertyExpression implements
     private String propertyName;
 
     protected AbstractBeanPropertyExpression() {
-        
     }
-    
+
     protected AbstractBeanPropertyExpression(String propertyName) {
         setPropertyName(propertyName);
     }
@@ -38,14 +38,12 @@ public abstract class AbstractBeanPropertyExpression implements
             return test((PropertyAccessStrategy)o);
         }
         else {
-            return testJavaBean(o);
+            return test(new BeanPropertyAccessStrategy(o));
         }
     }
 
     protected abstract boolean test(
             PropertyAccessStrategy domainObjectAccessStrategy);
-
-    protected abstract boolean testJavaBean(Object javaBean);
 
     public String toString() {
         return getPropertyName();

@@ -16,7 +16,6 @@
 package org.springframework.rules.predicates.beans;
 
 import org.springframework.rules.BinaryPredicate;
-import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.values.PropertyAccessStrategy;
 import org.springframework.util.Assert;
 
@@ -64,13 +63,6 @@ public class BeanPropertiesExpression extends AbstractBeanPropertyExpression {
         return beanPropertyExpression.test(domainObjectAccessStrategy
                 .getValue(getPropertyName()), domainObjectAccessStrategy
                 .getValue(getOtherPropertyName()));
-    }
-
-    protected boolean testJavaBean(Object bean) {
-        GetProperty getProperty = new GetProperty(bean);
-        return beanPropertyExpression.test(getProperty
-                .evaluate(getPropertyName()), getProperty
-                .evaluate(otherPropertyName));
     }
 
     public String toString() {
