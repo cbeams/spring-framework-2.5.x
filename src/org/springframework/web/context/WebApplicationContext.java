@@ -10,6 +10,7 @@ import javax.servlet.ServletContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.ui.context.ThemeSource;
+import org.springframework.beans.BeansException;
 
 /** 
  * Interface to provide configuration for a web application. This is read-only while
@@ -25,7 +26,7 @@ import org.springframework.ui.context.ThemeSource;
  *
  * @author Rod Johnson
  * @since January 19, 2001
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface WebApplicationContext extends ApplicationContext, ThemeSource {
 
@@ -38,8 +39,11 @@ public interface WebApplicationContext extends ApplicationContext, ThemeSource {
 	 * Give this context access to the standard Servlet API ServletContext for this
 	 * web application. This method amounts to an init method: implementations are
 	 * responsible for loading their URL or other config, and reloading.
+	 * @param servletContext ServletContext to use
+	 * @throws ApplicationContextException in case of initialization errors
+	 * @throws BeansException if thrown by application context methods
 	 */
-	void setServletContext(ServletContext servletContext) throws ApplicationContextException;
+	void setServletContext(ServletContext servletContext) throws BeansException;
 	
 	/** 
 	 * Return the standard Servlet API ServletContext for this application.

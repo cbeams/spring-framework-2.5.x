@@ -28,7 +28,7 @@ import java.io.PrintWriter;
  * should preserve their stack trace, if caused by a lower-level exception.
  *
  * @author Rod Johnson
- * @version $Id: NestedRuntimeException.java,v 1.3 2003-11-02 12:53:54 johnsonr Exp $
+ * @version $Id: NestedRuntimeException.java,v 1.4 2003-11-13 11:51:26 jhoeller Exp $
  */
 public abstract class NestedRuntimeException extends RuntimeException implements HasRootCause {
 
@@ -81,7 +81,7 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 			super.printStackTrace(ps);
 		}
 		else {
-			//ps.println(this);
+			ps.println(this);
 			this.rootCause.printStackTrace(ps);
 		}
 	}
@@ -95,7 +95,7 @@ public abstract class NestedRuntimeException extends RuntimeException implements
 			super.printStackTrace(pw);
 		}
 		else {
-			//pw.println(this);
+			pw.println(this);
 			this.rootCause.printStackTrace(pw);
 		}
 	}

@@ -3,8 +3,8 @@ package org.springframework.beans;
 /**
  * Thrown on an unrecoverable problem encountered in the
  * beans packages or sub-packages: e.g. bad class or field.
- * @author  Rod Johnson
- * @version $Revision: 1.1.1.1 $
+ * @author Rod Johnson
+ * @version $Revision: 1.2 $
  */
 public class FatalBeanException extends BeansException {
 
@@ -26,6 +26,5 @@ public class FatalBeanException extends BeansException {
 	public FatalBeanException(String msg, Throwable t) {
 		super(msg, t);
 	}
+
 }
-
-

@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.core.OrderComparator;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -89,7 +88,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.12 2003-11-04 23:10:03 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.13 2003-11-13 11:51:26 jhoeller Exp $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -279,7 +278,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			hm.setApplicationContext(getWebApplicationContext());
 			this.handlerMappings.add(hm);
 		}
-		catch (ApplicationContextException ex) {
+		catch (BeansException ex) {
 			throw new ServletException("Error initializing default HandlerMapping: " + ex.getMessage(), ex);
 		}
 	}
@@ -314,7 +313,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			ha.setApplicationContext(getWebApplicationContext());
 			this.handlerAdapters.add(ha);
 		}
-		catch (ApplicationContextException ex) {
+		catch (BeansException ex) {
 			throw new ServletException("Error initializing default HandlerAdapter: " + ex.getMessage(), ex);
 		}
 	}
@@ -334,7 +333,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			this.viewResolver = new InternalResourceViewResolver();
 			try {
 				this.viewResolver.setApplicationContext(getWebApplicationContext());
-			} catch (ApplicationContextException ex2) {
+			}
+			catch (BeansException ex2) {
 				throw new ServletException("Fatal error initializing default ViewResolver");
 			}
 			logger.info("Unable to locate view resolver with name '" + VIEW_RESOLVER_BEAN_NAME +

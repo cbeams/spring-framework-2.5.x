@@ -5,7 +5,7 @@
 
 package org.springframework.beans.factory;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 
 /**
  * Exception thrown when a BeanFactory encounters an internal error, and
@@ -13,7 +13,7 @@ import org.springframework.beans.BeansException;
  * bean definitions isn't well-formed.
  * @author Rod Johnson
  */
-public class BeanDefinitionStoreException extends BeansException {
+public class BeanDefinitionStoreException extends FatalBeanException {
 
 	public BeanDefinitionStoreException(String msg) {
 		super(msg);

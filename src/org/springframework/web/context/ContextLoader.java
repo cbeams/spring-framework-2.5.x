@@ -4,6 +4,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.config.ConfigurableApplicationContext;
@@ -39,7 +40,7 @@ public class ContextLoader {
 	 * @param servletContext current servlet context
 	 * @return the new WebApplicationContext
 	 */
-	public static WebApplicationContext initContext(ServletContext servletContext) throws ApplicationContextException {
+	public static WebApplicationContext initContext(ServletContext servletContext) throws BeansException {
 		servletContext.log("Loading root WebApplicationContext");
 		String contextClass = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 
@@ -47,29 +48,29 @@ public class ContextLoader {
 		// It configures itself: all we need to do is construct the class with a no-arg
 		// constructor, and invoke setServletContext.
 		try {
-			Class clazz = (contextClass != null ? Class.forName(contextClass) : DEFAULT_CONTEXT_CLASS);
-			logger.info("Loading root WebApplicationContext: using context class '" + clazz.getName() + "'");
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			Class clazz = (contextClass != null ? Class.forName(contextClass, true, cl) : DEFAULT_CONTEXT_CLASS);
+			logger.info("Loading root WebApplicationContext: using context class [" + clazz.getName() + "]");
 			if (!WebApplicationContext.class.isAssignableFrom(clazz)) {
-				throw new ApplicationContextException("Context class is no WebApplicationContext: " + contextClass);
+				throw new ApplicationContextException("Context class [" + contextClass + "] is no WebApplicationContext");
 			}
 			WebApplicationContext webApplicationContext = (WebApplicationContext) clazz.newInstance();
 			webApplicationContext.setServletContext(servletContext);
 			return webApplicationContext;
 		}
-		catch (ApplicationContextException ex) {
+		catch (BeansException ex) {
 			handleException("Failed to initialize application context", ex);
 		}
-		catch (BeansException ex) {
-			handleException("Failed to initialize beans in application context", ex);
-		}
 		catch (ClassNotFoundException ex) {
-			handleException("Failed to load config class '" + contextClass + "'", ex);
+			handleException("Failed to load config class [" + contextClass + "]", ex);
 		}
 		catch (InstantiationException ex) {
-			handleException("Failed to instantiate config class '" + contextClass + "': does it have a public no arg constructor?", ex);
+			handleException("Failed to instantiate config class [" + contextClass +
+			                "]: does it have a public no arg constructor?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			handleException("Illegal access while finding or instantiating config class '" + contextClass + "': does it have a public no arg constructor?", ex);
+			handleException("Illegal access while finding or instantiating config class [" +
+			                contextClass + "]: does it have a public no arg constructor?", ex);
 		}
 		catch (Throwable ex) {
 			handleException("Unexpected error loading context configuration", ex);
@@ -81,17 +82,16 @@ public class ContextLoader {
 	/**
 	 * Log and throw an appropriate exception.
 	 */
-	private static void handleException(String msg, Throwable ex) throws ApplicationContextException {
-		String thrownMsg = msg + ": " + ex.getMessage();
-		logger.error(thrownMsg, ex);
+	private static void handleException(String msg, Throwable ex) throws BeansException {
+		logger.error(msg, ex);
 		if (ex instanceof Error) {
 			throw (Error) ex;
 		}
-		else if (ex instanceof ApplicationContextException) {
-			throw (ApplicationContextException) ex;
+		else if (ex instanceof BeansException) {
+			throw (BeansException) ex;
 		}
 		else {
-			throw new ApplicationContextException(thrownMsg, ex);
+			throw new ApplicationContextException(msg, ex);
 		}
 	}
 
@@ -99,7 +99,7 @@ public class ContextLoader {
 	 * Close Spring's web application context for the given servlet context.
 	 * @param servletContext current servlet context
 	 */
-	public static void closeContext(ServletContext servletContext) {
+	public static void closeContext(ServletContext servletContext) throws ApplicationContextException {
 		servletContext.log("Closing root WebApplicationContext");
 		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 		if (wac instanceof ConfigurableApplicationContext) {

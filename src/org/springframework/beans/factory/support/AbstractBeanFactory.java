@@ -64,7 +64,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.18 2003-11-12 19:04:26 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.19 2003-11-13 11:51:25 jhoeller Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
@@ -168,8 +168,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	}
 
 	/**
-	 * Return whether this name is a factory dereference (beginning
-	 * with the factory dereference prefix)
+	 * Return whether this name is a factory dereference
+	 * (beginning with the factory dereference prefix).
 	 */
 	private boolean isFactoryDereference(String name) {
 		return name.startsWith(FACTORY_BEAN_PREFIX);
@@ -181,8 +181,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	 * @param name name of the bean to retrieve
 	 */
 	public Object getBean(String name) {
-		if (name == null)
-			throw new NoSuchBeanDefinitionException(null, "Cannot get bean with null name");
+		if (name == null) {
+			throw new NoSuchBeanDefinitionException(name, "Cannot get bean with null name");
+		}
 		try {
 			RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(transformedBeanName(name));
 			if (mergedBeanDefinition.isSingleton()) {
@@ -631,21 +632,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	}
 
 	/**
-	 * Apply BeanPostProcessors to a new bean instance.
-	 * The returned bean instance may be a wrapper around the original.
-	 * @param bean the new bean instance
-	 * @param name the name of the bean
-	 * @return the bean instance to use, either the original or a wrapped one
-	 */
-	private Object applyBeanPostProcessors(Object bean, String name) {
-		Object result = bean;
-		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
-			result = ((BeanPostProcessor) it.next()).postProcessBean(result, name);
-		}
-		return result;
-	}
-
-	/**
 	 * Apply the given property values, resolving any runtime references
 	 * to other beans in this bean factory.
 	 * Must use deep copy, so we don't permanently modify this property
@@ -767,51 +753,6 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 	}
 
 	/**
-	 * Give a bean a chance to react now all its properties are set,
-	 * and a chance to know about its owning bean factory (this object).
-	 * This means checking whether the bean implements InitializingBean
-	 * and/or BeanFactoryAware, and invoking the necessary callback(s) if it does.
-	 * @param bean new bean instance we may need to initialize
-	 * @param name the bean has in the factory. Used for debug output.
-	 */
-	private void callLifecycleMethodsIfNecessary(Object bean, String name, RootBeanDefinition rbd, BeanWrapper bw)
-	    throws BeansException {
-
-		if (bean instanceof BeanNameAware) {
-			((BeanNameAware) bean).setBeanName(name);
-		}
-
-		if (bean instanceof InitializingBean) {
-			logger.debug("Calling afterPropertiesSet() on bean with name '" + name + "'");
-			try {
-				((InitializingBean) bean).afterPropertiesSet();
-			}
-			catch (Exception ex) {
-				throw new FatalBeanException("afterPropertiesSet() on bean with name '" + name + "' threw an exception", ex);
-			}
-		}
-
-		if (rbd.getInitMethodName() != null) {
-			logger.debug("Calling custom init method '" + rbd.getInitMethodName() + "' on bean with name '" + name + "'");
-			bw.invoke(rbd.getInitMethodName(), null);
-			// Can throw MethodInvocationException
-		}
-
-		if (bean instanceof BeanFactoryAware) {
-			logger.debug("Calling setBeanFactory() on BeanFactoryAware bean with name '" + name + "'");
-			try {
-				((BeanFactoryAware) bean).setBeanFactory(this);
-			}
-			catch (BeansException ex) {
-				throw ex;
-			}
-			catch (Exception ex) {
-				throw new FatalBeanException("setBeanFactory() on bean with name '" + name + "' threw an exception", ex);
-			}
-		}
-	}
-
-	/**
 	 * Make a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
 	 * @return a merged RootBeanDefinition with overriden properties
 	 */
@@ -845,6 +786,63 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, Co
 		}
 		throw new FatalBeanException("Shouldn't happen: BeanDefinition for '" + beanName +
 																 "' is neither a RootBeanDefinition or ChildBeanDefinition");
+	}
+
+	/**
+	 * Give a bean a chance to react now all its properties are set,
+	 * and a chance to know about its owning bean factory (this object).
+	 * This means checking whether the bean implements InitializingBean
+	 * and/or BeanFactoryAware, and invoking the necessary callback(s) if it does.
+	 * @param bean new bean instance we may need to initialize
+	 * @param name the bean has in the factory. Used for debug output.
+	 */
+	private void callLifecycleMethodsIfNecessary(Object bean, String name, RootBeanDefinition rbd, BeanWrapper bw)
+	    throws BeansException {
+
+		if (bean instanceof BeanNameAware) {
+			((BeanNameAware) bean).setBeanName(name);
+		}
+
+		if (bean instanceof InitializingBean) {
+			logger.debug("Calling afterPropertiesSet() on bean with name '" + name + "'");
+			try {
+				((InitializingBean) bean).afterPropertiesSet();
+			}
+			catch (BeansException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				throw new FatalBeanException("afterPropertiesSet() on bean with name '" + name + "' threw exception", ex);
+			}
+		}
+
+		if (rbd.getInitMethodName() != null) {
+			logger.debug("Calling custom init method '" + rbd.getInitMethodName() + "' on bean with name '" + name + "'");
+			bw.invoke(rbd.getInitMethodName(), null);
+			// Can throw MethodInvocationException
+		}
+
+		if (bean instanceof BeanFactoryAware) {
+			logger.debug("Calling setBeanFactory() on BeanFactoryAware bean with name '" + name + "'");
+			((BeanFactoryAware) bean).setBeanFactory(this);
+		}
+	}
+
+	/**
+	 * Apply BeanPostProcessors to a new bean instance.
+	 * The returned bean instance may be a wrapper around the original.
+	 * @param bean the new bean instance
+	 * @param name the name of the bean
+	 * @return the bean instance to use, either the original or a wrapped one
+	 */
+	private Object applyBeanPostProcessors(Object bean, String name) throws BeansException {
+		logger.debug("Invoking BeanPostProcessors on bean with name '" + name + "'");
+		Object result = bean;
+		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+			result = beanProcessor.postProcessBean(result, name);
+		}
+		return result;
 	}
 
 	/**

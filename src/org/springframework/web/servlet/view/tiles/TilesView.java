@@ -100,11 +100,8 @@ public class TilesView extends InternalResourceView {
 			}
 			rd.include(request, response);
 		}
-		catch (DefinitionsFactoryException ex) {
-			throw new ServletException(ex.getMessage(), ex);
-		}
-		catch (InstantiationException ex) {
-			throw new ServletException(ex.getMessage(), ex);
+		catch (Exception ex) {
+			throw new ServletException("Could not render Tiles view: " + ex.getMessage(), ex);
 		}
 	}
 

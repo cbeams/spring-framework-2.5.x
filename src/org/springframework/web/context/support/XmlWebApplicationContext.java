@@ -117,9 +117,9 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext	im
 	/**
 	 * Initialize and attach to the given context.
 	 * @param servletContext ServletContext to use to load configuration,
-	 * and in which this web application context should be set as an attribute.
+	 * and in which this web application context should be set as an attribute
 	 */
-	public void setServletContext(ServletContext servletContext) throws ApplicationContextException, BeansException {
+	public void setServletContext(ServletContext servletContext) throws BeansException {
 		this.servletContext = servletContext;
 		this.configLocations = initConfigLocations();
 		logger.info("Using config location [" + StringUtils.arrayToCommaDelimitedString(this.configLocations) + "]");

@@ -30,7 +30,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 /**
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailTestSuite.java,v 1.10 2003-11-07 21:39:40 jhoeller Exp $
+ * @version $Id: MailTestSuite.java,v 1.11 2003-11-13 11:51:27 jhoeller Exp $
  */
 public class MailTestSuite extends TestCase {
 
@@ -290,7 +290,24 @@ public class MailTestSuite extends TestCase {
 		assertEquals(mimeMessage, sender.transport.getSentMessage(0));
 	}
 
-	public void testFailedSimpleMessage() throws MessagingException, IOException, MailException {
+	public void testFailedMailServerConnect() throws Exception {
+		MockJavaMailSender sender = new MockJavaMailSender();
+		sender.setHost(null);
+		sender.setUsername("username");
+		sender.setPassword("password");
+		SimpleMailMessage simpleMessage1 = new SimpleMailMessage();
+		try {
+			sender.send(simpleMessage1);
+			fail("Should have thrown MailSendException");
+		}
+		catch (MailSendException ex) {
+			// expected
+			assertTrue(ex.getFailedMessages() != null);
+			assertTrue(ex.getFailedMessages().isEmpty());
+		}
+	}
+
+	public void testFailedSimpleMessage() throws Exception {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -320,7 +337,7 @@ public class MailTestSuite extends TestCase {
 		}
 	}
 
-	public void testFailedMimeMessage() throws MessagingException, IOException, MailException {
+	public void testFailedMimeMessage() throws Exception {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -404,6 +421,9 @@ public class MailTestSuite extends TestCase {
 		}
 
 		public void connect(String host, int port, String username, String password) throws MessagingException {
+			if (host == null) {
+				throw new MessagingException("no host");
+			}
 			this.connectedHost = host;
 			this.connectedPort = port;
 			this.connectedUsername = username;

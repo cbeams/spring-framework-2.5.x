@@ -66,7 +66,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -200,7 +200,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * be found, or if configuration has already been loaded and reloading is forbidden
 	 * @throws BeansException if the bean factory could not be initialized
 	 */
-	public final void refresh() throws ApplicationContextException, BeansException {
+	public final void refresh() throws BeansException {
 		if (this.contextOptions != null && !this.contextOptions.isReloadable())
 			throw new ApplicationContextException("Forbidden to reload config");
 
@@ -210,10 +210,12 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		getBeanFactory().ignoreDependencyType(ApplicationContext.class);
 		getBeanFactory().addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 
-		if (getBeanDefinitionCount() == 0)
+		if (getBeanDefinitionCount() == 0) {
 			logger.warn("No beans defined in ApplicationContext [" + getDisplayName() + "]");
-		else
+		}
+		else {
 			logger.info(getBeanDefinitionCount() + " beans defined in ApplicationContext [" + getDisplayName() + "]");
+		}
 
 		// invoke factory processors that can override values in the bean definitions
 		invokeBeanFactoryPostProcessors();
@@ -242,9 +244,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	/**
 	 * Callback method which can be overridden to add context-specific refresh work.
-	 * @throws ApplicationContextException in case of errors during refresh
+	 * @throws BeansException in case of errors during refresh
 	 */
-	protected void onRefresh() throws ApplicationContextException {
+	protected void onRefresh() throws BeansException {
 		// For subclasses: do nothing by default.
 	}
 
@@ -253,7 +255,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * respecting explicit order if given.
 	 * Must be called before singleton instantiation.
 	 */
-	private void invokeBeanFactoryPostProcessors() {
+	private void invokeBeanFactoryPostProcessors() throws BeansException {
 		String[] beanNames = getBeanDefinitionNames(BeanFactoryPostProcessor.class);
 		BeanFactoryPostProcessor[] factoryProcessors = new BeanFactoryPostProcessor[beanNames.length];
 		for (int i = 0; i < beanNames.length; i++) {
@@ -271,7 +273,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * respecting explicit order if given.
 	 * Must be called before singleton instantiation.
 	 */
-	private void registerBeanPostProcessors() {
+	private void registerBeanPostProcessors() throws BeansException {
 		String[] beanNames = getBeanDefinitionNames(BeanPostProcessor.class);
 		if (beanNames.length > 0) {
 			List beanProcessors = new ArrayList();
@@ -289,7 +291,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * Load the options bean.
 	 * The BeanFactory must be loaded before this method is called.
 	 */
-	private void loadOptions() {
+	private void loadOptions() throws BeansException {
 		try {
 			this.contextOptions = (ContextOptions) getBean(OPTIONS_BEAN_NAME);
 		} catch (NoSuchBeanDefinitionException ex) {
@@ -302,7 +304,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * Initialize the message source.
 	 * Use parent's if none defined in this context.
 	 */
-	private void initMessageSource() {
+	private void initMessageSource() throws BeansException {
 		try {
 			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME);
 			// set parent message source if applicable,
@@ -324,7 +326,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * in the context. This involves instantiating the objects.
 	 * Only singletons will be instantiated eagerly.
 	 */
-	private void preInstantiateSingletons() {
+	private void preInstantiateSingletons() throws BeansException {
 		logger.info("Configuring singleton beans in context");
 		String[] beanNames = getBeanDefinitionNames();
 		logger.debug("Found " + beanNames.length + " listeners in bean factory: names=[" +
@@ -341,7 +343,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * Add beans that implement ApplicationListener as listeners.
 	 * Doesn't affect other listeners, which can be added without being beans.
 	 */
-	private void refreshListeners() {
+	private void refreshListeners() throws BeansException {
 		logger.info("Refreshing listeners");
 		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
 		logger.debug("Found " + listeners.size() + " listeners in bean factory");
@@ -493,7 +495,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		return getBeanFactory().getBeanDefinitionNames(type);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) throws BeansException {
 		return getBeanFactory().getBeansOfType(type, includePrototypes, includeFactoryBeans);
 	}
 

@@ -5,6 +5,8 @@
  
 package org.springframework.beans.factory;
 
+import org.springframework.beans.BeansException;
+
 /**
  * Interface to be implemented by beans that wish to be aware of their owning
  * BeanFactory. Beans can e.g. look up collaborating beans via the factory.
@@ -14,7 +16,7 @@ package org.springframework.beans.factory;
  *
  * @author Rod Johnson
  * @since 11-Mar-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface BeanFactoryAware {
 	
@@ -24,13 +26,9 @@ public interface BeanFactoryAware {
 	 * be invoked after InitializingBean's <code>afterPropertiesSet</code>.
 	 * @param beanFactory owning BeanFactory (may not be null).
 	 * The bean can immediately call methods on the factory.
-	 * @throws Exception this method can throw any exception. Normally we want
-	 * methods to declare more precise exceptions, but in this case the owning
-	 * BeanFactory will catch and handle the exception (treating it as fatal),
-	 * and we want to make it easy to implement BeanFactoryAware beans by
-	 * freeing developers from the need to catch and wrap fatal exceptions.
-	 * Exceptions thrown here are considered fatal.
+	 * @throws BeansException in case of initialization errors
+	 * @see BeanInitializationException
 	 */
-	void setBeanFactory(BeanFactory beanFactory) throws Exception;
+	void setBeanFactory(BeanFactory beanFactory) throws BeansException;
 
 }

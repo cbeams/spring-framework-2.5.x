@@ -1,13 +1,16 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.40 2003-11-09 21:50:42 jhoeller Exp $
+$Id: changelog.txt,v 1.41 2003-11-13 11:51:19 jhoeller Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
 * fixed empty-value-on-primitive-property check in BeanWrapperImpl to allow a custom editor to modify the value first
+* added support for indexed and mapped properties to BeanWrapperImpl, with "beanName.indexedProperty[index]" syntax
+* ClassEditor and other framework classes use the thread context class loader now, consistent within the framework
 * introduced "getBeansOfType" method in ListableBeanFactory, retrieving both normal beans and FactoryBean-created beans
 * introduced "getObjectType" method in FactoryBean, to avoid unnecessary bean creation on autowire checks
-* reworked BeanFactoryUtils' beanNamesIncludingAncestors and beansOfTypeIncludingAncestors methods
+* reworked BeanFactoryUtils' "beanNamesIncludingAncestors" and "beansOfTypeIncludingAncestors" methods
+* added "beanOfTypeIncludingAncestors" method to BeanFactoryUtils, expecting a single matching bean
 * introduced FactoryBeanCircularReferenceException and refined circular reference handling with a FactoryBean involved
 * introduced BeanNameAware interface to be implemented by beans that want to be aware of their bean factory name
 * introduced ConfigurableBeanFactory and ConfigurableListableBeanFactory interfaces in beans.factory.config package
@@ -17,10 +20,12 @@ Changes in version 1.0 M3 (XX.11.2003)
 * added support for lazy initialization of singleton beans in AbstractBeanFactory and subclasses
 * redefined autowiring to ignore if no matching bean found but still complain in case of more than one matching bean
 * ignore specified dependency types on autowiring, like BeanFactory and ApplicationContext
-* added autowire="constructor" mode for PicoContainer-style Type 3 IoC, resolving constructor arguments by type
 * added ConstructorArgumentValues support to RootBeanDefinition, for resolving arguments to specific beans or values
+* added autowire="constructor" mode for PicoContainer-style Type 3 IoC, resolving constructor arguments by type
 * made "id" attribute of "bean" tag in XML bean definition format optional, using the first given name as primary name
+* allow for "bean" tags with neither "id" nor "name", using the bean class name as implicit id (PicoContainer-style) 
 * added "lazy-init" attribute to "bean" tag in XML bean definition format, default being "false"
+* added "depends-on" attribute to "bean" tag in XML format, expressing initialization dependencies on other beans
 * added "constructor-arg" tag to "bean" tag in XML format, analogous to "property" tag, with optional "index" attribute
 * added "default-dependency-check" and "default-autowire" attributes to root tag in XML bean definitions
 * reworked PropertiesFactoryBean to allow for loaded and local properties
@@ -29,6 +34,9 @@ Changes in version 1.0 M3 (XX.11.2003)
 * can force CGLIB proxying using new "proxyTargetClass" property on DefaultProxyConfig
 * CGLIB proxies support introductions now
 * split ApplicationContext interface into ApplicationContext client interface and ConfigurableApplicationContext SPI
+* ApplicationContextException extends BeansException, to enable consistent catching of exceptions thrown by a context
+* ApplicationContextAware and ApplicationObjectSupport throw BeansException now instead of ApplicationContextException
+* added "ignoreResourceNotFound" property to PropertyResourceConfigurer, default is "false" (throwing an exception)
 * added support for placeholders in bean reference names to PropertyPlaceholderConfigurer
 * added support for cross-referencing placeholders in placeholder values to PropertyPlaceholderConfigurer
 * added "port" bean property to JavaMailSenderImpl, for setting a non-default mail server port
@@ -45,6 +53,7 @@ Changes in version 1.0 M3 (XX.11.2003)
 * refactored JDBC core package so that SQLErrorCodeExceptionTranslator can be subclassed by and passed into JdbcTemplate
 * refactored JDBC object package so that one JdbcTemplate can be used to configure multiple RdbmsOperations
 * reworked JdbcBeanFactory to extend ListableBeanFactoryImpl instead of using a refreshable delegate
+* added convenience methods for resource opening/closing to JdbcDaoSupport/HibernateDaoSupport/JdoDaoSupport
 * made LocalSessionFactoryBean and LocalPersistenceManagerFactoryBean methods non-final
 * reworked HibernateAccessor/HibernateTemplate/HibernateInterceptor flush handling
 * throw HibernateObjectRetrievalFailedException on Hibernate's ObjectDeletedException
@@ -55,6 +64,8 @@ Changes in version 1.0 M3 (XX.11.2003)
 * introduced JdoDialect interface with getJdbcConnection and flush methods
 * added support for JdoDialect in JdoTransactionManager and JdoAccessor/JdoTemplate/JdoInterceptor
 * reworked VelocityEngineFactory to allow VelocityEngineFactoryBean to run outside of application context
+* view bean factories of XmlViewResolver and ResourceBundleViewResolver are now children of the application context
+* added "attributesMap" property to AbstractView, for setting attribute values like bean references via a Map
 * fixed potential NPE in debug log statement of VelocityView
 * renamed BaseCommandController's "userObject" method to "getCommand" for clearer naming
 

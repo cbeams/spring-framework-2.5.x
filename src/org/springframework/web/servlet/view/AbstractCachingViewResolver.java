@@ -11,8 +11,8 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -86,8 +86,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			try {
 				((ApplicationContextAware) view).setApplicationContext(getApplicationContext());
 			}
-			catch (ApplicationContextException ex) {
-				throw new ServletException("Error initializing View [" + view + "]: " + ex.getMessage(), ex);
+			catch (BeansException ex) {
+				throw new ServletException("Error initializing View '" + viewName + "': " + ex.getMessage(), ex);
 			}
 
 			String cacheKey = getCacheKey(viewName, locale);

@@ -5,6 +5,8 @@
 
 package org.springframework.context;
 
+import org.springframework.beans.BeansException;
+
 /**
  * Interface to be implemented by any object that wishes to be notified
  * of the application context it runs in.
@@ -30,9 +32,10 @@ public interface ApplicationContextAware {
 	 * is reloadable. The implementation must check itself if it is
 	 * already initialized resp. if it wants to perform reinitialization.
 	 * @param context ApplicationContext object to be used by this object
-	 * @throws ApplicationContextException if initialization attempted
-	 * by this object fails
+	 * @throws ApplicationContextException in case of context initialization errors
+	 * @throws BeansException if thrown by application context methods
+	 * @see org.springframework.beans.factory.BeanInitializationException
 	 */
-	void setApplicationContext(ApplicationContext context) throws ApplicationContextException;
+	void setApplicationContext(ApplicationContext context) throws BeansException;
 
 }

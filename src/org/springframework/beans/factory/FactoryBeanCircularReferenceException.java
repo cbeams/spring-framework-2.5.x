@@ -1,7 +1,5 @@
 package org.springframework.beans.factory;
 
-import org.springframework.beans.FatalBeanException;
-
 /**
  * Exception thrown if a FactoryBean is involved in a circular reference.
  *
@@ -15,7 +13,7 @@ import org.springframework.beans.FatalBeanException;
  * @author Juergen Hoeller
  * @since 30.10.2003
  */
-public class FactoryBeanCircularReferenceException extends FatalBeanException {
+public class FactoryBeanCircularReferenceException extends BeanDefinitionStoreException {
 
 	public FactoryBeanCircularReferenceException(String msg) {
 		super(msg);

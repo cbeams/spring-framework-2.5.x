@@ -8,6 +8,7 @@ package org.springframework.context.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
@@ -56,11 +57,12 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 		this.applicationContext = context;
 	}
 
-	public final void setApplicationContext(ApplicationContext context) throws ApplicationContextException {
+	public final void setApplicationContext(ApplicationContext context) throws BeansException {
 		// ignore reinitialization
 		if (this.applicationContext == null) {
 			if (!requiredContextClass().isInstance(context)) {
-				throw new ApplicationContextException("Invalid application context: needs to be of type '" + requiredContextClass().getName() + "'");
+				throw new ApplicationContextException("Invalid application context: needs to be of type '" +
+				                                      requiredContextClass().getName() + "'");
 			}
 			this.applicationContext = context;
 			this.messageSourceAccessor = new MessageSourceAccessor(context);
@@ -81,10 +83,10 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called by setApplicationContext() after setting the context instance.
 	 * <p>Note: Does </i>not</i> get called on reinitialization of the context.
-	 * @throws ApplicationContextException if initialization attempted
-	 * by this object fails
+	 * @throws ApplicationContextException in case of initialization errors
+	 * @throws BeansException if thrown by application context methods
 	 */
-	protected void initApplicationContext() throws ApplicationContextException {
+	protected void initApplicationContext() throws BeansException {
 	}
 
 	/**

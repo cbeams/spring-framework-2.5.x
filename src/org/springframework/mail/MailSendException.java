@@ -2,6 +2,7 @@ package org.springframework.mail;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -10,11 +11,11 @@ import java.util.Map;
  * Can register failed messages with their exceptions.
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailSendException.java,v 1.4 2003-11-06 13:20:42 dkopylenko Exp $
+ * @version $Id: MailSendException.java,v 1.5 2003-11-13 11:51:26 jhoeller Exp $
  */
 public class MailSendException extends MailException {
 
-	private Map failedMessages;
+	private Map failedMessages = new HashMap();
 
 	public MailSendException(String msg) {
 		super(msg);
@@ -32,52 +33,68 @@ public class MailSendException extends MailException {
 	 */
 	public MailSendException(Map failedMessages) {
 		super(null);
-		this.failedMessages = failedMessages;
+		this.failedMessages.putAll(failedMessages);
 	}
 
 	/**
-	 * Return a Map with the failed messages as keys, and the thrown
-	 * exceptions as values.
+	 * Return a Map with the failed messages as keys, and the thrown exceptions
+	 * as values. Note that a general mail server connection failure will not
+	 * result in failed messages being returned here: A message will only be
+	 * contained here if actually sending it was attempted but failed.
 	 * <p>The messages will be the same that were originally passed to the
 	 * invoked send method, i.e. SimpleMailMessages in case of using the
 	 * generic MailSender interface.
 	 * <p>In case of sending MimeMessage instances via JavaMailSender,
 	 * the messages will be of type MimeMessage.
+	 * @return the Map of failed messages as keys and thrown exceptions as
+	 * values, or an empty Map if no failed messages
 	 */
 	public Map getFailedMessages() {
 		return failedMessages;
 	}
 
 	public String getMessage() {
-		StringBuffer msg = new StringBuffer("Could not send mail: ");
+		StringBuffer msg = new StringBuffer();
+		String superMsg = super.getMessage();
+		msg.append(superMsg != null ? superMsg : "Could not send mails: ");
 		for (Iterator subExs = this.failedMessages.values().iterator(); subExs.hasNext();) {
 			Exception subEx = (Exception) subExs.next();
 			msg.append(subEx.getMessage());
-			msg.append("; ");
+			if (subExs.hasNext()) {
+				msg.append("; ");
+			}
 		}
 		return msg.toString();
 	}
 
 	public void printStackTrace(PrintStream ps) {
-		if (this.failedMessages == null) {
+		if (this.failedMessages.isEmpty()) {
 			super.printStackTrace(ps);
 		}
 		else {
+			ps.println(this);
 			for (Iterator subExs = this.failedMessages.values().iterator(); subExs.hasNext();) {
 				Exception subEx = (Exception) subExs.next();
 				subEx.printStackTrace(ps);
+				if (subExs.hasNext()) {
+					ps.println();
+				}
 			}
 		}
 	}
 
 	public void printStackTrace(PrintWriter pw) {
-		if (this.failedMessages == null) {
+		if (this.failedMessages.isEmpty()) {
 			super.printStackTrace(pw);
 		}
 		else {
+			pw.println(this);
 			for (Iterator subExs = this.failedMessages.values().iterator(); subExs.hasNext();) {
 				Exception subEx = (Exception) subExs.next();
 				subEx.printStackTrace(pw);
+				if (subExs.hasNext()) {
+					pw.println();
+				}
 			}
 		}
 	}

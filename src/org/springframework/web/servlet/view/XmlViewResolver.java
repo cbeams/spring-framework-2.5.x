@@ -57,17 +57,32 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 	 * Pre-initialize the factory from the XML file.
 	 * Only effective if caching is enabled.
 	 */
-	protected void initApplicationContext() throws ApplicationContextException {
+	protected void initApplicationContext() throws BeansException {
 		if (isCache()) {
-			try {
-				initFactory();
+			initFactory();
+		}
+	}
+
+	/**
+	 * Initialize the BeanFactory from the XML file.
+	 * Synchronized because of access by parallel threads.
+	 * @throws BeansException in case of initialization errors
+	 */
+	protected synchronized BeanFactory initFactory() throws BeansException {
+		if (this.cachedFactory != null) {
+			return this.cachedFactory;
+		}
+
+		try {
+			InputStream is = getApplicationContext().getResourceAsStream(this.location);
+			BeanFactory xbf = new XmlBeanFactory(is, getApplicationContext());
+			if (isCache()) {
+				this.cachedFactory = xbf;
 			}
-			catch (IOException ex) {
-				throw new ApplicationContextException("Cannot initialize XML file '" + this.location + "'" , ex);
-			}
-			catch (BeansException ex) {
-				throw new ApplicationContextException("Cannot initialize XML file '" + this.location + "'" , ex);
-			}
+			return xbf;
+		}
+		catch (IOException ex) {
+			throw new ApplicationContextException("Cannot initialize XML file [" + this.location + "]" , ex);
 		}
 	}
 
@@ -75,37 +90,19 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 		try {
 			Object o = initFactory().getBean(viewName);
 			if (!(o instanceof View)) {
-				throw new ServletException("Bean with name '" + viewName + "' in XML file '" + this.location + "' must be of type View");
+				throw new ServletException("Bean with name '" + viewName + "' in XML file [" +
+				                           this.location + "] must be of type View");
 			}
 			return (View) o;
-		}
-		catch (IOException ex) {
-			throw new ServletException("Cannot load  XML file '" + this.location + "' trying to resolve view with name '" + viewName + "'", ex);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Let superclass handle this
 			return null;
 		}
 		catch (BeansException ex) {
-			throw new ServletException("Error initializing view bean with name '" + viewName + "' in XML file '" + this.location + "'", ex);
+			throw new ServletException("Error initializing view bean with name '" + viewName +
+			                           "' in XML file [" + this.location + "]", ex);
 		}
-	}
-
-	/**
-	 * Initialize the BeanFactory from the XML file.
-	 * Synchronized because of access by parallel threads.
-	 */
-	protected synchronized BeanFactory initFactory() throws IOException, BeansException {
-		if (this.cachedFactory != null) {
-			return this.cachedFactory;
-		}
-
-		InputStream is = getApplicationContext().getResourceAsStream(this.location);
-		BeanFactory xbf = new XmlBeanFactory(is, getApplicationContext());
-		if (isCache()) {
-			this.cachedFactory = xbf;
-		}
-		return xbf;
 	}
 
 }
