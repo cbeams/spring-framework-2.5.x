@@ -3,6 +3,28 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2 RC1 (14.3.2005)
+--------------------------------------
+
+Overall
+* removed all deprecated classes and methods whose deprecation dated back to Spring <= 1.1 final
+
+Package org.springframework.aop
+* deprecated AopUtils' "getAllInterfaces(ForClass)AsList" methods in favor of "getAllInterfaces(ForClass)AsSet"
+* removed deprecated RegexpMethodPointcut class: use Perl5RegexpMethodPointcut or JdkRegexpMethodPointcut instead
+
+Package org.springframework.orm
+* added "orm.hibernate3" support package for Hibernate3, mirroring the Hibernate 2.1 support in "orm.hibernate"
+* removed deprecated "createQuery" and "createCriteria" methods from HibernateTemplate: use Session methods instead
+
+Package org.springframework.samples
+* migrated Petclinic's Hibernate layer from Hibernate 2.1 to Hibernate3
+
+Package org.springframework.web
+* changed MultiActionController's log level from INFO to DEBUG
+* removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)
+
+
 Changes in version 1.1.5 (28.2.2005)
 ------------------------------------
 
