@@ -23,7 +23,7 @@
 	</action-state>
 	
 	<sub-flow-state id="collegue.detail" flow="person.detail" attributes-mapper="collegueId.modelMapper">
-		<transition event="finish" to="detail"/>
+		<transition event="finish" to="detail.get"/>
 		<transition event="error" to="error"/>
 	</sub-flow-state>
 	

@@ -14,11 +14,8 @@
 			<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
 			<INPUT type="hidden" name="_eventId" value="back">
 		</FORM>
-	
 		<DIV align="left">Person Detail</DIV>
-		
 		<HR>
-		
 		<DIV align="left">
 			<TABLE>
 				<TR>
@@ -53,12 +50,9 @@
 				}
 			%>
 		</DIV>
-		
 		<HR>
-
 		<DIV align="right">
 			<INPUT type="button" onclick="javascript:document.backForm.submit()" value="Back">
 		</DIV>
-		
 	</BODY>
 </HTML>

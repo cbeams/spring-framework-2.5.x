@@ -9,20 +9,15 @@
 	<HEAD>
 	</HEAD>
 	<BODY>
-	
 		<DIV align="left">Search Criteria</DIV>
-		
 		<HR>
-		
 		<spring:hasBindErrors name="query">
 			<FONT color="red">Please provide valid query criteria!</FONT>
 		</spring:hasBindErrors>
-		
 		<DIV align="left">
 			<FORM name="searchForm" action="search.htm">
 				<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
 				<INPUT type="hidden" name="_eventId" value="submit">
-				
 				<TABLE>
 					<TR>
 						<TD>First Name</TD>
@@ -35,12 +30,9 @@
 				</TABLE>
 			</FORM>
 		</DIV>
-		
 		<HR>
-
 		<DIV align="right">
 			<INPUT type="button" onclick="javascript:document.searchForm.submit()" value="Search">
 		</DIV>
-		
 	</BODY>
 </HTML>
