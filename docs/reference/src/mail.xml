@@ -258,4 +258,72 @@ public class OrderManagerImpl implements OrderManager {
       information.</para>
     </sect2>
   </sect1>
+  
+  <sect1>
+  	<title>Using the JavaMail MimeMessageHelper</title>
+  	<para>
+  		One of the components that comes in pretty handy when dealing with
+  		JavaMail messages is the <literal>org.springframework.mail.javamail.MimeMessageHelper</literal>.
+  		It prevents you from having to use the nasty APIs the the <literal>javax.mail.internet</literal> classes.
+  		A couple of possible scenarios:
+  	</para>
+  	<sect2>
+  		<title>Creating a simple MimeMessage and sending it</title>
+  		<para>
+  			Using the MimeMessageHelper it's pretty easy to setup and send a MimeMessage:
+  			<programlisting><![CDATA[
+// of course you would setup the mail sender using 
+// DI in any real-world cases
+JavaMailSenderImpl sender = new JavaMailSenderImpl();
+sender.setHost("mail.host.com");
+
+MimeMessage message = sender.createMimeMesage();
+MimeMessageHelper helper = new MimeMessageHelper(message);
+message.setTo("test@host.com");
+message.setText("Thank you for ordering!");
+
+sender.send(message);
+			]]></programlisting>
+		</para>
+	</sect2>
+	<sect2>
+		<title>Sending attachments and inline resources</title>
+		<para>
+			Email allow for attachments, but also for inline resources in multipart
+			messages. Inline resources could for example be images or stylesheet you
+			want to use in your message, but don't want displayed as attachment.
+			The following shows you how to use the MimeMessageHelper to send an
+			email along with an inline image.
+			<programlisting><![CDATA[
+JavaMailSenderImpl sender = new JavaMailSenderImpl();
+sender.setHost("mail.host.com");
+
+MimeMessage message = sender.createMimeMesage();
+
+// use the true flag to indicate you need a multipart message
+MimeMessageHelper helper = new MimeMessageHelper(message, true);
+message.setTo("test@host.com");
+
+// let's include the infamous windows Sample file (this time copied to c:/)
+FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
+helper.addInline("identifier1234", res);
+
+// use the true flag to indicate the text included is HTML
+helper.setText(
+  "<html><body><img src='cid:identifier1234'></body></html>"
+  true);
+  
+// if you would need to include the file as an attachment, use
+// addAttachment() methods on the MimeMessageHelper
+
+sender.send(message);
+			]]></programlisting>
+			<emphasis>Inline resources are added to the mime message using the Content-ID specified
+			as you've seen just now (<literal>identifier1234</literal> in this case). The order in 
+			which you're adding the text and the resource are VERY important. First add the resource
+			and after that the text. If you're doing it the other way around, it won't work!</emphasis>
+		</para>
+	</sect2>
+  </sect1>
+  
 </chapter>
