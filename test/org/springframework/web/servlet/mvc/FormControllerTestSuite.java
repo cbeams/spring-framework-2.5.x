@@ -89,9 +89,9 @@ public class FormControllerTestSuite extends TestCase {
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(formView));
 		
-		TestBean person = (TestBean) mv.getModel().get(mc.BEAN_NAME);
+		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
-		assertTrue("bean age default ok", person.getAge() == mc.DEFAULT_AGE);
+		assertTrue("bean age default ok", person.getAge() == TestController.DEFAULT_AGE);
 		assertTrue("name not set", person.getName() == null);
 	}
 
@@ -110,9 +110,9 @@ public class FormControllerTestSuite extends TestCase {
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(formView));
 
-		TestBean person = (TestBean) mv.getModel().get(mc.BEAN_NAME);
+		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
-		assertTrue("bean age default ok", person.getAge() == mc.DEFAULT_AGE);
+		assertTrue("bean age default ok", person.getAge() == TestController.DEFAULT_AGE);
 		assertTrue("name set", "rod".equals(person.getName()));
 	}
 
@@ -136,7 +136,7 @@ public class FormControllerTestSuite extends TestCase {
 			mv.getViewName().equals(successView));
 		
 		// Has bean
-		TestBean person = (TestBean) mv.getModel().get(mc.BEAN_NAME);
+		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age bound ok", person.getAge() == age);
@@ -163,7 +163,7 @@ public class FormControllerTestSuite extends TestCase {
 			mv.getViewName().equals(successView));
 		
 		// Has bean
-		TestBean person = (TestBean) mv.getModel().get(mc.BEAN_NAME);
+		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		assertTrue("bean name bound ok", person.getName().equals(name));
 		assertTrue("bean age bound ok", person.getAge() == age);
@@ -223,7 +223,7 @@ public class FormControllerTestSuite extends TestCase {
 		mv.getViewName().equals(formView));
 		
 		// Has bean
-		TestBean person = (TestBean) mv.getModel().get(mc.BEAN_NAME);
+		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 		
 		// yes, but it was rejected after binding by the validator
@@ -258,9 +258,9 @@ public class FormControllerTestSuite extends TestCase {
 		HttpServletResponse response1 = new MockHttpServletResponse();
 		ModelAndView mv1 = mc.handleRequest(request1, response1);
 		assertTrue("returned correct view name", mv1.getViewName().equals(formView));
-		TestBean person = (TestBean) mv1.getModel().get(mc.BEAN_NAME);
+		TestBean person = (TestBean) mv1.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
-		assertTrue("Bean age default ok", person.getAge() == mc.DEFAULT_AGE);
+		assertTrue("Bean age default ok", person.getAge() == TestController.DEFAULT_AGE);
 
 		// second request, using same session: POST submit
 		MockHttpServletRequest request2 = new MockHttpServletRequest(null, "POST", "/welcome.html");
@@ -268,7 +268,7 @@ public class FormControllerTestSuite extends TestCase {
 		HttpServletResponse response2 = new MockHttpServletResponse();
 		ModelAndView mv2 = mc.handleRequest(request2, response2);
 		assertTrue("returned correct view name", mv2.getViewName().equals(successView));
-		TestBean person2 = (TestBean) mv2.getModel().get(mc.BEAN_NAME);
+		TestBean person2 = (TestBean) mv2.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is same object", person == person2);
 	}
 
@@ -286,7 +286,7 @@ public class FormControllerTestSuite extends TestCase {
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name", mv.getViewName().equals(successView));
-		TestBean person = (TestBean) mv.getModel().get(mc.BEAN_NAME);
+		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
 	}
 

@@ -214,7 +214,7 @@ public class MultiActionControllerTestSuite extends TestCase {
 
 	private void testExceptionNoHandler(TestMaController mc, Throwable t) throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/testException.html");
-		request.setAttribute(mc.THROWABLE_ATT, t);
+		request.setAttribute(TestMaController.THROWABLE_ATT, t);
 		HttpServletResponse response = new MockHttpServletResponse();
 		try {
 			mc.handleRequest(request, response);
@@ -272,7 +272,7 @@ public class MultiActionControllerTestSuite extends TestCase {
 
 	private ModelAndView testHandlerCaughtException(TestMaController mc, Throwable t) throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/testException.html");
-		request.setAttribute(mc.THROWABLE_ATT, t);
+		request.setAttribute(TestMaController.THROWABLE_ATT, t);
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		return mv;

@@ -63,7 +63,7 @@ public class ValidationTestSuite extends TestCase {
 			TestBean tb = (TestBean) m.get("person");
 			assertTrue("Same object", tb.equals(rod));
 
-			BindException be = (BindException) m.get(binder.ERROR_KEY_PREFIX + "person");
+			BindException be = (BindException) m.get(DataBinder.ERROR_KEY_PREFIX + "person");
 			assertTrue("Added itself to map", ex == be);
 			assertTrue(be.hasErrors());
 			assertTrue("Correct number of errors", be.getErrorCount() == 1);

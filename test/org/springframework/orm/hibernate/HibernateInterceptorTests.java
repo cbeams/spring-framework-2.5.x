@@ -110,7 +110,7 @@ public class HibernateInterceptorTests extends TestCase {
 
 		SessionFactoryUtils.getThreadObjectManager().bindThreadObject(sf, new SessionHolder(session));
 		HibernateInterceptor interceptor = new HibernateInterceptor();
-		interceptor.setFlushMode(interceptor.FLUSH_EAGER);
+		interceptor.setFlushMode(HibernateInterceptor.FLUSH_EAGER);
 		interceptor.setSessionFactory(sf);
 		try {
 			interceptor.invoke(new TestInvocation(sf));
