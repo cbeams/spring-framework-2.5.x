@@ -97,7 +97,11 @@ public abstract class ObjectUtils {
         Assert.isTrue(clazz.getComponentType().isPrimitive(),
                 "The specified parameter is not a primitive array.");
         int length = Array.getLength(primitiveArray);
-        Object[] newArray = new Object[length];
+        if (length == 0) {
+        	return new Object[0];
+        }
+        Class wrapperType = Array.get(primitiveArray, 0).getClass();
+        Object[] newArray = (Object[])Array.newInstance(wrapperType, length);
         for (int i = 0; i < length; i++) {
             newArray[i] = Array.get(primitiveArray, i);
         }
