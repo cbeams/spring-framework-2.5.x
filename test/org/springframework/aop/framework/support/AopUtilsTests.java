@@ -25,12 +25,11 @@ public class AopUtilsTests extends TestCase {
 	public void testGetAllInterfaces() {
 		DerivedTestBean testBean = new DerivedTestBean();
 		List ifcs = Arrays.asList(AopUtils.getAllInterfaces(testBean));
-		assertEquals("Correct number of interfaces", 4, ifcs.size());
+		assertEquals("Correct number of interfaces", 5, ifcs.size());
 		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
 		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
 		assertTrue("Contains IOther", ifcs.contains(IOther.class));
 	}
-	
 	
 	public void testIsMethodDeclaredOnOneOfTheseInterfaces() throws Exception {
 		Method m = Object.class.getMethod("hashCode", null);

@@ -4,6 +4,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,6 +55,13 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
     implements AutowireCapableBeanFactory {
+
+	/**
+	 * Set that holds all inner beans created by this factory that implement
+	 * the DisposableBean interface, to be destroyed on destroySingletons.
+	 * @see #destroySingletons
+	 */
+	private final Set disposableInnerBeans = Collections.synchronizedSet(new HashSet());
 
 	public AbstractAutowireCapableBeanFactory() {
 	}
@@ -515,10 +523,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (pvs == null) {
 			return;
 		}
-
 		MutablePropertyValues deepCopy = new MutablePropertyValues(pvs);
 		PropertyValue[] pvals = deepCopy.getPropertyValues();
-
 		for (int i = 0; i < pvals.length; i++) {
 			Object value = resolveValueIfNecessary(beanName, mergedBeanDefinition,
 																						 pvals[i].getName(), pvals[i].getValue());
@@ -526,7 +532,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// update mutable copy
 			deepCopy.setPropertyValueAt(pv, i);
 		}
-
 		// set our (possibly massaged) deepCopy
 		try {
 			// synchronize if custom editors are registered
@@ -569,10 +574,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// If it does, we'll attempt to instantiate the bean and set the reference.
 		if (value instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition bd = (AbstractBeanDefinition) value;
-			bd.setSingleton(false);  // inner beans should never be cached as singleton
+			bd.setSingleton(false);  // an inner bean should never be cached as singleton
 			String innerBeanName = "(inner bean for property '" + beanName + "." + argName + "')";
-			Object beanInstance = createBean(innerBeanName, getMergedBeanDefinition(innerBeanName, bd));
-			return getObjectForSharedInstance(innerBeanName, beanInstance);
+			Object bean = createBean(innerBeanName, getMergedBeanDefinition(innerBeanName, bd));
+			if (bean instanceof DisposableBean) {
+				// keep reference to inner bean, to be able to destroy it on factory shutdown
+				this.disposableInnerBeans.add(bean);
+			}
+			return getObjectForSharedInstance(innerBeanName, bean);
 		}
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
@@ -675,6 +684,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 									 "' on bean with beanName '" + beanName + "'");
 			bw.invoke(mergedBeanDefinition.getInitMethodName(), null);
 			// can throw MethodInvocationException
+		}
+	}
+
+	public void destroySingletons() {
+		super.destroySingletons();
+		synchronized (this.disposableInnerBeans) {
+			for (Iterator it = this.disposableInnerBeans.iterator(); it.hasNext();) {
+				Object bean = it.next();
+				it.remove();
+				destroyBean("(inner bean of type " + bean.getClass().getName() + ")", bean);
+			}
 		}
 	}
 

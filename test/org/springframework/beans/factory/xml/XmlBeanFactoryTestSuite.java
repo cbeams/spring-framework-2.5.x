@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
@@ -45,7 +46,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.38 2004-03-08 19:26:23 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.39 2004-03-15 11:21:00 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -105,7 +106,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertNotNull(hasInnerBeans.getFriends());
 		List friends = (List) hasInnerBeans.getFriends();
 		assertEquals(2, friends.size());
-		TestBean inner2 = (TestBean) friends.get(0);
+		DerivedTestBean inner2 = (DerivedTestBean) friends.get(0);
 		assertEquals("inner2", inner2.getName());
 		assertEquals(7, inner2.getAge());
 		TestBean innerFactory = (TestBean) friends.get(1);
@@ -115,6 +116,9 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		TestBean inner3 = (TestBean) hasInnerBeans.getSomeMap().get("someKey");
 		assertEquals("inner3", inner3.getName());
 		assertEquals(8, inner3.getAge());
+		xbf.destroySingletons();
+		assertTrue(inner2.wasDestroyed());
+		assertTrue(innerFactory.getName() == null);
 	}
 
 	public void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
