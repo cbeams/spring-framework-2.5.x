@@ -30,6 +30,11 @@ import org.springframework.beans.factory.support.DependencyInjectionAspectSuppor
  * This enables richer domain models, with domain objects able to access
  * business objects.
  * <p> 
+ * When <i>creating</i> such objects in application code, before persisting them, you can
+ * apply configuration manually via Setters, use factory autowiring, or obtain a prototype from the factory.
+ * A dependency on Spring IoC can be avoided by using a lookup-method to obtain the prototype
+ * instance. 
+ * <p>
  * Based on a constribution by
  * Oliver Hutchison. Thanks also to Seth Ladd.
  * <p>
