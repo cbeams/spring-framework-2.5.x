@@ -71,7 +71,7 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
     }
 
     public String visit(Map.Entry value) {
-        return value.getKey() + " -> " + value.getValue();
+        return style(value.getKey()) + " -> " + style(value.getValue());
     }
 
     public String visit(Set value) {
