@@ -17,14 +17,14 @@ public class Pet {
     }
 
     /**
-     * @@org.springframework.rcp.validator.rules.Required()
+     * @@Required()
      */
     public String getNickName() {
         return null;
     }
 
     /**
-     * @@org.springframework.rcp.validator.rules.Required()
+     * @@Required()
      */
     public int getAge() {
         return age;
@@ -38,8 +38,8 @@ public class Pet {
     }
 
     /**
-     * @@org.springframework.rcp.validator.rules.Required()
-     * @@org.springframework.rcp.validator.rules.MaxLength(25)
+     * @@org.springframework.validation.rules.Required()
+     * @@org.springframework.validation.rules.MaxLength(26)
      */
     public String getFavoriteToy() {
         return favoriteToy;

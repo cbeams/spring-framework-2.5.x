@@ -27,7 +27,7 @@ public class Name {
 
     
     /**
-     * @@org.springframework.rcp.validator.rules.Required()
+     * @@org.springframework.validation.rules.Required()
      */
     public String getLastName() {
         return lastName;

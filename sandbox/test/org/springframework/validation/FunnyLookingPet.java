@@ -12,14 +12,14 @@ public class FunnyLookingPet extends Pet {
     }
 
     /**
-     * @@org.springframework.rcp.validator.rules.Required()
+     * @@org.springframework.validation.rules.Required()
      */
     public String getNickName() {
         return null;
     }
     
     /**
-     * @@org.springframework.rcp.validator.rules.Required()
+     * @@org.springframework.validation.rules.Required()
      */
     public String getHatColor() {
         return hatColor;
