@@ -29,6 +29,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.OrderComparator;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
@@ -47,21 +49,35 @@ import org.springframework.web.util.WebUtils;
  * <p>This servlet is very flexible: It can be used with just about any workflow,
  * with the installation of the appropriate adapter classes. It offers the
  * following functionality that distinguishes it from other MVC frameworks:
+ *
  * <ul>
  * <li>It is based around a JavaBeans configuration mechanism.
+ *
  * <li>It can use any HandlerMapping implementation - whether standard, or provided
  * as part of an application - to control the routing of requests to handler objects.
  * Additional HandlerMapping objects can be added through defining beans in the
  * servlet's application context that implement the HandlerMapping interface in this
  * package. HandlerMappings can be given any bean name (they are tested by type).
- * <li>It can use any HandlerAdapter (additional HandlerAdapter objects can be added
- * through the application context).
+ *
+ * <li>It can use any HandlerAdapter. Default is SimpleControllerHandlerAdapter;
+ * additional HandlerAdapter objects can be added through the application context.
+ * Like HandlerMappings, HandlerAdapters can be given any bean name (tested by type).
+ *
  * <li>Its view resolution strategy can be specified via a ViewResolver implementation.
  * Standard implementations support mapping URLs to bean names, and explicit mappings.
+ * The ViewResolver bean name is "viewResolver"; default is InternalResourceViewResolver.
+ *
+ * <li>Its strategy for resolving multipart requests is determined by a MultipartResolver
+ * implementation. Implementations for Jakarta Commons FileUpload and Jason Hunter's COS
+ * are included. The MultipartResolver bean name is "multipartResolver"; default is none.
+ *
  * <li>Its locale resolution strategy is determined by a LocaleResolver implementation.
  * Out-of-the-box implementations work via HTTP accept header, cookie, or session.
+ * The LocaleResolver bean name is "localeResolver"; default is AcceptHeaderLocaleResolver.
+ *
  * <li>Its theme resolution strategy is determined by a ThemeResolver implementation.
  * Implementations for a fixed theme and for cookie and session storage are included.
+ * The ThemeResolver bean name is "themeResolver"; default is FixedThemeResolver.
  * </ul>
  *
  * <p>A web application can use any number of dispatcher servlets.
@@ -71,20 +87,16 @@ import org.springframework.web.util.WebUtils;
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
+ * @see MultipartResolver
  * @see LocaleResolver
+ * @see ThemeResolver
  * @see org.springframework.web.context.WebApplicationContext
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DispatcherServlet extends FrameworkServlet {
-
-	/**
-	 * Well-known name for the LocaleResolver object in the bean factory for
-	 * this namespace.
-	 */
-	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
 
 	/**
 	 * Well-known name for the MultipartResolver object in the bean factory for
@@ -93,16 +105,22 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
 
 	/**
-	 * Well-known name for the ViewResolver object in the bean factory for
+	 * Well-known name for the LocaleResolver object in the bean factory for
 	 * this namespace.
 	 */
-	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
+	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
 
 	/**
 	 * Well-known name for the ThemeResolver object in the bean factory for
 	 * this namespace.
 	 */
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
+
+	/**
+	 * Well-known name for the ViewResolver object in the bean factory for
+	 * this namespace.
+	 */
+	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
 	/**
 	 * Request attribute to hold current web application context.
@@ -131,14 +149,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Additional logger for use when no mapping handlers are found for a request. 
 	 */
-	protected final Log pageNotFoundLogger =
-		LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
-
-	/** LocaleResolver used by this servlet */
-	private LocaleResolver localeResolver;
+	protected final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
 
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
+
+	/** LocaleResolver used by this servlet */
+	private LocaleResolver localeResolver;
 
 	/** ThemeResolver used by this servlet */
 	private ThemeResolver themeResolver;
@@ -160,12 +177,35 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * ViewResolver and a LocaleResolver.
 	 */
 	protected void initFrameworkServlet() throws ServletException {
+		initMultipartResolver();
 		initLocaleResolver();
 		initThemeResolver();
-		initMultipartResolver();
 		initHandlerMappings();
 		initHandlerAdapters();
 		initViewResolver();
+	}
+
+	/**
+	 * Initialize the MultipartResolver used by this class.
+	 * If no bean is defined with the given name in the BeanFactory
+	 * for this namespace, no multipart handling is provided.
+	 */
+	private void initMultipartResolver() throws ServletException {
+		try {
+			this.multipartResolver = (MultipartResolver) getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME);
+			logger.info("Loaded multipart resolver [" + this.multipartResolver + "]");
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Default to no multipart resolver
+			this.multipartResolver = null;
+			logger.info("Unable to locate multipart resolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
+			            "': no multipart handling provided");
+		}
+		catch (BeansException ex) {
+			// We tried and failed to load the MultipartResolver specified by a bean
+			throw new ServletException("Fatal error loading multipart resolver with name '" +
+			                           MULTIPART_RESOLVER_BEAN_NAME	+ "': using default",	ex);
+		}
 	}
 
 	/**
@@ -181,40 +221,13 @@ public class DispatcherServlet extends FrameworkServlet {
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default
 			this.localeResolver = new AcceptHeaderLocaleResolver();
-			logger.info("Unable to locate locale resolver with name '" + LOCALE_RESOLVER_BEAN_NAME + "': using default [" + this.localeResolver + "]");
+			logger.info("Unable to locate locale resolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
+			            "': using default [" + this.localeResolver + "]");
 		}
 		catch (BeansException ex) {
 			// We tried and failed to load the LocaleResolver specified by a bean
-			throw new ServletException("Fatal error loading locale resolver with name '" + LOCALE_RESOLVER_BEAN_NAME + "': using default", ex);
-		}
-	}
-
-	/**
-	 * Initialize the MultipartResolver used by this class.
-	 * If no bean is defined with the given name in the BeanFactory
-	 * for this namespace, no multipart handling is provided.
-	 */
-	private void initMultipartResolver() throws ServletException {
-		try {
-			this.multipartResolver =
-				(MultipartResolver) getWebApplicationContext().getBean(
-					MULTIPART_RESOLVER_BEAN_NAME);
-			logger.info(
-				"Loaded multipart resolver [" + this.multipartResolver + "]");
-		} catch (NoSuchBeanDefinitionException ex) {
-			// default to no resolver
-			this.multipartResolver = null;
-			logger.info(
-				"Unable to locate multipart resolver with name '"
-					+ MULTIPART_RESOLVER_BEAN_NAME
-					+ "': no multipart handling provided");
-		} catch (BeansException ex) {
-			// We tried and failed to load the MultipartResolver specified by a bean
-			throw new ServletException(
-				"Fatal error loading multipart resolver with name '"
-					+ MULTIPART_RESOLVER_BEAN_NAME
-					+ "': using default",
-				ex);
+			throw new ServletException("Fatal error loading locale resolver with name '" +
+			                           LOCALE_RESOLVER_BEAN_NAME + "': using default", ex);
 		}
 	}
 
@@ -231,11 +244,13 @@ public class DispatcherServlet extends FrameworkServlet {
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default
 			this.themeResolver = new FixedThemeResolver();
-			logger.info("Unable to locate theme resolver with name '" + THEME_RESOLVER_BEAN_NAME + "': using default [" + this.themeResolver + "]");
+			logger.info("Unable to locate theme resolver with name '" + THEME_RESOLVER_BEAN_NAME +
+			            "': using default [" + this.themeResolver + "]");
 		}
 		catch (BeansException ex) {
 			// We tried and failed to load the ThemeResolver specified by a bean
-			throw new ServletException("Fatal error loading theme resolver with name '" + THEME_RESOLVER_BEAN_NAME + "': using default", ex);
+			throw new ServletException("Fatal error loading theme resolver with name '" +
+			                           THEME_RESOLVER_BEAN_NAME + "': using default", ex);
 		}
 	}
 
@@ -448,7 +463,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		finally {
 			// Clean up any resources used by a multipart request.
-			if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+			if (this.multipartResolver != null && request instanceof MultipartHttpServletRequest) {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
 		}

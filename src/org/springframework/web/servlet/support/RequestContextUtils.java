@@ -10,7 +10,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.ui.context.Theme;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.servlet.*;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.ThemeResolver;
 
 /**
  * Utility class for easy access to various request-specific state,
@@ -84,18 +87,6 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Return the MultipartResolver that has been bound to the request by the DispatcherServlet.
-	 * @param request current HTTP request
-	 * @return the current MultipartResolver, or null if no MultipartResolver has been found
-	 */
-	public static MultipartResolver getMultipartResolver(HttpServletRequest request) {
-		MultipartResolver multipartResolver =
-			(MultipartResolver) request.getAttribute(
-				DispatcherServlet.MULTIPART_RESOLVER_ATTRIBUTE);
-		return multipartResolver;
-	}
-
-	/**
 	 * Return the ThemeResolver that has been bound to the request by the DispatcherServlet.
 	 * @param request current HTTP request
 	 * @return the current ThemeResolver
@@ -121,6 +112,15 @@ public abstract class RequestContextUtils {
 		WebApplicationContext context = getWebApplicationContext(request);
 		String themeName = getThemeResolver(request).resolveThemeName(request);
 		return context.getTheme(themeName);
+	}
+
+	/**
+	 * Return the MultipartResolver that has been bound to the request by the DispatcherServlet.
+	 * @param request current HTTP request
+	 * @return the current MultipartResolver, or null if not a multipart request
+	 */
+	public static MultipartResolver getMultipartResolver(HttpServletRequest request) {
+		return (MultipartResolver) request.getAttribute(DispatcherServlet.MULTIPART_RESOLVER_ATTRIBUTE);
 	}
 
 }
