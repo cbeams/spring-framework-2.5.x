@@ -6,10 +6,10 @@
 <web-flow id="testFlow" start-state="actionState1">
 
 	<action-state id="actionState1">
-		<action name="action1"/>
-		<action name="action2"/>
+		<action bean="action1"/>
+		<action name="action2Name" bean="action2"/>
 		<transition event="event1" to="viewState1"/>
-		<transition event="event2" to="viewState2"/>
+		<transition event="action2Name.event2" to="viewState2"/>
 	</action-state>
 	
 	<view-state id="viewState1" view="view1">
