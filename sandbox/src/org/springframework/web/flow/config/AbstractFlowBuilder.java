@@ -44,28 +44,29 @@ import org.springframework.web.flow.action.MultiAction;
  * <pre>
  * public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
  * 
- * 	protected String flowId() {
+ * 	 protected String flowId() {
  * 		return &quot;customer.Detail&quot;;
- * 	}
+ * 	 }
  * 
- * public void buildStates() {
- *            // get customer information
- *            addActionState(&quot;getDetails&quot;,
- *                action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *                on(success(), &quot;viewDetails&quot;));
- *            // view customer information               
- *            addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
- *                on(submit(), &quot;bindAndValidate&quot;);
- *            // bind and validate customer information updates 
- *            addActionState(&quot;bindAndValidate&quot;,
- *                action(&quot;customer.Detail.bindAndValidate&quot;),
- *                new Transition[] {
- *                    on(error(), &quot;viewDetails&quot;),
- *                    on(success(), &quot;finish&quot;)
- *                }
- *            // finish
- *            addEndState(&quot;finish&quot;);
- *         }}
+ *   public void buildStates() {
+ *     // get customer information
+ *     addActionState(&quot;getDetails&quot;,
+ *         action(GetCustomerAction.class, AutowireMode.BY_TYPE),
+ *         on(success(), &quot;viewDetails&quot;));
+ *     // view customer information               
+ *     addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.View&quot;,
+ *         on(submit(), &quot;bindAndValidate&quot;);
+ *     // bind and validate customer information updates 
+ *     addActionState(&quot;bindAndValidate&quot;,
+ *         action(&quot;customer.Detail.bindAndValidate&quot;),
+ *         new Transition[] {
+ *             on(error(), &quot;viewDetails&quot;),
+ *             on(success(), &quot;finish&quot;)
+ *         }
+ *     // finish
+ *     addEndState(&quot;finish&quot;);
+ *   }
+ * }
  * 
  * </pre>
  * 
