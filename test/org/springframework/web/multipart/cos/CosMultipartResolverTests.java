@@ -26,12 +26,12 @@ public class CosMultipartResolverTests extends TestCase {
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		wac.refresh();
 		CosMultipartResolver resolver = new CosMultipartResolver();
-		resolver.setMaximumFileSize(1000);
+		resolver.setMaxUploadSize(1000);
 		resolver.setHeaderEncoding("enc");
 		resolver.setApplicationContext(wac);
-		assertEquals(1000, resolver.getMaximumFileSize());
+		assertEquals(1000, resolver.getMaxUploadSize());
 		assertEquals("enc", resolver.getHeaderEncoding());
-		assertTrue(resolver.getUploadTempDir().endsWith("mytemp"));
+		assertEquals(new File("mytemp"), resolver.getUploadTempDir());
 
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest(null, null, null);
 		originalRequest.setContentType("multipart/form-data");
@@ -43,7 +43,7 @@ public class CosMultipartResolverTests extends TestCase {
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		CosMultipartResolver resolver = new CosMultipartResolver(sc);
-		assertTrue(resolver.getUploadTempDir().endsWith("mytemp"));
+		assertEquals(new File("mytemp"), resolver.getUploadTempDir());
 	}
 
 }

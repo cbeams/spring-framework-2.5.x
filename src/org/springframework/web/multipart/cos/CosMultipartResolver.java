@@ -22,7 +22,7 @@ import org.springframework.web.util.WebUtils;
  * <a href="http://www.servlets.com/cos">COS (com.oreilly.servlet)</a>.
  * Works with a COS MultipartRequest underneath.
  *
- * <p>Provides maximumFileSize and headerEncoding settings as bean properties;
+ * <p>Provides maxUploadSize and headerEncoding settings as bean properties;
  * see respective MultipartRequest constructor parameters for details.
  * Default maximum file size is unlimited; default encoding is the platform's default.
  *
@@ -35,13 +35,15 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 
 	public static final String MULTIPART_CONTENT_TYPE = "multipart/form-data";
 
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private int maximumFileSize = Integer.MAX_VALUE;
+	private int maxUploadSize = Integer.MAX_VALUE;
 
 	private String headerEncoding;
 
-	private String uploadTempDir;
+	private File uploadTempDir;
+
 
 	/**
 	 * Constructor for use as bean in an application context.
@@ -55,25 +57,24 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 	 * Determines the servlet container's temporary directory via the given ServletContext.
 	 */
 	public CosMultipartResolver(ServletContext servletContext) {
-		this.uploadTempDir = WebUtils.getTempDir(servletContext).getAbsolutePath();
+		this.uploadTempDir = WebUtils.getTempDir(servletContext);
 	}
 
 	/**
 	 * Set the maximum allowed file size (in bytes) before uploads are refused.
 	 * -1 indicates no limit (the default).
-	 * @param maximumFileSize the maximum file size allowed
-	 * @see org.apache.commons.fileupload.FileUploadBase#setSizeMax
+	 * @param maxUploadSize the maximum file size allowed
 	 */
-	public void setMaximumFileSize(int maximumFileSize) {
-		this.maximumFileSize = maximumFileSize;
+	public void setMaxUploadSize(int maxUploadSize) {
+		this.maxUploadSize = maxUploadSize;
 	}
 
-	protected int getMaximumFileSize() {
-		return maximumFileSize;
+	protected int getMaxUploadSize() {
+		return maxUploadSize;
 	}
 
 	/**
-	 * The character encoding to be used when reading the headers of individual parts.
+	 * Set the character encoding to be used when reading the headers of individual parts.
 	 * When not specified, or <code>null</code>, the platform default encoding is used.
 	 * @param headerEncoding the character encoding to use
 	 * @see org.apache.commons.fileupload.FileUploadBase#setHeaderEncoding
@@ -86,13 +87,24 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 		return headerEncoding;
 	}
 
-	protected String getUploadTempDir() {
+	/**
+	 * Set the temporary directory where uploaded files get stored.
+	 * Default is the servlet container's temporary directory for the web application.  
+	 */
+	public void setUploadTempDir(File uploadTempDir) {
+		this.uploadTempDir = uploadTempDir;
+	}
+
+	protected File getUploadTempDir() {
 		return uploadTempDir;
 	}
 
 	protected void initApplicationContext() {
-		this.uploadTempDir = getTempDir().getAbsolutePath();
+		if (this.uploadTempDir == null) {
+			this.uploadTempDir = getTempDir();
+		}
 	}
+
 
 	public boolean isMultipart(HttpServletRequest request) {
 		return request.getContentType() != null && request.getContentType().startsWith(MULTIPART_CONTENT_TYPE);
@@ -106,10 +118,9 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 				while (fileNames.hasMoreElements()) {
 					String fileName = (String) fileNames.nextElement();
 					File file = multipartRequest.getFile(fileName);
-					String msg = "Found multipart file [" + fileName + "] of size " + file.length() +
+					logger.debug("Found multipart file '" + fileName + "' of size " + (file != null ? file.length() : 0) +
 											 " bytes with original file name [" + multipartRequest.getOriginalFileName(fileName) +
-											 "], stored at [" + file.getAbsolutePath() + "]";
-					logger.debug(msg);
+											 "], " + (file != null ? "stored at [" + file.getAbsolutePath() + "]" : "empty"));
 				}
 			}
 			return new CosMultipartHttpServletRequest(request, multipartRequest);
@@ -128,8 +139,8 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 	 */
 	protected MultipartRequest newMultipartRequest(HttpServletRequest request) throws IOException {
 		return this.headerEncoding != null ?
-		    new MultipartRequest(request, getUploadTempDir(), getMaximumFileSize(), getHeaderEncoding()) :
-				new MultipartRequest(request, getUploadTempDir(), getMaximumFileSize());
+		    new MultipartRequest(request, this.uploadTempDir.getAbsolutePath(), this.maxUploadSize, this.headerEncoding) :
+				new MultipartRequest(request, this.uploadTempDir.getAbsolutePath(), this.maxUploadSize);
 	}
 
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
@@ -138,19 +149,27 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 		while (fileNames.hasMoreElements()) {
 			String fileName = (String) fileNames.nextElement();
 			File file = multipartRequest.getFile(fileName);
-			if (file.exists()) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Cleaning up multipart file [" + fileName + "] with original file name [" +
-											 multipartRequest.getOriginalFileName(fileName) +
-											 "], stored at [" + file.getAbsolutePath() + "]");
+			if (file != null) {
+				if (file.exists()) {
+					if (file.delete()) {
+						if (logger.isDebugEnabled()) {
+						logger.debug("Cleaned up multipart file '" + fileName + "' with original file name [" +
+												 multipartRequest.getOriginalFileName(fileName) +
+												 "], stored at [" + file.getAbsolutePath() + "]");
+						}
+					}
+					else {
+						logger.warn("Could not delete multipart file '" + fileName + "' with original file name [" +
+						            multipartRequest.getOriginalFileName(fileName) +
+						            "], stored at [" + file.getAbsolutePath() + "]");
+					}
 				}
-				file.delete();
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Multipart file [" + fileName + "] with original file name [" +
-											 multipartRequest.getOriginalFileName(fileName) +
-											 "] has already been moved -- no cleanup necessary");
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Multipart file '" + fileName + "' with original file name [" +
+												 multipartRequest.getOriginalFileName(fileName) +
+												 "] has already been moved - no cleanup necessary");
+					}
 				}
 			}
 		}

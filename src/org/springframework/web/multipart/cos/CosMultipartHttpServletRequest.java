@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -93,6 +94,10 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 			return name;
 		}
 
+		public boolean isEmpty() {
+			return (multipartRequest.getFile(this.name) == null);
+		}
+
 		public String getOriginalFileName() {
 			return multipartRequest.getOriginalFileName(this.name);
 		}
@@ -102,36 +107,48 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 		}
 
 		public long getSize() {
-			return multipartRequest.getFile(this.name).length();
+			File file = multipartRequest.getFile(this.name);
+			return (file != null ? file.length() : 0);
 		}
 
 		public byte[] getBytes() throws IOException {
-			return FileCopyUtils.copyToByteArray(multipartRequest.getFile(this.name));
+			File file = multipartRequest.getFile(this.name);
+			return (file != null ? FileCopyUtils.copyToByteArray(file) : new byte[0]);
 		}
 
 		public InputStream getInputStream() throws IOException {
-			return new FileInputStream(multipartRequest.getFile(this.name));
+			File file = multipartRequest.getFile(this.name);
+			return (file != null ? (InputStream) new FileInputStream(file) : new ByteArrayInputStream(new byte[0]));
 		}
 
 		public void transferTo(File dest) throws IOException, IllegalStateException {
-			File temp = multipartRequest.getFile(this.name);
-			if (!temp.exists()) {
-				throw new IllegalStateException("File has already been moved -- cannot be transferred again");
-			}
-			else if (temp.renameTo(dest)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Multipart file [" + getName() + "] with original file name [" +
-											 getOriginalFileName() + "], stored at [" + temp.getAbsolutePath() +
-											 "]: moved to [" + dest.getAbsolutePath() + "]");
+			File tempFile = multipartRequest.getFile(this.name);
+			if (tempFile != null) {
+				if (!tempFile.exists()) {
+					throw new IllegalStateException("File has already been moved - cannot be transferred again");
+				}
+				if (dest.exists() && !dest.delete()) {
+					throw new IOException("Destination file [" + dest.getAbsolutePath() +
+					                      "] already exists and could not be deleted");
+				}
+				if (tempFile.renameTo(dest)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Multipart file [" + getName() + "] with original file name [" +
+												 getOriginalFileName() + "], stored at [" + tempFile.getAbsolutePath() +
+												 "]: moved to [" + dest.getAbsolutePath() + "]");
+					}
+				}
+				else {
+					FileCopyUtils.copy(tempFile, dest);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Multipart file [" + getName() + "] with original file name [" +
+												 getOriginalFileName() + "], stored at [" + tempFile.getAbsolutePath() +
+												 "]: copied to [" + dest.getAbsolutePath() + "]");
+					}
 				}
 			}
 			else {
-				FileCopyUtils.copy(temp, dest);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Multipart file [" + getName() + "] with original file name [" +
-											 getOriginalFileName() + "], stored at [" + temp.getAbsolutePath() +
-											 "]: copied to [" + dest.getAbsolutePath() + "]");
-				}
+				dest.createNewFile();
 			}
 		}
 	}

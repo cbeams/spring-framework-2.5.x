@@ -1,5 +1,6 @@
 package org.springframework.web.multipart.commons;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,6 +49,8 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 
 	private DiskFileUpload fileUpload;
 
+	private File uploadTempDir;
+
 	/**
 	 * Constructor for use as bean in an application context.
 	 * Determines the servlet container's temporary directory via the application context.
@@ -84,24 +87,24 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 	}
 
 	/**
-	 * Set the maximum allowed file size (in bytes) before uploads are refused.
+	 * Set the maximum allowed size (in bytes) before uploads are refused.
 	 * -1 indicates no limit (the default).
-	 * @param maximumFileSize the maximum file size allowed
+	 * @param maxUploadSize the maximum upload size allowed
 	 * @see org.apache.commons.fileupload.FileUploadBase#setSizeMax
 	 */
-	public void setMaximumFileSize(long maximumFileSize) {
-		this.fileUpload.setSizeMax(maximumFileSize);
+	public void setMaxUploadSize(long maxUploadSize) {
+		this.fileUpload.setSizeMax(maxUploadSize);
 	}
 
 	/**
-	 * Set the maximum allowed file size (in bytes) before uploads are written to disk.
+	 * Set the maximum allowed size (in bytes) before uploads are written to disk.
 	 * Uploaded files will still be received past this amount, but they will not be
 	 * stored in memory. Default is 10240, according to Commons FileUpload.
-	 * @param maximumInMemorySize the maximum in memory size allowed
+	 * @param maxInMemorySize the maximum in memory size allowed
 	 * @see org.apache.commons.fileupload.DiskFileUpload#setSizeThreshold
 	 */
-	public void setMaximumInMemorySize(int maximumInMemorySize) {
-		this.fileUpload.setSizeThreshold(maximumInMemorySize);
+	public void setMaxInMemorySize(int maxInMemorySize) {
+		this.fileUpload.setSizeThreshold(maxInMemorySize);
 	}
 
 	/**
@@ -114,9 +117,25 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 		this.fileUpload.setHeaderEncoding(headerEncoding);
 	}
 
-	protected void initApplicationContext() {
-		this.fileUpload.setRepositoryPath(getTempDir().getAbsolutePath());
+	/**
+	 * Set the temporary directory where uploaded files get stored.
+	 * Default is the servlet container's temporary directory for the web application.
+	 */
+	public void setUploadTempDir(File uploadTempDir) {
+		if (!uploadTempDir.exists() && !uploadTempDir.mkdirs()) {
+			throw new IllegalArgumentException("Given uploadTempDir [" + uploadTempDir.getAbsolutePath() +
+																				 "] could not be created");
+		}
+		this.fileUpload.setRepositoryPath(uploadTempDir.getAbsolutePath());
+		this.uploadTempDir = uploadTempDir;
 	}
+
+	protected void initApplicationContext() {
+		if (this.uploadTempDir == null) {
+			this.fileUpload.setRepositoryPath(getTempDir().getAbsolutePath());
+		}
+	}
+
 
 	public boolean isMultipart(HttpServletRequest request) {
 		return FileUploadBase.isMultipartContent(request);

@@ -56,8 +56,8 @@ public class CommonsMultipartResolverTests extends TestCase {
 		wac.refresh();
 		CommonsMultipartResolver resolver = new MockCommonsMultipartResolver();
 		DiskFileUpload fileUpload = resolver.getFileUpload();
-		resolver.setMaximumFileSize(1000);
-		resolver.setMaximumInMemorySize(100);
+		resolver.setMaxUploadSize(1000);
+		resolver.setMaxInMemorySize(100);
 		resolver.setHeaderEncoding("enc");
 		resolver.setApplicationContext(wac);
 		assertEquals(1000, fileUpload.getSizeMax());

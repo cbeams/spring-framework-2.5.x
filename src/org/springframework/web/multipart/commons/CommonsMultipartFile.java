@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * MultipartFile implementation for Jakarta Commons FileUpload.
  * @author Trevor D. Cook
+ * @author Juergen Hoeller
  * @since 29-Sep-2003
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
  */
@@ -44,12 +45,16 @@ public class CommonsMultipartFile implements MultipartFile {
 		return this.fileItem.getFieldName();
 	}
 
+	public boolean isEmpty() {
+		return (this.fileItem.getName() == null || this.fileItem.getName().length() == 0);
+	}
+
 	public String getOriginalFileName() {
-		return new File(this.fileItem.getName()).getName();
+		return (!isEmpty() ? new File(this.fileItem.getName()).getName() : null);
 	}
 
 	public String getContentType() {
-		return this.fileItem.getContentType();
+		return (!isEmpty() ? this.fileItem.getContentType() : null);
 	}
 
 	public long getSize() {
@@ -65,11 +70,21 @@ public class CommonsMultipartFile implements MultipartFile {
 	}
 
 	public void transferTo(File dest) throws IOException, IllegalStateException {
+		if (dest.exists() && !dest.delete()) {
+			throw new IOException("Destination file [" + dest.getAbsolutePath() +
+			                      "] already exists and could not be deleted");
+		}
 		try {
 			this.fileItem.write(dest);
-			logger.debug("Multipart file [" + getName() + "] with original file name [" +
-									 getOriginalFileName() + "], stored " + getStorageDescription() +
-									 ": moved to [" + dest.getAbsolutePath() + "]");
+			if (logger.isDebugEnabled()) {
+				String action = "transferred";
+				if (this.fileItem instanceof DefaultFileItem) {
+					action = ((DefaultFileItem) this.fileItem).getStoreLocation().exists() ? "copied" : "moved";
+				}
+				logger.debug("Multipart file [" + getName() + "] with original file name [" +
+										 getOriginalFileName() + "], stored " + getStorageDescription() + ": " +
+				             action + " to [" + dest.getAbsolutePath() + "]");
+			}
 		}
 		catch (FileUploadException ex) {
 			throw new IllegalStateException(ex.getMessage());
@@ -84,12 +99,15 @@ public class CommonsMultipartFile implements MultipartFile {
 	}
 
 	protected String getStorageDescription() {
-		if (this.fileItem.isInMemory())
+		if (this.fileItem.isInMemory()) {
 			return "in memory";
-		else if (this.fileItem instanceof DefaultFileItem)
-			return "at [" + ((DefaultFileItem) fileItem).getStoreLocation().getAbsolutePath() + "]";
-		else
+		}
+		else if (this.fileItem instanceof DefaultFileItem) {
+			return "at [" + ((DefaultFileItem) this.fileItem).getStoreLocation().getAbsolutePath() + "]";
+		}
+		else {
 			return "at disk";
+		}
 	}
 
 }
