@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.69 2003-12-25 08:56:12 johnsonr Exp $
+$Id: changelog.txt,v 1.70 2004-01-02 00:31:13 jhoeller Exp $
 
 
-Changes in version 1.0 M4 (XX.12.2003)
+Changes in version 1.0 M4 (02.01.2003)
 --------------------------------------
 
 Package org.springframework.aop
@@ -16,14 +16,12 @@ Package org.springframework.aop
 * added aop.framework.adapter package to allow for new Advisor/advice types without changing the basic AOP framework
 
 Package org.springframework.beans
-* added registerBeanOfClass() method to AutowireCapableBeanFactory, allowing external classes to be plugged into ApplicationContexts
-and most BeanFactory implementations, benefiting from autowiring
-* added BeanDefinitionRegistryLocation: this parameter must be provided to construct an XmlBeanFactory, and enables more specific error messages on parse failures
 * removed event propagation support in BeanWrapper
 * added FileEditor to standard PropertyEditors, for creating java.io.File instances from String representations
 * added URLEditor to standard PropertyEditors, for creating java.net.URL instances from String representations
 * added "registerCustomEditor(Class, PropertyEditor)" convenience method to the BeanWrapper interface
 * added "registerCustomEditor(Class, PropertyEditor)" method to the ConfigurableBeanFactory interface
+* added "setParent" method to ConfigurableBeanFactory interface
 * added "preInstantiateSingletons" method to ConfigurableListableBeanFactory interface
 * added "containsBeanDefinition" method to ListableBeanFactory interface (same as in BeanDefinitionRegistry)
 * introduced AutowireCapableBeanFactory interface, allowing for autowiring of externally managed bean instances
@@ -33,27 +31,41 @@ and most BeanFactory implementations, benefiting from autowiring
 * dependent beans (with corresponding "depends-on") are destroyed first in AbstractBeanFactory's "destroySingletons"
 * consider arrays of primitive wrappers as "simple" properties in the sense of dependency-check="simple"
 * added support for inner bean definitions, at the same level as bean references and values
+* added generic autowire method to AutowireCapableBeanFactory, for guessing an appropriate autowiring strategy
 * factored out bean definition format reading logic into Properties/Xml/JdbcBeanDefinitionReader
 * added "beanClassLoader" property to AbstractBeanDefinitionReader, to override the thread context class loader
 * removed bean definition reading methods in DefaultListableBeanFactory, reduced them in XmlBeanFactory
 * added "allowBeanDefinitionOverriding" property in DefaultListableBeanFactory
 * separated XML bean definition reading into XmlBeanDefinitionReader plus (Default)XmlDefinitionParser
+* enabled more specific error messages on XML bean definition parse failures through use of location parameter
 * added optional "description" element in XML bean definition documents to allow for user documentation
 * added "default-lazy-init" attribute for XML bean definitions
 * allow for "bean/"list"/"map"/"props" as sub-element of "list" and "entry" in XML bean definitions
 * added two "beanOfType" convenience methods to BeanFactoryUtils
-* added ListFactoryBean and MapFactoryBean to org.springframework.beans.factory.config
+* added ListFactoryBean and MapFactoryBean to beans.factory.config
 
 Package org.springframework.context
 * ApplicationContext interface extends AutowireCapableBeanFactory
-* dissolved ContextOptions support in ApplicationContext and AbstractApplicationContext
-* reworked ApplicationContext's "String getResourceBasePath" method into "File getResourceBase"
+* removed ContextOptions support in ApplicationContext and AbstractApplicationContext
+* moved ApplicationEventMulticaster interface to package context.event
 * fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons"
-* added support for pseudo URL prefix "classpath:" in AbstractApplicationContext's "getResourceAsStream"
+* reworked ApplicationContext's "InputStream getResourceAsStream" method into "Resource getResource"
+* removed ApplicationContext's "getResourceBasePath" method, as its functionality is covered by the new "getResource"
+* added support for pseudo URL prefix "classpath:" in AbstractApplicationContext's "getResource"
+* added ContextResourceEditor to package context.config, for populating Resource bean properties via the context
+* added ContextResourceFactoryBean, for configuring Resource instances via ApplicationContext's "getResource"
+* added "getBeanFactory" method to ConfigurableApplicationContext, for access to the internal bean factory
+* moved PropertyResourceConfigurer/PropertyOverrideConfigurer/PropertyPlaceholderConfigurer to beans.factory.config
+
+Package org.springframework.core
+* introduced Resource interface in core.io package, for specifying resource locations in a generic way
+* added ClassPathResource, FileSystemResource, UrlResource, and InputStreamResource implementations
+* added ResourceEditor for automatic conversion of Strings to bean properties of type Resource
 
 Package org.springframework.ejb
 * SimpleRemoteSlsbInvokerInterceptor/SimpleRemoteStatelessSessionProxyFactoryBean support non-RMI business interfaces
 * SimpleRemoteSlsbInvokerInterceptor/SimpleRemoteStatelessSessionProxyFactoryBean's "inContainer" default set to false
+* support for multiple paths as "BeanFactoryPath" in XmlBeanFactoryLoader, separated by any number of commas or spaces
 
 Package org.springframework.jdbc
 * moved JDBC-specific DataAccessException subclasses from jdbc.core to root jdbc package
@@ -68,8 +80,11 @@ Package org.springframework.jdbc
 * added DatabaseStartupValidator that allows to defer the initialization of database-dependent components 
 
 Package org.springframework.orm
-* added OpenSessionInViewInterceptor and OpenSessionInViewFilter to org.springframework.orm.hibernate.support
 * introduced support for iBATIS Database Layer, in package org.springframework.orm.ibatis
+* added "get" and "lock" convenience methods to HibernateTemplate
+* added OpenSessionInViewInterceptor and OpenSessionInViewFilter to org.springframework.orm.hibernate.support
+* LocalSessionFactoryBean's "executeSchemaUpdate" uses plain executeUpdate calls now instead of a batch
+* changed type of LocalPersistenceManagerFactoryBean's "configLocation" property from String to Resource
 
 Package org.springframework.remoting
 * reworked RemoteProxySupport into RemoteAccessor plus UrlBasedRemoteAccessor
@@ -83,8 +98,12 @@ Package org.springframework.remoting
 
 Package org.springframework.samples
 * introduced JPetStore sample application, an adapted version of Clinton Begin's JPetStore
+* added "jdbc.properties" file with PropertyPlaceholderConfigurer in Petclinic and JPetStore
+* commented out "resource-ref" entries in Petclinic, Countries, and JPetStore for simpler deployment
+* removed support for JBoss' internal HSQL instance from Petclinic and Countries, for simpler deployment
 
 Package org.springframework.transaction
+* reworked transaction synchronization, allowing for synchronization even on "empty" transactions
 * removed TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
 * TransactionInterceptor now keeps TransactionStatus in its own ThreadLocal, not MethodInvocation
 * introduced PropertiesTransactionAttributeSource, for reusing TransactionFactoryProxyBean's parsing standalone
