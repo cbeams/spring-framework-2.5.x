@@ -16,7 +16,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * Interceptor that invokes a local Stateless Session Bean, after caching
  * the home object. A local EJB home can never go stale.
  * @author Rod Johnson
- * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.3 2003-12-19 11:28:42 jhoeller Exp $
+ * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.4 2003-12-20 18:20:06 johnsonr Exp $
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
@@ -25,7 +25,8 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 			logger.debug("Trying to create reference to remote EJB");
 		}
 
-		EJBLocalObject session = (EJBLocalObject) getHomeBeanWrapper().invoke(CREATE_METHOD, null);
+		// Call superclass to invoke the EJB create method on the cached home
+		EJBLocalObject session = (EJBLocalObject) create();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Obtained reference to remote EJB: " + session);
@@ -34,7 +35,8 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	}
 
 	/**
-	 * This is the last invoker in the chain:
+	 * This is the last invoker in the chain: 
+	 * invoke the EJB.
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		EJBLocalObject ejb = newSessionBeanInstance();

@@ -5,37 +5,63 @@
  
 package org.springframework.ejb.access;
 
-import org.aopalliance.intercept.MethodInterceptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.AbstractJndiLocator;
 
 /**
  * Superclass for all AOP interceptors invoking Stateless Session Beans.
+ * These must be the last interceptor in the interceptor chain. In this case,
+ * there is no target object.
  * @author Rod Johnson
- * @version $Id: AbstractSlsbInvokerInterceptor.java,v 1.3 2003-12-19 11:28:42 jhoeller Exp $
+ * @version $Id: AbstractSlsbInvokerInterceptor.java,v 1.4 2003-12-20 18:20:06 johnsonr Exp $
  */
 public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 		implements MethodInterceptor, InitializingBean {
 
 	/** 
-	 * Name of no arg create() method required on EJB homes,
+	 * No arg create() method required on EJB homes,
 	 * but not part of EJBLocalHome
 	 */
-	protected static final String CREATE_METHOD = "create";
+	private Method createMethod;
 	
-	private BeanWrapper homeBeanWrapper;
-
 	/**
-	 * We can get actual home from the BeanWrapper, if we ever need it
-	 * @return a BeanWrapper for the EJB home interface. This
-	 * may be a local or remote home.
+	 * The home interface. Must be object as it could be either EJBHome or EJBLocalHome.
 	 */
-	protected BeanWrapper getHomeBeanWrapper() {
-		return this.homeBeanWrapper;
+	private Object cachedHome;
+	
+	/**
+	 * @return the cached home object
+	 */
+	protected Object getCachedEjbHome() {
+		return cachedHome;
 	}
+	
+	/**
+	 * Invoke the create() method on the cached home.
+	 * @return a new EJBObject or EJBLocalObject
+	 */
+	protected Object create() {
+		try {
+			return createMethod.invoke(cachedHome, null);
+		}
+		catch (IllegalArgumentException ex) {
+			// Can't happen
+			throw new FatalBeanException("Inconsistent state: could not call ejbCreate() method without arguments", ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new FatalBeanException("Could not access ejbCreate() method", ex);
+		}
+		catch (InvocationTargetException ex) {
+			throw new MethodInvocationException(ex.getTargetException(), "create");
+		}
+	}
+
 	
  	/**
  	 * Implementation of AbstractJndiLocator's callback, to cache the home wrapper.
@@ -43,7 +69,17 @@ public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
 	 * @see #afterLocated
 	 */
 	protected void located(Object jndiObject) {
-		this.homeBeanWrapper = new BeanWrapperImpl(jndiObject);
+		// Cache the home object
+		this.cachedHome = jndiObject;
+		try {
+			// Cache the EJB create() method that must be declared on the home interface
+			createMethod = cachedHome.getClass().getMethod("create", null);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new FatalBeanException("Cannot create EJB proxy: EJB home [" + cachedHome + "] has no no-arg create() method");
+		}
+		
+		// Invoke any subclass initialization behaviour
 		afterLocated();
 	}
 
