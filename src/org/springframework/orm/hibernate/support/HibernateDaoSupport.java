@@ -34,22 +34,24 @@ import org.springframework.orm.hibernate.SessionFactoryUtils;
  * <p>Requires a SessionFactory to be set, providing a HibernateTemplate
  * based on it to subclasses. Can alternatively be initialized directly via
  * a HibernateTemplate, to reuse the latter's settings like SessionFactory,
- * exception translator, flush mode, etc.</p>
+ * exception translator, flush mode, etc.
  *
  * <p>This base class is mainly intended for HibernateTemplate usage
  * but can also be used when working with SessionFactoryUtils directly,
  * e.g. in combination with HibernateInterceptor-managed Sessions.
  * Convenience <code>getSession</code> and <code>closeSessionIfNecessary</code>
- * methods are provided for that usage style.</p>
+ * methods are provided for that usage style.
  * 
  * <p>This class will create its own HibernateTemplate if only a SessionFactory
- * is passed in. The allowCreate flag on that HibernateTemplate will true by
- * default. This default value may be overriden.</p>
+ * is passed in. The allowCreate flag on that HibernateTemplate will be true by
+ * default. A custom HibernateTemplate instance can be used through overriding
+ * <code>createHibernateTemplate</code>.
  *
  * @author Juergen Hoeller
  * @since 28.07.2003
  * @see #setSessionFactory
  * @see #setHibernateTemplate
+ * @see #createHibernateTemplate
  * @see #getSession
  * @see #closeSessionIfNecessary
  * @see org.springframework.orm.hibernate.HibernateTemplate
@@ -60,16 +62,29 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private HibernateTemplate hibernateTemplate;
-	protected boolean defaultTemplateAllowCreateValue = true;
-	protected boolean selfCreatedHibernateTemplate = false;
-	
+
 
 	/**
 	 * Set the Hibernate SessionFactory to be used by this DAO.
+	 * Will automatically create a HibernateTemplate for the given SessionFactory.
+	 * @see #createHibernateTemplate
+	 * @see #setHibernateTemplate
 	 */
-	public void setSessionFactory(SessionFactory sessionFactory) {
-	  this.hibernateTemplate = new HibernateTemplate(sessionFactory, defaultTemplateAllowCreateValue);
-	  selfCreatedHibernateTemplate = true;
+	public final void setSessionFactory(SessionFactory sessionFactory) {
+	  this.hibernateTemplate = createHibernateTemplate(sessionFactory);
+	}
+
+	/**
+	 * Create a HibernateTemplate for the given SessionFactory.
+	 * Only invoked if populating the DAO with a SessionFactory reference!
+	 * <p>Can be overridden in subclasses to provide a HibernateTemplate instance
+	 * with different configuration, or a custom HibernateTemplate subclass.
+	 * @param sessionFactory the Hibernate SessionFactory to create a HibernateTemplate for
+	 * @return the new HibernateTemplate instance
+	 * @see #setSessionFactory
+	 */
+	protected HibernateTemplate createHibernateTemplate(SessionFactory sessionFactory) {
+		return new HibernateTemplate(sessionFactory);
 	}
 
 	/**
@@ -82,10 +97,10 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	/**
 	 * Set the HibernateTemplate for this DAO explicitly,
 	 * as an alternative to specifying a SessionFactory.
+	 * @see #setSessionFactory
 	 */
 	public final void setHibernateTemplate(HibernateTemplate hibernateTemplate) {
 		this.hibernateTemplate = hibernateTemplate;
-		selfCreatedHibernateTemplate = false;
 	}
 
 	/**
@@ -96,30 +111,6 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	  return hibernateTemplate;
 	}
 
-	
-	/**
-	 * Allow the default value for the allowCreate flag on any HibernateTemplate
-	 * created by this class to be set. If this method is called after
-	 * setSessionFactory, which will normally internally immediately created a
-	 * HibernateTemplate, that existing template will be called with this value.
-	 * This value has no bearing on the allowCreate flag of any externally passed-
-	 * in HibernateTemplate
-	 * 
-	 * @param defaultAllowCreate The default allowCreate flga to set.
-	 */
-	public void setDefaultTemplateAllowCreateValue(boolean defaultAllowCreate) {
-		this.defaultTemplateAllowCreateValue = defaultAllowCreate;
-		if (selfCreatedHibernateTemplate)
-			getHibernateTemplate().setAllowCreate(defaultAllowCreate);
-	}
-	
-	/**
-	 * @return Returns the defaultTemplateAllowCreateValue 
-	 */
-	public boolean getDefaultTemplateAllowCreateValue() {
-		return defaultTemplateAllowCreateValue;
-	}
-	
 	public final void afterPropertiesSet() throws Exception {
 		if (this.hibernateTemplate == null) {
 			throw new IllegalArgumentException("sessionFactory or hibernateTemplate is required");

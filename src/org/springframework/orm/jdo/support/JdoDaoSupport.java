@@ -43,6 +43,10 @@ import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
  * <code>getPersistenceManager</code> and <code>closePersistenceManagerIfNecessary</code>
  * methods are provided for that usage style.
  *
+ * <p>This class will create its own JdoTemplate if only a PersistenceManagerFactory
+ * is passed in. The allowCreate flag on that JdoTemplate will be true by default.
+ * A custom JdoTemplate instance can be used through overriding <code>createJdoTemplate</code>.
+ *
  * @author Juergen Hoeller
  * @since 28.07.2003
  * @see #setPersistenceManagerFactory
@@ -61,9 +65,25 @@ public abstract class JdoDaoSupport implements InitializingBean {
 
 	/**
 	 * Set the JDO PersistenceManagerFactory to be used by this DAO.
+	 * Will automatically create a JdoTemplate for the given PersistenceManagerFactory.
+	 * @see #createJdoTemplate
+	 * @see #setJdoTemplate
 	 */
 	public final void setPersistenceManagerFactory(PersistenceManagerFactory persistenceManagerFactory) {
-	  this.jdoTemplate = new JdoTemplate(persistenceManagerFactory);
+	  this.jdoTemplate = createJdoTemplate(persistenceManagerFactory);
+	}
+
+	/**
+	 * Create a JdoTemplate for the given PersistenceManagerFactory.
+	 * Only invoked if populating the DAO with a PersistenceManagerFactory reference!
+	 * <p>Can be overridden in subclasses to provide a JdoTemplate instance
+	 * with different configuration, or a custom JdoTemplate subclass.
+	 * @param persistenceManagerFactory the JDO PersistenceManagerFactoryto create a JdoTemplate for
+	 * @return the new JdoTemplate instance
+	 * @see #setPersistenceManagerFactory
+	 */
+	protected JdoTemplate createJdoTemplate(PersistenceManagerFactory persistenceManagerFactory) {
+		return new JdoTemplate(persistenceManagerFactory);
 	}
 
 	/**
@@ -76,6 +96,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	/**
 	 * Set the JdoTemplate for this DAO explicitly,
 	 * as an alternative to specifying a PersistenceManagerFactory.
+	 * @see #setPersistenceManagerFactory
 	 */
 	public final void setJdoTemplate(JdoTemplate jdoTemplate) {
 		this.jdoTemplate = jdoTemplate;

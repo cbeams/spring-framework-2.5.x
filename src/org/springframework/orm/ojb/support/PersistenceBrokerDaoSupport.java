@@ -39,15 +39,40 @@ import org.springframework.orm.ojb.PersistenceBrokerTemplate;
  * <code>getPersistenceBroker</code> and <code>closePersistenceBrokerIfNecessary</code>
  * methods are provided for that usage style.
  *
+ * <p>This class will create its own PersistenceBrokerTemplate if no explicit
+ * instance is passed in. The allowCreate flag on that PersistenceBrokerTemplate
+ * will be true by default. A custom PersistenceBrokerTemplate instance can be
+ * used through overriding <code>createHibernateTemplate</code>.
+ *
  * @author Juergen Hoeller
  * @since 02.07.2004
+ * @see #setJcdAlias
+ * @see #setPersistenceBrokerTemplate
+ * @see #createPersistenceBrokerTemplate
+ * @see #getPersistenceBroker
+ * @see #closePersistenceBrokerIfNecessary
+ * @see org.springframework.orm.ojb.PersistenceBrokerTemplate
  */
 public class PersistenceBrokerDaoSupport {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private PersistenceBrokerTemplate persistenceBrokerTemplate = new PersistenceBrokerTemplate();
+	private PersistenceBrokerTemplate persistenceBrokerTemplate = createPersistenceBrokerTemplate();
 
+
+	/**
+	 * Create a new default PersistenceBrokerTemplate on initialization.
+	 * The returned template instance might be populated with a JCD alias,
+	 * or get overwritten by an explicitly passed-in PersistenceBrokerTemplate.
+	 * <p>Can be overridden in subclasses to provide a PersistenceBrokerTemplate instance
+	 * with different configuration, or a custom PersistenceBrokerTemplate subclass.
+	 * @return the new PersistenceBrokerTemplate instance
+	 * @see #setJcdAlias
+	 * @see #setPersistenceBrokerTemplate
+	 */
+	protected PersistenceBrokerTemplate createPersistenceBrokerTemplate() {
+		return new PersistenceBrokerTemplate();
+	}
 
 	/**
 	 * Set the JDBC Connection Descriptor alias of the PersistenceBroker
