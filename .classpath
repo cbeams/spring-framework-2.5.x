@@ -93,5 +93,6 @@
 	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxtools.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.2.jar"/>
+	<classpathentry kind="lib" path="lib/jamon/JAMon.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
