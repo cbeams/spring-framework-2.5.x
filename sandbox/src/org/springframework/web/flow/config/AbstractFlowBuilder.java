@@ -597,7 +597,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * also of "customerDetails.view". This view name will be mapped to a
 	 * physical view resource to render a response when the view state is
 	 * entered during a flow execution.
-	 * @param the supported set of transitions out of this view state
+	 * @param transitions the supported set of transitions out of this view state
 	 * @return The view state
 	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
@@ -2106,7 +2106,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * If these defaults do not fit your needs, use one of the more generic
 	 * action state builder methods. This method is provided as a convenience to
 	 * help reduce repetitive configuration code for common situations.
-	 * @param the action
+	 * @param action the action
 	 * @return The action state
 	 */
 	protected ActionState addBindAndValidateState(Action action) throws IllegalArgumentException {
@@ -2290,7 +2290,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * used as the qualifying stateIdPrefix. The <i>save </i> stereotype is a
 	 * simple qualifier that indicates this action state, when entered, executes
 	 * an action that saves data out to a persistent store.
-	 * @param the save action
+	 * @param action the save action
 	 */
 	protected ActionState addSaveState(Action action) throws IllegalArgumentException {
 		return addSaveState(getFlow().getId(), action);

@@ -30,7 +30,6 @@ import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
-import org.springframework.web.flow.config.FlowServiceLocator;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -62,10 +61,10 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	private FlowLocator flowLocator;
 
 	/**
-	 * Set the flow service locator
-	 * @param flowServiceLocator the locator
+	 * Set the flow locator.
+	 * @param flowLocator the locator
 	 */
-	public void setFlowLocator(FlowServiceLocator flowLocator) {
+	public void setFlowLocator(FlowLocator flowLocator) {
 		this.flowLocator = flowLocator;
 	}
 
@@ -250,7 +249,6 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 
 	/**
 	 * Returns the current state of the flow execution being tested.
-	 * @return
 	 */
 	protected String getCurrentStateId() {
 		return flowExecution.getCurrentStateId();
