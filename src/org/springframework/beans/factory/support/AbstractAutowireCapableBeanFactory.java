@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -745,17 +746,60 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (bd.getDestroyMethodName() != null) {
 				logger.debug("Calling custom destroy method '" + bd.getDestroyMethodName() +
 										 "' on bean with name '" + beanName + "'");
-				BeanWrapper bw = new BeanWrapperImpl(bean);
-				try {
-					bw.invoke(bd.getDestroyMethodName(), null);
-				}
-				catch (MethodInvocationException ex) {
-					logger.error(ex.getMessage(), ex.getCause());
-				}
+				invokeCustomDestroyMethod(beanName, bean, bd.getDestroyMethodName());
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// ignore, from manually registered singleton
+		}
+	}
+
+	/**
+	 * Invoke the specified custom destroy method on the given bean.
+	 * <p>This implementation invokes a no-arg method if found, else checking
+	 * for a method with a single boolean argument (passing in "true",
+	 * assuming a "force" parameter), else logging an error.
+	 * <p>Can be overridden in subclasses for custom resolution of destroy
+	 * methods with arguments.
+	 */
+	protected void invokeCustomDestroyMethod(String beanName, Object bean, String destroyMethodName) {
+		Method[] methods = bean.getClass().getMethods();
+		Method targetMethod = null;
+		for (int i = 0; i < methods.length; i++) {
+			if (methods[i].getName().equals(destroyMethodName)) {
+				if (targetMethod == null ||
+						methods[i].getParameterTypes().length < targetMethod.getParameterTypes().length) {
+					targetMethod = methods[i];
+				}
+			}
+		}
+		if (targetMethod == null) {
+			logger.error("Couldn't find a method named '" + destroyMethodName +
+									 "' on bean with name '" + beanName + "'");
+		}
+		else {
+			Class[] paramTypes = targetMethod.getParameterTypes();
+			if (paramTypes.length > 1) {
+				logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
+										 "' has more than one parameter - not supported as destroy method");
+			}
+			else if (paramTypes.length == 1 && !paramTypes[0].equals(boolean.class)) {
+				logger.error("Method '" + destroyMethodName + "' of bean '" + beanName +
+										 "' has a non-boolean parameter - not supported as destroy method");
+			}
+			else {
+				Object[] args = new Object[paramTypes.length];
+				if (paramTypes.length == 1) {
+					args[0] = Boolean.TRUE;
+				}
+				try {
+					targetMethod.invoke(bean, args);
+				}
+				catch (Exception ex) {
+					logger.error("Couldn't invoke destroy method '" + destroyMethodName +
+											 "' of bean with name '" + beanName + "'", ex);
+				}
+			}
 		}
 	}
 
