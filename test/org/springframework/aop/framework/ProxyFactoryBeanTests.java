@@ -54,7 +54,7 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.29 2004-06-19 14:33:28 aarendsen Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.30 2004-06-19 22:36:29 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -69,13 +69,41 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue("test1 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
 	}
 	
-	public void testDoubleTargetSource() {
-		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryDoubleTargetSourceTests.xml", getClass()));
-		ITestBean tb = (ITestBean) bf.getBean("doubleTarget");
-		assertEquals("Adam", tb.getName());
-		
-		tb = (ITestBean)bf.getBean("arbitraryTarget");
-		assertEquals("Adam", tb.getName());
+	/**
+	 * Test that it's forbidden to specify TargetSource in both
+	 * interceptor chain and targetSource property.
+	 */
+	public void testDoubleTargetSourcesAreRejected() {
+		testDoubleTargetSourceIsRejected("doubleTarget");
+		// Now with conversion from arbitrary bean to a TargetSource
+		testDoubleTargetSourceIsRejected("arbitraryTarget");
+	}
+	
+	private void testDoubleTargetSourceIsRejected(String name) {
+		try {
+			BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryDoubleTargetSourceTests.xml", getClass()));
+			ITestBean tb = (ITestBean) bf.getBean(name);
+			//assertEquals("Adam", tb.getName());
+			fail("Should not allow TargetSource to be specified in interceptorNames as well as targetSource property");
+		}
+		catch (BeanCreationException ex) {
+			// Root cause of the problem must be an AOP exception
+			AopConfigException aex = (AopConfigException) ex.getCause();
+			assertTrue(aex.getMessage().indexOf("TargetSource") != -1);
+		}
+	}
+	
+	public void testTargetSourceNotAtEndOfInterceptorNamesIsRejected() {
+		try {
+			BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTargetSourceNotLastTests.xml", getClass()));
+			bf.getBean("targetSourceNotLast");
+			fail("TargetSource or non-advised object must be last in interceptorNames");
+		}
+		catch (BeanCreationException ex) {
+			// Root cause of the problem must be an AOP exception
+			AopConfigException aex = (AopConfigException) ex.getCause();
+			assertTrue(aex.getMessage().indexOf("TargetSource") != -1);
+		}
 	}
 	
 	public void testGetObjectTypeWithDirectTarget() {
@@ -219,7 +247,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		final Exception ex = new UnsupportedOperationException("invoke");
 		// Add evil interceptor to head of list
-		config.addInterceptor(0, new MethodInterceptor() {
+		config.addAdvice(0, new MethodInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				throw ex;
 			}
@@ -284,7 +312,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue(ts.getTimeStamp() == time);
 	
 		// Can remove
-		config.removeInterceptor(ti);
+		config.removeAdvice(ti);
 
 		assertTrue(config.getAdvisors().length == oldCount);
 	

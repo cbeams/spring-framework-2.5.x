@@ -47,7 +47,11 @@ import org.springframework.core.OrderComparator;
  * <p>Interceptors and Advisors are identified by a list of bean names in the current
  * bean factory. These beans should be of type Interceptor or Advisor. The last entry
  * in the list can be the name of any bean in the factory. If it's neither an
- * Interceptor nor an Advisor, a new SingletonTargetSource is added to wrap it.
+ * Interceptor nor an Advisor, a new SingletonTargetSource is added to wrap it. If it;s
+ * a TargetSource, it is used as this proxy factory's TargetSource. It's normally preferred
+ * to use the "targetSource" property to set the TargetSource. It is not possible to use
+ * both the targetSource property and an interceptor name: this is treated as a
+ * configuration error.
  *
  * <p>Global interceptors and advisors can be added at the factory level. The specified
  * ones are expanded in an interceptor list where an "xxx*" entry is included in the
@@ -73,7 +77,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.30 2004-06-06 21:39:50 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.31 2004-06-19 22:36:47 johnsonr Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -106,6 +110,10 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private BeanFactory beanFactory;
 
+	/**
+	 * Name of the target or TargetSource bean. Null if the TargetSource is not specified in
+	 * the interceptorNames list.
+	 */
 	private String targetName;
 
 	/**
@@ -237,15 +245,16 @@ public class ProxyFactoryBean extends AdvisedSupport
 			return;
 		}
 		
-		// globals can't be last
-		if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX)) {
+		// Globals can't be last unless we specified a targetSource using the property... 
+		if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX) &&
+				this.targetSource == EMPTY_TARGET_SOURCE) {
 			throw new AopConfigException("Target required after globals");
 		}
 
-		// materialize interceptor chain from bean names
+		// Materialize interceptor chain from bean names
 		for (int i = 0; i < this.interceptorNames.length; i++) {
 			String name = this.interceptorNames[i];
-			logger.debug("Configuring interceptor '" + name + "'");
+			logger.debug("Configuring advisor or advice '" + name + "'");
 
 			if (name.endsWith(GLOBAL_SUFFIX)) {
 				if (!(this.beanFactory instanceof ListableBeanFactory)) {
@@ -259,7 +268,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 			else {
 				// add a named interceptor
 				Object advice = this.beanFactory.getBean(this.interceptorNames[i]);
-				addAdvisor(advice, this.interceptorNames[i]);
+				addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
 			}
 		}
 	}
@@ -322,22 +331,31 @@ public class ProxyFactoryBean extends AdvisedSupport
 			Object bean = it.next();
 			String name = (String) names.get(bean);
 			if (name.startsWith(prefix)) {
-				addAdvisor(bean, name);
+				addAdvisorOnChainCreation(bean, name);
 			}
 		}
 	}
 
 	/**
-	 * Add the given interceptor, pointcut or object to the interceptor list.
+	 * Invoked when advice chain is created.
+	 * Add the given advice, advisor or object to the interceptor list.
 	 * Because of these three possibilities, we can't type the signature
 	 * more strongly.
-	 * @param next interceptor, pointcut or target object.
+	 * @param next advice, advisor or target object.
 	 * @param name bean name from which we obtained this object in our owning
 	 * bean factory
 	 */
-	private void addAdvisor(Object next, String name) {
+	private void addAdvisorOnChainCreation(Object next, String name) {
 		logger.debug("Adding advisor or TargetSource [" + next + "] with name [" + name + "]");
-		// We need to add a method pointcut so that our source reference matches
+		
+		// Can only use interceptorName -> TargetSource conversion once,
+		// for the last entry in the interceptorNames list
+		if (this.targetName != null) {
+			throw new AopConfigException("TargetSource specified more than once in interceptorNames list:" +
+					"Specify in targetSource property or ONCE at the END of the interceptorNames list");
+		}
+		
+		// We need to convert to an Advisor if necessary so that our source reference matches
 		// what we find from superclass interceptors.
 		Object advisor = namedBeanToAdvisorOrTargetSource(next);
 		if (advisor instanceof Advisor) {
@@ -352,6 +370,15 @@ public class ProxyFactoryBean extends AdvisedSupport
 			this.sourceMap.put(advisor, name);
 		}
 		else {
+			// Must be a TargetSource.
+			// It's an error if we already have a TargetSource, set by a previous
+			// TargetSource bean name or the targetSource property.
+			// The default set by AdvisedSupport superclass is OK.
+			if (this.targetSource != EMPTY_TARGET_SOURCE) {
+				throw new AopConfigException("TargetSource specified more than once: " +
+						"Specify in targetSource property or at the END of the interceptorNames list");
+			}
+			
 			logger.debug("Adding TargetSource [" + advisor + "] with name [" + name + "]");
 			setTargetSource((TargetSource) advisor);
 			// save target name
@@ -377,13 +404,13 @@ public class ProxyFactoryBean extends AdvisedSupport
 			return adv;
 		}
 		catch (UnknownAdviceTypeException ex) {
-			// TODO consider checking that it's the last in the list?
+			// Treat it as a TargetSource
 			if (next instanceof TargetSource) {
 				return (TargetSource) next;
 			}
 			else {
 				// It's not a pointcut or interceptor.
-				// It's a bean that needs an invoker around it.
+				// It's a bean that needs a TargetSource around it.
 				return new SingletonTargetSource(next);
 			}
 		}
@@ -391,6 +418,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 
 	public void activated(AdvisedSupport advisedSupport) {
+		// Nothing to do
 	}
 
 	/**
