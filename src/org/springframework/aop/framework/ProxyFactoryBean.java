@@ -49,7 +49,7 @@ import org.springframework.core.OrderComparator;
  * actual target class if not. Note that the latter will only work if the target class
  * does not have final methods, as a dynamic subclass will be created at runtime.
  *
- * <p>It's possible to cast a proxy obtained from this factory to Adviser,
+ * <p>It's possible to cast a proxy obtained from this factory to Advisor,
  * or to obtain the ProxyFactoryBean reference and programmatically
  * manipulate it. This won't work for existing prototype references, which are independent. However,
  * it will work for prototypes subsequently obtained from the factory. Changes to interception
@@ -61,7 +61,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.12 2003-11-16 12:54:58 johnsonr Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.13 2003-11-18 16:32:05 colins Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
