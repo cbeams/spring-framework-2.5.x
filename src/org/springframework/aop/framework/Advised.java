@@ -34,7 +34,7 @@ import org.springframework.aop.ThrowsAdvice;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.13 2004-06-18 11:02:39 johnsonr Exp $
+ * @version $Id: Advised.java,v 1.14 2004-07-23 08:44:22 johnsonr Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
@@ -44,6 +44,13 @@ public interface Advised {
 	 * @return the TargetSource used by this advised object
 	 */
 	TargetSource getTargetSource();
+	
+	/**
+	 * Change the TargetSource used by this Advised object.
+	 * Only works if the configuration isn't frozen.
+	 * @param targetSource new TargetSource to use
+	 */
+	void setTargetSource(TargetSource targetSource);
 	
 	/**
 	 * Get whether the factory should expose the proxy as a ThreadLocal. 
