@@ -16,13 +16,15 @@
 package org.springframework.web.flow;
 
 /**
- * Thrown if a unhandled, uncoverable exception is thrown when an action is
+ * Thrown if an unhandled, uncoverable exception is thrown when an action is
  * executed in an action state.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class ActionExecutionException extends RuntimeException {
 	public ActionExecutionException(ActionState state, ActionState.NamedAction action, Throwable cause) {
-		super("Executing action '" + action.getCaption() + "' in state '" + state.getId() + "' of flow '"
-				+ state.getFlow().getId() + "' threw a unrecoverable exception", cause);
+		super("Executing action '" + action + "' in state '" + state.getId() + "' of flow '"
+				+ state.getFlow().getId() + "' threw an unrecoverable exception", cause);
 	}
 }

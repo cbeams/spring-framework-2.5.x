@@ -25,6 +25,12 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * Terminates an active web flow session when entered.
  * 
+ * <p>
+ * An end state can optionally have a view name specified. This view
+ * will be rendered if the end state terminates the entire flow
+ * execution. If there is a parent flow, execution will continue in
+ * that parent flow and the resulting view will be rendered.
+ * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
@@ -33,29 +39,50 @@ public class EndState extends AbstractState {
 
 	private String viewName;
 
-	public EndState(Flow flow, String id) {
+	/**
+	 * Create a new end state with no associated view.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public EndState(Flow flow, String id) throws IllegalArgumentException {
 		super(flow, id);
 	}
 
-	public EndState(Flow flow, String id, String viewName) {
+	/**
+	 * Create a new end state with specified associated view. 
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param viewName The name of the view that should be rendered if this end state
+	 *                 terminates flow execution
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public EndState(Flow flow, String id, String viewName) throws IllegalArgumentException {
 		super(flow, id);
 		setViewName(viewName);
 	}
 
+	/**
+	 * @param viewName The name of the view that should be rendered if this end state
+	 *                 terminates flow execution.
+	 */
 	protected void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
-	protected String getViewName() {
+	/**
+	 * @return The name of the view that will be rendered if this end state terminates
+	 *         flow execution, or null if there is no associated view.
+	 */
+	public String getViewName() {
 		return viewName;
 	}
 
+	/**
+	 * @return True if this end state has no associated view, false otherwise.
+	 */
 	public boolean isMarker() {
 		return !StringUtils.hasText(viewName);
-	}
-
-	public boolean isEndState() {
-		return true;
 	}
 
 	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,

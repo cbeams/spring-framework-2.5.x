@@ -26,7 +26,14 @@ import org.springframework.web.servlet.ModelAndView;
  * A view state is a state in which a physical view resource should be rendered
  * to the user, for example, for solicting form input.
  * 
+ * <p>
+ * A view state can also be a <i>marker</i> state with no associated view.
+ * In this case it just return controll back to the client. Marker states
+ * are usefull for situations where an action has already generated the
+ * response.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class ViewState extends TransitionableState {
 
@@ -35,36 +42,71 @@ public class ViewState extends TransitionableState {
 	 */
 	private String viewName;
 
-	public ViewState(Flow flow, String id, Transition transition) {
+	/**
+	 * Create a new marker view state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param transition The sole transition of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ViewState(Flow flow, String id, Transition transition) throws IllegalArgumentException {
 		super(flow, id, transition);
 	}
 
-	public ViewState(Flow flow, String id, Transition[] transitions) {
+	/**
+	 * Create a new marker view state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param transitions The transitions of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ViewState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
 	}
 
-	public ViewState(Flow flow, String id, String viewName, Transition transition) {
+	/**
+	 * Create a new view state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param viewName The logical name of the view to render
+	 * @param transition The sole transition of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ViewState(Flow flow, String id, String viewName, Transition transition) throws IllegalArgumentException {
 		super(flow, id, transition);
 		setViewName(viewName);
 	}
 
-	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) {
+	/**
+	 * Create a new view state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param viewName The logical name of the view to render
+	 * @param transitions The transitions of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
 		setViewName(viewName);
 	}
 
+	/**
+	 * @return The logical name of the view to render in this view state.
+	 */
 	public String getViewName() {
 		return viewName;
 	}
 
+	/**
+	 * @param viewName The logical name of the view to render in this view state.
+	 */
 	protected void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
-	public boolean isViewState() {
-		return true;
-	}
-	
+	/**
+	 * @return True if this view state has no associated view, false otherwise.
+	 */
 	public boolean isMarker() {
 		return !StringUtils.hasText(getViewName());
 	}

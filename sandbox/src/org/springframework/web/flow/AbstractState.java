@@ -27,17 +27,19 @@ import org.springframework.util.ToStringCreator;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * A base super class for a state definition, associatable with any number of
- * Flow definitions. Types of states include action states, view states, subflow
- * states, and end states.
+ * A base super class for state definitions. Each state is associated with an
+ * owning flow definition. Standard types of states include action states,
+ * view states, subflow states, and end states.
  * 
+ * <p>
  * Subclasses of this class capture all the configuration information needed for
- * a specific type of state associatable with a single Flow definition.
+ * a specific type of state.
  * Subclasses should override the <code>doEnterState</code> method to execute
  * the action that should occur when this state is entered, acting on its
  * configuration information.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public abstract class AbstractState implements Serializable {
 
@@ -55,14 +57,14 @@ public abstract class AbstractState implements Serializable {
 
 	/**
 	 * Creates a state for the provided <code>flow</code> identified by the
-	 * provided <code>id</code>.
-	 * 
-	 * The id must be locally unique to the owning flow.
+	 * provided <code>id</code>. The id must be locally unique to the owning flow.
+	 * Flow state will automatically be added to the owning flow.
 	 * 
 	 * @param flow The owning flow
-	 * @param id The state identifier (must be unique to the flow);
+	 * @param id The state identifier (must be unique to the flow)
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
 	 */
-	public AbstractState(Flow flow, String id) {
+	public AbstractState(Flow flow, String id) throws IllegalArgumentException {
 		setId(id);
 		setFlow(flow);
 		flow.add(this);
@@ -76,15 +78,25 @@ public abstract class AbstractState implements Serializable {
 		return id;
 	}
 
+	/**
+	 * Set the state identifier, unique to the owning flow.
+	 * @param id The state identifier.
+	 */
 	private void setId(String id) {
 		Assert.hasText(id, "The state must have a valid identifier");
 		this.id = id;
 	}
 
+	/**
+	 * @return The owning flow. 
+	 */
 	public Flow getFlow() {
 		return flow;
 	}
 
+	/**
+	 * @param flow The owning flow.
+	 */
 	private void setFlow(Flow flow) {
 		Assert.notNull(flow, "The owning flow is required");
 		this.flow = flow;
@@ -97,56 +109,7 @@ public abstract class AbstractState implements Serializable {
 	 * @return true or false
 	 */
 	public boolean isTransitionable() {
-		return false;
-	}
-
-	/**
-	 * Is this state a view state? View states return
-	 * <code>View Descriptors</code> that request rendering of a view resource
-	 * with model data.
-	 * @return true or false
-	 */
-	public boolean isViewState() {
-		return false;
-	}
-
-	/**
-	 * Is this state an action state? Action states execute action beans when
-	 * entered.
-	 * @return true or false
-	 */
-	public boolean isActionState() {
-		return false;
-	}
-
-	/**
-	 * Is this state a sub flow state? Sub flow states spawn flows as sub flows
-	 * within a session execution when entered.
-	 * @return true or false
-	 */
-	public boolean isSubFlowState() {
-		return false;
-	}
-
-	/**
-	 * Is this state an end state? End states terminate a flow session when
-	 * entered.
-	 * @return
-	 */
-	public boolean isEndState() {
-		return false;
-	}
-
-	public boolean equals(Object o) {
-		if (!(o instanceof AbstractState)) {
-			return false;
-		}
-		AbstractState s = (AbstractState)o;
-		return flow.equals(s.flow) && id.equals(s.id);
-	}
-
-	public int hashCode() {
-		return flow.hashCode() + id.hashCode();
+		return this instanceof TransitionableState;
 	}
 
 	/**
@@ -179,6 +142,18 @@ public abstract class AbstractState implements Serializable {
 	 */
 	protected abstract ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
 			HttpServletResponse response);
+
+	public boolean equals(Object o) {
+		if (!(o instanceof AbstractState)) {
+			return false;
+		}
+		AbstractState s = (AbstractState)o;
+		return flow.equals(s.flow) && id.equals(s.id);
+	}
+
+	public int hashCode() {
+		return flow.hashCode() + id.hashCode();
+	}
 
 	public String toString() {
 		ToStringCreator creator = new ToStringCreator(this).append("id", getId());

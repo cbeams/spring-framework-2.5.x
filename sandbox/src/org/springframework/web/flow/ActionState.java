@@ -33,54 +33,122 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * A transitionable state that executes one or more actions when entered.
+ * 
+ * <p>
+ * The actions executed by an action state can optionally be <i>named</i>.
+ * When an action named "myAction" signals event "ok", the transition
+ * "myAction.ok" will be executed. If the action is not named, the "ok"
+ * transition will execute.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class ActionState extends TransitionableState {
 
 	private Set namedActions = new LinkedHashSet(1);
 
-	public ActionState(Flow flow, String id, Action action, Transition transition) {
+	/**
+	 * Create a new action state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param action The unnamed action to execute in this state
+	 * @param transition The sole transition of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ActionState(Flow flow, String id, Action action, Transition transition) throws IllegalArgumentException {
 		super(flow, id, transition);
 		addAction(action);
 	}
 
-	public ActionState(Flow flow, String id, String actionName, Action action, Transition transition) {
+	/**
+	 * Create a new action state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param actionName The name of the named action
+	 * @param action The named action to execute in this state
+	 * @param transition The sole transition of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ActionState(Flow flow, String id, String actionName, Action action, Transition transition)
+			throws IllegalArgumentException {
 		super(flow, id, transition);
 		addAction(actionName, action);
 	}
 
-	public ActionState(Flow flow, String id, Action action, Transition[] transitions) {
+	/**
+	 * Create a new action state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param action The unnamed action to execute in this state
+	 * @param transitions The transitions of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ActionState(Flow flow, String id, Action action, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
 		addAction(action);
 	}
 
-	public ActionState(Flow flow, String id, String actionName, Action action, Transition[] transitions) {
+	/**
+	 * Create a new action state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param actionName The name of the named action
+	 * @param action The named action to execute in this state
+	 * @param transitions The transitions of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ActionState(Flow flow, String id, String actionName, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		super(flow, id, transitions);
 		addAction(actionName, action);
 	}
 
-	public ActionState(Flow flow, String id, Action[] actions, Transition[] transitions) {
+	/**
+	 * Create a new action state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param actions The unnamed actions to execute in this state
+	 * @param transitions The transitions of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ActionState(Flow flow, String id, Action[] actions, Transition[] transitions)
+			throws IllegalArgumentException {
 		super(flow, id, transitions);
 		addActions(actions);
 	}
 
-	public ActionState(Flow flow, String id, String[] actionNames, Action[] actions, Transition[] transitions) {
+	/**
+	 * Create a new action state.
+	 * @param flow The owning flow
+	 * @param id The state identifier (must be unique to the flow)
+	 * @param actionNames The names of the named actions
+	 * @param actions The named actions to execute in this state
+	 * @param transitions The transitions of this state
+	 * @throws IllegalArgumentException When this state cannot be added to given flow
+	 */
+	public ActionState(Flow flow, String id, String[] actionNames, Action[] actions, Transition[] transitions)
+			throws IllegalArgumentException {
 		super(flow, id, transitions);
 		addActions(actionNames, actions);
 	}
 
-	public boolean isActionState() {
-		return true;
-	}
-
+	/**
+	 * Add an unnamed action to the state.
+	 */
 	protected void addAction(Action action) {
 		this.namedActions.add(createNamedAction(null, action));
 	}
 
+	/**
+	 * Add a named action to the state.
+	 */
 	protected void addAction(String actionName, Action action) {
 		this.namedActions.add(createNamedAction(actionName, action));
 	}
 
+	/**
+	 * Add a collection of unnamed actions to this state.
+	 */
 	protected void addActions(Action[] actions) {
 		Assert.notEmpty(actions, "You must add at least one action");
 		for (int i = 0; i < actions.length; i++) {
@@ -88,6 +156,9 @@ public class ActionState extends TransitionableState {
 		}
 	}
 
+	/**
+	 * Add a collection of named actions to this state.
+	 */
 	protected void addActions(String[] names, Action[] actions) {
 		Assert.notEmpty(names, "You must add at least one action");
 		Assert.notEmpty(actions, "You must add at least one action");
@@ -97,13 +168,20 @@ public class ActionState extends TransitionableState {
 		}
 	}
 
+	/**
+	 * Create a wrapper object for a named action.
+	 * @param actionName The name of the action to wrap
+	 * @param action The action to wrap
+	 * @return The wrapped named action
+	 */
 	protected NamedAction createNamedAction(String actionName, Action action) {
 		return new NamedAction(this, actionName, action);
 	}
 
 	/**
 	 * @return An iterator that returns the set of actions to execute for this
-	 *         state.
+	 *         state. Both named and unnamed actions will be returned, but
+	 *         all are wrapped as NamedAction objects.
 	 */
 	protected Iterator namedActionIterator() {
 		return this.namedActions.iterator();
@@ -130,8 +208,8 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * @param action the action for which the named should be looked up
-	 * @return the name of given action or null if the action does not have a
+	 * @param action The action for which the name should be looked up
+	 * @return The name of given action or null if the action does not have a
 	 *         name
 	 * @throws NoSuchElementException when given action is not an action
 	 *         executed by this state
@@ -150,7 +228,7 @@ public class ActionState extends TransitionableState {
 	/**
 	 * Hook method implementation that initiates state processing.
 	 * 
-	 * This implementation iterators over each configured Action for this state
+	 * This implementation iterates over each configured Action for this state
 	 * and executes it.
 	 */
 	protected ModelAndView doEnterState(FlowExecutionStack flowExecution, HttpServletRequest request,
@@ -188,8 +266,19 @@ public class ActionState extends TransitionableState {
 		}
 	}
 
+	/**
+	 * Wrapper class for actions that associates an action with its name (or null
+	 * if its an unnamed action).
+	 * 
+	 * <p>
+	 * For internal use only.
+	 * 
+	 * @author Keith Donald
+	 * @author Erwin Vervaet
+	 */
 	protected static class NamedAction implements Serializable {
-		protected static final Log logger = LogFactory.getLog(NamedAction.class);
+		
+		protected final Log logger = LogFactory.getLog(NamedAction.class);
 
 		private ActionState actionState;
 
@@ -197,6 +286,12 @@ public class ActionState extends TransitionableState {
 
 		private Action action;
 
+		/**
+		 * Create a new action wrapper.
+		 * @param actionState The state containing the action
+		 * @param name The name of the action, or null if it's unnamed
+		 * @param action The action to wrap
+		 */
 		public NamedAction(ActionState actionState, String name, Action action) {
 			Assert.notNull(actionState, "The owning action state is required");
 			Assert.notNull(action, "The action is required");
@@ -205,28 +300,40 @@ public class ActionState extends TransitionableState {
 			this.action = action;
 		}
 
-		protected String getCaption() {
-			return (isNameSet() ? "[name='" + name + "', class='" + action.getClass().getName() + "']" : "[class='"
-					+ action.getClass().getName() + "']");
-		}
-
+		/**
+		 * @return The name of the wrapped action, or null when it's unnamed
+		 */
 		protected String getName() {
 			return name;
 		}
 
+		/**
+		 * @return The wrapped action
+		 */
 		protected Action getAction() {
 			return action;
 		}
 
-		public boolean isNameSet() {
+		/**
+		 * @return True when the wrapped action is named, false otherwise
+		 */
+		public boolean isNamed() {
 			return StringUtils.hasText(name);
 		}
 
+		/**
+		 * Get the event id that should be used to find a matching
+		 * transition based on given event signaled by the wrapped action.
+		 * 
+		 * <p>
+		 * If the wrapped action is named, the name will be prepended
+		 * to the event Id (e.g. "myAction.ok").  
+		 */
 		protected String getEventId(ActionResult result) {
 			if (result == null) {
 				return null;
 			}
-			if (isNameSet()) {
+			if (isNamed()) {
 				return name + FlowConstants.DOT_SEPARATOR + result.getId();
 			}
 			else {
@@ -234,11 +341,14 @@ public class ActionState extends TransitionableState {
 			}
 		}
 
+		/**
+		 * Execute the wrapped action.
+		 */
 		protected ActionResult execute(HttpServletRequest request, HttpServletResponse response,
 				FlowExecutionStack flowExecution) {
 			try {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Executing action '" + getCaption() + "'");
+					logger.debug("Executing action '" + this + "'");
 				}
 				return action.execute(request, response, flowExecution);
 			}
@@ -248,7 +358,8 @@ public class ActionState extends TransitionableState {
 		}
 
 		public String toString() {
-			return getCaption();
+			return (isNamed() ? "[name='" + name + "', class='" + action.getClass().getName() + "']" : "[class='"
+				+ action.getClass().getName() + "']");
 		}
 	}
 }

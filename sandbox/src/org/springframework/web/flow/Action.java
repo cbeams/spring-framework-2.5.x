@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A action that executes controller, command-like behavior. Actions
+ * An action that executes controller, command-like behavior. Actions
  * typically delegate down to the service-layer to perform business operations,
  * and/or prep views with dynamic model data for rendering.
  * 
