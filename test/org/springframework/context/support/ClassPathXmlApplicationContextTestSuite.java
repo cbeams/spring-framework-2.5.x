@@ -27,7 +27,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 
-public class ClasspathXmlApplicationContextTests extends TestCase {
+/**
+ * @author Juergen Hoeller
+ */
+public class ClassPathXmlApplicationContextTestSuite extends TestCase {
 
 	public void testMultipleConfigLocations() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
@@ -52,7 +55,7 @@ public class ClasspathXmlApplicationContextTests extends TestCase {
 		    new ClassPathXmlApplicationContext("/org/springframework/beans/factory/xml/resource.xml") {
 			public Resource getResource(String location) {
 				if ("classpath:org/springframework/beans/factory/xml/test.properties".equals(location)) {
-					return new ClassPathResource("test.properties", ClasspathXmlApplicationContextTests.class);
+					return new ClassPathResource("test.properties", ClassPathXmlApplicationContextTestSuite.class);
 				}
 				return super.getResource(location);
 			}
