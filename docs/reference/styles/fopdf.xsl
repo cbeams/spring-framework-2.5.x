@@ -45,7 +45,7 @@
                                 <xsl:value-of select="bookinfo/subtitle"/> 
                             </fo:block>
                             <fo:block font-family="Helvetica" font-size="12pt" padding="10mm">
-                                Version: <xsl:value-of select="bookinfo/releaseinfo"/>  
+                                <xsl:value-of select="bookinfo/releaseinfo"/>  
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
@@ -70,7 +70,7 @@
                                 </xsl:for-each>
                             </fo:block>
                             <fo:block font-family="Helvetica" font-size="10pt" padding="1mm">
-                                <xsl:value-of select="bookinfo/copyright"/>  
+                                <xsl:value-of select="bookinfo/legalnotice"/>  
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
