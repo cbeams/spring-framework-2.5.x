@@ -165,7 +165,7 @@
       <para>Spring provides a <literal>JmsTransactionManager</literal> 
       that manages transactions for a single JMS ConnectionFactory.  
       This allows JMS applications to leverage the managed transaction 
-      features of Spring as described in <literal>Chapter 6</literal>.
+      features of Spring as described in <literal>Chapter 7</literal>.
       The <literal>JmsTransactionManager</literal> binds a Connection/Session
       pair from the specified ConnectionFactory to the thread.  However,
       in a J2EE environment the ConnectionFactory will pool connections 
