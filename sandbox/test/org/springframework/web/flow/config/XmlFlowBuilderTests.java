@@ -49,42 +49,7 @@ public class XmlFlowBuilderTests extends TestCase {
 
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
-		builder.setFlowServiceLocator(new FlowServiceLocatorAdapter() {
-			public Action getAction(String actionId) throws ServiceLookupException {
-				if ("action1".equals(actionId) || "action2".equals(actionId)) {
-					return new Action() {
-						public String execute(HttpServletRequest request, HttpServletResponse response,
-								MutableFlowModel model) throws Exception {
-							return "testOk";
-						}
-					};
-				}
-				throw new NoSuchActionException(actionId);
-			}
-
-			public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
-				if ("subFlow1".equals(flowDefinitionId) || "subFlow2".equals(flowDefinitionId)) {
-					return new Flow(flowDefinitionId);
-				}
-				throw new NoSuchFlowDefinitionException(flowDefinitionId);
-			}
-
-			public FlowModelMapper getFlowModelMapper(String flowModelMapperId)
-					throws ServiceLookupException {
-				if ("modelMapper1".equals(flowModelMapperId)) {
-					return new FlowModelMapper() {
-						public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
-							return new HashMap();
-						}
-
-						public void mapSubFlowOutputAttributes(FlowModel endingSubFlowModel,
-								MutableFlowModel resumingParentFlowModel) {
-						}
-					};
-				}
-				throw new NoSuchFlowModelMapperException(flowModelMapperId);
-			}
-		});
+		builder.setFlowServiceLocator(new TestFlowServiceLocator());
 		flow = new FlowFactoryBean(builder).getFlow();
 	}
 
@@ -162,5 +127,48 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertFalse(endState3.isMarker());
 		assertEquals("endState3", endState3.getViewName());
 	}
+	
+	/**
+	 * Flow service locator for the services needed by the testFlow (defined
+	 * in testFlow.xml)
+	 * 
+	 * @author Erwin Vervaet
+	 */
+	public static class TestFlowServiceLocator extends FlowServiceLocatorAdapter {
+		public Action getAction(String actionId) throws ServiceLookupException {
+			if ("action1".equals(actionId) || "action2".equals(actionId)) {
+				return new Action() {
+					public String execute(HttpServletRequest request, HttpServletResponse response,
+							MutableFlowModel model) throws Exception {
+						return "event1";
+					}
+				};
+			}
+			throw new NoSuchActionException(actionId);
+		}
+
+		public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
+			if ("subFlow1".equals(flowDefinitionId) || "subFlow2".equals(flowDefinitionId)) {
+				return new Flow(flowDefinitionId);
+			}
+			throw new NoSuchFlowDefinitionException(flowDefinitionId);
+		}
+
+		public FlowModelMapper getFlowModelMapper(String flowModelMapperId)
+				throws ServiceLookupException {
+			if ("modelMapper1".equals(flowModelMapperId)) {
+				return new FlowModelMapper() {
+					public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
+						return new HashMap();
+					}
+
+					public void mapSubFlowOutputAttributes(FlowModel endingSubFlowModel,
+							MutableFlowModel resumingParentFlowModel) {
+					}
+				};
+			}
+			throw new NoSuchFlowModelMapperException(flowModelMapperId);
+		}
+	};
 
 }
