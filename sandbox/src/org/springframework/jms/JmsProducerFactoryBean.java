@@ -1,11 +1,9 @@
 /*
- * Created on May 27, 2004
- *
- * Copyright (C) 2004 CodeStreet.  All Rights Reserved.
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
 package org.springframework.jms;
 
-import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.Message;
 import javax.jms.MessageProducer;

@@ -1,8 +1,6 @@
 /*
- * Created on Apr 11, 2004
- *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
  */
 package org.springframework.jms;
 
