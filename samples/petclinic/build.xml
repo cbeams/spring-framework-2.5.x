@@ -90,7 +90,7 @@
 	</target>
 
 
-	<target name="clean" description="Clean output dirs (build, dist, testbuild, weblib)">
+	<target name="clean" description="Clean output dirs (build, docs, testbuild, testreports, weblib, dist)">
 
 		<delete dir="${build.dir}"/>
 		<delete dir="${docs.dir}"/>
@@ -133,8 +133,10 @@
 			<fileset dir="${spring.root}/lib/cglib">
 				<include name="cglib-asm.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/hibernate">
+			<fileset dir="${spring.root}/lib/dom4j">
 				<include name="dom4j.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/hibernate">
 				<include name="hibernate2.jar"/>
 				<include name="odmg.jar"/>
 			</fileset>
