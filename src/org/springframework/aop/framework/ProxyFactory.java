@@ -5,57 +5,47 @@
  
 package org.springframework.aop.framework;
 
-import java.util.Iterator;
-import java.util.Set;
+import org.aopalliance.intercept.Interceptor;
 
 
 /**
- * Factory for AOP proxies for programmatic use, rather
- * than via a bean factory.
- * This class provides a simple way of obtaining and configuring
+ * Factory for AOP proxies for programmatic use, rather than via a bean
+ * factory. This class provides a simple way of obtaining and configuring
  * AOP proxies in code.
  * @since 14-Mar-2003
  * @author Rod Johnson
- * @version $Id: ProxyFactory.java,v 1.1.1.1 2003-08-14 16:20:13 trisberg Exp $
+ * @version $Id: ProxyFactory.java,v 1.2 2003-10-06 13:42:08 jhoeller Exp $
  */
 public class ProxyFactory extends DefaultProxyConfig {
-	
+
+	public ProxyFactory() {
+	}
+
 	/**
-	 * Proxy all interfaces
-	 * @param target
+	 * Proxy all interfaces of the given target.
 	 */
 	public ProxyFactory(Object target) throws AopConfigException {
-		if (target == null)
+		addTarget(target);
+	}
+	
+	/**
+	 * No target, only interfaces. Must add interceptors.
+	 */
+	public ProxyFactory(Class[] interfaces) {
+		setInterfaces(interfaces);
+	}
+
+	public void addTarget(Object target) throws AopConfigException {
+		if (target == null) {
 			throw new AopConfigException("Can't proxy null object");
-						
-		Set s = AopUtils.findAllImplementedInterfaces(target.getClass());
-		
-		if (s.size() == 0)
-			throw new AopConfigException("Can't proxy class " + target.getClass() + 
-				": it implements no interfaces");
-		for (Iterator iter = s.iterator(); iter.hasNext(); ) {
-			addInterface((Class) iter.next());
 		}
-		
-		// Add the interceptor we'll always require
+		setInterfaces(AopUtils.getAllInterfaces(target));
 		InvokerInterceptor ii = new InvokerInterceptor(target);
 		addInterceptor(ii);
 	}
-	
-	
+
 	/**
-	 * No target, only interfaces
-	 *
-	 */
-	public ProxyFactory(Class[] interfaces) {
-		// TODO if null or empty
-		for (int i = 0; i < interfaces.length; i++) {
-			addInterface(interfaces[i]);
-		}
-		// Must add interceptors
-	}
-	
-	/**
+	 * Create new proxy according to the settings in this factory.
 	 * Can be called repeatedly. Effect will vary if we've added
 	 * or removed interfaces. Can add and remove "interceptors"
 	 * @return Object
@@ -63,6 +53,20 @@ public class ProxyFactory extends DefaultProxyConfig {
 	public Object getProxy() {
 		AopProxy proxy = new AopProxy(this);
 		return proxy.getProxy();
+	}
+
+	/**
+	 * Create new proxy for the given interface and interceptor.
+	 * Convenience method for creating a proxy for a single interceptor.
+	 * @param proxyInterface the interface that the proxy should implement
+	 * @param interceptor the interceptor that the proxy should invoke
+	 * @return the new proxy
+	 */
+	public static Object getProxy(Class proxyInterface, Interceptor interceptor) {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.addInterface(proxyInterface);
+		proxyFactory.addInterceptor(interceptor);
+		return proxyFactory.getProxy();
 	}
 
 }

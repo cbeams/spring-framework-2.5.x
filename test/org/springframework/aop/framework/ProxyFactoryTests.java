@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
  * Also tests DefaultProxyConfig superclass
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ProxyFactoryTests extends TestCase {
 
@@ -49,15 +49,6 @@ public class ProxyFactoryTests extends TestCase {
 		}
 	}
 
-	public void testNoInterfaces() {
-		Concrete c = new Concrete();
-		try {
-			new ProxyFactory(c);
-			fail("Should't allow proxy with no interfaces");
-		} catch (AopConfigException ex) {
-		}
-	}
-	
 	public void testAddRepeatedInterface() {
 		TimeStamped tst = new TimeStamped() {
 			public long getTimeStamp() {
