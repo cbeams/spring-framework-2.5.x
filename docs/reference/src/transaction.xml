@@ -689,7 +689,7 @@ transactionManager.commit(status);</programlisting></para>
     approach.</para>
 
     <para>On the other hand, if your applications has numerous transactional
-    operations, programmatic transaction management is usually worthwhile. It
+    operations, declarative transaction management is usually worthwhile. It
     keeps transaction management out of business logic, and is not difficult
     to configure in Spring. Using Spring, rather than EJB CMT, the
     configuration cost of declarative transaction management is greatly
