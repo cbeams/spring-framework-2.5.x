@@ -20,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * <p>Convenient superclass for controller implementations, using the Template
  * Method design pattern.</p>
+ * 
  * <p>As stated in the {@link org.springframework.web.servlet.mvc.Controller Controller}
  * interface, a lot of functionality is already provided by certain abstract
  * base controllers. The AbstractController is one of the most important
@@ -133,7 +134,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * method will get synchronized if this flag is true.
 	 * @see #handleRequestInternal
 	 */
-	public void setSynchronizeOnSession(boolean synchronizeOnSession) {
+	public final void setSynchronizeOnSession(boolean synchronizeOnSession) {
 		this.synchronizeOnSession = synchronizeOnSession;
 	}
 
