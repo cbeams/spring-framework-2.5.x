@@ -4,6 +4,21 @@
 @author Ken Krebs
 @author Juergen Hoeller
 
+Since release 1.0 M2, Petclinic features alternative DAO implementations and
+application configurations for JDBC and Hibernate, on HSQL and MySQL.
+The default Petclinic configuration is Hibernate on HSQL; to be able to build
+and run it, the Spring distribution comes with Hibernate jar files now.
+See "WEB-INF/web.xml", "WEB-INF/applicationContext-hibernate.xml", and
+"WEB-INF/applicationContext-jdbc.xml" for details.
+
+Both data access strategies can work with JTA for transaction management,
+by activating the JtaTransactionManager and a JndiObjectFactoryBean that
+refers to a transactional container DataSource. The default for Hibernate
+is HibernateTransactionManager; for JDBC, DataSourceTransactionManager:
+They allow to work with any locally defined DataSource; in the default case,
+the sample configurations specify Spring's non-pooling DriverManagerDataSource.
+
+
 This directory contains the web app source.
 For deployment, it needs to be built with Apache Ant.
 The only requirements are JDK >=1.3 and Ant >=1.5.
@@ -37,4 +52,5 @@ Note for JBoss users:
 - in build.properties: set the port number for HSQL to 1701
 - if using JBoss 3.2.x, copy db/jboss/3.2.x/*.xml in your deploy directory
 - for the time being, no database descriptor is provided for other JBoss versions
+
  
