@@ -15,6 +15,11 @@
  */
 package org.springframework.functor;
 
+import org
+    .springframework
+    .functor
+    .predicates
+    .BeanPropertyConstantExpressionTester;
 import org.springframework.functor.predicates.BeanPropertyExpressionTester;
 import org.springframework.functor.predicates.BinaryFunctionResultTester;
 import org.springframework.functor.predicates.GreaterThan;
@@ -147,6 +152,78 @@ public class PredicateFactory {
         UnaryPredicate predicate1,
         UnaryPredicate predicate2) {
         return new UnaryOr(predicate1, predicate2);
+    }
+
+    /**
+     * Apply a "greater than" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static UnaryPredicate greaterThan(
+        String propertyName,
+        Object propertyValue) {
+        return new BeanPropertyConstantExpressionTester(
+            propertyName,
+            propertyValue,
+            GreaterThan.instance());
+    }
+
+    /**
+     * Apply a "greater than equal to" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static UnaryPredicate greaterThanEqualTo(
+        String propertyName,
+        Object propertyValue) {
+        return new BeanPropertyConstantExpressionTester(
+            propertyName,
+            propertyValue,
+            GreaterThanEqualTo.instance());
+    }
+
+    /**
+     * Apply a "less than" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static UnaryPredicate lessThan(
+        String propertyName,
+        Object propertyValue) {
+        return new BeanPropertyConstantExpressionTester(
+            propertyName,
+            propertyValue,
+            LessThan.instance());
+    }
+
+    /**
+     * Apply a "less than equal to" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static UnaryPredicate lessThanEqualTo(
+        String propertyName,
+        Object propertyValue) {
+        return new BeanPropertyConstantExpressionTester(
+            propertyName,
+            propertyValue,
+            LessThanEqualTo.instance());
     }
 
     /**
