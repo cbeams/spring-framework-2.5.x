@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.context.support;
 
@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
  * MessageSource that accesses the ResourceBundles with the specified basenames.
  * This class uses java.util.Properties instances as its internal data structure
  * for messages, loading them via a PropertiesPersister strategy: The default
- * strategy can load properties files with a specific charset.
+ * strategy can load properties files with a specific encoding.
  *
  * <p>In contrast to ResourceBundleMessageSource, this class supports reloading
  * of properties files through the "cacheSeconds" setting, and also through
@@ -55,11 +55,20 @@ import org.springframework.util.StringUtils;
  * resources can still be loaded from the classpath, but "cacheSeconds" values
  * other than "-1" (caching forever) will not work in this case.
  *
+ * <p>This MessageSource implementation is usually slightly faster than
+ * ResourceBundleMessageSource, which builds on <code>java.util.ResourceBundle</code>
+ * - in the default mode, i.e. when caching forever. With "cacheSeconds" set to 1,
+ * message lookup takes about twice as long - with the benefit that changes in
+ * individual properties files are detected with a maximum delay of 1 second.
+ * Higher "cacheSeconds" values usually <i>don't</i> make a significant difference.
+ *
  * <p>This MessageSource can easily be used outside an ApplicationContext: It uses
  * a DefaultResourceLoader as default, getting overridden with the ApplicationContext
  * if running in a context. It does not have any other specific dependencies.
- * 
- * @author Thomas Achleitner
+ *
+ * <p>Thanks to Thomas Achleitner for providing the initial implementation of
+ * this message source!
+ *
  * @author Juergen Hoeller
  * @see #setCacheSeconds
  * @see #setBasenames
@@ -76,7 +85,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
     implements ResourceLoaderAware {
 
 	private static final String PROPERTIES_SUFFIX = ".properties";
-	
+
 
 	private String[] basenames;
 
@@ -93,6 +102,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/** Cache to hold already loaded properties per filename */
 	private final Map cachedProperties = new HashMap();
+
+	/** Cache to hold merged loaded properties per basename */
+	private final Map cachedMergedProperties = new HashMap();
 
 	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
 
@@ -204,13 +216,44 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	}
 
 
+	protected String resolveCodeWithoutArguments(String code, Locale locale) {
+		if (this.cacheMillis < 0) {
+			PropertiesHolder propHolder = getMergedProperties(locale);
+			String result = propHolder.getProperty(code);
+			if (result != null) {
+				return result;
+			}
+		}
+		else {
+			for (int i = 0; i < this.basenames.length; i++) {
+				List filenames = calculateAllFilenames(this.basenames[i], locale);
+				for (int j = 0; j < filenames.size(); j++) {
+					String filename = (String) filenames.get(j);
+					PropertiesHolder propHolder = getProperties(filename);
+					String result = propHolder.getProperty(code);
+					if (result != null) {
+						return result;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	protected MessageFormat resolveCode(String code, Locale locale) {
-		for (int i = 0; i < this.basenames.length; i++) {
-			List filenames = calculateAllFilenames(this.basenames[i], locale);
-			for (int j = 0; j < filenames.size(); j++) {
-				String filename = (String) filenames.get(j);
-				PropertiesHolder propHolder = getProperties(filename);
-				if (propHolder.getProperties() != null) {
+		if (this.cacheMillis < 0) {
+			PropertiesHolder propHolder = getMergedProperties(locale);
+			MessageFormat result = propHolder.getMessageFormat(code, locale);
+			if (result != null) {
+				return result;
+			}
+		}
+		else {
+			for (int i = 0; i < this.basenames.length; i++) {
+				List filenames = calculateAllFilenames(this.basenames[i], locale);
+				for (int j = 0; j < filenames.size(); j++) {
+					String filename = (String) filenames.get(j);
+					PropertiesHolder propHolder = getProperties(filename);
 					MessageFormat result = propHolder.getMessageFormat(code, locale);
 					if (result != null) {
 						return result;
@@ -219,6 +262,37 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Get a PropertiesHolder that contains the actually visible properties
+	 * for a Locale, after merging all specified resource bundles.
+	 * Either fetches the holder from the cache or freshly loads it.
+	 * <p>Only used when caching resource bundle contents forever, i.e.
+	 * with cacheSeconds < 0. Therefore, merged properties are always
+	 * cached forever.
+	 */
+	protected PropertiesHolder getMergedProperties(Locale locale) {
+		synchronized (this.cachedMergedProperties) {
+			PropertiesHolder mergedHolder = (PropertiesHolder) this.cachedMergedProperties.get(locale);
+			if (mergedHolder != null) {
+				return mergedHolder;
+			}
+			Properties mergedProps = new Properties();
+			mergedHolder = new PropertiesHolder(mergedProps, -1);
+			for (int i = this.basenames.length - 1; i >= 0; i--) {
+				List filenames = calculateAllFilenames(this.basenames[i], locale);
+				for (int j = filenames.size() - 1; j >= 0; j--) {
+					String filename = (String) filenames.get(j);
+					PropertiesHolder propHolder = getProperties(filename);
+					if (propHolder.getProperties() != null) {
+						mergedProps.putAll(propHolder.getProperties());
+					}
+				}
+			}
+			this.cachedMergedProperties.put(locale, mergedHolder);
+			return mergedHolder;
+		}
 	}
 
 	/**
@@ -293,8 +367,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	}
 
 	/**
-	 * Get PropertiesHolder for the given filename, either from the cache
-	 * or freshly loaded.
+	 * Get a PropertiesHolder for the given filename, either from the
+	 * cache or freshly loaded.
 	 */
 	protected PropertiesHolder getProperties(String filename) {
 		synchronized (this.cachedProperties) {
@@ -302,11 +376,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			if (propHolder != null &&
 					(propHolder.getRefreshTimestamp() < 0 ||
 					 propHolder.getRefreshTimestamp() > System.currentTimeMillis() - this.cacheMillis)) {
+				// up to date
 				return propHolder;
 			}
-			else {
-				return refreshProperties(filename, propHolder);
-			}
+			return refreshProperties(filename, propHolder);
 		}
 	}
 
@@ -317,6 +390,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 */
 	protected PropertiesHolder refreshProperties(String filename, PropertiesHolder propHolder) {
 		long refreshTimestamp = (this.cacheMillis < 0) ? -1 : System.currentTimeMillis();
+
 		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
 		try {
 			long fileTimestamp = -1;
@@ -335,21 +409,22 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 					return propHolder;
 				}
 			}
+
 			InputStream is = resource.getInputStream();
 			Properties props = new Properties();
 			try {
-				String charset = null;
+				String encoding = null;
 				if (this.fileEncodings != null) {
-					charset = this.fileEncodings.getProperty(filename);
+					encoding = this.fileEncodings.getProperty(filename);
 				}
-				if (charset == null) {
-					charset = this.defaultEncoding;
+				if (encoding == null) {
+					encoding = this.defaultEncoding;
 				}
-				if (charset != null) {
+				if (encoding != null) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Loading properties for filename [" + filename + "] with charset '" + charset + "'");
+						logger.debug("Loading properties for filename [" + filename + "] with encoding '" + encoding + "'");
 					}
-					this.propertiesPersister.load(props, new InputStreamReader(is, charset));
+					this.propertiesPersister.load(props, new InputStreamReader(is, encoding));
 				}
 				else {
 					if (logger.isDebugEnabled()) {
@@ -370,6 +445,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			// empty holder representing "not found"
 			propHolder = new PropertiesHolder();
 		}
+
 		propHolder.setRefreshTimestamp(refreshTimestamp);
 		this.cachedProperties.put(filename, propHolder);
 		return propHolder;
@@ -443,7 +519,17 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			return refreshTimestamp;
 		}
 
+		protected String getProperty(String code) {
+			if (this.properties == null) {
+				return null;
+			}
+			return this.properties.getProperty(code);
+		}
+
 		protected MessageFormat getMessageFormat(String code, Locale locale) {
+			if (this.properties == null) {
+				return null;
+			}
 			synchronized (this.cachedMessageFormats) {
 				Map localeMap = (Map) this.cachedMessageFormats.get(code);
 				if (localeMap != null) {

@@ -46,6 +46,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 
 	private ClassLoader classLoader;
 
+	private final Map cachedResourceBundles = new HashMap();
+
 	/**
 	 * Cache to hold already generated MessageFormats per message code.
 	 * Note that this Map contains the actual code Map, keyed with the Locale.
@@ -93,44 +95,67 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	}
 
 
-	protected final MessageFormat resolveCode(String code, Locale locale) {
+	protected String resolveCodeWithoutArguments(String code, Locale locale) {
+		String result = null;
+		for (int i = 0; result == null && i < this.basenames.length; i++) {
+			ResourceBundle bundle = getResourceBundle(this.basenames[i], locale);
+			if (bundle != null) {
+				result = getStringOrNull(bundle, code);
+			}
+		}
+		return result;
+	}
+
+	protected MessageFormat resolveCode(String code, Locale locale) {
 		MessageFormat messageFormat = null;
 		for (int i = 0; messageFormat == null && i < this.basenames.length; i++) {
-			messageFormat = resolve(this.basenames[i], code, locale);
+			ResourceBundle bundle = getResourceBundle(this.basenames[i], locale);
+			if (bundle != null) {
+				messageFormat = getMessageFormat(bundle, code, locale);
+			}
 		}
 		return messageFormat;
 	}
 
 	/**
-	 * Return a MessageFormat for the given bundle basename, message code,
-	 * and Locale.
-	 * @param basename the basename of the bundle
-	 * @param code the message code to retrieve
-	 * @param locale the Locale to resolve for
-	 * @return the resulting MessageFormat
+	 * Return a ResourceBundle for the given basename and code,
+	 * fetching already generated MessageFormats from the cache.
+	 * @param basename the basename of the ResourceBundle
+	 * @param locale the Locale to find the ResourceBundle for
+	 * @return the resulting ResourceBundle, or null if none
+	 * found for the given basename and Locale
 	 */
-	protected MessageFormat resolve(String basename, String code, Locale locale) {
-		try {
-			ClassLoader cl = this.classLoader;
-			if (cl == null) {
-				// no class loader specified -> use thread context class loader
-				cl = Thread.currentThread().getContextClassLoader();
+	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
+		synchronized (this.cachedResourceBundles) {
+			Map localeMap = (Map) this.cachedResourceBundles.get(basename);
+			if (localeMap != null) {
+				ResourceBundle bundle = (ResourceBundle) localeMap.get(locale);
+				if (bundle != null) {
+					return bundle;
+				}
 			}
-			ResourceBundle bundle = ResourceBundle.getBundle(basename, locale, cl);
 			try {
-				return getMessageFormat(bundle, code, locale);
+				ClassLoader cl = this.classLoader;
+				if (cl == null) {
+					// no class loader specified -> use thread context class loader
+					cl = Thread.currentThread().getContextClassLoader();
+				}
+				ResourceBundle bundle = ResourceBundle.getBundle(basename, locale, cl);
+				if (localeMap == null) {
+					localeMap = new HashMap();
+					this.cachedResourceBundles.put(basename, localeMap);
+				}
+				localeMap.put(locale, bundle);
+				return bundle;
 			}
 			catch (MissingResourceException ex) {
-				// assume key not found
+				if (logger.isWarnEnabled()) {
+					logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
+				}
+				// assume bundle not found
 				// -> do NOT throw the exception to allow for checking parent message source
 				return null;
 			}
-		}
-		catch (MissingResourceException ex) {
-			logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
-			// assume bundle not found
-			// -> do NOT throw the exception to allow for checking parent message source
-			return null;
 		}
 	}
 
@@ -140,10 +165,12 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * @param bundle the ResourceBundle to work on
 	 * @param code the message code to retrieve
 	 * @param locale the Locale to use to build the MessageFormat
-	 * @return the resulting MessageFormat
+	 * @return the resulting MessageFormat, or null if no message
+	 * defined for the given code
 	 */
 	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
 			throws MissingResourceException {
+
 		synchronized (this.cachedMessageFormats) {
 			Map codeMap = (Map) this.cachedMessageFormats.get(bundle);
 			Map localeMap = null;
@@ -156,7 +183,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 					}
 				}
 			}
-			String msg = bundle.getString(code);
+
+			String msg = getStringOrNull(bundle, code);
 			if (msg != null) {
 				if (codeMap == null) {
 					codeMap = new HashMap();
@@ -169,7 +197,19 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 				MessageFormat result = createMessageFormat(msg, locale);
 				localeMap.put(locale, result);
 				return result;
+
 			}
+			return null;
+		}
+	}
+
+	private String getStringOrNull(ResourceBundle bundle, String key) {
+		try {
+			return bundle.getString(key);
+		}
+		catch (MissingResourceException ex) {
+			// assume key not found
+			// -> do NOT throw the exception to allow for checking parent message source
 			return null;
 		}
 	}

@@ -154,11 +154,26 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		if (locale == null) {
 			locale = Locale.getDefault();
 		}
-		MessageFormat messageFormat = resolveCode(code, locale);
-		if (messageFormat != null) {
-			return messageFormat.format(resolveArguments(args, locale));
+
+		if (args == null || args.length == 0) {
+			// Optimized resolution: no arguments to apply,
+			// therefore no MessageFormat needs to be involved.
+			// Note that the default implementation still uses MessageFormat;
+			// this can be overridden in specific subclasses.
+			String message = resolveCodeWithoutArguments(code, locale);
+			if (message != null) {
+				return message;
+			}
 		}
-		else if (this.parentMessageSource != null) {
+		else {
+			MessageFormat messageFormat = resolveCode(code, locale);
+			if (messageFormat != null) {
+				return messageFormat.format(resolveArguments(args, locale));
+			}
+		}
+
+		// not found -> check parent, if any
+		if (this.parentMessageSource != null) {
 			if (this.parentMessageSource instanceof AbstractMessageSource) {
 				// Call internal method to avoid getting the default code back
 				// in case of "useCodeAsDefaultMessage" being activated.
@@ -169,9 +184,36 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 				return this.parentMessageSource.getMessage(code, args, null, locale);
 			}
 		}
-		else {
-			return null;
+
+		// not found at all
+		return null;
+	}
+
+	/**
+	 * Subclasses can override this method to resolve a message without
+	 * arguments in an optimized fashion, i.e. to resolve a message
+	 * without involving a MessageFormat.
+	 * <p>The default implementation <i>does</i> use MessageFormat,
+	 * through delegating to the <code>resolveCode</code> method.
+	 * Subclasses are encouraged to replace this with optimized resolution.
+	 * <p>Unfortunately, <code>java.text.MessageFormat</code> is not
+	 * implemented in an efficient fashion. In particular, it does not
+	 * detect that a message pattern doesn't contain argument placeholders
+	 * in the first place. Therefore, it's advisable to circumvent
+	 * MessageFormat completely for messages without arguments.
+	 * @param code the code of the message to resolve
+	 * @param locale the Locale to resolve the code for
+	 * (subclasses are encouraged to support internationalization)
+	 * @return the message String, or null if not found
+	 * @see #resolveCode
+	 * @see java.text.MessageFormat
+	 */
+	protected String resolveCodeWithoutArguments(String code, Locale locale) {
+		MessageFormat messageFormat = resolveCode(code, locale);
+		if (messageFormat != null) {
+			return messageFormat.format(new Object[0]);
 		}
+		return null;
 	}
 
 	/**
@@ -222,10 +264,14 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * Subclasses must implement this method to resolve a message.
 	 * <p>Returns a MessageFormat instance rather than a message String,
 	 * to allow for appropriate caching of MessageFormats in subclasses.
+	 * <p><b>Subclasses are encouraged to provide optimized resolution
+	 * for messages without arguments, not involving MessageFormat.</b>
+	 * See <code>resolveCodeWithoutArguments</code> javadoc for details.
 	 * @param code the code of the message to resolve
 	 * @param locale the Locale to resolve the code for
 	 * (subclasses are encouraged to support internationalization)
 	 * @return the MessageFormat for the message, or null if not found
+	 * @see #resolveCodeWithoutArguments
 	 */
 	protected abstract MessageFormat resolveCode(String code, Locale locale);
 
