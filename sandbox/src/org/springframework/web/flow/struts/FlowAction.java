@@ -187,16 +187,19 @@ public class FlowAction extends TemplateAction {
 				request.setAttribute(getCurrentStateIdAttributeName(), sessionExecution.getCurrentStateId());
 
 				// struts specific
-				String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
-				String actionFormBeanName = actionPathName + "Form";
-				if (logger.isDebugEnabled()) {
-					logger.debug("Setting '" + ACTION_PATH_NAME_ATTRIBUTE + "' attribute to value '" + actionPathName
-							+ " in request scope.");
-					logger.debug("Setting action form attribute '" + actionFormBeanName + " to form '" + form
-							+ "' in request scope.");
+				String mappingFlowId = getFlowId(mapping);
+				if (StringUtils.hasText(mappingFlowId)) {
+					String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
+					String actionFormBeanName = actionPathName + "Form";
+					if (logger.isDebugEnabled()) {
+						logger.debug("Setting '" + ACTION_PATH_NAME_ATTRIBUTE + "' attribute to value '"
+								+ actionPathName + "' in request scope.");
+						logger.debug("Setting action form attribute '" + actionFormBeanName + "' to form '" + form
+								+ "' in request scope.");
+					}
+					request.setAttribute(ACTION_PATH_NAME_ATTRIBUTE, actionPathName);
+					request.setAttribute(actionFormBeanName, form);
 				}
-				request.setAttribute(ACTION_PATH_NAME_ATTRIBUTE, actionPathName);
-				request.setAttribute(actionFormBeanName, form);
 				if (form instanceof BindingActionForm) {
 					BindingActionForm bindingForm = (BindingActionForm)form;
 					bindingForm.setErrors((Errors)sessionExecution
