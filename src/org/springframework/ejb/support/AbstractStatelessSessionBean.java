@@ -8,6 +8,8 @@ package org.springframework.ejb.support;
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 
+import org.springframework.beans.factory.support.BootstrapException;
+
 /**
  * Convenient superclass for stateless session beans (SLSBs), minimizing
  * the work involved in implementing an SLSB and preventing common errors.
@@ -30,19 +32,26 @@ import javax.ejb.EJBException;
  * eliminating a common cause of EJB deployment failure.
  *
  * @author Rod Johnson
- * @version $Id: AbstractStatelessSessionBean.java,v 1.1.1.1 2003-08-14 16:20:25 trisberg Exp $
+ * @version $Id: AbstractStatelessSessionBean.java,v 1.2 2003-11-14 20:19:33 colins Exp $
  */
 public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 
 	/** 
-	 * This implementation loads the BeanFactory.
+	 * This implementation loads the BeanFactory. Any {@link BootstrapException}
+	 * thrown by loadBeanFactory is rethrown as CreateException.
 	 * <p>Don't override it (although it can't be made final): code initialization
 	 * in onEjbCreate(), which is called when the BeanFactory is available.
 	 * <p>Unfortunately we can't load the BeanFactory in setSessionContext(),
 	 * as ResourceManager access isn't permitted and the BeanFactory may require it.
 	 */
 	public void ejbCreate() throws CreateException {
-		loadBeanFactory();
+
+		try {
+			loadBeanFactory();
+		}
+		catch (BootstrapException ex) {
+			throw new CreateException(ex.getMessage());
+		}
 		onEjbCreate();
 	}
 	

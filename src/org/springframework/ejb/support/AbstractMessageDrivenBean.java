@@ -27,7 +27,7 @@ import javax.ejb.MessageDrivenContext;
  * ejbCreate() methods.
  *
  * @author Rod Johnson
- * @version $Id: AbstractMessageDrivenBean.java,v 1.1.1.1 2003-08-14 16:20:25 trisberg Exp $
+ * @version $Id: AbstractMessageDrivenBean.java,v 1.2 2003-11-14 20:19:33 colins Exp $
  */
 public abstract class AbstractMessageDrivenBean 
 				extends AbstractEnterpriseBean 
@@ -62,7 +62,7 @@ public abstract class AbstractMessageDrivenBean
 	 * <p>Unfortunately we can't load the BeanFactory in setSessionContext(),
 	 * as ResourceManager access isn't permitted and the BeanFactory may require it.
 	 */
-	public void ejbCreate() throws CreateException {
+	public void ejbCreate() {
 		loadBeanFactory();
 		onEjbCreate();
 	}
@@ -75,6 +75,6 @@ public abstract class AbstractMessageDrivenBean
 	 * to an ejbCreate() method.
 	 * @throws CreateException
 	 */
-	protected abstract void onEjbCreate() throws CreateException;
+	protected abstract void onEjbCreate();
 
 }

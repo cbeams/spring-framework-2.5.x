@@ -5,7 +5,6 @@
 
 package org.springframework.ejb.support;
 
-import javax.ejb.CreateException;
 import javax.ejb.EnterpriseBean;
 
 import org.apache.commons.logging.Log;
@@ -30,7 +29,7 @@ import org.springframework.beans.factory.support.BootstrapException;
  * EJB lifecycle methods, as this violates the EJB specification.
  *
  * @author Rod Johnson
- * @version $Id: AbstractEnterpriseBean.java,v 1.1.1.1 2003-08-14 16:20:25 trisberg Exp $
+ * @version $Id: AbstractEnterpriseBean.java,v 1.2 2003-11-14 20:19:33 colins Exp $
  */
 abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
@@ -49,16 +48,11 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * shouldn't be called directly by user-created subclasses.
 	 * @see org.springframework.ejb.support.AbstractStatelessSessionBean#ejbCreate()
 	 */
-	void loadBeanFactory() throws CreateException {
+	void loadBeanFactory() throws BootstrapException {
 		if (this.beanFactoryLoader == null) {
 			this.beanFactoryLoader = new XmlBeanFactoryLoader();
 		}
-		try {
-			this.beanFactory = this.beanFactoryLoader.loadBeanFactory();
-		}
-		catch (BootstrapException ex) {
-			throw new CreateException(ex.getMessage());
-		}
+		this.beanFactory = this.beanFactoryLoader.loadBeanFactory();
 	}
 
 	/**
