@@ -8,6 +8,10 @@ import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -39,7 +43,9 @@ import org.springframework.util.ClassLoaderUtils;
  * @see JdoTransactionManager#setPersistenceManagerFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
-public class LocalPersistenceManagerFactoryBean implements FactoryBean, InitializingBean {
+public class LocalPersistenceManagerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String configLocation;
 
@@ -131,6 +137,14 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+	/**
+	 * Close the PersistenceManagerFactory on context shutdown.
+	 */
+	public void destroy() {
+		logger.info("Closing JDO PersistenceManagerFactory of LocalPersistenceManagerFactoryBean [" + this + "]");
+		this.persistenceManagerFactory.close();
 	}
 
 }
