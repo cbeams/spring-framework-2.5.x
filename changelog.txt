@@ -3,17 +3,20 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.4 (12.1.2005)
+Changes in version 1.1.4 (14.1.2005)
 ------------------------------------
 
 Package org.springframework.aop
 * added "setClassFilter" method to StaticMethodMatcherPointcut, to allow for overriding the default ClassFilter.TRUE
+* factored out AbstractBeanFactoryBasedTargetSource superclass from AbstractPrototypeBasedTargetSource
+* added LazyInitTargetSource, lazily accessing a singleton from a BeanFactory (lazily initializing on first call)
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl to allow custom PropertyEditor (setValue) to kick in before applying String[]-to-CSV conversion
 * added "getResourceDescription" and "getBeanName" accessors to BeanCreationException and BeanDefinitionStoreException
+* fixed AbstractFactoryBean's "afterPropertiesSet" implementation to avoid singleton creation in case of a prototype
 * added "ignoreInvalidKeys" bean property to PropertyOverrideConfigurer, allowing to just log invalid keys as warning
-* added ServiceLocatorFactoryBean, allowing the mapping of custom service locator interface methods to BeanFactory.getBean calls
+* added ServiceLocatorFactoryBean, allowing to map custom service locator interface methods to BeanFactory.getBean calls
 * fixed AbstractAutowireCapableBeanFactory to avoid potential NPE in case of chained factory-methods with factory-bean
 * added "getSingletonCount" method to AbstractBeanFactory, returning the number of objects in the singleton cache
 * changed DefaultListableBeanFactory's "getBeansOfType" to ignore beans that cause BeanCreationExceptions on "getType"
@@ -21,11 +24,18 @@ Package org.springframework.beans
 * added "factoryBean" argument to InstantiationStrategy's "instantiate" method for a factory method (required for above)
 * XML bean definition DTD allows "lookup-method" and "replaced-method" in arbitrary order
 
+Package org.springframework.context
+* added protected "getDefaultLocale" method to MessageSourceAccessor, to allow to use a thread-bound user locale
+
+Package org.springframework.core
+* reworked ResourcePatternResolver to extend ResourceLoader, for ResourcePatternResolver checks in ResourceLoaderAware
+
 Package org.springframework.ejb
 * added "isConnectFailure(RemoteException)" hook to AbstractRemoteSlsbInvokerInterceptor, for customized failure checks
 
 Package org.springframework.jdbc
 * TransactionAwareDataSourceProxy automatically applies Spring-managed transaction timeouts to all created Statements
+* added LazyConnectionDataSourceProxy, for lazily fetching JDBC Connections with native JDBC or Hibernate transactions
 * added overloaded "queryForList"/"queryForObject"/"queryForLong"/"queryForInt" methods with arg types to JdbcTemplate
 * optimized JdbcTemplate's "queryForList" result set parsing to not access result set meta data for empty results
 
@@ -53,6 +63,7 @@ Package org.springframework.remoting
 * reworked JaxRpcPortClientInterceptor to work with JAX-RPC dynamic calls when not given an RMI port interface
 
 Package org.springframework.samples
+* upgraded JPetStore's data access layer from iBATIS SQL Maps 1.3 (SqlMap API) to SQL Maps 2.0 (SqlMapClient API)
 * reworked JPetStore's JAX-RPC support to avoid the RemoteOrderService RMI interface in favor of JAX-RPC dynamic calls
 
 Package org.springframework.scheduling
@@ -60,8 +71,18 @@ Package org.springframework.scheduling
 * added "schedulerListeners", "(global)JobListeners", "(global)TriggerListeners" bean properties to SchedulerFactoryBean
 * added "jobListenerNames"/"triggerListenerNames" property to JobDetailBean, CronTriggerBean, SimpleTriggerBean (resp.)
 
+Package org.springframework.transaction
+* reworked TransactionProxyFactoryBean to allow auto-detection of interfaces for a non-default TargetSource too
+
+Package org.springframework.util
+* reimplemented DefaultPropertiesPersister's Reader/Writer persistence, to remove copying-and-pasting of Sun source code
+
+Package org.springframework.validation
+* made BindException serializable, provided that the contained target object is serializable
+
 Package org.springframework.web
 * ContextLoader can optionally load a (shared) parent application context to the root web application context
+* added ServletContextFactoryBean, exposing the ServletContext for bean references (alternative to ServletContextAware)
 * added ServletContextAttributeFactoryBean, exposing an existing ServletContext attribute for bean references
 * added ServletContextAttributeExporter, taking Spring-defined objects and exposing them as ServletContext attributes
 * added ServletContextPropertyPlaceholderConfigurer, a subclass that falls back to web.xml context-param entries
