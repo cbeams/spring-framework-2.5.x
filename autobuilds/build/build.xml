@@ -9,7 +9,7 @@
 	This script should normally be managed from a shell script or 
 	batch file (supplied).
 	
-	$Id: build.xml,v 1.2 2003-12-23 01:37:49 davison Exp $
+	$Id: build.xml,v 1.3 2003-12-24 20:18:21 davison Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
@@ -338,14 +338,12 @@ realclean       --> delete ALL server installations AND downloads
 	
 	
 	<!--
-		realclean
+		clean
 		
 		removes all classes, server installs and reports
 	-->
-	<target name="realclean">
+	<target name="clean">
 		<delete dir="${target.root.dir}" />
-		<mkdir dir="${target.root.dir}" />
-		<mkdir dir="${reports.dir}" />
 	</target>	
 	
 </project>
