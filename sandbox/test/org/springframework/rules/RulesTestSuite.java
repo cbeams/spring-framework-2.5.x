@@ -11,6 +11,7 @@ import org.springframework.rules.functions.StringLength;
 import org.springframework.rules.predicates.BeanPropertiesExpression;
 import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
+import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.EqualTo;
 import org.springframework.rules.predicates.GreaterThan;
 import org.springframework.rules.predicates.GreaterThanEqualTo;
@@ -234,6 +235,11 @@ public class RulesTestSuite extends TestCase {
         assertTrue(r.test(new TestBean()));
         r.add("test2", PredicateFactory.maxLength(4));
         assertFalse(r.test(new TestBean()));
+    }
+
+    public void testCompoundRules() {
+        Rules r = Rules.createRules(TestBean.class);
+        
     }
 
 }
