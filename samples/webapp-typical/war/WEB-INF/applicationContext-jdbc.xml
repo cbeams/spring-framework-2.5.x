@@ -36,7 +36,7 @@
 	  - By default, "java:comp/env/" will be prepended if not already specified.
 	  -->
 	<bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	  <property name="jndiName"><value>jdbc/myds</value></property>
+	  <property name="jndiName"><value>java:comp/env/jdbc/myds</value></property>
 	</bean>
 
 	<!--

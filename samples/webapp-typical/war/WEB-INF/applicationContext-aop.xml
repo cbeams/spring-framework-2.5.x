@@ -36,7 +36,7 @@
 	  - By default, "java:comp/env/" will be prepended if not already specified.
 	  -->
 	<bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	  <property name="jndiName"><value>jdbc/myds</value></property>
+	  <property name="jndiName"><value>java:comp/env/jdbc/myds</value></property>
 	</bean>
 
 	<!--
@@ -150,7 +150,9 @@
 		-->
 	<bean id="exampleBusinessObjectV1" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>example.ExampleBusinessInterface</value></property>
-		<property name="interceptorNames"><value>exampleTransactionInterceptor,exampleBusinessObjectTarget</value></property>
+		<property name="interceptorNames">
+			<value>exampleTransactionInterceptor,exampleBusinessObjectTarget</value>
+		</property>
 	</bean>
 	
 	<!-- 
@@ -171,8 +173,8 @@
 		<property name="target"><ref local="exampleBusinessObjectTarget"/></property>
 		<property name="transactionAttributes">
 			<props>
-				<prop key="myBusiness*">PROPAGATION_REQUIRED</prop>
-				<prop key="myBusinessMethod">PROPAGATION_MANDATORY</prop>
+				<prop key="exampleMethod">PROPAGATION_REQUIRED</prop>
+				<prop key="anotherExampleMethod">PROPAGATION_MANDATORY</prop>
 			</props>
 		</property>
 	</bean>

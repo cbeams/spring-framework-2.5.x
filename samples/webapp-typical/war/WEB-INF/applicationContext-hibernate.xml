@@ -47,7 +47,7 @@
 	  - Hibernate use its own connection provider, specified via Hibernate properties.
 	  -->
 	<bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	  <property name="jndiName"><value>jdbc/myds</value></property>
+	  <property name="jndiName"><value>java:comp/env/jdbc/myds</value></property>
 	</bean>
 
 	<!--
@@ -69,6 +69,7 @@
 	  - JCA Connector (not recommended for most types of applications).
 	  -->
 	<bean id="mySessionFactory" class="org.springframework.orm.hibernate.LocalSessionFactoryBean">
+		<property name="dataSource"><ref local="myDataSource"/></property>
 		<property name="mappingResources">
 		  <list>
 		    <value>example.hbm.xml</value>
@@ -81,7 +82,6 @@
 		    <prop key="hibernate.show_sql">true</prop>
 		  </props>
 		</property>
-		<property name="dataSource"><ref local="myDataSource"/></property>
 	</bean>
 
 	<!--
