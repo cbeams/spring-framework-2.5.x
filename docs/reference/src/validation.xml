@@ -125,12 +125,20 @@
               <row>
                 <entry><literal>account[2]</literal></entry>
 
-                <entry>Indicates the <emphasis>third</emphasis> element of the
-                indexed property <literal>account</literal>. Indexed
+                <entry>Indicates the <emphasis>third</emphasis> element of
+                the indexed property <literal>account</literal>. Indexed
                 properties can be of type <literal>array</literal>,
                 <literal>list</literal> or other <emphasis>naturally
                 ordered</emphasis> collection</entry>
               </row>
+
+							<row>
+							  <entry><literal>account[COMPANYNAME]</literal></entry>
+
+							  <entry>Indicates the value of the map entry indexed by the
+							  key <emphasis>COMPANYNAME</emphasis> of the Map property
+							  <literal>account</literal></entry>
+							</row>
             </tbody>
           </tgroup>
         </table></para>
