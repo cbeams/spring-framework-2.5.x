@@ -42,7 +42,7 @@ public class JUnitAssertSupport extends Assert {
 
 	/**
 	 * Assert that an attribute with specified name is not present in given
-	 * attributes.
+	 * attributes map.
 	 */
 	public void assertAttributeNotPresent(AttributeSource attributes, String attributeName) {
 		assertTrue("The attributes attribute '" + attributeName + "' is present in attributes but shouldn't be", !attributes
@@ -88,7 +88,7 @@ public class JUnitAssertSupport extends Assert {
 	}
 
 	/**
-	 * Assert that a bean property attribute in the attributes map has a property
+	 * Assert that a bean attribute in the attributes map has a property
 	 * with the provided property value.
 	 * @param attributes the attributes map
 	 * @param attributeName the attribute name (of a javabean)

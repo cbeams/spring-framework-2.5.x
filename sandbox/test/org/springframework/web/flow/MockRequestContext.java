@@ -20,16 +20,23 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * Stub implementation of the <code>RequestContext</code> interface to
+ * Mock implementation of the <code>RequestContext</code> interface to
  * facilitate standalone Action unit tests.
  * <p>
  * NOT intended to be used for anything but standalone action unit tests. This
  * is a simple state holder, a stub implementation.
+ * <p>
+ * Note that this is really a <i>stub</i> implementation of the RequestContext
+ * interface, at least if you follow
+ * <a href="http://www.martinfowler.com/articles/mocksArentStubs.html">Martin
+ * Fowler's</a> reasoning. This class is called <i>Mock</i>RequestContext to
+ * be consistent with the naming convention in the rest of the Spring framework
+ * (e.g. MockHttpServletRequest, ...).
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class StubRequestContext implements RequestContext, TransactionSynchronizer {
+public class MockRequestContext implements RequestContext, TransactionSynchronizer {
 
 	private Flow activeFlow;
 
@@ -52,7 +59,7 @@ public class StubRequestContext implements RequestContext, TransactionSynchroniz
 	/**
 	 * Create a new stub request context.
 	 */
-	public StubRequestContext() {
+	public MockRequestContext() {
 	}
 
 	/**
@@ -61,7 +68,7 @@ public class StubRequestContext implements RequestContext, TransactionSynchroniz
 	 * @param currentState the current state
 	 * @param originatingEvent the event originating this request context
 	 */
-	public StubRequestContext(Flow activeFlow, State currentState, Event originatingEvent) {
+	public MockRequestContext(Flow activeFlow, State currentState, Event originatingEvent) {
 		setActiveFlow(activeFlow);
 		setCurrentState(currentState);
 		setOriginatingEvent(originatingEvent);

@@ -22,7 +22,7 @@ import org.springframework.samples.phonebook.domain.Person;
 import org.springframework.samples.phonebook.domain.PhoneBook;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.JUnitAssertSupport;
-import org.springframework.web.flow.StubRequestContext;
+import org.springframework.web.flow.MockRequestContext;
 
 public class GetPersonActionTests extends TestCase {
 
@@ -49,7 +49,7 @@ public class GetPersonActionTests extends TestCase {
 
 		GetPersonAction action = new GetPersonAction();
 		action.setPhoneBook(phoneBook);
-		StubRequestContext context = new StubRequestContext();
+		MockRequestContext context = new MockRequestContext();
 		context.getFlowScope().setAttribute("id", new Long(1));
 		Event result = action.execute(context);
 		assertEquals("success", result.getId());
@@ -66,7 +66,7 @@ public class GetPersonActionTests extends TestCase {
 
 		GetPersonAction action = new GetPersonAction();
 		action.setPhoneBook(phoneBook);
-		StubRequestContext context = new StubRequestContext();
+		MockRequestContext context = new MockRequestContext();
 		context.getFlowScope().setAttribute("id", new Long(2));
 		Event result = action.execute(context);
 		assertEquals("error", result.getId());
