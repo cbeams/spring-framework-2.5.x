@@ -6,10 +6,8 @@
 package org.springframework.context.support;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationEventMulticaster;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
@@ -41,11 +39,16 @@ import org.springframework.context.NestingMessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.config.ApplicationContextAwareProcessor;
 import org.springframework.context.config.ConfigurableApplicationContext;
+import org.springframework.context.config.ContextResourceEditor;
 import org.springframework.context.event.ApplicationEventMulticasterImpl;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.OrderComparator;
-import org.springframework.util.ClassLoaderUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
+import org.springframework.core.io.UrlResource;
 
 
 /**
@@ -62,7 +65,7 @@ import org.springframework.util.ClassLoaderUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -75,12 +78,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * @see MessageSource
 	 */
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
-
-	/**
-	 * Pseudo URL prefix for loading from the class path.
-	 * @see #getResourceAsStream
-	 */
-	public static final String CLASSPATH_URL_PREFIX = "classpath:";
 
 
 	//---------------------------------------------------------------------
@@ -162,7 +159,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * Return the timestamp when this context was first loaded
 	 * @return the timestamp (ms) when this context was first loaded
 	 */
-	public final long getStartupDate() {
+	public long getStartupDate() {
 		return startupTime;
 	}
 
@@ -174,7 +171,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * @param event event to publish. The event may be application-specific,
 	 * or a standard framework event.
 	 */
-	public final void publishEvent(ApplicationEvent event) {
+	public void publishEvent(ApplicationEvent event) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event.toString());
 		}
@@ -189,41 +186,39 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * pseudo-URL, and context-specific file paths via getResourceByPath.
 	 * Throws a FileNotFoundException if getResourceByPath returns null.
 	 * @see #getResourceByPath
-	 * @see #CLASSPATH_URL_PREFIX
+	 * @see org.springframework.core.io.ResourceEditor#CLASSPATH_URL_PREFIX
 	 */
-	public final InputStream getResourceAsStream(String location) throws IOException {
-		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
-			return ClassLoaderUtils.getResourceAsStream(location.substring(CLASSPATH_URL_PREFIX.length()));
+	public Resource getResource(String location) throws IOException {
+		if (location.startsWith(ResourceEditor.CLASSPATH_URL_PREFIX)) {
+			return new ClassPathResource(location.substring(ResourceEditor.CLASSPATH_URL_PREFIX.length()));
 		}
 		try {
 			// try URL
 			URL url = new URL(location);
-			logger.debug("Opening as URL: " + location);
-			return url.openStream();
+			return new UrlResource(url);
 		}
 		catch (MalformedURLException ex) {
-			// no URL -> try (file) path
-			InputStream in = getResourceByPath(location);
-			if (in == null) {
-				throw new FileNotFoundException("Location [" + location + "] could not be opened as file path");
+			// no URL -> try path
+			Resource resource = getResourceByPath(location);
+			if (resource == null) {
+				throw new FileNotFoundException("Location [" + location + "] could not be opened as path");
 			}
-			return in;
+			return resource;
 		}
 	}
 
 	/**
-	 * Return input stream to the resource at the given (file) path.
+	 * Return a Resource handle for the resource at the given path.
 	 * <p>Default implementation supports file paths, either absolute or
 	 * relative to the application's working directory. This should be
 	 * appropriate for standalone implementations but can be overridden,
 	 * e.g. for implementations targeted at a container.
 	 * @param path path to the resource
-	 * @return InputStream for the specified resource, can be null if
-	 * not found (instead of throwing an exception)
+	 * @return Resource handle, or null if not found
 	 * @throws IOException exception when opening the specified resource
 	 */
-	protected InputStream getResourceByPath(String path) throws IOException {
-		return new FileInputStream(path);
+	protected Resource getResourceByPath(String path) throws IOException {
+		return new FileResource(path);
 	}
 
 	/**
@@ -246,8 +241,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 	/**
 	 * Load or reload configuration.
-	 * @throws ApplicationContextException if the configuration was invalid or couldn't
-	 * be found, or if configuration has already been loaded and reloading is forbidden
+	 * @throws org.springframework.context.ApplicationContextException if the configuration
+	 * was invalid or couldn't be found, or if configuration has already been loaded and
+	 * reloading is forbidden
 	 * @throws BeansException if the bean factory could not be initialized
 	 */
 	public void refresh() throws BeansException {
@@ -256,6 +252,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		refreshBeanFactory();
 		getBeanFactory().ignoreDependencyType(ApplicationContext.class);
 		getBeanFactory().addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+		getBeanFactory().registerCustomEditor(Resource.class, new ContextResourceEditor(this));
 
 		if (getBeanDefinitionCount() == 0) {
 			logger.warn("No beans defined in ApplicationContext [" + getDisplayName() + "]");
@@ -453,21 +450,21 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	// Implementation of AutowireCapableBeanFactory
 	//---------------------------------------------------------------------
 
+	public Object autowire(Class beanClass) throws BeansException {
+		return getBeanFactory().autowire(beanClass);
+	}
+
 	public Object autowireConstructor(Class beanClass) throws BeansException {
 		return getBeanFactory().autowireConstructor(beanClass);
 	}
 
-	public void autowireExistingBean(Object existingBean, int autowireMode, boolean dependencyCheck)
+	public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
 			throws BeansException {
-		getBeanFactory().autowireExistingBean(existingBean, autowireMode, dependencyCheck);
+		getBeanFactory().autowireBeanProperties(existingBean, autowireMode, dependencyCheck);
 	}
 
 	public Object applyBeanPostProcessors(Object existingBean, String name) throws BeansException {
 		return getBeanFactory().applyBeanPostProcessors(existingBean, name);
-	}
-	
-	public Object registerBeanOfClass(String beanName, Class beanClass, boolean dependencyCheck) throws BeansException {
-		return getBeanFactory().registerBeanOfClass(beanName, beanClass, dependencyCheck);
 	}
 
 
@@ -520,6 +517,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * repeatedly without a performance penalty.
 	 * @return this application context's internal bean factory
 	 */
-	protected abstract ConfigurableListableBeanFactory getBeanFactory();
+	public abstract ConfigurableListableBeanFactory getBeanFactory();
 
 }

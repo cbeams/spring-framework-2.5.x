@@ -5,17 +5,17 @@
 
 package org.springframework.web.context.support;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.Resource;
 import org.springframework.ui.context.support.AbstractXmlUiApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
+import org.springframework.web.util.ServletContextResource;
 
 /**
  * WebApplicationContext implementation that takes configuration from an XML document.
@@ -40,7 +40,7 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * @see #setConfigLocations
  * @see org.springframework.web.context.ContextLoader#initWebApplicationContext
  * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
- * @see org.springframework.context.support.AbstractApplicationContext#getResourceAsStream
+ * @see org.springframework.context.support.AbstractApplicationContext#getResource
  */
 public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 		implements ConfigurableWebApplicationContext {
@@ -113,31 +113,20 @@ public class XmlWebApplicationContext extends AbstractXmlUiApplicationContext
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
 		for (int i = 0; i < this.configLocations.length; i++) {
-			reader.loadBeanDefinitions(getResourceAsStream(this.configLocations[i]), 
-					new WarResourceBeanDefinitionRegistryLocation(this.servletContext, this.configLocations[i]));
+			reader.loadBeanDefinitions(getResource(this.configLocations[i]));
 		}
 	}
 
 	/**
 	 * This implementation supports file paths beneath the root of the web application.
 	 */
-	protected InputStream getResourceByPath(String path) throws IOException {
+	protected Resource getResourceByPath(String path) throws IOException {
 		if (path != null && !path.startsWith("/")) {
 			// the Servlet spec requires that resource paths start with a slash,
 			// even if many containers accept paths without leading slash too
 			path = "/" + path;
 		}
-		return getServletContext().getResourceAsStream(path);
-	}
-
-	/**
-	 * This implementation returns the real path of the root directory of the
-	 * web application that this WebApplicationContext is associated with.
-	 * @see org.springframework.context.ApplicationContext#getResourceBase
-	 * @see javax.servlet.ServletContext#getRealPath
-	 */
-	public File getResourceBase() {
-		return new File(getServletContext().getRealPath("/"));
+		return new ServletContextResource(this.servletContext, path);
 	}
 
 	/**

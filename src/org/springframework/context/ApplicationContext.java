@@ -5,12 +5,11 @@
 
 package org.springframework.context;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.springframework.beans.factory.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
+import org.springframework.core.io.Resource;
 
 /** 
  * Interface to provide configuration for an application.
@@ -35,7 +34,7 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
  * </ul>
  *
  * @author Rod Johnson
- * @version $Id: ApplicationContext.java,v 1.9 2003-12-12 19:26:37 jhoeller Exp $
+ * @version $Id: ApplicationContext.java,v 1.10 2003-12-30 00:15:36 jhoeller Exp $
  */
 public interface ApplicationContext extends AutowireCapableBeanFactory, HierarchicalBeanFactory, MessageSource {
 	
@@ -67,7 +66,9 @@ public interface ApplicationContext extends AutowireCapableBeanFactory, Hierarch
 	void publishEvent(ApplicationEvent event);
 
 	/**
-	 * Open an InputStream to the specified resource.
+	 * Return a Resource handle for the specified resource.
+	 * The handle should always be a reusable resource descriptor,
+	 * allowing for multiple getInputStream calls.
 	 * <ul>
 	 * <li>Must support fully qualified URLs, e.g. "file:C:/test.dat".
 	 * <li>Should support relative file paths, e.g. "WEB-INF/test.dat".
@@ -77,21 +78,9 @@ public interface ApplicationContext extends AutowireCapableBeanFactory, Hierarch
 	 * a "file:" URL, as this must be supported by all implementations.
 	 * <p>Note: Callers are responsible for closing the input stream.
 	 * @param location location to the resource
-	 * @return InputStream for the specified resource
-	 * @throws IOException exception when opening the specified resource
+	 * @return Resource handle
+	 * @throws IOException if the resource could not be resolved
 	 */
-	InputStream getResourceAsStream(String location) throws IOException;
-
-	/**
-	 * Return the base path for relatively addressed resources for this
-	 * application context. Normally, this path will be the same as the one
-	 * that getResourceAsStream uses for evaluating relative paths.
-	 * <p>Note that this method returns null if this application context
-	 * does not have a dedicated resource base. Accordingly, getResourceAsStream
-	 * may not support relative paths at all, or use more than one resource base
-	 * for evaluating relative paths.
-	 * @return the resource base as java.io.File, or null
-	 */
-	File getResourceBase();
+	Resource getResource(String location) throws IOException;
 
 }

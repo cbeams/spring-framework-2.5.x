@@ -50,7 +50,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	/**
 	 * Return underlying bean factory for super class.
 	 */
-	protected ConfigurableListableBeanFactory getBeanFactory() {
+	public ConfigurableListableBeanFactory getBeanFactory() {
 		return beanFactory;
 	}
 

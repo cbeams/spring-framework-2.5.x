@@ -17,8 +17,8 @@ import junit.framework.TestCase;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MethodInvocationException;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -28,34 +28,32 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.27 2003-12-22 10:47:11 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.28 2003-12-30 00:25:24 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 	
 	public void testDescriptionButNoProperties() throws Exception {
-		InputStream is = getClass().getResourceAsStream("collections.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("collections.xml"));
+		reader.loadBeanDefinitions(new ClassPathResource("collections.xml", getClass()));
 		TestBean validEmpty = (TestBean) xbf.getBean("validEmptyWithDescription");
 		assertEquals(0, validEmpty.getAge());
 	}
 
 	/** Uses a separate factory */
 	public void testRefToSeparatePrototypeInstances() throws Exception {
-		InputStream is = getClass().getResourceAsStream("reftypes.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("reftypes.xml"));
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean emma = (TestBean) xbf.getBean("emma");
 		TestBean georgia = (TestBean) xbf.getBean("georgia");
@@ -70,11 +68,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testRefToSingleton() throws Exception {
-		InputStream is = getClass().getResourceAsStream("reftypes.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("reftypes.xml"));
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 		assertTrue("7 beans in reftypes, not " + xbf.getBeanDefinitionCount(), xbf.getBeanDefinitionCount() == 7);
 		TestBean jen = (TestBean) xbf.getBean("jenny");
 		TestBean dave = (TestBean) xbf.getBean("david");
@@ -86,11 +83,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testInnerBeans() {
-		InputStream is = getClass().getResourceAsStream("reftypes.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("reftypes.xml"));
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 		TestBean hasInnerBeans = (TestBean) xbf.getBean("hasInnerBeans");
 		assertEquals(5, hasInnerBeans.getAge());
 		assertNotNull(hasInnerBeans.getSpouse());
@@ -109,10 +105,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
-		InputStream pis = getClass().getResourceAsStream("parent.xml");
-		XmlBeanFactory parent = new XmlBeanFactory(pis);
-		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("inheritsFromParentFactory");
 		// Name property value is overriden
 		assertTrue(inherits.getName().equals("override"));
@@ -123,10 +117,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testPrototypeInheritanceFromParentFactoryPrototype() throws Exception {
-		InputStream pis = getClass().getResourceAsStream("parent.xml");
-		XmlBeanFactory parent = new XmlBeanFactory(pis);
-		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("prototypeInheritsFromParentFactoryPrototype");
 		// Name property value is overriden
 		assertTrue(inherits.getName().equals("prototype-override"));
@@ -141,10 +133,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testPrototypeInheritanceFromParentFactorySingleton() throws Exception {
-		InputStream pis = getClass().getResourceAsStream("parent.xml");
-		XmlBeanFactory parent = new XmlBeanFactory(pis);
-		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("protoypeInheritsFromParentFactorySingleton");
 		// Name property value is overriden
 		assertTrue(inherits.getName().equals("prototypeOverridesInheritedSingleton"));
@@ -173,10 +163,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	 * @throws Exception
 	 */
 	public void testBogusParentageFromParentFactory() throws Exception {
-		InputStream pis = getClass().getResourceAsStream("parent.xml");
-		XmlBeanFactory parent = new XmlBeanFactory(pis);
-		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		try {
 			TestBean inherits = (TestBean) child.getBean("bogusParent");
 			fail();
@@ -195,10 +183,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	 * @throws Exception
 	 */
 	public void testSingletonInheritsFromParentFactoryPrototype() throws Exception {
-		InputStream pis = getClass().getResourceAsStream("parent.xml");
-		XmlBeanFactory parent = new XmlBeanFactory(pis);
-		InputStream is = getClass().getResourceAsStream("child.xml");
-		XmlBeanFactory child = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("child.xml"));
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		TestBean inherits = (TestBean) child.getBean("singletonInheritsFromParentFactoryPrototype");
 		// Name property value is overriden
 		assertTrue(inherits.getName().equals("prototype-override"));
@@ -209,11 +195,10 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testCircularReferences() {
-		InputStream is = getClass().getResourceAsStream("reftypes.xml");
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidating(false);
-		reader.loadBeanDefinitions(is, new ClasspathBeanDefinitionRegistryLocation("reftypes.xml"));
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		TestBean david = (TestBean) xbf.getBean("david");
 		TestBean ego = (TestBean) xbf.getBean("ego");
@@ -572,10 +557,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testNoSuchXmlFile() throws Exception {
-		String filename = "missing.xml";
-		InputStream is = getClass().getResourceAsStream(filename);
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("missing.xml", getClass()));
 			fail("Shouldn't create factory from missing XML");
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -585,10 +568,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testInvalidXmlFile() throws Exception {
-		String filename = "invalid.xml";
-		InputStream is = getClass().getResourceAsStream(filename);
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("invalid.xml", getClass()));
 			fail("Shouldn't create factory from invalid XML");
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -598,10 +579,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testUnsatisfiedObjectDependencyCheck() throws Exception {
-		InputStream is = getClass().getResourceAsStream("unsatisfiedObjectDependencyCheck.xml");
-
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedObjectDependencyCheck.xml", getClass()));
 			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 			fail();
 		}
@@ -613,9 +592,8 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testUnsatisfiedSimpleDependencyCheck() throws Exception {
-		InputStream is = getClass().getResourceAsStream("unsatisfiedSimpleDependencyCheck.xml");
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedSimpleDependencyCheck.xml", getClass()));
 			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 			fail();
 		}
@@ -627,24 +605,20 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testSatisfiedObjectDependencyCheck() throws Exception {
-		InputStream is = getClass().getResourceAsStream("satisfiedObjectDependencyCheck.xml");
-
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("satisfiedObjectDependencyCheck.xml", getClass()));
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertNotNull(a.getSpouse());
 	}
 
 	public void testSatisfiedSimpleDependencyCheck() throws Exception {
-		InputStream is = getClass().getResourceAsStream("satisfiedSimpleDependencyCheck.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("satisfiedSimpleDependencyCheck.xml", getClass()));
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertEquals(a.getAge(), 33);
 	}
 
 	public void testUnsatisfiedAllDependencyCheck() throws Exception {
-		InputStream is = getClass().getResourceAsStream("unsatisfiedAllDependencyCheckMissingObjects.xml");
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedAllDependencyCheckMissingObjects.xml", getClass()));
 			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 			fail();
 		}
@@ -656,8 +630,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testSatisfiedAllDependencyCheck() throws Exception {
-		InputStream is = getClass().getResourceAsStream("satisfiedAllDependencyCheck.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("satisfiedAllDependencyCheck.xml", getClass()));
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertEquals(a.getAge(), 33);
 		assertNotNull(a.getName());
@@ -665,16 +638,14 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testAutowire() throws Exception {
-		InputStream is = getClass().getResourceAsStream("autowire.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("autowire.xml", getClass()));
 		TestBean spouse = new TestBean("kerry", 0);
 		xbf.registerSingleton("spouse", spouse);
 		doTestAutowire(xbf);
 	}
 
 	public void testAutowireWithParent() throws Exception {
-		InputStream is = getClass().getResourceAsStream("autowire.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("autowire.xml", getClass()));
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "kerry");
@@ -719,8 +690,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testAutowireWithDefault() throws Exception {
-		InputStream is = getClass().getResourceAsStream("default-autowire.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("default-autowire.xml", getClass()));
 		DependenciesBean rod1 = (DependenciesBean) xbf.getBean("rod1");
 		// Should have been autowired
 		assertNotNull(rod1.getSpouse());
@@ -733,8 +703,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testAutowireByConstructor() throws Exception {
-		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		ConstructorDependenciesBean rod1 = (ConstructorDependenciesBean) xbf.getBean("rod1");
 		TestBean kerry = (TestBean) xbf.getBean("kerry2");
 		// Should have been autowired
@@ -771,8 +740,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testAutowireByConstructorWithSimpleValues() throws Exception {
-		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		ConstructorDependenciesBean rod5 = (ConstructorDependenciesBean) xbf.getBean("rod5");
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
@@ -794,8 +762,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testThrowsExceptionOnTooManyArguments() throws Exception {
-		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		try {
 			ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod7");
 			fail("Should have thrown BeanDefinitionStoreException");
@@ -806,8 +773,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 
 	public void testThrowsExceptionOnAmbiguousResolution() throws Exception {
-		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		try {
 			ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod8");
 			fail("Should have thrown UnsatisfiedDependencyException");
@@ -819,8 +785,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 
 	public void testFactoryBeanDefinedAsPrototype()  {
 		try {
-			InputStream is = getClass().getResourceAsStream("invalid-factory.xml");
-			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("invalid-factory.xml", getClass()));
 			fail("Should have thrown BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {

@@ -1,6 +1,5 @@
 package org.springframework.beans.factory.xml;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -22,8 +21,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryLocation;
-import org.springframework.beans.factory.support.FileBeanDefinitionRegistryLocation;
+import org.springframework.core.io.Resource;
 
 /**
  * Bean definition reader for Spring's default XML bean definition format.
@@ -41,7 +39,7 @@ import org.springframework.beans.factory.support.FileBeanDefinitionRegistryLocat
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see #setParserClass
- * @version $Id: XmlBeanDefinitionReader.java,v 1.2 2003-12-19 15:49:58 johnsonr Exp $
+ * @version $Id: XmlBeanDefinitionReader.java,v 1.3 2003-12-30 00:15:37 jhoeller Exp $
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -92,49 +90,38 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Load definitions from the given file.
-	 * @param fileName name of the file containing the XML document
+	 * Load bean definitions from the given resource.
+	 * @param resource XML resource to load bean definitions from
+	 * @throws BeansException in case of loading or parsing errors
 	 */
-	public void loadBeanDefinitions(String fileName) throws BeansException {
-		try {
-			logger.info("Loading XmlBeanFactory from file [" + fileName + "]");
-			loadBeanDefinitions(new FileInputStream(fileName), new FileBeanDefinitionRegistryLocation(fileName));
+	public void loadBeanDefinitions(Resource resource) throws BeansException {
+		if (resource == null) {
+			throw new BeanDefinitionStoreException("Resource cannot be null: expected an XML file");
 		}
-		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("Can't open file [" + fileName + "]", ex);
-		}
-	}
-
-	/**
-	 * Load definitions from the given input stream and close it.
-	 * @param is InputStream containing XML
-	 */
-	public void loadBeanDefinitions(InputStream is, BeanDefinitionRegistryLocation location) throws BeansException {
-		if (is == null)
-			throw new BeanDefinitionStoreException("InputStream cannot be null: expected an XML file", null);
-
+		InputStream is = null;
 		try {
-			logger.info("Loading XmlBeanFactory from InputStream [" + is + "]");
+			logger.info("Loading XmlBeanFactory from resource [" + resource + "]");
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			logger.debug("Using JAXP implementation [" + factory + "]");
 			factory.setValidating(this.validating);
-			DocumentBuilder db = factory.newDocumentBuilder();
-			db.setErrorHandler(new BeansErrorHandler());
-			db.setEntityResolver(this.entityResolver != null ? this.entityResolver : new BeansDtdResolver());
-			Document doc = db.parse(is);
-			loadBeanDefinitions(doc, location);
+			DocumentBuilder docBuilder = factory.newDocumentBuilder();
+			docBuilder.setErrorHandler(new BeansErrorHandler());
+			docBuilder.setEntityResolver(this.entityResolver != null ? this.entityResolver : new BeansDtdResolver());
+			is = resource.getInputStream();
+			Document doc = docBuilder.parse(is);
+			loadBeanDefinitions(doc, resource);
 		}
 		catch (ParserConfigurationException ex) {
-			throw new BeanDefinitionStoreException("ParserConfiguration exception parsing XML from " + location, ex);
+			throw new BeanDefinitionStoreException("Parser configuration exception parsing XML from " + resource, ex);
 		}
 		catch (SAXParseException ex) {
-			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document from " + location + " is invalid", ex);
+			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document from " + resource + " is invalid", ex);
 		}
 		catch (SAXException ex) {
-			throw new BeanDefinitionStoreException("XML document from " + location + " is invalid", ex);
+			throw new BeanDefinitionStoreException("XML document from " + resource + " is invalid", ex);
 		}
 		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("IOException parsing XML document from " + location, ex);
+			throw new BeanDefinitionStoreException("IOException parsing XML document from " + resource, ex);
 		}
 		finally {
 			try {
@@ -142,7 +129,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					is.close();
 			}
 			catch (IOException ex) {
-				throw new FatalBeanException("IOException closing stream for XML document from " + location, ex);
+				throw new FatalBeanException("IOException closing stream for XML document from " + resource, ex);
 			}
 		}
 	}
@@ -152,9 +139,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * All calls go through this.
 	 * @param doc the DOM document
 	 */
-	public void loadBeanDefinitions(Document doc, BeanDefinitionRegistryLocation location) throws BeansException {
+	public void loadBeanDefinitions(Document doc, Resource resource) throws BeansException {
 		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
-		parser.loadBeanDefinitions(getBeanFactory(), getBeanClassLoader(), doc, location);
+		parser.loadBeanDefinitions(getBeanFactory(), getBeanClassLoader(), doc, resource);
 	}
 
 

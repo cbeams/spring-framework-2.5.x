@@ -6,14 +6,12 @@
 package org.springframework.web.servlet.view;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.ApplicationContextResourceBeanDefinitionRegistryLocation;
 import org.springframework.web.servlet.View;
 
 /**
@@ -30,7 +28,7 @@ import org.springframework.web.servlet.View;
  *
  * @author Juergen Hoeller
  * @since 18.06.2003
- * @see org.springframework.context.ApplicationContext#getResourceAsStream
+ * @see org.springframework.context.ApplicationContext#getResource
  * @see ResourceBundleViewResolver
  */
 public class XmlViewResolver extends AbstractCachingViewResolver {
@@ -83,9 +81,8 @@ public class XmlViewResolver extends AbstractCachingViewResolver {
 			return this.cachedFactory;
 		}
 		try {
-			InputStream is = getApplicationContext().getResourceAsStream(this.location);
-			BeanFactory xbf = new XmlBeanFactory(is, getApplicationContext(), 
-					new ApplicationContextResourceBeanDefinitionRegistryLocation(this.location));
+			BeanFactory xbf = new XmlBeanFactory(getApplicationContext().getResource(this.location),
+																					 getApplicationContext());
 			if (isCache()) {
 				this.cachedFactory = xbf;
 			}

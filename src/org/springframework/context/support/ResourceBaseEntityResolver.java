@@ -10,6 +10,7 @@ import org.xml.sax.InputSource;
 
 import org.springframework.beans.factory.xml.BeansDtdResolver;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 
 /**
  * EntityResolver implementation that tries to resolve entity references
@@ -28,12 +29,11 @@ import org.springframework.context.ApplicationContext;
  *
  * @author Juergen Hoeller
  * @since 31.07.2003
- * @see org.springframework.context.ApplicationContext#getResourceBase
- * @see org.springframework.context.ApplicationContext#getResourceAsStream
+ * @see org.springframework.context.ApplicationContext#getResource
  */
 public class ResourceBaseEntityResolver extends BeansDtdResolver {
 
-	private ApplicationContext applicationContext;
+	private final ApplicationContext applicationContext;
 
 	public ResourceBaseEntityResolver(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -57,9 +57,9 @@ public class ResourceBaseEntityResolver extends BeansDtdResolver {
 			}
 			if (resourcePath != null) {
 				logger.debug("Trying to locate entity [" + systemId + "] as application context resource [" + resourcePath + "]");
-				InputStream is = this.applicationContext.getResourceAsStream(resourcePath);
+				Resource resource = this.applicationContext.getResource(resourcePath);
 				logger.info("Found entity [" + systemId + "] as application context resource [" + resourcePath + "]");
-				source = new InputSource(is);
+				source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
 			}

@@ -1,6 +1,5 @@
 package org.springframework.beans.factory.xml;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,9 +11,9 @@ import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
@@ -38,8 +37,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
 
 		// Load from classpath, NOT a file path
-		InputStream is = getClass().getResourceAsStream("test.xml");
-		this.factory = new XmlBeanFactory(is, parent, new ClasspathBeanDefinitionRegistryLocation("test.xml"));
+		this.factory = new XmlBeanFactory(new ClassPathResource("test.xml", getClass()), parent);
 		this.factory.addBeanPostProcessor(new BeanPostProcessor() {
 			public Object postProcessBean(Object bean, String name) throws BeansException {
 				if (bean instanceof TestBean) {

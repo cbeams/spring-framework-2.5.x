@@ -9,8 +9,9 @@ import java.io.InputStream;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.InputStreamResource;
 
 /**
  * Convenience extension of DefaultListableBeanFactory that reads bean definitions from
@@ -30,61 +31,36 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.22 2003-12-19 15:49:58 johnsonr Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.23 2003-12-30 00:15:37 jhoeller Exp $
  */
 public class XmlBeanFactory extends DefaultListableBeanFactory {
 
 	private final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this);
 
-	/**
-	 * Create new XmlBeanFactory using java.io to read the XML document
-	 * with the given file name.
-	 * @param fileName name of the file containing the XML document
-	 */
-	public XmlBeanFactory(String fileName) throws BeansException {
-		this(fileName, null);
+	public XmlBeanFactory(InputStream is) throws BeansException {
+		this(new InputStreamResource(is, "(no description"));
 	}
 
 	/**
-	 * Create new XmlBeanFactory using java.io to read the XML document
-	 * with the given file name.
-	 * @param fileName name of the file containing the XML document
-	 * @param parentBeanFactory parent bean factory
-	 */
-	public XmlBeanFactory(String fileName, BeanFactory parentBeanFactory) throws BeansException {
-		super(parentBeanFactory);
-		this.reader.loadBeanDefinitions(fileName);
-	}
-
-	/**
-	 * Create a new XmlBeanFactory with the given input stream,
+	 * Create a new XmlBeanFactory with the given resource,
 	 * which must be parsable using DOM.
-	 * @param is InputStream containing XML
-	 * @throws BeansException
-	 * @param location location of the resource
+	 * @param resource XML resource to load bean definitions from
+	 * @throws BeansException in case of loading or parsing errors
 	 */
-	public XmlBeanFactory(InputStream is, BeanDefinitionRegistryLocation location) throws BeansException {
-		this(is, null, location);
+	public XmlBeanFactory(Resource resource) throws BeansException {
+		this(resource, null);
 	}
 	
 	/**
-	 * Convenient method for testing: doesn't require location info
-	 */
-	XmlBeanFactory(InputStream is) {
-		this(is, null, null);
-	}
-
-	/**
 	 * Create a new XmlBeanFactory with the given input stream,
 	 * which must be parsable using DOM.
-	 * @param is InputStream containing XML
+	 * @param resource XML resource to load bean definitions from
 	 * @param parentBeanFactory parent bean factory
-	 * @param location location information, for display on parse errors
-	 * @throws BeansException
+	 * @throws BeansException in case of loading or parsing errors
 	 */
-	public XmlBeanFactory(InputStream is, BeanFactory parentBeanFactory, BeanDefinitionRegistryLocation location) throws BeansException {
+	public XmlBeanFactory(Resource resource, BeanFactory parentBeanFactory) throws BeansException {
 		super(parentBeanFactory);
-		this.reader.loadBeanDefinitions(is, location);
+		this.reader.loadBeanDefinitions(resource);
 	}
 
 }

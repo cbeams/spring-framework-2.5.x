@@ -1,7 +1,6 @@
 package org.springframework.orm.jdo;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import javax.jdo.JDOException;
@@ -14,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.ClassLoaderUtils;
+import org.springframework.core.io.Resource;
 
 /**
  * FactoryBean that creates a local JDO PersistenceManager instance.
@@ -46,7 +45,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private String configLocation;
+	private Resource configLocation;
 
 	private Properties jdoProperties;
 
@@ -58,7 +57,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 * <p>Note: Can be omitted when all necessary properties are
 	 * specified locally via this bean.
 	 */
-	public void setConfigLocation(String configLocation) {
+	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
 	}
 
@@ -86,12 +85,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 		if (this.configLocation != null) {
 			// load JDO properties from given location
-			String resourceLocation = this.configLocation;
-			InputStream in = ClassLoaderUtils.getResourceAsStream(resourceLocation);
-			if (in == null) {
-				throw new IOException("Cannot open config location: " + resourceLocation);
-			}
-			prop.load(in);
+			prop.load(this.configLocation.getInputStream());
 		}
 
 		if (this.jdoProperties != null) {

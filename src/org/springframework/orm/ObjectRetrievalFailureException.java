@@ -10,9 +10,9 @@ import org.springframework.dao.DataRetrievalFailureException;
  */
 public class ObjectRetrievalFailureException extends DataRetrievalFailureException {
 
-	private Class persistentClass;
+	private final Class persistentClass;
 
-	private Object identifier;
+	private final Object identifier;
 
 	/**
 	 * Create a new ObjectRetrievalFailureException for the given object,

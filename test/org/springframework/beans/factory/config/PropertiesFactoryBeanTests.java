@@ -5,6 +5,8 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.io.ClassPathResource;
+
 /**
  * @author Juergen Hoeller
  * @since 01.11.2003
@@ -17,7 +19,7 @@ public class PropertiesFactoryBeanTests extends TestCase {
 
 	public void testWithPropertiesFile() throws IOException {
 		PropertiesFactoryBean pfb = getPropertiesFactoryBean();
-		pfb.setLocation("/org/springframework/beans/factory/support/test.properties");
+		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/support/test.properties"));
 		pfb.afterPropertiesSet();
 		Properties props = (Properties) pfb.getObject();
 		assertEquals("value1", props.getProperty("key1"));
@@ -35,7 +37,7 @@ public class PropertiesFactoryBeanTests extends TestCase {
 
 	public void testWithPropertiesFileAndLocalProperties() throws IOException {
 		PropertiesFactoryBean pfb = getPropertiesFactoryBean();
-		pfb.setLocation("/org/springframework/beans/factory/support/test.properties");
+		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/support/test.properties"));
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
 		pfb.setProperties(localProps);
@@ -48,7 +50,7 @@ public class PropertiesFactoryBeanTests extends TestCase {
 	public void testWithPrototype() throws IOException {
 		PropertiesFactoryBean pfb = getPropertiesFactoryBean();
 		pfb.setSingleton(false);
-		pfb.setLocation("/org/springframework/beans/factory/support/test.properties");
+		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/support/test.properties"));
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
 		pfb.setProperties(localProps);

@@ -10,11 +10,11 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-import org.w3c.dom.Document;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
@@ -22,14 +22,14 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryLocation;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -105,8 +105,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 
 	public void loadBeanDefinitions(BeanDefinitionRegistry beanFactory, ClassLoader beanClassLoader,
-	                                Document doc,
-									BeanDefinitionRegistryLocation location) {
+	                                Document doc, Resource resource) {
 		this.beanFactory = beanFactory;
 		this.beanClassLoader = beanClassLoader;
 
@@ -114,11 +113,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		Element root = doc.getDocumentElement();
 
 		this.defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
-		logger.debug("Default lazy init '" + defaultLazyInit + "'");
+		logger.debug("Default lazy init '" + this.defaultLazyInit + "'");
 		this.defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
-		logger.debug("Default dependency check '" + defaultDependencyCheck + "'");
+		logger.debug("Default dependency check '" + this.defaultDependencyCheck + "'");
 		this.defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
-		logger.debug("Default autowire '" + defaultAutowire + "'");
+		logger.debug("Default autowire '" + this.defaultAutowire + "'");
 
 		NodeList nl = root.getChildNodes();
 		int beanDefinitionCounter = 0;

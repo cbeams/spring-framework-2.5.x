@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.ClassLoaderUtils;
+import org.springframework.core.io.Resource;
 
 /**
  * Allows for making a properties file from a classpath location available
@@ -30,7 +30,7 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private String location;
+	private Resource location;
 
 	private Properties properties;
 
@@ -42,12 +42,8 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	 * Set the location of the properties file as class path resource,
 	 * e.g. "/myprops.properties".
 	 */
-	public void setLocation(String location) {
+	public void setLocation(Resource location) {
 		this.location = location;
-	}
-
-	protected String getLocation() {
-		return location;
 	}
 
 	/**
@@ -71,7 +67,7 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	 */
 	public void afterPropertiesSet() throws IOException {
 		if (this.location == null && this.properties == null) {
-			throw new IllegalArgumentException("Either location (e.g. '/myprops.properties') or properties must be set");
+			throw new IllegalArgumentException("Either location or properties must be set");
 		}
 		if (this.singleton) {
 			this.singletonInstance = mergeProperties();
@@ -114,7 +110,7 @@ public class PropertiesFactoryBean implements FactoryBean, InitializingBean {
 	protected Properties loadProperties() throws IOException {
 		logger.info("Loading properties file from class path location [" + this.location + "]");
 		Properties properties = new Properties();
-		properties.load(ClassLoaderUtils.getResourceAsStream(this.location));
+		properties.load(this.location.getInputStream());
 		return properties;
 	}
 

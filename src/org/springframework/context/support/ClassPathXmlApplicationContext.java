@@ -1,12 +1,11 @@
 package org.springframework.context.support;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.ClassLoaderUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Standalone XML application context, taking the context definition
@@ -14,12 +13,12 @@ import org.springframework.util.ClassLoaderUtils;
  * but also for application contexts embedded within JARs.
  *
  * <p>Note: Generally treats (file) paths as class path resources, when using
- * ApplicationContext.getResourceAsStream. Only supports full class path
- * names including package specification, like "/mypackage/myresource.dat".
+ * ApplicationContext.getResource. Only supports full classpath resource
+ * names that include the package path, like "mypackage/myresource.dat".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.context.ApplicationContext#getResourceAsStream
+ * @see #getResource
  * @see #getResourceByPath
  */
 public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationContext {
@@ -59,15 +58,8 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * like "/mypackage/myresource.dat". A root slash gets prepended to
 	 * the path if not already contained.
 	 */
-	protected InputStream getResourceByPath(String path) throws IOException {
-		return ClassLoaderUtils.getResourceAsStream(path);
-	}
-
-	/**
-	 * This implementation returns null, as there is no base path for class path resources.
-	 */
-	public File getResourceBase() {
-		return null;
+	protected Resource getResourceByPath(String path) throws IOException {
+		return new ClassPathResource(path);
 	}
 
 }

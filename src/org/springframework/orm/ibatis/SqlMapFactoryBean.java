@@ -9,7 +9,7 @@ import com.ibatis.db.sqlmap.XmlSqlMapBuilder;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.ClassLoaderUtils;
+import org.springframework.core.io.Resource;
 
 /**
  * FactoryBean that creates an iBATIS Database Layer SqlMap as singleton in the
@@ -20,7 +20,7 @@ import org.springframework.util.ClassLoaderUtils;
  */
 public class SqlMapFactoryBean implements FactoryBean, InitializingBean {
 
-	private String configLocation;
+	private Resource configLocation;
 
 	private SqlMap sqlMap;
 
@@ -29,7 +29,7 @@ public class SqlMapFactoryBean implements FactoryBean, InitializingBean {
 	 * A typical value is "example/sql-map-config.xml", in the case of web
 	 * applications normally to be found in WEB-INF/classes.
 	 */
-	public void setConfigLocation(String configLocation) {
+	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
 	}
 
@@ -37,10 +37,7 @@ public class SqlMapFactoryBean implements FactoryBean, InitializingBean {
 		if (this.configLocation == null) {
 			throw new IllegalArgumentException("configLocation must be set");
 		}
-		InputStream is = ClassLoaderUtils.getResourceAsStream(configLocation);
-		if (is == null) {
-			throw new IOException("Class path resource [" + configLocation + "] not found");
-		}
+		InputStream is = this.configLocation.getInputStream();
 		this.sqlMap = XmlSqlMapBuilder.buildSqlMap(new InputStreamReader(is));
 	}
 
