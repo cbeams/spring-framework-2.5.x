@@ -1,8 +1,19 @@
 /*
- * The Spring Framework is published under the terms
- * of the Apache Software License.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
- 
+
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
@@ -11,24 +22,26 @@ import java.util.List;
 
 /**
  * Extension of MethodOverride that represents an arbitrary
- * override of a method by the IoC container.<br>
- * Any non-final method can be overridden, irrespective of its
+ * override of a method by the IoC container.
+ *
+ * <p>Any non-final method can be overridden, irrespective of its
  * parameters and return types.
+ *
  * @author Rod Johnson
- * @version $Id: ReplaceOverride.java,v 1.1 2004-06-28 11:44:18 johnsonr Exp $
+ * @version $Id: ReplaceOverride.java,v 1.2 2004-07-28 09:47:16 jhoeller Exp $
  */
 public class ReplaceOverride extends MethodOverride {
 	
-	private final String callback;
+	private final String methodReplacerBeanName;
 	
 	/** 
 	 * List of String. Identifying signatures.
 	 */
 	private List typeIdentifiers = new LinkedList();
 
-	public ReplaceOverride(String methodName, String callback) {
+	public ReplaceOverride(String methodName, String methodReplacerBeanName) {
 		super(methodName);
-		this.callback = callback;
+		this.methodReplacerBeanName = methodReplacerBeanName;
 	}
 	
 	/**
@@ -40,30 +53,26 @@ public class ReplaceOverride extends MethodOverride {
 		this.typeIdentifiers.add(s);
 	}
 	
-	
-	/**
-	 * @see org.springframework.beans.factory.support.MethodOverride#matches(java.lang.reflect.Method)
-	 */
 	public boolean matches(Method method, MethodOverrides overrides) {
 		// TODO could cache result for efficiency
 		if (!method.getName().equals(getMethodName())) {
-			// It can't match
+			// it can't match
 			return false;
 		}
 		
 		if (!overrides.isOverloadedMethodName(method.getName())) {
-			// No overloaded: don't worry about arg type matching
+			// No overloaded: don't worry about arg type matching.
 			return true;
 		}
 		
-		// If we get to here, we need to insist on precise argument matching
-		if (typeIdentifiers.size() != method.getParameterTypes().length) {
+		// If we get to here, we need to insist on precise argument matching.
+		if (this.typeIdentifiers.size() != method.getParameterTypes().length) {
 			return false;
 		}
-		for (int i = 0; i < typeIdentifiers.size(); i++) {
-			String identifier = (String) typeIdentifiers.get(i);
+		for (int i = 0; i < this.typeIdentifiers.size(); i++) {
+			String identifier = (String) this.typeIdentifiers.get(i);
 			if (method.getParameterTypes()[i].getName().indexOf(identifier) == -1) {
-				// This parameter can't match
+				// this parameter can't match
 				return false;
 			}
 		}
@@ -71,14 +80,15 @@ public class ReplaceOverride extends MethodOverride {
 	}
 	
 	/**
-	 * @return the name of the bean implementing MethodReplacer
+	 * Return the name of the bean implementing MethodReplacer.
 	 */
 	public String getMethodReplacerBeanName() {
-		return callback;
+		return methodReplacerBeanName;
 	}
-
 
 	public String toString() {
-		return "Replace override for method '" + getMethodName() + "; will callback bean '" + callback + "'";
+		return "Replace override for method '" + getMethodName() + "; will call bean '" +
+				this.methodReplacerBeanName + "'";
 	}
+
 }

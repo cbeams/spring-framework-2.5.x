@@ -23,60 +23,75 @@ import java.util.Map;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /** 
- * An implementation of the KeyRetriever interface.
- * 
+ * An implementation of the KeyHolder interface, to be used for holding
+ * auto-generated keys as potentially returned by JDBC insert statements.
+ *
+ * <p>Create an instance of this class for each insert operation, and pass
+ * it to the corresponding JdbcTemplate respectively SqlUpdate methods.
+ *
  * @author Thomas Risberg
- * @see KeyHolder
- * @see JdbcTemplate
+ * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.object.SqlUpdate
  */
 public class GeneratedKeyHolder implements KeyHolder {
-	private List keyList = new LinkedList();
 
-	/* Return single key value
-	 * @see org.springframework.jdbc.core.support.KeyHolder#getKey()
+	private final List keyList;
+
+	/**
+	 * Create a new GeneratedKeyHolder with a default list.
 	 */
+	public GeneratedKeyHolder() {
+		this.keyList = new LinkedList();
+	}
+
+	/**
+	 * Create a new GeneratedKeyHolder with a given list.
+	 * @param keyList a list to hold maps of keys
+	 */
+	public GeneratedKeyHolder(List keyList) {
+		this.keyList = keyList;
+	}
+
 	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
-		if (keyList.size() == 0)
+		if (this.keyList.size() == 0) {
 			return null;
-		if (keyList.size() > 1 || ((Map)keyList.get(0)).size() > 1)
-			throw new 
-				InvalidDataAccessApiUsageException("The getKey method should only be used when a single key is returned.  " +
-						"The current key entry contains multiple keys: " + 
-						keyList);
-		Iterator keyIter = ((Map)keyList.get(0)).values().iterator();
+		}
+		if (this.keyList.size() > 1 || ((Map) this.keyList.get(0)).size() > 1) {
+			throw new InvalidDataAccessApiUsageException(
+					"The getKey method should only be used when a single key is returned.  " +
+					"The current key entry contains multiple keys: " + this.keyList);
+		}
+		Iterator keyIter = ((Map) this.keyList.get(0)).values().iterator();
 		if (keyIter.hasNext()) {
 			Object key = keyIter.next();
 			if (!(key instanceof Number)) {
-				throw new DataRetrievalFailureException("The generated key is not of a supported numeric type. " +"" +
-						"Unable to cast " + key.getClass().getName() + " to " + Number.class.getName() );
+				throw new DataRetrievalFailureException(
+						"The generated key is not of a supported numeric type. " +
+						"Unable to cast [" + key.getClass().getName() + "] to [" + Number.class.getName() + "]");
 			}
-			return (Number)key;
+			return (Number) key;
 		}
 		else {
-			throw new DataRetrievalFailureException("Unable to retrieve the generated key.  Check that the table has the an identity column enabled");
+			throw new DataRetrievalFailureException("Unable to retrieve the generated key. " +
+																							"Check that the table has an identity column enabled.");
 		}
 	}
-	/* Return the Map of keys
-	 * @see org.springframework.jdbc.core.support.KeyHolder#getKeys()
-	 */
+
 	public Map getKeys() throws InvalidDataAccessApiUsageException {
-		if (keyList.size() == 0)
+		if (this.keyList.size() == 0) {
 			return null;
-		if (keyList.size() > 1)
-			throw new 
-				InvalidDataAccessApiUsageException("The getKeys method should only be used when keys for a single row are returned.  " + 
-						"The current key list contains keys for multiple rows: " +
-						keyList);
-		return (Map)keyList.get(0);
+		}
+		if (this.keyList.size() > 1)
+			throw new InvalidDataAccessApiUsageException(
+					"The getKeys method should only be used when keys for a single row are returned.  " +
+					"The current key list contains keys for multiple rows: " + this.keyList);
+		return (Map) this.keyList.get(0);
 	}
-	/* Return the List containing the keys
-	 * @see org.springframework.jdbc.core.support.KeyHolder#getKeyList()
-	 */
+
 	public List getKeyList() {
 		return keyList;
 	}
+
 }
