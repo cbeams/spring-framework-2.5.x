@@ -9,7 +9,6 @@ import junit.framework.TestCase;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.functions.StringLength;
 import org.springframework.rules.predicates.BeanPropertiesExpression;
-import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.EqualTo;
 import org.springframework.rules.predicates.GreaterThan;
@@ -74,10 +73,8 @@ public class RulesTestSuite extends TestCase {
         UnaryFunction lengther = StringLength.instance();
         UnaryFunctionResultConstraint p =
             new UnaryFunctionResultConstraint(
-                PredicateFactory.bind(
-                    EqualTo.instance(),
-                    new Integer(s.length())),
-                lengther);
+                lengther,
+                Constraints.bind(EqualTo.instance(), new Integer(s.length())));
         assertTrue(p.test(s));
         assertFalse(p.test("1234567"));
     }
@@ -139,7 +136,7 @@ public class RulesTestSuite extends TestCase {
 
     public void testNot() {
         Number n = new Integer("25");
-        UnaryPredicate p = PredicateFactory.bind(EqualTo.instance(), n);
+        UnaryPredicate p = Constraints.bind(EqualTo.instance(), n);
         UnaryNot not = new UnaryNot(p);
         assertTrue(not.test(new Integer(24)));
         assertFalse(not.test(new Integer("25")));
@@ -177,14 +174,14 @@ public class RulesTestSuite extends TestCase {
     }
 
     public void testBeanPropertyValueConstraint() {
-        UnaryAnd p = PredicateFactory.conjunction();
-        p.add(PredicateFactory.required());
-        p.add(PredicateFactory.maxLength(3));
+        UnaryAnd p = Constraints.conjunction();
+        p.add(Constraints.required());
+        p.add(Constraints.maxLength(3));
         BeanPropertyExpression e = new BeanPropertyValueConstraint("test", p);
 
-        p = PredicateFactory.conjunction();
-        p.add(PredicateFactory.required());
-        p.add(PredicateFactory.maxLength(6));
+        p = Constraints.conjunction();
+        p.add(Constraints.required());
+        p.add(Constraints.maxLength(6));
         assertFalse(e.test(new TestBean()));
     }
 
@@ -222,22 +219,22 @@ public class RulesTestSuite extends TestCase {
 
     public void testMinMaxRules() {
         Rules r = Rules.createRules(TestBean.class);
-        r.add(PredicateFactory.inRangeProperty("number", "min", "max"));
+        r.add(Constraints.inRangeProperties("number", "min", "max"));
         assertTrue(r.test(new TestBean()));
     }
 
     public void testBasicCompoundRules() {
         Rules r = Rules.createRules(TestBean.class);
-        r.add(PredicateFactory.inRangeProperty("number", "min", "max")).add(
-            PredicateFactory.equalsProperty("test", "confirmTest"));
+        r.add(Constraints.inRangeProperties("number", "min", "max")).add(
+            Constraints.eqProperty("test", "confirmTest"));
         assertTrue(r.test(new TestBean()));
-        r.add("test2", PredicateFactory.maxLength(4));
+        r.add("test2", Constraints.maxLength(4));
         assertFalse(r.test(new TestBean()));
     }
 
     public void testCompoundRules() {
         Rules r = Rules.createRules(TestBean.class);
-        
+
     }
 
 }

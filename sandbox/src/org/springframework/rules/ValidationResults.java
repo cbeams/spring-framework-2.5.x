@@ -19,7 +19,6 @@ import java.util.Stack;
 
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.BeanPropertiesExpression;
-import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.ParameterizedBeanPropertyExpression;
 import org.springframework.rules.predicates.UnaryAnd;

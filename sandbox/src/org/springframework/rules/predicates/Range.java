@@ -17,7 +17,7 @@ package org.springframework.rules.predicates;
 
 import java.io.Serializable;
 
-import org.springframework.rules.PredicateFactory;
+import org.springframework.rules.Constraints;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
@@ -45,9 +45,9 @@ public final class Range implements Serializable, UnaryPredicate {
         Assert.isTrue(min.getClass() == max.getClass());
         Assert.isTrue(LessThanEqualTo.instance().test(min, max), "Minimum "
                 + min + " must be less than maximum " + max);
-        UnaryPredicate minimum = PredicateFactory.bind(GreaterThanEqualTo
+        UnaryPredicate minimum = Constraints.bind(GreaterThanEqualTo
                 .instance(), min);
-        UnaryPredicate maximum = PredicateFactory.bind(LessThanEqualTo
+        UnaryPredicate maximum = Constraints.bind(LessThanEqualTo
                 .instance(), max);
         this.rangeConstraint = new UnaryAnd(minimum, maximum);
     }

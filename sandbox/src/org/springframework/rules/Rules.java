@@ -17,7 +17,6 @@ package org.springframework.rules;
 
 import java.util.Iterator;
 
-import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.util.Assert;
@@ -85,7 +84,7 @@ public class Rules implements UnaryPredicate, Validator {
      *      org.springframework.validation.Errors)
      */
     public void validate(final Object bean, final Errors errors) {
-        Algorithms.forEach(propertyRules.entries(), new UnaryProcedure() {
+        Algorithms.forEach(propertyRules.values(), new UnaryProcedure() {
             public void run(Object predicate) {
                 BeanPropertyExpression rule = (BeanPropertyExpression)predicate;
                 ValidationResults results = new ValidationResults(bean, errors);

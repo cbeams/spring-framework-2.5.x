@@ -38,8 +38,8 @@ public class UnaryFunctionResultConstraint implements UnaryPredicate {
      *            The function to test.
      */
     public UnaryFunctionResultConstraint(
-        UnaryPredicate constraint,
-        UnaryFunction function) {
+        UnaryFunction function,
+        UnaryPredicate constraint) {
         Assert.notNull(constraint);
         Assert.notNull(function);
         this.constraint = constraint;

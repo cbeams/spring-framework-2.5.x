@@ -16,7 +16,6 @@
 package org.springframework.rules;
 
 import org.springframework.rules.predicates.BeanPropertiesExpression;
-import org.springframework.rules.predicates.BeanPropertyExpression;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.BinaryFunctionResultConstraint;
 import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
@@ -40,10 +39,10 @@ import org.springframework.rules.predicates.UnaryOr;
  * 
  * @author Keith Donald
  */
-public class PredicateFactory {
+public class Constraints {
 
     // static utility class
-    private PredicateFactory() {
+    private Constraints() {
 
     }
 
@@ -69,17 +68,17 @@ public class PredicateFactory {
      * specified unary function. This effectively attaches a constraint on the
      * function return value.
      * 
-     * @param constraint
-     *            the predicate to test the function result
      * @param function
      *            the function
+     * @param constraint
+     *            the predicate to test the function result
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public static UnaryPredicate attachResultConstraint(
-        UnaryPredicate constraint,
-        UnaryFunction function) {
-        return new UnaryFunctionResultConstraint(constraint, function);
+    public static UnaryPredicate result(
+        UnaryFunction function,
+        UnaryPredicate constraint) {
+        return new UnaryFunctionResultConstraint(function, constraint);
     }
 
     /**
@@ -94,7 +93,7 @@ public class PredicateFactory {
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public static BinaryPredicate attachResultConstraint(
+    public static BinaryPredicate result(
         UnaryPredicate constraint,
         BinaryFunction function) {
         return new BinaryFunctionResultConstraint(constraint, function);
@@ -173,7 +172,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression equals(
+    public static BeanPropertyExpression eq(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -191,7 +190,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression greaterThan(
+    public static BeanPropertyExpression gt(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -209,7 +208,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression greaterThanEqualTo(
+    public static BeanPropertyExpression gte(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -227,7 +226,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression lessThan(
+    public static BeanPropertyExpression lt(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -245,7 +244,7 @@ public class PredicateFactory {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression lessThanEqualTo(
+    public static BeanPropertyExpression lte(
         String propertyName,
         Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(
@@ -263,7 +262,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression greaterThanProperty(
+    public static BeanPropertyExpression gtProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -281,7 +280,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression equalsProperty(
+    public static BeanPropertyExpression eqProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -299,7 +298,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression greaterThanEqualToProperty(
+    public static BeanPropertyExpression gteProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -317,7 +316,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression lessThanProperty(
+    public static BeanPropertyExpression ltProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -335,7 +334,7 @@ public class PredicateFactory {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression lessThanEqualToProperty(
+    public static BeanPropertyExpression lteProperty(
         String propertyName,
         String otherPropertyName) {
         return new BeanPropertiesExpression(
@@ -375,7 +374,7 @@ public class PredicateFactory {
      *            the high edge of the range
      * @return The range predicate constraint
      */
-    public static BeanPropertyExpression inRangeProperty(
+    public static BeanPropertyExpression inRangeProperties(
         String propertyName,
         String minPropertyName,
         String maxPropertyName) {

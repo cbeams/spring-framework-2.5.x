@@ -2,9 +2,8 @@
  * The Spring Framework is published under the terms of the Apache Software
  * License.
  */
-package org.springframework.rules.predicates;
+package org.springframework.rules;
 
-import org.springframework.rules.UnaryPredicate;
 
 /**
  * @author Keith Donald

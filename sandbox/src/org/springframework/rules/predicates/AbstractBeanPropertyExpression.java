@@ -4,6 +4,7 @@
  */
 package org.springframework.rules.predicates;
 
+import org.springframework.rules.*;
 import org.springframework.util.Assert;
 
 /**

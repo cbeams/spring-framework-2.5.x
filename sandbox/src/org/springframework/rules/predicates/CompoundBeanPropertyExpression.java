@@ -17,6 +17,7 @@ package org.springframework.rules.predicates;
 
 import java.util.Iterator;
 
+import org.springframework.rules.*;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.util.Assert;
 

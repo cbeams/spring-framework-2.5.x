@@ -22,10 +22,10 @@ import org.springframework.rules.functions.UnaryFunctionChain;
  * 
  * @author Keith Donald
  */
-public class FunctionFactory {
+public class Functions {
 
     // static utility class
-    private FunctionFactory() {
+    private Functions() {
 
     }
 

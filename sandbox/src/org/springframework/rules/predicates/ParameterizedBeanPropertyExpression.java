@@ -15,6 +15,7 @@
  */
 package org.springframework.rules.predicates;
 
+import org.springframework.rules.*;
 import org.springframework.rules.BinaryPredicate;
 
 /**
@@ -49,7 +50,7 @@ public class ParameterizedBeanPropertyExpression
     }
 
     /**
-     * @see org.springframework.rules.predicates.BeanPropertyExpression#getPropertyName()
+     * @see org.springframework.rules.BeanPropertyExpression#getPropertyName()
      */
     public String getPropertyName() {
         return parameterizedExpression.getPropertyName();
