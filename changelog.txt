@@ -26,6 +26,7 @@ Package org.springframework.core
 * fixed FileSystemResource's "createRelative" to correctly apply a given relative path when starting from a directory
 
 Package org.springframework.jdbc
+* added "int[] batchExecute(String[] sql)" method for executing a group os sql statements as a batch, if that is supported by the JDBC driver
 * DataSourceUtils only executes Connection cleanup in "beforeCompletion" synchronization if there are no open references
 * added C3P0NativeJdbcExtractor for C3P0 0.8.5 or later (for earlier C3P0 versions, use SimpleNativeJdbcExtractor)
 * added "maxRows" bean property to JdbcTemplate, allowing to specify the maximum number of rows to be fetched

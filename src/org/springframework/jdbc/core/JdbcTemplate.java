@@ -280,6 +280,87 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		execute(new ExecuteStatementCallback());
 	}
 
+	public int[] batchExecute(String[] sql) throws DataAccessException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing SQL batch update of " + sql.length + " statements");
+		}
+		boolean supportsBatchUpdates = false;
+		Connection con = DataSourceUtils.getConnection(getDataSource());
+		try {
+			DatabaseMetaData dbmd = con.getMetaData();
+			try {
+				if (dbmd != null) {
+					if (dbmd.supportsBatchUpdates()) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("JDBC driver supports batch updates");
+						}
+						supportsBatchUpdates = true;
+					}
+					else {
+						if (logger.isDebugEnabled()) {
+							logger.debug("JDBC driver does not support batch updates");
+						}
+					}
+				}
+			}
+			catch (AbstractMethodError ame) {
+				logger.warn("JDBC driver does not support JDBC 2.0 'supportsBatchUpdates' method");
+			}
+		}
+		catch (SQLException se) {
+			throw getExceptionTranslator().translate("executing batch", "getDatabaseMetatData", se);
+		}
+		finally {
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+		}
+		
+		int[] rowsAffected = new int[sql.length];
+
+		con = DataSourceUtils.getConnection(getDataSource());
+		String currSql = null;
+		Statement stmt = null;
+		try {
+			stmt = con.createStatement();
+			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
+			
+			if (supportsBatchUpdates) {
+
+				for (int i = 0; i < sql.length; i++) {
+					currSql = sql[i];
+					stmt.addBatch(currSql);
+				}
+				rowsAffected = stmt.executeBatch();
+				SQLWarning warning = stmt.getWarnings();
+				throwExceptionOnWarningIfNotIgnoringWarnings(warning);
+				
+			}
+			else {
+				
+				for (int i = 0; i < sql.length; i++) {
+					currSql = sql[i];
+					if (!stmt.execute(currSql))
+						rowsAffected[i] = stmt.getUpdateCount();
+					else
+						throw new InvalidDataAccessApiUsageException("Invalid batch SQL statement: " + currSql);
+					SQLWarning warning = stmt.getWarnings();
+					throwExceptionOnWarningIfNotIgnoringWarnings(warning);
+				}
+
+			}
+
+		}
+		catch (SQLException ex) {
+			throw getExceptionTranslator().translate("executing batch", currSql, ex);
+		}
+		finally {
+			JdbcUtils.closeStatement(stmt);
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+		}
+		
+		return rowsAffected;
+	}
+
+	
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
 		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL must not be null");
