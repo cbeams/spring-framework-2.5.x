@@ -33,7 +33,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.23 2003-12-01 10:24:11 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.24 2003-12-01 10:55:49 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 	
@@ -68,7 +68,7 @@ public class AopProxyTests extends TestCase {
 		}
 	}
 
-	public void testNoInterceptors() {
+	public void testNoInterceptorsAndNoTarget() {
 		AdvisedSupport pc =
 			new AdvisedSupport(new Class[] { ITestBean.class });
 		// Add no interceptors
