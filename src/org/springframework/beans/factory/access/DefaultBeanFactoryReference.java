@@ -54,12 +54,13 @@ public class DefaultBeanFactoryReference implements BeanFactoryReference {
 
 		if (beanFactory != null) {
 			BeanFactory savedFactory;
+
+			// we don't actually guarantee thread-safty, but it's not a lot of extra work
 			synchronized (this) {
 				savedFactory = beanFactory;
 				beanFactory = null;
 			}
 
-			// we don't actually guarantee thread-safty, but it's not a lot of extra work
 			if (savedFactory != null && savedFactory instanceof ConfigurableBeanFactory) {
 				((ConfigurableBeanFactory) savedFactory).destroySingletons();
 			}

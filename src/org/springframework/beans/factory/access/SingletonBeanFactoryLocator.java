@@ -439,20 +439,29 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 					return beanFactory;
 				}
 
+				// note that it's legal to call release more than once!
 				public void release() throws FatalBeanException {
 					synchronized (bfgInstancesByKey) {
-						BeanFactoryGroup bfg = (BeanFactoryGroup) bfgInstancesByObj.get(this.groupContextRef);
-						if (bfg != null) {
-							bfg.refCount--;
-							if (bfg.refCount == 0) {
-								destroyDefinition(this.groupContextRef, resourceName);
-								bfgInstancesByKey.remove(resourceName);
-								bfgInstancesByObj.remove(this.groupContextRef);
+						BeanFactory savedRef = this.groupContextRef;
+						if (savedRef != null) {
+							this.groupContextRef = null;
+							BeanFactoryGroup bfg = (BeanFactoryGroup) bfgInstancesByObj
+									.get(savedRef);
+							if (bfg != null) {
+								bfg.refCount--;
+								if (bfg.refCount == 0) {
+									destroyDefinition(savedRef, resourceName);
+									bfgInstancesByKey.remove(resourceName);
+									bfgInstancesByObj.remove(savedRef);
+								}
 							}
-						}
-						else {
-							logger.warn("Tried to release a SingletonBeanFactoryLocator (or subclass) group definition " +
-									"more times than it has actually been used. Resource name [" + resourceName + "]");
+							else {
+								// this should be impossible
+								logger
+										.warn("Tried to release a SingletonBeanFactoryLocator (or subclass) group definition "
+												+ "more times than it has actually been used. Resource name ["
+												+ resourceName + "]");
+							}
 						}
 					}
 				}
