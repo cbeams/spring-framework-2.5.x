@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 
 /**
- * A base super class for a state definition, associtable with any number of
+ * A base super class for a state definition, associatable with any number of
  * Flow definitions. Types of states include action states, view states, subflow
  * states, and end states.
  * 

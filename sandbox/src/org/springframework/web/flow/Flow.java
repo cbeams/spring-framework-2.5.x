@@ -129,6 +129,7 @@ import org.springframework.util.closure.support.AbstractConstraint;
  * either externally or via a specific subclass.
  * 
  * @author Keith Donald
+ * @author Colin Sampaleanu
  * @see FlowEventProcessor
  */
 public class Flow implements FlowEventProcessor, Serializable {
@@ -599,6 +600,24 @@ public class Flow implements FlowEventProcessor, Serializable {
 				response);
 		return viewDescriptor;
 	}
+    
+    // javadoc in superclass
+    public ViewDescriptor resume(FlowSessionExecutionStack sessionExecutionStack, String stateId, 
+            HttpServletRequest request, HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("A new session resuming in state '" + stateId + "' for flow '" + getId()
+                    + "' was requested; processing...");
+        }
+        
+        AbstractState abstractState = getRequiredState(stateId);
+        if (!(abstractState instanceof TransitionableState))
+            throw new IllegalArgumentException(
+                    "Asked to resume flow at state which is not a TransitionableState: " + abstractState);
+        TransitionableState state = (TransitionableState) abstractState;
+        
+        return new StartState(state).enter(this, sessionExecutionStack, request, response,
+                inputAttributes);
+    }
 
 	/**
 	 * @param sessionExecutionStack
