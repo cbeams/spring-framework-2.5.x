@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RedirectView.java,v 1.5 2004-03-09 08:27:23 jhoeller Exp $
+ * @version $Id: RedirectView.java,v 1.6 2004-03-14 21:33:54 jhoeller Exp $
  * @see javax.servlet.http.HttpServletResponse#sendRedirect
  */
 public class RedirectView extends AbstractUrlBasedView {
@@ -41,6 +41,17 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	public RedirectView(String url) {
 		setUrl(url);
+	}
+
+	/**
+	 * Create a new RedirectView with the given URL.
+	 * @param url the URL to redirect to
+	 * @param contextRelative whether to interpret the given URL as
+	 * relative to the current ServletContext
+	 */
+	public RedirectView(String url, boolean contextRelative) {
+		setUrl(url);
+		this.contextRelative = contextRelative;
 	}
 
 	/**
