@@ -30,8 +30,8 @@ public abstract class ApplicationEvent extends EventObject {
 	private final long timestamp;
 
 	/**
-	 * Creates a new ApplicationEvent.
-	 * @param source component that published the event
+	 * Create a new ApplicationEvent.
+	 * @param source the component that published the event
 	 */
 	public ApplicationEvent(Object source) {
 		super(source);
