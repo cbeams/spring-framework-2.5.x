@@ -79,5 +79,6 @@
 	<classpathentry kind="src" path="mock"/>
 	<classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
