@@ -6,6 +6,7 @@ package org.springframework.rules;
 
 import junit.framework.TestCase;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.functions.StringLength;
 import org.springframework.rules.predicates.EqualTo;
@@ -24,6 +25,7 @@ import org.springframework.rules.predicates.UnaryOr;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
+import org.springframework.samples.petclinic.Person;
 
 /**
  * @author Keith Donald
@@ -153,7 +155,7 @@ public class RulesTestSuite extends TestCase {
         private int number = 15;
         private int min = 10;
         private int max = 25;
-        
+
         public String getTest() {
             return test;
         }
@@ -235,26 +237,39 @@ public class RulesTestSuite extends TestCase {
         Rules r = Rules.createRules(TestBean.class);
         // test must be required, and have a length in range 3 to 25
         // or test must just equal confirmTest
-        UnaryPredicate rules = constraints.or(
-                constraints.all("test", new UnaryPredicate[] {
-                        constraints.required(),
+        UnaryPredicate rules = constraints.or(constraints.all("test",
+                new UnaryPredicate[] { constraints.required(),
                         constraints.maxLength(25),
-                        constraints.minLength(3)}),
-                constraints.eqProperty("test", "confirmTest"));
+                        constraints.minLength(3) }), constraints.eqProperty(
+                "test", "confirmTest"));
         r.add(rules);
         assertTrue(r.test(new TestBean()));
         TestBean b = new TestBean();
         b.test = "a";
         b.confirmTest = "a";
         assertTrue(r.test(b));
-        
+
         b.test = null;
         b.confirmTest = null;
         assertTrue(r.test(b));
-        
+
         b.test = "hi";
         assertFalse(r.test(b));
-        
+    }
+
+    public void testDefaultRulesSource() {
+        ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
+                "org/springframework/rules/rules-context.xml");
+        RulesSource rulesSource = (RulesSource)ac.getBean("rulesSource");
+        Rules rules = rulesSource.getRules(Person.class);
+        assertTrue(rules != null);
+        Person p = new Person();
+        assertFalse(rules.test(p));
+        p.setFirstName("Keith");
+        p.setLastName("Donald");
+        assertTrue(rules.test(p));
+        p.setLastName("Keith");
+        assertFalse(rules.test(p));
     }
 
 }

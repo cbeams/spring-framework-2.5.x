@@ -2,15 +2,44 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+	<!-- The xml here is *not* the best format to define rules...it's too fine grained and as a result 
+	      way to verbose!!! -->
+	<!-- direct java / groovy / beanshell / jython or some other scripting solution is better
+	     Using the Constraints factory and builders is preferred -->
+	
   	<bean id="rulesSource" class="org.springframework.rules.DefaultRulesSource">
-  		<property name="beanRules">
+  		<property name="rules">
   			<list>
 				<bean class="org.springframework.rules.Rules">
-					<property name="beanClass"><value>org.springframework.samples.petclinic.Person</value></property>
+					<property name="beanClass">
+						<value>org.springframework.samples.petclinic.Person</value>
+					</property>
 	  				<property name="propertyRules">
 	  		 			<map>
 	  		 				<entry key="firstName">
-	  							<bean class="org.springframework.rules.predicates.Required"/>
+	  							<ref bean="required"/>
+	  		 				</entry>
+	  		 				<entry key="lastName">
+	  		 					<list>
+		  							<ref bean="required"/>
+		  							<bean class="org.springframework.rules.predicates.StringLengthConstraint">
+		  								<constructor-arg index="0">
+		  									<value>10</value>
+		  								</constructor-arg>
+		  							</bean>
+		  							<bean class="org.springframework.rules.predicates.UnaryNot">
+		  								<constructor-arg index="0">
+		  									<bean class="org.springframework.rules.predicates.ParameterizedBinaryPredicate">
+		  										<constructor-arg index="0">
+		  											<ref bean="equals"/>
+		  										</constructor-arg>
+		  										<constructor-arg index="1">
+		  											<value>Keith</value>
+		  										</constructor-arg>
+		  									</bean>
+		  								</constructor-arg>
+		  							</bean>
+		  						</list>
 	  		 				</entry>
 	  					</map>
 	  				</property>
@@ -18,4 +47,7 @@
 			</list>
   		</property>
   	</bean>
+  	
+  	<bean id="equals" class="org.springframework.rules.predicates.EqualTo"/>
+  	<bean id="required" class="org.springframework.rules.predicates.Required"/>
 </beans>

@@ -42,6 +42,54 @@ public class ParameterizedBinaryPredicate implements UnaryPredicate {
         this.predicate = predicate;
         this.parameter = parameter;
     }
+
+    /**
+     * Convenience constructor for <code>short</code> parameters.
+     */
+    public ParameterizedBinaryPredicate(BinaryPredicate predicate,
+            short number) {
+        this(predicate, new Short(number));
+    }
+
+    /**
+     * Convenience constructor for <code>byte</code> parameters.
+     */
+    public ParameterizedBinaryPredicate(BinaryPredicate predicate,
+            byte b) {
+        this(predicate, new Byte(b));
+    }
+
+    /**
+     * Convenience constructor for <code>integer</code> parameters.
+     */
+    public ParameterizedBinaryPredicate(BinaryPredicate predicate,
+            int number) {
+        this(predicate, new Integer(number));
+    }
+
+    /**
+     * Convenience constructor for <code>float</code> parameters.
+     */
+    public ParameterizedBinaryPredicate(BinaryPredicate predicate,
+            float number) {
+        this(predicate, new Float(number));
+    }
+
+    /**
+     * Convenience constructor for <code>double</code> parameters.
+     */
+    public ParameterizedBinaryPredicate(BinaryPredicate predicate,
+            double number) {
+        this(predicate, new Double(number));
+    }
+
+    /**
+     * Convenience constructor for <code>boolean</code> parameters.
+     */
+    public ParameterizedBinaryPredicate(BinaryPredicate predicate,
+            boolean bool) {
+        this(predicate, (bool ? Boolean.TRUE : Boolean.FALSE));
+    }
     
     public Object getParameter() {
         return parameter;
