@@ -145,7 +145,18 @@ public class UrlPathHelper {
 	 * @return the path within the servlet mapping, or ""
 	 */
 	public String getPathWithinServletMapping(HttpServletRequest request) {
-		return getPathWithinApplication(request).substring(getServletPath(request).length());
+		String pathWithinApp = getPathWithinApplication(request);
+		String servletPath = getServletPath(request);
+		if (pathWithinApp.startsWith(servletPath)) {
+			// Normal case: URI contains servlet path.
+			return pathWithinApp.substring(servletPath.length());
+		}
+		else {
+			// Special case: URI is different from servlet path.
+			// Can happen e.g. with index page: URI="/", servletPath="/index.html"
+			// Use servlet path in this case, as it indicates the actual target path.
+			return servletPath;
+		}
 	}
 
 	/**

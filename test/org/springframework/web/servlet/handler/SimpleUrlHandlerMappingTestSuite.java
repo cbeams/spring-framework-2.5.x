@@ -75,6 +75,11 @@ public class SimpleUrlHandlerMappingTestSuite extends TestCase {
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
+		req = new MockHttpServletRequest("GET", "/");
+		req.setServletPath("/welcome.html");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
 		req = new MockHttpServletRequest("GET", "/show.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
