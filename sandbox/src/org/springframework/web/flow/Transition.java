@@ -15,12 +15,12 @@
  */
 package org.springframework.web.flow;
 
+import java.io.Serializable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AbstractConstraint;
 
 /**
  * A transition takes a flow execution from one state to another when executed.
@@ -46,7 +46,7 @@ public class Transition {
 	 * The criteria that determines whether or not this transition handles a
 	 * given <code>Event</code>.
 	 */
-	private Constraint condition;
+	private TransitionCriteria criteria;
 
 	/**
 	 * The source state that owns this transition.
@@ -74,21 +74,41 @@ public class Transition {
 	public Transition(String eventId, String targetStateId) {
 		Assert.notNull(eventId, "The event id property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.condition = createDefaultCondition(eventId);
+		this.criteria = createDefaultTransitionCriteria(eventId);
 		this.targetStateId = targetStateId;
 	}
 
 	/**
+	 * Create a default constraint implementation that will match true on events
+	 * with the provided event id.
+	 * <p>
+	 * If the given event id is "*", a wildcard event criteria object will be
+	 * returned that matches any event. Otherwise you get a criteria object that
+	 * matches given event id exactly.
+	 * @param the default event condition
+	 */
+	protected TransitionCriteria createDefaultTransitionCriteria(String eventId) {
+		if (WILDCARD_EVENT_ID.equals(eventId)) {
+			return WILDCARD_TRANSITION_CRITERIA;
+		}
+		else {
+			// implementation note: this inner class is not a class constant
+			// because we need the eventId
+			return new EventIdTransitionCriteria(eventId);
+		}
+	}
+
+	/**
 	 * Create a new transition.
-	 * @param condition Constraint object used to determine if this transition
-	 *        should be executed for a particular event id
+	 * @param criteria Strategy object used to determine if this transition
+	 *        should be executed given contextual information
 	 * @param targetStateId The id of the state to transition to when this
 	 *        transition is executed
 	 */
-	public Transition(Constraint condition, String targetStateId) {
-		Assert.notNull(condition, "The eventIdCriteria property is required");
+	public Transition(TransitionCriteria criteria, String targetStateId) {
+		Assert.notNull(criteria, "The transition criteria property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.condition = condition;
+		this.criteria = criteria;
 		this.targetStateId = targetStateId;
 	}
 
@@ -138,40 +158,12 @@ public class Transition {
 	}
 
 	/**
-	 * Create a default constraint implementation that will match true on events
-	 * with the provided event id.
-	 * <p>
-	 * If the given event id is "*", a wildcard event criteria object will be
-	 * returned that matches any event. Otherwise you get a criteria object that
-	 * matches given event id exactly.
-	 * @param the default event condition
-	 */
-	protected Constraint createDefaultCondition(final String eventId) {
-		if (WILDCARD_EVENT_ID.equals(eventId)) {
-			return WILDCARD_EVENT_CRITERIA;
-		}
-		else {
-			// implementation note: this inner class is not a class constant
-			// because we need the eventId
-			return new AbstractConstraint() {
-				public boolean test(Object argument) {
-					return ((FlowExecutionContext)argument).getLastEvent().getId().equals(eventId);
-				}
-
-				public String toString() {
-					return eventId;
-				}
-			};
-		}
-	}
-
-	/**
 	 * Returns the strategy used to determine if this transition should execute
 	 * given a execution context.
 	 * @return the constraint
 	 */
-	public Constraint getCondition() {
-		return this.condition;
+	public TransitionCriteria getCriteria() {
+		return this.criteria;
 	}
 
 	/**
@@ -180,8 +172,8 @@ public class Transition {
 	 * @param context the flow execution context
 	 * @return true if this transition should execute, false otherwise
 	 */
-	public boolean executesOn(FlowExecutionContext context) {
-		return condition.test(context);
+	public boolean shouldExecute(FlowExecutionContext context) {
+		return this.criteria.test(context);
 	}
 
 	/**
@@ -217,18 +209,41 @@ public class Transition {
 	/**
 	 * Event matching criteria that matches on any event.
 	 */
-	public static final Constraint WILDCARD_EVENT_CRITERIA = new Constraint() {
-		public boolean test(Object o) {
+	public static final TransitionCriteria WILDCARD_TRANSITION_CRITERIA = new TransitionCriteria() {
+		public boolean test(FlowExecutionContext context) {
 			return true;
 		}
 
-		public String toString() {
+		public String getCaption() {
 			return WILDCARD_EVENT_ID;
+		}
+
+		public String toString() {
+			return getCaption();
 		}
 	};
 
+	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
+		private String eventId;
+
+		public EventIdTransitionCriteria(String eventId) {
+			this.eventId = eventId;
+		}
+
+		public String getCaption() {
+			return eventId;
+		}
+
+		public boolean test(FlowExecutionContext context) {
+			return context.getLastEvent().getId().equals(eventId);
+		}
+
+		public String toString() {
+			return getCaption();
+		}
+	}
+
 	public String toString() {
-		return new ToStringCreator(this).append("eventIdCriteria", condition).append("toState", targetStateId)
-				.toString();
+		return new ToStringCreator(this).append("criteria", criteria).append("targetStateId", targetStateId).toString();
 	}
 }

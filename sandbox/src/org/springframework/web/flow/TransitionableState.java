@@ -130,7 +130,7 @@ public abstract class TransitionableState extends State {
 		Set criteria = new LinkedHashSet(transitions.size());
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
-			criteria.add(((Transition)it.next()).getCondition());
+			criteria.add(((Transition)it.next()).getCriteria());
 		}
 		return Collections.unmodifiableSet(criteria);
 	}
@@ -162,7 +162,7 @@ public abstract class TransitionableState extends State {
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
-			if (transition.executesOn(context)) {
+			if (transition.shouldExecute(context)) {
 				return transition;
 			}
 		}
