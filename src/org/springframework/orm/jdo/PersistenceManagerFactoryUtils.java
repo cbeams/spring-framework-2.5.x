@@ -91,7 +91,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
-	    throws DataAccessResourceFailureException {
+	    throws DataAccessResourceFailureException, IllegalStateException {
 		return getPersistenceManager(pmf, allowCreate, true);
 	}
 
@@ -111,7 +111,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate,
 	                                                       boolean allowSynchronization)
-	    throws DataAccessResourceFailureException {
+	    throws DataAccessResourceFailureException, IllegalStateException {
 
 		PersistenceManagerHolder pmHolder =
 				(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);

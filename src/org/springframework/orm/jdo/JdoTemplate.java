@@ -120,7 +120,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	/**
-	 * Return if a new Session should be created if no thread-bound found.
+	 * Return if a new PersistenceManager should be created if no thread-bound found.
 	 */
 	public boolean isAllowCreate() {
 		return allowCreate;
@@ -128,9 +128,10 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 
 	public Object execute(JdoCallback action) throws DataAccessException {
-		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(),
-																																								 this.allowCreate);
-		boolean existingTransaction = TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory());
+		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(
+		    getPersistenceManagerFactory(), isAllowCreate());
+		boolean existingTransaction =
+		    TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory());
 		try {
 			Object result = action.doInJdo(pm);
 			flushIfNecessary(pm, existingTransaction);

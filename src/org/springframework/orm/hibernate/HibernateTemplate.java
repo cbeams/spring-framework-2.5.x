@@ -163,7 +163,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	public Object execute(HibernateCallback action) throws DataAccessException {
-		Session session = (!this.allowCreate ?
+		Session session = (!isAllowCreate() ?
 				SessionFactoryUtils.getSession(getSessionFactory(), false) :
 				SessionFactoryUtils.getSession(getSessionFactory(), getEntityInterceptor(),
 																			 getJdbcExceptionTranslator()));
