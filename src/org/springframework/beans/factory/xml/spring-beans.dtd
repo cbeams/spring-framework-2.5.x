@@ -31,7 +31,7 @@
   XML documents that conform to this DTD should declare the following doctype:
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.20 2004-01-21 23:13:18 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.21 2004-01-29 23:27:50 aarendsen Exp $
 -->
 
 <!--
@@ -51,8 +51,8 @@
 )>
 
 <!--
-  Default values for all bean definitions. Can be overridden at
-  the "bean" level. See those attribute definitions for details.
+	Default values for all bean definitions. Can be overridden at
+	the "bean" level. See those attribute definitions for details.
 -->
 <!ATTLIST beans default-lazy-init (true | false) "false">
 <!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
@@ -104,7 +104,7 @@
 <!ATTLIST bean singleton (true | false) "true">
 
 <!--
-  If this bean should be lazily initialized.
+	If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
 -->
@@ -162,12 +162,12 @@
 <!ATTLIST bean dependency-check (none | objects | simple | all | default) "default">
 
 <!--
-  The names of the beans that this bean depends on being initialized.
-  The bean factory will guarantee that these beans get initialized before.
+	The names of the beans that this bean depends on being initialized.
+	The bean factory will guarantee that these beans get initialized before.
 
 	Note that dependencies are normally expressed through bean properties or
-  constructor arguments. This property should just be necessary for other kinds
-  of dependencies like statics (*ugh*) or database preparation on startup.
+	constructor arguments. This property should just be necessary for other kinds
+	of dependencies like statics (*ugh*) or database preparation on startup.
 -->
 <!ATTLIST bean depends-on CDATA #IMPLIED>
 
@@ -197,7 +197,7 @@
 )>
 
 <!--
-  The constructor-arg than can have an optional index attribute,
+	The constructor-arg than can have an optional index attribute,
 	to specify the exact index in the constructor argument list. Only needed
 	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
 -->
