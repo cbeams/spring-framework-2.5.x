@@ -314,7 +314,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private StateGroups stateGroups = new StateGroups(this);
 
-	private transient FlowServiceLocator serviceLocator;
+	private transient FlowServiceLocator flowServiceLocator;
 
 	private transient EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(
 			FlowExecutionListener.class);
@@ -334,9 +334,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param id
 	 * @param serviceLocator
 	 */
-	public Flow(String id, FlowServiceLocator serviceLocator) {
+	public Flow(String id, FlowServiceLocator flowServiceLocator) {
 		setId(id);
-		setServiceLocator(serviceLocator);
+		setFlowServiceLocator(flowServiceLocator);
 	}
 
 	/**
@@ -344,9 +344,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param startStateId
 	 * @param states
 	 */
-	public Flow(String id, String startStateId, FlowServiceLocator serviceLocator, AbstractState[] states) {
+	public Flow(String id, String startStateId, FlowServiceLocator flowServiceLocator, AbstractState[] states) {
 		setId(id);
-		setServiceLocator(serviceLocator);
+		setFlowServiceLocator(flowServiceLocator);
 		addAll(states);
 		setStartState(startStateId);
 	}
@@ -356,8 +356,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 		this.id = id;
 	}
 
-	public void setServiceLocator(FlowServiceLocator serviceLocator) {
-		this.serviceLocator = serviceLocator;
+	public void setFlowServiceLocator(FlowServiceLocator serviceLocator) {
+		this.flowServiceLocator = serviceLocator;
 	}
 
 	public boolean equals(Object o) {
@@ -375,7 +375,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @param listener
 	 */
-	public void setExecutionListener(FlowExecutionListener listener) {
+	public void setFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners.clear();
 		this.flowExecutionListeners.add(listener);
 	}
@@ -383,7 +383,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @param listeners
 	 */
-	public void setExecutionListeners(FlowExecutionListener[] listeners) {
+	public void setFlowExecutionListeners(FlowExecutionListener[] listeners) {
 		this.flowExecutionListeners.clear();
 		this.flowExecutionListeners.addAll(listeners);
 	}
@@ -391,21 +391,21 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @param listener
 	 */
-	public void addExecutionListener(FlowExecutionListener listener) {
+	public void addFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners.add(listener);
 	}
 
 	/**
 	 * @param listener
 	 */
-	public void removeExecutionListener(FlowExecutionListener listener) {
+	public void removeFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners.remove(listener);
 	}
 
 	/**
 	 * @return
 	 */
-	public int getExecutionListenerCount() {
+	public int getFlowExecutionListenerCount() {
 		return flowExecutionListeners.getListenerCount();
 	}
 
@@ -413,7 +413,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param listenerClass
 	 * @return
 	 */
-	public boolean isExecutionListenerAdded(Class listenerClass) {
+	public boolean isFlowExecutionListenerAdded(Class listenerClass) {
 		Assert.isTrue(FlowExecutionListener.class.isAssignableFrom(listenerClass),
 				"Listener class must be a FlowSessionExecutionListener");
 		return this.flowExecutionListeners.isAdded(listenerClass);
@@ -423,14 +423,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param listener
 	 * @return
 	 */
-	public boolean isExecutionListenerAdded(FlowExecutionListener listener) {
+	public boolean isFlowExecutionListenerAdded(FlowExecutionListener listener) {
 		return this.flowExecutionListeners.isAdded(listener);
 	}
 
 	/**
 	 * @return
 	 */
-	public ProcessTemplate getExecutionListenerIteratorTemplate() {
+	public ProcessTemplate getFlowExecutionListenerIteratorTemplate() {
 		return flowExecutionListeners;
 	}
 
@@ -444,13 +444,13 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/**
 	 * @return
 	 */
-	public FlowServiceLocator getServiceLocator() {
-		assertServiceLocatorSet();
-		return this.serviceLocator;
+	public FlowServiceLocator getFlowServiceLocator() {
+		assertFlowServiceLocatorSet();
+		return this.flowServiceLocator;
 	}
 
-	private void assertServiceLocatorSet() {
-		Assert.notNull(serviceLocator, "The flow service locator reference you asked for is required "
+	private void assertFlowServiceLocatorSet() {
+		Assert.notNull(flowServiceLocator, "The flow service locator reference you asked for is required "
 				+ "to lookup subflow, action bean, and attributes mapper services; "
 				+ "however, it is not set on this flow definiton -- programmer error?");
 	}
@@ -752,9 +752,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	protected void fireRequestSubmitted(final FlowExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getExecutionListenerCount() + " listener(s)");
+			logger.debug("Publishing request submitted event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getExecutionListenerIteratorTemplate().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).requestSubmitted(sessionExecution, request);
 			}
@@ -763,9 +763,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	protected void fireRequestProcessed(final FlowExecution sessionExecution, final HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request processed event to " + getExecutionListenerCount() + " listener(s)");
+			logger.debug("Publishing request processed event to " + getFlowExecutionListenerCount() + " listener(s)");
 		}
-		getExecutionListenerIteratorTemplate().run(new Block() {
+		getFlowExecutionListenerIteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).requestProcessed(sessionExecution, request);
 			}
@@ -775,19 +775,19 @@ public class Flow implements FlowEventProcessor, Serializable {
 	// flow config factory methods
 
 	protected Flow spawnFlow(Class flowImplementationClass) {
-		return getServiceLocator().getFlow(flowImplementationClass);
+		return getFlowServiceLocator().getFlow(flowImplementationClass);
 	}
 
 	protected ActionBean useActionBean(Class actionBeanImplementationClass) {
-		return getServiceLocator().getActionBean(actionBeanImplementationClass);
+		return getFlowServiceLocator().getActionBean(actionBeanImplementationClass);
 	}
 
 	protected FlowAttributesMapper useAttributesMapper(String attributesMapperBeanNamePrefix) {
-		return getServiceLocator().getFlowAttributesMapper(attributesMapper(attributesMapperBeanNamePrefix));
+		return getFlowServiceLocator().getFlowAttributesMapper(attributesMapper(attributesMapperBeanNamePrefix));
 	}
 
 	protected FlowAttributesMapper useAttributesMapper(Class flowAttributesMapperImplementationClass) {
-		return getServiceLocator().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
+		return getFlowServiceLocator().getFlowAttributesMapper(flowAttributesMapperImplementationClass);
 	}
 
 	/**

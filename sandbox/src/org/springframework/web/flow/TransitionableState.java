@@ -35,6 +35,20 @@ import org.springframework.util.ToStringCreator;
 public abstract class TransitionableState extends AbstractState {
 	private Set transitions = new LinkedHashSet();
 
+	public TransitionableState(String id) {
+		super(id);
+	}
+
+	public TransitionableState(String id, Transition transition) {
+		super(id);
+		add(transition);
+	}
+
+	public TransitionableState(String id, Transition[] transitions) {
+		super(id);
+		addAll(transitions);
+	}
+
 	public TransitionableState(Flow flow, String id) {
 		super(flow, id);
 	}

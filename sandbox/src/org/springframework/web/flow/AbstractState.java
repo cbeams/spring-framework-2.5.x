@@ -53,6 +53,17 @@ public abstract class AbstractState implements Serializable {
 	private String id;
 
 	/**
+	 * Creates a state with the provided the provided <code>id</code>.
+	 * 
+	 * An owning flow must be set before this state is used.
+	 * 
+	 * @param id The state identifier (must be unique to any future flow);
+	 */
+	public AbstractState(String id) {
+		setId(id);
+	}
+
+	/**
 	 * Creates a state for the provided <code>flow</code> identified by the
 	 * provided <code>id</code>.
 	 * 
@@ -145,7 +156,7 @@ public abstract class AbstractState implements Serializable {
 	}
 
 	protected FlowServiceLocator getFlowServiceLocator() {
-		return getFlow().getServiceLocator();
+		return getFlow().getFlowServiceLocator();
 	}
 
 	public boolean equals(Object o) {

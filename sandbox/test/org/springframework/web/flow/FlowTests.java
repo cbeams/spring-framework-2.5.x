@@ -63,7 +63,7 @@ public class FlowTests extends TestCase {
 		dao.getActionBean(bindAndValidateStateId);
 		flowDaoMc.setReturnValue(new NoOpActionBean());
 		flowDaoMc.replay();
-		flow.setServiceLocator(dao);
+		flow.setFlowServiceLocator(dao);
 	}
 
 	private class TestMasterFlowDependencyLookup extends Flow {
