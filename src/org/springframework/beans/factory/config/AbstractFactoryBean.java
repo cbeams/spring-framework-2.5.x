@@ -38,6 +38,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public abstract class AbstractFactoryBean implements FactoryBean, InitializingBean {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean singleton = true;
@@ -46,7 +47,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 
 	/**
 	 * Set if a singleton should be created, or a new object
-	 * on each request else. Default is true.
+	 * on each request else. Default is true (a singleton).
 	 */
 	public final void setSingleton(boolean singleton) {
 		this.singleton = singleton;
@@ -57,13 +58,13 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	}
 
 	public final void afterPropertiesSet() throws Exception {
-		if (singletonInstance == null) {
+		if (this.singleton) {
 			this.singletonInstance = createInstance();
 		}
 	}
 
 	public final Object getObject() throws Exception {
-		if (isSingleton()) {
+		if (this.singleton) {
 			return this.singletonInstance;
 		}
 		else {
@@ -75,7 +76,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	 * Template method that subclasses must override to construct
 	 * the object returned by this factory.
 	 * <p>Invoked on initialization of this FactoryBean in case of
-	 * a singleton; else, on each getObject() call.
+	 * a singleton; else, on each <code>getObject()</code> call.
 	 * @return the object returned by this factory
 	 * @throws Exception if an exception occured during object creation
 	 * @see #getObject
