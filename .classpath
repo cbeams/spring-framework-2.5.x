@@ -77,14 +77,14 @@
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
-	<classpathentry kind="lib" path="lib/groovy/groovy-1.0-beta-6.jar"/>
+	<classpathentry kind="lib" path="lib/groovy/groovy-1.0-beta-10.jar"/>
 	<classpathentry kind="lib" path="lib/jsf/jsf-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-httpclient.jar"/>
 	<classpathentry kind="lib" path="lib/oro/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/poi/poi-2.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler.jar"/>
-	<classpathentry kind="lib" path="lib/bsh/bsh-2.0b1.jar"/>
+	<classpathentry kind="lib" path="lib/bsh/bsh-2.0b2.jar"/>
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxremote.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxremote_optional.jar"/>
