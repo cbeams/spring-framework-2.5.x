@@ -44,6 +44,9 @@ import org.springframework.jmx.assembler.ReflectiveModelMBeanInfoAssembler;
 import org.springframework.jmx.naming.KeyNamingStrategy;
 import org.springframework.jmx.naming.ObjectNamingStrategy;
 import org.springframework.jmx.util.JmxUtils;
+import org.springframework.jmx.registration.RegistrationStrategy;
+import org.springframework.jmx.registration.DefaultRegistrationStrategy;
+import org.springframework.jmx.registration.MBeanServerAwareRegistrationStrategy;
 
 /**
  * A bean that allows for any Spring-managed to be exposed to an <code>MBeanServer</code>
@@ -104,6 +107,11 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	 */
 	private ObjectName[] registeredBeans;
 
+	/**
+	 * Strategy interface used to register an MBean with the <code>MBeanServer</code>.
+	 */
+	private RegistrationStrategy registrationStrategy = new DefaultRegistrationStrategy();
+
 
 	/**
 	 * Specify an instance <code>MBeanServer</code> with which all beans should
@@ -157,6 +165,15 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	}
 
 	/**
+	 * Sets the implementation of <code>RegistrationStrategy</code> used to
+	 * register MBeans.
+	 * @param registrationStrategy an implementation of the <code>RegistrationStrategy</code> interface.
+	 */
+	public void setRegistrationStrategy(RegistrationStrategy registrationStrategy) {
+		this.registrationStrategy = registrationStrategy;
+	}
+
+	/**
 	 * Implemented to grab the <code>BeanFactory</code> to allow for auto detection of
 	 * managed bean resources.
 	 */
@@ -197,6 +214,10 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		// JBoss where there is already an MBeanServer loaded
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
+		}
+
+		if(registrationStrategy instanceof MBeanServerAwareRegistrationStrategy) {
+			((MBeanServerAwareRegistrationStrategy)registrationStrategy).setMBeanServer(this.server);
 		}
 
 		// The beans property may be null.
@@ -346,7 +367,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		mbean.setModelMBeanInfo(this.assembler.getMBeanInfo(beanKey, bean.getClass()));
 		mbean.setManagedResource(bean, "ObjectReference");
 
-		this.server.registerMBean(mbean, objectName);
+		registrationStrategy.registerMBean(mbean, objectName);
 
 		return objectName;
 	}
@@ -382,7 +403,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 		mbean.setModelMBeanInfo(this.assembler.getMBeanInfo(beanKey, targetSource.getTargetClass()));
 		mbean.setManagedResource(proxy, "ObjectReference");
 
-		this.server.registerMBean(mbean, objectName);
+		registrationStrategy.registerMBean(mbean, objectName);
 
 		return objectName;
 	}
@@ -399,7 +420,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	 */
 	private ObjectName registerMBean(String beanKey, Object mbean) throws JMException {
 		ObjectName objectName = this.namingStrategy.getObjectName(mbean, beanKey);
-		this.server.registerMBean(mbean, objectName);
+		registrationStrategy.registerMBean(mbean, objectName);
 		return objectName;
 	}
 
@@ -450,7 +471,7 @@ public class MBeanExporter implements InitializingBean, DisposableBean, BeanFact
 	public void destroy() throws Exception {
 		logger.info("Unregistering all JMXified beans on shutdown");
 		for (int x = 0; x < this.registeredBeans.length; x++) {
-			this.server.unregisterMBean(this.registeredBeans[x]);
+			registrationStrategy.unregisterMBean(this.registeredBeans[x]);
 		}
 	}
 
