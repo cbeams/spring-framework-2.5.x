@@ -16,10 +16,10 @@
 
 package org.springframework.orm.ojb;
 
-import java.util.Collection;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Iterator;
 
-import org.apache.ojb.broker.Identity;
 import org.apache.ojb.broker.PBKey;
 import org.apache.ojb.broker.PersistenceBroker;
 import org.apache.ojb.broker.PersistenceBrokerException;
@@ -104,14 +104,6 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 	}
 
 
-	public Object getObjectByIdentity(final Identity id) throws DataAccessException {
-		return execute(new PersistenceBrokerCallback() {
-			public Object doInPersistenceBroker(PersistenceBroker pb) throws PersistenceBrokerException {
-				return pb.getObjectByIdentity(id);
-			}
-		});
-	}
-
 	public Object getObjectByQuery(final Query query) throws DataAccessException {
 		return execute(new PersistenceBrokerCallback() {
 			public Object doInPersistenceBroker(PersistenceBroker pb) throws PersistenceBrokerException {
@@ -124,6 +116,14 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 		return executeFind(new PersistenceBrokerCallback() {
 			public Object doInPersistenceBroker(PersistenceBroker pb) throws PersistenceBrokerException {
 				return pb.getCollectionByQuery(query);
+			}
+		});
+	}
+
+	public Iterator getIteratorByQuery(final Query query) throws DataAccessException {
+		return (Iterator) execute(new PersistenceBrokerCallback() {
+			public Object doInPersistenceBroker(PersistenceBroker pb) throws PersistenceBrokerException {
+				return pb.getIteratorByQuery(query);
 			}
 		});
 	}

@@ -17,8 +17,8 @@
 package org.springframework.orm.ojb;
 
 import java.util.Collection;
+import java.util.Iterator;
 
-import org.apache.ojb.broker.Identity;
 import org.apache.ojb.broker.query.Query;
 
 import org.springframework.dao.DataAccessException;
@@ -29,7 +29,8 @@ import org.springframework.dao.DataAccessException;
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
  * <p>Provides PersistenceBrokerTemplate's data access methods that mirror
- * various PersistenceBroker methods.
+ * various PersistenceBroker methods. See the PersistenceBroker javadocs
+ * for details on those methods.
  *
  * @author Juergen Hoeller
  * @since 02.07.2004
@@ -38,8 +39,31 @@ import org.springframework.dao.DataAccessException;
  */
 public interface PersistenceBrokerOperations {
 
+	/**
+	 * Execute the action specified by the given action object within a
+	 * PersistenceBroker. Application exceptions thrown by the action object
+	 * get propagated to the caller (can only be unchecked). OJB exceptions
+	 * are transformed into appropriate DAO ones. Allows for returning a
+	 * result object, i.e. a domain object or a collection of domain objects.
+	 * <p>Note: Callback code is not supposed to handle transactions itself!
+	 * Use an appropriate transaction manager like PersistenceBrokerTransactionManager.
+	 * @param action action object that specifies the OJB action
+	 * @return a result object returned by the action, or null
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 * @see PersistenceBrokerTransactionManager
+	 * @see org.springframework.dao
+	 * @see org.springframework.transaction
+	 */
 	Object execute(PersistenceBrokerCallback action) throws DataAccessException;
 
+	/**
+	 * Execute the specified action assuming that the result object is a
+	 * Collection. This is a convenience method for executing OJB queries
+	 * within an action.
+	 * @param action action object that specifies the OJB action
+	 * @return a result object returned by the action, or null
+	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
+	 */
 	Collection executeFind(PersistenceBrokerCallback action) throws DataAccessException;
 
 
@@ -47,11 +71,11 @@ public interface PersistenceBrokerOperations {
 	// Convenience methods for load, find, save, delete
 	//-------------------------------------------------------------------------
 
-	Object getObjectByIdentity(Identity id) throws DataAccessException;
-
 	Object getObjectByQuery(Query query) throws DataAccessException;
 
 	Collection getCollectionByQuery(Query query) throws DataAccessException;
+
+	Iterator getIteratorByQuery(final Query query) throws DataAccessException;
 
 	int getCount(Query query) throws DataAccessException;
 
