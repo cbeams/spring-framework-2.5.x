@@ -30,7 +30,7 @@ import org.springframework.beans.TestBean;
  * TargetSources or do other things that this proxy can't do.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: OptimizedCglibProxyTests.java,v 1.8 2004-07-23 18:11:01 johnsonr Exp $
+ * @version $Id: OptimizedCglibProxyTests.java,v 1.9 2004-07-25 16:13:23 johnsonr Exp $
  */
 public class OptimizedCglibProxyTests extends CglibProxyTests {
 	
@@ -50,11 +50,6 @@ public class OptimizedCglibProxyTests extends CglibProxyTests {
 	
 	protected boolean requiresTarget() {
 		return true;
-	}
-
-	public void testSerializationSerializableTargetAndAdvice() throws Exception {
-		// TODO remove override--
-		// it's only to conceal superclass test that fails here
 	}
 	
 	/**
