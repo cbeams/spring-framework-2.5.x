@@ -33,6 +33,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.StringUtils;
 
 /**
@@ -147,7 +148,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
 			throws BeansException {
-		Map result = new HashMap();
+
+		Map result = CollectionFactory.createLinkedMapIfPossible(16);
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 
 		// Check all bean definitions.
