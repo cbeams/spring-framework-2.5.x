@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.86 2004-02-11 11:01:56 jhoeller Exp $
+$Id: changelog.txt,v 1.87 2004-02-11 17:18:46 jhoeller Exp $
 
 
 Changes in version 1.0 RC1 (11.02.2003)
@@ -10,8 +10,10 @@ Package org.springframework.aop
 * Overhauled advice manipulation methods on AdvisedSupport
 * SimpleIntroductionAdvisor -> DefaultInterceptionIntroductionAdvisor
 * added AfterReturning advice to complete AOP advice types
-* RegexpMethodPointcut now also handles multiple patterns (backward compatible)
+* RegexpMethodPointcut can handle multiple patterns
+* added NameMatchMethodPointcut and NameMatchMethodPointcutAroundAdvisor for simple "xxx*"/"*xxx" name matches
 * changed AbstractAutoProxyCreator's "interceptors" property to "interceptorNames" to handle prototypes correctly
+* added ConcurrencyThrottleInterceptor, blocking invocations if a specified concurrency limit is reached
 
 Package org.springframework.beans
 * removed PropertyEditorManager registration from BeanWrapper, purely relying on local registration now
@@ -111,6 +113,8 @@ Package org.springframework.transaction
 * added support for transaction suspension to JtaTransactionManager, via the JTA TransactionManager interface
 * added JotmFactoryBean for exposing a JOTM instance (implementing UserTransaction and TransactionManager)
 * added WebSphereTransactionManagerFactoryBean for exposing a WebSphere 4/5's JTA TransactionManager
+* allow advisors for TransactionProxyFactoryBean's "preInterceptors" and "postInterceptors" properties
+* removed AbstractTransactionAttributeSource, moved isMatch implementation to concrete subclasses 
 
 Package org.springframework.ui
 * added VelocityEngineUtils utility class for convenient merging of a Velocity template with a model
