@@ -1,38 +1,48 @@
 <project
    xmlns:j="jelly:core"
    xmlns:maven="jelly:maven"
+   xmlns:ant="jelly:ant"
   >
-   
+
+   <!--
+    | Hack to get the Mock source tree included
+    -->
+   <preGoal name="java:compile">
+      <ant:path id="maven.compile.src.set">
+         <ant:pathelement location="${pom.build.sourceDirectory}" />
+         <ant:pathelement location="${mock.dir}" />
+      </ant:path>
+   </preGoal>
+
    <postGoal name="java:compile">
       <!-- Compile RMI stubs  -->
       <rmic base="${maven.build.dest}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper"/>
-      
+
       <copy todir="${maven.build.dest}">
          <fileset dir="${pom.build.sourceDirectory}">
             <include name="**/*.xml"/>
             <include name="**/*.dtd"/>
          </fileset>
-      </copy>      
-   </postGoal>   
-   
-   
+      </copy>
+   </postGoal>
+
    <postGoal name="test:compile">
       <echo>Copying test files from ${pom.build.unitTestSourceDirectory}</echo>
       <copy todir="${maven.test.dest}">
          <fileset dir="${pom.build.unitTestSourceDirectory}">
             <include name="**/*.xml"/>
-            <include name="**/*.properties"/>            
+            <include name="**/*.properties"/>
          </fileset>
-      </copy>      
+      </copy>
    </postGoal>
-   
+
 
    <!--
     | Build the additional jars. The full spring.jar will be built as the default project target
     -->
    <preGoal name="jar:jar">
-      
-      <!-- 
+
+      <!--
        | The spring-beans jar.
        -->
       <jar jarfile="${maven.build.dir}/spring-beans-${pom.currentVersion}.jar">
@@ -43,9 +53,9 @@
          </fileset>
       </jar>
 
-      <!-- 
+      <!--
        | The spring-jdbc jar.
-       -->      
+       -->
       <jar jarfile="${maven.build.dir}/spring-jdbc-${pom.currentVersion}.jar">
          <fileset dir="${maven.build.dest}">
             <include name="org/springframework/aop/**"/>
@@ -58,9 +68,9 @@
             <include name="org/springframework/transaction/**"/>
             <include name="org/springframework/util/*"/>
          </fileset>
-      </jar>      
-      
-      
+      </jar>
+
+
    </preGoal>
 
 
@@ -68,9 +78,9 @@
     | Copy the additional jars to the distribution binary directory
     -->
    <preGoal name="dist:prepare-bin-filesystem">
-   
+
       <!-- TODO -->
-         
+
    </preGoal>
 
 
@@ -101,22 +111,22 @@
 
    <!--   ${systemScope.setProperty('javax.xml.transform.TransformerFactory','org.apache.xalan.processor.TransformerFactoryImpl')} -->
       ${systemScope.setProperty('javax.xml.transform.TransformerFactory','com.icl.saxon.TransformerFactoryImpl')}
-<!--  
+<!--
      <style   basedir="${basedir}/${doc.ref.dir}/src/"
               extension=".fop"
               destdir="${dist.ref.dir}/pdf"
               style="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"
               includes="index.xml"
       />
--->      
+-->
 
       <java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
          <classpath>
             <fileset dir="${basedir}/${doc.ref.dir}/lib">
                <include name="**/*.jar"/>
-            </fileset> 
+            </fileset>
          </classpath>
-         <sysproperty key="java.awt.headless" value="true"/> 
+         <sysproperty key="java.awt.headless" value="true"/>
          <!-- classpath refid="maven.dependency.classpath"/ -->
          <arg value="-o"/>
          <arg value="${basedir}/${doc.ref.dir}/pdf/index.fop"/>
@@ -128,7 +138,7 @@
          <classpath>
             <fileset dir="${basedir}/${doc.ref.dir}/lib">
                <include name="**/*.jar"/>
-            </fileset> 
+            </fileset>
          </classpath>
          <sysproperty key="java.awt.headless" value="true"/>
          <!-- classpath refid="maven.dependency.classpath"/ -->
@@ -161,20 +171,20 @@
               style="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"
               includes="index.xml"
       >
-         <classpath refid="maven.dependency.classpath"/>      
+         <classpath refid="maven.dependency.classpath"/>
       </style>
 -->
       <java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.ref.dir}/html/">
          <classpath>
             <fileset dir="${basedir}/${doc.ref.dir}/lib">
                <include name="**/*.jar"/>
-            </fileset> 
+            </fileset>
          </classpath>
          <!-- classpath refid="maven.dependency.classpath"/ -->
          <arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
          <arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
-      </java>      
-      
+      </java>
+
    </goal>
 
 
@@ -201,20 +211,20 @@
          <arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
          <arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
       </java>
-      
+
    </goal>
 
    <goal name="refdoc" prereqs="dochtml,dochtmlsingle,docpdf" description="Generate and copy reference documentation">
-      <mkdir dir="${maven.build.dir}/docs"/>   
+      <mkdir dir="${maven.build.dir}/docs"/>
       <mkdir dir="${maven.build.dir}/docs/ref"/>
-      
+
       <copy todir="${maven.build.dir}/docs/ref">
          <fileset dir="${doc.ref.dir}/html"/>
       </copy>
-      <copy file="${doc.ref.dir}/pdf/spring-reference.pdf" 
-          todir="${maven.build.dir}/docs/ref"/> 
-      <copy file="${doc.ref.dir}/html_single/index.html" 
-          tofile="${maven.build.dir}/docs/ref/spring-reference.html"/>           
+      <copy file="${doc.ref.dir}/pdf/spring-reference.pdf"
+          todir="${maven.build.dir}/docs/ref"/>
+      <copy file="${doc.ref.dir}/html_single/index.html"
+          tofile="${maven.build.dir}/docs/ref/spring-reference.html"/>
    </goal>
 
 

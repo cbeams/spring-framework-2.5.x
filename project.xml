@@ -72,7 +72,7 @@
          <id>jhoeller</id>
          <email>jhoeller at users.sourceforge.net</email>
          <roles>
-            <role>Project Admin</role>         
+            <role>Project Admin</role>
             <role>Developer</role>
          </roles>
       </developer>
@@ -139,7 +139,7 @@
          <roles>
             <role>Developer</role>
          </roles>
-      </developer>      
+      </developer>
       <developer>
          <name>Thomas Risberg</name>
          <id>trisberg</id>
@@ -186,7 +186,7 @@
 
    <!-- jar files the project is dependent on -->
    <dependencies>
-      <!-- 
+      <!--
        | J2EE classes. With the exception of servletapi, these are not available from the Maven online repository
        | due to licensing restrictions and must be manually added.
        -->
@@ -202,7 +202,7 @@
       <dependency>
          <id>jdo</id>
          <version>1.0</version>
-      </dependency>      
+      </dependency>
       <dependency>
          <id>ejb</id>
          <version>2.0</version>
@@ -226,9 +226,9 @@
       </dependency>
       <dependency>
          <id>ant</id>
-         <version>1.5.3-1</version>
+         <version>1.6</version>
       </dependency>
-<!--      
+<!--
       <dependency>
          <groupId>avalon-framework</groupId>
          <artifactId>avalon-framework</artifactId>
@@ -243,7 +243,7 @@
          <groupId>batik</groupId>
          <artifactId>batik-svg-dom</artifactId>
          <version>1.5</version>
-      </dependency> 
+      </dependency>
       <dependency>
          <groupId>batik</groupId>
          <artifactId>batik-bridge</artifactId>
@@ -253,17 +253,17 @@
          <groupId>batik</groupId>
          <artifactId>batik-gvt</artifactId>
          <version>1.5</version>
-      </dependency> 
+      </dependency>
       <dependency>
          <groupId>batik</groupId>
          <artifactId>batik-awt-util</artifactId>
          <version>1.5</version>
       </dependency>
--->      
+-->
       <dependency>
          <id>cos</id>
          <version>1.0</version>
-      </dependency>      
+      </dependency>
       <dependency>
          <id>burlap</id>
          <version>2.1.7</version>
@@ -313,7 +313,7 @@
       <dependency>
          <id>commons-fileupload</id>
          <version>1.0</version>
-      </dependency>       
+      </dependency>
       <dependency>
          <id>commons-logging</id>
          <version>1.0.3</version>
@@ -321,7 +321,7 @@
       <dependency>
          <id>commons-pool</id>
          <version>1.1</version>
-      </dependency>      
+      </dependency>
       <dependency>
          <id>easymock</id>
          <version>1.0</version>
@@ -348,7 +348,7 @@
          <groupId>ibatis</groupId>
          <artifactId>ibatis-common</artifactId>
          <version>1.2.9b</version>
-      </dependency> 
+      </dependency>
       <dependency>
          <groupId>ibatis</groupId>
          <artifactId>ibatis-sqlmap</artifactId>
@@ -413,7 +413,7 @@
          <id>quartz</id>
          <version>1.2.3</version>
       </dependency>
-<!--      
+<!--
       <dependency>
          <groupId>saxon</groupId>
          <artifactId>saxon</artifactId>
@@ -424,7 +424,7 @@
          <artifactId>saxon-dbxsl-extensions</artifactId>
          <version>20040115</version>
       </dependency>
--->      
+-->
       <dependency>
          <id>struts</id>
          <version>1.1</version>
@@ -433,7 +433,7 @@
          <groupId>taglibs</groupId>
          <artifactId>standard</artifactId>
          <version>1.0.2</version>
-      </dependency>      
+      </dependency>
       <dependency>
          <id>velocity</id>
          <version>1.4</version>
@@ -496,8 +496,8 @@
                <directory>${pom.build.unitTestSourceDirectory}</directory>
                <includes>
                   <include>**/*.xml</include>
-                  <include>**/*.properties</include>                  
-               </includes>               
+                  <include>**/*.properties</include>
+               </includes>
             </resource>
          </resources>
       </unitTest>
@@ -519,7 +519,7 @@
       <report>maven-developer-activity-plugin</report>
       <report>maven-file-activity-plugin</report>
       <!-- report>maven-statcvs-plugin</report -->
-      <!-- report>maven-checkstyle-plugin</report --> 
+      <!-- report>maven-checkstyle-plugin</report -->
       <report>maven-javadoc-plugin</report>
       <report>maven-jxr-plugin</report>
       <report>maven-junit-report-plugin</report>
