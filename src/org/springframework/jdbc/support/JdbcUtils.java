@@ -6,14 +6,47 @@
 package org.springframework.jdbc.support;
 
 import java.sql.Types;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * Utility methods for SQL statements.
  * @author Isabelle Muszynski
  * @author Thomas Risberg
- * @version $Id: JdbcUtils.java,v 1.2 2003-12-08 12:56:11 trisberg Exp $
+ * @version $Id: JdbcUtils.java,v 1.3 2004-01-13 18:01:59 jhoeller Exp $
  */
 public class JdbcUtils {
+
+	/**
+	 * Close the given JDBC Statement and ignore any thrown exception.
+	 * This is useful for typical finally blocks in manual JDBC code.
+	 * @param stmt the JDBC Statement to close
+	 */
+	public static void closeStatement(Statement stmt) {
+		if (stmt != null) {
+			try {
+				stmt.close();
+			}
+			catch (SQLException ignore) {
+			}
+		}
+	}
+
+	/**
+	 * Close the given JDBC ResultSet and ignore any thrown exception.
+	 * This is useful for typical finally blocks in manual JDBC code.
+	 * @param rs the JDBC ResultSet to close
+	 */
+	public static void closeResultSet(ResultSet rs) {
+		if (rs != null) {
+			try {
+				rs.close();
+			}
+			catch (SQLException ignore) {
+			}
+		}
+	}
 
 	/**
 	 * Count the occurrences of the character <code>placeholder</code> in an SQL string <code>str</code>.
@@ -84,7 +117,6 @@ public class JdbcUtils {
 	 * @return the new SQL type
 	 */
 	public static int translateType(int sqlType) {
-
 		int retType = sqlType;
 		if (Types.BIT == sqlType || Types.TINYINT == sqlType || Types.SMALLINT == sqlType || Types.INTEGER == sqlType)
 			retType = Types.INTEGER;
@@ -100,4 +132,5 @@ public class JdbcUtils {
 
 		return retType;
 	}
+
 }

@@ -27,6 +27,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
@@ -64,7 +65,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.19 2004-01-04 23:43:42 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.20 2004-01-13 18:01:59 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -222,20 +223,8 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			throw getExceptionTranslator().translate("JdbcTemplate.query(sql)", sql, ex);
 		}
 		finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				}
-				catch (SQLException ignore) {
-				}
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				}
-				catch (SQLException ignore) {
-				}
-			}
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeStatement(stmt);
 			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
@@ -295,20 +284,8 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			    null, ex);
 		}
 		finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				}
-				catch (SQLException ignore) {
-				}
-			}
-			if (ps != null) {
-				try {
-					ps.close();
-				}
-				catch (SQLException ignore) {
-				}
-			}
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeStatement(ps);
 			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
@@ -429,13 +406,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			return retVals;
 		}
 		catch (SQLException ex) {
-			if (ps != null) {
-				try {
-					ps.close();
-				}
-				catch (SQLException ignore) {
-				}
-			}
+			JdbcUtils.closeStatement(ps);
 			throw getExceptionTranslator().translate(
 			    "processing update " + (index + 1) + " of " + pscs.length + "; update was [" + pscs[index] + "]",
 			    null, ex);
@@ -509,13 +480,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			return retVals;
 		}
 		catch (SQLException ex) {
-			if (ps != null) {
-				try {
-					ps.close();
-				}
-				catch (SQLException ignore) {
-				}
-			}
+			JdbcUtils.closeStatement(ps);
 			throw getExceptionTranslator().translate(
 			    "processing batch update with size=" + pss.getBatchSize() + "; update was [" + sql + "]",
 			    sql, ex);
@@ -567,13 +532,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			    ex);
 		}
 		finally {
-			if (cs != null) {
-				try {
-					cs.close();
-				}
-				catch (SQLException ignore) {
-				}
-			}
+			JdbcUtils.closeStatement(cs);
 			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
@@ -619,11 +578,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 						throw se;
 					}
 					finally {
-						try {
-							((ResultSet) out).close();
-						}
-						catch (SQLException ignore) {
-						}
+						JdbcUtils.closeResultSet((ResultSet) out);
 					}
 				}
 				else {
@@ -673,15 +628,8 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 						returnedResults.put(p.getName(), "ResultSet returned from stored procedure was processed");
 					}
 				}
-				catch (SQLException se) {
-					throw se;
-				}
 				finally {
-					try {
-						rs.close();
-					}
-					catch (SQLException ignore) {
-					}
+					JdbcUtils.closeResultSet(rs);
 				}
 			}
 			else {
@@ -699,8 +647,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 * @param warning warning from current statement. May be null,
 	 * in which case this method does nothing.
 	 */
-	private void throwExceptionOnWarningIfNotIgnoringWarnings(SQLWarning warning)
-	    throws SQLWarningException {
+	private void throwExceptionOnWarningIfNotIgnoringWarnings(SQLWarning warning) throws SQLWarningException {
 		if (warning != null) {
 			if (this.ignoreWarnings) {
 				logger.warn("SQLWarning ignored: " + warning);
