@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.springframework.jmx.adpters.ri.HtmlAdapterHost;
+import org.springframework.jmx.adapters.ri.HtmlAdapterHost;
 
 /**
  * @author robh

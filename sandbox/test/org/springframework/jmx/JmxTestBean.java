@@ -104,4 +104,20 @@ public class JmxTestBean implements IJmxTestBean{
     public void dontExposeMe() {
         throw new RuntimeException();
     }
+
+    protected void someProtectedMethod() {
+
+    }
+
+    private void somePrivateMethod() {
+
+    }
+
+    protected void getSomething() {
+
+    }
+
+    private void getSomethingElse(){
+
+    }
 }

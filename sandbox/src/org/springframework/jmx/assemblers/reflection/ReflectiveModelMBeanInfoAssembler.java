@@ -17,6 +17,7 @@ package org.springframework.jmx.assemblers.reflection;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import javax.management.Descriptor;
 
@@ -34,16 +35,16 @@ public class ReflectiveModelMBeanInfoAssembler extends
     }
 
     protected boolean includeReadAttribute(Method method) {
-        return true;
+        return isPublic(method);
     }
 
 
     protected boolean includeWriteAttribute(Method method) {
-        return true;
+        return isPublic(method);
     }
 
     protected boolean includeOperation(Method method) {
-        return true;
+        return isPublic(method);
     }
 
     protected String getOperationDescription(Method method) {
@@ -68,5 +69,9 @@ public class ReflectiveModelMBeanInfoAssembler extends
     protected void populateOperationDescriptor(Descriptor descriptor,
             Method method) {
         // no-op
+    }
+
+    private boolean isPublic(Method method) {
+        return (method.getModifiers() & Modifier.PUBLIC) > 0;
     }
 }
