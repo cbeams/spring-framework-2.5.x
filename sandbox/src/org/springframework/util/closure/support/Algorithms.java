@@ -73,7 +73,7 @@ public class Algorithms {
 	 * @return true or false
 	 */
 	public boolean anyTrue(Iterator it, Constraint constraint) {
-		return findFirst(it, constraint) != null;
+		return new IteratorProcessTemplate(it).anyTrue(constraint);
 	}
 
 	/**
