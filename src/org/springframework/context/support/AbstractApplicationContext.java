@@ -227,14 +227,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return beanFactoryPostProcessors;
 	}
 
-	/**
-	 * Load or reload configuration.
-	 * @throws org.springframework.context.ApplicationContextException if the
-	 * configuration was invalid or couldn't be found, or if configuration
-	 * has already been loaded and reloading is forbidden
-	 * @throws BeansException if the bean factory could not be initialized
-	 */
-	public void refresh() throws BeansException {
+	public void refresh() throws BeansException, IllegalStateException {
 		this.startupTime = System.currentTimeMillis();
 
 		// tell subclass to refresh the internal bean factory
@@ -260,11 +253,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			factoryProcessor.postProcessBeanFactory(beanFactory);
 		}
 
-		if (getBeanDefinitionCount() == 0) {
-			logger.warn("No beans defined in application context [" + getDisplayName() + "]");
-		}
-		else {
-			logger.info(getBeanDefinitionCount() + " beans defined in application context [" + getDisplayName() + "]");
+		if (logger.isInfoEnabled()) {
+			if (getBeanDefinitionCount() == 0) {
+				logger.info("No beans defined in application context [" + getDisplayName() + "]");
+			}
+			else {
+				logger.info(getBeanDefinitionCount() + " beans defined in application context [" + getDisplayName() + "]");
+			}
 		}
 
 		// invoke factory processors registered as beans in the context
@@ -347,18 +342,25 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private void initMessageSource() throws BeansException {
 		try {
 			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME);
-			// Set parent message source if applicable,
-			// and if the message source is defined in this context, not in a parent.
-			if (this.parent != null && (this.messageSource instanceof HierarchicalMessageSource) &&
-			    containsBeanDefinition(MESSAGE_SOURCE_BEAN_NAME)) {
-				((HierarchicalMessageSource) this.messageSource).setParentMessageSource(
-				    getInternalParentMessageSource());
+			// make MessageSource aware of parent MessageSource
+			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
+				MessageSource parentMessageSource = getInternalParentMessageSource();
+				// only set parent MessageSource if not dealing with the parent MessageSource itself
+				if (this.messageSource != parentMessageSource) {
+					((HierarchicalMessageSource) this.messageSource).setParentMessageSource(parentMessageSource);
+				}
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Using MessageSource [" + this.messageSource + "]");
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No message source found for context [" + getDisplayName() + "]: using empty default");
 			// use empty message source to be able to accept getMessage calls
 			this.messageSource = new StaticMessageSource();
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
+						"': using default [" + this.messageSource+ "]");
+			}
 		}
 	}
 
@@ -371,10 +373,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		try {
 			this.applicationEventMulticaster =
 					(ApplicationEventMulticaster) getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME);
+			if (logger.isInfoEnabled()) {
+				logger.info("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
+			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No ApplicationEventMulticaster found for context [" + getDisplayName() + "]: using default");
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster();
+			if (logger.isInfoEnabled()) {
+				logger.info("Unable to locate ApplicationEventMulticaster with name '" +
+						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
+						"': using default [" + this.applicationEventMulticaster+ "]");
+			}
 		}
 	}
 
@@ -418,7 +427,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Destroy the singletons in the bean factory of this application context.
 	 */
 	public void close() {
-		logger.info("Closing application context [" + getDisplayName() + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("Closing application context [" + getDisplayName() + "]");
+		}
 
 		// Destroy all cached singletons in this context,
 		// invoking DisposableBean.destroy and/or "destroy-method".
@@ -543,17 +554,26 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Subclasses must implement this method to perform the actual configuration load.
 	 * The method is invoked by refresh before any other initialization work.
+	 * <p>A subclass will either create a new bean factory and hold a reference to it,
+	 * or return a single bean factory instance that it holds. In the latter case, it will
+	 * usually throw an IllegalStateException if refreshing the context more than once.
+	 * @throws BeansException if initialization of the bean factory failed
+	 * @throws IllegalStateException if already initialized and multiple refresh
+	 * attempts are not supported
 	 * @see #refresh
 	 */
-	protected abstract void refreshBeanFactory() throws BeansException;
+	protected abstract void refreshBeanFactory() throws BeansException, IllegalStateException;
 
 	/**
 	 * Subclasses must return their internal bean factory here.
 	 * They should implement the lookup efficiently, so that it can be called
 	 * repeatedly without a performance penalty.
 	 * @return this application context's internal bean factory
+	 * @throws IllegalStateException if the context does not hold an internal
+	 * bean factory yet (usually if <code>refresh</code> has never been called)
+	 * @see #refresh
 	 */
-	public abstract ConfigurableListableBeanFactory getBeanFactory();
+	public abstract ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 
 
 	/**

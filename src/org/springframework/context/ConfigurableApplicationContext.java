@@ -52,31 +52,32 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor);
 
 	/**
-	 * Load or refresh the persistent representation of the configuration,
+	 * Load respectively refresh the persistent representation of the configuration,
 	 * which might an XML file, properties file, or relational database schema.
-	 * @throws org.springframework.context.ApplicationContextException if the config cannot be loaded
-	 * @throws org.springframework.beans.BeansException if the bean factory could not be initialized
+	 * @throws BeansException if the bean factory could not be initialized
+	 * @throws IllegalStateException if already initialized and multiple refresh
+	 * attempts are not supported
 	 */
-	void refresh() throws BeansException;
+	void refresh() throws BeansException, IllegalStateException;
 
 	/**
 	 * Return the internal bean factory of this application context.
 	 * Can be used to access specific functionality of the factory.
-	 * <p>Note that this is just guaranteed to return a non-null instance
-	 * <i>after</i> the context has been refreshed at least once.
 	 * <p>Note: Do not use this to post-process the bean factory; singletons
 	 * will already have been instantiated before. Use a BeanFactoryPostProcessor
 	 * to intercept the bean factory setup process before beans get touched.
+	 * @throws IllegalStateException if the context does not hold an internal
+	 * bean factory yet (usually if <code>refresh</code> has never been called)
 	 * @see #refresh
 	 * @see #addBeanFactoryPostProcessor
 	 */
-	ConfigurableListableBeanFactory getBeanFactory();
+	ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 
 	/**
 	 * Close this application context, releasing all resources and locks that the
 	 * implementation might hold. This includes disposing all cached singleton beans.
 	 * <p>Note: Does <i>not</i> invoke close on a parent context.
-	 * @throws org.springframework.context.ApplicationContextException if there were fatal errors
+	 * @throws ApplicationContextException if there were fatal errors
 	 */
 	void close() throws ApplicationContextException;
 

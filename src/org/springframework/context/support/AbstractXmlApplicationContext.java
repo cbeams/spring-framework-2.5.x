@@ -81,7 +81,12 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	}
 
 	public final ConfigurableListableBeanFactory getBeanFactory() {
-		return beanFactory;
+		if (this.beanFactory == null) {
+			throw new IllegalStateException("Internal bean factory of context not initialized - "+
+					"call 'refresh' before accessing beans via the context");
+
+		}
+		return this.beanFactory;
 	}
 
 	/**
