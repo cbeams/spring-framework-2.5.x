@@ -30,33 +30,32 @@ import java.util.Set;
  * constant values to be accessed via their string names.
  *
  * <p>Consider class Foo containing public final static int CONSTANT1 = 66;
- * An instance of this class wrapping Foo.class will return the 
- * constant value of 66 from its asInt() method given the argument "CONSTANT1". 
+ * An instance of this class wrapping Foo.class will return the constant value
+ * of 66 from its asInt() method given the argument "CONSTANT1".
  *
- * <p>This class is ideal for use in PropertyEditors, enabling them to recognize
- * the same names as the constants themselves, and freeing them from
- * maintaining their own mapping.
+ * <p>This class is ideal for use in PropertyEditors, enabling them to
+ * recognize the same names as the constants themselves, and freeing them
+ * from maintaining their own mapping.
  *
- * @version $Id: Constants.java,v 1.2 2004-03-18 02:46:06 trisberg Exp $
+ * @version $Id: Constants.java,v 1.3 2004-05-23 20:23:32 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16-Mar-2003
  */
 public class Constants {
 
-	/** Map from String field name to object value */
-	private final Map map = new HashMap();
+	private final String className;
 
-	/** Class analyzed */
-	private final Class clazz;
+	/** Map from String field name to object value */
+	private final Map fieldCache = new HashMap();
 
 	/**
 	 * Create a new Constants converter class wrapping the given class.
 	 * All public static final variables will be exposed, whatever their type.
-	 * @param clazz class to analyze.
+	 * @param clazz class to analyze
 	 */
 	public Constants(Class clazz) {
-		this.clazz = clazz;
+		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
 		for (int i = 0; i < fields.length; i++) {
 			Field f = fields[i];
@@ -65,7 +64,7 @@ public class Constants {
 				String name = f.getName();
 				try {
 					Object value = f.get(null);
-					this.map.put(name, value);
+					this.fieldCache.put(name, value);
 				}
 				catch (IllegalAccessException ex) {
 					// just leave this field and continue
@@ -79,7 +78,7 @@ public class Constants {
 	 * @return int the number of constants exposed
 	 */
 	public int getSize() {
-		return this.map.size();
+		return this.fieldCache.size();
 	}
 
 	/**
@@ -92,8 +91,9 @@ public class Constants {
 	 */
 	public Number asNumber(String code) throws ConstantException {
 		Object o = asObject(code);
-		if (!(o instanceof Number))
-			throw new ConstantException(this.clazz, code, "not a Number");
+		if (!(o instanceof Number)) {
+			throw new ConstantException(this.className, code, "not a Number");
+		}
 		return (Number) o;
 	}
 
@@ -117,9 +117,9 @@ public class Constants {
 	 */
 	public Object asObject(String code) throws ConstantException {
 		code = code.toUpperCase();
-		Object val = this.map.get(code);
+		Object val = this.fieldCache.get(code);
 		if (val == null) {
-			throw new ConstantException(this.clazz, code, "not found");
+			throw new ConstantException(this.className, code, "not found");
 		}
 		return val;
 	}
@@ -132,10 +132,10 @@ public class Constants {
 	public Set getValues(String namePrefix) {
 		namePrefix = namePrefix.toUpperCase();
 		Set values = new HashSet();
-		for (Iterator it = this.map.keySet().iterator(); it.hasNext();) {
+		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
 			String code = (String) it.next();
 			if (code.startsWith(namePrefix)) {
-				values.add(this.map.get(code));
+				values.add(this.fieldCache.get(code));
 			}
 		}
 		return values;
@@ -162,14 +162,14 @@ public class Constants {
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
 		namePrefix = namePrefix.toUpperCase();
-		for (Iterator it = this.map.entrySet().iterator(); it.hasNext();) {
+		for (Iterator it = this.fieldCache.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = (String) entry.getKey();
 			if (key.startsWith(namePrefix) && entry.getValue().equals(value)) {
 				return key;
 			}
 		}
-		throw new ConstantException(this.clazz, namePrefix, value);
+		throw new ConstantException(this.className, namePrefix, value);
 	}
 
 	/**
