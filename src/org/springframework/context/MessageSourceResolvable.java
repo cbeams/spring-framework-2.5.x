@@ -17,12 +17,13 @@
 package org.springframework.context;
 
 /**
- * Interface for objects that are suitable for message resolution
- * in a MessageSource, e.g. validation errors.
- * @author Tony Falabella
+ * Interface for objects that are suitable for message resolution in a
+ * MessageSource. Spring's own validation error classes implement this
+ * interface.
  * @author Juergen Hoeller
  * @see MessageSource#getMessage(MessageSourceResolvable, java.util.Locale)
  * @see org.springframework.validation.ObjectError
+ * @see org.springframework.validation.FieldError
  */
 public interface MessageSourceResolvable {
 
@@ -36,7 +37,7 @@ public interface MessageSourceResolvable {
 	/**
 	 * Return the array of arguments to be used to resolve this message.
 	 * @return an array of objects to be used as parameters to replace
-	 * placeholders within the code message text
+	 * placeholders within the message text
 	 * @see <a href="http://java.sun.com/j2se/1.3/docs/api/java/text/MessageFormat.html">java.text.MessageFormat</a>
 	 */
 	public Object[] getArguments();
