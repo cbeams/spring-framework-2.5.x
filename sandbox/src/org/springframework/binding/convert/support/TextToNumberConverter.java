@@ -40,7 +40,7 @@ public class TextToNumberConverter extends AbstractFormattingConverter {
 				BigDecimal.class };
 	}
 
-	protected Object doConvert(Object o, Class targetClass) throws Exception {
-		return getFormatterLocator().getNumberFormatter(targetClass).parseValue((String)o);
+	protected Object doConvert(Object source, Class targetClass) throws Exception {
+		return getFormatterLocator().getNumberFormatter(targetClass).parseValue((String)source);
 	}
 }
