@@ -97,6 +97,8 @@ public abstract class VelocityEngineUtils {
 
 	/**
 	 * Merge the specified Velocity template with the given model into a String.
+	 * <p>When using this method to prepare a text for a mail to be sent with Spring's
+	 * mail support, consider wrapping VelocityException in MailPreparationException.
 	 * @param velocityEngine VelocityEngine to work with
 	 * @param templateLocation the location of template, relative to Velocity's
 	 * resource loader path
@@ -104,6 +106,7 @@ public abstract class VelocityEngineUtils {
 	 * as values
 	 * @return the result as String
 	 * @throws VelocityException if the template wasn't found or rendering failed
+	 * @see org.springframework.mail.MailPreparationException
 	 */
 	public static String mergeTemplateIntoString(VelocityEngine velocityEngine, String templateLocation,
 																							 Map model) throws VelocityException {
@@ -114,6 +117,8 @@ public abstract class VelocityEngineUtils {
 
 	/**
 	 * Merge the specified Velocity template with the given model into a String.
+	 * <p>When using this method to prepare a text for a mail to be sent with Spring's
+	 * mail support, consider wrapping VelocityException in MailPreparationException.
 	 * @param velocityEngine VelocityEngine to work with
 	 * @param templateLocation the location of template, relative to Velocity's
 	 * resource loader path
@@ -122,6 +127,7 @@ public abstract class VelocityEngineUtils {
 	 * as values
 	 * @return the result as String
 	 * @throws VelocityException if the template wasn't found or rendering failed
+	 * @see org.springframework.mail.MailPreparationException
 	 */
 	public static String mergeTemplateIntoString(VelocityEngine velocityEngine, String templateLocation,
 																							 String encoding, Map model) throws VelocityException {
