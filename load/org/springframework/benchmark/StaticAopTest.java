@@ -4,7 +4,6 @@ package org.springframework.benchmark;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.interceptor.InvokerInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -49,10 +48,8 @@ public class StaticAopTest extends AbstractTest implements InitializingBean {
 
 		TestBean target = new TestBean();
 		target.setName(NAME1);
-	
-		InvokerInterceptor ii = new InvokerInterceptor(target);
 
-		pf.addInterceptor(ii);
+		pf.setTarget(target);
 
 		this.advised = (ITestBean) pf.getProxy();
 		System.out.println(advised.getClass().getName());

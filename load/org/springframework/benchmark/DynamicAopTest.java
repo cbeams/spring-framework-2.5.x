@@ -3,9 +3,8 @@ package org.springframework.benchmark;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.framework.AopProxyTests;
+import org.springframework.aop.framework.AbstractAopProxyTests;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.interceptor.InvokerInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.load.AbortTestException;
@@ -39,15 +38,14 @@ public class DynamicAopTest extends AbstractTest {
 		
 		pf.addAdvisor(new Advices.ObjectReturnPointCut(new Advices.NopInterceptor()));
 
-		Advisor dynamic1 = new AopProxyTests.StringSetterNullReplacementAdvice();
+		Advisor dynamic1 = new AbstractAopProxyTests.StringSetterNullReplacementAdvice();
 		
 		pf.addAdvisor(dynamic1);
 
 		TestBean target = new TestBean();
 		target.setName(NAME1);
-		InvokerInterceptor ii = new InvokerInterceptor(target);
 
-		pf.addInterceptor(ii);
+		pf.setTarget(target);
 
 		this.advised = (ITestBean) pf.getProxy();
 		System.out.println("dynamic class=" + this.advised.getClass().getName());
