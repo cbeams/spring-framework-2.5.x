@@ -22,12 +22,14 @@ package org.springframework.beans.factory.support;
  * and the class loader to use for loading bean classes. 
  * @author Juergen Hoeller
  * @since 11.12.2003
+ * @see BeanDefinitionReaderUtils
  */
 public abstract class AbstractBeanDefinitionReader {
 
 	private BeanDefinitionRegistry beanFactory;
 
 	private ClassLoader beanClassLoader = Thread.currentThread().getContextClassLoader();
+
 
 	protected AbstractBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
 		this.beanFactory = beanFactory;

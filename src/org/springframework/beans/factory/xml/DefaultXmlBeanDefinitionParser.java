@@ -40,6 +40,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
@@ -60,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.30 2004-07-08 21:27:40 jhoeller Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.31 2004-07-09 14:04:21 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
@@ -128,7 +129,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String PROP_ELEMENT = "prop";
 	public static final String VALUE_ELEMENT = "value";
 	public static final String NULL_ELEMENT = "null";
-
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -266,31 +266,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				parent = ele.getAttribute(PARENT_ATTRIBUTE);
 			}
 
-			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
 			ConstructorArgumentValues cargs = getConstructorArgSubElements(beanName, ele);
+			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
 
-			Class beanClass = null;
-			if (className != null && this.beanClassLoader != null) {
-				beanClass = Class.forName(className, true, this.beanClassLoader);
-			}
-
-			AbstractBeanDefinition bd = null;
-			if (parent == null) {
-				if (beanClass != null) {
-					bd = new RootBeanDefinition(beanClass, cargs, pvs);
-				}
-				else {
-					bd = new RootBeanDefinition(className, cargs, pvs);
-				}
-			}
-			else {
-				if (beanClass != null) {
-					bd = new ChildBeanDefinition(parent, beanClass, cargs, pvs);
-				}
-				else {
-					bd = new ChildBeanDefinition(parent, className, cargs, pvs);
-				}
-			}
+			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
+					className, parent, cargs, pvs, getBeanClassLoader());
 
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
@@ -342,11 +322,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		catch (ClassNotFoundException ex) {
 			throw new BeanDefinitionStoreException(this.resource, beanName,
-						"Bean class [" + className + "] not found", ex);
+			                                       "Bean class [" + className + "] not found", ex);
 		}
 		catch (NoClassDefFoundError err) {
 			throw new BeanDefinitionStoreException(this.resource, beanName,
-						"Class that bean class [" + className + "] depends on not found", err);
+			                                       "Class that bean class [" + className + "] depends on not found", err);
 		}
 	}
 
