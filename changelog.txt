@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.105 2004-03-11 22:57:41 colins Exp $
+$Id: changelog.txt,v 1.106 2004-03-12 15:29:06 jhoeller Exp $
 
 
 Changes in version 1.0 final (20.3.2003)
@@ -11,12 +11,20 @@ Package org.springframework.beans
 * fixed default editor registration to use classes rather than instances, for thread-safety
 * fixed type difference weight algorithm in AbstractAutowireCapableBeanFactory to ignore non-matching arguments
 * added "ignoreUnresolvablePlaceholders" property to PropertyPlaceholderConfigurer
+* reworked PropertiesFactoryBean to work with PropertiesPersister strategy
 
 Package org.springframework.context
+* added "postProcessBeanFactory" hook to AbstractApplicationContext
+* added ResourceLoaderAware and MessageSourceAware interfaces, for expressing simpler dependencies
 * AbstractMessageSource supports resolution of message arguments that are MessageSourceResolvables themselves
 * renamed AbstractMessageSource's "resolve" method to "resolveCode"
+* reworked ReloadableResourceBundleMessageSource to work with ResourceLoader instead of ApplicationContext
+* reworked ReloadableResourceBundleMessageSource to work with PropertiesPersister strategy
+* added charset support to ReloadableResourceBundleMessageSource, via "defaultCharset" and "fileCharsets" properties
 
 Package org.springframework.core
+* added ResourceLoader interface, extended by the ApplicationContext interface
+* factored out default loading strategy from ResourceEditor into DefaultResourceLoader implementation
 * fixed CLASSPATH_URL_PREFIX check in ResourceEditor
 * log warning message rather than throw an exception if ResourceEditor cannot resolve a system property
 * decode URL file path before using it to construct a File in UrlResource and ClassPathResource
@@ -30,13 +38,21 @@ Package org.springframework.jndi
 * added "jndiEnvironment" property to AbstractJndiLocator, for simplified configuration of JNDI environment settings
 
 Package org.springframework.orm
+* added "createCriteria" method to HibernateTemplate, for creating Criteria objects that respect transaction timeouts
+* added "loadAll(Class)" method to HibernateTemplate and HibernateOperations, for retrieving all instances of a class
 * allow for ClobStringType to be instantiated without LobHandler, for use with Hibernate's SchemaExport tool
 * adapted iBATIS SQL Maps 2 support to SQL Maps 2.0 beta 4, calling the new SqlMapSession.close method
 * changed SqlMapClientCallback's "doInSqlMapSession(SqlMapSession)" method to "doInSqlMapClient(SqlMapExecutor)"
-* added loadAll convenience method to HibernateTemplate (and HibernateOperations interface)
 
 Package org.springframework.scheduling
 * fixed SchedulerFactoryBean's JobDetail auto-registration when multiple triggers refer to the same JobDetail
+
+Package org.springframework.transaction
+* do not attempt rollback when afterCompletion callback throws an exception, avoiding a meaningless rollback failure
+
+Package org.springframework.util
+* added PropertiesPersister interface, to factor out properties parsing strategies
+* added DefaultPropertiesPersister implementation, capable of loading properties files with a specific charset
 
 Package org.springframework.validation
 * added "getNestedPath" method to Errors interface
@@ -44,6 +60,11 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * updated HtmlUtils to more efficient implementation by Chris Wilson
+* added "getRequiredSessionAttribute" method to WebUtils
+* changed WebUtils' "getOrCreateSessionAttribute" signature from HttpServletRequest to HttpSession
+* added "bindEmptyMultipartFiles" setting to ServletRequestDataBinder
+* added ServletContextAware interface for application beans, to be detected by web application contexts
+* reworked CommonsMultipartResolver and CosMultipartResolver to implement ServletContextAware
 * fixed AbstractCachingViewResolver's caching to use appropriate synchronization
 * fetch DefinitionsFactory on initialization of TilesView, throwing a proper exception if not found
 
