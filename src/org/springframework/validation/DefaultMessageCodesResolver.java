@@ -16,6 +16,7 @@
 
 package org.springframework.validation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +70,7 @@ import java.util.List;
  * @author Juergen Hoeller
  * @since 27.03.2004
  */
-public class DefaultMessageCodesResolver implements MessageCodesResolver {
+public class DefaultMessageCodesResolver implements MessageCodesResolver, Serializable {
 
 	public static final String CODE_SEPARATOR = ".";
 

@@ -40,7 +40,7 @@ import org.springframework.beans.BeanWrapperImpl;
  *
  * <p>Supports exporting a model, suitable for example for web MVC.
  * Thus, it is sometimes used as parameter type instead of the Errors interface
- * itself - if extracting the model makes sense in the respective context.
+ * itself - if extracting the model makes sense in the particular context.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -58,9 +58,11 @@ public class BindException extends Exception implements Errors {
 
 	private final List errors = new LinkedList();
 
-	private final BeanWrapper beanWrapper;
+	private final Object target;
 
 	private final String objectName;
+
+	private transient BeanWrapper beanWrapper;
 
 	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
 
@@ -76,27 +78,30 @@ public class BindException extends Exception implements Errors {
 	 * @see DefaultMessageCodesResolver
 	 */
 	public BindException(Object target, String name) {
-		this.beanWrapper = new BeanWrapperImpl(target);
+		this.target = target;
 		this.objectName = name;
-		this.nestedPath = "";
-	}
-
-	/**
-	 * Return the BeanWrapper that this instance uses.
-	 */
-	protected BeanWrapper getBeanWrapper() {
-		return beanWrapper;
 	}
 
 	/**
 	 * Return the wrapped target object.
 	 */
 	public Object getTarget() {
-		return this.beanWrapper.getWrappedInstance();
+		return target;
 	}
 
 	public String getObjectName() {
 		return objectName;
+	}
+
+	/**
+	 * Return the BeanWrapper that this instance uses.
+	 * Creates a new one if none existed before.
+	 */
+	protected BeanWrapper getBeanWrapper() {
+		if (this.beanWrapper == null) {
+			this.beanWrapper = new BeanWrapperImpl(this.target);
+		}
+		return this.beanWrapper;
 	}
 
 	/**
@@ -126,8 +131,8 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public void pushNestedPath(String subPath) {
-		this.nestedPathStack.push(this.nestedPath);
-		doSetNestedPath(this.nestedPath + subPath);
+		this.nestedPathStack.push(getNestedPath());
+		doSetNestedPath(getNestedPath() + subPath);
 	}
 
 	public void popNestedPath() throws IllegalArgumentException {
@@ -159,7 +164,7 @@ public class BindException extends Exception implements Errors {
 	 * regarding the nested path of this instance.
 	 */
 	protected String fixedField(String field) {
-		return this.nestedPath + field;
+		return getNestedPath() + field;
 	}
 
 
@@ -168,7 +173,7 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
-		addError(new ObjectError(this.objectName, resolveMessageCodes(errorCode), errorArgs, defaultMessage));
+		addError(new ObjectError(getObjectName(), resolveMessageCodes(errorCode), errorArgs, defaultMessage));
 	}
 
 	public void rejectValue(String field, String errorCode, String defaultMessage) {
@@ -179,19 +184,19 @@ public class BindException extends Exception implements Errors {
 		String fixedField = fixedField(field);
 		Object newVal = getBeanWrapper().getPropertyValue(fixedField);
 		FieldError fe = new FieldError(
-				this.objectName, fixedField, newVal, false,
+				getObjectName(), fixedField, newVal, false,
 				resolveMessageCodes(errorCode, field), errorArgs, defaultMessage);
 		addError(fe);
 	}
 
 	protected String[] resolveMessageCodes(String errorCode) {
-		return this.messageCodesResolver.resolveMessageCodes(errorCode, this.objectName);
+		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName());
 	}
 
 	protected String[] resolveMessageCodes(String errorCode, String field) {
 		String fixedField = fixedField(field);
-		Class fieldType = this.beanWrapper.getPropertyType(fixedField);
-		return this.messageCodesResolver.resolveMessageCodes(errorCode, this.objectName, fixedField, fieldType);
+		Class fieldType = getBeanWrapper().getPropertyType(fixedField);
+		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName(), fixedField, fieldType);
 	}
 
 	/**
@@ -335,12 +340,12 @@ public class BindException extends Exception implements Errors {
 	 * @see org.springframework.web.servlet.tags.BindTag
 	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
-	public final Map getModel() {
+	public Map getModel() {
 		Map model = new HashMap();
 		// Errors instance, even if no errors.
-		model.put(ERROR_KEY_PREFIX + this.objectName, this);
+		model.put(ERROR_KEY_PREFIX + getObjectName(), this);
 		// Mapping from name to target object.
-		model.put(this.objectName, this.beanWrapper.getWrappedInstance());
+		model.put(getObjectName(), getTarget());
 		return model;
 	}
 
