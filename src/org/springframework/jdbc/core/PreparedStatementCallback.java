@@ -24,8 +24,8 @@ import org.springframework.dao.DataAccessException;
 /**
  * Generic callback interface for code that operates on a PreparedStatement.
  * Allows to execute any number of operations on a single PreparedStatement,
- * for example a single executeUpdate call or repeated executeUpdate calls
- * with varying parameters.
+ * for example a single <code>executeUpdate</code> call or repeated
+ * <code>executeUpdate</code> calls with varying parameters.
  *
  * <p>Used internally by JdbcTemplate, but also useful for application code.
  * Note that the passed-in PreparedStatement can have been created by the
@@ -62,7 +62,7 @@ public interface PreparedStatementCallback {
 	 * @param ps active JDBC PreparedStatement
 	 * @return a result object, or null if none
 	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
-	 * into a DataAccessException by a SQLExceptionTranslator
+	 * to a DataAccessException by a SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions
 	 * @see JdbcTemplate#queryForObject(String, Object[], Class)
 	 * @see JdbcTemplate#queryForList(String, Object[])
