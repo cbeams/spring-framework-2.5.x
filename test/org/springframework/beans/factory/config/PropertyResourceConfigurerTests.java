@@ -94,14 +94,14 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		innerPvs.addPropertyValue("touchy", "${os.name}");
 		someMap.put("key3", new RootBeanDefinition(TestBean.class, innerPvs));
 		MutablePropertyValues innerPvs2 = new MutablePropertyValues(innerPvs);
-		someMap.put("key4", new BeanDefinitionHolder(new ChildBeanDefinition("tb1", innerPvs2), "child"));
+		someMap.put("${key4}", new BeanDefinitionHolder(new ChildBeanDefinition("tb1", innerPvs2), "child"));
 		pvs.addPropertyValue("someMap", someMap);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, cas, pvs);
 		ac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my");
+		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=mykey4");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		ac.refresh();
 
@@ -122,7 +122,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(tb2, tb2.getSomeMap().get("key1"));
 		assertEquals("98name", tb2.getSomeMap().get("key2"));
 		TestBean inner1 = (TestBean) tb2.getSomeMap().get("key3");
-		TestBean inner2 = (TestBean) tb2.getSomeMap().get("key4");
+		TestBean inner2 = (TestBean) tb2.getSomeMap().get("mykey4");
 		assertEquals(0, inner1.getAge());
 		assertEquals(null, inner1.getName());
 		assertEquals(System.getProperty("os.name"), inner1.getTouchy());

@@ -90,7 +90,7 @@ import org.springframework.util.ObjectUtils;
  * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
- * @version $Id: PropertyPlaceholderConfigurer.java,v 1.15 2004-06-21 08:57:11 jhoeller Exp $
+ * @version $Id: PropertyPlaceholderConfigurer.java,v 1.16 2004-07-09 09:07:05 jhoeller Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
@@ -298,10 +298,15 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	protected void parseMap(Properties props, Map mapVal) {
 		for (Iterator it = new HashMap(mapVal).keySet().iterator(); it.hasNext();) {
 			Object key = it.next();
-			Object elem = mapVal.get(key);
-			Object newVal = parseValue(props, elem);
-			if (!ObjectUtils.nullSafeEquals(newVal, elem)) {
-				mapVal.put(key, newVal);
+			Object newKey = parseValue(props, key);
+			boolean isNewKey = !ObjectUtils.nullSafeEquals(key, newKey);
+			Object val = mapVal.get(key);
+			Object newVal = parseValue(props, val);
+			if (isNewKey) {
+				mapVal.remove(key);
+			}
+			if (isNewKey || !ObjectUtils.nullSafeEquals(newVal, val)) {
+				mapVal.put(newKey, newVal);
 			}
 		}
 	}
