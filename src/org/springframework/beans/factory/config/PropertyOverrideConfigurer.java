@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.config;
 
@@ -81,23 +81,19 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
 			throws BeansException {
-		for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
-			String key = (String) en.nextElement();
+
+		for (Enumeration names = props.propertyNames(); names.hasMoreElements();) {
+			String key = (String) names.nextElement();
 			try {
 				processKey(beanFactory, key, props.getProperty(key));
 			}
 			catch (BeansException ex) {
 				String msg = "Could not process key [" + key + "] in PropertyOverrideConfigurer";
-				if (this.ignoreInvalidKeys) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(msg, ex);
-					}
-					else if (logger.isWarnEnabled()) {
-						logger.warn(msg + ": " + ex.getMessage());
-					}
-				}
-				else {
+				if (!this.ignoreInvalidKeys) {
 					throw new BeanInitializationException(msg, ex);
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug(msg, ex);
 				}
 			}
 		}
@@ -108,6 +104,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	 */
 	protected void processKey(ConfigurableListableBeanFactory factory, String key, String value)
 			throws BeansException {
+
 		int dotIndex = key.indexOf('.');
 		if (dotIndex == -1) {
 			throw new BeanInitializationException("Invalid key [" + key + "]: expected 'beanName.property'");
@@ -126,6 +123,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	 */ 
 	protected void applyPropertyValue(
 	    ConfigurableListableBeanFactory factory, String beanName, String property, String value) {
+
 		BeanDefinition bd = factory.getBeanDefinition(beanName);
 		bd.getPropertyValues().addPropertyValue(property, value);
 	}
