@@ -46,7 +46,8 @@
 				</listitem>
 				<listitem>
 					<para>
-						<emphasis>JAX RPC (TODO)</emphasis>.
+						<emphasis>JAX RPC</emphasis>. Spring provides remoting support
+						for Web Services via JAX-RPC.
 					</para>
 				</listitem>
 				<listitem>
@@ -77,6 +78,15 @@ public interface AccountService {
   public void insertAccount(Account acc);
   
   public List getAccounts(String name);
+}
+			]]></programlisting>
+			<programlisting><![CDATA[
+// Remote Account service
+public interface RemoteAccountService extends Remote {
+
+  public void insertAccount(Account acc) throws RemoteException;
+  
+  public List getAccounts(String name) throws RemoteException;
 }
 			]]></programlisting>
 			<programlisting><![CDATA[
@@ -379,6 +389,279 @@ public class SimpleObject {
 			</para>
 		</sect2>
 	</sect1>
+	
+	<sect1>
+		<title>Web Services</title>
+		<para>
+			Spring has support for:
+			<itemizedlist spacing="compact">
+				<listitem>Exposing services using JAX-RPC</listitem>
+				<listitem>Accessing Web Services</listitem>
+			</itemizedlist>
+		</para>
+		<sect2>
+			<title>Exposing services using JAX-RPC</title>
+			<para>
+				Spring has a convenience base class for JAX-RPC servlet endpoint implementations -
+				<literal>ServletEndpointSupport</literal>. To expose our AccountService we extend Spring's ServletEndpointSupport class
+				and implement our business logic here, usually delegating the call to the business layer.
+<programlisting><![CDATA[
+/**
+ * JAX-RPC compliant RemoteAccountService implementation that simply delegates
+ * to the AccountService implementation in the root web application context.
+ *
+ * This wrapper class is necessary because JAX-RPC requires working with
+ * RMI interfaces. If an existing service needs to be exported, a wrapper that
+ * extends ServletEndpointSupport for simple application context access is
+ * the simplest JAX-RPC compliant way.
+ *
+ * This is the class registered with the server-side JAX-RPC implementation.
+ * In the case of Axis, this happens in "server-config.wsdd" respectively via
+ * deployment calls. The Web Service tool manages the life-cycle of instances
+ * of this class: A Spring application context can just be accessed here.
+ */
+public class AccountServiceEndpoint extends ServletEndpointSupport implements RemoteAccountService {
+    
+    private AccountService biz;
+	
+    protected void onInit() {
+        this.biz = (AccountService) getWebApplicationContext().getBean("accountService");
+    }
+
+    public void insertAccount(Account acc) throws RemoteException {
+        biz.insertAccount(acc);
+    }
+  
+    public Account[] getAccounts(String name) throws RemoteException {
+        return biz.getAccounts(name);
+    }
+  
+}	
+]]></programlisting>
+				Our AccountServletEndpoint needs to run in the same web application as the Spring context to allow for access
+				to Spring's facilities. In case of Axis, copy the AxisServlet definition into your web.xml, and set up
+				the endpoint in "server-config.wsdd" (or use the deploy tool).
+				See the sample application JPetStore where the OrderService is exposed as a Web Service using Axis.
+			</para>
+		</sect2>
+
+		<sect2>
+			<title>Accessing Web Services</title>
+			<para>
+				Spring has two factory beans to create web service proxies <literal>LocalJaxRpcServiceFactoryBean</literal> and
+				<literal>JaxRpcPortProxyFactoryBean</literal>. The former can only return a JAX-RPC Service class for us to work with.
+				The latter is the full fledged version that can return a proxy that implements our business service interface.
+				In this example we use the later to create a proxy for the AccountService Endpoint we exposed in the previous paragraph.
+				You will see that Spring has great support for Web Services requiring little coding efforts - most of the magic is done in
+				the spring configuration file as usual:
+<programlisting><![CDATA[
+    <bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
+        <property name="serviceInterface">
+            <value>example.RemoteAccountService</value>
+        </property>
+        <property name="wsdlDocumentUrl">
+            <value>http://localhost:8080/account/services/accountService?WSDL</value>
+        </property>
+        <property name="namespaceUri">
+            <value>http://localhost:8080/account/services/accountService</value>
+        </property>
+        <property name="serviceName">
+            <value>AccountService</value>
+        </property>
+        <property name="portName">
+            <value>AccountPort</value>
+        </property>
+    </bean>
+]]></programlisting>
+				Where <literal>serviceInterface</literal> is our remote business interface the clients will use.
+				<literal>wsdlDocumentUrl</literal> is the URL for the WSDL file. Spring needs this a startup time to create the JAX-RPC Service.
+				<literal>namespaceUri</literal> corresponds to the targetNamespace in the .wsdl file.
+				<literal>serviceName</literal> corresponds to the serivce name in the .wsdl file.
+				<literal>portName</literal> corresponds to the port name in the .wsdl file.
+			</para>
+			<para>
+				Accessing the Web Service is now very easy as we have a bean factory for it that will expose it as <literal>RemoteAccountService</literal>
+				interface. We can wire this up in Spring:
+<programlisting><![CDATA[
+    <bean id="client" class="example.AccountClientImpl">
+        ...
+        <property name="service">
+            <ref bean="accountWebService"/>
+        </property>
+    </bean>
+]]></programlisting>
+				And from the client code we can access the Web Service just as if it was a normal class, except that it throws RemoteException.
+<programlisting><![CDATA[
+public class AccountClientImpl {
+
+    private RemoteAccountService service;
+    
+    public void setService(RemoteAccountService service) {
+        this.service = service;
+    }
+    
+    public void foo() {
+       try {
+           service.insertAccount(...);
+        } catch (RemoteException e) {
+           // ouch
+           ...
+        }
+     }
+     
+}
+]]></programlisting>
+			</para>
+			<para>
+				We can get rid of the checked RemoteException since Spring supports automatic conversion to its corresponding unchecked
+				<literal>RemoteAccessException</literal>. This requires that we provide a non RMI interface also. Our configuration is now:
+<programlisting><![CDATA[
+    <bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
+        <property name="serviceInterface">
+            <value>example.AccountService</value>
+        </property>
+        <property name="portInterface">
+            <value>example.RemoteAccountService</value>
+        </property>
+        ...
+    </bean>
+]]></programlisting>
+				Where <literal>serviceInterface</literal> is changed to our non RMI interface. Our RMI interface is now defined using the property
+				<literal>portInterface</literal>. Our client code can now avoid handling <literal>java.rmi.RemoteException</literal>:
+<programlisting><![CDATA[
+public class AccountClientImpl {
+
+    private AccountService service;
+    
+    public void setService(AccountService service) {
+        this.service = service;
+    }
+    
+    public void foo() {
+        service.insertAccount(...);
+     }
+     
+}
+]]></programlisting>
+    		</para>
+		</sect2>
+		
+		<sect2>
+			<title>Register Bean Mappings</title>
+			<para>
+				To transfer complex objects over the wire such as Account we must register bean mappings on the client side.
+				<note>
+					<para>
+						On the server side using Axis registering bean mappings is usually done in server-config.wsdd.
+					</para>						
+				</note>
+				We will use Axis to register bean mappings on the client side. To do this we need to subclass Spring Bean factory and
+				register the bean mappings programmatic:
+<programlisting><![CDATA[
+public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
+
+	protected void postProcessJaxRpcService(Service service) {
+		TypeMappingRegistry registry = service.getTypeMappingRegistry();
+		TypeMapping mapping = registry.createTypeMapping();
+		registerBeanMapping(mapping, Account.class, "Account");
+		registry.register("http://schemas.xmlsoap.org/soap/encoding/", mapping);
+	}
+
+	protected void registerBeanMapping(TypeMapping mapping, Class type, String name) {
+		QName qName = new QName("http://localhost:8080/account/services/accountService", name);
+		mapping.register(type, qName,
+		    new BeanSerializerFactory(type, qName),
+		    new BeanDeserializerFactory(type, qName));
+	}
+
+}
+]]></programlisting>
+			</para>
+		</sect2>
+
+		<sect2>
+			<title>Registering our own Handler</title>
+			<para>
+				In this section we will register our own <literal>javax.rpc.xml.handler.Handler</literal> to the Web Service Proxy
+				where we can do custom code before the SOAP message is sent over the wire.
+				The <literal>javax.rpc.xml.handler.Handler</literal> is a callback interface. There is a convenience base class provided
+				in jaxrpc.jar -	<literal>javax.rpc.xml.handler.GenericHandler</literal> that we will extend:
+<programlisting><![CDATA[
+public class AccountHandler extends GenericHandler {
+
+    public QName[] getHeaders() {
+        return null;
+    }
+
+    public boolean handleRequest(MessageContext context) {
+        SOAPMessageContext smc = (SOAPMessageContext) context;
+        SOAPMessage msg = smc.getMessage();
+
+        try {
+            SOAPEnvelope envelope = msg.getSOAPPart().getEnvelope();
+            SOAPHeader header = envelope.getHeader();
+            ...
+		
+        } catch (SOAPException e) {
+            throw new JAXRPCException(e);
+        }
+
+        return true;
+    }
+
+}
+]]></programlisting>
+			What we need to do now is to register our AccountHandler to JAX-RPC Service so it would invoke <literal>handleRequest</literal>
+			before the message is sent over the wire. Spring has at this time of writing no declarative support for registering handlers.
+			So we must use the programmatic approach. However Spring has made it very easy for us to do this as we can extend its bean factory
+			and override its <literal>postProcessJaxRpcService</literal> method that is designed for this: 
+<programlisting><![CDATA[
+public class AccountHandlerJaxRpcPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
+
+    protected void postProcessJaxRpcService(Service service) {
+        QName port = new QName(this.getNamespaceUri(), this.getPortName());
+        List list = service.getHandlerRegistry().getHandlerChain(port);
+        list.add(new HandlerInfo(AccountHandler.class, null, null));
+
+        logger.info("Registered JAX-RPC Handler [" + AccountHandler.class.getName() + "] on port " + port);
+    }
+
+}
+]]></programlisting>
+			And the last thing we must remember to do is to change the Spring configuration to use our factory bean:
+<programlisting><![CDATA[
+    <bean id="accountWebService" class="example.AccountHandlerJaxRpcPortProxyFactoryBean">
+        ...
+    </bean>    
+]]></programlisting>
+			</para>
+		</sect2>
+
+	</sect1>
+
+	<sect1>
+        <title>Auto-detection is not implemented for remote interfaces</title>
+        <para>
+            The main reason why auto-detection of implemented interfaces does not occur for
+            remote interfaces is to avoid opening too many doors to remote callers. The target
+            object might implement internal callback interfaces like InitializingBean or
+            DisposableBean which one would not want to expose to callers.
+        </para>
+        <para>
+            Offering a proxy with all interfaces implemented by the target usually does not
+            matter in the local case. But when exporting a remote service, you should expose
+            a specific service interface, with specific operations intended for remote usage.
+            Besides internal callback interfaces, the target might implement multiple business
+            interfaces, with just one of them intended for remote exposure. For these reasons,
+            we <emphasis>require</emphasis> such a service interface to be specified.
+        </para>
+        <para>
+            This is a trade-off between configuration convenience and the risk of accidental
+            exposure of internal methods. Always specifying a service interface is not too much
+            effort, and puts you on the safe side regarding controlled exposure of specific 
+            methods.
+        </para>
+    </sect1>
 	
 	<sect1>
 		<title>Considerations when choosing a technology</title>

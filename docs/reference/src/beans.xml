@@ -2054,7 +2054,12 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
       <para>Implementing custom events can be done as well. Simply call the
       <literal>publishEvent()</literal> method on the ApplicationContext,
       specifying a parameter which is an instance of your custom event class
-      implementing ApplicationEvent. Let's look at an example. First, the
+      implementing ApplicationEvent. Event listeners receive events
+      synchronously. This means the publishEvent() method blocks until all
+      listeners have finished processing the event. Furthermore, when a
+      listener receives an event it operates inside the transaction context
+      of the publisher, if a transaction context is available.</para>
+      <para>Let's look at an example. First, the
       ApplicationContext: <programlisting>&lt;bean id="emailer" class="example.EmailBean"&gt;
     &lt;property name="blackList"&gt;
         &lt;list&gt;
