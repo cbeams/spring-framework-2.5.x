@@ -21,7 +21,7 @@ import java.io.File;
 import javax.servlet.ServletContext;
 
 import org.apache.struts.action.ActionServlet;
-import org.apache.struts.actions.DispatchAction;
+import org.apache.struts.actions.MappingDispatchAction;
 
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.web.context.WebApplicationContext;
@@ -29,18 +29,17 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Convenience class for Spring-aware Struts 1.1/1.2 DispatchActions.
+ * Convenience class for Spring-aware Struts 1.2 MappingDispatchActions.
  *
  * <p>Provides a reference to the current Spring application context, e.g.
  * for bean lookup or resource loading. Auto-detects a ContextLoaderPlugIn
  * context, falling back to the root WebApplicationContext. For typical
  * usage, i.e. accessing middle tier beans, use a root WebApplicationContext.
  *
- * <p>For classic Struts Actions or Lookup/MappingDispatchActions, use the
- * analogous {@link ActionSupport ActionSupport} or
- * {@link LookupDispatchActionSupport LookupDispatchActionSupport} /
- * {@link MappingDispatchActionSupport MappingDispatchActionSupport} class,
- * respectively.
+ * <p>For classic Struts Actions, DispatchActions or LookupDispatchActions,
+ * use the analogous {@link ActionSupport ActionSupport} or
+ * {@link DispatchActionSupport DispatchActionSupport} /
+ * {@link LookupDispatchActionSupport LookupDispatchActionSupport} class.
  *
  * <p>As an alternative approach, you can wire your Struts Actions themselves
  * as Spring beans, passing references to them via IoC rather than looking
@@ -49,18 +48,18 @@ import org.springframework.web.util.WebUtils;
  * {@link DelegatingRequestProcessor DelegatingRequestProcessor}.
  *
  * @author Juergen Hoeller
- * @since 06.04.2004
+ * @since 1.1.3
  * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
- * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+ * @see WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
  * @see org.springframework.web.context.ContextLoaderListener
  * @see org.springframework.web.context.ContextLoaderServlet
  * @see ActionSupport
+ * @see DispatchActionSupport
  * @see LookupDispatchActionSupport
- * @see MappingDispatchActionSupport
  * @see DelegatingActionProxy
  * @see DelegatingRequestProcessor
  */
-public abstract class DispatchActionSupport extends DispatchAction {
+public abstract class MappingDispatchActionSupport extends MappingDispatchAction {
 
 	private WebApplicationContext webApplicationContext;
 
@@ -91,7 +90,7 @@ public abstract class DispatchActionSupport extends DispatchAction {
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
 	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
-	 * @see org.springframework.web.context.support.WebApplicationContextUtils#getWebApplicationContext
+	 * @see WebApplicationContextUtils#getWebApplicationContext
 	 */
 	protected WebApplicationContext initWebApplicationContext(ActionServlet actionServlet)
 			throws IllegalStateException {

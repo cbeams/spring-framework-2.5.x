@@ -29,16 +29,17 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Convenience class for Spring-aware Struts 1.1 LookupDispatchActions.
+ * Convenience class for Spring-aware Struts 1.1/1.2 LookupDispatchActions.
  *
  * <p>Provides a reference to the current Spring application context, e.g.
  * for bean lookup or resource loading. Auto-detects a ContextLoaderPlugIn
  * context, falling back to the root WebApplicationContext. For typical
  * usage, i.e. accessing middle tier beans, use a root WebApplicationContext.
  *
- * <p>For classic Struts Actions or DispatchActions, use the analogous
- * {@link ActionSupport ActionSupport} respectively
- * {@link DispatchActionSupport DispatchActionSupport} class.
+ * <p>For classic Struts Actions, DispatchActions or MappingDispatchActions,
+ * use the analogous {@link ActionSupport ActionSupport} or
+ * {@link DispatchActionSupport DispatchActionSupport} /
+ * {@link MappingDispatchActionSupport MappingDispatchActionSupport} class.
  *
  * <p>As an alternative approach, you can wire your Struts Actions themselves
  * as Spring beans, passing references to them via IoC rather than looking
@@ -54,6 +55,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderServlet
  * @see ActionSupport
  * @see DispatchActionSupport
+ * @see MappingDispatchActionSupport
  * @see DelegatingActionProxy
  * @see DelegatingRequestProcessor
  */
