@@ -21,7 +21,7 @@ import org.easymock.MockControl;
 import org.springframework.samples.phonebook.domain.Person;
 import org.springframework.samples.phonebook.domain.PhoneBook;
 import org.springframework.test.JUnitAssertSupport;
-import org.springframework.test.flow.MockRequestContext;
+import org.springframework.test.web.flow.MockRequestContext;
 import org.springframework.web.flow.Event;
 
 public class GetPersonActionTests extends TestCase {

@@ -30,10 +30,10 @@ import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
@@ -48,16 +48,16 @@ import org.springframework.web.flow.ViewState;
 public class XmlFlowBuilderTests extends TestCase {
 
 	private Flow flow;
+
 	private MockRequestContext context;
 
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
 		builder.setFlowServiceLocator(new TestFlowServiceLocator());
 		flow = new FlowFactoryBean(builder).getFlow();
-		
-		context=new MockRequestContext();
+		context = new MockRequestContext();
 	}
-	
+
 	private Event createEvent(String id) {
 		return new SimpleEvent(this, id);
 	}
@@ -68,7 +68,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals("actionState1", flow.getStartState().getId());
 		assertEquals(7, flow.getStateIds().length);
 
-		ActionState actionState1 = (ActionState)flow.getState("actionState1");
+		ActionState actionState1 = (ActionState) flow.getState("actionState1");
 		assertNotNull(actionState1);
 		assertEquals(5, actionState1.getActionCount());
 		assertEquals(null, actionState1.getAction().getCaption());
@@ -85,7 +85,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals("prop1Value", actionState1.getActions()[0].getProperty("prop1"));
 		assertEquals("prop2Value", actionState1.getActions()[0].getProperty("prop2"));
 
-		ViewState viewState1 = (ViewState)flow.getState("viewState1");
+		ViewState viewState1 = (ViewState) flow.getState("viewState1");
 		assertNotNull(viewState1);
 		assertFalse(viewState1.isMarker());
 		assertEquals("view1", viewState1.getViewName());
@@ -95,7 +95,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		transition = viewState1.getTransition(context);
 		assertEquals("subFlowState1", transition.getTargetStateId());
 
-		ViewState viewState2 = (ViewState)flow.getState("viewState2");
+		ViewState viewState2 = (ViewState) flow.getState("viewState2");
 		assertNotNull(viewState2);
 		assertTrue(viewState2.isMarker());
 		assertNull(viewState2.getViewName());
@@ -105,7 +105,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		transition = viewState2.getTransition(context);
 		assertEquals("subFlowState2", transition.getTargetStateId());
 
-		SubFlowState subFlowState1 = (SubFlowState)flow.getState("subFlowState1");
+		SubFlowState subFlowState1 = (SubFlowState) flow.getState("subFlowState1");
 		assertNotNull(subFlowState1);
 		assertNotNull(subFlowState1.getSubFlow());
 		assertEquals("subFlow1", subFlowState1.getSubFlow().getId());
@@ -116,7 +116,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		transition = subFlowState1.getTransition(context);
 		assertEquals("endState1", transition.getTargetStateId());
 
-		SubFlowState subFlowState2 = (SubFlowState)flow.getState("subFlowState2");
+		SubFlowState subFlowState2 = (SubFlowState) flow.getState("subFlowState2");
 		assertNotNull(subFlowState2);
 		assertNotNull(subFlowState2.getSubFlow());
 		assertEquals("subFlow2", subFlowState2.getSubFlow().getId());
@@ -127,12 +127,12 @@ public class XmlFlowBuilderTests extends TestCase {
 		transition = subFlowState2.getTransition(context);
 		assertEquals("endState2", transition.getTargetStateId());
 
-		EndState endState1 = (EndState)flow.getState("endState1");
+		EndState endState1 = (EndState) flow.getState("endState1");
 		assertNotNull(endState1);
 		assertFalse(endState1.isMarker());
 		assertEquals("endView1", endState1.getViewName());
 
-		EndState endState2 = (EndState)flow.getState("endState2");
+		EndState endState2 = (EndState) flow.getState("endState2");
 		assertNotNull(endState2);
 		assertTrue(endState2.isMarker());
 		assertNull(endState2.getViewName());
