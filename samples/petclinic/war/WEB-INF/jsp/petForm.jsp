@@ -29,17 +29,17 @@
   <BR>(yyyy-mm-dd)
   <P>
   <B>Type:</B>
-  <spring:bind path="command.typeId">
+  <spring:bind path="command.type">
     <FONT color="red">
       <B><c:out value="${status.errorMessage}"/></B>
     </FONT>
     <BR>
     <SELECT name="typeId">
       <c:forEach var="type" items="${types}">
-        <c:if test="${command.typeId == type.id}">
-          <OPTION selected="<c:out value="${command.typeId}"/>" value="<c:out value="${type.id}"/>"><c:out value="${type.name}"/></OPTION>
+        <c:if test="${command.type.id == type.id}">
+          <OPTION selected="<c:out value="${command.type.id}"/>" value="<c:out value="${type.id}"/>"><c:out value="${type.name}"/></OPTION>
         </c:if>
-        <c:if test="${command.typeId != type.id}">
+        <c:if test="${command.type.id != type.id}">
           <OPTION value="<c:out value="${type.id}"/>"><c:out value="${type.name}"/></OPTION>
         </c:if>
       </c:forEach>
