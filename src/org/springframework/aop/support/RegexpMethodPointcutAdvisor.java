@@ -18,52 +18,51 @@ package org.springframework.aop.support;
 
 import org.aopalliance.aop.Advice;
 
-import org.springframework.aop.Pointcut;
-import org.springframework.aop.PointcutAdvisor;
-import org.springframework.core.Ordered;
-
 /**
- * Convenient class for regexp method pointcuts that hold an Interceptor,
+ * Convenient class for regexp method pointcuts that hold an Advice,
  * making them an Advisor.
+ * <p>
+ * Configure this class using the pattern and patterns
+ * pass-through properties. These are analogous to the pattern
+ * and patterns properties of AbstractRegexpMethodPointcut.
+ * <p>
+ * Can delegate to any type of regexp pointcut.
+ * Currently only Perl5 pointcuts are supported.
+ * Pointcut property must be of class AbstractRegexpMethodPointcut.
+ * This should not normally be set directly.
  * @author Dmitriy Kopylenko
- * @version $Id: RegexpMethodPointcutAdvisor.java,v 1.4 2004-03-23 14:29:45 jhoeller Exp $
+ * @author Rod Johnson
+ * @version $Id: RegexpMethodPointcutAdvisor.java,v 1.5 2004-07-25 11:58:10 johnsonr Exp $
  */
-public class RegexpMethodPointcutAdvisor extends RegexpMethodPointcut
-    implements PointcutAdvisor, Ordered {
-
-	private int order = Integer.MAX_VALUE;
-
-	private Advice advice;
-
+public class RegexpMethodPointcutAdvisor extends DefaultPointcutAdvisor {
+	
 	public RegexpMethodPointcutAdvisor() {
+		initPointcut();
 	}
 
 	public RegexpMethodPointcutAdvisor(Advice advice) {
-		this.advice = advice;
+		super(advice);
+		initPointcut();
 	}
 	
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	public int getOrder() {
-		return order;
-	}
-
-	public void setAdvice(Advice advice) {
-		this.advice = advice;
+	/**
+	 * Create the pointcut.
+	 * This will be of type AbstractRegexpMethodPointcut.
+	 */
+	protected void initPointcut() {
+		// TODO could support different types driven by properties
+		setPointcut(new Perl5RegexpMethodPointcut());
 	}
 	
-	public Advice getAdvice() {
-		return this.advice;
+	public void setPattern(String pattern) throws Exception {
+		// We know that the Pointcut in this object is of type
+		// AbstractRegexpMethodPointcut, as we set it
+		AbstractRegexpMethodPointcut armp = (AbstractRegexpMethodPointcut) getPointcut();
+		armp.setPattern(pattern);
 	}
-
-	public boolean isPerInstance() {
-		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
+	
+	public void setPatterns(String[] patterns) throws Exception {
+		AbstractRegexpMethodPointcut armp = (AbstractRegexpMethodPointcut) getPointcut();
+		armp.setPatterns(patterns);
 	}
-
-	public Pointcut getPointcut() {
-		return this;
-	}
-
 }

@@ -18,24 +18,28 @@ package org.springframework.aop.support;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.Person;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: RegexpMethodPointcutAroundAdvisorIntegrationTests.java,v 1.3 2004-03-18 03:01:17 trisberg Exp $
+ * @version $Id: RegexpMethodPointcutAdvisorIntegrationTests.java,v 1.1 2004-07-25 11:58:12 johnsonr Exp $
  */
-public class RegexpMethodPointcutAroundAdvisorIntegrationTests extends TestCase {
+public class RegexpMethodPointcutAdvisorIntegrationTests extends TestCase {
 
 	/**
 	 * Constructor for RegexpMethodPointcutAroundAdvisorTests.
 	 * @param arg0
 	 */
-	public RegexpMethodPointcutAroundAdvisorIntegrationTests(String arg0) {
+	public RegexpMethodPointcutAdvisorIntegrationTests(String arg0) {
 		super(arg0);
 	}
 	
@@ -76,6 +80,39 @@ public class RegexpMethodPointcutAroundAdvisorIntegrationTests extends TestCase 
 		assertEquals(newAge, advised.getAge());
 		// Only setter fired
 		assertEquals(2, nop.getCount());
+	}
+	
+	public void testSerialization() throws Throwable {
+		BeanFactory bf = new ClassPathXmlApplicationContext("org/springframework/aop/support/regexpSetterTests.xml"); 
+		// This is a CGLIB proxy, so we can proxy it to the target class
+		Person p = (Person) bf.getBean("serializableSettersAdvised");
+		// Interceptor behind regexp advisor
+		NopInterceptor nop = (NopInterceptor) bf.getBean("nopInterceptor");
+		assertEquals(0, nop.getCount());
+	
+		int newAge = 12;
+		// Not advised
+		assertEquals(0, p.getAge());
+		assertEquals(0, nop.getCount());
+		
+		// This is proxied
+		p.setAge(newAge);
+		assertEquals(1, nop.getCount());
+		p.setAge(newAge);
+		assertEquals(newAge, p.getAge());
+		// Only setter fired
+		assertEquals(2, nop.getCount());
+		
+		// Serialize and continue...
+		p = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		assertEquals(newAge, p.getAge());
+		// Remembers count, but we need to get a new reference to nop...
+		nop = (SerializableNopInterceptor) ((Advised) p).getAdvisors()[0].getAdvice();
+		assertEquals(2, nop.getCount());
+		assertEquals("serializableSettersAdvised", p.getName());
+		p.setAge(newAge + 1);
+		assertEquals(3, nop.getCount());
+		assertEquals(newAge + 1, p.getAge());
 	}
 
 }
