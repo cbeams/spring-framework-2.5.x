@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +42,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
+import org.springframework.beans.propertyeditors.CustomBooleanEditor;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
@@ -71,7 +75,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.39 2004-05-21 19:37:28 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.40 2004-05-28 11:08:36 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -86,23 +90,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	/** We'll create a lot of these objects, so we don't want a new logger every time */
 	private static final Log logger = LogFactory.getLog(BeanWrapperImpl.class);
 
-	/** Registry for default PropertyEditors */
-	private static final Map defaultEditors = new HashMap();
-
-	static {
-		// Register default editors in this class, for restricted environments.
-		// We're not using the JRE's PropertyEditorManager to avoid potential
-		// SecurityExceptions when running in a SecurityManager.
-		defaultEditors.put(byte[].class, ByteArrayPropertyEditor.class);
-		defaultEditors.put(Class.class, ClassEditor.class);
-		defaultEditors.put(File.class, FileEditor.class);
-		defaultEditors.put(InputStream.class, InputStreamEditor.class);
-		defaultEditors.put(Locale.class, LocaleEditor.class);
-		defaultEditors.put(Properties.class, PropertiesEditor.class);
-		defaultEditors.put(String[].class, StringArrayPropertyEditor.class);
-		defaultEditors.put(URL.class, URLEditor.class);
-	}
-
 
 	//---------------------------------------------------------------------
 	// Instance data
@@ -114,8 +101,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	/** The nested path of the object */
 	private String nestedPath = "";
 
-	/* Map with cached nested BeanWrappers */
-	private Map nestedBeanWrappers;
+	/** Registry for default PropertyEditors */
+	private final Map defaultEditors;
 
 	/** Map with custom PropertyEditor instances */
 	private Map customEditors;
@@ -125,6 +112,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * of JavaBeans introspection every time.
 	 */
 	private CachedIntrospectionResults cachedIntrospectionResults;
+
+	/* Map with cached nested BeanWrappers */
+	private Map nestedBeanWrappers;
 
 
 	//---------------------------------------------------------------------
@@ -136,6 +126,31 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @see #setWrappedInstance
 	 */
 	public BeanWrapperImpl() {
+		// Register default editors in this class, for restricted environments.
+		// We're not using the JRE's PropertyEditorManager to avoid potential
+		// SecurityExceptions when running in a SecurityManager.
+		this.defaultEditors = new HashMap(16);
+
+		// Simple editors, without parameterization capabilities.
+		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
+		this.defaultEditors.put(Class.class, new ClassEditor());
+		this.defaultEditors.put(File.class, new FileEditor());
+		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
+		this.defaultEditors.put(Locale.class, new LocaleEditor());
+		this.defaultEditors.put(Properties.class, new PropertiesEditor());
+		this.defaultEditors.put(String[].class, new StringArrayPropertyEditor());
+		this.defaultEditors.put(URL.class, new URLEditor());
+
+		// Default instances of parameterizable editors.
+		// Can be overridden by registering custom instances of those as custom editors.
+		this.defaultEditors.put(Boolean.class, new CustomBooleanEditor(false));
+		this.defaultEditors.put(Short.class, new CustomNumberEditor(Short.class, false));
+		this.defaultEditors.put(Integer.class, new CustomNumberEditor(Integer.class, false));
+		this.defaultEditors.put(Long.class, new CustomNumberEditor(Long.class, false));
+		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, false));
+		this.defaultEditors.put(Float.class, new CustomNumberEditor(Float.class, false));
+		this.defaultEditors.put(Double.class, new CustomNumberEditor(Double.class, false));
+		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, false));
 	}
 
 	/**
@@ -144,7 +159,18 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object) throws BeansException {
+		this();
 		setWrappedInstance(object);
+	}
+
+	/**
+	 * Create new BeanWrapperImpl, wrapping a new instance of the specified class.
+	 * @param clazz class to instantiate and wrap
+	 * @throws BeansException if the class cannot be wrapped by a BeanWrapper
+	 */
+	public BeanWrapperImpl(Class clazz) throws BeansException {
+		this();
+		setWrappedInstance(BeanUtils.instantiateClass(clazz));
 	}
 
 	/**
@@ -155,17 +181,21 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object, String nestedPath) throws BeansException {
-		setWrappedInstance(object);
-		this.nestedPath = nestedPath;
+		this();
+		setWrappedInstance(object, nestedPath);
 	}
 
 	/**
-	 * Create new BeanWrapperImpl, wrapping a new instance of the specified class.
-	 * @param clazz class to instantiate and wrap
-	 * @throws BeansException if the class cannot be wrapped by a BeanWrapper
+	 * Create new BeanWrapperImpl for the given object,
+	 * registering a nested path that the object is in.
+	 * @param object object wrapped by this BeanWrapper.
+	 * @param nestedPath the nested path of the object
+	 * @param superBw the containing BeanWrapper (must not be null)
+	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
-	public BeanWrapperImpl(Class clazz) throws BeansException {
-		setWrappedInstance(BeanUtils.instantiateClass(clazz));
+	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) throws BeansException {
+		this.defaultEditors = superBw.defaultEditors;
+		setWrappedInstance(object, nestedPath);
 	}
 
 
@@ -174,16 +204,28 @@ public class BeanWrapperImpl implements BeanWrapper {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Switches the target object, replacing the cached introspection results only
+	 * Switch the target object, replacing the cached introspection results only
 	 * if the class of the new object is different to that of the replaced object.
 	 * @param object new target
 	 * @throws BeansException if the object cannot be changed
 	 */
 	public void setWrappedInstance(Object object) throws BeansException {
+		setWrappedInstance(object, "");
+	}
+
+	/**
+	 * Switch the target object, replacing the cached introspection results only
+	 * if the class of the new object is different to that of the replaced object.
+	 * @param object new target
+	 * @param nestedPath the nested path of the object
+	 * @throws BeansException if the object cannot be changed
+	 */
+	public void setWrappedInstance(Object object, String nestedPath) throws BeansException {
 		if (object == null) {
 			throw new FatalBeanException("Cannot set BeanWrapperImpl target to a null object");
 		}
 		this.object = object;
+		this.nestedPath = nestedPath;
 		this.nestedBeanWrappers = null;
 		if (this.cachedIntrospectionResults == null ||
 		    !this.cachedIntrospectionResults.getBeanClass().equals(object.getClass())) {
@@ -191,14 +233,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	public Class getWrappedClass() {
-		return object.getClass();
-	}
-
 	public Object getWrappedInstance() {
-		return object;
+		return this.object;
 	}
 
+	public Class getWrappedClass() {
+		return this.object.getClass();
+	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		registerCustomEditor(requiredType, null, propertyEditor);
@@ -338,29 +379,26 @@ public class BeanWrapperImpl implements BeanWrapper {
 				if (propertyType.isArray()) {
 					Object[] array = (Object[]) getPropertyValue(nestedProperty);
 					for (int i = 0; i < array.length; i++) {
-						beanWrappers.addAll(
-								getBeanWrappersForNestedProperty(propertyPath, nestedProperty + "[" + i + "]", nestedPath));
+						beanWrappers.addAll(getBeanWrappersForNestedProperty(nestedProperty + "[" + i + "]", nestedPath));
 					}
 					return beanWrappers;
 				}
 				else if (List.class.isAssignableFrom(propertyType)) {
 					List list = (List) getPropertyValue(nestedProperty);
 					for (int i = 0; i < list.size(); i++) {
-						beanWrappers.addAll(
-								getBeanWrappersForNestedProperty(propertyPath, nestedProperty + "[" + i + "]", nestedPath));
+						beanWrappers.addAll(getBeanWrappersForNestedProperty(nestedProperty + "[" + i + "]", nestedPath));
 					}
 					return beanWrappers;
 				}
 				else if (Map.class.isAssignableFrom(propertyType)) {
 					Map map = (Map) getPropertyValue(nestedProperty);
 					for (Iterator it = map.keySet().iterator(); it.hasNext();) {
-						beanWrappers.addAll(
-								getBeanWrappersForNestedProperty(propertyPath, nestedProperty + "[" + it.next() + "]", nestedPath));
+						beanWrappers.addAll(getBeanWrappersForNestedProperty(nestedProperty + "[" + it.next() + "]", nestedPath));
 					}
 					return beanWrappers;
 				}
 			}
-			beanWrappers.addAll(getBeanWrappersForNestedProperty(propertyPath, nestedProperty, nestedPath));
+			beanWrappers.addAll(getBeanWrappersForNestedProperty(nestedProperty, nestedPath));
 			return beanWrappers;
 		}
 		else {
@@ -369,8 +407,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	private List getBeanWrappersForNestedProperty(String propertyPath, String nestedProperty, String nestedPath) {
-		logger.debug("Navigating to nested property '" + nestedProperty + "' of property path '" + propertyPath + "'");
+	private List getBeanWrappersForNestedProperty(String nestedProperty, String nestedPath) {
 		BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
 		return nestedBw.getBeanWrappersForPropertyPath(nestedPath);
 	}
@@ -398,8 +435,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// lookup cached sub-BeanWrapper, create new one if not found
 		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(canonicalName);
 		if (nestedBw == null) {
-			logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
-			nestedBw = new BeanWrapperImpl(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
+			}
+			nestedBw = new BeanWrapperImpl(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR,
+																		 this);
 			// inherit all type-specific PropertyEditors
 			if (this.customEditors != null) {
 				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
@@ -407,14 +447,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 					if (key instanceof Class) {
 						Class requiredType = (Class) key;
 						PropertyEditor propertyEditor = (PropertyEditor) this.customEditors.get(key);
-						nestedBw.registerCustomEditor(requiredType, null, propertyEditor);
+						nestedBw.registerCustomEditor(requiredType, propertyEditor);
 					}
 				}
 			}
 			this.nestedBeanWrappers.put(canonicalName, nestedBw);
 		}
 		else {
-			logger.debug("Using cached nested BeanWrapper for property '" + canonicalName + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using cached nested BeanWrapper for property '" + canonicalName + "'");
+			}
 		}
 		return nestedBw;
 	}
@@ -537,10 +579,19 @@ public class BeanWrapperImpl implements BeanWrapper {
 	private void setPropertyValue(String propertyName, String actualName, String key, Object value)
 			throws BeansException {
 		if (key != null) {
-			Object propValue = getPropertyValue(actualName);
+			Object propValue = null;
+			try {
+				propValue = getPropertyValue(actualName);
+			}
+			catch (BeansException ex) {
+				throw new NotWritablePropertyException("Cannot access indexed value in property referenced " +
+																							 "in indexed property path '" + propertyName + "'",
+																							 getWrappedClass(), ex);
+			}
 			if (propValue == null) {
-				throw new FatalBeanException("Cannot access indexed value in property referenced in indexed property path '" +
-																		 propertyName + "': returned null");
+				throw new NotWritablePropertyException("Cannot access indexed value in property referenced " +
+																							 "in indexed property path '" + propertyName + "': returned null",
+																							 getWrappedClass());
 			}
 			else if (propValue.getClass().isArray()) {
 				Object newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value,
@@ -560,9 +611,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 							list.add(null);
 						}
 						catch (NullPointerException ex) {
-							throw new FatalBeanException("Cannot set element with index " + index + " in List of size " +
-																					 list.size() + ", accessed using property path '" + propertyName +
-																					 "': List does not support filling up gaps with null elements");
+							throw new NotWritablePropertyException("Cannot set element with index " + index + " in List of size " +
+																										 list.size() + ", accessed using property path '" + propertyName +
+																										 "': List does not support filling up gaps with null elements",
+																										 getWrappedClass());
 						}
 					}
 					list.add(newValue);
@@ -574,8 +626,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 				map.put(key, newValue);
 			}
 			else {
-				throw new FatalBeanException("Property referenced in indexed property path '" + propertyName +
-																		 "' is neither an array nor a List nor a Map; returned value was [" + value + "]");
+				throw new NotWritablePropertyException("Property referenced in indexed property path '" + propertyName +
+																							 "' is neither an array nor a List nor a Map; returned value was [" +
+																							 value + "]", getWrappedClass());
 			}
 		}
 		else {
@@ -756,8 +809,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 			if (pe != null || (requiredType != null && !requiredType.isAssignableFrom(newValue.getClass()))) {
 
 				if (pe == null && requiredType != null) {
-					// no custom editor -> check BeanWrapper's default editors
-					pe = findDefaultEditor(requiredType);
+					// no custom editor -> check BeanWrapperImpl's default editors
+					pe = (PropertyEditor) this.defaultEditors.get(requiredType);
 					if (pe == null) {
 						// no BeanWrapper default editor -> check standard JavaBean editors
 						pe = PropertyEditorManager.findEditor(requiredType);
@@ -819,16 +872,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 
 		return newValue;
-	}
-
-	private PropertyEditor findDefaultEditor(Class type) {
-		Class editorClass = (Class) defaultEditors.get(type);
-		if (editorClass != null) {
-			return (PropertyEditor) BeanUtils.instantiateClass(editorClass);
-		}
-		else {
-			return null;
-		}
 	}
 
 

@@ -19,6 +19,8 @@ package org.springframework.beans;
 
 import java.beans.PropertyEditorSupport;
 import java.beans.PropertyVetoException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -26,7 +28,7 @@ import junit.framework.TestCase;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanWrapperTestSuite.java,v 1.19 2004-04-05 07:17:57 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.20 2004-05-28 11:09:23 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -176,15 +178,76 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertTrue("name is not null to start off", t.getName() != null);
 		bw.setPropertyValue("name", null);
 		assertTrue("name is now null", t.getName() == null);
-		// Now test with non-string
+		// now test with non-string
 		assertTrue("spouse is not null to start off", t.getSpouse() != null);
 		bw.setPropertyValue("spouse", null);
 		assertTrue("spouse is now null", t.getSpouse() == null);
 	}
 
-	/**
-	 * Test default conversion of properties
-	 */
+	public void testIgnoringIndexedProperty() {
+		MutablePropertyValues values = new MutablePropertyValues();
+		values.addPropertyValue("toBeIgnored[0]", new Integer(42));
+		BeanWrapper wrapper = new BeanWrapperImpl(new Object());
+		wrapper.setPropertyValues(values, true);
+	}
+
+	public void testBooleanObject() {
+		BooleanTestBean tb = new BooleanTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+
+		try {
+			bw.setPropertyValue("bool2", "true");
+		}
+		catch (BeansException ex) {
+			fail("Should not throw BeansException: " + ex.getMessage());
+		}
+		assertTrue("Correct bool2 value", Boolean.TRUE.equals(bw.getPropertyValue("bool2")));
+		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
+
+		try {
+			bw.setPropertyValue("bool2", "false");
+		}
+		catch (BeansException ex) {
+			fail("Should not throw BeansException: " + ex.getMessage());
+		}
+		assertTrue("Correct bool2 value", Boolean.FALSE.equals(bw.getPropertyValue("bool2")));
+		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
+
+	}
+
+	public void testNumberObjects() {
+		NumberTestBean tb = new NumberTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+
+		try {
+			bw.setPropertyValue("short2", "2");
+			bw.setPropertyValue("int2", "8");
+			bw.setPropertyValue("long2", "6");
+			bw.setPropertyValue("bigInteger", "3");
+			bw.setPropertyValue("float2", "8.1");
+			bw.setPropertyValue("double2", "6.1");
+			bw.setPropertyValue("bigDecimal", "4.0");
+		}
+		catch (BeansException ex) {
+			fail("Should not throw BeansException: " + ex.getMessage());
+		}
+
+		assertTrue("Correct short2 value", new Short("2").equals(bw.getPropertyValue("short2")));
+		assertTrue("Correct short2 value", new Short("2").equals(tb.getShort2()));
+		assertTrue("Correct int2 value", new Integer("8").equals(bw.getPropertyValue("int2")));
+		assertTrue("Correct int2 value", new Integer("8").equals(tb.getInt2()));
+		assertTrue("Correct long2 value", new Long("6").equals(bw.getPropertyValue("long2")));
+		assertTrue("Correct long2 value", new Long("6").equals(tb.getLong2()));
+		assertTrue("Correct bigInteger value", new BigInteger("3").equals(bw.getPropertyValue("bigInteger")));
+		assertTrue("Correct bigInteger value", new BigInteger("3").equals(tb.getBigInteger()));
+		assertTrue("Correct float2 value", new Float("8.1").equals(bw.getPropertyValue("float2")));
+		assertTrue("Correct float2 value", new Float("8.1").equals(tb.getFloat2()));
+		assertTrue("Correct double2 value", new Double("6.1").equals(bw.getPropertyValue("double2")));
+		assertTrue("Correct double2 value", new Double("6.1").equals(tb.getDouble2()));
+		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(bw.getPropertyValue("bigDecimal")));
+		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(tb.getBigDecimal()));
+	}
+
 	public void testPropertiesProperty() throws Exception {
 		PropsTest pt = new PropsTest();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
