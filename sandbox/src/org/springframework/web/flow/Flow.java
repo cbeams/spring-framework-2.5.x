@@ -329,7 +329,7 @@ public class Flow implements Serializable {
 	protected void setStartState(TransitionableState state) throws NoSuchFlowStateException {
 		assertValidState(state);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting start state for flow '" + getId() + "' as '" + state + "'");
+			logger.debug("Setting start state for flow '" + getId() + "' to '" + state.getId() + "'");
 		}
 		this.startState = state;
 	}
