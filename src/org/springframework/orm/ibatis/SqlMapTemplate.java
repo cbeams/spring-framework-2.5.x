@@ -52,7 +52,7 @@ public class SqlMapTemplate extends JdbcAccessor {
 	 */
 	public Object execute(String statementName, SqlMapCallback action) throws DataAccessException {
 		MappedStatement stmt = this.sqlMap.getMappedStatement(statementName);
-		Connection con = DataSourceUtils.getConnection(this.dataSource);
+		Connection con = DataSourceUtils.getConnection(getDataSource());
 		try {
 			return action.doInMappedStatement(stmt, con);
 		}
@@ -60,7 +60,7 @@ public class SqlMapTemplate extends JdbcAccessor {
 			throw getExceptionTranslator().translate("SqlMapTemplate", null, ex);
 		}
 		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
 

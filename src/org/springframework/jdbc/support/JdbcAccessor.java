@@ -18,7 +18,7 @@ public class JdbcAccessor {
 	 * Used to obtain connections throughout the lifecycle of this object.
 	 * This enables this class to close connections if necessary.
 	 **/
-	protected DataSource dataSource;
+	private DataSource dataSource;
 
 	/** Helper to translate SQL exceptions to DataAccessExceptions */
 	private SQLExceptionTranslator exceptionTranslator;

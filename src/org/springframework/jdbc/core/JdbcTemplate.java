@@ -64,7 +64,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.17 2003-12-10 02:13:55 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.18 2003-12-21 16:20:34 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -191,7 +191,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			throw new InvalidDataAccessApiUsageException(
 			    "Cannot execute [" + sql + "] as a static query: it contains bind variables");
 		}
-		Connection con = DataSourceUtils.getConnection(this.dataSource);
+		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
@@ -204,7 +204,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			stmt = conToUse.createStatement();
-			DataSourceUtils.applyTransactionTimeout(stmt, this.dataSource);
+			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 			Statement stmtToUse = stmt;
 			if (this.nativeJdbcExtractor != null) {
 				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
@@ -236,7 +236,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 				catch (SQLException ignore) {
 				}
 			}
-			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
 
@@ -263,7 +263,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 */
 	public void doWithResultSetFromPreparedQuery(PreparedStatementCreator psc, ResultSetExtractor rse)
 	    throws DataAccessException {
-		Connection con = DataSourceUtils.getConnection(this.dataSource);
+		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
@@ -309,7 +309,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 				catch (SQLException ignore) {
 				}
 			}
-			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
 
@@ -342,7 +342,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			query(new PreparedStatementCreator() {
 				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 					PreparedStatement ps = con.prepareStatement(sql);
-					DataSourceUtils.applyTransactionTimeout(ps, dataSource);
+					DataSourceUtils.applyTransactionTimeout(ps, getDataSource());
 					PreparedStatement psToUse = ps;
 					if (nativeJdbcExtractor != null) {
 						psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
@@ -374,7 +374,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		return update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 				PreparedStatement ps = con.prepareStatement(sql);
-				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
+				DataSourceUtils.applyTransactionTimeout(ps, getDataSource());
 				if (nativeJdbcExtractor != null) {
 					return nativeJdbcExtractor.getNativePreparedStatement(ps);
 				}
@@ -402,7 +402,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	public int[] update(PreparedStatementCreator[] pscs) throws DataAccessException {
-		Connection con = DataSourceUtils.getConnection(this.dataSource);
+		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
 		int index = 0;
 		try {
@@ -441,7 +441,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			    null, ex);
 		}
 		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
 
@@ -463,7 +463,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		return update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 				PreparedStatement ps = con.prepareStatement(sql);
-				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
+				DataSourceUtils.applyTransactionTimeout(ps, getDataSource());
 				PreparedStatement psToUse = ps;
 				if (nativeJdbcExtractor != null) {
 					psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
@@ -485,7 +485,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	public int[] batchUpdate(String sql, BatchPreparedStatementSetter setter) throws DataAccessException {
-		Connection con = DataSourceUtils.getConnection(this.dataSource);
+		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
 		try {
 			Connection conToUse = con;
@@ -494,7 +494,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
 			}
 			ps = conToUse.prepareStatement(sql);
-			DataSourceUtils.applyTransactionTimeout(ps, dataSource);
+			DataSourceUtils.applyTransactionTimeout(ps, getDataSource());
 			PreparedStatement psToUse = ps;
 			if (this.nativeJdbcExtractor != null) {
 				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
@@ -521,7 +521,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			    sql, ex);
 		}
 		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
 
@@ -533,7 +533,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	public Map execute(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
-		Connection con = DataSourceUtils.getConnection(this.dataSource);
+		Connection con = DataSourceUtils.getConnection(getDataSource());
 		CallableStatement cs = null;
 		try {
 			Connection conToUse = con;
@@ -574,7 +574,7 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 				catch (SQLException ignore) {
 				}
 			}
-			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 		}
 	}
 
