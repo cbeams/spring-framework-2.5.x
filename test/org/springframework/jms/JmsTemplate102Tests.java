@@ -179,8 +179,9 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _topicConnectionControl.replay();
 
         sender.execute(new SessionCallback() {
-            public void doInJms(Session session) throws JMSException {
+            public Object doInJms(Session session) throws JMSException {
                 boolean b = session.getTransacted();
+                return null;
             }
         });
 
@@ -222,10 +223,11 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _topicConnectionControl.replay();
 
         sender.execute(new ProducerCallback() {
-            public void doInJms(Session session, MessageProducer msgProducer)
+            public Object doInJms(Session session, MessageProducer msgProducer)
                 throws JMSException {
                 boolean b = session.getTransacted();
                 int i = msgProducer.getPriority();
+                return null;
             }
         });
 
@@ -254,8 +256,9 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _queueConnectionControl.replay();
 
         sender.execute(new SessionCallback() {
-            public void doInJms(Session session) throws JMSException {
+            public Object doInJms(Session session) throws JMSException {
                 boolean b = session.getTransacted();
+                return null;
             }
         });
 
@@ -298,10 +301,11 @@ public class JmsTemplate102Tests extends JmsTestCase {
         _queueConnectionControl.replay();
 
         sender.execute(new ProducerCallback() {
-            public void doInJms(Session session, MessageProducer msgProducer)
+            public Object doInJms(Session session, MessageProducer msgProducer)
                 throws JMSException {
                 boolean b = session.getTransacted();
                 int i = msgProducer.getPriority();
+                return null;
             }
         });
 

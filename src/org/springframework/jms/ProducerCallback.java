@@ -32,5 +32,13 @@ import javax.jms.Session;
  */
 public interface ProducerCallback
 {
-    void doInJms(Session session, MessageProducer msgProducer) throws JMSException;
+    /**
+     * Perform operations on the Session and MessageProducer.  The messgae producer is
+     * not associated with any destination.
+     * @param session The JMS session object to use
+     * @param msgProducer  The JMS MessageProducer object to use
+     * @return A return value, if any.
+     * @throws JMSException JMS provider exception.
+     */
+    Object doInJms(Session session, MessageProducer msgProducer) throws JMSException;
 }

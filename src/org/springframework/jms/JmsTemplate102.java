@@ -23,6 +23,7 @@ import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueReceiver;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
@@ -31,6 +32,7 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
+import javax.jms.TopicSubscriber;
 
 /**
  * An implementation of the JmsTemplate interface that uses the 
@@ -276,25 +278,25 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
 
     }
 
-    public void execute(ProducerCallback action) throws JmsException {
+    public Object execute(ProducerCallback action) throws JmsException {
         if (isPubSubDomain()) {
-            executeTopicJmsSenderCallback(action);
+            return executeTopicJmsSenderCallback(action);
         } else {
-            executeQueueJmsSenderCallback(action);
+            return executeQueueJmsSenderCallback(action);
         }
 
     }
 
-    public void execute(SessionCallback action) throws JmsException {
+    public Object execute(SessionCallback action) throws JmsException {
         if (isPubSubDomain()) {
-            executeTopicSessionCallback(action);
+            return executeTopicSessionCallback(action);
         } else {
-            executeQueueSessionCallback(action);
+            return executeQueueSessionCallback(action);
         }
 
     }
 
-    private void executeTopicJmsSenderCallback(ProducerCallback action) {
+    private Object executeTopicJmsSenderCallback(ProducerCallback action) {
         TopicConnection topicConnection = null;
         try {
             topicConnection =
@@ -306,7 +308,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
                     getSessionAcknowledgeMode());
             TopicPublisher publisher = topicSession.createPublisher(null);
 
-            action.doInJms(topicSession, publisher);
+            return action.doInJms(topicSession, publisher);
 
         } catch (JMSException e) {
             throw convertJMSException("Call JmsSenderCallback", e);
@@ -321,7 +323,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
         }
     }
 
-    private void executeTopicSessionCallback(SessionCallback action) {
+    private Object executeTopicSessionCallback(SessionCallback action) {
         TopicConnection topicConnection = null;
         try {
             topicConnection =
@@ -332,7 +334,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
                     isSessionTransacted(),
                     getSessionAcknowledgeMode());
 
-            action.doInJms(topicSession);
+            return action.doInJms(topicSession);
 
         } catch (JMSException e) {
             throw convertJMSException("Call SessionCallback", e);
@@ -347,7 +349,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
         }
     }
 
-    private void executeQueueJmsSenderCallback(ProducerCallback action) {
+    private Object executeQueueJmsSenderCallback(ProducerCallback action) {
         QueueConnection queueConnection = null;
         try {
             queueConnection =
@@ -361,7 +363,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
 
             QueueSender queueSender = queueSession.createSender(null);
 
-            action.doInJms(queueSession, queueSender);
+            return action.doInJms(queueSession, queueSender);
 
         } catch (JMSException e) {
             throw convertJMSException("Call SessionCallback", e);
@@ -376,7 +378,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
         }
     }
 
-    private void executeQueueSessionCallback(SessionCallback action) {
+    private Object executeQueueSessionCallback(SessionCallback action) {
         QueueConnection queueConnection = null;
         try {
             queueConnection =
@@ -388,7 +390,7 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
                     isSessionTransacted(),
                     getSessionAcknowledgeMode());
 
-            action.doInJms(queueSession);
+            return action.doInJms(queueSession);
 
         } catch (JMSException e) {
             throw convertJMSException("Call SessionCallback", e);
@@ -460,6 +462,37 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
                 }
             });
         }
+    }
+    
+    public Message receive(final Destination d, final long timeout) {
+        Message returnMessage = null;
+        if (isPubSubDomain()) {
+            //TODO check d instanceof Queue?
+            returnMessage = (Message) execute(new SessionCallback() {
+                public Object doInJms(Session session) throws JMSException {
+                    QueueReceiver mc = ((QueueSession)session).createReceiver((Queue)d);
+                    return mc.receive(timeout);
+                }
+            });
+        } else {
+            returnMessage = (Message) execute(new SessionCallback() {
+                public Object doInJms(Session session) throws JMSException {
+                    TopicSubscriber mc = ((TopicSession)session).createSubscriber((Topic)d);
+                    return mc.receive(timeout);
+                }
+            });
+        }
+        return returnMessage;
+    }
+
+    public Message receive(final String destinationName, final long timeout) {
+        final Destination destination =
+            (Destination) getJmsAdmin().lookup(
+                destinationName,
+                isDynamicDestinationEnabled(),
+                isPubSubDomain());
+
+        return receive(destination, timeout);
     }
 
 }

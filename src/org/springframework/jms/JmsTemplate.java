@@ -63,9 +63,10 @@ public interface JmsTemplate {
      * 
      *
      * @param action callback object that exposes the session.
+     * @return The result object from working with the session.
      * @throws JmsException if there is any problem
      */
-    public void execute(SessionCallback action) throws JmsException;
+    public Object execute(SessionCallback action) throws JmsException;
 
 
     /**
@@ -73,16 +74,17 @@ public interface JmsTemplate {
      * the JMS session and MessageProducer in order to do more complex
      * send operations.
      * @param action callback object that exposes the session/producer pair.
+     * @return The result object from working with the session.
      * @throws JmsException
      */
-    public void execute(ProducerCallback action)
+    public Object execute(ProducerCallback action)
         throws JmsException;
 
     /**
      * Send a message to a JMS destination.  The messageCreator callback creates
      * the message given a session.
      * @param destinationName The destination name can refer to
-     * either the a dynamic destination or one residing in JNDI.   
+     * either a dynamic destination or one residing in JNDI.   
      * @param messageCreator callback to create a message.
      * @throws JmsException converted checked JMSException to unchecked.
      */
@@ -231,8 +233,27 @@ public interface JmsTemplate {
      */
     public void send(String d, Object o, MessagePostProcessor c);
     
-
-
+    /**
+     * Receive a message synchronously but only wait up to a specified time
+     * for delivery.
+     * This method should be used carefully, since it will block the thread
+     * until the message becomes available or until the timeout value is exceeded.
+     * @param d The destination to receive a message from.
+     * @param timeout the timeout value (in milliseconds)
+     * @return the message produced for the consumer or null if the timeout expires.
+     */
+    public Message receive(Destination d, long timeout);
+    
+    /**
+     * Receive a message synchronously but only wait up to a specified time for
+     * delivery.  This method should be used carefully, since it will block the
+     * thread until the message becomes available or until the timeout value is exceeded. 
+     * @param d The destination to receive a message from.   The name can refer to
+     * either a dynamic destination or one residing in JNDI. 
+     * @param timeout
+     * @return
+     */
+    public Message receive(String d, long timeout);
     
     //TODO  receive(Destination, timeout)
     

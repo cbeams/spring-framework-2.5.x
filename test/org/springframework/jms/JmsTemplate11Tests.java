@@ -139,10 +139,11 @@ public class JmsTemplate11Tests extends JmsTestCase
 
         sender.execute(new ProducerCallback()
         {
-            public void doInJms(Session session, MessageProducer msgProducer) throws JMSException
+            public Object doInJms(Session session, MessageProducer msgProducer) throws JMSException
             {
                 boolean b = session.getTransacted();
                 int i = msgProducer.getPriority();
+                return null;
             }
         });
 
@@ -173,9 +174,10 @@ public class JmsTemplate11Tests extends JmsTestCase
 
         sender.execute(new SessionCallback()
         {
-            public void doInJms(Session session) throws JMSException
+            public Object doInJms(Session session) throws JMSException
             {
                 boolean b = session.getTransacted();
+                return null;
             }
         });
 

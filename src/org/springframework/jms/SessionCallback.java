@@ -29,5 +29,11 @@ import javax.jms.Session;
  */
 public interface SessionCallback
 {
-    void doInJms(Session session) throws JMSException;
+    /**
+     * Execute operations against a JMS session possibly returning a result.
+     * @param session the JMS session
+     * @return The result object from working with the session.
+     * @throws JMSException JMS provider exception.
+     */
+    Object doInJms(Session session) throws JMSException;
 }
