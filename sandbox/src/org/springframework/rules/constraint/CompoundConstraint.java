@@ -20,11 +20,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.core.ToStringCreator;
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.closure.support.Algorithms;
+import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.Algorithms;
-import org.springframework.util.closure.support.Block;
 
 /**
  * Abstract base class for unary constraints which compose other constraints.

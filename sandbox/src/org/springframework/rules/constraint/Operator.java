@@ -15,7 +15,7 @@
  */
 package org.springframework.rules.constraint;
 
-import org.springframework.util.enums.support.StringCodedLabeledEnum;
+import org.springframework.core.enums.support.StringCodedLabeledEnum;
 
 /**
  * @author Keith Donald

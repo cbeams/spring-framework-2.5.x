@@ -17,8 +17,8 @@ package org.springframework.rules.constraint;
 
 import java.util.Collection;
 
+import org.springframework.core.closure.Constraint;
 import org.springframework.util.StringUtils;
-import org.springframework.util.closure.Constraint;
 
 /**
  * Validates a required property. Required is defined as non-null and, if the
@@ -32,7 +32,7 @@ public class Required implements Constraint {
     /**
      * Tests if this argument is present (non-null, not-empty, not blank)
      * 
-     * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
+     * @see org.springframework.core.closure.Constraint#test(java.lang.Object)
      */
     public boolean test(Object argument) {
         if (argument != null) {

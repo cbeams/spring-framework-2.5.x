@@ -15,9 +15,9 @@
  */
 package org.springframework.rules.constraint;
 
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.enums.support.StringCodedLabeledEnum;
 import org.springframework.util.StringUtils;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.enums.support.StringCodedLabeledEnum;
 
 /**
  * A like constraint, supporting "starts with%", "%ends with", and "%contains%".

@@ -17,8 +17,8 @@ package org.springframework.rules.constraint;
 
 import java.util.Comparator;
 
-import org.springframework.util.comparator.ComparableComparator;
-import org.springframework.util.comparator.NullSafeComparator;
+import org.springframework.core.comparator.ComparableComparator;
+import org.springframework.core.comparator.NullSafeComparator;
 
 /**
  * Abstract helper superclass for binary predicates involved in comparison

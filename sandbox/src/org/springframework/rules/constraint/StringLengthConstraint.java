@@ -15,10 +15,10 @@
  */
 package org.springframework.rules.constraint;
 
+import org.springframework.core.closure.Constraint;
 import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.closure.StringLength;
 import org.springframework.util.Assert;
-import org.springframework.util.closure.Constraint;
 
 /**
  * Constraint to validate an object's string length.
@@ -74,7 +74,7 @@ public class StringLengthConstraint extends AbstractConstraint {
      * Tests that the string form of this argument falls within the length
      * constraint.
      * 
-     * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
+     * @see org.springframework.core.closure.Constraint#test(java.lang.Object)
      */
     public boolean test(Object argument) {
         return this.lengthConstraint.test(argument);

@@ -27,13 +27,13 @@ import net.sf.hibernate.type.NullableType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.enums.LabeledEnum;
+import org.springframework.core.enums.LabeledEnumResolver;
+import org.springframework.core.enums.support.LetterCodedLabeledEnum;
+import org.springframework.core.enums.support.ShortCodedLabeledEnum;
+import org.springframework.core.enums.support.StaticLabeledEnumResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.enums.LabeledEnum;
-import org.springframework.util.enums.LabeledEnumResolver;
-import org.springframework.util.enums.support.LetterCodedLabeledEnum;
-import org.springframework.util.enums.support.ShortCodedLabeledEnum;
-import org.springframework.util.enums.support.StaticLabeledEnumResolver;
 
 /**
  * A Hibernate user type for <code>LabeledEnum</code> instances.

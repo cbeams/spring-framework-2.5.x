@@ -22,12 +22,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.closure.support.Block;
+import org.springframework.core.enums.LabeledEnum;
+import org.springframework.core.enums.LabeledEnumResolver;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.orm.hibernate.HibernateTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.closure.support.Block;
-import org.springframework.util.enums.LabeledEnum;
-import org.springframework.util.enums.LabeledEnumResolver;
 
 /**
  * A enum resolver that loads enums using the <code>Hibernate</code> data

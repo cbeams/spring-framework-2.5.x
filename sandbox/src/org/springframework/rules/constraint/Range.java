@@ -17,9 +17,9 @@ package org.springframework.rules.constraint;
 
 import java.util.Comparator;
 
+import org.springframework.core.ToStringCreator;
+import org.springframework.core.closure.Constraint;
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringCreator;
-import org.springframework.util.closure.Constraint;
 
 /**
  * A range whose edges are defined by a minimum Comparable and a maximum
@@ -189,7 +189,7 @@ public final class Range extends AbstractConstraint {
 	/**
 	 * Test if the specified argument falls within the established range.
 	 * 
-	 * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
+	 * @see org.springframework.core.closure.Constraint#test(java.lang.Object)
 	 */
 	public boolean test(Object argument) {
 		return this.rangeConstraint.test(argument);

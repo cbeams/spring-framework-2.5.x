@@ -18,13 +18,13 @@ package org.springframework.rules.constraint;
 import java.util.Comparator;
 import java.util.Set;
 
+import org.springframework.core.closure.Closure;
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.closure.support.AlgorithmsAccessor;
 import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.constraint.Like.LikeType;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.factory.Constraints;
-import org.springframework.util.closure.Closure;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AlgorithmsAccessor;
 
 /**
  * A convenience constraints factory accessor for easy subclassing.

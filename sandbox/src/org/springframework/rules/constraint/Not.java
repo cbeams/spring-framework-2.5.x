@@ -15,8 +15,8 @@
  */
 package org.springframework.rules.constraint;
 
+import org.springframework.core.closure.Constraint;
 import org.springframework.util.Assert;
-import org.springframework.util.closure.Constraint;
 
 /**
  * "Nots" another unary constraint (the inverse) by using composition.
@@ -51,7 +51,7 @@ public class Not implements Constraint {
     /**
      * Negates the boolean result returned by testing the wrapped constraint.
      * 
-     * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
+     * @see org.springframework.core.closure.Constraint#test(java.lang.Object)
      */
     public boolean test(Object value) {
     	Assert.state(constraint != null, "The constraint is not set");

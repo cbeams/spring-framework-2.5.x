@@ -15,9 +15,9 @@
  */
 package org.springframework.rules.constraint;
 
+import org.springframework.core.closure.Constraint;
+import org.springframework.core.closure.support.AbstractConstraint;
 import org.springframework.util.Assert;
-import org.springframework.util.closure.Constraint;
-import org.springframework.util.closure.support.AbstractConstraint;
 
 public class IfTrue extends AbstractConstraint {
 

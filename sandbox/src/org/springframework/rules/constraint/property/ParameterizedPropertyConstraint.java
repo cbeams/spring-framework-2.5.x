@@ -15,9 +15,9 @@
  */
 package org.springframework.rules.constraint.property;
 
+import org.springframework.core.closure.Constraint;
 import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.rules.constraint.ParameterizedBinaryConstraint;
-import org.springframework.util.closure.Constraint;
 
 /**
  * A constraint that returns the result of a <code>boolean</code>
@@ -75,7 +75,7 @@ public class ParameterizedPropertyConstraint implements PropertyConstraint {
 	 * Tests the value of the configured propertyName for this bean against the
 	 * configured parameter value using the configured binary predicate.
 	 * 
-	 * @see org.springframework.util.closure.Constraint#test(java.lang.Object)
+	 * @see org.springframework.core.closure.Constraint#test(java.lang.Object)
 	 */
 	public boolean test(Object bean) {
 		return parameterizedExpression.test(bean);

@@ -17,9 +17,9 @@ package org.springframework.rules.constraint;
 
 import java.util.Comparator;
 
+import org.springframework.core.closure.Constraint;
 import org.springframework.rules.closure.BinaryConstraint;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.closure.Constraint;
 
 /**
  * Constraint that tests object equality (not identity.)

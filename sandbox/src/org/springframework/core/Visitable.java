@@ -1,40 +1,35 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.springframework.core;
-/**
- * Generic framework code included with 
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/1861007841/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). 
- * This code is free to use and modify. 
- * Please contact <a href="mailto:rod.johnson@interface21.com">rod.johnson@interface21.com</a>
- * for commercial support.
- */
 
 /**
-*	Interface to be implemented by objects supporting the Visitor
-*	design pattern.
-*	@author Rod Johnson
-*	@since 15.10.1999
-*/
-public interface  Visitable {
-	
-	/** Accept the given visitor.
-	 * <br>There are two cases:
-	 * <ol>
-	 *        <li><i>The host (this Visitable object) is a composite element,
-	 *        with subnodes:</i> The host is responsible for
-	 *        calling the visitor's enterComposite() method,
-	 *        calling the acceptVisitor(Visitor) method on any subnodes
-	 *        implementing this interface, and calling the visitor's
-	 *        exitComposite() method to end the visit. Note that the Visitor
-	 *        can prevent the evaluation of subnodes by returning false
-	 *        in enterComposite(), in which case this object should call
-	 *        acceptVisitor() on itself instead of child nodes, and ignore
-	 *        the call to exitComposite().
-	 *        <li><i>The element is a leaf, with no subnodes:</i>
-	 *        The element must call the Visitor's visit() method on itself
-	 * </ol>
-	 * @param v Visitor
-	 * @param depth current depth of traversal, starting at 0
+ * The super vistable interface of the visitor design pattern.
+ * @author Keith Donald
  */
-	public void acceptVisitor(Visitor v, int depth);
+public interface Visitable {
+
+	/**
+	 * Accept a visitor and perform a dispatch. Within accept(), Vistables pass
+	 * themselves back to the visitor. The visitor then executes an encapsulated
+	 * algorithm unique to that type of Visitable object. As an alternative to
+	 * defining specific Vistable implementations, consider using the generic
+	 * <code>ReflectiveVisitorSupport</code>.
+	 * 
+	 * @param visitor
+	 *            The visitor to accept.
+	 */
+	public void accept(Visitor visitor);
 }
-
