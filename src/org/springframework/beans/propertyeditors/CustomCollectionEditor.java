@@ -171,4 +171,12 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 		return element;
 	}
 
+	/**
+	 * This implementation returns null to indicate that there is no
+	 * appropriate text representation.
+	 */
+	public String getAsText() {
+		return null;
+	}
+
 }
