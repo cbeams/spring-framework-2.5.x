@@ -1,5 +1,5 @@
 THE SPRING FRAMEWORK, release 1.0 (March 2004)
--------------------------------------------------
+----------------------------------------------
 http://www.springframework.org
 
 
@@ -109,11 +109,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: web application context, multipart resolver, web utilities
 - Dependencies: spring-context, Servlet, (Commons FileUpload, COS)
 
-* "spring-webmvc" (~130 KB)
+* "spring-webmvc" (~135 KB)
 - Contents: web MVC framework, web controllers, web views
 - Dependencies: spring-web, (JSP, JSTL, Tiles, iText, POI)
 
-* "spring" (~930 KB)
+* "spring" (~935 KB)
 - Contents: all of the above
 - Dependencies: all of the above
 
