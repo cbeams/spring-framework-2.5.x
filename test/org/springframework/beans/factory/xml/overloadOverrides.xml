@@ -9,14 +9,14 @@
 
 	<bean id="autoProxiedOverload" 
 		lazy-init="true"
-		class="org.springframework.beans.factory.xml.SPR391LookupMethodWrappedByCglibProxyTests$OverloadLookup">
+		class="org.springframework.beans.factory.xml.LookupMethodWrappedByCglibProxyTests$OverloadLookup">
 		
 		<lookup-method name="newTestBean" bean="jenny" />		
 	</bean>
 	
 	<bean id="regularlyProxiedOverloadTarget" 
 		singleton="false"
-		class="org.springframework.beans.factory.xml.SPR391LookupMethodWrappedByCglibProxyTests$OverloadLookup">
+		class="org.springframework.beans.factory.xml.LookupMethodWrappedByCglibProxyTests$OverloadLookup">
 		
 		<lookup-method name="newTestBean" bean="jenny" />		
 	</bean>
