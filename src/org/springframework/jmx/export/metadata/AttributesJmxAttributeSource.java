@@ -146,4 +146,25 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 		}
 	}
 
+	/**
+	 * If the specified method has <code>ManagedOperationParameters</code> then these
+	 * are returned, otherwise a zero length array of <code>ManagedOperationParameter</code>
+	 * is returned.
+	 * @param method the <code>Method</code> to get the <code>ManagedOperationParameter</code>s for.
+	 * @return the array of <code>ManagedOperationParameter</code>.
+	 * @throws InvalidMetadataException if the number of <code>ManagedOperationParameter</code>s does not match the number
+	 * of parameters in the <code>Method</code>
+	 */
+	public ManagedOperationParameter[] getManagedOperationParameters(Method method) throws InvalidMetadataException {
+		Collection attrs = this.attributes.getAttributes(method, ManagedOperationParameter.class);
+
+		if(attrs.size() == 0) {
+			return new ManagedOperationParameter[0];
+		} else if(attrs.size() != method.getParameterTypes().length) {
+			throw new InvalidMetadataException("Method [" + method +
+					"] has an incorrect number of ManagedOperationParameters specified");
+		} else {
+			return (ManagedOperationParameter[]) attrs.toArray(new ManagedOperationParameter[attrs.size()]);
+		}
+	}
 }

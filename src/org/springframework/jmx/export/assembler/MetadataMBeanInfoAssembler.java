@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 import javax.management.Descriptor;
+import javax.management.MBeanParameterInfo;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,6 +29,7 @@ import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedResource;
+import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.util.StringUtils;
 
 /**
@@ -279,6 +281,32 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		}
 	}
 
+	/**
+	 * Reads <code>MBeanParameterInfo</code> from the <code>ManagedOperationParameter</code>
+	 * attributes attached to a method. Returns an empty array of <code>MBeanParameterInfo</code> if no
+	 * attributes are found.
+	 * @param method the <code>Method</code> to get the <code>ManagedOperationParameter</code> for.
+	 * @return the <code>MBeanParameterInfo</code> array.
+	 */
+	protected MBeanParameterInfo[] getOperationParameters(Method method) {
+
+		ManagedOperationParameter[] params = this.attributeSource.getManagedOperationParameters(method);
+
+		if(params == null || params.length == 0) {
+			return new MBeanParameterInfo[0];
+		}
+
+		MBeanParameterInfo[] parameterInfo = new MBeanParameterInfo[params.length];
+		Class[] methodParameters = method.getParameterTypes();
+
+		for (int i = 0; i < params.length; i++) {
+			ManagedOperationParameter param = params[i];
+			parameterInfo[i] =
+					new MBeanParameterInfo(param.getName(), methodParameters[i].getName(), param.getDescription());
+		}
+
+		return parameterInfo;
+	}
 
 	/**
 	 * Determines which of two <code>int</code> values should be used as the value
