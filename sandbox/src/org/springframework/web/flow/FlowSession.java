@@ -45,7 +45,7 @@ import org.springframework.web.flow.support.FlowUtils;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class FlowSession implements MutableAttributesAccessor, Serializable {
+public class FlowSession implements MutableFlowModel, Serializable {
 
 	protected final Log logger = LogFactory.getLog(FlowSession.class);
 

@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.closure.Constraint;
 
 /**
- * A interface that provides access to a data model.
+ * A interface that provides access to data model of a executing flow session.
  * <p>
  * This is a simple interface for accessing model attributes. It helps prevent
  * accidental misuse and manipulation of more enabling interfaces like Map, for
@@ -40,7 +40,7 @@ import org.springframework.util.closure.Constraint;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface AttributesAccessor {
+public interface FlowModel {
 
 	/**
 	 * Get the attribute value associated with the provided name, returning

@@ -27,9 +27,9 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.AttributesAccessor;
+import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.FlowConstants;
-import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -238,7 +238,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         model
 	 */
-	protected Object getLocalFormObject(AttributesAccessor model, Class formObjectClass) throws IllegalStateException {
+	protected Object getLocalFormObject(FlowModel model, Class formObjectClass) throws IllegalStateException {
 		return model.getRequiredAttribute(LOCAL_FORM_OBJECT_NAME, formObjectClass);
 	}
 
@@ -250,7 +250,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws IllegalStateException if the form object is not found in the
 	 *         model
 	 */
-	protected Object getLocalFormObject(AttributesAccessor model) throws IllegalStateException {
+	protected Object getLocalFormObject(FlowModel model) throws IllegalStateException {
 		return model.getRequiredAttribute(LOCAL_FORM_OBJECT_NAME);
 	}
 
@@ -262,7 +262,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws IllegalStateException if the Errors instance is not found in the
 	 *         model
 	 */
-	protected Errors getLocalFormErrors(AttributesAccessor model) throws IllegalStateException {
+	protected Errors getLocalFormErrors(FlowModel model) throws IllegalStateException {
 		return (Errors)model.getRequiredAttribute(LOCAL_FORM_OBJECT_ERRORS_NAME, Errors.class);
 	}
 
@@ -274,7 +274,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 *        verified
 	 * @return the form object
 	 */
-	protected Object getRequiredFormObject(AttributesAccessor model, String formObjectName, Class formObjectClass) {
+	protected Object getRequiredFormObject(FlowModel model, String formObjectName, Class formObjectClass) {
 		return model.getRequiredAttribute(formObjectName, formObjectClass);
 	}
 
@@ -284,7 +284,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param formObjectName the name of the form in the model
 	 * @return the form object
 	 */
-	protected Object getRequiredFormObject(AttributesAccessor model, String formObjectName) {
+	protected Object getRequiredFormObject(FlowModel model, String formObjectName) {
 		return model.getRequiredAttribute(formObjectName);
 	}
 
@@ -295,7 +295,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param formObjectName The name of the form object
 	 * @return The form object errors instance
 	 */
-	protected Errors getRequiredFormErrors(AttributesAccessor model, String formObjectName) {
+	protected Errors getRequiredFormErrors(FlowModel model, String formObjectName) {
 		return (Errors)model.getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName, Errors.class);
 	}
 
@@ -307,7 +307,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param model The flow model
 	 * @param formObject The form object to export an errors instance under
 	 */
-	protected void exportErrors(MutableAttributesAccessor model, Object formObject) {
+	protected void exportErrors(MutableFlowModel model, Object formObject) {
 		exportErrors(model, formObject, LOCAL_FORM_OBJECT_NAME);
 	}
 
@@ -318,11 +318,11 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @param formObject The form object
 	 * @param formObjectName The name of the form object
 	 */
-	protected void exportErrors(MutableAttributesAccessor model, Object formObject, String formObjectName) {
+	protected void exportErrors(MutableFlowModel model, Object formObject, String formObjectName) {
 		exportErrorsInternal(model, new BindException(formObject, formObjectName));
 	}
 
-	protected void exportErrorsInternal(MutableAttributesAccessor model, BindException errors) {
+	protected void exportErrorsInternal(MutableFlowModel model, BindException errors) {
 		// also bind it under the local (to flow) alias, so other actions can
 		// find it easily
 		model.setAttribute(LOCAL_FORM_OBJECT_NAME, errors.getTarget());
@@ -331,7 +331,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	public final String execute(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws Exception {
+			MutableFlowModel model) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Action '" + getClass().getName() + "' beginning execution");
 		}
@@ -379,7 +379,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 *         checked or unchecked
 	 */
 	protected String onPreExecute(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws Exception {
+			MutableFlowModel model) throws Exception {
 		return null;
 	}
 
@@ -395,7 +395,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 *         checked or unchecked
 	 */
 	protected abstract String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws Exception;
+			MutableFlowModel model) throws Exception;
 
 	/**
 	 * Post-action execution hook, subclasses may override.
@@ -409,7 +409,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws Exception An <b>unrecoverable</b> exception occured, either
 	 *         checked or unchecked
 	 */
-	protected void onPostExecute(HttpServletRequest request, HttpServletResponse response, AttributesAccessor model)
+	protected void onPostExecute(HttpServletRequest request, HttpServletResponse response, FlowModel model)
 			throws Exception {
 	}
 }

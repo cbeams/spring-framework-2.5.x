@@ -26,7 +26,7 @@ import java.io.Serializable;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowExecutionInfo extends AttributesAccessor, Serializable {
+public interface FlowExecutionInfo extends FlowModel, Serializable {
 
 	/**
 	 * Return the id of this flow execution. This is not a human readable flow

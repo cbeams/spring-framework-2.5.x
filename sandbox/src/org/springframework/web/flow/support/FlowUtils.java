@@ -18,9 +18,9 @@ package org.springframework.web.flow.support;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.AttributesAccessor;
+import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.MutableFlowModel;
 
 /**
  * Utility class providing convenience methods for the Spring web flow system.
@@ -49,7 +49,7 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  * </ul>
  * Alternatively, you can use the <code>beginTransaction()</code> and
  * <code>inTransaction()</code> methods avaible on the flow data model
- * interface ({@link org.springframework.web.flow.MutableAttributesAccessor}).
+ * interface ({@link org.springframework.web.flow.MutableFlowModel}).
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -61,7 +61,7 @@ public class FlowUtils {
 	 * @param model The model for the executing flow.
 	 * @return The flow execution
 	 */
-	public static FlowExecution getFlowExecution(AttributesAccessor model) {
+	public static FlowExecution getFlowExecution(FlowModel model) {
 		return (FlowExecution)model.getRequiredAttribute(FlowExecution.ATTRIBUTE_NAME);
 	}
 
@@ -73,7 +73,7 @@ public class FlowUtils {
 	 * @param model the model where the generated token should be saved
 	 * @param tokenName the key used to save the token in the model
 	 */
-	public static void setToken(MutableAttributesAccessor model, String tokenName) {
+	public static void setToken(MutableFlowModel model, String tokenName) {
 		String txToken = new RandomGuid().toString();
 		synchronized (model) {
 			model.setAttribute(tokenName, txToken);
@@ -88,7 +88,7 @@ public class FlowUtils {
 	 * @param model the model where the generated token should be saved
 	 * @param tokenName the key used to save the token in the model
 	 */
-	public static void clearToken(MutableAttributesAccessor model, String tokenName) {
+	public static void clearToken(MutableFlowModel model, String tokenName) {
 		synchronized (model) {
 			model.removeAttribute(tokenName);
 		}
@@ -114,7 +114,7 @@ public class FlowUtils {
 	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */
-	public static boolean isTokenValid(MutableAttributesAccessor model, HttpServletRequest request, String tokenName,
+	public static boolean isTokenValid(MutableFlowModel model, HttpServletRequest request, String tokenName,
 			String requestParameterName, boolean clear) {
 		String tokenValue = request.getParameter(requestParameterName);
 		return isTokenValid(model, tokenName, tokenValue, clear);
@@ -138,7 +138,7 @@ public class FlowUtils {
 	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */
-	public static boolean isTokenValid(MutableAttributesAccessor model, String tokenName, String tokenValue,
+	public static boolean isTokenValid(MutableFlowModel model, String tokenName, String tokenValue,
 			boolean clear) {
 		if (!StringUtils.hasText(tokenValue)) {
 			return false;

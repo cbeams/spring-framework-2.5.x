@@ -30,9 +30,9 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.Assert;
 import org.springframework.util.closure.Constraint;
-import org.springframework.web.flow.AttributesAccessor;
+import org.springframework.web.flow.FlowModel;
 import org.springframework.web.flow.FlowAttributesMapper;
-import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.MutableFlowModel;
 
 /**
  * Simple attributes mapper that allows mappings to be configured in the Spring
@@ -217,20 +217,20 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		return this.mapMissingAttributesToNull;
 	}
 
-	public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
+	public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 		Map subFlowAttributes = new HashMap();
 		map(parentFlowModel, new MapAttributesAccessorAdapter(subFlowAttributes), inputMappings);
 		return Collections.unmodifiableMap(subFlowAttributes);
 	}
 
-	public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel, MutableAttributesAccessor parentFlowModel) {
+	public void mapSubFlowOutputAttributes(FlowModel subFlowModel, MutableFlowModel parentFlowModel) {
 		map(subFlowModel, parentFlowModel, outputMappings);
 	}
 
 	/**
 	 * Map data from one map to another map using specified mappings.
 	 */
-	protected void map(AttributesAccessor from, MutableAttributesAccessor to, Map mappings) {
+	protected void map(FlowModel from, MutableFlowModel to, Map mappings) {
 		if (mappings != null) {
 			Iterator fromNames = mappings.keySet().iterator();
 			while (fromNames.hasNext()) {
@@ -303,7 +303,7 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 	/**
 	 * Helper class that wraps a map in a MutableAttributesAccessor interface.
 	 */
-	private static class MapAttributesAccessorAdapter implements MutableAttributesAccessor {
+	private static class MapAttributesAccessorAdapter implements MutableFlowModel {
 		private Map map;
 
 		public MapAttributesAccessorAdapter(Map map) {

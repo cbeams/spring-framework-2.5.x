@@ -38,7 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowExecution extends FlowExecutionInfo, MutableAttributesAccessor {
+public interface FlowExecution extends FlowExecutionInfo, MutableFlowModel {
 
 	/**
 	 * A flow execution is available as an attribute from the

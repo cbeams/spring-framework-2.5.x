@@ -25,7 +25,7 @@ import org.springframework.enums.ShortCodedEnum;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.MutableFlowModel;
 
 /**
  * A base superclass for actions that contain form view setup logic. Extends
@@ -99,7 +99,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	}
 
 	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws Exception {
+			MutableFlowModel model) throws Exception {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		if (prepopulateFromRequest) {
@@ -125,7 +125,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * @param request The request
 	 * @param model The model
 	 */
-	protected void exportViewPlaceholders(HttpServletRequest request, MutableAttributesAccessor model) {
+	protected void exportViewPlaceholders(HttpServletRequest request, MutableFlowModel model) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exporting view markers/placeholders to notify business-tier developers of "
 					+ "form fields that are missing, not mapped to backing objects, or need clarification");
@@ -159,7 +159,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 */
-	protected void setupReferenceData(HttpServletRequest request, MutableAttributesAccessor model)
+	protected void setupReferenceData(HttpServletRequest request, MutableFlowModel model)
 			throws ReferenceDataSetupException, ServletRequestBindingException {
 
 	}

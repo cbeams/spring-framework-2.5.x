@@ -76,6 +76,6 @@ public interface Action {
 	 *         checked or unchecked; note: any recoverable exceptions should be
 	 *         caught and an appropriate result outcome returned.
 	 */
-	public String execute(HttpServletRequest request, HttpServletResponse response, MutableAttributesAccessor model)
+	public String execute(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
 			throws Exception;
 }

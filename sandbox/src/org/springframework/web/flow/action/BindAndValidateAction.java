@@ -28,8 +28,8 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.flow.AttributesAccessor;
-import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.FlowModel;
+import org.springframework.web.flow.MutableFlowModel;
 
 /**
  * Base binding and validation action, which may be used as is, or specialized
@@ -201,7 +201,7 @@ public class BindAndValidateAction extends AbstractAction {
 	}
 
 	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws Exception {
+			MutableFlowModel model) throws Exception {
 		Object formObject = loadRequiredFormObject(request, model);
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		String result = bindAndValidate(request, model, binder);
@@ -224,7 +224,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param errors possible binding errors
 	 * @return the action result
 	 */
-	protected String getDefaultActionResult(HttpServletRequest request, MutableAttributesAccessor model,
+	protected String getDefaultActionResult(HttpServletRequest request, MutableFlowModel model,
 			Object formObject, BindException errors) {
 		return errors.hasErrors() ? error() : success();
 	}
@@ -242,7 +242,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @throws ObjectRetrievalFailureException the form object could not be
 	 *         loaded
 	 */
-	protected final Object loadRequiredFormObject(HttpServletRequest request, AttributesAccessor model)
+	protected final Object loadRequiredFormObject(HttpServletRequest request, FlowModel model)
 			throws IllegalStateException, ObjectRetrievalFailureException {
 		try {
 			// get the form object
@@ -275,7 +275,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @throws ServletRequestBindingException the form object could not be
 	 *         loaded because valid input was not provided in the request
 	 */
-	protected Object loadFormObject(HttpServletRequest request, AttributesAccessor model)
+	protected Object loadFormObject(HttpServletRequest request, FlowModel model)
 			throws ObjectRetrievalFailureException, ServletRequestBindingException {
 		if (!isCreateFormObjectPerRequest() && model.containsAttribute(getFormObjectName())) {
 			Object formObject = model.getAttribute(getFormObjectName(), getFormObjectClass());
@@ -311,7 +311,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @throws IllegalAccessException if the class or its constructor is not
 	 *         accessible
 	 */
-	protected Object createFormObject(HttpServletRequest request, AttributesAccessor model)
+	protected Object createFormObject(HttpServletRequest request, FlowModel model)
 			throws InstantiationException, IllegalAccessException, ServletRequestBindingException {
 		if (this.formObjectClass == null) {
 			throw new IllegalStateException("Cannot create formObject without formObjectClass being set - "
@@ -331,7 +331,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @return the action result outcome
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected final String bindAndValidate(HttpServletRequest request, MutableAttributesAccessor model,
+	protected final String bindAndValidate(HttpServletRequest request, MutableFlowModel model,
 			ServletRequestDataBinder binder) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
@@ -365,7 +365,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @see #initBinder
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object formObject,
-			AttributesAccessor model) {
+			FlowModel model) {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(formObject, getFormObjectName());
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
@@ -400,7 +400,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 */
-	protected void initBinder(HttpServletRequest request, AttributesAccessor model, ServletRequestDataBinder binder) {
+	protected void initBinder(HttpServletRequest request, FlowModel model, ServletRequestDataBinder binder) {
 		if (propertyEditorRegistrar != null) {
 			propertyEditorRegistrar.registerCustomEditors(binder);
 		}
@@ -423,7 +423,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 *        registration of binding errors
 	 * @see #bindAndValidate
 	 */
-	protected void onBind(HttpServletRequest request, MutableAttributesAccessor model, Object formObject,
+	protected void onBind(HttpServletRequest request, MutableFlowModel model, Object formObject,
 			BindException errors) {
 		onBind(request, model, formObject);
 	}
@@ -438,7 +438,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param model the flow model
 	 * @param formObject the formObject object to perform further binding on
 	 */
-	protected void onBind(HttpServletRequest request, MutableAttributesAccessor model, Object formObject) {
+	protected void onBind(HttpServletRequest request, MutableFlowModel model, Object formObject) {
 	}
 
 	/**
@@ -465,7 +465,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
 	 */
-	protected String onBindAndValidate(HttpServletRequest request, MutableAttributesAccessor model, Object formObject,
+	protected String onBindAndValidate(HttpServletRequest request, MutableFlowModel model, Object formObject,
 			BindException errors) {
 		if (!errors.hasErrors()) {
 			return onBindAndValidateSuccess(request, model, formObject, errors);
@@ -483,7 +483,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param errors the possible binding errors
 	 * @return the action result
 	 */
-	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
+	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableFlowModel model,
 			Object formObject, BindException errors) {
 		return onBindAndValidateSuccess(request, model, formObject);
 	}
@@ -498,7 +498,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param formObject the form object
 	 * @return the action result
 	 */
-	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
+	protected String onBindAndValidateSuccess(HttpServletRequest request, MutableFlowModel model,
 			Object formObject) {
 		return null;
 	}

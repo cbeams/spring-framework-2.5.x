@@ -145,7 +145,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 		return flowExecution.spawn(getSubFlow(), subFlowInput, request, response);
 	}
 
-	public Map createSubFlowInputAttributes(AttributesAccessor parentFlowModel) {
+	public Map createSubFlowInputAttributes(FlowModel parentFlowModel) {
 		if (getFlowAttributesMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attributes mapper to map parent-flow attributes "
@@ -165,7 +165,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributesM
 		}
 	}
 
-	public void mapSubFlowOutputAttributes(AttributesAccessor subFlowModel, MutableAttributesAccessor parentFlowModel) {
+	public void mapSubFlowOutputAttributes(FlowModel subFlowModel, MutableFlowModel parentFlowModel) {
 		if (getFlowAttributesMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger

@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**
@@ -64,7 +64,7 @@ public class MultiAction extends AbstractAction {
 	}
 
 	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response,
-			MutableAttributesAccessor model) throws Exception {
+			MutableFlowModel model) throws Exception {
 		FlowExecution flowExecution = FlowUtils.getFlowExecution(model);
 		String eventId = flowExecution.getLastEventId();
 		String handlerMethodName = methodNameResolver.getHandlerMethodName(eventId);
@@ -89,7 +89,7 @@ public class MultiAction extends AbstractAction {
 	protected Method getHandlerMethod(String eventHandlerMethodName) throws NoSuchMethodException,
 			IllegalAccessException {
 		return getDelegate().getClass().getMethod(eventHandlerMethodName,
-				new Class[] { HttpServletRequest.class, HttpServletResponse.class, MutableAttributesAccessor.class });
+				new Class[] { HttpServletRequest.class, HttpServletResponse.class, MutableFlowModel.class });
 	}
 
 	protected Object getDelegate() {
