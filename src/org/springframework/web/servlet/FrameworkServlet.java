@@ -309,11 +309,75 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 
 	/**
+	 * Delegate GET requests to servletWrapper respectively doService.
+	 * @see #doService
+	 */
+	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+		serviceWrapper(request, response);
+	}
+
+	/**
+	 * Delegate POST requests to servletWrapper respectively doService.
+	 * @see #doService
+	 */
+	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+		serviceWrapper(request, response);
+	}
+
+	/**
+	 * Delegate PUT requests to servletWrapper respectively doService.
+	 * @see #doService
+	 */
+	protected final void doPut(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+		serviceWrapper(request, response);
+	}
+
+	/**
+	 * Delegate DELETE requests to servletWrapper respectively doService.
+	 * @see #doService
+	 */
+	protected final void doDelete(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+		serviceWrapper(request, response);
+	}
+
+	/**
+	 * Delegate HEAD requests to servletWrapper respectively doService.
+	 * @see #doService
+	 */
+	protected final void doHead(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+		serviceWrapper(request, response);
+	}
+
+	/**
+	 * Delegate OPTIONS requests to servletWrapper respectively doService.
+	 * @see #doService
+	 */
+	protected final void doOptions(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+		serviceWrapper(request, response);
+	}
+
+	/**
+	 * Delegate TRACE requests to servletWrapper respectively doService.
+	 * @see #doService
+	 */
+	protected final void doTrace(HttpServletRequest request, HttpServletResponse response)
+	    throws ServletException, IOException {
+		serviceWrapper(request, response);
+	}
+
+	/**
 	 * Handle this request, publishing an event regardless of the outcome.
 	 * The actually event handling is performed by the abstract doService() method.
 	 */
-	protected final void service(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+	private void serviceWrapper(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
 		long startTime = System.currentTimeMillis();
 		Exception failureCause = null;
 		try {
