@@ -1,8 +1,10 @@
 package org.springframework.beans.factory.config;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
-import java.io.FileNotFoundException;
+import java.util.Properties;
+import java.util.prefs.Preferences;
 
 import junit.framework.TestCase;
 
@@ -172,6 +174,58 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		catch (BeanDefinitionStoreException ex) {
 			// expected
 		}
+	}
+
+	public void testPreferencesPlaceholderConfigurer() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "${myName}");
+		pvs.addPropertyValue("age", "${myAge}");
+		pvs.addPropertyValue("touchy", "${myTouchy}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("myAge", "99");
+		pvs.addPropertyValue("properties", props);
+		ac.registerSingleton("configurer", PreferencesPlaceholderConfigurer.class, pvs);
+		Preferences.systemRoot().put("myName", "myNameValue");
+		Preferences.systemRoot().put("myTouchy", "myTouchyValue");
+		Preferences.userRoot().put("myTouchy", "myOtherTouchyValue");
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("myNameValue", tb.getName());
+		assertEquals(99, tb.getAge());
+		assertEquals("myOtherTouchyValue", tb.getTouchy());
+		Preferences.userRoot().remove("myTouchy");
+		Preferences.systemRoot().remove("myTouchy");
+		Preferences.systemRoot().remove("myName");
+	}
+
+	public void testPreferencesPlaceholderConfigurerWithCustomTreePaths() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "${myName}");
+		pvs.addPropertyValue("age", "${myAge}");
+		pvs.addPropertyValue("touchy", "${myTouchy}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("myAge", "99");
+		pvs.addPropertyValue("properties", props);
+		pvs.addPropertyValue("systemTreePath", "mySystemPath");
+		pvs.addPropertyValue("userTreePath", "myUserPath");
+		ac.registerSingleton("configurer", PreferencesPlaceholderConfigurer.class, pvs);
+		Preferences.systemRoot().node("mySystemPath").put("myName", "myNameValue");
+		Preferences.systemRoot().node("mySystemPath").put("myTouchy", "myTouchyValue");
+		Preferences.userRoot().node("myUserPath").put("myTouchy", "myOtherTouchyValue");
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("myNameValue", tb.getName());
+		assertEquals(99, tb.getAge());
+		assertEquals("myOtherTouchyValue", tb.getTouchy());
+		Preferences.userRoot().node("myUserPath").remove("myTouchy");
+		Preferences.systemRoot().node("mySystemPath").remove("myTouchy");
+		Preferences.systemRoot().node("mySystemPath").remove("myName");
 	}
 
 }

@@ -292,7 +292,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 					throw new BeanDefinitionStoreException("Circular placeholder reference '" + placeholder +
 																								 "' in property definitions [" + props + "]");
 				}
-				String propVal = props.getProperty(placeholder);
+				String propVal = resolvePlaceholder(placeholder, props);
 				if (propVal == null && this.checkSystemProperties) {
 					// try system property (e.g. "user.dir")
 					propVal = System.getProperty(placeholder);
@@ -312,6 +312,20 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 			}
 		}
 		return strVal;
+	}
+
+	/**
+	 * Resolve the given placeholder using the given properties.
+	 * Default implementation simply checks for a corresponding property key.
+	 * <p>Subclasses can override this for customized placeholder-to-key mappings
+	 * or custom resolution strategies, possibly just using the given properties
+	 * as fallback.
+	 * @param placeholder the placeholder to resolve
+	 * @param props the merged properties of this configurer
+	 * @return the resolved value
+	 */
+	protected String resolvePlaceholder(String placeholder, Properties props) {
+		return props.getProperty(placeholder);
 	}
 
 }
