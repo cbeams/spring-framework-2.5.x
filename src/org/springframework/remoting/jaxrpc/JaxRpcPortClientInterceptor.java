@@ -30,6 +30,7 @@ import javax.xml.rpc.Stub;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
@@ -426,6 +427,11 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		if (AopUtils.isToStringMethod(invocation.getMethod())) {
+			return "JAX-RPC proxy for port [" + getPortName() + "] of service [" +
+					getJaxRpcService().getServiceName() + "]";
+		}
+
 		Remote stub = getPortStub();
 		if (stub != null) {
 			// JAX-RPC stub available -> traditional RMI stub invocation.
