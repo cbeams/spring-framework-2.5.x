@@ -839,7 +839,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query string", (Object) "myvalue", Hibernate.STRING);
+		List result = ht.find("some query string", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
 		sfControl.verify();
 		sessionControl.verify();
@@ -963,7 +963,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query string", "myparam", "myvalue");
+		List result = ht.findByNamedParam("some query string", "myparam", "myvalue");
 		assertTrue("Correct list", result == list);
 		sfControl.verify();
 		sessionControl.verify();
@@ -998,7 +998,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query string", "myparam", "myvalue", Hibernate.STRING);
+		List result = ht.findByNamedParam("some query string", "myparam", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
 		sfControl.verify();
 		sessionControl.verify();
@@ -1035,7 +1035,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query string",
+		List result = ht.findByNamedParam("some query string",
 													new String[] {"myparam1", "myparam2"},
 													new Object[] {"myvalue1", new Integer(2)});
 		assertTrue("Correct list", result == list);
@@ -1074,7 +1074,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.find("some query string",
+		List result = ht.findByNamedParam("some query string",
 													new String[] {"myparam1", "myparam2"},
 													new Object[] {"myvalue1", new Integer(2)},
 													new Type[] {Hibernate.STRING, Hibernate.INTEGER});
@@ -1303,7 +1303,7 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate();
 		try {
 			ht.findByNamedQuery("some query string",
-													new Object[] {"myvalue1", new Integer(2)},
+													new Object[] {"myvalue1", "myValue2"},
 													new Type[] {Hibernate.STRING});
 			fail("Should have thrown IllegalArgumentException");
 		}
@@ -1340,7 +1340,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQuery("some query name", "myparam", "myvalue");
+		List result = ht.findByNamedQueryAndNamedParam("some query name", "myparam", "myvalue");
 		assertTrue("Correct list", result == list);
 		sfControl.verify();
 		sessionControl.verify();
@@ -1375,7 +1375,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQuery("some query name", "myparam", "myvalue", Hibernate.STRING);
+		List result = ht.findByNamedQueryAndNamedParam("some query name", "myparam", "myvalue", Hibernate.STRING);
 		assertTrue("Correct list", result == list);
 		sfControl.verify();
 		sessionControl.verify();
@@ -1412,7 +1412,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQuery("some query name",
+		List result = ht.findByNamedQueryAndNamedParam("some query name",
 																			new String[] {"myparam1", "myparam2"},
 																			new Object[] {"myvalue1", new Integer(2)});
 		assertTrue("Correct list", result == list);
@@ -1451,7 +1451,7 @@ public class HibernateTemplateTests extends TestCase {
 		queryControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		List result = ht.findByNamedQuery("some query name",
+		List result = ht.findByNamedQueryAndNamedParam("some query name",
 																			new String[] {"myparam1", "myparam2"},
 																			new Object[] {"myvalue1", new Integer(2)},
 																			new Type[] {Hibernate.STRING, Hibernate.INTEGER});

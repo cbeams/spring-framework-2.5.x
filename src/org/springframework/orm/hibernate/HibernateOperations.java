@@ -72,7 +72,7 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
-	// Convenience methods for load, save, update, delete
+	// Convenience methods for loading individual objects
 	//-------------------------------------------------------------------------
 
 	/**
@@ -138,35 +138,6 @@ public interface HibernateOperations {
 	List loadAll(Class entityClass) throws DataAccessException;
 
 	/**
-	 * Check whether the given object is in the Session cache.
-	 * @param entity the persistence instance to check
-	 * @return whether the given object is in the Session cache
-	 * @throws org.springframework.dao.DataAccessException if there is a Hibernate error
-	 * @see net.sf.hibernate.Session#contains
-	 */
-	boolean contains(Object entity) throws DataAccessException;
-
-	/**
-	 * Remove the given object from the Session cache.
-	 * @param entity the persistent instance to evict
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#evict
-	 */
-	void evict(Object entity) throws DataAccessException;
-
-	/**
-	 * Obtain the specified lock level upon the given object, implicitly
-	 * checking whether the corresponding database entry still exists
-	 * (throwing an OptimisticLockingFailureException if not found).
-	 * @param entity the persistent instance to lock
-	 * @param lockMode the lock mode to obtain
-	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
-	 * @see HibernateOptimisticLockingFailureException
-	 * @see net.sf.hibernate.Session#lock(Object, net.sf.hibernate.LockMode)
-	 */
-	void lock(Object entity, LockMode lockMode) throws DataAccessException;
-
-	/**
 	 * Re-read the state of the given persistent instance.
 	 * @param entity the persistent instance to re-read
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -183,6 +154,40 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#refresh(Object, net.sf.hibernate.LockMode)
 	 */
 	void refresh(Object entity, LockMode lockMode) throws DataAccessException;
+
+	/**
+	 * Check whether the given object is in the Session cache.
+	 * @param entity the persistence instance to check
+	 * @return whether the given object is in the Session cache
+	 * @throws org.springframework.dao.DataAccessException if there is a Hibernate error
+	 * @see net.sf.hibernate.Session#contains
+	 */
+	boolean contains(Object entity) throws DataAccessException;
+
+	/**
+	 * Remove the given object from the Session cache.
+	 * @param entity the persistent instance to evict
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#evict
+	 */
+	void evict(Object entity) throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for storing individual objects
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Obtain the specified lock level upon the given object, implicitly
+	 * checking whether the corresponding database entry still exists
+	 * (throwing an OptimisticLockingFailureException if not found).
+	 * @param entity the persistent instance to lock
+	 * @param lockMode the lock mode to obtain
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see HibernateOptimisticLockingFailureException
+	 * @see net.sf.hibernate.Session#lock(Object, net.sf.hibernate.LockMode)
+	 */
+	void lock(Object entity, LockMode lockMode) throws DataAccessException;
 
 	/**
 	 * Persist the given transient instance.
@@ -288,7 +293,7 @@ public interface HibernateOperations {
 
 
 	//-------------------------------------------------------------------------
-	// Convenience finder methods
+	// Convenience finder methods for HQL strings
 	//-------------------------------------------------------------------------
 
 	/**
@@ -354,7 +359,6 @@ public interface HibernateOperations {
 	/**
 	 * Execute a query for persistent instances, binding
 	 * one value to a ":" named parameter in the query string.
-	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param paramName the name of parameter
 	 * @param value the value of the parameter
@@ -363,13 +367,12 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List find(String queryName, String paramName, Object value)
+	List findByNamedParam(String queryName, String paramName, Object value)
 			throws DataAccessException;
 
 	/**
 	 * Execute a query for persistent instances, binding
 	 * one value to a ":" named parameter in the query string.
-	 * A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param paramName the name of the parameter
 	 * @param value the value of the parameter
@@ -379,14 +382,13 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List find(String queryName, String paramName, Object value, Type type)
+	List findByNamedParam(String queryName, String paramName, Object value, Type type)
 			throws DataAccessException;
 
 	/**
 	 * Execute a query for persistent instances, binding a
 	 * number of values to ":" named parameters in the query string.
-	 * A named query is defined in a Hibernate mapping file.
-	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param queryString a query expressed in Hibernate's query language
 	 * @param paramNames the names of the parameters
 	 * @param values the values of the parameters
 	 * @return a List containing 0 or more persistent instances
@@ -394,14 +396,13 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List find(String queryName, String[] paramNames, Object[] values)
+	List findByNamedParam(String queryString, String[] paramNames, Object[] values)
 			throws DataAccessException;
 
 	/**
 	 * Execute a query for persistent instances, binding a
 	 * number of values to ":" named parameters in the query string.
-	 * A named query is defined in a Hibernate mapping file.
-	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param queryString a query expressed in Hibernate's query language
 	 * @param paramNames the names of the parameters
 	 * @param values the values of the parameters
 	 * @param types Hibernate types of the parameters
@@ -410,7 +411,7 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List find(String queryName, String[] paramNames, Object[] values, Type[] types)
+	List findByNamedParam(String queryString, String[] paramNames, Object[] values, Type[] types)
 			throws DataAccessException;
 
 	/**
@@ -424,6 +425,11 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#createQuery
 	 */
 	List findByValueBean(String queryString, Object valueBean) throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods for named queries
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Execute a named query for persistent instances.
@@ -490,6 +496,38 @@ public interface HibernateOperations {
 			throws DataAccessException;
 
 	/**
+	 * @deprecated in favor of findByNamedQueryAndNamedParam,
+	 * to avoid parameter overloading ambiguities
+	 * @see #findByNamedQueryAndNamedParam
+	 */
+	List findByNamedQuery(String queryName, String paramName, Object value)
+			throws DataAccessException;
+
+	/**
+	 * @deprecated in favor of findByNamedQueryAndNamedParam,
+	 * to avoid parameter overloading ambiguities
+	 * @see #findByNamedQueryAndNamedParam
+	 */
+	List findByNamedQuery(String queryName, String paramName, Object value, Type type)
+			throws DataAccessException;
+
+	/**
+	 * @deprecated in favor of findByNamedQueryAndNamedParam,
+	 * to avoid parameter overloading ambiguities
+	 * @see #findByNamedQueryAndNamedParam
+	 */
+	List findByNamedQuery(String queryName, String[] paramNames, Object[] values)
+			throws DataAccessException;
+
+	/**
+	 * @deprecated in favor of findByNamedQueryAndNamedParam,
+	 * to avoid parameter overloading ambiguities
+	 * @see #findByNamedQueryAndNamedParam
+	 */
+	List findByNamedQuery(String queryName, String[] paramNames, Object[] values, Type[] types)
+			throws DataAccessException;
+
+	/**
 	 * Execute a named query for persistent instances, binding
 	 * one value to a ":" named parameter in the query string.
 	 * A named query is defined in a Hibernate mapping file.
@@ -501,7 +539,7 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List findByNamedQuery(String queryName, String paramName, Object value)
+	List findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
 			throws DataAccessException;
 
 	/**
@@ -517,7 +555,7 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List findByNamedQuery(String queryName, String paramName, Object value, Type type)
+	List findByNamedQueryAndNamedParam(String queryName, String paramName, Object value, Type type)
 			throws DataAccessException;
 
 	/**
@@ -532,7 +570,7 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List findByNamedQuery(String queryName, String[] paramNames, Object[] values)
+	List findByNamedQueryAndNamedParam(String queryName, String[] paramNames, Object[] values)
 			throws DataAccessException;
 
 	/**
@@ -548,7 +586,7 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List findByNamedQuery(String queryName, String[] paramNames, Object[] values, Type[] types)
+	List findByNamedQueryAndNamedParam(String queryName, String[] paramNames, Object[] values, Type[] types)
 			throws DataAccessException;
 
 	/**
@@ -564,6 +602,11 @@ public interface HibernateOperations {
 	 */
 	List findByNamedQueryAndValueBean(String queryName, Object valueBean)
 			throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
+	// Convenience query methods for iterate and delete
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Execute a query for persistent instances.

@@ -18,6 +18,10 @@ Package org.springframework.beans
 Package org.springframework.jms
 * fixed JmsTemplate102's "doSend" implementation to properly work with a JMS 1.0.2 API jar in the classpath
 
+Package org.springframework.orm
+* renamed HibernateOperations/HibernateTemplate's "find" methods for named parameters to "findByNamedParam"
+* deprecated Hibernate "findByNamedQuery" methods for named parameters in favor of "findByNamedQueryAndNamedParam"
+
 Package org.springframework.validation
 * added "pushNestedPath"/"popNestedPath" methods to Errors interface, for convenient handling of temporary nested paths
 
