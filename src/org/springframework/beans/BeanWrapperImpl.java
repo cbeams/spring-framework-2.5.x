@@ -38,6 +38,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
+import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
@@ -138,7 +140,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// Register default editors in this class, for restricted environments.
 		// We're not using the JRE's PropertyEditorManager to avoid potential
 		// SecurityExceptions when running in a SecurityManager.
-		this.defaultEditors = new HashMap(16);
+		this.defaultEditors = new HashMap(20);
 
 		// Simple editors, without parameterization capabilities.
 		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
@@ -151,7 +153,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		this.defaultEditors.put(String[].class, new StringArrayPropertyEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 
-		// Default instances of parameterizable editors.
+		// Default instances of boolean and number editors.
 		// Can be overridden by registering custom instances of those as custom editors.
 		this.defaultEditors.put(Boolean.class, new CustomBooleanEditor(false));
 		this.defaultEditors.put(Short.class, new CustomNumberEditor(Short.class, false));
@@ -161,6 +163,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 		this.defaultEditors.put(Float.class, new CustomNumberEditor(Float.class, false));
 		this.defaultEditors.put(Double.class, new CustomNumberEditor(Double.class, false));
 		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, false));
+
+		// Default instances of collection editors.
+		// Can be overridden by registering custom instances of those as custom editors.
+		this.defaultEditors.put(Set.class, new CustomCollectionEditor(Set.class));
+		this.defaultEditors.put(SortedSet.class, new CustomCollectionEditor(SortedSet.class));
+		this.defaultEditors.put(List.class, new CustomCollectionEditor(List.class));
 	}
 
 	/**
@@ -890,33 +898,34 @@ public class BeanWrapperImpl implements BeanWrapper {
 		Object convertedValue = newValue;
 		if (convertedValue != null) {
 
-			// custom editor for this type?
+			// Custom editor for this type?
 			PropertyEditor pe = findCustomEditor(requiredType, fullPropertyName);
 
-			// value not of required type?
+			// Value not of required type?
 			if (pe != null ||
 					(requiredType != null &&
 					 (requiredType.isArray() || !requiredType.isAssignableFrom(convertedValue.getClass())))) {
 
-				if (pe == null && requiredType != null) {
-					// no custom editor -> check BeanWrapperImpl's default editors
-					pe = (PropertyEditor) this.defaultEditors.get(requiredType);
+				if (requiredType != null) {
 					if (pe == null) {
-						// no BeanWrapper default editor -> check standard JavaBean editors
-						pe = PropertyEditorManager.findEditor(requiredType);
+						// No custom editor -> check BeanWrapperImpl's default editors.
+						pe = (PropertyEditor) this.defaultEditors.get(requiredType);
+						if (pe == null) {
+							// No BeanWrapper default editor -> check standard JavaBean editors.
+							pe = PropertyEditorManager.findEditor(requiredType);
+						}
 					}
-				}
-
-				if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[]) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Converting String array to comma-delimited String [" + convertedValue + "]");
+					if (!requiredType.isArray() && convertedValue instanceof String[]) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Converting String array to comma-delimited String [" + convertedValue + "]");
+						}
+						convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
 					}
-					convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
 				}
 
 				if (pe != null) {
 					if (convertedValue instanceof String) {
-						// use PropertyEditor's setAsText in case of a String value
+						// Use PropertyEditor's setAsText in case of a String value.
 						if (logger.isDebugEnabled()) {
 							logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
 						}
@@ -945,52 +954,54 @@ public class BeanWrapperImpl implements BeanWrapper {
 					}
 				}
 
-				// array required -> apply appropriate conversion of elements
-				if (requiredType != null && requiredType.isArray()) {
-					Class componentType = requiredType.getComponentType();
-					if (convertedValue instanceof Collection) {
-						// convert individual elements to array elements
-						Collection coll = (Collection) convertedValue;
-						Object result = Array.newInstance(componentType, coll.size());
-						int i = 0;
-						for (Iterator it = coll.iterator(); it.hasNext(); i++) {
-							Object value = doTypeConversionIfNecessary(
-									propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-									null, it.next(), componentType);
-							Array.set(result, i, value);
+				if (requiredType != null) {
+					// Array required -> apply appropriate conversion of elements.
+					if (requiredType.isArray()) {
+						Class componentType = requiredType.getComponentType();
+						if (convertedValue instanceof Collection) {
+							// Convert Collection elements to array elements.
+							Collection coll = (Collection) convertedValue;
+							Object result = Array.newInstance(componentType, coll.size());
+							int i = 0;
+							for (Iterator it = coll.iterator(); it.hasNext(); i++) {
+								Object value = doTypeConversionIfNecessary(
+										propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+										null, it.next(), componentType);
+								Array.set(result, i, value);
+							}
+							return result;
 						}
-						return result;
-					}
-					else if (convertedValue != null && convertedValue.getClass().isArray()) {
-						// convert individual elements to array elements
-						int arrayLength = Array.getLength(convertedValue);
-						Object result = Array.newInstance(componentType, arrayLength);
-						for (int i = 0; i < arrayLength; i++) {
-							Object value = doTypeConversionIfNecessary(
-									propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-									null, Array.get(convertedValue, i), componentType);
-							Array.set(result, i, value);
+						else if (convertedValue != null && convertedValue.getClass().isArray()) {
+							// Convert Collection elements to array elements.
+							int arrayLength = Array.getLength(convertedValue);
+							Object result = Array.newInstance(componentType, arrayLength);
+							for (int i = 0; i < arrayLength; i++) {
+								Object value = doTypeConversionIfNecessary(
+										propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+										null, Array.get(convertedValue, i), componentType);
+								Array.set(result, i, value);
+							}
+							return result;
 						}
-						return result;
+						else {
+							// A plain value: convert it to an array with a single component.
+							Object result = Array.newInstance(componentType, 1) ;
+							Object val = doTypeConversionIfNecessary(
+									propertyName, propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
+									null, convertedValue, componentType);
+							Array.set(result, 0, val);
+							return result;
+						}
 					}
-					else {
-						// a plain value: convert it to an array with a single component
-						Object result = Array.newInstance(componentType, 1) ;
-						Object val = doTypeConversionIfNecessary(
-								propertyName, propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
-								null, convertedValue, componentType);
-						Array.set(result, 0, val);
-						return result;
+
+					// Throw explicit TypeMismatchException with full context information
+					// if the resulting value definitely doesn't match the required type.
+					if (convertedValue != null && !requiredType.isPrimitive() &&
+							!requiredType.isAssignableFrom(convertedValue.getClass())) {
+						throw new TypeMismatchException(
+								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType);
 					}
 				}
-			}
-
-			// Throw explicit TypeMismatchException with full context information
-			// if the resulting value definitely doesn't match the required type.
-			if (convertedValue != null && requiredType != null && !requiredType.isPrimitive() &&
-					!requiredType.isAssignableFrom(convertedValue.getClass())) {
-				throw new TypeMismatchException(
-						createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType);
 			}
 		}
 
