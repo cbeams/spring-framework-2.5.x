@@ -61,7 +61,7 @@ public class Maximum implements BinaryFunction {
     }
 
     public String toString() {
-        return "max";
+        return "max(arg1, arg2)";
     }
 
 }

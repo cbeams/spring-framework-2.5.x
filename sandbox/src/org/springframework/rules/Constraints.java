@@ -41,9 +41,14 @@ import org.springframework.rules.predicates.UnaryOr;
  */
 public class Constraints {
 
-    // static utility class
-    private Constraints() {
+    private static final Constraints INSTANCE = new Constraints();
 
+    public Constraints() {
+
+    }
+    
+    public static Constraints instance() {
+        return INSTANCE;
     }
 
     /**
@@ -57,8 +62,7 @@ public class Constraints {
      *            the parameter value (constant)
      * @return The unary predicate
      */
-    public static UnaryPredicate bind(BinaryPredicate predicate,
-            Object parameter) {
+    public UnaryPredicate bind(BinaryPredicate predicate, Object parameter) {
         return new ParameterizedBinaryPredicate(predicate, parameter);
     }
 
@@ -74,7 +78,7 @@ public class Constraints {
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public static UnaryPredicate onResult(UnaryFunction function,
+    public UnaryPredicate onResult(UnaryFunction function,
             UnaryPredicate constraint) {
         return new UnaryFunctionResultConstraint(function, constraint);
     }
@@ -91,7 +95,7 @@ public class Constraints {
      * @return The testing predicate, which on the call to test(o) first
      *         evaluates 'o' using the function and then tests the result.
      */
-    public static BinaryPredicate onResult(BinaryFunction function,
+    public BinaryPredicate onResult(BinaryFunction function,
             UnaryPredicate constraint) {
         return new BinaryFunctionResultConstraint(function, constraint);
     }
@@ -105,7 +109,7 @@ public class Constraints {
      *            the second predicate
      * @return The compound AND predicate
      */
-    public static UnaryPredicate and(UnaryPredicate predicate1,
+    public UnaryPredicate and(UnaryPredicate predicate1,
             UnaryPredicate predicate2) {
         return new UnaryAnd(predicate1, predicate2);
     }
@@ -117,7 +121,7 @@ public class Constraints {
      *            the predicates
      * @return The compound AND predicate
      */
-    public static UnaryPredicate all(UnaryPredicate[] predicates) {
+    public UnaryPredicate all(UnaryPredicate[] predicates) {
         return new UnaryAnd(predicates);
     }
 
@@ -127,7 +131,7 @@ public class Constraints {
      * 
      * @return the UnaryAnd
      */
-    public static UnaryAnd conjunction() {
+    public UnaryAnd conjunction() {
         return new UnaryAnd();
     }
 
@@ -140,7 +144,7 @@ public class Constraints {
      *            the second predicate
      * @return The compound OR predicate
      */
-    public static UnaryPredicate or(UnaryPredicate predicate1,
+    public UnaryPredicate or(UnaryPredicate predicate1,
             UnaryPredicate predicate2) {
         return new UnaryOr(predicate1, predicate2);
     }
@@ -152,7 +156,7 @@ public class Constraints {
      *            the predicates
      * @return The compound AND predicate
      */
-    public static UnaryPredicate any(UnaryPredicate[] predicates) {
+    public UnaryPredicate any(UnaryPredicate[] predicates) {
         return new UnaryOr(predicates);
     }
 
@@ -163,7 +167,7 @@ public class Constraints {
      *            The predicate to negate
      * @return The negated predicate.
      */
-    public static UnaryPredicate negate(UnaryPredicate predicate) {
+    public UnaryPredicate negate(UnaryPredicate predicate) {
         if (predicate instanceof UnaryNot) {
             throw new IllegalArgumentException("Predicate is already negated");
         }
@@ -176,7 +180,7 @@ public class Constraints {
      * 
      * @return the UnaryAnd
      */
-    public static UnaryOr disjunction() {
+    public UnaryOr disjunction() {
         return new UnaryOr();
     }
 
@@ -185,7 +189,7 @@ public class Constraints {
      * 
      * @return The required predicate instance.
      */
-    public static UnaryPredicate required() {
+    public UnaryPredicate required() {
         return Required.instance();
     }
 
@@ -196,7 +200,7 @@ public class Constraints {
      *            The maximum length in characters.
      * @return The configured maxlength predicate.
      */
-    public static UnaryPredicate maxLength(int maxLength) {
+    public UnaryPredicate maxLength(int maxLength) {
         return new StringLengthConstraint(maxLength);
     }
 
@@ -207,7 +211,7 @@ public class Constraints {
      *            The minimum length in characters.
      * @return The configured minlength predicate.
      */
-    public static UnaryPredicate minLength(int minLength) {
+    public UnaryPredicate minLength(int minLength) {
         return new StringLengthConstraint(
                 RelationalOperator.GREATER_THAN_EQUAL_TO, minLength);
     }
@@ -221,7 +225,7 @@ public class Constraints {
      *            the value constraint
      * @return The bean property expression that tests the constraint
      */
-    public static BeanPropertyExpression value(String propertyName,
+    public BeanPropertyExpression value(String propertyName,
             UnaryPredicate valueConstraint) {
         return new BeanPropertyValueConstraint(propertyName, valueConstraint);
     }
@@ -235,7 +239,7 @@ public class Constraints {
      *            The constraints that form a all conjunction
      * @return
      */
-    public static BeanPropertyExpression all(String propertyName,
+    public BeanPropertyExpression all(String propertyName,
             UnaryPredicate[] constraints) {
         return value(propertyName, all(constraints));
     }
@@ -249,7 +253,7 @@ public class Constraints {
      *            The constraints that form a all disjunction
      * @return
      */
-    public static BeanPropertyExpression any(String propertyName,
+    public BeanPropertyExpression any(String propertyName,
             UnaryPredicate[] constraints) {
         return value(propertyName, any(constraints));
     }
@@ -263,8 +267,7 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression eq(String propertyName,
-            Object propertyValue) {
+    public BeanPropertyExpression eq(String propertyName, Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(propertyName, EqualTo
                 .instance(), propertyValue);
     }
@@ -278,8 +281,7 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression gt(String propertyName,
-            Object propertyValue) {
+    public BeanPropertyExpression gt(String propertyName, Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(propertyName,
                 GreaterThan.instance(), propertyValue);
     }
@@ -293,8 +295,7 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression gte(String propertyName,
-            Object propertyValue) {
+    public BeanPropertyExpression gte(String propertyName, Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(propertyName,
                 GreaterThanEqualTo.instance(), propertyValue);
     }
@@ -308,8 +309,7 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression lt(String propertyName,
-            Object propertyValue) {
+    public BeanPropertyExpression lt(String propertyName, Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(propertyName, LessThan
                 .instance(), propertyValue);
     }
@@ -323,8 +323,7 @@ public class Constraints {
      *            The constraint value
      * @return The predicate
      */
-    public static BeanPropertyExpression lte(String propertyName,
-            Object propertyValue) {
+    public BeanPropertyExpression lte(String propertyName, Object propertyValue) {
         return new ParameterizedBeanPropertyExpression(propertyName,
                 LessThanEqualTo.instance(), propertyValue);
     }
@@ -338,7 +337,7 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression gtProperty(String propertyName,
+    public BeanPropertyExpression gtProperty(String propertyName,
             String otherPropertyName) {
         return new BeanPropertiesExpression(propertyName, GreaterThan
                 .instance(), otherPropertyName);
@@ -353,7 +352,7 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression eqProperty(String propertyName,
+    public BeanPropertyExpression eqProperty(String propertyName,
             String otherPropertyName) {
         return new BeanPropertiesExpression(propertyName, EqualTo.instance(),
                 otherPropertyName);
@@ -368,7 +367,7 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression gteProperty(String propertyName,
+    public BeanPropertyExpression gteProperty(String propertyName,
             String otherPropertyName) {
         return new BeanPropertiesExpression(propertyName, GreaterThanEqualTo
                 .instance(), otherPropertyName);
@@ -383,7 +382,7 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression ltProperty(String propertyName,
+    public BeanPropertyExpression ltProperty(String propertyName,
             String otherPropertyName) {
         return new BeanPropertiesExpression(propertyName, LessThan.instance(),
                 otherPropertyName);
@@ -398,7 +397,7 @@ public class Constraints {
      *            The other property
      * @return The predicate
      */
-    public static BeanPropertyExpression lteProperty(String propertyName,
+    public BeanPropertyExpression lteProperty(String propertyName,
             String otherPropertyName) {
         return new BeanPropertiesExpression(propertyName, LessThanEqualTo
                 .instance(), otherPropertyName);
@@ -415,8 +414,8 @@ public class Constraints {
      *            the high edge of the range
      * @return The range predicate constraint
      */
-    public static BeanPropertyExpression inRange(String propertyName,
-            Comparable min, Comparable max) {
+    public BeanPropertyExpression inRange(String propertyName, Comparable min,
+            Comparable max) {
         Range range = new Range(min, max);
         return value(propertyName, range);
     }
@@ -433,7 +432,7 @@ public class Constraints {
      *            the high edge of the range
      * @return The range predicate constraint
      */
-    public static BeanPropertyExpression inRangeProperties(String propertyName,
+    public BeanPropertyExpression inRangeProperties(String propertyName,
             String minPropertyName, String maxPropertyName) {
         BeanPropertiesExpression min = new BeanPropertiesExpression(
                 propertyName, GreaterThanEqualTo.instance(), minPropertyName);

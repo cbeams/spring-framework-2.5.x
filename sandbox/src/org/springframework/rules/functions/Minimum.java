@@ -61,7 +61,7 @@ public class Minimum implements BinaryFunction {
     }
 
     public String toString() {
-        return "min";
+        return "min(arg1, arg2)";
     }
 
 }

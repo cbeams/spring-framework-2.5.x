@@ -51,7 +51,7 @@ public class StringLength implements UnaryFunction {
     }
 
     public String toString() {
-        return "strLength";
+        return "strLength(arg)";
     }
 
 

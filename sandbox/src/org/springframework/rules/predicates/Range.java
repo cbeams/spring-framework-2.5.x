@@ -47,11 +47,10 @@ public final class Range implements Serializable, UnaryPredicate {
         commonAssert(min, max);
         Assert.isTrue(LessThanEqualTo.instance().test(min, max), "Minimum "
                 + min + " must be less than maximum " + max);
-        UnaryPredicate minimum = Constraints.bind(
-                GreaterThanEqualTo.instance(), min);
-        UnaryPredicate maximum = Constraints.bind(LessThanEqualTo.instance(),
-                max);
-        this.rangeConstraint = Constraints.and(minimum, maximum);
+        Constraints c = Constraints.instance();
+        UnaryPredicate minimum = c.bind(GreaterThanEqualTo.instance(), min);
+        UnaryPredicate maximum = c.bind(LessThanEqualTo.instance(), max);
+        this.rangeConstraint = c.and(minimum, maximum);
     }
 
     /**
@@ -69,10 +68,11 @@ public final class Range implements Serializable, UnaryPredicate {
         BinaryPredicate lessThanEqualTo = LessThanEqualTo.instance(comparator);
         Assert.isTrue(lessThanEqualTo.test(min, max), "Minimum " + min
                 + " must be less than maximum " + max);
-        UnaryPredicate minimum = Constraints.bind(GreaterThanEqualTo
-                .instance(comparator), min);
-        UnaryPredicate maximum = Constraints.bind(lessThanEqualTo, max);
-        this.rangeConstraint = Constraints.and(minimum, maximum);
+        Constraints c = Constraints.instance();
+        UnaryPredicate minimum = c.bind(
+                GreaterThanEqualTo.instance(comparator), min);
+        UnaryPredicate maximum = c.bind(lessThanEqualTo, max);
+        this.rangeConstraint = c.and(minimum, maximum);
     }
 
     private void commonAssert(Object min, Object max) {

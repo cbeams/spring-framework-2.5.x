@@ -42,6 +42,6 @@ public class GetProperty implements UnaryFunction {
     }
 
     public String toString() {
-        return "getProperty(" + beanWrapper + ")";
+        return "getProperty(name)";
     }
 }

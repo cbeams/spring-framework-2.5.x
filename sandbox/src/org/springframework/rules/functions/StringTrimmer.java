@@ -47,7 +47,7 @@ public class StringTrimmer implements UnaryFunction {
     }
 
     public String toString() {
-        return "trim";
+        return "trim(arg)";
     }
 
 

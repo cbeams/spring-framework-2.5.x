@@ -23,18 +23,22 @@ import org.springframework.rules.functions.UnaryFunctionChain;
  * @author Keith Donald
  */
 public class Functions {
+    private static final Functions INSTANCE = new Functions();
 
-    // static utility class
-    private Functions() {
+    public Functions() {
 
     }
 
-    public static UnaryFunction chain(UnaryFunction firstFunction,
+    public static Functions instance() {
+        return INSTANCE;
+    }
+
+    public UnaryFunction chain(UnaryFunction firstFunction,
             UnaryFunction secondFunction) {
         return new UnaryFunctionChain(firstFunction, secondFunction);
     }
 
-    public static UnaryFunction chain(UnaryFunction[] functionsToChain) {
+    public UnaryFunction chain(UnaryFunction[] functionsToChain) {
         return new UnaryFunctionChain(functionsToChain);
     }
 
