@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
 import org.apache.commons.fileupload.DefaultFileItem;
 import org.apache.commons.fileupload.FileItem;
@@ -34,9 +35,9 @@ import org.springframework.web.multipart.MultipartFile;
  * @author Trevor D. Cook
  * @author Juergen Hoeller
  * @since 29-Sep-2003
- * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
+ * @see CommonsMultipartResolver
  */
-public class CommonsMultipartFile implements MultipartFile {
+public class CommonsMultipartFile implements MultipartFile, Serializable {
 
 	protected static final Log logger = LogFactory.getLog(CommonsMultipartFile.class);
 
@@ -119,8 +120,8 @@ public class CommonsMultipartFile implements MultipartFile {
 		}
 
 		if (dest.exists() && !dest.delete()) {
-			throw new IOException("Destination file [" + dest.getAbsolutePath() +
-			                      "] already exists and could not be deleted");
+			throw new IOException(
+					"Destination file [" + dest.getAbsolutePath() + "] already exists and could not be deleted");
 		}
 
 		try {
@@ -131,8 +132,8 @@ public class CommonsMultipartFile implements MultipartFile {
 					action = tempFileExists() ? "copied" : "moved";
 				}
 				logger.debug("Multipart file '" + getName() + "' with original filename [" +
-										 getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
-				             action + " to [" + dest.getAbsolutePath() + "]");
+						getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
+						action + " to [" + dest.getAbsolutePath() + "]");
 			}
 		}
 		catch (FileUploadException ex) {
@@ -166,7 +167,7 @@ public class CommonsMultipartFile implements MultipartFile {
 			return "at [" + ((DefaultFileItem) this.fileItem).getStoreLocation().getAbsolutePath() + "]";
 		}
 		else {
-			return "at disk";
+			return "on disk";
 		}
 	}
 
