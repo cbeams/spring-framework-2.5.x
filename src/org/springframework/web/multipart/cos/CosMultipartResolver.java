@@ -95,12 +95,12 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 	}
 
 	public boolean isMultipart(HttpServletRequest request) {
-		return request.getContentType().startsWith(MULTIPART_CONTENT_TYPE);
+		return request.getContentType() != null && request.getContentType().startsWith(MULTIPART_CONTENT_TYPE);
 	}
 
 	public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
 		try {
-			MultipartRequest multipartRequest = createMultipartRequest(request);
+			MultipartRequest multipartRequest = newMultipartRequest(request);
 			if (logger.isDebugEnabled()) {
 				Enumeration fileNames = multipartRequest.getFileNames();
 				while (fileNames.hasMoreElements()) {
@@ -126,7 +126,7 @@ public class CosMultipartResolver extends WebApplicationObjectSupport implements
 	 * @return the new MultipartRequest
 	 * @throws IOException if thrown by the MultipartRequest constructor
 	 */
-	protected MultipartRequest createMultipartRequest(HttpServletRequest request) throws IOException {
+	protected MultipartRequest newMultipartRequest(HttpServletRequest request) throws IOException {
 		return this.headerEncoding != null ?
 		    new MultipartRequest(request, getUploadTempDir(), getMaximumFileSize(), getHeaderEncoding()) :
 				new MultipartRequest(request, getUploadTempDir(), getMaximumFileSize());
