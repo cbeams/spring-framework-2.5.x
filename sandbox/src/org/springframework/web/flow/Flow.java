@@ -136,46 +136,109 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private static final long serialVersionUID = 3258695403305513015L;
 
+	/**
+	 * Comment for <code>CREATE</code>
+	 */
 	public static final String CREATE = "create";
 
+	/**
+	 * Comment for <code>ADD</code>
+	 */
 	public static final String ADD = "add";
 
+	/**
+	 * Comment for <code>LINK</code>
+	 */
 	public static final String LINK = "link";
 
+	/**
+	 * Comment for <code>REMOVE</code>
+	 */
 	public static final String REMOVE = "remove";
 
+	/**
+	 * Comment for <code>UNLINK</code>
+	 */
 	public static final String UNLINK = "unlink";
 
+	/**
+	 * Comment for <code>DELETE</code>
+	 */
 	public static final String DELETE = "delete";
 
+	/**
+	 * Comment for <code>GET</code>
+	 */
 	public static final String GET = "get";
 
+	/**
+	 * Comment for <code>POPULATE</code>
+	 */
 	public static final String POPULATE = "populate";
 
+	/**
+	 * Comment for <code>VIEW</code>
+	 */
 	public static final String VIEW = "view";
 
+	/**
+	 * Comment for <code>SUBMIT</code>
+	 */
 	public static final String SUBMIT = "submit";
 
+	/**
+	 * Comment for <code>BIND_AND_VALIDATE</code>
+	 */
 	public static final String BIND_AND_VALIDATE = "bindAndValidate";
 
+	/**
+	 * Comment for <code>EDIT</code>
+	 */
 	public static final String EDIT = "edit";
 
+	/**
+	 * Comment for <code>VALIDATE</code>
+	 */
 	public static final String VALIDATE = "validate";
 
+	/**
+	 * Comment for <code>SEARCH</code>
+	 */
 	public static final String SEARCH = "search";
 
+	/**
+	 * Comment for <code>SAVE</code>
+	 */
 	public static final String SAVE = "save";
 
+	/**
+	 * Comment for <code>SUCCESS</code>
+	 */
 	public static final String SUCCESS = "success";
 
+	/**
+	 * Comment for <code>ERROR</code>
+	 */
 	public static final String ERROR = "error";
 
+	/**
+	 * Comment for <code>BACK</code>
+	 */
 	public static final String BACK = "back";
 
+	/**
+	 * Comment for <code>CANCEL</code>
+	 */
 	public static final String CANCEL = "cancel";
 
+	/**
+	 * Comment for <code>FINISH</code>
+	 */
 	public static final String FINISH = "finish";
 
+	/**
+	 * Comment for <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
+	 */
 	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "AttributesMapper";
 
 	protected final Log logger = LogFactory.getLog(getClass());
