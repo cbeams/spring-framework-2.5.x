@@ -26,65 +26,64 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DependencyInjectionAspectSupport;
 
 /**
- * Allows Spring to create and wire up objects that come from Hibernate. 
+ * Allows Spring to create and wire up objects that come from Hibernate.
  * This enables richer domain models, with domain objects able to access
  * business objects.
- * <p> 
- * When <i>creating</i> such objects in application code, before persisting them, you can
- * apply configuration manually via Setters, use factory autowiring, or obtain a prototype from the factory.
- * A dependency on Spring IoC can be avoided by using a lookup-method to obtain the prototype
- * instance. 
- * <p>
- * Based on a constribution by
- * Oliver Hutchison. Thanks also to Seth Ladd.
- * <p>
- * This is a factory bean, as we want to extend DependencyInjectionAspectSupport yet be usable
- * as a Hibernate Interceptor. 
- * <p>
- * Typically, the Hibernate SessionFactory will be set via the sessionFactoryName
+ *
+ * <p> When <i>creating</i> such objects in application code, before persisting
+ * them, you can apply configuration manually via Setters, use factory autowiring,
+ * or obtain a prototype from the factory. A dependency on Spring IoC can be
+ * avoided by using a lookup-method to obtain the prototype instance.
+ *
+ * <p>This is a factory bean, as we want to extend DependencyInjectionAspectSupport
+ * yet be usable as a Hibernate Interceptor.
+ *
+ * <p>Typically, the Hibernate SessionFactory will be set via the "sessionFactoryName"
  * property: this avoids a circular dependency between SessionFactory (requiring an
  * Interceptor) and this Interceptor (requiring a SessionFactory).
- * 
- * @author Oliver Hutchison
+ *
+ * <p>Based on a constribution by Oliver Hutchison. Thanks also to Seth Ladd.
+ *
  * @author Rod Johnson
- * @see Interceptor
  * @since 1.2
+ * @see Interceptor
  */
-public class DependencyInjectionInterceptorFactoryBean extends DependencyInjectionAspectSupport implements FactoryBean {
+public class DependencyInjectionInterceptorFactoryBean extends DependencyInjectionAspectSupport
+		implements FactoryBean {
 
 	private SessionFactory sessionFactory;
-	
+
 	private String sessionFactoryName;
-	
+
 	private Interceptor nextInterceptor;
-	
+
+
 	/**
-	 * As Hibernate doesn't support chaining of interceptors natively, we add the ability for
-	 * chaining via a delegate.
-	 * 
-	 * @param delegateInterceptor
+	 * As Hibernate doesn't support chaining of interceptors natively,
+	 * we add the ability for chaining via a delegate.
 	 */
 	public void setNextInterceptor(Interceptor nextInterceptor) {
 		this.nextInterceptor = nextInterceptor;
 	}
 
 	/**
-	 * @return the next Interceptor in the chain, or null if this is
-	 * the only interceptor
+	 * Reutn the next Interceptor in the chain, or null if this is
+	 * the only interceptor.
 	 */
 	public Interceptor getNextInterceptor() {
 		return nextInterceptor;
 	}
 
 	/**
-	 * We need the Hibernate SessionFactory to work out identifier property name to set PK on object
+	 * We need the Hibernate SessionFactory to work out identifier property name
+	 * to set PK on object.
 	 * @param sessionFactory bean name of the Hibernate SessionFactory
 	 * this interceptor should configure persistent object instances for
 	 */
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
-	
+
 	/**
 	 * Alternative to the sessionFactory property.
 	 * Use this property to avoid circular dependencies between interceptor
@@ -96,21 +95,48 @@ public class DependencyInjectionInterceptorFactoryBean extends DependencyInjecti
 		this.sessionFactoryName = sessionFactoryName;
 	}
 
-
 	protected void validateProperties() {
-		if (sessionFactory == null && sessionFactoryName == null) {
+		if (this.sessionFactory == null && this.sessionFactoryName == null) {
 			throw new IllegalArgumentException("Either sessionFactory or sessionFactoryName property must be set");
-		}			
+		}
 	}
+
+
+	public Object getObject() throws Exception {
+		DependencyInjectionInterceptor dii = new DependencyInjectionInterceptor();
+		dii.setNextInterceptor(nextInterceptor);
+		return dii;
+	}
+
+	public Class getObjectType() {
+		return Interceptor.class;
+	}
+
+	public boolean isSingleton() {
+		return true;
+	}
+
+
+	/**
+	 * Lazily look up the session factory.
+	 * @return the Hibernate SessionFactory this class should configure objects for
+	 */
+	private SessionFactory getSessionFactory() {
+		// We don't do this in validate, as that could still cause circular
+		// dependency problems.
+		if (this.sessionFactory == null) {
+			this.sessionFactory = (SessionFactory)
+					getBeanFactory().getBean(this.sessionFactoryName, SessionFactory.class);
+		}
+		return this.sessionFactory;
+	}
+
 
 	/**
 	 * Class of Hibernate Interceptor returned by this factory.
 	 */
 	protected class DependencyInjectionInterceptor extends ChainedInterceptorSupport {
 
-		/**
-		 * @see net.sf.hibernate.Interceptor#instantiate(java.lang.Class, java.io.Serializable)
-		 */
 		public Object instantiate(Class clazz, Serializable id) throws CallbackException {
 			try {
 				Object newEntity = createAndConfigure(clazz);
@@ -118,48 +144,10 @@ public class DependencyInjectionInterceptorFactoryBean extends DependencyInjecti
 				return newEntity;
 			}
 			catch (NoAutowiringConfigurationForClassException ex) {
-				// Delegate to next interceptor in the chain if we didn't find an instantiation rule
+				// Delegate to next interceptor in the chain if we didn't find an instantiation rule.
 				return super.instantiate(clazz, id);
 			}
 		}
 	}
 
-
-	/**
-	 * @see org.springframework.beans.factory.FactoryBean#getObject()
-	 */
-	public Object getObject() throws Exception {
-		DependencyInjectionInterceptor dii = new DependencyInjectionInterceptor();
-		dii.setNextInterceptor(nextInterceptor);
-		return dii;
-	}
-
-	/**
-	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
-	 */
-	public Class getObjectType() {
-		return Interceptor.class;
-	}
-
-	/**
-	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
-	 */
-	public boolean isSingleton() {
-		return true;
-	}
-	
-	/**
-	 * Lazily look up the session factory
-	 * @return the Hibernate SessionFactory this class should configure
-	 * objects for
-	 */
-	private SessionFactory getSessionFactory() {
-		// We don't do this in validate, as that could still cause circular
-		// dependency problems.
-       if (sessionFactory == null) { 
-            sessionFactory = (SessionFactory) getBeanFactory().getBean(sessionFactoryName, SessionFactory.class); 
-        } 
-        return sessionFactory; 
-    } 
-	
 }
