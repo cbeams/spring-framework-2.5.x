@@ -61,7 +61,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.27 2004-04-22 07:58:25 jhoeller Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.28 2004-04-30 15:26:00 jhoeller Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -92,8 +92,8 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 	/**
 	 * Set the target object, i.e. the bean to be wrapped with a transactional proxy.
-	 * The target may be any object, in which case a SingletonTargetSource will be
-	 * created. If it is a TargetSource, no wrapper TargetSource is created:
+	 * <p>The target may be any object, in which case a SingletonTargetSource will
+	 * be created. If it is a TargetSource, no wrapper TargetSource is created:
 	 * This enables the use of a pooling or prototype TargetSource etc.
 	 * @see org.springframework.aop.TargetSource
 	 * @see org.springframework.aop.target.SingletonTargetSource
@@ -103,11 +103,10 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	}
 
 	/**
-	 * Optional: You only need to set this property to filter the set of interfaces
-	 * being proxied (default is to pick up all interfaces on the target),
-	 * or if providing a custom invoker interceptor instead of a target.
-	 * <p>If left null (the default), the AOP infrastructure works out which
-	 * interfaces need proxying.
+	 * Specify the set of interfaces being proxied.
+	 * <p>If left null (the default), the AOP infrastructure works
+	 * out which interfaces need proxying by analyzing the target,
+	 * proxying all the interfaces that the target object implements.
 	 */
 	public void setProxyInterfaces(String[] interfaceNames) throws AspectException, ClassNotFoundException {
 		this.proxyInterfaces = AopUtils.toInterfaceArray(interfaceNames);
@@ -181,7 +180,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 	public void afterPropertiesSet() throws AopConfigException {
 		if (this.target == null) {
-			throw new AopConfigException("Target must be set");
+			throw new AopConfigException("'target' is required");
 		}
 		
 		if (this.transactionAttributeSource == null) {
@@ -226,6 +225,10 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 			proxyFactory.setInterfaces(this.proxyInterfaces);
 		}
 		else if (!getProxyTargetClass()) {
+			if (this.target instanceof TargetSource) {
+				throw new AopConfigException("Either 'proxyInterfaces' or 'proxyTargetClass' is required " +
+				                             "when using a TargetSource as 'target");
+			}
 			// rely on AOP infrastructure to tell us what interfaces to proxy
 			proxyFactory.setInterfaces(AopUtils.getAllInterfaces(this.target));
 		}
@@ -255,7 +258,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 		if (this.proxy != null) {
 			return this.proxy.getClass();
 		}
-		else if (this.target != null) {
+		else if (this.target != null && this.target instanceof TargetSource) {
 			return this.target.getClass();
 		}
 		else {
