@@ -19,10 +19,16 @@ package org.springframework.beans.factory;
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AdvisedSupport;
+import org.springframework.aop.framework.CountingBeforeAdvice;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * 
@@ -35,12 +41,126 @@ public class ConfigurerTests extends TestCase {
         Configurer cfg = new Configurer(bf);
         cfg.add("testBean", TestBean.class).
         	prop("name", "tom");
-        //cfg.apply();
         
         System.out.println(bf);
         ITestBean tb = (ITestBean) bf.getBean("testBean");
         assertEquals("tom", tb.getName());
     }
+    
+    public void testDisallowsOtherThanSetters() {
+        DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+        Configurer cfg = new Configurer(bf);
+        TestBean tb = (TestBean) cfg.add("testBean", TestBean.class);
+        tb.setAge(25);
+        try {
+            tb.getAge();
+            fail();
+        }
+        catch (UnsupportedOperationException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    public void testFactoryBean() {
+        DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+        Configurer cfg = new Configurer(bf);
+        cfg.add("testBean", MyFactory.class).
+        	prop("myString", "myString");
+        
+        System.out.println(bf);
+        ITestBean tb = (ITestBean) bf.getBean("testBean");
+        assertEquals("myString", tb.getName());
+    }
+    
+    public static class MyFactory implements FactoryBean {
+        
+        private String myString;
+        
+        public void setMyString(String myString) {
+            this.myString = myString;
+        }
+        
+        public String getMyString() {
+            return myString;
+        }
+
+        /**
+         * @see org.springframework.beans.factory.FactoryBean#getObject()
+         */
+        public Object getObject() throws Exception {
+            TestBean tb = new TestBean();
+            tb.setName(myString);
+            return tb;
+        }
+
+        /**
+         * @see org.springframework.beans.factory.FactoryBean#getObjectType()
+         */
+        public Class getObjectType() {
+           return TestBean.class;
+        }
+
+        /**
+         * @see org.springframework.beans.factory.FactoryBean#isSingleton()
+         */
+        public boolean isSingleton() {
+            return true;
+        }        
+    }
+    
+    // TODO SHOULD be able to run same tests on ac and bf
+    
+    public void testAdvisedOnBeanFactory() {
+        DefaultListableBeanFactory bf = new DefaultListableBeanFactory(); 
+        testAdvised(bf);
+    }
+    
+    public void testAdvisedOnApplicationContext() {
+        GenericApplicationContext gac = new GenericApplicationContext();
+        testAdvised(gac);
+    }
+    
+    // TODO final stage is @ttributes
+    
+    // TFPB
+    
+    private void testAdvised(BeanDefinitionRegistry bdr) {
+              
+        Configurer cfg = new Configurer(bdr);
+        cfg.properties(getClass(), "test.properties");
+        
+        NopInterceptor nop = (NopInterceptor) cfg.add("nop", NopInterceptor.class);
+        
+        String tomName = "tom";
+        String beanName = "tom";
+        Definition def = cfg.add(beanName, TestBean.class).
+        	prop("name", tomName);
+        AdvisedSupport pfb = cfg.advise(def);
+        
+        // Add a named bean here
+        pfb.addAdvice(nop);
+        // Add this guy to the bean factory
+        pfb.addAdvice(new CountingBeforeAdvice());
+        pfb.setExposeProxy(true);       
+        
+        BeanFactory bf = (BeanFactory) bdr;
+        ITestBean tb = (ITestBean) bf.getBean(beanName);
+        assertTrue(AopUtils.isAopProxy(tb));
+        nop = (NopInterceptor) bf.getBean("nop");
+        assertEquals(0, nop.getCount());
+        assertEquals(tomName, tb.getName());
+       
+        assertEquals(1, nop.getCount());
+        Advised advised = (Advised) tb;
+        assertTrue(advised.getExposeProxy());
+        assertEquals(2, advised.getAdvisors().length);
+        CountingBeforeAdvice cba = (CountingBeforeAdvice) bf.getBean(CountingBeforeAdvice.class.getName());
+        assertEquals(1, cba.getCalls());
+        
+        assertEquals("Properties were applied", 38, tb.getAge());
+    }
+    
+    // TODO how to set dependency on factory bean!?
     
     public void testOnBeanFactoryNoProcessorsWithRecording() {
         String beckyName = "becky";
