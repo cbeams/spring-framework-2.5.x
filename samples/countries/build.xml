@@ -6,7 +6,6 @@
 
 	<property name="war.dir" value="war"/>
 	<property name="src.dir" value="src"/>
-	<property name="lib.dir" value="lib"/>
 	<property name="build.dir" value=".classes"/>
 	<property name="docs.dir" value="${war.dir}/docs"/>
 	<property name="weblib.dir" value="${war.dir}/WEB-INF/lib"/>
@@ -27,9 +26,6 @@
 
 	<path id="master-classpath">
 
-		<fileset dir="${lib.dir}">
-			<include name="*.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
 		</fileset>
@@ -62,8 +58,6 @@
 		<echo message="build    --> Compile main Java sources and copy libraries"/>
 		<echo message="docs     --> Create complete Javadoc documentation"/>
 		<echo message="warfile  --> Build the web application archive"/>
-		<echo message="setupDB  --> Initialize the database"/>
-		<echo message="test     --> Run tests using initialized database"/>
 		<echo message="all      --> Clean,build,warfile,docs,test"/>
 		<echo message=""/>
 
