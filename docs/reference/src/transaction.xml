@@ -545,14 +545,14 @@
 
       <para><classname>TransactionProxyFactoryBean</classname> is very useful,
       and gives you full control when wrapping objects with a transactional
-      proxy. In that case that you need to wrap a number of beans in an
-      identical fashion (for example, a boilerplat, 'make all methods
+      proxy. In the case that you need to wrap a number of beans in an
+      identical fashion (for example, a boilerplate, 'make all methods
       transactional', using a <classname>BeanFactoryPostProcessor</classname>
       called <classname>BeanNameAutoProxyCreator</classname> can offer an
       alternative approach which can end up being significantly less verbose
       for this simplified use case.</para>
 
-      <para>To recap, once the ApplicaitonContext has read its initialization
+      <para>To recap, once the ApplicationContext has read its initialization
       information, it instantiates any beans within it which implement the
       <classname>BeanPostProcessor</classname> interface, and gives them a
       chance to post-process all other beans in the ApplicationContext. So
@@ -603,7 +603,7 @@
       <classname>TransactionManager</classname> instance in our
       ApplicationContext, the first thing we need to do is create a
       <classname>TransactionInterceptor</classname> instance to use. The
-      <classname>TransactionInterceptor</classname> decides what methods to
+      <classname>TransactionInterceptor</classname> decides which methods to
       intercept based on a <classname>TransactionAttributeSource</classname>
       implementing object passed to it as a property. In this case, we want to
       handle the very simple case of matching all methods. This is not
