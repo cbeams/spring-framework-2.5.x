@@ -28,12 +28,13 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see RemoteInvocation
  */
 public class RemoteInvocationResult implements Serializable {
 
 	private Object value;
 
-	private Exception exception;
+	private Throwable exception;
 
 
 	/**
@@ -50,18 +51,34 @@ public class RemoteInvocationResult implements Serializable {
 	 * @param exception the exception thrown by an unsuccessful invocation
 	 * of the target method
 	 */
-	public RemoteInvocationResult(Exception exception) {
+	public RemoteInvocationResult(Throwable exception) {
 		this.exception = exception;
 	}
 
+	/**
+	 * Return the result value returned by a successful invocation
+	 * of the target method, if any.
+	 * @see #hasException
+	 */
 	public Object getValue() {
 		return value;
 	}
 
-	public Exception getException() {
+	/**
+	 * Return the exception thrown by an unsuccessful invocation
+	 * of the target method, if any.
+	 * @see #hasException
+	 */
+	public Throwable getException() {
 		return exception;
 	}
 
+	/**
+	 * Return whether this invocation result holds an exception.
+	 * If this returns false, the result value applies (even if null).
+	 * @see #getValue
+	 * @see #getException
+	 */
 	public boolean hasException() {
 		return (exception != null);
 	}

@@ -85,7 +85,7 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 			Object value = invoke(invocation, targetObject);
 			return new RemoteInvocationResult(value);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			return new RemoteInvocationResult(ex);
 		}
 	}
