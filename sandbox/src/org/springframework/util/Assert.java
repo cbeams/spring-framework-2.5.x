@@ -21,8 +21,7 @@ import java.util.Map;
  * deemed invalid, an IllegalArgumentException is thrown. For example:
  * 
  * <pre>
- *  Assert.isTrue(i > 0, "The value must be greater than zero ", i);
- *  Assert.notNull(clazz, "The class must not be null");
+ *  Assert.isTrue(i > 0, "The value must be greater than zero ", i); Assert.notNull(clazz, "The class must not be null");
  * </pre>
  * 
  * @author Keith Donald, adapted from jakarta-commons-lang Validate
@@ -320,6 +319,19 @@ public class Assert {
     public static void hasEntries(Map map) {
         if (map == null || map.size() == 0) {
             throw new IllegalArgumentException("Assertion failed; this map must have at least one entry (key-value pair.)");
+        }
+    }
+
+    /**
+     * Asserts that this string has valid text content; that is, it is not null
+     * and not empty or blank.
+     * 
+     * @param text
+     *            The string to assert.
+     */
+    public static void hasText(String text) {
+        if (!StringUtils.hasText(text)) {
+            throw new IllegalArgumentException("Assertion failed; this string is null or blank");
         }
     }
 

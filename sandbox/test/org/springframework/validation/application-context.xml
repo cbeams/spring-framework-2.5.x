@@ -2,6 +2,16 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename"><value>org/springframework/validation/validator-messages</value></property>
+	</bean>
+	
+	<bean id="beanValidationService" class="org.springframework.validation.support.DefaultBeanValidationService">
+		<property name="beanValidatorSource"><ref bean="attributesValidatorSource"/></property>
+	</bean>
+	
+	<bean id="attributesValidatorSource" class="org.springframework.validation.support.AttributesValidatorSource"/>
+	
 	<bean id="beanValidatorBuilder" class="org.springframework.validation.support.BeanValidatorBuilder">
 		<constructor-arg index="0">
 			<description>The validated bean type</description>
