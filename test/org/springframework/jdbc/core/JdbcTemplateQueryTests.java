@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -378,7 +379,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getObject(1);
-		ctrlResultSet.setReturnValue(new java.math.BigDecimal(87));
+		ctrlResultSet.setReturnValue(new BigDecimal(87.0d));
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -768,7 +769,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getObject(1);
-		ctrlResultSet.setReturnValue(new java.math.BigDecimal(87));
+		ctrlResultSet.setReturnValue(new BigDecimal(87.0d));
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
