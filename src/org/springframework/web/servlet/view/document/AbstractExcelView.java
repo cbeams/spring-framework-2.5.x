@@ -128,8 +128,8 @@ public abstract class AbstractExcelView extends AbstractView {
 	/**
 	 * Renders the view given the specified model.
 	 */
-	protected final void renderMergedOutputModel(Map model, HttpServletRequest request,
-	                                             HttpServletResponse response) throws Exception {
+	protected final void renderMergedOutputModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (this.url != null) {
 			this.workbook = getTemplateSource(this.url, request);
 		}
@@ -153,8 +153,8 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * @param request
 	 * @return HSSFWorkbook
 	 */
-	protected HSSFWorkbook getTemplateSource(String url, HttpServletRequest request) 
-		throws ServletException, IOException {
+	protected HSSFWorkbook getTemplateSource(String url, HttpServletRequest request)
+			throws ServletException, IOException {
 
 		String source = null;
 		Resource inputFile = null;
@@ -198,8 +198,9 @@ public abstract class AbstractExcelView extends AbstractView {
 	 * @param request in case we need locale etc. Shouldn't look at attributes
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 */
-	protected abstract void buildExcelDocument(Map model,	HSSFWorkbook wb, HttpServletRequest request,
-																						 HttpServletResponse response) throws Exception;
+	protected abstract void buildExcelDocument(
+			Map model,	HSSFWorkbook wb, HttpServletRequest request, HttpServletResponse response)
+			throws Exception;
 
 	/**
 	 * Convenient method to obtain the cell in the given sheet, row and column.

@@ -56,8 +56,9 @@ public abstract class AbstractPdfView extends AbstractView {
 		setContentType("application/pdf");
 	}
 	
-	protected final void renderMergedOutputModel(Map model, HttpServletRequest request,
-	                                             HttpServletResponse response) throws Exception {
+	protected final void renderMergedOutputModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
 		Document document = getDocument();
 
 		// The following simple method doesn't work in IE, which
@@ -118,8 +119,8 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * @param response in case we need to set cookies. Shouldn't write to it.
 	 * @throws Exception any exception that occured during document building
 	 */
-	protected abstract void buildPdfDocument(Map model, Document pdfDoc, PdfWriter writer,
-																					 HttpServletRequest request, HttpServletResponse response)
+	protected abstract void buildPdfDocument(
+			Map model, Document pdfDoc, PdfWriter writer, HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 
 }

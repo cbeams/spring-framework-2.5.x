@@ -365,8 +365,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	protected Object query(PreparedStatementCreator psc, final PreparedStatementSetter pss,
-												 final ResultSetExtractor rse) throws DataAccessException {
+	protected Object query(
+			PreparedStatementCreator psc, final PreparedStatementSetter pss, final ResultSetExtractor rse)
+			throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(psc);
 			logger.debug("Executing SQL query" + (sql != null ? " [" + sql  + "]" : ""));

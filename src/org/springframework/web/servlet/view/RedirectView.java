@@ -91,14 +91,18 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * Convert model to request parameters and redirect to the given URL.
 	 * @see #appendQueryProperties
 	 */
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+	protected final void renderMergedOutputModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+		// prepare target URL
 		StringBuffer targetUrl = new StringBuffer();
 		if (this.contextRelative) {
 			targetUrl.append(request.getContextPath());
 		}
 		targetUrl.append(getUrl());
 		appendQueryProperties(targetUrl, model, this.encodingScheme);
+
+		// send redirect
 		response.sendRedirect(response.encodeRedirectURL(targetUrl.toString()));
 	}
 
@@ -113,6 +117,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	protected void appendQueryProperties(StringBuffer targetUrl, Map model, String encodingScheme)
 			throws UnsupportedEncodingException {
+
 		// if there are not already some parameters, we need a ?
 		boolean first = (getUrl().indexOf('?') < 0);
 		Iterator entries = queryProperties(model).entrySet().iterator();

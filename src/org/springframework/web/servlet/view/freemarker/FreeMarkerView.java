@@ -116,14 +116,15 @@ public class FreeMarkerView extends AbstractTemplateView {
 		if (this.configuration == null) {
 			try {
 				FreeMarkerConfig freemarkerConfig = (FreeMarkerConfig)
-						BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(),
-																													FreeMarkerConfig.class, true, true);
+						BeanFactoryUtils.beanOfTypeIncludingAncestors(
+								getApplicationContext(), FreeMarkerConfig.class, true, true);
 				this.configuration = freemarkerConfig.getConfiguration();
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				throw new ApplicationContextException("Must define a single FreeMarkerConfig bean in this web application " +
-																							"context (may be inherited): FreeMarkerConfigurer is the usual " +
-																							"implementation. This bean may be given any name.", ex);
+				throw new ApplicationContextException(
+						"Must define a single FreeMarkerConfig bean in this web application context " +
+						"(may be inherited): FreeMarkerConfigurer is the usual implementation. " +
+						"This bean may be given any name.", ex);
 			}
 		}
 
@@ -133,7 +134,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException("Cannot load FreeMarker template for URL [" + getUrl() +
-																						"]: Did you specify the correct template loader path?");
+					"]: Did you specify the correct template loader path?");
 		}
 	}
 
@@ -143,8 +144,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * directed to the response. This method can be overridden if custom behavior
 	 * is needed.
 	 */
-	protected void renderMergedTemplateModel(Map model, HttpServletRequest request,
-																					 HttpServletResponse response) throws Exception {
+	protected void renderMergedTemplateModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 	   
 		// grab the locale-specific version of the template
 		Template template = getTemplate(RequestContextUtils.getLocale(request));

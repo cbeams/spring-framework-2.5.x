@@ -60,8 +60,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * Render the internal resource given the specified model.
 	 * This includes setting the model as request attributes.
 	 */
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request,
-	                                       HttpServletResponse response) throws Exception {
+	protected void renderMergedOutputModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// expose the model object as request attributes
 		exposeModelAsRequestAttributes(model, request);
@@ -73,18 +73,22 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		// Note: The JSP is supposed to determine the content type itself.
 		RequestDispatcher rd = request.getRequestDispatcher(dispatcherPath);
 		if (rd == null) {
-			throw new ServletException("Could not get RequestDispatcher for [" + getUrl() +
-			                           "]: check that this file exists within your WAR");
+			throw new ServletException(
+					"Could not get RequestDispatcher for [" + getUrl() + "]: check that this file exists within your WAR");
 		}
 
 		// if already included, include again, else forward
 		if (request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE) != null) {
 			rd.include(request, response);
-			logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+			}
 		}
 		else {
 			rd.forward(request, response);
-			logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
+			}
 		}
 	}
 
@@ -132,8 +136,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @see #getUrl
 	 * @see org.springframework.web.servlet.view.tiles.TilesView#prepareForRendering
 	 */
-	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception {
+	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		return getUrl();
 	}
 

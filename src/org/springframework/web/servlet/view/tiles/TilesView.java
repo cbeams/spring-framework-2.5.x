@@ -90,8 +90,7 @@ public class TilesView extends InternalResourceView {
 	 * Prepare for rendering the Tiles definition: Execute the associated
 	 * component controller if any, and determine the request dispatcher path.
 	 */
-	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception {
+	protected String prepareForRendering(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// get component definition
 		ComponentDefinition definition = getComponentDefinition(this.definitionsFactory, request);
@@ -174,8 +173,8 @@ public class TilesView extends InternalResourceView {
 	 * @param response current HTTP response
 	 * @throws Exception if controller execution failed
 	 */
-	protected void executeController(Controller controller, ComponentContext context,
-	                                 HttpServletRequest request, HttpServletResponse response)
+	protected void executeController(
+			Controller controller, ComponentContext context, HttpServletRequest request, HttpServletResponse response)
 	    throws Exception {
 		controller.perform(context, request, response, getServletContext());
 	}

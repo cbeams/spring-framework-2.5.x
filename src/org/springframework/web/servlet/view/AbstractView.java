@@ -100,18 +100,17 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Set the name of the RequestContext attribute for this view.
 	 * Default is none.
-	 * @param requestContextAttribute name of the RequestContext attribute
 	 */
 	public void setRequestContextAttribute(String requestContextAttribute) {
 		this.requestContextAttribute = requestContextAttribute;
 	}
 
-    /**
-     * @return Returns the requestContextAttribute if defined
-     */
-    public String getRequestContextAttribute() {
-        return requestContextAttribute;
-    }
+	/**
+	 * Return the name of the RequestContext attribute, if any.
+	 */
+	public String getRequestContextAttribute() {
+			return requestContextAttribute;
+	}
     
 	/**
 	 * Set static attributes as a CSV string.
@@ -128,10 +127,11 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			String tok = st.nextToken();
 			int eqIdx = tok.indexOf("=");
 			if (eqIdx == -1) {
-				throw new IllegalArgumentException("Expected = in View string '" + propString + "'");
+				throw new IllegalArgumentException("Expected = in attributes CSV string '" + propString + "'");
 			}
 			if (eqIdx >= tok.length() - 2) {
-				throw new IllegalArgumentException("At least 2 characters ([]) required in View string '" + propString + "'");
+				throw new IllegalArgumentException(
+						"At least 2 characters ([]) required in attributes CSV string '" + propString + "'");
 			}
 			String name = tok.substring(0, eqIdx);
 			String val = tok.substring(eqIdx + 1);
@@ -250,7 +250,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @param response current HTTP response
 	 * @throws Exception if rendering failed
 	 */
-	protected abstract void renderMergedOutputModel(Map model, HttpServletRequest request,
-	                                                HttpServletResponse response) throws Exception;
+	protected abstract void renderMergedOutputModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

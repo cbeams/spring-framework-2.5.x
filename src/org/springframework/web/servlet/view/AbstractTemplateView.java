@@ -109,8 +109,8 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 		this.exposeSpringMacroHelpers = exposeSpringMacroHelpers;
 	}
 
-	protected final void renderMergedOutputModel(Map model, HttpServletRequest request,
-												 HttpServletResponse response) throws Exception {
+	protected final void renderMergedOutputModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		if (this.exposeRequestAttributes) {
 			for (Enumeration enum = request.getAttributeNames(); enum.hasMoreElements();) {
@@ -121,8 +121,8 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 				}
 				Object attributeValue = request.getAttribute(attribute);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Exposing request attribute '" + attribute + "' with value [" +
-											 attributeValue + "] to model");
+					logger.debug("Exposing request attribute '" + attribute +
+							"' with value [" + attributeValue + "] to model");
 				}
 				model.put(attribute, attributeValue);
 			}
@@ -139,8 +139,8 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 					}
 					Object attributeValue = session.getAttribute(attribute);
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing session attribute '" + attribute + "' with value [" +
-												 attributeValue + "] to model");
+						logger.debug("Exposing session attribute '" + attribute +
+								"' with value [" + attributeValue + "] to model");
 					}
 					model.put(attribute, attributeValue);
 				}
@@ -149,8 +149,9 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 		if (this.exposeSpringMacroHelpers) {
 			if (model.containsKey(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)) {
-				throw new ServletException("Cannot expose bind macro helper '" + SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE +
-																	 "' because of an existing model object of the same name");
+				throw new ServletException(
+						"Cannot expose bind macro helper '" + SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE +
+						"' because of an existing model object of the same name");
 			}
 			// expose RequestContext instance for Spring macros
 			model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(request, model));
@@ -167,7 +168,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	 * @param response current HTTP response
 	 * @throws Exception if rendering failed
 	 */
-	protected abstract void renderMergedTemplateModel(Map model, HttpServletRequest request,
-																										HttpServletResponse response) throws Exception;
+	protected abstract void renderMergedTemplateModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

@@ -180,14 +180,15 @@ public class VelocityView extends AbstractTemplateView {
 		if (this.velocityEngine == null) {
 			try {
 				VelocityConfig velocityConfig = (VelocityConfig)
-						BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(),
-																													VelocityConfig.class, true, true);
+						BeanFactoryUtils.beanOfTypeIncludingAncestors(
+								getApplicationContext(), VelocityConfig.class, true, true);
 				this.velocityEngine = velocityConfig.getVelocityEngine();
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				throw new ApplicationContextException("Must define a single VelocityConfig bean in this web application " +
-																							"context (may be inherited): VelocityConfigurer is the usual " +
-																							"implementation. This bean may be given any name.", ex);
+				throw new ApplicationContextException(
+						"Must define a single VelocityConfig bean in this web application context " +
+						"(may be inherited): VelocityConfigurer is the usual implementation. " +
+						"This bean may be given any name.", ex);
 			}
 		}
 
@@ -205,12 +206,11 @@ public class VelocityView extends AbstractTemplateView {
 	}
 
 	/**
-	 * Process the model map by merging it with the Velocity template. Output is
-	 * directed to the response. This method can be overridden if custom behavior
-	 * is needed.
+	 * Process the model map by merging it with the Velocity template. Output is directed
+	 * to the response. This method can be overridden if custom behavior is needed.
 	 */
-	protected void renderMergedTemplateModel(Map model, HttpServletRequest request,
-												HttpServletResponse response) throws Exception {
+	protected void renderMergedTemplateModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// We already hold a reference to the template, but we might want to load it
 		// if not caching. As Velocity itself caches templates, so our ability to
