@@ -678,24 +678,32 @@ public class Constraints {
                 Object bean = it.next();
                 if (accessor == null) {
                     accessor = createPropertyAccessStrategy(bean);
-                } else {
+                }
+                else {
                     accessor.getDomainObjectHolder().set(bean);
                 }
                 Object value = accessor.getValue(propertyName);
-                Integer hashCode = new Integer(value.hashCode());
+                Integer hashCode;
+                if (value == null) {
+                    hashCode = new Integer(0);
+                }
+                else {
+                    hashCode = new Integer(value.hashCode());
+                }
                 if (distinctTable.containsKey(hashCode)) {
                     return false;
-                } else {
+                }
+                else {
                     distinctTable.put(hashCode, value);
                 }
             }
             return true;
         }
-        
-        protected MutablePropertyAccessStrategy createPropertyAccessStrategy(Object o) {
+
+        protected MutablePropertyAccessStrategy createPropertyAccessStrategy(
+                Object o) {
             return new BeanPropertyAccessStrategy(o);
         }
-
 
     }
 
