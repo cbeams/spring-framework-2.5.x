@@ -1,12 +1,11 @@
 package org.springframework.web.servlet.handler;
 
-import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -28,7 +27,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	private Object defaultHandler = null;
 
-	private List interceptors;
+	private HandlerInterceptor[] interceptors;
 
 	public final void setOrder(int order) {
 	  this.order = order;
@@ -55,7 +54,12 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 		return defaultHandler;
 	}
 
-	public final void setInterceptors(List interceptors) {
+	/**
+	 * Set the handler interceptors to apply for all handlers mapped by
+	 * this handler mapping.
+	 * @param interceptors array of handler interceptors, or null if none
+	 */
+	public final void setInterceptors(HandlerInterceptor[] interceptors) {
 		this.interceptors = interceptors;
 	}
 
@@ -73,11 +77,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 		if (handler == null) {
 			return null;
 		}
-		HandlerInterceptor[] interceptorArray = null;
-		if (this.interceptors != null) {
-			interceptorArray = (HandlerInterceptor[]) this.interceptors.toArray(new HandlerInterceptor[this.interceptors.size()]);
-		}
-		return new HandlerExecutionChain(handler, interceptorArray);
+		return new HandlerExecutionChain(handler, this.interceptors);
 	}
 
 	/**

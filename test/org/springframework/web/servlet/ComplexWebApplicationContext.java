@@ -96,7 +96,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		interceptors.add(interceptor4);
 		interceptors.add(new MyHandlerInterceptor1());
 		interceptors.add(new MyHandlerInterceptor2());
-		myUrlMapping1.setInterceptors(interceptors);
+		myUrlMapping1.setInterceptors((HandlerInterceptor[]) interceptors.toArray(new HandlerInterceptor[interceptors.size()]));
 	}
 
 
