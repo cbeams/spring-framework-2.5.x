@@ -1477,10 +1477,10 @@ boolean isFrozen();</programlisting>
       </sect3>
 
       <sect3>
-        <title>AdvisorAutoProxyCreator</title>
+        <title>DefaultAdvisorAutoProxyCreator</title>
 
         <para>A more general and extremely powerful auto proxy creator is
-        <literal>AdvisorAutoProxyCreator</literal>. This will automagically
+        <literal>DefaultAdvisorAutoProxyCreator</literal>. This will automagically
         apply eligible advisors in the current context, without the need to
         include specific bean names in the autoproxy advisor's bean
         definition. It offers the same merit of consistent configuration and
@@ -1491,7 +1491,7 @@ boolean isFrozen();</programlisting>
 
         <itemizedlist>
           <listitem>
-            <para>Specifying an <literal>AdvisorAutoProxyCreator</literal>
+            <para>Specifying a <literal>DefaultAdvisorAutoProxyCreator</literal>
             bean definition</para>
           </listitem>
 
@@ -1500,11 +1500,11 @@ boolean isFrozen();</programlisting>
             contexts. Note that these <emphasis>must</emphasis> be Advisors,
             not just interceptors or other advices. This is necessary because
             there must be a pointcut to evaluate, to check the eligibility of
-            each advice to candidate bean defiitions.</para>
+            each advice to candidate bean definitions.</para>
           </listitem>
         </itemizedlist>
 
-        <para>The <literal>AdvisorAutoProxyCreator</literal> will
+        <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> will
         automatically evaluate the pointcut contained in each advisor, to see
         what (if any) advice it should apply to each business object (such as
         "businessObject1" and "businessObject2" in the example).</para>
@@ -1521,12 +1521,13 @@ boolean isFrozen();</programlisting>
         return an AOP proxy, not the target business object.</para>
 
         <para><programlisting>&lt;bean id="autoProxyCreator"
-    class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator"&gt;
+    class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
 &lt;/bean&gt;
 
 &lt;bean id="txAdvisor"
     autowire="constructor"
-    class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor"&gt;
+    class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+    &lt;property name="order"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="customAdvisor"
@@ -1542,33 +1543,32 @@ boolean isFrozen();</programlisting>
     class="com.mycompany.BusinessObject2"&gt;
 &lt;/bean&gt;</programlisting></para>
 
-        <para>The <literal>AdvisorAutoProxyCreator</literal> is very useful if
-        you want to apply the same advice consistently to many business
+        <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> is very useful
+        if you want to apply the same advice consistently to many business
         objects. Once the infrastructure definitions are in place, you can
         simply add new business objects without including specific proxy
         configuration. You can also drop in additional aspects very
         easily--for example, tracing or performance monitoring aspects--with
         minimal change to configuration.</para>
 
-        <para>The AdvisorAutoProxyCreator offers support for filtering (using
-        a naming convention so that only certain advisors are evaluated,
+        <para>The DefaultAdvisorAutoProxyCreator offers support for filtering
+        (using a naming convention so that only certain advisors are evaluated,
         allowing use of multiple, differently configured,
         AdvisorAutoProxyCreators in the same factory) and ordering. Advisors
         can implement the <literal>org.springframework.core.Ordered</literal>
         interface to ensure correct ordering if this is an issue. The
-        TransactionAttributeSourceTransactionAroundAdvisor used in the above
-        example has a high order value, as most other advice will normally
-        want to be run in a transaction context.</para>
+        TransactionAttributeSourceAdvisor used in the above example has a
+        configurable order value; default is unordered.</para>
       </sect3>
 
       <sect3>
         <title>AbstractAdvisorAutoProxyCreator</title>
 
-        <para>This is the superclass of AdvisorAutoProxyCreator. You can
-        create your own autoproxy creators by subclassing this class, in the
-        unlikely event that advisor definitions offer insufficient
+        <para>This is the superclass of DefaultAdvisorAutoProxyCreator. You
+        can create your own autoproxy creators by subclassing this class,
+        in the unlikely event that advisor definitions offer insufficient
         customization to the behaviour of the framework
-        <literal>AdvisorAutoProxyCreator</literal>.</para>
+        <literal>DefaultAdvisorAutoProxyCreator</literal>.</para>
       </sect3>
     </sect2>
 
@@ -1582,15 +1582,15 @@ boolean isFrozen();</programlisting>
       other enterprise services is held in source-level attributes.</para>
 
       <para>In this case, you use the
-      <literal>AdvisorAutoProxyCreator</literal>, in combination with Advisors
-      that understand metadata attributes. The metadata specifics are held in
-      the pointcut part of the candidate advisors, rather than in the
+      <literal>DefaultAdvisorAutoProxyCreator</literal>, in combination with
+      Advisors that understand metadata attributes. The metadata specifics are
+      held in the pointcut part of the candidate advisors, rather than in the
       autoproxy creation class itself.</para>
 
       <para>This is really a special case of the
-      <literal>AdvisorAutoProxyCreator</literal>, but deserves consideration
-      on its own. (The metadata-aware code is in the pointcuts contained in
-      the advisors, not the AOP framework itself.)</para>
+      <literal>DefaultAdvisorAutoProxyCreator</literal>, but deserves
+      consideration on its own. (The metadata-aware code is in the pointcuts
+      contained in the advisors, not the AOP framework itself.)</para>
 
       <para>The <literal>/attributes</literal> directory of the jPetStore
       sample application shows the use of attribute-driven autoproxying. In
@@ -1602,7 +1602,7 @@ boolean isFrozen();</programlisting>
       Note that this is generic, and can be used outside the jPetStore:</para>
 
       <para><programlisting>&lt;bean id="autoproxy" 
-    class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator"&gt;	
+    class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"&gt;
 &lt;/bean&gt;
 
 &lt;bean id="transactionAttributeSource"
@@ -1616,7 +1616,7 @@ boolean isFrozen();</programlisting>
 &lt;/bean&gt;
 
 &lt;bean id="transactionAdvisor"
-    class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor"
+    class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
     autowire="constructor" &gt;
 &lt;/bean&gt;
 
@@ -1624,18 +1624,16 @@ boolean isFrozen();</programlisting>
     class="org.springframework.metadata.commons.CommonsAttributes"
 /&gt;</programlisting></para>
 
-      <para>The <literal>AdvisorAutoProxyCreator</literal> bean
+      <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> bean
       definition--called "advisor" in this case, but the name is not
       significant--will pick up all eligible pointcuts in the current
       application context. In this case, the "transactionAdvisor" bean
-      definition, of type
-      <literal>TransactionAttributeSourceTransactionAroundAdvisor</literal>,
+      definition, of type <literal>TransactionAttributeSourceAdvisor</literal>,
       will apply to classes or methods carrying a transaction attribute. The
-      TransactionAttributeSourceTransactionAroundAdvisor depends on a
-      TransactionInterceptor, via constructor dependency. The example resolves
-      this via autowiring. The
-      <literal>AttributesTransactionAttributeSource</literal> depends on an
-      implementation of the
+      TransactionAttributeSourceAdvisor depends on a TransactionInterceptor,
+      via constructor dependency. The example resolves this via autowiring.
+      The <literal>AttributesTransactionAttributeSource</literal> depends
+      on an implementation of the
       <literal>org.springframework.metadata.Attributes</literal> interface. In
       this fragement, the "attributes" bean satisfies this, using the Jakarta
       Commons Attributes API to obtain attribute information. (The application

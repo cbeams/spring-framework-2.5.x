@@ -295,7 +295,7 @@ public void echoException(Exception ex) throws Exception {
       Configuration might look like this:</para>
 
       <para><programlisting>&#60;bean id=&#34;autoproxy&#34; 
-    class=&#34;org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator&#34;&#62;
+    class=&#34;org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator&#34;&#62;
 &#60;/bean&#62;
 
 &#60;bean id=&#34;transactionAttributeSource&#34;
@@ -309,7 +309,7 @@ public void echoException(Exception ex) throws Exception {
 &#60;/bean&#62;
 
 &#60;bean id=&#34;transactionAdvisor&#34;
-    class=&#34;org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor&#34;
+    class=&#34;org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor&#34;
     autowire=&#34;constructor&#34; &#62;
 &#60;/bean&#62;
 
@@ -325,7 +325,7 @@ public void echoException(Exception ex) throws Exception {
       Note that the actual bean names are not important; what matters is their
       class.</para>
 
-      <para>The autoproxy bean definition of class <literal>org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator</literal>
+      <para>The autoproxy bean definition of class <literal>org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator</literal>
       will automatically advise (&#34;autoproxy&#34;) all bean instances in
       the current factory based on matching Advisor implementations. This
       class knows nothing about attributes, but relies on Advisors&#39;
@@ -393,7 +393,7 @@ public class MyClass {</programlisting>You&#39;ll need the usual autoproxy
       property as follows:</para>
 
       <para><programlisting>&#60;bean id=&#34;autoproxy&#34; 
-    class=&#34;org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator&#34;&#62;
+    class=&#34;org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator&#34;&#62;
 &#62;
     &#60;property name=&#34;customTargetSourceCreators&#34;&#62;
         &#60;list&#62;
