@@ -31,6 +31,7 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.util.ToStringCreator;
 import org.springframework.web.flow.support.RandomGuid;
 
@@ -294,7 +295,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		assertActive();
 		String eventId = event.getId();
 		String stateId = event.getStateId();
-		if (stateId == null) {
+		if (!StringUtils.hasText(stateId)) {
 			if (logger.isDebugEnabled()) {
 				logger
 						.debug("Current state id was not provided in request to signal event '"
@@ -317,7 +318,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		}
 		LocalFlowExecutionContext context = new LocalFlowExecutionContext(event, this);
 		context.fireRequestSubmitted(event);
-		ViewDescriptor view = state.enter(context);
+		ViewDescriptor view = state.signalEvent(event, context);
 		context.fireRequestProcessed(event);
 		return view;
 	}

@@ -23,14 +23,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.web.flow.support.AttributeSetterSupport;
-import org.springframework.web.flow.support.FlowUtils;
 
 /**
  * A single client session instance for a <code>Flow</code> participating in a
@@ -184,7 +181,7 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 	public Map getAttributeMap() {
 		return attributes;
 	}
-	
+
 	public Object getAttribute(String attributeName) {
 		return attributes.get(attributeName);
 	}
@@ -206,8 +203,10 @@ public class FlowSession extends AttributeSetterSupport implements Serializable 
 	// methods implementing MutableFlowModel
 
 	public void setAttribute(String attributeName, Object attributeValue) {
-		Assert.isInstanceOf(Serializable.class, attributeValue,
-				"attributes stored in the flow session should be Serializable");
+		if (attributeValue != null) {
+			Assert.isInstanceOf(Serializable.class, attributeValue, "Attempt to set FlowSession attribute '"
+					+ attributeName + "' failed: ");
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting flow '" + getFlowId() + "' attribute '" + attributeName + "' to '" + attributeValue
 					+ "'");

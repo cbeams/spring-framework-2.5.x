@@ -58,7 +58,6 @@ public class StateTests extends TestCase {
 		assertEquals("success", flowExecution.getEventId());
 		Action[] actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
-			System.out.println(i);
 			assertEquals(1, ((ExecutionCounterAction)actions[i]).getExecutionCount());
 		}
 	}
@@ -79,7 +78,7 @@ public class StateTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 	public void testActionStateActionChainNamedActions() {
 		Flow flow = new Flow("myFlow");
 		ActionState state = new ActionState(flow, "actionState", new String[] { null, null, "action3", "action4" },
@@ -149,17 +148,15 @@ public class StateTests extends TestCase {
 		SubFlowState state = new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(
 				"finish", "finish"));
 		new EndState(flow, "finish", "myParentFlowEndingViewName");
-		FlowExecution flowExecution = flow.createExecution();
-		MockHttpServletRequest request = new MockHttpServletRequest();
+		FlowExecutionStack flowExecution = (FlowExecutionStack)flow.createExecution();
 		Map input = new HashMap();
 		input.put("parentInputAttribute", "attributeValue");
-		ViewDescriptor view = flowExecution.start(new LocalEvent("start"));
+		ViewDescriptor view = flowExecution.start(new LocalEvent("start", input));
 		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
 		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
 		assertEquals("mySubFlowViewName", view.getViewName());
-		// assertEquals("attributeValue",
-		// flowExecution.getAttribute("childInputAttribute"));
-		// view = flowExecution.signalEvent("submit", null, request, null);
+		assertEquals("attributeValue", flowExecution.getActiveFlowSession().getAttribute("childInputAttribute"));
+		view = flowExecution.signalEvent(new LocalEvent("submit"));
 		assertEquals("myParentFlowEndingViewName", view.getViewName());
 		assertTrue(!flowExecution.isActive());
 		assertEquals("attributeValue", view.getModel().get("parentOutputAttribute"));
@@ -189,7 +186,8 @@ public class StateTests extends TestCase {
 		public ExecutionCounterAction(String result) {
 			if (StringUtils.hasText(result)) {
 				this.result = new LocalEvent(result);
-			} else {
+			}
+			else {
 				this.result = null;
 			}
 		}
@@ -199,7 +197,6 @@ public class StateTests extends TestCase {
 		}
 
 		public Event execute(FlowExecutionContext context) throws Exception {
-			System.out.println("executed with result " + result);
 			executionCount++;
 			return result;
 		}
