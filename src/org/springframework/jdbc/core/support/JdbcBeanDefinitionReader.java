@@ -6,18 +6,19 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
- * ListableBeanFactory implementation that reads values from a database
- * table. Expects columns for bean name, property name and value
- * as string. Formats for each are identical to the properties format
- * recognized by DefaultListableBeanFactory.
+ * ListableBeanFactory implementation that reads values from a database table.
+ * Expects columns for bean name, property name and value as string.
+ * Formats for each are identical to the properties format recognized by
+ * PropertiesBeanDefinitionReader.
  * @author Rod Johnson
- * @author Juergen Hoellre
+ * @author Juergen Hoeller
+ * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
  */
 public class JdbcBeanDefinitionReader {
 
@@ -26,7 +27,7 @@ public class JdbcBeanDefinitionReader {
 	private JdbcTemplate jdbcTemplate;
 
 	/**
-	 * Create a new JdbcBeanDefinitionReader.
+	 * Create a new JdbcBeanDefinitionReader for the given bean factory.
 	 */
 	public JdbcBeanDefinitionReader(DefaultListableBeanFactory beanFactory) {
 		this.propReader = new PropertiesBeanDefinitionReader(beanFactory);
@@ -42,7 +43,7 @@ public class JdbcBeanDefinitionReader {
 
 	/**
 	 * Set the JdbcTemplate to be used by this bean factory.
-	 * Contains settings for DataSource, SQLExceptionTranslator, QueryExecutor, etc.
+	 * Contains settings for DataSource, SQLExceptionTranslator, NativeJdbcExtractor, etc.
 	 */
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;

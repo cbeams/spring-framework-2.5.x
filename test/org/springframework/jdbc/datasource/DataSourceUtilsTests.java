@@ -9,14 +9,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 
 /**
  * 
  * @author Rod Johnson
  * @since 10-May-2003
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DataSourceUtilsTests extends TestCase {
 

@@ -9,12 +9,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 
 /**
 * @author Rod Johnson
-* @version $Id: DriverManagerDataSourceTests.java,v 1.3 2003-09-24 13:43:19 beanie42 Exp $
+* @version $Id: DriverManagerDataSourceTests.java,v 1.4 2003-12-05 17:03:16 jhoeller Exp $
 */
 public class DriverManagerDataSourceTests extends TestCase {
 

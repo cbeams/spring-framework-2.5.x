@@ -15,9 +15,9 @@ import net.sf.hibernate.SessionFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.SQLExceptionTranslator;
-import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHolder;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -176,8 +176,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * thrown by flushing on commit.
 	 * <p>The default exception translator evaluates the exception's SQLState.
 	 * @param jdbcExceptionTranslator exception translator
-	 * @see org.springframework.jdbc.core.SQLStateSQLExceptionTranslator
-	 * @see org.springframework.jdbc.core.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 */
 	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
 		this.jdbcExceptionTranslator = jdbcExceptionTranslator;

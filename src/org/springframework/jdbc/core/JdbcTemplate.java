@@ -24,7 +24,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.JdbcAccessor;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -61,7 +64,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.15 2003-11-28 16:54:57 jhoeller Exp $
+ * @version $Id: JdbcTemplate.java,v 1.16 2003-12-05 17:03:12 jhoeller Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -85,11 +88,8 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Custom query executor.
-	 * This default may be overridden by a JavaBean property if desired.
-	 */
-	private QueryExecutor queryExecutor = new DefaultQueryExecutor();
+	/** Custom NativeJdbcExtractor */
+	private NativeJdbcExtractor nativeJdbcExtractor;
 
 	/** If this variable is false, we will throw exceptions on SQL warnings */
 	private boolean ignoreWarnings = true;
@@ -116,17 +116,20 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	}
 
 	/**
-	 * Set a custom QueryExecutor implementation.
+	 * Set a NativeJdbcExtractor to extract native JDBC objects from wrapped handles.
+	 * Useful if native Statement and/or ResultSet handles are expected for casting
+	 * to database-specific implementation classes, but a connection pool that wraps
+	 * JDBC objects is used (note: <i>any</i> pool will return wrapped Connections).
 	 */
-	public void setQueryExecutor(QueryExecutor queryExecutor) {
-		this.queryExecutor = queryExecutor;
+	public void setNativeJdbcExtractor(NativeJdbcExtractor extractor) {
+		this.nativeJdbcExtractor = extractor;
 	}
 	
 	/**
-	 * @return the current QueryExecutor implementation.
+	 * Return the current NativeJdbcExtractor implementation.
 	 */
-	public QueryExecutor getQueryExecutor() {
-		return this.queryExecutor;
+	public NativeJdbcExtractor getNativeJdbcExtractor() {
+		return this.nativeJdbcExtractor;
 	}
 
 	/**
@@ -181,25 +184,37 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 * the query
 	 */
 	public void doWithResultSetFromStaticQuery(String sql, ResultSetExtractor rse) throws DataAccessException {
-		if (sql == null)
+		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
-		if (containsBindVariables(sql))
+		}
+		if (containsBindVariables(sql)) {
 			throw new InvalidDataAccessApiUsageException(
 			    "Cannot execute [" + sql + "] as a static query: it contains bind variables");
-
+		}
 		Connection con = DataSourceUtils.getConnection(this.dataSource);
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = con.createStatement();
-			DataSourceUtils.applyTransactionTimeout(stmt, this.dataSource);
-
-			if (logger.isDebugEnabled())
+			if (logger.isDebugEnabled()) {
 				logger.debug("Executing static SQL query [" + sql + "] using a java.sql.Statement");
-
-			rs = this.queryExecutor.executeQuery(stmt, sql);
-			rse.extractData(rs);
-
+			}
+			Connection conToUse = con;
+			if (this.nativeJdbcExtractor != null &&
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
+			stmt = conToUse.createStatement();
+			DataSourceUtils.applyTransactionTimeout(stmt, this.dataSource);
+			Statement stmtToUse = stmt;
+			if (this.nativeJdbcExtractor != null) {
+				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
+			}
+			rs = stmtToUse.executeQuery(sql);
+			ResultSet rsToUse = rs;
+			if (this.nativeJdbcExtractor != null) {
+				rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
+			}
+			rse.extractData(rsToUse);
 			SQLWarning warning = stmt.getWarnings();
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
 		}
@@ -235,15 +250,14 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 */
 	public void query(PreparedStatementCreator psc, RowCallbackHandler callbackHandler)
 	    throws DataAccessException {
-		doWithResultSetFromPreparedQuery( psc,
+		doWithResultSetFromPreparedQuery(psc,
 		    new RowCallbackHandlerResultSetExtractor(callbackHandler));
 	}
 
 	/**
-	 * Query using a prepared statement. Most other query methods use
-	 * this method.
-	 * @param psc Callback handler that can create a PreparedStatement
-	 * given a Connection
+	 * Query using a prepared statement. Most other query methods use this method.
+	 * @param psc Callback handler that can create a PreparedStatement given a
+	 * Connection
 	 * @param rse object that will extract results.
 	 * @throws DataAccessException if there is any problem
 	 */
@@ -253,14 +267,25 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
-			ps = psc.createPreparedStatement(con);
-
-			if (logger.isDebugEnabled())
+			Connection conToUse = con;
+			if (this.nativeJdbcExtractor != null &&
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
+			ps = psc.createPreparedStatement(conToUse);
+			if (logger.isDebugEnabled()) {
 				logger.debug("Executing SQL query using PreparedStatement [" + psc + "]");
-
-			rs = this.queryExecutor.executeQuery(ps);
-			rse.extractData(rs);
-
+			}
+			PreparedStatement psToUse = ps;
+			if (this.nativeJdbcExtractor != null) {
+				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
+			}
+			rs = psToUse.executeQuery();
+			ResultSet rsToUse = rs;
+			if (this.nativeJdbcExtractor != null) {
+				rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
+			}
+			rse.extractData(rsToUse);
 			SQLWarning warning = ps.getWarnings();
 			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
 		}
@@ -302,9 +327,9 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 */
 	public void query(final String sql, final PreparedStatementSetter pss, RowCallbackHandler callbackHandler)
 	    throws DataAccessException {
-		if (sql == null)
+		if (sql == null) {
 			throw new InvalidDataAccessApiUsageException("SQL may not be null");
-
+		}
 		if (pss == null) {
 			// Check there are no bind parameters, in which case pss could not be null
 			if (containsBindVariables(sql))
@@ -315,12 +340,15 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		else {
 			// Wrap it in a new PreparedStatementCreator
 			query(new PreparedStatementCreator() {
-				public PreparedStatement createPreparedStatement(Connection conn)
-				    throws SQLException {
-					PreparedStatement ps = conn.prepareStatement(sql);
+				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+					PreparedStatement ps = con.prepareStatement(sql);
 					DataSourceUtils.applyTransactionTimeout(ps, dataSource);
-					pss.setValues(ps);
-					return ps;
+					PreparedStatement psToUse = ps;
+					if (nativeJdbcExtractor != null) {
+						psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
+					}
+					pss.setValues(psToUse);
+					return psToUse;
 				}
 			}, callbackHandler);
 		}
@@ -340,14 +368,16 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 * @throws DataAccessException if there is any problem.
 	 */
 	public int update(final String sql) throws DataAccessException {
-		if (logger.isDebugEnabled())
+		if (logger.isDebugEnabled()) {
 			logger.debug("Running SQL update [" + sql + "]");
-
+		}
 		return update(new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection conn)
-			    throws SQLException {
-				PreparedStatement ps = conn.prepareStatement(sql);
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement ps = con.prepareStatement(sql);
 				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
+				if (nativeJdbcExtractor != null) {
+					return nativeJdbcExtractor.getNativePreparedStatement(ps);
+				}
 				return ps;
 			}
 		});
@@ -376,14 +406,21 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		PreparedStatement ps = null;
 		int index = 0;
 		try {
+			Connection conToUse = con;
+			if (this.nativeJdbcExtractor != null &&
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
 			int[] retvals = new int[pscs.length];
 			for (index = 0; index < retvals.length; index++) {
-				ps = pscs[index].createPreparedStatement(con);
-				if (logger.isDebugEnabled())
+				ps = pscs[index].createPreparedStatement(conToUse);
+				if (logger.isDebugEnabled()) {
 					logger.debug("Executing SQL update using PreparedStatement [" + pscs[index] + "]");
+				}
 				retvals[index] = ps.executeUpdate();
-				if (logger.isDebugEnabled())
+				if (logger.isDebugEnabled()) {
 					logger.debug("SQL update affected " + retvals[index] + " rows");
+				}
 				ps.close();
 			}
 
@@ -420,15 +457,18 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	public int update(final String sql, final PreparedStatementSetter pss) throws DataAccessException {
-		if (pss == null)
+		if (pss == null) {
 			return update(sql);
-
+		}
 		return update(new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection conn)
-			    throws SQLException {
-				PreparedStatement ps = conn.prepareStatement(sql);
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement ps = con.prepareStatement(sql);
 				DataSourceUtils.applyTransactionTimeout(ps, dataSource);
-				pss.setValues(ps);
+				PreparedStatement psToUse = ps;
+				if (nativeJdbcExtractor != null) {
+					psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
+				}
+				pss.setValues(psToUse);
 				return ps;
 			}
 		});
@@ -448,11 +488,20 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		Connection con = DataSourceUtils.getConnection(this.dataSource);
 		PreparedStatement ps = null;
 		try {
-			ps = con.prepareStatement(sql);
+			Connection conToUse = con;
+			if (this.nativeJdbcExtractor != null &&
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
+			ps = conToUse.prepareStatement(sql);
 			DataSourceUtils.applyTransactionTimeout(ps, dataSource);
+			PreparedStatement psToUse = ps;
+			if (this.nativeJdbcExtractor != null) {
+				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
+			}
 			int batchSize = setter.getBatchSize();
 			for (int i = 0; i < batchSize; i++) {
-				setter.setValues(ps, i);
+				setter.setValues(psToUse, i);
 				ps.addBatch();
 			}
 			int[] retvals = ps.executeBatch();
@@ -478,8 +527,8 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 
 	/**
 	 * Execute an Sql call using a CallableStatementCreator to provide SQL and any required
-	 * parameters
-	 * @param csc helper: callback object that provides SQL and any necessary parameters
+	 * parameters.
+	 * @param csc callback object that provides SQL and any necessary parameters
 	 * @return Map of extracted out parameters
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
@@ -487,16 +536,28 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 		Connection con = DataSourceUtils.getConnection(this.dataSource);
 		CallableStatement cs = null;
 		try {
-			cs = csc.createCallableStatement(con);
-			if (logger.isDebugEnabled())
+			Connection conToUse = con;
+			if (this.nativeJdbcExtractor != null &&
+			    this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
+				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
+			cs = csc.createCallableStatement(conToUse);
+			CallableStatement csToUse = cs;
+			if (this.nativeJdbcExtractor != null) {
+				csToUse = this.nativeJdbcExtractor.getNativeCallableStatement(cs);
+			}
+			if (logger.isDebugEnabled()) {
 				logger.debug("Executing call using CallableStatement [" + cs + "]");
-			boolean retval = cs.execute();
-			if (logger.isDebugEnabled())
-				logger.debug("CallableStatement.execute returned [" + retval + "]");
+			}
+			boolean retVal = csToUse.execute();
+			if (logger.isDebugEnabled()) {
+				logger.debug("CallableStatement.execute returned [" + retVal + "]");
+			}
 			Map retMap = new HashMap();
-			if (retval)
-				retMap.putAll(extractReturnedResultSets(cs, declaredParameters));
-			retMap.putAll(extractOutputParameters(cs, declaredParameters));
+			if (retVal) {
+				retMap.putAll(extractReturnedResultSets(csToUse, declaredParameters));
+			}
+			retMap.putAll(extractOutputParameters(csToUse, declaredParameters));
 			return retMap;
 		}
 		catch (SQLException ex) {
@@ -542,10 +603,12 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 								rse = new RowCallbackHandlerResultSetExtractor(((SqlOutParameter) p).getRowCallbackHandler());
 							rse.extractData((ResultSet) out);
 							logger.debug("ResultSet returned from stored procedure was processed");
-							if (((SqlOutParameter) p).isRowMapperSupported())
+							if (((SqlOutParameter) p).isRowMapperSupported()) {
 								outParams.put(p.getName(), ((ResultReader) ((RowCallbackHandlerResultSetExtractor) rse).getCallbackHandler()).getResults() );
-							else
+							}
+							else {
 								outParams.put(p.getName(), "ResultSet processed.");
+							}
 						}
 						else {
 							logger.warn("ResultSet returned from stored procedure but a corresponding SqlOutParameter with a RowCallbackHandler was not declared");
@@ -590,16 +653,24 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 				ResultSet rs = null;
 				rs = cs.getResultSet();
 				try {
+					ResultSet rsToUse = rs;
+					if (this.nativeJdbcExtractor != null) {
+						rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
+					}
 					ResultSetExtractor rse = null;
-					if (((SqlReturnResultSet) p).isRowMapperSupported())
+					if (((SqlReturnResultSet) p).isRowMapperSupported()) {
 						rse = new RowCallbackHandlerResultSetExtractor(((SqlReturnResultSet) p).newResultReader());
-					else
+					}
+					else {
 						rse = new RowCallbackHandlerResultSetExtractor(((SqlReturnResultSet) p).getRowCallbackHandler());
-					rse.extractData(rs);
-					if (((SqlReturnResultSet) p).isRowMapperSupported())
+					}
+					rse.extractData(rsToUse);
+					if (((SqlReturnResultSet) p).isRowMapperSupported()) {
 						returnedResults.put(p.getName(), ((ResultReader)((RowCallbackHandlerResultSetExtractor) rse).getCallbackHandler()).getResults());
-					else
+					}
+					else {
 						returnedResults.put(p.getName(), "ResultSet returned from stored procedure was processed");
+					}
 				}
 				catch (SQLException se) {
 					throw se;
@@ -636,22 +707,6 @@ public class JdbcTemplate extends JdbcAccessor implements IJdbcTemplate, Initial
 			else {
 				throw new SQLWarningException("Warning not ignored", warning);
 			}
-		}
-	}
-
-
-	/**
-	 * Default implementation of the QueryExecutor interface.
-	 * Simply executes the respective query on the given statement.
-	 */
-	private static final class DefaultQueryExecutor implements QueryExecutor {
-
-		public ResultSet executeQuery(Statement stmt, String sql) throws SQLException {
-			return stmt.executeQuery(sql);
-		}
-
-		public ResultSet executeQuery(PreparedStatement ps) throws SQLException {
-			return ps.executeQuery();
 		}
 	}
 

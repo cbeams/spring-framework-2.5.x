@@ -8,7 +8,7 @@ package org.springframework.jdbc.object;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
-import org.springframework.jdbc.core.support.JdbcUtils;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -18,7 +18,7 @@ import org.springframework.jdbc.core.support.JdbcUtils;
  * parameters.
  *
  * @author Rod Johnson
- * @version $Id: SqlOperation.java,v 1.4 2003-11-03 17:03:42 johnsonr Exp $
+ * @version $Id: SqlOperation.java,v 1.5 2003-12-05 17:03:14 jhoeller Exp $
  */
 public abstract class SqlOperation extends RdbmsOperation {
 

@@ -10,10 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.SQLExceptionTranslator;
-import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
-import org.springframework.util.Constants;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.util.Constants;
 
 /**
  * Base class for HibernateTemplate and HibernateInterceptor, defining common
@@ -120,8 +120,8 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 * SQLExceptions or wrapped HibernateJDBCExceptions.
 	 * <p>The default exception translator evaluates the exception's SQLState.
 	 * @param jdbcExceptionTranslator exception translator
-	 * @see org.springframework.jdbc.core.SQLStateSQLExceptionTranslator
-	 * @see org.springframework.jdbc.core.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 */
 	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
 		this.jdbcExceptionTranslator = jdbcExceptionTranslator;

@@ -4,18 +4,17 @@ import java.sql.Types;
 
 import javax.sql.DataSource;
 
+import com.mockobjects.sql.MockDataSource;
 import junit.framework.TestCase;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.QueryExecutor;
-import org.springframework.jdbc.core.SQLExceptionTranslator;
-import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.support.CommonsDbcpQueryExecutor;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
-import com.mockobjects.sql.MockDataSource;
+import org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
 /**
  * @author Trevor D. Cook
@@ -125,17 +124,9 @@ public class RdbmsOperationTestSuite extends TestCase {
 		SqlOperation operation = new SqlOperation() {
 		};
 		DataSource ds = new DriverManagerDataSource();
-		SQLExceptionTranslator et = new SQLStateSQLExceptionTranslator();
-		QueryExecutor qe = new CommonsDbcpQueryExecutor();
 		operation.setDataSource(ds);
-		operation.setExceptionTranslator(et);
-		operation.setQueryExecutor(qe);
-		operation.setIgnoreWarnings(false);
 		JdbcTemplate jt = operation.getJdbcTemplate();
 		assertEquals(ds, jt.getDataSource());
-		assertEquals(et, jt.getExceptionTranslator());
-		assertEquals(qe, jt.getQueryExecutor());
-		assertFalse(jt.getIgnoreWarnings());
 	}
 
 

@@ -12,7 +12,7 @@ import java.sql.Types;
 import javax.sql.DataSource;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.support.JdbcUtils;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * SQL function wrapper that returns a single row of results. The default
@@ -33,7 +33,7 @@ import org.springframework.jdbc.core.support.JdbcUtils;
  * History :
  * 20/04/2003 : modified by IM to allow returning something else than an int
  * 09/05/2003 : modified by JPP, added case Types.BIGINT in function extract
- * @version $Id: SqlFunction.java,v 1.3 2003-11-03 16:58:15 johnsonr Exp $
+ * @version $Id: SqlFunction.java,v 1.4 2003-12-05 17:03:14 jhoeller Exp $
  */
 
 public class SqlFunction extends MappingSqlQuery {

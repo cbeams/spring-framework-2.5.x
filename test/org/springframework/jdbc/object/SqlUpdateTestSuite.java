@@ -5,12 +5,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.easymock.MockControl;
-import org.springframework.jdbc.*;
-import org
-	.springframework
-	.jdbc
-	.core
-	.JdbcUpdateAffectedIncorrectNumberOfRowsException;
+
+import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.SqlParameter;
 
 public class SqlUpdateTestSuite extends JdbcTestCase {

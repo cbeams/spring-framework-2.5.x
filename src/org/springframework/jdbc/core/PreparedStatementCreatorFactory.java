@@ -15,7 +15,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.3 2003-08-26 17:21:52 jhoeller Exp $
+ * @version $Id: PreparedStatementCreatorFactory.java,v 1.4 2003-12-05 17:03:13 jhoeller Exp $
  */
 public class PreparedStatementCreatorFactory { 
 
@@ -95,8 +95,8 @@ public class PreparedStatementCreatorFactory {
 				throw new InvalidDataAccessApiUsageException("SQL='" + sql + "': given " + parameters.size() + " parameter but expected " + declaredParameters.size());
 		}
 		
-		public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
-			PreparedStatement ps = conn.prepareStatement(sql);
+		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+			PreparedStatement ps = con.prepareStatement(sql);
 
 			// Set arguments: does nothing if there are no parameters
 			for (int i = 0; i < parameters.size(); i++) {

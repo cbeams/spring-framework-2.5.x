@@ -10,8 +10,8 @@ import com.ibatis.db.sqlmap.RowHandler;
 import com.ibatis.db.sqlmap.SqlMap;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcAccessor;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.JdbcAccessor;
 
 /**
  * Helper class that simplifies data access via the MappedStatement API of the iBATIS

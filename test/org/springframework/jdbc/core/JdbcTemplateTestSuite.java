@@ -1,6 +1,13 @@
 package org.springframework.jdbc.core;
 
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,15 +15,25 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.easymock.MockControl;
-import org.springframework.dao.*;
+
+import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.UncategorizedDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.SQLWarningException;
+import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.datasource.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.8 2003-11-03 15:14:29 johnsonr Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.9 2003-12-05 17:03:15 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -1158,69 +1175,111 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		ctrlConnection.verify();
 	}
 
-	public void testCustomQueryExecutorInvoked() throws Exception {
+	public void testNativeJdbcExtractorInvoked() throws Exception {
+		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
+		final ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable(2);
+
 		MockControl ctrlStatement = MockControl.createControl(Statement.class);
 		final Statement mockStatement = (Statement) ctrlStatement.getMock();
 		mockStatement.getWarnings();
 		ctrlStatement.setReturnValue(null);
 		mockStatement.close();
 		ctrlStatement.setVoidCallable();
+		MockControl ctrlStatement2 = MockControl.createControl(Statement.class);
+		final Statement mockStatement2 = (Statement) ctrlStatement2.getMock();
+		mockStatement2.executeQuery("my query");
+		ctrlStatement2.setReturnValue(mockResultSet, 1);
 
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		final PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlPreparedStatement =	MockControl.createControl(PreparedStatement.class);
+		final PreparedStatement mockPreparedStatement =	(PreparedStatement) ctrlPreparedStatement.getMock();
 		mockPreparedStatement.getWarnings();
 		ctrlPreparedStatement.setReturnValue(null);
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
+		MockControl ctrlPreparedStatement2 =	MockControl.createControl(PreparedStatement.class);
+		final PreparedStatement mockPreparedStatement2 =	(PreparedStatement) ctrlPreparedStatement2.getMock();
+		mockPreparedStatement2.executeQuery();
+		ctrlPreparedStatement2.setReturnValue(mockResultSet, 1);
 
-		final ResultSet rs = null;
+		MockControl ctrlCallableStatement =	MockControl.createControl(CallableStatement.class);
+		final CallableStatement mockCallableStatement =	(CallableStatement) ctrlCallableStatement.getMock();
+		mockCallableStatement.close();
+		ctrlCallableStatement.setVoidCallable();
+		MockControl ctrlCallableStatement2 =	MockControl.createControl(CallableStatement.class);
+		final CallableStatement mockCallableStatement2 =	(CallableStatement) ctrlCallableStatement2.getMock();
+		mockCallableStatement2.execute();
+		ctrlCallableStatement2.setReturnValue(true);
+		mockCallableStatement2.getMoreResults();
+		ctrlCallableStatement2.setReturnValue(false);
+
+		ctrlResultSet.replay();
+		ctrlStatement.replay();
+		ctrlStatement2.replay();
+		ctrlPreparedStatement.replay();
+		ctrlPreparedStatement2.replay();
+		ctrlCallableStatement.replay();
+		ctrlCallableStatement2.replay();
 
 		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlStatement.replay();
-		ctrlPreparedStatement.replay();
+		ctrlConnection.setReturnValue(mockStatement, 1);
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		template.setQueryExecutor(new QueryExecutor() {
-			public ResultSet executeQuery(Statement stmt2, String sql)
-				throws SQLException {
-				assertEquals(mockStatement, stmt2);
-				assertEquals("my query", sql);
-				return rs;
+		template.setNativeJdbcExtractor(new NativeJdbcExtractor() {
+			public boolean isNativeConnectionNecessaryForNativeStatements() {
+				return false;
 			}
-			public ResultSet executeQuery(PreparedStatement ps2)
-				throws SQLException {
-				assertEquals(mockPreparedStatement, ps2);
+			public Connection getNativeConnection(Connection con) {
+				return con;
+			}
+			public Statement getNativeStatement(Statement stmt) {
+				assertTrue(stmt == mockStatement);
+				return mockStatement2;
+			}
+			public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
+				assertTrue(ps == mockPreparedStatement);
+				return mockPreparedStatement2;
+			}
+			public CallableStatement getNativeCallableStatement(CallableStatement cs) {
+				assertTrue(cs == mockCallableStatement);
+				return mockCallableStatement2;
+			}
+			public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 				return rs;
 			}
 		});
 
-		template
-			.doWithResultSetFromStaticQuery(
-				"my query",
-				new ResultSetExtractor() {
+		template.doWithResultSetFromStaticQuery("my query",	new ResultSetExtractor() {
 			public void extractData(ResultSet rs2) throws SQLException {
-				assertEquals(rs, rs2);
+				assertEquals(mockResultSet, rs2);
 			}
 		});
-		template
-			.doWithResultSetFromPreparedQuery(new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection conn)
-				throws SQLException {
+
+		template.doWithResultSetFromPreparedQuery(new PreparedStatementCreator() {
+			public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
 				return mockPreparedStatement;
 			}
 		}, new ResultSetExtractor() {
 			public void extractData(ResultSet rs2) throws SQLException {
-				assertEquals(rs, rs2);
+				assertEquals(mockResultSet, rs2);
 			}
 		});
 
+		template.execute(new CallableStatementCreator() {
+			public CallableStatement createCallableStatement(Connection con) throws SQLException {
+				return mockCallableStatement;
+			}
+		},
+		new ArrayList());
+
 		ctrlStatement.verify();
+		ctrlStatement2.verify();
 		ctrlPreparedStatement.verify();
+		ctrlPreparedStatement2.verify();
+		ctrlCallableStatement.verify();
+		ctrlCallableStatement2.verify();
 	}
 
 	public void testStaticResultSetClosed() throws Exception {
@@ -1241,7 +1300,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 
 			ctrlStatement = MockControl.createControl(Statement.class);
 			mockStatement = (Statement) ctrlStatement.getMock();
-			mockStatement.getResultSet();
+			mockStatement.executeQuery("my query");
 			ctrlStatement.setReturnValue(mockResultSet);
 			mockStatement.close();
 			ctrlStatement.setVoidCallable();
@@ -1251,11 +1310,9 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			mockResultSet2.close();
 			ctrlResultSet2.setVoidCallable();
 
-			ctrlPreparedStatement =
-				MockControl.createControl(PreparedStatement.class);
-			mockPreparedStatement =
-				(PreparedStatement) ctrlPreparedStatement.getMock();
-			mockPreparedStatement.getResultSet();
+			ctrlPreparedStatement =	MockControl.createControl(PreparedStatement.class);
+			mockPreparedStatement =	(PreparedStatement) ctrlPreparedStatement.getMock();
+			mockPreparedStatement.executeQuery();
 			ctrlPreparedStatement.setReturnValue(mockResultSet2);
 			mockPreparedStatement.close();
 			ctrlPreparedStatement.setVoidCallable();
@@ -1264,8 +1321,8 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 			ctrlConnection.setReturnValue(mockStatement);
 			mockConnection.prepareStatement("my query");
 			ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		} catch (SQLException sex) {
+		}
+		catch (SQLException sex) {
 			throw new RuntimeException("EasyMock initialization of jdbc objects failed");
 		}
 
@@ -1276,44 +1333,32 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		template.setQueryExecutor(new QueryExecutor() {
-			public ResultSet executeQuery(Statement stmt, String sql)
-				throws SQLException {
-				return stmt.getResultSet();
-			}
-			public ResultSet executeQuery(PreparedStatement ps)
-				throws SQLException {
-				return ps.getResultSet();
-			}
-		});
 
 		try {
-			template
-				.doWithResultSetFromStaticQuery(
-					"my query",
-					new ResultSetExtractor() {
+			template.doWithResultSetFromStaticQuery("my query",	new ResultSetExtractor() {
 				public void extractData(ResultSet rs) throws SQLException {
 					throw new InvalidDataAccessApiUsageException("");
 				}
 			});
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+			fail("Should have thrown InvalidDataAccessApiUsageException");
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// ok
 		}
 
 		try {
-			template
-				.doWithResultSetFromPreparedQuery(
-					new PreparedStatementCreator() {
-				public PreparedStatement createPreparedStatement(Connection conn)
-					throws SQLException {
-					return conn.prepareStatement("my query");
+			template.doWithResultSetFromPreparedQuery(new PreparedStatementCreator() {
+				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+					return con.prepareStatement("my query");
 				}
 			}, new ResultSetExtractor() {
 				public void extractData(ResultSet rs2) throws SQLException {
 					throw new InvalidDataAccessApiUsageException("");
 				}
 			});
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+			fail("Should have thrown InvalidDataAccessApiUsageException");
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// ok
 		}
 

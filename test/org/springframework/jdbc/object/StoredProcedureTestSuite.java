@@ -15,19 +15,19 @@ import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.JdbcTestCase;
-import org.springframework.jdbc.core.BadSqlGrammarException;
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SQLExceptionTranslator;
-import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.datasource.ConnectionHolder;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Thomas Risberg
  * @author Trevor Cook
  * @author Rod Johnson
- * @version $Id: StoredProcedureTestSuite.java,v 1.10 2003-11-27 05:04:39 trisberg Exp $
+ * @version $Id: StoredProcedureTestSuite.java,v 1.11 2003-12-05 17:03:16 jhoeller Exp $
  */
 public class StoredProcedureTestSuite extends JdbcTestCase {
 
@@ -622,7 +622,7 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		public StoredProcedureExceptionTranslator(DataSource ds) {
 			setDataSource(ds);
 			setSql(SQL);
-			setExceptionTranslator(new SQLExceptionTranslator() {
+			getJdbcTemplate().setExceptionTranslator(new SQLExceptionTranslator() {
 				public DataAccessException translate(
 					String task,
 					String sql,

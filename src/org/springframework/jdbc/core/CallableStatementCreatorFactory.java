@@ -55,7 +55,7 @@ public class CallableStatementCreatorFactory {
 	 * Order of parameter addition is significant.
 	 */
 	public void addParameter(SqlParameter p) {
-		declaredParameters.add(p);
+		this.declaredParameters.add(p);
 	}
 		
 	/**
@@ -73,6 +73,7 @@ public class CallableStatementCreatorFactory {
 	public CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return new CallableStatementCreatorImpl(inParamMapper);
 	}
+
 
 	/**
 	 * CallableStatementCreator implementation returned by this class.
@@ -98,11 +99,10 @@ public class CallableStatementCreatorFactory {
 			this.inParameterMapper = inParamMapper;
 		}
 
-		public CallableStatement createCallableStatement(Connection conn) throws SQLException {
-			
+		public CallableStatement createCallableStatement(Connection con) throws SQLException {
 			/* If we were given a ParameterMapper - we must let the mapper do its thing to create the Map */
 			if (inParameterMapper != null) {
-				inParameters = inParameterMapper.createMap(conn);
+				inParameters = inParameterMapper.createMap(con);
 			}
 			else {
 				if (inParameters == null) {
@@ -110,21 +110,24 @@ public class CallableStatementCreatorFactory {
 				}
 			}
 
-			CallableStatement cs = conn.prepareCall(callString);
+			CallableStatement cs = con.prepareCall(callString);
 
 			int sqlColIndx = 1;
 			for (int i = 0; i < declaredParameters.size(); i++) {
 				SqlParameter p = (SqlParameter) CallableStatementCreatorFactory.this.declaredParameters.get(i);
-				if (!inParameters.containsKey(p.getName()) && !(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet))
+				if (!inParameters.containsKey(p.getName()) && !(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet)) {
 					throw new InvalidDataAccessApiUsageException("Required input parameter '" + p.getName() + "' is missing");
+				}
 				// The value may still be null
 				Object in = inParameters.get(p.getName());
 				if (!(p instanceof SqlOutParameter) && !(p instanceof SqlReturnResultSet)) {
 					// Input parameters must be supplied
-					if (in != null)
+					if (in != null) {
 						cs.setObject(sqlColIndx, in, p.getSqlType());
-					else
+					}
+					else {
 						cs.setNull(sqlColIndx, p.getSqlType());
+					}
 				}
 				else {
 					// It's an output parameter. Skip SqlReturnResultSet parameters

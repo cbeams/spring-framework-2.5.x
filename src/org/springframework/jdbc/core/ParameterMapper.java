@@ -21,7 +21,7 @@ import java.util.Map;
 public interface ParameterMapper {
 
 	/**
-	 * @param conn JDBC connection. This is useful (and the purpose
+	 * @param con JDBC connection. This is useful (and the purpose
 	 * of this interface) if we need to do something RDBMS-specific
 	 * with a proprietary Connection implementation. This class conceals
 	 * such proprietary details. However, it is best to avoid using
@@ -30,6 +30,6 @@ public interface ParameterMapper {
 	 * parameter values (that is, there's no need to catch SQLException)
 	 * @return Map of input parameters, keyed by name
 	 */
-	Map createMap(Connection conn) throws SQLException;
+	Map createMap(Connection con) throws SQLException;
 	
 }
