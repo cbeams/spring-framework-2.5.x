@@ -19,21 +19,52 @@ package org.springframework.web.servlet.support;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
+import org.springframework.context.support.ResourceBundleMessageSource;
 
 /**
- * Helper class for preparing JSTL views.
+ * Helper class for preparing JSTL views,
+ * in particular for exposing a JSTL localization context.
  * @author Juergen Hoeller
  * @since 20.08.2003
  */
 public abstract class JstlUtils {
 
 	public static final String REQUEST_SCOPE_SUFFIX = ".request";
+
+	/**
+	 * Checks JSTL's "javax.servlet.jsp.jstl.fmt.localizationContext"
+	 * context-param and creates a corresponding child message source,
+	 * with the provided Spring-defined MessageSource as parent.
+	 * @param servletContext the ServletContext we're running in
+	 * (to check JSTL-related context-params in web.xml)
+	 * @param messageSource the MessageSource to expose, typically
+	 * the ApplicationContext of the current DispatcherServlet
+	 * @return the MessageSource to expose to JSTL; first checking the
+	 * JSTL-defined bundle, then the Spring-defined MessageSource
+	 * @see org.springframework.context.ApplicationContext
+	 */
+	public static MessageSource getJstlAwareMessageSource(
+			ServletContext servletContext, MessageSource messageSource) {
+
+		String jstlInitParam = servletContext.getInitParameter(Config.FMT_LOCALIZATION_CONTEXT);
+		if (jstlInitParam != null) {
+			// Create a ResourceBundleMessageSource for the specified resource bundle
+			// basename in the JSTL context-param in web.xml, wiring it with the given
+			// Spring-defined MessageSource as parent.
+			ResourceBundleMessageSource jstlBundleWrapper = new ResourceBundleMessageSource();
+			jstlBundleWrapper.setBasename(jstlInitParam);
+			jstlBundleWrapper.setParentMessageSource(messageSource);
+			return jstlBundleWrapper;
+		}
+		return messageSource;
+	}
 
 	/**
 	 * Exposes JSTL-specific request attributes specifying locale
@@ -45,7 +76,7 @@ public abstract class JstlUtils {
 	 */
 	public static void exposeLocalizationContext(HttpServletRequest request, MessageSource messageSource) {
 
-		// add JSTL locale and LocalizationContext request attributes
+		// Add JSTL locale and LocalizationContext request attributes.
 		Locale jstlLocale = RequestContextUtils.getLocale(request);
 		ResourceBundle bundle = new MessageSourceResourceBundle(messageSource, jstlLocale);
 		LocalizationContext jstlContext = new LocalizationContext(bundle, jstlLocale);

@@ -40,10 +40,11 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
  * @author Alef Arendsen
+ * @author Juergen Hoeller
  */
 public class TilesViewTests extends TestCase {
 
-	protected WebApplicationContext prepareWebApplicationContext() throws Exception {
+	protected StaticWebApplicationContext prepareWebApplicationContext() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		MockServletContext sc = new MockServletContext("/org/springframework/web/servlet/view/tiles/");
 		wac.setServletContext(sc);
@@ -69,6 +70,7 @@ public class TilesViewTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+
 		view.render(new HashMap(), request, response);
 		assertEquals("/WEB-INF/jsp/layout.jsp", response.getForwardedUrl());
 		ComponentContext cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
@@ -85,7 +87,7 @@ public class TilesViewTests extends TestCase {
 	}
 
 	public void testTilesJstlView() throws Exception {
-		WebApplicationContext wac = prepareWebApplicationContext();
+		StaticWebApplicationContext wac = prepareWebApplicationContext();
 
 		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
 		irvr.setApplicationContext(wac);
@@ -95,6 +97,43 @@ public class TilesViewTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		wac.addMessage("code1", request.getLocale(), "messageX");
+		view.render(new HashMap(), request, response);
+
+		assertEquals("/WEB-INF/jsp/layout.jsp", response.getForwardedUrl());
+		ComponentContext cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
+		assertNotNull(cc);
+		PathAttribute attr = (PathAttribute) cc.getAttribute("content");
+		assertEquals("/WEB-INF/jsp/content.jsp", attr.getValue());
+
+		assertTrue("Correct JSTL attributes",
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT) instanceof LocalizationContext);
+		assertTrue("Correct JSTL attributes",
+				request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE)));
+		assertTrue("Correct JSTL attributes",
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
+		assertTrue("Correct JSTL attributes",
+				request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+
+		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
+		assertEquals("messageX", lc.getResourceBundle().getString("code1"));
+	}
+
+	public void testTilesJstlViewWithContextParam() throws Exception {
+		StaticWebApplicationContext wac = prepareWebApplicationContext();
+		((MockServletContext) wac.getServletContext()).addInitParameter(
+				Config.FMT_LOCALIZATION_CONTEXT, "org/springframework/web/context/WEB-INF/context-messages");
+
+		InternalResourceViewResolver irvr = new InternalResourceViewResolver();
+		irvr.setApplicationContext(wac);
+		irvr.setViewClass(TilesJstlView.class);
+		View view = irvr.resolveViewName("testTile", new Locale("nl", ""));
+
+		MockHttpServletRequest request = new MockHttpServletRequest(wac.getServletContext());
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		wac.addMessage("code1", request.getLocale(), "messageX");
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+
 		view.render(new HashMap(), request, response);
 		assertEquals("/WEB-INF/jsp/layout.jsp", response.getForwardedUrl());
 		ComponentContext cc = (ComponentContext) request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
@@ -110,6 +149,10 @@ public class TilesViewTests extends TestCase {
 				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
 		assertTrue("Correct JSTL attributes",
 				request.getLocale().equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+
+		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
+		assertEquals("message1", lc.getResourceBundle().getString("code1"));
+		assertEquals("message2", lc.getResourceBundle().getString("code2"));
 	}
 
 	public void testTilesViewWithController() throws Exception {

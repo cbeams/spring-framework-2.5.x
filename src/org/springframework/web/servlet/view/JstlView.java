@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.JstlUtils;
 
 /**
@@ -37,8 +38,17 @@ import org.springframework.web.servlet.support.JstlUtils;
  */
 public class JstlView extends InternalResourceView {
 
+	private MessageSource jstlAwareMessageSource;
+
+	protected void initApplicationContext() {
+		super.initApplicationContext();
+		this.jstlAwareMessageSource =
+				JstlUtils.getJstlAwareMessageSource(getServletContext(), getApplicationContext());
+	}
+
+
 	protected void exposeHelpers(HttpServletRequest request) throws Exception {
-		JstlUtils.exposeLocalizationContext(request, getApplicationContext());
+		JstlUtils.exposeLocalizationContext(request, this.jstlAwareMessageSource);
 	}
 
 }

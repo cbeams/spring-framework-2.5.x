@@ -172,8 +172,12 @@ public class ViewResolverTests extends TestCase {
 	}
 
 	public void testInternalResourceViewResolverWithJstl() throws Exception {
+		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.ENGLISH;
+
+		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(new MockServletContext());
+		wac.setServletContext(sc);
+		wac.addMessage("code1", locale, "messageX");
 		wac.refresh();
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setViewClass(JstlView.class);
@@ -187,9 +191,7 @@ public class ViewResolverTests extends TestCase {
 		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example2", ((JstlView) view).getUrl());
 
-		ServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
-		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.ENGLISH;
 		request.addPreferredLocale(locale);
 		HttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
@@ -198,12 +200,67 @@ public class ViewResolverTests extends TestCase {
 		TestBean tb = new TestBean();
 		model.put("tb", tb);
 		view.render(model, request, response);
+
 		assertTrue("Correct tb attribute", tb.equals(request.getAttribute("tb")));
 		assertTrue("Correct rc attribute", request.getAttribute("rc") == null);
-		assertTrue("Correct JSTL attributes", request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT) instanceof LocalizationContext);
-		assertTrue("Correct JSTL attributes", locale.equals(request.getAttribute(Config.FMT_LOCALE)));
-		assertTrue("Correct JSTL attributes", request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
-		assertTrue("Correct JSTL attributes", locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+		assertTrue("Correct JSTL attributes",
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT) instanceof LocalizationContext);
+		assertTrue("Correct JSTL attributes",
+				locale.equals(request.getAttribute(Config.FMT_LOCALE)));
+		assertTrue("Correct JSTL attributes",
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
+		assertTrue("Correct JSTL attributes",
+				locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+
+		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
+		assertEquals("messageX", lc.getResourceBundle().getString("code1"));
+	}
+
+	public void testInternalResourceViewResolverWithJstlAndContextParam() throws Exception {
+		Locale locale = !Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.ENGLISH;
+
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter(Config.FMT_LOCALIZATION_CONTEXT, "org/springframework/web/context/WEB-INF/context-messages");
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(sc);
+		wac.addMessage("code1", locale, "messageX");
+		wac.refresh();
+		InternalResourceViewResolver vr = new InternalResourceViewResolver();
+		vr.setViewClass(JstlView.class);
+		vr.setApplicationContext(wac);
+
+		View view = vr.resolveViewName("example1", Locale.getDefault());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
+		assertEquals("Correct URL", "example1", ((JstlView) view).getUrl());
+
+		view = vr.resolveViewName("example2", Locale.getDefault());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
+		assertEquals("Correct URL", "example2", ((JstlView) view).getUrl());
+
+		MockHttpServletRequest request = new MockHttpServletRequest(sc);
+		request.addPreferredLocale(locale);
+		HttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		Map model = new HashMap();
+		TestBean tb = new TestBean();
+		model.put("tb", tb);
+		view.render(model, request, response);
+
+		assertTrue("Correct tb attribute", tb.equals(request.getAttribute("tb")));
+		assertTrue("Correct rc attribute", request.getAttribute("rc") == null);
+		assertTrue("Correct JSTL attributes",
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT) instanceof LocalizationContext);
+		assertTrue("Correct JSTL attributes",
+				locale.equals(request.getAttribute(Config.FMT_LOCALE)));
+		assertTrue("Correct JSTL attributes",
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
+		assertTrue("Correct JSTL attributes",
+				locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+
+		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
+		assertEquals("message1", lc.getResourceBundle().getString("code1"));
+		assertEquals("message2", lc.getResourceBundle().getString("code2"));
 	}
 
 	public void testXmlViewResolver() throws Exception {
