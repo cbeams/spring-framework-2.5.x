@@ -24,8 +24,8 @@ import java.util.Arrays;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.AbstractDataSource;
@@ -37,8 +37,7 @@ import org.springframework.jdbc.datasource.AbstractDataSource;
 public class SQLErrorCodesFactoryTests extends TestCase {
 
 	/**
-	 * Check that a default instance returns empty error codes for an unknown
-	 * database
+	 * Check that a default instance returns empty error codes for an unknown database.
 	 */
 	public void testDefaultInstanceWithNoSuchDatabase() {
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes("xx");
@@ -47,7 +46,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	}
 	
 	/**
-	 * Check that a known database produces recognizable codes
+	 * Check that a known database produces recognizable codes.
 	 */
 	public void testDefaultInstanceWithOracle() {
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes("Oracle");
@@ -153,9 +152,9 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertEquals(1, sf.getErrorCodes("Oracle").getCustomTranslations().size());
 		assertEquals("org.springframework.jdbc.support.CustomErrorCodeException", 
-				((CustomSQLErrorCodesTranslation)sf.getErrorCodes("Oracle").getCustomTranslations().get(0)).getExceptionClass());
+				((CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations().get(0)).getExceptionClass());
 		assertEquals(1,
-				((CustomSQLErrorCodesTranslation)sf.getErrorCodes("Oracle").getCustomTranslations().get(0)).getErrorCodes().length);
+				((CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations().get(0)).getErrorCodes().length);
 	}
 	
 	public void testDataSourceWithNullMetadata() throws Exception {
@@ -208,8 +207,6 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
 		md.getDatabaseProductName();
 		mdControl.setReturnValue(productName);
-		md.getDriverVersion();
-		mdControl.setReturnValue("version");
 		mdControl.replay();
 		
 		MockControl ctrlConnection = MockControl.createControl(Connection.class);
@@ -244,12 +241,12 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		mdControl.verify();
 		ctrlConnection.verify();
 		//ctrlDataSource.verify();
-		
+
 		return sec;
 	}
 	
 	/* 
-	 * Stand in for the EasyMock mock object - see comment above 
+	 * Stand in for the EasyMock mock object - see comment above.
 	 */ 
 	private class SpringMockDataSource extends AbstractDataSource {
 		String productName;
@@ -333,4 +330,5 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB0/", factory);
 		assertIsEmpty(sec);
 	}
+
 }

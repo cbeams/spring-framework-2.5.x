@@ -104,7 +104,8 @@ public class SQLErrorCodesFactory {
 				path = SQL_ERROR_CODE_DEFAULT_PATH;
 				resource = loadResource(path);
 				if (resource == null || !resource.exists()) {
-					throw new BeanDefinitionStoreException("Unable to locate file [" + SQL_ERROR_CODE_DEFAULT_PATH  + "]");
+					throw new BeanDefinitionStoreException(
+							"Unable to locate file [" + SQL_ERROR_CODE_DEFAULT_PATH  + "]");
 				}
 			}
 			ListableBeanFactory bf = new XmlBeanFactory(resource);
@@ -178,7 +179,7 @@ public class SQLErrorCodesFactory {
 	 * Protected for testability. Load the given resource from the class path.
 	 * @param path resource path. SQL_ERROR_CODE_DEFAULT_PATH or
 	 * SQL_ERROR_CODE_OVERRIDE_PATH.
-	 * <b>Not to be overriden by application developers, who should obtain instances
+	 * <b>Not to be overridden by application developers, who should obtain instances
 	 * of this class from the static getInstance() method.</b>
 	 * @return the input stream or null if the resource wasn't found
 	 * @see #getInstance
@@ -200,73 +201,66 @@ public class SQLErrorCodesFactory {
 		String dataSourceDbName = (String) this.dataSourceProductName.get(ds);
 		if (dataSourceDbName != null) {
 			logger.info("Database product name found in cache for DataSource [" +
-			            ds + "]. Name is '" + dataSourceDbName + "'.");
+					ds + "]. Name is '" + dataSourceDbName + "'.");
 			return getErrorCodes(dataSourceDbName);
 		}
 
 		// We could not find it - got to look it up.
 		try {
-			Map dbmdInfo = (Map) JdbcUtils.extractDatabaseMetaData(ds, new DatabaseMetaDataCallback() {
-				public Object processMetaData(DatabaseMetaData dbmd) throws SQLException {
-					Map info = new HashMap(2);
-					if (dbmd != null) {
-						info.put("DatabaseProductName", dbmd.getDatabaseProductName());
-						info.put("DriverVersion", dbmd.getDriverVersion());
+			String dbName = (String) JdbcUtils.extractDatabaseMetaData(ds,
+					new DatabaseMetaDataCallback() {
+						public Object processMetaData(DatabaseMetaData dbmd) throws SQLException {
+							if (dbmd == null) {
+								// should only happen in test environments
+								return null;
+							}
+							return dbmd.getDatabaseProductName();
+						}
 					}
-					return info;
-				}
-			});
+			);
 
-			if (dbmdInfo != null) {
-				// should always be the case outside of test environments
-				String dbName = (String) dbmdInfo.get("DatabaseProductName");
-				String driverVersion = (String) dbmdInfo.get("DriverVersion");
-
-				// special check for DB2 -- !!! DEPRECATED AS OF Spring 1.1 !!!
+			if (dbName != null) {
+				// Special check for DB2 -- !!! DEPRECATED AS OF Spring 1.1 !!!
 				// !!! This will be removed in a future version !!!
 				// We have added wildcard support so you should add a
 				// <property name="databaseProductName"><value>DB2*</value></property>
 				// entry to your custom sql-error-cdes.xml instead.
-				if (dbName != null && dbName.startsWith("DB2")) {
+				if (dbName.startsWith("DB2")) {
 					dbName = "DB2";
 				}
 
-				// special check for wild card match - we can match on a database name like 'DB2*' meaning
-				// the database name starts with 'DB2' or '*DB2' for ends with 'DB2' or even '*DB2*' for
-				// contains 'DB2'
+				// Special check for wild card match:W we can match on a database name like
+				// 'DB2*' meaning the database name starts with 'DB2', or '*DB2' for ends
+				// with 'DB2', or even '*DB2*' for contains 'DB2'.
 				Iterator dbNameIter = this.rdbmsErrorCodes.keySet().iterator();
 				while (dbNameIter.hasNext()) {
 					String checkDbName = (String) dbNameIter.next();
 					if (checkDbName != null && (checkDbName.startsWith("*") || checkDbName.endsWith("*"))) {
-						if (dbName != null) {
-							if (checkDbName.startsWith("*") && checkDbName.endsWith("*")) {
-								if (dbName.indexOf(checkDbName.substring(1, checkDbName.length() - 1)) >= 0) {
-									dbName = checkDbName;
-								}
+						if (checkDbName.startsWith("*") && checkDbName.endsWith("*")) {
+							if (dbName.indexOf(checkDbName.substring(1, checkDbName.length() - 1)) >= 0) {
+								dbName = checkDbName;
 							}
-							else if (checkDbName.startsWith("*")) {
-								if (dbName.endsWith(checkDbName.substring(1, checkDbName.length()))) {
-									dbName = checkDbName;
-								}
+						}
+						else if (checkDbName.startsWith("*")) {
+							if (dbName.endsWith(checkDbName.substring(1, checkDbName.length()))) {
+								dbName = checkDbName;
 							}
-							else if (checkDbName.endsWith("*")) {
-								if (dbName.startsWith(checkDbName.substring(0, checkDbName.length() - 1))) {
-									dbName = checkDbName;
-								}
+						}
+						else if (checkDbName.endsWith("*")) {
+							if (dbName.startsWith(checkDbName.substring(0, checkDbName.length() - 1))) {
+								dbName = checkDbName;
 							}
 						}
 					}
 				}
 
-				if (dbName != null) {
-					this.dataSourceProductName.put(ds, dbName);
-					logger.info("Database Product Name is " + dbName);
-					logger.info("Driver Version is " + driverVersion);
-					SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
-					if (sec != null) {
-						return sec;
-					}
-					logger.info("Error Codes for " + dbName + " not found");
+				this.dataSourceProductName.put(ds, dbName);
+				SQLErrorCodes sec = (SQLErrorCodes) this.rdbmsErrorCodes.get(dbName);
+				if (sec != null) {
+					return sec;
+				}
+				else if (logger.isInfoEnabled()) {
+					logger.info("SQL error codes for '" + dbName + "' not found");
 				}
 			}
 		}
