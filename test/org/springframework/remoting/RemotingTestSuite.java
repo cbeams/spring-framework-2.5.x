@@ -24,12 +24,12 @@ public class RemotingTestSuite extends TestCase {
 		RmiServiceExporter exporter = new RmiServiceExporter();
 		exporter.setService(tb);
 		exporter.setName("test");
-		exporter.setPort(1099);
+		exporter.setPort(1090);
 		exporter.afterPropertiesSet();
 
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("rmi://localhost:1099/test");
+		factory.setServiceUrl("rmi://localhost:1090/test");
 		factory.afterPropertiesSet();
 
 		ITestBean proxy = (ITestBean) factory.getObject();
