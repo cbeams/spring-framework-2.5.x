@@ -1,5 +1,3 @@
-<%@ include file="includes.jsp" %>
-
 <c:if test="${not (rc.theme.name == 'blue')}">
   <li><a href="<c:url value="/home.htm"><c:param name="theme" value="blue"/></c:url>"><fmt:message key="nav.css.blue"/><span><fmt:message key="nav.css.blue.info"/></span></a></li>
 </c:if>
