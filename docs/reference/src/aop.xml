@@ -267,6 +267,10 @@
 
 }</programlisting>
 
+      <para>Splitting the Pointcut interface into two parts allows reuse of
+      class and method matching parts, and fine-grained composition operations
+      (such as performing a &#34;union&#34; with another method matcher).</para>
+
       <para>The ClassFilter interface is used to restrict the pointcut to a
       given set of target classes. If the matches() method always returns
       true, all target classes will be matched:</para>
@@ -306,6 +310,28 @@
       <remark>If possible, try to make pointcuts static, allowing the AOP
       framework to cache the results of pointcut evaluation when an AOP proxy
       is created.</remark>
+    </sect2>
+
+    <sect2>
+      <title>Operations on pointcuts</title>
+
+      <para>COMPOSITION</para>
+
+      <para>The two operations on pointcuts are <emphasis>union</emphasis> and
+      <emphasis>intersection</emphasis>. </para>
+
+      <para>Union means the methods that either pointcut matches. </para>
+
+      <para>Intersection means the methods that both pointcuts match.</para>
+
+      <para>Union is usually more useful.</para>
+
+      <para>Pointcuts can be composed using the static methods in the
+      <emphasis>org.springframework.aop.support.Pointcuts</emphasis> class, or
+      using the <emphasis>ComposablePointcut</emphasis> class in the same
+      package.</para>
+
+      <para>Either of these</para>
     </sect2>
 
     <sect2>
@@ -756,8 +782,8 @@
         </listitem>
 
         <listitem>
-          <para>An AOP proxy bean definition specifying tyhe target object
-          (the personTarget bean) and the interfaces to proxy, along with the
+          <para>An AOP proxy bean definition specifying the target object (the
+          personTarget bean) and the interfaces to proxy, along with the
           advices to apply. </para>
         </listitem>
       </itemizedlist>
@@ -1187,10 +1213,12 @@ boolean getProxyTargetClass();</programlisting>
     <sect2 id="aop-ts-swap">
       <title>Hot swappable target sources</title>
 
-      <para>The hot swappable</para>
+      <para>The <literal>org.springframework.aop.target.HotSwappableTargetSource</literal>
+      exists to allow the target of an AOP proxy to be switched while allowing
+      callers to keep their references to it.</para>
 
-      <para>Changing the target source&#39;s target should take effect
-      immediately</para>
+      <para>Changing the target source&#39;s target takes effect immediately.
+      The <literal>HotSwappableTargetSource</literal> is threadsafe.</para>
 
       <para>CODE EXAMPLE</para>
     </sect2>
@@ -1198,26 +1226,85 @@ boolean getProxyTargetClass();</programlisting>
     <sect2 id="aop-ts-pool">
       <title>Pooling target sources</title>
 
-      <para>Using a pooling target sourced provides a similar programming
-      model to stateless session EJBs, in which a pool of identical instances
-      is maintained, with method invocations going to free objects in the
-      pool.</para>
+      <para>Using a pooling target source provides a similar programming model
+      to stateless session EJBs, in which a pool of identical instances is
+      maintained, with method invocations going to free objects in the pool.</para>
 
-      <para>A crucial difference of Spring pooling from EJB pooling is that
-      Spring pooling can be applied to any POJO.</para>
+      <para>A crucial difference between Spring pooling and SLSB pooling is
+      that Spring pooling can be applied to any POJO. As with Spring in
+      general, this service can be applied in a non-invasive way.</para>
 
       <para>Spring provides out-of-the-box support for Jakarta Commons Pool
-      1.1, which provides a reasonably efficient pooling implementation.</para>
+      1.1, which provides a reasonably efficient pooling implementation.
+      You&#39;ll need the commons-pool Jar on your application&#39;s classpath
+      to use this feature. It&#39;s also possible to subclass
+      <literal>org.springframework.aop.target.AbstractPoolingTargetSource</literal>
+      to support any other pooling API.</para>
 
       <para>Config example</para>
 
-      <para>It&#39;s possible to configure Spring so as to obtain examples
-      from running ********</para>
+      <para><programlisting>&#60;bean id=&#34;businessObjectTarget&#34; class=&#34;com.mycompany.MyBusinessObject&#34; 
+    singleton=&#34;false&#34;&#62;
+    ... properties omitted
+&#60;/bean&#62;
+
+&#60;bean id=&#34;poolTargetSource&#34; 
+    class=&#34;org.springframework.aop.target.CommonsPoolTargetSource&#34;&#62;	
+    &#60;property name=&#34;targetBeanName&#34;&#62;&#60;value&#62;businessObject&#60;/value&#62;&#60;/property&#62;
+    &#60;property name=&#34;maxSize&#34;&#62;&#60;value&#62;25&#60;/value&#62;&#60;/property&#62;
+&#60;/bean&#62;
+
+&#60;bean id=&#34;businessObject&#34; 
+    class=&#34;org.springframework.aop.framework.ProxyFactoryBean&#34;
+&#62;
+    &#60;property name=&#34;targetSource&#34;&#62;&#60;ref local=&#34;poolTargetSource&#34;/&#62;&#60;/property&#62;
+    &#60;property name=&#34;interceptorNames&#34;&#62;&#60;value&#62;myInterceptor&#60;/value&#62;&#60;/property&#62;
+&#60;/bean&#62;</programlisting></para>
+
+      <para>Note that the target object--&#34;businessObjectTarget&#34; in the
+      example--must be a prototype. This allows the PoolingTargetSource
+      implementation to create new instances of the target to grow the pool as
+      necessary. See the Jvadoc for AbstractPoolingTargetSource and the
+      concrete subclass you wish to use for information about it&#39;s
+      properties: maxSize is the most basic, and always guaranteed to be
+      present.</para>
+
+      <para>In this case, &#34;myInterceptor&#34; is the name of an
+      interceptor that would need to be defined in the same IoC context.
+      However, it isn&#39;t necessary to specify interceptors to use pooling.
+      If you want only pooling, and no other advice, don&#39;t set the
+      interceptorNames property at all.</para>
+
+      <para>It&#39;s possible to configure Spring so as to be able to cast any
+      pooled object to the org.springframework.aop.target.PoolingConfig
+      interface, which exposes information about the configuration and current
+      size of the pool through an introduction. You&#39;ll need to define an
+      advisor like this:</para>
+
+      <para><programlisting>&#60;bean id=&#34;poolConfigAdvisor&#34; 
+    class=&#34;org.springframework.beans.factory.config.MethodInvokingFactoryBean&#34;&#62;
+    &#60;property name=&#34;target&#34;&#62;&#60;ref local=&#34;poolTargetSource&#34; /&#62;&#60;/property&#62;
+    &#60;property name=&#34;targetMethod&#34;&#62;&#60;value&#62;getPoolingConfigMixin&#60;/value&#62;&#60;/property&#62;
+&#60;/bean&#62;</programlisting></para>
+
+      <para>This advisor is obtained by calling a convenience method on the
+      AbstractPoolingTargetSource class, hence the use of
+      MethodInvokingFactoryBean. This advisor&#39;s name
+      (&#34;poolConfigAdvisor&#34; here) must be in the list of interceptors
+      names in the ProxyFactoryBean exposing the pooled object.</para>
+
+      <para>The cast will look as follows:</para>
+
+      <para><programlisting>PoolingConfig conf = (PoolingConfig) beanFactory.getBean(&#34;businessObject&#34;);
+System.out.println(&#34;Max pool size is &#34; + conf.getMaxSize());</programlisting></para>
 
       <remark>Pooling stateless service objects is not usually necessary. We
       don&#39;t believe it should be the default choice, as most stateless
       objects are naturally threadsafe, and instance pooling is problematic if
       resources are cached.</remark>
+
+      <para>Simpler pooling is available using autoproxying. It&#39;s possible
+      to set the TargetSources used by any autoproxy creator.</para>
     </sect2>
 
     <sect2 id="aop-ts-prototype">
