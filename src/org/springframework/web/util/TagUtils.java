@@ -12,22 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.util;
 
 import javax.servlet.jsp.PageContext;
 
 /**
- * Utility class to transform Strings to scopes:<br>
- * <code>page</code> will be transformed to
+ * Utility class to transform Strings to scopes:
+ *
+ * <ul>
+ * <li><code>page</code> will be transformed to
  * {@link javax.servlet.jsp.PageContext#PAGE_SCOPE PageContext.PAGE_SCOPE}
- * <code>request</code> will be transformed to
- * {@link javax.servlet.jsp.PageContext#REQUEST_SCOPE PageContext.REQUEST_SCOPE}<br>
- * <code>session</code> will be transformed to
- * {@link javax.servlet.jsp.PageContext#SESSION_SCOPE PageContext.SESSION_SCOPE}<br>
- * <code>application</code> will be transformed to
- * {@link javax.servlet.jsp.PageContext#APPLICATION_SCOPE PageContext.APPLICATION_SCOPE}<br>
+ * <li><code>request</code> will be transformed to
+ * {@link javax.servlet.jsp.PageContext#REQUEST_SCOPE PageContext.REQUEST_SCOPE}
+ * <li><code>session</code> will be transformed to
+ * {@link javax.servlet.jsp.PageContext#SESSION_SCOPE PageContext.SESSION_SCOPE}
+ * <li><code>application</code> will be transformed to
+ * {@link javax.servlet.jsp.PageContext#APPLICATION_SCOPE PageContext.APPLICATION_SCOPE}
+ * </ul>
  *
  * @author Alef Arendsen
  */
