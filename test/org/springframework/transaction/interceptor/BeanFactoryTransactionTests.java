@@ -22,46 +22,22 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 
 /**
- * Test cases for AOP transaction management
+ * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.1.1.1 2003-08-14 16:21:19 trisberg Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.2 2003-08-18 16:29:58 jhoeller Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 	
-	
 	private BeanFactory factory;
 
-
-	/**
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	protected void setUp() throws Exception {
-		
-		// Reset properties on raw target
-		ITestBean test1 = (ITestBean) factory.getBean("target");
-		test1.setAge(666);	
-	}
-	
-	public BeanFactoryTransactionTests(String s) {
-		super(s);
-		
-		// Load from classpath, NOT a file path
-		
-		// TODO have a way of registering this at startup
-		//PropertyEditorManager.registerEditor(TransactionAttributeSource.class, TransactionAttributeSourcePropertyEditor.class);
-		
+	public void setUp() {
 		InputStream is = getClass().getResourceAsStream("transactionalBeanFactory.xml");
 		this.factory = new XmlBeanFactory(is, null);
-
+		ITestBean test1 = (ITestBean) factory.getBean("target");
+		test1.setAge(666);
 	}
 
-	// For profiling
-//	public void testGetsAreNotTransactionalX() {
-//		for (int i = 0; i < 10000; i++)
-//			testGetsAreNotTransactional();
-//	}
-	
 	public void testGetsAreNotTransactional() throws NoSuchMethodException {
 		ITestBean test1 = (ITestBean) factory.getBean("txtest");
 		assertTrue("test1 is a dynamic proxy", Proxy.isProxyClass(test1.getClass()));
@@ -99,11 +75,5 @@ public class BeanFactoryTransactionTests extends TestCase {
 		
 		assertTrue(test1.getAge() == age);
 	}
-	
-	public static void main(String[] args) {
-		TestRunner.run(new TestSuite(BeanFactoryTransactionTests.class));
-	}
-	
-	//public void test
-	
+
 }
