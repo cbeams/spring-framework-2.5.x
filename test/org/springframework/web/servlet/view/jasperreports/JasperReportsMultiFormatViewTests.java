@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Rob Harrop
@@ -28,8 +29,8 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		model.put(getDiscriminatorKey(), "csv");
 	}
 
-	public void testSimpleHtmlRender() throws Exception{
-    AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
+	public void testSimpleHtmlRender() throws Exception {
+		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
 		Map model = new HashMap();
 		model.put("ReportTitle", "Foo");
@@ -39,6 +40,28 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		view.render(model, request, response);
 
 		assertEquals("Invalid content type", "text/html", response.getContentType());
+	}
+
+	public void testOverrideContentDisposition() throws Exception {
+		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
+
+		Map model = new HashMap();
+		model.put("ReportTitle", "Foo");
+		model.put("dataSource", getData());
+		model.put(getDiscriminatorKey(), "csv");
+
+		String headerValue = "inline; filename=foo.txt";
+
+		Properties mappings = new Properties();
+		mappings.put("csv", headerValue);
+
+
+		((JasperReportsMultiFormatView)view).setContentDispositionMappings(mappings);
+
+		view.render(model, request, response);
+
+		assertEquals("Invalid Content-Disposition header value", headerValue,
+				response.getHeader("Content-Disposition"));
 	}
 
 	protected String getDiscriminatorKey() {

@@ -20,8 +20,17 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 
+import net.sf.jasperreports.engine.JRDataSourceProvider;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.data.JRAbstractBeanDataSourceProvider;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.ui.jasperreports.PersonBean;
 
 /**
  * @author Rob Harrop
@@ -119,6 +128,15 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
+	}
+
+	public void testWithJRDataSourceProvider() throws Exception {
+		Map model = getModel();
+		model.remove("dataSource");
+		model.put("dataSource", new MockDataSourceProvider(PersonBean.class));
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+		view.render(model, request, response);
+		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
 	public void testWithSpecificCollection() throws Exception {
@@ -258,5 +276,20 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertNotNull("Header not present", response.getHeader(key));
 		assertEquals("Invalid header value", value, response.getHeader(key));
 
+	}
+
+	private class MockDataSourceProvider extends JRAbstractBeanDataSourceProvider {
+
+		public MockDataSourceProvider(Class aClass) {
+			super(aClass);
+		}
+
+		public JRDataSource create(JasperReport jasperReport) throws JRException {
+			return new JRBeanCollectionDataSource(getData());
+		}
+
+		public void dispose(JRDataSource jrDataSource) throws JRException {
+
+		}
 	}
 }
