@@ -32,7 +32,7 @@ import java.sql.SQLException;
  *
  * @author Juergen Hoeller
  * @since 14.03.2003
- * @version $Id: DriverManagerDataSource.java,v 1.3 2003-08-28 17:26:49 jhoeller Exp $
+ * @version $Id: DriverManagerDataSource.java,v 1.4 2003-11-13 11:11:06 jhoeller Exp $
  * @see org.springframework.jndi.support.SimpleNamingContextBuilder
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
@@ -67,7 +67,7 @@ public class DriverManagerDataSource extends AbstractDataSource implements Smart
 	public void setDriverClassName(String driverClassName) throws CannotGetJdbcConnectionException {
 		this.driverClassName = driverClassName;
 		try {
-			Class.forName(this.driverClassName);
+			Class.forName(this.driverClassName, true, Thread.currentThread().getContextClassLoader());
 			logger.info("Loaded JDBC driver: " + this.driverClassName);
 		}
 		catch (ClassNotFoundException ex) {
