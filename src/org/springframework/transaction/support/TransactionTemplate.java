@@ -2,6 +2,7 @@ package org.springframework.transaction.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
@@ -117,7 +118,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 	 * @throws TransactionException in case of a rollback error
 	 */
 	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
-		if (status.isDebug()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("Initiating transaction rollback on application exception", ex);
 		}
 		try {

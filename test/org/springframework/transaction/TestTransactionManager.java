@@ -1,6 +1,7 @@
 package org.springframework.transaction;
 
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * @author Juergen Hoeller
@@ -46,21 +47,21 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.begin = true;
 	}
 
-	protected void doCommit(TransactionStatus status) {
+	protected void doCommit(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
 		}
 		this.commit = true;
 	}
 
-	protected void doRollback(TransactionStatus status) {
+	protected void doRollback(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
 		}
 		this.rollback = true;
 	}
 
-	protected void doSetRollbackOnly(TransactionStatus status) {
+	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
 		}

@@ -23,8 +23,8 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Alternative to the standard AOP ProxyFactoryBean with a TransactionInterceptor.
  *
  * <p>This class is intended to cover the <i>typical</i> case of declarative
- * transaction demarcation: wrapping a target object with a transactional proxy,
- * proxying all the interfaces that the target implements.
+ * transaction demarcation: namely, wrapping a (singleton) target object with a
+ * transactional proxy, proxying all the interfaces that the target implements.
  *
  * <p>In contrast to TransactionInterceptor, the transaction attributes are
  * specified as properties, with method names as keys and transaction attribute
@@ -45,7 +45,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.18 2004-01-01 23:39:58 jhoeller Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.19 2004-01-20 10:41:09 jhoeller Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -74,11 +74,10 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	}
 
 	/**
-	 * Set the target object, i.e. the bean to be wrapped with a
-	 * transactional proxy. The target may be any object, in case an
-	 * InvokerInterceptor will be created. If it is a MethodInterceptor no
-	 * wrapper interceptor is created. This enables the use of a pooling target
-	 * or prototype interceptor etc.
+	 * Set the target object, i.e. the bean to be wrapped with a transactional proxy.
+	 * The target may be any object, in case an InvokerInterceptor will be created.
+	 * If it is a MethodInterceptor, no wrapper interceptor is created. This enables
+	 * the use of a pooling target or prototype interceptor etc.
 	 */
 	public void setTarget(Object target) {
 		this.target = target;
@@ -194,30 +193,27 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 			proxyFactory.setInterfaces(this.interfaces);
 		}
 		else if (!getProxyTargetClass()) {
-			// Rely on AOP infrastucture to tell us what interfaces to proxy
+			// rely on AOP infrastructure to tell us what interfaces to proxy
 			proxyFactory.setInterfaces(AopUtils.getAllInterfaces(this.target));
 		}
 		this.proxy = proxyFactory.getProxy();
 	}
 
-	
 	/**
-	 * Set the target or TargetSource
-	 * @param pTarget target. If this is an implementation of TargetSource it
-     * is used as our TargetSource; otherwise it is wrapped
-     * in a SingletonTargetSource.
+	 * Set the target or TargetSource.
+	 * @param target target. If this is an implementation of TargetSource it is
+	 * used as our TargetSource; otherwise it is wrapped in a SingletonTargetSource.
 	 * @return a TargetSource for this object
 	 */
-	protected TargetSource createTargetSource(Object pTarget) {
-		if (pTarget instanceof TargetSource) {
-			return (TargetSource) pTarget;
+	protected TargetSource createTargetSource(Object target) {
+		if (target instanceof TargetSource) {
+			return (TargetSource) target;
 		}
 		else {
-			return new SingletonTargetSource(pTarget);
+			return new SingletonTargetSource(target);
 		}
 	}
 
-	
 	public Object getObject() {
 		return this.proxy;
 	}

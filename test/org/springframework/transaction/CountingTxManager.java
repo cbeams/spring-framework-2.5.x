@@ -6,11 +6,11 @@
 package org.springframework.transaction;
 
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: CountingTxManager.java,v 1.1 2003-12-02 16:27:31 johnsonr Exp $
+ * @version $Id: CountingTxManager.java,v 1.2 2004-01-20 10:41:10 jhoeller Exp $
  */
 public class CountingTxManager extends AbstractPlatformTransactionManager {
 	
@@ -19,47 +19,29 @@ public class CountingTxManager extends AbstractPlatformTransactionManager {
 	public int inflight;
 	private boolean rollbackOnly;
 
-	/**
-	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#doGetTransaction()
-	 */
 	protected Object doGetTransaction() throws TransactionException {
 		return new Object();
 	}
 
-	/**
-	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#isExistingTransaction(java.lang.Object)
-	 */
 	protected boolean isExistingTransaction(Object transaction) throws TransactionException {
 		return false;
 	}
 
-	/**
-	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#doBegin(java.lang.Object, org.springframework.transaction.TransactionDefinition)
-	 */
 	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
 		++inflight;
 	}
 
-	/**
-	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#doCommit(org.springframework.transaction.TransactionStatus)
-	 */
-	protected void doCommit(TransactionStatus status) throws TransactionException {
+	protected void doCommit(DefaultTransactionStatus status) throws TransactionException {
 		++commits;
 		--inflight;
 	}
 
-	/**
-	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#doRollback(org.springframework.transaction.TransactionStatus)
-	 */
-	protected void doRollback(TransactionStatus status) throws TransactionException {
+	protected void doRollback(DefaultTransactionStatus status) throws TransactionException {
 		++rollbacks;
 		--inflight;
 	}
 
-	/**
-	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#doSetRollbackOnly(org.springframework.transaction.TransactionStatus)
-	 */
-	protected void doSetRollbackOnly(TransactionStatus status) throws TransactionException {
+	protected void doSetRollbackOnly(DefaultTransactionStatus status) throws TransactionException {
 		rollbackOnly = true;
 	}
 

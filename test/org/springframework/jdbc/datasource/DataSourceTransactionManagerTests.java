@@ -19,6 +19,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -76,8 +77,9 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 				assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue("Is new transaction", status.isNewTransaction());
-				assertEquals("Preserved information about old autocommit setting", 
-						autoCommit, ((DataSourceTransactionObject) status.getTransaction()).getMustRestoreAutoCommit());
+				DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
+				assertEquals("Preserved information about old autocommit setting",
+						autoCommit, ((DataSourceTransactionObject) defStatus.getTransaction()).getMustRestoreAutoCommit());
 			}
 		});
 
@@ -136,8 +138,9 @@ public class DataSourceTransactionManagerTests extends TestCase {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 					assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue("Is new transaction", status.isNewTransaction());
-					assertEquals("Preserved information about old autocommit setting", 
-											autoCommit, ((DataSourceTransactionObject) status.getTransaction()).getMustRestoreAutoCommit());
+					DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
+					assertEquals("Preserved information about old autocommit setting",
+											autoCommit, ((DataSourceTransactionObject) defStatus.getTransaction()).getMustRestoreAutoCommit());
 					throw ex;
 				}
 			});

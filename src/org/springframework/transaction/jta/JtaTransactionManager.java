@@ -17,10 +17,10 @@ import org.springframework.transaction.InvalidIsolationException;
 import org.springframework.transaction.NestedTransactionNotPermittedException;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * PlatformTransactionManager implementation for JTA, i.e. J2EE container transactions.
@@ -41,9 +41,11 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
  *
  * <p>Synchronization is also leveraged for transactional cache handling with Hibernate.
  * Therefore, as long as JtaTransactionManager drives the JTA transactions, there is
- * absolutely no need to configure Hibernate for its JTATransaction strategy (with a
- * corresponding container-specific TransactionManagerLookup). Hibernate's own
- * transaction (and JTA) support does not need to be used in such a scenario.
+ * no need to configure Hibernate's JTATransaction strategy or a container-specific
+ * Hibernate TransactionManagerLookup. However, certain JTA implementations are
+ * restrictive in terms of what JDBC calls they allow after transaction completion,
+ * complaining even on close calls: In that case, it is indeed necessary to configure
+ * a Hibernate TransactionManagerLookup; Spring will automatically adapt to this.
  *
  * <p>If JtaTransactionManager participates in an existing JTA transaction, e.g. from
  * EJB CMT, synchronization will be triggered on finishing the nested transaction,
@@ -201,7 +203,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected void doCommit(TransactionStatus status) {
+	protected void doCommit(DefaultTransactionStatus status) {
 		if (status.isDebug()) {
 			logger.debug("Committing JTA transaction [" + status.getTransaction() + "]");
 		}
@@ -222,7 +224,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected void doRollback(TransactionStatus status) {
+	protected void doRollback(DefaultTransactionStatus status) {
 		if (status.isDebug()) {
 			logger.debug("Rolling back JTA transaction [" + status.getTransaction() + "]");
 		}
@@ -234,7 +236,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected void doSetRollbackOnly(TransactionStatus status) {
+	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		if (status.isDebug()) {
 			logger.debug("Setting JTA transaction [" + status.getTransaction() + "] rollback-only");
 		}

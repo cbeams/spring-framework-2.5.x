@@ -20,9 +20,9 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -54,24 +54,25 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * LocalSessionFactoryBean. In the latter case, the Hibernate settings do not
  * have to define a connection provider at all, avoiding duplicated configuration.
  *
- * <p>JTA resp. JtaTransactionManager is necessary for accessing multiple
- * transactional resources. The DataSource that Hibernate uses needs to be
- * JTA-enabled then (see container setup), alternatively the Hibernate JCA
- * connector can to be used for direct container integration. Normally, JTA setup
- * for Hibernate is somewhat container-specific due to the JTA TransactionManager
- * lookup, required for proper transactional handling of the JVM-level read-write
- * cache. Using the JCA Connector can solve this but involves packaging issues
- * and container-specific connector deployment.
+ * <p>JTA respectively JtaTransactionManager is necessary for accessing multiple
+ * transactional resources. The DataSource that Hibernate uses needs to be JTA-enabled
+ * then (see container setup), alternatively the Hibernate JCA connector can be used
+ * for direct container integration. Normally, JTA setup for Hibernate is somewhat
+ * container-specific due to the JTA TransactionManager lookup, required for proper
+ * transactional handling of the SessionFactory-level read-write cache. Using the
+ * JCA Connector can solve this but involves packaging issue and container-specific
+ * connector deployment.
  *
- * <p>Fortunately, there is an easier way with Spring: SessionFactoryUtils'
- * close (and thus HibernateTemplate) registers synchronizations with
- * JtaTransactionManager, for proper afterCompletion callbacks. Therefore,
- * as long as JtaTransactionManager drives the JTA transactions, Hibernate
+ * <p>Fortunately, there is an easier way with Spring: SessionFactoryUtils (and thus
+ * HibernateTemplate) registers synchronizations with TransactionSynchronizationManager
+ * (as used by JtaTransactionManager), for proper afterCompletion callbacks. Therefore,
+ * as long as Spring's JtaTransactionManager drives the JTA transactions, Hibernate
  * does not require any special configuration for proper JTA participation.
- * The only special case is participating in existing JTA transactions from
- * EJB CMT: See JtaTransactionManager's javadoc for details.
+ * Note that there are special cases with EJB CMT and restrictive JTA subsystems:
+ * See JtaTransactionManager's javadoc for details.
  *
  * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
+ * For using JtaTransactionManager with Hibernate, Hibernate 2.1 is required.
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -301,7 +302,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		return ((HibernateTransactionObject) transaction).getSessionHolder().isRollbackOnly();
 	}
 
-	protected void doCommit(TransactionStatus status) {
+	protected void doCommit(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Committing Hibernate transaction on session [" +
@@ -324,7 +325,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
-	protected void doRollback(TransactionStatus status) {
+	protected void doRollback(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Rolling back Hibernate transaction on session [" +
@@ -346,7 +347,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
-	protected void doSetRollbackOnly(TransactionStatus status) {
+	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Setting Hibernate transaction on Session [" +
@@ -390,7 +391,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		catch (Exception ex) {
 			// HibernateException, SQLException, or UnsupportedOperationException
-			logger.warn("Could not reset JDBC connection of Hibernate session", ex);
+			// typically not something to worry about, can be ignored
+			logger.info("Could not reset JDBC connection of Hibernate session", ex);
 		}
 
 		Session session = txObject.getSessionHolder().getSession();

@@ -10,9 +10,9 @@ import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -45,7 +45,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.11 2003-12-30 00:46:27 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.12 2004-01-20 10:41:09 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -175,7 +175,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		return txObject.getConnectionHolder().isRollbackOnly();
 	}
 
-	protected void doCommit(TransactionStatus status) {
+	protected void doCommit(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Committing JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
@@ -188,7 +188,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 	}
 
-	protected void doRollback(TransactionStatus status) {
+	protected void doRollback(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Rolling back JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "]");
@@ -201,7 +201,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 	}
 
-	protected void doSetRollbackOnly(TransactionStatus status) {
+	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Setting JDBC transaction [" + txObject.getConnectionHolder().getConnection() + "] rollback-only");
@@ -243,7 +243,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 		catch (Exception ex) {
 			// SQLException or UnsupportedOperationException
-			logger.warn("Could not reset JDBC connection", ex);
+			// typically not something to worry about, can be ignored
+			logger.info("Could not reset JDBC connection", ex);
 		}
 
 		try {

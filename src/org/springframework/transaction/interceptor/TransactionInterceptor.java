@@ -10,6 +10,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -27,7 +28,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.14 2004-01-13 13:57:12 johnsonr Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.15 2004-01-20 10:41:09 jhoeller Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -167,7 +168,7 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 			}
 		}
 		if (status != null) {
-			if (status.isDebug()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking commit for transaction on method '" + invocation.getMethod().getName() + "'");
 			}
 			this.transactionManager.commit(status);

@@ -13,9 +13,9 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationException;
 import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -183,7 +183,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		return ((JdoTransactionObject) transaction).getPersistenceManagerHolder().isRollbackOnly();
 	}
 
-	protected void doCommit(TransactionStatus status) {
+	protected void doCommit(DefaultTransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		logger.debug("Committing JDO transaction");
 		try {
@@ -199,7 +199,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected void doRollback(TransactionStatus status) {
+	protected void doRollback(DefaultTransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		logger.debug("Rolling back JDO transaction");
 		try {
@@ -210,7 +210,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
-	protected void doSetRollbackOnly(TransactionStatus status) {
+	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		logger.debug("Setting JDO transaction rollback-only");
 		txObject.getPersistenceManagerHolder().setRollbackOnly();

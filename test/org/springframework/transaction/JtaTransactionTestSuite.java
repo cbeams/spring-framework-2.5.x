@@ -17,6 +17,7 @@ import org.springframework.jndi.JndiTemplate;
 import org.springframework.jndi.support.SimpleNamingContext;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -874,7 +875,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		tm.rollback(status1);
 		TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition());
 		tm.rollback(status2);
-		assertTrue(status1.getTransaction() != status2.getTransaction());
+		DefaultTransactionStatus defStatus1 = (DefaultTransactionStatus) status1;
+		DefaultTransactionStatus defStatus2 = (DefaultTransactionStatus) status2;
+		assertTrue(defStatus1.getTransaction() != defStatus2.getTransaction());
 	}
 
 	protected void tearDown() {

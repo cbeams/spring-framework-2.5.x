@@ -6,6 +6,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * @author Juergen Hoeller
@@ -15,10 +16,12 @@ public class TransactionTestSuite extends TestCase {
 
 	public void testNoExistingTransaction() {
 		PlatformTransactionManager tm = new TestTransactionManager(false, true);
-		TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
+		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
+				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
 		assertTrue("Must not have transaction", status1.getTransaction() == null);
 
-		TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
+		DefaultTransactionStatus status2 = (DefaultTransactionStatus)
+				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
 		assertTrue("Must have transaction", status2.getTransaction() != null);
 		assertTrue("Must be new transaction", status2.isNewTransaction());
 
@@ -33,16 +36,19 @@ public class TransactionTestSuite extends TestCase {
 
 	public void testExistingTransaction() {
 		PlatformTransactionManager tm = new TestTransactionManager(true, true);
-		TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
+		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
+				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
 		assertTrue("Must have transaction", status1.getTransaction() != null);
 		assertTrue("Must not be new transaction", !status1.isNewTransaction());
 
-		TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
+		DefaultTransactionStatus status2 = (DefaultTransactionStatus)
+				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
 		assertTrue("Must have transaction", status2.getTransaction() != null);
 		assertTrue("Must not be new transaction", !status2.isNewTransaction());
 
 		try {
-			TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
+			DefaultTransactionStatus status3 = (DefaultTransactionStatus)
+					tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
 			assertTrue("Must have transaction", status3.getTransaction() != null);
 			assertTrue("Must not be new transaction", !status3.isNewTransaction());
 		}
@@ -156,7 +162,7 @@ public class TransactionTestSuite extends TestCase {
 	public void testTransactionTemplateWithRollbackException() {
 		final TransactionSystemException tex = new TransactionSystemException("system exception");
 		TestTransactionManager tm = new TestTransactionManager(false, true) {
-			protected void doRollback(TransactionStatus status) {
+			protected void doRollback(DefaultTransactionStatus status) {
 				super.doRollback(status);
 				throw tex;
 			}
