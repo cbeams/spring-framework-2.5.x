@@ -61,7 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.56 2004-05-31 17:15:13 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.57 2004-06-15 09:29:40 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
@@ -234,10 +234,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Hi
 		if (this.singletonCache.containsKey(beanName) || containsBeanDefinition(beanName)) {
 			// if found, gather aliases
 			List aliases = new ArrayList();
-			for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				if (entry.getValue().equals(beanName)) {
-					aliases.add(entry.getKey());
+			synchronized (this.aliasMap) {
+				for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					if (entry.getValue().equals(beanName)) {
+						aliases.add(entry.getKey());
+					}
 				}
 			}
 			return (String[]) aliases.toArray(new String[aliases.size()]);
