@@ -46,7 +46,6 @@
 	<classpathentry kind="lib" path="lib/jdom/jdom.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit/Tidy.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/axis/axis.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jstl.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-taglibs/standard.jar"/>
@@ -92,5 +91,6 @@
 	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/fop/fop.jar"/>
 	<classpathentry kind="lib" path="lib/activemq/activemq-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
