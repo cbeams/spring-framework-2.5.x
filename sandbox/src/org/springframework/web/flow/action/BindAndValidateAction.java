@@ -16,7 +16,6 @@
 package org.springframework.web.flow.action;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
@@ -305,7 +304,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @throws ServletRequestBindingException the form object could not be
 	 *         loaded because valid input was not provided in the request
 	 */
-	protected Object loadFormObject(FlowExecutionContext context) throws ObjectRetrievalFailureException,
+	protected Object loadFormObject(FlowExecutionContext context) throws FormObjectRetrievalFailureException,
 			ServletRequestBindingException {
 		if (!isCreateFormObjectPerRequest() && context.flowScope().containsAttribute(getFormObjectName())) {
 			Object formObject = context.flowScope().getAttribute(getFormObjectName(), getFormObjectClass());
@@ -322,11 +321,11 @@ public class BindAndValidateAction extends AbstractAction {
 				return createFormObject(context);
 			}
 			catch (InstantiationException e) {
-				throw new ObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
+				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to instantiate form object", e);
 			}
 			catch (IllegalAccessException e) {
-				throw new ObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
+				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to access form object class constructor", e);
 			}
 		}
