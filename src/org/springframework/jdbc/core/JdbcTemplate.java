@@ -84,7 +84,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.54 2004-07-12 03:45:42 trisberg Exp $
+ * @version $Id: JdbcTemplate.java,v 1.55 2004-07-13 17:14:52 trisberg Exp $
  * @since May 3, 2001
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -497,6 +497,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		Integer result = (Integer) execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				int rows = ps.executeUpdate();
+				generatedKeys.clear();
 				ResultSet keys = ps.getGeneratedKeys();
 				if (keys != null) {
 					ListResultSetExtractor lrse = new ListResultSetExtractor();

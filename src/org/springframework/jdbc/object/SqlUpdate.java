@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
+import org.springframework.jdbc.core.support.KeyHolder;
 
 /**
  * RdbmsOperation subclass representing a SQL update.
@@ -38,7 +39,7 @@ import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException
  * @author Rod Johnson
  * @author Isabelle Muszynski
  * @author Thomas Risberg
- * @version $Id: SqlUpdate.java,v 1.11 2004-07-12 03:29:52 trisberg Exp $
+ * @version $Id: SqlUpdate.java,v 1.12 2004-07-13 17:14:52 trisberg Exp $
  */
 public class SqlUpdate extends SqlOperation {
 
@@ -157,8 +158,19 @@ public class SqlUpdate extends SqlOperation {
 	}
 
 	/**
-	 * Generic method to execute the update given arguments.
-	 * All other update methods invoke this method.
+	 * Method to execute the update given arguments and 
+	 * retrieve the generated keys using a KeyHolder.
+	 * @param args array of object arguments
+	 * @param generatedKeys List that will hold the generated keys
+	 * @return the number of rows affected by the update
+	 */
+	public int update(Object[] args, KeyHolder keyHolder) throws DataAccessException {
+		return update(args, keyHolder.getKeyList());
+	}
+
+	/**
+	 * Method to execute the update given arguments and 
+	 * retrieve the generated keys with a List.
 	 * @param args array of object arguments
 	 * @param generatedKeys List that will hold the generated keys
 	 * @return the number of rows affected by the update
