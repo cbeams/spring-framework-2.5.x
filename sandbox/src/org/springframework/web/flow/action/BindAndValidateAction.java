@@ -41,6 +41,15 @@ import org.springframework.web.flow.MutableAttributesAccessor;
  */
 public class BindAndValidateAction extends AbstractAction implements InitializingBean {
 
+	/**
+	 * Constant <code>ActionResult</code> marker that indicates to the base
+	 * BindAndValidate action that it should attempt to return a default
+	 * <code>success</code> or <code>error</code> event. What event to
+	 * returned is calculated based on whether any errors were generated during
+	 * the bind and validate process.
+	 */
+	protected static final ActionResult USE_DEFAULT_EVENT = ActionResult.NULL_RESULT;
+
 	private String formObjectName = DEFAULT_FORM_OBJECT_NAME;
 
 	private Class formObjectClass;
@@ -56,26 +65,17 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	private MessageCodesResolver messageCodesResolver;
 
 	/**
-	 * Constant <code>ActionBeanEvent</code> marker that indicates to the base
-	 * BindAndValidate action that it should attempt to return a default
-	 * <code>success</code> or <code>error</code> event. What event to
-	 * returned is calculated based on whether any errors were generated during
-	 * the bind and validate process.
-	 */
-	protected static final ActionResult USE_DEFAULT_EVENT = ActionResult.NULL_RESULT;
-
-	/**
 	 * Set the name of the formObject in the model. The formObject object will
 	 * be included in the model under this name.
 	 */
-	public final void setFormObjectName(String formObjectName) {
+	public void setFormObjectName(String formObjectName) {
 		this.formObjectName = formObjectName;
 	}
 
 	/**
 	 * Return the name of the formObject in the model.
 	 */
-	public final String getFormObjectName() {
+	public String getFormObjectName() {
 		return this.formObjectName;
 	}
 
@@ -83,14 +83,14 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	 * Set the formObject class for this controller. An instance of this class
 	 * gets populated and validated on each request.
 	 */
-	public final void setFormObjectClass(Class formObjectClass) {
+	public void setFormObjectClass(Class formObjectClass) {
 		this.formObjectClass = formObjectClass;
 	}
 
 	/**
 	 * Return the formObject class for this controller.
 	 */
-	public final Class getFormObjectClass() {
+	public Class getFormObjectClass() {
 		return this.formObjectClass;
 	}
 
@@ -110,14 +110,14 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	 * be kept. Use {@link #setValidators(Validator[])}to set multiple
 	 * validators.
 	 */
-	public final void setValidator(Validator validator) {
+	public void setValidator(Validator validator) {
 		setValidators(new Validator[] { validator });
 	}
 
 	/**
 	 * @return the Validators for this controller.
 	 */
-	public final Validator getValidator() {
+	public Validator getValidator() {
 		return (validators != null && validators.length > 0 ? validators[0] : null);
 	}
 
@@ -125,7 +125,7 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	 * Set the Validators for this controller. The Validator must support the
 	 * specified formObject class.
 	 */
-	public final void setValidators(Validator[] validators) {
+	public void setValidators(Validator[] validators) {
 		this.validators = validators;
 	}
 
@@ -139,18 +139,21 @@ public class BindAndValidateAction extends AbstractAction implements Initializin
 	/**
 	 * Set if the Validator should get applied when binding.
 	 */
-	public final void setValidateOnBinding(boolean validateOnBinding) {
+	public void setValidateOnBinding(boolean validateOnBinding) {
 		this.validateOnBinding = validateOnBinding;
 	}
 
 	/**
 	 * Return if the Validator should get applied when binding.
 	 */
-	public final boolean isValidateOnBinding() {
+	public boolean isValidateOnBinding() {
 		return validateOnBinding;
 	}
 
-	public final boolean isCreateFormObjectPerRequest() {
+	/**
+	 * @return
+	 */
+	public boolean isCreateFormObjectPerRequest() {
 		return createFormObjectPerRequest;
 	}
 

@@ -372,9 +372,9 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	}
 
 	/**
-	 * Add a ViewState marker to the flow built by this builder; a marker has a null viewName
-	 * and assumes the response has already been written.  The marker notes that control should
-	 * be returned to the 
+	 * Add a ViewState marker to the flow built by this builder; a marker has a
+	 * null viewName and assumes the response has already been written. The
+	 * marker notes that control should be returned to the
 	 * @param stateIdPrefix
 	 * @return
 	 */
@@ -821,8 +821,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param stateIdPrefix
 	 * @return
 	 */
-	protected ActionState addPopulateState(String stateIdPrefix) {
-		return addPopulateState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	protected ActionState addetupState(String stateIdPrefix) {
+		return addSetupState(stateIdPrefix, onSuccessView(stateIdPrefix));
 	}
 
 	/**
@@ -830,8 +830,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param actionBean
 	 * @return
 	 */
-	protected ActionState addPopulateState(String stateIdPrefix, Action actionBean) {
-		return addPopulateState(stateIdPrefix, actionBean, onSuccessView(stateIdPrefix));
+	protected ActionState addSetupState(String stateIdPrefix, Action actionBean) {
+		return addSetupState(stateIdPrefix, actionBean, onSuccessView(stateIdPrefix));
 	}
 
 	/**
@@ -839,8 +839,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param transition
 	 * @return
 	 */
-	protected ActionState addPopulateState(String stateIdPrefix, Transition transition) {
-		return addPopulateState(stateIdPrefix, new Transition[] { transition });
+	protected ActionState addSetupState(String stateIdPrefix, Transition transition) {
+		return addSetupState(stateIdPrefix, new Transition[] { transition });
 	}
 
 	/**
@@ -849,8 +849,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param transition
 	 * @return
 	 */
-	protected ActionState addPopulateState(String stateIdPrefix, Action actionBean, Transition transition) {
-		return addPopulateState(stateIdPrefix, actionBean, new Transition[] { transition });
+	protected ActionState addSetupState(String stateIdPrefix, Action actionBean, Transition transition) {
+		return addSetupState(stateIdPrefix, actionBean, new Transition[] { transition });
 	}
 
 	/**
@@ -858,8 +858,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param transitions
 	 * @return
 	 */
-	protected ActionState addPopulateState(String stateIdPrefix, Transition[] transitions) {
-		return addActionState(populate(stateIdPrefix), transitions);
+	protected ActionState addSetupState(String stateIdPrefix, Transition[] transitions) {
+		return addActionState(setup(stateIdPrefix), transitions);
 	}
 
 	/**
@@ -867,8 +867,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param transitions
 	 * @return
 	 */
-	protected ActionState addPopulateState(String stateIdPrefix, Action actionBean, Transition[] transitions) {
-		return addActionState(populate(stateIdPrefix), actionBean, transitions);
+	protected ActionState addSetupState(String stateIdPrefix, Action actionBean, Transition[] transitions) {
+		return addActionState(setup(stateIdPrefix), actionBean, transitions);
 	}
 
 	/**
@@ -1231,8 +1231,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param stateIdPrefix
 	 * @return
 	 */
-	protected Transition onSuccessPopulate(String stateIdPrefix) {
-		return onSuccess(populate(stateIdPrefix));
+	protected Transition onSuccessSetup(String stateIdPrefix) {
+		return onSuccess(setup(stateIdPrefix));
 	}
 
 	/**
@@ -1353,8 +1353,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param stateIdPrefix
 	 * @return
 	 */
-	protected Transition onBackPopulate(String stateIdPrefix) {
-		return onBack(populate(stateIdPrefix));
+	protected Transition onBackSetup(String stateIdPrefix) {
+		return onBack(setup(stateIdPrefix));
 	}
 
 	/**
@@ -1456,8 +1456,8 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 	 * @param stateIdPrefix
 	 * @return
 	 */
-	protected Transition onFinishPopulate(String stateIdPrefix) {
-		return onFinish(populate(stateIdPrefix));
+	protected Transition onFinishSetup(String stateIdPrefix) {
+		return onFinish(setup(stateIdPrefix));
 	}
 
 	/**
@@ -1582,6 +1582,10 @@ public abstract class AbstractFlowBuilder extends FlowConstants implements FlowB
 
 	protected String search(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, SEARCH);
+	}
+
+	protected String setup(String stateIdPrefix) {
+		return buildStateId(stateIdPrefix, SETUP);
 	}
 
 	protected String populate(String stateIdPrefix) {

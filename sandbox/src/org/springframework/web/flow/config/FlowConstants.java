@@ -64,6 +64,11 @@ public abstract class FlowConstants {
 	public static final String SET = "set";
 
 	/**
+	 * The <code>SETUP</code> action state/event identifier.
+	 */
+	public static final String SETUP = "setup";
+
+	/**
 	 * The <code>PUT</code> action state/event identifier.
 	 */
 	public static final String PUT = "put";
