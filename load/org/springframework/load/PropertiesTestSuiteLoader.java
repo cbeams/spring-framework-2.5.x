@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 
 /**
@@ -26,7 +26,7 @@ public class PropertiesTestSuiteLoader  {
 		}
 		file = args[0];
 		
-		ListableBeanFactoryImpl lbf = new ListableBeanFactoryImpl();
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties props = new Properties();
 		try {
 			props.load(getInputStream(file));
