@@ -69,8 +69,8 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	protected BeanFactory getBeanFactory() {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException(
-					"The bean factory reference has not yet been set for this BeanFactoryServiceLocator"
-							+ " -- call setBeanFactory()");
+					"The bean factory reference has not yet been set for this FlowLocator"
+							+ " -- it must be set before I can load flows -- call setBeanFactory()");
 		}
 		return beanFactory;
 	}
