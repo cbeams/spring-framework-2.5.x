@@ -39,6 +39,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
 
 /**
@@ -58,9 +60,9 @@ import org.springframework.core.io.Resource;
  * @since 18.02.2004
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
- * @version $Id: SchedulerFactoryBean.java,v 1.8 2004-03-18 02:46:09 trisberg Exp $
+ * @version $Id: SchedulerFactoryBean.java,v 1.9 2004-05-18 07:35:22 jhoeller Exp $
  */
-public class SchedulerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -71,6 +73,12 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 	private Resource configLocation;
 
 	private Properties quartzProperties;
+
+	private Map schedulerContextMap;
+
+	private ApplicationContext applicationContext;
+
+	private String applicationContextSchedulerContextKey;
 
 	private List jobDetails;
 
@@ -121,6 +129,44 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 	 */
 	public void setQuartzProperties(Properties quartzProperties) {
 		this.quartzProperties = quartzProperties;
+	}
+
+	/**
+	 * Register objects in the Scheduler context via a given Map.
+	 * These objects will be available to any Job that runs in this Scheduler.
+	 * <p>Note: When using persistent Jobs whose JobDetail will be kept in the
+	 * database, do not put Spring-managed beans or an ApplicationContext
+	 * reference into the JobDataMap but rather into the SchedulerContext.
+	 * @param schedulerContextAsMap Map with String keys and any objects as values
+	 * (for example Spring-managed beans)
+	 * @see JobDetailBean#setJobDataAsMap
+	 */
+	public void setSchedulerContextAsMap(Map schedulerContextAsMap) {
+		this.schedulerContextMap = schedulerContextAsMap;
+	}
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+	/**
+	 * Set the key of an ApplicationContext reference to expose in the
+	 * SchedulerContext, for example "applicationContext". Default is none.
+	 * Only applicable when running in a Spring ApplicationContext.
+	 * <p>Note: When using persistent Jobs whose JobDetail will be kept in the
+	 * database, do not put an ApplicationContext reference into the JobDataMap
+	 * but rather into the SchedulerContext.
+	 * <p>In case of a QuartzJobBean, the reference will be applied to the Job
+	 * instance as bean property. An "applicationContext" attribute will correspond
+	 * to a "setApplicationContext" method in that scenario.
+	 * <p>Note that BeanFactory callback interfaces like ApplicationContextAware
+	 * are not automatically applied to Quartz Job instances, because Quartz
+	 * itself is reponsible for the lifecycle of its Jobs.
+	 * @see JobDetailBean#setApplicationContextJobDataKey
+	 * @see org.springframework.context.ApplicationContext
+	 */
+	public void setApplicationContextSchedulerContextKey(String applicationContextSchedulerContextKey) {
+		this.applicationContextSchedulerContextKey = applicationContextSchedulerContextKey;
 	}
 
 	/**
@@ -203,6 +249,20 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 
 		// get Scheduler instance from SchedulerFactory
 		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
+
+		// put specified objects into Scheduler context
+		if (this.schedulerContextMap != null) {
+			this.scheduler.getContext().putAll(this.schedulerContextMap);
+		}
+
+		// register ApplicationContext in Scheduler context
+		if (this.applicationContextSchedulerContextKey != null) {
+			if (this.applicationContext == null) {
+				throw new IllegalStateException("SchedulerFactoryBean needs to be set up in an ApplicationContext " +
+																				"to be able to handle an 'applicationContextSchedulerContextKey'");
+			}
+			this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
+		}
 
 		// register JobDetails
 		if (this.jobDetails != null) {

@@ -19,6 +19,7 @@ package org.springframework.scheduling.quartz;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.SchedulerException;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -26,10 +27,12 @@ import org.springframework.beans.MutablePropertyValues;
 
 /**
  * Simple implementation of the Quartz Job interface, applying the
- * passed-in job data map as bean property values. This is appropriate
- * because a new Job instance will be created for each execution.
+ * passed-in JobDataMap and also the SchedulerContext as bean property
+ * values. This is appropriate because a new Job instance will be created
+ * for each execution. JobDataMap entries will override SchedulerContext
+ * entries with the same keys.
  *
- * <p>For example, let's assume that the job data map contains a key
+ * <p>For example, let's assume that the JobDataMap contains a key
  * "myParam" with value "5": The Job implementation can then expose
  * a bean property "myParam" of type int to receive such a value,
  * i.e. a method "setMyParam(int)". This will also work for complex
@@ -38,6 +41,9 @@ import org.springframework.beans.MutablePropertyValues;
  * @author Juergen Hoeller
  * @since 18.02.2004
  * @see org.quartz.JobDetail#getJobDataMap
+ * @see org.quartz.Scheduler#getContext
+ * @see JobDetailBean#setJobDataAsMap
+ * @see SchedulerFactoryBean#setSchedulerContextAsMap
  */
 public abstract class QuartzJobBean implements Job {
 
@@ -47,8 +53,16 @@ public abstract class QuartzJobBean implements Job {
 	 * @see #executeInternal
 	 */
 	public final void execute(JobExecutionContext context) throws JobExecutionException {
-		BeanWrapper bw = new BeanWrapperImpl(this);
-		bw.setPropertyValues(new MutablePropertyValues(context.getJobDetail().getJobDataMap()), true);
+		try {
+			BeanWrapper bw = new BeanWrapperImpl(this);
+			MutablePropertyValues pvs = new MutablePropertyValues();
+			pvs.addPropertyValues(context.getScheduler().getContext());
+			pvs.addPropertyValues(context.getJobDetail().getJobDataMap());
+			bw.setPropertyValues(pvs, true);
+		}
+		catch (SchedulerException ex) {
+			throw new JobExecutionException(ex);
+		}
 		executeInternal(context);
 	}
 

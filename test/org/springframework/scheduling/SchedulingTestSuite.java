@@ -34,6 +34,7 @@ import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
+import org.quartz.SchedulerContext;
 
 import org.springframework.beans.TestBean;
 import org.springframework.context.support.StaticApplicationContext;
@@ -137,6 +138,8 @@ public class SchedulingTestSuite extends TestCase {
 
 		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
 		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		scheduler.getContext();
+		schedulerControl.setReturnValue(new SchedulerContext());
 		scheduler.addJob(jobDetail0, true);
 		schedulerControl.setVoidCallable();
 		scheduler.scheduleJob(trigger0);
@@ -157,6 +160,9 @@ public class SchedulingTestSuite extends TestCase {
 				return scheduler;
 			}
 		};
+		Map schedulerContext = new HashMap();
+		schedulerContext.put("otherTestBean", tb);
+		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
@@ -237,22 +243,61 @@ public class SchedulingTestSuite extends TestCase {
 		schedulerControl.verify();
 	}
 
+	public void testSchedulerFactoryBeanWithApplicationContext() throws Exception {
+		TestBean tb = new TestBean("tb", 99);
+		StaticApplicationContext ac = new StaticApplicationContext();
+
+		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
+		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		SchedulerContext schedulerContext = new SchedulerContext();
+		scheduler.getContext();
+		schedulerControl.setReturnValue(schedulerContext, 4);
+		scheduler.start();
+		schedulerControl.setVoidCallable();
+		scheduler.shutdown();
+		schedulerControl.setVoidCallable();
+		schedulerControl.replay();
+
+		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
+					throws SchedulerException {
+				return scheduler;
+			}
+		};
+		Map schedulerContextMap = new HashMap();
+		schedulerContextMap.put("testBean", tb);
+		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContextMap);
+		schedulerFactoryBean.setApplicationContext(ac);
+		schedulerFactoryBean.setApplicationContextSchedulerContextKey("appCtx");
+		try {
+			schedulerFactoryBean.afterPropertiesSet();
+			Scheduler returnedScheduler = (Scheduler) schedulerFactoryBean.getObject();
+			assertEquals(tb, returnedScheduler.getContext().get("testBean"));
+			assertEquals(ac, returnedScheduler.getContext().get("appCtx"));
+		}
+		finally {
+			schedulerFactoryBean.destroy();
+		}
+
+		schedulerControl.verify();
+	}
+
 	public void testJobDetailBeanWithApplicationContext() throws Exception {
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
 
-		JobDetailBean jobDetail0 = new JobDetailBean();
-		jobDetail0.setJobClass(Job.class);
-		jobDetail0.setBeanName("myJob0");
+		JobDetailBean jobDetail = new JobDetailBean();
+		jobDetail.setJobClass(Job.class);
+		jobDetail.setBeanName("myJob0");
 		Map jobData = new HashMap();
 		jobData.put("testBean", tb);
-		jobDetail0.setJobDataAsMap(jobData);
-		jobDetail0.setApplicationContext(ac);
-		jobDetail0.setApplicationContextJobDataKey("appCtx");
-		jobDetail0.afterPropertiesSet();
+		jobDetail.setJobDataAsMap(jobData);
+		jobDetail.setApplicationContext(ac);
+		jobDetail.setApplicationContextJobDataKey("appCtx");
+		jobDetail.afterPropertiesSet();
 
-		assertEquals(tb, jobDetail0.getJobDataMap().get("testBean"));
-		assertEquals(ac, jobDetail0.getJobDataMap().get("appCtx"));
+		assertEquals(tb, jobDetail.getJobDataMap().get("testBean"));
+		assertEquals(ac, jobDetail.getJobDataMap().get("appCtx"));
 	}
 
 
