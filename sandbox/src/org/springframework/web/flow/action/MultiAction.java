@@ -15,14 +15,10 @@
  */
 package org.springframework.web.flow.action;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
 
-import org.springframework.util.Assert;
-import org.springframework.util.CachingMapTemplate;
+import org.springframework.util.MethodDispatcher;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
@@ -101,10 +97,10 @@ import org.springframework.web.flow.RequestContext;
 public class MultiAction extends AbstractAction {
 
 	/**
-	 * A configurable delegate that may handle execution requests -- useful for
-	 * invoking legacy code.
+	 * A cache for dispatched action execute methods.
 	 */
-	private Object delegate = this;
+	private MethodDispatcher executeMethodDispatcher = new MethodDispatcher(this, new Class[] { RequestContext.class },
+			Event.class, "action", "public Event <methodName>(RequestContext)");
 
 	/**
 	 * The action execute method name resolver strategy.
@@ -112,29 +108,11 @@ public class MultiAction extends AbstractAction {
 	private ActionExecuteMethodNameResolver executeMethodNameResolver = new DefaultActionExecuteMethodNameResolver();
 
 	/**
-	 * The resolved action execute method cache.
-	 */
-	private Map executeMethodCache = new CachingMapTemplate() {
-		public Object create(Object key) {
-			String executeMethodName = (String)key;
-			try {
-				return getDelegate().getClass().getMethod(executeMethodName, new Class[] { RequestContext.class });
-			}
-			catch (NoSuchMethodException e) {
-				throw new ActionExecutionException(
-						"Unable to resolve action execute method with signature 'public Event " + executeMethodName
-								+ "(RequestContext context)' - make sure the method name is correct "
-								+ "and such a public method is defined in this action implementation", e);
-			}
-		}
-	};
-
-	/**
 	 * Set the delegate object holding the action execution methods.
 	 * @param delegate the delegate to set
 	 */
 	public void setDelegate(Object delegate) {
-		this.delegate = delegate;
+		this.executeMethodDispatcher.setTarget(delegate);
 	}
 
 	/**
@@ -142,38 +120,6 @@ public class MultiAction extends AbstractAction {
 	 */
 	public void setExecuteMethodNameResolver(ActionExecuteMethodNameResolver methodNameResolver) {
 		this.executeMethodNameResolver = methodNameResolver;
-	}
-
-	protected Event doExecuteAction(RequestContext context) throws Exception {
-		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context, this);
-		try {
-			Method actionExecuteMethod = getActionExecuteMethod(actionExecuteMethodName);
-			Object result = actionExecuteMethod.invoke(getDelegate(), new Object[] { context });
-			if (result != null) {
-				Assert.isInstanceOf(Event.class, result,
-						"Dispatched multi-action execute methods must return result objects of type Event or null; "
-								+ "however, this method '" + actionExecuteMethod.getName()
-								+ "' returned an object of type " + result.getClass());
-			}
-			return (Event)result;
-		}
-		catch (InvocationTargetException e) {
-			Throwable t = e.getTargetException();
-			if (t instanceof Exception) {
-				throw (Exception)e.getTargetException();
-			}
-			else {
-				throw (Error)e.getTargetException();
-			}
-		}
-	}
-
-	/**
-	 * Returns the delegate object holding the action execution methods.
-	 * Defaults to this object.
-	 */
-	public Object getDelegate() {
-		return delegate;
 	}
 
 	/**
@@ -184,12 +130,25 @@ public class MultiAction extends AbstractAction {
 		return executeMethodNameResolver;
 	}
 
+	protected Event doExecuteAction(RequestContext context) throws Exception {
+		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context, this);
+		return (Event)this.executeMethodDispatcher.dispatch(actionExecuteMethodName, new Object[] { context });
+	}
+
+	/**
+	 * Returns the delegate object holding the action execution methods.
+	 * Defaults to this object.
+	 */
+	public Object getDelegate() {
+		return this.executeMethodDispatcher.getTarget();
+	}
+
 	/**
 	 * Find the action execution method with given name on the delegate object
 	 * using reflection.
 	 */
 	protected Method getActionExecuteMethod(String actionExecuteMethodName) {
-		return (Method)this.executeMethodCache.get(actionExecuteMethodName);
+		return (Method)this.executeMethodDispatcher.getMethod(actionExecuteMethodName);
 	}
 
 	/**

@@ -20,6 +20,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.util.Assert;
+import org.springframework.util.MethodDispatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
@@ -205,6 +206,12 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * Strategy for resolving error message codes.
 	 */
 	private MessageCodesResolver messageCodesResolver;
+
+	/**
+	 * A cache for dispatched action execute methods.
+	 */
+	private MethodDispatcher validateMethodDispatcher = new MethodDispatcher(this, new Class[] { Object.class,
+			Errors.class }, null, "validator", "public void <methodName>(Object, Errors)");
 
 	/**
 	 * Return the name of the form object in the flow scope.
@@ -544,7 +551,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * @param binder the binder to use for binding
 	 * @return the action result outcome
 	 */
-	protected Event bindAndValidateInternal(RequestContext context, DataBinder binder) {
+	protected Event bindAndValidateInternal(RequestContext context, DataBinder binder) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Binding allowed matching event parameters to object '" + binder.getObjectName()
 					+ "', details='" + binder.getTarget() + "'");
@@ -568,16 +575,19 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * @param formObject the form object
 	 * @param errors possible binding errors
 	 */
-	protected void validate(RequestContext context, Object formObject, Errors errors) {
+	protected void validate(RequestContext context, Object formObject, Errors errors) throws Exception {
 		ActionStateAction action = getActionStateAction(context);
 		String validatorMethod = action.getProperty(VALIDATOR_METHOD_PROPERTY);
 		if (StringUtils.hasText(validatorMethod)) {
-			//TODO
-			throw new UnsupportedOperationException("Not yet implemented - TODO");
+			invokeValidatorMethod(validatorMethod, formObject, errors);
 		}
 		else {
 			getValidator().validate(formObject, errors);
 		}
+	}
+
+	protected void invokeValidatorMethod(String validatorMethod, Object formObject, Errors errors) throws Exception {
+		this.validateMethodDispatcher.dispatch(validatorMethod, new Object[] { formObject, errors });
 	}
 
 	/**
