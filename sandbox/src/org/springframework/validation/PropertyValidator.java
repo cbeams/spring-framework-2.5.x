@@ -9,7 +9,7 @@ import org.springframework.context.MessageSourceResolvable;
 /**
  * A declarative validator for a single bean property. Property validators
  * encapsulate one or more <code>PropertyValidationRules</code> that
- * constrain a validated property's values.
+ * constrain a property's allowed values.
  * 
  * @author Keith Donald
  */

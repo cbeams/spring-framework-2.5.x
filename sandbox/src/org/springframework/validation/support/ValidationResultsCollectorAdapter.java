@@ -17,6 +17,12 @@ import org.springframework.validation.PropertyValidator;
 import org.springframework.validation.ValidationResultsCollector;
 
 /**
+ * Convenience implementation of the ValidationResultsCollector interface.
+ * Subclasses may override any or all of the validation result callbacks.
+ * 
+ * This implementation conveniently keeps track of the current nestedPath
+ * during each validation run.
+ * 
  * @author Keith Donald
  */
 public class ValidationResultsCollectorAdapter implements

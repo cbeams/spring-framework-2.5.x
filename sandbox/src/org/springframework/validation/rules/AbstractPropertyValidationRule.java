@@ -4,6 +4,8 @@
  */
 package org.springframework.validation.rules;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.ArrayUtils;
@@ -21,6 +23,9 @@ import org.springframework.validation.PropertyValidationRule;
  */
 public abstract class AbstractPropertyValidationRule implements
         PropertyValidationRule {
+    protected static Log logger = LogFactory
+            .getLog(PropertyValidationRule.class);
+
     private String TYPING_HINT_PREFIX = "typingHints.";
     private String ERROR_PREFIX = "errors.";
 
@@ -30,9 +35,17 @@ public abstract class AbstractPropertyValidationRule implements
     }
 
     public MessageSourceResolvable createErrorMessage(String propertyNamePath) {
-        return new DefaultMessageSourceResolvable(
+        if (logger.isDebugEnabled()) {
+            logger.debug("Creating resolvable error message for property '"
+                    + propertyNamePath + "'");
+        }
+        DefaultMessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
                 new String[] { getErrorCode() },
                 getErrorArguments(propertyNamePath));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Resolvable error message is " + resolvable);
+        }
+        return resolvable;
     }
 
     public void invokeRejectValue(Errors errors, String nestedPath) {
@@ -46,7 +59,8 @@ public abstract class AbstractPropertyValidationRule implements
     /**
      * Returns the rule type, used to lookup rule messages. By default, the
      * ruleType is the uncapitalized short rule class name. For example, the
-     * rule "org.springframework....Required" would be "required".
+     * rule <code>org.springframework.validation.rules.Required</code> rule
+     * type would be <code>required</code>.
      * 
      * @return The rule type.
      */

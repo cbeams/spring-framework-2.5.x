@@ -39,8 +39,8 @@ public interface ValidationResultsCollector {
     /**
      * Callback indicating the validation process has started for a property.
      * 
-     * @param validator the property validator (@TODO too much?)
-     * @param bean the validated bean (@TODO not needed?)
+     * @param validator the property validator
+     * @param bean the validated bean
      * @param value the property value to be validated.
      */
     public void propertyValidationStarted(
@@ -51,8 +51,8 @@ public interface ValidationResultsCollector {
     /**
      * Callback indicating the validation process has started for a property.
      * 
-     * @param validator the property validator (@TODO too much?)
-     * @param bean the validated bean (@TODO not needed?)
+     * @param validator the property validator
+     * @param bean the validated bean
      * @param value the property value to be validated.
      */
     public void propertyValidationCompleted(

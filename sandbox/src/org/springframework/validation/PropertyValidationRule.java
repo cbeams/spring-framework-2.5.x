@@ -52,7 +52,7 @@ public interface PropertyValidationRule {
     public MessageSourceResolvable createErrorMessage(String propertyNamePath);
 
     /**
-     * Convenience method for rejecting a property value on a <code>Errors</code>
+     * Convenience method for rejecting a property value on an <code>Errors</code>
      * object.
      * 
      * @param errors

@@ -13,8 +13,7 @@ package org.springframework.validation;
  * 
  * @author Keith Donald
  */
-public interface BeanValidationService
-    extends org.springframework.validation.Validator {
+public interface BeanValidationService extends Validator {
 
     /**
      * Validate the specfied bean and collect the validation results.
@@ -48,11 +47,8 @@ public interface BeanValidationService
      * @param results
      *            The validation results collector.
      */
-    public void validatePropertyValue(
-        Object bean,
-        String propertyName,
-        Object value,
-        ValidationResultsCollector results);
+    public void validatePropertyValue(Object bean, String propertyName,
+            Object value, ValidationResultsCollector results);
 
     /**
      * Convenience method for validating multiple proposed property changes.
@@ -66,9 +62,6 @@ public interface BeanValidationService
      * @param results
      *            The validation results collector.
      */
-    public void validatePropertyValues(
-        Object bean,
-        String[] properties,
-        Object[] values,
-        ValidationResultsCollector results);
+    public void validatePropertyValues(Object bean, String[] properties,
+            Object[] values, ValidationResultsCollector results);
 }

@@ -20,6 +20,9 @@ import org.springframework.validation.PropertyValidator;
 import org.springframework.validation.ValidationResultsCollector;
 
 /**
+ * Encapsulates the algorithm for validated a bean, where property validators
+ * are stored within the bean's <code>BeanInfo</code> metadata objects.
+ * 
  * @author Keith Donald
  */
 public class BeanInfoBeanValidator {
@@ -28,6 +31,15 @@ public class BeanInfoBeanValidator {
 
     private BeanValidatorSource beanValidatorSource;
 
+    /**
+     * Sets the source to load validators from in the event no validators can
+     * be found for a <code>bean</code> passed to one of the <code>validate*</code>
+     * methods. If this is null, it is expected that all validators have
+     * already configured and attached to the appropriate BeanInfo instances.
+     * 
+     * @param source
+     *            The validator source, to load validators on demand.
+     */
     public void setBeanValidatorSource(BeanValidatorSource source) {
         this.beanValidatorSource = source;
     }
@@ -57,6 +69,13 @@ public class BeanInfoBeanValidator {
         }
     }
 
+    /**
+     * Checks if the specified bean type has any attached property validators.
+     * 
+     * @param beanType
+     *            The bean type.
+     * @return true if the bean is validateable, false otherwise.
+     */
     public boolean hasValidators(Class beanType) {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(beanType);

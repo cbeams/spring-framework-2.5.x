@@ -4,13 +4,16 @@
  */
 package org.springframework.validation.support;
 
-import org.springframework.validation.PropertyValidationRule;
-import org.springframework.validation.PropertyValidator;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
+import org.springframework.validation.PropertyValidationRule;
+import org.springframework.validation.PropertyValidator;
 
 /**
+ * A validation results collector responsible for populating a Errors object.
+ * 
  * @author Keith Donald
+ * @see org.springframework.validation.Errors
  */
 public class ValidationResultsErrorsCollector extends
         ValidationResultsCollectorAdapter {
