@@ -82,10 +82,11 @@ public class SqlMapTemplate extends JdbcAccessor implements SqlMapOperations {
 
 
 	/**
-	 * Execute the given data access action on the given mapped statement.
+	 * Execute the given data access action on the given iBATIS mapped statement.
 	 * @param statementName name of the statement mapped in the iBATIS SqlMap config file
 	 * @param action callback object that specifies the data access action
-	 * @throws DataAccessException in case of Hibernate errors
+	 * @return a result object returned by the action, or null
+	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public Object execute(String statementName, SqlMapCallback action) throws DataAccessException {
 		MappedStatement stmt = this.sqlMap.getMappedStatement(statementName);
@@ -106,7 +107,8 @@ public class SqlMapTemplate extends JdbcAccessor implements SqlMapOperations {
 	 * expecting a List result.
 	 * @param statementName name of the statement mapped in the iBATIS SqlMap config file
 	 * @param action callback object that specifies the data access action
-	 * @throws DataAccessException in case of Hibernate errors
+	 * @return a List result
+	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public List executeWithListResult(String statementName, SqlMapCallback action)
 	    throws DataAccessException {
@@ -118,12 +120,14 @@ public class SqlMapTemplate extends JdbcAccessor implements SqlMapOperations {
 	 * expecting a Map result.
 	 * @param statementName name of the statement mapped in the iBATIS SqlMap config file
 	 * @param action callback object that specifies the data access action
-	 * @throws DataAccessException in case of Hibernate errors
+	 * @return a Map result
+	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public Map executeWithMapResult(String statementName, SqlMapCallback action)
 	    throws DataAccessException {
 		return (Map) execute(statementName, action);
 	}
+
 
 	public Object executeQueryForObject(String statementName, final Object parameterObject)
 			throws DataAccessException {
