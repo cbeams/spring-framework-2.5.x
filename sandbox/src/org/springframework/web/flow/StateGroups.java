@@ -41,16 +41,16 @@ public class StateGroups implements Serializable {
 		add(DEFAULT_GROUP_ID, state);
 	}
 
-	public boolean add(String groupId, AbstractState state) {
-		return getOrCreateGroup(groupId).add(state);
+	public void add(String groupId, AbstractState state) {
+		getOrCreateGroup(groupId).add(state);
 	}
 
-	public boolean addAll(AbstractState[] states) {
-		return addAll(DEFAULT_GROUP_ID, states);
+	public void addAll(AbstractState[] states) {
+		addAll(DEFAULT_GROUP_ID, states);
 	}
 
-	public boolean addAll(String groupId, AbstractState[] states) {
-		return getOrCreateGroup(groupId).addAll(states);
+	public void addAll(String groupId, AbstractState[] states) {
+		getOrCreateGroup(groupId).addAll(states);
 	}
 
 	private StateGroup getOrCreateGroup(String groupId) {

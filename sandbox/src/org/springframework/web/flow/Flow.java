@@ -610,7 +610,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public AbstractState getState(String stateId) {
-		Iterator it = stateGroups.statesIterator();
+		Iterator it = statesIterator();
 		while (it.hasNext()) {
 			AbstractState state = (AbstractState)it.next();
 			if (state.getId().equals(stateId)) {

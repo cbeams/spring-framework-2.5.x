@@ -48,7 +48,7 @@ public class StateGroup implements Serializable {
 
 	public void add(AbstractState state) {
 		state.setFlow(flow);
-		states.add(states);
+		states.add(state);
 	}
 
 	public void addAll(AbstractState[] states) {
