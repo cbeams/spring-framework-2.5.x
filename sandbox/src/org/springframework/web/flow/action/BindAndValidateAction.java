@@ -273,7 +273,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 *         loaded
 	 */
 	protected final Object loadRequiredFormObject(FlowExecutionContext context) throws IllegalStateException,
-			ObjectRetrievalFailureException {
+			FormObjectRetrievalFailureException {
 		try {
 			// get the form object
 			Object formObject = loadFormObject(context);
@@ -281,8 +281,8 @@ public class BindAndValidateAction extends AbstractAction {
 			return formObject;
 		}
 		catch (ServletRequestBindingException e) {
-			throw new ObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
-					"Unable to obtain object identifier info from request", e);
+			throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
+					"Unable to obtain form object identifying information from the input event", e);
 		}
 	}
 
