@@ -52,7 +52,7 @@ distribution/website before using any of them in your own applications.
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
 - EasyMock 1.1 (http://www.easymock.org)
-- required for building the test suite
+- required for building and running the framework test suite
 
 * ehcache/ehcache-1.1.jar
 - EHCache 1.1 (http://ehcache.sourceforge.net)
@@ -115,13 +115,12 @@ distribution/website before using any of them in your own applications.
 
 * j2ee/jdbc2_0-stdext.jar
 - JDBC 2.0 Standard Extensions (http://java.sun.com/products/jdbc)
-- required for building the framework on J2SE 1.3
 - required at runtime when using Spring's JDBC support on J2SE 1.3
 
 * j2ee/jms.jar
 - Java Message Service API 1.1 (java.sun.com/products/jms)
 - required for building the framework
-- required at runtime when using Spring's AbstractJmsMessageDrivenBean
+- required at runtime when using Spring's JMS support
 
 * j2ee/jsp-api.jar
 - JSP API 2.0 (http://java.sun.com/products/jsp)
@@ -143,6 +142,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JavaMailSender
 
+* j2ee/rowset.jar
+- JDBC RowSet Implementations 1.0.1 (http://java.sun.com/products/jdbc)
+- required for building the framework on JDK < 1.5
+- required at runtime when using Spring's RowSet support on JDK < 1.5
+
 * j2ee/servlet-api.jar
 - Servlet API 2.4 (http://java.sun.com/products/servlet)
 - required for building the framework
@@ -150,8 +154,7 @@ distribution/website before using any of them in your own applications.
 
 * j2ee/xml-apis.jar
 - JAXP, DOM and SAX APIs (taken from Xerces 2.6 distribution; http://xml.apache.org/xerces2-j)
-- required for building the framework on J2SE 1.3
-- required at runtime when using Spring's XmlBeanFactory on J2SE 1.3
+- required at runtime when using Spring's XmlBeanFactory on JDK < 1.4
 
 * jakarta-commons/commons-attributes-api.jar, jakarta-commons/commons-attributes-compiler.jar
 - Commons Attributes 2.1 (http://jakarta.apache.org/commons/attributes)
@@ -165,8 +168,8 @@ distribution/website before using any of them in your own applications.
 * jakarta-commons/commons-collections.jar
 - Commons Collections 3.1 (http://jakarta.apache.org/commons/collections)
 - required for building the framework
-- optional for using linked/identity maps in Spring core (on JDK <= 1.4)
-- required for running Petclinic, JPetStore, Image Database (by Commons DBCP, Hibernate, OJB)
+- optional for using linked/identity maps in Spring core (on JDK < 1.4)
+- required for running Petclinic, JPetStore (by Commons DBCP, Hibernate, OJB)
 
 * jakarta-commons/commons-dbcp.jar
 - Commons DBCP 1.2.1 (http://jakarta.apache.org/commons/dbcp)
@@ -228,6 +231,21 @@ distribution/website before using any of them in your own applications.
 - JDO API 1.0.1 (http://access1.sun.com/jdo)
 - required for building the framework
 - required at runtime when using Spring's JDO support
+
+* jmx/jmxri.jar
+- JMX 1.2.1 reference implementation
+- required for building the framework on JDK < 1.5
+- required at runtime when using Spring's JMX support on JDK < 1.5
+
+* jmx/jmxremote.jar
+- JMX Remote API 1.0.1 reference implementation
+- required for building the framework on JDK < 1.5
+- required at runtime when using Spring's JMX support on JDK < 1.5
+
+* jmx/jmxremote_optional.jar
+- JMXMP connector (from JMX Remote API 1.0.1 reference implementation)
+- required for running the framework test suite (even on JDK 1.5)
+- required at runtime when using the JMXMP connector (even on JDK 1.5)
 
 * jotm/jotm.jar
 - JOTM 2.0.3 (http://jotm.objectweb.org)
