@@ -16,18 +16,20 @@
 package org.springframework.rules.values;
 
 /**
+ * Interface to be implemented by backing form objects; e.g unbuffered,
+ * domain-specific form models.
+ * 
  * @author Keith Donald
  */
-public interface MutableFormModel extends NestableFormModel {
-    public MutableAspectAccessStrategy getAspectAccessStrategy();
-
-    public MetaAspectAccessStrategy getMetaAspectAccessor();
-
-    public void setFormProperties(String[] domainObjectProperties);
-
-    public ValueModel add(String domainObjectProperty);
-
-    public ValueModel add(String domainObjectProperty, boolean bufferChanges);
-
-    public ValueModel add(String domainObjectProperty, ValueModel valueModel);
+public interface FormObject extends PropertyChangePublisher {
+    
+    /**
+     * Does this form object have changes that have not yet been committed? This
+     * can be used to determine if a warning needs to be displayed when a user
+     * closes the GUI displaying the form without first committing their
+     * changes, for example.
+     * 
+     * @return the dirty status
+     */
+    public boolean isDirty();
 }

@@ -15,7 +15,9 @@
  */
 package org.springframework.rules.values;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -100,10 +102,10 @@ public class DefaultFormModel implements MutableFormModel {
             String formProperty) {
         Assert
                 .isTrue(
-                        valueModel != null,
-                        "The property '"
-                                + formProperty
-                                + "' has not been added to this form model (or to any parents.)");
+                    valueModel != null,
+                    "The property '"
+                            + formProperty
+                            + "' has not been added to this form model (or to any parents.)");
     }
 
     public ValueModel add(String domainObjectProperty) {
@@ -140,7 +142,7 @@ public class DefaultFormModel implements MutableFormModel {
                     .setCommitTrigger(commitTrigger);
         }
         formValueModel = preProcessNewFormValueModel(domainObjectProperty,
-                formValueModel);
+            formValueModel);
         formValueModels.put(domainObjectProperty, formValueModel);
         if (logger.isDebugEnabled()) {
             logger
@@ -181,13 +183,34 @@ public class DefaultFormModel implements MutableFormModel {
         if (valueModel == null) {
             if (parent != null && queryParent) {
                 valueModel = parent.findValueModelFor(this,
-                        domainObjectProperty);
+                    domainObjectProperty);
             }
         }
         return valueModel;
     }
 
     public boolean hasErrors() {
+        return false;
+    }
+
+    public Map getErrors() {
+        return Collections.EMPTY_MAP;
+    }
+
+    public boolean isDirty() {
+        if (getFormObject() instanceof FormObject) {
+            return ((FormObject)getFormObject()).isDirty();
+        }
+        else if (bufferChanges) {
+            Iterator it = formValueModels.values().iterator();
+            while (it.hasNext()) {
+                ValueModel model = (ValueModel)it.next();
+                if (model instanceof BufferedValueModel) {
+                    BufferedValueModel bufferable = (BufferedValueModel)model;
+                    if (bufferable.isDirty()) { return true; }
+                }
+            }
+        }
         return false;
     }
 

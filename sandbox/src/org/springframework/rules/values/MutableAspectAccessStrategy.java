@@ -38,8 +38,8 @@ public interface MutableAspectAccessStrategy extends AspectAccessStrategy {
 
     public ValueModel getDomainObjectHolder();
 
-    public void addValueListener(ValueListener o, String aspect);
+    public void addValueListener(ValueListener listener, String aspect);
 
-    public void removeValueListener(ValueListener o, String aspect);
+    public void removeValueListener(ValueListener listener, String aspect);
 
 }

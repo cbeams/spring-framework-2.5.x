@@ -25,6 +25,7 @@ public abstract class Operator extends StringCodedEnum {
     
     protected Operator(String code, String symbol) {
         super(code);
+        this.symbol = symbol;
     }
     
     public String getSymbol() {

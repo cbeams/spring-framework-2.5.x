@@ -15,6 +15,8 @@
  */
 package org.springframework.rules.values;
 
+import java.util.Map;
+
 /**
  * @author Keith Donald
  */
@@ -35,7 +37,11 @@ public interface FormModel {
 
     public ValueModel getValueModel(String formProperty);
 
+    public Map getErrors();
+
     public boolean hasErrors();
+
+    public boolean isDirty();
 
     public void commit();
 

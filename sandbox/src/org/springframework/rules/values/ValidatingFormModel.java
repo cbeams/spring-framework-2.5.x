@@ -17,6 +17,7 @@ package org.springframework.rules.values;
 
 import java.beans.PropertyEditor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -76,11 +77,15 @@ public class ValidatingFormModel extends DefaultFormModel implements
         return validationErrors.size() > 0;
     }
 
+    public Map getErrors() {
+        return Collections.unmodifiableMap(validationErrors);
+    }
+
     public int getFormPropertiesWithErrorsCount() {
         return validationErrors.size();
     }
 
-    public int getTotalErrors() {
+    public int getTotalErrorCount() {
         Iterator it = validationErrors.values().iterator();
         int totalErrors = 0;
         while (it.hasNext()) {
@@ -108,15 +113,14 @@ public class ValidatingFormModel extends DefaultFormModel implements
             PropertyEditor editor = provider
                     .getPropertyEditor(domainObjectProperty);
             formValueModel = installTypeConverter(formValueModel,
-                    domainObjectProperty, editor);
+                domainObjectProperty, editor);
         }
         else {
             PropertyEditor editor = getAspectAccessStrategy().findCustomEditor(
-                    getMetaAspectAccessor()
-                            .getAspectClass(domainObjectProperty),
-                    domainObjectProperty);
+                getMetaAspectAccessor().getAspectClass(domainObjectProperty),
+                domainObjectProperty);
             formValueModel = installTypeConverter(formValueModel,
-                    domainObjectProperty, editor);
+                domainObjectProperty, editor);
         }
         return new ValidatingFormValueModel(domainObjectProperty,
                 formValueModel, getValidationRule(domainObjectProperty));
@@ -163,7 +167,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
                                 + "please set a valid reference to enable rules-based validation.");
             }
             constraint = rulesSource.getRules(getFormObjectClass(),
-                    domainObjectProperty);
+                domainObjectProperty);
         }
         return constraint;
     }

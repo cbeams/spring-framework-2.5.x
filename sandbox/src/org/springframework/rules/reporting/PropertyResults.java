@@ -41,23 +41,14 @@ public class PropertyResults implements ValidationResults {
         return new DefaultMessageTranslator(messages).getMessage(this);
     }
 
-    /**
-     * @return Returns the propertyName.
-     */
     public String getPropertyName() {
         return propertyName;
     }
 
-    /**
-     * @return Returns the rejectedValue.
-     */
     public Object getRejectedValue() {
         return rejectedValue;
     }
 
-    /**
-     * @return Returns the violatedConstraint.
-     */
     public UnaryPredicate getViolatedConstraint() {
         return violatedConstraint;
     }
@@ -66,9 +57,6 @@ public class PropertyResults implements ValidationResults {
         return new SummingVisitor(getViolatedConstraint()).sum();
     }
 
-    /**
-     * @return Returns the severity.
-     */
     public Severity getSeverity() {
         return severity;
     }
