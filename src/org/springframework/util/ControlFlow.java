@@ -10,18 +10,17 @@ package org.springframework.util;
  * the current call stack. Useful in AOP (as in AspectJ cflow concept)
  * but not AOP-specific.
  * @author Rod Johnson
- * @version $Id: ControlFlow.java,v 1.1 2003-12-21 11:49:39 johnsonr Exp $
+ * @version $Id: ControlFlow.java,v 1.2 2003-12-30 01:24:06 jhoeller Exp $
  */
 public interface ControlFlow {
 	
 	boolean under(Class clazz);
+
 	/**
-	 * Matches whole method name
-	 * @param clazz
-	 * @param methodName
-	 * @return
+	 * Matches whole method name.
 	 */
 	boolean under(Class clazz, String methodName);
 	
 	boolean underToken(String token);
+
 }
