@@ -10,6 +10,7 @@ import net.sf.hibernate.Hibernate;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.JDBCException;
+import net.sf.hibernate.LockMode;
 import net.sf.hibernate.ObjectDeletedException;
 import net.sf.hibernate.ObjectNotFoundException;
 import net.sf.hibernate.PersistentObjectException;
@@ -24,8 +25,8 @@ import net.sf.hibernate.type.Type;
 import org.easymock.MockControl;
 
 import org.springframework.beans.TestBean;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -197,6 +198,54 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testGet() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.get(TestBean.class, "");
+		sessionControl.setReturnValue(tb, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Object result = ht.get(TestBean.class, "");
+		assertTrue("Correct result", result == tb);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testGetWithLockMode() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.get(TestBean.class, "", LockMode.UPGRADE_NOWAIT);
+		sessionControl.setReturnValue(tb, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Object result = ht.get(TestBean.class, "", LockMode.UPGRADE_NOWAIT);
+		assertTrue("Correct result", result == tb);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testLoad() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
@@ -247,6 +296,30 @@ public class HibernateTemplateTests extends TestCase {
 			assertEquals("id", ex.getIdentifier());
 			assertEquals(onfex, ex.getRootCause());
 		}
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testLoadWithLockMode() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.load(TestBean.class, "", LockMode.UPGRADE);
+		sessionControl.setReturnValue(tb, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		Object result = ht.load(TestBean.class, "", LockMode.UPGRADE);
+		assertTrue("Correct result", result == tb);
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -339,6 +412,29 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.saveOrUpdate(tb);
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testLock() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		TestBean tb = new TestBean();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.lock(tb, LockMode.WRITE);
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+			sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.lock(tb, LockMode.WRITE);
 		sfControl.verify();
 		sessionControl.verify();
 	}

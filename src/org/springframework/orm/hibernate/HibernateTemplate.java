@@ -7,6 +7,7 @@ import java.util.List;
 
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
+import net.sf.hibernate.LockMode;
 import net.sf.hibernate.Query;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
@@ -56,8 +57,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>LocalSessionFactoryBean is the preferred way of obtaining a reference
  * to a specific Hibernate SessionFactory, at least in a non-EJB environment.
  *
- * <p>Note: This class, like all of Spring's Hibernate support, requires
- * Hibernate 2.0 (initially developed with RC1).
+ * <p>Note: Spring's Hibernate support requires Hibernate 2.x (2.1 recommended).
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -165,7 +165,47 @@ public class HibernateTemplate extends HibernateAccessor {
 
 	/**
 	 * Return the persistent instance of the given entity class
-	 * with the given identifier.
+	 * with the given identifier, or null if not found.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.get.
+	 * @param entityClass a persistent class
+	 * @param id an identifier of the persistent instance
+	 * @return the persistent instance, or null if not found
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#get(Class, Serializable)
+	 */
+	public Object get(final Class entityClass, final Serializable id) throws DataAccessException {
+		return execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return session.get(entityClass, id);
+			}
+		});
+	}
+
+	/**
+	 * Return the persistent instance of the given entity class
+	 * with the given identifier, or null if not found.
+	 * Obtain the specified lock mode if the instance exists.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.get.
+	 * @param entityClass a persistent class
+	 * @param id an identifier of the persistent instance
+	 * @return the persistent instance, or null if not found
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#get(Class, Serializable, LockMode)
+	 */
+	public Object get(final Class entityClass, final Serializable id, final LockMode lockMode)
+			throws DataAccessException {
+		return execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return session.get(entityClass, id, lockMode);
+			}
+		});
+	}
+
+	/**
+	 * Return the persistent instance of the given entity class
+	 * with the given identifier, throwing an exception if not found.
 	 * <p>This is a convenience method for single step actions,
 	 * mirroring Session.load.
 	 * @param entityClass a persistent class
@@ -173,12 +213,34 @@ public class HibernateTemplate extends HibernateAccessor {
 	 * @return the persistent instance
 	 * @throws HibernateObjectRetrievalFailureException if the instance could not be found
 	 * @throws DataAccessException in case of Hibernate errors
-	 * @see net.sf.hibernate.Session#load(Class,Serializable)
+	 * @see net.sf.hibernate.Session#load(Class, Serializable)
 	 */
 	public Object load(final Class entityClass, final Serializable id) throws DataAccessException {
 		return execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				return session.load(entityClass, id);
+			}
+		});
+	}
+
+	/**
+	 * Return the persistent instance of the given entity class
+	 * with the given identifier, throwing an exception if not found.
+	 * Obtain the specified lock mode if the instance exists.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.load.
+	 * @param entityClass a persistent class
+	 * @param id an identifier of the persistent instance
+	 * @return the persistent instance
+	 * @throws HibernateObjectRetrievalFailureException if the instance could not be found
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#load(Class, Serializable)
+	 */
+	public Object load(final Class entityClass, final Serializable id, final LockMode lockMode)
+			throws DataAccessException {
+		return execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				return session.load(entityClass, id, lockMode);
 			}
 		});
 	}
@@ -248,6 +310,23 @@ public class HibernateTemplate extends HibernateAccessor {
 		execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				session.saveOrUpdate(entity);
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * Obtain the specified lock level upon the given object.
+	 * <p>This is a convenience method for single step actions,
+	 * mirroring Session.lock.
+	 * @param entity the persistent instance to lock
+	 * @throws DataAccessException in case of Hibernate errors
+	 * @see net.sf.hibernate.Session#lock(Object, LockMode)
+	 */
+	public void lock(final Object entity, final LockMode lockMode) throws DataAccessException {
+		execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+				session.lock(entity, lockMode);
 				return null;
 			}
 		});
