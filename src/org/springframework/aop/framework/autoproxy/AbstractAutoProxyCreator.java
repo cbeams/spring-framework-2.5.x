@@ -50,7 +50,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.1 2003-12-12 16:50:43 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.2 2004-01-07 12:40:12 jhoeller Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, BeanFactoryAware, Ordered {
 
@@ -171,8 +171,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 			}
 			if (logger.isInfoEnabled()) {
 				int nrOfCommonInterceptors = this.interceptors != null ? this.interceptors.length : 0;
+				int nrOfSpecificInterceptors = specificInterceptors != null ? specificInterceptors.length : 0;
 				logger.info("Creating implicit proxy for bean '" +  name + "' with " + nrOfCommonInterceptors +
-										" common interceptors and " + specificInterceptors.length + " specific interceptors");
+										" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 			}
 			ProxyFactory proxyFactory = new ProxyFactory();
 			// Copy our properties (proxyTargetClass) inherited from ProxyConfig
@@ -193,7 +194,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 			}
 			proxyFactory.setTargetSource(getTargetSource(bean, name));
 			
-			//System.err.print(proxyFactory);
 			return proxyFactory.getProxy();
 		}
 		else {
