@@ -30,8 +30,8 @@ public class PropertyPresent implements UnaryPredicate {
 
     public boolean evaluate(Object bean) {
         BeanWrapper wrapper = new BeanWrapperImpl(bean);
-        Object otherValue = wrapper.getPropertyValue(propertyName);
-        return Required.instance().evaluate(otherValue);
+        Object value = wrapper.getPropertyValue(propertyName);
+        return Required.instance().evaluate(value);
     }
 
 }
