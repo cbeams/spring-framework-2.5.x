@@ -36,7 +36,7 @@
 	-->
 	<action-state id="bindAndValidateForm">
 		<action bean="birthDateFormAction">
-			<property name="executeMethodName">bindAndValidate</property>
+			<property name="executeMethodName" value="bindAndValidate"/>
 		</action>
 		<transition on="success" to="calculateAge"/>
 		<transition on="error" to="formView"/>
