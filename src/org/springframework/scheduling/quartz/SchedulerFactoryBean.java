@@ -16,14 +16,15 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +35,7 @@ import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.simpl.SimpleThreadPool;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -41,7 +43,12 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
  * FactoryBean that sets up a Quartz Scheduler and exposes it for
@@ -56,13 +63,21 @@ import org.springframework.core.io.Resource;
  * contrast to Timer which uses a TimerTask instance that is shared
  * between repeated executions. Just JobDetail descriptors are shared.
  *
+ * <p>Spring's Quartz support was developed against Quartz 1.3.
+ *
  * @author Juergen Hoeller
  * @since 18.02.2004
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
- * @version $Id: SchedulerFactoryBean.java,v 1.9 2004-05-18 07:35:22 jhoeller Exp $
+ * @version $Id: SchedulerFactoryBean.java,v 1.10 2004-06-09 15:59:10 jhoeller Exp $
  */
-public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
+public class SchedulerFactoryBean
+    implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
+
+	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
+
+	public static final int DEFAULT_THREAD_COUNT = 10;
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -74,17 +89,29 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 
 	private Properties quartzProperties;
 
+	private DataSource dataSource;
+
+	private PlatformTransactionManager transactionManager;
+
 	private Map schedulerContextMap;
 
 	private ApplicationContext applicationContext;
 
 	private String applicationContextSchedulerContextKey;
 
+	private boolean overwriteExistingJobs = false;
+
+	private String[] jobSchedulingDataLocations;
+
 	private List jobDetails;
 
 	private Map calendars;
 
 	private List triggers;
+
+	private int startupDelay = 0;
+
+	private boolean waitForJobsToCompleteOnShutdown = false;
 
 	private Scheduler scheduler;
 
@@ -115,8 +142,9 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 	/**
 	 * Set the location of the Quartz properties config file, for example
 	 * as classpath resource "classpath:quartz.properties".
-	 * <p>Note: Can be omitted when all necessary properties are
-	 * specified locally via this bean.
+	 * <p>Note: Can be omitted when all necessary properties are specified
+	 * locally via this bean, or when relying on Quartz' default configuration.
+	 * @see #setQuartzProperties
 	 */
 	public void setConfigLocation(Resource configLocation) {
 		this.configLocation = configLocation;
@@ -126,9 +154,33 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 	 * Set Quartz properties, like "org.quartz.threadPool.class".
 	 * <p>Can be used to override values in a Quartz properties config file,
 	 * or to specify all necessary properties locally.
+	 * @see #setConfigLocation
 	 */
 	public void setQuartzProperties(Properties quartzProperties) {
 		this.quartzProperties = quartzProperties;
+	}
+
+	/**
+	 * Set the DataSource to be used by the Scheduler. If set,
+	 * this will override corresponding settings in Quartz properties.
+	 * <p>Note: If this is set, the Quartz settings should not define
+	 * a job store "dataSource" to avoid meaningless double configuration.
+	 * @see #setQuartzProperties
+	 * @see #setTransactionManager
+	 * @see org.springframework.scheduling.quartz.LocalDataSourceJobStore
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Set the transaction manager to be used for registering jobs and triggers
+	 * that are defined by this SchedulerFactoryBean. Default is none; setting
+	 * this only makes sense when specifying a DataSource for the Scheduler.
+	 * @see #setDataSource
+	 */
+	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
 	}
 
 	/**
@@ -137,8 +189,8 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 	 * <p>Note: When using persistent Jobs whose JobDetail will be kept in the
 	 * database, do not put Spring-managed beans or an ApplicationContext
 	 * reference into the JobDataMap but rather into the SchedulerContext.
-	 * @param schedulerContextAsMap Map with String keys and any objects as values
-	 * (for example Spring-managed beans)
+	 * @param schedulerContextAsMap Map with String keys and any objects as
+	 * values (for example Spring-managed beans)
 	 * @see JobDetailBean#setJobDataAsMap
 	 */
 	public void setSchedulerContextAsMap(Map schedulerContextAsMap) {
@@ -157,8 +209,8 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 	 * database, do not put an ApplicationContext reference into the JobDataMap
 	 * but rather into the SchedulerContext.
 	 * <p>In case of a QuartzJobBean, the reference will be applied to the Job
-	 * instance as bean property. An "applicationContext" attribute will correspond
-	 * to a "setApplicationContext" method in that scenario.
+	 * instance as bean property. An "applicationContext" attribute will
+	 * correspond to a "setApplicationContext" method in that scenario.
 	 * <p>Note that BeanFactory callback interfaces like ApplicationContextAware
 	 * are not automatically applied to Quartz Job instances, because Quartz
 	 * itself is reponsible for the lifecycle of its Jobs.
@@ -170,8 +222,41 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 	}
 
 	/**
-	 * Register a list of JobDetail objects with the Scheduler that this
-	 * FactoryBean creates, to be referenced by Triggers.
+	 * Set whether any jobs defined on this SchedulerFactoryBean should overwrite
+	 * existing job definitions. Default is "false", to not overwrite already
+	 * registered jobs that have been read in from a persistent job store.
+	 */
+	public void setOverwriteExistingJobs(boolean overwriteExistingJobs) {
+		this.overwriteExistingJobs = overwriteExistingJobs;
+	}
+
+	/**
+	 * Set the location of a Quartz job definition XML file that follows the
+	 * "job_scheduling_data_1_0" DTD. Can be specified to automatically
+	 * register jobs that are defined in such a file, possibly in addition
+	 * to jobs defined directly on this SchedulerFactoryBean.
+	 * @see ResourceJobSchedulingDataProcessor
+	 * @see org.quartz.xml.JobSchedulingDataProcessor
+	 */
+	public void setJobSchedulingDataLocation(String jobSchedulingDataLocation) {
+		this.jobSchedulingDataLocations = new String[] {jobSchedulingDataLocation};
+	}
+
+	/**
+	 * Set the locations of Quartz job definition XML files that follow the
+	 * "job_scheduling_data_1_0" DTD. Can be specified to automatically
+	 * register jobs that are defined in such files, possibly in addition
+	 * to jobs defined directly on this SchedulerFactoryBean.
+	 * @see ResourceJobSchedulingDataProcessor
+	 * @see org.quartz.xml.JobSchedulingDataProcessor
+	 */
+	public void setJobSchedulingDataLocations(String[] jobSchedulingDataLocations) {
+		this.jobSchedulingDataLocations = jobSchedulingDataLocations;
+	}
+
+	/**
+	 * Register a list of JobDetail objects with the Scheduler that
+	 * this FactoryBean creates, to be referenced by Triggers.
 	 * <p>This is not necessary when a Trigger determines the JobDetail
 	 * itself: In this case, the JobDetail will be implicitly registered
 	 * in combination with the Trigger.
@@ -186,8 +271,8 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 	}
 
 	/**
-	 * Register a list of Quartz Calendar objects with the Scheduler that
-	 * this FactoryBean creates, to be referenced by Triggers.
+	 * Register a list of Quartz Calendar objects with the Scheduler
+	 * that this FactoryBean creates, to be referenced by Triggers.
 	 * @param calendars Map with calendar names as keys as Calendar
 	 * objects as values
 	 * @see org.quartz.Calendar
@@ -198,8 +283,8 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 	}
 
 	/**
-	 * Register a list of Trigger objects with the Scheduler that this
-	 * FactoryBean creates.
+	 * Register a list of Trigger objects with the Scheduler that
+	 * this FactoryBean creates.
 	 * <p>If the Trigger determines the corresponding JobDetail itself,
 	 * the job will be automatically registered with the Scheduler.
 	 * Else, the respective JobDetail needs to be registered via the
@@ -214,19 +299,44 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 		this.triggers = Arrays.asList(triggers);
 	}
 
+	/**
+	 * Set the number of seconds to wait after initialization before
+	 * starting the scheduler asynchronously. Default is 0, meaning
+	 * immediate synchronous startup on initialization of this bean.
+	 * <p>Setting this to 10 or 20 seconds makes sense if no jobs
+	 * should be run before the entire application has started up.
+	 */
+	public void setStartupDelay(int startupDelay) {
+		this.startupDelay = startupDelay;
+	}
 
-	public void afterPropertiesSet() throws IOException, SchedulerException {
+	/**
+	 * Set whether to wait for running jobs to complete on shutdown.
+	 * Default is false.
+	 * @see org.quartz.Scheduler#shutdown(boolean)
+	 */
+	public void setWaitForJobsToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
+		this.waitForJobsToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
+	}
+
+
+	public void afterPropertiesSet() throws Exception {
 		// create SchedulerFactory
 		SchedulerFactory schedulerFactory = (SchedulerFactory)
 		    BeanUtils.instantiateClass(this.schedulerFactoryClass);
 
 		// load and/or apply Quartz properties
-		if (this.configLocation != null || this.quartzProperties != null) {
+		if (this.configLocation != null || this.quartzProperties != null || this.dataSource != null) {
 			if (!(schedulerFactory instanceof StdSchedulerFactory)) {
 				throw new IllegalArgumentException("StdSchedulerFactory required for applying Quartz properties");
 			}
 
 			Properties props = new Properties();
+
+			// Set necessary default properties here, as Quartz will not apply
+			// its default configuration when explicitly given properties.
+			props.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
+			props.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
 
 			if (this.configLocation != null) {
 				// load Quarz properties from given location
@@ -244,11 +354,24 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 				props.putAll(this.quartzProperties);
 			}
 
+			if (this.dataSource != null) {
+				props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
+			}
+
 			((StdSchedulerFactory) schedulerFactory).initialize(props);
+		}
+
+		if (this.dataSource != null) {
+			// make given DataSource available for SchedulerFactory configuration
+			LocalDataSourceJobStore.configTimeDataSourceHolder.set(this.dataSource);
 		}
 
 		// get Scheduler instance from SchedulerFactory
 		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
+
+		if (this.dataSource != null) {
+			LocalDataSourceJobStore.configTimeDataSourceHolder.set(null);
+		}
 
 		// put specified objects into Scheduler context
 		if (this.schedulerContextMap != null) {
@@ -264,46 +387,9 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 			this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
 		}
 
-		// register JobDetails
-		if (this.jobDetails != null) {
-			for (Iterator it = this.jobDetails.iterator(); it.hasNext();) {
-				JobDetail jobDetail = (JobDetail) it.next();
-				this.scheduler.addJob(jobDetail, true);
-			}
-		}
-		else {
-			// create empty list for easier checks when registering triggers
-			this.jobDetails = new ArrayList();
-		}
+		registerJobsAndTriggers();
 
-		// register Calendars
-		if (this.calendars != null) {
-			for (Iterator it = this.calendars.keySet().iterator(); it.hasNext();) {
-				String calendarName = (String) it.next();
-				Calendar calendar = (Calendar) this.calendars.get(calendarName);
-				this.scheduler.addCalendar(calendarName, calendar, true);
-			}
-		}
-
-		// register Triggers
-		if (this.triggers != null) {
-			for (Iterator it = this.triggers.iterator(); it.hasNext();) {
-				Trigger trigger = (Trigger) it.next();
-				// check if the Trigger is aware of an associated JobDetail
-				if (trigger instanceof JobDetailAwareTrigger) {
-					JobDetail jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
-					if (!this.jobDetails.contains(jobDetail)) {
-						// automatically register the JobDetail too
-						this.jobDetails.add(jobDetail);
-						this.scheduler.addJob(jobDetail, true);
-					}
-				}
-				this.scheduler.scheduleJob(trigger);
-			}
-		}
-
-		logger.info("Starting Quartz Scheduler");
-		this.scheduler.start();
+		startScheduler(this.scheduler, this.startupDelay);
 	}
 
 	/**
@@ -329,6 +415,136 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 		}
 	}
 
+	/**
+	 * Register jobs and triggers (within a transaction, if possible).
+	 */
+	private void registerJobsAndTriggers() throws Exception {
+		TransactionStatus transactionStatus = null;
+		if (this.transactionManager != null) {
+			transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+		}
+		try {
+
+			if (this.jobSchedulingDataLocations != null) {
+				ResourceJobSchedulingDataProcessor dataProcessor = new ResourceJobSchedulingDataProcessor();
+				if (this.applicationContext != null) {
+					dataProcessor.setResourceLoader(this.applicationContext);
+				}
+				for (int i = 0; i < this.jobSchedulingDataLocations.length; i++) {
+					dataProcessor.processFileAndScheduleJobs(this.jobSchedulingDataLocations[i], this.scheduler,
+																									 this.overwriteExistingJobs);
+				}
+			}
+
+			// register JobDetails
+			if (this.jobDetails != null) {
+				for (Iterator it = this.jobDetails.iterator(); it.hasNext();) {
+					JobDetail jobDetail = (JobDetail) it.next();
+					addJobToScheduler(jobDetail);
+				}
+			}
+			else {
+				// create empty list for easier checks when registering triggers
+				this.jobDetails = new LinkedList();
+			}
+
+			// register Calendars
+			if (this.calendars != null) {
+				for (Iterator it = this.calendars.keySet().iterator(); it.hasNext();) {
+					String calendarName = (String) it.next();
+					Calendar calendar = (Calendar) this.calendars.get(calendarName);
+					this.scheduler.addCalendar(calendarName, calendar, true);
+				}
+			}
+
+			// register Triggers
+			if (this.triggers != null) {
+				for (Iterator it = this.triggers.iterator(); it.hasNext();) {
+					Trigger trigger = (Trigger) it.next();
+					if (this.scheduler.getTrigger(trigger.getName(), trigger.getGroup()) == null) {
+						// check if the Trigger is aware of an associated JobDetail
+						if (trigger instanceof JobDetailAwareTrigger) {
+							JobDetail jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
+							// automatically register the JobDetail too
+							if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
+								this.jobDetails.add(jobDetail);
+							}
+						}
+						this.scheduler.scheduleJob(trigger);
+					}
+				}
+			}
+		}
+
+		catch (Exception ex) {
+			if (transactionStatus != null) {
+				try {
+					this.transactionManager.rollback(transactionStatus);
+				}
+				catch (TransactionException tex) {
+					logger.error("Job registration exception overridden by rollback exception", ex);
+					throw tex;
+				}
+			}
+			throw ex;
+		}
+		if (transactionStatus != null) {
+			this.transactionManager.commit(transactionStatus);
+		}
+	}
+
+	/**
+	 * Add the given job to the Scheduler, if it doesn't already exist.
+	 * Overwrites the job in any case if "overwriteExistingJobs" is set.
+	 * @param jobDetail the job to add
+	 * @return true if the job was actually added,
+	 * false if it already existed before
+	 * @see #setOverwriteExistingJobs
+	 */
+	private boolean addJobToScheduler(JobDetail jobDetail) throws SchedulerException {
+		if (this.overwriteExistingJobs ||
+		    this.scheduler.getJobDetail(jobDetail.getName(), jobDetail.getGroup()) == null) {
+			this.scheduler.addJob(jobDetail, true);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	/**
+	 * Start the Quartz Scheduler, respecting the "startupDelay" setting.
+	 * @param scheduler the Scheduler to start
+	 * @param startupDelay the number of seconds to wait before starting
+	 * the Scheduler asynchronously
+	 */
+	protected void startScheduler(final Scheduler scheduler, final int startupDelay) throws SchedulerException {
+		if (startupDelay <= 0) {
+			logger.info("Starting Quartz scheduler now");
+			scheduler.start();
+		}
+		else {
+			logger.info("Will start Quartz scheduler in " + startupDelay + " seconds");
+			new Thread() {
+				public void run() {
+					try {
+						Thread.sleep(startupDelay * 1000);
+					}
+					catch (InterruptedException ex) {
+						// simply proceed
+					}
+					logger.info("Starting Quartz scheduler now, after delay of " + startupDelay + " seconds");
+					try {
+						scheduler.start();
+					}
+					catch (SchedulerException ex) {
+						throw new DelayedSchedulerStartException(ex);
+					}
+				}
+			}.start();
+		}
+	}
+
 
 	public Object getObject() {
 		return this.scheduler;
@@ -347,8 +563,16 @@ public class SchedulerFactoryBean implements FactoryBean, ApplicationContextAwar
 	 * stopping all scheduled jobs.
 	 */
 	public void destroy() throws SchedulerException {
-		logger.info("Shutting down Quartz Scheduler");
-		this.scheduler.shutdown();
+		logger.info("Shutting down Quartz scheduler");
+		this.scheduler.shutdown(this.waitForJobsToCompleteOnShutdown);
+	}
+
+
+	public static class DelayedSchedulerStartException extends NestedRuntimeException {
+
+		private DelayedSchedulerStartException(SchedulerException ex) {
+			super("Could not start Quartz scheduler after delay", ex);
+		}
 	}
 
 }
