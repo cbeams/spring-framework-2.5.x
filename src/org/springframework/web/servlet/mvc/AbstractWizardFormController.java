@@ -354,12 +354,17 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Return the name of the session attribute that holds
-	 * the page object for this controller.
+	 * Return the name of the HttpSession attribute that holds
+	 * the page object for this wizard form controller.
+	 * <p>Default is an internal name, of no relevance to applications,
+	 * as the page session attribute is not usually accessed directly.
+	 * Can be overridden to use an application-specific attribute name,
+	 * which allows other code to access the session attribute directly.
 	 * @return the name of the page session attribute
+	 * @see #getFormSessionAttributeName
 	 */
-	protected final String getPageSessionAttributeName() {
-		return getClass().getName() + ".page." + getCommandName();
+	protected String getPageSessionAttributeName() {
+		return getClass().getName() + ".PAGE." + getCommandName();
 	}
 
 	/**
@@ -455,7 +460,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			return pageAttr.intValue();
 		}
 		throw new IllegalStateException("Page attribute [" + getPageSessionAttributeName() +
-																		"] neither found in session nor in request");
+		    "] neither found in session nor in request");
 	}
 
 	/**
@@ -534,7 +539,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			return showPage(request, errors, currentPage);
 		}
 
-		// In case of field errors on a page -> show the page.
+		// In case of remaining errors on a page -> show the page.
 		for (int page = 0; page < this.pages.length; page++) {
 			validatePage(command, errors, page, true);
 			if (errors.hasErrors()) {

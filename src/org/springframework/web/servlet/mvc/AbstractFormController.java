@@ -209,16 +209,6 @@ public abstract class AbstractFormController extends BaseCommandController {
 	
 
 	/**
-	 * Return the name of the session attribute that holds
-	 * the form object for this controller.
-	 * @return the name of the form session attribute,
-	 * or null if not in session form mode.
-	 */
-	protected final String getFormSessionAttributeName() {
-		return isSessionForm() ? getClass().getName() + ".form." + getCommandName() : null;
-	}
-
-	/**
 	 * Handles two cases: form submissions and showing a new form.
 	 * Delegates the decision between the two to isFormSubmission,
 	 * always treating requests without existing form session attribute
@@ -253,6 +243,20 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 */
 	protected boolean isFormSubmission(HttpServletRequest request) {
 		return "POST".equals(request.getMethod());
+	}
+
+	/**
+	 * Return the name of the HttpSession attribute that holds
+	 * the form object for this form controller.
+	 * <p>Default is an internal name, of no relevance to applications,
+	 * as the form session attribute is not usually accessed directly.
+	 * Can be overridden to use an application-specific attribute name,
+	 * which allows other code to access the session attribute directly.
+	 * @return the name of the form session attribute,
+	 * or null if not in session form mode
+	 */
+	protected String getFormSessionAttributeName() {
+		return isSessionForm() ? getClass().getName() + ".FORM." + getCommandName() : null;
 	}
 
 	/**
