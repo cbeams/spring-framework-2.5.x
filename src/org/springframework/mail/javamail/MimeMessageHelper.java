@@ -16,7 +16,6 @@
 
 package org.springframework.mail.javamail;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,30 +55,38 @@ import org.springframework.core.io.Resource;
  * setters on the wrapper, using the underlying MimeMessage for mail sending.
  * Also used internally by JavaMailSenderImpl.
  *
- * <p>Sample code:
+ * <p>Sample code for an HTML mail with an inline image and a PDF attachment:
  *
  * <pre>
  * mailSender.send(new MimeMessagePreparator() {
  *   public void prepare(MimeMessage mimeMessage) throws MessagingException {
- *     MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true);
+ *     MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
  *     message.setFrom("me@mail.com");
  *     message.setTo("you@mail.com");
  *     message.setSubject("my subject");
- *     message.setText("my text");
- *     message.addAttachment("logo.gif", new ClassPathResource("images/mylogo.gif"));
+ *     message.setText("my text &lt;img src='cid:myLogo'&gt;", true);
+ *     message.addInline("myLogo", new ClassPathResource("images/mylogo.gif"));
+ *     message.addAttachment("myDocument.pdf", new ClassPathResource("doc/myDocument.pdf"));
  *   }
  * });</pre>
  *
  * @author Juergen Hoeller
  * @since 19.01.2004
- * @see javax.mail.internet.MimeMessage
  * @see #getMimeMessage
  * @see MimeMessagePreparator
  * @see JavaMailSender
  * @see JavaMailSenderImpl
+ * @see javax.mail.internet.MimeMessage
  * @see org.springframework.mail.SimpleMailMessage
  */
 public class MimeMessageHelper {
+
+	private static final String CONTENT_TYPE_HTML = "text/html";
+
+	private static final String CONTENT_TYPE_CHARSET_SUFFIX = ";charset=";
+
+	private static final String HEADER_CONTENT_ID = "Content-ID";
+
 
 	private final MimeMessage mimeMessage;
 
@@ -366,14 +373,12 @@ public class MimeMessageHelper {
 
 	private void setTextToMimePart(MimePart mimePart, final String text, boolean html) throws MessagingException {
 		if (html) {
-			// Need to use a javax.activation.DataSource to set a text
-			// with content type "text/html"!
-			InputStreamSource isSource = new InputStreamSource() {
-				public InputStream getInputStream() throws IOException {
-					return new ByteArrayInputStream(getEncoding() != null ? text.getBytes(getEncoding()) : text.getBytes());
-				}
-			};
-			mimePart.setDataHandler(new DataHandler(createDataSource(isSource, "text/html", "text")));
+			if (getEncoding() != null) {
+				mimePart.setContent(text, CONTENT_TYPE_HTML + CONTENT_TYPE_CHARSET_SUFFIX + getEncoding());
+			}
+			else {
+				mimePart.setContent(text, CONTENT_TYPE_HTML);
+			}
 		}
 		else {
 			if (getEncoding() != null) {
@@ -385,6 +390,89 @@ public class MimeMessageHelper {
 		}
 	}
 
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from a
+	 * <code>javax.activation.DataSource</code>.
+	 * <p>Note that the InputStream returned by the DataSource implementation
+	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
+	 * getInputStream() multiple times.
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param dataSource the <code>javax.activation.DataSource</code> to take
+	 * the content from, determining the InputStream and the content type
+	 * @throws MessagingException in case of errors
+	 * @see #addAttachment(String, File)
+	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
+	 */
+	public void addInline(String contentId, DataSource dataSource) throws MessagingException {
+		MimeBodyPart mimeBodyPart = new MimeBodyPart();
+		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
+		// Using setHeader here to stay compatible with JavaMail 1.2,
+		// rather than JavaMail 1.3's setContentID.
+		mimeBodyPart.setHeader(HEADER_CONTENT_ID, "<" + contentId + ">");
+		mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
+		getMimeMultipart().addBodyPart(mimeBodyPart);
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from a
+	 * <code>java.io.File</code>.
+	 * <p>The content type will be determined by the name of the given
+	 * content file. Do not use this for temporary files with arbitrary
+	 * filenames (possibly ending in ".tmp" or the like)!
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param file the File resource to take the content from
+	 * @throws MessagingException
+	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
+	 * @see #addAttachment(String, javax.activation.DataSource)
+	 */
+	public void addInline(String contentId, File file) throws MessagingException {
+		addInline(contentId, new FileDataSource(file));
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from an
+	 * <code>org.springframework.core.io.InputStreamResource</code>.
+	 * <p>The content type will be determined by the name of the given
+	 * content file. Do not use this for temporary files with arbitrary
+	 * filenames (possibly ending in ".tmp" or the like)!
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param resource the resource to take the content from
+	 * @see #addAttachment(String, File)
+	 * @see #addAttachment(String, javax.activation.DataSource)
+	 */
+	public void addInline(String contentId, Resource resource) throws MessagingException {
+		String contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(resource.getFilename());
+		addInline(contentId, resource, contentType);
+	}
+
+	/**
+	 * Add an inline element to the MimeMessage, taking the content from an
+	 * <code>org.springframework.core.InputStreamResource</code>.
+	 * <p>Note that you can determine the content type for any given filename
+	 * via the Activation Framework's FileTypeMap utility:<br>
+	 * <code>FileTypeMap.getDefaultFileTypeMap().getContentType(myFilename)</code>
+	 * @param contentId the content ID to use. Will end up as "Content-ID" header
+	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
+	 * Can be referenced in HTML source via src="cid:myId" expressions.
+	 * @param inputStreamSource the resource to take the content from
+	 * @param contentType the content type to use for the element
+	 * @see #addAttachment(String, File)
+	 * @see #addAttachment(String, javax.activation.DataSource)
+	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
+	 * @see javax.activation.FileTypeMap#getContentType
+	 */
+	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
+	    throws MessagingException {
+		DataSource dataSource = createDataSource(inputStreamSource, contentType, "inline");
+		addInline(contentId, dataSource);
+	}
 
 	/**
 	 * Add an attachment to the MimeMessage, taking the content from a
@@ -442,88 +530,6 @@ public class MimeMessageHelper {
 		DataSource dataSource = createDataSource(inputStreamSource, contentType, attachmentFilename);
 		addAttachment(attachmentFilename, dataSource);
 	}
-
-
-	/**
-	 * Add an inline element to the MimeMessage, taking the content from a
-	 * <code>javax.activation.DataSource</code>.
-	 * <p>Note that the InputStream returned by the DataSource implementation
-	 * needs to be a <i>fresh one on each call</i>, as JavaMail will invoke
-	 * getInputStream() multiple times.
-	 * @param contentId the content ID to use. Will end up as "Content-ID" header
-	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
-	 * Can be referenced in HTML source via src="cid:myId" expressions.
-	 * @param dataSource the <code>javax.activation.DataSource</code> to take
-	 * the content from, determining the InputStream and the content type
-	 * @throws MessagingException in case of errors
-	 * @see #addAttachment(String, File)
-	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
-	 */
-	public void addInline(String contentId, DataSource dataSource) throws MessagingException {
-		MimeBodyPart mimeBodyPart = new MimeBodyPart();
-		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
-		mimeBodyPart.setHeader("Content-ID", "<" + contentId + ">");
-		mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
-		getMimeMultipart().addBodyPart(mimeBodyPart);
-	}
-
-	/**
-	 * Add an inline element to the MimeMessage, taking the content from a
-	 * <code>java.io.File</code>.
-	 * <p>The content type will be determined by the name of the given
-	 * content file. Do not use this for temporary files with arbitrary
-	 * filenames (possibly ending in ".tmp" or the like)!
-	 * @param contentId the content ID to use. Will end up as "Content-ID" header
-	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
-	 * Can be referenced in HTML source via src="cid:myId" expressions.
-	 * @param file the File resource to take the content from
-	 * @throws MessagingException
-	 * @see #addAttachment(String, org.springframework.core.io.InputStreamSource)
-	 * @see #addAttachment(String, javax.activation.DataSource)
-	 */
-	public void addInline(String contentId, File file) throws MessagingException {
-		addInline(contentId, new FileDataSource(file));
-	}
-
-	/**
-	 * Add an inline element to the MimeMessage, taking the content from an
-	 * <code>org.springframework.core.io.InputStreamResource</code>.
-	 * <p>The content type will be determined by the name of the given
-	 * content file. Do not use this for temporary files with arbitrary
-	 * filenames (possibly ending in ".tmp" or the like)!
-	 * @param contentId the content ID to use. Will end up as "Content-ID" header
-	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
-	 * Can be referenced in HTML source via src="cid:myId" expressions.
-	 * @param resource the resource to take the content from
-	 * @see #addAttachment(String, File)
-	 * @see #addAttachment(String, javax.activation.DataSource)
-	 */
-	public void addInline(String contentId, Resource resource) throws MessagingException {
-		String contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(resource.getFilename());
-		addInline(contentId, createDataSource(resource, contentType, "inline"));
-	}
-
-	/**
-	 * Add an inline element to the MimeMessage, taking the content from an
-	 * <code>org.springframework.core.InputStreamResource</code>.
-	 * <p>Note that you can determine the content type for any given filename
-	 * via the Activation Framework's FileTypeMap utility:<br>
-	 * <code>FileTypeMap.getDefaultFileTypeMap().getContentType(myFilename)</code>
-	 * @param contentId the content ID to use. Will end up as "Content-ID" header
-	 * in the body part, surrounded by angle brackets: e.g. "myId" -> "&lt;myId&gt;".
-	 * Can be referenced in HTML source via src="cid:myId" expressions.
-	 * @param inputStreamSource the resource to take the content from
-	 * @param contentType the content type to use for the element
-	 * @see #addAttachment(String, File)
-	 * @see #addAttachment(String, javax.activation.DataSource)
-	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
-	 * @see javax.activation.FileTypeMap#getContentType
-	 */
-	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
-	    throws MessagingException {
-		addInline(contentId, createDataSource(inputStreamSource, contentType, "inline"));
-	}
-
 
 	/**
 	 * Create an Activation Framework DataSource for the given InputStreamSource.
