@@ -239,7 +239,11 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		catch (BeanInitializationException ex) {
 			// expected
 			assertTrue(ex.getCause() instanceof FileNotFoundException);
-			assertTrue(ex.getMessage().indexOf(System.getProperty("user.dir")) != -1);
+			// slight hack for Linux/Unix systems
+			String userDir = System.getProperty("user.dir");
+			if (userDir.startsWith("/"))
+				userDir = userDir.substring(1);
+			assertTrue(ex.getMessage().indexOf(userDir) != -1);
 		}
 	}
 
