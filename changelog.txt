@@ -3,18 +3,25 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.3 (12.12.2004)
--------------------------------------
+Changes in version 1.1.3 (5.12.2004)
+------------------------------------
 
 Package org.springframework.beans
 * fixed TypeMismatchException constructor to avoid NPE in case of null as required type
+* added "fileEncoding" and "propertiesPersister" properties to PropertyResourceConfigurer
+* added hooks for custom conversion of read-in property values to PropertyResourceConfigurer (e.g. for decryption)
 * fixed PropertyPlaceholderConfigurer to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
 
 Package org.springframework.core
 * fixed AbstractPathResolvingPropertyEditor to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
 
 Package org.springframework.jndi
-* added optional "proxyInterface", "lookupOnStartup" and "cache" properties to JndiObjectFactoryBean
+* added optional "proxyInterface" property to JndiObjectFactoryBean, for exposing a proxy rather than the plain object
+* added "lookupOnStartup" and "cache" properties to JndiObjectFactoryBean, allowing for lazy lookup on first access etc
+
+Package org.springframework.remoting
+* added "codebaseUrl" property to HttpInvokerClientInterceptor, specifying a URL for dynamic class download
+* added support for dynamic class downloading to AbstractHttpInvokerRequestExecutor and its subclasses
 
 
 Changes in version 1.1.2 (14.11.2004)
