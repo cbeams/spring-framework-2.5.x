@@ -75,7 +75,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -431,7 +431,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().containsBeanDefinition(name);
 	}
 
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) throws BeansException {
+	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+			throws BeansException {
 		return getBeanFactory().getBeansOfType(type, includePrototypes, includeFactoryBeans);
 	}
 
@@ -442,6 +443,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public BeanFactory getParentBeanFactory() {
 		return getParent();
+	}
+
+	/**
+	 * Return the internal bean factory of the parent context if it implements
+	 * ConfigurableApplicationContext; else, return the parent context itself.
+	 * @see org.springframework.context.ConfigurableApplicationContext#getBeanFactory
+	 */
+	protected BeanFactory getInternalParentBeanFactory() {
+		return (getParent() instanceof ConfigurableApplicationContext) ?
+				((ConfigurableApplicationContext) getParent()).getBeanFactory() : (BeanFactory) getParent();
 	}
 
 

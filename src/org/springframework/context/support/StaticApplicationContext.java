@@ -50,7 +50,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 		super(parent);
 
 		// create bean factory with parent
-		this.beanFactory = new DefaultListableBeanFactory(parent);
+		this.beanFactory = new DefaultListableBeanFactory(getInternalParentBeanFactory());
 
 		// Register the message source bean
 		registerSingleton(MESSAGE_SOURCE_BEAN_NAME, StaticMessageSource.class, null);
