@@ -290,7 +290,7 @@ public void setMyComponent(MyComponent myComponent) {
     However, it is problematic when the ApplicationContext is loading a number
     of beans, or the initializaiton of those beans is time consuming or memory
     intensive (such as a Hibernate SessionFactory initialization, for
-    example), since every EJB will have their own copy. In this case, the use
+    example), since every EJB will have their own copy. In this case, the user
     may want to override the defualt
     <literal>ContextJndiBeanFactoryLocator</literal> usage and use another
     <literal>BeanFactoryLocator </literal>variant, such as
