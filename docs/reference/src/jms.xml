@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter>
+  <title>JMS</title>
+  <sect1>
+    <title>Introduction</title>
+    <para>Spring provides a JMS abstraction framework that simplifies
+    the use of the JMS API and shields the user from differences in the 
+    JMS API between version 1.0.2 and 1.1.</para>
+
+    <para>The package <literal>org.springframework.jms</literal> provides 
+    the core funtionality for using JMS.  It contains the interface 
+    <literal>JmsTemplate</literal> that executes the part of the JMS API 
+    responsible for creation and release of JMS resources and delegates 
+    the essence of the JMS processing task to user implemented callback 
+    interfaces.  It also contains the interface <literal>JmsAdmin</literal> 
+    for obtaining JMS destinations from JNDI and to create dynamic
+    destinations.  Exceptions that are thrown during JMS processing 
+    are converted to a mirrored hierarchy of unchecked exceptions.</para>
+
+    <para>JMS functionality can be roughly divided into two areas of
+    functionality, producing and consuming of messages.  In an
+    J2EE environment, the ability to consume messages is provided for 
+    by MessageDriven beans while in a stand-alone application this 
+    ability is provided for by the creation of MessageListeners or 
+    ConnectionConsumers.  With a few small caveats, producing messages 
+    is similar in both a J2EE and stand-alone environment and the JmsTemplate
+    can be used in either environment.  Spring also provides various factory 
+    classes for use outside a J2EE containers for configuring connections,
+    sessions, message producers and messgae consumers.
+    </para>
+  </sect1>    
+
+  <sect1>
+    <title>Domain unification</title>
+    <para>There are two major releases of the JMS specification, 1.0.2 
+    and 1.1.  JMS 1.0.2 defined two types of messaging domains, 
+    point-to-point and publish/subscribe.  The 1.0.2 API reflected these two
+    messaging domains by providing a parallel class hierarcy for each domain.
+    Consequentially, a client application was domain specific in the use of
+    the JMS API.  JMS 1.1 introduced the concept of domain unification 
+    that minimized both the functional differences and client API 
+    differences between the two domains.  As an example of a functional 
+    difference that was removed, if you use the JMS 1.1 API you can 
+    transactionally consume a message from one domain and produce a message
+    on the other.
+    </para>
+
+    <para>The JMS 1.1 specification is part of J2EE 1.4 and is 
+    required by EJB 2.1.  The JmsTemplate inteface was designed with 
+    domain unification in mind, so that it will be easy to transition from
+    using 1.0.2 to a 1.1 provider.</para>
+  </sect1>
+
+  <sect1>
+    <title>JmsTemplate</title>
+
+    <para>This interface simplifies the use of the JMS by handling the 
+    creation and release of resources, much like the 
+    <literal>JdbcTemplate</literal> does for JDBC.  This interface
+    has implementations for both the JMS 1.0.2 and 1.1 APIs, namely
+    <literal>JmsTemplate102</literal> and <literal>JmsTemplate11</literal>.
+    This interface offers various convience methods for the sending of
+    messages, consuming a  message synchronously, and exposing the
+    JMS session and message producer to the user.<para>
+    <!-- TODO see if sendRequestReply makes it into 1.1 -->
+    </para>
+    <para>Code that uses the the JmsTemplate only needs to implement callback
+    interfaces giving them a clearly defined contract.  The 
+    <literal>MessageCreator</literal> callback interface creates a message
+    given a Session provided by the JmsTemplate.  In order to allow
+    for more complex usage of the JMS API, the callback  
+    <literal>SessionCallback</literal> provides the user with the JMS
+    session.  The callback <literal>JmsSenderCallback</literal> exposes
+    the a Session and MessageProduer pair.
+    
+    <!-- TODO change name of JmsSenderCallback to something more meaningful. -->
+    </para>
+    <para>
+    The JMS API exposes delivery mode, priority, and time to live as 
+    quality of service (QOS) parameters when sending a message.  These QOS
+    parameters 
+    </para>    
+  </sect1>  
+
+  <sect1>
+    <title>ConnectionFactory</title>
+  </sect1>
+
+  <sect1>
+    <title>Using the JmsTemplate</title>
+  </sect1>
+
+  <sect1>
+    <title>MessageConverters</title>
+  </sect1>
+
+  <sect1>
+    <title>Use in a J2EE container</title>
+  </sect1>
+
+  <sect1>
+    <title>Use outside a J2EE container</title>
+  </sect1>
+
+
+        
+</chapter>
+
