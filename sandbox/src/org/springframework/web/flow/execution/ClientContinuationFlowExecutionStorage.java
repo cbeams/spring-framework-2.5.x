@@ -43,23 +43,22 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * 
  * @author Erwin Vervaet
  */
-public class ClientSideContinuationsFlowExecutionStorage implements FlowExecutionStorage {
+public class ClientContinuationFlowExecutionStorage implements FlowExecutionStorage {
 
-	public FlowExecution load(Event requestingEvent, String uniqueId)
-			throws NoSuchFlowExecutionException, FlowExecutionStorageException {
-		return decode(uniqueId);
+	public FlowExecution load(String id, Event requestingEvent) throws NoSuchFlowExecutionException,
+			FlowExecutionStorageException {
+		return decode(id);
 	}
 
-	public String save(Event requestingEvent, String uniqueId,
-			FlowExecution flowExecution) throws FlowExecutionStorageException {
+	public String save(String id, FlowExecution flowExecution, Event requestingEvent)
+			throws FlowExecutionStorageException {
 		return encode(flowExecution);
 	}
 
-	public void remove(Event requestingEvent, String uniqueId)
-			throws FlowExecutionStorageException {
+	public void remove(String id, Event requestingEvent) throws FlowExecutionStorageException {
 		// nothing to do here
 	}
-	
+
 	/**
 	 * Decode given data string, received from the client, and return the
 	 * corresponding flow execution object.
@@ -71,7 +70,7 @@ public class ClientSideContinuationsFlowExecutionStorage implements FlowExecutio
 	protected FlowExecution decode(String data) {
 		return new FlowExecutionContinuation(Base64.decodeBase64(data.getBytes())).getFlowExecution();
 	}
-	
+
 	/**
 	 * Encode given flow execution object into a data string that can be
 	 * stored on the client.
@@ -83,5 +82,4 @@ public class ClientSideContinuationsFlowExecutionStorage implements FlowExecutio
 		byte[] data = new FlowExecutionContinuation(flowExecution).getData();
 		return new String(Base64.encodeBase64(data));
 	}
-
 }

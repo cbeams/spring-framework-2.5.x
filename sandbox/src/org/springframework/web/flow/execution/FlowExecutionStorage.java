@@ -28,46 +28,45 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * @author Erwin Vervaet
  */
 public interface FlowExecutionStorage {
-	
+
 	/**
 	 * Load an existing flow execution, identified by given unique id, from
 	 * the storage.
-	 * @param requestingEvent the event requesting the load of the flow execution
-	 * @param uniqueId the unique id of the flow execution, as returned by the
+	 * @param id the unique id of the flow execution, as returned by the
 	 *        {@link #save(Event, String, FlowExecution) save} method
+	 * @param requestingEvent the event requesting the load of the flow execution
 	 * @return the loaded flow execution
 	 * @throws NoSuchFlowExecutionException when there is no flow execution
 	 *         with specified id in the storage
 	 * @throws FlowExecutionStorageException when there is a technical problem
 	 *         accessing the flow execution storage
 	 */
-	public FlowExecution load(Event requestingEvent, String uniqueId)
-		throws NoSuchFlowExecutionException, FlowExecutionStorageException;
-	
+	public FlowExecution load(String id, Event requestingEvent) throws NoSuchFlowExecutionException,
+			FlowExecutionStorageException;
+
 	/**
 	 * Save given flow execution in the storage.
-	 * @param requestingEvent the event requesting the save of the flow execution
-	 * @param uniqueId the unique id of the flow execution, or <code>null</code>
+	 * @param id the unique id of the flow execution, or <code>null</code>
 	 *        if the flow execution does not yet have an id (e.g. was not
 	 *        previously saved)
+	 * @param requestingEvent the event requesting the save of the flow execution
 	 * @param flowExecution the flow execution to save
 	 * @return the unique id that actually identifies the saved flow execution,
 	 *         this could be different from the id passed into the method
 	 * @throws FlowExecutionStorageException when there is a technical problem
 	 *         accessing the flow execution storage
 	 */
-	public String save(Event requestingEvent, String uniqueId, FlowExecution flowExecution)
-		throws FlowExecutionStorageException;
+	public String save(String id, FlowExecution flowExecution, Event requestingEvent)
+			throws FlowExecutionStorageException;
 
 	/**
 	 * Remove the identified flow execution from the storage.
-	 * @param requestingEvent the event requesting the remove of the flow execution
-	 * @param uniqueId the unique id of the flow execution, as returned by the
+	 * @param id the unique id of the flow execution, as returned by the
 	 *        {@link #save(Event, String, FlowExecution) save} method
+	 * @param requestingEvent the event requesting the remove of the flow execution
 	 * @throws FlowExecutionStorageException when there is a technical problem
 	 *         accessing the flow execution storage
 	 */
-	public void remove(Event requestingEvent, String uniqueId)
-		throws FlowExecutionStorageException;
+	public void remove(String id, Event requestingEvent) throws FlowExecutionStorageException;
 
 }

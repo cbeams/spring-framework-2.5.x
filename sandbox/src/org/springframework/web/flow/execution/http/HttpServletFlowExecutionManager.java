@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution;
+package org.springframework.web.flow.execution.http;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,6 +24,7 @@ import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.execution.FlowExecutionManager;
 
 /**
  * Flow execution manager to manage flow executions using HTTP servlet
@@ -32,42 +33,22 @@ import org.springframework.web.flow.ViewDescriptor;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public class HttpServletRequestFlowExecutionManager extends FlowExecutionManager {
-	
+public class HttpServletFlowExecutionManager extends FlowExecutionManager {
+
 	/**
-	 * Create a new HTTP servlet request flow execution manager.
-	 * The manager should be configured using the appropriate setters.
+	 * Creates a http-servlet based flow execution manager.
+	 * @param flow the flow to manage
 	 */
-	public HttpServletRequestFlowExecutionManager() {
+	public HttpServletFlowExecutionManager(Flow flow) {
+		super(flow);
 	}
-	
+
 	/**
-	 * Create a new HTTP servlet request flow execution manager.
-	 * @param storage the flow execution storage strategy to use
-	 * @param flowLocator the flow locator to use for flow lookup of possible
-	 *        other flows specified using the "_flowId" request parameter
-	 * @param flow the default flow for which executions will be managed
+	 * Creates a http-servlet based flow execution manager.
+	 * @param flowLocator the locator to find flows to manage
 	 */
-	public HttpServletRequestFlowExecutionManager(FlowExecutionStorage storage, FlowLocator flowLocator, Flow flow) {
-		setFlowExecutionStorage(storage);
-		setFlowLocator(flowLocator);
-		setFlow(flow);
-	}
-	
-	/**
-	 * Create a new HTTP servlet request flow execution manager.
-	 * @param storage the flow execution storage strategy to use
-	 * @param flowLocator the flow locator to use for flow lookup of possible
-	 *        other flows specified using the "_flowId" request parameter
-	 * @param flow the default flow for which executions will be managed
-	 * @param flowExecutionListeners the listeners to attach to executing flows
-	 */
-	public HttpServletRequestFlowExecutionManager(
-			FlowExecutionStorage storage, FlowLocator flowLocator, Flow flow, FlowExecutionListener[] flowExecutionListeners) {
-		setFlowExecutionStorage(storage);
-		setFlowLocator(flowLocator);
-		setFlow(flow);
-		setFlowExecutionListeners(flowExecutionListeners);
+	public HttpServletFlowExecutionManager(FlowLocator flowLocator) {
+		super(flowLocator);
 	}
 
 	/**

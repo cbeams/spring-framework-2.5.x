@@ -19,20 +19,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowExecutionListener;
-import org.springframework.web.flow.FlowLocator;
+import org.springframework.util.Assert;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
-import org.springframework.web.flow.execution.FlowExecutionStorage;
-import org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager;
-import org.springframework.web.flow.execution.HttpSessionFlowExecutionStorage;
+import org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
  * Web controller for the Spring MVC framework that handles requests using a web
- * flow. Requests are managed using an {@link HttpServletRequestFlowExecutionManager}.
+ * flow. Requests are managed using an {@link HttpServletFlowExecutionManager}.
  * Consult the JavaDoc of that class for more information on how requests are
  * processed.
  * <p>
@@ -48,25 +43,13 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * <td><b>description </b></td>
  * </tr>
  * <tr>
- * <td>flow</td>
- * <td><i>null</i></td>
- * <td>Set the top level fow started by this controller. This is optional.
- * </td>
- * </tr>
- * <tr>
- * <td>flowExecutionListener(s)</td>
- * <td><i>null</i></td>
- * <td>Set the flow execution listener(s) that should be notified of flow
- * execution lifecycle events.</td>
- * </tr>
- * <tr>
  * <td>flowExecutionManager</td>
- * <td>{@link org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager default}</td>
+ * <td>{@link org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager default}</td>
  * <td>Configures the flow execution manager implementation to use.</td>
  * </tr>
  * </table>
  * 
- * @see org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager
+ * @see org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager
  * 
  * @author Erwin Vervaet
  * @author Keith Donald
@@ -74,21 +57,10 @@ import org.springframework.web.servlet.mvc.AbstractController;
 public class FlowController extends AbstractController implements InitializingBean {
 
 	/**
-	 * The flow managed by this controller, may be null if the views will
-	 * parameterize this controller with the id of the flow to manage.
+	 * The HTTP servlet-basebased manager flow executions.
 	 */
-	private Flow flow;
+	private HttpServletFlowExecutionManager flowExecutionManager;
 
-	/**
-	 * A helper for managed HTTP servlet request-based flow executions.
-	 */
-	private HttpServletRequestFlowExecutionManager flowExecutionManager;
-
-	/**
-	 * The listeners of executing flows managed by this controller.
-	 */
-	private FlowExecutionListener[] flowExecutionListeners;
-	
 	/**
 	 * Create a new FlowController.
 	 * <p>
@@ -96,71 +68,51 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * web flow controllers).
 	 */
 	public FlowController() {
+		initDefaults();
+	}
+
+	/**
+	 * Create a new FlowController.
+	 * <p>
+	 * The "cacheSeconds" property is by default set to 0 (so no caching for
+	 * web flow controllers).
+	 */
+	public FlowController(HttpServletFlowExecutionManager manager) {
+		setFlowExecutionManager(manager);
+		initDefaults();
+	}
+
+	/**
+	 * Set default properties for this controller.
+	 */
+	protected void initDefaults() {
+		setRequireSession(true);
 		setCacheSeconds(0);
 	}
 
 	/**
-	 * Returns the top level flow started by this controller, or
-	 * <code>null</code> if not set.
-	 */
-	protected Flow getFlow() {
-		return flow;
-	}
-	
-	/**
-	 * Set the top level fow started by this controller. This is optional.
-	 */
-	public void setFlow(Flow flow) {
-		this.flow = flow;
-	}
-
-	/**
-	 * Returns the flow execution listeners that should be notified of flow
-	 * execution lifecycle events.
-	 */
-	protected FlowExecutionListener[] getFlowExecutionListeners() {
-		return this.flowExecutionListeners;
-	}
-	
-	/**
-	 * Set the flow execution listener that should be notified of flow execution
-	 * lifecycle events.
-	 */
-	public void setFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners = new FlowExecutionListener[] { listener };
-	}
-
-	/**
-	 * Set the flow execution listeners that should be notified of flow
-	 * execution lifecycle events.
-	 */
-	public void setFlowExecutionListeners(FlowExecutionListener[] listeners) {
-		this.flowExecutionListeners = listeners;
-	}
-
-	/**
-	 * Returns the flow execution manager used by this controller. Defaults
-	 * to {@link HttpServletRequestFlowExecutionManager}.
-	 */
-	protected HttpServletRequestFlowExecutionManager getFlowExecutionManager() {
-		return flowExecutionManager;
-	}
-
-	/**
-	 * Configures the flow execution manager implementation to use, allowing
-	 * parameterization of custom manager specializations.
+	 * Configures the flow execution manager implementation to use
 	 * @param manager the flow execution manager.
 	 */
-	public void setFlowExecutionManager(HttpServletRequestFlowExecutionManager manager) {
+	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
 		this.flowExecutionManager = manager;
+		assertManagerSet();
+	}
+
+	private void assertManagerSet() {
+		Assert.notNull(this.flowExecutionManager, "The http servlet flow execution manager is required");
 	}
 
 	public void afterPropertiesSet() throws Exception {
-		// web flows need a session!
-		setRequireSession(true);
-		if (this.flowExecutionManager == null) {
-			this.flowExecutionManager = createFlowExecutionManager();
-		}
+		assertManagerSet();
+	}
+
+	/**
+	 * Returns the flow execution manager used by this controller.
+	 * @return the http flow execution manager
+	 */
+	protected HttpServletFlowExecutionManager getFlowExecutionManager() {
+		return flowExecutionManager;
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
@@ -168,22 +120,9 @@ public class FlowController extends AbstractController implements InitializingBe
 		// delegate to the flow execution manager to process the request
 		ViewDescriptor viewDescriptor = flowExecutionManager.handle(request, response);
 		// convert the view descriptor to a ModelAndView object
-		return createModelAndViewFromViewDescriptor(viewDescriptor);
+		return toModelAndView(viewDescriptor);
 	}
 
-	// subclassing hooks
-
-	/**
-	 * Creates the default flow execution manager. Subclasses can override this to
-	 * return a specialized manager. Alternatively, they can pass in a custom
-	 * flow execution manager by setting the "flowExecutionManager" property.
-	 */
-	protected HttpServletRequestFlowExecutionManager createFlowExecutionManager() {
-		FlowExecutionStorage storage = new HttpSessionFlowExecutionStorage();
-		FlowLocator flowLocator = new BeanFactoryFlowServiceLocator(getApplicationContext());
-		return new HttpServletRequestFlowExecutionManager(storage, flowLocator, getFlow(), getFlowExecutionListeners());
-	}
-	
 	/**
 	 * Create a ModelAndView object based on the information in given view
 	 * descriptor. Subclasses can override this to return a specialized ModelAndView
@@ -191,7 +130,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * @param viewDescriptor the view descriptor to convert
 	 * @return a new ModelAndView object
 	 */
-	protected ModelAndView createModelAndViewFromViewDescriptor(ViewDescriptor viewDescriptor) {
+	protected ModelAndView toModelAndView(ViewDescriptor viewDescriptor) {
 		return new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
 	}
 }

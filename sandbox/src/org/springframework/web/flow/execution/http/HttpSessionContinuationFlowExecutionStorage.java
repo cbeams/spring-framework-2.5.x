@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution;
+package org.springframework.web.flow.execution.http;
 
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
+import org.springframework.web.flow.execution.FlowExecutionContinuation;
+import org.springframework.web.flow.execution.FlowExecutionStorageException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -26,35 +28,32 @@ import org.springframework.web.util.WebUtils;
  * <p>
  * This storage strategy requires a <code>HttpServletRequestEvent</code>.
  * 	
- * @see org.springframework.web.flow.execution.HttpServletRequestEvent
+ * @see org.springframework.web.flow.execution.http.HttpServletRequestEvent
  * 
  * @author Erwin Vervaet
  */
-public class HttpSessionContinuationsFlowExecutionStorage extends HttpSessionFlowExecutionStorage {
+public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlowExecutionStorage {
 
-	public FlowExecution load(Event requestingEvent, String uniqueId)
-			throws NoSuchFlowExecutionException, FlowExecutionStorageException {
+	public FlowExecution load(String id, Event requestingEvent) throws NoSuchFlowExecutionException,
+			FlowExecutionStorageException {
 		try {
-			FlowExecutionContinuation continuation = 
-				(FlowExecutionContinuation)
-					WebUtils.getRequiredSessionAttribute(getHttpServletRequest(requestingEvent), uniqueId);
+			FlowExecutionContinuation continuation = (FlowExecutionContinuation)WebUtils.getRequiredSessionAttribute(
+					getHttpServletRequest(requestingEvent), id);
 			return continuation.getFlowExecution();
-		}
-		catch (IllegalStateException e) {
-			throw new NoSuchFlowExecutionException(uniqueId, e);
+		} catch (IllegalStateException e) {
+			throw new NoSuchFlowExecutionException(id, e);
 		}
 	}
 
-	public String save(Event requestingEvent, String uniqueId, FlowExecution flowExecution)
+	public String save(String id, FlowExecution flowExecution, Event requestingEvent)
 			throws FlowExecutionStorageException {
 		// generate a new id for each continuation!
-		uniqueId = generateUniqueId();
-		getHttpSession(requestingEvent).setAttribute(uniqueId, new FlowExecutionContinuation(flowExecution));
-		return uniqueId;
+		id = createId();
+		getHttpSession(requestingEvent).setAttribute(id, new FlowExecutionContinuation(flowExecution));
+		return id;
 	}
 
-	public void remove(Event requestingEvent, String uniqueId) throws FlowExecutionStorageException {
-		getHttpSession(requestingEvent).removeAttribute(uniqueId);
+	public void remove(String id, Event requestingEvent) throws FlowExecutionStorageException {
+		getHttpSession(requestingEvent).removeAttribute(id);
 	}
-
 }

@@ -23,6 +23,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionServlet;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionListener;
@@ -31,9 +32,7 @@ import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.FormObjectAccessor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
-import org.springframework.web.flow.execution.FlowExecutionStorage;
-import org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager;
-import org.springframework.web.flow.execution.HttpSessionFlowExecutionStorage;
+import org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
@@ -47,7 +46,7 @@ import org.springframework.web.util.WebUtils;
  * views that start new flow executions.
  * <p>
  * Requests are managed by and delegated to a
- * {@link HttpServletRequestFlowExecutionManager}, allowing reuse of common front flow
+ * {@link HttpServletFlowExecutionManager}, allowing reuse of common front flow
  * controller logic in other environments. Consult the JavaDoc of that class for
  * more information on how requests are processed.
  * <p>
@@ -110,7 +109,7 @@ import org.springframework.web.util.WebUtils;
  * <code>ActionForm</code> classes found in traditional Struts-based apps.
  * 
  * @see org.springframework.web.flow.struts.FlowActionMapping
- * @see org.springframework.web.flow.execution.HttpServletRequestFlowExecutionManager
+ * @see org.springframework.web.flow.execution.http.HttpServletFlowExecutionManager
  * @see org.springframework.web.struts.BindingActionForm
  * @see org.springframework.web.struts.BindingRequestProcessor
  * @see org.springframework.web.struts.BindingPlugin
@@ -146,19 +145,23 @@ public class FlowAction extends TemplateAction {
 
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		HttpServletRequestFlowExecutionManager flowExecutionManager = createFlowExecutionManager(mapping);
+		HttpServletFlowExecutionManager flowExecutionManager = createFlowExecutionManager(mapping);
 		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
 		ViewDescriptor viewDescriptor = flowExecutionManager.handle(request, response, actionFormAdapter);
-		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
+		return toActionForward(viewDescriptor, mapping, request);
 	}
 
 	/**
 	 * Creates the default flow execution manager. Subclasses can override this to
 	 * return a specialized manager.
 	 */
-	protected HttpServletRequestFlowExecutionManager createFlowExecutionManager(ActionMapping mapping) {
-		FlowExecutionStorage storage = new HttpSessionFlowExecutionStorage();
-		return new HttpServletRequestFlowExecutionManager(storage, flowLocator, flowLocator.getFlow(getFlowId(mapping)));
+	protected HttpServletFlowExecutionManager createFlowExecutionManager(ActionMapping mapping) {
+		HttpServletFlowExecutionManager manager = new HttpServletFlowExecutionManager(getFlowLocator());
+		String flowId = getFlowId(mapping);
+		if (StringUtils.hasText(flowId)) {
+			manager.setFlow(getFlowLocator().getFlow(flowId));
+		}
+		return manager;
 	}
 
 	/**
@@ -188,7 +191,7 @@ public class FlowAction extends TemplateAction {
 	 * Return a Struts ActionForward given a ViewDescriptor. We need to add all
 	 * attributes from the ViewDescriptor as request attributes.
 	 */
-	private ActionForward createForwardFromViewDescriptor(ViewDescriptor viewDescriptor, ActionMapping mapping,
+	private ActionForward toActionForward(ViewDescriptor viewDescriptor, ActionMapping mapping,
 			HttpServletRequest request) {
 		if (viewDescriptor != null) {
 			WebUtils.exposeRequestAttributes(request, viewDescriptor.getModel());

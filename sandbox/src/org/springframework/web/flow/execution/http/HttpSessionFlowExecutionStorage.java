@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution;
+package org.springframework.web.flow.execution.http;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -21,11 +21,12 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.RandomGuid;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
+import org.springframework.web.flow.execution.FlowExecutionStorage;
+import org.springframework.web.flow.execution.FlowExecutionStorageException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -39,7 +40,7 @@ import org.springframework.web.util.WebUtils;
 public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 
 	protected final Log logger = LogFactory.getLog(HttpSessionFlowExecutionStorage.class);
-	
+
 	private boolean createSession = true;
 
 	/**
@@ -49,7 +50,7 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 	public boolean isCreateSession() {
 		return createSession;
 	}
-	
+
 	/**
 	 * Set whether or not an HTTP session should be created if non exists.
 	 */
@@ -57,60 +58,58 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 		this.createSession = createSession;
 	}
 
-	public FlowExecution load(Event requestingEvent, String uniqueId)
-			throws NoSuchFlowExecutionException, FlowExecutionStorageException {
+	public FlowExecution load(String id, Event requestingEvent) throws NoSuchFlowExecutionException,
+			FlowExecutionStorageException {
 		try {
-			return (FlowExecution)WebUtils.getRequiredSessionAttribute(getHttpServletRequest(requestingEvent), uniqueId);
-		}
-		catch (IllegalStateException e) {
-			throw new NoSuchFlowExecutionException(uniqueId, e);
+			return (FlowExecution)WebUtils.getRequiredSessionAttribute(getHttpServletRequest(requestingEvent), id);
+		} catch (IllegalStateException e) {
+			throw new NoSuchFlowExecutionException(id, e);
 		}
 	}
 
-	public String save(Event requestingEvent, String uniqueId, FlowExecution flowExecution)
+	public String save(String id, FlowExecution flowExecution, Event requestingEvent)
 			throws FlowExecutionStorageException {
-		if (uniqueId == null) {
-			uniqueId = generateUniqueId();
+		if (id == null) {
+			id = createId();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Saving flow execution in HTTP session using unique id '" + uniqueId + "'");
+				logger.debug("Saving flow execution in HTTP session using id '" + id + "'");
 			}
 		}
 		// always update session attribute, even if just overwriting
 		// an existing one to make sure the servlet engine knows that this
 		// attribute has changed!
-		getHttpSession(requestingEvent).setAttribute(uniqueId, flowExecution);
-		return uniqueId;
+		getHttpSession(requestingEvent).setAttribute(id, flowExecution);
+		return id;
 	}
 
-	public void remove(Event requestingEvent, String uniqueId) throws FlowExecutionStorageException {
+	public void remove(String id, Event requestingEvent) throws FlowExecutionStorageException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Removing flow execution with unique id '" + uniqueId + "' from HTTP session");
+			logger.debug("Removing flow execution with id '" + id + "' from HTTP session");
 		}
-		getHttpSession(requestingEvent).removeAttribute(uniqueId);
+		getHttpSession(requestingEvent).removeAttribute(id);
 	}
-	
+
 	/**
 	 * Helper to generate a unique id for a flow execution in the storage
 	 */
-	protected String generateUniqueId() {
+	protected String createId() {
 		return new RandomGuid().toString();
 	}
-	
+
 	/**
 	 * Make sure given event is a <code>HttpServletRequestEvent</code>.
 	 */
 	protected void assertHttpServletRequestEvent(Event event) {
-		Assert.isInstanceOf(HttpServletRequestEvent.class, event,
-				"'" + ClassUtils.getShortName(this.getClass()) + "' can only work with 'HttpServletRequestEvent'");
+		Assert.isInstanceOf(HttpServletRequestEvent.class, event, "Wrong event type:");
 	}
-	
+
 	/**
 	 * Helper to get the HTTP request from given event.
 	 */
 	protected HttpServletRequest getHttpServletRequest(Event event) {
 		return ((HttpServletRequestEvent)event).getRequest();
 	}
-	
+
 	/**
 	 * Helper to get the HTTP session associated with the HTTP request
 	 * embedded in given event.
@@ -118,5 +117,4 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 	protected HttpSession getHttpSession(Event event) {
 		return getHttpServletRequest(event).getSession(isCreateSession());
 	}
-
 }
