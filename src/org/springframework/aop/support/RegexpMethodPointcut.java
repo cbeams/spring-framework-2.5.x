@@ -23,7 +23,6 @@ package org.springframework.aop.support;
  * us to support other pointcut syntaxes in future releases
  * and preserves consistent naming conventions within the framework.
  * @author Rod Johnson
- * @version $Id: RegexpMethodPointcut.java,v 1.7 2004-07-25 11:58:10 johnsonr Exp $
  * @deprecated use Perl5RegexpMethodPointcut
  */
 public class RegexpMethodPointcut extends Perl5RegexpMethodPointcut {

@@ -28,7 +28,6 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 /**
  * Default implementation of the AdvisorAdapterRegistry interface.
  * @author Rod Johnson
- * @version $Id: DefaultAdvisorAdapterRegistry.java,v 1.11 2004-05-23 20:50:25 jhoeller Exp $
  */
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
 	

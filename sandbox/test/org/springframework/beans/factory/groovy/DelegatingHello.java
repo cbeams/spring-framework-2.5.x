@@ -19,7 +19,6 @@ package org.springframework.beans.factory.groovy;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: DelegatingHello.java,v 1.1 2004-07-31 08:54:13 johnsonr Exp $
  */
 public class DelegatingHello implements Hello {
 	

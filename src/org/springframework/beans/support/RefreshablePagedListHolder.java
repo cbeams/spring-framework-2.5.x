@@ -69,7 +69,6 @@ import org.springframework.beans.BeanUtils;
  * @since 24.05.2003
  * @see org.springframework.beans.support.PagedListSourceProvider
  * @see org.springframework.beans.propertyeditors.LocaleEditor
- * @version $Id: RefreshablePagedListHolder.java,v 1.2 2004-03-18 02:46:10 trisberg Exp $
  */
 public class RefreshablePagedListHolder extends PagedListHolder {
 

@@ -28,7 +28,6 @@ import org.springframework.beans.FatalBeanException;
  * 
  * @author Rod Johnson
  * @since 09-Apr-2003
- * @version $Revision: 1.3 $
  */
 public class RollbackRuleTests extends TestCase {
 

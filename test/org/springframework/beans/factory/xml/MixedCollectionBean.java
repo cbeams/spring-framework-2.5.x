@@ -23,7 +23,6 @@ import java.util.Collection;
  * to a mix of references and individual values
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: MixedCollectionBean.java,v 1.4 2004-03-18 03:01:16 trisberg Exp $
  */
 public class MixedCollectionBean {
 

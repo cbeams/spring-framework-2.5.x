@@ -31,7 +31,6 @@ import org.springframework.util.StringUtils;
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 10.09.2003
- * @version $Id: SimpleMailMessage.java,v 1.8 2004-06-05 14:40:29 jhoeller Exp $
  * @see MailSender
  * @see org.springframework.mail.javamail.JavaMailSender
  * @see org.springframework.mail.javamail.MimeMessagePreparator

@@ -23,7 +23,6 @@ import org.apache.velocity.app.VelocityEngine;
  * VelocityEngine for automatic lookup in a web environment. Detected
  * and used by VelocityView.
  * @author Rod Johnson
- * @version $Id: VelocityConfig.java,v 1.3 2004-03-18 02:46:15 trisberg Exp $
  * @see VelocityConfigurer
  * @see VelocityView
  */

@@ -42,7 +42,6 @@ import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
  * @author Rod Johnson
  * @since December 2, 2002
  * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
- * @version $Id: BeanFactoryBootstrap.java,v 1.3 2004-03-18 02:46:14 trisberg Exp $
  */
 public class BeanFactoryBootstrap {
 	

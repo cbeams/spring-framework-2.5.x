@@ -59,7 +59,6 @@ import org.springframework.ui.velocity.VelocityEngineFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Darren Davison
- * @version $Id: VelocityConfigurer.java,v 1.16 2004-07-23 08:38:54 jhoeller Exp $
  * @see #setConfigLocation
  * @see #setVelocityProperties
  * @see #setResourceLoaderPath

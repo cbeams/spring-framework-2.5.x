@@ -28,7 +28,6 @@ import java.util.List;
  * parameters and return types.
  *
  * @author Rod Johnson
- * @version $Id: ReplaceOverride.java,v 1.2 2004-07-28 09:47:16 jhoeller Exp $
  */
 public class ReplaceOverride extends MethodOverride {
 	

@@ -41,7 +41,6 @@ import org.springframework.web.servlet.view.velocity.VelocityViewTests.TestVeloc
 /**
  * @author Darren Davison
  * @since 18.06.2004
- * @version $Id: VelocityMacroTests.java,v 1.2 2004-07-26 06:29:44 jhoeller Exp $
  */
 public class VelocityMacroTests extends TestCase {
 

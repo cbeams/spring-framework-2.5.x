@@ -21,7 +21,6 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * @author Rod Johnson
- * @version $Id: CountingTxManager.java,v 1.4 2004-03-18 03:01:40 trisberg Exp $
  */
 public class CountingTxManager extends AbstractPlatformTransactionManager {
 	

@@ -13,7 +13,6 @@ import java.util.Set;
  *
  * @author Mark Pollack
  * @since Oct 14, 2003
- * @version $Id: JavaDocTags.java,v 1.1 2003-11-22 09:05:44 johnsonr Exp $
  */
 public class JavaDocTags {
 	/**

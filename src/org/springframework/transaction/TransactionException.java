@@ -22,7 +22,6 @@ import org.springframework.core.NestedRuntimeException;
  * Superclass for all transaction exceptions.
  * @author Rod Johnson
  * @since 17-Mar-2003
- * @version $Revision: 1.2 $
  */
 public abstract class TransactionException extends NestedRuntimeException {
 

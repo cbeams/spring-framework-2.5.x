@@ -66,7 +66,6 @@ import javax.ejb.SessionContext;
  *
  * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
  * 
- * @version $Id: ConverterEJB.java,v 1.2 2004-04-18 03:28:52 colins Exp $
  */
 public class ConverterEJB implements SessionBean {
 	/**

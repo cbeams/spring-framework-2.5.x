@@ -19,7 +19,6 @@ package org.springframework.core;
 /**
  * Tests with ControlFlowFactory return
  * @author Rod Johnson
- * @version $Id: DefaultControlFlowTests.java,v 1.2 2004-03-18 03:01:13 trisberg Exp $
  */
 public class DefaultControlFlowTests extends AbstractControlFlowTests {
 	

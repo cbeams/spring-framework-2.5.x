@@ -19,7 +19,6 @@ package org.springframework.beans;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: Person.java,v 1.4 2004-07-29 12:02:40 johnsonr Exp $
  */
 public interface Person {
 	

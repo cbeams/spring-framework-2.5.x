@@ -20,7 +20,6 @@ package org.springframework.dao;
  * Exception thrown on failure to complete a transaction in serialized mode due to update conflicts. 
  * This exception will be thrown either by O/R mapping tools or by custom DAO implementations.
  * @author Rod Johnson
- * @version $Id: CannotSerializeTransactionException.java,v 1.1 2004-07-01 02:34:21 trisberg Exp $
  */
 public class CannotSerializeTransactionException extends ConcurrencyFailureException {
 

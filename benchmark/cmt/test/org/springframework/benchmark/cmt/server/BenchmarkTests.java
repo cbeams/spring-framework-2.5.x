@@ -18,7 +18,6 @@ import org.springframework.benchmark.cmt.server.pojo.PojoBenchmark;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BenchmarkTests.java,v 1.1 2003-12-02 18:31:09 johnsonr Exp $
  */
 public class BenchmarkTests extends TestCase {
 	

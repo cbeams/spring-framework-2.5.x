@@ -22,7 +22,6 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: StringUtilsTestSuite.java,v 1.3 2003/10/08 14:18:39 jhoeller
  *          Exp $
  */
 public class StringUtilsTestSuite extends TestCase {

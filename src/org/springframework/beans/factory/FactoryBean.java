@@ -29,7 +29,6 @@ package org.springframework.beans.factory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since March 08, 2003
- * @version $Id: FactoryBean.java,v 1.8 2004-03-18 02:46:07 trisberg Exp $
  * @see org.springframework.beans.factory.BeanFactory
  */
 public interface FactoryBean {

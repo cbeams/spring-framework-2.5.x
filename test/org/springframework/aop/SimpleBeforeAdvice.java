@@ -21,7 +21,6 @@ import org.springframework.aop.BeforeAdvice;
 /**
  * Simple BeforeAdvice targeted for testing
  * @author Dmitriy Kopylenko
- * @version $Id: SimpleBeforeAdvice.java,v 1.2 2004-03-18 03:01:17 trisberg Exp $
  */
 public interface SimpleBeforeAdvice extends BeforeAdvice {
 	

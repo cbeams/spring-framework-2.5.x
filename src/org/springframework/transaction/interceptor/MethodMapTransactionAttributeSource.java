@@ -32,7 +32,6 @@ import org.springframework.transaction.TransactionUsageException;
  * Simple implementation of TransactionAttributeSource that
  * allows attributes to be stored per method in a map.
  * @since 24-Apr-2003
- * @version $Id: MethodMapTransactionAttributeSource.java,v 1.8 2004-03-18 02:46:05 trisberg Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #isMatch

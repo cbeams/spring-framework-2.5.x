@@ -20,7 +20,6 @@ package org.springframework.dao;
  * Generic exception thrown when the current process was
  * a deadlock loser, and its transaction rolled back.
  * @author Rod Johnson
- * @version $Id: DeadlockLoserDataAccessException.java,v 1.3 2004-03-18 02:46:07 trisberg Exp $
  */
 public class DeadlockLoserDataAccessException extends DataAccessException {
 

@@ -25,7 +25,6 @@ package org.springframework.util;
  * @author Rod Johnson
  * @since 19.03.2004
  * @see org.apache.commons.lang.ObjectUtils
- * @version $Id: ObjectUtils.java,v 1.6 2004-07-27 14:12:50 jhoeller Exp $
  */
 public abstract class ObjectUtils {
 

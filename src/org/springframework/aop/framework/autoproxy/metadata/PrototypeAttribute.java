@@ -20,7 +20,6 @@ package org.springframework.aop.framework.autoproxy.metadata;
  * Tag attribute to identify beans for which the target should be a 
  * prototype (new instance per invocation)
  * @author Rod Johnson
- * @version $Id: PrototypeAttribute.java,v 1.2 2004-03-18 02:46:08 trisberg Exp $
  */
 public class PrototypeAttribute {
 

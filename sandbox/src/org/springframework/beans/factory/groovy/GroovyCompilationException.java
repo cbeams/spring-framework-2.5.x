@@ -22,7 +22,6 @@ import org.springframework.beans.factory.script.CompilationException;
 /**
  * Exception thrown when a Groovy script can't be compiled.
  * @author Rod Johnson
- * @version $Id: GroovyCompilationException.java,v 1.1 2004-08-01 15:42:02 johnsonr Exp $
  */
 public class GroovyCompilationException extends CompilationException {
 	

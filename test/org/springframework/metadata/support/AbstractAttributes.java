@@ -31,7 +31,6 @@ import org.springframework.metadata.Attributes;
  * TODO could implement caching here for efficiency,
  * or add a caching decorator (probably a better idea)
  * @author Rod Johnson
- * @version $Id: AbstractAttributes.java,v 1.2 2004-03-18 03:01:19 trisberg Exp $
  */
 public abstract class AbstractAttributes implements Attributes {
 	

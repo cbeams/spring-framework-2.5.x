@@ -33,7 +33,6 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see ConfigurableListableBeanFactory
- * @version $Id: ConfigurableBeanFactory.java,v 1.12 2004-03-23 20:16:58 jhoeller Exp $
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 

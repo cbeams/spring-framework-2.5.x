@@ -19,7 +19,6 @@ package org.springframework.context.support;
 
 /**
  * @author Alef Arendsen
- * @version $Id: Assembler.java,v 1.3 2004-03-18 03:01:15 trisberg Exp $
  */
 public class Assembler implements TestIF {
 	

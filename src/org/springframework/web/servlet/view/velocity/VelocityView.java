@@ -70,7 +70,6 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityView.java,v 1.29 2004-07-23 08:38:54 jhoeller Exp $
  * @see VelocityConfig
  * @see VelocityConfigurer
  * @see #setUrl

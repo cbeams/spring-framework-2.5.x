@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
  * 
  * Helper that regularly polls a resource
  * @author Rod Johnson
- * @version $Id: DynamicObjectPoller.java,v 1.2 2004-08-05 13:52:21 johnsonr Exp $
  */
 public abstract class DynamicObjectPoller extends TimerTask {
 	

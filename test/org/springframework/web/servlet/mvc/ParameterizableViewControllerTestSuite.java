@@ -25,7 +25,6 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * @author Rod Johnson
  * @since March 2, 2003
- * @version $Id: ParameterizableViewControllerTestSuite.java,v 1.5 2004-04-30 09:03:06 jhoeller Exp $
  */
 public class ParameterizableViewControllerTestSuite extends TestCase {
 

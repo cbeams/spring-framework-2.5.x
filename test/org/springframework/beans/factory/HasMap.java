@@ -24,7 +24,6 @@ import java.util.Set;
  * Bean exposing a map. Used for bean factory tests.
  * @author Rod Johnson
  * @since 05-Jun-2003
- * @version $Id: HasMap.java,v 1.5 2004-06-23 10:39:01 jhoeller Exp $
  */
 public class HasMap {
 	

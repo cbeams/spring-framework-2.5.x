@@ -45,7 +45,6 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
  *
  * @author Juergen Hoeller
  * @since 14.03.2003
- * @version $Id: DriverManagerDataSource.java,v 1.10 2004-07-22 09:45:27 jhoeller Exp $
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see org.springframework.mock.jndi.SimpleNamingContextBuilder
  * @see org.apache.commons.dbcp.BasicDataSource

@@ -55,7 +55,6 @@ import org.springframework.remoting.RemoteAccessException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 09-May-2003
- * @version $Id: SimpleRemoteSlsbInvokerInterceptor.java,v 1.12 2004-07-06 14:52:01 jhoeller Exp $
  * @see org.springframework.remoting.RemoteAccessException
  */
 public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {

@@ -10,7 +10,6 @@ import org.springframework.benchmark.cmt.data.Order;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: GetOrdersBenchmark.java,v 1.1 2003-12-02 18:31:08 johnsonr Exp $
  */
 public class GetOrdersBenchmark extends AbstractBenchmark {
 

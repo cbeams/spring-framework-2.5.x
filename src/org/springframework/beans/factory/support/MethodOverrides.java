@@ -25,7 +25,6 @@ import java.util.Set;
  * Set of method overrides, determining which, if any, methods on a
  * managed object the Spring IoC container will override at runtime.
  * @author Rod Johnson
- * @version $Id: MethodOverrides.java,v 1.4 2004-06-28 11:43:47 johnsonr Exp $
  */
 public class MethodOverrides {
 

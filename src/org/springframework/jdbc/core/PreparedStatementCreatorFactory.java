@@ -35,7 +35,6 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * set of parameter declarations.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: PreparedStatementCreatorFactory.java,v 1.17 2004-07-28 09:40:19 jhoeller Exp $
  */
 public class PreparedStatementCreatorFactory {
 

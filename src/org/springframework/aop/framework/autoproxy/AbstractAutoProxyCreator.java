@@ -72,7 +72,6 @@ import org.springframework.core.Ordered;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since October 13, 2003
- * @version $Id: AbstractAutoProxyCreator.java,v 1.14 2004-08-10 21:15:20 jhoeller Exp $
  * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
  */

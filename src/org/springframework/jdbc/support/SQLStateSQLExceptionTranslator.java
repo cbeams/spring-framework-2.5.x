@@ -33,7 +33,6 @@ import org.springframework.jdbc.UncategorizedSQLException;
  * code in the SQLException. Can't diagnose all problems, but is
  * portable between databases.
  * @author Rod Johnson
- * @version $Id: SQLStateSQLExceptionTranslator.java,v 1.5 2004-07-02 15:26:42 jhoeller Exp $
  * @see java.sql.SQLException#getSQLState
  */
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {

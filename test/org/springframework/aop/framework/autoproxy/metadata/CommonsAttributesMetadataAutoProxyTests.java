@@ -29,7 +29,6 @@ import org.springframework.metadata.commons.CommonsAttributeCompilerUtils;
  * <br>See the commonsBuild.xml Ant build script.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: CommonsAttributesMetadataAutoProxyTests.java,v 1.2 2004-03-18 03:01:17 trisberg Exp $
  */
 public class CommonsAttributesMetadataAutoProxyTests extends AbstractMetadataAutoProxyTests {
 	

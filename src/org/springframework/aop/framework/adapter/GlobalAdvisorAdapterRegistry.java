@@ -20,7 +20,6 @@ package org.springframework.aop.framework.adapter;
  * Singleton to publish a shared DefaultAdvisorAdapterRegistry instance.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: GlobalAdvisorAdapterRegistry.java,v 1.5 2004-05-30 15:13:37 jhoeller Exp $
  * @see DefaultAdvisorAdapterRegistry
  */
 public abstract class GlobalAdvisorAdapterRegistry {

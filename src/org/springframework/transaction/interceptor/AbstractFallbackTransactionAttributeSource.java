@@ -44,7 +44,6 @@ import org.springframework.metadata.Attributes;
  * of the cost of evaluating rollback rules.
  *
  * @author Rod Johnson
- * @version $Id: AbstractFallbackTransactionAttributeSource.java,v 1.1 2004-07-01 16:46:34 johnsonr Exp $
  */
 public abstract class AbstractFallbackTransactionAttributeSource implements TransactionAttributeSource {
 	

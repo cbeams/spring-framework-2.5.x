@@ -42,7 +42,6 @@ import org.springframework.context.ApplicationContext;
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
- * @version $Id: ClassPathXmlApplicationContext.java,v 1.13 2004-07-22 09:55:36 jhoeller Exp $
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 

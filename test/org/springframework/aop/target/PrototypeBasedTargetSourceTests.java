@@ -30,7 +30,6 @@ import junit.framework.TestCase;
  * Unit tests relating to the abstract AbstractPrototypeBasedTargetSource
  * and not subclasses.
  * @author Rod Johnson
- * @version $Id: AbstractVetoableChangeListener.java,v 1.1.1.1 2003/08/14
  *          16:20:14 trisberg Exp $
  */
 public class PrototypeBasedTargetSourceTests extends TestCase {

@@ -18,7 +18,6 @@ package org.springframework.autobuilds.ejbtest.dbutil.mapper;
 /**
  * Base implementation of NewInstanceAware
  * 
- * @version $Revision: 1.1 $
  * @author colin sampaleanu
  */
 public class BaseNewInstanceAware implements NewInstanceAware {

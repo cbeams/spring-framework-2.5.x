@@ -48,7 +48,6 @@ import org.springframework.aop.IntroductionInterceptor;
  * <p>A DelegatingIntroductionInterceptor is serializable if the delegate is.
  *
  * @author Rod Johnson
- * @version $Id: DelegatingIntroductionInterceptor.java,v 1.6 2004-08-04 10:56:01 johnsonr Exp $
  */
 public class DelegatingIntroductionInterceptor implements IntroductionInterceptor, Serializable {
 

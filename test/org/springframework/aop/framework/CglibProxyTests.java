@@ -29,7 +29,6 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: CglibProxyTests.java,v 1.15 2004-07-24 14:08:55 robharrop Exp $
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 

@@ -34,7 +34,6 @@ import java.util.Collection;
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  * @author Rod Johnson
  * @since Sep 30, 2003
- * @version $Id: Attributes.java,v 1.4 2004-03-18 02:46:17 trisberg Exp $
  */
 public interface Attributes {
 

@@ -8,7 +8,6 @@ package org.springframework.benchmark.cmt.server;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: InsufficientStockException.java,v 1.1 2003-12-02 18:31:09 johnsonr Exp $
  */
 public class InsufficientStockException extends Exception {
 	

@@ -31,7 +31,6 @@ import org.springframework.dao.DataAccessException;
  *
  * @author Rod Johnson
  * @see org.springframework.dao.DataAccessException
- * @version $Id: SQLExceptionTranslator.java,v 1.2 2004-03-18 02:46:15 trisberg Exp $
  */
 public interface SQLExceptionTranslator {
 

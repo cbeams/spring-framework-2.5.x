@@ -38,7 +38,6 @@ import org.springframework.jdbc.core.ResultReader;
  *
  * @author Rod Johnson
  * @author Jean-Pierre Pawlak
- * @version $Id: SqlQuery.java,v 1.8 2004-05-28 14:13:13 jhoeller Exp $
  */
 public abstract class SqlQuery extends SqlOperation {
 

@@ -37,7 +37,6 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.11 $
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 

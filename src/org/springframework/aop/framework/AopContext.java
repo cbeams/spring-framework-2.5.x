@@ -39,7 +39,6 @@ import org.aopalliance.aop.AspectException;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: AopContext.java,v 1.7 2004-04-01 15:35:46 jhoeller Exp $
  */
 public abstract class AopContext {
 	

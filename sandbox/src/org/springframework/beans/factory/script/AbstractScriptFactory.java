@@ -36,7 +36,6 @@ import org.springframework.core.io.ResourceLoader;
  * Separate out post processor
  * 
  * @author Rod Johnson
- * @version $Id: AbstractScriptFactory.java,v 1.5 2004-08-10 14:27:22 johnsonr Exp $
  */
 public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoProxyCreator implements ScriptContext, ApplicationContextAware, BeanFactoryAware,
 		BeanPostProcessor {

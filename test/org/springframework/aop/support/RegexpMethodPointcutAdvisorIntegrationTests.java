@@ -31,7 +31,6 @@ import org.springframework.util.SerializationTestUtils;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: RegexpMethodPointcutAdvisorIntegrationTests.java,v 1.1 2004-07-25 11:58:12 johnsonr Exp $
  */
 public class RegexpMethodPointcutAdvisorIntegrationTests extends TestCase {
 

@@ -23,7 +23,6 @@ import org.springframework.aop.MethodBeforeAdvice;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AutoRefreshInterceptor.java,v 1.1 2004-08-04 16:49:47 johnsonr Exp $
  */
 public class AutoRefreshInterceptor implements MethodBeforeAdvice {
 

@@ -34,7 +34,6 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractBeanDefinition.java,v 1.21 2004-08-02 15:40:35 jhoeller Exp $
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */

@@ -20,7 +20,6 @@ package org.springframework.autobuilds.ejbtest.dbutil.mapper;
  * Interface to be used by classes which are aware of being a new instance via some
  * other mechanism than a null id. Recognized by O/R mapping engine.
  * 
- * @version $Revision: 1.1 $
  * @author colin sampaleanu
  */
 public interface NewInstanceAware {

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  * TargetSource that can apply to singletons,
  * reloading them on request from a child factory.
  * @author Rod Johnson
- * @version $Id: DynamicBeanTargetSource.java,v 1.3 2004-08-05 13:52:21 johnsonr Exp $
  */
 public class DynamicBeanTargetSource extends AbstractRefreshableTargetSource {
 

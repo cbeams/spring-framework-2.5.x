@@ -27,7 +27,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Colin Sampaleanu
- * @version $Revision: 1.3 $
  */
 public class SingletonBeanFactoryLocatorTests extends TestCase {
 

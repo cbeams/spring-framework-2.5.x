@@ -26,7 +26,6 @@ import org.springframework.beans.propertyeditors.PropertiesEditor;
  * JndiTemplate to be populated with a properties-format string.
  * @author Rod Johnson
  * @since 09-May-2003
- * @version $Id: JndiTemplateEditor.java,v 1.3 2004-03-18 02:46:17 trisberg Exp $
  */
 public class JndiTemplateEditor extends PropertyEditorSupport {
 

@@ -27,7 +27,6 @@ import org.springframework.core.Ordered;
  * Convenient superclass for Advisors that are also dynamic pointcuts.
  * Serializable if Advice and subclass is.
  * @author Rod Johnson
- * @version $Id: DynamicMethodMatcherPointcutAdvisor.java,v 1.6 2004-07-28 17:02:05 johnsonr Exp $
  */
 public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodMatcherPointcut
     implements PointcutAdvisor, Ordered, Serializable {

@@ -15,7 +15,6 @@ import org.springframework.web.servlet.mvc.Controller;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ChangeModeController.java,v 1.1 2003-12-02 18:31:08 johnsonr Exp $
  */
 public class ChangeModeController implements Controller {
 	

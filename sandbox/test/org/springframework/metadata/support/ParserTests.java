@@ -12,7 +12,6 @@ import junit.framework.TestCase;
  * Test the parsing of javadoc attributes to extract constructor
  * and Java bean properties information.
  * @author Mark Pollack
- * @version $Id: ParserTests.java,v 1.1 2003-11-22 09:05:42 johnsonr Exp $
  * 
  */
 public class ParserTests extends TestCase {

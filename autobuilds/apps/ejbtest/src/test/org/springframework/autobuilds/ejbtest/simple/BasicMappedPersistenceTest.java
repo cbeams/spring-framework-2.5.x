@@ -43,7 +43,6 @@ import org.springframework.util.ClassUtils;
  * classes in real life would normally be used by service objects wrapped with
  * declarative transactions.
  * 
- * @version $Revision: 1.1 $
  * @author Colin Sampaleanu
  */
 public class BasicMappedPersistenceTest extends TestCase {

@@ -29,7 +29,6 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * without affecting code using this class.
  *
  * @author Rod Johnson
- * @version $Id: BadSqlGrammarException.java,v 1.2 2004-03-18 02:46:16 trisberg Exp $
  */
 public class BadSqlGrammarException extends InvalidDataAccessResourceUsageException {
 	

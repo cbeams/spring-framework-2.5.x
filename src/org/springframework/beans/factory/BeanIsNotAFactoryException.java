@@ -24,7 +24,6 @@ package org.springframework.beans.factory;
  * @author Rod Johnson
  * @since 10-Mar-2003
  * @see org.springframework.beans.factory.FactoryBean
- * @version $Revision: 1.2 $
  */
 public class BeanIsNotAFactoryException extends BeanNotOfRequiredTypeException {
 

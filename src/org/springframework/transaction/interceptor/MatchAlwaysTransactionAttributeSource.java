@@ -27,7 +27,6 @@ import java.lang.reflect.Method;
  * methods being handled by a transaction interceptor.
  * @author Colin Sampaleanu
  * @since 15.10.2003
- * @version $Id: MatchAlwaysTransactionAttributeSource.java,v 1.7 2004-07-28 08:25:59 johnsonr Exp $
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator
  */

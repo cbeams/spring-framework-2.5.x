@@ -25,7 +25,6 @@ import javax.ejb.SessionContext;
  * <p>This class saves the session context provided by the EJB container in an instance
  * variable and provides a NOP implementation of the ejbRemove() lifecycle method.
  *
- * @version $Id: AbstractSessionBean.java,v 1.4 2004-03-18 02:46:14 trisberg Exp $
  * @author Rod Johnson
  */
 abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SessionBean {

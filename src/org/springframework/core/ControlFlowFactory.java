@@ -25,7 +25,6 @@ import java.io.StringWriter;
  * Java 1.4 StackTraceElement if we can, and we don't want to impose
  * a runtime dependency on 1.4.
  * @author Rod Johnson
- * @version $Id: ControlFlowFactory.java,v 1.2 2004-03-18 02:46:06 trisberg Exp $
  */
 public abstract class ControlFlowFactory {
 	
@@ -43,7 +42,7 @@ public abstract class ControlFlowFactory {
 	 * However, they are useful in some cases.
 	 * <p>This implementation uses the StackTraceElement class introduced in Java 1.4.
 	 * @author Rod Johnson
-	 * @version $Id: ControlFlowFactory.java,v 1.2 2004-03-18 02:46:06 trisberg Exp $
+	 * @version $Id: ControlFlowFactory.java,v 1.3 2004-08-16 12:29:07 trisberg Exp $
 	 */
 	static class Jdk14ControlFlow implements ControlFlow {
 
@@ -113,7 +112,7 @@ public abstract class ControlFlowFactory {
 	 * JDK 1.3 than other pointcuts, as they require analysis of the stack trace
 	 * (through constructing a new throwable). However, they are useful in some cases.
 	 * @author Rod Johnson
-	 * @version $Id: ControlFlowFactory.java,v 1.2 2004-03-18 02:46:06 trisberg Exp $
+	 * @version $Id: ControlFlowFactory.java,v 1.3 2004-08-16 12:29:07 trisberg Exp $
 	 */
 	static class Jdk13ControlFlow implements ControlFlow {
 

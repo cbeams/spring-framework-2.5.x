@@ -37,7 +37,6 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
  * Advised object.
  *
  * @author Rod Johnson
- * @version $Id: AdvisorChainFactoryUtils.java,v 1.8 2004-05-23 20:13:06 jhoeller Exp $
  */
 public abstract class AdvisorChainFactoryUtils {
 

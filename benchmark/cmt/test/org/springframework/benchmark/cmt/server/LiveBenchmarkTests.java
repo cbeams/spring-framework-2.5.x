@@ -23,7 +23,6 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: LiveBenchmarkTests.java,v 1.4 2004-02-26 22:53:14 dkopylenko Exp $
  */
 public class LiveBenchmarkTests extends TestCase {
 	

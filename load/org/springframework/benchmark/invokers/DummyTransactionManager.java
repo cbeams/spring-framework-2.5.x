@@ -12,7 +12,6 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
  * @author Rod Johnson
- * @version $Id: DummyTransactionManager.java,v 1.4 2004-01-29 23:33:48 jhoeller Exp $
  */
 public class DummyTransactionManager extends AbstractPlatformTransactionManager {
 

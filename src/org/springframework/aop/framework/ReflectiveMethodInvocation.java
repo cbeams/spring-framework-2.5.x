@@ -34,7 +34,6 @@ import org.aopalliance.intercept.MethodInvocation;
  * It's possible to clone an invocation, to invoke proceed() repeatedly
  * (once per clone), using the invocableClone() method.
  * @author Rod Johnson
- * @version $Id: ReflectiveMethodInvocation.java,v 1.8 2004-07-26 16:11:38 johnsonr Exp $
  * @see #invokeJoinpoint
  */
 public class ReflectiveMethodInvocation implements MethodInvocation, Cloneable {

@@ -41,7 +41,6 @@ import org.springframework.beans.BeansException;
  * SingletonBeanFactoryLocator may be used to demand load these contexts.
  * 
  * @author Colin Sampaleanu
- * @version $Revision: 1.4 $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.context.access.DefaultLocatorFactory
  * @see org.springframework.context.ApplicationContext

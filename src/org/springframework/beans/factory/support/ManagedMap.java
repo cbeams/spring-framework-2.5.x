@@ -27,7 +27,6 @@ import java.util.HashMap;
  *
  * @author Rod Johnson
  * @since 27-May-2003
- * @version $Id: ManagedMap.java,v 1.3 2004-06-02 17:10:48 jhoeller Exp $
  * @see ManagedLinkedMap
  * @see java.util.LinkedHashMap
  */

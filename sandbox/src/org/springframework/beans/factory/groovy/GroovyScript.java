@@ -31,7 +31,6 @@ import org.springframework.beans.factory.script.ScriptContext;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: GroovyScript.java,v 1.3 2004-08-04 16:49:49 johnsonr Exp $
  */
 public class GroovyScript extends AbstractScript {
 

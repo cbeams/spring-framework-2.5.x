@@ -26,7 +26,6 @@ import org.springframework.util.StopWatch;
  * 
  * @author  Rod Johnson
  * @since February 9, 2001
- * @version $Id: AbstractTest.java,v 1.8 2004-02-25 00:56:47 kdonald Exp $
  */
 public abstract class AbstractTest implements Test, BeanNameAware {
 

@@ -31,7 +31,6 @@ import org.springframework.beans.BeansException;
  * 
  * 
  * @author Rod Johnson
- * @version $Id: AbstractScript.java,v 1.2 2004-08-04 16:49:48 johnsonr Exp $
  */
 public abstract class AbstractScript implements Script {
 	

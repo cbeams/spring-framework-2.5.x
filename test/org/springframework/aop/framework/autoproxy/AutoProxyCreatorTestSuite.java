@@ -44,7 +44,6 @@ import org.springframework.context.support.StaticMessageSource;
 /**
  * @author Juergen Hoeller
  * @since 09.12.2003
- * @version $Id: AutoProxyCreatorTestSuite.java,v 1.9 2004-08-10 21:15:20 jhoeller Exp $
  */
 public class AutoProxyCreatorTestSuite extends TestCase {
 

@@ -30,7 +30,6 @@ import org.easymock.MockControl;
 
 /**
  * @author <a href="mailto:tcook@interprisesoftware.com">Trevor D. Cook</a>
- * @version $Id: AbstractJdbcTests.java,v 1.2 2004-05-27 14:47:34 jhoeller Exp $
  */
 public abstract class AbstractJdbcTests extends TestCase {
 

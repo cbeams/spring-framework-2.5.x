@@ -26,7 +26,6 @@ import javax.ejb.EJBHome;
  *
  * @author colin sampaleanu
  * 
- * @version $Id: CmtJtaNoSpringTxHomeRemote.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
 public interface CmtJtaNoSpringTxHomeRemote extends EJBHome {
 	/**

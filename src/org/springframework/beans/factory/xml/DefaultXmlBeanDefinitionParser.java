@@ -62,7 +62,6 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.36 2004-08-10 08:12:30 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 

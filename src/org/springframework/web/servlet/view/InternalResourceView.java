@@ -37,7 +37,6 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: InternalResourceView.java,v 1.12 2004-03-24 11:38:48 jhoeller Exp $
  * @see javax.servlet.RequestDispatcher#forward
  * @see javax.servlet.RequestDispatcher#include
  */

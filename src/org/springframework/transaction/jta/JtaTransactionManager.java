@@ -146,7 +146,6 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
- * @version $Id: JtaTransactionManager.java,v 1.21 2004-08-12 08:59:47 jhoeller Exp $
  * @see #setUserTransactionName
  * @see #setUserTransaction
  * @see #setTransactionManagerName

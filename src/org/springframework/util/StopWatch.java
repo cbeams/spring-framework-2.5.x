@@ -34,7 +34,6 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @since May 2, 2001
- * @version $Id: StopWatch.java,v 1.7 2004-06-09 18:54:39 jhoeller Exp $
  */
 public class StopWatch {
 

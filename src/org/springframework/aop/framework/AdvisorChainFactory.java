@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * Factory for advisor chains.
  * @author Rod Johnson
- * @version $Id: AdvisorChainFactory.java,v 1.4 2004-03-18 02:46:05 trisberg Exp $
  */
 public interface AdvisorChainFactory extends AdvisedSupportListener {
 	

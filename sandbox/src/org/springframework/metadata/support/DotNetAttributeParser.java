@@ -39,7 +39,6 @@ import org.springframework.metadata.AttributeParser;
  * 
  * @author Mark Pollack
  * @since Sep 28, 2003
- * @version $Id: DotNetAttributeParser.java,v 1.1 2003-11-22 09:05:44 johnsonr Exp $
  * 
  */
 public class DotNetAttributeParser implements AttributeParser {

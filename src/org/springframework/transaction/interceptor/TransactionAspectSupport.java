@@ -52,7 +52,6 @@ import org.springframework.transaction.TransactionStatus;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: TransactionAspectSupport.java,v 1.8 2004-08-09 08:29:30 jhoeller Exp $
  */
 public class TransactionAspectSupport implements InitializingBean, Serializable {
 

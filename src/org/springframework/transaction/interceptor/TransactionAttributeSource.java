@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
  * metadata attributes at source level, or anywhere else.
  * @author Rod Johnson
  * @since 15-Apr-2003
- * @version $Id: TransactionAttributeSource.java,v 1.4 2004-03-18 02:46:05 trisberg Exp $
  */
 public interface TransactionAttributeSource {
 

@@ -28,7 +28,6 @@ import org.springframework.dao.DataAccessException;
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
- * @version $Id: AbstractDataFieldMaxValueIncrementer.java,v 1.4 2004-03-18 02:46:11 trisberg Exp $
  */
 public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldMaxValueIncrementer, InitializingBean {
 

@@ -27,7 +27,6 @@ import org.springframework.beans.TestBean;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ControlFlowPointcutTests.java,v 1.4 2004-07-26 14:31:15 johnsonr Exp $
  */
 public class ControlFlowPointcutTests extends TestCase {
 	

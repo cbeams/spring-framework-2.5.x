@@ -29,7 +29,6 @@ import org.springframework.util.SerializationTestUtils;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: NameMatchMethodPointcutTests.java,v 1.2 2004-07-29 12:01:46 johnsonr Exp $
  */
 public class NameMatchMethodPointcutTests extends TestCase {
 	

@@ -21,7 +21,6 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ScriptException.java,v 1.1 2004-08-01 15:42:01 johnsonr Exp $
  */
 public abstract class ScriptException extends BeanDefinitionStoreException {
 	

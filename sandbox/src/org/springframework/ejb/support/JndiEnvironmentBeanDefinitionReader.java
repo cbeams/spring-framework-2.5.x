@@ -28,7 +28,6 @@ import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
  * <p>Only environment entries with names beginning with "beans." are included.
  *
  * @author Rod Johnson
- * @version $Id: JndiEnvironmentBeanDefinitionReader.java,v 1.1 2003-11-28 20:10:38 jhoeller Exp $
  */
 public class JndiEnvironmentBeanDefinitionReader {
 	

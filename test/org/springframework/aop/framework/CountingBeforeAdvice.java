@@ -23,7 +23,6 @@ import org.springframework.aop.MethodBeforeAdvice;
 /**
  * Simple before advice example that we can use for counting checks.
  * @author Rod Johnson
- * @version $Id: CountingBeforeAdvice.java,v 1.3 2004-06-09 16:15:50 jhoeller Exp $
  */
 public class CountingBeforeAdvice extends MethodCounter implements MethodBeforeAdvice {
 

@@ -44,7 +44,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @version $Id: JdoTemplateTests.java,v 1.11 2004-06-21 20:36:26 jhoeller Exp $
  */
 public class JdoTemplateTests extends TestCase {
 

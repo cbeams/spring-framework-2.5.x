@@ -10,7 +10,6 @@ package org.springframework.metadata.ant;
  * @PersonAttribute ( name=Albert Einstein, age=33, height=150.4 )
  * @author Mark Pollack
  * @since Oct 16, 2003
- * @version Id
  */
 public class AnnotatedClass {
 

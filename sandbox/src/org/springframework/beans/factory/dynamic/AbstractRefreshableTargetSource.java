@@ -23,7 +23,6 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
  * Superclass for TargetSources that are threadsafe yet
  * support refresh operations.
  * @author Rod Johnson
- * @version $Id: AbstractRefreshableTargetSource.java,v 1.3 2004-08-04 18:40:46 johnsonr Exp $
  */
 public abstract class AbstractRefreshableTargetSource extends DelegatingIntroductionInterceptor implements TargetSource, DynamicObject {
 	

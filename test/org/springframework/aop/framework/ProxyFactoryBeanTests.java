@@ -56,7 +56,6 @@ import org.springframework.util.SerializationTestUtils;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.31 2004-07-24 10:26:07 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	

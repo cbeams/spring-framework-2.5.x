@@ -47,7 +47,6 @@ import org.springframework.core.io.ResourceLoader;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ApplicationContext.java,v 1.15 2004-03-22 10:34:50 jhoeller Exp $
  * @see ApplicationContextAware#setApplicationContext
  */
 public interface ApplicationContext

@@ -19,7 +19,6 @@ package org.springframework.aop.framework;
 /**
  * Simple implementation of AopProxyFactory
  * @author Rod Johnson
- * @version $Id: DefaultAopProxyFactory.java,v 1.2 2004-03-18 02:46:05 trisberg Exp $
  */
 public class DefaultAopProxyFactory implements AopProxyFactory {
 

@@ -22,7 +22,6 @@ import org.springframework.core.NestedRuntimeException;
  * A simple wrapper for exceptions that occur within the metadata package.
  * @author Mark Pollack
  * @since Sep 28, 2003
- * @version $Id: AttributeException.java,v 1.3 2004-06-02 00:08:09 jhoeller Exp $
  */
 public class AttributeException extends NestedRuntimeException {
 

@@ -29,7 +29,6 @@ import javax.sql.DataSource;
  * useful for efficiency, if we know that we want to reuse
  * a connection.
  * @author  Rod Johnson
- * @version $Id: SmartDataSource.java,v 1.2 2004-03-18 02:46:05 trisberg Exp $
  */
 public interface SmartDataSource extends DataSource {
 		

@@ -24,7 +24,6 @@ import org.springframework.dao.DataAccessException;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: CountingThrowsAdvice.java,v 1.1 2004-07-29 12:21:34 johnsonr Exp $
  */
 public class CountingThrowsAdvice extends MethodCounter implements ThrowsAdvice {
 	

@@ -36,7 +36,6 @@ import org.springframework.aop.MethodBeforeAdvice;
  * interfaces.
  *
  * @author Rod Johnson
- * @version $Id: MethodBeforeAdviceInterceptor.java,v 1.4 2004-07-29 11:53:40 johnsonr Exp $
  */
 public final class MethodBeforeAdviceInterceptor implements MethodInterceptor, Serializable {
 	

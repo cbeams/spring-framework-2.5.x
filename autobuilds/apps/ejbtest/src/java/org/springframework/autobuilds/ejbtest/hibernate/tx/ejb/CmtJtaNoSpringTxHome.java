@@ -66,7 +66,6 @@ import javax.ejb.EJBHome;
  *
  * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
  * 
- * @version $Id: CmtJtaNoSpringTxHome.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
 public interface CmtJtaNoSpringTxHome extends EJBHome
 {

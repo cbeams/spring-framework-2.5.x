@@ -29,7 +29,6 @@ import org.springframework.beans.factory.BeanFactory;
  * <li>% ThreadLocalTargetSource
  * <li>! PrototypeTargetSource
  * @author Rod Johnson
- * @version $Id: QuickTargetSourceCreator.java,v 1.5 2004-04-21 11:54:43 jhoeller Exp $
  * @see org.springframework.aop.target.CommonsPoolTargetSource
  * @see org.springframework.aop.target.ThreadLocalTargetSource
  * @see org.springframework.aop.target.PrototypeTargetSource

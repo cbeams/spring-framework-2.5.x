@@ -40,7 +40,6 @@ import org.springframework.web.servlet.support.RequestContext;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 17.05.2004
- * @version $Id: AbstractTemplateView.java,v 1.4 2004-08-04 19:21:14 davison Exp $
  */
 public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 

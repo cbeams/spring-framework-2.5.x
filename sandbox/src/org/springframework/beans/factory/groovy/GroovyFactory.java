@@ -33,7 +33,6 @@ import org.springframework.beans.factory.script.Script;
  * Injection.
  * 
  * @author Rod Johnson
- * @version $Id: AbstractVetoableChangeListener.java,v 1.1.1.1 2003/08/14
  *          16:20:14 trisberg Exp $
  */
 public class GroovyFactory extends AbstractScriptFactory {

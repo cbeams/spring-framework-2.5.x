@@ -47,7 +47,6 @@ import org.springframework.beans.factory.FactoryBean;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 09-May-2003
- * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBean.java,v 1.9 2004-03-18 02:46:14 trisberg Exp $
  * @see org.springframework.remoting.RemoteAccessException
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSlsbInvokerInterceptor

@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
  * ejbCreate() methods.
  *
  * @author Rod Johnson
- * @version $Id: AbstractMessageDrivenBean.java,v 1.5 2004-03-18 02:46:14 trisberg Exp $
  */
 public abstract class AbstractMessageDrivenBean extends AbstractEnterpriseBean
     implements MessageDrivenBean {

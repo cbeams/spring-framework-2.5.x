@@ -24,7 +24,6 @@ package org.springframework.core;
  * <p>An error code can be resolved by a MessageSource, for example.
  *
  * @author Rod Johnson
- * @version $Id: ErrorCoded.java,v 1.4 2004-04-22 07:58:23 jhoeller Exp $
  * @see org.springframework.context.MessageSource
  */
 public interface ErrorCoded {

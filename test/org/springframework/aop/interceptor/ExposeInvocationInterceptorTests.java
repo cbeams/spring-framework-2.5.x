@@ -24,7 +24,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * Non-XML tests are in AbstractAopProxyTests
  * @author Rod Johnson
- * @version $Id: ExposeInvocationInterceptorTests.java,v 1.1 2004-08-10 11:03:38 johnsonr Exp $
  */
 public class ExposeInvocationInterceptorTests extends TestCase {
 

@@ -26,7 +26,6 @@ import org.springframework.metadata.Attributes;
  * attributes from an Attributes implementation.
  *
  * @author Rod Johnson
- * @version $Id: AttributesTransactionAttributeSource.java,v 1.9 2004-07-01 16:46:34 johnsonr Exp $
  * @see org.springframework.metadata.Attributes
  * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource
  */

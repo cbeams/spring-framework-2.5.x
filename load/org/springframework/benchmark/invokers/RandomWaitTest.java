@@ -16,7 +16,6 @@ import org.springframework.load.TestFailedException;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: RandomWaitTest.java,v 1.4 2003-12-30 13:52:39 jhoeller Exp $
  */
 public class RandomWaitTest extends AbstractTest implements InitializingBean {
 	

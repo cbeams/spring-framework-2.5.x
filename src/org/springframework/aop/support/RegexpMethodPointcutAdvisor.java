@@ -32,7 +32,6 @@ import org.aopalliance.aop.Advice;
  * This should not normally be set directly.
  * @author Dmitriy Kopylenko
  * @author Rod Johnson
- * @version $Id: RegexpMethodPointcutAdvisor.java,v 1.5 2004-07-25 11:58:10 johnsonr Exp $
  */
 public class RegexpMethodPointcutAdvisor extends DefaultPointcutAdvisor {
 	

@@ -40,7 +40,6 @@ import org.springframework.metadata.AttributeException;
  * 
  * @author Mark Pollack
  * @since Oct 6, 2003
- * @version $Id: AttributeCreator.java,v 1.1 2003-11-22 09:05:44 johnsonr Exp $
  */
 public class AttributeCreator {
 

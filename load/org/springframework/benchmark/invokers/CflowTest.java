@@ -18,7 +18,6 @@ import org.springframework.load.TestFailedException;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: CflowTest.java,v 1.3 2004-02-23 18:23:02 dkopylenko Exp $
  */
 public class CflowTest extends RandomWaitTest {
 

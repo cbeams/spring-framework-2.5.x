@@ -30,7 +30,6 @@ import org.aopalliance.aop.AspectException;
  * In this case, there is no target object.
  *
  * @author Rod Johnson
- * @version $Id: AbstractRemoteSlsbInvokerInterceptor.java,v 1.8 2004-07-06 14:52:01 jhoeller Exp $
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 	

@@ -21,7 +21,6 @@ package org.springframework.autobuilds.ejbtest.simple;
  * <p>Business interface for a simple EJB test.</p>
  * 
  * @author colin sampaleanu
- * @version $Id: SimpleService.java,v 1.3 2004-07-16 04:24:08 colins Exp $
  */
 public interface SimpleService {
 

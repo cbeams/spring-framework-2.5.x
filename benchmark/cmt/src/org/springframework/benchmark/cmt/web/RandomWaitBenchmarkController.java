@@ -11,7 +11,6 @@ import org.springframework.benchmark.cmt.server.Benchmark;
 /**
  * Eliminates DB access time
  * @author Rod Johnson
- * @version $Id: RandomWaitBenchmarkController.java,v 1.1 2003-12-02 18:31:08 johnsonr Exp $
  */
 public class RandomWaitBenchmarkController extends AbstractBenchmarkController {
 	

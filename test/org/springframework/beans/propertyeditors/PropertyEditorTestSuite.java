@@ -31,7 +31,6 @@ import org.springframework.beans.TestBean;
  * and other property editors.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: PropertyEditorTestSuite.java,v 1.4 2004-05-17 10:06:41 jhoeller Exp $
  */
 public class PropertyEditorTestSuite extends TestCase {
 

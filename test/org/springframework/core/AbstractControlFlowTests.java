@@ -20,7 +20,6 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: AbstractControlFlowTests.java,v 1.2 2004-03-18 03:01:13 trisberg Exp $
  */
 public abstract class AbstractControlFlowTests extends TestCase {
 

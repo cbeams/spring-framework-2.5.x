@@ -40,7 +40,6 @@ import org.springframework.context.ApplicationContext;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Revision: 1.2 $
  * @see PortletContextAware#setPortletContext
  */
 public interface PortletApplicationContext extends ApplicationContext {

@@ -9,7 +9,6 @@ package org.springframework.metadata;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AttributeIndex.java,v 1.1 2003-12-24 17:17:26 johnsonr Exp $
  */
 public interface AttributeIndex {
 	

@@ -24,7 +24,6 @@ import org.springframework.beans.TestBean;
 /**
  * Used to test ExposeInvocationInterceptor. 
  * @author Rod Johnson
- * @version $Id: ExposedInvocationTestBean.java,v 1.1 2004-08-10 10:35:33 johnsonr Exp $
  */
 public abstract class ExposedInvocationTestBean extends TestBean {
 

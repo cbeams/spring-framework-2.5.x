@@ -26,7 +26,6 @@ import org.springframework.core.io.Resource;
 /**
  * TODO implements DynamicObject?
  * @author Rod Johnson
- * @version $Id: PropertiesDynamicObjectConverter.java,v 1.1 2004-08-05 13:52:21 johnsonr Exp $
  */
 public class PropertiesDynamicObjectConverter extends AbstractDynamicObjectConverter implements DynamicObject, BeanFactoryPostProcessor {
 	

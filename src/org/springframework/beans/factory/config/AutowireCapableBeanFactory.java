@@ -25,7 +25,6 @@ import org.springframework.beans.factory.BeanFactory;
  * for existing bean instances.
  * @author Juergen Hoeller
  * @since 04.12.2003
- * @version $Id: AutowireCapableBeanFactory.java,v 1.4 2004-03-18 02:46:07 trisberg Exp $
  */
 public interface AutowireCapableBeanFactory extends BeanFactory {
 

@@ -89,7 +89,6 @@ import org.springframework.util.ObjectUtils;
  * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
- * @version $Id: PropertyPlaceholderConfigurer.java,v 1.17 2004-08-02 15:40:33 jhoeller Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 

@@ -11,7 +11,6 @@ import org.springframework.web.util.WebUtils;
 /**
  * @author Juergen Hoeller
  * @since 01.12.2003
- * @version $Id: SignonInterceptor.java,v 1.4 2004-01-04 23:43:41 jhoeller Exp $
  */
 public class SignonInterceptor extends HandlerInterceptorAdapter {
 

@@ -31,7 +31,6 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
- * @version $Id: HotSwappableTargetSourceTests.java,v 1.6 2004-07-25 13:42:55 johnsonr Exp $
  */
 public class HotSwappableTargetSourceTests extends TestCase {
 

@@ -26,7 +26,6 @@ import org.springframework.core.Ordered;
  * Convenient class for name-match method pointcuts that hold an Interceptor,
  * making them an Advisor.
  * @author Juergen Hoeller
- * @version $Id: NameMatchMethodPointcutAdvisor.java,v 1.5 2004-03-23 14:29:45 jhoeller Exp $
  */
 public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut
 		implements PointcutAdvisor, Ordered {

@@ -21,7 +21,6 @@ package org.springframework.core;
  * Usually we want to find if we're in a 1.4 or higher JVM.
  * (Spring does not support 1.2 JVMs.)
  * @author Rod Johnson
- * @version $Id: JdkVersion.java,v 1.4 2004-07-26 16:17:38 jhoeller Exp $
  */
 public class JdkVersion {
 	

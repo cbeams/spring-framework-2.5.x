@@ -37,7 +37,6 @@ import org.springframework.jdbc.support.KeyHolder;
  * @author Rod Johnson
  * @author Isabelle Muszynski
  * @author Thomas Risberg
- * @version $Id: SqlUpdate.java,v 1.13 2004-07-18 23:20:32 trisberg Exp $
  */
 public class SqlUpdate extends SqlOperation {
 

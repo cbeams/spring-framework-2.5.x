@@ -36,7 +36,6 @@ import org.springframework.beans.FatalBeanException;
  * ejbPassivate, with a corresponding call to setBeanFactoryLocator(xxx)
  * in ejbActivate unless relying on the default locator.
  * 
- * @version $Id: AbstractStatefulSessionBean.java,v 1.9 2004-03-18 19:17:53 jhoeller Exp $
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @see org.springframework.context.access.ContextJndiBeanFactoryLocator

@@ -76,7 +76,6 @@ import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBean.java,v 1.14 2004-06-09 21:35:40 jhoeller Exp $
  */
 public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		implements FactoryBean, InitializingBean {

@@ -33,7 +33,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * Operates identically in every other respect.
  *  
  * @author Colin Sampaleanu
- * @version $Id: ContextJndiBeanFactoryLocator.java,v 1.3 2004-07-13 12:06:21 colins Exp $
  */
 public class ContextJndiBeanFactoryLocator extends JndiBeanFactoryLocator {
 

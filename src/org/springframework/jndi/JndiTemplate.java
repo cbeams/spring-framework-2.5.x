@@ -37,7 +37,6 @@ import org.apache.commons.logging.LogFactory;
  * @author Juergen Hoeller
  * @see JndiCallback
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: JndiTemplate.java,v 1.6 2004-03-18 02:46:17 trisberg Exp $
  */
 public class JndiTemplate {
 	

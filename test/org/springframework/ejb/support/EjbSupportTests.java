@@ -42,7 +42,6 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
  * to implement ejbCreate() methods.
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: EjbSupportTests.java,v 1.12 2004-04-28 18:31:35 jhoeller Exp $
  */
 public class EjbSupportTests extends TestCase {
 

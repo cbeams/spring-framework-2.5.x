@@ -25,7 +25,6 @@ import org.springframework.transaction.TransactionDefinition;
  *
  * @author Rod Johnson
  * @since 16-Mar-2003
- * @version $Revision: 1.2 $
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
  */
 public interface TransactionAttribute extends TransactionDefinition {

@@ -28,7 +28,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * TestCase for AdvisorAdapterRegistrationManager mechanism.
  * @author Dmitriy Kopylenko
- * @version $Id: AdvisorAdapterRegistrationTests.java,v 1.3 2004-03-19 17:19:46 jhoeller Exp $
  */
 public class AdvisorAdapterRegistrationTests extends TestCase {
 

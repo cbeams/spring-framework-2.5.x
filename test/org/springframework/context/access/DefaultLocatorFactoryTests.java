@@ -22,7 +22,6 @@ import org.springframework.beans.factory.access.BeanFactoryLocator;
 
 /**
  * @author Colin Sampaleanu
- * @version $Revision: 1.2 $
  */
 public class DefaultLocatorFactoryTests extends TestCase {
 

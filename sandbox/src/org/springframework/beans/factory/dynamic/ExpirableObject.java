@@ -19,7 +19,6 @@ package org.springframework.beans.factory.dynamic;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ExpirableObject.java,v 1.1 2004-08-04 16:49:47 johnsonr Exp $
  */
 public interface ExpirableObject {
 	

@@ -23,7 +23,6 @@ import org.springframework.beans.factory.BeanFactory;
  * Class used to track a reference to a BeanFactory obtained through
  * a BeanFactoryLocator.
  * @author Colin Sampaleanu
- * @version $Revision: 1.5 $
  * @see BeanFactoryLocator
  */
 public interface BeanFactoryReference {

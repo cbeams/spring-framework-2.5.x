@@ -29,7 +29,6 @@ package org.springframework.transaction;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16-Mar-2003
- * @version $Revision: 1.2 $
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.support.AbstractPlatformTransactionManager

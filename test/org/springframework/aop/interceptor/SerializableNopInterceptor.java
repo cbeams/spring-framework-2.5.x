@@ -24,7 +24,6 @@ import java.io.Serializable;
  * can be used to test proxy serialization.
  * 
  * @author Rod Johnson
- * @version $Id: SerializableNopInterceptor.java,v 1.2 2004-07-25 11:55:21 johnsonr Exp $
  */
 public class SerializableNopInterceptor extends NopInterceptor implements Serializable {
 	

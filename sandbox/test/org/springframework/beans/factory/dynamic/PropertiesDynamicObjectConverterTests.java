@@ -25,7 +25,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: PropertiesDynamicObjectConverterTests.java,v 1.1 2004-08-05 14:17:10 johnsonr Exp $
  */
 public class PropertiesDynamicObjectConverterTests extends TestCase {
 	

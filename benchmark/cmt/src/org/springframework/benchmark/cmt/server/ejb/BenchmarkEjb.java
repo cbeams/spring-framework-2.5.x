@@ -22,7 +22,6 @@ import org.springframework.benchmark.cmt.server.pojo.PojoBenchmark;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BenchmarkEjb.java,v 1.1 2003-12-02 18:31:10 johnsonr Exp $
  */
 public class BenchmarkEjb extends PojoBenchmark implements SessionBean {
 

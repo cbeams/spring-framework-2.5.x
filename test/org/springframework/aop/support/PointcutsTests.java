@@ -27,7 +27,6 @@ import junit.framework.TestCase;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: PointcutsTests.java,v 1.7 2004-07-26 15:43:38 johnsonr Exp $
  */
 public class PointcutsTests extends TestCase {
 	

@@ -16,7 +16,6 @@ import org.springframework.samples.jpetstore.domain.Order;
 /**
  * AOP advice that sends confirmation email after order has been submitted
  * @author Dmitriy Kopylenko
- * @version $Id: SendOrderConfirmationEmailAdvice.java,v 1.2 2004-03-19 20:27:43 dkopylenko Exp $
  */
 public class SendOrderConfirmationEmailAdvice implements AfterReturningAdvice, InitializingBean {
 

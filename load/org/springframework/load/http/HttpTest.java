@@ -19,7 +19,6 @@ import HTTPClient.ModuleException;
  * Simple: presently there's no support for query strings etc, although this
  * wouldn't be hard to add.
  * @author Rod Johnson
- * @version $Id: HttpTest.java,v 1.1 2003-11-21 18:42:51 johnsonr Exp $
  */
 public class HttpTest extends AbstractTest {
 

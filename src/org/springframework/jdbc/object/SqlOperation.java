@@ -31,7 +31,6 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SqlOperation.java,v 1.13 2004-07-12 03:29:52 trisberg Exp $
  */
 public abstract class SqlOperation extends RdbmsOperation {
 

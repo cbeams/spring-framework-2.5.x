@@ -57,7 +57,6 @@ import org.springframework.samples.jpetstore.domain.Product;
  *
  * @author Juergen Hoeller
  * @since 30.11.2003
- * @version $Id: PetStoreImpl.java,v 1.5 2004-06-25 06:49:20 johnsonr Exp $
  */
 public class PetStoreImpl implements PetStoreFacade, OrderService {
 

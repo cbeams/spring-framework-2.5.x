@@ -24,7 +24,6 @@ import org.springframework.beans.TestBean;
  * objects using static factory methods, rather
  * than constructors. 
  * @author Rod Johnson
- * @version $Id: FactoryMethods.java,v 1.2 2004-06-25 09:10:44 johnsonr Exp $
  */
 public class FactoryMethods {
 	

@@ -30,7 +30,6 @@ import org.springframework.core.NestedRuntimeException;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ComposablePointcutTests.java,v 1.5 2004-03-18 03:01:17 trisberg Exp $
  */
 public class ComposablePointcutTests extends TestCase {
 	

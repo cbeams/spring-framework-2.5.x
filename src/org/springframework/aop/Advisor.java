@@ -31,7 +31,6 @@ import org.aopalliance.aop.Advice;
  * which need not be implemented using interception.
  *
  * @author Rod Johnson
- * @version $Id: Advisor.java,v 1.6 2004-03-19 16:54:36 johnsonr Exp $
  */
 public interface Advisor {
 	

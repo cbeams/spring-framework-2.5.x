@@ -27,7 +27,6 @@ import com.meterware.httpunit.WebResponse;
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.8 2004-06-22 20:38:58 colins Exp $
  */
 public class AllTests extends AbstractTestCase {
 

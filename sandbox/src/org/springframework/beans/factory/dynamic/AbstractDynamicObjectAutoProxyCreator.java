@@ -27,7 +27,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AbstractDynamicObjectAutoProxyCreator.java,v 1.2 2004-08-10 21:15:19 jhoeller Exp $
  */
 public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAutoProxyCreator {
 	

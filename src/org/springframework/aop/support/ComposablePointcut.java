@@ -33,7 +33,6 @@ import org.springframework.aop.Pointcut;
  * method for this.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: ComposablePointcut.java,v 1.6 2004-07-25 12:19:31 johnsonr Exp $
  */
 public class ComposablePointcut implements Pointcut, Serializable {
 	

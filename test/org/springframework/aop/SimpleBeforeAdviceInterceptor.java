@@ -22,7 +22,6 @@ import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author Dmitriy Kopylenko
- * @version $Id: SimpleBeforeAdviceInterceptor.java,v 1.2 2004-03-18 03:01:17 trisberg Exp $
  */
 final class SimpleBeforeAdviceInterceptor implements MethodInterceptor {
 	

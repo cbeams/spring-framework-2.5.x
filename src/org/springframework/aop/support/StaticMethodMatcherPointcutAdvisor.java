@@ -28,7 +28,6 @@ import org.springframework.core.Ordered;
  * Convenient superclass for Advisors that are also static pointcuts.
  * Serializable if Advice and subclass are.
  * @author Rod Johnson
- * @version $Id: StaticMethodMatcherPointcutAdvisor.java,v 1.8 2004-07-25 13:26:12 johnsonr Exp $
  */
 public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcut
 		implements PointcutAdvisor, Ordered, Serializable {

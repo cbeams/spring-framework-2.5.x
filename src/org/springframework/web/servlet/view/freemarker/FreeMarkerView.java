@@ -54,7 +54,6 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 3/3/2004
- * @version $Id: FreeMarkerView.java,v 1.5 2004-07-23 08:38:55 jhoeller Exp $
  * @see #setUrl
  * @see #setExposeSpringMacroHelpers
  * @see #setEncoding

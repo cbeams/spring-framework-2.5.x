@@ -75,7 +75,6 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.17 $
  * @see #doService
  * @see #initFrameworkServlet
  * @see #setContextClass

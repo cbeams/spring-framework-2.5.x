@@ -44,7 +44,6 @@ import org.springframework.aop.ClassFilter;
  * 
  * @author Rod Johnson
  * @since 1.1
- * @version $Id: AbstractRegexpMethodPointcut.java,v 1.2 2004-07-28 18:34:34 dkopylenko Exp $
  */
 public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut implements ClassFilter, Serializable { 
 	

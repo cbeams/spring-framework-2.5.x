@@ -8,7 +8,6 @@ import java.io.Serializable;
 
 /**
  * @author Rod Johnson
- * @version $Id: User.java,v 1.1 2003-12-02 18:31:08 johnsonr Exp $
  */
 public class User implements Serializable {
 

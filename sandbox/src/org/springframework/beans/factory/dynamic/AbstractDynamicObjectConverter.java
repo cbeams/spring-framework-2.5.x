@@ -30,7 +30,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * Post processor that can make any bean dynamic.
  * 
  * @author Rod Johnson
- * @version $Id: AbstractDynamicObjectConverter.java,v 1.1 2004-08-05 10:23:24 johnsonr Exp $
  */
 public abstract class AbstractDynamicObjectConverter extends ProxyConfig implements BeanFactoryAware,
 		BeanPostProcessor {

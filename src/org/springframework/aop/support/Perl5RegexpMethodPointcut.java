@@ -37,7 +37,6 @@ import org.apache.oro.text.regex.Perl5Matcher;
  *
  * @author Rod Johnson
  * @since 1.1
- * @version $Id: Perl5RegexpMethodPointcut.java,v 1.2 2004-07-28 18:34:34 dkopylenko Exp $
  * @see org.springframework.aop.support.AbstractRegexpMethodPointcut
  */
 public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut { 

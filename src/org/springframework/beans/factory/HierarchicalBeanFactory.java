@@ -26,7 +26,6 @@ package org.springframework.beans.factory;
  *
  * @author Rod Johnson
  * @since 07-Jul-2003
- * @version $Id: HierarchicalBeanFactory.java,v 1.3 2004-03-18 02:46:07 trisberg Exp $
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
  */
 public interface HierarchicalBeanFactory extends BeanFactory {

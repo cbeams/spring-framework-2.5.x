@@ -19,7 +19,6 @@ package org.springframework.beans.factory.xml;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: DummyBoImpl.java,v 1.2 2004-03-18 03:01:16 trisberg Exp $
  */
 public class DummyBoImpl implements DummyBo {
 	

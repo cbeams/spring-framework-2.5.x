@@ -56,7 +56,6 @@ import org.springframework.orm.hibernate.HibernateTemplate;
  * </p>
  * 
  * @author colin sampaleanu
- * @version $Id: CmtJtaNoSpringTxEJB.java,v 1.2 2004-07-16 01:47:28 colins Exp $
  */
 public class CmtJtaNoSpringTxEJB extends AbstractStatelessSessionBean
 		implements

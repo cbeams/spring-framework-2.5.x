@@ -49,7 +49,6 @@ import org.springframework.beans.factory.ObjectFactory;
  *
  * @author Colin Sampaleanu
  * @since 2004-05-11
- * @version $Id: ObjectFactoryCreatingFactoryBean.java,v 1.2 2004-05-17 17:08:07 jhoeller Exp $
  * @see org.springframework.beans.factory.ObjectFactory
  */
 public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean implements BeanFactoryAware {

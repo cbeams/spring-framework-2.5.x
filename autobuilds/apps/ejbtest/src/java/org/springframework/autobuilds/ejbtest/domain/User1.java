@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 /**
  * Simple user domain object (variant 1)
  * 
- * @version $Revision: 1.1 $
  * @author colin sampaleanu
  */
 public class User1 {

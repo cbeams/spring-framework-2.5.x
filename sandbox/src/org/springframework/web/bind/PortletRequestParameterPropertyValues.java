@@ -28,7 +28,6 @@ import org.springframework.web.util.WebUtils;
  * <p>This class is not immutable to be able to efficiently remove property
  * values that should be ignored for binding.
  *
- * @version $Id: PortletRequestParameterPropertyValues.java,v 1.1 2004-05-08 01:45:13 dkopylenko Exp $
  */
 public class PortletRequestParameterPropertyValues extends MutablePropertyValues {
 

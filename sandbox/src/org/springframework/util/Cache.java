@@ -36,7 +36,6 @@ import org.apache.commons.logging.LogFactory;
  * @author Keith Donald
  * @author Bob Lee
  * @see http://www.crazybob.org
- * @version $Id: Cache.java,v 1.6 2004-04-24 16:37:32 kdonald Exp $
  */
 public abstract class Cache {
     private static final Log logger = LogFactory.getLog(Cache.class);

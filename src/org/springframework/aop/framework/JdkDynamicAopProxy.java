@@ -48,7 +48,6 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.18 2004-07-27 15:52:25 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory

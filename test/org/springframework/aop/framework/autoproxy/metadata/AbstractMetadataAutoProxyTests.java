@@ -40,7 +40,6 @@ import org.springframework.transaction.CountingTxManager;
  * define the EnterpriseServices bean in a separate file to
  * change how attributes are source. 
  * @author Rod Johnson
- * @version $Id: AbstractMetadataAutoProxyTests.java,v 1.6 2004-07-05 20:56:18 colins Exp $
  */
 public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	

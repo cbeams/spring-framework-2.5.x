@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
  * <p>Methods eligible for lookup override must not have arguments.
  *
  * @author Rod Johnson
- * @version $Id: LookupOverride.java,v 1.3 2004-06-28 11:43:47 johnsonr Exp $
  */
 public class LookupOverride extends MethodOverride {
 	

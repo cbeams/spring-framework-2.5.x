@@ -35,7 +35,6 @@ import org.springframework.beans.support.DerivedFromProtectedBaseBean;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanWrapperTestSuite.java,v 1.26 2004-07-29 17:15:12 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 

@@ -26,7 +26,6 @@ import com.meterware.httpunit.WebResponse;
  * makes use of.
  * 
  * @author Darren Davison
- * @version $Id: AllTests.java,v 1.2 2004-06-10 20:51:13 aarendsen Exp $
  */
 public class AllTests extends TestCase {
 

@@ -34,7 +34,6 @@ import javax.mail.internet.MimeMessage;
  *
  * @author Juergen Hoeller
  * @since 07.10.2003
- * @version $Id: MimeMessagePreparator.java,v 1.4 2004-03-18 02:46:14 trisberg Exp $
  * @see JavaMailSender#send(MimeMessagePreparator)
  * @see JavaMailSender#send(MimeMessagePreparator[])
  * @see MimeMessageHelper

@@ -20,7 +20,6 @@ package org.springframework.mail;
  * Exception thrown if illegal message properties are encountered.
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @version $Id: MailParseException.java,v 1.3 2004-03-18 02:46:05 trisberg Exp $
  */
 public class MailParseException extends MailException {
 

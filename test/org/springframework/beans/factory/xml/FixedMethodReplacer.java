@@ -23,7 +23,6 @@ import org.springframework.beans.factory.support.MethodReplacer;
 /**
  * Fixed method replacer for String return types
  * @author Rod Johnson
- * @version $Id: FixedMethodReplacer.java,v 1.1 2004-06-28 11:46:03 johnsonr Exp $
  */
 public class FixedMethodReplacer implements MethodReplacer {
 	

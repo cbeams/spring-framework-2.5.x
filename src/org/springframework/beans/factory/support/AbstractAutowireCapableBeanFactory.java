@@ -75,7 +75,6 @@ import org.springframework.core.JdkVersion;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13.02.2004
- * @version $Id: AbstractAutowireCapableBeanFactory.java,v 1.31 2004-08-11 10:05:25 johnsonr Exp $
  * @see #findMatchingBeans
  * @see DefaultListableBeanFactory
  */

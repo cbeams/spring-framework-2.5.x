@@ -70,7 +70,6 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @since 18.02.2004
  * @see org.quartz.Scheduler
  * @see org.quartz.impl.StdSchedulerFactory
- * @version $Id: SchedulerFactoryBean.java,v 1.14 2004-08-10 13:12:30 jhoeller Exp $
  */
 public class SchedulerFactoryBean
     implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {

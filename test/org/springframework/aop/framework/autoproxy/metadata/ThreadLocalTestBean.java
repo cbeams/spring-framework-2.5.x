@@ -25,7 +25,6 @@ import org.springframework.beans.TestBean;
  * @@ThreadLocalAttribute()
  * 
  * @author Rod Johnson
- * @version $Id: ThreadLocalTestBean.java,v 1.3 2004-03-18 03:01:17 trisberg Exp $
  */
 public class ThreadLocalTestBean extends TestBean {
 

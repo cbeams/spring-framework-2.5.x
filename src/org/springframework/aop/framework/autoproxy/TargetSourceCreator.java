@@ -28,7 +28,6 @@ import org.springframework.beans.factory.BeanFactory;
  * which will be applied in order.
  *
  * @author Rod Johnson
- * @version $Id: TargetSourceCreator.java,v 1.4 2004-03-18 02:46:16 trisberg Exp $
  */
 public interface TargetSourceCreator {
 	

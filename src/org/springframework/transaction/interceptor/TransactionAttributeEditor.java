@@ -37,7 +37,6 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 24-Apr-2003
- * @version $Id: TransactionAttributeEditor.java,v 1.5 2004-04-09 05:43:27 jhoeller Exp $
  * @see org.springframework.transaction.TransactionDefinition
  * @see org.springframework.core.Constants
  */

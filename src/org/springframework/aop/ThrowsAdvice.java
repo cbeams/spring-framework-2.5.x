@@ -29,7 +29,6 @@ import org.aopalliance.aop.Advice;
  * we want further information about the joinpoint, as in AspectJ
  * <b>after throwing</b> advice.
  * @author Rod Johnson
- * @version $Id: ThrowsAdvice.java,v 1.3 2004-03-19 16:54:36 johnsonr Exp $
  */
 public interface ThrowsAdvice extends Advice {
 

@@ -12,7 +12,6 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBenchmarkFactory.java,v 1.3 2003-12-30 13:52:39 jhoeller Exp $
  */
 public class XmlBenchmarkFactory implements BenchmarkFactory {
 	

@@ -28,7 +28,6 @@ import org.springframework.aop.Pointcut;
  * This methods are particularly useful for composing pointcuts
  * using the union and intersection methods.
  * @author Rod Johnson
- * @version $Id: Pointcuts.java,v 1.6 2004-07-26 14:26:33 johnsonr Exp $
  */
 public abstract class Pointcuts {
 	

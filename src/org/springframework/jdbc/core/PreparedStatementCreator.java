@@ -35,7 +35,6 @@ import java.sql.SQLException;
  * This allows for better contextual information in case of exceptions.
  *
  * @author Rod Johnson
- * @version $Id: PreparedStatementCreator.java,v 1.7 2004-03-18 02:46:08 trisberg Exp $
  * @see JdbcTemplate#execute(PreparedStatementCreator, PreparedStatementCallback)
  * @see JdbcTemplate#query(PreparedStatementCreator, RowCallbackHandler)
  * @see JdbcTemplate#update(PreparedStatementCreator)

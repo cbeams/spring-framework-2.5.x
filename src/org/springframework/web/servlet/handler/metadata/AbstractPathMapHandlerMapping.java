@@ -45,7 +45,6 @@ import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
  * Controllers with attributes will be picked up by each DispatcherServlet's context.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPathMapHandlerMapping.java,v 1.7 2004-05-26 10:48:57 jhoeller Exp $
  */
 public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMapping {
 	

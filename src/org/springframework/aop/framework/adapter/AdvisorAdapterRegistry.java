@@ -27,7 +27,6 @@ import org.springframework.aop.Advisor;
  * by any Spring user.</i>
  *
  * @author Rod Johnson
- * @version $Id: AdvisorAdapterRegistry.java,v 1.4 2004-04-01 15:35:46 jhoeller Exp $
  */
 public interface AdvisorAdapterRegistry {
 	

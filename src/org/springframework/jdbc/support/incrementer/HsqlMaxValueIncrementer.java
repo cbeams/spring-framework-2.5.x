@@ -51,7 +51,6 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
- * @version $Id: HsqlMaxValueIncrementer.java,v 1.6 2004-04-22 07:58:24 jhoeller Exp $
  */
 public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 

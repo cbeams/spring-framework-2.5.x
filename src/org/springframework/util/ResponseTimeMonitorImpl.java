@@ -26,7 +26,6 @@ import java.util.Date;
  *
  * @author Rod Johnson
  * @since November 21, 2000
- * @version $Id: ResponseTimeMonitorImpl.java,v 1.5 2004-06-09 18:54:39 jhoeller Exp $
  */
 public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 

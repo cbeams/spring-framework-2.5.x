@@ -40,7 +40,6 @@ import java.util.TreeSet;
  * @author Juergen Hoeller
  * @author Keith Donald
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.18 2004-07-28 09:40:21 jhoeller Exp $
  * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {

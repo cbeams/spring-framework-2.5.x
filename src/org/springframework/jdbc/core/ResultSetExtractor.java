@@ -39,7 +39,6 @@ import org.springframework.dao.DataAccessException;
  *
  * @author Rod Johnson
  * @since April 24, 2003
- * @version $Id: ResultSetExtractor.java,v 1.6 2004-05-27 14:46:26 jhoeller Exp $
  * @see JdbcTemplate
  * @see RowCallbackHandler
  * @see RowMapperResultReader

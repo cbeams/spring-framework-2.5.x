@@ -28,7 +28,6 @@ package org.springframework.util;
  * 
  * @author Rod Johnson
  * @since November 21, 2000
- * @version $Id: ResponseTimeMonitor.java,v 1.3 2004-03-18 02:46:10 trisberg Exp $
  */
 public interface ResponseTimeMonitor {
 

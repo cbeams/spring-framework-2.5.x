@@ -71,7 +71,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Id: DispatcherPortlet.java,v 1.6 2004-05-08 05:55:04 wgthom Exp $
  * @see PortletControllerMapping
  * @see ViewResolver
  * @see org.springframework.web.portlet.context.PortletApplicationContext

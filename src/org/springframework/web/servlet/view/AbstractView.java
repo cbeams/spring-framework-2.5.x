@@ -42,7 +42,6 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.12 2004-07-02 00:40:06 davison Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View, BeanNameAware {

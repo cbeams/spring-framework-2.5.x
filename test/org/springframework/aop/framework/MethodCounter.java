@@ -25,7 +25,6 @@ import java.util.HashMap;
  * Useful abstract superclass for counting advices etc.
  * 
  * @author Rod Johnson
- * @version $Id: MethodCounter.java,v 1.3 2004-07-29 12:21:35 johnsonr Exp $
  */
 public class MethodCounter implements Serializable {
 	

@@ -26,7 +26,6 @@ import junit.framework.TestCase;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: NestedCheckedExceptionTests.java,v 1.3 2004-03-18 03:01:13 trisberg Exp $
  */
 public class NestedCheckedExceptionTests extends TestCase {
 

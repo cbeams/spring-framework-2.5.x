@@ -57,7 +57,6 @@ import org.springframework.core.io.ResourceLoader;
  * @see #setFreemarkerVariables
  * @see #setTemplateLoaderPath
  * @see #createConfiguration
- * @version $Id: FreeMarkerConfigurationFactory.java,v 1.3 2004-07-23 08:49:16 jhoeller Exp $
  */
 public class FreeMarkerConfigurationFactory {
 

@@ -27,7 +27,6 @@ import org.springframework.context.support.StaticApplicationContext;
 
 /** 
  * @author Dmitriy Kopylenko
- * @version $Id: EventPublicationInterceptorTests.java,v 1.5 2004-07-24 14:21:01 dkopylenko Exp $
  */
 public class EventPublicationInterceptorTests extends TestCase {
 

@@ -55,7 +55,6 @@ import java.util.List;
  * 
  * @author Rob Harrop
  * @since 1.2
- * @version $Id: ModelMBeanImpl.java,v 1.4 2004-08-02 13:12:51 robharrop Exp $
  */
 public class ModelMBeanImpl implements ModelMBean, NotificationEmitter {
 

@@ -21,7 +21,6 @@ package org.springframework.transaction;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 17-Mar-2003
- * @version $Revision: 1.2 $
  */
 public class HeuristicCompletionException extends TransactionException {
 

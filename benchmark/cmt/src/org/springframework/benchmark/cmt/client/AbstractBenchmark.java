@@ -10,7 +10,6 @@ import org.springframework.load.AbstractTest;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: AbstractBenchmark.java,v 1.1 2003-12-02 18:31:08 johnsonr Exp $
  */
 public abstract class AbstractBenchmark extends AbstractTest  {
 	

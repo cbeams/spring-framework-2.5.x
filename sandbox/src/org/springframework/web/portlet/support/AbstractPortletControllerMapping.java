@@ -31,7 +31,6 @@ import org.springframework.web.portlet.context.support.PortletApplicationObjectS
  * Supports ordering, a default controller, and controller interceptors.
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Revision: 1.1 $
  * @see #getPortletControllerInternal
  * @see org.springframework.web.portlet.PortletControllerInterceptor
  */

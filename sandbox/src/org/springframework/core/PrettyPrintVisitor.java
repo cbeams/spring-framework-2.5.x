@@ -5,7 +5,6 @@ package org.springframework.core;
  * Produces console output as it visits each node
  * that shows the tree's structure.
  * @author Rod Johnson
- * @version 1.0
  */
 public class PrettyPrintVisitor implements Visitor {
 

@@ -22,7 +22,6 @@ import java.io.Serializable;
 /**
  * Canonical ClassFilter instance that matches all classes.
  * @author Rod Johnson
- * @version $Id: TrueClassFilter.java,v 1.1 2004-07-24 13:45:46 johnsonr Exp $
  */
 class TrueClassFilter implements ClassFilter, Serializable {
 	

@@ -35,7 +35,6 @@ import org.springframework.aop.ThrowsAdvice;
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.15 2004-07-27 10:22:22 jhoeller Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {

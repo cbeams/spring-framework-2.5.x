@@ -10,7 +10,6 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: Advices.java,v 1.2 2004-02-23 15:57:54 dkopylenko Exp $
  */
 public abstract class Advices {
 

@@ -24,7 +24,6 @@ import org.springframework.orm.hibernate.support.HibernateDaoSupport;
  * on a passed in Mapper instance. InitializingBean's afterPropertiesSet must still be
  * called when using this constructor! 
  * 
- * @version $Revision: 1.1 $
  * @author colin sampaleanu
  */
 

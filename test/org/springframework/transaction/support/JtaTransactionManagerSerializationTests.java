@@ -28,7 +28,6 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
- * @version $Id: JtaTransactionManagerSerializationTests.java,v 1.2 2004-07-27 10:21:41 jhoeller Exp $
  */
 public class JtaTransactionManagerSerializationTests extends TestCase {
 

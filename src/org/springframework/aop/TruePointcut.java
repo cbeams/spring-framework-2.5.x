@@ -22,7 +22,6 @@ import java.io.Serializable;
 /**
  * Canonical Pointcut instance that always matches.
  * @author Rod Johnson
- * @version $Id: TruePointcut.java,v 1.2 2004-07-24 09:46:45 johnsonr Exp $
  */
 class TruePointcut implements Pointcut, Serializable {
 	

@@ -16,7 +16,6 @@ import org.springframework.metadata.bcel.BcelAttributes;
  * 
  * @author Mark Pollack
  * @since Oct 16, 2003
- * @version Id
  */
 public class PersonProgram {
 

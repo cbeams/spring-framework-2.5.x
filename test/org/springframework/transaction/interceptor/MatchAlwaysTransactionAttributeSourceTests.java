@@ -26,7 +26,6 @@ import org.springframework.transaction.TransactionDefinition;
  * Test for MatchAlwaysTransactionAttributeSource.
  * @author Colin Sampaleanu
  * @since 15.10.2003
- * @version $Id: MatchAlwaysTransactionAttributeSourceTests.java,v 1.4 2004-03-18 03:01:17 trisberg Exp $
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public class MatchAlwaysTransactionAttributeSourceTests extends TestCase {

@@ -28,7 +28,6 @@ import org.springframework.metadata.support.DotNetAttributeParser;
  * Retrieve attributes stored in the .class file using the BCEL library
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  * @since Sep 30, 2003
- * @version $Id: BcelAttributes.java,v 1.3 2003-12-23 12:02:37 johnsonr Exp $
  */
 public abstract class BcelAttributes implements Attributes {
 

@@ -26,7 +26,6 @@ package org.springframework.aop;
  * <br>Application developers don't usually need to work with TargetSources
  * directly: this is an AOP framework interface.
  * @author Rod Johnson
- * @version $Id: TargetSource.java,v 1.5 2004-07-25 13:24:51 johnsonr Exp $
  */
 public interface TargetSource {
 	

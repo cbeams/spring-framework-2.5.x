@@ -36,7 +36,6 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.14 2004-06-28 07:17:31 jhoeller Exp $
  */
 public class JdbcUtils {
 

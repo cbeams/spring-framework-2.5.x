@@ -30,7 +30,6 @@ import org.springframework.orm.hibernate.LocalSessionFactoryBean;
  * An implementation of MapperFactory. An instance of this should either be
  * obtained by the client from the container (IOC), or through the root mapper
  * 
- * @version $Revision: 1.1 $
  * @author colin sampaleanu
  */
 public class MapperFactoryImpl implements MapperFactory {

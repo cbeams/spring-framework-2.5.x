@@ -42,7 +42,6 @@ import java.beans.PropertyEditor;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.16 2004-06-11 23:39:18 jhoeller Exp $
  * @see BeanWrapperImpl
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder

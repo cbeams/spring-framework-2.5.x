@@ -17,7 +17,6 @@ import java.util.Map;
  * 
  * @author Mark Pollack
  * @since September 28, 2003
- * @version $Id: AttributeDefinition.java,v 1.1 2003-11-22 09:05:44 johnsonr Exp $
  * 
  */
 public class AttributeDefinition {

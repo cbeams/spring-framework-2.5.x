@@ -20,7 +20,6 @@ package org.springframework.dao;
  * Data access exception thrown when a resource fails completely:
  * for example, if we can't connect to a database using JDBC.
  * @author Rod Johnson
- * @version $Id: DataAccessResourceFailureException.java,v 1.5 2004-03-18 02:46:07 trisberg Exp $
  */
 public class DataAccessResourceFailureException extends DataAccessException {
 

@@ -13,7 +13,6 @@ import javax.ejb.EJBHome;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BenchmarkHome.java,v 1.1 2003-12-02 18:31:10 johnsonr Exp $
  */
 public interface BenchmarkHome extends EJBHome {
 	

@@ -21,7 +21,6 @@ import org.springframework.samples.jpetstore.domain.Account;
  * or from JNDI, concealing the JNDI lookup from application code.
  * 
  * @author Juergen Hoeller
- * @version $Id: SqlMapAccountDao.java,v 1.3 2004-06-25 06:49:20 johnsonr Exp $
  */
 public class SqlMapAccountDao extends SqlMapDaoSupport implements AccountDao {
 

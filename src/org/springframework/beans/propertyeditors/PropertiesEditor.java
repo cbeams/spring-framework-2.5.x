@@ -38,7 +38,6 @@ import java.util.Properties;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: PropertiesEditor.java,v 1.7 2004-06-05 14:42:03 jhoeller Exp $
  * @see org.springframework.beans.BeanWrapperImpl
  * @see java.util.Properties#load
  */

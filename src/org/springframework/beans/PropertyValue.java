@@ -30,7 +30,6 @@ import java.io.Serializable;
  *
  * @author Rod Johnson
  * @since 13 May 2001
- * @version $Id: PropertyValue.java,v 1.5 2004-04-29 09:56:50 jhoeller Exp $
  * @see PropertyValues
  * @see BeanWrapper
  */

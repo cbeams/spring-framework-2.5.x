@@ -44,7 +44,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractJndiLocator.java,v 1.11 2004-07-23 12:59:13 jhoeller Exp $
  * @see #setJndiName
  * @see #setJndiTemplate
  * @see #setJndiEnvironment

@@ -9,7 +9,6 @@ package org.springframework.metadata.support;
  * 
  * @author Mark Pollack
  * @since Oct 6, 2003
- * @version $Id: PersonAttribute.java,v 1.1 2003-11-22 09:05:42 johnsonr Exp $
  */
 public class PersonAttribute {
 

@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
  * Advice invoked before a method is invoked. Such advices cannot
  * prevent the method call proceeding, unless they throw a Throwable.
  * @author Rod Johnson
- * @version $Id: MethodBeforeAdvice.java,v 1.4 2004-07-22 09:56:30 jhoeller Exp $
  */
 public interface MethodBeforeAdvice extends BeforeAdvice {
 	

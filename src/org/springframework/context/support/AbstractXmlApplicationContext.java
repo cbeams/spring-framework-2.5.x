@@ -34,7 +34,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * understood by an XmlBeanDefinitionParser.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.14 $
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {

@@ -33,7 +33,6 @@ import org.springframework.aop.Advisor;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: OptimizedJdkDynamicAopProxy.java,v 1.2 2004-03-19 17:52:49 jhoeller Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory

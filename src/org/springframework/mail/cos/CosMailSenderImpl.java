@@ -45,7 +45,6 @@ import org.springframework.mail.SimpleMailMessage;
  * @since 09.10.2003
  * @see com.oreilly.servlet.MailMessage
  * @see org.springframework.mail.javamail.JavaMailSenderImpl
- * @version $Id: CosMailSenderImpl.java,v 1.7 2004-06-05 14:41:03 jhoeller Exp $
  */
 public class CosMailSenderImpl implements MailSender {
 

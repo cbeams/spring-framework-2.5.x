@@ -25,7 +25,6 @@ import org.springframework.beans.TestBean;
  * @@PrototypeAttribute()
  * 
  * @author Rod Johnson
- * @version $Id: PrototypeTestBean.java,v 1.3 2004-03-18 03:01:17 trisberg Exp $
  */
 public class PrototypeTestBean extends TestBean {
 

@@ -37,7 +37,6 @@ import org.springframework.util.SerializationTestUtils;
  * 
  * @author Rod Johnson
  * @since 13-May-2003
- * @version $Id: DelegatingIntroductionInterceptorTests.java,v 1.10 2004-08-04 10:54:24 johnsonr Exp $
  */
 public class DelegatingIntroductionInterceptorTests extends TestCase {
 

@@ -35,7 +35,6 @@ import org.springframework.core.ControlFlowFactory;
  * the JDK. This class also has a dependency on the target test tree beeing '/target/test-classes'</p>
  * 
  * @author Rod Johnson
- * @version $Id: CommonsAttributeCompilerUtils.java,v 1.6 2004-07-05 19:22:29 colins Exp $
  */
 public class CommonsAttributeCompilerUtils {
 

@@ -36,7 +36,6 @@ import com.thoughtworks.qdox.model.JavaSource;
  * 
  * @author Mark Pollack
  * @since Oct 13, 2003
- * @version $Id: QDoxMetadataCompiler.java,v 1.2 2003-12-23 12:01:55 johnsonr Exp $
  */
 public class QDoxMetadataCompiler extends AbstractMetadataCompiler {
 

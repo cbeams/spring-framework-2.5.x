@@ -25,7 +25,6 @@ import org.springframework.aop.TargetSource;
  * Canonical TargetSource when there's no target, and behavior is supplied
  * by interfaces and advisors.
  * @author Rod Johnson
- * @version $Id: EmptyTargetSource.java,v 1.1 2004-07-25 15:59:24 johnsonr Exp $
  */
 public class EmptyTargetSource implements TargetSource, Serializable {
 	

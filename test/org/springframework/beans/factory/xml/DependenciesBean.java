@@ -22,7 +22,6 @@ import org.springframework.beans.TestBean;
  * Simple bean used to check dependency checking
  * @author Rod Johnson
  * @since 04-Sep-2003
- * @version $Id: DependenciesBean.java,v 1.2 2004-03-18 03:01:16 trisberg Exp $
  */
 public class DependenciesBean {
 	

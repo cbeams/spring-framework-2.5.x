@@ -27,7 +27,6 @@ import org.springframework.web.servlet.mvc.AbstractController;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ConstructorController.java,v 1.2 2004-03-18 03:01:39 trisberg Exp $
  * 
  * @@PathMap("/constructor.cgi")
  */

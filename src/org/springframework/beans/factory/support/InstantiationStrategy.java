@@ -30,7 +30,6 @@ import org.springframework.beans.factory.BeanFactory;
  * Method Injection.
  *
  * @author Rod Johnson
- * @version $Id: InstantiationStrategy.java,v 1.3 2004-08-11 10:05:25 johnsonr Exp $
  */
 public interface InstantiationStrategy {
 	

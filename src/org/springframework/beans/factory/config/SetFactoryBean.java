@@ -26,7 +26,6 @@ import org.springframework.beans.BeanUtils;
  * of Sets via the "set" element in XML bean definitions.
  * @author Juergen Hoeller
  * @since 21.01.2003
- * @version $Id: SetFactoryBean.java,v 1.4 2004-04-26 22:03:08 jhoeller Exp $
  */
 public class SetFactoryBean extends AbstractFactoryBean {
 

@@ -26,7 +26,6 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @version $Id: ObjectUtilsTests.java,v 1.2 2004-07-27 14:11:39 jhoeller Exp $
  */
 public class ObjectUtilsTests extends TestCase {
 	

@@ -25,7 +25,6 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: NeverMatchAdvisor.java,v 1.3 2004-03-18 03:01:14 trisberg Exp $
  */
 public class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
 	

@@ -15,7 +15,6 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rod Johnson
- * @version $Id: MultiXmlBeanFactory.java,v 1.2 2003-12-30 13:52:18 jhoeller Exp $
  */
 public class MultiXmlBeanFactory extends DefaultListableBeanFactory {
 	

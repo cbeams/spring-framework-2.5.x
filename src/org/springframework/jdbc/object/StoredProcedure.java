@@ -37,7 +37,6 @@ import org.springframework.jdbc.core.SqlParameter;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: StoredProcedure.java,v 1.14 2004-06-28 07:17:30 jhoeller Exp $
  */
 public abstract class StoredProcedure extends SqlCall {
 

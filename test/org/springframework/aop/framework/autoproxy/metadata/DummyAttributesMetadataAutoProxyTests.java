@@ -24,7 +24,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * Metadata auto proxy test that sources attributes from source-level metadata.
  * @author Rod Johnson
- * @version $Id: DummyAttributesMetadataAutoProxyTests.java,v 1.2 2004-03-18 03:01:17 trisberg Exp $
  */
 public class DummyAttributesMetadataAutoProxyTests extends AbstractMetadataAutoProxyTests {
 	

@@ -43,7 +43,6 @@ import java.io.PrintWriter;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: NestedRuntimeException.java,v 1.8 2004-03-29 20:51:27 jhoeller Exp $
  * @see #getMessage
  * @see #printStackTrace
  */

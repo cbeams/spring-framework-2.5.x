@@ -38,7 +38,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
- * @version $Revision: 1.5 $
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
  */

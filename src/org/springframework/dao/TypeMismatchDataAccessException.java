@@ -21,7 +21,6 @@ package org.springframework.dao;
  * for example on an attempt to set an object of the wrong type
  * in an RDBMS column.
  * @author Rod Johnson
- * @version $Id: TypeMismatchDataAccessException.java,v 1.5 2004-05-26 10:04:10 jhoeller Exp $
  */
 public class TypeMismatchDataAccessException extends InvalidDataAccessResourceUsageException {
 

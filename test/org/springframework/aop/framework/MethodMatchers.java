@@ -28,7 +28,6 @@ import org.springframework.aop.MethodMatcher;
  * method invocation).
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: MethodMatchers.java,v 1.2 2004-03-18 03:01:14 trisberg Exp $
  */
 public abstract class MethodMatchers {
 	

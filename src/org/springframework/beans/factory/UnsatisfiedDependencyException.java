@@ -22,7 +22,6 @@ package org.springframework.beans.factory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since September 3, 2003
- * @version $Id: UnsatisfiedDependencyException.java,v 1.8 2004-05-27 08:55:00 jhoeller Exp $
  */
 public class UnsatisfiedDependencyException extends BeanCreationException {
 

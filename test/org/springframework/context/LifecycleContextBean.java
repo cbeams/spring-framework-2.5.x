@@ -25,7 +25,6 @@ import org.springframework.beans.factory.LifecycleBean;
  * 
  * @author Colin Sampaleanu
  * @since 03-Jul-2004
- * @version $Revision: 1.2 $
  */
 public class LifecycleContextBean extends LifecycleBean implements ApplicationContextAware {
 	

@@ -20,7 +20,6 @@ package org.springframework.beans;
  * Object containing 0 or more PropertyValues comprising one update.
  * @author Rod Johnson
  * @since 13 May 2001
- * @version $Id: PropertyValues.java,v 1.3 2004-03-18 02:46:12 trisberg Exp $
  */
 public interface PropertyValues {
    

@@ -44,7 +44,6 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.20 2004-03-18 03:01:17 trisberg Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 

@@ -21,7 +21,6 @@ import org.springframework.metadata.bcel.BcelAttributes;
  *
  * @author Mark Pollack
  * @since Oct 13, 2003
- * @version $Id: CompilerTests.java,v 1.3 2003-12-23 18:08:42 dkopylenko Exp $
  */
 public class CompilerTests extends TestCase {
 

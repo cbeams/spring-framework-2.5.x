@@ -42,7 +42,6 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: ListableBeanFactory.java,v 1.10 2004-03-23 20:15:16 jhoeller Exp $
  * @see BeanFactoryUtils
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#registerSingleton
  */

@@ -19,7 +19,6 @@ package org.springframework.aop.framework.autoproxy.target;
 /**
  * Simple pooling attribute that can drive automatic creation of a TargetSource.
  * @author Rod Johnson
- * @version $Id: PoolingAttribute.java,v 1.3 2004-03-18 02:46:16 trisberg Exp $
  */
 public class PoolingAttribute {
 	

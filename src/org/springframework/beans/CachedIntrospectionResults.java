@@ -48,7 +48,6 @@ import org.apache.commons.logging.LogFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 05 May 2001
- * @version $Id: CachedIntrospectionResults.java,v 1.13 2004-07-29 17:14:43 jhoeller Exp $
  */
 final class CachedIntrospectionResults {
 

@@ -32,7 +32,6 @@ import org.springframework.transaction.TransactionDefinition;
  * 
  * @author Rod Johnson
  * @since 09-Apr-2003
- * @version $Revision: 1.5 $
  */
 public class RuleBasedTransactionAttributeTests extends TestCase {
 

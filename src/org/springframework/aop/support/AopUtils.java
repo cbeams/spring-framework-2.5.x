@@ -34,7 +34,6 @@ import org.springframework.aop.PointcutAdvisor;
  * Not intended to be used directly by applications.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.3 2004-08-03 13:32:14 johnsonr Exp $
  */
 public abstract class AopUtils {
 

@@ -24,7 +24,6 @@ package org.springframework.aop;
  * of an IntroductionAdvice.
  *
  * @author Rod Johnson
- * @version $Id: ClassFilter.java,v 1.5 2004-07-24 13:45:46 johnsonr Exp $
  * @see org.springframework.aop.Pointcut
  */
 public interface ClassFilter {

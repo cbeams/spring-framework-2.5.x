@@ -21,7 +21,6 @@ package org.springframework.aop.framework.autoproxy.metadata;
  * modify state. We choose to use this rather than a
  * Modifier attribute as it's less error-prone for developers.
  * @author Rod Johnson
- * @version $Id: ModifiableAttribute.java,v 1.2 2004-03-18 03:01:17 trisberg Exp $
  */
 public class ModifiableAttribute {
 

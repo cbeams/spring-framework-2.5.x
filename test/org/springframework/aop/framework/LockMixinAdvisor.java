@@ -21,7 +21,6 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 /**
  * Advisor for use with a LockMixin. Applies to all classes.
  * @author Rod Johnson
- * @version $Id: LockMixinAdvisor.java,v 1.4 2004-03-18 03:01:14 trisberg Exp $
  */
 public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 	

@@ -23,7 +23,6 @@ import org.springframework.beans.BeansException;
  * that support reloading and optionally polling for
  * updates.
  * @author Rod Johnson
- * @version $Id: DynamicObject.java,v 1.2 2004-08-04 16:49:47 johnsonr Exp $
  */
 public interface DynamicObject extends ExpirableObject {
 	

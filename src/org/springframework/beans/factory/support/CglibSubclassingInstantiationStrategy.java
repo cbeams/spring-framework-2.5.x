@@ -41,7 +41,6 @@ import org.springframework.beans.factory.BeanFactory;
  * However, the core IoC container will still run without CGLIB being available.
  *
  * @author Rod Johnson
- * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.7 2004-08-11 10:05:25 johnsonr Exp $
  */
 public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationStrategy {
 

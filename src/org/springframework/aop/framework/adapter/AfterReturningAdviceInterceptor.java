@@ -36,7 +36,6 @@ import org.springframework.aop.AfterReturningAdvice;
  * interfaces.
  *
  * @author Rod Johnson
- * @version $Id: AfterReturningAdviceInterceptor.java,v 1.5 2004-07-29 11:53:40 johnsonr Exp $
  */
 public final class AfterReturningAdviceInterceptor implements MethodInterceptor, Serializable {
 	

@@ -39,7 +39,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * @author Juergen Hoeller
  * @since 12.05.2003
- * @version $Id: JtaTransactionTestSuite.java,v 1.20 2004-07-28 14:10:40 johnsonr Exp $
  */
 public class JtaTransactionTestSuite extends TestCase {
 	

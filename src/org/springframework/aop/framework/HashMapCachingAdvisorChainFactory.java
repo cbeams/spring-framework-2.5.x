@@ -31,7 +31,6 @@ import org.springframework.core.JdkVersion;
  * Method.hashCode() call. On J2SE 1.3, falls back to using java.util.HashMap.
  *
  * @author Rod Johnson
- * @version $Id: HashMapCachingAdvisorChainFactory.java,v 1.8 2004-06-02 20:44:07 jhoeller Exp $
  * @see java.util.IdentityHashMap
  * @see java.util.HashMap
  * @see java.lang.reflect.Method#hashCode

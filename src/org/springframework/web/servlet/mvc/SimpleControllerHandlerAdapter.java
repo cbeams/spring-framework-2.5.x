@@ -29,7 +29,6 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>This is an SPI class, not used directly by application code.
  *
  * @author Rod Johnson
- * @version $Id: SimpleControllerHandlerAdapter.java,v 1.7 2004-03-18 02:46:08 trisberg Exp $
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see Controller
  * @see LastModified

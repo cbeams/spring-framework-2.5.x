@@ -65,7 +65,6 @@ import org.springframework.util.StopWatch;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.61 2004-08-02 13:46:12 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 

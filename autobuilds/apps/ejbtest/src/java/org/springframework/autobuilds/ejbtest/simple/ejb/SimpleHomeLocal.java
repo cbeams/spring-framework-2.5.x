@@ -65,7 +65,6 @@ import org.springframework.autobuilds.ejbtest.simple.SimpleService;
  * Simple EJB local home interface
  *
  * @author Colin Sampaleanu
- * @version $Id: SimpleHomeLocal.java,v 1.1 2004-07-14 23:44:09 colins Exp $
  */
 public interface SimpleHomeLocal extends EJBLocalHome
 {

@@ -67,7 +67,6 @@ import javax.ejb.EJBHome;
  *
  * @author <a href="mailto:vmassol@apache.org">Vincent Massol</a>
  * 
- * @version $Id: ConverterHome.java,v 1.2 2004-04-18 03:28:52 colins Exp $
  */
 public interface ConverterHome extends EJBHome {
 	/**

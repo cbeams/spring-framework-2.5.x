@@ -24,7 +24,6 @@ import org.springframework.aop.ThrowsAdvice;
 
 /**
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceAdapter.java,v 1.6 2004-04-01 15:35:47 jhoeller Exp $
  */
 class ThrowsAdviceAdapter implements AdvisorAdapter {
 

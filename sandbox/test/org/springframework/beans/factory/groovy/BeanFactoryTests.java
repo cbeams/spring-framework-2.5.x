@@ -28,7 +28,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BeanFactoryTests.java,v 1.6 2004-08-05 10:53:00 johnsonr Exp $
  */
 public class BeanFactoryTests extends TestCase {
 	

@@ -21,7 +21,6 @@ package org.springframework.transaction;
  * in an unexpected rollback
  * @author Rod Johnson
  * @since 17-Mar-2003
- * @version $Revision: 1.2 $
  */
 public class UnexpectedRollbackException extends TransactionException {
 

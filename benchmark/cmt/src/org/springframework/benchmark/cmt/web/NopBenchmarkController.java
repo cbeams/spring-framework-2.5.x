@@ -10,7 +10,6 @@ import org.springframework.benchmark.cmt.server.Benchmark;
 
 /**
  * @author Rod Johnson
- * @version $Id: NopBenchmarkController.java,v 1.1 2003-12-02 18:31:08 johnsonr Exp $
  */
 public class NopBenchmarkController extends AbstractBenchmarkController {
 

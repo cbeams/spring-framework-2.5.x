@@ -19,7 +19,6 @@ package org.springframework.aop.support;
 /**
  * @author Dmitriy Kopylenko
  * @since 1.1
- * @version $Id: Perl5RegexpMethodPointcutTests.java,v 1.1 2004-07-28 18:35:27 dkopylenko Exp $
  */
 public class Perl5RegexpMethodPointcutTests extends AbstractRegexpMethodPointcutTests {
     

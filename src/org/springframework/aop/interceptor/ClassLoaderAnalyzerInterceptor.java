@@ -26,7 +26,6 @@ import org.springframework.util.ClassLoaderUtils;
 
 /**
  * Trivial classloader analyzer interceptor.
- * @version $Id: ClassLoaderAnalyzerInterceptor.java,v 1.4 2004-07-24 19:14:08 johnsonr Exp $
  * @author Rod Johnson
  * @author Dmitriy Kopylenko
  */

@@ -75,7 +75,6 @@ import org.springframework.mock.jndi.SimpleNamingContext;
  * @see org.springframework.mock.jndi.SimpleNamingContext
  * @see org.springframework.jdbc.datasource.SingleConnectionDataSource
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
- * @version $Id: SimpleNamingContextBuilder.java,v 1.1 2004-04-28 18:31:30 jhoeller Exp $
  */
 public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder {
 	

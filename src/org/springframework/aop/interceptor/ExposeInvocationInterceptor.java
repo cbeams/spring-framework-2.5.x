@@ -34,7 +34,6 @@ import org.aopalliance.intercept.MethodInvocation;
  * <br>If used, this interceptor will normally be the first
  * in the interceptor chain.
  * @author Rod Johnson
- * @version $Id: ExposeInvocationInterceptor.java,v 1.4 2004-07-25 13:58:38 johnsonr Exp $
  */
 public class ExposeInvocationInterceptor implements MethodInterceptor, Serializable {
 	

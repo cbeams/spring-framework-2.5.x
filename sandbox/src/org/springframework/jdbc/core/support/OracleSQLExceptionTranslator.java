@@ -27,7 +27,6 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * This can easily be done by adding additional values to the switch.
  *
  * @author Rod Johnson
- * @version $Id: OracleSQLExceptionTranslator.java,v 1.2 2003-12-05 17:54:31 johnsonr Exp $
  */
 public class OracleSQLExceptionTranslator implements SQLExceptionTranslator {
 

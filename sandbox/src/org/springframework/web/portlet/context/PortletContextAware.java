@@ -29,7 +29,6 @@ import javax.portlet.PortletContext;
  *
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Revision: 1.2 $
  * @see org.springframework.context.ApplicationContextAware
  */
 public interface PortletContextAware {

@@ -40,7 +40,6 @@ import org.springframework.metadata.support.JavaDocTags;
  * target class. 
  * @author Mark Pollack
  * @since Sep 28, 2003
- * @version $Id: BcelAttributeWriter.java,v 1.2 2003-12-23 12:02:37 johnsonr Exp $
  * 
  */
 public abstract class BcelAttributeWriter implements AttributeWriter {

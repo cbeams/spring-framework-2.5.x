@@ -42,7 +42,6 @@ import org.springframework.beans.factory.InitializingBean;
  * and turning into a SingletonTargetSource.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPrototypeBasedTargetSource.java,v 1.2 2004-07-27 15:39:53 johnsonr Exp $
  * @see org.springframework.beans.factory.BeanFactory#getBean
  */
 public abstract class AbstractPrototypeBasedTargetSource

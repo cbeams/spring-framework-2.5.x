@@ -31,7 +31,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * Convenient superclass for TargetSourceCreators that require creating
  * multiple instances of a prototype bean.
  * @author Rod Johnson
- * @version $Id: AbstractPrototypeBasedTargetSourceCreator.java,v 1.1 2004-04-21 11:54:41 jhoeller Exp $
  * @see org.springframework.aop.target.AbstractPrototypeBasedTargetSource
  */
 public abstract class AbstractPrototypeBasedTargetSourceCreator implements TargetSourceCreator {

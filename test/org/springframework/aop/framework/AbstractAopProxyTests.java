@@ -60,7 +60,6 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.45 2004-08-10 11:04:19 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	

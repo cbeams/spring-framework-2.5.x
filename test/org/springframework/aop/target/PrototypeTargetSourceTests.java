@@ -25,7 +25,6 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rod Johnson
- * @version $Id: PrototypeTargetSourceTests.java,v 1.4 2004-03-18 03:01:18 trisberg Exp $
  */
 public class PrototypeTargetSourceTests extends TestCase {
 	

@@ -31,7 +31,6 @@ import org.springframework.orm.hibernate.HibernateCallback;
 /**
  * Hibernate implementation of Mapper
  * 
- * @version $Revision: 1.1 $
  * @author colin sampaleanu
  */
 public class MapperImpl extends MapperHibernateDaoSupport implements Mapper {

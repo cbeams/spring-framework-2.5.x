@@ -29,7 +29,6 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @since 11-Mar-2003
- * @version $Revision: 1.5 $
  * @see BeanNameAware
  * @see InitializingBean
  * @see BeanFactory

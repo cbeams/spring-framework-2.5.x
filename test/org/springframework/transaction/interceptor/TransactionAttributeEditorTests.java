@@ -28,7 +28,6 @@ import org.springframework.transaction.TransactionDefinition;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 26-Apr-2003
- * @version $Id: TransactionAttributeEditorTests.java,v 1.5 2004-04-09 05:43:26 jhoeller Exp $
  */
 public class TransactionAttributeEditorTests extends TestCase {
 	

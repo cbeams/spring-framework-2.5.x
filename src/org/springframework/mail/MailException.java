@@ -21,7 +21,6 @@ import org.springframework.core.NestedRuntimeException;
 /**
  * Base class for all mail exceptions.
  * @author Dmitriy Kopylenko
- * @version $Id: MailException.java,v 1.5 2004-03-18 02:46:05 trisberg Exp $
  */
 public abstract class MailException extends NestedRuntimeException {
 

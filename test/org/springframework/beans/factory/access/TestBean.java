@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * Scrap bean for use in tests.
  * @author Colin Sampaleanu
- * @version $Revision: 1.3 $
  */
 public class TestBean {
 

@@ -38,7 +38,6 @@ import org.springframework.beans.factory.DisposableBean;
  * <p>Cleanup is performed in the destroy() method from DisposableBean.
  *
  * @author Rod Johnson
- * @version $Id: ThreadLocalTargetSource.java,v 1.9 2004-04-20 21:54:13 jhoeller Exp $
  * @see #destroy
  */
 public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource

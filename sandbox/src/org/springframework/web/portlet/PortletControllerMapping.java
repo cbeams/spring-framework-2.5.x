@@ -39,7 +39,6 @@ import javax.portlet.PortletRequest;
  *
  * @author William G. Thompson, Jr.
  * @see org.springframework.core.Ordered
- * @version $Id: PortletControllerMapping.java,v 1.2 2004-05-08 01:31:24 dkopylenko Exp $
  */
 public interface PortletControllerMapping {
 	

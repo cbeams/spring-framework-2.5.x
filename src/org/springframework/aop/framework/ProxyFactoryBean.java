@@ -76,7 +76,6 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.33 2004-08-05 13:26:44 dkopylenko Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor

@@ -26,7 +26,6 @@ import org.springframework.dao.DataAccessException;
  * CmtJtaNoSpringTx EJB Remote interface
  *
  * @author colin sampaleanu
- * @version $Id: CmtJtaNoSpringTxRemote.java,v 1.1 2004-07-14 22:55:07 colins Exp $
  */
 public interface CmtJtaNoSpringTxRemote extends EJBObject {
 
