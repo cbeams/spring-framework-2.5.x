@@ -17,6 +17,7 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperManager;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 import org.springframework.core.io.Resource;
 import org.springframework.ui.jasperreports.JasperReportsUtils;
@@ -34,13 +36,19 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
  * Base view class for all JasperReports views. Controls on the fly compilation
- * of report designs as required and is responsible for locating the report data source
- * in the Spring model.
+ * of report designs as required and is responsible for locating the report data
+ * source in the Spring model.
  * 
  * @author robh
  */
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
+    /**
+     * Key used to locate report data in <code>Collection</code> form 
+     * in the model.
+     */
+    private static final String REPORT_DATA_KEY = "reportData";
+    
     /**
      * The <code>JasperReport</code> that is used to render the view.
      */
@@ -88,7 +96,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
         super.initApplicationContext();
 
         String reportPath = getUrl();
-        
+
         // we know the url is set
         // now try to get the report
         // and then compile it
@@ -96,12 +104,10 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
         try {
             if (reportPath.endsWith(".jasper")) {
-                report = JasperManager.loadReport(reportResource
-                        .getInputStream());
+                report = JasperManager.loadReport(reportResource.getInputStream());
             } else if (reportPath.endsWith(".jrxml")) {
                 // attempt a compile
-                report = JasperReportsUtils.compileReport(reportResource
-                        .getInputStream());
+                report = JasperReportsUtils.compileReport(reportResource.getInputStream());
             } else {
                 throw new UnrecognizedReportExtensionException(
                         "Report URL must end in either .jasper or .jrxml");
@@ -120,11 +126,15 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
     }
 
     /**
-     * Attempts to locate an instance of JRDataSource in a given Map instance.
+     * Attempts to locate an instance of <code>JRDataSource</code> in a given
+     * <code>Map</code> instance. If no instance of <code>JRDataSource</code>
+     * can be found, looks for an entry called <code>reportData</code> of type
+     * <code>Collection</code> and creates an instance of
+     * <code>JRDataSource</code> automatically.
      * 
      * @param model
-     *            The Map to look in.
-     * @return The JRDataSource if found, otherwise null.
+     *            The <code>Map</code> to look in.
+     * @return The <code>JRDataSource</code> if found, otherwise null.
      */
     private JRDataSource locateDataSource(Map model) {
         JRDataSource dataSource = null;
@@ -137,16 +147,32 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
                 break;
             }
         }
+        
+        // is the datasource still null
+        if(dataSource == null) {
+            Object data = model.get(REPORT_DATA_KEY);
+            
+            if(data instanceof Collection) {
+                dataSource = new JRBeanCollectionDataSource((Collection)data);
+            }
+        }
 
         return dataSource;
     }
 
     /**
-     * Subclasses should implement this method to perform the actual rendering process.
-     * @param report The <code>JasperReport</code> to render.
-     * @param model The <code>Map</code> containg report parameters.
-     * @param dataSource The <code>JRDataSource</code> containing the report data.
-     * @param response The <code>HttpServletResponse</code> the report should be rendered to.
+     * Subclasses should implement this method to perform the actual rendering
+     * process.
+     * 
+     * @param report
+     *            The <code>JasperReport</code> to render.
+     * @param model
+     *            The <code>Map</code> containg report parameters.
+     * @param dataSource
+     *            The <code>JRDataSource</code> containing the report data.
+     * @param response
+     *            The <code>HttpServletResponse</code> the report should be
+     *            rendered to.
      * @throws Exception
      */
     protected abstract void renderView(JasperReport report, Map model,

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.25 2004-11-09 09:58:38 davison Exp $-->
+<!--$Id: views.xml,v 1.26 2004-11-19 12:59:18 robharrop Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -1721,5 +1721,141 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
       Framework, and we have managed to extend it all the way up the J2EE
       stack in this Tapestry application.</para>
     </sect2>
+  </sect1>
+  
+  <sect1 id="view-jasper-reports">
+      <title>JasperReports</title>
+      <para>
+          JasperReports (<ulink url="http://jasperreports.sourceforge.net"></ulink>) 
+          is a powerful, open-source reporting engine that supports 
+          the creation of report designs using an easily understood XML file formats. 
+          JasperReports is capable of rendering reports output into four different 
+          formats: CSV, Excel, HTML and PDF.
+      </para>
+      <sect2 id="view-jasper-reports-dependencies">
+          <title>Dependencies</title>
+          <para>
+          Your application will need to include the latest release of JasperReports, 
+          which at the time of writing was 0.6.1. JasperReports itself depends on the 
+          following projects:</para>
+          <itemizedlist mark="bullet">
+              <listitem><para>BeanShell</para></listitem>
+              <listitem><para>Commons BeanUtils</para></listitem>
+              <listitem><para>Commons Collections</para></listitem>
+              <listitem><para>Commons Digester</para></listitem>
+              <listitem><para>Commons Logging</para></listitem>
+              <listitem><para>iText</para></listitem>
+              <listitem><para>POI</para></listitem>
+          </itemizedlist>
+          <para>JasperReports also requires a JAXP compliant XML parser.
+          </para>
+      </sect2>
+      <sect2 id="view-jasper-reports-configuration">
+          <title>Configuration</title>
+          <para>
+              To configure JasperReports views in your <literal>ApplicationContext</literal> 
+              you have to define a <literal>ViewResolver</literal> to map view names to the
+              appropriate view class depending on which format you want your report rendered in.
+              </para>
+          <sect3 id="view-jasper-reports-configuration-resolver">
+              <title>Configuring the <literal>ViewResolver</literal></title>
+              <para>
+                  Typically, you will use the <literal>ResourceBundleViewResolver</literal>
+                  to map view names to view classes and files in a properties file
+                  <programlisting>&lt;bean id=&quot;viewResolver&quot; class=&quot;org.springframework.web.servlet.view.ResourceBundleViewResolver&quot;&gt;
+    &lt;property name=&quot;basename&quot;&gt;
+        &lt;value&gt;views&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+                  </programlisting>
+              </para>
+              <para>Here we've configured an instance of <literal>ResourceBundleViewResolver</literal>
+              which will look for view mappings in the resource bundle with base name <literal>views</literal>.
+              The exact contents of this file is described in the next section.
+              </para>
+          </sect3>
+          <sect3 id="view-jasper-reports-configuration-views">
+              <title>Configuring the <literal>View</literal>s</title>
+              <para>
+              Spring contains four different View implementations for JasperReports
+              each of which corresponds to one of the four output formats supported 
+              by JasperReports:</para>
+              <table id="view-jasper-reports-configuration-views-classes">
+                  <title>JasperReports <literal>View</literal> Classes</title>
+                  <tgroup cols="2">
+                      <colspec colname="c1" colwidth="1*" />
+
+                      <colspec colname="c2" colwidth="1*" />
+            
+                      <thead>
+                        <row>
+                          <entry>Class Name</entry>
+            
+                          <entry>Render Format</entry>
+                        </row>
+                      </thead>
+
+                      <tbody>
+                        <row>
+                          <entry><literal>JasperReportsCsvView</literal></entry>
+            
+                          <entry>CSV</entry>
+                        </row>
+            
+                        <row>
+                          <entry><literal>JasperReportsHtmlView</literal></entry>
+            
+                          <entry>HTML</entry>
+                        </row>
+            
+                        <row>
+                          <entry><literal>JasperReportsPdfView</literal></entry>
+            
+                          <entry>PDF</entry>
+                        </row>
+            
+                        <row>
+                          <entry><literal>JasperReportsXlsView</literal></entry>
+            
+                          <entry>Microsoft Excel</entry>
+                        </row>
+                      </tbody>
+                    </tgroup>
+              </table>              
+              <para>
+              Mapping one of these classes to a view name and a report file is simply 
+              a matter of adding the appropriate entries into the resource bundle configured
+              in the previous section as shown here:
+              </para>
+              <programlisting>simpleReport.class=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
+simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
+              </programlisting>
+              <para>
+              Here you can see that the view with name, <literal>simpleReport</literal>, is mapped 
+              to the <literal>JasperReportsPdfView</literal> class. This will cause the output of 
+              this report to be rendered in PDF format. The <literal>url</literal> property of the 
+              view is set to the location of the underlying report file.
+              </para>
+          </sect3>
+          <sect3 id="view-jasper-reports-configuration-report-files">
+              <title>About Report Files</title>
+              <para>
+                  JasperReports has two distinct types of report file: the design file, 
+                  which has a <literal>.jrxml</literal> extension, and the compiled
+                  report file, which has a <literal>.jasper</literal> extension. Typically,
+                  you use the JasperReports Ant task to compile your <literal>.jrxml</literal>
+                  design file into a <literal>.jasper</literal> file before deploying it
+                  into your application. With Spring you can map either of these files to
+                  your report file and Spring will take care of compiling the 
+                  <literal>.jrxml</literal> file on the fly for you. You should note that
+                  after a <literal>.jrxml</literal> file is compiled by Spring, the compiled
+                  report is cached for the life of the application. To make changes to the
+                  file you will need to restart your application.
+              </para>
+          </sect3>
+      </sect2>
+      <sect2 id="view=jasper-reports-model">
+          <title>Populating the <literal>ModelAndView</literal></title>
+      </sect2>
   </sect1>
 </chapter>

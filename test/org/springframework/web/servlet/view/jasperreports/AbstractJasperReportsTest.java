@@ -45,11 +45,13 @@ public abstract class AbstractJasperReportsTest extends TestCase {
 	public void testCompiledReport() throws Exception{
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
 		view.render(getModel(), request, response);
+        assertTrue(response.getContentAsByteArray().length > 0);
 	}
 	
 	public void testUncompiledReport() throws Exception {
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 		view.render(getModel(), request, response);
+        assertTrue(response.getContentAsByteArray().length > 0);
 	}
 	
 	public void testWithInvalidPath() throws Exception {
@@ -92,6 +94,20 @@ public abstract class AbstractJasperReportsTest extends TestCase {
 			// good!
 		}
 	}
+    
+    public void testWithCollection() throws Exception {
+        Map model = getModel();
+        model.remove("dataSource");
+        model.put("reportData", getData());
+        
+        try {
+            AbstractJasperReportsView view = getView(COMPILED_REPORT);
+            view.render(model, request, response);
+            assertTrue(response.getContentAsByteArray().length > 0);
+        } catch(NoDataSourceException ex) {
+            fail("Collection keyed as reportData should result in implicit data source creation.");
+        }
+    }
 	
 	private AbstractJasperReportsView getView(String url) {
 		AbstractJasperReportsView view = getViewImplementation();
