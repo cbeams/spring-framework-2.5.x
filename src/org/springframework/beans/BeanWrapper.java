@@ -31,7 +31,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.9 2004-02-02 11:33:34 jhoeller Exp $
+ * @version $Id: BeanWrapper.java,v 1.10 2004-02-04 17:36:32 jhoeller Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -50,14 +50,6 @@ public interface BeanWrapper {
 	 * @param obj wrapped object that we are manipulating
 	 */
 	void setWrappedInstance(Object obj) throws BeansException;
-
-	/**
-	 * This method is included for efficiency. If an implementation
-	 * caches all necessary information about the class,
-	 * it might be faster to instantiate a new instance in the
-	 * class than create a new wrapper to work with a new object
-	 */
-	void newWrappedInstance() throws BeansException;
 
 	/**
 	 * Return the bean wrapped by this object (cannot be null).
@@ -130,7 +122,7 @@ public interface BeanWrapper {
 	 * <p>Bulk updates from PropertyValues are more powerful: This method is
 	 * provided for convenience. Behaviour will be identical to that of
 	 * the setPropertyValues(PropertyValues) method.
-	 * @param m Map to take properties from. Contains property value objects,
+	 * @param map Map to take properties from. Contains property value objects,
 	 * keyed by property name
 	 */
 	void setPropertyValues(Map map) throws BeansException;

@@ -7,10 +7,9 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-
 /**
- * @version $Id: BeanWrapperTestSuite.java,v 1.10 2004-02-02 11:34:32 jhoeller Exp $
  * @author Rod Johnson
+ * @version $Id: BeanWrapperTestSuite.java,v 1.11 2004-02-04 17:36:32 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -36,13 +35,7 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertTrue(s.indexOf("37") != -1);
 		assertTrue(s.indexOf("kerry") != -1);
 	}
-	
-	
-	public static class NoRead {
-		public void setAge(int age) {
-		}
-	}
-	
+
 	public void testIsReadablePropertyNotReadable() {
 		NoRead nr = new NoRead();
 		BeanWrapper bw = new BeanWrapperImpl(nr);
@@ -66,7 +59,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			fail("Can't inquire into readability of null property");
 		}
 		catch (BeansException ex) {
-			
+			// expected
 		}
 	}
 	
@@ -78,7 +71,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			fail("Can't inquire into writability of null property");
 		}
 		catch (BeansException ex) {
-		
+			// expected
 		}
 	}
 
@@ -93,27 +86,6 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertTrue("2nd changed", tb2.getAge()==14);
 	}
 
-	public void testNewInstanceIsIndependent() {
-		TestBean t = new TestBean();
-		int age = 50;
-		String name = "Tony";
-		t.setAge(age);
-		t.setName(name);
-		try {
-			BeanWrapper bw = new BeanWrapperImpl(t);
-			assertTrue("age is OK", t.getAge() == age);
-			assertTrue("name is OK", name.equals(t.getName()));
-			bw.newWrappedInstance();
-			TestBean t2 = (TestBean) bw.getWrappedInstance();
-			assertTrue("Not ==", t2 != t);
-			assertTrue("Not equals", !t2.equals(t));
-			assertTrue("t2 has defaults", t2.getAge() == 0 && t2.getName() == null);
-		}
-		catch (BeansException ex) {
-			fail("Shouldn't throw exception when everything is valid");
-		}
-	}
-	
 	public void testGetterThrowsException() {
 		GetterBean gb = new GetterBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -339,8 +311,6 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertTrue("spousesSpouse = initial point", rod == spousesSpouse);
 	}
 	
-	
-	
 	public void testGetNestedPropertyNullValue() throws Exception {
 		ITestBean rod = new TestBean("rod", 31);
 		ITestBean kerry = new TestBean("kerry", 35);
@@ -405,6 +375,32 @@ public class BeanWrapperTestSuite extends TestCase {
 		BeanWrapper kbw = new BeanWrapperImpl(kerry);
 		assertTrue("spouse.spouse.spouse.spouse.company=Lewisham", 
 			"Lewisham".equals(kbw.getPropertyValue("spouse.spouse.spouse.spouse.company")));
+	}
+
+	public void testNewWrappedInstancePropertyValuesGet() {
+		BeanWrapper bw = new BeanWrapperImpl();
+
+		TestBean t = new TestBean("Tony", 50);
+		bw.setWrappedInstance(t);
+		assertEquals("Bean wrapper returns wrong property value", new Integer(t.getAge()), bw.getPropertyValue("age"));
+
+		TestBean u = new TestBean("Udo", 30);
+		bw.setWrappedInstance(u);
+		assertEquals("Bean wrapper returns cached property value", new Integer(u.getAge()), bw.getPropertyValue("age"));
+	}
+
+	public void testNewWrappedInstanceNestedPropertyValuesGet() {
+		BeanWrapper bw = new BeanWrapperImpl();
+
+		TestBean t = new TestBean("Tony", 50);
+		t.setSpouse(new TestBean("Sue", 40));
+		bw.setWrappedInstance(t);
+		assertEquals("Bean wrapper returns wrong nested property value", new Integer(t.getSpouse().getAge()), bw.getPropertyValue("spouse.age"));
+
+		TestBean u = new TestBean("Udo", 30);
+		u.setSpouse(new TestBean("Vera", 20));
+		bw.setWrappedInstance(u);
+		assertEquals("Bean wrapper returns cached nested property value", new Integer(u.getSpouse().getAge()), bw.getPropertyValue("spouse.age"));
 	}
 
 	public void testNullObject() {
@@ -829,6 +825,13 @@ public class BeanWrapperTestSuite extends TestCase {
 	}
 
 
+	private static class NoRead {
+
+		public void setAge(int age) {
+		}
+	}
+
+
 	private static class PropsTest {
 
 		private Properties props;
@@ -860,8 +863,9 @@ public class BeanWrapperTestSuite extends TestCase {
 		}
 
 		public String getName() {
-			if (this.name == null)
+			if (this.name == null) {
 				throw new RuntimeException("name property must be set");
+			}
 			return name;
 		}
 	}

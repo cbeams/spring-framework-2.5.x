@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.23 2004-02-02 11:33:34 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.24 2004-02-04 17:36:32 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -166,15 +166,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 			throw new FatalBeanException("Cannot set BeanWrapperImpl target to a null object");
 		}
 		this.object = object;
+		this.nestedBeanWrappers = null;
 		if (this.cachedIntrospectionResults == null ||
 		    !this.cachedIntrospectionResults.getBeanClass().equals(object.getClass())) {
 			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(object.getClass());
 		}
-		// assert: cachedIntrospectionResults != null
-	}
-
-	public void newWrappedInstance() throws BeansException {
-		this.object = BeanUtils.instantiateClass(getWrappedClass());
 	}
 
 	public Class getWrappedClass() {
