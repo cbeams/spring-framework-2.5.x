@@ -86,7 +86,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~245 KB)
+* "spring-core" (~250 KB)
 - Contents: bean container, core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -94,7 +94,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~245 KB)
+* "spring-context" (~250 KB)
 - Contents: application context, validation, UI support, mail, JNDI, JMS, EJB, remoting, scheduling, caching
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, JMS, EJB, JAX-RPC, Hessian, Burlap, Quartz, EHCache)
 
@@ -102,7 +102,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
-* "spring-orm" (~190 KB)
+* "spring-orm" (~180 KB)
 - Contents: Hibernate support, JDO support, Apache OJB, iBATIS SQL Maps support
 - Dependencies: spring-dao, (Hibernate, JDO, Apache OJB, iBATIS SQL Maps)
 
@@ -114,7 +114,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~1315 KB)
+* "spring" (~1310 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
