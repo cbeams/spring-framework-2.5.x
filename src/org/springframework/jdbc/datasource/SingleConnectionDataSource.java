@@ -21,7 +21,7 @@ import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Implementation of SmartDataSource that wraps a single connection which is not
@@ -61,8 +61,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	/**
 	 * Create a new SingleConnectionDataSource with the given standard
 	 * DriverManager parameters.
-	 * @param suppressClose if the returned connection will be a close-suppressing
-	 * proxy or the physical connection.
+	 * @param suppressClose if the returned connection should be a
+	 * close-suppressing proxy or the physical connection.
 	 */
 	public SingleConnectionDataSource(String driverClassName, String url, String username, String password,
 	                                  boolean suppressClose) throws CannotGetJdbcConnectionException {
@@ -86,16 +86,16 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	}
 
 	/**
-	 * Set if the returned connection will be a close-suppressing proxy or
-	 * the physical connection.
+	 * Set if the returned connection should be a close-suppressing proxy
+	 * or the physical connection.
 	 */
 	public void setSuppressClose(boolean suppressClose) {
 		this.suppressClose = suppressClose;
 	}
 
 	/**
-	 * Return if the returned connection will be a close-suppressing proxy or
-	 * the physical connection.
+	 * Return if the returned connection will be a close-suppressing proxy
+	 * or the physical connection.
 	 */
 	public boolean isSuppressClose() {
 		return suppressClose;
@@ -121,7 +121,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * @param source the JDBC Connection to use
 	 */
 	protected void init(Connection source) {
-		// wrap connection?
 		this.connection = this.suppressClose ? DataSourceUtils.getCloseSuppressingConnectionProxy(source) : source;
 	}
 
@@ -144,12 +143,13 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	}
 
 	/**
-	 * Specifying a custom username and password doesn't make sense with a single connection.
-	 * Returns the single connection if given the same username and password, though.
+	 * Specifying a custom username and password doesn't make sense
+	 * with a single connection. Returns the single connection if given
+	 * the same username and password, though.
 	 */
 	public Connection getConnection(String username, String password) throws SQLException {
-		if (StringUtils.nullSafeEquals(username, getUsername()) &&
-				StringUtils.nullSafeEquals(password, getPassword())) {
+		if (ObjectUtils.nullSafeEquals(username, getUsername()) &&
+				ObjectUtils.nullSafeEquals(password, getPassword())) {
 			return getConnection();
 		}
 		else {
