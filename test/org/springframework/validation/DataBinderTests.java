@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class ValidationTestSuite extends TestCase {
+public class DataBinderTests extends TestCase {
 
 	public void testBindingNoErrors() throws Exception {
 		TestBean rod = new TestBean();
@@ -213,32 +213,29 @@ public class ValidationTestSuite extends TestCase {
 	}
 
 	/**
-	 * Tests for required field, both null, non-existing and empty strings
+	 * Tests for required field, both null, non-existing and empty strings.
 	 */
 	public void testBindingWithRequiredFields() throws Exception {
-		TestBean alef = new TestBean();
+		TestBean tb = new TestBean();
+		tb.setSpouse(new TestBean());
 
-		DataBinder binder = new DataBinder(alef, "person");
-		binder.setRequiredFields(new String[]{"name", "touchy", "date"});
+		DataBinder binder = new DataBinder(tb, "person");
+		binder.setRequiredFields(new String[]{"touchy", "name", "date", "spouse.name"});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("touchy", ""));
 		pvs.addPropertyValue(new PropertyValue("name", null));
+		pvs.addPropertyValue(new PropertyValue("spouse.name", "     "));
 
 		binder.bind(pvs);
 
 		BindException ex = binder.getErrors();
-		assertEquals("Wrong amount of errors", 3, ex.getErrorCount());
-
-		/*// for debugging purposes
-		assertTrue("Error available for name", ex.getFieldError("name") != null);
-		assertTrue("Error available for touchy", ex.getFieldError("touchy") != null);
-		assertTrue("Error available for date", ex.getFieldError("date") != null);
-		*/
+		assertEquals("Wrong amount of errors", 4, ex.getErrorCount());
 
 		assertEquals("required", ex.getFieldError("touchy").getCode());
 		assertEquals("required", ex.getFieldError("name").getCode());
 		assertEquals("required", ex.getFieldError("date").getCode());
+		assertEquals("required", ex.getFieldError("spouse.name").getCode());
 	}
 
 	public void testCustomEditorForSingleProperty() {
@@ -717,65 +714,6 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("Field Person Age did not have correct type", msg);
 	}
 
-	public void testValidationUtilsEmpty() throws Exception {
-		//Test null
-		TestBean tb = new TestBean();
-		Errors errors = new BindException(tb, "tb");
-		Validator testValidator = new ValidationUtilsEmptyValidator();
-		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY", errors.getFieldError("name").getCode());
-
-		//Test empty String
-		tb.setName("");
-		errors = new BindException(tb, "tb");
-		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY", errors.getFieldError("name").getCode());
-
-		//Test OK1
-		tb.setName(" ");
-		errors = new BindException(tb, "tb");
-		testValidator.validate(tb, errors);
-		assertFalse(errors.hasFieldErrors("name"));
-
-		//Test OK2
-		tb.setName("Roddy");
-		errors = new BindException(tb, "tb");
-		testValidator.validate(tb, errors);
-		assertFalse(errors.hasFieldErrors("name"));
-	}
-
-	public void testValidationUtilsEmptyOrWhitespace() throws Exception {
-		//Test null
-		TestBean tb = new TestBean();
-		Errors errors = new BindException(tb, "tb");
-		Validator testValidator = new ValidationUtilsEmptyOrWhitespaceValidator();
-		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
-
-		//Test empty String
-		tb.setName("");
-		errors = new BindException(tb, "tb");
-		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
-
-		//Test empty String
-		tb.setName(" ");
-		errors = new BindException(tb, "tb");
-		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
-
-		//Test OK
-		tb.setName("Roddy");
-		errors = new BindException(tb, "tb");
-		testValidator.validate(tb, errors);
-		assertFalse(errors.hasFieldErrors("name"));
-	}
-
 	public void testBindingWithResortedList() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -834,31 +772,5 @@ public class ValidationTestSuite extends TestCase {
 			}
 		}
 	}
-
-
-	private static class ValidationUtilsEmptyValidator implements Validator {
-
-		public boolean supports(Class clazz) {
-			return TestBean.class.isAssignableFrom(clazz);
-		}
-
-		public void validate(Object obj, Errors errors) {
-			//TestBean tb = (TestBean) obj;
-			ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!");
-		}
-	}
-
-	private static class ValidationUtilsEmptyOrWhitespaceValidator implements Validator {
-
-		public boolean supports(Class clazz) {
-			return TestBean.class.isAssignableFrom(clazz);
-		}
-
-		public void validate(Object obj, Errors errors) {
-			//TestBean tb = (TestBean) obj;
-			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", "You must enter a name!");
-		}
-	}
-
 
 }
