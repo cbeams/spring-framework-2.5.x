@@ -29,17 +29,17 @@ import java.beans.PropertyEditorSupport;
  */
 public class StringTrimmerEditor extends PropertyEditorSupport {
 
-	private boolean emptyAsNull;
+	private final boolean emptyAsNull;
 
 	/**
-	 * Create a new instance.
+	 * Create a new StringTrimmerEditor instance.
 	 * @param emptyAsNull whether to transform an empty string to null
 	 */
 	public StringTrimmerEditor(boolean emptyAsNull) {
 		this.emptyAsNull = emptyAsNull;
 	}
 
-	public void setAsText(String text) throws IllegalArgumentException {
+	public void setAsText(String text) {
 		if (text == null) {
 			setValue(null);
 		}
@@ -52,6 +52,11 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 				setValue(value);
 			}
 		}
+	}
+
+	public String getAsText() {
+		// if null is considered as empty, return empty string for it rather than "null"
+		return (this.emptyAsNull && getValue() == null ? "" : super.getAsText());
 	}
 
 }
