@@ -12,8 +12,10 @@ Changes in version 1.0 M1 (xx.8.2003)
 * fixed typeMismatch reporting for nested bean properties
 * added getValues and toCode methods to Constants utility class
 * DynamicMethodPointcut now takes method, args and AttributeRegistry arguments instead of MethodInvocation
+* JndiObjectFactoryBean does not prepend container prefix if scheme is given
 * dissolved ReadOnlyResultSet to make JdbcTemplate return the underlying ResultSet
-* fixed Statement and ResultSet handling to work for all kinds of JDBC drivers 
+* fixed Statement and ResultSet handling to work for all kinds of JDBC drivers
+* renamed XxxExtracter to XxxExtractor and XxxTranslater to XxxTranslator  
 * support for returning Types.ARRAY from stored procedure
 * added HibernateTemplate.deleteAll for batch deletes
 * support for overlapping method name patterns in transaction attribute source definitions
@@ -29,6 +31,7 @@ Changes in version 1.0 M1 (xx.8.2003)
 * refactored Log4jConfigListener into Log4jWebConfigurer and listener
 * introduced deprecated Log4jConfigServlet for Servlet 2.2 containers
 * introduced Tiles support through TilesView and TilesConfigurer
+* introduced support for Spring-aware Tiles component controller
 
 Changes in version 0.9.1 (8.8.2003)
 -----------------------------------
@@ -63,7 +66,7 @@ Changes in version 0.9.1 (8.8.2003)
 * revised VelocityConfigurer with bean-defined settings
 * support for Ant-style path matching in the web framework
 * support for JSP expression language in tag implementations
-* recommended "<spring:" as tag prefix instead of "<i21:"
+* recommended "spring:" as tag prefix instead of "i21:"
 * turned sample "PagedList" into full-fledged "Countries"
 * new Petclinic tutorial
 * new MVC-step-by-step tutorial
