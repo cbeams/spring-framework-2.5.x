@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>The optional "configLocation" property sets the configLocation within the WAR
  * of the Velocity properties file. By default it will be sought in the WEB-INF
- * directory, with the name "velocity.properties".
+ * directory, under the name "velocity.properties".
  *
  * <p>Velocity properties can be overridden via "velocityProperties", or even
  * completely specified locally, avoiding the need for an external properties file.
@@ -117,7 +117,7 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 		this.velocityEngine = newVelocityEngine();
 
 		try {
-			Properties prop = new Properties();
+			Properties props = new Properties();
 			// try default config location as fallback
 			String actualLocation = this.configLocation;
 			if (this.configLocation == null && this.velocityProperties == null) {
@@ -128,13 +128,13 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 				logger.info("Loading Velocity config from [" + actualLocation + "]");
 				InputStream is = getApplicationContext().getResourceAsStream(actualLocation);
 				if (is == null) {
-					throw new ApplicationContextException("Velocity properties file not found within WAR at '" + actualLocation + "'");
+					throw new ApplicationContextException("Velocity properties file not found within WAR at [" + actualLocation + "]");
 				}
-				prop.load(is);
+				props.load(is);
 			}
 			// merge local properties if set
 			if (this.velocityProperties != null) {
-				prop.putAll(this.velocityProperties);
+				props.putAll(this.velocityProperties);
 			}
 			// determine the root directory of the web app
 			String resourceBase = getApplicationContext().getResourceBasePath();
@@ -143,9 +143,9 @@ public class VelocityEngineFactory extends ApplicationObjectSupport {
 			}
 
 			// Set properties
-			for (Iterator it = prop.keySet().iterator(); it.hasNext();) {
+			for (Iterator it = props.keySet().iterator(); it.hasNext();) {
 				String key = (String) it.next();
-				String value = prop.getProperty(key);
+				String value = props.getProperty(key);
 				if (resourceBase != null) {
 					value = StringUtils.replace(value, this.appRootMarker, resourceBase);
 				}
