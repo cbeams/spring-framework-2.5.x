@@ -5,6 +5,7 @@
  
 package org.springframework.aop.interceptor;
 
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 
@@ -15,7 +16,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
  * to do an explicit getBean() method to get the prototype
  * instance.
  * @author Rod Johnson
- * @version $Id: PrototypeInvokerInterceptor.java,v 1.1 2003-10-06 09:45:52 johnsonr Exp $
+ * @version $Id: PrototypeInvokerInterceptor.java,v 1.2 2003-10-21 16:06:50 johnsonr Exp $
  */
 public class PrototypeInvokerInterceptor extends AbstractReflectionInvokerInterceptor implements BeanFactoryAware {
 	
@@ -49,6 +50,9 @@ public class PrototypeInvokerInterceptor extends AbstractReflectionInvokerInterc
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) throws Exception {
 		this.owningBeanFactory = beanFactory;
+		if (this.owningBeanFactory.isSingleton(this.targetBeanName)) {
+			throw new BeanDefinitionStoreException("Cannot use PrototypeInvoker against a Singleton bean; instances would not be independent", null);
+		}
 	}
 
 	/**
