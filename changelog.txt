@@ -7,7 +7,8 @@ Changes in version 1.1.1 (28.9.2004)
 ------------------------------------
 
 Package org.springframework.aop
-* DelegatingIntroductionAdvisor lets unchecked exceptions thrown by introduction delegates through without wrapping them
+* Introduced new IntroductionInfo interface, allowing introduction without an IntroductionAdvisor
+* DelegatingIntroductionInterceptor lets unchecked exceptions thrown by introduction delegates through without wrapping them
 
 Package org.springframework.beans
 * MutablePropertyValues's "addPropertyValues" methods return MutablePropertyValues, for invocation chains in 1 statement
