@@ -19,7 +19,6 @@ package org.springframework.jdbc.support.nativejdbc;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -40,31 +39,14 @@ import org.jboss.resource.adapter.jdbc.WrappedStatement;
  *
  * @author Juergen Hoeller
  * @since 03.01.2004
- * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
  */
-public class JBossNativeJdbcExtractor implements NativeJdbcExtractor {
-
-	public boolean isNativeConnectionNecessaryForNativeStatements() {
-		return false;
-	}
-
-	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
-		return false;
-	}
-
-	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
-		return false;
-	}
+public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	public Connection getNativeConnection(Connection con) throws SQLException {
 		if (con instanceof WrappedConnection) {
 			return ((WrappedConnection) con).getUnderlyingConnection();
 		}
 		return con;
-	}
-
-	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
-		return getNativeConnection(stmt.getConnection());
 	}
 
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
@@ -86,10 +68,6 @@ public class JBossNativeJdbcExtractor implements NativeJdbcExtractor {
 			return (CallableStatement) ((WrappedCallableStatement) cs).getUnderlyingStatement();
 		}
 		return cs;
-	}
-
-	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
-		return rs;
 	}
 
 }

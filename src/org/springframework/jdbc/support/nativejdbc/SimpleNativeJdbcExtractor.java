@@ -16,12 +16,11 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Simple implementation of the NativeJdbcExtractor interface.
@@ -70,8 +69,11 @@ import java.sql.Statement;
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
  * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
  * @see #getNativeConnectionFromStatement
+ * @see #getNativeConnection
  */
-public class SimpleNativeJdbcExtractor implements NativeJdbcExtractor {
+public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean nativeConnectionNecessaryForNativeStatements = false;
 
@@ -147,45 +149,11 @@ public class SimpleNativeJdbcExtractor implements NativeJdbcExtractor {
 	 * @see java.sql.DatabaseMetaData#getConnection
 	 */
 	public Connection getNativeConnection(Connection con) throws SQLException {
-		return con.getMetaData().getConnection();
-	}
-
-	/**
-	 * Retrieve the Connection via the DatabaseMetaData object of the
-	 * Statement's Connection.
-	 * @see #getNativeConnection
-	 * @see java.sql.Statement#getConnection
-	 */
-	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
-		return getNativeConnection(stmt.getConnection());
-	}
-
-	/**
-	 * Not able to unwrap: return passed-in Statement.
-	 */
-	public Statement getNativeStatement(Statement stmt) {
-		return stmt;
-	}
-
-	/**
-	 * Not able to unwrap: return passed-in PreparedStatement.
-	 */
-	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
-		return ps;
-	}
-
-	/**
-	 * Not able to unwrap: return passed-in CallableStatement.
-	 */
-	public CallableStatement getNativeCallableStatement(CallableStatement cs) {
-		return cs;
-	}
-
-	/**
-	 * Not able to unwrap: return passed-in ResultSet.
-	 */
-	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
-		return rs;
+		Connection nativeCon = con.getMetaData().getConnection();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Returning native Connection [" + nativeCon + "] for given Connection handle [" + con + "]");
+		}
+		return nativeCon;
 	}
 
 }

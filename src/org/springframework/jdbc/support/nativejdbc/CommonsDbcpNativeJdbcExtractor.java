@@ -48,48 +48,36 @@ import org.apache.commons.dbcp.DelegatingStatement;
  *
  * @author Juergen Hoeller
  * @since 25.08.2003
- * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
  */
-public class CommonsDbcpNativeJdbcExtractor implements NativeJdbcExtractor {
+public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
-	public boolean isNativeConnectionNecessaryForNativeStatements() {
-		return false;
-	}
-
-	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
-		return false;
-	}
-
-	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
-		return false;
-	}
-
-	public Connection getNativeConnection(Connection con) {
+	public Connection getNativeConnection(Connection con) throws SQLException {
 		if (con instanceof DelegatingConnection) {
-			return ((DelegatingConnection) con).getInnermostDelegate();
+			Connection nativeCon = ((DelegatingConnection) con).getInnermostDelegate();
+			// For some reason, the innermost delegate can be null: not for a
+			// Statement's Connection but for the Connection handle returned by the pool.
+			// We'll fall back to the MetaData's Connection in this case, which is
+			// a native unwrapped Connection with Commons DBCP 1.1.
+			return (nativeCon != null ? nativeCon : con.getMetaData().getConnection());
 		}
 		return con;
 	}
 
-	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
-		return getNativeConnection(stmt.getConnection());
-	}
-
-	public Statement getNativeStatement(Statement stmt) {
+	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		if (stmt instanceof DelegatingStatement) {
 			return ((DelegatingStatement) stmt).getInnermostDelegate();
 		}
 		return stmt;
 	}
 
-	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
+	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
 		if (ps instanceof DelegatingPreparedStatement) {
 			return ((DelegatingPreparedStatement) ps).getInnermostDelegate();
 		}
 		return ps;
 	}
 
-	public CallableStatement getNativeCallableStatement(CallableStatement cs) {
+	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
 		if (cs instanceof DelegatingCallableStatement) {
 			return ((DelegatingCallableStatement) cs).getInnermostDelegate();
 		}

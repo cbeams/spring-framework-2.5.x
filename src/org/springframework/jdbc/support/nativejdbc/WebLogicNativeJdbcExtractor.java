@@ -16,178 +16,81 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for WebLogic Server.
- * Returns the underlying native Connection, Statement, ResultSet etc to application 
- * code instead of WebLogic's wrapper implementations.  The returned JDBC classes can 
- * then safely be cast, e.g. to OracleResultSet.
+ * Returns the underlying native Connection to application code instead of
+ * WebLogic's wrapper implementation; unwraps the Connection for native statements.
+ * The returned JDBC classes can then safely be cast, e.g. to OracleConnection.
+ *
+ * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with a
+ * WebLogic DataSource: If a given object is not a WebLogic Connection wrapper,
+ * it will be returned as-is.
+ *
+ * <p>Currently just tested with BEA WebLogic 8.1 SP2.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 31.05.2004
- * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
+ * @see #getNativeConnection
+ * @see weblogic.jdbc.extensions.WLConnection#getVendorConnection
  */
-public class WebLogicNativeJdbcExtractor implements NativeJdbcExtractor {
+public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
-	private boolean nativeConnectionNecessaryForNativeStatements = false;
+	private static final String JDBC_EXTENSION_NAME = "weblogic.jdbc.extensions.WLConnection";
 
-	private boolean nativeConnectionNecessaryForNativePreparedStatements = false;
+	private final Class jdbcExtensionClass;
 
-	private boolean nativeConnectionNecessaryForNativeCallableStatements = false;
-	
-	private static final String WEBLOGIC_JDBC_EXTENSION_NAME = "weblogic.jdbc.extensions.WLConnection";
-	
-	private final Class jdbcExtension;
+	private final Method getVendorConnectionMethod;
 	
 	/**
-	 * This constructor retrieves the WebLogic jdbc extension interface so we can get the underlying 
-	 * vendor connection using reflectoin.
-	 * @throws ClassNotFoundException
+	 * This constructor retrieves the WebLogic JDBC extension interface,
+	 * so we can get the underlying  vendor connection using reflection.
 	 */
-	public WebLogicNativeJdbcExtractor() throws ClassNotFoundException {
-		
-		this.jdbcExtension = getClass().getClassLoader().loadClass(WEBLOGIC_JDBC_EXTENSION_NAME);
-		
+	public WebLogicNativeJdbcExtractor() throws ClassNotFoundException, NoSuchMethodException {
+		this.jdbcExtensionClass = getClass().getClassLoader().loadClass(JDBC_EXTENSION_NAME);
+		this.getVendorConnectionMethod = this.jdbcExtensionClass.getMethod("getVendorConnection", new Class[] {});
 	}
-
 
 	/**
-	 * Set whether it is necessary to work on the native Connection to
-	 * receive native Statements. Default is false. If true, the Connection
-	 * will be unwrapped first to create a Statement.
-	 * <p>This makes sense if you need to work with native Statements from
-	 * a pool that does not allow to extract the native JDBC objects from its
-	 * wrappers but returns the native Connection on DatabaseMetaData.getConnection.
-	 * <p>The standard SimpleNativeJdbcExtractor is unable to unwrap statements,
-	 * so set this to true if your connection pool wraps Statements.
-	 * @see java.sql.Connection#createStatement
-	 * @see java.sql.DatabaseMetaData#getConnection
+	 * Return true, as WebLogic returns wrapped Statements.
 	 */
-	public void setNativeConnectionNecessaryForNativeStatements(boolean nativeConnectionNecessaryForNativeStatements) {
-		this.nativeConnectionNecessaryForNativeStatements = nativeConnectionNecessaryForNativeStatements;
-	}
-
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
-		return nativeConnectionNecessaryForNativeStatements;
+		return true;
 	}
 
 	/**
-	 * Set whether it is necessary to work on the native Connection to
-	 * receive native PreparedStatements. Default is false. If true,
-	 * the Connection will be unwrapped first to create a PreparedStatement.
-	 * <p>This makes sense if you need to work with native PreparedStatements from
-	 * a pool that does not allow to extract the native JDBC objects from its
-	 * wrappers but returns the native Connection on Statement.getConnection.
-	 * <p>The standard SimpleNativeJdbcExtractor is unable to unwrap statements,
-	 * so set this to true if your connection pool wraps PreparedStatements.
-	 * @see java.sql.Connection#prepareStatement
-	 * @see java.sql.DatabaseMetaData#getConnection
+	 * Return true, as WebLogic returns wrapped PreparedStatements.
 	 */
-	public void setNativeConnectionNecessaryForNativePreparedStatements(boolean nativeConnectionNecessary) {
-		this.nativeConnectionNecessaryForNativePreparedStatements = nativeConnectionNecessary;
-	}
-
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
-		return nativeConnectionNecessaryForNativePreparedStatements;
+		return true;
 	}
 
 	/**
-	 * Set whether it is necessary to work on the native Connection to
-	 * receive native CallableStatements. Default is false. If true,
-	 * the Connection will be unwrapped first to create a CallableStatement.
-	 * <p>This makes sense if you need to work with native CallableStatements from
-	 * a pool that does not allow to extract the native JDBC objects from its
-	 * wrappers but returns the native Connection on Statement.getConnection.
-	 * <p>The standard SimpleNativeJdbcExtractor is unable to unwrap statements,
-	 * so set this to true if your connection pool wraps CallableStatements.
-	 * @see java.sql.Connection#prepareCall
-	 * @see java.sql.DatabaseMetaData#getConnection
+	 * Return true, as WebLogic returns wrapped CallableStatements.
 	 */
-	public void setNativeConnectionNecessaryForNativeCallableStatements(boolean nativeConnectionNecessary) {
-		this.nativeConnectionNecessaryForNativeCallableStatements = nativeConnectionNecessary;
-	}
-
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
-		return nativeConnectionNecessaryForNativeCallableStatements;
+		return true;
 	}
-
 
 	/**
-	 * Retrieve the Connection via the DatabaseMetaData object, which will
-	 * result in the native JDBC Connection with many connection pools.
-	 * @see java.sql.DatabaseMetaData#getConnection
+	 * Retrieve the Connection via WebLogic's <code>getVendorConnection</code> method.
 	 */
 	public Connection getNativeConnection(Connection con) throws SQLException {
-		
-		Connection vendorConnection = null;
-		
-		try {
-			Method getVendorConn = jdbcExtension.getMethod("getVendorConnection", new Class[] {});
-			Object o = getVendorConn.invoke(con, new Object[] {});
-			vendorConnection = (Connection) o;
+		if (this.jdbcExtensionClass.isAssignableFrom(con.getClass())) {
+			try {
+				return (Connection) this.getVendorConnectionMethod.invoke(con, new Object[] {});
+			}
+			catch (Exception ex) {
+				throw new DataAccessResourceFailureException("Could not invoke WebLogic's getVendorConnection method", ex);
+			}
 		}
-		catch (IllegalAccessException iae) {
-			throw new DataAccessResourceFailureException("Could not unwrap WebLogic connection wrapper", iae);
-		}
-		catch (InvocationTargetException ite) {
-			throw new DataAccessResourceFailureException("Could not unwrap WebLogic connection wrapper", ite);
-		}
-		catch (NoSuchMethodException nsme) {
-			throw new DataAccessResourceFailureException("Could not unwrap WebLogic connection wrapper", nsme);
-		}
-		
-		if (vendorConnection == null)
-			return con.getMetaData().getConnection();
-		else
-			return vendorConnection;
-	}
-
-	/**
-	 * Retrieve the Connection via the DatabaseMetaData object of the
-	 * Statement's Connection.
-	 * @see #getNativeConnection
-	 * @see java.sql.Statement#getConnection
-	 */
-	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
-		return getNativeConnection(stmt.getConnection());
-	}
-
-	/**
-	 * Not able to unwrap: return passed-in Statement.
-	 */
-	public Statement getNativeStatement(Statement stmt) {
-		return stmt;
-	}
-
-	/**
-	 * Not able to unwrap: return passed-in PreparedStatement.
-	 */
-	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
-		return ps;
-	}
-
-	/**
-	 * Not able to unwrap: return passed-in CallableStatement.
-	 */
-	public CallableStatement getNativeCallableStatement(CallableStatement cs) {
-		return cs;
-	}
-
-	/**
-	 * Not able to unwrap: return passed-in ResultSet.
-	 */
-	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
-		return rs;
+		return con;
 	}
 
 }
