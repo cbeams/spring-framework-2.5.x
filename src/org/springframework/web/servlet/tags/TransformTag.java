@@ -77,7 +77,7 @@ public class TransformTag extends RequestContextAwareTag {
 		this.scope = scope;
 	}
 
-	public int doStartTagInternal() throws JspException {
+	protected final int doStartTagInternal() throws JspException {
 		Object resolvedValue = ExpressionEvaluationUtils.evaluate("value", this.value, Object.class, pageContext);
 		if (resolvedValue != null) {
 			// find the BingTag (if applicable)
@@ -116,10 +116,11 @@ public class TransformTag extends RequestContextAwareTag {
 		return SKIP_BODY;
 	}
 
-	public void release() {
-		this.scope = TagUtils.SCOPE_PAGE;
-		this.var = null;
+	public void doFinally() {
+		super.doFinally();
 		this.value = null;
+		this.var = null;
+		this.scope = TagUtils.SCOPE_PAGE;
 	}
 
 }

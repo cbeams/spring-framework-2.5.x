@@ -66,53 +66,25 @@ public class BindTag extends RequestContextAwareTag {
 	}
 
 	/**
-	 * Retrieve the path that this tag should apply to
-	 * @return the path that this tag should apply to or <code>null</code>
-	 * if it is not set
-	 * @see #setPath(String)
+	 * Retrieve the path that this tag applies to
+	 * @return the path that this tag applies to,
+	 * or <code>null</code> if none
 	 */
 	public String getPath() {
 		return path;
 	}
 
-	/**
-	 * Retrieve the Errors instance that this tag is currently bound to.
-	 * Intended for cooperating nesting tags.
-	 * @return an instance of Errors
-	 */
-	public Errors getErrors() {
-		return errors;
-	}
-
-	/**
-	 * Retrieve the property that this tag is currently bound to,
-	 * or null if bound to an object rather than a specific property.
-	 * Intended for cooperating nesting tags.
-	 */
-	public String getProperty() {
-		return property;
-	}
-
-	/**
-	 * Retrieve the property editor for the property that this tag is
-	 * currently bound to. Intended for cooperating nesting tags.
-	 * @return the property editor, or null if none applicable
-	 */
-	public PropertyEditor getEditor() {
-		return editor;
-	}
-
-	protected int doStartTagInternal() throws Exception {
+	protected final int doStartTagInternal() throws Exception {
 		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", this.path, pageContext);
 
 		// determine name of the object and property
 		String name = null;
-		this.property = null;
 
 		int dotPos = resolvedPath.indexOf('.');
 		if (dotPos == -1) {
 			// property not set, only the object itself
 			name = resolvedPath;
+			this.property = null;
 		}
 		else {
 			name = resolvedPath.substring(0, dotPos);
@@ -182,11 +154,41 @@ public class BindTag extends RequestContextAwareTag {
 		return messages;
 	}
 
-	public void release() {
-		super.release();
+	/**
+	 * Retrieve the property that this tag is currently bound to,
+	 * or null if bound to an object rather than a specific property.
+	 * Intended for cooperating nesting tags.
+	 * @return the property that this tag is currently bound to,
+	 * or <code>null</code> if none
+	 */
+	public final String getProperty() {
+		return property;
+	}
+
+	/**
+	 * Retrieve the Errors instance that this tag is currently bound to.
+	 * Intended for cooperating nesting tags.
+	 * @return the current Errors instance, or null if none
+	 */
+	public final Errors getErrors() {
+		return errors;
+	}
+
+	/**
+	 * Retrieve the PropertyEditor for the property that this tag is
+	 * currently bound to. Intended for cooperating nesting tags.
+	 * @return the current PropertyEditor, or null if none
+	 */
+	public final PropertyEditor getEditor() {
+		return editor;
+	}
+
+	public void doFinally() {
+		super.doFinally();
 		this.path = null;
-		this.errors = null;
 		this.property = null;
+		this.errors = null;
+		this.editor = null;
 	}
 
 }

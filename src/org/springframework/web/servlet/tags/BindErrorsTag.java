@@ -36,6 +36,8 @@ public class BindErrorsTag extends RequestContextAwareTag {
 
 	private String name;
 
+	private Errors errors;
+
 	/**
 	 * Set the name of the bean that this tag should check.
 	 */
@@ -43,16 +45,36 @@ public class BindErrorsTag extends RequestContextAwareTag {
 		this.name = name;
 	}
 
-	protected int doStartTagInternal() throws ServletException, JspException {
-		String resolvedName = ExpressionEvaluationUtils.evaluateString("name", name, pageContext);
-		Errors errors = getRequestContext().getErrors(resolvedName, isHtmlEscape());
-		if (errors != null && errors.hasErrors()) {
-			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, errors);
+	/**
+	 * Return the name of the bean that this tag checks.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	protected final int doStartTagInternal() throws ServletException, JspException {
+		String resolvedName = ExpressionEvaluationUtils.evaluateString("name", this.name, pageContext);
+		this.errors = getRequestContext().getErrors(resolvedName, isHtmlEscape());
+		if (this.errors != null && this.errors.hasErrors()) {
+			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, this.errors);
 			return EVAL_BODY_INCLUDE;
 		}
 		else {
 			return SKIP_BODY;
 		}
+	}
+
+	/**
+	 * Retrieve the Errors instance that this tag is currently bound to.
+	 * Intended for cooperating nesting tags.
+	 */
+	public final Errors getErrors() {
+		return errors;
+	}
+
+	public void doFinally() {
+		super.doFinally();
+		this.errors = null;
 	}
 
 }

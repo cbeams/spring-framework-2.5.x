@@ -142,6 +142,11 @@ public class MessageTag extends RequestContextAwareTag {
 		return EVAL_BODY_INCLUDE;
 	}
 
+	/**
+	 * Write the message to the page.
+	 * @param msg the message to write
+	 * @throws IOException if writing failed
+	 */
 	protected void writeMessage(String msg) throws IOException {
 		pageContext.getOut().write(msg);
 	}
@@ -159,9 +164,9 @@ public class MessageTag extends RequestContextAwareTag {
 	protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
 		return ex.getMessage();
 	}
-	
-	public void release() {
-		super.release();
+
+	public void doFinally() {
+		super.doFinally();
 		this.code = null;
 		this.text = null;
 		this.var = null;
