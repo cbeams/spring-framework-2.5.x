@@ -148,10 +148,10 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Opening new connection for JDBC transaction");
-		}
 		Connection con = DataSourceUtils.getConnection(this.dataSource, false);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Opened connection [" + con + "] for JDBC transaction");
+		}
 
 		txObject.setConnectionHolder(new ConnectionHolder(con));
 		txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
