@@ -44,7 +44,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.12 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.13 2004-03-19 16:54:42 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -141,7 +141,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 				// We need to create a method invocation...
 				//invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, target, args, chain, advised);
 				
-				invocation = new ReflectiveMethodInvocation(proxy, target, method.getDeclaringClass(),
+				invocation = new ReflectiveMethodInvocation(proxy, target,
 									method, args, targetClass, chain);
 										
 				// Proceed to the joinpoint through the interceptor chain

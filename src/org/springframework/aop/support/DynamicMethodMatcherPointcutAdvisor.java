@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -28,20 +29,20 @@ import org.springframework.aop.PointcutAdvisor;
 public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodMatcher
     implements PointcutAdvisor, Pointcut {
 
-	private Object advice;
+	private Advice advice;
 	
 	protected DynamicMethodMatcherPointcutAdvisor() {
 	}
 
-	protected DynamicMethodMatcherPointcutAdvisor(Object advice) {
+	protected DynamicMethodMatcherPointcutAdvisor(Advice advice) {
 		this.advice = advice;
 	}
 	
-	public void setAdvice(Object advice) {
+	public void setAdvice(Advice advice) {
 		this.advice = advice;
 	}
 	
-	public Object getAdvice() {
+	public Advice getAdvice() {
 		return advice;
 	}
 

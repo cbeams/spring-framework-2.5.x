@@ -16,6 +16,8 @@
 
 package org.springframework.aop;
 
+import org.aopalliance.aop.Advice;
+
 
 /**
  * Superinterface for all after returning advice. Such advice is invoked
@@ -23,8 +25,8 @@ package org.springframework.aop;
  * Such advice can see the return value, but cannot change it.
  * @see org.springframework.aop.MethodAfterReturningAdvice
  * @author Rod Johnson
- * @version $Id: AfterReturningAdvice.java,v 1.2 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: AfterReturningAdvice.java,v 1.3 2004-03-19 16:54:36 johnsonr Exp $
  */
-public interface AfterReturningAdvice {
+public interface AfterReturningAdvice extends Advice {
 
 }

@@ -18,11 +18,8 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
 
-import org.aopalliance.intercept.AttributeRegistry;
-import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -32,15 +29,9 @@ import org.aopalliance.intercept.MethodInvocation;
  * invokeJoinpoint() method to change this behaviour, so this is a useful
  * base class for MethodInvocation implementations.
  * @author Rod Johnson
- * @version $Id: ReflectiveMethodInvocation.java,v 1.3 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: ReflectiveMethodInvocation.java,v 1.4 2004-03-19 16:54:41 johnsonr Exp $
  */
 public class ReflectiveMethodInvocation implements MethodInvocation {
-	
-	/**  
-	 * Interface this invocation is against.
-	 * May not be the same as the method's declaring interface. 
-	 */
-	protected Class targetInterface;
 
 	protected Method method;
 	
@@ -54,13 +45,6 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 * List of Methodnterceptor and InterceptorAndDynamicMethodMatcher that need dynamic checks.
 	 **/
 	protected List interceptorsAndDynamicMethodMatchers;
-	
-	/** 
-	 * Any resources attached to this invocation.
-	 * Lazily initialized for efficiency.
-	 */
-	private HashMap resources;
-	
 	
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
@@ -80,11 +64,10 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 * the code. And it would work only for static pointcuts.
 	 */
 	public ReflectiveMethodInvocation(Object proxy, Object target, 
-					Class targetInterface, Method m, Object[] arguments,
+					Method m, Object[] arguments,
 					Class targetClass, List interceptorsAndDynamicMethodMatchers) {
 		this.proxy = proxy;
 		this.target = target;
-		this.targetInterface = targetInterface;
 		this.targetClass = targetClass;
 		this.method = m;
 		this.arguments = arguments;
@@ -114,43 +97,6 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 		return this.proxy;
 	}
 	
-
-	public String toString() {
-		// Don't do toString on target, it may be
-		// proxied
-		
-		// ToString on args may also fail
-		String s =  "Invocation: method=[" + method + "] " +
-				//"args=[" + StringUtils.arrayToDelimitedString(arguments, ",") +
-				"args=" + this.arguments + 
-				"] ";
-		 
-		s += (this.target == null) ? "target is null": 
-				"target is of class " + target.getClass().getName();
-		return s;
-				
-	}
-
-
-	public Object addAttachment(String key, Object resource) {
-		// Invocations are single-threaded, so we can lazily
-		// instantiate the resource map if we have to
-		if (this.resources == null) {
-			this.resources = new HashMap();
-		}
-		Object oldValue = this.resources.get(key);
-		this.resources.put(key, resource);
-		return oldValue;
-	}
-	
-	/**
-	 * @return the resource or null
-	 */
-	public Object getAttachment(String key) {
-		// Resource map may be null if it hasn't been instantiated
-		return (this.resources == null) ? null : this.resources.get(key);
-	}
-	
 	/**
 	 * Private optimization method
 	 * @return Object[]
@@ -159,25 +105,6 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 		return this.arguments;
 	}
 	
-	/**
-	 * @see org.aopalliance.intercept.MethodInvocation#getArgument(int)
-	 */
-	public Object getArgument(int i) {
-		return this.arguments[i];
-	}
-
-	/**
-	 * @see org.aopalliance.intercept.MethodInvocation#getArgumentCount()
-	 */
-	public int getArgumentCount() {
-		return (this.arguments != null) ? this.arguments.length : 0;
-	}
-
-
-	public final Class getTargetInterface() {
-		return this.targetInterface;
-	}
-
 	/**
 	 * @see org.aopalliance.intercept.Invocation#proceed
 	 */
@@ -208,30 +135,14 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 		}
 	}
 	
+	/**
+	 * Invoke the joinpoint using reflection. Subclasses can override this to use custom
+	 * invocation.
+	 * @return the return value of the joinpoint
+	 * @throws Throwable if invoking the joinpoint resulted in an exception
+	 */
 	protected Object invokeJoinpoint() throws Throwable {
 		return AopProxyUtils.invokeJoinpointUsingReflection(target, method, arguments);
-	}
-
-
-	/**
-	 * @see org.aopalliance.intercept.Invocation#cloneInstance
-	 */
-	public Invocation cloneInstance() {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * @see org.aopalliance.intercept.Invocation#getAttributeRegistry()
-	 */
-	public AttributeRegistry getAttributeRegistry() {
-		throw new UnsupportedOperationException("Likely to be removed from AOP Alliance API");
-	}
-
-	/**
-	 * @see org.aopalliance.intercept.MethodInvocation#setArgument(int, java.lang.Object)
-	 */
-	public void setArgument(int index, Object argument) {
-		this.arguments[index] = argument;
 	}
 
 
@@ -240,6 +151,22 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
 	 */
 	public final Object getThis() {
 		return this.target;
+	}
+	
+	public String toString() {
+		// Don't do toString on target, it may be
+		// proxied
+	
+		// ToString on args may also fail
+		String s =  "Invocation: method=[" + method + "] " +
+				//"args=[" + StringUtils.arrayToDelimitedString(arguments, ",") +
+				"args=" + this.arguments + 
+				"] ";
+	 
+		s += (this.target == null) ? "target is null": 
+				"target is of class " + target.getClass().getName();
+		return s;
+			
 	}
 
 }

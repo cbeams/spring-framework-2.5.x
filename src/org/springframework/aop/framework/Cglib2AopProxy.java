@@ -48,7 +48,7 @@ import org.springframework.aop.TargetSource;
  * underlying (target) class is threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: Cglib2AopProxy.java,v 1.4 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.5 2004-03-19 16:54:42 johnsonr Exp $
  */
 class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	
@@ -137,7 +137,7 @@ class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 			}
 			else {
 				// We need to create a method invocation...
-				invocation = new MethodInvocationImpl(proxy, target, targetClass, method, args, 
+				invocation = new MethodInvocationImpl(proxy, target, method, args, 
 							targetClass, chain, methodProxy);
 				
 				// If we get here, we need to create a MethodInvocation
@@ -377,10 +377,10 @@ class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	
 		private MethodProxy methodProxy;
 	
-		public MethodInvocationImpl(Object proxy, Object target, Class targetInterface, Method m, Object[] arguments, Class targetClass,
+		public MethodInvocationImpl(Object proxy, Object target, Method m, Object[] arguments, Class targetClass,
 				List interceptorsAndDynamicMethodMatchers,
 				MethodProxy methodProxy) {
-			super(proxy, target, targetInterface, m, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
+			super(proxy, target, m, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
 			this.methodProxy = methodProxy;
 		}
 	

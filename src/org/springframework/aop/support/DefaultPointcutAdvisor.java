@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 
@@ -23,31 +24,31 @@ import org.springframework.aop.PointcutAdvisor;
  * Convenient superclass for pointcut-driven advisors, implementing
  * the getPointcut() and isPerInstance() methods.
  * @author Rod Johnson
- * @version $Id: DefaultPointcutAdvisor.java,v 1.4 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: DefaultPointcutAdvisor.java,v 1.5 2004-03-19 16:54:39 johnsonr Exp $
  */
 public class DefaultPointcutAdvisor implements PointcutAdvisor {
 	
 	private Pointcut pointcut;
 	
-	private Object advice;
+	private Advice advice;
 	
 	public DefaultPointcutAdvisor() {
 	}
 	
-	public DefaultPointcutAdvisor(Object advice) {
+	public DefaultPointcutAdvisor(Advice advice) {
 		this(Pointcut.TRUE, advice);
 	}
 	
-	public DefaultPointcutAdvisor(Pointcut pointcut, Object advice) {
+	public DefaultPointcutAdvisor(Pointcut pointcut, Advice advice) {
 		this.pointcut = pointcut;
 		this.advice = advice;
 	}
 
-	public void setAdvice(Object object) {
-		advice = object;
+	public void setAdvice(Advice advice) {
+		this.advice = advice;
 	}
 
-	public Object getAdvice() {
+	public Advice getAdvice() {
 		return advice;
 	}
 

@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework.adapter;
 
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.Advisor;
 
@@ -29,7 +30,7 @@ import org.springframework.aop.Advisor;
  * do so only if you need to introduce more Advisor or Advice types to
  * Spring.
  * @author Rod Johnson
- * @version $Id: AdvisorAdapter.java,v 1.6 2004-03-18 02:46:10 trisberg Exp $
+ * @version $Id: AdvisorAdapter.java,v 1.7 2004-03-19 16:54:41 johnsonr Exp $
  */
 public interface AdvisorAdapter {
 	
@@ -37,12 +38,10 @@ public interface AdvisorAdapter {
 	 * Does this adapter understand this advice object? 
 	 * Is it valid to invoke the wrap() method with the
 	 * given advice as an argument?
-	 * @param advice Advice such as a BeforeAdvice. There is
-	 * no common interface for Advices, partly because Spring 
-	 * implements the AOP Alliance interfaces.
+	 * @param advice Advice such as a BeforeAdvice.
 	 * @return whether this adapter understands the given advice object 
 	 */
-	boolean supportsAdvice(Object advice);
+	boolean supportsAdvice(Advice advice);
 	
 	/**
 	 * Return an AOP Alliance Interceptor exposing the behaviour of

@@ -19,6 +19,7 @@ package org.springframework.aop.support;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
@@ -28,7 +29,7 @@ import org.springframework.aop.framework.AopConfigException;
  * Simple IntroductionAdvisor implementation that by default applies to any class.
  * @author Rod Johnson
  * @since 11-Nov-2003
- * @version $Id: DefaultIntroductionAdvisor.java,v 1.2 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: DefaultIntroductionAdvisor.java,v 1.3 2004-03-19 16:54:39 johnsonr Exp $
  */
 public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter {
 	
@@ -64,7 +65,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		return this;
 	}
 
-	public Object getAdvice() {
+	public Advice getAdvice() {
 		return interceptor;
 	}
 

@@ -24,6 +24,8 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
+
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -52,7 +54,7 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.24 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.25 2004-03-19 16:54:41 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -556,7 +558,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 			return ClassFilter.TRUE;
 		}
 
-		public Object getAdvice() {
+		public Advice getAdvice() {
 			return this.gi;
 		}
 

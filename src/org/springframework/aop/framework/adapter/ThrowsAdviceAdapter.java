@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework.adapter;
 
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.ThrowsAdvice;
@@ -23,14 +24,14 @@ import org.springframework.aop.ThrowsAdvice;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceAdapter.java,v 1.4 2004-03-18 02:46:10 trisberg Exp $
+ * @version $Id: ThrowsAdviceAdapter.java,v 1.5 2004-03-19 16:54:41 johnsonr Exp $
  */
 class ThrowsAdviceAdapter implements AdvisorAdapter {
 
 	/**
 	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice(java.lang.Object)
 	 */
-	public boolean supportsAdvice(Object advice) {
+	public boolean supportsAdvice(Advice advice) {
 		return advice instanceof ThrowsAdvice;
 	}
 

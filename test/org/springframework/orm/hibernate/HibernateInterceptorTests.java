@@ -23,18 +23,16 @@ import java.sql.SQLException;
 import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
+import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
-import net.sf.hibernate.JDBCException;
 
-import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
-
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Juergen Hoeller
@@ -270,20 +268,11 @@ public class HibernateInterceptorTests extends TestCase {
 			return null;
 		}
 
-		public Object addAttachment(String msg, Object handler) {
-			return null;
-		}
-
-		public Object getAttachment(String msg) {
-			return null;
-		}
-
 		public Invocation cloneInstance() {
 			return null;
 		}
 
-		public AttributeRegistry getAttributeRegistry() {
-			return null;
+		public void release() {
 		}
 	}
 

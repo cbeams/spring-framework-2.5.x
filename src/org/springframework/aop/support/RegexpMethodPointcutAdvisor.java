@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 
@@ -23,25 +24,25 @@ import org.springframework.aop.PointcutAdvisor;
  * Convenient class for regexp method pointcuts that hold an Interceptor,
  * making them an Advisor.
  * @author Dmitriy Kopylenko
- * @version $Id: RegexpMethodPointcutAdvisor.java,v 1.2 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: RegexpMethodPointcutAdvisor.java,v 1.3 2004-03-19 16:54:39 johnsonr Exp $
  */
 public class RegexpMethodPointcutAdvisor extends RegexpMethodPointcut
     implements PointcutAdvisor {
 
-	private Object advice;
+	private Advice advice;
 
 	public RegexpMethodPointcutAdvisor() {
 	}
 
-	public RegexpMethodPointcutAdvisor(Object advice) {
+	public RegexpMethodPointcutAdvisor(Advice advice) {
 		this.advice = advice;
 	}
 	
-	public void setAdvice(Object advice) {
+	public void setAdvice(Advice advice) {
 		this.advice = advice;
 	}
 	
-	public Object getAdvice() {
+	public Advice getAdvice() {
 		return this.advice;
 	}
 

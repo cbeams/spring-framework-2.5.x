@@ -24,14 +24,13 @@ import junit.framework.TestCase;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.TestBean;
 
 /**
  * TODO COULD REFACTOR TO BE GENERIC
  * @author Rod Johnson
  * @since 14-Mar-2003
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class MethodInvocationTests extends TestCase {
 	
@@ -88,82 +87,13 @@ new Attrib4jAttributeRegistry());
 				return returnValue;
 			}
 		});
-			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, null, m.getDeclaringClass(), //?
+			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, null, //?
 		m, null, null, is // list
 	);
 		Object rv = invocation.proceed();
 		assertTrue("correct response", rv == returnValue);
 	}
 	
-/* 
-// This test is not really relevant: the framework won't invoke this twice
- 
-	public void testLimits() throws Throwable {
-		Method m = Object.class.getMethod("hashCode", null);
-		Object proxy = new Object();
-		List is = new LinkedList();
-		
-		is.add(new NopInterceptor());
-		
-		Object target = new Object();
-
-			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, target, m.getDeclaringClass(), //?
-		m, null, null, is // list
-	);
-		assertTrue(invocation.getArgumentCount() == 0);
-		//assertTrue(invocation.getCurrentInterceptorIndex() == 0);
-		//assertTrue(invocation.getInterceptor(0) == interceptor);
-		Object rv = invocation.proceed();
-		assertEquals("correct response", new Integer(target.hashCode()), rv);
-
-		//assertTrue(invocation.getCurrentInterceptorIndex() == 0);
-		//assertTrue(invocation.getNumberOfInterceptors() == 1);
-
-		// Now it gets interesting
-		try {
-			invocation.proceed();
-			fail("Shouldn't allow illegal invocation number");
-		} catch (AspectException ex) {
-			// Shouldn't have changed position in interceptor chain
-			//assertTrue(
-			//	"Shouldn't have changed current interceptor index",
-			//	invocation.getCurrentInterceptorIndex() == 0);
-		}
-
-//		try {
-//			invocation.getInterceptor(666);
-//			fail("Shouldn't allow illegal interceptor get");
-//		} catch (AspectException ex) {
-//		}
-	}
-*/
-
-	public void testAttachments() throws Throwable {
-		Method m = Object.class.getMethod("hashCode", null);
-		Object proxy = new Object();
-		final Object returnValue = new Object();
-		List is = new LinkedList();
-		is.add(new DefaultPointcutAdvisor(new MethodInterceptor() {
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				return returnValue;
-			}
-		}));
-
-			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, null, m.getDeclaringClass(), //?
-		m, null, null, is // list
-	);
-
-		assertTrue("no bogus attachment", invocation.getAttachment("bogus") == null);
-		String name = "foo";
-		Object val = new Object();
-		Object val2 = "foo";
-		assertTrue("New attachment returns null", null == invocation.addAttachment(name, val));
-		assertTrue(invocation.getAttachment(name) == val);
-		assertTrue("Replace returns correct value", val == invocation.addAttachment(name, val2));
-		assertTrue(invocation.getAttachment(name) == val2);
-		assertTrue("Can clear by attaching null", val2 == invocation.addAttachment(name, null));
-	}
-
 	/**
 	 * ToString on target can cause failure
 	 * @throws Throwable
@@ -179,7 +109,7 @@ new Attrib4jAttributeRegistry());
 
 		Method m = Object.class.getMethod("hashCode", null);
 		Object proxy = new Object();
-			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, target, m.getDeclaringClass(), //?
+			ReflectiveMethodInvocation invocation = new ReflectiveMethodInvocation(proxy, target, //?
 		m, null, null, is // list
 	);
 

@@ -16,6 +16,8 @@
 
 package org.springframework.aop;
 
+import org.aopalliance.aop.Advice;
+
 
 /**
  * Superinterface for all before advice. Spring supports only method before
@@ -23,8 +25,8 @@ package org.springframework.aop;
  * allow field advice in future if desired.
  * @see org.springframework.aop.MethodBeforeAdvice
  * @author Rod Johnson
- * @version $Id: BeforeAdvice.java,v 1.2 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: BeforeAdvice.java,v 1.3 2004-03-19 16:54:36 johnsonr Exp $
  */
-public interface BeforeAdvice {
+public interface BeforeAdvice extends Advice {
 
 }

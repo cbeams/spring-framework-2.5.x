@@ -16,20 +16,21 @@
 
 package org.springframework.aop;
 
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.framework.adapter.AdvisorAdapter;
 
 /**
  * 
  * @author Dmitriy Kopylenko
- * @version $Id: SimpleBeforeAdviceAdapter.java,v 1.2 2004-03-18 03:01:17 trisberg Exp $
+ * @version $Id: SimpleBeforeAdviceAdapter.java,v 1.3 2004-03-19 16:54:40 johnsonr Exp $
  */
 public class SimpleBeforeAdviceAdapter implements AdvisorAdapter {
 
 	/**
 	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice(java.lang.Object)
 	 */
-	public boolean supportsAdvice(Object advice) {
+	public boolean supportsAdvice(Advice advice) {
 		return advice instanceof SimpleBeforeAdvice;
 	}
 

@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: CglibProxyTests.java,v 1.6 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: CglibProxyTests.java,v 1.7 2004-03-19 16:54:41 johnsonr Exp $
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 	
@@ -113,7 +113,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		}
 		catch (AspectException ex) {
 			// Check that stack trace is preserved
-			assertTrue(ex.getRootCause() instanceof CodeGenerationException);
+			assertTrue(ex.getCause() instanceof CodeGenerationException);
 			
 			// Check that error message is helpful
 			

@@ -16,6 +16,8 @@
 
 package org.springframework.aop;
 
+import org.aopalliance.aop.Advice;
+
 /**
  * Tag interface for throws advice.
  * There aren't any methods on this interface, as methods are invoked by reflection.
@@ -27,8 +29,8 @@ package org.springframework.aop;
  * we want further information about the joinpoint, as in AspectJ
  * <b>after throwing</b> advice.
  * @author Rod Johnson
- * @version $Id: ThrowsAdvice.java,v 1.2 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: ThrowsAdvice.java,v 1.3 2004-03-19 16:54:36 johnsonr Exp $
  */
-public interface ThrowsAdvice {
+public interface ThrowsAdvice extends Advice {
 
 }

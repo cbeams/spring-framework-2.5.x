@@ -33,7 +33,7 @@ import org.springframework.jndi.JndiTemplate;
  * Tests Business Methods pattern
  * @author Rod Johnson
  * @since 21-May-2003
- * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.8 2004-03-19 07:41:44 jhoeller Exp $
+ * @version $Id: LocalStatelessSessionProxyFactoryBeanTests.java,v 1.9 2004-03-19 16:54:42 johnsonr Exp $
  */
 public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 
@@ -122,7 +122,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests extends TestCase {
 			fail("Should have failed to create EJB");
 		}
 		catch (AspectException ex) {
-			assertTrue(ex.getRootCause() == cex);
+			assertSame(cex, ex.getCause());
 		}
 		
 		mc.verify();	

@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 
@@ -23,24 +24,24 @@ import org.springframework.aop.PointcutAdvisor;
  * Convenient class for name-match method pointcuts that hold an Interceptor,
  * making them an Advisor.
  * @author Juergen Hoeller
- * @version $Id: NameMatchMethodPointcutAdvisor.java,v 1.3 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: NameMatchMethodPointcutAdvisor.java,v 1.4 2004-03-19 16:54:39 johnsonr Exp $
  */
 public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut implements PointcutAdvisor {
 
-	private Object advice;
+	private Advice advice;
 
 	public NameMatchMethodPointcutAdvisor() {
 	}
 
-	public NameMatchMethodPointcutAdvisor(Object advice) {
+	public NameMatchMethodPointcutAdvisor(Advice advice) {
 		this.advice = advice;
 	}
 
-	public void setAdvice(Object object) {
-		advice = object;
+	public void setAdvice(Advice advice) {
+		this.advice = advice;
 	}
 
-	public Object getAdvice() {
+	public Advice getAdvice() {
 		return advice;
 	}
 

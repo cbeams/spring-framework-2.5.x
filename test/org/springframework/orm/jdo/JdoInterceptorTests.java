@@ -24,12 +24,10 @@ import javax.jdo.PersistenceManagerFactory;
 
 import junit.framework.TestCase;
 
-import org.aopalliance.intercept.AttributeRegistry;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
-
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -146,20 +144,11 @@ public class JdoInterceptorTests extends TestCase {
 			return null;
 		}
 
-		public Object addAttachment(String msg, Object handler) {
-			return null;
-		}
-
-		public Object getAttachment(String msg) {
-			return null;
-		}
-
 		public Invocation cloneInstance() {
 			return null;
 		}
 
-		public AttributeRegistry getAttributeRegistry() {
-			return null;
+		public void release() {
 		}
 	}
 

@@ -16,30 +16,31 @@
 
 package org.springframework.aop.support;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 
 /**
  * Convenient superclass for Advisors that are also static pointcuts.
  * @author Rod Johnson
- * @version $Id: StaticMethodMatcherPointcutAdvisor.java,v 1.5 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: StaticMethodMatcherPointcutAdvisor.java,v 1.6 2004-03-19 16:54:39 johnsonr Exp $
  */
 public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcut implements PointcutAdvisor {
 
-	private Object advice;
+	private Advice advice;
 	
 	public StaticMethodMatcherPointcutAdvisor() {
 	}
 
-	public StaticMethodMatcherPointcutAdvisor(Object advice) {
+	public StaticMethodMatcherPointcutAdvisor(Advice advice) {
 		this.advice = advice;
 	}
 
-	public void setAdvice(Object object) {
-		advice = object;
+	public void setAdvice(Advice advice) {
+		this.advice = advice;
 	}
 
-	public Object getAdvice() {
+	public Advice getAdvice() {
 		return advice;
 	}
 

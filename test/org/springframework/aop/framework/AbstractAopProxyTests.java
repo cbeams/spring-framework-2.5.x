@@ -46,7 +46,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.22 2004-03-18 03:01:14 trisberg Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.23 2004-03-19 16:54:41 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -913,7 +913,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		private static MethodInterceptor cleaner = new MethodInterceptor() {
 			public Object invoke(MethodInvocation mi) throws Throwable {
 				// We know it can only be invoked if there's a single parameter of type string
-				mi.setArgument(0, "");
+				mi.getArguments()[0] = "";
 				return mi.proceed();
 			}
 		};
