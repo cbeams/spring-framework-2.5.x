@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -90,6 +91,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @since 18.02.2004
  * @see #setDataSource
  * @see org.quartz.Scheduler
+ * @see org.quartz.SchedulerFactory
  * @see org.quartz.impl.StdSchedulerFactory
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
@@ -182,6 +184,9 @@ public class SchedulerFactoryBean
 	 * @see #setQuartzProperties
 	 */
 	public void setSchedulerFactoryClass(Class schedulerFactoryClass) {
+		if (schedulerFactoryClass == null || !SchedulerFactory.class.isAssignableFrom(schedulerFactoryClass)) {
+			throw new IllegalArgumentException("schedulerFactoryClass must implement [org.quartz.SchedulerFactory]");
+		}
 		this.schedulerFactoryClass = schedulerFactoryClass;
 	}
 
@@ -442,12 +447,46 @@ public class SchedulerFactoryBean
 
 
 	public void afterPropertiesSet() throws Exception {
-		// create SchedulerFactory
+		// Create SchedulerFactory instance.
 		SchedulerFactory schedulerFactory = (SchedulerFactory)
-		    BeanUtils.instantiateClass(this.schedulerFactoryClass);
+				BeanUtils.instantiateClass(this.schedulerFactoryClass);
 
-		// load and/or apply Quartz properties
-		if (this.configLocation != null || this.quartzProperties != null || this.dataSource != null) {
+		initSchedulerFactory(schedulerFactory);
+
+		if (this.dataSource != null) {
+			// Make given DataSource available for SchedulerFactory configuration.
+			configTimeDataSourceHolder.set(this.dataSource);
+		}
+
+		// Get Scheduler instance from SchedulerFactory.
+		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
+
+		if (this.dataSource != null) {
+			configTimeDataSourceHolder.set(null);
+		}
+
+		populateSchedulerContext();
+
+		registerListeners();
+
+		registerJobsAndTriggers();
+
+		// Start Scheduler immediately, if demanded.
+		if (this.autoStartup) {
+			startScheduler(this.scheduler, this.startupDelay);
+		}
+	}
+
+	/**
+	 * Load and/or apply Quartz properties to the given SchedulerFactory.
+	 * @param schedulerFactory the SchedulerFactory to initialize
+	 */
+	private void initSchedulerFactory(SchedulerFactory schedulerFactory)
+			throws SchedulerException, IOException {
+
+		if (this.configLocation != null || this.quartzProperties != null ||
+				this.dataSource != null || this.schedulerName != null) {
+
 			if (!(schedulerFactory instanceof StdSchedulerFactory)) {
 				throw new IllegalArgumentException("StdSchedulerFactory required for applying Quartz properties");
 			}
@@ -460,7 +499,7 @@ public class SchedulerFactoryBean
 			props.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
 
 			if (this.configLocation != null) {
-				// load Quartz properties from given location
+				// Load Quartz properties from given location.
 				InputStream is = this.configLocation.getInputStream();
 				try {
 					props.load(is);
@@ -471,7 +510,7 @@ public class SchedulerFactoryBean
 			}
 
 			if (this.quartzProperties != null) {
-				// use propertyNames enumeration to also catch default properties
+				// Use propertyNames enumeration to also catch default properties.
 				for (Enumeration en = this.quartzProperties.propertyNames(); en.hasMoreElements();) {
 					String key = (String) en.nextElement();
 					props.setProperty(key, this.quartzProperties.getProperty(key));
@@ -482,32 +521,46 @@ public class SchedulerFactoryBean
 				props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
 			}
 
-            // make sure to set the scheduler name as configured in the spring configuration
-            if(schedulerName != null) {
-                props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, schedulerName);
-            }
+			// Make sure to set the scheduler name as configured in the Spring configuration.
+			if (this.schedulerName != null) {
+				props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
+			}
 
 			((StdSchedulerFactory) schedulerFactory).initialize(props);
 		}
+	}
 
-		if (this.dataSource != null) {
-			// make given DataSource available for SchedulerFactory configuration
-			configTimeDataSourceHolder.set(this.dataSource);
-		}
+	/**
+	 * Create the Scheduler instance for the given factory and scheduler name.
+	 * Called by afterPropertiesSet.
+	 * <p>Default implementation invokes SchedulerFactory's <code>getScheduler</code>
+	 * method. Can be overridden for custom Scheduler creation.
+	 * @param schedulerFactory the factory to create the Scheduler with
+	 * @param schedulerName the name of the scheduler to create
+	 * @return the Scheduler instance
+	 * @throws SchedulerException if thrown by Quartz methods
+	 * @see #afterPropertiesSet
+	 * @see org.quartz.SchedulerFactory#getScheduler
+	 */
+	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
+			throws SchedulerException {
+		// StdSchedulerFactory's default "getScheduler" implementation
+		// uses the scheduler name specified in the Quartz properties,
+		// which we have set before (in "initSchedulerFactory").
+		return schedulerFactory.getScheduler();
+	}
 
-		// get Scheduler instance from SchedulerFactory
-		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
-
-		if (this.dataSource != null) {
-			configTimeDataSourceHolder.set(null);
-		}
-
-		// put specified objects into Scheduler context
+	/**
+	 * Expose the specified context attributes and/or the current
+	 * ApplicationContext in the Quartz SchedulerContext.
+	 */
+	private void populateSchedulerContext() throws SchedulerException {
+		// Put specified objects into Scheduler context.
 		if (this.schedulerContextMap != null) {
 			this.scheduler.getContext().putAll(this.schedulerContextMap);
 		}
 
-		// register ApplicationContext in Scheduler context
+		// Register ApplicationContext in Scheduler context.
 		if (this.applicationContextSchedulerContextKey != null) {
 			if (this.applicationContext == null) {
 				throw new IllegalStateException(
@@ -516,44 +569,7 @@ public class SchedulerFactoryBean
 			}
 			this.scheduler.getContext().put(this.applicationContextSchedulerContextKey, this.applicationContext);
 		}
-
-		registerListeners();
-		registerJobsAndTriggers();
-
-		// start Scheduler if demanded
-		if (this.autoStartup) {
-			startScheduler(this.scheduler, this.startupDelay);
-		}
 	}
-
-	/**
-	 * Create the Scheduler instance for the given factory and scheduler name.
-	 * Called by afterPropertiesSet.
-	 * <p>Default implementation invokes the corresponding getScheduler methods
-	 * of SchedulerFactory. Can be overridden for custom Scheduler creation.
-	 * @param schedulerFactory the factory to create the Scheduler with
-	 * @param schedulerName the name of the scheduler to create
-	 * @return the Scheduler instance
-	 * @throws SchedulerException if thrown by Quartz methods
-	 * @see #afterPropertiesSet
-	 * @see org.quartz.SchedulerFactory#getScheduler
-	 * @see org.quartz.SchedulerFactory#getScheduler(String)
-	 */
-    protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
-            throws SchedulerException {
-	    if (schedulerName != null) {
-		    Scheduler scheduler = null;
-		    if(this.scheduler == null) {
-			    scheduler = schedulerFactory.getScheduler();
-		    } else {
-                schedulerFactory.getScheduler(schedulerName);
-            }
-		    return scheduler;
-	    }
-	    else {
-    		return schedulerFactory.getScheduler();
-    	}
-    }
 
 	/**
 	 * Register all specified listeners with the Scheduler.
@@ -607,7 +623,7 @@ public class SchedulerFactoryBean
 				}
 			}
 
-			// register JobDetails
+			// Register JobDetails.
 			if (this.jobDetails != null) {
 				for (Iterator it = this.jobDetails.iterator(); it.hasNext();) {
 					JobDetail jobDetail = (JobDetail) it.next();
@@ -615,11 +631,11 @@ public class SchedulerFactoryBean
 				}
 			}
 			else {
-				// create empty list for easier checks when registering triggers
+				// Create empty list for easier checks when registering triggers.
 				this.jobDetails = new LinkedList();
 			}
 
-			// register Calendars
+			// Register Calendars.
 			if (this.calendars != null) {
 				for (Iterator it = this.calendars.keySet().iterator(); it.hasNext();) {
 					String calendarName = (String) it.next();
@@ -628,15 +644,15 @@ public class SchedulerFactoryBean
 				}
 			}
 
-			// register Triggers
+			// Register Triggers.
 			if (this.triggers != null) {
 				for (Iterator it = this.triggers.iterator(); it.hasNext();) {
 					Trigger trigger = (Trigger) it.next();
 					if (this.scheduler.getTrigger(trigger.getName(), trigger.getGroup()) == null) {
-						// check if the Trigger is aware of an associated JobDetail
+						// Check if the Trigger is aware of an associated JobDetail.
 						if (trigger instanceof JobDetailAwareTrigger) {
 							JobDetail jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
-							// automatically register the JobDetail too
+							// Automatically register the JobDetail too.
 							if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
 								this.jobDetails.add(jobDetail);
 							}
@@ -697,14 +713,14 @@ public class SchedulerFactoryBean
 	private void addCalendarToScheduler(String calendarName, Calendar calendar) throws Exception {
 		try {
 			try {
-				// try Quartz 1.4 (with "updateTriggers" flag)
+				// Try Quartz 1.4 (with "updateTriggers" flag).
 				Method addCalendarMethod = this.scheduler.getClass().getMethod(
 						"addCalendar", new Class[] {String.class, Calendar.class, boolean.class, boolean.class});
 				addCalendarMethod.invoke(
 						this.scheduler, new Object[] {calendarName, calendar, Boolean.TRUE, Boolean.TRUE});
 			}
 			catch (NoSuchMethodException ex) {
-				// try Quartz 1.3 (without "updateTriggers" flag)
+				// Try Quartz 1.3 (without "updateTriggers" flag).
 				Method addCalendarMethod = this.scheduler.getClass().getMethod(
 						"addCalendar", new Class[] {String.class, Calendar.class, boolean.class});
 				addCalendarMethod.invoke(
