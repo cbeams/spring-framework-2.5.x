@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jms.JmsException;
 import org.springframework.jms.JmsSecurityException;
+import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -110,15 +111,15 @@ public abstract class JmsUtils {
 
 		try {
 			Class clazz = Class.forName(longName);
-			Constructor ctor = clazz.getConstructor(new Class[]{Throwable.class});
+			Constructor ctor = clazz.getConstructor(new Class[] {ex.getClass()});
 			Object counterpart = ctor.newInstance(new Object[]{ex});
 			return (JmsException) counterpart;
 		}
-		catch (Exception ex2) {
+		catch (Throwable ex2) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Couldn't resolve JmsException class [" + longName + "]", ex2);
 			}
-			return new JmsException("Uncategorized exception occured during JMS processing", ex);
+			return new UncategorizedJmsException(ex);
 		}
 	}
 

@@ -21,11 +21,12 @@ import javax.jms.JMSException;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Exception thrown by the framework whenever it encounters a problem related to JMS.
- * @author Andre Biryukov
+ * Base class for exception thrown by the framework whenever it
+ * encounters a problem related to JMS.
  * @author Les Hazlewood
+ * @author Juergen Hoeller
  */
-public class JmsException extends NestedRuntimeException {
+public abstract class JmsException extends NestedRuntimeException {
 
 	/**
 	 * Constructor that takes a message.
@@ -53,7 +54,7 @@ public class JmsException extends NestedRuntimeException {
 	 * expected to be a proper subclass of {@link javax.jms.JMSException}.
 	 */
 	protected JmsException(Throwable cause) {
-		this(null, cause);
+		super(cause.getMessage(), cause);
 	}
 
 	/**
