@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.149 2004-05-26 10:54:44 jhoeller Exp $
+$Id: changelog.txt,v 1.150 2004-05-27 09:18:53 jhoeller Exp $
 
 
 Changes in version 1.0.2 (27.5.2004)
@@ -11,6 +11,7 @@ Package org.springframework.aop
 * reworked GlobalAdvisorAdapterRegistry to hold and return a DefaultAdvisorAdapterRegistry
 * reworked GlobalAdvisorAdapterRegistry to hold the singleton in a WeakReference, for proper garbage collection
 * added "advisorAdapterRegistry" property to ProxyFactoryBean and co, with global AdvisorAdapterRegistry as default
+* removed unused MethodInvocationFactory interface and the corresponding bean property in the AdvisedSupport class
 
 Package org.springframework.beans
 * PropertyValue and MutablePropertyValues implement java.io.Serializable
@@ -20,13 +21,16 @@ Package org.springframework.beans
 * ClassEditor properly handles "java.lang.String[]"-style array class names, converting them to array classes
 * fixed CustomBooleanEditor, CustomDateEditor and CustomNumberEditor to properly handle null values in "getAsText"
 * PropertiesEditor supports population of java.util.Properties from a java.util.Map, for example from an XML "map" tag
-* added BeanDefinitionHolder class to beans.factory.support package, holding a BeanDefinition plus name and aliases
-* AbstractAutowireCapableBeanFactory detects BeanDefinitionHolder, applying its name to a BeanNameAware inner bean
-* DefaultXmlBeanDefinitionParser registers BeanDefinitionHolder for inner bean definition, including name and aliases
 * added AbstractFactoryBean class as superclass for FactoryBeans that are capable of both singletons and prototypes
 * reworked List/Map/Set/PropertiesFactoryBean to extend from AbstractFactoryBean
 * renamed PropertiesFactoryBean's "charset" property to "fileEncoding", for consistency with other encoding properties
 * added ObjectFactoryCreatingFactoryBean, to avoid having calling "getBean" to get prototype beans from the container
+* added BeanDefinitionHolder class to beans.factory.support package, holding a BeanDefinition plus name and aliases
+* AbstractAutowireCapableBeanFactory detects BeanDefinitionHolder, applying its name to a BeanNameAware inner bean
+* DefaultXmlBeanDefinitionParser registers BeanDefinitionHolder for inner bean definition, including name and aliases
+* AbstractAutowireCapableBeanFactory catches Throwable on bean creation, rethrowing as meaningful BeanCreationException
+* AbstractAutowireCapableBeanFactory cleans up eagerly cached singletons in case of bean creation failure
+* DefaultListableBeanFactory cleans up already created singletons in case of preInstantiateSingletons failure
 
 Package org.springframework.context
 * added ResourceMapFactoryBean class to context.support, for resolving properties into a Map with Resource values
@@ -131,6 +135,7 @@ Package org.springframework.web
 * added "detectAllHandlerExceptionResolvers" to DispatcherServlet, expecting a single HandlerExceptionResolver when off
 * added "detectAllViewResolvers" property to DispatcherServlet, expecting a single ViewResolver when off
 * XmlViewResolver, ResourceBundleViewResolver and BeanNameViewResolver implement Ordered to allow for order values
+* XmlViewResolver and ResourceBundleViewResolver clean up their view bean factories on context shutdown
 * added AbstractTemplateView allowing request and session attributes to be exposed in FreeMarker and Velocity views
 * refined HttpSession checks in WebContentGenerator and AbstractController for easier mocking
 * added "cacheMappings" property to WebContentInterceptor, for overriding cache seconds for specific URL paths
