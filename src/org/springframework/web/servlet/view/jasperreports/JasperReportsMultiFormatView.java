@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperPrint;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextException;
@@ -163,7 +164,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * report is then delegated to an instance of that view class.
 	 */
 	protected void renderReport(
-			JasperReport report, Map model, JRDataSource dataSource, HttpServletResponse response)
+			JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception {
 
 		String format = (String) model.get(this.formatKey);
@@ -186,11 +187,15 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 
 		AbstractJasperReportsView view = (AbstractJasperReportsView) BeanUtils.instantiateClass(viewClass);
 
+		// copy appropriate properties across
+		view.setExporterParameters(this.exporterParameters);
+    view.setDataSource(this.dataSource);
+		
 		response.setContentType(view.getContentType());
 
 		populateContentDispositionIfNecessary(format, response);
 
-		view.renderReport(report, model, dataSource, response);
+		view.renderReport(populatedReport, model, response);
 	}
 
 	/**

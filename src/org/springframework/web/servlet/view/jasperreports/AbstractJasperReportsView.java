@@ -24,20 +24,26 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.sql.SQLException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRDataSourceProvider;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.design.JRBshCompiler;
 import net.sf.jasperreports.engine.design.JRCompiler;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
@@ -56,6 +62,11 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * under the specified <code>reportDataKey</code> first, then falls back to looking
  * for a value of type <code>JRDataSource</code>, <code>java.util.Collection</code>,
  * object array (in that order).
+ * <p/>
+ * <p>If no <code>JRDataSource</code> can be found in the model, then reports will
+ * be filled using the configured <code>javax.sql.DataSource</code> if any. If neither
+ * a <code>JRDataSource</code> or <code>javax.sql.DataSource</code> is available then
+ * an <code>IllegalArgumentException</code> is raised.
  * <p/>
  * <p>Provides support for sub-reports through the <code>subReportUrls</code> and
  * <code>subReportDataKeys</code> properties.
@@ -92,6 +103,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @author Juergen Hoeller
  * @see #setUrl
  * @see #getReportData
+ * @see #setDataSource(javax.sql.DataSource)
  * @see #setSubReportDataKeys(String[])
  * @see #setSubReportUrls(java.util.Properties)
  * @see #setExporterParameters(java.util.Map)
@@ -99,6 +111,11 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @since 1.1.3
  */
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
+
+	/**
+	 * <code>Log</code> for this class.
+	 */
+	protected Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * Constant that defines "Content-Disposition" header.
@@ -147,7 +164,12 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Stores the <code>String</code> keyed exporter parameters passed in by the user.
 	 */
-	private Map exporterParameters;
+	protected Map exporterParameters;
+
+	/**
+	 * Stores the <code>DataSource</code>, if any, used as the report data source.
+	 */
+	protected DataSource dataSource;
 
 	/**
 	 * Set the name of the model attribute that represents the report data.
@@ -227,25 +249,29 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * and the value you wish to assign to the parameter as value
 	 */
 	public void setExporterParameters(Map parameters) {
+		if (parameters == null) return;
+
 		this.exporterParameters = new HashMap(parameters.size());
 		for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
-			String fieldName = (String) entry.getKey();
-			JRExporterParameter parameter = convertToExporterParameter(fieldName);
+
+			Object key = entry.getKey();
+
+			JRExporterParameter parameter = null;
+
+			if (key instanceof JRExporterParameter) {
+				parameter = (JRExporterParameter) key;
+			}
+			else if (key instanceof String) {
+				parameter = convertToExporterParameter((String) key);
+			}
+			else {
+				throw new ApplicationContextException("Key [" + key + "] is invalid type. Should be either String or JRExporterParameter");
+			}
+
 			this.exporterParameters.put(parameter, entry.getValue());
 		}
 	}
-
-	/**
-	 * Return the exporter parameters configured by the user.
-	 *
-	 * @return a <code>Map</code> containing the exporter parameters with instances
-	 *         of <code>JRExporterParameter</code> as the key.
-	 */
-	protected Map getExporterParameters() {
-		return exporterParameters;
-	}
-
 
 	/**
 	 * Checks to see that a valid report file URL is supplied in the
@@ -376,6 +402,22 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		return new JRBshCompiler();
 	}
 
+	/**
+	 * Gets the <code>DataSource</code> used for the  report data source.
+	 * May be <code>null</code> if a <code>JRDataSource</code> is used
+	 * instead.
+	 */
+	public DataSource getDataSource() {
+		return this.dataSource;
+	}
+
+	/**
+	 * Sets the <code>DataSource</code> to use for reports with
+	 * embedded SQL statements.
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
 	/**
 	 * Finds the report data to use for rendering the report and then invokes the
@@ -391,8 +433,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 		response.setContentType(getContentType());
 
-		// Determine JRDataSource for main report.
-		JRDataSource dataSource = getReportData(model);
 
 		if (this.subReports != null) {
 			// Expose sub-reports as model attributes.
@@ -408,9 +448,57 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		}
 
 		populateHeaders(response);
-		renderReport(this.report, model, dataSource, response);
+		JasperPrint filledReport = fillReport(model);
+		renderReport(filledReport, model, response);
 	}
 
+	/**
+	 * Creates a populated <code>JasperPrint</code> instance from the configured <code>JasperReport</code> instance.
+	 * By default will use any <code>JRDataSource</code> instance (or wrappable <code>Object</code>) that can be
+	 * located using <code>getReportData(Map)</code>. If no <code>JRDataSource</code> can be found will use a
+	 * <code>Connection</code> obtained from the configured <code>javax.sql.DataSource</code>.
+	 * @param model the model for this request
+	 * @throws IllegalArgumentException if no <code>JRDataSource</code> can be found and no <code>javax.sql.DataSource</code> is supplied.
+	 * @throws SQLException if there is an error when populating the report using the <code>javax.sql.DataSource</code>.
+	 * @throws JRException if there is an error when populating the report using a <code>JRDataSource</code>.
+	 * @return the populated <code>JasperPrint</code> instance.
+	 * @see #getReportData(java.util.Map)
+	 * @see #setDataSource(javax.sql.DataSource)
+	 */
+	protected JasperPrint fillReport(Map model) throws IllegalArgumentException, SQLException, JRException {
+
+		// Determine JRDataSource for main report.
+		JRDataSource jrDataSource = getReportData(model);
+
+		JasperPrint populatedReport = null;
+
+		if (jrDataSource == null && this.dataSource == null) {
+			throw new IllegalArgumentException("No report data source found in model and no javax.sql.DataSource specified in configuration.");
+		}
+		else if (jrDataSource == null) {
+			// use the SQL DataSource
+			if (logger.isDebugEnabled()) {
+				logger.debug("Filling report with javax.sql.DataSource [" + this.dataSource + "].");
+			}
+
+			populatedReport = JasperFillManager.fillReport(this.report, model, this.dataSource.getConnection());
+		}
+		else {
+			// use the JasperReports DataSource
+			if (logger.isDebugEnabled()) {
+				logger.debug("Filling report with JRDataSource [" + jrDataSource + "].");
+			}
+
+			populatedReport = JasperFillManager.fillReport(this.report, model, jrDataSource);
+		}
+
+		return populatedReport;
+	}
+
+	/**
+	 * Populates the headers in the <code>HttpServletResponse.</code> with the
+	 * headers supplied by the user.
+	 */
 	private void populateHeaders(HttpServletResponse response) {
 		// Apply the headers to the response.
 		for (Enumeration en = this.headers.propertyNames(); en.hasMoreElements();) {
@@ -428,13 +516,12 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * object array (in that order).
 	 *
 	 * @param model the model map, as passed in for view rendering
-	 * @return the <code>JRDataSource</code>
-	 * @throws IllegalArgumentException if no JRDataSource found
+	 * @return the <code>JRDataSource</code> or <code>null</code> if the data source is not found
 	 * @see #setReportDataKey
 	 * @see #convertReportData
 	 * @see #getReportDataTypes
 	 */
-	protected JRDataSource getReportData(Map model) throws IllegalArgumentException {
+	protected JRDataSource getReportData(Map model) {
 		// Try model attribute with specified name.
 		if (this.reportDataKey != null) {
 			Object value = model.get(this.reportDataKey);
@@ -448,7 +535,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			return convertReportData(value);
 		}
 
-		throw new IllegalArgumentException("No report data supplied in model " + model);
+		return null;
 	}
 
 	/**
@@ -456,7 +543,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * <p>The default implementation delegates to <code>JasperReportUtils</code> unless
 	 * the report data value is an instance of <code>JRDataSourceProvider</code>.
 	 * A <code>JRDataSource</code>, <code>JRDataSourceProvider</code>,
-	 *  <code>java.util.Collection</code> or object array is detected.
+	 * <code>java.util.Collection</code> or object array is detected.
 	 * <code>JRDataSource</code>s are returned as is, whilst <code>JRDataSourceProvider</code>s
 	 * are used to create an instance of <code>JRDataSource</code> which is then returned.
 	 * The latter two are converted to <code>JRBeanCollectionDataSource</code> or
@@ -513,13 +600,12 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Subclasses should implement this method to perform the actual rendering process.
 	 *
-	 * @param report the <code>JasperReport</code> to render
+	 * @param filledReport the filled <code>JasperPrint</code> to render
 	 * @param parameters the map containing report parameters
-	 * @param dataSource the <code>JRDataSource</code> containing the report data
 	 * @param response the HTTP response the report should be rendered to
 	 * @throws Exception if rendering failed
 	 */
-	protected abstract void renderReport(JasperReport report, Map parameters, JRDataSource dataSource, HttpServletResponse response)
+	protected abstract void renderReport(JasperPrint populatedReport, Map parameters, HttpServletResponse response)
 			throws Exception;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,12 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import junit.framework.TestCase;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
-import org.springframework.context.ApplicationContextException;
-import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.jasperreports.PersonBean;
@@ -56,7 +52,7 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
 	}
-  	
+
 
 	protected Map getModel() {
 		Map model = new HashMap();
@@ -69,7 +65,8 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	/**
 	 * Subclasses can extend the model if they need to.
 	 */
-	protected void extendModel(Map model) {};
+	protected void extendModel(Map model) {
+	};
 
 	protected List getData() {
 		List list = new ArrayList();
