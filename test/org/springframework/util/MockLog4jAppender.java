@@ -35,7 +35,7 @@ public class MockLog4jAppender extends AppenderSkeleton {
 	 * @see org.apache.log4j.AppenderSkeleton#append(org.apache.log4j.spi.LoggingEvent)
 	 */
 	protected void append(LoggingEvent evt) {
-		System.out.println("Adding " + evt.getMessage());
+		//System.out.println("Adding " + evt.getMessage());
 		loggingStrings.add(evt.getMessage());
 	}
 	
