@@ -12,18 +12,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.transaction.TransactionUsageException;
 
 /**
  * Simple implementation of TransactionAttributeSource that
  * allows attributes to be stored per method in a map.
  * @since 24-Apr-2003
- * @version $Id: MethodMapTransactionAttributeSource.java,v 1.6 2004-01-01 23:50:02 jhoeller Exp $
+ * @version $Id: MethodMapTransactionAttributeSource.java,v 1.7 2004-02-11 17:12:44 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #isMatch
  */
-public class MethodMapTransactionAttributeSource extends AbstractTransactionAttributeSource {
+public class MethodMapTransactionAttributeSource implements TransactionAttributeSource {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Map from Method to TransactionAttribute */
 	private Map methodMap = new HashMap();
@@ -124,6 +129,19 @@ public class MethodMapTransactionAttributeSource extends AbstractTransactionAttr
 	public void addTransactionalMethod(Method method, TransactionAttribute attr) {
 		logger.info("Adding transactional method [" + method + "] with attribute [" + attr + "]");
 		this.methodMap.put(method, attr);
+	}
+
+	/**
+	 * Return if the given method name matches the mapped name.
+	 * The default implementation checks for "xxx*" and "*xxx" matches.
+	 * Can be overridden in subclasses.
+	 * @param methodName the method name of the class
+	 * @param mappedName the name in the descriptor
+	 * @return if the names match
+	 */
+	protected boolean isMatch(String methodName, String mappedName) {
+		return (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
+				(mappedName.startsWith("*") && methodName.endsWith(mappedName.substring(1, mappedName.length())));
 	}
 
 	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {

@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Simple implementation of TransactionAttributeSource that
  * allows attributes to be matched by registered name.
@@ -13,7 +16,9 @@ import java.util.Properties;
  * @since 21.08.2003
  * @see #isMatch
  */
-public class NameMatchTransactionAttributeSource extends AbstractTransactionAttributeSource {
+public class NameMatchTransactionAttributeSource implements TransactionAttributeSource {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Map nameMap = new HashMap();
 
@@ -74,6 +79,19 @@ public class NameMatchTransactionAttributeSource extends AbstractTransactionAttr
 			}
 			return attr;
 		}
+	}
+
+	/**
+	 * Return if the given method name matches the mapped name.
+	 * The default implementation checks for "xxx*" and "*xxx" matches.
+	 * Can be overridden in subclasses.
+	 * @param methodName the method name of the class
+	 * @param mappedName the name in the descriptor
+	 * @return if the names match
+	 */
+	protected boolean isMatch(String methodName, String mappedName) {
+		return (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1))) ||
+				(mappedName.startsWith("*") && methodName.endsWith(mappedName.substring(1, mappedName.length())));
 	}
 
 }
