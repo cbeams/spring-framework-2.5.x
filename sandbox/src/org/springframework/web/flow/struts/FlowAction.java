@@ -30,6 +30,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionInfo;
+import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowExecutionStack;
 import org.springframework.web.flow.NoSuchFlowExecutionException;
 import org.springframework.web.flow.action.AbstractAction;
@@ -40,7 +41,9 @@ import org.springframework.web.struts.TemplateAction;
 /**
  * Struts Action that provides an entry point into the workflow mechanism for
  * this application.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class FlowAction extends TemplateAction {
 
@@ -61,6 +64,8 @@ public class FlowAction extends TemplateAction {
 	public static String ACTION_FORM_ATTRIBUTE = "_bindingActionForm";
 
 	public static final String ACTION_PATH_ATTRIBUTE = "actionPath";
+	
+	private FlowExecutionListener[] flowExecutionListeners;
 
 	protected String getFlowExecutionIdParameterName() {
 		return FLOW_EXECUTION_ID_PARAMETER;
@@ -103,12 +108,7 @@ public class FlowAction extends TemplateAction {
 	}
 
 	protected Flow getFlow(ActionMapping mapping) {
-		return getFlowExecutionFactory(getFlowId(mapping));
-	}
-
-	protected Flow getFlowExecutionFactory(String flowId) {
-		Assert.hasText(flowId, "The flow id must be set to lookup the flow for this action");
-		return (Flow)getBean(flowId, Flow.class);
+		return (Flow)getBean(getFlowId(mapping), Flow.class);
 	}
 
 	protected String getFlowId(ActionMapping mapping) {
@@ -117,11 +117,11 @@ public class FlowAction extends TemplateAction {
 	}
 
 	/**
-	 * The main entry point for this action. Looks for a flow session ID in the
+	 * The main entry point for this action. Looks for a flow execution ID in the
 	 * request. If none exists, it creates one. If one exists, it looks in the
-	 * user's session find the current FlowExecutionExecutionStack. The request
+	 * user's session find the current FlowExecution. The request
 	 * should also contain the current state ID and event ID. These String
-	 * values can be passed to the FlowEventProcessor to execute the action.
+	 * values can be passed to the FlowExecution to execute the action.
 	 * Execution will typically result in a state transition.
 	 * @see org.springframework.web.struts.TemplateAction#doExecuteAction(org.apache.struts.action.ActionMapping,
 	 *      org.apache.struts.action.ActionForm,
@@ -143,18 +143,18 @@ public class FlowAction extends TemplateAction {
 		// end struts specific
 
 		FlowExecution flowExecution;
-		ModelAndView viewDescriptor;
+		ModelAndView mv;
 
 		if (getStringParameter(request, getFlowExecutionIdParameterName()) == null) {
-			// No existing flow session execution to lookup as no _flowSessionId
+			// No existing flow execution to lookup as no _flowExecutionId
 			// was provided - start a new one
 			Flow flow = getFlow(mapping);
 			flowExecution = createFlowExecution(flow);
-			viewDescriptor = flowExecution.start(null, request, response);
+			mv = flowExecution.start(null, request, response);
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
-			// Client is participating in an existing flow session execution,
+			// Client is participating in an existing flow execution,
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(getRequiredStringParameter(request,
 					getFlowExecutionIdParameterName()), request);
@@ -190,7 +190,7 @@ public class FlowAction extends TemplateAction {
 			}
 			else {
 				// execute the signaled event within the current state
-				viewDescriptor = flowExecution.signalEvent(eventId, stateId, request, response);
+				mv = flowExecution.signalEvent(eventId, stateId, request, response);
 			}
 		}
 
@@ -200,7 +200,7 @@ public class FlowAction extends TemplateAction {
 		}
 		else {
 			// We're still in the flow, inject flow model into request
-			if (viewDescriptor != null) {
+			if (mv != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("[Placing information about the new current flow state in request scope]");
 					logger.debug("    - " + getFlowExecutionIdAttributeName() + "=" + flowExecution.getId());
@@ -235,61 +235,67 @@ public class FlowAction extends TemplateAction {
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Returning selected view descriptor " + viewDescriptor);
+			logger.debug("Returning selected model and view " + mv);
 		}
-		return createForwardFromViewDescriptor(viewDescriptor, mapping, request);
+		return createForwardFromModelAndView(mv, mapping, request);
 	}
-
+	
+	public void setFlowExecutionListeners(FlowExecutionListener[] flowExecutionListeners) {
+		this.flowExecutionListeners = flowExecutionListeners;
+	}
+	
 	protected FlowExecution createFlowExecution(Flow flow) {
-		return new FlowExecutionStack(flow);
+		FlowExecution flowExecution = new FlowExecutionStack(flow);
+		flowExecution.addAllFlowExecutionListeners(flowExecutionListeners);
+		return flowExecution;
 	}
 
 	/**
-	 * Return a Struts ActionForward given this ViewDescriptor. We need to add
-	 * all attributes from the ViewDescriptor as request attributes.
+	 * Return a Struts ActionForward given a ModelAndView. We need to add
+	 * all attributes from the ModelAndView as request attributes.
 	 */
-	private ActionForward createForwardFromViewDescriptor(ModelAndView viewDescriptor, ActionMapping mapping,
+	private ActionForward createForwardFromModelAndView(ModelAndView mv, ActionMapping mapping,
 			HttpServletRequest request) {
-		if (viewDescriptor != null) {
-			Iterator it = viewDescriptor.getModel().entrySet().iterator();
+		if (mv != null) {
+			Iterator it = mv.getModel().entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry)it.next();
 				request.setAttribute((String)entry.getKey(), entry.getValue());
 			}
-			ActionForward forward = mapping.findForward(viewDescriptor.getViewName());
+			ActionForward forward = mapping.findForward(mv.getViewName());
 			if (forward == null) {
-				forward = new ActionForward(viewDescriptor.getViewName());
+				forward = new ActionForward(mv.getViewName());
 			}
 			return forward;
 		}
 		else {
 			if (logger.isInfoEnabled()) {
-				logger.info("No view descriptor returned; returning a [null] forward");
+				logger.info("No model and view; returning a [null] forward");
 			}
 			return null;
 		}
 	}
 
-	protected FlowExecution getRequiredFlowExecution(String flowSessionId, HttpServletRequest request)
+	protected FlowExecution getRequiredFlowExecution(String flowExecutionId, HttpServletRequest request)
 			throws NoSuchFlowExecutionException {
 		try {
-			return (FlowExecution)getRequiredSessionAttribute(request, flowSessionId);
+			return (FlowExecution)getRequiredSessionAttribute(request, flowExecutionId);
 		}
 		catch (IllegalStateException e) {
-			throw new NoSuchFlowExecutionException(flowSessionId, e);
+			throw new NoSuchFlowExecutionException(flowExecutionId, e);
 		}
 	}
 
 	protected void saveInHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Saving flow session '" + flowExecution.getId() + "' in HTTP session");
+			logger.debug("Saving flow execution '" + flowExecution.getId() + "' in HTTP session");
 		}
 		request.getSession().setAttribute(flowExecution.getId(), flowExecution);
 	}
 
 	private void removeFromHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Removing flow session '" + flowExecution.getId() + "' from HTTP session");
+			logger.debug("Removing flow execution '" + flowExecution.getId() + "' from HTTP session");
 		}
 		request.getSession().removeAttribute(flowExecution.getId());
 	}
