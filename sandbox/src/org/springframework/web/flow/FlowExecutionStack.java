@@ -226,8 +226,6 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		this.lastEventId = lastEvent.getId();
 		this.lastEventTimestamp = lastEvent.getTimestamp();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Event '" + lastEvent + "' within state '" + getCurrentStateId() + "' for flow '"
-					+ getActiveFlowId() + "' was signaled");
 			logger.debug("Set last event id to '" + this.lastEventId + "' and updated timestamp to " + this.lastEventTimestamp);
 		}
 	}
