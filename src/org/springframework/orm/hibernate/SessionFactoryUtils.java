@@ -273,7 +273,7 @@ public abstract class SessionFactoryUtils {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
 
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null) {
+		if (sessionHolder != null && !sessionHolder.isEmpty()) {
 			// pre-bound Hibernate Session
 			if (TransactionSynchronizationManager.isSynchronizationActive()) {
 				// Spring transaction management is active ->
