@@ -73,7 +73,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.29 2004-05-23 20:13:06 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.30 2004-06-06 21:39:50 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -169,14 +169,12 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
-		logger.debug("Set BeanFactory. Will configure interceptor beans...");
 		createAdvisorChain();
-		logger.info("ProxyFactoryBean config: " + this);
 		if (this.singleton) {
-			// Eagerly initialize the shared singleton instance
+			// eagerly initialize the shared singleton instance
 			getSingletonInstance();
 			// We must listen to superclass advice change events to recache singleton
-			// instance if necessary
+			// instance if necessary.
 			addListener(this);
 		}
 	}
@@ -239,12 +237,12 @@ public class ProxyFactoryBean extends AdvisedSupport
 			return;
 		}
 		
-		// Globals can't be last
+		// globals can't be last
 		if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX)) {
 			throw new AopConfigException("Target required after globals");
 		}
 
-		// Materialize interceptor chain from bean names
+		// materialize interceptor chain from bean names
 		for (int i = 0; i < this.interceptorNames.length; i++) {
 			String name = this.interceptorNames[i];
 			logger.debug("Configuring interceptor '" + name + "'");
@@ -292,9 +290,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 			}
 			else {
 				// We can't throw an exception here, as the user may have added additional
-				// pointcuts programmatically we don't know about
-				logger.info("Cannot find bean name for Advisor [" + advisors[i] + 
-					"] when refreshing advisor chain");
+				// pointcuts programmatically we don't know about.
+				logger.info("Cannot find bean name for Advisor [" + advisors[i] +
+										"] when refreshing advisor chain");
 			}
 		}
 	}
@@ -392,15 +390,11 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 
 
-	/**
-	 * @see org.springframework.aop.framework.AdvisedSupportListener#activated(org.springframework.aop.framework.AdvisedSupport)
-	 */
 	public void activated(AdvisedSupport advisedSupport) {
 	}
 
 	/**
 	 * Blow away and recache singleton to allow for advice changes.
-	 * @see org.springframework.aop.framework.AdvisedSupportListener#adviceChanged(org.springframework.aop.framework.AdvisedSupport)
 	 */
 	public void adviceChanged(AdvisedSupport advisedSupport) {
 		logger.info("Advice has changed; recaching singleton instance");
