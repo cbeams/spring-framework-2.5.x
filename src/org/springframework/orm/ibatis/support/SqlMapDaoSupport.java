@@ -22,25 +22,31 @@ import com.ibatis.db.sqlmap.SqlMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.orm.ibatis.SqlMapTemplate;
 
 /**
  * Convenient super class for iBATIS SqlMap data access objects.
- * Requires a DataSource to be set, providing a SqlMapTemplate
+ * Requires a SqlMap to be set, providing a SqlMapTemplate
  * based on it to subclasses.
  * @author Juergen Hoeller
  * @since 29.11.2003
+ * @see #setSqlMap
  * @see org.springframework.orm.ibatis.SqlMapTemplate
  */
-public class SqlMapDaoSupport {
+public class SqlMapDaoSupport implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private SqlMapTemplate sqlMapTemplate = new SqlMapTemplate();
 
+	private boolean externalTemplate = false;
+
 
 	/**
 	 * Set the JDBC DataSource to be used by this DAO.
+	 * Not required: The SqlMap might carry a shared DataSource.
+	 * @see #setSqlMap
 	 */
 	public final void setDataSource(DataSource dataSource) {
 	  this.sqlMapTemplate.setDataSource(dataSource);
@@ -55,6 +61,8 @@ public class SqlMapDaoSupport {
 
 	/**
 	 * Set the iBATIS Database Layer SqlMap to work with.
+	 * Either this or a "sqlMapTemplate" is required.
+	 * @see #setSqlMapTemplate
 	 */
 	public final void setSqlMap(SqlMap sqlMap) {
 		this.sqlMapTemplate.setSqlMap(sqlMap);
@@ -68,23 +76,30 @@ public class SqlMapDaoSupport {
 	}
 
 	/**
-	 * Set the JdbcTemplate for this DAO explicitly,
-	 * as an alternative to specifying a DataSource.
+	 * Set the SqlMapTemplate for this DAO explicitly,
+	 * as an alternative to specifying a SqlMap.
+	 * @see #setSqlMap
 	 */
 	public final void setSqlMapTemplate(SqlMapTemplate sqlMapTemplate) {
+		if (sqlMapTemplate == null) {
+			throw new IllegalArgumentException("Cannot set sqlMapTemplate to null");
+		}
 		this.sqlMapTemplate = sqlMapTemplate;
+		this.externalTemplate = true;
 	}
 
 	/**
-	 * Return the JdbcTemplate for this DAO,
-	 * pre-initialized with the DataSource or set explicitly.
+	 * Return the SqlMapTemplate for this DAO,
+	 * pre-initialized with the SqlMap or set explicitly.
 	 */
 	public final SqlMapTemplate getSqlMapTemplate() {
 	  return sqlMapTemplate;
 	}
 
 	public final void afterPropertiesSet() throws Exception {
-		this.sqlMapTemplate.afterPropertiesSet();
+		if (!this.externalTemplate) {
+			this.sqlMapTemplate.afterPropertiesSet();
+		}
 		initDao();
 	}
 

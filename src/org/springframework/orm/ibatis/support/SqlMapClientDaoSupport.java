@@ -27,10 +27,11 @@ import org.springframework.orm.ibatis.SqlMapClientTemplate;
 
 /**
  * Convenient super class for iBATIS SqlMapClient data access objects.
- * Requires a DataSource to be set, providing a SqlMapClientTemplate
+ * Requires a SqlMapClient to be set, providing a SqlMapClientTemplate
  * based on it to subclasses.
  * @author Juergen Hoeller
  * @since 29.11.2003
+ * @see #setSqlMapClient
  * @see org.springframework.orm.ibatis.SqlMapClientTemplate
  */
 public class SqlMapClientDaoSupport implements InitializingBean {
@@ -39,9 +40,13 @@ public class SqlMapClientDaoSupport implements InitializingBean {
 
 	private SqlMapClientTemplate sqlMapClientTemplate = new SqlMapClientTemplate();
 
+	private boolean externalTemplate = false;
+
 
 	/**
 	 * Set the JDBC DataSource to be used by this DAO.
+	 * Not required: The SqlMapClient might carry a shared DataSource.
+	 * @see #setSqlMapClient
 	 */
 	public final void setDataSource(DataSource dataSource) {
 	  this.sqlMapClientTemplate.setDataSource(dataSource);
@@ -55,37 +60,46 @@ public class SqlMapClientDaoSupport implements InitializingBean {
 	}
 
 	/**
-	 * Set the iBATIS Database Layer SqlMap to work with.
+	 * Set the iBATIS Database Layer SqlMapClient to work with.
+	 * Either this or a "sqlMapClientTemplate" is required.
+	 * @see #setSqlMapClientTemplate
 	 */
 	public final void setSqlMapClient(SqlMapClient sqlMapClient) {
 		this.sqlMapClientTemplate.setSqlMapClient(sqlMapClient);
 	}
 
 	/**
-	 * Return the iBATIS Database Layer SqlMap that this template works with.
+	 * Return the iBATIS Database Layer SqlMapClient that this template works with.
 	 */
 	public final SqlMapClient getSqlMapClient() {
 		return this.sqlMapClientTemplate.getSqlMapClient();
 	}
 
 	/**
-	 * Set the JdbcTemplate for this DAO explicitly,
-	 * as an alternative to specifying a DataSource.
+	 * Set the SqlMapClientTemplate for this DAO explicitly,
+	 * as an alternative to specifying a SqlMapClient.
+	 * @see #setSqlMapClient
 	 */
 	public final void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
+		if (sqlMapClientTemplate == null) {
+			throw new IllegalArgumentException("Cannot set sqlMapClientTemplate to null");
+		}
 		this.sqlMapClientTemplate = sqlMapClientTemplate;
+		this.externalTemplate = true;
 	}
 
 	/**
-	 * Return the JdbcTemplate for this DAO,
-	 * pre-initialized with the DataSource or set explicitly.
+	 * Return the SqlMapClientTemplate for this DAO,
+	 * pre-initialized with the SqlMapClient or set explicitly.
 	 */
 	public final SqlMapClientTemplate getSqlMapClientTemplate() {
 	  return sqlMapClientTemplate;
 	}
 
 	public final void afterPropertiesSet() throws Exception {
-		this.sqlMapClientTemplate.afterPropertiesSet();
+		if (!this.externalTemplate) {
+			this.sqlMapClientTemplate.afterPropertiesSet();
+		}
 		initDao();
 	}
 
