@@ -16,28 +16,27 @@
 package org.springframework.jdbc.core.support;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 
+import junit.framework.TestCase;
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
+
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
-import junit.framework.TestCase;
-
 /**
- * 
- * test cases for the sql lob value:
+ * Test cases for the sql lob value:
+ *
  * BLOB: 
  *   1. Types.BLOB: setBlobAsBytes (byte[])
  *   2. String: setBlobAsBytes (byte[])
  *   3. else: IllegalArgumentException
+ *
  * CLOB:
  *   4. String or NULL: setClobAsString (String)
  *   5. InputStream: setClobAsAsciiStream (InputStream)
@@ -60,15 +59,15 @@ public class SqlLobValueTestSuite extends TestCase {
 	public void setUp() {
 		//	create preparedstatement
 		psControl = MockControl.createControl(PreparedStatement.class);
-		ps = (PreparedStatement)psControl.getMock();
+		ps = (PreparedStatement) psControl.getMock();
 		
 		// create handler controler
 		lobHandlerControl = MockControl.createControl(LobHandler.class);
-		handler = (LobHandler)lobHandlerControl.getMock();
+		handler = (LobHandler) lobHandlerControl.getMock();
 		
 		// create creator control
 		lobCreatorControl = MockControl.createControl(LobCreator.class);
-		creator = (LobCreator)lobCreatorControl.getMock();
+		creator = (LobCreator) lobCreatorControl.getMock();
 		
 		// set initial state
 		handler.getLobCreator();
@@ -81,10 +80,8 @@ public class SqlLobValueTestSuite extends TestCase {
 		lobCreatorControl.replay();
 	}
 	
-	public void test1() 
-	throws SQLException {
-		
-		byte[] testBytes = "Bla".getBytes();		
+	public void test1() throws SQLException {
+		byte[] testBytes = "Bla".getBytes();
 		creator.setBlobAsBytes(ps, 1, testBytes);
 		replay();
 		SqlLobValue lob = new SqlLobValue(testBytes, handler);
@@ -93,9 +90,7 @@ public class SqlLobValueTestSuite extends TestCase {
 		lobCreatorControl.verify();		
 	}
 	
-	public void test2()
-	throws SQLException {
-
+	public void test2() throws SQLException {
 		String testString = "Bla";
 		
 		creator.setBlobAsBytes(ps, 1, testString.getBytes());
@@ -118,7 +113,6 @@ public class SqlLobValueTestSuite extends TestCase {
 		
 		replay();
 
-		
 		SqlLobValue lob = new SqlLobValue(testString, handler);
 		lob.setTypeValue(ps, 1, Types.BLOB, "test");
 		lobHandlerControl.verify();
@@ -136,15 +130,14 @@ public class SqlLobValueTestSuite extends TestCase {
 		try {
 			lob.setTypeValue(ps, 1, Types.BLOB, "test");
 			fail("IllegalArgumentException should have been thrown");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			// expected
 		}
 	}
 	
-	public void test4()
-	throws SQLException {
-		
-		String testContent = "Bla";		
+	public void test4() throws SQLException {
+		String testContent = "Bla";
 		creator.setClobAsString(ps, 1, testContent);
 		
 		replay();
@@ -155,9 +148,7 @@ public class SqlLobValueTestSuite extends TestCase {
 		lobCreatorControl.verify();		
 	}
 	
-	public void test5()
-	throws SQLException {
-		
+	public void test5() throws SQLException {
 		byte[] testContent = "Bla".getBytes();
 		ByteArrayInputStream bais = new ByteArrayInputStream(testContent);
 		creator.setClobAsAsciiStream(ps, 1, bais, 3);
@@ -179,8 +170,7 @@ public class SqlLobValueTestSuite extends TestCase {
 		lobCreatorControl.verify();		
 	}
 	
-	public void test6()
-	throws SQLException {
+	public void test6()throws SQLException {
 		byte[] testContent = "Bla".getBytes();
 		ByteArrayInputStream bais = new ByteArrayInputStream(testContent);
 		InputStreamReader reader = new InputStreamReader(bais);
@@ -204,22 +194,20 @@ public class SqlLobValueTestSuite extends TestCase {
 		
 	}
 	
-	public void test7()
-	throws SQLException {
+	public void test7() throws SQLException {
 		Date testContent = new Date();
 		
-		SqlLobValue lob = 
-			new SqlLobValue("bla".getBytes());
+		SqlLobValue lob = new SqlLobValue("bla".getBytes());
 		try {
 			lob.setTypeValue(ps, 1, Types.CLOB, "test");
 			fail("IllegalArgumentException should have been thrown");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			// expected
 		}
 	}
 	
-	public void testOtherConstructors() 
-	throws SQLException {
+	public void testOtherConstructors() throws SQLException {
 		// a bit BS, but we need to test them, as long as they don't throw exceptions
 		
 		SqlLobValue lob = new SqlLobValue("bla");
@@ -229,11 +217,11 @@ public class SqlLobValueTestSuite extends TestCase {
 			lob = new SqlLobValue("bla".getBytes());
 			lob.setTypeValue(ps, 1, Types.CLOB, "test");
 			fail("IllegalArgumentException should have been thrown");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			// expected
 		}
-		
-		
+
 		lob = new SqlLobValue(new ByteArrayInputStream("bla".getBytes()), 3);
 		lob.setTypeValue(ps, 1, Types.CLOB, "test");
 		
@@ -257,14 +245,13 @@ public class SqlLobValueTestSuite extends TestCase {
 		try {
 			lob.setTypeValue(ps, 1, Types.BLOB, "test");
 			fail("IllegalArgumentException should have been thrown");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			// expected
 		}
-
 	}
 	
-	public void testCorrectCleanup() 
-	throws SQLException {		
+	public void testCorrectCleanup()  throws SQLException {
 		creator.setClobAsString(ps, 1, "Bla");
 		creator.close();
 		
@@ -276,15 +263,14 @@ public class SqlLobValueTestSuite extends TestCase {
 		lobCreatorControl.verify();
 	}
 	
-	public void testOtherSqlType()
-	throws SQLException {
-		
+	public void testOtherSqlType() throws SQLException {
 		replay();
 		SqlLobValue lob = new SqlLobValue("Bla", handler);
 		try {
 			lob.setTypeValue(ps, 1, Types.SMALLINT, "test");
 			fail("IllegalArgumentException should have been thrown");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			// expected
 		}
 		
