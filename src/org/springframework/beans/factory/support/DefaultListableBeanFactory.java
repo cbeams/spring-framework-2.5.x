@@ -144,11 +144,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return this.beanDefinitionMap.containsKey(beanName);
 	}
 
+	public Map getBeansOfType(Class type) throws BeansException {
+		return getBeansOfType(type, true, true);
+	}
+
 	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
 			throws BeansException {
 
-		String[] beanNames = getBeanDefinitionNames(type);
 		Map result = new HashMap();
+
+		String[] beanNames = getBeanDefinitionNames(type);
 		for (int i = 0; i < beanNames.length; i++) {
 			if (includePrototypes || isSingleton(beanNames[i])) {
 				try {
@@ -186,44 +191,59 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		if (includeFactoryBeans) {
-			String[] factoryNames = getBeanDefinitionNames(FactoryBean.class);
-			for (int i = 0; i < factoryNames.length; i++) {
-				try {
-					FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + factoryNames[i]);
-					Class objectType = factory.getObjectType();
-					if ((objectType == null && factory.isSingleton()) ||
-							((factory.isSingleton() || includePrototypes) &&
-							objectType != null && type.isAssignableFrom(objectType))) {
-						Object createdObject = getBean(factoryNames[i]);
-						if (type.isInstance(createdObject)) {
-							result.put(factoryNames[i], createdObject);
-						}
-					}
-				}
-				catch (BeanCurrentlyInCreationException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring match to currently created bean '" + factoryNames[i] + "'");
-					}
-					// ignore
-				}
-				catch (BeanIsAbstractException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring match to abstract bean definition '" + beanNames[i] + "'");
-					}
-					// ignore
-				}
-				catch (BeanCreationException ex) {
-					// We're currently creating that FactoryBean.
-					// Sensible to ignore it, as we are just looking for a certain type.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring FactoryBean creation failure when looking for matching beans", ex);
-					}
-					// ignore
-				}
-			}
+			// check FactoryBeans
+			addObjectsFromMatchingFactoryBeans(result, type, includePrototypes);
 		}
 
 		return result;
+	}
+
+	/**
+	 * Find matching FactoryBeans for the given type,
+	 * and add objects created by those FactoryBeans to the result.
+	 * @param result the result Map to add matching beans to
+	 * @param type class or interface to match
+	 * @param includePrototypes whether to include prototype beans too
+	 * or just singletons
+	 */
+	protected void addObjectsFromMatchingFactoryBeans(Map result, Class type, boolean includePrototypes)
+			throws BeansException {
+
+		String[] factoryNames = getBeanDefinitionNames(FactoryBean.class);
+		for (int i = 0; i < factoryNames.length; i++) {
+			try {
+				FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + factoryNames[i]);
+				Class objectType = factory.getObjectType();
+				if ((objectType == null && factory.isSingleton()) ||
+						((factory.isSingleton() || includePrototypes) &&
+						objectType != null && type.isAssignableFrom(objectType))) {
+					Object createdObject = getBean(factoryNames[i]);
+					if (type.isInstance(createdObject)) {
+						result.put(factoryNames[i], createdObject);
+					}
+				}
+			}
+			catch (BeanCurrentlyInCreationException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring match to currently created bean '" + factoryNames[i] + "'");
+				}
+				// ignore
+			}
+			catch (BeanIsAbstractException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring match to abstract bean definition '" + factoryNames[i] + "'");
+				}
+				// ignore
+			}
+			catch (BeanCreationException ex) {
+				// We're currently creating that FactoryBean.
+				// Sensible to ignore it, as we are just looking for a certain type.
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring FactoryBean creation failure when looking for matching beans", ex);
+				}
+				// ignore
+			}
+		}
 	}
 
 
@@ -260,7 +280,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				destroySingletons();
 			}
 			catch (Throwable ex2) {
-				logger.error("preInstantiateSingletons failed but couldn't destroy already created singletons", ex2);
+				logger.error("Pre-instantiating singletons failed, " +
+						"and couldn't destroy already created singletons", ex2);
 			}
 			throw ex;
 		}
@@ -279,19 +300,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			catch (BeanDefinitionValidationException ex) {
 				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), name,
-				                                       "Validation of bean definition with name failed", ex);
+						"Validation of bean definition with name failed", ex);
 			}
 		}
 		Object oldBeanDefinition = this.beanDefinitionMap.get(name);
 		if (oldBeanDefinition != null) {
 			if (!this.allowBeanDefinitionOverriding) {
-				throw new BeanDefinitionStoreException("Cannot register bean definition [" + beanDefinition + "] for bean '" +
-																							 name + "': there's already [" + oldBeanDefinition + "] bound");
+				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), name,
+						"Cannot register bean definition [" + beanDefinition + "] for bean '" + name +
+						"': there's already [" + oldBeanDefinition + "] bound");
 			}
 			else {
 				if (logger.isInfoEnabled()) {
 					logger.info("Overriding bean definition for bean '" + name +
-											"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
+							"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
 				}
 			}
 		}
@@ -315,7 +337,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	protected Map findMatchingBeans(Class requiredType) {
-		return BeanFactoryUtils.beansOfTypeIncludingAncestors(this, requiredType, true, true);
+		return BeanFactoryUtils.beansOfTypeIncludingAncestors(this, requiredType);
 	}
 
 

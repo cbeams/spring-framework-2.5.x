@@ -41,6 +41,7 @@ import org.springframework.beans.BeansException;
  * are not designed for frequent invocation. Implementations may be slow.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 16 April 2001
  * @see BeanFactoryUtils
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#registerSingleton
@@ -53,6 +54,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Note: Ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
 	 * @return the number of beans defined in the factory
+	 * @see BeanFactoryUtils#countBeansIncludingAncestors
 	 */
 	int getBeanDefinitionCount();
 
@@ -63,6 +65,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * other means than bean definitions.
 	 * @return the names of all beans defined in this factory,
 	 * or an empty array if none defined
+	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory)
 	 */
 	String[] getBeanDefinitionNames();
 	
@@ -76,6 +79,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @param type class or interface to match, or null for all bean names
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
+	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory, Class)
 	 */
 	String[] getBeanDefinitionNames(Class type);
 
@@ -86,8 +90,31 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * other means than bean definitions.
 	 * @param name the name of the bean to look for
 	 * @return if this bean factory contains a bean definition with the given name
+	 * @see #containsBean
 	 */
 	boolean containsBeanDefinition(String name);
+
+	/**
+	 * Return the bean instances that match the given object type (including
+	 * subclasses), judging from either bean definitions or the value of
+	 * getObjectType() in the case of FactoryBeans.
+	 * Does not consider any hierarchy this factory may participate in.
+	 * <p>If FactoryBean's getObjectType() returns null and the bean is a
+	 * singleton, the type of the actually created objects should be evaluated.
+	 * Prototypes without explicit object type specification should be ignored.
+	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
+	 * by other means than bean definitions.
+	 * <p>This version of getBeansOfType matches all kinds of beans, be it
+	 * singletons, prototypes, or FactoryBeans. In most implementations, the
+	 * result will be the same as for <code>getBeansOfType(type, true, true)</code>.
+	 * @param type class or interface to match
+	 * @return a Map with the matching beans, containing the bean names as
+	 * keys and the corresponding bean instances as values
+	 * @throws BeansException if the beans could not be created
+	 * @see FactoryBean#getObjectType
+	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class)
+	 */
+	Map getBeansOfType(Class type) throws BeansException;
 
 	/**
 	 * Return the bean instances that match the given object type (including
@@ -108,6 +135,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if the beans could not be created
 	 * @see FactoryBean#getObjectType
+	 * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
 	Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
 	    throws BeansException;
