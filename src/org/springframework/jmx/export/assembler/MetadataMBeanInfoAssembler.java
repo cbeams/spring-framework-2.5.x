@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
 import org.springframework.jmx.export.metadata.ManagedOperation;
-import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
+import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -156,21 +156,17 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
 			ManagedAttribute ma = this.attributeSource.getManagedAttribute(method);
-			if (ma == null) {
-				return method.getName();
-			}
-			else {
+			if (ma != null && StringUtils.hasText(ma.getDescription())) {
 				return ma.getDescription();
 			}
+			return method.getName();
 		}
 		else {
 			ManagedOperation mo = this.attributeSource.getManagedOperation(method);
-			if (mo == null) {
-				return method.getName();
-			}
-			else {
+			if (mo != null && StringUtils.hasText(mo.getDescription())) {
 				return mo.getDescription();
 			}
+			return method.getName();
 		}
 	}
 
@@ -196,9 +192,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		else if (setter != null && StringUtils.hasText(setter.getDescription())) {
 			return setter.getDescription();
 		}
-		else {
-			return propertyDescriptor.getDisplayName();
-		}
+		return propertyDescriptor.getDisplayName();
 	}
 
 	/**
@@ -289,10 +283,8 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @return the <code>MBeanParameterInfo</code> array.
 	 */
 	protected MBeanParameterInfo[] getOperationParameters(Method method) {
-
 		ManagedOperationParameter[] params = this.attributeSource.getManagedOperationParameters(method);
-
-		if(params == null || params.length == 0) {
+		if (params == null || params.length == 0) {
 			return new MBeanParameterInfo[0];
 		}
 
@@ -324,9 +316,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		else if (setter == 0 && getter != 0) {
 			return getter;
 		}
-		else {
-			return (getter >= setter) ? getter : setter;
-		}
+		return (getter >= setter) ? getter : setter;
 	}
 
 	/**
@@ -344,9 +334,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		else if (setter != null) {
 			return setter;
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
@@ -367,9 +355,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		else if (setter != null) {
 			return setter;
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
