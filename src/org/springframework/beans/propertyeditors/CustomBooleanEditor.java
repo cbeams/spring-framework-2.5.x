@@ -21,12 +21,12 @@ import java.beans.PropertyEditorSupport;
 import org.springframework.util.StringUtils;
 
 /**
- * Property editor for Boolean properties.
+ * Property editor for Boolean/boolean properties.
  *
  * <p>This is not meant to be used as system PropertyEditor but rather as
  * locale-specific Boolean editor within custom controller code, to parse
- * UI-caused boolean strings into Boolean properties of beans, and
- * evaluate them in the UI form.
+ * UI-caused boolean strings into boolean properties of beans and check
+ * them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
  * <code>binder.registerCustomEditor</code> calls in an implementation
@@ -56,15 +56,15 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 	private final boolean allowEmpty;
 
 	/**
-	 * Create a new CustomBooleanEditor instance,
-	 * with "true" and "false" as recognized String values.
+	 * Create a new CustomBooleanEditor instance, with "true"/"on"/"yes"
+	 * and "false"/"off"/"no" as recognized String values.
 	 * <p>The "allowEmpty" parameter states if an empty String should
 	 * be allowed for parsing, i.e. get interpreted as null value.
 	 * Else, an IllegalArgumentException gets thrown in that case.
 	 * @param allowEmpty if empty strings should be allowed
 	 */
 	public CustomBooleanEditor(boolean allowEmpty) {
-		this(VALUE_TRUE, VALUE_FALSE, allowEmpty);
+		this(null, null, allowEmpty);
 	}
 
 	/**
@@ -97,28 +97,31 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			setValue(null);
 		}
-		else if (text.equalsIgnoreCase(this.trueString)) {
+		else if (this.trueString != null && text.equalsIgnoreCase(this.trueString)) {
 			setValue(Boolean.TRUE);
 		}
-		else if (text.equalsIgnoreCase(this.falseString)) {
+		else if (this.falseString != null && text.equalsIgnoreCase(this.falseString)) {
 			setValue(Boolean.FALSE);
 		}
-		else if (text.equalsIgnoreCase(VALUE_TRUE) || text.equalsIgnoreCase(VALUE_ON) || text.equalsIgnoreCase(VALUE_YES)) {
-		    setValue(Boolean.TRUE);
+		else if (this.trueString == null && text.equalsIgnoreCase(VALUE_TRUE) ||
+				text.equalsIgnoreCase(VALUE_ON) || text.equalsIgnoreCase(VALUE_YES)) {
+			setValue(Boolean.TRUE);
 		}
-		else if (text.equalsIgnoreCase(VALUE_FALSE) || text.equalsIgnoreCase(VALUE_OFF) || text.equalsIgnoreCase(VALUE_NO)) {
-		    setValue(Boolean.FALSE);
-		} else {
+		else if (this.falseString == null && text.equalsIgnoreCase(VALUE_FALSE) ||
+				text.equalsIgnoreCase(VALUE_OFF) || text.equalsIgnoreCase(VALUE_NO)) {
+			setValue(Boolean.FALSE);
+		}
+		else {
 			throw new IllegalArgumentException("Invalid boolean value [" + text + "]");
 		}
 	}
 
 	public String getAsText() {
 		if (Boolean.TRUE.equals(getValue())) {
-			return this.trueString;
+			return (this.trueString != null ? this.trueString : VALUE_TRUE);
 		}
 		else if (Boolean.FALSE.equals(getValue())) {
-			return this.falseString;
+			return (this.falseString != null ? this.falseString : VALUE_FALSE);
 		}
 		else {
 			return "";
