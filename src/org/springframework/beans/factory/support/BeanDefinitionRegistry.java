@@ -11,12 +11,35 @@ import org.springframework.beans.BeansException;
  *
  * @author Juergen Hoeller
  * @since 26.11.2003
- * @version $Id: BeanDefinitionRegistry.java,v 1.3 2003-12-12 16:33:10 johnsonr Exp $
+ * @version $Id: BeanDefinitionRegistry.java,v 1.4 2004-01-13 18:12:07 jhoeller Exp $
  */
 public interface BeanDefinitionRegistry {
 
 	/**
-	 * Check if this bean factory contains a bean definition with the given name.
+	 * Return the number of beans defined in the registry.
+	 * @return the number of beans defined in the registry
+	 */
+	int getBeanDefinitionCount();
+
+	/**
+	 * Return the names of all beans defined in this registry.
+	 * @return the names of all beans defined in this registry,
+	 * or an empty array if none defined
+	 */
+	String[] getBeanDefinitionNames();
+
+	/**
+	 * Return the bean definition for the given bean name.
+	 * @param name name of the bean to find a definition for
+	 * @return the BeanDefinition for this prototype name. Must never return null.
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * if the bean definition cannot be resolved
+	 * @throws BeansException in case of errors
+	 */
+	AbstractBeanDefinition getBeanDefinition(String name) throws BeansException;
+
+	/**
+	 * Check if this registry contains a bean definition with the given name.
 	 * @param name the name of the bean to look for
 	 * @return if this bean factory contains a bean definition with the given name
 	 */
@@ -45,12 +68,4 @@ public interface BeanDefinitionRegistry {
 	 */
 	void registerAlias(String name, String alias) throws BeansException;
 
-	/**
-	 * Return the bean definition for the given bean name.
-	 * @param beanName name of the bean to find a definition for
-	 * @return the BeanDefinition for this prototype name. Must never return null.
-	 * @throws NoSuchBeanDefinitionException if the bean definition cannot be resolved
-	 * @throws BeansException in case of errors
-	 */
-	AbstractBeanDefinition getBeanDefinition(String beanName) throws BeansException;
 }
