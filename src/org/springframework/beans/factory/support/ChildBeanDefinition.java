@@ -8,25 +8,26 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.PropertyValues;
 
 /**
- * Extension of BeanDefinition interface for beans whose class is defined
- * by their ancestry. PropertyValues defined by the parent will also be
- * "inherited", although it's possible to override them by redefining
- * them in the property values associated with the child.
+ * Bean definition for beans whose class is defined by their ancestry. PropertyValues
+ * defined by the parent will also be "inherited", although it's possible to override
+ * them by redefining them in the property values associated with the child.
  * @author Rod Johnson
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	private String parentName;
 
-	public ChildBeanDefinition(String parentName, PropertyValues pvs, boolean singleton) {
-		super(pvs, singleton);
+	/**
+	 * Create a new ChildBeanDefinition for the given parent.
+	 */
+	public ChildBeanDefinition(String parentName, PropertyValues pvs) {
+		super(pvs);
 		this.parentName = parentName;
 	}
 
 	/**
-	 * Return the name of the parent bean definition in
-	 * the current bean factory.
+	 * Return the name of the parent bean definition in the bean factory.
 	 */
 	public String getParentName() {
 		return parentName;

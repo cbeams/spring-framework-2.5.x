@@ -18,14 +18,16 @@ import org.springframework.beans.factory.support.AbstractFactoryBean;
  * factories get this lifecycle callback if they want.
  * @author Rod Johnson
  * @since 10-Mar-2003
- * version $Id: DummyFactory.java,v 1.4 2003-11-04 23:10:04 jhoeller Exp $
+ * version $Id: DummyFactory.java,v 1.5 2003-11-05 11:28:15 jhoeller Exp $
  */
 public class DummyFactory extends AbstractFactoryBean implements InitializingBean, PropertyValuesProviderFactoryBean {
 	
 	public static final String SINGLETON_NAME = "Factory singleton";
 	
 	private boolean isInitialized;
-	
+
+	private static boolean prototypeCreated;
+
 	private TestBean testBean;
 
 	private TestBean otherTestBean;
@@ -58,6 +60,10 @@ public class DummyFactory extends AbstractFactoryBean implements InitializingBea
 		return this.isInitialized;
 	}
 
+	public static boolean wasPrototypeCreated() {
+		return prototypeCreated;
+	}
+
 	/**
 	 * Return the managed object, supporting both singleton
 	 * and prototype mode.
@@ -72,6 +78,7 @@ public class DummyFactory extends AbstractFactoryBean implements InitializingBea
 			//System.out.println("DummyFactory created new PROTOTYPE");
 			TestBean prototype = new TestBean("prototype created at " + System.currentTimeMillis(), 11);
 			//System.out.println("prot name is " + prototype.getName());
+			prototypeCreated = true;
 			return prototype;
 		}
 	}

@@ -6,10 +6,10 @@
 package org.springframework.beans.factory.xml;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
 
 import javax.servlet.ServletException;
 
@@ -32,7 +32,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.10 2003-11-04 23:10:04 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.11 2003-11-05 11:28:15 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -45,11 +45,11 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		Map m = new HashMap();
 		m.put("name", "Albert");
 		parent.registerBeanDefinition("father",
-			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m), true));
+			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
 		m = new HashMap();
 		m.put("name", "Roderick");
 		parent.registerBeanDefinition("rod",
-			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m), true));
+			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
 
 		// Load from classpath, NOT a file path
 		InputStream is = getClass().getResourceAsStream("test.xml");
@@ -144,16 +144,16 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		InputStream is = getClass().getResourceAsStream("child.xml");
 		XmlBeanFactory child = new XmlBeanFactory(is, parent);
 		TestBean inherits = (TestBean) child.getBean("protoypeInheritsFromParentFactorySingleton");
-		//		Name property value is overriden
-		 assertTrue(inherits.getName().equals("prototypeOverridesInheritedSingleton"));
-		 // Age property is inherited from bean in parent factory
-		 assertTrue(inherits.getAge() == 1);
-		 TestBean inherits2 = (TestBean) child.getBean("protoypeInheritsFromParentFactorySingleton");
-		 assertFalse(inherits2 == inherits);
-		 inherits2.setAge(13);
-		 assertTrue(inherits2.getAge() == 13);
-		 // Shouldn't have changed first instance
-		 assertTrue(inherits.getAge() == 1);
+		// Name property value is overriden
+		assertTrue(inherits.getName().equals("prototypeOverridesInheritedSingleton"));
+		// Age property is inherited from bean in parent factory
+		assertTrue(inherits.getAge() == 1);
+		TestBean inherits2 = (TestBean) child.getBean("protoypeInheritsFromParentFactorySingleton");
+		assertFalse(inherits2 == inherits);
+		inherits2.setAge(13);
+		assertTrue(inherits2.getAge() == 13);
+		// Shouldn't have changed first instance
+		assertTrue(inherits.getAge() == 1);
 	}
 
 	/**
@@ -478,9 +478,14 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 	 * @throws Exception
 	 */
 	public void testInitializingBeanAndInitMethod() throws Exception {
+		InitAndIB.constructed = false;
 		InputStream is = getClass().getResourceAsStream("initializers.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		assertFalse(InitAndIB.constructed);
+		xbf.preInstantiateSingletons();
+		assertFalse(InitAndIB.constructed);
 		InitAndIB iib = (InitAndIB) xbf.getBean("init-and-ib");
+		assertTrue(InitAndIB.constructed);
 		assertTrue(iib.afterPropertiesSetInvoked && iib.initMethodInvoked);
 		assertTrue(!iib.destroyed && !iib.customDestroyed);
 		xbf.destroySingletons();
@@ -649,7 +654,13 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
 	public static class InitAndIB implements InitializingBean, DisposableBean {
 
+		public static boolean constructed;
+
 		public boolean afterPropertiesSetInvoked, initMethodInvoked, destroyed, customDestroyed;
+
+		public InitAndIB() {
+			constructed = true;
+		}
 
 		public void afterPropertiesSet() {
 			if (this.initMethodInvoked)

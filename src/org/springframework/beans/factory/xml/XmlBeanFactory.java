@@ -64,17 +64,12 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.14 2003-11-04 23:10:02 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.15 2003-11-05 11:28:15 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 	public static final String BEAN_NAME_DELIMITERS = ",; ";
 
-	/**
-	 * Value of a T/F attribute that represents true.
-	 * Anything else represents false. Case seNsItive.
-	 */
-	private static final String TRUE_VALUE = "true";
 	private static final String DEFAULT_VALUE = "default";
 
 	private static final String BEAN_ELEMENT = "bean";
@@ -83,6 +78,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String ID_ATTRIBUTE = "id";
 	private static final String NAME_ATTRIBUTE = "name";
 	private static final String SINGLETON_ATTRIBUTE = "singleton";
+	private static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
 	private static final String PROPERTY_ELEMENT = "property";
 	private static final String REF_ELEMENT = "ref";
 	private static final String LIST_ELEMENT = "list";
@@ -320,17 +316,8 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	 */
 	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs,
 	                                                   String defaultDependencyCheck, String defaultAutowire) {
-		String className = null;
-		boolean singleton = true;
-		AbstractBeanDefinition bd = null;
-
-		if (el.hasAttribute(SINGLETON_ATTRIBUTE)) {
-			// Default is singleton
-			// Can override by making non-singleton if desired
-			singleton = TRUE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
-		}
-
 		try {
+			String className = null;
 			if (el.hasAttribute(CLASS_ATTRIBUTE))
 				className = el.getAttribute(CLASS_ATTRIBUTE);
 			String parent = null;
@@ -339,31 +326,45 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			if (className == null && parent == null) {
 				throw new FatalBeanException("No class or parent in bean definition '" + beanName + "'", null);
 			}
+
+			AbstractBeanDefinition bd = null;
+
 			if (className != null) {
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
+				RootBeanDefinition rbd = new RootBeanDefinition(Class.forName(className, true, cl), pvs);
+
 				String initMethodName = el.getAttribute(INIT_METHOD_ATTRIBUTE);
-				if (initMethodName.equals(""))
-					initMethodName = null;
+				if (!initMethodName.equals("")) {
+					rbd.setInitMethodName(initMethodName);
+				}
 				String destroyMethodName = el.getAttribute(DESTROY_METHOD_ATTRIBUTE);
-				if (destroyMethodName.equals(""))
-					destroyMethodName = null;
-				bd = new RootBeanDefinition(Class.forName(className, true, cl),
-				                            pvs, singleton, initMethodName, destroyMethodName);
+				if (!destroyMethodName.equals("")) {
+					rbd.setDestroyMethodName(destroyMethodName);
+				}
+
+				String dependencyCheck = el.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+				if (DEFAULT_VALUE.equals(dependencyCheck))
+					dependencyCheck = defaultDependencyCheck;
+				rbd.setDependencyCheck(getDependencyCheck(dependencyCheck));
+
+				String autowire = el.getAttribute(AUTOWIRE_ATTRIBUTE);
+				if (DEFAULT_VALUE.equals(autowire))
+					autowire = defaultAutowire;
+				rbd.setAutowire(getAutowire(autowire));
+
+				bd = rbd;
 			}
 			else {
-				bd = new ChildBeanDefinition(parent, pvs, singleton);
+				bd = new ChildBeanDefinition(parent, pvs);
 			}
 
-			String dependencyCheck = el.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
-			if (DEFAULT_VALUE.equals(dependencyCheck))
-				dependencyCheck = defaultDependencyCheck;
-			bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
-
-			String autowire = el.getAttribute(AUTOWIRE_ATTRIBUTE);
-			if (DEFAULT_VALUE.equals(autowire))
-				autowire = defaultAutowire;
-			bd.setAutowire(getAutowire(autowire));
-
+			if (el.hasAttribute(SINGLETON_ATTRIBUTE)) {
+				bd.setSingleton(TRUE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE)));
+			}
+			if (el.hasAttribute(LAZY_INIT_ATTRIBUTE)) {
+				bd.setLazyInit(TRUE_VALUE.equals(el.getAttribute(LAZY_INIT_ATTRIBUTE)));
+			}
+			
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
@@ -372,27 +373,27 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	}
 
 	private int getDependencyCheck(String att) {
-		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
+		int dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_NONE;
 		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
+			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_ALL;
 		}
 		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
+			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
 		}
 		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
+			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
 		}
 		// else leave default value
 		return dependencyCheckCode;
 	}
 
 	private int getAutowire(String att) {
-		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
+		int autowire = RootBeanDefinition.AUTOWIRE_NO;
 		if (AUTOWIRE_BY_TYPE_VALUE.equals(att)) {
-			autowire = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
+			autowire = RootBeanDefinition.AUTOWIRE_BY_TYPE;
 		}
 		else if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
-			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
+			autowire = RootBeanDefinition.AUTOWIRE_BY_NAME;
 		}
 		// else leave default value
 		return autowire;

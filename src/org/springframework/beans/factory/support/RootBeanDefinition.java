@@ -5,136 +5,159 @@
  
 package org.springframework.beans.factory.support;
 
-import java.beans.PropertyDescriptor;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.UnsatisfiedDependencyException;
 
 /** 
 * Root bean definitions have a class and properties.
 * @author Rod Johnson
-* @version $Id: RootBeanDefinition.java,v 1.6 2003-11-04 23:10:02 jhoeller Exp $
+* @version $Id: RootBeanDefinition.java,v 1.7 2003-11-05 11:28:15 jhoeller Exp $
 */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	/** Class of the wrapped object */
-	private Class clazz;
+	public static final int DEPENDENCY_CHECK_NONE = 0;
+
+	public static final int DEPENDENCY_CHECK_OBJECTS = 1;
+
+	public static final int DEPENDENCY_CHECK_SIMPLE = 2;
+
+	public static final int DEPENDENCY_CHECK_ALL = 3;
+
+	public static final int AUTOWIRE_NO = 10;
+
+	public static final int AUTOWIRE_BY_NAME = 11;
+
+	public static final int AUTOWIRE_BY_TYPE = 12;
+
+
+	private Class beanClass;
 	
 	private String initMethodName;
 
 	private String destroyMethodName;
 	
-	private BeanWrapper bw;
+	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
-	public RootBeanDefinition(Class clazz, PropertyValues pvs, boolean singleton,
-	                          String initMethodName, String destroyMethodName) {
-		super(pvs, singleton);
-		this.clazz = clazz;
-		this.initMethodName = initMethodName;
-		this.destroyMethodName = destroyMethodName;
-		this.bw = new BeanWrapperImpl(this.clazz);
+	private int autowire = AUTOWIRE_NO;
+
+	/**
+	 * Create a new RootBeanDefinition for a singleton.
+	 */
+	public RootBeanDefinition(Class beanClass, PropertyValues pvs) {
+		super(pvs);
+		this.beanClass = beanClass;
 	}
 
-	public RootBeanDefinition(Class clazz, PropertyValues pvs, boolean singleton, int autowire) {
-		this(clazz, pvs, singleton, null, null);
+	/**
+	 * Create a new RootBeanDefinition with the given singleton status.
+	 */
+	public RootBeanDefinition(Class beanClass, PropertyValues pvs, boolean singleton) {
+		super(pvs);
+		this.beanClass = beanClass;
+		setSingleton(singleton);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for the given parameters.
+	 */
+	public RootBeanDefinition(Class beanClass, PropertyValues pvs, boolean singleton, int dependencyCheck, int autowire) {
+		super(pvs);
+		this.beanClass = beanClass;
+		setSingleton(singleton);
+		setDependencyCheck(dependencyCheck);
 		setAutowire(autowire);
 	}
 	
-	public RootBeanDefinition(Class clazz, PropertyValues pvs, boolean singleton) {
-		this(clazz, pvs, singleton, null, null);
-	}
-
 	/**
 	 * Deep copy constructor.
 	 */
 	public RootBeanDefinition(RootBeanDefinition other) {
-		super(new MutablePropertyValues(other.getPropertyValues()), other.isSingleton());
-		this.setDependencyCheck(other.getDependencyCheck());
-		this.setAutowire(other.getAutowire());
-		this.clazz = other.clazz;
-		this.initMethodName = other.initMethodName;
-		this.destroyMethodName = other.destroyMethodName;
-		this.bw = other.bw;
+		super(new MutablePropertyValues(other.getPropertyValues()));
+		this.beanClass = other.beanClass;
+		setSingleton(other.isSingleton());
+		setLazyInit(other.isLazyInit());
+		setInitMethodName(other.getInitMethodName());
+		setDestroyMethodName(other.getDestroyMethodName());
+		setDependencyCheck(other.getDependencyCheck());
+		setAutowire(other.getAutowire());
 	}
 	
 	/**
-	 * Returns the name of the initializer method. The default is null
+	 * Returns the class of the wrapped bean.
+	 */
+	public final Class getBeanClass() {
+		return this.beanClass;
+	}
+
+	/**
+	 * Set the name of the initializer method. The default is null
 	 * in which case there is no initializer method.
+	 */
+	public void setInitMethodName(String initMethodName) {
+		this.initMethodName = initMethodName;
+	}
+
+	/**
+	 * Return the name of the initializer method.
 	 */
 	public String getInitMethodName() {
 		return this.initMethodName;
 	}
 
 	/**
-	 * Returns the name of the destroy method. The default is null
+	 * Set the name of the destroy method. The default is null
 	 * in which case there is no initializer method.
+	 */
+	public void setDestroyMethodName(String destroyMethodName) {
+		this.destroyMethodName = destroyMethodName;
+	}
+
+	/**
+	 * Return the name of the destroy method.
 	 */
 	public String getDestroyMethodName() {
 		return this.destroyMethodName;
 	}
 
 	/**
-	 * Returns the class of the wrapped bean.
+	 * Set the dependency check code.
+	 * @param dependencyCheck the code to set.
+	 * Must be one of the four constants defined in this class.
+	 * @see #DEPENDENCY_CHECK_NONE
+	 * @see #DEPENDENCY_CHECK_OBJECTS
+	 * @see #DEPENDENCY_CHECK_SIMPLE
+	 * @see #DEPENDENCY_CHECK_ALL
 	 */
-	public final Class getBeanClass() {
-		return this.clazz;
+	public void setDependencyCheck(int dependencyCheck) {
+		this.dependencyCheck = dependencyCheck;
 	}
 
 	/**
-	 * Perform a dependency check that all properties exposed have been set,
-	 * if desired. Dependency checks can be objects (collaborating beans),
-	 * simple (primitives and String), or all (both).
-	 * @param beanName name of the bean
-	 * @param ignoreTypes property types to ignore
-	 * @throws UnsatisfiedDependencyException
+	 * Return the dependency check code.
 	 */
-	public void dependencyCheck(String beanName, Set ignoreTypes) throws UnsatisfiedDependencyException {
-		if (getDependencyCheck() == DEPENDENCY_CHECK_NONE)
-			return;
-
-		PropertyDescriptor[] pds = this.bw.getPropertyDescriptors();
-		for (int i = 0; i < pds.length; i++) {
-			if (pds[i].getWriteMethod() != null &&
-			    !ignoreTypes.contains(pds[i].getPropertyType()) &&
-			    getPropertyValues().getPropertyValue(pds[i].getName()) == null) {
-				boolean isSimple = BeanUtils.isSimpleProperty(pds[i].getPropertyType());
-				boolean unsatisfied = getDependencyCheck() == DEPENDENCY_CHECK_ALL ||
-					(isSimple && getDependencyCheck() == DEPENDENCY_CHECK_SIMPLE) ||
-					(!isSimple && getDependencyCheck() == DEPENDENCY_CHECK_OBJECTS);
-				if (unsatisfied) {
-					throw new UnsatisfiedDependencyException(beanName, pds[i].getName());
-				}
-			}
-		}
+	public int getDependencyCheck() {
+		return dependencyCheck;
 	}
 
 	/**
-	 * Return an array of object-type property names that are unsatisfied.
-	 * These are probably unsatisfied references to other beans in the
-	 * factory. Does not include simple properties like primitives or Strings.
-	 * @param ignoreTypes property types to ignore
-	 * @return an array of object-type property names that are unsatisfied
-	 * @see org.springframework.beans.BeanUtils#isSimpleProperty
+	 * Set the autowire code. This determines whether any automagical
+	 * detection and setting of bean references will happen. Default
+	 * is AUTOWIRE_NO constant, which means there's no autowire.
+	 * @param autowire the autowire to set.
+	 * Must be one of the three constants defined in this class.
+	 * @see #AUTOWIRE_NO
+	 * @see #AUTOWIRE_BY_NAME
+	 * @see #AUTOWIRE_BY_TYPE
 	 */
-	public String[] unsatisfiedObjectProperties(Set ignoreTypes) {
-		Set result = new TreeSet();
-		PropertyDescriptor[] pds = this.bw.getPropertyDescriptors();
-		for (int i = 0; i < pds.length; i++) {
-			String name = pds[i].getName();
-			if (pds[i].getWriteMethod() != null &&
-			    !BeanUtils.isSimpleProperty(pds[i].getPropertyType()) &&
-			    !ignoreTypes.contains(pds[i].getPropertyType()) &&
-			    getPropertyValues().getPropertyValue(name) == null) {
-				result.add(name);
-			}
-		}
-		return (String[]) result.toArray(new String[result.size()]);
+	public void setAutowire(int autowire) {
+		this.autowire = autowire;
+	}
+
+	/**
+	 * Return the autowire code.
+	 */
+	public int getAutowire() {
+		return this.autowire;
 	}
 
 	public boolean equals(Object obj) {

@@ -24,7 +24,7 @@
 	As the format is simple, a DTD is sufficient, and there's
 	no need for a schema at this point.
 	
-	$Id: spring-beans.dtd,v 1.8 2003-11-04 23:10:02 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.9 2003-11-05 11:28:15 jhoeller Exp $
 -->
 
 <!-- 
@@ -66,6 +66,11 @@
 <!--
 	Each bean definition must specify the FQN of the class,
 	or the name of the parent bean from which the class can be worked out.
+
+	Note that a child bean definition that references a parent will just
+	add respectively override property values and be able to change the
+	singleton status. It will inherit all of the parent's other parameters
+	like lazy initialization or autowire settings.
 -->
 <!ATTLIST bean class CDATA #IMPLIED>
 <!ATTLIST bean parent CDATA #IMPLIED>
@@ -80,6 +85,13 @@
 	service objects.
 -->
 <!ATTLIST bean singleton (true|false) "true">
+
+<!--
+  If this bean should be lazily initialized.
+	If false, it will get instantiated on startup by bean factories
+	that perform eager initialization of singletons.
+-->
+<!ATTLIST bean lazy-init (true|false) "false">
 
 <!--
 	Optional attribute controlling whether to check whether all this

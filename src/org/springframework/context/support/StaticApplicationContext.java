@@ -38,7 +38,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 
 		// Register the message source bean
 		defaultBeanFactory.registerBeanDefinition(MESSAGE_SOURCE_BEAN_NAME,
-			new RootBeanDefinition(StaticMessageSource.class, null, true));
+			new RootBeanDefinition(StaticMessageSource.class, null));
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	 */
 	public void registerSingleton(String name, Class clazz, PropertyValues pvs) throws BeansException {
 		defaultBeanFactory.registerBeanDefinition(name,
-			new RootBeanDefinition(clazz, pvs, true));
+			new RootBeanDefinition(clazz, pvs));
 	}
 
 	public void registerPrototype(String name, Class clazz, PropertyValues pvs) throws BeansException {
