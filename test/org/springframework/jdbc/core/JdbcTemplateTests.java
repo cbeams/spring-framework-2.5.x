@@ -207,8 +207,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		}, true, argument);
 	}
 
-	protected void doTestStrings(JdbcTemplateCallback jdbcTemplateCallback,
-	                             boolean usePreparedStatement, Object argument) throws Exception {
+	protected void doTestStrings(
+			JdbcTemplateCallback jdbcTemplateCallback, boolean usePreparedStatement, Object argument)
+			throws Exception {
+
 		String sql = "SELECT FORENAME FROM CUSTMR";
 		String[] results = { "rod", "gary", " portia" };
 
@@ -331,7 +333,21 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlStatement.verify();
 	}
 
-	public void testCloseConnOnRequest() throws Exception {
+	public void testConnectionCallback() throws Exception {
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		Object result = template.execute(new ConnectionCallback() {
+			public Object doInConnection(Connection con) throws SQLException, DataAccessException {
+				assertEquals(con, mockConnection);
+				return "test";
+			}
+		});
+
+		assertEquals("test", result);
+	}
+
+	public void testCloseConnectionOnRequest() throws Exception {
 		String sql = "SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3";
 
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
@@ -357,9 +373,9 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlStatement.replay();
 		replay();
 
-		JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-		template2.query(sql, rcch);
+		template.query(sql, rcch);
 
 		ctrlResultSet.verify();
 		ctrlStatement.verify();

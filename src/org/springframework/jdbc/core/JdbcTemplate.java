@@ -187,10 +187,32 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 
 
 	//-------------------------------------------------------------------------
+	// Methods dealing with a plain java.sql.Connection
+	//-------------------------------------------------------------------------
+
+	public Object execute(final ConnectionCallback action) throws DataAccessException {
+		Connection con = DataSourceUtils.getConnection(getDataSource());
+		try {
+			Connection conToUse = con;
+			if (this.nativeJdbcExtractor != null) {
+				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
+			}
+			return action.doInConnection(conToUse);
+		}
+		catch (SQLException ex) {
+			throw getExceptionTranslator().translate("executing ConnectionCallback", getSql(action), ex);
+		}
+		finally {
+			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+		}
+	}
+
+
+	//-------------------------------------------------------------------------
 	// Methods dealing with static SQL (java.sql.Statement)
 	//-------------------------------------------------------------------------
 
-	public Object execute(final StatementCallback action) {
+	public Object execute(final StatementCallback action) throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
 		try {
@@ -321,7 +343,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	// Methods dealing with prepared statements
 	//-------------------------------------------------------------------------
 
-	public Object execute(PreparedStatementCreator psc, PreparedStatementCallback action) {
+	public Object execute(PreparedStatementCreator psc, PreparedStatementCallback action)
+			throws DataAccessException {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
 		try {
@@ -354,7 +377,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 	}
 
-	public Object execute(final String sql, PreparedStatementCallback action) {
+	public Object execute(final String sql, PreparedStatementCallback action) throws DataAccessException {
 		return execute(new SimplePreparedStatementCreator(sql), action);
 	}
 
@@ -404,7 +427,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		});
 	}
 
-	public Object query(PreparedStatementCreator psc, ResultSetExtractor rse) {
+	public Object query(PreparedStatementCreator psc, ResultSetExtractor rse) throws DataAccessException {
 		return query(psc, null, rse);
 	}
 
@@ -416,16 +439,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		return query(new SimplePreparedStatementCreator(sql), pss, rse);
 	}
 
-	public Object query(String sql, Object[] args, int[] argTypes, ResultSetExtractor rse) {
+	public Object query(String sql, Object[] args, int[] argTypes, ResultSetExtractor rse)
+			throws DataAccessException {
 		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
-	public Object query(String sql, Object[] args, ResultSetExtractor rse) {
+	public Object query(String sql, Object[] args, ResultSetExtractor rse) throws DataAccessException {
 		return query(sql, new ArgPreparedStatementSetter(args), rse);
 	}
 
-	public List query(PreparedStatementCreator psc, RowCallbackHandler rch)
-			throws DataAccessException {
+	public List query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException {
 		return (List) query(psc, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
@@ -470,8 +493,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 				new ListResultSetExtractor());
 	}
 
-	public Object queryForObject(String sql, Object[] args, Class requiredType)
-			throws DataAccessException {
+	public Object queryForObject(String sql, Object[] args, Class requiredType) throws DataAccessException {
 		return query(sql,
 				new ArgPreparedStatementSetter(args),
 				new ObjectResultSetExtractor(requiredType));
@@ -614,7 +636,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 	// Methods dealing with callable statements
 	//-------------------------------------------------------------------------
 
-	public Object execute(CallableStatementCreator csc, CallableStatementCallback action) {
+	public Object execute(CallableStatementCreator csc, CallableStatementCallback action)
+			throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(csc);
 			logger.debug("Calling stored procedure" + (sql != null ? " [" + sql  + "]" : ""));
@@ -651,7 +674,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations, Initia
 		}
 	}
 
-	public Object execute(final String callString, CallableStatementCallback action) {
+	public Object execute(final String callString, CallableStatementCallback action)
+			throws DataAccessException {
 		return execute(new SimpleCallableStatementCreator(callString), action);
 	}
 

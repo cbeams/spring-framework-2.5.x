@@ -38,6 +38,21 @@ import org.springframework.jdbc.support.KeyHolder;
 public interface JdbcOperations {
 
 	//-------------------------------------------------------------------------
+	// Methods dealing with a plain java.sql.Connection
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Execute the action specified by the given action object within a JDBC
+	 * Connection. Allows for returning a result object, i.e. a domain object
+	 * or a collection of domain objects.
+	 * @param action callback object that specifies the action
+	 * @return a result object returned by the action, or null
+	 * @throws DataAccessException if there is any problem
+	 */
+	Object execute(ConnectionCallback action) throws DataAccessException;
+
+
+	//-------------------------------------------------------------------------
 	// Methods dealing with static SQL (java.sql.Statement)
 	//-------------------------------------------------------------------------
 
