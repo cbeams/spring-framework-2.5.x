@@ -24,13 +24,17 @@ import org.springframework.util.ClassLoaderUtils;
 
 /**
  * Trivial classloader analyzer interceptor.
- * @version $Id: ClassLoaderAnalyzerInterceptor.java,v 1.2 2004-03-18 02:46:09 trisberg Exp $
+ * @version $Id: ClassLoaderAnalyzerInterceptor.java,v 1.3 2004-07-24 19:13:32 johnsonr Exp $
  * @author Rod Johnson
  * @author Dmitriy Kopylenko
  */
 public class ClassLoaderAnalyzerInterceptor implements MethodInterceptor {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Static to avoid serializing the logger
+	 */
+	protected static final Log logger = LogFactory.getLog(ClassLoaderAnalyzerInterceptor.class);
+
 
 	public Object invoke(MethodInvocation pInvocation) throws Throwable {
 		logger.debug("Begin class loader analysis");
