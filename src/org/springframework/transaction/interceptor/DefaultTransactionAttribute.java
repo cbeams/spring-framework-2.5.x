@@ -12,10 +12,15 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * back on runtime, but not checked, exceptions.
  * @author Rod Johnson
  * @since 16-Mar-2003
- * @version $Id: DefaultTransactionAttribute.java,v 1.1.1.1 2003-08-14 16:20:40 trisberg Exp $
+ * @version $Id: DefaultTransactionAttribute.java,v 1.2 2003-08-18 16:16:35 jhoeller Exp $
  */
-public class DefaultTransactionAttribute extends DefaultTransactionDefinition
-    implements TransactionAttribute {
+public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
+
+	/** Prefix for rollback-on-exception rules in description strings */
+	public static final String ROLLBACK_RULE_PREFIX = "-";
+
+	/** Prefix for commit-on-exception rules in description strings */
+	public static final String COMMIT_RULE_PREFIX = "+";
 
 	public DefaultTransactionAttribute() {
 	}
@@ -30,6 +35,19 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition
 	 */
 	public boolean rollbackOn(Throwable t) {
 		return (t instanceof RuntimeException);
+	}
+
+	/**
+	 * Return a description of this transaction attribute.
+	 * The format matches the one used by TransactionAttributeEditor,
+	 * to be able to feed toString results into TransactionAttribut properties.
+	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
+	 */
+	public String toString() {
+		StringBuffer result = getDefinitionDescription();
+		result.append(',');
+		result.append(ROLLBACK_RULE_PREFIX + "RuntimeException");
+		return result.toString();
 	}
 
 }
