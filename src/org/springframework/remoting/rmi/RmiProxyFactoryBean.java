@@ -14,10 +14,12 @@ import org.springframework.beans.factory.FactoryBean;
  * for any service. Service interfaces do not have to extend java.rmi.Remote or
  * throw RemoteException. Of course, in and out parameters have to be serializable.
  *
- * <p>This proxy factory bean can also apply non-RMI service interfaces to
- * conventional RMI services. The underlying RMI stub will simply be wrapped
- * with a proxy that implements the service interface, delegating all method
- * invocations to the corresponding methods of the underlying stub.
+ * <p>With conventional RMI services, this proxy factory is typically used with the
+ * RMI service interface. Alternatively, this factory can also proxy a remote RMI
+ * service with a matching non-RMI business interface, i.e. an interface that mirrors
+ * the RMI service methods but does not declare RemoteExceptions. In the latter case,
+ * RemoteExceptions thrown by the RMI stub will automatically get converted to
+ * Spring's unchecked RemoteAccessException.
  *
  * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
  * Effectively, any serializable Java object can be transported without hassle.

@@ -11,10 +11,10 @@ import org.springframework.beans.factory.FactoryBean;
 /**
  * <p>Convenient factory for remote SLSB proxies.
  * If you want control over interceptor chaining, use an AOP ProxyFactoryBean
- * rather than rely on this class.</p>
+ * with SimpleRemoteSlsbInvokerInterceptor rather than rely on this class.
  * 
  * <p>See {@link org.springframework.jndi.AbstractJndiLocator} for info on
- * how to specify the JNDI location of the target EJB</p>
+ * how to specify the JNDI location of the target EJB.
  * 
  * <p>In a bean container, this class is normally best used as a singleton. However,
  * if that bean container pre-instantiates singletons (as do the XML ApplicationContext
@@ -23,12 +23,21 @@ import org.springframework.beans.factory.FactoryBean;
  * the init method of this class and cached, but the EJB will not have been bound at the
  * target location yet. The solution is to not pre-instantiate this factory object, but
  * allow it to be created on first use. In the XML containers, this is controlled via
- * the lazy-init attribute.</p>
+ * the "lazy-init" attribute.
  * 
+ * <p>This proxy factory is typically used with an RMI business interface, which serves
+ * as super-interface of the EJB component interface. Alternatively, this factory
+ * can also proxy a remote SLSB with a matching non-RMI business interface, i.e. an
+ * interface that mirrors the EJB business methods but does not declare RemoteExceptions.
+ * In the latter case, RemoteExceptions thrown by the EJB stub will automatically get
+ * converted to Spring's unchecked RemoteAccessException.
+ *
  * @author Rod Johnson
- * @author colin sampaleanu
+ * @author Colin Sampaleanu
+ * @author Juergen Hoeller
  * @since 09-May-2003
- * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBean.java,v 1.7 2004-02-16 02:03:56 colins Exp $
+ * @version $Id: SimpleRemoteStatelessSessionProxyFactoryBean.java,v 1.8 2004-03-17 17:19:42 jhoeller Exp $
+ * @see org.springframework.remoting.RemoteAccessException
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSlsbInvokerInterceptor
     implements FactoryBean {
@@ -48,16 +57,20 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 
 	/**
 	 * Set the business interface of the EJB we're proxying.
-	 * This* will normally be the superinterface of the EJB remote component interface.
+	 * This will normally be a super-interface of the EJB remote component interface.
 	 * Using a business methods interface is a best practice when implementing EJBs.
-	 * @param businessInterface set the business interface of the EJB
+	 * <p>You can also specify a matching non-RMI business interface, i.e. an interface
+	 * that mirrors the EJB business methods but does not declare RemoteExceptions.
+	 * In this case, RemoteExceptions thrown by the EJB stub will automatically get
+	 * converted to Spring's generic RemoteAccessException.
+	 * @param businessInterface the business interface of the EJB
 	 */
 	public void setBusinessInterface(Class businessInterface) {
 		this.businessInterface = businessInterface;
 	}
 
 	/**
-	 * Returns the business interface of the EJB we're proxying.
+	 * Return the business interface of the EJB we're proxying.
 	 */
 	public Class getBusinessInterface() {
 		return businessInterface;

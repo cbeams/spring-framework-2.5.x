@@ -10,10 +10,17 @@ import org.springframework.beans.factory.FactoryBean;
  * Exposes a proxy for the port, to be used for bean references.
  * Inherits configuration properties from JaxRpcPortClientInterceptor.
  *
- * <p>Can either expose the JAX-RPC port interface - i.e. an RMI interface - directly,
- * or expose a non-RMI business interface. In the former case, setting "serviceInterface"
- * is sufficient; in the latter case, the business interface needs to be set as
- * "serviceInterface", and the JAX-RPC port interface as "portInterface".
+ * <p>This factory is typically used with an RMI service interface. Alternatively,
+ * this factory can also proxy a JAX-RPC service with a matching non-RMI business
+ * interface, i.e. an interface that mirrors the RMI service methods but does not
+ * declare RemoteExceptions. In the latter case, RemoteExceptions thrown by the
+ * JAX-RPC stub will automatically get converted to Spring's unchecked
+ * RemoteAccessException.
+ *
+ * <p>If exposing the JAX-RPC port interface (i.e. an RMI interface) directly,
+ * setting "serviceInterface" is sufficient. If exposing a non-RMI business
+ * interface, the business interface needs to be set as "serviceInterface",
+ * and the JAX-RPC port interface as "portInterface".
  *
  * @author Juergen Hoeller
  * @since 15.12.2003

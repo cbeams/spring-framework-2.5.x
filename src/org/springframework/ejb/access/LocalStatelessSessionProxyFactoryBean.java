@@ -10,11 +10,11 @@ import org.springframework.beans.factory.FactoryBean;
 
 /**
  * <p>Convenient factory for local Stateless Session Bean (SLSB) proxies.
- * If you want control over interceptor chaining, use an AOP
- * ProxyFactoryBean rather than to rely on this class.</p>
+ * If you want control over interceptor chaining, use an AOP ProxyFactoryBean
+ * with LocalSlsbInvokerInterceptor rather than rely on this class.
  * 
  * <p>See {@link org.springframework.jndi.AbstractJndiLocator} for info on
- * how to specify the JNDI location of the target EJB</p>
+ * how to specify the JNDI location of the target EJB.
  * 
  * <p>In a bean container, this class is normally best used as a singleton. However,
  * if that bean container pre-instantiates singletons (as do the XML ApplicationContext
@@ -23,18 +23,18 @@ import org.springframework.beans.factory.FactoryBean;
  * the init method of this class and cached, but the EJB will not have been bound at the
  * target location yet. The solution is to not pre-instantiate this factory object, but
  * allow it to be created on first use. In the XML containers, this is controlled via
- * the lazy-init attribute.</p>
+ * the "lazy-init" attribute.
  *  
  * @author Rod Johnson
- * @author colin sampaleanu
+ * @author Colin Sampaleanu
  * @since 09-May-2003
- * @version $Id: LocalStatelessSessionProxyFactoryBean.java,v 1.8 2004-02-18 03:51:11 colins Exp $
+ * @version $Id: LocalStatelessSessionProxyFactoryBean.java,v 1.9 2004-03-17 17:19:42 jhoeller Exp $
  */
 public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInterceptor
     implements FactoryBean {
 	
 	/*
-	 * Instead of a separate subclass for each type of SLSBInvoker, we could have added
+	 * Instead of a separate subclass for each type of SlsbInvoker, we could have added
 	 * this functionality to AbstractSlsbInvokerInterceptor. However, the avoiding of
 	 * code duplication would be outweighed by the confusion this would produce over the
 	 * purpose of AbstractSlsbInvokerInterceptor.
@@ -49,18 +49,17 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 	private Class businessInterface;
 
 	/**
-	 * Set the business interface of the EJB we're proxying
-	 * @param clazz set the business interface of the EJB
+	 * Set the business interface of the EJB we're proxying.
+	 * This will normally be a super-interface of the EJB local component interface.
+	 * Using a business methods interface is a best practice when implementing EJBs.
+	 * @param businessInterface set the business interface of the EJB
 	 */
-	public void setBusinessInterface(Class clazz) {
-		this.businessInterface = clazz;
+	public void setBusinessInterface(Class businessInterface) {
+		this.businessInterface = businessInterface;
 	}
 
 	/**
-	 * @return the business interface of the EJB. Note that this
-	 * will normally be the superinterface of the EJBLocal interface.
-	 * Using a business methods interface is a best practice
-	 * when implementing EJBs.
+	 * Return the business interface of the EJB we're proxying.
 	 */
 	public Class getBusinessInterface() {
 		return businessInterface;
@@ -68,7 +67,7 @@ public class LocalStatelessSessionProxyFactoryBean extends LocalSlsbInvokerInter
 
 	public void afterLocated() {
 		if (this.businessInterface == null) {
-			throw new IllegalArgumentException("businessInterface property must be set in LocalStatelessSessionProxyFactoryBean");
+			throw new IllegalArgumentException("businessInterface is required");
 		}
 		this.proxy = ProxyFactory.getProxy(this.businessInterface, this);
 	}

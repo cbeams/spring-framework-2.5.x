@@ -24,6 +24,13 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * throw RemoteException; Spring's unchecked RemoteAccessException will be thrown on
  * remote invocation failure. Of course, in and out parameters have to be serializable.
  *
+ * <p>With conventional RMI services, this invoker is typically used with the RMI
+ * service interface. Alternatively, this invoker can also proxy a remote RMI service
+ * with a matching non-RMI business interface, i.e. an interface that mirrors the RMI
+ * service methods but does not declare RemoteExceptions. In the latter case,
+ * RemoteExceptions thrown by the RMI stub will automatically get converted to
+ * Spring's unchecked RemoteAccessException.
+ *
  * @author Juergen Hoeller
  * @since 29.09.2003
  * @see RmiServiceExporter
