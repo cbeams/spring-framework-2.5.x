@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 
 import com.caucho.burlap.client.BurlapProxyFactory;
 import com.caucho.burlap.client.BurlapRuntimeException;
-import com.caucho.hessian.client.HessianRuntimeException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -65,7 +64,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 		}
 		catch (InvocationTargetException ex) {
 			logger.debug("Burlap service [" + getServiceUrl() + "] threw exception", ex.getTargetException());
-			if (ex.getTargetException() instanceof HessianRuntimeException) {
+			if (ex.getTargetException() instanceof BurlapRuntimeException) {
 				BurlapRuntimeException bre = (BurlapRuntimeException) ex.getTargetException();
 				Throwable rootCause = (bre.getRootCause() != null) ? bre.getRootCause() : bre;
 				throw new RemoteAccessException("Cannot access Burlap service", rootCause);
