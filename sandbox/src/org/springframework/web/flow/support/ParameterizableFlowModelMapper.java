@@ -129,18 +129,6 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 
 	/**
 	 * Set the mappings that will be executed when mapping model data to the sub
-	 * flow.
-	 * <p>
-	 * Note: only <strong>one </strong> of setInputMappings or
-	 * setInputMappingsMap must be called.
-	 * @param inputMappings The input mappings
-	 */
-	public void setInputMappings(Mapping[] inputMappings) {
-		this.inputMapper = new ParameterizableAttributeMapper(inputMappings);
-	}
-
-	/**
-	 * Set the mappings that will be executed when mapping model data to the sub
 	 * flow. This method is provided as a configuration convenience.
 	 * <p>
 	 * Note: only <strong>one </strong> of setInputMappings or
@@ -171,18 +159,6 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 	 * @param outputMappings The output mappings
 	 */
 	public void setOutputMappings(Collection outputMappings) {
-		this.outputMapper = new ParameterizableAttributeMapper(outputMappings);
-	}
-
-	/**
-	 * Set the mappings that will be executed when mapping model data from the
-	 * sub flow.
-	 * <p>
-	 * Note: Only <strong>one </strong> of setOutputMappings or
-	 * setOutputMappingsMap must be called.
-	 * @param outputMappings The output mappings
-	 */
-	public void setOutputMappings(Mapping[] outputMappings) {
 		this.outputMapper = new ParameterizableAttributeMapper(outputMappings);
 	}
 
