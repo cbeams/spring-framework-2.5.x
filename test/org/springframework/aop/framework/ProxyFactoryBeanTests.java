@@ -504,14 +504,14 @@ public class ProxyFactoryBeanTests extends TestCase {
 	public void testNoInterceptorNamesWithTarget() {
 		ITestBean tb = (ITestBean) factory.getBean("noInterceptorNamesWithoutTarget");
 	}
-	*.
+	*/
 	
 	public void testEmptyInterceptorNames() {
 		try {
 			ITestBean tb = (ITestBean) factory.getBean("emptyInterceptorNames");
 			fail("Interceptor names cannot be empty");
 		}
-		catch (NoSuchBeanDefinitionException ex) {
+		catch (BeanCreationException ex) {
 			// Ok
 		}
 	}
