@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1 final (4.9.2004)
+Changes in version 1.1 final (5.9.2004)
 ---------------------------------------
 
 Package org.springframework.aop
 * ProxyFactoryBean returns full target class as object type in case of a singleton
+* ProxyFactoryBean avoids unnecessary creation of prototype bean just for advisor chain initialization
 * reworked AbstractPrototypeBasedTargetSource's target class check to look for bean class on BeanDefinition first
-* deprecated ThreadLocalTargetSourceStats "getObjects"/"getHits" etc in favour of "getObjectCount"/"getHitCount" etc
+* deprecated ThreadLocalTargetSourceStats "getObjects"/"getHits" etc in favor of "getObjectCount"/"getHitCount" etc
 * renamed Jdk14RegexpMethodPointcut to JdkRegexpMethodPointcut, for consistent class naming throughout the framework
 
 Package org.springframework.beans
@@ -21,6 +22,7 @@ Package org.springframework.beans
 * added "applyBeanPropertyValues" method to AutowireCapableBeanFactory, for populating an existing bean instance
 * moved "getBeanDefinition" method from ConfigurableBeanFactory down to ConfigurableListableBeanFactory interface
 * added "getBeanClass", "isAbstract", "isSingleton", "isLazyInit" methods to BeanDefinition interface
+* added "(abstract)" marker for properties bean definitions, for parent beans that are not meant to be instantiated
 * added "abstract" attribute for XML bean definitions, for marking parent beans that are not meant to be instantiated
 
 Package org.springframework.ejb
@@ -1142,7 +1144,7 @@ Package org.springframework.samples
 
 Package org.springframework.transaction
 * reworked transaction synchronization, allowing for synchronization even on "empty" transactions
-* removed TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
+* removed TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favor of ProxyConfig's "proxyTargetClass"
 * TransactionInterceptor now keeps TransactionStatus in its own ThreadLocal, not MethodInvocation
 * merged TransactionFactoryProxyBean's parsing into NameMatchTransactionAttributeSource
 * added TransactionAttributeSourceTransactionAroundAdvisor to allow pointcut to be used for transaction interception
