@@ -46,7 +46,7 @@ import org.springframework.core.io.Resource;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SQLErrorCodesFactory.java,v 1.19 2004-07-22 13:13:43 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.20 2004-07-22 18:12:07 trisberg Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -231,13 +231,28 @@ public class SQLErrorCodesFactory {
 					dbName = "DB2";
 				}
 				// special check for wild card match - we can match on a database name like 'DB2*' meaning
-				// the database name starts with 'DB2'
+				// the database name starts with 'DB2' or '*DB2' for ends with 'DB2' or even '*DB2*' for
+				// contains 'DB2'
 				Iterator dbNameIter = this.rdbmsErrorCodes.keySet().iterator();
 				while (dbNameIter.hasNext()) {
 					String checkDbName = (String) dbNameIter.next();
-					if (checkDbName != null && checkDbName.endsWith("*")) {
-						if (dbName != null && dbName.startsWith(checkDbName.substring(0, (checkDbName.length() - 1)))) {
-							dbName = checkDbName;
+					if (checkDbName != null && (checkDbName.startsWith("*") || checkDbName.endsWith("*"))) {
+						if (dbName != null) {
+							if (checkDbName.startsWith("*") && checkDbName.endsWith("*")) {
+								if (dbName.indexOf(checkDbName.substring(1, checkDbName.length() - 1)) >= 0) {
+									dbName = checkDbName;
+								}
+							}
+							else if (checkDbName.startsWith("*")) {
+								if (dbName.endsWith(checkDbName.substring(1, checkDbName.length()))) {
+									dbName = checkDbName;
+								}
+							}
+							else if (checkDbName.endsWith("*")) {
+								if (dbName.startsWith(checkDbName.substring(0, checkDbName.length() - 1))) {
+									dbName = checkDbName;
+								}
+							}
 						}
 					}
 				}

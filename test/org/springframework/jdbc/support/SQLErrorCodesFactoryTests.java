@@ -203,7 +203,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertEquals(0, sec.getDataIntegrityViolationCodes().length);
 	}
 
-	private SQLErrorCodes getErrorCodesFromDataSourceWithGivenMetadata(String productName) throws Exception {
+	private SQLErrorCodes getErrorCodesFromDataSourceWithGivenMetadata(String productName, SQLErrorCodesFactory factory) throws Exception {
 		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
 		md.getDatabaseProductName();
@@ -233,7 +233,13 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		//ctrlDataSource.replay();
 		DataSource mockDataSource = new SpringMockDataSource(productName, mockConnection);
 
-		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(mockDataSource);
+		SQLErrorCodesFactory secf = null;
+		if (factory != null)
+			secf = factory;
+		else
+			secf = SQLErrorCodesFactory.getInstance();
+
+		SQLErrorCodes sec = secf.getErrorCodes(mockDataSource);
 
 		mdControl.verify();
 		ctrlConnection.verify();
@@ -261,22 +267,45 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	}
 
 	public void testOracleRecognizedFromMetadata() throws Exception {
-		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("Oracle");
+		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("Oracle", null);
 		assertIsOracle(sec);
 	}
 	
 	public void testHsqlRecognizedFromMetadata() throws Exception {
-		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("HSQL Database Engine");
+		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("HSQL Database Engine", null);
 		assertIsHsql(sec);
 	}
 
 	public void testDB2RecognizedFromMetadata() throws Exception {
-		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2");
+		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2", null);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2/");
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2/", null);
 		assertIsDB2(sec);
-		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-2");
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-2", null);
 		assertIsEmpty(sec);
 	}
 
+	/**
+	 * Check that wild card  database name works.
+	 */
+	public void testWildCardNameReconized() throws Exception {
+		class WildcardSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			protected Resource loadResource(String path) {
+				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
+				return new ClassPathResource("wildcard-error-codes.xml", SQLErrorCodesFactoryTests.class);
+			}
+		}
+	
+		WildcardSQLErrorCodesFactory factory = new WildcardSQLErrorCodesFactory();
+		SQLErrorCodes sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB2/", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB2", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("/DB2", factory);
+		assertIsDB2(sec);
+		sec = getErrorCodesFromDataSourceWithGivenMetadata("DB-2", factory);
+		assertIsEmpty(sec);
+	}
 }
