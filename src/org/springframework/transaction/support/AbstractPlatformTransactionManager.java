@@ -33,7 +33,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @version $Id: AbstractPlatformTransactionManager.java,v 1.10 2003-11-21 16:04:47 jhoeller Exp $
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.11 2003-11-28 10:07:04 johnsonr Exp $
  */
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
 
@@ -90,7 +90,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 		Object transaction = doGetTransaction();
-		if (logger.isDebugEnabled()) {
+		// Cache to avoid repeated checks
+		boolean isDebugEnabled = logger.isDebugEnabled();
+		
+		if (isDebugEnabled) {
 			logger.debug("Using transaction object [" + transaction + "]");
 		}
 
@@ -116,7 +119,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			if (this.transactionSynchronization) {
 				TransactionSynchronizationManager.initSynchronization();
 			}
-			return new TransactionStatus(transaction, true);
+			return new TransactionStatus(transaction, true, isDebugEnabled);
 		}
 		else {
 			// empty (-> "no") transaction
@@ -136,17 +139,21 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	public void commit(TransactionStatus status) throws TransactionException {
 		if (status.isRollbackOnly() ||
 		    (status.getTransaction() != null && isRollbackOnly(status.getTransaction()))) {
-			logger.debug("Transactional code has requested rollback");
+			if (status.isDebugEnabled())
+				logger.debug("Transactional code has requested rollback");
 			rollback(status);
 		}
 		else if (status.isNewTransaction()) {
 			// initiate transaction commit
 			try {
-				logger.debug("Triggering beforeCommit synchronization");
+				if (status.isDebugEnabled())
+					logger.debug("Triggering beforeCommit synchronization");
 				TransactionSynchronizationManager.triggerBeforeCommit();
-				logger.debug("Triggering beforeCompletion synchronization");
+				if (status.isDebugEnabled()) 
+					logger.debug("Triggering beforeCompletion synchronization");
 				TransactionSynchronizationManager.triggerBeforeCompletion();
-				logger.debug("Initiating transaction commit");
+				if (status.isDebugEnabled()) 
+					logger.debug("Initiating transaction commit");
 				doCommit(status);
 				triggerAfterCompletion(TransactionSynchronization.STATUS_COMMITTED, null);
 			}
@@ -190,9 +197,11 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	public void rollback(TransactionStatus status) throws TransactionException {
 		if (status.isNewTransaction()) {
 			try {
-				logger.debug("Triggering beforeCompletion synchronization");
+				if (status.isDebugEnabled())
+					logger.debug("Triggering beforeCompletion synchronization");
 				TransactionSynchronizationManager.triggerBeforeCompletion();
-				logger.debug("Initiating transaction rollback");
+				if (status.isDebugEnabled())
+					logger.debug("Initiating transaction rollback");
 				doRollback(status);
 				triggerAfterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK, null);
 			}
@@ -238,7 +247,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @throws TransactionException in case of a rollback error
 	 */
 	private void triggerAfterCompletion(int status, Throwable ex) {
-		logger.debug("Triggering afterCompletion synchronization");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Triggering afterCompletion synchronization");
+		}
+		
 		try {
 			TransactionSynchronizationManager.triggerAfterCompletion(status);
 		}

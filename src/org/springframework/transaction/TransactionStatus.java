@@ -14,6 +14,7 @@ package org.springframework.transaction;
  * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
  * @see org.springframework.transaction.interceptor.TransactionInterceptor#currentTransactionStatus
  * @see #setRollbackOnly
+ * @version $Id: TransactionStatus.java,v 1.2 2003-11-28 10:07:50 johnsonr Exp $
  */
 public class TransactionStatus {
 
@@ -22,6 +23,8 @@ public class TransactionStatus {
 	private boolean newTransaction = false;
 
 	private boolean rollbackOnly = false;
+	
+	private boolean debug;
 
 	/**
 	 * Create a new TransactionStatus instance.
@@ -29,11 +32,40 @@ public class TransactionStatus {
 	 * e.g. a JTA UserTransaction
 	 * @param newTransaction if the transaction is new,
 	 * else participating in an existing transaction
+	 * @param debug should debug logging be enabled for the handling of this transaction?
+	 * Caching it in here can prevent repeated calls to ask the logging system wheter
+	 * debug logging should be enabled.
 	 */
-	public TransactionStatus(Object transaction, boolean newTransaction) {
+	public TransactionStatus(Object transaction, boolean newTransaction, boolean debug) {
 		this.transaction = transaction;
 		this.newTransaction = newTransaction;
+		this.debug = debug;
 	}
+	
+	/**
+	 * Create a new TransactionStatus instance without debug logging.
+	 * @param transaction underlying transaction object,
+	 * e.g. a JTA UserTransaction
+	 * @param newTransaction if the transaction is new,
+	 * else participating in an existing transaction
+	 */
+	public TransactionStatus(Object transaction, boolean newTransaction) {
+		this(transaction, newTransaction, false);
+	}
+	
+	/**
+	 * @return whether the progress of this transaction being debugged. This is used
+	 * by AbstractPlatformTransactionManager as an optimization, to prevent repeated
+	 * calls to logger.isDebugEnabled(). Not really intended for client code.
+	 */
+	public final boolean isDebugEnabled() {
+		// TODO could consider opening this up so that it escalates logging level
+		// on behalf of clients, as well as for the present efficiency concern.
+		// Could also even provide a transaction log, to ensure that output all appeared
+		// together
+		return debug;
+	}
+	
 
 	/**
 	 * Return the underlying transaction object, e.g. a JTA UserTransaction.
