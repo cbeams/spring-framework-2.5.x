@@ -12,7 +12,7 @@ import org.springframework.beans.PropertyValues;
  * defined by the parent will also be "inherited", although it's possible to override
  * them by redefining them in the property values associated with the child.
  * @author Rod Johnson
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
@@ -41,7 +41,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	public String toString() {
-		return "Child bean definition with parent '" + getParentName() + "'";
+		return "Child bean with parent '" + getParentName() + "' defined in " + getResourceDescription();
 	}
 
 }

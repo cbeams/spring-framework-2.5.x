@@ -21,7 +21,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RootBeanDefinition.java,v 1.14 2004-01-20 11:26:43 jhoeller Exp $
+ * @version $Id: RootBeanDefinition.java,v 1.15 2004-01-26 08:58:50 jhoeller Exp $
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -329,7 +329,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	public String toString() {
-		return "Root bean definition with class [" + getBeanClass().getName() + "]";
+		return "Root bean with class [" + getBeanClassName() + "] defined in " + getResourceDescription();
 	}
 
 }

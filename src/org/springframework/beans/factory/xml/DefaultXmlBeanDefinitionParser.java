@@ -182,7 +182,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		if (id == null || "".equals(id)) {
 			if (beanDefinition instanceof RootBeanDefinition) {
-				id = ((RootBeanDefinition) beanDefinition).getBeanClass().getName();
+				id = ((RootBeanDefinition) beanDefinition).getBeanClassName();
 				logger.debug("Neither XML 'id' nor 'name' specified - using bean class name [" + id + "] as ID");
 			}
 			else {
