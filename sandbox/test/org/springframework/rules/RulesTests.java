@@ -1,7 +1,19 @@
 /*
- * The Spring Framework is published under the terms of the Apache Software
- * License.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.springframework.rules;
 
 import java.util.HashSet;
@@ -38,7 +50,7 @@ import org.springframework.util.closure.Constraint;
 /**
  * @author Keith Donald
  */
-public class RulesTestSuite extends TestCase {
+public class RulesTests extends TestCase {
 
 	private static final Constraints constraints = Constraints.instance();
 
@@ -203,48 +215,6 @@ public class RulesTestSuite extends TestCase {
 		assertFalse(not.test(new Integer("25")));
 	}
 
-	public class TestBean {
-		private String test = "testValue";
-
-		private String confirmTest = "testValue";
-
-		private String test2 = "test2Value";
-
-		private int number = 15;
-
-		private int min = 10;
-
-		private int max = 25;
-
-		public String getTest() {
-			return test;
-		}
-
-		public String getTest2() {
-			return test2;
-		}
-
-		public String getConfirmTest() {
-			return confirmTest;
-		}
-
-		public int getNumber() {
-			return number;
-		}
-
-		public int getMax() {
-			return max;
-		}
-
-		public int getMin() {
-			return min;
-		}
-
-		public boolean isTooMuch(int number) {
-			return number > max;
-		}
-	}
-
 	public void testBeanPropertyValueConstraint() {
 		And p = constraints.conjunction();
 		p.add(constraints.required());
@@ -333,6 +303,50 @@ public class RulesTestSuite extends TestCase {
 		assertTrue(rules.test(p));
 		p.setLastName("Keith");
 		assertFalse(rules.test(p));
+	}
+
+
+	public class TestBean {
+
+		private String test = "testValue";
+
+		private String confirmTest = "testValue";
+
+		private String test2 = "test2Value";
+
+		private int number = 15;
+
+		private int min = 10;
+
+		private int max = 25;
+
+		public String getTest() {
+			return test;
+		}
+
+		public String getTest2() {
+			return test2;
+		}
+
+		public String getConfirmTest() {
+			return confirmTest;
+		}
+
+		public int getNumber() {
+			return number;
+		}
+
+		public int getMax() {
+			return max;
+		}
+
+		public int getMin() {
+			return min;
+		}
+
+		public boolean isTooMuch(int number) {
+			return number > max;
+		}
 	}
 
 }
