@@ -16,8 +16,6 @@
 
 package org.springframework.transaction;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -31,8 +29,6 @@ import javax.transaction.UserTransaction;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.jndi.JndiTemplate;
-import org.springframework.mock.jndi.SimpleNamingContext;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -45,26 +41,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @since 12.05.2003
  */
 public class JtaTransactionTestSuite extends TestCase {
-
-	public static TransactionTemplate getTransactionTemplateForJta(final String utName, final UserTransaction ut) {
-		JndiTemplate jndiTemplate = new JndiTemplate() {
-			private boolean invoked = false;
-			protected Context createInitialContext() throws NamingException {
-				if (invoked) {
-					throw new IllegalStateException("Should only invoke createInitialContext once");
-				}
-				invoked = true;
-				Context mockContext = new SimpleNamingContext();
-				mockContext.bind(utName, ut);
-				return mockContext;
-			}
-		};
-		JtaTransactionManager tm = new JtaTransactionManager();
-		tm.setJndiTemplate(jndiTemplate);
-		tm.setUserTransactionName(utName);
-		tm.afterPropertiesSet();
-		return new TransactionTemplate(tm);
-	}
 
 	public void testJtaTransactionManagerWithCommit() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
@@ -89,7 +65,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		assertEquals(JtaTransactionManager.SYNCHRONIZATION_ALWAYS, ((JtaTransactionManager) tt.getTransactionManager()).getTransactionSynchronization());
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -128,8 +105,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -157,8 +135,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -191,7 +170,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta("test", ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setTimeout(10);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -228,8 +208,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta("test", ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
 		tt.setTimeout(10);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -258,8 +239,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta("test", ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronizationName("SYNCHRONIZATION_NEVER");
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		ptm.setTransactionSynchronizationName("SYNCHRONIZATION_NEVER");
 		tt.setTimeout(10);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -290,7 +272,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -322,8 +305,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -347,8 +331,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -378,7 +363,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -409,7 +395,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -432,8 +419,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		utControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -454,8 +442,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		utControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -485,9 +474,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 		tmControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionManager(tm);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -521,9 +510,9 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 		tmControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		((JtaTransactionManager) tt.getTransactionManager()).setTransactionManager(tm);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -543,7 +532,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		utControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		try {
@@ -569,7 +559,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -586,9 +577,9 @@ public class JtaTransactionTestSuite extends TestCase {
 	}
 
 	public void testJtaTransactionManagerWithoutJtaSupport() throws Exception {
-		JtaTransactionManager tm = new JtaTransactionManager();
+		JtaTransactionManager ptm = new JtaTransactionManager();
 		try {
-			tm.afterPropertiesSet();
+			ptm.afterPropertiesSet();
 			fail("Should have thrown CannotCreateTransactionException");
 		}
 		catch (CannotCreateTransactionException ex) {
@@ -604,7 +595,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
@@ -630,7 +622,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -651,7 +644,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -677,7 +671,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -703,7 +698,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
@@ -732,7 +728,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
@@ -766,7 +763,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
@@ -801,7 +799,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
@@ -836,7 +835,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
@@ -868,7 +868,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
@@ -898,7 +899,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					status.setRollbackOnly();
@@ -923,7 +925,8 @@ public class JtaTransactionTestSuite extends TestCase {
 		utControl.replay();
 
 		try {
-			TransactionTemplate tt = getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					status.setRollbackOnly();

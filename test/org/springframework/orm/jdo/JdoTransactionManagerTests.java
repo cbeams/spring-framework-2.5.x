@@ -36,7 +36,6 @@ import org.easymock.MockControl;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.SimpleConnectionHandle;
 import org.springframework.transaction.InvalidIsolationLevelException;
-import org.springframework.transaction.JtaTransactionTestSuite;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -457,7 +456,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.replay();
 		pmControl.replay();
 
-		TransactionTemplate tt = JtaTransactionTestSuite.getTransactionTemplateForJta(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
 		final List l = new ArrayList();
 		l.add("test");
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
