@@ -96,7 +96,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.35 2004-05-19 08:28:20 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.36 2004-08-04 08:52:30 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -169,9 +169,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME";
 
 	/**
-	 * Additional logger for use when no mapping handlers are found for a request.
+	 * Log category to use when no mapped handler is found for a request.
 	 */
-	protected static final Log pageNotFoundLogger = LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
+	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
+
+	/**
+	 * Additional logger to use when no mapped handler is found for a request.
+	 */
+	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 
 	/** Detect all HandlerMappings or just expect "handlerMapping" bean? */
