@@ -76,7 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.47 2004-06-17 19:40:44 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.48 2004-06-28 20:10:27 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -328,16 +328,21 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @return the custom editor, or null if none found for this type
 	 */
 	private PropertyEditor getCustomEditor(Class requiredType) {
-		CustomEditorHolder holder = (CustomEditorHolder) this.customEditors.get(requiredType);
-		if (holder == null) {
-			for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
-				Object key = it.next();
-				if (key instanceof Class && ((Class) key).isAssignableFrom(requiredType)) {
-					holder = (CustomEditorHolder) this.customEditors.get(key);
+		if (requiredType != null) {
+			CustomEditorHolder holder = (CustomEditorHolder) this.customEditors.get(requiredType);
+			if (holder == null) {
+				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
+					Object key = it.next();
+					if (key instanceof Class && ((Class) key).isAssignableFrom(requiredType)) {
+						holder = (CustomEditorHolder) this.customEditors.get(key);
+					}
 				}
 			}
+			if (holder != null) {
+				return holder.getPropertyEditor(requiredType);
+			}
 		}
-		return (holder != null ? holder.getPropertyEditor(requiredType) : null);
+		return null;
 	}
 
 
