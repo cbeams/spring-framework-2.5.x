@@ -87,12 +87,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
+	/** Dependency types to ignore on dependency check and autowire */
+	private final Set ignoreDependencyTypes = new HashSet();
+
 
 	/**
 	 * Create a new AbstractAutowireCapableBeanFactory.
 	 */
 	public AbstractAutowireCapableBeanFactory() {
 		super();
+		ignoreDependencyType(BeanFactory.class);
 	}
 
 	/**
@@ -100,17 +104,35 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param parentBeanFactory parent bean factory, or null if none
 	 */
 	public AbstractAutowireCapableBeanFactory(BeanFactory parentBeanFactory) {
-		super(parentBeanFactory);
+		this();
+		setParentBeanFactory(parentBeanFactory);
 	}
 
 	/**
-	 * Set the instantiation strategy to use.
-	 * Can be called by subclasses during initialization.
+	 * Set the instantiation strategy to use for creating bean instances.
 	 * Default is CglibSubclassingInstantiationStrategy.
 	 * @see CglibSubclassingInstantiationStrategy
 	 */
-	protected void setInstantiationStrategy(InstantiationStrategy instantiationStrategy) {
+	public void setInstantiationStrategy(InstantiationStrategy instantiationStrategy) {
 		this.instantiationStrategy = instantiationStrategy;
+	}
+
+	/**
+	 * Ignore the given dependency type for autowiring.
+	 * <p>This will typically be used by application contexts to register
+	 * dependencies that are resolved in other ways, like BeanFactory through
+	 * BeanFactoryAware (which bean factories are supposed to provide by default),
+	 * or ApplicationContext through ApplicationContextAware.
+	 */
+	public void ignoreDependencyType(Class type) {
+		this.ignoreDependencyTypes.add(type);
+	}
+
+	/**
+	 * Return the set of classes that will get ignored for autowiring.
+	 */
+	public Set getIgnoredDependencyTypes() {
+		return ignoreDependencyTypes;
 	}
 
 

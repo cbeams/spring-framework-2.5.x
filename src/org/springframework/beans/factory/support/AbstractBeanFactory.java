@@ -111,9 +111,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Custom PropertyEditors to apply to the beans of this factory */
 	private Map customEditors = new HashMap();
 
-	/** Dependency types to ignore on dependency check and autowire */
-	private final Set ignoreDependencyTypes = new HashSet();
-
 	/** BeanPostProcessors to apply in createBean */
 	private final List beanPostProcessors = new ArrayList();
 
@@ -142,7 +139,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * Create a new AbstractBeanFactory.
 	 */
 	public AbstractBeanFactory() {
-		ignoreDependencyType(BeanFactory.class);
 	}
 
 	/**
@@ -151,7 +147,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @see #getBean
 	 */
 	public AbstractBeanFactory(BeanFactory parentBeanFactory) {
-		this();
 		this.parentBeanFactory = parentBeanFactory;
 	}
 
@@ -412,17 +407,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return customEditors;
 	}
 
-	public void ignoreDependencyType(Class type) {
-		this.ignoreDependencyTypes.add(type);
-	}
-
-	/**
-	 * Return the set of classes that will get ignored for autowiring.
-	 */
-	public Set getIgnoredDependencyTypes() {
-		return ignoreDependencyTypes;
-	}
-
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		this.beanPostProcessors.add(beanPostProcessor);
 	}
@@ -520,7 +504,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param name the name of the bean to check
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 */
-	protected boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
+	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 		try {
 			Object beanInstance = this.singletonCache.get(beanName);
@@ -811,7 +795,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				}
 			}
 			else {
-				// the user wants the factory itself
+	 			// the user wants the factory itself
 				if (logger.isDebugEnabled()) {
 					logger.debug("Calling code asked for FactoryBean instance for name '" + beanName + "'");
 				}
@@ -959,10 +943,17 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/**
 	 * Check if this bean factory contains a bean definition with the given name.
 	 * Does not consider any hierarchy this factory may participate in.
-	 * Invoked by containsBean when no cached singleton instance is found.
+	 * Invoked by <code>containsBean</code> when no cached singleton instance is found.
+	 * <p>Depending on the nature of the concrete bean factory implementation,
+	 * this operation might be expensive (for example, because of directory lookups
+	 * in external registries). However, for listable bean factories, this usually
+	 * just amounts to a local hash lookup: The operation is therefore part of the
+	 * public interface there. The same implementation can serve for both this
+	 * template method and the public interface method in that case.
 	 * @param beanName the name of the bean to look for
 	 * @return if this bean factory contains a bean definition with the given name
 	 * @see #containsBean
+	 * @see org.springframework.beans.factory.ListableBeanFactory#containsBeanDefinition
 	 */
 	protected abstract boolean containsBeanDefinition(String beanName);
 
@@ -970,6 +961,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * Return the bean definition for the given bean name.
 	 * Subclasses should normally implement caching, as this method is invoked
 	 * by this class every time bean definition metadata is needed.
+	 * <p>Depending on the nature of the concrete bean factory implementation,
+	 * this operation might be expensive (for example, because of directory lookups
+	 * in external registries). However, for listable bean factories, this usually
+	 * just amounts to a local hash lookup: The operation is therefore part of the
+	 * public interface there. The same implementation can serve for both this
+	 * template method and the public interface method in that case.
 	 * @param beanName name of the bean to find a definition for
 	 * @return the BeanDefinition for this prototype name. Must never return null.
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
@@ -977,6 +974,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @throws BeansException in case of errors
 	 * @see RootBeanDefinition
 	 * @see ChildBeanDefinition
+	 * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory#getBeanDefinition
 	 */
 	protected abstract BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
