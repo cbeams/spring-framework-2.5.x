@@ -34,6 +34,7 @@ import org.springframework.web.flow.MutableFlowModel;
 /**
  * Maps parameters in the http servlet request to attributes <i>set</i> in the
  * flow model.
+ * 
  * @author Keith Donald
  */
 public class SetAction extends AbstractAction {
@@ -46,18 +47,17 @@ public class SetAction extends AbstractAction {
 	 * Creates a set action with an initially empty mappings list.
 	 */
 	public SetAction() {
-
 	}
 
 	/**
 	 * Create a set action with the specified string mapping, where the string
 	 * is a request parameter name that should be mapped as a string attribute
 	 * in the flow model with the same name.
-	 * 
+	 * <p>
 	 * If the type to convert should be something other than a string, it maybe
 	 * be encoded within the mappings argument with a comma delimiter: e.g.
 	 * <code>myAttribute,java.lang.Short</code>
-	 * @param mapping the string mapping (e.g. "postalCode");
+	 * @param mapping the string mapping (e.g. "postalCode")
 	 */
 	public SetAction(String mapping) {
 		setMapping(mapping);
@@ -65,7 +65,7 @@ public class SetAction extends AbstractAction {
 
 	/**
 	 * Create a set action with the specified string mappings, where each string
-	 * is a request parameter name that should be mapped as a strin attribute in
+	 * is a request parameter name that should be mapped as a string attribute in
 	 * the flow model with the same name.
 	 * @param mappings the string mappings
 	 */
@@ -83,7 +83,7 @@ public class SetAction extends AbstractAction {
 
 	/**
 	 * Create a set action with the specified mappings.
-	 * @param mappings The mappings
+	 * @param mappings the mappings
 	 */
 	public SetAction(Mapping[] mappings) {
 		setMappings(mappings);
@@ -192,7 +192,7 @@ public class SetAction extends AbstractAction {
 	protected String doExecuteAction(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
 			throws Exception {
 		if (requestParameterMapper != null) {
-			this.requestParameterMapper.map(new RequestParameterAccessorAdapter(request), model);
+			this.requestParameterMapper.map(new RequestParameterAttributeAccessorAdapter(request), model);
 		}
 		return success();
 	}
@@ -201,10 +201,14 @@ public class SetAction extends AbstractAction {
 	 * Adapts request parameter access to the attribute accessor interface.
 	 * @author Keith Donald
 	 */
-	public static class RequestParameterAccessorAdapter implements AttributeAccessor {
+	public static class RequestParameterAttributeAccessorAdapter implements AttributeAccessor {
+		
 		private HttpServletRequest request;
 
-		public RequestParameterAccessorAdapter(HttpServletRequest request) {
+		/**
+		 * Create a new request parameter attribute accessor. 
+		 */
+		public RequestParameterAttributeAccessorAdapter(HttpServletRequest request) {
 			this.request = request;
 		}
 
