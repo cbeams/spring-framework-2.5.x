@@ -19,16 +19,18 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.interceptor.TransactionAspectSupport.TransactionInfo;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
@@ -40,7 +42,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * and AspectJ aspect.
  * @author Rod Johnson
  * @since 16-Mar-2003
-*  @version $Id: AbstractTransactionAspectTests.java,v 1.2 2004-06-30 14:43:16 jhoeller Exp $
+*  @version $Id: AbstractTransactionAspectTests.java,v 1.3 2004-07-02 21:18:59 johnsonr Exp $
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
 	
@@ -107,6 +109,119 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		checkTransactionStatus(false);
 		// verification!?
 		itb.getName();
+		checkTransactionStatus(false);
+
+		ptxControl.verify();
+	}
+	
+	public void testEnclosingTransactionWithNonTransactionMethodOnAdvisedInside() throws Throwable {
+		TransactionAttribute txatt = new DefaultTransactionAttribute();
+
+		Method m = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
+		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
+		tas.register(m, txatt);
+
+		TransactionStatus status = new DefaultTransactionStatus(null, false, false, false, false, null);
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		// Expect a transaction
+		ptm.getTransaction(txatt);
+		ptxControl.setReturnValue(status, 1);
+		ptm.commit(status);
+		ptxControl.setVoidCallable(1);
+		ptxControl.replay();
+		
+		final String spouseName = "innerName";
+
+		TestBean outer = new TestBean() {
+			public void exceptional(Throwable t) throws Throwable {
+				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
+				assertTrue(ti.hasTransaction());
+				assertEquals(spouseName, getSpouse().getName());
+			}
+		};
+		TestBean inner = new TestBean() {
+			public String getName() {
+				// Assert that we're in the inner proxy
+				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
+				assertFalse(ti.hasTransaction());
+				return spouseName;
+			}
+		};
+		
+		ITestBean outerProxy = (ITestBean) advised(outer, ptm, tas);
+		ITestBean innerProxy = (ITestBean) advised(inner, ptm, tas);
+		outer.setSpouse(innerProxy);
+
+		checkTransactionStatus(false);
+
+		// Will invoke inner.getName, which is non-transactional
+		outerProxy.exceptional(null);		
+		
+		checkTransactionStatus(false);
+
+		ptxControl.verify();
+	}
+	
+	public void testEnclosingTransactionWithNestedTransactionOnAdvisedInside() throws Throwable {
+		final TransactionAttribute outerTxatt = new DefaultTransactionAttribute();
+		final TransactionAttribute innerTxatt = new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_NESTED);
+
+		Method outerMethod = ITestBean.class.getMethod("exceptional", new Class[] { Throwable.class });
+		Method innerMethod = ITestBean.class.getMethod("getName", null);
+		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
+		tas.register(outerMethod, outerTxatt);
+		tas.register(innerMethod, innerTxatt);
+
+		TransactionStatus outerStatus = new DefaultTransactionStatus(null, false, false, false, false, null);
+		TransactionStatus innerStatus = new DefaultTransactionStatus(null, true, false, false, false, null);
+		
+		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		// Expect a transaction
+		ptm.getTransaction(outerTxatt);
+		ptxControl.setReturnValue(outerStatus, 1);
+		
+		ptm.getTransaction(innerTxatt);
+		ptxControl.setReturnValue(innerStatus, 1);
+		
+		ptm.commit(innerStatus);
+		ptxControl.setVoidCallable(1);
+		
+		ptm.commit(outerStatus);
+		ptxControl.setVoidCallable(1);
+		ptxControl.replay();
+		
+		final String spouseName = "innerName";
+
+		TestBean outer = new TestBean() {
+			public void exceptional(Throwable t) throws Throwable {
+				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
+				assertTrue(ti.hasTransaction());
+				assertEquals(outerTxatt, ti.getTransactionAttribute());
+				assertEquals(spouseName, getSpouse().getName());
+			}
+		};
+		TestBean inner = new TestBean() {
+			public String getName() {
+				// Assert that we're in the inner proxy
+				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
+				// Has nested transaction
+				assertTrue(ti.hasTransaction());
+				assertEquals(innerTxatt, ti.getTransactionAttribute());
+				return spouseName;
+			}
+		};
+		
+		ITestBean outerProxy = (ITestBean) advised(outer, ptm, tas);
+		ITestBean innerProxy = (ITestBean) advised(inner, ptm, tas);
+		outer.setSpouse(innerProxy);
+
+		checkTransactionStatus(false);
+
+		// Will invoke inner.getName, which is non-transactional
+		outerProxy.exceptional(null);		
+		
 		checkTransactionStatus(false);
 
 		ptxControl.verify();
@@ -335,7 +450,6 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 				fail("Should have current TransactionStatus");
 			}
 		}
-
 	}
 
 }

@@ -24,7 +24,7 @@ import java.util.HashMap;
 /**
  * Inherits fallback behaviour from AbstractFallbackTransactionAttributeSource
  * @author Rod Johnson
- * @version $Id: MapTransactionAttributeSource.java,v 1.4 2004-07-01 16:44:53 johnsonr Exp $
+ * @version $Id: MapTransactionAttributeSource.java,v 1.5 2004-07-02 21:18:59 johnsonr Exp $
  */
 public class MapTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource {
 	
@@ -56,7 +56,7 @@ public class MapTransactionAttributeSource extends AbstractFallbackTransactionAt
 	}
 	
 	private Collection doFindAllAttributes(Object what) {
-		System.out.println("Trying key " + what);
+		//System.out.println("Trying key " + what);
 		Object att = attributeMap.get(what);		
 		return att != null ? Collections.singleton(att) : null;
 	}

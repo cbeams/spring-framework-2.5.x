@@ -28,7 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: TransactionInterceptor.java,v 1.24 2004-06-30 14:42:22 jhoeller Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.25 2004-07-02 21:19:39 johnsonr Exp $
  * @see TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see org.springframework.transaction.interceptor.TransactionAspectSupport
@@ -55,14 +55,14 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		catch (Throwable ex) {
 			// target invocation exception
 			if (txInfo != null) {
-				doAfterThrowing(txInfo, ex);
+				doCloseTransactionAfterThrowing(txInfo, ex);
 			}
 			throw ex;
 		}
 		finally {
 			doFinally(txInfo);
 		}
-		doAfterReturningOrNonRollbackThrowable(txInfo);
+		doAfterFinallyOnReturning(txInfo);
 
 		return retVal;
 	}
