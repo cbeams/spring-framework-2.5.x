@@ -31,7 +31,7 @@
 		-->
 		<!-- 
 		<property name="flowExecutionStorage">
-			<bean class="org.springframework.web.flow.execution.ClientSideContinuationFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.ClientContinuationFlowExecutionStorage"/>
 		</property>
 		-->
 	</bean>
