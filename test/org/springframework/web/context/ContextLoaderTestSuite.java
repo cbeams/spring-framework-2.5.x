@@ -26,9 +26,12 @@ import javax.servlet.http.HttpServlet;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.LifecycleBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -51,7 +54,7 @@ public class ContextLoaderTestSuite extends TestCase {
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext context = (WebApplicationContext)sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext", context instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
 		assertTrue("Has father", context.containsBean("father"));
@@ -68,7 +71,7 @@ public class ContextLoaderTestSuite extends TestCase {
 		HttpServlet servlet = new ContextLoaderServlet();
 		ServletConfig config = new MockServletConfig(sc, "test");
 		servlet.init(config);
-		WebApplicationContext wc = (WebApplicationContext)sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) wc.getBean("lifecycle");
 		assertTrue("Not destroyed", !lb.isDestroyed());
@@ -167,6 +170,28 @@ public class ContextLoaderTestSuite extends TestCase {
 		assertTrue("Has father", context.containsBean("father"));
 		assertTrue("Has rod", context.containsBean("rod"));
 		assertTrue("Has kerry", context.containsBean("kerry"));
+	}
+
+	public void testSingletonDestructionOnStartupFailure() throws IOException {
+		try {
+			new ClassPathXmlApplicationContext(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml",
+																											 "/org/springframework/web/context/WEB-INF/fail.xml"}) {
+				public void refresh() throws BeansException {
+					try {
+						super.refresh();
+					}
+					catch (BeanCreationException ex) {
+						DefaultListableBeanFactory factory = (DefaultListableBeanFactory) getBeanFactory();
+						assertEquals(0, factory.getSingletonNames(null).length);
+						throw ex;
+					}
+				}
+			};
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+		}
 	}
 
 }

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.20 2004-03-22 14:07:47 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.21 2004-05-27 08:56:42 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -50,10 +51,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private boolean allowBeanDefinitionOverriding = true;
 
 	/** Map of bean definition objects, keyed by bean name */
-	private Map beanDefinitionMap = new HashMap();
+	private final Map beanDefinitionMap = new HashMap();
 
 	/** List of bean definition names, in registration order */
-	private List beanDefinitionNames = new ArrayList();
+	private final List beanDefinitionNames = new LinkedList();
 
 
 	/**
@@ -125,7 +126,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		String[] singletonNames = getSingletonNames(type);
 		for (int i = 0; i < singletonNames.length; i++) {
-			result.put(singletonNames[i], getBean(singletonNames[i]));
+			if (!containsBeanDefinition(singletonNames[i])) {
+				// directly registered singleton
+				result.put(singletonNames[i], getBean(singletonNames[i]));
+			}
 		}
 
 		if (includeFactoryBeans) {
@@ -159,26 +163,38 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ConfigurableListableBeanFactory
 	//---------------------------------------------------------------------
 
-	public void preInstantiateSingletons() {
+	public void preInstantiateSingletons() throws BeansException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Pre-instantiating singletons in factory [" + this + "]");
 		}
-		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
-			String beanName = (String) it.next();
-			if (containsBeanDefinition(beanName)) {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-				if (bd.isSingleton() && !bd.isLazyInit()) {
-					if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
-						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-						if (factory.isSingleton()) {
+		try {
+			for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
+				String beanName = (String) it.next();
+				if (containsBeanDefinition(beanName)) {
+					RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+					if (bd.isSingleton() && !bd.isLazyInit()) {
+						if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
+							FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+							if (factory.isSingleton()) {
+								getBean(beanName);
+							}
+						}
+						else {
 							getBean(beanName);
 						}
 					}
-					else {
-						getBean(beanName);
-					}
 				}
 			}
+		}
+		catch (BeansException ex) {
+			// destroy already created singletons to avoid dangling resources
+			try {
+				destroySingletons();
+			}
+			catch (Throwable ex2) {
+				logger.error("preInstantiateSingletons failed but couldn't destroy already created singletons", ex2);
+			}
+			throw ex;
 		}
 	}
 
