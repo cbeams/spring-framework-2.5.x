@@ -12,16 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
 import java.io.ObjectStreamException;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
@@ -85,17 +84,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private List advisors = new LinkedList();
 	
 	/**
-	 * Array updated on changes to the advisors list,
-	 * which is easier to manipulate internally
+	 * Array updated on changes to the advisors list, which is easier
+	 * to manipulate internally.
 	 */
 	private Advisor[] advisorArray = new Advisor[0];
 
-	/** Interfaces to be implemented by the proxy */
-	private Set interfaces = new HashSet();
+	/**
+	 * Interfaces to be implemented by the proxy. Held in List to keep the order
+	 * of registration, to create JDK proxy with specified order of interfaces.
+	 */
+	private List interfaces = new ArrayList();
 
 	/**
-	 * Set to true when the first AOP proxy has been created, meaning that we must
-	 * track advice changes via onAdviceChange() callback.
+	 * Set to true when the first AOP proxy has been created, meaning that we
+	 * must track advice changes via onAdviceChange callback.
 	 */
 	private transient boolean isActive;
 
@@ -210,10 +212,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		if (!newInterface.isInterface()) {
 			throw new IllegalArgumentException("[" + newInterface.getName() + "] is not an interface");
 		}
-		this.interfaces.add(newInterface);
-		adviceChanged();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Added new aspect interface: " + newInterface.getName());
+		if (!this.interfaces.contains(newInterface)) {
+			this.interfaces.add(newInterface);
+			adviceChanged();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Added new aspect interface: " + newInterface.getName());
+			}
 		}
 	}
 
