@@ -81,10 +81,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	    "org.springframework.beans.factory.support.ManagedLinkedMap";
 
 	static {
-		// Eagerly load the DisposableBean class to avoid weird classloader
-		// issues on EJB shutdown within WebLogic 8.1's EJB container.
-		// (Reported by Andreas Senft.)
+		// Eagerly load the DisposableBean and DestructionAwareBeanPostProcessor
+		// classes to avoid weird classloader issues on application shutdown in
+		// WebLogic 8.1. (Reported by Andreas Senft and Eric Ma.)
 		DisposableBean.class.getName();
+		DestructionAwareBeanPostProcessor.class.getName();
 	}
 
 	/**
