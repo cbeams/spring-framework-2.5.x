@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.aop.framework.aspectwerkz;
 
 import java.lang.reflect.Method;
@@ -21,11 +37,11 @@ import org.apache.commons.logging.LogFactory;
 /**
  * @author Rob Harrop
  */
-public class AspectWerkzAopProxy implements AopProxy{
+public class AspectWerkzAopProxy implements AopProxy {
 
-    private static final Log log = LogFactory.getLog(AspectWerkzAopProxy.class);
+	private static final Log log = LogFactory.getLog(AspectWerkzAopProxy.class);
 
-    private AdvisedSupport advised;
+	private AdvisedSupport advised;
 
 	public AspectWerkzAopProxy(AdvisedSupport advised) {
 		this.advised = advised;
@@ -40,40 +56,43 @@ public class AspectWerkzAopProxy implements AopProxy{
 		Advisable advisable = (Advisable) proxy;
 		Advisor[] advisors = advised.getAdvisors();
 
-        Class targetClass = advised.getTargetSource().getTargetClass();
+		Class targetClass = advised.getTargetSource().getTargetClass();
 
 		// todo: need to support pointcuts somehow
 		// todo: need transparent support for expression-based pointcuts
-		String catchAll   = "execution(* " + targetClass.getName() + ".*(..))"; // could be made more specific
+		String catchAll = "execution(* " + targetClass.getName() + ".*(..))"; // could be made more specific
 
 		for (int x = 0; x < advisors.length; x++) {
 			Advisor advisor = advisors[x];
 
-            processAdvisor(advisor, targetClass, advisable, catchAll);
-        }
+			processAdvisor(advisor, targetClass, advisable, catchAll);
+		}
 		advisable.aw_addAdvice(catchAll, new TargetRoutingInterceptor());
 		return proxy;
 	}
 
-    private void processAdvisor(Advisor advisor, Class targetClass, Advisable advisable, String catchAll) {
-        if(advisor instanceof PointcutAdvisor) {
-            Pointcut p = ((PointcutAdvisor)advisor).getPointcut();
+	private void processAdvisor(Advisor advisor, Class targetClass, Advisable advisable, String catchAll) {
+		if (advisor instanceof PointcutAdvisor) {
+			Pointcut p = ((PointcutAdvisor) advisor).getPointcut();
 
-            if(p.getClassFilter().matches(targetClass) && p.getMethodMatcher() == MethodMatcher.TRUE) {
-                log.info("Matches this class and all methods - using catch all expression");
-                advisable.aw_addAdvice(catchAll, new MethodInterceptorAdapter((MethodInterceptor) advisor.getAdvice()));
-            } else if(p instanceof ExpressionBasedPointcut) {
-                log.info("Expression based pointcut - using expression");
-            } else {
-                throw new UnsupportedOperationException("foo");
-            }
-        } else {
-            log.info("No pointcut - using catch all expression");
-            advisable.aw_addAdvice(catchAll, new MethodInterceptorAdapter((MethodInterceptor) advisor.getAdvice()));
-        }
-    }
+			if (p.getClassFilter().matches(targetClass) && p.getMethodMatcher() == MethodMatcher.TRUE) {
+				log.info("Matches this class and all methods - using catch all expression");
+				advisable.aw_addAdvice(catchAll, new MethodInterceptorAdapter((MethodInterceptor) advisor.getAdvice()));
+			}
+			else if (p instanceof ExpressionBasedPointcut) {
+				log.info("Expression based pointcut - using expression");
+			}
+			else {
+				throw new UnsupportedOperationException("foo");
+			}
+		}
+		else {
+			log.info("No pointcut - using catch all expression");
+			advisable.aw_addAdvice(catchAll, new MethodInterceptorAdapter((MethodInterceptor) advisor.getAdvice()));
+		}
+	}
 
-    public class MethodInterceptorAdapter implements AroundAdvice {
+	public class MethodInterceptorAdapter implements AroundAdvice {
 
 		private MethodInterceptor interceptor;
 
@@ -84,9 +103,10 @@ public class AspectWerkzAopProxy implements AopProxy{
 		public Object invoke(JoinPoint jp) throws Throwable {
 			Method m = getMethodFromJoinPoint(jp);
 
-			if(m.getName().startsWith("aw_")) {
+			if (m.getName().startsWith("aw_")) {
 				return jp.proceed();
-			} else {
+			}
+			else {
 				JoinPointDelegator del = new JoinPointDelegator(jp);
 				return interceptor.invoke(del);
 			}
