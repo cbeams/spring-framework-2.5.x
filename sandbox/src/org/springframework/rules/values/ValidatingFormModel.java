@@ -301,7 +301,10 @@ public class ValidatingFormModel extends DefaultFormModel implements
                 return false;
             }
             catch (IllegalArgumentException e) {
-                logger.warn("Illegal argument exception occured setting value");
+                if (logger.isInfoEnabled()) {
+                    logger
+                            .info("Illegal argument exception occured setting value");
+                }
                 type = "typeMismatch";
                 return false;
             }
