@@ -38,7 +38,7 @@ import java.beans.PropertyEditorSupport;
  */
 public class CustomBooleanEditor extends PropertyEditorSupport {
 
-	private boolean allowEmpty;
+	private final boolean allowEmpty;
 
 	/**
 	 * Create a new instance.

@@ -43,9 +43,9 @@ import java.text.ParseException;
  */
 public class CustomNumberEditor extends PropertyEditorSupport {
 
-	private Class numberClass;
+	private final Class numberClass;
 
-	private NumberFormat numberFormat;
+	private final NumberFormat numberFormat;
 
 	private final boolean allowEmpty;
 
