@@ -19,6 +19,8 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.io.File;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Editor for java.io.File, to directly feed a File property
  * instead of using a String file name property.
@@ -29,11 +31,19 @@ import java.io.File;
 public class FileEditor extends PropertyEditorSupport {
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(new File(text));
+	    if (StringUtils.hasText(text)) {
+	        setValue(new File(text));
+	    } else {
+	        setValue(null);
+	    }
 	}
 
 	public String getAsText() {
-		return ((File) getValue()).getAbsolutePath();
+	    if (getValue() != null) {
+	        return ((File) getValue()).getAbsolutePath();
+	    } else {
+	        return "";
+	    }
 	}
 
 }
