@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.66 2004-07-06 15:46:37 jhoeller Exp $
+    $Id: build.xml,v 1.67 2004-07-16 21:09:47 colins Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -478,7 +478,7 @@
 
 		<mkdir dir="${reports.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
+		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
@@ -494,9 +494,29 @@
 			<formatter type="xml"/>
 
 			<batchtest fork="yes" todir="${reports.dir}">
-				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
-			</batchtest>
+				<fileset dir="${target.testclasses.dir}"
+							includes="${test.includes}"
+							excludes="${test.excludes}">
+					<exclude name="**/JmsTemplate102Tests.class"/>
+					<exclude name="**/JmsTemplate11Tests.class"/>
+					<exclude name="**/TransactionTestSuite.class"/>
+				</fileset>
 
+			</batchtest>
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}"
+						includes="**/JmsTemplate102Tests.class"
+						excludes="${test.excludes}"/>
+			</batchtest>
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}"
+						includes="**/JmsTemplate11Tests.class"
+						excludes="${test.excludes}"/>
+			</batchtest>
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}"
+						includes="**/TransactionTestSuite.class"/>
+			</batchtest>
 		</junit>
 
 	</target>
