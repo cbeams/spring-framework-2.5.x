@@ -23,6 +23,7 @@
 			<fileset file="${jstl.jar}" />
 			<fileset file="${spring.jar}" />
 			<fileset file="${spring.sandbox.jar}" />
+			<fileset file="${commons.fileupload.jar}"/>
 		</copy>
 	</target>
 </project>
