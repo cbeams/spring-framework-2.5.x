@@ -6,11 +6,7 @@
 	<!-- A generic front controller for the entire app.  A view that kicks off a new flow execution
 	     may parameterize this controller with a _flowId parameter.  A view participating in an
 	     existing flow execution may simply pass it the appropriate _flowExecutionId and _eventId. -->
-	<bean id="phonebookFrontController" name="/phonebook.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flowExecutionManager">
-			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager"/>
-		</property>
-	</bean>
+	<bean id="phonebookFrontController" name="/phonebook.htm" class="org.springframework.web.flow.mvc.FlowController"/>
 	
 	<!-- search flow beans -->
 

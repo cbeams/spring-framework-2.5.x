@@ -31,16 +31,21 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * Consult the JavaDoc of that class for more information on how requests are
  * processed.
  * <p>
+ * Configuration note: you can configure the flow controller by passing in a properly
+ * configured flow execution manager. To avoid unnecessary top-level bean definitions
+ * in the application context, you can use the Spring nested bean definition syntax.
+ * <p>
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
  * <tr>
  * <td><b>name</b></td>
+ * <td><b>default</b><td>
  * <td><b>description</b></td>
  * </tr>
  * <tr>
  * <td>flowExecutionManager</td>
- * <td>Configures the http servlet flow execution manager implementation to use.
- * This is a required property.</td>
+ * <td>{@link org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager default}</td>
+ * <td>Configures the HTTP servlet flow execution manager implementation to use.</td>
  * </tr>
  * </table>
  * 
@@ -82,6 +87,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 */
 	protected void initDefaults() {
 		setCacheSeconds(0);
+		setFlowExecutionManager(new HttpServletFlowExecutionManager());
 	}
 
 	public void afterPropertiesSet() throws Exception {
