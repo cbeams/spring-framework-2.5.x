@@ -16,21 +16,32 @@
 
 package org.springframework.aop;
 
+import java.io.Serializable;
 
 /**
- * Core Spring pointcut abstraction. A pointcut is composed of ClassFilters and MethodMatchers.
- * Both these basic terms and a Pointcut itself can be combined to build up combinations.
+ * Canonical Pointcut instance that always matches.
  * @author Rod Johnson
- * @version $Id: Pointcut.java,v 1.4 2004-07-23 18:11:49 johnsonr Exp $
+ * @version $Id: TruePointcut.java,v 1.1 2004-07-23 18:11:49 johnsonr Exp $
  */
-public interface Pointcut {
+class TruePointcut implements Pointcut, Serializable {
+	
+	public static final TruePointcut INSTANCE = new TruePointcut();
+	
+	/**
+	 * Enforce Singleton
+	 */
+	private TruePointcut() {
+	}
 
-	ClassFilter getClassFilter();
-	
-	MethodMatcher getMethodMatcher();
-	
-	// could add getFieldMatcher() without breaking most existing code
-	
-	Pointcut TRUE = TruePointcut.INSTANCE; 
+	public ClassFilter getClassFilter() {
+		return ClassFilter.TRUE;
+	}
 
+	public MethodMatcher getMethodMatcher() {
+		return MethodMatcher.TRUE;
+	}
+
+	public String toString() {
+		return "Pointcut.TRUE";
+	}
 }

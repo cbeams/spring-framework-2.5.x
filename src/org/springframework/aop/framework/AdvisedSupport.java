@@ -16,6 +16,9 @@
 
 package org.springframework.aop.framework;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,9 +26,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.aopalliance.aop.Advice;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
-
+import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -47,18 +51,21 @@ import org.springframework.util.StringUtils;
  * <p>This class frees subclasses of the housekeeping of Interceptors
  * and Advisors, but doesn't actually implement proxy creation
  * methods, which are provided by subclasses.
+ * <p>
+ * This class is serializable; subclasses need not be. This class is used
+ * to hold snapshots of proxies.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.32 2004-07-23 08:49:13 jhoeller Exp $
+ * @version $Id: AdvisedSupport.java,v 1.33 2004-07-23 18:11:49 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
-public class AdvisedSupport extends ProxyConfig implements Advised {
+public class AdvisedSupport extends ProxyConfig implements Advised, Serializable {
 	
 	/**
-	 * Canonical TargetSource when there's no target, and behavior is supplied
-	 * by the advisors.
+	 * Class of TargetSource when there's no target, and behavior is supplied
+	 * by interfaces and advisors.
 	 */
-	public static final TargetSource EMPTY_TARGET_SOURCE = new TargetSource() {
+	private static class EmptyTargetSource implements TargetSource, Serializable {
 
 		public Class getTargetClass() {
 			return null;
@@ -76,13 +83,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	};
 
+	/**
+	 * Canonical TargetSource when there's no target, and behavior is supplied
+	 * by the advisors.
+	 */
+	public static final TargetSource EMPTY_TARGET_SOURCE = new EmptyTargetSource();
 
 	/** List of AdvisedSupportListener */
-	private final List listeners = new LinkedList();
+	private transient List listeners = new LinkedList();
 
 	TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
-	AdvisorChainFactory advisorChainFactory;
+	transient AdvisorChainFactory advisorChainFactory;
 
 	/**
 	 * List of Advice. If an Interceptor is added, it will be wrapped
@@ -103,16 +115,23 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Set to true when the first AOP proxy has been created, meaning that we must
 	 * track advice changes via onAdviceChange() callback.
 	 */
-	private boolean isActive;
+	private transient boolean isActive;
 
 
 	/**
 	 * No arg constructor to allow use as a JavaBean.
 	 */
 	public AdvisedSupport() {
-		setAdvisorChainFactory(new HashMapCachingAdvisorChainFactory());
+		initDefaultAdvisorChainFactory();
 	}
 	
+	/**
+	 * Initialize the default AdvisorChainFactory
+	 */
+	private void initDefaultAdvisorChainFactory() {
+		setAdvisorChainFactory(new HashMapCachingAdvisorChainFactory());
+	}
+
 	/**
 	 * Create a DefaultProxyConfig with the given parameters.
 	 * @param interfaces the proxied interfaces
@@ -137,7 +156,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	public void setTargetSource(TargetSource targetSource) {
 		if (isActive() && getOptimize()) {
-			throw new AopConfigException("Can't change target with an optimized CGLIB proxy: it has it's own target");
+			throw new AopConfigException("Can't change target with an optimized CGLIB proxy: it has its own target");
 		}
 		this.targetSource = targetSource;
 	}
@@ -159,9 +178,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Call this method on a new instance created by the no-arg constructor
 	 * to create an independent copy of the configuration from the other.
-	 * <p>Does not copy MethodInvocationFactory; a parameter should be provided
-	 * to the constructor if necessary. Note that the same MethodInvocationFactory
-	 * should <b>not</b> be used for the new instance, or it may not be independent.
 	 * @param other DefaultProxyConfig to copy configuration from
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
@@ -535,6 +551,29 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public String toProxyConfigString() {
 		return toString();
 	}
+	
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+	
+	private void readObject(ObjectInputStream ois) throws IOException {
+		// Rely on default serialization, just initialize state after deserialization
+		try {
+			ois.defaultReadObject();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new AspectException("Failed to deserialize Spring AOP proxy:" +
+					"Check that Spring AOP libraries are available on the client side");
+		}
+		
+		// Initialize transient fields
+		this.logger = LogFactory.getLog(getClass());
+		this.isActive = true;
+		this.listeners = new LinkedList();
+		initDefaultAdvisorChainFactory();
+	}
+	
+	
 
 	/**
 	 * For debugging/diagnostic use.

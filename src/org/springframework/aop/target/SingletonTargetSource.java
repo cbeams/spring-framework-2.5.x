@@ -16,6 +16,8 @@
 
 package org.springframework.aop.target;
 
+import java.io.Serializable;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.util.ObjectUtils;
 
@@ -23,10 +25,12 @@ import org.springframework.util.ObjectUtils;
  * Implementation of the TargetSource interface that holds a local object.
  * This is the default implementation of TargetSource used by the AOP framework.
  * There is no need to create objects of this class in application code.
+ * <br>This class is Serializable. However, the serializability of a SingletonTargetSource
+ * will depend on whether the target is Serializable.
  * @author Rod Johnson
- * @version $Id: SingletonTargetSource.java,v 1.6 2004-06-06 21:39:58 jhoeller Exp $
+ * @version $Id: SingletonTargetSource.java,v 1.7 2004-07-23 18:11:48 johnsonr Exp $
  */
-public final class SingletonTargetSource implements TargetSource {
+public final class SingletonTargetSource implements TargetSource, Serializable {
 
 	/** Target cached and invoked using reflection */	
 	private final Object target;
@@ -44,6 +48,7 @@ public final class SingletonTargetSource implements TargetSource {
 	}
 	
 	public void releaseTarget(Object o) {
+		// Nothing to do
 	}
 
 	public boolean isStatic() {

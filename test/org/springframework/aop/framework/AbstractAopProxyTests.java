@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
 
+import org.aopalliance.aop.Advice;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -34,6 +36,7 @@ import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
@@ -50,7 +53,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.34 2004-07-23 08:44:20 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.35 2004-07-23 18:11:01 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -211,13 +214,97 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	
 	public void testSerializationAdviceAndTargetNotSerializable() throws Exception {
 		TestBean tb = new TestBean();
+		assertFalse(SerializationTestUtils.isSerializable(tb));
 		
 		ProxyFactory pf = new ProxyFactory(tb);
 		
-		pf.addInterceptor(new NopInterceptor());
+		pf.addAdvice(new NopInterceptor());
 		ITestBean proxy = (ITestBean) createAopProxy(pf).getProxy();
 		
 		assertFalse(SerializationTestUtils.isSerializable(proxy));
+	}
+	
+	public void testSerializationAdviceNotSerializable() throws Exception {
+		SerializablePerson sp = new SerializablePerson();
+		assertTrue(SerializationTestUtils.isSerializable(sp));
+		
+		ProxyFactory pf = new ProxyFactory(sp);
+		
+		// This isn't serializable
+		Advice i = new NopInterceptor();
+		pf.addAdvice(i);
+		assertFalse(SerializationTestUtils.isSerializable(i));
+		Object proxy = createAopProxy(pf).getProxy();
+		
+		assertFalse(SerializationTestUtils.isSerializable(proxy));
+	}
+	
+	/**
+	 * Test classes for serialization
+	 */
+	protected interface Person {
+		String getName();
+		int getAge();
+	}
+	
+	protected static class SerializablePerson implements Person, Serializable {
+		private String name;
+		private int age;
+
+		public int getAge() {
+			return age;
+		}
+		
+		public void setAge(int age) {
+			this.age = age;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+	
+	public static class SerializableNopInterceptor extends NopInterceptor implements Serializable {
+		
+	}
+	
+	public void testSerializationSerializableTargetAndAdvice() throws Exception {
+		SerializablePerson personTarget = new SerializablePerson();
+		personTarget.setName("jim");
+		personTarget.setAge(26);
+		
+		assertTrue(SerializationTestUtils.isSerializable(personTarget));
+		
+		ProxyFactory pf = new ProxyFactory(personTarget);
+		
+		pf.addAdvice(new SerializableNopInterceptor());
+		Person p = (Person) createAopProxy(pf).getProxy();
+		
+		// Will throw exception if it fails
+		SerializationTestUtils.testSerialization(p);
+		
+		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		assertNotSame(p, p2);
+		assertEquals(p.getName(), p2.getName());
+		assertEquals(p.getAge(), p2.getAge());
+		assertTrue("Deserialized object is an AOP proxy", AopUtils.isAopProxy(p2));
+		
+		Advised a1 = (Advised) p;
+		Advised a2 = (Advised) p2;
+		// Check we can manipulate state of p2
+		assertEquals(a1.getAdvisors().length, a2.getAdvisors().length);
+		
+		// Check we can add a new advisor to the target
+		NopInterceptor ni = new NopInterceptor();
+		p2.getAge();
+		assertEquals(0, ni.getCount());
+		a2.addAdvice(ni);
+		p2.getAge();
+		assertEquals(1, ni.getCount());
 	}
 	
 	/**

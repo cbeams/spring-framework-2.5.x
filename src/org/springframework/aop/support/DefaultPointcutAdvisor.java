@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
+
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
@@ -30,9 +32,9 @@ import org.springframework.core.Ordered;
  * used with any pointcut and advice type, except for introductions.
  *
  * @author Rod Johnson
- * @version $Id: DefaultPointcutAdvisor.java,v 1.7 2004-03-23 14:29:45 jhoeller Exp $
+ * @version $Id: DefaultPointcutAdvisor.java,v 1.8 2004-07-23 18:11:48 johnsonr Exp $
  */
-public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered {
+public class DefaultPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
 
 	private int order = Integer.MAX_VALUE;
 

@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * interceptor to do so.
  *
  * @author Rod Johnson
- * @version $Id: ProxyConfig.java,v 1.11 2004-05-27 09:14:40 jhoeller Exp $
+ * @version $Id: ProxyConfig.java,v 1.12 2004-07-23 18:11:49 johnsonr Exp $
  */
 public class ProxyConfig {
 	
@@ -43,7 +43,7 @@ public class ProxyConfig {
 	 * method access. - RJ, December 10, 2003.
 	 */
 	
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private boolean proxyTargetClass;
 	
