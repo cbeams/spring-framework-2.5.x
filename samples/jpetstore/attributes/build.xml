@@ -2,8 +2,9 @@
 
 <!--
 	Similar to main build file, but using Commons Attributes to deliver
-	autoproxying: no need to use TransactionProxyFactoryBean.
+	auto-proxying: no need to use TransactionProxyFactoryBean.
 -->
+
 <project name="jpetstore-attributes" basedir=".." default="usage">
 
 	<property name="name" value="jpetstore"/>
@@ -95,19 +96,18 @@
 
 
 	<!--
-		Compile attributes with Jakarta Commons Attributes.
-		It will generate source files in the $commons.attributes.tempdir
+		This will generate source files in the $commons.attributes.tempdir
 		directory. These must then be compiled along with the application
 		Java sources in the build target below.
 	-->
-	<target name="compileAttributes" >
+	<target name="compileattr" description="Compile attributes with Jakarta Commons Attributes">
 	
 		<!-- Bring in Jakarta Commons attribute compilation -->
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
 			<classpath refid="attribute-compiler-classpath"/>
 		</taskdef>
 
-	 	<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
+	 	<!-- Compile to a temp directory: Commons Attributes will place Java source there. -->
 	  <attribute-compiler destdir="${commons.attributes.tempdir}">
 			<fileset dir="${src.dir}" includes="**/*.java"/>
 		</attribute-compiler>
@@ -115,7 +115,7 @@
  	</target>
 
 
-	<target name="build" depends="compileAttributes"
+	<target name="build" depends="compileattr"
 		description="Compile main source tree java files into class files, generate jar files">
 
 		<mkdir dir="${build.dir}"/>
@@ -192,15 +192,6 @@
 	</target>
 
 
-	<target name="dist" depends="warfile">
-		<!-- 
-			delegate to warfile target by depending on it.  dist is just to offer
-			a generic target name across all Spring sample apps that may be used
-			for autobuilds testing
-		-->
-	</target>
-
-
 	<target name="warfile" depends="build" description="Build the web application archive">
 
 		<mkdir dir="${dist.dir}"/>
@@ -226,6 +217,15 @@
 			<exclude name="**/.*"/>
 		</war>
 
+	</target>
+
+
+	<target name="dist" depends="warfile">
+		<!--
+			Delegate to "warfile" target by depending on it. "dist" is just to offer
+			a generic target name across all Spring sample apps that may be used
+			for autobuilds testing
+		-->
 	</target>
 
 

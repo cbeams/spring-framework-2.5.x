@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.38 2004-02-22 22:14:18 jhoeller Exp $
+    $Id: build.xml,v 1.39 2004-02-23 10:49:33 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -80,7 +80,7 @@
 	<!--
 		Use Jakarta Commons Attributes to compile the attributes for the main source tree.
 	-->
-	<target name="compileSrcAttributes">
+	<target name="compileattr">
 
 	 	<!-- Bring in Jakarta Commons attribute compilation -->
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
@@ -104,8 +104,7 @@
 		This task depends on the Commons Attributes compile step,
 		as some classes must ship with attributes.
 	-->
-	<target name="build"
-		depends="compileSrcAttributes"
+	<target name="build" depends="compileattr"
 		description="Compile main source tree java files into class files (no-jarring)">
 
 		<mkdir dir="${target.classes.dir}"/>
@@ -359,11 +358,11 @@
 	</target>
 
 
- 	<target name="compileTestAttributes" depends="build">
+ 	<target name="compiletestattr" depends="build">
 
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
 		  <classpath refid="attribute-compiler-classpath"/>
-        </taskdef>
+		</taskdef>
 
 	 	<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.test}">
@@ -377,7 +376,8 @@
 		This task depends on the Commons Attributes compile step,
 		as some tests require source-level attribute support.
 	-->
-	<target name="buildtests" depends="compileTestAttributes" description="Compile test source tree Java files into class files">
+	<target name="buildtests" depends="compiletestattr"
+		description="Compile test source tree Java files into class files">
 
 		<mkdir dir="${target.testclasses.dir}"/>
 
