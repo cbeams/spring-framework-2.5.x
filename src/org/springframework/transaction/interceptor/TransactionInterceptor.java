@@ -28,8 +28,11 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.2 2003-10-31 17:07:06 jhoeller Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.3 2003-11-07 15:29:25 jhoeller Exp $
  * @author Rod Johnson
+ * @see org.springframework.aop.framework.ProxyFactoryBean
+ * @see TransactionProxyFactoryBean
+ * @see org.springframework.transaction.PlatformTransactionManager
  */
 public class TransactionInterceptor implements MethodInterceptor, InitializingBean {
 	
@@ -173,11 +176,8 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	private void onThrowable(MethodInvocation invocation, TransactionAttribute txAtt, TransactionStatus status, Throwable ex) {
 		if (txAtt.rollbackOn(ex)) {
-			logger.error(
-				"Rolling back transaction on method '"
-					+ invocation.getMethod().getName()
-					+ "' due to throwable: "
-					+ ex.getMessage());
+			logger.error("Rolling back transaction on method '" + invocation.getMethod().getName() +
+			             "' due to throwable [" + ex + "]");
 			try {
 				this.transactionManager.rollback(status);
 			}
@@ -188,8 +188,8 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 		}
 		else {
 			if (logger.isDebugEnabled())
-				logger.debug("Method '"	+ invocation.getMethod().getName()+ "' threw throwable {"	+
-				             ex.getMessage()	+ "} but this does not force transaction rollback");
+				logger.debug("Method '"	+ invocation.getMethod().getName()+ "' threw throwable ["	+ ex +
+				             "] but this does not force transaction rollback");
 			// Will still roll back if rollbackOnly is true
 			this.transactionManager.commit(status);
 		}
