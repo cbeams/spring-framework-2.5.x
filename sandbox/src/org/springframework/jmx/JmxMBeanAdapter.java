@@ -34,7 +34,20 @@ import org.springframework.jmx.naming.KeyNamingStrategy;
 import org.springframework.jmx.naming.ObjectNamingStrategy;
 
 /**
+ * A bean that allows for any Spring managed to be exposed
+ * to an MBeanServer without the need to define any JMX specific
+ * information in the bean classes. 
+ * 
+ * If the bean implements one of the JMX management interface
+ * then JmxMBeanAdapter will simply register the MBean with the server
+ * automatically.
+ * 
+ * If the bean does not implement on the JMX management interface then
+ * JmxMBeanAdapter will create the management information using the supplied <tt>MetadataAssembler</tt>
+ * implementation. Once the MBean data is created JmxMBeanAdapter handles requests to invoke methods
+ * on the managed bean using one the <tt>MBeanInvoker</tt> implementations.
  * @author Rob Harrop
+ * @since 1.2
  */
 public class JmxMBeanAdapter implements InitializingBean, DisposableBean {
 
@@ -84,9 +97,15 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean {
                     "Must specify at least one bean for registration");
         }
 
-        // locate the MBeanServer
-        locateMBeanServer();
-
+        // if no server was provided
+        // then try to load one. 
+        // This is useful in environment such as
+        // JBoss where there is already an MBeanServer loaded
+        if(server == null) {
+            log.debug("No MBeanServer provided. Attempting to locate one...");
+            locateMBeanServer();
+        }
+        
         // now register the beans
         registerBeans();
     }
@@ -106,6 +125,10 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean {
     public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
         this.namingStrategy = namingStrategy;
     }
+    
+    public void setServer(MBeanServer server) {
+        this.server = server;
+    }
 
     private void locateMBeanServer() {
         List servers = MBeanServerFactory.findMBeanServer(null);
@@ -119,6 +142,10 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean {
         //TODO: Throw exception if more than one exists
 
         this.server = (MBeanServer) servers.get(0);
+        
+        if(log.isDebugEnabled()) {
+           log.debug("Found MBeanServer: " + server.toString());
+        }
     }
 
     /**

@@ -67,8 +67,6 @@ public interface MBeanInvoker {
             throws AttributeNotFoundException, InvalidAttributeValueException,
             MBeanException, ReflectionException;
 
-    public AttributeList setAttributes(AttributeList attributes);
-
     /**
      * Invoke a method on a managed resource
      * @param method The <tt>Method</tt> to invoke.

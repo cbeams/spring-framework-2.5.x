@@ -118,20 +118,4 @@ public abstract class AbstractMBeanInvoker implements MBeanInvoker {
 		}
 		return attributes;
 	}
-
-	public AttributeList setAttributes(AttributeList attributes) {
-		AttributeList al = new AttributeList();
-	
-		for (int x = 0; x < attributes.size(); x++) {
-			Attribute a = (Attribute) attributes.get(x);
-			try {
-				setAttribute(a);
-				al.add(a);
-			} catch (JMException ex) {
-				// ignore any errors
-			}
-		}
-	
-		return al;
-	}
 }
