@@ -204,7 +204,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// apply read-only
 			if (definition.isReadOnly()) {
 				session.setFlushMode(FlushMode.NEVER);
-				session.connection().setReadOnly(true);
+				try {
+					session.connection().setReadOnly(true);
+				}
+				catch (Exception ex) {
+					// driver has thrown SQLException or UnsupportedOperationException
+					logger.warn("Could not set JDBC connection read-only", ex);
+				}
 			}
 
 			// add the Hibernate transaction to the session holder
@@ -344,10 +350,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 
 			// reset read-only
-			if (con.isReadOnly()) {
-				con.setReadOnly(false);
+			try {
+				if (con.isReadOnly()) {
+					con.setReadOnly(false);
+				}
+			}
+			catch (Exception ex) {
+				// driver has thrown SQLException or UnsupportedOperationException
+				logger.warn("Could not reset read-only status of JDBC connection", ex);
 			}
 		}
+
 		catch (HibernateException ex) {
 			logger.warn("Cannot reset transaction isolation", ex);
 		}

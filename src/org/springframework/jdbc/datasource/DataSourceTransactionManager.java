@@ -9,10 +9,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 
 /**
@@ -120,7 +120,13 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 			// apply read-only
 			if (definition.isReadOnly()) {
-				con.setReadOnly(true);
+				try {
+					con.setReadOnly(true);
+				}
+				catch (Exception ex) {
+					// driver has thrown SQLException or UnsupportedOperationException
+					logger.warn("Could not set JDBC connection read-only", ex);
+				}
 			}
 
 			// switch to manual commit
@@ -183,19 +189,29 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		DataSourceUtils.getThreadObjectManager().removeThreadObject(this.dataSource);
 		// reset connection
 		Connection con = txObject.getConnectionHolder().getConnection();
+
 		try {
 			// reset to auto-commit
 			con.setAutoCommit(true);
+
 			// reset read-only
-			if (con.isReadOnly()) {
-				con.setReadOnly(false);
+			try {
+				if (con.isReadOnly()) {
+					con.setReadOnly(false);
+				}
 			}
+			catch (Exception ex) {
+				// driver has thrown SQLException or UnsupportedOperationException
+				logger.warn("Could not reset read-only status of JDBC connection", ex);
+			}
+
 			// reset transaction isolation to previous value, if changed for the transaction
 			if (txObject.getPreviousIsolationLevel() != null) {
 				logger.debug("Resetting isolation level to " + txObject.getPreviousIsolationLevel());
 				con.setTransactionIsolation(txObject.getPreviousIsolationLevel().intValue());
 			}
 		}
+
 		catch (SQLException ex) {
 			logger.warn("Could not reset JDBC connection [" + con + "]", ex);
 		}
