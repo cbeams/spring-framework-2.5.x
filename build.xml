@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 
 <!--
-    Build file for the Spring Framework.
+  Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.70 2004-07-23 08:56:44 jhoeller Exp $
+  $Id: build.xml,v 1.71 2004-07-23 13:00:31 jhoeller Exp $
 
-    This script requires a "lib" directory containing the necessary third party JAR files.
-    See project.properties for the definitions of the properties used in this file.
+  This script requires a "lib" directory containing the necessary third party JAR files.
+  See project.properties for the definitions of the properties used in this file.
 
-		Building Spring requires J2SE 1.4; the "dist" JARs are built with Sun's JDK 1.4.2.
-		Note: To successfully run the tests, you need to use Xerces or any other JAXP parser
-		that properly supports XML includes. A simple way to achieve this is to put
-		xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
+  Building Spring requires J2SE 1.4; the "dist" JARs are built with Sun's JDK 1.4.2.
+  Note: To successfully run the tests, you need to use Xerces or any other JAXP parser
+  that properly supports XML includes. A simple way to achieve this is to put
+  xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
 -->
 
 <project name="spring-core" default="usage" basedir=".">
@@ -24,8 +24,8 @@
 
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
-			<!-- Exclude ibatis-common-2, because it conflicts with ibatis-common -->
-			<!-- The former is not needed for building the framework, but the latter is -->
+			<!-- Exclude ibatis-common-2, because it conflicts with ibatis-common. -->
+			<!-- The former is not needed for building the framework, but the latter is. -->
 			<exclude name="ibatis/ibatis-common-2.jar"/>
 		</fileset>
 
@@ -109,14 +109,13 @@
 		This task depends on the Commons Attributes compile step,
 		as some classes must ship with attributes.
 	-->
-	<target name="build" depends="compileattr"
-		description="Compile main source tree java files into class files (no-jarring)">
+	<target name="build" depends="compileattr" description="Compile main source tree java files into class files">
 
 		<mkdir dir="${target.classes.dir}"/>
 		<mkdir dir="${target.classes.dir}/META-INF"/>
 
-		<javac destdir="${target.classes.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="true">
+		<javac destdir="${target.classes.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<!-- Include Commons Attributes generated Java sources -->
 			<src path="${commons.attributes.tempdir.src}"/>
@@ -264,8 +263,8 @@
 
 		<mkdir dir="${target.mockclasses.dir}"/>
 
-		<javac destdir="${target.mockclasses.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="true">
+		<javac destdir="${target.mockclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${mock.dir}"/>
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
@@ -310,16 +309,16 @@
 		</zip>
 
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"
-			todir="${dist.dir}" preservelastmodified="true"/>
+				todir="${dist.dir}" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
-			todir="${dist.dir}" preservelastmodified="true"/>
+				todir="${dist.dir}" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/view/velocity/spring.vm"
-			todir="${dist.dir}" preservelastmodified="true"/>
+				todir="${dist.dir}" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/view/freemarker/spring.ftl"
-			todir="${dist.dir}" preservelastmodified="true"/>
+				todir="${dist.dir}" preservelastmodified="true"/>
 
 	</target>
 
@@ -339,7 +338,7 @@
 		<mkdir dir="${javadocs.dir}"/>
 
 		<javadoc sourcepath="src" destdir="${javadocs.dir}" windowtitle="Spring Framework"
-			defaultexcludes="yes"	author="true" version="true" use="true">
+				source="1.3" defaultexcludes="yes" author="true" version="true" use="true">
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright (C) 2003-2004 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
@@ -449,13 +448,12 @@
 		This task depends on the Commons Attributes compile step,
 		as some tests require source-level attribute support.
 	-->
-	<target name="buildtests" depends="compiletestattr"
-		description="Compile test source tree Java files into class files">
+	<target name="buildtests" depends="compiletestattr" description="Compile test source tree java files into class files">
 
 		<mkdir dir="${target.testclasses.dir}"/>
 
-		<javac destdir="${target.testclasses.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="true">
+		<javac destdir="${target.testclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${test.dir}"/>
 			<!-- Include Commons Attributes generated Java sources -->
 			<src path="${commons.attributes.tempdir.test}"/>
@@ -587,8 +585,8 @@
 
 		<mkdir dir="${target.clover.dir}"/>
 
-		<javac destdir="${target.clover.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="true">
+		<javac destdir="${target.clover.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="all-libs"/>
 		</javac>
@@ -618,7 +616,7 @@
 
 			<!-- Need files loaded as resources -->
 			<classpath location="${test.dir}"/>
-			
+
 			<classpath refid="all-libs"/>
 
 			<formatter type="plain" usefile="false"/>
@@ -637,7 +635,7 @@
 		Run test suite under Clover coverage analysis, and bring up
 		Clover's Swing browser to display the results.
 	-->
-	<target name="clover.swing" depends="clover.tests" description="Run Clover tests and bring up Swing coverage viewer">
+	<target name="clover.swing" depends="clover.tests" description="Run Clover tests and launch Swing coverage viewer">
 
 		<echo>Launching Clover coverage viewer</echo>
 
@@ -653,7 +651,7 @@
 		Run test suite under Clover coverage analysis, and use Clover
 		to generate Javadoc/style HTML results that may be browsed later.
 	-->
-	<target name="clover.html" depends="clover.tests" description="Generate Clover HTML coverage reports from an existing Clover database">
+	<target name="clover.html" depends="clover.tests" description="Run Clover tests and generate HTML coverage reports">
 
 		<java classname="com.cortexeb.tools.clover.reporters.html.HtmlReporter" fork="yes">
 			<arg line="-o '${target.clover.html.dir}' -i '${clover.initstring}' -t 'Spring Framework'"/>
@@ -788,17 +786,15 @@
 
 	<target name="refdoc" depends="dochtml,dochtmlsingle,docpdf" description="Generate and copy reference documentation"/>
 
-	
-	
-	<!-- sandbox build -->
-	<target name="build-sandbox"
-		description="Compile sandbox source tree java files into class files (no-jarring)">
+
+	<target name="build-sandbox" description="Compile sandbox source tree java files into class files">
+
 		<echo message="WARNING: To keep things speedy, there's no Ant-dependency on the build-target"/>
 		<mkdir dir="${sandbox.target.classes.dir}"/>
 		<mkdir dir="${sandbox.target.classes.dir}/META-INF"/>
 
-		<javac destdir="${sandbox.target.classes.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="true">
+		<javac destdir="${sandbox.target.classes.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${sandbox.src.dir}"/>
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
@@ -816,8 +812,9 @@
 				<include name="*.tld"/>
 			</fileset>
 		</copy>
-					
+
 	</target>
+
 
 	<!--
 		Use Jakarta Commons Attributes to compile the attributes for the sandbox test tree.
@@ -828,22 +825,23 @@
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
 		  <classpath refid="attribute-compiler-classpath"/>
 		</taskdef>
-		
+
 		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.sandbox.test}" >
-			
+
 			<fileset dir="${sandbox.test.dir}" includes="**/*.java"/>
 		</attribute-compiler>
 
  	</target>
-	
+
+
 	<target name="buildtests-sandbox" depends="buildtests, compileattr-sandbox-tests"
-		description="Compile test source tree Java files into class files">
+			description="Compile test source tree Java files into class files">
 
 		<mkdir dir="${sandbox.target.testclasses.dir}"/>
 
-		<javac destdir="${sandbox.target.testclasses.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="true">
+		<javac destdir="${sandbox.target.testclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${sandbox.test.dir}"/>
 			<src path="${commons.attributes.tempdir.sandbox.test}"/>
 			<classpath refid="all-libs"/>
@@ -861,7 +859,7 @@
 				<include name="**/*.xml"/>
 			</fileset>
 		</copy>
-		
+
 	</target>
 
 
@@ -923,8 +921,8 @@
 
 		<mkdir dir="${target.loadclasses.dir}"/>
 
-		<javac destdir="${target.loadclasses.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="false">
+		<javac destdir="${target.loadclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="false">
 
 			<src path="${load.dir}"/>
 
@@ -956,49 +954,56 @@
 	<!--
 		 targets for the automated build
 		 @author Alef Arendsen
-		 
+
 		 'mb' runs all the automated build tests and is supposed to be expanded further
 		 'mb-server-tests' runs all the servers tests
-		 'mb-publish' publishes the results from the server tests		 
+		 'mb-publish' publishes the results from the server tests
 	-->
-	<target name="mb" depends="clean, build, fulljar, tests, mb-server-tests, mb-publish"/>		
-	
-	<target name="mb-server-tests">
-		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
-				<property name="autobuild.nospringbuild" value="true"/>
-				<property name="target.app" value="buildtest"/>
-				<property name="target.server" value="tomcat4"/>
-				<property name="autobuild.nomail" value="true"/>
-		</ant>
-		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
-				<property name="autobuild.nospringbuild" value="true"/>
-				<property name="target.app" value="buildtest"/>
-				<property name="target.server" value="tomcat5"/>
-				<property name="autobuild.nomail" value="true"/>
-		</ant>
-		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
-				<property name="autobuild.nospringbuild" value="true"/>
-				<property name="target.app" value="buildtest"/>
-				<property name="target.server" value="jetty4"/>
-				<property name="autobuild.nomail" value="true"/>
-		</ant>
-		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
-				<property name="autobuild.nospringbuild" value="true"/>
-				<property name="target.app" value="jpetstore"/>
-				<property name="target.server" value="tomcat4"/>
-		</ant>
-		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
-				<property name="autobuild.nospringbuild" value="true"/>
-				<property name="target.app" value="jpetstore"/>
-				<property name="target.server" value="tomcat5"/>
-				<property name="autobuild.nomail" value="true"/>
-		</ant>
-    </target>
+	<target name="mb" depends="clean, build, fulljar, tests, mb-server-tests, mb-publish"/>
 
-	
+
+	<target name="mb-server-tests">
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="buildtest"/>
+			<property name="target.server" value="tomcat4"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="buildtest"/>
+			<property name="target.server" value="tomcat5"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="buildtest"/>
+			<property name="target.server" value="jetty4"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="jpetstore"/>
+			<property name="target.server" value="tomcat4"/>
+		</ant>
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="jpetstore"/>
+			<property name="target.server" value="tomcat5"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+
+	</target>
+
+
 	<target name="mb-publish">
 		<tstamp>
-			<format pattern="yyyy-MM-dd" property="tstamp.servertests"/> 
+			<format pattern="yyyy-MM-dd" property="tstamp.servertests"/>
 		</tstamp>
 		<copy todir="${target.junit.reports.dir}">
 			<fileset dir="${target.dir}/autobuilds/reports">
@@ -1007,11 +1012,11 @@
 		</copy>
 		<mkdir dir="${target.junit.reports.html.dir}"/>
 		<junitreport todir="${target.junit.reports.html.dir}">
-          <fileset dir="${target.junit.reports.dir}">
-            <include name="*.xml"/>
-          </fileset>
-          <report format="frames" todir="${target.junit.reports.html.dir}"/>
-        </junitreport>
+			<fileset dir="${target.junit.reports.dir}">
+				<include name="*.xml"/>
+			</fileset>
+			<report format="frames" todir="${target.junit.reports.html.dir}"/>
+		</junitreport>
 	</target>
 
 </project>
