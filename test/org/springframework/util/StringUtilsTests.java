@@ -25,10 +25,6 @@ import junit.framework.TestCase;
  */
 public class StringUtilsTests extends TestCase {
 
-	/** Run for each test */
-	protected void setUp() throws Exception {
-	}
-
 	public void testCountOccurrencesOf() {
 		assertTrue(
 				"nullx2 = 0",
@@ -65,8 +61,14 @@ public class StringUtilsTests extends TestCase {
 		assertTrue("test last", StringUtils.countOccurrencesOf(s, "r") == 2);
 	}
 
-	public void testCommaDelimitedListToStringArrayNullProducesEmptyArray() {
+	public void testCommaDelimitedListToStringArrayWithNullProducesEmptyArray() {
 		String[] sa = StringUtils.commaDelimitedListToStringArray(null);
+		assertTrue("String array isn't null with null input", sa != null);
+		assertTrue("String array length == 0 with null input", sa.length == 0);
+	}
+
+	public void testCommaDelimitedListToStringArrayWithEmptyStringProducesEmptyArray() {
+		String[] sa = StringUtils.commaDelimitedListToStringArray("");
 		assertTrue("String array isn't null with null input", sa != null);
 		assertTrue("String array length == 0 with null input", sa.length == 0);
 	}

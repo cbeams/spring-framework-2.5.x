@@ -213,22 +213,22 @@ public abstract class StringUtils {
 			return new String[0];
 		}
 		if (delim == null) {
-			return new String[]{s};
+			return new String[] {s};
 		}
 
-		List l = new LinkedList();
+		List result = new ArrayList();
 		int pos = 0;
 		int delPos = 0;
 		while ((delPos = s.indexOf(delim, pos)) != -1) {
-			l.add(s.substring(pos, delPos));
+			result.add(s.substring(pos, delPos));
 			pos = delPos + delim.length();
 		}
-		if (pos <= s.length()) {
-			// add rest of String
-			l.add(s.substring(pos));
+		if (s.length() > 0 && pos <= s.length()) {
+			// add rest of String, but not in case of empty input
+			result.add(s.substring(pos));
 		}
 
-		return (String[]) l.toArray(new String[l.size()]);
+		return (String[]) result.toArray(new String[result.size()]);
 	}
 
 	/**
@@ -305,11 +305,11 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to return a Collection as a delimited (e.g. CSV)
 	 * String. E.g. useful for toString() implementations.
-	 * @param c Collection to display
+	 * @param coll Collection to display
 	 * @param delim delimiter to use (probably a ",")
 	 */
-	public static String collectionToDelimitedString(Collection c, String delim) {
-		return collectionToDelimitedString(c, delim, "", "");
+	public static String collectionToDelimitedString(Collection coll, String delim) {
+		return collectionToDelimitedString(coll, delim, "", "");
 	}
 
 	/**
@@ -325,10 +325,10 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to return a Collection as a CSV String.
 	 * E.g. useful for toString() implementations.
-	 * @param c Collection to display
+	 * @param coll Collection to display
 	 */
-	public static String collectionToCommaDelimitedString(Collection c) {
-		return collectionToDelimitedString(c, ",");
+	public static String collectionToCommaDelimitedString(Collection coll) {
+		return collectionToDelimitedString(coll, ",");
 	}
 
 	/**
