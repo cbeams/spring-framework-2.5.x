@@ -1,6 +1,6 @@
 package org.springframework.samples.countries.web.views;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Iterator;
@@ -9,14 +9,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.SortDefinition;
-import org.springframework.samples.countries.appli.ICountry;
-import org.springframework.util.RefreshablePagedListHolder;
-import org.springframework.web.servlet.view.document.AbstractPdfView;
-import org.springframework.context.NoSuchMessageException;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -31,6 +23,15 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
+
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.SortDefinition;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.samples.countries.appli.ICountry;
+import org.springframework.util.RefreshablePagedListHolder;
+import org.springframework.web.servlet.view.document.AbstractPdfView;
 
 /**
  * This view demonstrates how to send a Pdf file with the Spring Framework
@@ -72,11 +73,11 @@ public class CountriesPdfView extends AbstractPdfView {
 		// So we can well paging, ensuring that only entire cells are printed
 		// at end of pages (the latter is useless in this example as records
 		// keep in one row, but in your own developpment it's not always the case).
-		MyPageEvents events = new MyPageEvents(loc);
+		MyPageEvents events = new MyPageEvents(getMessageSourceAccessor(), loc);
 		writer.setPageEvent( events );
 		events.onOpenDocument( writer, pdfDoc );
 		
-		String title = getMessage("app.name", loc);
+		String title = getMessageSourceAccessor().getMessage("app.name", loc);
 		pdfDoc.add( new Paragraph(title, HEADLINE_FONT));
 		pdfDoc.add( new Paragraph(" "));
 		pdfDoc.add( new Paragraph(" "));
@@ -91,52 +92,52 @@ public class CountriesPdfView extends AbstractPdfView {
 		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
 		table.getDefaultCell().setVerticalAlignment( Element.ALIGN_MIDDLE);
 
-		PdfPCell cell = new PdfPCell(new Phrase(getMessage("criteria", loc), HEADING_FONT));
+		PdfPCell cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage("criteria", loc), HEADING_FONT));
 		cell.setColspan(2);
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		cell.setGrayFill(0.7f);
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(getMessage( "property",loc), HEADING_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "property",loc), HEADING_FONT));
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		cell.setGrayFill(0.9f);
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(getMessage( "value", loc), HEADING_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "value", loc), HEADING_FONT));
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		cell.setGrayFill(0.9f);
 		table.addCell(cell);
 
 		// We put the used criteria and extracting information	
-		cell = new PdfPCell(new Phrase(getMessage( "date.extraction", loc), HEADING_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "date.extraction", loc), HEADING_FONT));
 		table.addCell(cell);
 		cell = new PdfPCell(new Phrase(df.format(pgHolder.getRefreshDate()), HEADING_DATA_FONT));
 		table.addCell(cell);
 
-		cell = new PdfPCell(new Phrase(getMessage( "nbRecords", loc), HEADING_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "nbRecords", loc), HEADING_FONT));
 		table.addCell(cell);
 		cell = new PdfPCell(new Phrase(String.valueOf(pgHolder.getNrOfElements()), HEADING_DATA_FONT));
 		table.addCell(cell);
 
-		cell = new PdfPCell(new Phrase(getMessage( "sort.name", loc), HEADING_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "sort.name", loc), HEADING_FONT));
 		table.addCell(cell);
 		cell = new PdfPCell(new Phrase(sort.getProperty(), HEADING_DATA_FONT));
 		table.addCell(cell);
 
-		cell = new PdfPCell(new Phrase(getMessage( "sort.asc", loc), HEADING_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "sort.asc", loc), HEADING_FONT));
 		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(getMessage(new Boolean(sort.isAscending()).toString(), loc), HEADING_DATA_FONT));
-		table.addCell(cell);
-
-		cell = new PdfPCell(new Phrase(getMessage( "sort.igncase", loc), HEADING_FONT));
-		table.addCell(cell);
-		cell = new PdfPCell(new Phrase(getMessage(new Boolean(sort.isIgnoreCase()).toString(), loc), HEADING_DATA_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage(new Boolean(sort.isAscending()).toString(), loc), HEADING_DATA_FONT));
 		table.addCell(cell);
 
-		cell = new PdfPCell(new Phrase(getMessage( "filter.name", loc), HEADING_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "sort.igncase", loc), HEADING_FONT));
+		table.addCell(cell);
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage(new Boolean(sort.isIgnoreCase()).toString(), loc), HEADING_DATA_FONT));
+		table.addCell(cell);
+
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "filter.name", loc), HEADING_FONT));
 		table.addCell(cell);
 		cell = new PdfPCell(new Phrase(null == filterName ? "" : filterName, HEADING_DATA_FONT));
 		table.addCell(cell);
 
-		cell = new PdfPCell(new Phrase(getMessage( "filter.code", loc), HEADING_FONT));
+		cell = new PdfPCell(new Phrase(getMessageSourceAccessor().getMessage( "filter.code", loc), HEADING_FONT));
 		table.addCell(cell);
 		cell = new PdfPCell(new Phrase(null == filterCode ? "" : filterCode, HEADING_DATA_FONT));
 		table.addCell(cell);
@@ -156,8 +157,8 @@ public class CountriesPdfView extends AbstractPdfView {
 		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
 		table.getDefaultCell().setVerticalAlignment(Element.ALIGN_MIDDLE);
 
-		table.addCell(new Phrase(getMessage( "code", loc), DATA_HEAD_FONT));
-		table.addCell(new Phrase(getMessage( "name", loc), DATA_HEAD_FONT));
+		table.addCell(new Phrase(getMessageSourceAccessor().getMessage( "code", loc), DATA_HEAD_FONT));
+		table.addCell(new Phrase(getMessageSourceAccessor().getMessage( "name", loc), DATA_HEAD_FONT));
 
 		// We set the above row as remaining title
 		// and adjust properties for normal cells
@@ -186,10 +187,15 @@ public class CountriesPdfView extends AbstractPdfView {
 		pdfDoc.add(table);
 	}
 
+
 	//~ Inner Classes ----------------------------------------------------------
 
-	class MyPageEvents extends PdfPageEventHelper {
-		//~ Instance fields ----------------------------------------------------
+	private static class MyPageEvents extends PdfPageEventHelper {
+
+		private MessageSourceAccessor messageSourceAccessor;
+
+		// this the locale to use for retrieved messages
+		private Locale loc;
 
 		// This is the contentbyte object of the writer
 		PdfContentByte cb;
@@ -200,18 +206,13 @@ public class CountriesPdfView extends AbstractPdfView {
 		// this is the BaseFont we are going to use for the header / footer
 		BaseFont bf = null;
 		
-		// this the locale to use for retrieved messages
-		private Locale loc;
-
-			//~ Constructors -------------------------------------------------------
-		public MyPageEvents(Locale loc) {
+		public MyPageEvents(MessageSourceAccessor messageSourceAccessor, Locale loc) {
+			this.messageSourceAccessor = messageSourceAccessor;
 			this.loc = loc;
 		}
 
-		//~ Methods ------------------------------------------------------------
-
 		// we override the onOpenDocument method
-		public void onOpenDocument( PdfWriter writer, Document  document ) {
+		public void onOpenDocument(PdfWriter writer, Document document) {
 			try	{
 				bf = BaseFont.createFont( BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED );
 				cb = writer.getDirectContent();
@@ -223,7 +224,8 @@ public class CountriesPdfView extends AbstractPdfView {
 		// we override the onEndPage method
 		public void onEndPage(PdfWriter writer, Document document) {
 			int pageN = writer.getPageNumber();
-			String text = getMessage("page", "page", loc) + " " + pageN + " " + getMessage("on", "on", loc) + " ";
+			String text = messageSourceAccessor.getMessage("page", "page", loc) + " " + pageN + " " +
+			    messageSourceAccessor.getMessage("on", "on", loc) + " ";
 			float  len = bf.getWidthPoint( text, 8 );
 			cb.beginText();
 			cb.setFontAndSize(bf, 8);

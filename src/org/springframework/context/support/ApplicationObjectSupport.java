@@ -5,16 +5,12 @@
 
 package org.springframework.context.support;
 
-import java.util.Locale;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.NoSuchMessageException;
 
 /**
  * Convenient superclass for application objects that want to be aware of
@@ -43,24 +39,35 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	/** ApplicationContext this object runs in */
 	private ApplicationContext applicationContext;
 
-	public final void setApplicationContext(ApplicationContext ctx) throws ApplicationContextException {
+	/** MessageSourceAccessor for easy message access */
+	private MessageSourceAccessor messageSourceAccessor;
+
+	/**
+	 * Constructor for bean usage via subclassing.
+	 */
+	public ApplicationObjectSupport() {
+	}
+
+	/**
+	 * Constructor for usage as helper to delegate to.
+	 * @param context ApplicationContext object to be used by this object
+	 */
+	public ApplicationObjectSupport(ApplicationContext context) {
+		this.applicationContext = context;
+	}
+
+	public final void setApplicationContext(ApplicationContext context) throws ApplicationContextException {
 		// ignore reinitialization
 		if (this.applicationContext == null) {
-			if (!requiredContextClass().isInstance(ctx)) {
+			if (!requiredContextClass().isInstance(context)) {
 				throw new ApplicationContextException("Invalid application context: needs to be of type '" + requiredContextClass().getName() + "'");
 			}
-			this.applicationContext = ctx;
+			this.applicationContext = context;
+			this.messageSourceAccessor = new MessageSourceAccessor(context);
 			initApplicationContext();
 		}
 	}
 	
-	/**
-	 * Return the ApplicationContext instance used by this object.
-	 */
-	public final ApplicationContext getApplicationContext() {
-		return applicationContext;
-	}
-
 	/**
 	 * Determine the context class that any context passed to
 	 * setApplicationContext must be an instance of.
@@ -81,114 +88,18 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	}
 
 	/**
-	 * Retrieve the message for the given code and the default Locale.
-	 * @param code code of the message
-	 * @param defaultMessage String to return if the lookup fails
-	 * @return the message
+	 * Return the ApplicationContext instance used by this object.
 	 */
-	protected final String getMessage(String code, String defaultMessage) {
-		return getApplicationContext().getMessage(code, null, defaultMessage, Locale.getDefault());
+	public final ApplicationContext getApplicationContext() {
+		return applicationContext;
 	}
 
 	/**
-	 * Retrieve the message for the given code and the given Locale.
-	 * @param code code of the message
-	 * @param defaultMessage String to return if the lookup fails
-	 * @param locale Locale in which to do lookup
-	 * @return the message
+	 * Return a MessageSourceAccessor for the application context
+	 * used by this object, for easy message access.
 	 */
-	protected final String getMessage(String code, String defaultMessage, Locale locale) {
-		return getApplicationContext().getMessage(code, null, defaultMessage, locale);
-	}
-
-	/**
-	 * Retrieve the message for the given code and the default Locale.
-	 * @param code code of the message
-	 * @param args arguments for the message, or null if none
-	 * @param defaultMessage String to return if the lookup fails
-	 * @return the message
-	 */
-	protected final String getMessage(String code, Object[] args, String defaultMessage) {
-		return getApplicationContext().getMessage(code, args, defaultMessage, Locale.getDefault());
-	}
-
-	/**
-	 * Retrieve the message for the given code and the given Locale.
-	 * @param code code of the message
-	 * @param args arguments for the message, or null if none
-	 * @param defaultMessage String to return if the lookup fails
-	 * @param locale Locale in which to do lookup
-	 * @return the message
-	 */
-	protected final String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
-		return getApplicationContext().getMessage(code, args, defaultMessage, locale);
-	}
-
-	/**
-	 * Retrieve the message for the given code and the default Locale.
-	 * @param code code of the message
-	 * @return the message
-	 * @throws NoSuchMessageException if not found
-	 */
-	protected final String getMessage(String code) throws NoSuchMessageException {
-		return getApplicationContext().getMessage(code, null, Locale.getDefault());
-	}
-
-	/**
-	 * Retrieve the message for the given code and the given Locale.
-	 * @param code code of the message
-	 * @param locale Locale in which to do lookup
-	 * @return the message
-	 * @throws NoSuchMessageException if not found
-	 */
-	protected final String getMessage(String code, Locale locale) throws NoSuchMessageException {
-		return getApplicationContext().getMessage(code, null, locale);
-	}
-
-	/**
-	 * Retrieve the message for the given code and the default Locale.
-	 * @param code code of the message
-	 * @param args arguments for the message, or null if none
-	 * @return the message
-	 * @throws NoSuchMessageException if not found
-	 */
-	protected final String getMessage(String code, Object[] args) throws NoSuchMessageException {
-		return getApplicationContext().getMessage(code, args, Locale.getDefault());
-	}
-
-	/**
-	 * Retrieve the message for the given code and the given Locale.
-	 * @param code code of the message
-	 * @param args arguments for the message, or null if none
-	 * @param locale Locale in which to do lookup
-	 * @return the message
-	 * @throws NoSuchMessageException if not found
-	 */
-	protected final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
-		return getApplicationContext().getMessage(code, args, locale);
-	}
-
-	/**
-	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance)
-	 * in the default Locale.
-	 * @param resolvable the MessageSourceResolvable
-	 * @return the message
-	 * @throws NoSuchMessageException if not found
-	 */
-	protected final String getMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
-		return getApplicationContext().getMessage(resolvable, Locale.getDefault());
-	}
-
-	/**
-	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance)
-	 * in the given Locale.
-	 * @param resolvable the MessageSourceResolvable
-	 * @param locale Locale in which to do lookup
-	 * @return the message
-	 * @throws NoSuchMessageException if not found
-	 */
-	protected final String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
-		return getApplicationContext().getMessage(resolvable, locale);
+	protected final MessageSourceAccessor getMessageSourceAccessor() {
+		return this.messageSourceAccessor;
 	}
 
 }
