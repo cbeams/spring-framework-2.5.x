@@ -22,8 +22,10 @@ public abstract class BindUtils {
 	 * @param object object to bind the parameters to
 	 * @param objectName name of the bind object
 	 * @return the binder used (can be treated as DataBinder or Errors instance)
+	 * @throws ServletException if thrown by multipart binding
 	 */
-	public static BindException bind(ServletRequest request, Object object, String objectName) {
+	public static BindException bind(ServletRequest request, Object object, String objectName)
+	    throws ServletException {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(object, objectName);
 		binder.bind(request);
 		return binder;
@@ -38,7 +40,7 @@ public abstract class BindUtils {
 	 * @param initializer implementation of the BindInitializer interface
 	 * which will be able to set custom editors
 	 * @return the binder used (can be treated as DataBinder or Errors instance)
-	 * @throws ServletException if thrown by the BindInitializer
+	 * @throws ServletException if thrown by multipart binding or the BindInitializer
 	 */
 	public static BindException bind(ServletRequest request, Object object, String objectName,
 																	 BindInitializer initializer) throws ServletException  {
@@ -58,9 +60,10 @@ public abstract class BindUtils {
 	 * @param objectName name of the bind object
 	 * @param validator validator to be invoked, or null if no validation
 	 * @return the binder used (can be treated as Errors instance)
+	 * @throws ServletException if thrown by multipart binding
 	 */
 	public static BindException bindAndValidate(ServletRequest request, Object object, String objectName,
-																							Validator validator) {
+																							Validator validator) throws ServletException {
 		BindException binder = bind(request, object, objectName);
 		ValidationUtils.invokeValidator(validator, object, binder);
 		return binder;
@@ -76,10 +79,11 @@ public abstract class BindUtils {
 	 * @param validator validator to be invoked, or null if no validation
 	 * @param initializer Implementation of the BindInitializer interface which will be able to set custom editors
 	 * @return the binder used (can be treated as Errors instance)
-	 * @throws ServletException if thrown by the BindInitializer
+	 * @throws ServletException if thrown by multipart binding or the BindInitializer
 	 */
 	public static BindException bindAndValidate(ServletRequest request,	Object object, String objectName,
-																							Validator validator, BindInitializer initializer) throws ServletException  {
+																							Validator validator, BindInitializer initializer)
+	    throws ServletException  {
 		BindException binder = bind(request, object, objectName, initializer);
 		ValidationUtils.invokeValidator(validator, object, binder);
 		return binder;

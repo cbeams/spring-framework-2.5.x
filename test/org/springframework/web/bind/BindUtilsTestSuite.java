@@ -19,7 +19,7 @@ import org.springframework.web.mock.MockServletContext;
  */
 public class BindUtilsTestSuite extends TestCase {
 
-	public void testBind() {
+	public void testBind() throws ServletException {
 		ServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test.do");
 		request.addParameter("name", " myname ");
@@ -45,7 +45,7 @@ public class BindUtilsTestSuite extends TestCase {
 		assertTrue("Correct spouse age error", "typeMismatch".equals(errors.getFieldError("spouse.age").getCode()));
 	}
 
-	public void testBindAndValidate() {
+	public void testBindAndValidate() throws ServletException {
 		ServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test.do");
 		request.addParameter("name", " myname ");
