@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.benchmark.invokers;
 
 import org.springframework.transaction.TransactionDefinition;
@@ -11,9 +11,8 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /**
- * 
  * @author Rod Johnson
- * @version $Id: DummyTransactionManager.java,v 1.3 2004-01-27 02:02:31 dkopylenko Exp $
+ * @version $Id: DummyTransactionManager.java,v 1.4 2004-01-29 23:33:48 jhoeller Exp $
  */
 public class DummyTransactionManager extends AbstractPlatformTransactionManager {
 
@@ -28,6 +27,18 @@ public class DummyTransactionManager extends AbstractPlatformTransactionManager 
 	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException {
 	}
 
+	protected Object doSuspend(Object transaction) throws TransactionException {
+		return null;
+	}
+
+	protected void doResume(Object transaction, Object suspendedResources)
+			throws TransactionException {
+	}
+
+	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
+		return false;
+	}
+
 	protected void doCommit(DefaultTransactionStatus status) throws TransactionException {
 	}
 
@@ -37,20 +48,7 @@ public class DummyTransactionManager extends AbstractPlatformTransactionManager 
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) throws TransactionException {
 	}
 
-	
 	protected void doCleanupAfterCompletion(Object transaction) {
-	}
-
-	
-	protected void doResume(Object transaction, Object suspendedResources) throws TransactionException {
-	}
-
-	protected Object doSuspend(Object transaction) throws TransactionException {
-		return null;
-	}
-
-	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
-		return false;
 	}
 
 }
