@@ -1,6 +1,7 @@
 package org.springframework.context.config;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 
@@ -26,6 +27,12 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	 * @see org.springframework.web.context.ConfigurableWebApplicationContext
 	 */
 	void setParent(ApplicationContext parent);
+
+	/**
+	 * Return the internal bean factory of this application context.
+	 * Can be used to access specific functionality of the factory.
+	 */
+	ConfigurableListableBeanFactory getBeanFactory();
 
 	/**
 	 * Load or refresh the persistent representation of the configuration,
