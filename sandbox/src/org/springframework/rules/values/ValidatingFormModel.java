@@ -69,7 +69,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
     public MetaAspectAccessStrategy getMetaAspectAccessor() {
         return getAccessStrategy().getMetaAspectAccessor();
     }
-    
+
     public Object getDomainObject() {
         return this;
     }
@@ -110,10 +110,12 @@ public class ValidatingFormModel extends DefaultFormModel implements
                         "No rules source has been configured; please set a valid reference.");
         BeanPropertyExpression constraint;
         if (getFormObject() instanceof RulesProvider) {
-            constraint = ((RulesProvider)getFormObject()).getRules(domainObjectProperty);
-        } else {
-            constraint = rulesSource.getRules(
-                    getFormObjectClass(), domainObjectProperty);
+            constraint = ((RulesProvider)getFormObject())
+                    .getRules(domainObjectProperty);
+        }
+        else {
+            constraint = rulesSource.getRules(getFormObjectClass(),
+                    domainObjectProperty);
         }
         if (constraint != null) {
             FormValueModelValidator validator = new FormValueModelValidator(
@@ -173,7 +175,8 @@ public class ValidatingFormModel extends DefaultFormModel implements
     private void fireConstraintSatisfied(BeanPropertyExpression constraint) {
         Iterator it = validationListeners.iterator();
         while (it.hasNext()) {
-            ((ValidationListener)it.next()).constraintSatisfied(constraint);
+            ((ValidationListener)it.next())
+                    .constraintSatisfied(new ValidationEvent(this, constraint));
         }
     }
 
@@ -198,8 +201,9 @@ public class ValidatingFormModel extends DefaultFormModel implements
             PropertyResults results) {
         Iterator it = validationListeners.iterator();
         while (it.hasNext()) {
-            ((ValidationListener)it.next()).constraintViolated(constraint,
-                    results);
+            ((ValidationListener)it.next())
+                    .constraintViolated(new ValidationEvent(this, constraint,
+                            results));
         }
     }
 

@@ -88,6 +88,10 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
             ValueModel formValueModel) {
     }
 
+    public Object getValue(String domainObjectProperty) {
+        return getValueModel(domainObjectProperty).get();
+    }
+
     public ValueModel getValueModel(String domainObjectProperty) {
         ValueModel valueModel = (ValueModel)formValueModels
                 .get(domainObjectProperty);

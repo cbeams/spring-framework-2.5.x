@@ -89,6 +89,7 @@ public class DefaultMessageTranslator implements Visitor {
     }
 
     public String getMessage(PropertyResults results) {
+        Assert.notNull(results);
         return buildMessage(results.getPropertyName(), results
                 .getRejectedValue(), results.getViolatedConstraint(), Locale
                 .getDefault());

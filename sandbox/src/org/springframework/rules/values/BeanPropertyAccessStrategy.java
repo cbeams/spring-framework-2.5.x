@@ -62,7 +62,9 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
                     logger
                             .debug("[Updating the enclosed bean wrapper's target object]");
                 }
-                beanWrapper.setWrappedInstance(beanHolder.get());
+                if (beanHolder.get() != null) {
+                    beanWrapper.setWrappedInstance(beanHolder.get());
+                }
             }
         });
     }
@@ -99,6 +101,7 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
      */
     public Object getValue(String aspect) {
         try {
+            if (beanHolder.get() == null) { return null; }
             if (logger.isDebugEnabled()) {
                 logger.debug("Accessing aspect '" + aspect + "'...");
             }
@@ -116,6 +119,8 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
      *      java.lang.Object)
      */
     public void setValue(String aspect, Object value) {
+        if (beanHolder.get() == null) { throw new IllegalStateException(
+                "Attempt to set property on null reference"); }
         if (logger.isDebugEnabled()) {
             logger.debug("Setting aspect '" + aspect + "' = " + value);
         }

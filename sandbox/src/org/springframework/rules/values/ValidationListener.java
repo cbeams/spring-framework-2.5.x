@@ -15,15 +15,11 @@
  */
 package org.springframework.rules.values;
 
-import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.reporting.ValidationResults;
-
 /**
  * @author Keith Donald
  */
 public interface ValidationListener {
-    public void constraintSatisfied(UnaryPredicate constraint);
+    public void constraintSatisfied(ValidationEvent event);
 
-    public void constraintViolated(UnaryPredicate constraint,
-            ValidationResults results);
+    public void constraintViolated(ValidationEvent event);
 }

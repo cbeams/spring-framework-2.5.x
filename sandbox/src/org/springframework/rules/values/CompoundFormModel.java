@@ -84,7 +84,11 @@ public class CompoundFormModel implements FormModel {
                 });
     }
 
-    public ValueModel getValueModel(final String domainObjectProperty) {
+    public Object getValue(String domainObjectProperty) {
+        return getValueModel(domainObjectProperty).get();
+    }
+
+    public ValueModel getValueModel(String domainObjectProperty) {
         Iterator it = formModels.values().iterator();
         while (it.hasNext()) {
             FormModel formModel = (FormModel)it.next();
