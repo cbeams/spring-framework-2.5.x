@@ -134,7 +134,7 @@ public class XmlFlowBuilderTest extends TestCase {
 		assertNotNull(subFlowState1);
 		assertNotNull(subFlowState1.getSubFlow());
 		assertEquals("subFlow1", subFlowState1.getSubFlow().getId());
-		assertNotNull(subFlowState1.getAttributesMapper());
+		assertNotNull(subFlowState1.getFlowAttributesMapper());
 		assertEquals(1, subFlowState1.getTransitions().length);
 		assertNotNull(subFlowState1.getTransition("event1"));
 		assertEquals("endState1", subFlowState1.getTransition("event1").getTargetStateId());
@@ -143,7 +143,7 @@ public class XmlFlowBuilderTest extends TestCase {
 		assertNotNull(subFlowState2);
 		assertNotNull(subFlowState2.getSubFlow());
 		assertEquals("subFlow2", subFlowState2.getSubFlow().getId());
-		assertNull(subFlowState2.getAttributesMapper());
+		assertNull(subFlowState2.getFlowAttributesMapper());
 		assertEquals(1, subFlowState2.getTransitions().length);
 		assertNotNull(subFlowState2.getTransition("event2"));
 		assertEquals("endState2", subFlowState2.getTransition("event2").getTargetStateId());
