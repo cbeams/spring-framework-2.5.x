@@ -39,12 +39,16 @@ import org.springframework.beans.BeansException;
  * The syntax is PATH=HANDLER_BEAN_NAME.
  * If the path doesn't begin with a slash, one is prepended.
  *
- * <p>Supports direct matches (given "/test" -> registered "/test")
- * and "*" matches (given "/test" -> registered "/t*").
+ * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
+ * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
+ * matches both "/test" and "/team", "/test/*" matches all paths in the
+ * "/test" directory, "/test/**" matches all paths below "/test".
+ * For details, see the PathMatcher class.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.web.servlet.DispatcherServlet
+ * @see org.springframework.util.PathMatcher
  * @see java.util.Properties
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {

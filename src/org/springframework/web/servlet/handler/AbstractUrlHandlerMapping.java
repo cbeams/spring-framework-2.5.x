@@ -33,8 +33,10 @@ import org.springframework.web.util.UrlPathHelper;
  * URL lookup. For information on the latter, see alwaysUseFullPath property.
  *
  * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
- * and various Ant-style pattern matches, e.g. a registered "/t*" matches
- * both "/test" and "/team". For details, see the PathMatcher class.
+ * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
+ * matches both "/test" and "/team", "/test/*" matches all paths in the
+ * "/test" directory, "/test/**" matches all paths below "/test".
+ * For details, see the PathMatcher class.
  *
  * @author Juergen Hoeller
  * @since 16.04.2003
@@ -48,7 +50,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private boolean lazyInitHandlers = false;
 
-	private Map handlerMap = new HashMap();
+	private final Map handlerMap = new HashMap();
 
 
 	/**

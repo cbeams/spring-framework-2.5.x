@@ -22,40 +22,42 @@ import java.util.StringTokenizer;
 
 /**
  * Utility for matching paths with patterns in an Ant-like way.
- * Examples are provided below. Part of this mapping code has been
- * kindly borrowed from Ant (http://ant.apache.org).
+ * Examples are provided below.
  *
- * <p>The mapping matches urls using the following rules:<br>
+ * <p>Part of this mapping code has been kindly borrowed from
+ * <a href="http://ant.apache.org">Apache Ant</a>.
+ *
+ * <p>The mapping matches URLs using the following rules:<br>
  * <ul>
- * <li>'*' matches zero or more characters</li>
- * <li>'?' matches one characters</li>
+ * <li>? matches one character</li>
+ * <li>* matches zero or more characters</li>
  * <li>** matches zero or more 'directories' in a path</li>
  * </ul>
  *
  * <p>Some examples:<br>
  * <ul>
- * <li>com/**\/test.jsp - matches all test.jsp path underneath the com path</li>
- * <li>org/springframework/**\/*.jsp - matches all .jsp files underneath the
- * org/springframework path</li>
  * <li>com/t?st.jsp - matches test.jsp but also tast.jsp or txst.jsp</li>
- * <li>com/**\/servlet/bla.jsp - matches org/springframework/servlet/bla.jsp but
- * also org/springframework/testing/servlet/bla.jsp and com/servlet/bla.jsp</li>
+ * <li>com/*.jsp - matches all .jsp files in the com directory</li>
+ * <li>com/&#42;&#42;/test.jsp - matches all test.jsp path underneath the com path</li>
+ * <li>org/springframework/&#42;&#42;/*.jsp - matches all .jsp files underneath the
+ * org/springframework path</li>
+ * <li>com/&#42;&#42;/servlet/bla.jsp - matches org/springframework/servlet/bla.jsp
+ * but also org/springframework/testing/servlet/bla.jsp and com/servlet/bla.jsp</li>
  * </ul>
  *
  * @author Alef Arendsen
+ * @since 16.07.2003
  */
 public abstract class PathMatcher {
 
 	/**
-	 * Matches a strign agains the given pattern
+	 * Match a string against the given pattern.
 	 * @param pattern the pattern to match against
 	 * @param str the string to test
-	 * @return <code>true</code> is the arguments matched, <code>false</code>
-	 * otherwise
+	 * @return whether the arguments matched
 	 */
 	public static boolean match(String pattern, String str) {
-		if (str.startsWith("/") !=
-		    pattern.startsWith("/")) {
+		if (str.startsWith("/") != pattern.startsWith("/")) {
 			return false;
 		}
 
@@ -314,7 +316,7 @@ public abstract class PathMatcher {
 	}
 
 	/**
-	 * Breaks up a given path in a List of elements.
+	 * Break up a given path in a List of elements.
 	 * @param path Path to tokenize. Must not be <code>null</code>.
 	 * @return a List of path elements from the tokenized path
 	 */
