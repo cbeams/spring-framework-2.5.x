@@ -37,9 +37,9 @@ import org.apache.ojb.broker.accesslayer.LookupException;
 public interface PersistenceBrokerCallback {
 
 	/**
-	 * Gets called by PersistenceBrokerTemplate.execute with an active
-	 * PersistenceBroker. Does not need to care about activating or closing
-	 * the PersistenceBroker, or handling transactions.
+	 * Gets called by <code>PersistenceBrokerTemplate.execute</code> with an active
+	 * PersistenceBroker. Does not need to care about activating or closing the
+	 * PersistenceBroker, or handling transactions.
 	 *
 	 * <p>Allows for returning a result object created within the callback,
 	 * i.e. a domain object or a collection of domain objects.

@@ -43,9 +43,17 @@ import org.springframework.dao.DataAccessException;
 public interface CallableStatementCallback {
 
 	/**
-	 * Gets called by JdbcTemplate.execute with an active JDBC CallableStatement.
-	 * Does not need to care about activating or closing the Connection,
-	 * or handling transactions.
+	 * Gets called by <code>JdbcTemplate.execute</code> with an active JDBC
+	 * CallableStatement. Does not need to care about closing the Statement
+	 * or the Connection, or about handling transactions: this will all be
+	 * handled by Spring's JdbcTemplate.
+	 *
+	 * <p><b>NOTE:</b> Any ResultSets opened should be closed in finally blocks
+	 * within the callback implementation. Spring will close the Statement
+	 * object after the callback returned, but this does not necessarily imply
+	 * that the ResultSet resources will be closed: the Statement objects might
+	 * get pooled by the connection pool, with <code>close</code> calls only
+	 * returning the object to the pool but not physically closing the resources.
 	 *
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
 	 * DataSourceTransactionManager), the code will simply get executed on the
@@ -55,7 +63,7 @@ public interface CallableStatementCallback {
 	 *
 	 * <p>Allows for returning a result object created within the callback, i.e.
 	 * a domain object or a collection of domain objects. A thrown RuntimeException
-	 * is treated as application exception, it gets propagated to the caller of
+	 * is treated as application exception: it gets propagated to the caller of
 	 * the template.
 	 *
 	 * @param cs active JDBC CallableStatement

@@ -44,7 +44,7 @@ import javax.jdo.PersistenceManager;
 public interface JdoCallback {
 
 	/**
-	 * Gets called by JdoTemplate.execute with an active PersistenceManager.
+	 * Gets called by <code>JdoTemplate.execute</code> with an active PersistenceManager.
 	 * Does not need to care about activating or closing the PersistenceManager,
 	 * or handling transactions.
 	 *

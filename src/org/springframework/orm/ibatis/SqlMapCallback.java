@@ -31,12 +31,14 @@ import com.ibatis.db.sqlmap.MappedStatement;
  *
  * @author Juergen Hoeller
  * @since 28.11.2003
+ * @see SqlMapTemplate#execute(String, SqlMapCallback)
  */
 public interface SqlMapCallback {
 
 	/**
-	 * Gets called by SqlMapTemplate.execute with an active JDBC Connection. Does not
-	 * need to care about the lifecycle of the Connection or handling transactions.
+	 * Gets called by <code>SqlMapTemplate.execute</code> with an active JDBC
+	 * Connection. Does not need to care about the lifecycle of the Connection
+	 * or handling transactions.
 	 *
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
 	 * DataSourceTransactionManager), the code will simply get executed on the
@@ -54,7 +56,6 @@ public interface SqlMapCallback {
 	 * @param con the JDBC Connection to work on
 	 * @return a result object, or null if none
 	 * @throws SQLException if thrown by MappedStatement methods
-	 * @see SqlMapTemplate#execute
 	 * @see SqlMapTemplate#executeQueryForList
 	 * @see SqlMapTemplate#executeQueryForMap
 	 * @see SqlMapTemplate#executeUpdate

@@ -40,9 +40,9 @@ import org.springframework.dao.DataAccessException;
 public interface ConnectionCallback {
 
 	/**
-	 * Gets called by JdbcTemplate.execute with an active JDBC Connection.
-	 * Does not need to care about activating or closing the Connection,
-	 * or handling transactions.
+	 * Gets called by <code>JdbcTemplate.execute</code> with an active JDBC
+	 * Connection. Does not need to care about activating or closing the
+	 * Connection, or handling transactions.
 	 *
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
 	 * DataSourceTransactionManager), the code will simply get executed on the

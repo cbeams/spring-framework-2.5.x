@@ -30,13 +30,14 @@ import com.ibatis.sqlmap.client.SqlMapExecutor;
  *
  * @author Juergen Hoeller
  * @since 24.02.2004
+ * @see SqlMapClientTemplate#execute(SqlMapClientCallback)
  */
 public interface SqlMapClientCallback {
 
 	/**
-	 * Gets called by SqlMapClientTemplate.execute with an active SqlMapExecutor.
-	 * Does not need to care about activating or closing the session,
-	 * or handling transactions.
+	 * Gets called by <code>SqlMapClientTemplate.execute</code> with an active
+	 * SqlMapExecutor. Does not need to care about activating or closing the
+	 * session, or handling transactions.
 	 *
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
 	 * DataSourceTransactionManager), the code will simply get executed on the
@@ -54,7 +55,6 @@ public interface SqlMapClientCallback {
 	 * SqlMapExecutor interface here to avoid manual lifecycle handling
 	 * @return a result object, or null if none
 	 * @throws SQLException if throw my the iBATIS SQL Maps API
-	 * @see SqlMapClientTemplate#execute
 	 * @see SqlMapClientTemplate#queryForList
 	 * @see SqlMapClientTemplate#queryForMap
 	 * @see SqlMapClientTemplate#queryForObject

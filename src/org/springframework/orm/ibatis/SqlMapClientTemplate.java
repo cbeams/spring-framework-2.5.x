@@ -49,9 +49,25 @@ import org.springframework.util.Assert;
  * methods that mirror SqlMapExecutor's execution methods. See the
  * SqlMapExecutor javadocs for details on those methods.
  *
- * <p>Needs a SqlMapClient to work on, passed in via the "sqlMapClient" property.
- * Can additionally be configured with a DataSource for fetching Connections,
- * although this is not necessary if a DataSource is specified for the SqlMapClient.
+ * <p>It is generally recommended to use the convenience methods on this template
+ * for plain query/insert/update/delete operations. However, for more complex
+ * operations like batch updates, a custom SqlMapClientCallback must be implemented,
+ * usually as anonymous inner class. For example:
+ *
+ * <pre>
+ * getSqlMapClientTemplate().execute(new SqlMapClientCallback() {
+ * 	 public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
+ * 		 executor.startBatch();
+ * 		 executor.update("insertSomething", "myParamValue");
+ * 		 executor.update("insertSomethingElse", "myOtherParamValue");
+ * 		 executor.executeBatch();
+ * 		 return null;
+ * 	 }
+ * });</pre>
+ *
+ * The template needs a SqlMapClient to work on, passed in via the "sqlMapClient"
+ * property. Can additionally be configured with a DataSource for fetching Connections,
+ * although this is not necessary if a DataSource is specified for the SqlMapClient itself.
  *
  * <p>NOTE: The SqlMapClient/SqlMapSession API is the API of iBATIS SQL Maps 2.
  * With SQL Maps 1.x, the SqlMap/MappedStatement API has to be used.

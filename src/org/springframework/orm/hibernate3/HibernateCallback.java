@@ -43,9 +43,9 @@ import org.hibernate.Session;
 public interface HibernateCallback {
 
 	/**
-	 * Gets called by HibernateTemplate.execute with an active Hibernate Session.
-	 * Does not need to care about activating or closing the Session,
-	 * or handling transactions.
+	 * Gets called by <code>HibernateTemplate.execute</code> with an active
+	 * Hibernate Session. Does not need to care about activating or closing
+	 * the Session, or handling transactions.
 	 *
 	 * <p>If called without a thread-bound Hibernate transaction (initiated
 	 * by HibernateTransactionManager), the code will simply get executed on the
