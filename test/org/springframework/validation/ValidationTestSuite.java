@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.validation;
 
@@ -27,6 +27,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Rod Johnson
@@ -89,7 +90,7 @@ public class ValidationTestSuite extends TestCase {
 	public void testBindingWithAllowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
-		binder.setAllowedFields(new String[] {"name", "myparam"});
+		binder.setAllowedFields(new String[]{"name", "myparam"});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("age", "32x"));
@@ -109,7 +110,7 @@ public class ValidationTestSuite extends TestCase {
 	public void testBindingWithAllowedFieldsUsingAsterisks() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
-		binder.setAllowedFields(new String[] {"nam*", "*ouchy"});
+		binder.setAllowedFields(new String[]{"nam*", "*ouchy"});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("touchy", "Rod"));
@@ -127,31 +128,31 @@ public class ValidationTestSuite extends TestCase {
 		TestBean tb = (TestBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
 	}
-	
+
 	/**
 	 * Tests for required field, both null, non-existing and empty strings
 	 */
 	public void testBindingWithRequiredFields() throws Exception {
-		TestBean alef = new TestBean();		
-		
+		TestBean alef = new TestBean();
+
 		DataBinder binder = new DataBinder(alef, "person");
-		binder.setRequiredFields(new String[] {"name", "touchy", "date"});		
-		
+		binder.setRequiredFields(new String[]{"name", "touchy", "date"});
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("touchy", ""));
 		pvs.addPropertyValue(new PropertyValue("name", null));
-		
+
 		binder.bind(pvs);
-		
+
 		BindException ex = binder.getErrors();
-		assertEquals("Wrong amount of errors", 3, ex.getErrorCount());		
-		
+		assertEquals("Wrong amount of errors", 3, ex.getErrorCount());
+
 		/*// for debugging purposes
 		assertTrue("Error available for name", ex.getFieldError("name") != null);
 		assertTrue("Error available for touchy", ex.getFieldError("touchy") != null);
 		assertTrue("Error available for date", ex.getFieldError("date") != null);
 		*/
-		
+
 		assertEquals("required", ex.getFieldError("touchy").getCode());
 		assertEquals("required", ex.getFieldError("name").getCode());
 		assertEquals("required", ex.getFieldError("date").getCode());
@@ -166,6 +167,7 @@ public class ValidationTestSuite extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
+
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
 			}
@@ -202,6 +204,7 @@ public class ValidationTestSuite extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new Integer(99));
 			}
+
 			public String getAsText() {
 				return "argh";
 			}
@@ -223,6 +226,7 @@ public class ValidationTestSuite extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
+
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
 			}
@@ -384,7 +388,7 @@ public class ValidationTestSuite extends TestCase {
 	public void testDirectBindingToIndexedField() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
-		binder.registerCustomEditor(String.class, "array", new PropertyEditorSupport() {
+		binder.registerCustomEditor(TestBean.class, "array", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array" + text, 99));
 			}
@@ -428,6 +432,40 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[4]);
 	}
 
+	public void testBindToStringArrayWithArrayEditor() {
+		StringArrayTestBean tb = new StringArrayTestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(String[].class, "stringArray", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(StringUtils.delimitedListToStringArray(text, "-"));
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("stringArray", "a1-b2");
+		binder.bind(pvs);
+		assertTrue(!binder.getErrors().hasErrors());
+		assertEquals(2, tb.getStringArray().length);
+		assertEquals("a1", tb.getStringArray()[0]);
+		assertEquals("b2", tb.getStringArray()[1]);
+	}
+
+	public void testBindToStringArrayWithComponentEditor() {
+		StringArrayTestBean tb = new StringArrayTestBean();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("X" + text);
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("stringArray", new String[] {"a1", "b2"});
+		binder.bind(pvs);
+		assertTrue(!binder.getErrors().hasErrors());
+		assertEquals(2, tb.getStringArray().length);
+		assertEquals("Xa1", tb.getStringArray()[0]);
+		assertEquals("Xb2", tb.getStringArray()[1]);
+	}
+
 	public void testBindingErrors() {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -454,6 +492,79 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("Field Person Age did not have correct type", msg);
 	}
 
+	public void testValidationUtilsEmpty() throws Exception {
+		//Test null
+		TestBean tb = new TestBean();
+		Errors errors = new BindException(tb, "tb");
+		Validator testValidator = new ValidationUtilsEmptyValidator();
+		testValidator.validate(tb, errors);
+		assertTrue(errors.hasFieldErrors("name"));
+		assertEquals("EMPTY", errors.getFieldError("name").getCode());
+
+		//Test empty String
+		tb.setName("");
+		errors = new BindException(tb, "tb");
+		testValidator.validate(tb, errors);
+		assertTrue(errors.hasFieldErrors("name"));
+		assertEquals("EMPTY", errors.getFieldError("name").getCode());
+
+		//Test OK1
+		tb.setName(" ");
+		errors = new BindException(tb, "tb");
+		testValidator.validate(tb, errors);
+		assertFalse(errors.hasFieldErrors("name"));
+
+		//Test OK2
+		tb.setName("Roddy");
+		errors = new BindException(tb, "tb");
+		testValidator.validate(tb, errors);
+		assertFalse(errors.hasFieldErrors("name"));
+	}
+
+	public void testValidationUtilsEmptyOrWhitespace() throws Exception {
+		//Test null
+		TestBean tb = new TestBean();
+		Errors errors = new BindException(tb, "tb");
+		Validator testValidator = new ValidationUtilsEmptyOrWhitespaceValidator();
+		testValidator.validate(tb, errors);
+		assertTrue(errors.hasFieldErrors("name"));
+		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
+
+		//Test empty String
+		tb.setName("");
+		errors = new BindException(tb, "tb");
+		testValidator.validate(tb, errors);
+		assertTrue(errors.hasFieldErrors("name"));
+		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
+
+		//Test empty String
+		tb.setName(" ");
+		errors = new BindException(tb, "tb");
+		testValidator.validate(tb, errors);
+		assertTrue(errors.hasFieldErrors("name"));
+		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
+
+		//Test OK
+		tb.setName("Roddy");
+		errors = new BindException(tb, "tb");
+		testValidator.validate(tb, errors);
+		assertFalse(errors.hasFieldErrors("name"));
+	}
+
+
+	public static class StringArrayTestBean {
+
+		private String[] stringArray = new String[1];
+
+		public void setStringArray(String[] stringArray) {
+			this.stringArray = stringArray;
+		}
+
+		public String[] getStringArray() {
+			return stringArray;
+		}
+	}
+
 
 	private static class TestBeanValidator implements Validator {
 
@@ -476,11 +587,11 @@ public class ValidationTestSuite extends TestCase {
 				errors.reject("NAME_TOUCHY_MISMATCH", "name and touchy do not match");
 			}
 			if (tb.getAge() == 0) {
-				errors.reject("GENERAL_ERROR", new String[] {"arg"}, "msg");
+				errors.reject("GENERAL_ERROR", new String[]{"arg"}, "msg");
 			}
 		}
 	}
-	
+
 
 	private static class SpouseValidator implements Validator {
 
@@ -495,5 +606,31 @@ public class ValidationTestSuite extends TestCase {
 			}
 		}
 	}
+
+
+	private static class ValidationUtilsEmptyValidator implements Validator {
+
+		public boolean supports(Class clazz) {
+			return TestBean.class.isAssignableFrom(clazz);
+		}
+
+		public void validate(Object obj, Errors errors) {
+			//TestBean tb = (TestBean) obj;
+			ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!");
+		}
+	}
+
+	private static class ValidationUtilsEmptyOrWhitespaceValidator implements Validator {
+
+		public boolean supports(Class clazz) {
+			return TestBean.class.isAssignableFrom(clazz);
+		}
+
+		public void validate(Object obj, Errors errors) {
+			//TestBean tb = (TestBean) obj;
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", "You must enter a name!");
+		}
+	}
+
 
 }

@@ -19,6 +19,8 @@ package org.springframework.validation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.StringUtils;
+
 /**
  * This utility class offers convenient methods for invoking a validator and
  * for rejecting an empty field. Used by BindUtils' bindAndValidate method.
@@ -28,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * @see Validator
  * @see Errors
  * @see org.springframework.web.bind.BindUtils#bindAndValidate
- * @version $Id: ValidationUtils.java,v 1.6 2004-04-19 08:59:15 jhoeller Exp $
+ * @version $Id: ValidationUtils.java,v 1.7 2004-06-11 23:35:25 jhoeller Exp $
  */
 public abstract class ValidationUtils {
 
@@ -69,9 +71,26 @@ public abstract class ValidationUtils {
 	 * @param errorCode to reject with
 	 * @param defaultMessage to reject with
 	 */
-	public static void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage) {
+	public static void rejectIfEmpty(Errors errors, String field, String errorCode,
+																	 String defaultMessage) {
 		Object value = errors.getFieldValue(field);
-		if (value == null || value.toString().length() == 0) {
+		if (value == null || !StringUtils.hasLength(value.toString())) {
+			errors.rejectValue(field, errorCode, defaultMessage);
+		}
+	}
+
+	/**
+	 * Reject the given field with the given error code and message
+	 * if the value is empty or only contains whitespace.
+	 * @param errors Errors instance containing bound fields
+	 * @param field field name to check
+	 * @param errorCode to reject with
+	 * @param defaultMessage to reject with
+	 */
+	public static void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode,
+																							 String defaultMessage) {
+		Object value = errors.getFieldValue(field);
+		if (value == null ||!StringUtils.hasText(value.toString())) {
 			errors.rejectValue(field, errorCode, defaultMessage);
 		}
 	}
