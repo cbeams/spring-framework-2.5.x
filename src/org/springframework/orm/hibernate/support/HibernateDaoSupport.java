@@ -32,20 +32,22 @@ import org.springframework.orm.hibernate.SessionFactoryUtils;
  * Convenient super class for Hibernate data access objects.
  *
  * <p>Requires a SessionFactory to be set, providing a HibernateTemplate
- * based on it to subclasses. Can alternatively be initialized directly via a
- * HibernateTemplate, to reuse the latter's settings like SessionFactory,
- * flush mode, exception translator, etc.
+ * based on it to subclasses. Can alternatively be initialized directly via
+ * a HibernateTemplate, to reuse the latter's settings like SessionFactory,
+ * exception translator, flush mode, etc.
  *
  * <p>This base class is mainly intended for HibernateTemplate usage
  * but can also be used when working with SessionFactoryUtils directly,
  * e.g. in combination with HibernateInterceptor-managed Sessions.
- * Convenience getSession and closeSessionIfNecessary methods are provided
- * for that usage.
+ * Convenience <code>getSession</code> and <code>closeSessionIfNecessary</code>
+ * methods are provided for that usage style.
  *
  * @author Juergen Hoeller
  * @since 28.07.2003
  * @see #setSessionFactory
  * @see #setHibernateTemplate
+ * @see #getSession
+ * @see #closeSessionIfNecessary
  * @see org.springframework.orm.hibernate.HibernateTemplate
  * @see org.springframework.orm.hibernate.HibernateInterceptor
  */
