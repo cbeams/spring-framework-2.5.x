@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  * generic means of inserting crosscutting code: use AOP for that.
  *
  * @author Rod Johnson
- * @version $Id: MethodOverride.java,v 1.2 2004-06-24 08:45:59 jhoeller Exp $
+ * @version $Id: MethodOverride.java,v 1.3 2004-06-28 11:43:47 johnsonr Exp $
  */
 public abstract class MethodOverride {
 	
@@ -52,8 +52,10 @@ public abstract class MethodOverride {
 	 * the given method. This allows for argument list checking
 	 * as well as method name checking.
 	 * @param method the method to check
+	 * @param overrides owning MethodOverrides object.
+	 * This allows us to check whether the method is overloaded.
 	 * @return whether this override matches the given method
 	 */
-	public abstract boolean matches(Method method);
+	public abstract boolean matches(Method method, MethodOverrides overrides);
 
 }
