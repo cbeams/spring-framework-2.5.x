@@ -60,7 +60,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.44 2004-08-10 10:35:33 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.45 2004-08-10 11:04:19 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -635,17 +635,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		proxied.incrementViaProxy();
 	}
 	
-	/**
-	 * Static for CGLIB visibility
-	 */
-	static class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean {
-		protected void assertions(MethodInvocation invocation) {
-			assertTrue(invocation.getThis() == this);
-			assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
-					ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
-		}
-	}
-
 	public void testTargetCanGetInvocation() throws Throwable {
 		final InvocationCheckExposedInvocationTestBean expectedTarget = new InvocationCheckExposedInvocationTestBean();
 		
