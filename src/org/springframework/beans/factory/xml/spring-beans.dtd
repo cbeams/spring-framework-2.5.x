@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-	Spring XML BeanFactory DTD.
+	Spring XML Beans DTD.
 	Authors: Rod Johnson, Juergen Hoeller
 
 	This defines a simple and consistent way of creating a namespace
-	of JavaBeans configured by a Spring XmlBeanFactory.
+	of JavaBeans objects, configured by a Spring BeanFactory, read by
+	a DefaultXmlBeanDefinitionReader.
 
 	This document type is used by most Spring functionality, including
 	web application contexts, which are based on bean factories.
 
-	Each <bean> element in this document defines a JavaBean.
+	Each "bean" element in this document defines a JavaBean.
 	Typically the bean class is specified, along with JavaBean properties.
 
 	Bean instances can be "singletons" (shared instances) or "prototypes"
@@ -32,7 +33,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.25 2004-03-16 16:42:49 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.26 2004-04-28 16:02:18 jhoeller Exp $
 -->
 
 <!--
@@ -303,6 +304,9 @@
         (bean | ref | idref | list | set | map | props | value | null)
 )>
 
+<!--
+	Each map element must specify its key.
+-->
 <!ATTLIST entry key CDATA #REQUIRED>
 
 <!--
@@ -314,17 +318,16 @@
 )>
 
 <!--
-	Element content is the string value of the property. The "key"
-	attribute is the name of the property.
+	Element content is the string value of the property.
+	Note that whitespace is trimmed off to avoid unwanted whitespace
+	caused by typical XML formatting.
 -->
 <!ELEMENT prop
         (#PCDATA)
 >
 
 <!--
-	Each property element must specify the key. The value is the
-	element content: Note that whitespace is trimmed off to avoid
-	unwanted whitespace caused by typical XML formatting.
+	Each property element must specify its key.
 -->
 <!ATTLIST prop key CDATA #REQUIRED>
 
