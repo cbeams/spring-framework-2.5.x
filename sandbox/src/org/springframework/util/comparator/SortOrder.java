@@ -15,42 +15,24 @@
  */
 package org.springframework.util.comparator;
 
-import java.io.Serializable;
+import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 
 /**
  * A Sort Order enum type - may be ASCENDING (forward) or DESCENDING (reverse).
  * 
  * @author Keith Donald
  */
-public class SortOrder implements Serializable {
+public class SortOrder extends ShortCodedLabeledEnum {
 
-    public static final SortOrder ASCENDING = new SortOrder(true);
+	public static final SortOrder ASCENDING = new SortOrder(0, "ascending");
 
-    public static final SortOrder DESCENDING = new SortOrder(false);
+	public static final SortOrder DESCENDING = new SortOrder(1, "descending");
 
-    private boolean ascending;
+	private SortOrder(int code, String label) {
+		super(code, label);
+	}
 
-    private SortOrder(boolean ascending) {
-        this.ascending = ascending;
-    }
-
-    public boolean equals(Object o) {
-        if (!(o instanceof SortOrder)) { return false; }
-        SortOrder order = (SortOrder)o;
-        return ascending == order.ascending;
-    }
-
-    public int hashCode() {
-        int hash = "SortOrder".hashCode();
-        return ascending ? -1 * hash : hash;
-    }
-
-    public String toString() {
-        return (ascending ? "ascending" : "descending");
-    }
-
-    public static SortOrder flip(SortOrder order) {
-        return (order == ASCENDING ? DESCENDING : ASCENDING);
-    }
-
+	public static SortOrder flip(SortOrder sortOrder) {
+		return (sortOrder.equals(ASCENDING) ? DESCENDING : ASCENDING);
+	}
 }
