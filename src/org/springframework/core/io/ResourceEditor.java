@@ -4,6 +4,9 @@ import java.beans.PropertyEditorSupport;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Editor for Resource descriptors, to convert String locations to Resource
  * properties automatically instead of using a String location property.
@@ -24,6 +27,8 @@ import java.net.URL;
  */
 public class ResourceEditor extends PropertyEditorSupport {
 
+	private static final Log logger = LogFactory.getLog(ResourceEditor.class);
+
 	public static final String PLACEHOLDER_PREFIX = "${";
 
 	public static final String PLACEHOLDER_SUFFIX = "}";
@@ -31,7 +36,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	/** Pseudo URL prefix for loading from the class path */
 	public static final String CLASSPATH_URL_PREFIX = "classpath:";
 
-	public void setAsText(String text) throws IllegalArgumentException {
+	public void setAsText(String text) {
 		String resolvedPath = resolvePath(text);
 		if (resolvedPath.startsWith(CLASSPATH_URL_PREFIX)) {
 			setValue(new ClassPathResource(resolvedPath.substring(CLASSPATH_URL_PREFIX.length())));
@@ -43,7 +48,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 				setValue(new UrlResource(url));
 			}
 			catch (MalformedURLException ex) {
-				// no URL -> try classpath
+				// no URL -> try class path
 				setValue(new ClassPathResource(text));
 			}
 		}
@@ -62,11 +67,13 @@ public class ResourceEditor extends PropertyEditorSupport {
 			if (endIndex != -1) {
 				String placeholder = path.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
 				String propVal = System.getProperty(placeholder);
-				if (propVal == null) {
-					throw new IllegalArgumentException("Could not resolve placeholder '" + placeholder +
-					                                   "' in file path [" + path + "] as system property");
+				if (propVal != null) {
+					return path.substring(0, startIndex) + propVal + path.substring(endIndex+1);
 				}
-				return path.substring(0, startIndex) + propVal + path.substring(endIndex+1);
+				else {
+					logger.warn("Could not resolve placeholder '" + placeholder +
+					            "' in file path [" + path + "] as system property");
+				}
 			}
 		}
 		return path;
