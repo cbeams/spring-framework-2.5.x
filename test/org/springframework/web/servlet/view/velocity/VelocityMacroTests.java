@@ -36,7 +36,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
-import org.springframework.web.servlet.view.velocity.VelocityViewTests.TestVelocityEngine;
 
 /**
  * @author Darren Davison

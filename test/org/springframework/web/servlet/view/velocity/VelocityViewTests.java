@@ -293,21 +293,4 @@ public class VelocityViewTests extends TestCase {
 		assertEquals("prefix_test_suffix", view.getUrl());
 	}
 
-
-	//	Damn thing is a class so we can't mock it
-	static class TestVelocityEngine extends VelocityEngine {
-		private Template t;
-		private String expectedName;
-
-		public TestVelocityEngine(String expectedName, Template t) {
-			this.t = t;
-			this.expectedName = expectedName;
-		}
-
-		public Template getTemplate(String arg0) throws ResourceNotFoundException, ParseErrorException, Exception {
-			assertEquals(arg0, expectedName);
-			return t;
-		}
-	}
-
 }
