@@ -29,17 +29,18 @@ import org.springframework.jndi.JndiTemplate;
 import org.springframework.util.StringUtils;
 
 /**
- * BeanFactoryLocator implementation that creates the BeanFactory
- * from file locations specified as JNDI environment variable.
- *
- * <p>This default implementation creates a DefaultListableBeanFactory,
- * populated via an XmlBeanDefinitionReader. Subclasses may override
- * createFactory for custom instantiation.
+ * <p>BeanFactoryLocator implementation that creates the BeanFactory from one or
+ * more classpath locations specified in one JNDI environment variable.</p>
+ * 
+ * <p>This default implementation creates a DefaultListableBeanFactory, populated
+ * via an XmlBeanDefinitionReader. Subclasses may override createFactory for
+ * custom instantiation.</p>
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
+ * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
  */
 public class JndiBeanFactoryLocator implements BeanFactoryLocator {
 
@@ -52,8 +53,12 @@ public class JndiBeanFactoryLocator implements BeanFactoryLocator {
 	protected Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Load/use a bean factory, as specified by a factoryKey which is a JNDI address,
-	 * of the form <code>java:comp/env/ejb/BeanFactoryPath</code>.
+	 * Load/use a bean factory, as specified by a factoryKey which is a JNDI
+	 * address, of the form <code>java:comp/env/ejb/BeanFactoryPath</code>. The
+	 * contents of this JNDI location must be a string containing one or more
+	 * classpath resource names (separated by any of the delimiters
+	 * '<code>,; \t\n</code>' if there is more than one. The resulting
+	 * BeanFactory (or subclass) will be created from the combined resources.
 	 */
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		String beanFactoryPath = null;
