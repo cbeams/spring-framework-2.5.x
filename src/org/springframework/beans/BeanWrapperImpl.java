@@ -76,7 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.48 2004-06-28 20:10:27 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.49 2004-07-01 20:04:36 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -974,18 +974,22 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	public Class getPropertyType(String propertyName) throws BeansException {
 		try {
-			return getPropertyDescriptor(propertyName).getPropertyType();
-		}
-		catch (InvalidPropertyException ex) {
-			// probably an indexed or mapped element
-			Object value = getPropertyValue(propertyName);
-			if (value != null) {
-				return value.getClass();
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd != null) {
+				return pd.getPropertyType();
 			}
 			else {
-				return null;
+				// maybe an indexed/mapped property
+				Object value = getPropertyValue(propertyName);
+				if (value != null) {
+					return value.getClass();
+				}
 			}
 		}
+		catch (NullValueInNestedPathException ex) {
+			// consider as not determinable
+		}
+		return null;
 	}
 
 	public boolean isReadableProperty(String propertyName) {
@@ -996,12 +1000,21 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-			return (pd != null && pd.getReadMethod() != null);
+			if (pd != null) {
+				if (pd.getReadMethod() != null) {
+					return true;
+				}
+			}
+			else {
+				// maybe an indexed/mapped property
+				getPropertyValue(propertyName);
+				return true;
+			}
 		}
 		catch (InvalidPropertyException ex) {
-			// doesn't exist, so can't be readable
-			return false;
+			// cannot be evaluated, so can't be readable
 		}
+		return false;
 	}
 
 	public boolean isWritableProperty(String propertyName) {
@@ -1012,12 +1025,21 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-			return (pd != null && pd.getWriteMethod() != null);
+			if (pd != null) {
+				if (pd.getWriteMethod() != null) {
+					return true;
+				}
+			}
+			else {
+				// maybe an indexed/mapped property
+				getPropertyValue(propertyName);
+				return true;
+			}
 		}
 		catch (InvalidPropertyException ex) {
-			// doesn't exist, so can't be writable
-			return false;
+			// cannot be evaluated, so can't be writable
 		}
+		return false;
 	}
 
 
