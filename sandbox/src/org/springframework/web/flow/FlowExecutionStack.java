@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.ProcessTemplate;
@@ -45,7 +46,7 @@ import org.springframework.web.util.SessionKeyUtils;
  * @author Erwin Vervaet
  */
 public class FlowExecutionStack implements FlowExecution, Serializable {
-	
+
 	private static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
 
 	private String id;
@@ -60,7 +61,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	public FlowExecutionStack(Flow rootFlow) {
 		Assert.notNull(rootFlow, "The root flow definition is required");
-		this.id = SessionKeyUtils.generateMD5SessionKey(String.valueOf(this), true);
+		this.id = SessionKeyUtils.generateMD5SessionKey(ObjectUtils.getIdentityHexString(this), true);
 		this.rootFlow = rootFlow;
 	}
 
@@ -79,7 +80,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		assertActive();
 		if (stateId == null) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Current state id was not provided in request to signal event '"
+				logger
+						.info("Current state id was not provided in request to signal event '"
 								+ eventId
 								+ "' in flow "
 								+ getCaption()
@@ -376,13 +378,13 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	// lifecycle event publishers
 
 	protected ProcessTemplate getListenerIterator() {
-		return getActiveFlow().getFlowExecutionListenerIteratorTemplate();
+		return getRootFlow().getFlowExecutionListenerIteratorTemplate();
 	}
 
 	protected int getListenerCount() {
-		return getActiveFlow().getFlowExecutionListenerCount();
+		return getRootFlow().getFlowExecutionListenerCount();
 	}
-	
+
 	protected void fireStarted() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow session execution started event to " + getListenerCount() + " listener(s)");
@@ -440,7 +442,8 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	protected void fireSubFlowSpawned() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow session execution started event to " + getListenerCount() + " listener(s)");
+			logger.debug("Publishing sub flow session execution started event to " + getListenerCount()
+					+ " listener(s)");
 		}
 		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
@@ -465,7 +468,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 			logger.debug("Publishing flow session execution ended event to "
 					+ endingRootFlowSession.getFlow().getFlowExecutionListenerCount() + " listener(s)");
 		}
-		endingRootFlowSession.getFlow().getFlowExecutionListenerIteratorTemplate().run(new Block() {
+		getListenerIterator().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).ended(FlowExecutionStack.this, endingRootFlowSession);
 			}
