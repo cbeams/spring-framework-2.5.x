@@ -49,5 +49,6 @@
     <classpathentry kind="lib" path="lib/qdox/qdox-1.2.jar"/>
     <classpathentry kind="lib" path="lib/ant/ant.jar"/>
     <classpathentry kind="lib" path="lib/jdo/jdo.jar"/>
+    <classpathentry kind="lib" path="lib/httpclient/httpclient.jar"/>
     <classpathentry kind="output" path="target/other-classes"/>
 </classpath>
