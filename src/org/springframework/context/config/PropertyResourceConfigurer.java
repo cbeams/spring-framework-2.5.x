@@ -7,8 +7,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 
@@ -41,6 +42,8 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 
 	private Properties properties;
 
+	private boolean ignoreResourceNotFound = false;
+
 	public void setOrder(int order) {
 	  this.order = order;
 	}
@@ -66,6 +69,15 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 		this.properties = properties;
 	}
 
+	/**
+	 * Set if failure to find the property resource should be ignored.
+	 * True is appropriate if the properties file is completely optional.
+	 * Default is false.
+	 */
+	public void setIgnoreResourceNotFound(boolean ignoreResourceNotFound) {
+		this.ignoreResourceNotFound = ignoreResourceNotFound;
+	}
+
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		Properties props = new Properties();
 
@@ -75,7 +87,13 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 				props.load(getApplicationContext().getResourceAsStream(this.location));
 			}
 			catch (IOException ex) {
-				logger.warn("Could not load properties [" + this.location + "]: " + ex.getMessage());
+				String msg = "Could not load properties file from [" + this.location + "]";
+				if (this.ignoreResourceNotFound) {
+					logger.warn(msg + ": " + ex.getMessage());
+				}
+				else {
+					throw new ApplicationContextException(msg, ex);
+				}
 			}
 		}
 
@@ -93,6 +111,12 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 		}
 	}
 
+	/**
+	 * Apply the given Properties to the bean factory.
+	 * @param beanFactory	the bean factory used by the application context
+	 * @param props the Properties to apply
+	 * @throws BeansException in case of errors
+	 */
 	protected abstract void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
 			throws BeansException;
 
