@@ -506,14 +506,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Return the names of beans in the singleton cache.
-	 * <p>Does not consider any hierarchy this factory may participate in.
-	 */
-	public String[] getSingletonNames() {
-		return (String[]) this.singletonCache.keySet().toArray(new String[this.singletonCache.size()]);
-	}
-
-	/**
 	 * Return the number of beans in the singleton cache.
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 */
@@ -522,136 +514,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Determine whether the bean with the given name is a FactoryBean.
-	 * @param name the name of the bean to check
-	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * Return the names of beans in the singleton cache.
+	 * <p>Does not consider any hierarchy this factory may participate in.
 	 */
-	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
-		String beanName = transformedBeanName(name);
-		try {
-			Object beanInstance = this.singletonCache.get(beanName);
-			if (beanInstance == CURRENTLY_IN_CREATION) {
-				throw new BeanCurrentlyInCreationException(beanName);
-			}
-			if (beanInstance != null) {
-				return (beanInstance instanceof FactoryBean);
-			}
-			else {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-				return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Not found -> check parent.
-			if (this.parentBeanFactory != null) {
-				return this.parentBeanFactory.isSingleton(name);
-			}
-			throw ex;
-		}
+	public String[] getSingletonNames() {
+		return (String[]) this.singletonCache.keySet().toArray(new String[this.singletonCache.size()]);
 	}
 
-
-	/**
-	 * Add the given bean to the list of disposable beans in this factory,
-	 * registering its DisposableBean interface and/or the given destroy method
-	 * to be called on factory shutdown (if applicable). Only applies to singletons.
-	 * <p>Also registers bean as dependent on other beans, according to the
-	 * "depends-on" configuration in the bean definition.
-	 * @param beanName the name of the bean
-	 * @param bean the bean instance
-	 * @param mergedBeanDefinition the bean definition for the bean
-	 * @see RootBeanDefinition#isSingleton
-	 * @see RootBeanDefinition#getDependsOn
-	 * @see #registerDisposableBean
-	 * @see #registerDependentBean
-	 */
-	protected void registerDisposableBeanIfNecessary(
-			final String beanName, final Object bean, final RootBeanDefinition mergedBeanDefinition) {
-
-		if (mergedBeanDefinition.isSingleton()) {
-			final boolean isDisposableBean = (bean instanceof DisposableBean);
-			final boolean hasDestroyMethod = (mergedBeanDefinition.getDestroyMethodName() != null);
-
-			if (isDisposableBean || hasDestroyMethod || hasDestructionAwareBeanPostProcessors()) {
-				// Determine unique key for registration of disposable bean
-				int counter = 1;
-				String id = beanName;
-				while (this.disposableBeans.containsKey(id)) {
-					counter++;
-					id = beanName + "#" + counter;
-				}
-
-				// Register a DisposableBean implementation that performs all destruction
-				// work for the given bean: DestructionAwareBeanPostProcessors,
-				// DisposableBean interface, custom destroy method.
-
-				registerDisposableBean(id, new DisposableBean() {
-					public void destroy() throws Exception {
-
-						if (hasDestructionAwareBeanPostProcessors()) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
-							}
-							for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
-								Object beanProcessor = getBeanPostProcessors().get(i);
-								if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
-									((DestructionAwareBeanPostProcessor) beanProcessor).postProcessBeforeDestruction(bean, beanName);
-								}
-							}
-						}
-
-						if (isDisposableBean) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Invoking destroy() on bean with name '" + beanName + "'");
-							}
-							((DisposableBean) bean).destroy();
-						}
-
-						if (hasDestroyMethod) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Invoking custom destroy method on bean with name '" + beanName + "'");
-							}
-							invokeCustomDestroyMethod(beanName, bean, mergedBeanDefinition.getDestroyMethodName());
-						}
-					}
-				});
-			}
-
-			// Register bean as dependent on other beans, if necessary,
-			// for correct shutdown order.
-			String[] dependsOn = mergedBeanDefinition.getDependsOn();
-			if (dependsOn != null) {
-				for (int i = 0; i < dependsOn.length; i++) {
-					registerDependentBean(dependsOn[i], beanName);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Add the given bean to the list of further disposable beans in this factory.
-	 * @param beanName the name of the bean
-	 * @param bean the bean instance
-	 */
-	protected void registerDisposableBean(String beanName, DisposableBean bean) {
-		this.disposableBeans.put(beanName, bean);
-	}
-
-	/**
-	 * Register a dependent bean for the given bean,
-	 * to be destroyed before the given bean is destroyed.
-	 * @param beanName the name of the bean
-	 * @param dependentBeanName the name of the dependent bean
-	 */
-	protected void registerDependentBean(String beanName, String dependentBeanName) {
-		synchronized (this.dependentBeanMap) {
-			List dependencies = (List) this.dependentBeanMap.get(beanName);
-			if (dependencies == null) {
-				dependencies = new LinkedList();
-				this.dependentBeanMap.put(beanName, dependencies);
-			}
-			dependencies.add(dependentBeanName);
-		}
+	public boolean containsSingleton(String beanName) {
+		return this.singletonCache.containsKey(beanName);
 	}
 
 	public void destroySingletons() {
@@ -663,19 +534,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			for (Iterator it = new HashSet(this.disposableBeans.keySet()).iterator(); it.hasNext();) {
 				destroyDisposableBean((String) it.next());
 			}
-		}
-	}
-
-	/**
-	 * Destroy the given bean. Delegates to destroyBean if a
-	 * corresponding disposable bean instance is found.
-	 * @param beanName name of the bean
-	 * @see #destroyBean
-	 */
-	private void destroyDisposableBean(String beanName) {
-		Object disposableBean = this.disposableBeans.remove(beanName);
-		if (disposableBean != null) {
-			destroyBean(beanName, disposableBean);
 		}
 	}
 
@@ -859,6 +717,152 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 
 		return beanInstance;
+	}
+
+	/**
+	 * Determine whether the bean with the given name is a FactoryBean.
+	 * @param name the name of the bean to check
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 */
+	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
+		String beanName = transformedBeanName(name);
+		try {
+			Object beanInstance = this.singletonCache.get(beanName);
+			if (beanInstance == CURRENTLY_IN_CREATION) {
+				throw new BeanCurrentlyInCreationException(beanName);
+			}
+			if (beanInstance != null) {
+				return (beanInstance instanceof FactoryBean);
+			}
+			else {
+				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+				return (bd.hasBeanClass() && FactoryBean.class.equals(bd.getBeanClass()));
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Not found -> check parent.
+			if (this.parentBeanFactory != null) {
+				return this.parentBeanFactory.isSingleton(name);
+			}
+			throw ex;
+		}
+	}
+
+
+	/**
+	 * Add the given bean to the list of disposable beans in this factory,
+	 * registering its DisposableBean interface and/or the given destroy method
+	 * to be called on factory shutdown (if applicable). Only applies to singletons.
+	 * <p>Also registers bean as dependent on other beans, according to the
+	 * "depends-on" configuration in the bean definition.
+	 * @param beanName the name of the bean
+	 * @param bean the bean instance
+	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @see RootBeanDefinition#isSingleton
+	 * @see RootBeanDefinition#getDependsOn
+	 * @see #registerDisposableBean
+	 * @see #registerDependentBean
+	 */
+	protected void registerDisposableBeanIfNecessary(
+			final String beanName, final Object bean, final RootBeanDefinition mergedBeanDefinition) {
+
+		if (mergedBeanDefinition.isSingleton()) {
+			final boolean isDisposableBean = (bean instanceof DisposableBean);
+			final boolean hasDestroyMethod = (mergedBeanDefinition.getDestroyMethodName() != null);
+
+			if (isDisposableBean || hasDestroyMethod || hasDestructionAwareBeanPostProcessors()) {
+				// Determine unique key for registration of disposable bean
+				int counter = 1;
+				String id = beanName;
+				while (this.disposableBeans.containsKey(id)) {
+					counter++;
+					id = beanName + "#" + counter;
+				}
+
+				// Register a DisposableBean implementation that performs all destruction
+				// work for the given bean: DestructionAwareBeanPostProcessors,
+				// DisposableBean interface, custom destroy method.
+
+				registerDisposableBean(id, new DisposableBean() {
+					public void destroy() throws Exception {
+
+						if (hasDestructionAwareBeanPostProcessors()) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
+							}
+							for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
+								Object beanProcessor = getBeanPostProcessors().get(i);
+								if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
+									((DestructionAwareBeanPostProcessor) beanProcessor).postProcessBeforeDestruction(bean, beanName);
+								}
+							}
+						}
+
+						if (isDisposableBean) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Invoking destroy() on bean with name '" + beanName + "'");
+							}
+							((DisposableBean) bean).destroy();
+						}
+
+						if (hasDestroyMethod) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Invoking custom destroy method on bean with name '" + beanName + "'");
+							}
+							invokeCustomDestroyMethod(beanName, bean, mergedBeanDefinition.getDestroyMethodName());
+						}
+					}
+				});
+			}
+
+			// Register bean as dependent on other beans, if necessary,
+			// for correct shutdown order.
+			String[] dependsOn = mergedBeanDefinition.getDependsOn();
+			if (dependsOn != null) {
+				for (int i = 0; i < dependsOn.length; i++) {
+					registerDependentBean(dependsOn[i], beanName);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add the given bean to the list of further disposable beans in this factory.
+	 * @param beanName the name of the bean
+	 * @param bean the bean instance
+	 */
+	protected void registerDisposableBean(String beanName, DisposableBean bean) {
+		this.disposableBeans.put(beanName, bean);
+	}
+
+	/**
+	 * Register a dependent bean for the given bean,
+	 * to be destroyed before the given bean is destroyed.
+	 * @param beanName the name of the bean
+	 * @param dependentBeanName the name of the dependent bean
+	 */
+	protected void registerDependentBean(String beanName, String dependentBeanName) {
+		synchronized (this.dependentBeanMap) {
+			List dependencies = (List) this.dependentBeanMap.get(beanName);
+			if (dependencies == null) {
+				dependencies = new LinkedList();
+				this.dependentBeanMap.put(beanName, dependencies);
+			}
+			dependencies.add(dependentBeanName);
+		}
+	}
+
+	/**
+	 * Destroy the given bean. Delegates to destroyBean if a
+	 * corresponding disposable bean instance is found.
+	 * @param beanName name of the bean
+	 * @see #destroyBean
+	 */
+	private void destroyDisposableBean(String beanName) {
+		Object disposableBean = this.disposableBeans.remove(beanName);
+		if (disposableBean != null) {
+			destroyBean(beanName, disposableBean);
+		}
 	}
 
 

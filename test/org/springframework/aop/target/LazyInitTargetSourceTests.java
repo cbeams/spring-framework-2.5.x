@@ -34,9 +34,9 @@ public class LazyInitTargetSourceTests extends TestCase {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("lazyInitSingletonTests.xml", getClass()));
 		bf.preInstantiateSingletons();
 		TestBean tb = (TestBean) bf.getBean("proxy");
-		assertFalse(Arrays.asList(bf.getSingletonNames()).contains("target"));
+		assertFalse(bf.containsSingleton("target"));
 		assertEquals(10, tb.getAge());
-		assertTrue(Arrays.asList(bf.getSingletonNames()).contains("target"));
+		assertTrue(bf.containsSingleton("target"));
 	}
 
 }

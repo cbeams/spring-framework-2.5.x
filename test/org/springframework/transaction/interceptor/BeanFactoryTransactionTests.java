@@ -76,9 +76,9 @@ public class BeanFactoryTransactionTests extends TestCase {
 	
 	public void testProxyFactory2Lazy() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Lazy");
-		assertFalse(Arrays.asList(factory.getSingletonNames()).contains("target"));
+		assertFalse(factory.containsSingleton("target"));
 		assertEquals(666, testBean.getAge());
-		assertTrue(Arrays.asList(factory.getSingletonNames()).contains("target"));
+		assertTrue(factory.containsSingleton("target"));
 	}
 
 	public void testCglibTransactionProxyImplementsNoInterfaces() throws NoSuchMethodException {
