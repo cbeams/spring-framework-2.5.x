@@ -12,7 +12,7 @@
 
    <!-- The version of the project under development, e.g.
         1.1, 1.2, 2.0-dev -->
-   <currentVersion>0.9.1-dev</currentVersion>
+   <currentVersion>1.0-dev</currentVersion>
 
    <organization>
       <name>Spring Framework Inc. :-)</name>
@@ -210,13 +210,25 @@
          <version>1.4</version>
       </dependency>
       <dependency>
+         <id>commons-beanutils</id>
+         <version>1.6</version>
+      </dependency>
+      <dependency>
+         <id>commons-digester</id>
+         <version>1.5</version>
+      </dependency>
+      <dependency>
          <id>commons-lang</id>
          <version>1.0.1</version>
       </dependency>
       <dependency>
          <id>commons-collections</id>
          <version>2.1</version>
-      </dependency>       
+      </dependency>
+      <dependency>
+         <id>commons-dbcp</id>
+         <version>1.0</version>
+      </dependency>      
       <dependency>
          <id>commons-logging</id>
          <version>1.0.3</version>
@@ -236,7 +248,7 @@
       <dependency>
          <id>itext</id>
          <version>0.99</version>
-      </dependency>      
+      </dependency>
       <dependency>
          <id>jstl</id>
          <version>1.0.2</version>
@@ -265,8 +277,8 @@
          <version>2.0.7</version>
       </dependency>
       <dependency>
-         <id>poi</id>
-         <version>1.10.0-dev-20030222</version>
+         <id>struts</id>
+         <version>1.1</version>
       </dependency>
       <dependency>
          <groupId>taglibs</groupId>
@@ -279,19 +291,24 @@
       </dependency>
       
       <!-- 
-       | these jars are not currently at http://www.ibiblio.org/maven, so must be manually added to the local repository
-      for the time being -->
+       | these jars are not currently at http://www.ibiblio.org/maven, so are currently specified explicitly
+       | using jar overrides in the project.properties file.
+       -->
+      <dependency>
+         <id>aopalliance</id>
+         <version>0.1-dev</version>
+         <jar>aopalliance.jar</jar>
+      </dependency>
       <dependency>
          <id>attrib4j</id>
          <version>0.8.4</version>
          <jar>attrib4j-0.8.4.jar</jar>
       </dependency>
       <dependency>
-         <id>aopalliance</id>
-         <version>0.1-dev</version>
-         <jar>aopalliance.jar</jar>
+         <groupId>poi</groupId>
+         <artifactId>poi</artifactId>
+         <version>2.0-pre3-20030728</version>
       </dependency>
-
    </dependencies>
 
    <!-- build information for the project -->
