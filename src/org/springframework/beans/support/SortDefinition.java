@@ -1,4 +1,4 @@
-package org.springframework.beans;
+package org.springframework.beans.support;
 
 /**
  * Definition for sorting bean instances by a property.

@@ -1,4 +1,4 @@
-package org.springframework.beans;
+package org.springframework.beans.support;
 
 import java.io.Serializable;
 

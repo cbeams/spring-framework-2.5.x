@@ -1,14 +1,14 @@
 package org.springframework.samples.petclinic;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
 
-import org.springframework.beans.PropertyComparator;
-import org.springframework.beans.MutableSortDefinition;
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PropertyComparator;
 
 /**
  * Simple JavaBean business object representing a pet.

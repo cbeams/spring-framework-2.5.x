@@ -1,4 +1,4 @@
-package org.springframework.beans;
+package org.springframework.beans.support;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,6 +9,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.BeansException;
 
 /**
  * PropertyComparator performs a comparison of two beans,
@@ -72,7 +76,7 @@ public class PropertyComparator implements Comparator {
 	 * in the form of a bean property, i.e. a getXXX method.
 	 * @param source the input List
 	 * @param sortDefinition the parameters to sort by
-	 * @throws IllegalArgumentException in case of a missing propertyName
+	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
 	 */
 	public static void sort(List source, SortDefinition sortDefinition) throws BeansException {
 		Collections.sort(source, new PropertyComparator(sortDefinition));
@@ -84,7 +88,7 @@ public class PropertyComparator implements Comparator {
 	 * in the form of a bean property, i.e. a getXXX method.
 	 * @param source input source
 	 * @param sortDefinition the parameters to sort by
-	 * @throws IllegalArgumentException in case of a missing propertyName
+	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
 	 */
 	public static void sort(Object[] source, SortDefinition sortDefinition) throws BeansException {
 		Arrays.sort(source, new PropertyComparator(sortDefinition));

@@ -7,8 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.MutableSortDefinition;
-import org.springframework.beans.PropertyComparator;
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PropertyComparator;
 
 /**
  * Simple JavaBean domain object representing an owner.
