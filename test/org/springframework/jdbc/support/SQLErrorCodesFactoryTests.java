@@ -1,6 +1,5 @@
 package org.springframework.jdbc.support;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -10,6 +9,9 @@ import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Tests for SQLErrorCode loading.
@@ -65,16 +67,16 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	public void testLookupOrder() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			private int lookups = 0;
-			protected InputStream loadInputStream(String resourcePath) {
+			protected Resource loadResource(String path) {
 				++lookups;
 				if (lookups == 1) {
-					assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, resourcePath);
+					assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
 					return null;
 				}
 				else {
 					// Should have only one more lookup
 					assertEquals(2, lookups);
-					assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_DEFAULT_PATH, resourcePath);
+					assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_DEFAULT_PATH, path);
 					return null;
 				}
 			}
@@ -91,9 +93,9 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	 */
 	public void testFindCustomCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
-			protected InputStream loadInputStream(String resourcePath) {
-				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, resourcePath);
-				return getClass().getResourceAsStream("test-error-codes.xml");
+			protected Resource loadResource(String path) {
+				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
+				return new ClassPathResource("test-error-codes.xml", SQLErrorCodesFactoryTests.class);
 			}
 		};
 	
@@ -106,10 +108,10 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	
 	public void testInvalidCustomCodeFormat() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
-			protected InputStream loadInputStream(String resourcePath) {
-				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, resourcePath);
+			protected Resource loadResource(String path) {
+				assertEquals(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, path);
 				// Guaranteed to be on the classpath, but most certainly NOT XML
-				return getClass().getResourceAsStream("SQLExceptionTranslator.class");
+				return new ClassPathResource("SQLExceptionTranslator.class", SQLErrorCodesFactoryTests.class);
 			}
 		};
 

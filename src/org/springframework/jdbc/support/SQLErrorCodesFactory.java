@@ -5,7 +5,6 @@
 
 package org.springframework.jdbc.support;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -20,11 +19,11 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.util.ClassLoaderUtils;
 
 /**
  * Factory for creating SQLErrorCodes based on the
@@ -37,7 +36,7 @@ import org.springframework.util.ClassLoaderUtils;
  *
  * @author Thomas Risberg
  * @author Rod Johnson
-   @version $Id: SQLErrorCodesFactory.java,v 1.4 2003-12-19 15:49:45 johnsonr Exp $
+   @version $Id: SQLErrorCodesFactory.java,v 1.5 2003-12-30 00:49:45 jhoeller Exp $
  */
 public class SQLErrorCodesFactory {
 
@@ -85,17 +84,17 @@ public class SQLErrorCodesFactory {
 	protected SQLErrorCodesFactory() {
 		try {
 			String path = SQL_ERROR_CODE_OVERRIDE_PATH;
-			InputStream is = loadInputStream(path);
-			if (is == null) {
+			Resource resource = loadResource(path);
+			if (resource == null || !resource.exists()) {
 				path = SQL_ERROR_CODE_DEFAULT_PATH;
-				is = loadInputStream(path);
-				if (is == null) {
-					throw new BeanDefinitionStoreException("Unable to locate file [" + SQL_ERROR_CODE_DEFAULT_PATH +"]",null);
+				resource = loadResource(path);
+				if (resource == null || !resource.exists()) {
+					throw new BeanDefinitionStoreException("Unable to locate file [" + SQL_ERROR_CODE_DEFAULT_PATH  + "]");
 				}
 			}
-			ListableBeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation(path));
-			String[] rdbmsNames = bf.getBeanDefinitionNames(org.springframework.jdbc.support.SQLErrorCodes.class);
-			rdbmsErrorCodes = new HashMap(rdbmsNames.length);
+			ListableBeanFactory bf = new XmlBeanFactory(resource);
+			String[] rdbmsNames = bf.getBeanDefinitionNames(SQLErrorCodes.class);
+			this.rdbmsErrorCodes = new HashMap(rdbmsNames.length);
 
 			for (int i = 0; i < rdbmsNames.length; i++) {
 				SQLErrorCodes ec = (SQLErrorCodes) bf.getBean(rdbmsNames[i]);
@@ -111,29 +110,31 @@ public class SQLErrorCodesFactory {
 				else {
 					Arrays.sort(ec.getDataIntegrityViolationCodes());
 				}
-				if (ec.getDatabaseProductName() == null)
-					rdbmsErrorCodes.put(rdbmsNames[i], ec);
-				else
-				rdbmsErrorCodes.put(ec.getDatabaseProductName(), ec);
+				if (ec.getDatabaseProductName() == null) {
+					this.rdbmsErrorCodes.put(rdbmsNames[i], ec);
+				}
+				else {
+					this.rdbmsErrorCodes.put(ec.getDatabaseProductName(), ec);
+				}
 			}
-			logger.info("SQLErrorCodes loaded " + rdbmsErrorCodes.keySet());
+			logger.info("SQLErrorCodes loaded: " + this.rdbmsErrorCodes.keySet());
 		}
 		catch (BeanDefinitionStoreException be) {
-			logger.warn("Error loading error codes from config file.  Message = " + be.getMessage());
-			rdbmsErrorCodes = new HashMap(0);
+			logger.warn("Error loading error codes from config file. Message: " + be.getMessage());
+			this.rdbmsErrorCodes = new HashMap(0);
 		}
 	}
 	
 	/**
-	 * Protected for testability. Load the given input stream from the class path.
-	 * @param resourcePath classpath syntax for input stream. SQL_ERROR_CODE_DEFAULT_PATH
-	 * or SQL_ERROR_CODE_OVERRIDE_PATH.
+	 * Protected for testability. Load the given resource from the class path.
+	 * @param path resource path. SQL_ERROR_CODE_DEFAULT_PATH or
+	 * SQL_ERROR_CODE_OVERRIDE_PATH.
 	 * <b>Not to be overriden by application developers, who should obtain instances
 	 * of this class from the static getInstance() method.</b>
 	 * @return the input stream or null if the resource wasn't found
 	 */
-	protected InputStream loadInputStream(String resourcePath) {
-		return ClassLoaderUtils.getResourceAsStream(resourcePath);
+	protected Resource loadResource(String path) {
+		return new ClassPathResource(path);
 	}
 
 	/**

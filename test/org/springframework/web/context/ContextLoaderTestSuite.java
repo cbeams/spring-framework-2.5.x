@@ -2,7 +2,6 @@ package org.springframework.web.context;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContextEvent;
@@ -12,10 +11,12 @@ import javax.servlet.http.HttpServlet;
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockServletConfig;
 import org.springframework.web.mock.MockServletContext;
@@ -79,7 +80,7 @@ public class ContextLoaderTestSuite extends TestCase {
 			listener.contextInitialized(event);
 			fail("Should have thrown ApplicationContextException");
 		}
-		catch (ApplicationContextException ex) {
+		catch (BeanDefinitionStoreException ex) {
 			// expected
 			assertTrue(ex.getRootCause() instanceof FileNotFoundException);
 		}
@@ -156,7 +157,7 @@ public class ContextLoaderTestSuite extends TestCase {
 
 	public static class TestXmlWebApplicationContext extends XmlWebApplicationContext {
 
-		protected InputStream getResourceByPath(String path) throws IOException {
+		protected Resource getResourceByPath(String path) throws IOException {
 			throw new IOException(path);
 		}
 	}

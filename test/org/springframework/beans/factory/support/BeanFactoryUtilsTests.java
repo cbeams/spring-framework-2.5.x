@@ -17,13 +17,13 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.servlet.HandlerAdapter;
 
 /**
- *
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtilsTests.java,v 1.8 2003-12-19 15:49:59 johnsonr Exp $
+ * @version $Id: BeanFactoryUtilsTests.java,v 1.9 2003-12-30 00:57:37 jhoeller Exp $
  */
 public class BeanFactoryUtilsTests extends TestCase {
 
@@ -32,9 +32,9 @@ public class BeanFactoryUtilsTests extends TestCase {
 	protected void setUp() {
 		// Interesting hierarchical factory to test counts
 		// Slow to read so we cache it
-		XmlBeanFactory grandParent = new XmlBeanFactory(getClass().getResourceAsStream("root.xml"), new ClasspathBeanDefinitionRegistryLocation("root.xml"));
-		XmlBeanFactory parent = new XmlBeanFactory(getClass().getResourceAsStream("middle.xml"), grandParent, new ClasspathBeanDefinitionRegistryLocation("middle.xml"));
-		XmlBeanFactory child = new XmlBeanFactory(getClass().getResourceAsStream("leaf.xml"), parent, new ClasspathBeanDefinitionRegistryLocation("leaf.xml"));
+		XmlBeanFactory grandParent = new XmlBeanFactory(new ClassPathResource("root.xml", getClass()));
+		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("middle.xml", getClass()), grandParent);
+		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("leaf.xml", getClass()), parent);
 		this.listableFactory = child;
 	}
 

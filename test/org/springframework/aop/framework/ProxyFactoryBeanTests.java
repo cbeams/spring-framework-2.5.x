@@ -14,9 +14,9 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.InterceptionIntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
@@ -31,10 +31,10 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.TimeStamped;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * Test cases for AOP FactoryBean, using XML bean factory.
@@ -42,7 +42,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.17 2003-12-19 15:49:59 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.18 2003-12-30 00:55:42 jhoeller Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -62,7 +62,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	protected void setUp() throws Exception {
 		// Load from classpath, NOT a file path
 		InputStream is = getClass().getResourceAsStream("proxyFactoryTests.xml");
-		this.factory = new XmlBeanFactory(is, null);
+		this.factory = new XmlBeanFactory(is);
 	}
 
 
@@ -73,7 +73,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 	public void testGetObjectTypeWithDirectTarget() {
 		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is, null);
+		BeanFactory bf = new XmlBeanFactory(is);
 		
 		// We have a counting before advice here
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) bf.getBean("countingBeforeAdvice");
@@ -88,9 +88,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	}
 	
 	public void testGetObjectTypeWithTargetViaTargetSource() {
-		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("proxyFactoryTargetSourceTests.xml"));
-
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTargetSourceTests.xml", getClass()));
 		ITestBean tb = (ITestBean) bf.getBean("viaTargetSource");
 		assertTrue(tb.getName().equals("Adam"));
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&viaTargetSource");
@@ -99,7 +97,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 	public void testGetObjectTypeWithNoTargetOrTargetSource() {
 		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is, null);
+		BeanFactory bf = new XmlBeanFactory(is);
 
 		ITestBean tb = (ITestBean) bf.getBean("noTarget");
 		try {
@@ -158,8 +156,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		// Initial count value set in bean factory XML 
 		int INITIAL_COUNT = 10;
 		
-		InputStream is = getClass().getResourceAsStream("prototypeTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is, new ClasspathBeanDefinitionRegistryLocation("prototypeTests"));
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("prototypeTests.xml", getClass()));
 		
 		// Check it works without AOP
 		SideEffectBean raw = (SideEffectBean) bf.getBean("prototypeTarget");
@@ -401,7 +398,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	
 	public void testCanAddThrowsAdviceWithoutAdvisor() throws Throwable {
 		InputStream is = getClass().getResourceAsStream("throwsAdvice.xml");
-		BeanFactory f = new XmlBeanFactory(is, null);
+		BeanFactory f = new XmlBeanFactory(is);
 		ThrowsAdviceInterceptorTests.MyThrowsHandler th = (ThrowsAdviceInterceptorTests.MyThrowsHandler) f.getBean("throwsAdvice");
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) f.getBean("countingBeforeAdvice");
 		assertEquals(0, cba.getCalls());
@@ -563,30 +560,18 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		private IntroductionInterceptor gi = new GlobalAspectInterfaceInterceptor();
 
-		/**
-		 * @see org.springframework.aop.IntroductionAdvice#getClassFilter()
-		 */
 		public ClassFilter getClassFilter() {
 			return ClassFilter.TRUE;
 		}
 
-		/**
-		 * @see org.springframework.aop.IntroductionAdvice#getIntroductionInterceptor()
-		 */
 		public IntroductionInterceptor getIntroductionInterceptor() {
 			return this.gi;
 		}
 
-		/**
-		 * @see org.springframework.aop.IntroductionAdvice#getInterfaces()
-		 */
 		public Class[] getInterfaces() {
 			return new Class[] { AddedGlobalInterface.class };
 		}
 
-		/**
-		 * @see org.springframework.aop.Advice#isPerInstance()
-		 */
 		public boolean isPerInstance() {
 			return false;
 		}

@@ -6,12 +6,12 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-
-import org.easymock.MockControl;
-
 import com.ibatis.db.sqlmap.MappedStatement;
 import com.ibatis.db.sqlmap.SqlMap;
+import junit.framework.TestCase;
+import org.easymock.MockControl;
+
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
@@ -21,7 +21,7 @@ public class SqlMapTestSuite extends TestCase {
 
 	public void testSqlMapFactoryBean() throws IOException {
 		SqlMapFactoryBean factory = new SqlMapFactoryBean();
-		factory.setConfigLocation("org/springframework/orm/ibatis/sql-map-config.xml");
+		factory.setConfigLocation(new ClassPathResource("sql-map-config.xml", getClass()));
 		factory.afterPropertiesSet();
 		assertTrue(factory.getObject() instanceof SqlMap);
 		assertEquals(201, ((SqlMap) factory.getObject()).getStatementCacheSize());
@@ -29,7 +29,7 @@ public class SqlMapTestSuite extends TestCase {
 
 	public void testSqlMapFactoryBeanWithConfigNotFound() {
 		SqlMapFactoryBean factory = new SqlMapFactoryBean();
-		factory.setConfigLocation("example/sql-map-config.xml");
+		factory.setConfigLocation(new ClassPathResource("example/sql-map-config.xml"));
 		try {
 			factory.afterPropertiesSet();
 			fail("Should have thrown IOException");

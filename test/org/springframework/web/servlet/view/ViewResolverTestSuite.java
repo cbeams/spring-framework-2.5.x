@@ -1,7 +1,6 @@
 package org.springframework.web.servlet.view;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +18,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
@@ -142,8 +143,8 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testXmlViewResolver() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
-			protected InputStream getResourceByPath(String path) throws IOException {
-				return ViewResolverTestSuite.class.getResourceAsStream(path);
+			protected Resource getResourceByPath(String path) throws IOException {
+				return new ClassPathResource(path, ViewResolverTestSuite.class);
 			}
 		};
 		wac.registerSingleton("testBean", TestBean.class, null);
@@ -188,9 +189,9 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testXmlViewResolverDefaultLocation() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
-			protected InputStream getResourceByPath(String path) throws IOException {
+			protected Resource getResourceByPath(String path) throws IOException {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
-				return null;
+				throw new IOException();
 			}
 		};
 		wac.setServletContext(new MockServletContext());
@@ -207,9 +208,9 @@ public class ViewResolverTestSuite extends TestCase {
 
 	public void testXmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
-			protected InputStream getResourceByPath(String path) throws IOException {
+			protected Resource getResourceByPath(String path) throws IOException {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
-				return null;
+				throw new IOException();
 			}
 		};
 		wac.setServletContext(new MockServletContext());

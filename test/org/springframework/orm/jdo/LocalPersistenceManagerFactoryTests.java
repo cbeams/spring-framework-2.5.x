@@ -8,6 +8,8 @@ import javax.jdo.PersistenceManagerFactory;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.io.ClassPathResource;
+
 /**
  * @author Juergen Hoeller
  */
@@ -44,7 +46,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 				throw new IllegalArgumentException(prop.getProperty("myKey"));
 			}
 		};
-		pmfb.setConfigLocation("/org/springframework/orm/jdo/test.properties");
+		pmfb.setConfigLocation(new ClassPathResource("test.properties", getClass()));
 		try {
 			pmfb.afterPropertiesSet();
 			fail("Should have thrown IllegalArgumentException");
