@@ -23,12 +23,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * PropertyEditor for TransactionAttribute objects. Takes Strings of form
- * <p><code>PROPAGATION_NAME,ISOLATION_NAME,readOnly,+Exception1,-Exception2</code>
+ * <p><code>PROPAGATION_NAME,ISOLATION_NAME,readOnly,timeout_NNNN,+Exception1,-Exception2</code>
  * <p>where only propagation code is required. For example:
  * <p><code>PROPAGATION_MANDATORY,ISOLATION_DEFAULT</code>
  *
- * <p>The tokens can be in any order. Propagation and isolation codes
- * must use the names of the constants in the TransactionDefinition class.
+ * <p>The tokens can be in <strong>any</strong> order. Propagation and isolation codes
+ * must use the names of the constants in the TransactionDefinition class. Timeout values
+ * are in seconds. If no timeout is specified, the transaction manager will apply a default
+ * timeout specific to the particular transaction manager.
  *
  * <p>A "+" before an exception name substring indicates that
  * transactions should commit even if this exception is thrown;
@@ -43,7 +45,7 @@ import org.springframework.util.StringUtils;
 public class TransactionAttributeEditor extends PropertyEditorSupport {
 
 	/**
-	 * Format is PROPAGATION_NAME,ISOLATION_NAME,readOnly,+Exception1,-Exception2.
+	 * Format is PROPAGATION_NAME,ISOLATION_NAME,readOnly,timeout_NNNN,+Exception1,-Exception2.
 	 * Null or the empty string means that the method is non transactional.
 	 * @see java.beans.PropertyEditor#setAsText(java.lang.String)
 	 */
