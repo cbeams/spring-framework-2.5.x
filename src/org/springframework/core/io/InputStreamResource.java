@@ -27,6 +27,9 @@ public class InputStreamResource extends AbstractResource {
 	 * @param description where the InputStream comes from
 	 */
 	public InputStreamResource(InputStream inputStream, String description) {
+		if (inputStream == null) {
+			throw new IllegalArgumentException("inputStream must not be null");
+		}
 		this.inputStream = inputStream;
 		this.description = description;
 	}
