@@ -28,7 +28,7 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: ListableBeanFactory.java,v 1.4 2003-11-12 19:05:56 jhoeller Exp $
+ * @version $Id: ListableBeanFactory.java,v 1.5 2003-11-21 15:34:32 jhoeller Exp $
  * @see org.springframework.beans.factory.support.BeanFactoryUtils
  */
 public interface ListableBeanFactory extends BeanFactory {
@@ -54,7 +54,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * consider FactoryBeans as the type of their created objects is not
 	 * known before instantiation.
 	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * @param type class or interface to match
+	 * @param type class or interface to match, or null for all bean names
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
 	 */
