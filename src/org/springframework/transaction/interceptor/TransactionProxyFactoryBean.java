@@ -45,7 +45,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.14 2003-12-01 18:40:27 johnsonr Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.15 2003-12-02 16:34:50 johnsonr Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -159,6 +159,10 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	public void afterPropertiesSet() throws AopConfigException {
 		if (this.target == null) {
 			throw new AopConfigException("Target must be set");
+		}
+		
+		if (this.transactionAttributes == null) {
+			throw new AopConfigException("'transactionAttributes' property must be set: if there are no transaction methods, don't use a transactional proxy");
 		}
 
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
