@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.4 (26.1.2005)
+Changes in version 1.1.4 (31.1.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -31,6 +31,7 @@ Package org.springframework.beans
 
 Package org.springframework.context
 * fixed AbstractApplicationContext to ignore "applicationEventMulticaster" bean in parent context (-> only local bean)
+* optimized ReloadableResourceBundleMessageSource to never check the same message file twice for the same message
 * added protected "getDefaultLocale" method to MessageSourceAccessor, to allow to use a thread-bound user locale
 
 Package org.springframework.core
@@ -65,15 +66,21 @@ Package org.springframework.mock
 * fixed "getAttributeNames" in MockPageContext to correctly return attribute keys (rather than attribute values)
 
 Package org.springframework.orm
-* SqlMapClientFactoryBean automatically lets all operations participate in Spring-managed transaction timeouts
+* added "useTransactionAwareDataSource" flag to SqlMapClientFactoryBean, with default true (transactional lazy loading)
 * added overloaded "update"/"delete" methods to SqlMapClientOperations/Template, with required number of affected rows
 * marked SqlMapDaoSupport and SqlMapClientDaoSupport as abstract classes (analogous to all other DAO support classes)
+* added "useTransactionAwareDataSource" flag to LocalSessionFactoryBean, with default false (for JDBC-based transaction)
+* fixed NPE in SessionFactoryUtils' Session lookup code (when using both JTA synchronization and Spring synchronization)
+* refined SessionFactoryUtils' JTA synchronization to unbind the Session as early as possible (earlier for a commit)
+* refined AbstractLobType' JTA synchronization to close the LobCreator as early as possible (earlier for a commit)
 * fixed NPE in HibernateTemplate's "iterate(queryString,value)" and "iterate(queryString,values)" methods
 * added "saveOrUpdateAll" operation to HibernateOperations and HibernateTemplate, accepting a collection of entities
 * added "alwaysUseNewSession" flag to HibernateTemplate, enforcing a new Session even in case of a pre-bound Session
 * HibernateTemplate proxies exposed Sessions by default, applying query cache settings and transaction timeouts
 * deprecated HibernateTemplate's "createQuery", "getNamedQuery" and "createCriteria" methods (in favor of Session proxy)
 * JdoTemplate can proxy exposed PersistenceManagers ("exposeNativePersistenceManager"), applying transaction timeouts
+* added TransactionAwareDataSourceConnectionFactory for OJB (JDBC-based transaction participation, transaction timeouts)
+* added "getObjectById(entityClass, idValue)" method to PersistenceBrokerOperations/Template, for single primary keys
 
 Package org.springframework.remoting
 * added "prepare" methods and corresponding checks to all client interceptors, to allow for easier standalone usage
@@ -95,6 +102,9 @@ Package org.springframework.scheduling
 * added "schedulerListeners", "(global)JobListeners", "(global)TriggerListeners" bean properties to SchedulerFactoryBean
 * added "jobListenerNames"/"triggerListenerNames" property to JobDetailBean, CronTriggerBean, SimpleTriggerBean (resp.)
 
+Package org.springframework.test
+* added "endTransaction" method to AbstractTransactionalSpringContextTests, to force an early end of the transaction
+
 Package org.springframework.transaction
 * reworked TransactionProxyFactoryBean to allow auto-detection of interfaces for a non-default TargetSource too
 
@@ -106,6 +116,7 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * added "exposeRequestAttributes" method to WebUtils, exposing a given java.util.Map as request attributes
+* Log4jConfigListener/Servlet supports "file:" URL as "log4jConfigLocation" (as alternative to ServletContext resource)
 * Log4jConfigListener/Servlet and WebAppRootListener remove the web app root system property on shutdown
 * ContextLoader can optionally load a (shared) parent application context to the root web application context
 * added ServletContextFactoryBean, exposing the ServletContext for bean references (alternative to ServletContextAware)
