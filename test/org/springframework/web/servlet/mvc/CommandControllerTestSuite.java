@@ -391,11 +391,11 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct float value", errors.getFieldValue("myFloat") != null);
 	}
 
-	public void testResetEmptyFields() throws Exception {
+	public void testResetEmptyStringField() throws Exception {
 		TestController mc = new TestController();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
-		request.addParameter(ServletRequestDataBinder.FIELD_MARKER_PREFIX + "name", "true");
+		request.addParameter("_name", "visible");
 		request.addParameter("name", "test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -405,7 +405,8 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct name value", "test".equals(errors.getFieldValue("name")));
 
 		request = new MockHttpServletRequest("GET", "/welcome.html");
-		request.addParameter(ServletRequestDataBinder.FIELD_MARKER_PREFIX + "name", "true");
+		request.addParameter("_name", "visible");
+		request.addParameter("_someNonExistingField", "visible");
 		mv = mc.handleRequest(request, response);
 		tb = (TestBean) mv.getModel().get("command");
 		errors = (Errors) mv.getModel().get("errors");
@@ -413,18 +414,59 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct name value", errors.getFieldValue("name") == null);
 	}
 
-	public void testResetEmptyCheckboxesTurnedOff() throws Exception {
+	public void testResetEmptyBooleanField() throws Exception {
+		TestController mc = new TestController();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
+		request.addParameter("_postProcessed", "visible");
+		request.addParameter("postProcessed", "true");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = mc.handleRequest(request, response);
+		TestBean tb = (TestBean) mv.getModel().get("command");
+		Errors errors = (Errors) mv.getModel().get("errors");
+		assertTrue("Correct postProcessed property", tb.isPostProcessed());
+		assertTrue("Correct postProcessed value", Boolean.TRUE.equals(errors.getFieldValue("postProcessed")));
+
+		request = new MockHttpServletRequest("GET", "/welcome.html");
+		request.addParameter("_postProcessed", "visible");
+		mv = mc.handleRequest(request, response);
+		tb = (TestBean) mv.getModel().get("command");
+		errors = (Errors) mv.getModel().get("errors");
+		assertTrue("Correct postProcessed property", !tb.isPostProcessed());
+		assertTrue("Correct postProcessed value", Boolean.FALSE.equals(errors.getFieldValue("postProcessed")));
+	}
+
+	public void testResetEmptyStringArrayField() throws Exception {
+		TestController mc = new TestController();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
+		request.addParameter("_stringArray", "visible");
+		request.addParameter("stringArray", "value1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = mc.handleRequest(request, response);
+		TestBean tb = (TestBean) mv.getModel().get("command");
+		assertTrue("Correct stringArray property",
+							 tb.getStringArray() != null && "value1".equals(tb.getStringArray()[0]));
+
+		request = new MockHttpServletRequest("GET", "/welcome.html");
+		request.addParameter("_stringArray", "visible");
+		mv = mc.handleRequest(request, response);
+		tb = (TestBean) mv.getModel().get("command");
+		assertTrue("Correct stringArray property", tb.getStringArray() != null && tb.getStringArray().length == 0);
+	}
+
+	public void testResetEmptyFieldsTurnedOff() throws Exception {
 		TestController mc = new TestController() {
 			protected Object getCommand(HttpServletRequest request) throws Exception {
 				return new TestBean("original", 99);
 			}
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
-				binder.setResetEmptyFields(false);
+				binder.setFieldMarkerPrefix(null);
 			}
 		};
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome.html");
-		request.addParameter(ServletRequestDataBinder.FIELD_MARKER_PREFIX + "name", "true");
+		request.addParameter("_name", "visible");
 		request.addParameter("name", "test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
@@ -434,7 +476,7 @@ public class CommandControllerTestSuite extends TestCase {
 		assertTrue("Correct name value", "test".equals(errors.getFieldValue("name")));
 
 		request = new MockHttpServletRequest("GET", "/welcome.html");
-		request.addParameter(ServletRequestDataBinder.FIELD_MARKER_PREFIX + "name", "true");
+		request.addParameter("_name", "true");
 		mv = mc.handleRequest(request, response);
 		tb = (TestBean) mv.getModel().get("command");
 		errors = (Errors) mv.getModel().get("errors");

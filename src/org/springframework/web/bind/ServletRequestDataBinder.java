@@ -16,12 +16,12 @@
 
 package org.springframework.web.bind;
 
+import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
 
-import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.validation.DataBinder;
@@ -49,17 +49,17 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public class ServletRequestDataBinder extends DataBinder {
 
 	/**
-	 * Prefix that field marker parameters start with, followed by the field
+	 * Default prefix that field marker parameters start with, followed by the field
 	 * name: e.g. "_subscribeToNewsletter" for a field "subscribeToNewsletter".
-	 * <p>Such a marker parameter indicates that the field existed in the form
-	 * that caused the submission. If no corresponding field value parameter
-	 * was found, the field will be reset. This is particularly useful for
-	 * HTML checkboxes and select options.
-	 * @see #resetEmptyFields
+	 * <p>Such a marker parameter indicates that the field was visible respectively
+	 * existed in the form that caused the submission. If no corresponding field
+	 * value parameter was found, the field will be reset. This is particularly
+	 * useful for HTML checkboxes and select options.
+	 * @see #setFieldMarkerPrefix
 	 */
-	public static final String FIELD_MARKER_PREFIX = "_";
+	public static final String DEFAULT_FIELD_MARKER_PREFIX = "_";
 
-	private boolean resetEmptyFields = true;
+	private String fieldMarkerPrefix = DEFAULT_FIELD_MARKER_PREFIX;
 
 	private boolean bindEmptyMultipartFiles = true;
 
@@ -74,9 +74,12 @@ public class ServletRequestDataBinder extends DataBinder {
 	}
 
 	/**
-	 * Set whether to automatically reset empty fields that are marked through
-	 * "_FIELD" parameters (e.g. "_subscribeToNewsletter"). Default is true.
+	 * Specify a prefix that can be used for parameters that mark potentially
+	 * empty fields, having "prefix + field" as name. Such a marker parameter is
+	 * checked by existence: You can send any value for it, for example "visible".
 	 * This is particularly useful for HTML checkboxes and select options.
+	 * <p>Default is "_", for "_FIELD" parameters (e.g. "_subscribeToNewsletter").
+	 * Set this to null if you want to turn off the empty field check completely.
 	 * <p>HTML checkboxes only send a value when they're checked, so it is not
 	 * possible to detect that a formerly checked box has just been unchecked,
 	 * at least not with standard HTML means.
@@ -89,11 +92,11 @@ public class ServletRequestDataBinder extends DataBinder {
 	 * "_subscribeToNewsletter" for a "subscribeToNewsletter" field.
 	 * As the marker parameter is sent in any case, the data binder can
 	 * detect an empty field and automatically reset its value.
-	 * @see #FIELD_MARKER_PREFIX
+	 * @see #DEFAULT_FIELD_MARKER_PREFIX
 	 * @see org.springframework.web.servlet.mvc.BaseCommandController#onBind
 	 */
-	public void setResetEmptyFields(boolean resetEmptyFields) {
-		this.resetEmptyFields = resetEmptyFields;
+	public void setFieldMarkerPrefix(String fieldMarkerPrefix) {
+		this.fieldMarkerPrefix = fieldMarkerPrefix;
 	}
 
 	/**
@@ -129,25 +132,25 @@ public class ServletRequestDataBinder extends DataBinder {
 		MutablePropertyValues pvs = new ServletRequestParameterPropertyValues(request);
 
 		// check for special field markers
-		if (this.resetEmptyFields) {
+		if (this.fieldMarkerPrefix != null) {
 			PropertyValue[] pvArray = pvs.getPropertyValues();
 			for (int i = 0; i < pvArray.length; i++) {
 				PropertyValue pv = pvArray[i];
-				if (pv.getName().startsWith(FIELD_MARKER_PREFIX)) {
-					String field = pv.getName().substring(FIELD_MARKER_PREFIX.length());
-					if (!pvs.contains(field)) {
-						try {
-							Class type = getBeanWrapper().getPropertyType(field);
-							// special check for boolean property
-							if (type != null && boolean.class.equals(type) || Boolean.class.equals(type)) {
-								pvs.addPropertyValue(field, Boolean.FALSE);
-							}
-							else {
-								pvs.addPropertyValue(field, null);
-							}
+				if (pv.getName().startsWith(this.fieldMarkerPrefix)) {
+					String field = pv.getName().substring(this.fieldMarkerPrefix.length());
+					if (getBeanWrapper().isWritableProperty(field) && !pvs.contains(field)) {
+						Class type = getBeanWrapper().getPropertyType(field);
+						if (type != null && boolean.class.equals(type) || Boolean.class.equals(type)) {
+							// special handling of boolean property
+							pvs.addPropertyValue(field, Boolean.FALSE);
 						}
-						catch (InvalidPropertyException ex) {
-							// ignore if no matching property
+						else if (type != null && type.isArray()) {
+							// special handling of array property
+							pvs.addPropertyValue(field, Array.newInstance(type.getComponentType(), 0));
+						}
+						else {
+							// fallback: try to set to null
+							pvs.addPropertyValue(field, null);
 						}
 					}
 				}
