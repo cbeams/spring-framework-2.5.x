@@ -36,7 +36,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
     }
 
     public void testRegisterOperations() throws Exception {
-        JmxTestBean bean = getBean();
+        IJmxTestBean bean = getBean();
 
         MBeanInfo inf = getMBeanInfo();
 
@@ -45,7 +45,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
     }
 
     public void testRegisterAttributes() throws Exception {
-        JmxTestBean bean = getBean();
+        IJmxTestBean bean = getBean();
 
         MBeanInfo inf = getMBeanInfo();
 
@@ -53,8 +53,9 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
                 getExpectedAttributeCount(), inf.getAttributes().length);
     }
 
-    private JmxTestBean getBean() {
-        return (JmxTestBean) getContext().getBean("testBean");
+    private IJmxTestBean getBean() {
+        Object bean = getContext().getBean("testBean");
+        return (IJmxTestBean)bean;
     }
 
     public void testGetMBeanInfo() throws Exception {
@@ -108,7 +109,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
         
         server.setAttribute(objectName, new Attribute("name", "Rob Harrop"));
         
-        JmxTestBean bean = (JmxTestBean) getContext().getBean("testBean");
+        IJmxTestBean bean = (IJmxTestBean) getContext().getBean("testBean");
         assertEquals("Rob Harrop", bean.getName());
     }
 
@@ -149,7 +150,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
      * @return
      */
     protected ModelMBeanInfo getMBeanInfoFromAssembler() {
-        JmxTestBean bean = getBean();
+        IJmxTestBean bean = getBean();
         ModelMBeanInfo info = getAssembler().getMBeanInfo(bean);
         return info;
     }

@@ -17,14 +17,12 @@ import org.springframework.jmx.metadata.support.JmxAttributeSource;
  */
 public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemblerTests {
 
-    private static final String OBJECT_NAME = "bean:name=testBean3";
-
     public AbstractMetadataAssemblerTests(String name) {
         super(name);
     }
 
     public void testDescription() throws Exception {
-        MBeanInfo info = getMBeanInfo();
+        ModelMBeanInfo info = getMBeanInfoFromAssembler();
         assertEquals("The descriptions are not the same", "My Managed Bean",
                 info.getDescription());
     }
@@ -132,9 +130,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
         assertEquals("Role should be \"operation\"", "operation", desc.getFieldValue("role"));
     }
     
-    protected String getObjectName() {
-        return OBJECT_NAME;
-    }
+    protected abstract String getObjectName();
 
     protected int getExpectedAttributeCount() {
         return 4;

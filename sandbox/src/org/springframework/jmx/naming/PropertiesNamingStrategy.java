@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.jmx.naming;
 
 import java.io.FileInputStream;
@@ -25,21 +25,20 @@ import javax.management.ObjectName;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.ObjectNameManager;
 import org.springframework.jmx.exceptions.ObjectNamingException;
+import org.springframework.core.io.Resource;
 
 /**
  * <code>ObjectNamingStrategy</code> implementation that reads
  * object names from a properties file. The key used to look up
  * an <code>ObjectName</code> for a bean if the key used to in the <code>Map</code> of beans
  * passed to <code>JmxMBeanAdapter</code>.
+ *
  * @author Rob Harrop
  */
 public class PropertiesNamingStrategy implements ObjectNamingStrategy,
         InitializingBean {
 
-    /**
-     * The default properties file name.
-     */
-    private String propertiesFile = "objectnames.properties";
+    private Resource resource;
 
     /**
      * Store the properties
@@ -52,47 +51,39 @@ public class PropertiesNamingStrategy implements ObjectNamingStrategy,
      * been set.
      */
     public void afterPropertiesSet() throws Exception {
-        properties = new Properties();
-        try {
-            properties.load(new FileInputStream(propertiesFile));
-        } catch (FileNotFoundException ex) {
-            throw new ObjectNamingException(
-                    "Unable to locate the properties file containing the name map. Path supplied: "
-                            + propertiesFile, ex);
+
+        if (resource == null) {
+            throw new IllegalArgumentException("Must set property resource of class [" + this.getClass() + "]");
         }
+        properties = new Properties();
+
+        properties.load(resource.getInputStream());
     }
 
     /**
-     * Attempts to retreive the ObjectName from the 
+     * Attempts to retreive the ObjectName from the
      * properties file.
      */
     public ObjectName getObjectName(Object managedResource, String key)
             throws ObjectNamingException {
-        
+
         String objectName = null;
-        
+
         try {
             objectName = properties.getProperty(key);
             return ObjectNameManager.getInstance(objectName);
-        } catch(MalformedObjectNameException ex) {
+        } catch (MalformedObjectNameException ex) {
             throw new ObjectNamingException("The name associated with key: " + key + " [" + objectName + "] is malformed.", ex);
         }
     }
 
     /**
-     * Specify the path to the properties file.
-     * @param propertiesFile
+     * Specify the <code>Resource</code> from whicg to load the properties.
+     *
+     * @param resource
      */
-    public void setPropertiesFile(String propertiesFile) {
-        this.propertiesFile = propertiesFile;
-    }
-
-    /**
-     * Retrieve the path to the properties file.
-     * @return
-     */
-    public String getPropertiesFile() {
-        return this.propertiesFile;
+    public void setPropertiesFile(Resource resource) {
+        this.resource = resource;
     }
 
 }

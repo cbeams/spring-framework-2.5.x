@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author robh
@@ -26,11 +27,11 @@ public class AbstractJmxTests extends TestCase {
 
     public void setUp() throws Exception{
         server = MBeanServerFactory.createMBeanServer();
-        ctx = new FileSystemXmlApplicationContext(getApplicationContextPath());
+        ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
     }
 
     protected String getApplicationContextPath() {
-        return "./sandbox/test/org/springframework/jmx/applicationContext.xml";
+        return "org/springframework/jmx/applicationContext.xml";
     }
 
     public void tearDown() throws Exception {

@@ -12,6 +12,8 @@ import org.springframework.jmx.metadata.support.commons.CommonsAttributesJmxAttr
 public class CommonsAttributesMetadataAssemblerTests extends
         AbstractMetadataAssemblerTests {
 
+    private static final String OBJECT_NAME = "bean:name=testBean3";
+
     public CommonsAttributesMetadataAssemblerTests(String name) {
         super(name);
 
@@ -21,4 +23,7 @@ public class CommonsAttributesMetadataAssemblerTests extends
         return new CommonsAttributesJmxAttributeSource();
     }
 
+    protected String getObjectName() {
+        return OBJECT_NAME;
+    }
 }

@@ -21,7 +21,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/servlet.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/jdbc2_0-stdext.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j/log4j-1.2.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
@@ -94,5 +93,6 @@
 	<classpathentry kind="lib" path="lib/jmx/jmxtools.jar"/>
 	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jamon/JAMon.jar"/>
+	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.9.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>

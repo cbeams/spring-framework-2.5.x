@@ -85,7 +85,7 @@
 		
 	<bean id="propertiesNamingStrategy" class="org.springframework.jmx.naming.PropertiesNamingStrategy">
 		<property name="propertiesFile">
-			<value>./sandbox/test/org/springframework/jmx/jmx.names</value>
+			<value>classpath:org/springframework/jmx/jmx.names.properties</value>
 		</property>
 	</bean>
 	

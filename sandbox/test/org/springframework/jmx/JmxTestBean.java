@@ -11,7 +11,7 @@ package org.springframework.jmx;
  * 
  * @author Rob Harrop
  */
-public class JmxTestBean {
+public class JmxTestBean implements IJmxTestBean{
 
     private String name;
 
