@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.core;
 
@@ -21,67 +21,98 @@ import java.util.List;
 
 /**
  * Object to represent a SQL parameter definition.
- * Parameters may be anonymous, in which case name is null.
- * However all parameters must define a SQL type constant
- * from java.sql.Types.
+ *
+ * <p>Parameters may be anonymous, in which case name is null.
+ * However, all parameters must define a SQL type constant from
+ * <code>java.sql.Types</code>.
+ *
  * @author Rod Johnson
  * @author Thomas Risberg
+ * @see java.sql.Types
  */
 public class SqlParameter {
 
 	private String name;
 	
 	/** SQL type constant from java.sql.Types */
-	private int type;
+	private int sqlType;
 
-	/** used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, and named array types. */
+	/** used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, and named array types */
 	private String typeName;
-			
+
+
 	/**
-	 * Add a new anonymous parameter
+	 * Create a new anonymous SqlParameter, supplying SQL type.
+	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 */
-	public SqlParameter(int type) {
-		this(null, type, (String)null);
+	public SqlParameter(int sqlType) {
+		this(null, sqlType, (String) null);
 	}
 
-	public SqlParameter(int type, String typeName) {
-		this(null, type, typeName);
+	/**
+	 * Create a new anonymous SqlParameter, supplying SQL type.
+	 * @param sqlType SQL type of the parameter according to java.sql.Types
+	 * @param typeName the type name of the parameter (optional)
+	 */
+	public SqlParameter(int sqlType, String typeName) {
+		this(null, sqlType, typeName);
 	}
 
-	public SqlParameter(String name, int type) {
-		this(name, type, (String)null);
+	/**
+	 * Create a new SqlParameter, supplying name and SQL type.
+	 * @param name name of the parameter, as used in input and output maps
+	 * @param sqlType SQL type of the parameter according to java.sql.Types
+	 */
+	public SqlParameter(String name, int sqlType) {
+		this(name, sqlType, (String) null);
 	}
 	
-	public SqlParameter(String name, int type, String typeName) {
+	/**
+	 * Create a new SqlParameter, supplying name and SQL type.
+	 * @param name name of the parameter, as used in input and output maps
+	 * @param sqlType SQL type of the parameter according to java.sql.Types
+	 * @param typeName the type name of the parameter (optional)
+	 */
+	public SqlParameter(String name, int sqlType, String typeName) {
 		this.name = name;
-		this.type = type;
+		this.sqlType = sqlType;
 		this.typeName = typeName;
 	}
 
+	/**
+	 * Return the name of the parameter.
+	 */
 	public String getName() {
 		return name;
 	}
-	
+
+	/**
+	 * Return the SQL type of the parameter.
+	 */
 	public int getSqlType() {
-		return type;
+		return sqlType;
 	}
 
+	/**
+	 * Return the type name of the parameter, if any.
+	 */
 	public String getTypeName() {
 		return typeName;
 	}
 
+
 	/**
-	 * Convert a list of JDBC types, as defined in the java.sql.Types class,
-	 * to a List of SqlParameter objects as used in this package
+	 * Convert a list of JDBC types, as defined in <code>java.sql.Types</code>,
+	 * to a List of SqlParameter objects as used in this package.
 	 */
 	public static List sqlTypesToAnonymousParameterList(int[] types) {
-		List l = new LinkedList();
+		List result = new LinkedList();
 		if (types != null) {
 			for (int i = 0; i < types.length; i++) {
-				l.add(new SqlParameter(types[i]));
+				result.add(new SqlParameter(types[i]));
 			}
 		}
-		return l;
+		return result;
 	}
 
 }

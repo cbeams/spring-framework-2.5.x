@@ -70,8 +70,10 @@ public class StatementCreatorUtils {
 	 * @param paramIndex index of the parameter we are setting
 	 * @param sqlType the SQL type of the parameter
 	 * @param typeName the type name of the parameter
+	 * (optional, only used for SQL NULL and SqlTypeValue)
 	 * @param inValue the value to set
 	 * @throws SQLException if thrown by PreparedStatement methods
+	 * @see SqlTypeValue
 	 */
 	public static void setParameterValue(
 	    PreparedStatement ps, int paramIndex, int sqlType, String typeName, Object inValue)
