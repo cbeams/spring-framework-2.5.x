@@ -11,6 +11,7 @@ General
 * renamed all remaining "*TestSuite" class to "*Tests", for consistent naming of test cases
 
 Package org.springframework.aop
+* Added setExposeProxy() method to Advised interface
 * DelegatingIntroductionInterceptor now massages return type, returning the proxy, rather than the delegate, if a delegate method returns this
 * reworked ProxyFactoryBean and AbstractPrototypeBasedTargetSource to leverage BeanFactory's "getType" method
 * moved "invokeJoinpointUsingReflection" method from aop.framework.AopProxyUtils to aop.support.AopUtils

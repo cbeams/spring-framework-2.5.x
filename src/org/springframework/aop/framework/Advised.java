@@ -61,6 +61,15 @@ public interface Advised {
 	boolean getExposeProxy();
 	
 	/**
+	 * Set whether the proxy should be exposed by the AOP framework as a
+	 * ThreadLocal for retrieval via the AopContext class. This is useful
+	 * if an advised object needs to call another advised method on itself.
+	 * (If it uses <code>this</code>, the invocation will not be advised).
+	 * <p>Default is false, for optimal performance.
+	 */
+	void setExposeProxy(boolean exposeProxy);
+	
+	/**
 	 * Should we proxy the target class as well as any interfaces?
 	 * Can use this to force CGLIB proxying.
 	 */
