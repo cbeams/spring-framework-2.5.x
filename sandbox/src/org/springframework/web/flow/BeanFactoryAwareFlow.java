@@ -44,8 +44,7 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 
 	public void setFlowDao(FlowDao dao) {
 		Assert.isInstanceOf(BeanFactoryFlowDao.class, dao,
-				"The FlowDao must be a BeanFactoryFlowDao implementation for BeanFactoryAwareFlows, but you provided a "
-						+ dao.getClass() + " implementation");
+				"The FlowDao must be a BeanFactoryFlowDao implementation for BeanFactoryAwareFlows: ");
 		super.setFlowDao(dao);
 	}
 
