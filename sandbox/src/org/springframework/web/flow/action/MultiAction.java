@@ -21,7 +21,9 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CachingMapTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.flow.ActionExecutionException;
+import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 
@@ -34,8 +36,9 @@ import org.springframework.web.flow.RequestContext;
  *     public Event ${executeMethodName}(RequestContext context) throws Exception
  * </pre>
  * 
- * By default, the ${executeMethodName} will be the name of the <b>current state</b>
- * of the flow, so the follow state definition
+ * By default, the ${executeMethodName} will be the name of a <i>named action</i>,
+ * or the name of the <i>current state</i> of the flow if the action is unnamed.
+ * So the follow state definition
  * 
  * <pre>
  *    &lt;action-state id=&quot;search&quot;&gt;
@@ -48,6 +51,15 @@ import org.springframework.web.flow.RequestContext;
  * 
  * <pre>
  *    public Event search(RequestContext context) throws Exception
+ * </pre>
+ * 
+ * Alternatively you could have used a named action to execute the above method:
+ * 
+ * <pre>
+ *    &lt;action-state id=&quot;searchState&quot;&gt;
+ *         &lt;action name="search" bean=&quot;my.search.action&quot;/&gt;
+ *         &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
+ *    &lt;/action-state&gt;
  * </pre>
  * 
  * <p>
@@ -71,12 +83,13 @@ import org.springframework.web.flow.RequestContext;
  * </tr>
  * <tr>
  * <td>executeMethodNameResolver</td>
- * <td><i>{@link MultiAction.CurrentStateActionExecuteMethodNameResolver current state}</i></td>
+ * <td><i>{@link MultiAction.DefaultActionExecuteMethodNameResolver default}</i></td>
  * <td>Set the strategy used to resolve the name of an action execution method.</td>
  * </tr>
  * </table>
  * 
  * @see MultiAction.ActionExecuteMethodNameResolver
+ * @see MultiAction.DefaultActionExecuteMethodNameResolver
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -92,7 +105,7 @@ public class MultiAction extends AbstractAction {
 	/**
 	 * The action execute method name resolver strategy.
 	 */
-	private ActionExecuteMethodNameResolver executeMethodNameResolver = new CurrentStateActionExecuteMethodNameResolver();
+	private ActionExecuteMethodNameResolver executeMethodNameResolver = new DefaultActionExecuteMethodNameResolver();
 
 	/**
 	 * The resolved action execute method cache.
@@ -128,7 +141,7 @@ public class MultiAction extends AbstractAction {
 	}
 
 	protected Event doExecuteAction(RequestContext context) throws Exception {
-		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context);
+		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context, this);
 		try {
 			Method actionExecuteMethod = getActionExecuteMethod(actionExecuteMethodName);
 			Object result = actionExecuteMethod.invoke(getDelegate(), new Object[] { context });
@@ -187,21 +200,37 @@ public class MultiAction extends AbstractAction {
 		/**
 		 * Resolve a method name from given flow execution request context.
 		 * @param context the flow execution request context
+		 * @param action the multi-action requesting method name resolution
 		 * @return the name of the method that should handle action execution
 		 */
-		public String getMethodName(RequestContext context);
+		public String getMethodName(RequestContext context, MultiAction action);
 	}
 
 	/**
-	 * Action execution method name resolver that uses the name of the current
-	 * state of the flow execution as a method name. This is the default method
-	 * name resolver used by the MultiAction class.
+	 * Action execution method name resolver that uses the following
+	 * algorithm to calculate a method name:
+	 * <ol>
+	 * <li>If the currently executing action is a <i>named action</i>, use the
+	 * name of the action as a method name.</li>
+	 * <li>Else, use the name of the current state of the flow execution as a
+	 * method name.</li>
+	 * </ol>
+	 * This is the default method name resolver used by the MultiAction class.
 	 * 
 	 * @author Erwin Vervaet
 	 */
-	public static class CurrentStateActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
-		public String getMethodName(RequestContext context) {
-			return context.getCurrentState().getId();
+	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
+		public String getMethodName(RequestContext context, MultiAction action) {
+			Assert.isInstanceOf(ActionState.class, context.getCurrentState());
+			String actionName=((ActionState)context.getCurrentState()).getActionName(action);
+			if (StringUtils.hasText(actionName)) {
+				// use action name as method name
+				return actionName;
+			}
+			else {
+				// use current state name as method name
+				return context.getCurrentState().getId();
+			}
 		}
 	}
 }
