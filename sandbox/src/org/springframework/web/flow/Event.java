@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow;
 
+import java.util.EventObject;
 import java.util.Map;
 
 import org.springframework.binding.AttributeAccessor;
@@ -23,8 +24,8 @@ import org.springframework.util.ToStringCreator;
 /**
  * Signals the occurence of a <i>request</i> that is relevant to the web flow
  * system. Each event has a string id. An event may optionally contain
- * information about the state in which it occured. Events may have
- * parameters. Events are immutable.
+ * information about the state in which it occured. Events may have parameters.
+ * Events are immutable.
  * <p>
  * For example, a "submit" event might signal that a Submit button was pressed
  * in a web browser. A "success" event might signal an action executed
@@ -38,14 +39,16 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class Event implements AttributeAccessor {
+public abstract class Event extends EventObject implements AttributeAccessor {
 
 	/**
-	 * Returns the underlying client <i>request</i> that triggered this event.
-	 * @return the client source request object, may be null
+	 * Constructs a new event with the specified source
+	 * @param source the source
 	 */
-	public abstract Object getSource();
-	
+	public Event(Object source) {
+		super(source);
+	}
+
 	/**
 	 * Returns the event identifier.
 	 * @return The event id
@@ -79,7 +82,7 @@ public abstract class Event implements AttributeAccessor {
 	 *         not present in the request
 	 */
 	public abstract Object getParameter(String parameterName);
-	
+
 	// implementing AttributeAccessor
 
 	public boolean containsAttribute(String attributeName) {
@@ -91,7 +94,7 @@ public abstract class Event implements AttributeAccessor {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("id", getId()).append("stateId", getStateId()).append("parameters",
-				getParameters()).toString();
+		return new ToStringCreator(this).append("source", getSource()).append("id", getId()).append("stateId",
+				getStateId()).append("parameters", getParameters()).toString();
 	}
 }

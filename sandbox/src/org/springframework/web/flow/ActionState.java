@@ -434,35 +434,32 @@ public class ActionState extends TransitionableState {
 		private static class ActionNameQualifiedEvent extends Event {
 			private String actionName;
 
-			private Event event;
-
+			private Event resultEvent;
+			
 			public ActionNameQualifiedEvent(String actionName, Event resultEvent) {
+				super(resultEvent.getSource());
 				this.actionName = actionName;
-				this.event = resultEvent;
+				this.resultEvent = resultEvent;
 			}
 
 			public String getId() {
-				return actionName + "." + event.getId();
+				return actionName + "." + resultEvent.getId();
 			}
 
 			public long getTimestamp() {
-				return event.getTimestamp();
+				return resultEvent.getTimestamp();
 			}
 			
 			public Object getParameter(String parameterName) {
-				return event.getParameter(parameterName);
+				return resultEvent.getParameter(parameterName);
 			}
 
 			public Map getParameters() {
-				return event.getParameters();
+				return resultEvent.getParameters();
 			}
 
 			public String getStateId() {
-				return event.getStateId();
-			}
-
-			public Object getSource() {
-				return event.getSource();
+				return resultEvent.getStateId();
 			}
 		}
 

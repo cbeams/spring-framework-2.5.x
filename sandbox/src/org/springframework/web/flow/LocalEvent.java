@@ -55,19 +55,23 @@ public class LocalEvent extends Event {
 
 	/**
 	 * Create a local event with the specified <code>id</code>.
+	 * @param source the source of the event
 	 * @param id the event identifier
 	 */
-	public LocalEvent(String id) {
+	public LocalEvent(Object source, String id) {
+		super(source);
 		setId(id);
 	}
 
 	/**
 	 * Create a local event with the specified <code>id</code> occuring in the
 	 * state with the specified <code>stateId</code>.
+	 * @param source the source of the event
 	 * @param id the event identifier
 	 * @param stateId the state in which this event occured
 	 */
-	public LocalEvent(String id, String stateId) {
+	public LocalEvent(Object source, String id, String stateId) {
+		super(source);
 		setId(id);
 		this.stateId = stateId;
 	}
@@ -78,7 +82,8 @@ public class LocalEvent extends Event {
 	 * @param id the event identifier
 	 * @param parameters the event parameters
 	 */
-	public LocalEvent(String id, Map parameters) {
+	public LocalEvent(Object source, String id, Map parameters) {
+		super(source);
 		setId(id);
 		setParameters(parameters);
 	}
@@ -87,11 +92,13 @@ public class LocalEvent extends Event {
 	 * Create a local event with the specified <code>id</code> occuring in the
 	 * state with the specified <code>stateId</code> and the provided
 	 * contextual parameters.
+	 * @param source the source of the event
 	 * @param id the event identifier
 	 * @param stateId the state in which this event occured
 	 * @param parameters contextual parameters
 	 */
-	public LocalEvent(String id, String stateId, Map parameters) {
+	public LocalEvent(Object source, String id, String stateId, Map parameters) {
+		super(source);
 		setId(id);
 		this.stateId = stateId;
 		setParameters(parameters);
@@ -121,7 +128,7 @@ public class LocalEvent extends Event {
 	public long getTimestamp() {
 		return timestamp;
 	}
-	
+
 	public String getStateId() {
 		return stateId;
 	}
@@ -142,9 +149,5 @@ public class LocalEvent extends Event {
 		else {
 			return null;
 		}
-	}
-	
-	public Object getSource() {
-		return null; //this is an internal event!
 	}
 }

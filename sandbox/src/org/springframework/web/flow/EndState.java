@@ -97,8 +97,8 @@ public class EndState extends State {
 	}
 
 	/**
-	 * Specialization of State's <code>doEnterState</code> template
-	 * method that executes behaivior specific to this state type in polymorphic
+	 * Specialization of State's <code>doEnterState</code> template method
+	 * that executes behaivior specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
 	 * This implementation pops the top (active) flow session off the execution
@@ -127,7 +127,8 @@ public class EndState extends State {
 			// treat this end state id as a transitional event in the
 			// resuming state, this is so cool!
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
-			return ((TransitionableState)resumingState).executeTransitionOnEvent(createSubFlowResultEvent(), context);
+			return ((TransitionableState)resumingState).executeTransitionOnEvent(createEndingSubFlowResultEvent(),
+					context);
 		}
 		else {
 			// entire flow execution has ended, return ending view if applicable
@@ -154,7 +155,7 @@ public class EndState extends State {
 	 * paramtereters. Subclasses may override.
 	 * @return
 	 */
-	protected Event createSubFlowResultEvent() {
-		return new LocalEvent(getId());
+	protected Event createEndingSubFlowResultEvent() {
+		return new LocalEvent(this, getId());
 	}
 }
