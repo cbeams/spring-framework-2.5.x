@@ -76,7 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.46 2004-06-17 16:59:14 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.47 2004-06-17 19:40:44 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -354,10 +354,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 		while ((last && i >= 0) || i < propertyPath.length()) {
 			switch (propertyPath.charAt(i)) {
 				case PROPERTY_KEY_PREFIX_CHAR:
-					inKey = true;
-					break;
 				case PROPERTY_KEY_SUFFIX_CHAR:
-					inKey = false;
+					inKey = !inKey;
 					break;
 				case NESTED_PROPERTY_SEPARATOR_CHAR:
 					if (!inKey) {
