@@ -23,8 +23,9 @@ import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.MutableAttributesAccessor;
 
 /**
- * Utility class providing convenience methods for the Flow system.
+ * Utility class providing convenience methods for the Spring web flow system.
  * 
+ * <p>
  * This class provides web transaction token handling methods similar to those
  * available in the Struts framework. In essense an implementation of the <a
  * href="http://www.javajunkies.org/index.pl?lastnode_id=3361&node_id=3355">synchronizer
@@ -64,7 +65,6 @@ public class FlowUtils {
 	// token related functionality like in Struts
 
 	/**
-	 * <p>
 	 * Save a new transaction token in given model.
 	 * 
 	 * @param model the model map where the generated token should be saved

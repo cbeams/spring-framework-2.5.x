@@ -168,7 +168,10 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		this.outputMappings = new HashMap(outputMappings);
 	}
 
-	// internal worker function
+	/**
+	 * Internal worker function to convert given mappingsList to a
+	 * simple mappings map.
+	 */
 	private void putCollectionMappings(Map map, Collection mappingsList) {
 		Iterator it = mappingsList.iterator();
 		while (it.hasNext()) {
@@ -198,10 +201,18 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		}
 	}
 
+	/**
+	 * <p>Set whether or not missing attributes in the model should
+	 * be mapped to a null value or shouldn't be mapped at all.
+	 */
 	public void setMapMissingAttributesToNull(boolean toNull) {
 		this.mapMissingAttributesToNull = toNull;
 	}
 
+	/**
+	 * <p>Get whether or not missing attributes in the model should
+	 * be mapped to a null value or shouldn't be mapped at all.
+	 */
 	public boolean isMapMissingAttributesToNull() {
 		return this.mapMissingAttributesToNull;
 	}
@@ -289,6 +300,9 @@ public class ParameterizableFlowAttributesMapper implements FlowAttributesMapper
 		return new BeanWrapperImpl(obj);
 	}
 
+	/**
+	 * Helper class that wraps a map in a MutableAttributesAccessor interface.
+	 */
 	private static class MapAttributesAccessorAdapter implements MutableAttributesAccessor {
 		private Map map;
 
