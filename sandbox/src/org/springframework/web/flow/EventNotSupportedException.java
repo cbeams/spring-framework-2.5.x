@@ -26,8 +26,14 @@ import org.springframework.util.Styler;
  */
 public class EventNotSupportedException extends FlowNavigationException {
 
+	/**
+	 * The state this exception was thrown.
+	 */
 	private TransitionableState state;
 
+	/**
+	 * The event that did not map to any state transition.
+	 */
 	private Event event;
 
 	/**

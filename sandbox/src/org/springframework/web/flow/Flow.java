@@ -41,9 +41,9 @@ import org.springframework.util.ToStringCreator;
  * action, spawning a sub flow, or terminating the flow.
  * <p>
  * Each state has one or more transitions that are used to move to another
- * state. A transition is triggered by a supported event. An event is a string
- * identifier signalling the occurence of something: e.g "submit", "back",
- * "success", "error".
+ * state. A transition is triggered by the occurence of a supported event within
+ * a execution context. An event is a string identifier signalling the occurence
+ * of something: e.g "submit", "back", "success", "error".
  * <p>
  * Each Flow has exactly one start state. A start state is simply a marker for
  * the state FlowExecutions (client instances of this flow) should start in.
@@ -52,8 +52,8 @@ import org.springframework.util.ToStringCreator;
  * but may also be subclassed. This class, and the rest of the web.flow system,
  * has been purposefully designed with minimal dependencies on other parts of
  * Spring, and are easily usable in a standalone fashion (as well as in the
- * context of other request-driven frameworks like Struts or WebWork, for
- * example).
+ * context of other frameworks like Struts, WebWork, Tapestry, JSF, or Beehive,
+ * for example).
  * <p>
  * A flow object also acts as a factory for <code>FlowExecution</code>s
  * executing the flow as the top-level flow. See the {@link #createExecution()}
@@ -129,7 +129,6 @@ public class Flow {
 	 * flow itself! You can use this when you want certain listeners to always
 	 * be notified when a flow execution is created for this flow, irrespective
 	 * of the client that is driving the execution.
-	 * 
 	 * @return The set of flow execution listeners
 	 */
 	public FlowExecutionListenerList getFlowExecutionListenerList() {
@@ -140,7 +139,6 @@ public class Flow {
 	 * Add the state definition to this flow definition. Marked protected, as
 	 * this method is to be called by the (privileged) state definition classes
 	 * themselves during state construction as part of a FlowBuilder invocation.
-	 * 
 	 * @param state The state, if already added nothing happens, if another
 	 *        instance is added with the same id, an exception is thrown
 	 * @throws IllegalArgumentException when the state cannot be added to the

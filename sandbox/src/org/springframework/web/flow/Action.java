@@ -22,6 +22,10 @@ package org.springframework.web.flow;
  * They act as a bridge between the web-tier (browser/views) and the middle-tier
  * (service layer).
  * <p>
+ * When an action completes execution, it signals a result event describing the
+ * outcome of the execution attempt ("success", "error", etc). This result event
+ * is used as grounds for a state transition in the current state.
+ * <p>
  * Action implementations are typically singletons instantiated and managed by
  * Spring to take advantage of Spring's powerful configuration and dependency
  * injection (wiring) capabilities. Actions can also be directly instantiated
@@ -39,33 +43,40 @@ package org.springframework.web.flow;
 public interface Action {
 
 	/**
-	 * Execute this action. Action execution will occur in the context of the
-	 * current request. Execution is triggered in production when an
-	 * <code>ActionState</code> is entered in an ongoing
+	 * Execute this action. Action execution will occur in the context of an
+	 * request associated with an active flow execution.
+	 * <p>
+	 * More specifically, Action execution is triggered in production when an
+	 * <code>ActionState</code> is entered as part of an ongoing
 	 * <code>FlowExecution</code> for a specific <code>Flow</code>
-	 * definition. The result of execution, a logical outcome identifier, is
+	 * definition. The result of Action execution, a logical outcome event, is
 	 * used as grounds for a transition in the calling action state.
 	 * <p>
-	 * Note: The <code>FlowModel</code> argument to this method provides
-	 * access to the <b>data model </b> of the active flow session. This allows
-	 * this Action to access model data set by other Actions, as well as set its
-	 * own attributes it wishes to expose. All attributes in the flow model are
-	 * considered in "flow scope"; that is, they exist for the life of the flow
-	 * session and will be cleaned up when the flow session ends. All attributes
-	 * in the flow model are automatically exposed for convenient access by the
-	 * views when a <code>ViewState</code> is entered, using a standard Spring
-	 * <code>ViewDescriptor</code> descriptor.
+	 * Note: The <code>FlowExecutionContext</code> argument to this method
+	 * provides access to the <b>data model</b> of the active flow execution.
+	 * Among other things, this allows this Action to access model data set by
+	 * other Actions, as well as set its own attributes it wishes to expose in a
+	 * given scope.
 	 * <p>
-	 * Note: The flow model should not be used as a general purpose cache, but
-	 * rather as a context for data needed locally by the flows this action
-	 * participates in. For example, it would be inappropriate to stuff large
-	 * collections of objects (like those returned to support a search results
-	 * view) into the flow model. Instead, put such result collections in the
-	 * request, and ensure you execute this action again each time you wish to
-	 * view those results. 2nd level caches are much better cache solutions.
+	 * All attributes set in "flow scope" exist for the life of the flow session
+	 * and will be cleaned up when the flow session ends. All attributes set in
+	 * "request scope" exist for the life of the current executing request only.
 	 * <p>
-	 * Note: The flow model is typically managed in the HTTP session, so
-	 * attributes set in it should generally be serializable.
+	 * All attributes present in the context are automatically exposed for
+	 * convenient access by the views when a <code>ViewState</code> is
+	 * entered.
+	 * <p>
+	 * Note: The flow execution context should NOT be used as a general purpose
+	 * cache, but rather as a context for data needed locally by the flows this
+	 * action participates in. For example, it would be inappropriate to stuff
+	 * large collections of objects (like those returned to support a search
+	 * results view) into flow scope. Instead, put such result collections in
+	 * request scope, and ensure you execute this action again each time you
+	 * wish to view those results. 2nd level caches are much better cache
+	 * solutions.
+	 * <p>
+	 * Note: as flow scoped attributes are typically managed in the HTTP
+	 * session, they must be <code>Serializable</code>.
 	 * 
 	 * @param context The action execution context, for accessing and setting
 	 *        data in "flow scope" or "request scope"
@@ -75,7 +86,6 @@ public interface Action {
 	 *         checked or unchecked; note: any recoverable exceptions should be
 	 *         caught and an appropriate result outcome returned.
 	 * @see org.springframework.web.flow.ViewState
-	 * @see org.springframework.web.servlet.ViewDescriptor
 	 */
 	public Event execute(FlowExecutionContext context) throws Exception;
 }

@@ -20,13 +20,48 @@ import java.util.Map;
 import org.springframework.binding.AttributeAccessor;
 import org.springframework.util.ToStringCreator;
 
+/**
+ * Signals the occurence of something that happens relavent to the web.flow
+ * system. Each event has a string id. An event may contain information about
+ * the state in which it occured. Events may have parameters. Events are
+ * immutable.
+ * <p>
+ * For example, a "submit" event might signal that a Submit button was pressed
+ * in a web browser. A "success" event might signal an action executed
+ * successfully. A "finish" event might signal a sub flow ended normally.
+ * <p>
+ * Why is this class abstract and not an interface? A specific design choice. An
+ * event does not define any kind of contract or role per-say, it is expected
+ * that specializations of this base class be "Events" and nothing else.
+ * @author Keith Donald
+ */
 public abstract class Event implements AttributeAccessor {
+
+	/**
+	 * Returns the event identifier.
+	 * @return The event id
+	 */
 	public abstract String getId();
 
+	/**
+	 * Returns the state in which this event occured (optional).
+	 * @return The state id
+	 */
 	public abstract String getStateId();
 
+	/**
+	 * Returns a unmodifiable parameter map storing parameters associated with
+	 * this event.
+	 * @return The events parameters
+	 */
 	public abstract Map getParameters();
 
+	/**
+	 * Returns a parameter value given a parameter name, or <code>null</code>
+	 * if no parameter was found.
+	 * @param parameterName
+	 * @return
+	 */
 	public abstract Object getParameter(String parameterName);
 
 	public boolean containsAttribute(String attributeName) {

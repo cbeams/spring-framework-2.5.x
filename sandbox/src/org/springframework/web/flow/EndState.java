@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
  * An end state may optionally be configured with the name of a view. This view
  * will be rendered if the end state terminates the entire flow execution.
  * <p>
- * Note: if no</code> viewName</code> property is specified <b>and</b> this
+ * Note: if no <code>viewName</code> property is specified <b>and</b> this
  * EndState terminates the entire flow execution, it is expected that some
  * action has already written the response (or else a blank response will
  * result.) On the other hand, if no <code>viewName</code> is specified <b>and</b>
@@ -39,6 +39,10 @@ import org.springframework.util.StringUtils;
  */
 public class EndState extends State {
 
+	/**
+	 * An optional view name to render if this end state terminates an entire
+	 * flow execution.
+	 */
 	private String viewName;
 
 	/**
@@ -69,6 +73,7 @@ public class EndState extends State {
 	/**
 	 * Set the name of the view that should be rendered if this end state
 	 * terminates flow execution.
+	 * @param viewName the logical view name
 	 */
 	protected void setViewName(String viewName) {
 		this.viewName = viewName;
@@ -77,6 +82,7 @@ public class EndState extends State {
 	/**
 	 * Returns the name of the view that will be rendered if this end state
 	 * terminates flow execution, or null if there is no associated view.
+	 * @returns the logical view name
 	 */
 	public String getViewName() {
 		return viewName;
@@ -84,18 +90,24 @@ public class EndState extends State {
 
 	/**
 	 * Returns true if this end state has no associated view, false otherwise.
+	 * @return true if a view marker, false otherwise
 	 */
 	public boolean isMarker() {
 		return !StringUtils.hasText(viewName);
 	}
 
 	/**
-	 * Hook method implementation that initiates state-specific processing.
-	 * 
+	 * Specialization of AbstractState's <code>doEnterState</code> template
+	 * method that executes behaivior specific to this state type in polymorphic
+	 * fashion.
+	 * <p>
 	 * This implementation pops the top (active) flow session off the execution
 	 * stack, ending it, and resumes control in the spawning parent flow (if
 	 * neccessary.) If the ended session is the root flow, a ViewDescriptor is
 	 * returned (when viewName is not null, else null is returned.)
+	 * @param context The state execution context
+	 * @return ViewDescriptor a view descriptor signaling that control should be
+	 *         returned to the client and a view rendered.
 	 */
 	protected ViewDescriptor doEnterState(StateContext context) {
 		FlowSession endingFlowSession = context.endActiveFlowSession();
@@ -137,6 +149,11 @@ public class EndState extends State {
 		}
 	}
 
+	/**
+	 * Factory method to create a local sub flow ending result event with no
+	 * paramtereters. Subclasses may override.
+	 * @return
+	 */
 	protected Event createSubFlowResultEvent() {
 		return new LocalEvent(getId());
 	}

@@ -30,20 +30,24 @@ import org.springframework.util.Styler;
 /**
  * A transitionable state that executes one or more actions when entered. If
  * more than one action is specified, they are executed in an ordered chain
- * until one returns a result that matches a valid state transition for this
- * state (this is a form of the Chain of Responsibility (CoR) pattern).
+ * until one returns a result event that matches a valid state transition for
+ * this state. This is a form of the Chain of Responsibility (CoR) pattern.
  * <p>
- * Each action executed by this action state can optionally be <i>named </i>.
- * This name is used as a qualifier in determing what transition should be
- * executed for a given result. For example, when an action named "myAction"
- * returns a "success" result, a transition for "myAction.success" will be
- * searched, and if found, executed. If the action is not named, a transition
- * for the base "success" result will be searched, and if found, executed.
+ * Each action executed by this action state can optionally be qualified with a
+ * <i>name</i> attribute. This name is used as a qualifier in determing what
+ * transition should be executed for a given action result event. For example,
+ * if an action named "myAction" returns a "success" result, a transition for
+ * Event "myAction.success" will be searched, and if found, executed. If the
+ * action is not named, a transition for the base "success" Event will be
+ * searched, and if found, executed.
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class ActionState extends TransitionableState {
 
+	/**
+	 * The set of actions to be executed when this action state is entered.
+	 */
 	private Set namedActions = new LinkedHashSet(1);
 
 	/**
@@ -169,6 +173,7 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Add an unnamed action to the state.
+	 * @param action the action to add
 	 */
 	protected void addAction(Action action) {
 		this.namedActions.add(createNamedAction(null, action));
@@ -176,6 +181,8 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Add a named action to the state.
+	 * @param actionName the name of the action
+	 * @param action the action to add
 	 */
 	protected void addAction(String actionName, Action action) {
 		this.namedActions.add(createNamedAction(actionName, action));
@@ -183,6 +190,7 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Add a collection of unnamed actions to this state.
+	 * @param actions the actions to add
 	 */
 	protected void addActions(Action[] actions) {
 		Assert.notEmpty(actions, "You must add at least one action");
@@ -193,13 +201,15 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Add a collection of named actions to this state.
+	 * @param actionNames the names of the actions
+	 * @param actions the actions to add
 	 */
-	protected void addActions(String[] names, Action[] actions) {
-		Assert.notEmpty(names, "You must add at least one action");
+	protected void addActions(String[] actionNames, Action[] actions) {
+		Assert.notEmpty(actionNames, "You must add at least one action");
 		Assert.notEmpty(actions, "You must add at least one action");
-		Assert.isTrue(names.length == actions.length, "The name->action arrays must be equal in length");
+		Assert.isTrue(actionNames.length == actions.length, "The name->action arrays must be equal in length");
 		for (int i = 0; i < actions.length; i++) {
-			addAction(names[i], actions[i]);
+			addAction(actionNames[i], actions[i]);
 		}
 	}
 
@@ -217,6 +227,7 @@ public class ActionState extends TransitionableState {
 	 * Returns an iterator that lists the set of actions to execute for this
 	 * state. Both named and unnamed actions will be returned, but all are
 	 * wrapped as {@link ActionState.NamedAction} objects.
+	 * @return the NamedAction iterator
 	 */
 	protected Iterator namedActionIterator() {
 		return this.namedActions.iterator();
@@ -225,6 +236,7 @@ public class ActionState extends TransitionableState {
 	/**
 	 * Returns the number of actions executed by this action state when it is
 	 * entered.
+	 * @return the action count
 	 */
 	public int getActionCount() {
 		return namedActions.size();
@@ -232,7 +244,7 @@ public class ActionState extends TransitionableState {
 
 	/**
 	 * Returns the first action executed by this action state.
-	 * @return The first action;
+	 * @return The first action
 	 */
 	public Action getAction() {
 		return getActions()[0];
@@ -272,10 +284,20 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Hook method implementation that initiates state processing.
+	 * Specialization of AbstractState's <code>doEnterState</code> template
+	 * method that executes behaivior specific to this state type in polymorphic
+	 * fashion.
 	 * <p>
-	 * This implementation iterates over each configured Action for this state
-	 * and executes it.
+	 * This implementation iterates over each configured <code>Action</code>
+	 * instance and executes it. Execution continues until a <code>Action</code>
+	 * returns a result event that matches a state transition, or the list of
+	 * all actions is exhausted.
+	 * @param context The state execution context
+	 * @return ViewDescriptor a view descriptor signaling that control should be
+	 *         returned to the client and a view rendered.
+	 * @throws CannotExecuteStateTransitionException no action execution
+	 *         resulted in a outcome event that could be mapped to a valid state
+	 *         transition
 	 */
 	protected ViewDescriptor doEnterState(StateContext context) {
 		Iterator it = namedActionIterator();
@@ -324,7 +346,6 @@ public class ActionState extends TransitionableState {
 	 * null if its an unnamed action).
 	 * <p>
 	 * For internal use by the ActionState.
-	 * 
 	 * @author Keith Donald
 	 * @author Erwin Vervaet
 	 */
@@ -353,28 +374,30 @@ public class ActionState extends TransitionableState {
 		}
 
 		/**
-		 * Returns the name of the wrapped action, or null when it's unnamed.
+		 * @return the name of the wrapped action, or null when it's unnamed.
 		 */
 		protected String getName() {
 			return name;
 		}
 
 		/**
-		 * Returns the wrapped action.
+		 * @return the wrapped action.
 		 */
 		protected Action getAction() {
 			return action;
 		}
 
 		/**
-		 * Returns true when the wrapped action is named, false otherwise.
+		 * @return true when the wrapped action is named, false otherwise.
 		 */
 		public boolean isNamed() {
 			return StringUtils.hasText(name);
 		}
 
 		/**
-		 * Execute the wrapped action.
+		 * Execute the wrapped action
+		 * @param context the flow execution context
+		 * @return result of execution
 		 */
 		protected Event execute(FlowExecutionContext context) {
 			try {
@@ -410,7 +433,7 @@ public class ActionState extends TransitionableState {
 
 		private static class ActionNameQualifiedEvent extends Event {
 			private String actionName;
-			
+
 			private Event event;
 
 			public ActionNameQualifiedEvent(String actionName, Event resultEvent) {

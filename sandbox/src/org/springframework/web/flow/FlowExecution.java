@@ -32,8 +32,10 @@ public interface FlowExecution extends FlowExecutionMBean {
 	 * Start this flow execution, transitioning it to the start state and
 	 * returning the starting model and view descriptor. Typically called by the
 	 * FlowController, but also in test code.
-	 * @param event The event that occured
-	 * @return The starting model and view.
+	 * @param event The event that occured that triggered flow execution
+	 *        creation
+	 * @return The starting view descriptor, which returns control to the client
+	 *         and requests that a view be rendered with model data.
 	 * @throws IllegalStateException if this execution has already been started,
 	 *         or no state is marked as the start state.
 	 */
@@ -42,20 +44,22 @@ public interface FlowExecution extends FlowExecutionMBean {
 	/**
 	 * Signal an occurence of the specified event in the (optionally) provided
 	 * state of this flow execution.
-	 * @param event The event that occured
+	 * @param event The event that occured within the current state of this flow
+	 *        execution.
 	 * @return The next model and view descriptor to display for this flow
-	 *         execution.
+	 *         execution. This returns control to the client and requests that a
+	 *         view be rendered with model data.
 	 * @throws EventNotSupportedException if the signaled event does not map to
 	 *         any state transitions in the state.
 	 * @throws IllegalStateException if the flow execution is not active and
-	 *         thus no longer processing events.
+	 *         thus is no longer processing events.
 	 */
 	public ViewDescriptor signalEvent(Event event) throws EventNotSupportedException, IllegalStateException;
 
 	/**
-	 * Called by a controller to restore this execution's state after
-	 * deserialization if neccessary.
-	 * @param flowLocator the locator
+	 * Called by a client to restore this flow execution's state after
+	 * deserialization.
+	 * @param flowLocator the locator capable of supporting rehydration.
 	 * @param listeners the set of listeners that should be notified of
 	 *        lifecycle events in this flow execution
 	 */

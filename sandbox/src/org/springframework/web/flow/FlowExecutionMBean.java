@@ -28,6 +28,7 @@ public interface FlowExecutionMBean {
 	/**
 	 * Return the id of this flow execution. This is not a human readable flow
 	 * definition ID, but a system generated key.
+	 * @return the unique flow execution id
 	 */
 	public String getId();
 
@@ -40,31 +41,38 @@ public interface FlowExecutionMBean {
 	/**
 	 * Return a display string suitable for logging/printing in a console
 	 * containing info about this flow execution.
+	 * @return the flow execution caption
 	 */
 	public String getCaption();
 
 	/**
 	 * Is the flow execution active?
+	 * @return true if active, false if terminated or not yet started
 	 */
 	public boolean isActive();
 
 	/**
 	 * Get the id of the active flow definition.
+	 * @return the active flow id
+	 * @throws IllegalStateException the execution is not active
 	 */
-	public String getActiveFlowId();
+	public String getActiveFlowId() throws IllegalStateException;
 
 	/**
 	 * Return the qualified id of the executing flow, taking into account any
 	 * nesting parent flows. For example,
 	 * <code>registerUser.editContacts.editContact</code>.
+	 * @return the qualified active flow id
+	 * @throws IllegalStateException the execution is not active
 	 */
 	public String getQualifiedActiveFlowId();
 
 	/**
 	 * Get a string array stack of executing flow ids, with the active flow at
 	 * the top (first element) of the stack.
+	 * @throws IllegalStateException the execution is not active
 	 */
-	public String[] getFlowIdStack();
+	public String[] getFlowIdStack() throws IllegalStateException;
 
 	/**
 	 * Return the id of the root level flow definition. May be the same as the
@@ -83,13 +91,14 @@ public interface FlowExecutionMBean {
 
 	/**
 	 * Returns the id of the current state of this flow execution.
+	 * @throws IllegalStateException the execution is not active
 	 */
-	public String getCurrentStateId();
+	public String getCurrentStateId() throws IllegalStateException;
 
 	/**
-	 * Returns the <code>eventId</code> of the last event signaled for this
+	 * Returns the <code>eventId</code> of the last event signaled within this
 	 * flow execution.
-	 * @return The id of the last event
+	 * @return The identifier of the last event
 	 */
 	public String getEventId();
 
@@ -100,7 +109,8 @@ public interface FlowExecutionMBean {
 	public long getEventTimestamp();
 
 	/**
-	 * Returns the time in milliseconds this flow execution has been active.
+	 * Returns the time in milliseconds this flow execution has been active, or
+	 * 0 if not active.
 	 * @return the flow execution up time
 	 */
 	public long getUptime();

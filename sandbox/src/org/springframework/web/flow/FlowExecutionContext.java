@@ -70,7 +70,9 @@ public interface FlowExecutionContext {
 	public Scope flowScope();
 
 	/**
-	 * @return
+	 * Returns a synchronizer for demaracting application transactions within
+	 * the flow execution associated with this context.
+	 * @return The transaction synchronizer
 	 */
 	public TransactionSynchronizer getTransactionSynchronizer();
 

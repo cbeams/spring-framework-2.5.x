@@ -25,9 +25,9 @@ public class ActionExecutionException extends RuntimeException {
 
 	/**
 	 * Create a new action execution exception.
-	 * @param state The action state that was executing the action
-	 * @param action The action that generated an exception
-	 * @param cause The underlying cause of this exception
+	 * @param state The action state that attempted to execute the action
+	 * @param action The action that generated the exception
+	 * @param cause The underlying cause of the exception, thrown by the action
 	 */
 	public ActionExecutionException(ActionState state, ActionState.NamedAction action, Throwable cause) {
 		super("Executing action '" + action + "' in state '" + state.getId() + "' of flow '" + state.getFlow().getId()

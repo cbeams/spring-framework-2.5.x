@@ -21,68 +21,68 @@ import org.springframework.binding.AttributeAccessor;
 import org.springframework.binding.AttributeSetter;
 
 /**
- * A service interface that maps attributes between flow models.
+ * A service interface that maps attributes between flows.
  * <p>
- * A model mapper maps the attributes of a parent flow model down to a child
- * flow model, as <i>input</i> when the child is spawned as a subflow. In
- * addition, a model mapper maps attributes of a child flow model back up to a
- * resuming parent flow, as <i>output</i> when the child session ends and
- * control is returned to the parent flow.
+ * A attribute mapper may map attributes of a parent flow down to a child flow
+ * as <i>input</i> when the child is spawned as a subflow. In addition, a
+ * mapper may map attributes of a child flow model back up to a resuming parent
+ * flow, as <i>output</i> when the child session ends and control is returned
+ * to the parent flow.
  * <p>
  * For example, say you have the following parent flow session:
  * 
  * <pre>
  * 
- *  Parent Flow Session 1
- *  ---------------------
- *  - flow=myFlow
- *  - flowModel=[map:attr1-&gt;value1, attr2-&gt;value2, attr3-&gt;value3]
+ *      Parent Flow Session 1
+ *      ---------------------
+ *      - flow=myFlow
+ *      - flowScope=[map:attr1=value1, attr2=value2, attr3=value3]
  *  
  * </pre>
  * 
- * For "Parent Flow Session 1" above, there are 3 attributes in the flow model
+ * For "Parent Flow Session 1" above, there are 3 attributes in flow scope
  * ("attr1", "attr2", and "attr3", respectively.) Any of these three attributes
  * may be mapped as input down to child subflows when those subflows are
  * spawned. An implementation of this interface performs the actual mapping,
  * encapsulating knowledge of <i>which </i> attributes should be mapped, and
  * <i>how </i> they will be mapped (for example, will the same attribute names
- * be used between models or not?)
+ * be used between flows or not?)
  * <p>
  * For example:
  * 
  * <pre>
  * 
- *  Model Mapper 1
- *  --------------
- *  - inputMappings=(map:attr1-&gt;attr1, attr3-&gt;localAttr1)
- *  - outputMappings=(map:localAttr1-&gt;attr3)
+ *      Flow Attribute Mapper 1
+ *      --------------
+ *      - inputMappings=(map:attr1-&gt;attr1, attr3-&gt;localAttr1)
+ *      - outputMappings=(map:localAttr1-&gt;attr3)
  *  
  * </pre>
  * 
- * The above example "Model Mapper 1" specifies <code>inputMappings</code>
- * that define which parent attributes to map as input to the child. In this
- * case, two attributes in the parent model are mapped, "attr1" and "attr3".
- * "attr1" is mapped with the name "attr1" (given the same name in both models),
- * while "attr3" is mapped to "localAttr1", given a different name that is local
- * to the child flow model.
+ * The above example "Flow Attribute Mapper 1" specifies
+ * <code>inputMappings</code> that define which parent attributes to map as
+ * input to the child. In this case, two attributes in the parent are mapped,
+ * "attr1" and "attr3". "attr1" is mapped with the name "attr1" (given the same
+ * name in both flows), while "attr3" is mapped to "localAttr1", given a
+ * different name that is local to the child flow.
  * <p>
  * Likewise, when a child flow ends, the <code>outputMappings</code> define
  * which attributes to map as output up to the parent. In this case the
  * attribute "localAttr1" will be mapped up to the parent as "attr3", updating
- * the value of "attr3" in the parent flow model.
+ * the value of "attr3" in the parent's flow scope.
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public interface FlowAttributeMapper {
 
 	/**
-	 * Create a map of model attributes that should be passed as input to a
-	 * spawning child flow session.
+	 * Create a map of attributes that should be passed as input to a spawning
+	 * child flow session.
 	 * <p>
 	 * Attributes set in the <code>Map</code> returned by this method will be
-	 * added to the flow model of the child sub flow session when the session is
+	 * added to flow scope of the child sub flow session when the session is
 	 * spawned and activated.
-	 * @param parentFlowAttributes The parent flow model, containing the set of
+	 * @param parentFlowAttributes The parent's flow scope, containing the set of
 	 *        possible attributes that may be passed down to the child.
 	 * @return A map of attributes (name=value pairs) to pass as input to the
 	 *         spawning child subflow.
@@ -90,13 +90,13 @@ public interface FlowAttributeMapper {
 	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowAttributes);
 
 	/**
-	 * Map relavent model attributes of an ending sub flow session back up to a
-	 * resuming parent flow session. This maps the <i>output </i> of the child
+	 * Map relavent attributes of an ending sub flow session back up to a
+	 * resuming parent flow session. This maps the <i>output</i> of the child
 	 * as new input to the resuming parent.
-	 * @param subFlowAttributes The child's flow model that should be mapped
+	 * @param subFlowAttributes The child's flow scope that should be mapped
 	 *        from, containing the set of possible attributes that may be passed
 	 *        up to the parent.
-	 * @param parentFlowAttributes The parent's flow model that should be mapped
+	 * @param parentFlowAttributes The parent's flow scope that should be mapped
 	 *        to, where output attributes of the child sub flow will be set as
 	 *        input.
 	 */
