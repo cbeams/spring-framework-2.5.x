@@ -1,16 +1,17 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.114 2004-03-19 18:50:13 johnsonr Exp $
+$Id: changelog.txt,v 1.115 2004-03-19 19:05:08 jhoeller Exp $
 
 
 Changes in version 1.0 final (20.3.2003)
 ----------------------------------------
 
 Package org.springframework.aop
-* upgraded to release 1.0 version of AOP Alliance interfaces. Removed attachment feature on MethodInvocation; all Spring advices
-extend new org.aopalliance.aop.Advice tag interface.
-* introduced frozen flag on ProxyConfig: use to disable advice changes
-* deleted MethodAfterReturningAdvice: AfterReturningAdvice superclass is sufficient
+* upgraded to release 1.0 version of AOP Alliance interfaces
+* removed attachment feature on MethodInvocation
+* all Spring advices extend org.aopalliance.aop.Advice tag interface
+* introduced frozen flag on ProxyConfig, to be used to disable advice changes
+* deleted MethodAfterReturningAdvice, as AfterReturningAdvice superclass is sufficient
 * fixed too eager initialization of common interceptors in AbstractAutoProxyCreator, potentially causing circular refs
 
 Package org.springframework.beans
@@ -20,6 +21,9 @@ Package org.springframework.beans
 * fixed BeanWrapperImpl's custom editor detection for indexed and mapped properties
 * fixed BeanWrapperImpl's default editor registration to use classes rather than instances, for thread-safety
 * fixed BeanWrapperImpl's conversion of Lists to arrays to correctly convert to primitive arrays
+* fixed BeanWrapperImpl's population of an array when given a single value
+* added BeanDefinition interface, used by ConfigurableBeanFactory to return property and constructor argument values
+* adapted BeanDefinitionRegistry interface and AbstractBeanFactory base class to BeanDefinition interface
 * refined AbstractAutowireCapableBeanFactory's use of synchronization, particularly with custom editors
 * refined AbstractAutowireCapableBeanFactory's "destroyBean" implementation to detect "shutdown(boolean force)" methods
 * fixed type difference weight algorithm in AbstractAutowireCapableBeanFactory to ignore non-matching arguments
@@ -97,6 +101,7 @@ Package org.springframework.ui
 * added FreeMarker support (analogous to Velocity): FreemarkerConfigurationFactory, FreemarkerConfigurationFactoryBean
 
 Package org.springframework.util
+* added ObjectUtils class, containing the "nullSafeEquals" method formerly found in StringUtils
 * added PropertiesPersister interface, to factor out properties parsing strategies
 * added DefaultPropertiesPersister implementation, capable of loading properties files with a specific charset
 
