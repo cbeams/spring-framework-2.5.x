@@ -2,14 +2,11 @@ package org.springframework.util.visitor;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
-import org.springframework.util.visitor.ReflectiveVisitorSupport;
-import org.springframework.util.visitor.Visitable;
-import org.springframework.util.visitor.Visitor;
 
 /**
  * Tests the various functionality of the ReflectiveVisitorSupport class.
@@ -20,10 +17,14 @@ public class ReflectiveVisitorSupportTests extends TestCase {
 
     private ReflectiveVisitorSupport support;
 
+    public void setUp() {
+        support = new ReflectiveVisitorSupport();
+    }
+
     public void testDirectDefaultLookup() {
         ensureVisit(new DirectMockVisitor(), new ArrayList());
     }
-    
+
     public void testDirectDefaultLookupCache() {
         DirectMockVisitor visitor = new DirectMockVisitor();
         ensureVisit(visitor, new ArrayList());
@@ -31,14 +32,22 @@ public class ReflectiveVisitorSupportTests extends TestCase {
         ensureVisit(visitor, new ArrayList());
     }
 
-    public void testSuperclassDefaultLookup() {
-        ensureVisit(new SuperclassMockVisitor(), new ArrayList());
+    public void testSuperClassDefaultLookup() {
+        ensureVisit(new SuperClassMockVisitor(), new ArrayList());
+    }
+
+    public void testPackagePrivateDefaultLookup() {
+        ensureVisit(new PackagePrivateMockVisitor(), new ArrayList());
+    }
+
+    public void testSuperClassSuperInterfaceDefaultLookup() {
+        ensureVisit(new SuperClassSuperInterfaceMockVisitor(), new ArrayList());
     }
 
     public void testInterfaceDefaultLookup() {
         ensureVisit(new InterfaceMockVisitor(), new ArrayList());
     }
-    
+
     public void testInnerClassArgument() {
         Map.Entry entry = new Map.Entry() {
             public Object getKey() {
@@ -54,10 +63,9 @@ public class ReflectiveVisitorSupportTests extends TestCase {
         ensureVisit(new DirectMockVisitor(), entry);
     }
 
-    
-    //public void testInheritedValueLookup() {
-    //    ensureVisit(new InheritedArgMockVisitor(), new ArrayList());
-    //}
+    public void testInheritedValueLookup() {
+        ensureVisit(new InheritedArgMockVisitor(), new ArrayList());
+    }
 
     public void testVisitableHook() {
         ensureVisit(new CustomVisitor(), new VisitorAwareVisitable());
@@ -67,26 +75,9 @@ public class ReflectiveVisitorSupportTests extends TestCase {
         ensureVisit(new NullVisitor(), null);
     }
 
-    // Should this pass (if security permits)?
-    // possible approach:
-    // Method m = ... <find method algorithm>
-    // try {
-    //   m.setAccessible(false);
-    //   // ... invoke
-    //   m.setAccessible(true);
-    // }
-    // catch(IllegalAccessException e) {
-    //	 // look for superclass/interface method here?
-    //   throw new RuntimeException("Method Visibility is not sufficient.", e);
-    // }
     public void testInvisibleClassVisitor() {
         ensureVisit(new InvisibleClassVisitor(), new ArrayList());
     }
-
-    // Should this pass? (see comments above)
-    //public void testInvisibleMethodVisitor() {
-    //    ensureVisit(new InvisibleMethodVisitor(), new ArrayList());
-    //}
 
     public void testNullVisitor() {
         try {
@@ -104,10 +95,6 @@ public class ReflectiveVisitorSupportTests extends TestCase {
         assertTrue("Visitor was not visited!", visitor.visited);
     }
 
-    public void setUp() {
-        support = new ReflectiveVisitorSupport();
-    }
-
     public abstract class AbstractMockVisitor implements Visitor {
         boolean visited;
     }
@@ -121,21 +108,33 @@ public class ReflectiveVisitorSupportTests extends TestCase {
         }
     }
 
-    /*
     public class InheritedArgMockVisitor extends AbstractMockVisitor {
-        public void visitArrayList(Object value) {
+        public void visit(Object value) {
             visited = true;
         }
     }
-    */
 
-    public class SuperclassMockVisitor extends AbstractMockVisitor {
+    public class SuperClassMockVisitor extends AbstractMockVisitor {
         public void visit(AbstractList value) {
             visited = true;
         }
     }
+
+    public class SuperClassSuperInterfaceMockVisitor
+        extends AbstractMockVisitor {
+        public void visit(Collection value) {
+            visited = true;
+        }
+    }
+
     public class InterfaceMockVisitor extends AbstractMockVisitor {
         public void visit(List value) {
+            visited = true;
+        }
+    }
+
+    public class PackagePrivateMockVisitor extends AbstractMockVisitor {
+        void visit(ArrayList value) {
             visited = true;
         }
     }
@@ -158,13 +157,6 @@ public class ReflectiveVisitorSupportTests extends TestCase {
         }
     }
 
-    /*
-    public class InvisibleMethodVisitor extends AbstractMockVisitor {
-        private void visitArrayList(ArrayList list) {
-            visited = true;
-        }
-    }
-    */
     public class VisitorAwareVisitable implements Visitable {
         public void accept(Visitor visitor) {
             CustomVisitor custom = (CustomVisitor)visitor;

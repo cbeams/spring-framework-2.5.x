@@ -5,6 +5,8 @@
 package org.springframework.util;
 
 import java.lang.reflect.Method;
+import java.text.NumberFormat;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,9 @@ import org.springframework.util.visitor.Visitor;
 public class DefaultObjectStyler implements Visitor, ObjectStyler {
     private ReflectiveVisitorSupport visitorSupport =
         new ReflectiveVisitorSupport();
-
+    private static final String EMPTY = "[empty]";
+    private static final String NULL = "[null]";
+    
     /**
      * Styles the string form of this object using the reflective visitor
      * pattern. The reflective help removes the need to define a vistable class
@@ -35,27 +39,27 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
         return (String)visitorSupport.invokeVisit(this, o);
     }
 
-    public String visit(String value) {
+    String visit(String value) {
         return ('\'' + value + '\'');
     }
 
-    public String visit(Number value) {
-        return String.valueOf(value);
+    String visit(Number value) {
+        return NumberFormat.getInstance().format(value);
     }
 
-    public String visit(Class clazz) {
+    String visit(Class clazz) {
         return ClassUtils.getShortName(clazz);
     }
 
-    public String visit(Method method) {
+    String visit(Method method) {
         return method.getName()
             + "@"
             + ClassUtils.getShortName(method.getDeclaringClass());
     }
 
-    public String visit(Map value) {
+    String visit(Map value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
-        buffer.append("<map = { ");
+        buffer.append("map[");
         for (Iterator i = value.entrySet().iterator(); i.hasNext();) {
             Map.Entry entry = (Map.Entry)i.next();
             buffer.append(style(entry));
@@ -64,19 +68,19 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
             }
         }
         if (value.isEmpty()) {
-            buffer.append("<none>");
+            buffer.append(EMPTY);
         }
-        buffer.append(" }>");
+        buffer.append("]");
         return buffer.toString();
     }
 
-    public String visit(Map.Entry value) {
+    String visit(Map.Entry value) {
         return style(value.getKey()) + " -> " + style(value.getValue());
     }
 
-    public String visit(Set value) {
+    String visit(Collection value) {
         StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
-        buffer.append("<set = { ");
+        buffer.append(getTypeString(value) + "[");
         for (Iterator i = value.iterator(); i.hasNext();) {
             buffer.append(style(i.next()));
             if (i.hasNext()) {
@@ -84,29 +88,23 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
             }
         }
         if (value.isEmpty()) {
-            buffer.append("<none>");
+            buffer.append(EMPTY);
         }
-        buffer.append(" }>");
+        buffer.append("]");
         return buffer.toString();
     }
-
-    public String visit(List value) {
-        StringBuffer buffer = new StringBuffer(value.size() * 8 + 16);
-        buffer.append("<list = { ");
-        for (Iterator i = value.iterator(); i.hasNext();) {
-            buffer.append(style(i.next()));
-            if (i.hasNext()) {
-                buffer.append(',').append(' ');
-            }
+    
+    private String getTypeString(Collection value) {
+        if (value instanceof List) {
+            return "list";
+        } else if (value instanceof Set) {
+            return "set";
+        } else {
+            return "collection";
         }
-        if (value.isEmpty()) {
-            buffer.append("<none>");
-        }
-        buffer.append(" }>");
-        return buffer.toString();
     }
 
-    public String visit(Object value) {
+    String visit(Object value) {
         if (value.getClass().isArray()) {
             return styleArray(getObjectArray(value));
         } else {
@@ -114,13 +112,13 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
         }
     }
 
-    public String visitNull() {
-        return "[null]";
+    String visitNull() {
+        return NULL;
     }
 
     private String styleArray(Object[] array) {
         StringBuffer buffer = new StringBuffer(array.length * 8 + 16);
-        buffer.append("<array = { ");
+        buffer.append("array[");
         for (int i = 0; i < array.length - 1; i++) {
             buffer.append(style(array[i]));
             buffer.append(',').append(' ');
@@ -128,9 +126,9 @@ public class DefaultObjectStyler implements Visitor, ObjectStyler {
         if (array.length > 0) {
             buffer.append(style(array[array.length - 1]));
         } else {
-            buffer.append("<none>");
+            buffer.append(EMPTY);
         }
-        buffer.append(" }>");
+        buffer.append("]");
         return buffer.toString();
     }
 

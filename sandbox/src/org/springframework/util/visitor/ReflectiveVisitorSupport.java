@@ -5,6 +5,7 @@
 package org.springframework.util.visitor;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
@@ -64,7 +65,7 @@ public class ReflectiveVisitorSupport {
         public boolean isVisitor(Method method) {
             Class[] params = method.getParameterTypes();
             return (
-                method.getName().equals("visit")
+                method.getName().equals(VISIT_METHOD)
                     && (params.length == 1)
                     && (params[0] != Object.class));
         }
@@ -79,7 +80,7 @@ public class ReflectiveVisitorSupport {
                 clazz != null;
                 clazz = clazz.getSuperclass()) {
                 try {
-                    return clazz.getMethod(VISIT_METHOD, args);
+                    return clazz.getDeclaredMethod(VISIT_METHOD, args);
                 } catch (NoSuchMethodException e) {
                 }
             }
@@ -95,7 +96,7 @@ public class ReflectiveVisitorSupport {
                 clazz != null;
                 clazz = clazz.getSuperclass()) {
                 try {
-                    return clazz.getMethod(VISIT_NULL, null);
+                    return clazz.getDeclaredMethod(VISIT_NULL, null);
                 } catch (NoSuchMethodException e) {
                 }
             }
@@ -131,14 +132,14 @@ public class ReflectiveVisitorSupport {
                 // check for a visitor method matching this type.
                 try {
                     if (logger.isDebugEnabled()) {
-                        logger.warn(
+                        logger.debug(
                             "Looking for method "
                                 + VISIT_METHOD
                                 + "("
                                 + clazz
                                 + ")");
                     }
-                    return visitorClass.getMethod(
+                    return visitorClass.getDeclaredMethod(
                         VISIT_METHOD,
                         new Class[] { clazz });
                 } catch (NoSuchMethodException e) {
@@ -179,34 +180,35 @@ public class ReflectiveVisitorSupport {
      */
     public final Object invokeVisit(Visitor visitor, Object argument) {
         Assert.notNull(visitor);
-        try {
-            if (argument instanceof Visitable) {
-                callAccept((Visitable)argument, visitor);
+        if (argument instanceof Visitable) {
+            callAccept((Visitable)argument, visitor);
+            return null;
+        } else {
+            Method method = getMethod(visitor.getClass(), argument);
+            if (method == null) {
+                logger.warn(
+                    "No method found by reflection for visitor class '"
+                        + visitor.getClass()
+                        + "' and argument of type '"
+                        + (argument != null ? argument.getClass() : null)
+                        + "'");
                 return null;
-            } else {
-                Method method = getMethod(visitor.getClass(), argument);
-                if (method == null) {
-                    logger.warn(
-                        "No method found by reflection for visitor class '"
-                            + visitor.getClass()
-                            + "' and argument of type '"
-                            + (argument != null ? argument.getClass() : null)
-                            + "'");
-                    return null;
-                }
-                try {
-                    Object[] args = null;
-                    if (argument != null) {
-                        args = new Object[] { argument };
-                    }
-                    return method.invoke(visitor, args);
-                } catch (Exception e) {
-                    throw e;
-                }
             }
-        } catch (Exception e) {
-            logger.error("Exception occured dispatching to visitor " + e);
-            throw new RuntimeException(e);
+            try {
+                Object[] args = null;
+                if (argument != null) {
+                    args = new Object[] { argument };
+                }
+                if (!Modifier.isPublic(method.getModifiers())
+                    && method.isAccessible() == false) {
+                    method.setAccessible(true);
+                }
+                return method.invoke(visitor, args);
+
+            } catch (Exception e) {
+                logger.error("Exception occured dispatching to visitor " + e);
+                throw new RuntimeException(e);
+            }
         }
     }
 

@@ -23,30 +23,26 @@ public class ToStringBuilderTests extends TestCase {
                     .toString();
             }
         };
-        String identity = Integer.toHexString(System.identityHashCode(stringy));
         assertEquals(
             "[ToStringBuilderTests.1@"
-                + identity
-                + " familyFavoriteSport = <map = { 'Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football' }>]",
+                +  ObjectUtils.getIdentity(stringy) 
+                + " familyFavoriteSport = map['Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football']]",
             stringy.toString());
     }
 
     public void testDefaultStyleArray() {
         Object array = new Object[] { s1, s2, s3 };
-        String identity = Integer.toHexString(System.identityHashCode(array));
         String stringy = new ToStringBuilder(array).toString();
         assertEquals(
-            "[Object;@" + identity + " <array = { A, B, C }>]",
+            "[Object;@" + ObjectUtils.getIdentity(array) + " array[A, B, C]]",
             stringy);
     }
 
     public void testPrimitiveArrays() {
         int[] integers = new int[] { 0, 1, 2, 3, 4 };
         String str = new ToStringBuilder(integers).toString();
-        String identity =
-            Integer.toHexString(System.identityHashCode(integers));
         assertEquals(
-            "[[I@" + identity + " <array = { 0, 1, 2, 3, 4 }>]",
+            "[[I@" + ObjectUtils.getIdentity(integers) + " array[0, 1, 2, 3, 4]]",
             str);
     }
 
@@ -55,13 +51,12 @@ public class ToStringBuilderTests extends TestCase {
         list.add(s1);
         list.add(s2);
         list.add(s3);
-        String identity = Integer.toHexString(System.identityHashCode(this));
         String str =
             new ToStringBuilder(this).append("myLetters", list).toString();
         assertEquals(
             "[ToStringBuilderTests@"
-                + identity
-                + " myLetters = <list = { A, B, C }>]",
+                + ObjectUtils.getIdentity(this)
+                + " myLetters = list[A, B, C]]",
             str);
     }
 

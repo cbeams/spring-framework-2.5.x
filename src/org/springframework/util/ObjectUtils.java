@@ -21,6 +21,7 @@ package org.springframework.util;
  * within the framework; consider Jakarta's Commons Lang for a more
  * comprehensive suite of object utilities.
  * @author Juergen Hoeller
+ * @author Keith Donald
  * @since 19.03.2004
  * @see org.apache.commons.lang.ObjectUtils
  */
@@ -36,5 +37,14 @@ public abstract class ObjectUtils {
 	public static boolean nullSafeEquals(Object o1, Object o2) {
 		return (o1 == o2 || (o1 != null && o1.equals(o2)));
 	}
+
+    /**
+     * Returns a hex string form of an object's identity hash code.
+     * @param The object
+     * @return The object's identity code in hex.
+     */
+    public static String getIdentity(Object o) {
+        return Integer.toHexString(System.identityHashCode(o));
+    }
 
 }
