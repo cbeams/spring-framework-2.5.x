@@ -249,7 +249,12 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	/**
 	 * Subclasses must implement this method to return the locations of their
 	 * config files. A plain path will be treated as class path location.
-	 * E.g.: "org/springframework/whatever/foo.xml"
+	 * E.g.: "org/springframework/whatever/foo.xml". Note however that you may
+     * prefix path locations with standard Spring resource prefixes. Therefore,
+     * a config location path prefixed with "classpath:" with behave the same
+     * as a plain path, but a config location such as
+     * "file:/some/path/path/location/appContext.xml" will be treated as a 
+     * filesystem location.
 	 * @return an array of config locations
 	 */
 	protected abstract String[] getConfigLocations();
