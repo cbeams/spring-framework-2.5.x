@@ -28,22 +28,60 @@ import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.flow.support.FlowUtils;
 
 /**
- * Action that allows multiple event types types to be processed by a single
- * action.
+ * Action that allows multiple event types to be processed by a single
+ * action. The action will take the last event id executed by the
+ * containing flow and will map it to an event handling method using
+ * an instance of <code>EventHandlerMethodNameResolver</code>.
+ * The event handling method will then be invoked to take care of the
+ * required processing.
  * 
- * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
+ * <p>
+ * By default, the event handling method for event "Save" should have
+ * the following signature, where the method parameters are similar
+ * to those of the <code>doExecuteAction</code> method on the action itself.
+ * <pre>
+ * public String handleSaveEvent(HttpServletRequest request, HttpServletResponse response, MutableFlowModel model)
+ * </pre>
+ * 
+ * <p>
+ * <b>Exposed configuration properties:</b><br>
+ * <table border="1">
+ *  <tr>
+ *      <td><b>name</b></td>
+ *      <td><b>default</b></td>
+ *      <td><b>description</b></td>
+ *  </tr>
+ *  <tr>
+ *      <td>delegate</td>
+ *      <td><i>this</i></td>
+ *      <td>Set the delegate object holding the event handler methods.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>methodNameResolver</td>
+ *      <td><i>{@link MultiAction.EventHandlerMethodNameResolver}</i></td>
+ *      <td>Set the strategy used to resolve event ids to event
+ *      handling method names.</td>
+ *  </tr>
+ * </table>
+ *
+ * @see MultiAction.EventHandlerMethodNameResolver
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class MultiAction extends AbstractAction {
-
+	
 	/**
+	 * Strategy interface used by the MultiAction to map an
+	 * event to an event handling method to do appropriate processing.
+	 * 
 	 * @author Keith Donald
+	 * @author Erwin Vervaet
 	 */
 	public interface EventHandlerMethodNameResolver {
 
 		/**
+		 * Resolve an event id to an event handling method name.
 		 * @param eventId The event id to resolve
 		 * @return The name of the method that should handle processing
 		 */
@@ -51,14 +89,45 @@ public class MultiAction extends AbstractAction {
 
 	}
 
-	private static class DefaultEventHandlerMethodNameResolver implements EventHandlerMethodNameResolver {
+	/**
+	 * The default <code>EventHandlerMethodNameResolver</code> implementation.
+	 * This resolver prefixes the event id with "handle" and appends
+	 * the "Event" suffix. The event id itself is properly capitalized.
+	 * So event id "save" would be resolved to event handler method name
+	 * "handleSaveEvent".
+	 *  
+	 * @author Erwin Vervaet
+	 */
+	public static class DefaultEventHandlerMethodNameResolver implements EventHandlerMethodNameResolver {
 		public String getHandlerMethodName(String eventId) {
 			return "handle" + StringUtils.capitalize(eventId) + "Event";
 		}
 	}
 
+	private Object delegate=this;
+
 	private EventHandlerMethodNameResolver methodNameResolver = new DefaultEventHandlerMethodNameResolver();
 
+	/**
+	 * Returns the delegate object holding the event handler methods.
+	 * Defaults to this object.
+	 */
+	public Object getDelegate() {
+		return this;
+	}
+
+	/**
+	 * Set the delegate object holding the event handler methods.
+	 * @param delegate The delegate to set.
+	 */
+	public void setDelegate(Object delegate) {
+		this.delegate = delegate;
+	}
+
+	/**
+	 * Set the strategy used to resolve event ids to event
+	 * handling method names.
+	 */
 	public void setMethodNameResolver(EventHandlerMethodNameResolver methodNameResolver) {
 		this.methodNameResolver = methodNameResolver;
 	}
@@ -86,14 +155,13 @@ public class MultiAction extends AbstractAction {
 		}
 	}
 
+	/**
+	 * Find the event handler method with given name on the delegate object
+	 * using reflection.
+	 */
 	protected Method getHandlerMethod(String eventHandlerMethodName) throws NoSuchMethodException,
 			IllegalAccessException {
 		return getDelegate().getClass().getMethod(eventHandlerMethodName,
 				new Class[] { HttpServletRequest.class, HttpServletResponse.class, MutableFlowModel.class });
 	}
-
-	protected Object getDelegate() {
-		return this;
-	}
-
 }
