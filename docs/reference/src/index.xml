@@ -7,6 +7,7 @@
 <!ENTITY context					SYSTEM "context.xml">
 <!ENTITY mail						SYSTEM "mail.xml">
 <!ENTITY validation					SYSTEM "validation.xml">
+<!ENTITY transaction					SYSTEM "transaction.xml">
 <!ENTITY aop						SYSTEM "aop.xml">
 <!ENTITY metadata					SYSTEM "metadata.xml">
 <!ENTITY jdbc						SYSTEM "jdbc.xml">
@@ -41,6 +42,8 @@
 	    <!-- &util; -->
 
 	    &aop;
+	    
+	    &transaction;
 	    
 	    &metadata;
 	    

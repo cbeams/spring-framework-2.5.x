@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="transaction">
+  <title>Transaction management</title>
+
+  <sect1>
+    <title>The Spring transaction abstraction</title>
+
+    <para>Spring provides a consistent abstraction for transaction management.
+    This abstraction delivers the following benefits:<itemizedlist><listitem><para>Provides
+    a consistent programming model across different transaction APIs such as
+    JTA, JDBC, Hibernate, iBATIS Database Layer and JDO</para></listitem><listitem><para>Provides
+    a simpler, easier to use API for programmatic transaction management than
+    most of these transaction APIs</para></listitem><listitem><para>Supports
+    Spring declarative transaction management</para></listitem></itemizedlist></para>
+
+    <para>Spring provides this consistent model through the PTM </para>
+  </sect1>
+
+  <sect1>
+    <title>Transaction strategies</title>
+
+    <para>Spring provides</para>
+  </sect1>
+
+  <sect1>
+    <title>Programmatic transaction management</title>
+
+    <para></para>
+
+    <para></para>
+
+    <para></para>
+
+    <para></para>
+  </sect1>
+
+  <sect1>
+    <title>Declarative transaction management</title>
+
+    <para>Spring also offers declarative transaction management. This is based
+    on Spring AOP.</para>
+
+    <para>Spring declarative transaction management is most similar to EJB
+    CMT.</para>
+
+    <para></para>
+
+    <para></para>
+  </sect1>
+
+  <sect1></sect1>
+</chapter>
