@@ -157,6 +157,31 @@
             <role>Developer</role>
          </roles>
       </developer>
+      <developer>
+         <name>Colin Sampaleanu</name>
+         <id>colins</id>
+         <email>colinml1 at exis.com</email>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
+      <developer>
+         <name>Darren Davison</name>
+         <id>davison</id>
+         <email>davison at users.sourceforge.net</email>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
+      <developer>
+         <name>Mark Pollack</name>
+         <id>markpollack</id>
+         <email>markpollack at users.sourceforge.net</email>
+         <roles>
+            <role>Developer</role>
+         </roles>
+      </developer>
+
    </developers>
 
    <!-- jar files the project is dependent on -->
