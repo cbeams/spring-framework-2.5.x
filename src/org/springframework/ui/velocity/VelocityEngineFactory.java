@@ -18,7 +18,9 @@ package org.springframework.ui.velocity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -66,7 +68,7 @@ public class VelocityEngineFactory {
 
 	private Resource configLocation;
 
-	private Properties velocityProperties;
+	private final Map velocityProperties = new HashMap();
 
 	private String resourceLoaderPath;
 
@@ -87,12 +89,27 @@ public class VelocityEngineFactory {
 
 	/**
 	 * Set Velocity properties, like "file.resource.loader.path".
-	 * <p>Can be used to override values in a Velocity config file,
+	 * Can be used to override values in a Velocity config file,
 	 * or to specify all necessary properties locally.
+	 * <p>Note that the Velocity resource loader path also be set to any
+	 * Spring resource location via the "resourceLoaderPath" property.
+	 * Setting it here is just necessary when using a non-file-based
+	 * resource loader.
+	 * @see #setVelocityPropertiesMap
 	 * @see #setConfigLocation
+	 * @see #setResourceLoaderPath
 	 */
 	public void setVelocityProperties(Properties velocityProperties) {
-		this.velocityProperties = velocityProperties;
+		this.velocityProperties.putAll(velocityProperties);
+	}
+
+	/**
+	 * Set Velocity properties as Map, to allow for non-String values
+	 * like "ds.resource.loader.instance".
+	 * @see #setVelocityProperties
+	 */
+	public void setVelocityPropertiesMap(Map velocityPropertiesMap) {
+		this.velocityProperties.putAll(velocityPropertiesMap);
 	}
 
 	/**
@@ -155,14 +172,14 @@ public class VelocityEngineFactory {
 		}
 
 		// merge local properties if set
-		if (velocityProperties != null) {
-			props.putAll(velocityProperties);
+		if (!this.velocityProperties.isEmpty()) {
+			props.putAll(this.velocityProperties);
 		}
 
 		// set properties
 		for (Iterator it = props.keySet().iterator(); it.hasNext();) {
 			String key = (String) it.next();
-			velocityEngine.setProperty(key, props.getProperty(key));
+			velocityEngine.setProperty(key, props.get(key));
 		}
 
 		// set a resource loader path, if required

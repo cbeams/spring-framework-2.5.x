@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -52,6 +53,22 @@ public class VelocityConfigurerTests extends TestCase {
 		catch (IOException ex) {
 			// expected
 		}
+	}
+
+	public void testVelocityEngineFactoryBeanWithVelocityProperties() throws VelocityException, IOException {
+		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
+		Properties props = new Properties();
+		props.setProperty("myprop", "/mydir");
+		vefb.setVelocityProperties(props);
+		Object value = new Object();
+		Map map = new HashMap();
+		map.put("myentry", value);
+		vefb.setVelocityPropertiesMap(map);
+		vefb.afterPropertiesSet();
+		assertTrue(vefb.getObject() instanceof VelocityEngine);
+		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		assertEquals("/mydir", ve.getProperty("myprop"));
+		assertEquals(value, ve.getProperty("myentry"));
 	}
 
 	public void testVelocityEngineFactoryBeanWithResourceLoaderPath() throws IOException, VelocityException {
