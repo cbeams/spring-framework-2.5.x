@@ -19,7 +19,7 @@
 	  - We use the "defaultParentView" property. All views defined will by default inherit
 		- the properties defined in the "modelView" view.
 	  -->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">			
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
 		<property name="basename"><value>views-countries</value></property>
 		<property name="defaultParentView"><value>modelView</value></property>
 	</bean>
@@ -33,24 +33,9 @@
 	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver"/>
 
 	<!--
-		- Interceptors will pre-handle any request in this servlet, no matter which controller
-		- is mapped for a request.
-		-
-		- We use two built-in interceptors to detect user locale or theme change requests.
-		- The third interceptor is specific to this Demo. It allows views to easily be aware
-		- about the configuration detected. Precisely to know if a copy data to database can be
-		- proposed to the user.
-	-->
-	<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
-
-	<bean id="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
-
-	<bean id="copyInterceptor" class="org.springframework.samples.countries.web.CopyInterceptor"/>
-
-	<!--
 	 - Explicit URL handler mapping instead of default BeanNameUrlHandlerMapping.
 	 -->
-	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"> 
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="interceptors">
 			<list>
 				<ref local="localeChangeInterceptor"/>
@@ -74,6 +59,23 @@
 
 
 	<!-- ========================= CONTROLLER DEFINITIONS ========================= -->
+
+	<!--
+		- Interceptors will pre-handle any request in this servlet, no matter which controller
+		- is mapped for a request.
+		-
+		- We use two built-in interceptors to detect user locale or theme change requests.
+		- The third interceptor is specific to this Demo. It allows views to easily be aware
+		- about the configuration detected. Precisely to know if a copy data to database can be
+		- proposed to the user.
+	-->
+	<bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+
+	<bean id="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
+
+	<bean id="copyInterceptor" class="org.springframework.samples.countries.web.CopyInterceptor">
+		<property name="countriesController"><ref local="countriesController"/></property>
+	</bean>
 
 	<!-- General use Multiaction controller for Errors -->
 	<bean id="errorsController" class="org.springframework.samples.countries.web.ErrorsController">
