@@ -142,9 +142,7 @@ public class JtaTransactionTestSuite extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				// something transactional
 				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-				TransactionSynchronizationManager.registerSynchronization(synch);
 			}
 		});
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
@@ -252,7 +250,6 @@ public class JtaTransactionTestSuite extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-				TransactionSynchronizationManager.registerSynchronization(synch);
 				status.setRollbackOnly();
 			}
 		});
@@ -346,7 +343,6 @@ public class JtaTransactionTestSuite extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-				TransactionSynchronizationManager.registerSynchronization(synch);
 				status.setRollbackOnly();
 			}
 		});
@@ -438,7 +434,6 @@ public class JtaTransactionTestSuite extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-				TransactionSynchronizationManager.registerSynchronization(synch);
 				status.setRollbackOnly();
 			}
 		});
@@ -466,7 +461,6 @@ public class JtaTransactionTestSuite extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-				TransactionSynchronizationManager.registerSynchronization(synch);
 				status.setRollbackOnly();
 			}
 		});
