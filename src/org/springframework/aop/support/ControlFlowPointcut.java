@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.ClassFilter;
@@ -30,9 +31,9 @@ import org.springframework.core.ControlFlowFactory;
  * normal pointcuts, but they are useful in some cases.
  * @see org.springframework.core.ControlFlow
  * @author Rod Johnson
- * @version $Id: ControlFlowPointcut.java,v 1.6 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: ControlFlowPointcut.java,v 1.7 2004-07-24 13:38:46 johnsonr Exp $
  */
-public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher {
+public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher, Serializable {
 	
 	private Class clazz;
 	
