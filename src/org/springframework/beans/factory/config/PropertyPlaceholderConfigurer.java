@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.config;
 
@@ -354,11 +354,13 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	protected String parseString(Properties props, String strVal, String originalPlaceholder)
 	    throws BeansException {
 
-		int startIndex = strVal.indexOf(this.placeholderPrefix);
+		StringBuffer buf = new StringBuffer(strVal);
+
+		int startIndex = buf.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
-			int endIndex = strVal.indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
+			int endIndex = buf.indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
 			if (endIndex != -1) {
-				String placeholder = strVal.substring(startIndex + this.placeholderPrefix.length(), endIndex);
+				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholderToUse = null;
 
 				if (originalPlaceholder != null) {
@@ -388,12 +390,12 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 					if (logger.isDebugEnabled()) {
 						logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
 					}
-					strVal = strVal.substring(0, startIndex) + propVal + strVal.substring(endIndex+1);
-					startIndex = strVal.indexOf(this.placeholderPrefix, startIndex + propVal.length());
+					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
+					startIndex = buf.indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
 				else if (this.ignoreUnresolvablePlaceholders) {
-					// return unprocessed value
-					return strVal;
+					// proceed with unprocessed value
+					startIndex = buf.indexOf(this.placeholderPrefix, endIndex);
 				}
 				else {
 					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");
@@ -403,7 +405,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 				startIndex = -1;
 			}
 		}
-		return strVal;
+
+		return buf.toString();
 	}
 
 	/**
