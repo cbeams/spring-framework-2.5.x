@@ -15,7 +15,7 @@ import java.util.Date;
  *
  * @author Rod Johnson
  * @since November 21, 2000
- * @version $Id: ResponseTimeMonitorImpl.java,v 1.1.1.1 2003-08-14 16:20:46 trisberg Exp $
+ * @version $Id: ResponseTimeMonitorImpl.java,v 1.2 2003-09-22 21:28:04 aarendsen Exp $
  */
 public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 
@@ -112,7 +112,10 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 	 * data recorded by this object.
 	 */
 	public String toString() {
-		return "hits=" + getAccessCount() + "; avg=" + getAverageResponseTimeMillis() + "; best=" + getBestResponseTimeMillis() + "; worst=" + getWorstResponseTimeMillis();
+		return "hits=" + getAccessCount() + 
+			"; avg=" + getAverageResponseTimeMillis() + 
+			"; best=" + getBestResponseTimeMillis() + 
+			"; worst=" + getWorstResponseTimeMillis();
 	}
 
 }

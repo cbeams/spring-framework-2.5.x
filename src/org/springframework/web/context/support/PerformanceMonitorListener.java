@@ -16,7 +16,7 @@ public class PerformanceMonitorListener implements ApplicationListener {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private ResponseTimeMonitorImpl responseTimeMonitor;
+	protected ResponseTimeMonitorImpl responseTimeMonitor;
 
 	public PerformanceMonitorListener() {
 		responseTimeMonitor = new ResponseTimeMonitorImpl();
@@ -33,5 +33,4 @@ public class PerformanceMonitorListener implements ApplicationListener {
 			}
 		}
 	}
-
 }
