@@ -34,6 +34,9 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import javax.management.MBeanException;
+import javax.management.AttributeNotFoundException;
+import javax.management.InvalidAttributeValueException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -45,6 +48,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.util.StringUtils;
 
 /**
  * <code>MethodInterceptor</code> implementation that routes calls to an MBean
@@ -87,6 +91,8 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * Caches method signatures for use during invocation.
 	 */
 	private final Map signatureCache = new HashMap();
+
+	private boolean useStrictCasing = true;
 
 
 	/**
@@ -194,34 +200,8 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 		try {
 			PropertyDescriptor pd = BeanUtils.findPropertyForMethod(invocation.getMethod());
 			if (pd != null) {
-				MBeanAttributeInfo inf = (MBeanAttributeInfo) this.allowedAttributes.get(pd.getName());
-				// If no attribute is returned, we know that it is not defined in the
-				// management interface.
-				if (inf == null) {
-					throw new InvalidInvocationException(
-							"Attribute '" + pd.getName() + "' is not exposed on the management interface");
-				}
-				if (invocation.getMethod().equals(pd.getReadMethod())) {
-					if (inf.isReadable()) {
-						return this.server.getAttribute(this.objectName, pd.getName());
-					}
-					else {
-						throw new InvalidInvocationException("Attribute '" + pd.getName() + "' is not readable");
-					}
-				}
-				else if (invocation.getMethod().equals(pd.getWriteMethod())) {
-					if (inf.isWritable()) {
-						server.setAttribute(this.objectName, new Attribute(pd.getName(), invocation.getArguments()[0]));
-						return null;
-					}
-					else {
-						throw new InvalidInvocationException("Attribute '" + pd.getName() + "' is not writable");
-					}
-				}
-				else {
-					throw new IllegalStateException(
-							"Method [" + invocation.getMethod() + "] is neither a bean property getter nor a setter");
-				}
+
+				return invokeAttribute(pd, invocation);
 			}
 			else {
 				return invokeMethod(invocation.getMethod(), invocation.getArguments());
@@ -232,6 +212,39 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 		}
 		catch (IOException ex) {
 			throw new InvocationFailureException("JMX access failed", ex);
+		}
+	}
+
+	private Object invokeAttribute(PropertyDescriptor pd, MethodInvocation invocation) throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException, InvalidAttributeValueException {
+		String attributeName = JmxUtils.getAttributeName(pd, this.useStrictCasing);
+		MBeanAttributeInfo inf = (MBeanAttributeInfo) this.allowedAttributes.get(attributeName);
+
+		// If no attribute is returned, we know that it is not defined in the
+		// management interface.
+		if (inf == null) {
+			throw new InvalidInvocationException(
+					"Attribute '" + pd.getName() + "' is not exposed on the management interface");
+		}
+		if (invocation.getMethod().equals(pd.getReadMethod())) {
+			if (inf.isReadable()) {
+				return this.server.getAttribute(this.objectName, attributeName);
+			}
+			else {
+				throw new InvalidInvocationException("Attribute '" + attributeName + "' is not readable");
+			}
+		}
+		else if (invocation.getMethod().equals(pd.getWriteMethod())) {
+			if (inf.isWritable()) {
+				server.setAttribute(this.objectName, new Attribute(attributeName, invocation.getArguments()[0]));
+				return null;
+			}
+			else {
+				throw new InvalidInvocationException("Attribute '" + attributeName + "' is not writable");
+			}
+		}
+		else {
+			throw new IllegalStateException(
+					"Method [" + invocation.getMethod() + "] is neither a bean property getter nor a setter");
 		}
 	}
 

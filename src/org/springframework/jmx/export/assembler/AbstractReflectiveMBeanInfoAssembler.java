@@ -89,6 +89,19 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	private static final String OPERATION = "operation";
 
+	/**
+	 * Indicates whether or not strict casing is being used for attributes.
+	 */
+  private boolean useStrictCasing = true;
+
+	/**
+	 * Enables and disables strict casing for attributes. When using strict casing a JavaBean property
+	 * with a getter such as <code>getFoo()</code> translates to an attribute called <code>Foo</code>.
+	 * With strict casing disable <code>getFoo()</code> would translate to just <code>foo</code>. 
+	 */
+	public void setUseStrictCasing(boolean useStrictCasing) {
+		this.useStrictCasing = useStrictCasing;
+	}
 
 	/**
 	 * Iterate through all properties on the MBean class and gives subclasses the chance to vote on the
@@ -121,7 +134,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 			if (getter != null || setter != null) {
 				// If both getter and setter are null, then this does not need exposing.
-				ModelMBeanAttributeInfo info = new ModelMBeanAttributeInfo(props[i].getName(), getAttributeDescription(props[i]), getter, setter);
+				String attributeName = JmxUtils.getAttributeName(props[i], this.useStrictCasing);
+				ModelMBeanAttributeInfo info = new ModelMBeanAttributeInfo(attributeName, getAttributeDescription(props[i]), getter, setter);
 
 				Descriptor desc = info.getDescriptor();
 				if (getter != null) {
