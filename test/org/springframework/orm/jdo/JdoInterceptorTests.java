@@ -63,6 +63,9 @@ public class JdoInterceptorTests extends TestCase {
 		catch (Throwable t) {
 			fail("Should not have thrown Throwable: " + t.getMessage());
 		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(pmf);
+		}
 
 		pmfControl.verify();
 		pmControl.verify();
