@@ -38,7 +38,7 @@
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.39 2004-09-23 09:47:17 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.40 2004-09-30 21:10:33 jhoeller Exp $
 -->
 
 
@@ -47,9 +47,9 @@
 	At least one bean definition is required.
 -->
 <!ELEMENT beans (
-        description?,
-        import*,
-        bean+
+	description?,
+	import*,
+	bean+
 )>
 
 <!--
@@ -82,10 +82,10 @@
 	Defines a single named bean.
 -->
 <!ELEMENT bean (
-        description?,
-        (constructor-arg | property)*,
-        (lookup-method)*,
-        (replaced-method)*
+	description?,
+	(constructor-arg | property)*,
+	(lookup-method)*,
+	(replaced-method)*
 )>
 
 <!--
@@ -111,20 +111,20 @@
 <!ATTLIST bean class CDATA #IMPLIED>
 
 <!--
-  Optionally specify a parent bean definition.
+	Optionally specify a parent bean definition.
 
-  Will use the bean class of the parent if none specified, but can
-  also override it. In the latter case, the child bean class must be
-  compatible with the parent, i.e. accept the parent's property values
-  and constructor argument values, if any.
+	Will use the bean class of the parent if none specified, but can
+	also override it. In the latter case, the child bean class must be
+	compatible with the parent, i.e. accept the parent's property values
+	and constructor argument values, if any.
 
-  A child bean definition will inherit constructor argument values,
-  property values and method overrides from the parent, with the option
-  to add new values. If init method, destroy method, factory bean and/or factory
-  method are specified, they will override the corresponding parent settings.
+	A child bean definition will inherit constructor argument values,
+	property values and method overrides from the parent, with the option
+	to add new values. If init method, destroy method, factory bean and/or factory
+	method are specified, they will override the corresponding parent settings.
 
-  The remaining settings will <i>always</i> be taken from the child definition:
-  depends on, autowire mode, dependency check, singleton, lazy init.
+	The remaining settings will <i>always</i> be taken from the child definition:
+	depends on, autowire mode, dependency check, singleton, lazy init.
 -->
 <!ATTLIST bean parent CDATA #IMPLIED>
 
@@ -279,8 +279,8 @@
 	element to construct beans using static or instance factory methods.
 -->
 <!ELEMENT constructor-arg (
-        description?,
-        (bean | ref | idref | list | set | map | props | value | null)
+	description?,
+	(bean | ref | idref | list | set | map | props | value | null)
 )>
 
 <!--
@@ -312,8 +312,8 @@
 	beans in the same or related factories, lists, maps and properties.
 -->
 <!ELEMENT property (
-        description?,
-        (bean | ref | idref | list | set | map | props | value | null)
+	description?,
+	(bean | ref | idref | list | set | map | props | value | null)
 )>
 
 <!--
@@ -336,7 +336,6 @@
 	Name of a lookup method. This method should take no arguments.
 -->
 <!ATTLIST lookup-method name CDATA #IMPLIED>
-
 
 <!--
 	Similar to the lookup method mechanism, the replaced-method element is used to control
@@ -371,17 +370,16 @@
 
 <!--
 	Specification of the type of an overloaded method argument as a String. 
-	For convenenince, this may be a substring of the FQN. E.g. all the
+	For convenience, this may be a substring of the FQN. E.g. all the
 	following would match "java.lang.String":
 	- java.lang.String
 	- String
 	- Str
 	
 	As the number of arguments will be checked also, this convenience can often
-	be used to save typing
+	be used to save typing.
 -->
 <!ATTLIST arg-type match CDATA #IMPLIED>
-
 
 <!--
 	Name of the bean in the current or ancestor factories that the lookup method
@@ -390,7 +388,6 @@
 	is useful for single-threaded objects.
 -->
 <!ATTLIST lookup-method bean CDATA #IMPLIED>
-
 
 <!--
 	Defines a reference to another bean in this factory or an external
@@ -438,7 +435,7 @@
 	is automatically performed by the BeanFactory.
 -->
 <!ELEMENT list (
-        (bean | ref | idref | list | set | map | props | value | null)*
+	(bean | ref | idref | list | set | map | props | value | null)*
 )>
 
 <!--
@@ -447,7 +444,7 @@
 	although references will be strongly typed.
 -->
 <!ELEMENT set (
-        (bean | ref | idref | list | set | map | props | value | null)*
+	(bean | ref | idref | list | set | map | props | value | null)*
 )>
 
 <!--
@@ -455,7 +452,7 @@
 	Maps may be empty.
 -->
 <!ELEMENT map (
-        (entry)*
+	(entry)*
 )>
 
 <!--
@@ -463,7 +460,7 @@
 	The name of the property is given by the "key" attribute.
 -->
 <!ELEMENT entry (
-        (bean | ref | idref | list | set | map | props | value | null)
+	(bean | ref | idref | list | set | map | props | value | null)
 )>
 
 <!--
@@ -476,7 +473,7 @@
 	Props may be empty.
 -->
 <!ELEMENT props (
-        (prop)*
+	(prop)*
 )>
 
 <!--
@@ -484,9 +481,7 @@
 	Note that whitespace is trimmed off to avoid unwanted whitespace
 	caused by typical XML formatting.
 -->
-<!ELEMENT prop
-        (#PCDATA)
->
+<!ELEMENT prop (#PCDATA)>
 
 <!--
 	Each property element must specify its key.
