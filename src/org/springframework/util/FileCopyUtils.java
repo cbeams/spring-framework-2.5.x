@@ -154,7 +154,7 @@ public abstract class FileCopyUtils {
 	 * @throws IOException in case of I/O errors
 	 */
 	public static byte[] copyToByteArray(InputStream in) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
 		copy(in, out);
 		return out.toByteArray();
 	}

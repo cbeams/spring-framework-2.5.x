@@ -42,7 +42,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  */
 public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerRequestExecutor {
 
-	private static final int SERIALIZED_INVOCATION_BYTE_ARRAY_INITIAL_SIZE = 500;
+	private static final int SERIALIZED_INVOCATION_BYTE_ARRAY_INITIAL_SIZE = 1024;
 
 	protected static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
 

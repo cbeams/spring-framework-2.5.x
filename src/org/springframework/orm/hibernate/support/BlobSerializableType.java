@@ -52,6 +52,14 @@ import org.springframework.jdbc.support.lob.LobHandler;
 public class BlobSerializableType extends AbstractLobType {
 
 	/**
+	 * Initial size for ByteArrayOutputStreams used for serialization output.
+	 * <p>If a serialized object is larger than these 1024 bytes, the size of
+	 * the byte array used by the output stream will be doubled each time the
+	 * limit is reached.
+	 */
+	private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 1024;
+
+	/**
 	 * Constructor used by Hibernate: fetches config-time LobHandler and
 	 * config-time JTA TransactionManager from LocalSessionFactoryBean.
 	 * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#getConfigTimeLobHandler
@@ -83,8 +91,8 @@ public class BlobSerializableType extends AbstractLobType {
 
 	public Object deepCopy(Object value) throws HibernateException {
 		try {
-			// write to new byte array to clone
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			// Write to new byte array to clone.
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
 			try {
 				oos.writeObject(value);
@@ -93,7 +101,7 @@ public class BlobSerializableType extends AbstractLobType {
 				oos.close();
 			}
 
-			// read it back and return a true copy
+			// Read it back and return a true copy.
 			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 			ObjectInputStream ois = new ObjectInputStream(bais);
 			try {
@@ -113,6 +121,7 @@ public class BlobSerializableType extends AbstractLobType {
 
 	protected Object nullSafeGetInternal(ResultSet rs, int index, LobHandler lobHandler)
 			throws SQLException, IOException, HibernateException {
+
 		InputStream is = lobHandler.getBlobAsBinaryStream(rs, index);
 		if (is != null) {
 			ObjectInputStream ois = new ObjectInputStream(is);
@@ -131,11 +140,11 @@ public class BlobSerializableType extends AbstractLobType {
 		}
 	}
 
-	protected void nullSafeSetInternal(
-			PreparedStatement ps, int index, Object value, LobCreator lobCreator)
+	protected void nullSafeSetInternal(PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException, IOException {
+
 		if (value != null) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
 			try {
 				oos.writeObject(value);
