@@ -1,43 +1,37 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.95 2004-02-22 17:11:05 johnsonr Exp $
+$Id: changelog.txt,v 1.96 2004-02-22 21:55:03 jhoeller Exp $
 
 
-Changes in version 1.0 (01.03.2003)
------------------------------------
+Changes in version 1.0 RC2 (25.2.2003)
+--------------------------------------
 
-WARNING: Small, but non-backwards-compatible JNDI configuration change!
-  'inContainer' property of AbstractJndiLocator and derived subclasses such as JndiObjectFactoryBean
-  and the EJB invokers has become 'resourceRef', and the default value is now false, not true.
-  If your old JNDI locations had a scheme (i.e. started with 'java:' or any 'xxxx:' value) you do
-  not have to do anything. If your old JNDI location had no scheme specified, Spring will no longer
-  by default prepend 'java:comp/env/' to it. To get the old behaviour, just add the resourceRef property
-  with a true value. Alternately just add the 'java:comp/env/' prefix yourself to the JNDI location path.
-  
-WARNING: Change in AOP API with impact on some user applications (easy to fix)
+Package org.springframework.aop
+* simplified Advisor interface hierarchy, reducing Advisor subinterfaces to PointcutAdvisor and IntroductionAdvisor
 
 Package org.springframework.beans
+* fixed PropertyValue's "equals" implementation, added corresponding "hashCode" implementation
+* apply custom property editors to converted String array values in BeanWrapperImpl
+* CustomNumberEditor supports Short, BigInteger and BigDecimal too
 * refactored AbstractBeanFactory into AbstractBeanFactory and AbstractAutowireCapableBeanFactory
 * revised BeanFactoryLocator exception handling
 * renamed SimpleJndiBeanFactoryLocator to JndiBeanFactoryLocator
 * added PreferencesPlaceholderConfigurer, being able to resolve placeholders via J2SE 1.4 Preferences
 * reworked MethodInvocationFactoryBean to derive from org.springframework.util.MethodInvoker
+* renamed DTD file to "spring-beans_1_0.dtd", still supporting "spring-beans.dtd" as shortcut
+* added optional "type" attribute to "constructor-arg" tag, for resolving ambiguities when converting String values
 
 Package org.springframework.context
 * renamed JndiBeanFactoryLocator to ContextJndiBeanFactoryLocator
 * renamed DefaultBeanFactoryLocator to ContextSingletonBeanFactoryLocator
 * renamed LocatorFactory to DefaultLocatorFactory
 * fixed "useCodeAsDefaultMessage" fallback for multiple codes in a MessageSourceResolvable
+* renamed NestingMessageSource to HierarchicalMessageSource and AbstractNestingMessageSource to AbstractMessageSource
+* fixed bug in ReloadableResourceBundleMessageSource's filename caching that prevented loading from multiple basenames
+* added "clearCacheIncludingAncestors" method to ReloadableResourceBundleMessageSource
 
-Package org.springframework.aop
-* simplified Advisor interface hierarchy. Now the only subinterfaces of Advisor
-are PointcutAdvisor and IntroductionAdvisor. There is no longer a parallel hierarchy
-of Advisors and Advice: DefaultPointcutAdvisor can be used to hold any
-advice type (Interceptor, MethodBeforeAdvice etc.).
-MIGRATION: if you used or extended a class like DefaultMethodBeforeAdvisor,
-replace that with DefaultPointcutAdvisor. If you used RegexpMethodPointcutAroundAdvisor,
-replace with RegexpMethodPoincutAdvisor. Note that regular expressions can now
-be used to target any advice type.
+Package org.springframework.core
+* ClassPathResource returns a File on "getFile" if the classpath resource resides in the file system
 
 Package org.springframework.jndi
 * renamed the "inContainer" property to "resourceRef", and changed the default value from "true" to "false"
@@ -47,7 +41,7 @@ Package org.springframework.ejb
 
 Package org.springframework.jdbc
 * added "execute(String sql) method to support static sql and ddl statements
-* renamed method "execute(CallableStatementCreator csc, List declaredParameters)" to call 
+* renamed method "execute(CallableStatementCreator csc, List declaredParameters)" to call
 * added support for new SQL error code categories: DataRetrieval/OptimisticLocking/DataAccessResourceFailureException
 * added overloaded query methods to JdbcTemplate, allowing to pass in prepared statement arguments as Object array
 * added queryForList/queryForObject/queryForInt methods to JdbcTemplate class and JdbcOperations interface
@@ -55,21 +49,37 @@ Package org.springframework.jdbc
 * removed "doWithResultSetXxx" methods from JdbcOperations interface
 * removed JdbcHelper and its helper classes ColumnExtractor and DefaultColumnExtractor
 
+Package org.springframework.remoting
+* added support for custom RMI socket factories to RmiServiceExporter
+* unbind RMI object from RMI registry on shutdown of RmiServiceExporter
+
+Package org.springframework.transaction
+* consider a JTA transaction with STATUS_MARKED_ROLLBACK as existing transaction in JtaTransactionManager
+
 Package org.springframework.scheduler
 * added Quartz support, for setting up Schedulers, JobDetails and Triggers in a Spring context
 * added QuartzJobBean, a convenience class that applies the Quartz job data map as bean properties
 * added MethodInvocationJobDetailFactoryBean, a convenience class for delegating a job to a business method
+* added J2SE Timer support, for setting up Timers and ScheduledTimerTasks
+* added MethodInvocationTimerTaskFactoryBean, a convenience class for delegating a task to a business method
+
+Package org.springframework.ui
+* renamed NestingThemeSource to HierarchicalThemeSource
+* removed AbstractXmlUiApplicationContext and StaticUiApplicationContext base classes (use UiApplicationContextUtils)
 
 Package org.springframework.util
 * removed package path utility methods from ClassLoaderUtils
 * added MethodInvoker, a base class for MethodInvocationFactoryBean and MethodInvocationJobDetailFactoryBean
 
+Package org.springframework.validation
+* added "allowedFields" property to DataBinder, to avoid unwanted modifications when binding request parameters
+
 Package org.springframework.web
-* added "defaultMethodName" property to ParameterMethodNameResolver
+* added "defaultMethod" property to ParameterMethodNameResolver
 
 
-Changes in version 1.0 RC1 (11.02.2003)
----------------------------------------
+Changes in version 1.0 RC1 (11.2.2003)
+--------------------------------------
 
 Package org.springframework.aop
 * Overhauled advice manipulation methods on AdvisedSupport
@@ -233,8 +243,8 @@ Building
 * added "build.bat" file to framework root
 
 
-Changes in version 1.0 M4 (04.01.2003)
---------------------------------------
+Changes in version 1.0 M4 (4.1.2003)
+------------------------------------
 
 Package org.springframework.aop
 * moved auto proxy creator implementations into new org.springframework.aop.framework.autoproxy package
