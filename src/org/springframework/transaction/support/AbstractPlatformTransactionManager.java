@@ -37,6 +37,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	private boolean transactionSynchronization = false;
 
+	private boolean rollbackOnCommitFailure = false;
+
 	/**
 	 * Set if this transaction manager should activate the thread-bound
 	 * transaction synchronization support. The default can very between
@@ -46,7 +48,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Only one transaction manager is allowed to activate it at any time.
 	 * @see TransactionSynchronizationManager
 	 */
-	public final void setTransactionSynchronization(boolean transactionSynchronization) {
+	public void setTransactionSynchronization(boolean transactionSynchronization) {
 		this.transactionSynchronization = transactionSynchronization;
 	}
 
@@ -54,8 +56,24 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Return if this transaction manager should activate the thread-bound
 	 * transaction synchronization support.
 	 */
-	public final boolean getTransactionSynchronization() {
+	public boolean getTransactionSynchronization() {
 		return transactionSynchronization;
+	}
+
+	/**
+	 * Set if a rollback should be performed on failure of the commit call.
+	 * Typically not necessary and thus to be avoided as it can override the
+	 * commit exception with a subsequent rollback exception. Default is false.
+	 */
+	public void setRollbackOnCommitFailure(boolean rollbackOnCommitFailure) {
+		this.rollbackOnCommitFailure = rollbackOnCommitFailure;
+	}
+
+	/**
+	 * Return if a rollback should be performed on failure of the commit call.
+	 */
+	public boolean isRollbackOnCommitFailure() {
+		return rollbackOnCommitFailure;
 	}
 
 	/**
@@ -65,7 +83,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #isExistingTransaction
 	 * @see #doBegin
 	 */
-	public final TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 		Object transaction = doGetTransaction();
 		logger.debug("Using transaction object [" + transaction + "]");
 
@@ -108,29 +126,17 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doCommit
 	 * @see #rollback
 	 */
-	public final void commit(TransactionStatus status) throws TransactionException {
+	public void commit(TransactionStatus status) throws TransactionException {
 		if (status.isRollbackOnly() || isRollbackOnly(status.getTransaction())) {
 			logger.debug("Transactional code has requested rollback");
 			rollback(status);
 		}
 		else if (status.isNewTransaction()) {
-
-			// trigger synchronization before commit
-			logger.debug("Triggering beforeCommit synchronization");
-			try {
-				TransactionSynchronizationManager.triggerBeforeCommit();
-			}
-			catch (RuntimeException ex) {
-				rollbackOnException(status, ex);
-				throw ex;
-			}
-			catch (Error err) {
-				rollbackOnException(status, err);
-				throw err;
-			}
-
 			// initiate transaction commit
 			try {
+				logger.debug("Triggering beforeCommit synchronization");
+				TransactionSynchronizationManager.triggerBeforeCommit();
+				logger.debug("Initiating transaction commit");
 				doCommit(status);
 				triggerAfterCompletion(TransactionSynchronization.STATUS_COMMITTED, null);
 			}
@@ -138,15 +144,28 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				triggerAfterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK, ex);
 				throw ex;
 			}
+			catch (TransactionException ex) {
+				if (this.rollbackOnCommitFailure) {
+					doRollbackOnCommitException(status, ex);
+					triggerAfterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK, ex);
+				}
+				else {
+					triggerAfterCompletion(TransactionSynchronization.STATUS_UNKNOWN, ex);
+				}
+				throw ex;
+			}
 			catch (RuntimeException ex) {
-				triggerAfterCompletion(TransactionSynchronization.STATUS_UNKNOWN, ex);
+				doRollbackOnCommitException(status, ex);
+				triggerAfterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK, ex);
 				throw ex;
 			}
 			catch (Error err) {
+				doRollbackOnCommitException(status, err);
 				triggerAfterCompletion(TransactionSynchronization.STATUS_UNKNOWN, err);
 				throw err;
 			}
 			finally {
+				cleanupAfterCompletion(status.getTransaction());
 				TransactionSynchronizationManager.clear();
 			}
 		}
@@ -158,7 +177,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doRollback
 	 * @see #doSetRollbackOnly
 	 */
-	public final void rollback(TransactionStatus status) throws TransactionException {
+	public void rollback(TransactionStatus status) throws TransactionException {
 		if (status.isNewTransaction()) {
 			try {
 				doRollback(status);
@@ -169,6 +188,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				throw ex;
 			}
 			finally {
+				cleanupAfterCompletion(status.getTransaction());
 				TransactionSynchronizationManager.clear();
 			}
 		}
@@ -177,24 +197,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		else {
 			// no transaction available
-			logger.warn("Should roll back transaction but cannot -- no transaction available");
-		}
-	}
-
-	/**
-	 * Invoke rollback, handling rollback exceptions properly.
-	 * @param status object representing the transaction
-	 * @param ex the thrown application exception or error
-	 * @throws TransactionException in case of a rollback error
-	 * @see #rollback
-	 */
-	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
-		try {
-			rollback(status);
-		}
-		catch (TransactionException tex) {
-			logger.error("Commit exception overridden by rollback exception", ex);
-			throw tex;
+			logger.warn("Should roll back transaction but cannot - no transaction available");
 		}
 	}
 
@@ -205,7 +208,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @throws TransactionException in case of a rollback error
 	 * @see #doRollback
 	 */
-	protected void doRollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
+	private void doRollbackOnCommitException(TransactionStatus status, Throwable ex) throws TransactionException {
 		try {
 			doRollback(status);
 		}
@@ -304,5 +307,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @throws TransactionException in case of system errors
 	 */
 	protected abstract void doSetRollbackOnly(TransactionStatus status) throws TransactionException;
+
+	/**
+	 * Cleanup resources after transaction completion.
+	 * Called after doCommit and doRollback execution on any outcome.
+	 * Should not throw any exceptions but just issue warnings on errors.
+	 * @param transaction transaction object returned by doGetTransaction()
+	 */
+	protected void cleanupAfterCompletion(Object transaction) {
+	}
 
 }
