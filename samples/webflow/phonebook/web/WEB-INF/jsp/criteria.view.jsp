@@ -1,6 +1,6 @@
 <%@ page session="false" %>
 
-<%@ taglib uri="/WEB-INF/tld/spring.tld" prefix="spring" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <jsp:useBean id="query" scope="request" class="org.springframework.samples.phonebook.domain.PhoneBookQuery"/>
 
