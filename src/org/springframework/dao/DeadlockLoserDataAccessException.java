@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.dao;
 /**
  * Generic exception thrown when the current process was
  * a deadlock loser, and its transaction rolled back.
+ * This exception will be thrown either by O/R mapping tools or by custom DAO implementations.
+ * It is also thrown by Spring's SQLException translation support.
  * @author Rod Johnson
  */
-public class DeadlockLoserDataAccessException extends ConcurrencyFailureException {
+public class DeadlockLoserDataAccessException extends PessimisticLockingFailureException {
 
 	/**
 	 * Constructor for DeadlockLoserDataAccessException.

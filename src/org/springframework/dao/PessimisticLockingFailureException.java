@@ -17,27 +17,27 @@
 package org.springframework.dao;
 
 /**
- * Exception thrown on failure to complete a transaction in serialized mode due to update conflicts. 
- * This exception will be thrown either by O/R mapping tools or by custom DAO implementations.
+ * Exception thrown on an optimistic locking violation. This exception will
+ * be thrown either by O/R mapping tools or by custom DAO implementations.  
  * It is also thrown by Spring's SQLException translation support.
- * @author Rod Johnson
+ * @author Thomas Risberg
  */
-public class CannotSerializeTransactionException extends PessimisticLockingFailureException {
+public class PessimisticLockingFailureException extends ConcurrencyFailureException {
 
 	/**
-	 * Constructor for CannotSerializeTransactionException.
+	 * Constructor for PessimisticLockingFailureException.
 	 * @param msg message
 	 */
-	public CannotSerializeTransactionException(String msg) {
+	public PessimisticLockingFailureException(String msg) {
 		super(msg);
 	}
 
 	/**
-	 * Constructor for CannotSerializeTransactionException.
+	 * Constructor for PessimisticLockingFailureException.
 	 * @param msg message
 	 * @param ex root cause from data access API in use
 	 */
-	public CannotSerializeTransactionException(String msg, Throwable ex) {
+	public PessimisticLockingFailureException(String msg, Throwable ex) {
 		super(msg, ex);
 	}
 
