@@ -42,7 +42,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @author Isabelle Muszynski
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @version $Id: JdbcUtils.java,v 1.10 2004-06-04 12:50:05 trisberg Exp $
+ * @version $Id: JdbcUtils.java,v 1.11 2004-06-10 17:17:05 trisberg Exp $
  */
 public class JdbcUtils {
 
@@ -179,7 +179,7 @@ public class JdbcUtils {
 						break;
 					case Types.BLOB:
 						if (inValue instanceof SqlLobValue) {
-							lh = declaredParameter.getLobHandler();
+							lh = ((SqlLobValue) inValue).getLobHandler();
 							if (lh == null)
 								lh = new DefaultLobHandler();
 							LobCreator lc = ((SqlLobValue) inValue).newLobCreator(lh);
@@ -198,7 +198,7 @@ public class JdbcUtils {
 						break;
 					case Types.CLOB:
 						if (inValue instanceof SqlLobValue) {
-							lh = declaredParameter.getLobHandler();
+							lh = ((SqlLobValue) inValue).getLobHandler();
 							if (lh == null)
 								lh = new DefaultLobHandler();
 							LobCreator lc = ((SqlLobValue) inValue).newLobCreator(lh);

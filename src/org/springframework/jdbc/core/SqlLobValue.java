@@ -21,6 +21,7 @@ import java.io.Reader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
@@ -63,7 +64,7 @@ public class SqlLobValue {
 	private int length;
 
 	/**
-	 * This contains the length of the Lob stored in this parameter
+	 * This contains the content of the Lob stored in this parameter
 	 */
 	private byte[] bytes;
 	private InputStream stream;
@@ -71,55 +72,97 @@ public class SqlLobValue {
 	private String string;
 	
 	/**
+	 * This contains a reference to the LobHandler - so we can create a
+	 * LobHandler when we need one
+	 */
+	private LobHandler lobHandler;
+
+	/**
 	 * This contains a reference to the LobCreator - so we can close it
 	 * once the update is done.
 	 */
 	private LobCreator lobCreator;
-
 
 	/**
 	 * @param reader The character stream containing the CLOB value
 	 * @param length The length of the CLOB value
 	 */
 	public SqlLobValue(Reader reader, int length) {
-		this.type = READER;
-		this.reader = reader;
-		this.length = length;
+		this(reader, length, new DefaultLobHandler());
 	}
 
 	/**
-	 * @param reader The character stream containing the LOB value
+	 * @param reader The character stream containing the CLOB value
+	 * @param length The length of the CLOB value
+	 * @param lobHandler the LobHandler to be used
+	 */
+	public SqlLobValue(Reader reader, int length, LobHandler lobHandler) {
+		this.type = READER;
+		this.reader = reader;
+		this.length = length;
+		this.lobHandler = lobHandler;
+	}
+
+	/**
+	 * @param stream The character stream containing the LOB value
 	 * @param length The length of the LOB value
 	 */
 	public SqlLobValue(InputStream stream, int length) {
+		this(stream, length, new DefaultLobHandler());
+	}
+
+	/**
+	 * @param stream The character stream containing the LOB value
+	 * @param length The length of the LOB value
+	 * @param lobHandler the LobHandler to be used
+	 */
+	public SqlLobValue(InputStream stream, int length, LobHandler lobHandler) {
 		this.type = STREAM;
 		this.stream = stream;
 		this.length = length;
+		this.lobHandler = lobHandler;
 	}
 
 	/**
 	 * @param bytes The byte array containing the BLOB value
 	 */
 	public SqlLobValue(byte[] bytes) {
+		this(bytes, new DefaultLobHandler());			
+	}
+
+	/**
+	 * @param bytes The byte array containing the BLOB value
+	 * @param lobHandler the LobHandler to be used
+	 */
+	public SqlLobValue(byte[] bytes, LobHandler lobHandler) {
 		this.type = BYTES;
 		this.bytes = bytes;
 		if (bytes != null)
 			this.length = bytes.length;
 		else
 			this.length = 0;
+		this.lobHandler = lobHandler;
 	}
 
 	/**
 	 * @param s The String containing the CLOB value
 	 */
 	public SqlLobValue(String s) {
+		this(s, new DefaultLobHandler());			
+	}
+
+	/**
+	 * @param s The String containing the CLOB value
+	 * @param lobHandler the LobHandler to be used
+	 */
+	public SqlLobValue(String s, LobHandler lobHandler) {
 		this.type = STRING;
 		this.string = s;
 		if (s != null)
 			this.length = s.length();
 		else
 			this.length = 0;
-			
+		this.lobHandler = lobHandler;
 	}
 
 	/**
@@ -166,6 +209,19 @@ public class SqlLobValue {
 	 */
 	public String getString() {
 		return string;
+	}
+
+	/**
+	 * @return Returns the lobHandler.
+	 */
+	public LobHandler getLobHandler() {
+		return lobHandler;
+	}
+	/**
+	 * @param lobHandler The lobHandler to set.
+	 */
+	public void setLobHandler(LobHandler lobHandler) {
+		this.lobHandler = lobHandler;
 	}
 
 	/**

@@ -19,8 +19,6 @@ package org.springframework.jdbc.core;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.jdbc.support.lob.LobHandler;
-
 /**
  * Object to represent a SQL parameter definition.
  * Parameters may be anonymous, in which case name is null.
@@ -38,10 +36,7 @@ public class SqlParameter {
 
 	/** used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, and named array types. */
 	private String typeName;
-	
-	/** used for types that are large objects like BLOB and CLOB. */
-	private LobHandler lobHandler;
-		
+			
 	/**
 	 * Add a new anonymous parameter
 	 */
@@ -63,16 +58,6 @@ public class SqlParameter {
 		this.typeName = typeName;
 	}
 
-	public SqlParameter(int type, LobHandler lobHandler) {
-		this(null, type, lobHandler);
-	}
-
-	public SqlParameter(String name, int type, LobHandler lobHandler) {
-		this.name = name;
-		this.type = type;
-		this.lobHandler = lobHandler;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -83,13 +68,6 @@ public class SqlParameter {
 
 	public String getTypeName() {
 		return typeName;
-	}
-
-	/**
-	 * @return Returns the lobHandler.
-	 */
-	public LobHandler getLobHandler() {
-		return lobHandler;
 	}
 
 	/**
