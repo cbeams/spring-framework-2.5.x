@@ -33,7 +33,7 @@ public class ServiceLocatorProxyCreatorTest extends TestCase {
 	public void testNoArgeGetter() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
-		ctx.registerSingleton("testbean", TestService.class, new MutablePropertyValues());
+		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
 		MutablePropertyValues mpv = new MutablePropertyValues();
 		mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",
 				TestServiceLocator.class));
@@ -42,12 +42,13 @@ public class ServiceLocatorProxyCreatorTest extends TestCase {
 		TestServiceLocator factory = (TestServiceLocator) ctx.getBean("factory");
 		TestService tetBean = factory.getTestService();
 	}
-	
+
 	public void testErrorOnTooManyOrTooFew() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
-		ctx.registerSingleton("testbean", TestService.class, new MutablePropertyValues());
-		ctx.registerSingleton("testbean2", TestService.class, new MutablePropertyValues());
+		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
+		ctx.registerSingleton("testServiceInstance2", TestService.class,
+				new MutablePropertyValues());
 		MutablePropertyValues mpv = new MutablePropertyValues();
 		mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",
 				TestServiceLocator.class));
@@ -86,18 +87,52 @@ public class ServiceLocatorProxyCreatorTest extends TestCase {
 			// expected
 		}
 	}
-	
-	public void testStringArgGetterWithNullId() {
+
+	public void testStringArgGetter() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
-		ctx.registerSingleton("testbean", TestService.class, new MutablePropertyValues());
+		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
 		MutablePropertyValues mpv = new MutablePropertyValues();
 		mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",
 				TestServiceLocator2.class));
 		ctx.registerSingleton("factory", ServiceLocatorProxyCreator.class, mpv);
 		ctx.refresh();
+		// test string-arg getter with null id
 		TestServiceLocator2 factory = (TestServiceLocator2) ctx.getBean("factory");
-		TestService tetBean = factory.getTestService(null);
+		TestService tetsBean = factory.getTestService(null);
+		// now test with explicit id
+		tetsBean = factory.getTestService("testService");
+		// now verify failure on bad id
+		try {
+			tetsBean = factory.getTestService("bogusTestService");
+			fail("illegal operation allowed");
+		}
+		catch (NoSuchBeanDefinitionException e) {
+			// expected
+		}
+	}
+
+	public void testCombinedLocatorInterface() {
+		StaticApplicationContext ctx = new StaticApplicationContext();
+
+		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
+		MutablePropertyValues mpv = new MutablePropertyValues();
+		mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",
+				TestServiceLocator3.class));
+		ctx.registerSingleton("factory", ServiceLocatorProxyCreator.class, mpv);
+		ctx.refresh();
+		TestServiceLocator3 factory = (TestServiceLocator3) ctx.getBean("factory");
+		TestService testBean = factory.getTestService();
+		testBean = factory.getTestService("testService");
+		// should fail trying to call non-getter service locator interface
+		// method
+		try {
+			testBean = factory.badGetter();
+			fail("illegal operation allowed");
+		}
+		catch (UnsupportedOperationException e) {
+			// expected
+		}
 	}
 
 	public static class TestService {
@@ -109,11 +144,20 @@ public class ServiceLocatorProxyCreatorTest extends TestCase {
 	public static interface TestServiceLocator {
 		TestService getTestService();
 	}
+
 	public static interface TestServiceLocator2 {
 		TestService getTestService(String id);
 	}
 
+	public static interface TestServiceLocator3 {
+		TestService getTestService();
+
+		TestService getTestService(String id);
+
+		TestService badGetter();
+	}
+
 	public static interface TestService2Locator {
 		TestService2 getTestService();
-	}	
+	}
 }
