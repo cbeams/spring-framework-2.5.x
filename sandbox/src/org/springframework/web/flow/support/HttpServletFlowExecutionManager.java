@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,46 +166,39 @@ public class HttpServletFlowExecutionManager {
 	public ViewDescriptor handleRequest(HttpServletRequest request, HttpServletResponse response,
 			FlowExecutionListener executionListener) throws Exception {
 		FlowExecution flowExecution;
-		ViewDescriptor viewDesc;
+		ViewDescriptor viewDescriptor;
 		if (isNewFlowExecutionRequest(request)) {
 			// start a new flow execution
 			flowExecution = createFlowExecution(getFlow(request));
-			
 			if (executionListener != null) {
 				flowExecution.getListenerList().add(executionListener);
 			}
-			
-			viewDesc = flowExecution.start(createEvent(request));
+			viewDescriptor = flowExecution.start(createEvent(request));
 			saveInHttpSession(flowExecution, request);
 		}
 		else {
 			// client is participating in an existing flow execution,
 			// retrieve information about it
 			flowExecution = getRequiredFlowExecution(request);
-
 			// rehydrate the execution if neccessary (if it had been serialized out)
 			flowExecution.rehydrate(getFlowLocator(), flowExecutionListeners);
-
 			if (executionListener != null) {
 				flowExecution.getListenerList().add(executionListener);
 			}
-
 			// signal the event within the current state
-			viewDesc = flowExecution.signalEvent(createEvent(request));
+			viewDescriptor = flowExecution.signalEvent(createEvent(request));
 		}
 		if (!flowExecution.isActive()) {
 			// event execution resulted in the entire flow ending, cleanup
 			removeFromHttpSession(flowExecution, request);
 		}
-
 		if (executionListener != null) {
 			flowExecution.getListenerList().remove(executionListener);
 		}
-
 		if (logger.isDebugEnabled()) {
-			logger.debug("Returning selected view descriptor " + viewDesc);
+			logger.debug("Returning selected view descriptor " + viewDescriptor);
 		}
-		return viewDesc;
+		return viewDescriptor;
 	}
 
 	// subclassing hooks

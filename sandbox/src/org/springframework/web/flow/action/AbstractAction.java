@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.springframework.web.flow.action;
+
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +49,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Action initializing callback, may be overriden by subclasses to perform
-	 * custom initialization.
+	 * custom initialization logic.
 	 */
 	protected void initAction() {
 	}
@@ -66,6 +68,34 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 */
 	protected Event success() {
 		return new LocalEvent(this, FlowConstants.SUCCESS);
+	}
+
+	/**
+	 * Returns a result event for this action with the specified identifier.
+	 * Typically called as part of return, for example:
+	 * 
+	 * <pre>
+	 *    protected Event doExecuteAction(FlowExecutionContext context) {
+	 *      // do some work
+	 *      if (some condition) {
+	 *        return result(&quot;success&quot;);
+	 *      } else {
+	 *        return result(&quot;error&quot;);
+	 *      }
+	 *    }
+	 * </pre>
+	 * 
+	 * Consider calling the error() or success() factory methods for returning
+	 * common results.
+	 * @param resultId the result event identifier
+	 * @return the action result event
+	 */
+	protected Event result(String resultId) {
+		return new LocalEvent(this, resultId);
+	}
+
+	protected Event result(String resultId, Map parameters) {
+		return new LocalEvent(this, resultId, parameters);
 	}
 
 	// action pre and post execution logic
