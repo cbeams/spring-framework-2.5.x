@@ -41,7 +41,7 @@ import org.springframework.util.ToStringCreator;
  * stored in an HTTP session.
  * <p>
  * Note: this implementation synchronizes both execution entry points
- * (@link #start(Event)) and {@link #signalEvent(Event)}.
+ * {@link #start(Event)} and {@link #signalEvent(Event)}.
  * They are locked on a per client basis for this flow execution.
  * Synchronization prevents a client from being able to signal other events
  * before previously signaled ones have processed in-full, preventing possible
