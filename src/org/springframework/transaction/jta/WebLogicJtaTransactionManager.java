@@ -81,7 +81,10 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			getTransactionManager().resume(suspendedTransaction);
 		}
 		catch (InvalidTransactionException ex) {
-			logger.debug("Standard JTA resume threw InvalidTransactionException - trying WebLogic forceResume", ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Standard JTA resume threw InvalidTransactionException: " + ex.getMessage() +
+				    " - trying WebLogic JTA forceResume");
+			}
 			/*
 			weblogic.transaction.TransactionManager wtm =
 					(weblogic.transaction.TransactionManager) getTransactionManager();
