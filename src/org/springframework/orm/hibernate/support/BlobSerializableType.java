@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate.support;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import javax.transaction.TransactionManager;
+
+import net.sf.hibernate.HibernateException;
 
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
@@ -78,15 +81,45 @@ public class BlobSerializableType extends AbstractLobType {
 		return true;
 	}
 
+	public Object deepCopy(Object value) throws HibernateException {
+		try {
+			// write to new byte array to clone
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			try {
+				oos.writeObject(value);
+			}
+			finally {
+				oos.close();
+			}
+
+			// read it back and return a true copy
+			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+			ObjectInputStream ois = new ObjectInputStream(bais);
+			try {
+				return ois.readObject();
+			}
+			finally {
+				ois.close();
+			}
+		}
+		catch (ClassNotFoundException ex) {
+			throw new HibernateException("Couldn't clone BLOB contents", ex);
+		}
+		catch (IOException ex) {
+			throw new HibernateException("Couldn't clone BLOB contents", ex);
+		}
+	}
+
 	protected Object nullSafeGetInternal(ResultSet rs, int index, LobHandler lobHandler)
-			throws SQLException, IOException {
+			throws SQLException, IOException, HibernateException {
 		InputStream is = lobHandler.getBlobAsBinaryStream(rs, index);
 		ObjectInputStream ois = new ObjectInputStream(is);
 		try {
 			return ois.readObject();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new IOException("Could not deserialize BLOB contents: " + ex.getMessage());
+			throw new HibernateException("Could not deserialize BLOB contents", ex);
 		}
 		finally {
 			ois.close();
