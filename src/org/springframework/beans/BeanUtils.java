@@ -19,7 +19,6 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -108,7 +107,7 @@ public abstract class BeanUtils {
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
 	 * <p>For example used in BeanWrapperImpl's custom editor matrching.
-	 * @param targetType the target targetType
+	 * @param targetType the target type
 	 * @param valueType the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
 	 */
