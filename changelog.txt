@@ -3,6 +3,21 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.1.1 (26.9.2004)
+------------------------------------
+
+Package org.springframework.mock
+* added full support for scoped attributes to MockPageContext, properly regarding request/session/application scope
+
+Package org.springframework.orm
+* pre-bound Hibernate Session gets set to FlushMode.AUTO for transaction synchronization, to enforce flush at commit
+* added "checkWriteOperations" flag to HibernateTemplate, to be able to suppress read-only check on save/update/delete
+
+Package org.springframework.web
+* turned protected getter methods in controller implementations to public, for introspection and testing purposes
+* fixed resetting of previous nested path in NestedPathTag, properly working in request scope (rather than page scope)
+
+
 Changes in version 1.1 final (5.9.2004)
 ---------------------------------------
 
