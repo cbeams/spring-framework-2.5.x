@@ -16,6 +16,7 @@
 package org.springframework.binding.value.support;
 
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -61,7 +62,12 @@ public abstract class AbstractValueModel extends AbstractPropertyChangePublisher
 			}
 			Iterator it = listeners.iterator();
 			while (it.hasNext()) {
-				((ValueChangeListener)it.next()).valueChanged();
+			    try {
+			        ((ValueChangeListener)it.next()).valueChanged();
+			    } catch(ConcurrentModificationException e) {
+			        logger.equals("Concurrent access to value model listener list detected!  Subscribing listeners must not update the value model in their handler methods.");
+			        throw e;
+			    }
 			}
 		}
 	}
