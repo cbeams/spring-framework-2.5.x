@@ -130,6 +130,7 @@ import org.springframework.util.closure.support.AbstractConstraint;
  * either externally or via a specific subclass.
  * 
  * @author Keith Donald
+ * @see FlowEventProcessor
  */
 public class Flow implements FlowEventProcessor, Serializable {
 
@@ -189,17 +190,29 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private transient FlowLifecycleListener flowLifecycleListener;
 
+	/**
+	 * @param id
+	 */
 	public Flow(String id) {
 		this.id = id;
 		initFlow();
 	}
 
+	/**
+	 * @param id
+	 * @param flowDao
+	 */
 	public Flow(String id, FlowDao flowDao) {
 		this.id = id;
 		setFlowDao(flowDao);
 		initFlow();
 	}
 
+	/**
+	 * @param id
+	 * @param startStateId
+	 * @param states
+	 */
 	public Flow(String id, String startStateId, AbstractState[] states) {
 		this.id = id;
 		addAll(states);
@@ -207,24 +220,39 @@ public class Flow implements FlowEventProcessor, Serializable {
 		initFlow();
 	}
 
+	/**
+	 * @param dao
+	 */
 	public void setFlowDao(FlowDao dao) {
 		Assert.notNull(dao, "The flow data access object is required for loading subflows and action beans");
 		this.flowDao = dao;
 	}
 
+	/**
+	 * @param listener
+	 */
 	public void setFlowLifecycleListener(FlowLifecycleListener listener) {
 		this.flowLifecycleListener = listener;
 	}
 
+	/**
+	 *  
+	 */
 	protected void initFlow() {
 
 	}
 
+	/**
+	 * @return
+	 */
 	protected FlowDao getFlowDao() {
 		assertFlowDaoSet();
 		return this.flowDao;
 	}
 
+	/**
+	 *  
+	 */
 	private void assertFlowDaoSet() {
 		Assert.notNull(flowDao,
 				"The flow DAO reference is required to load subflows and action beans - programmer error?");
@@ -237,10 +265,17 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return flowLifecycleListener;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * @param state
+	 * @return
+	 */
 	public boolean add(AbstractState state) {
 		return addAll(getDefaultStateGroupId(), new AbstractState[] { state });
 	}
@@ -252,18 +287,37 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return StateGroups.DEFAULT_GROUP_ID;
 	}
 
+	/**
+	 * @param states
+	 * @return
+	 */
 	public boolean addAll(AbstractState[] states) {
 		return addAll(getDefaultStateGroupId(), states);
 	}
 
+	/**
+	 * @param groupId
+	 * @param state
+	 * @return
+	 */
 	public boolean add(String groupId, AbstractState state) {
 		return addAll(groupId, new AbstractState[] { state });
 	}
 
+	/**
+	 * @param groupId
+	 * @param state
+	 * @return
+	 */
 	public boolean addAll(String groupId, AbstractState state) {
 		return addAll(groupId, new AbstractState[] { state });
 	}
 
+	/**
+	 * @param groupId
+	 * @param states
+	 * @return
+	 */
 	public boolean addAll(String groupId, AbstractState[] states) {
 		boolean firstAdd = false;
 		if (this.stateGroups.isEmpty()) {
@@ -276,10 +330,21 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return changed;
 	}
 
+	/**
+	 * @param subFlowId
+	 * @param transition
+	 * @return
+	 */
 	public boolean addSubFlow(String subFlowId, Transition transition) {
 		return add(new SubFlowState(subFlowId, transition));
 	}
 
+	/**
+	 * @param subFlowIdSuffix
+	 * @param subFlowAttributesMapperId
+	 * @param subFlowDefaultFinishStateId
+	 * @return
+	 */
 	public boolean addSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
 			String subFlowDefaultFinishStateId) {
 		return addSubFlow(subFlowIdSuffix, subFlowAttributesMapperId, new Transition[] {
@@ -287,43 +352,91 @@ public class Flow implements FlowEventProcessor, Serializable {
 				onFinish(subFlowDefaultFinishStateId) });
 	}
 
+	/**
+	 * @param subFlowId
+	 * @param transitions
+	 * @return
+	 */
 	public boolean addSubFlow(String subFlowId, Transition[] transitions) {
 		return add(new SubFlowState(subFlowId, transitions));
 	}
 
+	/**
+	 * @param subFlowId
+	 * @param subFlowAttributesMapperId
+	 * @param transitions
+	 * @return
+	 */
 	public boolean addSubFlow(String subFlowId, String subFlowAttributesMapperId, Transition[] transitions) {
 		return add(new SubFlowState(subFlowId, subFlowAttributesMapperId, transitions));
 	}
 
+	/**
+	 * @param editSubFlowIdSuffix
+	 * @param transition
+	 * @return
+	 */
 	public boolean addEditSubFlow(String editSubFlowIdSuffix, Transition transition) {
 		return addSubFlow(buildEditFlowId(editSubFlowIdSuffix), transition);
 	}
 
+	/**
+	 * @param subFlowIdSuffix
+	 * @param subFlowAttributesMapperId
+	 * @param subFlowDefaultFinishStateId
+	 * @return
+	 */
 	public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId,
 			String subFlowDefaultFinishStateId) {
 		return addSubFlow(buildEditFlowId(subFlowIdSuffix), subFlowAttributesMapperId, subFlowDefaultFinishStateId);
 	}
 
+	/**
+	 * @param subFlowIdSuffix
+	 * @param transitions
+	 * @return
+	 */
 	public boolean addEditSubFlow(String subFlowIdSuffix, Transition[] transitions) {
 		return addSubFlow(buildEditFlowId(subFlowIdSuffix), transitions);
 	}
 
+	/**
+	 * @param subFlowIdSuffix
+	 * @param subFlowAttributesMapperId
+	 * @param transitions
+	 * @return
+	 */
 	public boolean addEditSubFlow(String subFlowIdSuffix, String subFlowAttributesMapperId, Transition[] transitions) {
 		return addSubFlow(buildEditFlowId(subFlowIdSuffix), subFlowAttributesMapperId, transitions);
 	}
 
-	public static String buildEditFlowId(String suffix) {
+	/**
+	 * @param suffix
+	 * @return
+	 */
+	protected String buildEditFlowId(String suffix) {
 		return EDIT + StringUtils.capitalize(suffix);
 	}
 
+	/**
+	 * @param stateGroup
+	 * @return
+	 */
 	public boolean add(StateGroup stateGroup) {
 		return this.stateGroups.add(stateGroup);
 	}
 
+	/**
+	 * @return
+	 */
 	public Iterator statesIterator() {
 		return this.stateGroups.statesIterator();
 	}
 
+	/**
+	 * @param state
+	 * @throws NoSuchFlowStateException
+	 */
 	public void setStartState(TransitionableState state) throws NoSuchFlowStateException {
 		assertValidState(state);
 		if (logger.isDebugEnabled()) {
@@ -332,14 +445,27 @@ public class Flow implements FlowEventProcessor, Serializable {
 		this.startState = new StartState(state);
 	}
 
+	/**
+	 * @param startStateId
+	 * @throws NoSuchFlowStateException
+	 */
 	public void setStartState(String startStateId) throws NoSuchFlowStateException {
 		this.startState = new StartState((ViewState)getRequiredState(startStateId));
 	}
 
+	/**
+	 * @param state
+	 * @throws NoSuchFlowStateException
+	 */
 	private void assertValidState(AbstractState state) throws NoSuchFlowStateException {
 		getRequiredState(state.getId());
 	}
 
+	/**
+	 * @param stateId
+	 * @return
+	 * @throws NoSuchFlowStateException
+	 */
 	public AbstractState getRequiredState(String stateId) throws NoSuchFlowStateException {
 		AbstractState state = getState(stateId);
 		if (state == null) {
@@ -348,6 +474,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return state;
 	}
 
+	/**
+	 * @param stateId
+	 * @return
+	 */
 	public AbstractState getState(String stateId) {
 		Iterator it = stateGroups.statesIterator();
 		while (it.hasNext()) {
@@ -359,6 +489,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return null;
 	}
 
+	/**
+	 * @param stateId
+	 * @return
+	 * @throws NoSuchFlowStateException
+	 */
 	public TransitionableState getRequiredTransitionableState(String stateId) throws NoSuchFlowStateException {
 		AbstractState state = getRequiredState(stateId);
 		Assert.state(state.isTransitionable(), "This state '" + stateId + "' of flow '" + getId()
@@ -366,12 +501,19 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return (TransitionableState)state;
 	}
 
+	/**
+	 * @return
+	 * @throws IllegalStateException
+	 */
 	public StartState getStartState() throws IllegalStateException {
 		Assert.state(startState != null, "No state has been marked as the start state for this flow '" + getId()
 				+ "' -- programmer error?");
 		return startState;
 	}
 
+	/**
+	 * @return
+	 */
 	public int getViewStateCount() {
 		return new AbstractConstraint() {
 			public boolean test(Object o) {
@@ -380,6 +522,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 		}.findAll(stateGroups.statesIterator()).size();
 	}
 
+	/**
+	 * @return
+	 */
 	public int getActionStateCount() {
 		return new AbstractConstraint() {
 			public boolean test(Object o) {
@@ -388,6 +533,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 		}.findAll(stateGroups.statesIterator()).size();
 	}
 
+	/**
+	 * @return
+	 */
 	public int getSubFlowStateCount() {
 		return new AbstractConstraint() {
 			public boolean test(Object o) {
@@ -396,6 +544,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 		}.findAll(stateGroups.statesIterator()).size();
 	}
 
+	/**
+	 * @return
+	 */
 	public int getEndStateCount() {
 		return new AbstractConstraint() {
 			public boolean test(Object o) {
@@ -404,6 +555,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 		}.findAll(stateGroups.statesIterator()).size();
 	}
 
+	/*
+	 * see #FlowEventProcessor.start
+	 */
 	public ViewDescriptor start(FlowSessionExecutionStack sessionExecutionStack, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
 		if (logger.isDebugEnabled()) {
@@ -412,6 +566,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return getStartState().enter(this, sessionExecutionStack, request, response, inputAttributes);
 	}
 
+	/*
+	 * see #FlowEventProcessor.execute
+	 */
 	public ViewDescriptor execute(String eventId, String stateId, FlowSessionExecutionStack sessionExecutionStack,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
 		Assert.isTrue(sessionExecutionStack.isActive(),
@@ -423,6 +580,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return viewDescriptor;
 	}
 
+	/**
+	 * @param sessionExecutionStack
+	 * @return
+	 */
 	Flow getActiveFlow(FlowSessionExecutionStack sessionExecutionStack) {
 		String activeFlowId = sessionExecutionStack.getActiveFlowId();
 		if (getId().equals(activeFlowId)) {
@@ -433,213 +594,440 @@ public class Flow implements FlowEventProcessor, Serializable {
 		}
 	}
 
+	/**
+	 * @return
+	 */
 	FlowLifecycleListener getLifecycleListener() {
 		return flowLifecycleListener;
 	}
 
-	boolean isLifecycleListenerSet() {
+	/**
+	 * @return
+	 */
+	public boolean isLifecycleListenerSet() {
 		return flowLifecycleListener != null;
 	}
 
-	public FlowSession createSession() {
+	/**
+	 * @return
+	 */
+	protected FlowSession createSession() {
 		return new FlowSession(getId(), getStartState().getState().getId());
 	}
 
-	public FlowSession createSession(Map input) {
+	/**
+	 * @param input
+	 * @return
+	 */
+	protected FlowSession createSession(Map input) {
 		return new FlowSession(getId(), null, input);
 	}
 
 	// flow config factory methods
 
+	/**
+	 * @param stateId
+	 * @param transition
+	 * @return
+	 */
 	public ActionState createActionState(String stateId, Transition transition) {
 		return new ActionState(stateId, transition);
 	}
 
+	/**
+	 * @param stateId
+	 * @param actionBeanName
+	 * @param transition
+	 * @return
+	 */
 	public ActionState createActionState(String stateId, String actionBeanName, Transition transition) {
 		return new ActionState(stateId, actionBeanName, transition);
 	}
 
+	/**
+	 * @param stateId
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createActionState(String stateId, Transition[] transitions) {
 		return new ActionState(stateId, transitions);
 	}
 
+	/**
+	 * @param stateId
+	 * @param actionBeanName
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createActionState(String stateId, String actionBeanName, Transition[] transitions) {
 		return new ActionState(stateId, actionBeanName, transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ActionState createCreateState(String stateIdPrefix) {
 		return createCreateState(stateIdPrefix, onSuccessView(stateIdPrefix));
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
 	public ActionState createCreateState(String stateIdPrefix, Transition transition) {
 		return createCreateState(stateIdPrefix, new Transition[] { transition });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createCreateState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(create(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ActionState createGetState(String stateIdPrefix) {
 		return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
 	public ActionState createGetState(String stateIdPrefix, Transition transition) {
 		return createGetState(stateIdPrefix, new Transition[] { transition });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(get(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ActionState createPopulateState(String stateIdPrefix) {
 		return createPopulateState(stateIdPrefix, onSuccessView(stateIdPrefix));
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
 	public ActionState createPopulateState(String stateIdPrefix, Transition transition) {
 		return createPopulateState(stateIdPrefix, new Transition[] { transition });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createPopulateState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(populate(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ViewState createViewState(String stateIdPrefix) {
 		return createViewState(stateIdPrefix, new Transition[] { onBackEnd(), onCancelEnd(),
 				onSubmitBindAndValidate(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param viewName
+	 * @return
+	 */
 	public ViewState createViewState(String stateIdPrefix, String viewName) {
 		return createViewState(stateIdPrefix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
 				onSubmitBindAndValidate(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
 	public ViewState createViewState(String stateIdPrefix, Transition transition) {
 		return new ViewState(view(stateIdPrefix), transition);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param viewName
+	 * @param transition
+	 * @return
+	 */
 	public ViewState createViewState(String stateIdPrefix, String viewName, Transition transition) {
 		return new ViewState(view(stateIdPrefix), viewName, transition);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ViewState createViewState(String stateIdPrefix, Transition[] transitions) {
 		return new ViewState(view(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param viewName
+	 * @param transitions
+	 * @return
+	 */
 	public ViewState createViewState(String stateIdPrefix, String viewName, Transition[] transitions) {
 		return new ViewState(view(stateIdPrefix), viewName, transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ActionState createBindAndValidateState(String stateIdPrefix) {
 		return createBindAndValidateState(stateIdPrefix,
 				new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
 	public ActionState createBindAndValidateState(String stateIdPrefix, Transition transition) {
 		return createBindAndValidateState(stateIdPrefix, new Transition[] { transition });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createBindAndValidateState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(bindAndValidate(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ActionState createAddState(String stateIdPrefix) {
 		return createAddState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createAddState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(add(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param successStateId
+	 * @return
+	 */
 	public ActionState createAddState(String stateIdPrefix, String successStateId) {
 		return createAddState(stateIdPrefix, new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param addActionBeanName
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createAddState(String stateIdPrefix, String addActionBeanName, Transition[] transitions) {
 		return createActionState(add(stateIdPrefix), addActionBeanName, transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ActionState createSaveState(String stateIdPrefix) {
 		return createSaveState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param successStateId
+	 * @return
+	 */
 	public ActionState createSaveState(String stateIdPrefix, String successStateId) {
 		return createSaveState(stateIdPrefix,
 				new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createSaveState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(save(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param saveActionBeanName
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createSaveState(String stateIdPrefix, String saveActionBeanName, Transition[] transitions) {
 		return createActionState(add(stateIdPrefix), saveActionBeanName, transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ActionState createDeleteState(String stateIdPrefix) {
 		return createDeleteState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param successAndErrorStateId
+	 * @return
+	 */
 	public ActionState createDeleteState(String stateIdPrefix, String successAndErrorStateId) {
 		return createDeleteState(stateIdPrefix, new Transition[] { onSuccess(successAndErrorStateId),
 				onErrorView(successAndErrorStateId) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createDeleteState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(delete(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param deleteActionBeanName
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createDeleteState(String stateIdPrefix, String deleteActionBeanName, Transition[] transitions) {
 		return createActionState(delete(stateIdPrefix), deleteActionBeanName, transitions);
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public ActionState createValidateState(String stateIdPrefix) {
 		return createValidateState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
 	public ActionState createValidateState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(validate(stateIdPrefix), transitions);
 	}
 
+	/**
+	 * @return
+	 */
 	public EndState createFinishEndState() {
 		return new EndState(getDefaultSuccessEndStateId());
 	}
 
+	/**
+	 * @param viewName
+	 * @return
+	 */
 	public EndState createFinishEndState(String viewName) {
 		return new EndState(getDefaultSuccessEndStateId(), viewName);
 	}
 
+	/**
+	 * @return
+	 */
 	public AbstractState createBackEndState() {
 		return new EndState(getDefaultBackEndStateId());
 	}
 
+	/**
+	 * @param backViewName
+	 * @return
+	 */
 	public AbstractState createBackEndState(String backViewName) {
 		return new EndState(getDefaultBackEndStateId(), backViewName);
 	}
 
+	/**
+	 * @return
+	 */
 	public EndState createCancelEndState() {
 		return new EndState(getDefaultCancelEndStateId());
 	}
 
+	/**
+	 * @param cancelViewName
+	 * @return
+	 */
 	public EndState createCancelEndState(String cancelViewName) {
 		return new EndState(getDefaultCancelEndStateId(), cancelViewName);
 	}
 
+	/**
+	 *  
+	 */
 	protected void addDefaultEndStates() {
 		add(createCancelEndState());
 		add(createBackEndState());
 		add(createFinishEndState());
 	}
 
+	/**
+	 * @param viewName
+	 */
 	protected void addDefaultEndStates(String viewName) {
 		add(createCancelEndState(viewName));
 		add(createBackEndState(viewName));
 		add(createFinishEndState(viewName));
 	}
 
+	/**
+	 * @param eventId
+	 * @param newState
+	 * @return
+	 */
 	public Transition onEvent(String eventId, String newState) {
 		return new Transition(eventId, newState);
 	}
 
+	/**
+	 * @param successStateId
+	 * @return
+	 */
 	public Transition onSuccess(String successStateId) {
 		return onEvent(getSuccessEventId(), successStateId);
 	}
@@ -651,38 +1039,73 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return SUCCESS;
 	}
 
+	/**
+	 * @param getActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onSuccessGet(String getActionStateIdPrefix) {
 		return onSuccess(get(getActionStateIdPrefix));
 	}
 
+	/**
+	 * @param populateActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onSuccessPopulate(String populateActionStateIdPrefix) {
 		return onSuccess(populate(populateActionStateIdPrefix));
 	}
 
+	/**
+	 * @param editSubFlowStateIdPrefix
+	 * @return
+	 */
 	public Transition onSuccessEdit(String editSubFlowStateIdPrefix) {
 		return onSuccess(edit(editSubFlowStateIdPrefix));
 	}
 
+	/**
+	 * @param viewStateIdPrefix
+	 * @return
+	 */
 	public Transition onSuccessView(String viewStateIdPrefix) {
 		return onSuccess(view(viewStateIdPrefix));
 	}
 
+	/**
+	 * @param addActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onSuccessAdd(String addActionStateIdPrefix) {
 		return onSuccess(add(addActionStateIdPrefix));
 	}
 
+	/**
+	 * @param saveActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onSuccessSave(String saveActionStateIdPrefix) {
 		return onSuccess(save(saveActionStateIdPrefix));
 	}
 
+	/**
+	 * @return
+	 */
 	public Transition onSuccessEnd() {
 		return onSuccess(getDefaultSuccessEndStateId());
 	}
 
+	/**
+	 * @param editSubFlowStateIdPrefix
+	 * @return
+	 */
 	public Transition onEditEdit(String editSubFlowStateIdPrefix) {
 		return onEvent(EDIT, edit(editSubFlowStateIdPrefix));
 	}
 
+	/**
+	 * @param submitActionStateId
+	 * @return
+	 */
 	public Transition onSubmit(String submitActionStateId) {
 		return onEvent(getSubmitEventId(), submitActionStateId);
 	}
@@ -694,18 +1117,33 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return SUBMIT;
 	}
 
+	/**
+	 * @param bindAndValidateStateIdPrefix
+	 * @return
+	 */
 	public Transition onSubmitBindAndValidate(String bindAndValidateStateIdPrefix) {
 		return onSubmit(bindAndValidate(bindAndValidateStateIdPrefix));
 	}
 
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
 	public Transition onSubmitEdit(String stateIdPrefix) {
 		return onSubmit(edit(stateIdPrefix));
 	}
 
+	/**
+	 * @return
+	 */
 	public Transition onSubmitEnd() {
 		return onSubmit(getDefaultBackEndStateId());
 	}
 
+	/**
+	 * @param searchActionStateId
+	 * @return
+	 */
 	public Transition onSearch(String searchActionStateId) {
 		return onEvent(getSearchEventId(), searchActionStateId);
 	}
@@ -717,10 +1155,18 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return SEARCH;
 	}
 
+	/**
+	 * @param getSearchResultsActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onSearchGet(String getSearchResultsActionStateIdPrefix) {
 		return onSearch(get(getSearchResultsActionStateIdPrefix));
 	}
 
+	/**
+	 * @param backStateId
+	 * @return
+	 */
 	public Transition onBack(String backStateId) {
 		return onEvent(getBackEventId(), backStateId);
 	}
@@ -732,18 +1178,33 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return BACK;
 	}
 
+	/**
+	 * @param populateActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onBackPopulate(String populateActionStateIdPrefix) {
 		return onBack(populate(populateActionStateIdPrefix));
 	}
 
+	/**
+	 * @param viewActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onBackView(String viewActionStateIdPrefix) {
 		return onBack(view(viewActionStateIdPrefix));
 	}
 
+	/**
+	 * @param editSubFlowStateIdPrefix
+	 * @return
+	 */
 	public Transition onBackEdit(String editSubFlowStateIdPrefix) {
 		return onBack(edit(editSubFlowStateIdPrefix));
 	}
 
+	/**
+	 * @return
+	 */
 	public Transition onBackCancel() {
 		return onBack(getDefaultCancelEndStateId());
 	}
@@ -755,6 +1216,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return EndState.DEFAULT_CANCEL_STATE_ID;
 	}
 
+	/**
+	 * @return
+	 */
 	public Transition onBackEnd() {
 		return onBack(getDefaultBackEndStateId());
 	}
@@ -766,6 +1230,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return EndState.DEFAULT_BACK_STATE_ID;
 	}
 
+	/**
+	 * @param cancelStateId
+	 * @return
+	 */
 	public Transition onCancel(String cancelStateId) {
 		return onEvent(getCancelEventId(), cancelStateId);
 	}
@@ -777,10 +1245,17 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return CANCEL;
 	}
 
+	/**
+	 * @return
+	 */
 	public Transition onCancelEnd() {
 		return onCancel(getDefaultCancelEndStateId());
 	}
 
+	/**
+	 * @param finishStateId
+	 * @return
+	 */
 	public Transition onFinish(String finishStateId) {
 		return onEvent(getFinishEventId(), finishStateId);
 	}
@@ -792,6 +1267,9 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return FINISH;
 	}
 
+	/**
+	 * @return
+	 */
 	public Transition onFinishEnd() {
 		return onFinish(getDefaultSuccessEndStateId());
 	}
@@ -803,22 +1281,42 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return EndState.DEFAULT_FINISH_STATE_ID;
 	}
 
+	/**
+	 * @param getActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onFinishGet(String getActionStateIdPrefix) {
 		return onFinish(get(getActionStateIdPrefix));
 	}
 
+	/**
+	 * @param populateActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onFinishPopulate(String populateActionStateIdPrefix) {
 		return onFinish(populate(populateActionStateIdPrefix));
 	}
 
+	/**
+	 * @param saveActionStateIdPrefix
+	 * @return
+	 */
 	public Transition onFinishSave(String saveActionStateIdPrefix) {
 		return onFinish(save(saveActionStateIdPrefix));
 	}
 
+	/**
+	 * @param editSubFlowStateIdPrefix
+	 * @return
+	 */
 	public Transition onFinishEdit(String editSubFlowStateIdPrefix) {
 		return onFinish(edit(editSubFlowStateIdPrefix));
 	}
 
+	/**
+	 * @param errorStateIdPrefix
+	 * @return
+	 */
 	public Transition onError(String errorStateIdPrefix) {
 		return onEvent(getErrorEventId(), errorStateIdPrefix);
 	}
@@ -830,58 +1328,114 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return ERROR;
 	}
 
+	/**
+	 * @param viewStateIdPrefix
+	 * @return
+	 */
 	public Transition onErrorView(String viewStateIdPrefix) {
 		return onError(view(viewStateIdPrefix));
 	}
 
+	/**
+	 * @param createActionStateIdPrefix
+	 * @return
+	 */
 	public String create(String createActionStateIdPrefix) {
 		return buildStateId(createActionStateIdPrefix, CREATE);
 	}
 
+	/**
+	 * @param getActionStateIdPrefix
+	 * @return
+	 */
 	public String get(String getActionStateIdPrefix) {
 		return buildStateId(getActionStateIdPrefix, GET);
 	}
 
+	/**
+	 * @param populateFormActionStateIdPrefix
+	 * @return
+	 */
 	public String populate(String populateFormActionStateIdPrefix) {
 		return buildStateId(populateFormActionStateIdPrefix, POPULATE);
 	}
 
+	/**
+	 * @param viewActionStateIdPrefix
+	 * @return
+	 */
 	public String view(String viewActionStateIdPrefix) {
 		return buildStateId(viewActionStateIdPrefix, VIEW);
 	}
 
+	/**
+	 * @param addActionStateIdPrefix
+	 * @return
+	 */
 	public String add(String addActionStateIdPrefix) {
 		return buildStateId(addActionStateIdPrefix, ADD);
 	}
 
+	/**
+	 * @param saveActionStateIdPrefix
+	 * @return
+	 */
 	public String save(String saveActionStateIdPrefix) {
 		return buildStateId(saveActionStateIdPrefix, SAVE);
 	}
 
+	/**
+	 * @param bindAndValidateStateIdPrefix
+	 * @return
+	 */
 	public String bindAndValidate(String bindAndValidateStateIdPrefix) {
 		return buildStateId(bindAndValidateStateIdPrefix, BIND_AND_VALIDATE);
 	}
 
+	/**
+	 * @param validateActionStateIdPrefix
+	 * @return
+	 */
 	public String validate(String validateActionStateIdPrefix) {
 		return buildStateId(validateActionStateIdPrefix, VALIDATE);
 	}
 
+	/**
+	 * @param deleteActionStateIdPrefix
+	 * @return
+	 */
 	public String delete(String deleteActionStateIdPrefix) {
 		return buildStateId(deleteActionStateIdPrefix, DELETE);
 	}
 
+	/**
+	 * @param editActionStateIdPrefix
+	 * @return
+	 */
 	public String edit(String editActionStateIdPrefix) {
 		return buildStateId(editActionStateIdPrefix, EDIT);
 	}
 
-	public String buildStateId(String stateIdPrefix, String stateIdSuffix) {
+	/**
+	 * @param stateIdPrefix
+	 * @param stateIdSuffix
+	 * @return
+	 */
+	protected String buildStateId(String stateIdPrefix, String stateIdSuffix) {
 		return stateIdPrefix + "." + stateIdSuffix;
 	}
 
+	/**
+	 * @param attributesMapperBeanNamePrefix
+	 * @return
+	 */
 	public String attributesMapper(String attributesMapperBeanNamePrefix) {
 		return attributesMapperBeanNamePrefix + ATTRIBUTES_MAPPER_ID_SUFFIX;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getDefaultFlowAttributesMapperId() {
 		return attributesMapper(getId());
 	}
