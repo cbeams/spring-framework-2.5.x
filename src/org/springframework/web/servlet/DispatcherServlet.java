@@ -17,6 +17,7 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -26,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -35,19 +37,18 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
-import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
-import org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -202,9 +203,37 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
 	/**
+	 * Name of the class path resource (relative to the DispatcherServlet class)
+	 * that defines DispatcherServlet's default strategy names.
+	 */
+	private static final String DEFAULT_STRATEGIES_PATH = "DispatcherServlet.properties";
+
+
+	/**
 	 * Additional logger to use when no mapped handler is found for a request.
 	 */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
+
+	private static final Properties defaultStrategies = new Properties();
+
+	static {
+		// Load default strategy implementations from properties file.
+		// This is currently strictly internal and not meant to be customized
+		// by application developers.
+		try {
+			ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, DispatcherServlet.class);
+			InputStream is = resource.getInputStream();
+			try {
+				defaultStrategies.load(is);
+			}
+			finally {
+				is.close();
+			}
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Could not load 'DispatcherServlet.properties': " + ex.getMessage());
+		}
+	}
 
 
 	/** Perform cleanup of request attributes after include request? */
@@ -345,7 +374,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
-			this.localeResolver = new AcceptHeaderLocaleResolver();
+			this.localeResolver = (LocaleResolver) getDefaultStrategy(LocaleResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
 						"': using default [" + this.localeResolver + "]");
@@ -367,7 +396,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
-			this.themeResolver = new FixedThemeResolver();
+			this.themeResolver = (ThemeResolver) getDefaultStrategy(ThemeResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("Unable to locate ThemeResolver with name '" + THEME_RESOLVER_BEAN_NAME +
 						"': using default [" + this.themeResolver + "]");
@@ -405,9 +434,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings == null) {
-			BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
-			hm.setApplicationContext(getWebApplicationContext());
-			this.handlerMappings = Collections.singletonList(hm);
+			this.handlerMappings = getDefaultStrategies(HandlerMapping.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("No HandlerMappings found in servlet '" + getServletName() + "': using default");
 			}
@@ -432,9 +459,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		else {
 			// Ensure we have at least some HandlerAdapters, by registering
 			// default HandlerAdapters if no other adapters are found.
-			this.handlerAdapters = new ArrayList(2);
-			this.handlerAdapters.add(new SimpleControllerHandlerAdapter());
-			this.handlerAdapters.add(new ThrowawayControllerHandlerAdapter());
+			this.handlerAdapters = getDefaultStrategies(HandlerAdapter.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using default");
 			}
@@ -463,7 +488,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Ignore, no HandlerExceptionResolver is fine too.
-				this.handlerExceptionResolvers = Collections.EMPTY_LIST;
+				this.handlerExceptionResolvers = getDefaultStrategies(HandlerExceptionResolver.class);
 			}
 		}
 	}
@@ -498,12 +523,67 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Ensure we have at least one ViewResolver, by registering
 		// a default ViewResolver if no other resolvers are found.
 		if (this.viewResolvers == null) {
-			InternalResourceViewResolver vr = new InternalResourceViewResolver();
-			vr.setApplicationContext(getWebApplicationContext());
-			this.viewResolvers = Collections.singletonList(vr);
+			this.viewResolvers = getDefaultStrategies(ViewResolver.class);
 			if (logger.isInfoEnabled()) {
 				logger.info("No ViewResolvers found in servlet '" + getServletName() + "': using default");
 			}
+		}
+	}
+
+
+	/**
+	 * Return the default strategy object for the given strategy interface.
+	 * <p>Default implementation delegates to <code>getDefaultStrategies</code>,
+	 * expecting a single object in the list.
+	 * @param strategyInterface the strategy interface
+	 * @return the corresponding strategy object
+	 * @throws BeansException if initialization failed
+	 * @see #getDefaultStrategies
+	 */
+	protected Object getDefaultStrategy(Class strategyInterface) throws BeansException {
+		List strategies = getDefaultStrategies(strategyInterface);
+		if (strategies.size() != 1) {
+			throw new BeanInitializationException(
+					"DispatcherServlet needs exactly 1 strategy for interface [" + strategyInterface.getName() + "]");
+		}
+		return strategies.get(0);
+	}
+
+	/**
+	 * Create a List of default strategy objects for the given strategy interface.
+	 * <p>The default implementation uses the "DispatcherServlet.properties" file
+	 * (in the same package as the DispatcherServlet class) to determine the class names.
+	 * It instantiates the strategy objects and satisifies ApplicationContextAware
+	 * if necessary.
+	 * @param strategyInterface the strategy interface
+	 * @return the List of corresponding strategy objects
+	 * @throws BeansException if initialization failed
+	 */
+	protected List getDefaultStrategies(Class strategyInterface) throws BeansException {
+		String key = strategyInterface.getName();
+		try {
+			List strategies = null;
+			String value = defaultStrategies.getProperty(key);
+			if (value != null) {
+				String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
+				strategies = new ArrayList(classNames.length);
+				for (int i = 0; i < classNames.length; i++) {
+					Class clazz = Class.forName(classNames[i], true, getClass().getClassLoader());
+					Object strategy = BeanUtils.instantiateClass(clazz);
+					if (strategy instanceof ApplicationContextAware) {
+						((ApplicationContextAware) strategy).setApplicationContext(getWebApplicationContext());
+					}
+					strategies.add(strategy);
+				}
+			}
+			else {
+				strategies = Collections.EMPTY_LIST;
+			}
+			return strategies;
+		}
+		catch (ClassNotFoundException ex) {
+			throw new BeanInitializationException(
+					"Could not find DispatcherServlet's default strategy class for interface [" + key + "]", ex);
 		}
 	}
 
