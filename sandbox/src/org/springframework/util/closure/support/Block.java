@@ -26,29 +26,26 @@ package org.springframework.util.closure.support;
  */
 public abstract class Block extends AbstractClosure {
 
-    /**
-     * Method to override in block subclasses that return a result: this method
-     * is intended encapsulate the block's processing.
-     * 
-     * @param argument
-     *            The argument to process
-     */
-    public Object call(Object argument) {
-        handle(argument);
-        return null;
-    }
+	/**
+	 * Method to override in block subclasses that return a result: this method
+	 * is intended encapsulate the block's processing.
+	 * 
+	 * @param argument The argument to process
+	 */
+	public Object call(Object argument) {
+		handle(argument);
+		return null;
+	}
 
-    /**
-     * Method to override in block subclasses that return no result: this method
-     * is intended encapsulate the block's processing.
-     * 
-     * @param argument
-     *            The argument to process
-     */
-    protected void handle(Object argument) {
-        throw new UnsupportedOperationException(
-                "You must override call(arg) for processing an arg with a return value, "
-                        + "or handle(arg) for processing a single argument with no return result.");
-    }
+	/**
+	 * Method to override in block subclasses that return no result: this method
+	 * is intended encapsulate the block's processing.
+	 * 
+	 * @param argument The argument to process
+	 */
+	protected void handle(Object argument) {
+		throw new IllegalStateException("You must override call(arg) for processing an arg with a return value, "
+				+ "or handle(arg) for processing a single argument with no return result.");
+	}
 
 }

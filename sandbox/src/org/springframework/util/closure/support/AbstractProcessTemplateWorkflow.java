@@ -10,12 +10,22 @@ import org.springframework.util.closure.Closure;
  */
 public abstract class AbstractProcessTemplateWorkflow extends AbstractProcessTemplate {
 
+	protected AbstractProcessTemplateWorkflow() {
+		super();
+	}
+
+	protected AbstractProcessTemplateWorkflow(boolean runOnce) {
+		super(runOnce);
+	}
+
 	public final void run(Closure templateCallback) {
 		reset();
+		setRunning();
 		doSetup();
 		while (processing()) {
 			templateCallback.call(doWork());
 		}
+		setCompleted();
 		doCleanup();
 	}
 

@@ -23,14 +23,23 @@ import java.util.Iterator;
  * @author Keith Donald
  */
 public class IteratorProcessTemplate extends AbstractProcessTemplateWorkflow {
+	private Collection collection;
+
 	private Iterator it;
 
 	public IteratorProcessTemplate(Collection collection) {
-		this(collection.iterator());
+		this.collection = collection;
 	}
 
 	public IteratorProcessTemplate(Iterator it) {
+		super(true);
 		this.it = it;
+	}
+
+	protected void doSetup() {
+		if (this.collection != null) {
+			this.it = this.collection.iterator();
+		}
 	}
 
 	protected boolean hasMoreWork() {

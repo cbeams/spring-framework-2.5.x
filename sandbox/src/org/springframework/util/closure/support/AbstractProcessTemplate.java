@@ -21,20 +21,25 @@ import org.springframework.util.closure.ProcessTemplate;
 
 /**
  * Base superclass for process templates.
- * <p>
  * @author Keith Donald
  */
 public abstract class AbstractProcessTemplate implements ProcessTemplate {
 
 	private ProcessTemplate wrappedTemplate;
 
-	private volatile boolean stopped;
+	private boolean runOnce = false;
+
+	private volatile ProcessStatus status = ProcessStatus.CREATED;
 
 	protected AbstractProcessTemplate() {
 
 	}
 
-	protected AbstractProcessTemplate(ProcessTemplate wrappedTemplate) {
+	protected AbstractProcessTemplate(boolean runOnce) {
+		this.runOnce = runOnce;
+	}
+
+	private AbstractProcessTemplate(ProcessTemplate wrappedTemplate) {
 		this.wrappedTemplate = wrappedTemplate;
 	}
 
@@ -43,7 +48,7 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 	}
 
 	public boolean allTrue(Constraint constraint) {
-		TemplateController controller = new TemplateController(this, constraint);
+		WhileTrueController controller = new WhileTrueController(this, constraint);
 		run(controller);
 		return controller.allTrue();
 	}
@@ -71,60 +76,96 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 	}
 
 	public boolean isStopped() {
-		return this.stopped;
+		return this.status == ProcessStatus.STOPPED;
+	}
+
+	public boolean isFinished() {
+		return this.status == ProcessStatus.COMPLETED;
+	}
+
+	public boolean isRunning() {
+		return this.status == ProcessStatus.RUNNING;
 	}
 
 	public void stop() throws IllegalStateException {
 		if (this.wrappedTemplate != null) {
 			wrappedTemplate.stop();
 		}
-		this.stopped = true;
+		this.status = ProcessStatus.STOPPED;
 	}
 
 	public void runUntil(Closure templateCallback, final Constraint constraint) {
-		run(new TemplateController(this, constraint, templateCallback));
+		run(new UntilTrueController(this, templateCallback, constraint));
 	}
 
 	protected void reset() {
-		this.stopped = false;
+		if (this.status == ProcessStatus.STOPPED || this.status == ProcessStatus.COMPLETED) {
+			if (this.runOnce) {
+				throw new UnsupportedOperationException("This process template can only safely execute once; "
+						+ "instantiate a new instance per request");
+			}
+			else {
+				this.status = ProcessStatus.RESET;
+			}
+		}
+	}
+
+	protected void setRunning() {
+		this.status = ProcessStatus.RUNNING;
+	}
+
+	protected void setCompleted() {
+		this.status = ProcessStatus.COMPLETED;
 	}
 
 	public abstract void run(Closure templateCallback);
 
-	private static class TemplateController extends Block {
+	private static class WhileTrueController extends Block {
 		private ProcessTemplate template;
 
 		private Constraint constraint;
 
-		private Closure templateCallback;
-
 		private boolean allTrue = true;
 
-		public TemplateController(ProcessTemplate template, Constraint constraint) {
+		public WhileTrueController(ProcessTemplate template, Constraint constraint) {
 			this.template = template;
 			this.constraint = constraint;
-		}
-
-		public TemplateController(ProcessTemplate template, Constraint constraint, Closure templateCallback) {
-			this.template = template;
-			this.constraint = constraint;
-			this.templateCallback = templateCallback;
 		}
 
 		protected void handle(Object o) {
 			if (!this.constraint.test(o)) {
-				allTrue = false;
+				this.allTrue = false;
 				this.template.stop();
-			}
-			else {
-				if (this.templateCallback != null) {
-					this.templateCallback.call(o);
-				}
 			}
 		}
 
 		public boolean allTrue() {
 			return allTrue;
+		}
+	}
+
+	private static class UntilTrueController extends Block {
+		private ProcessTemplate template;
+
+		private Closure templateCallback;
+
+		private Constraint constraint;
+
+		private boolean allTrue = true;
+
+		public UntilTrueController(ProcessTemplate template, Closure templateCallback, Constraint constraint) {
+			this.template = template;
+			this.templateCallback = templateCallback;
+			this.constraint = constraint;
+		}
+
+		protected void handle(Object o) {
+			if (this.constraint.test(o)) {
+				this.template.stop();
+			}
+			else {
+				this.templateCallback.call(o);
+			}
 		}
 	}
 
