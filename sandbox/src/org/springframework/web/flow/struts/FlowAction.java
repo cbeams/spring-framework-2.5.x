@@ -31,7 +31,7 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowExecutionStack;
-import org.springframework.web.flow.NoSuchFlowSessionException;
+import org.springframework.web.flow.NoSuchFlowExecutionException;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.struts.BindingActionForm;
@@ -270,12 +270,12 @@ public class FlowAction extends TemplateAction {
 	}
 
 	protected FlowExecution getRequiredFlowExecution(String flowSessionId, HttpServletRequest request)
-			throws NoSuchFlowSessionException {
+			throws NoSuchFlowExecutionException {
 		try {
 			return (FlowExecution)getRequiredSessionAttribute(request, flowSessionId);
 		}
 		catch (IllegalStateException e) {
-			throw new NoSuchFlowSessionException(flowSessionId, e);
+			throw new NoSuchFlowExecutionException(flowSessionId, e);
 		}
 	}
 

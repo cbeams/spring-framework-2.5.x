@@ -15,21 +15,20 @@
  */
 package org.springframework.web.flow;
 
-
 /**
  * Thrown when no flow session exists by the specified
  * <code>flowSessionId</code>.
  * @author Keith Donald
  */
-public class NoSuchFlowSessionException extends FlowException {
-	private String flowSessionId;
+public class NoSuchFlowExecutionException extends RuntimeException {
+	private String flowExecutionId;
 
-	public NoSuchFlowSessionException(String flowSessionId, Throwable cause) {
+	public NoSuchFlowExecutionException(String flowExecutionId, Throwable cause) {
 		super(cause);
-		this.flowSessionId = flowSessionId;
+		this.flowExecutionId = flowExecutionId;
 	}
 
 	public String getMessage() {
-		return "No flow session could be found with id '" + flowSessionId + "' - perhaps the flow has ended?";
+		return "No executing flow could be found with id '" + flowExecutionId + "' - perhaps the flow has ended?";
 	}
 }

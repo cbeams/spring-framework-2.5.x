@@ -4,6 +4,7 @@
 package org.springframework.web.flow;
 
 /**
+ * Thrown if the flow subsystem cannot execute a state transition.
  * @author Keith Donald
  */
 public class CannotExecuteStateTransitionException extends FlowNavigationException {

@@ -4,19 +4,18 @@
 package org.springframework.web.flow.config;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.FlowException;
 
 /**
  * @author Keith Donald
  */
-public class FlowServiceLookupException extends FlowException {
+public class FlowServiceLookupException extends RuntimeException {
 
 	private String serviceId;
 
 	private Class serviceImplementationClass;
 
 	/**
-	 *  
+	 * 
 	 */
 	public FlowServiceLookupException(String serviceId) {
 		super();
@@ -24,7 +23,7 @@ public class FlowServiceLookupException extends FlowException {
 	}
 
 	/**
-	 *  
+	 * 
 	 */
 	public FlowServiceLookupException(String serviceId, Throwable cause) {
 		super(cause);
@@ -32,7 +31,7 @@ public class FlowServiceLookupException extends FlowException {
 	}
 
 	/**
-	 *  
+	 * 
 	 */
 	public FlowServiceLookupException(String serviceId, String message, Throwable cause) {
 		super(message, cause);
@@ -40,7 +39,7 @@ public class FlowServiceLookupException extends FlowException {
 	}
 
 	/**
-	 *  
+	 * 
 	 */
 	public FlowServiceLookupException(Class serviceImplementationClass) {
 		super();
@@ -48,7 +47,7 @@ public class FlowServiceLookupException extends FlowException {
 	}
 
 	/**
-	 *  
+	 * 
 	 */
 	public FlowServiceLookupException(Class serviceImplementationClass, Throwable cause) {
 		super(cause);
@@ -56,7 +55,7 @@ public class FlowServiceLookupException extends FlowException {
 	}
 
 	/**
-	 *  
+	 * 
 	 */
 	public FlowServiceLookupException(Class serviceImplementationClass, String message, Throwable cause) {
 		super(message, cause);

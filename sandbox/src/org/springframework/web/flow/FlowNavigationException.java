@@ -18,7 +18,7 @@ package org.springframework.web.flow;
 /**
  * @author Keith Donald
  */
-public abstract class FlowNavigationException extends FlowException {
+public abstract class FlowNavigationException extends RuntimeException {
 
 	private Flow flow;
 
