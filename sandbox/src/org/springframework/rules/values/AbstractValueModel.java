@@ -29,7 +29,7 @@ import org.springframework.util.DefaultObjectStyler;
  * @author Keith Donald
  */
 public abstract class AbstractValueModel implements ValueModel {
-    protected Log logger = LogFactory.getLog(ValueModel.class);
+    protected Log logger = LogFactory.getLog(getClass());
 
     private List listeners = new ArrayList();
 

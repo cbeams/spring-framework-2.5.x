@@ -28,7 +28,6 @@ import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.reporting.BeanValidationResultsCollector;
 import org.springframework.rules.reporting.PropertyResults;
 import org.springframework.rules.reporting.TypeResolvable;
-import org.springframework.util.Assert;
 
 /**
  * @author Keith Donald
@@ -120,7 +119,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
                     domainObjectProperty, editor);
         }
         return new ValidatingFormValueModel(domainObjectProperty,
-                formValueModel);
+                formValueModel, getValidationRule(domainObjectProperty));
     }
 
     private ValueModel installTypeConverter(ValueModel formValueModel,
@@ -139,11 +138,16 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
     }
 
-    protected void postProcessFormValueModel(String domainObjectProperty,
-            ValueModel formValueModel) {
-        Assert
-                .notNull(rulesSource,
-                        "No rules source has been configured; please set a valid reference.");
+    protected void postProcessNewFormValueModel(String domainObjectProperty,
+            ValueModel valueModel) {
+        // trigger validation to catch initial form errors
+        if (valueModel instanceof ValidatingFormValueModel) {
+            ((ValidatingFormValueModel)valueModel).validate();
+        }
+    }
+
+    protected BeanPropertyExpression getValidationRule(
+            String domainObjectProperty) {
         BeanPropertyExpression constraint;
         //@TODO if form object changes, rules aren't updated...introduces
         // subtle bugs...
@@ -153,44 +157,80 @@ public class ValidatingFormModel extends DefaultFormModel implements
                     .getRules(domainObjectProperty);
         }
         else {
+            if (rulesSource == null) {
+                logger
+                        .info("No rules source has been configured; "
+                                + "please set a valid reference to enable rules-based validation.");
+            }
             constraint = rulesSource.getRules(getFormObjectClass(),
                     domainObjectProperty);
         }
-        if (constraint != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Creating validator for form property '"
-                        + domainObjectProperty + "'");
-            }
-            FormValueModelValidator validator = new FormValueModelValidator(
-                    constraint, formValueModel);
-            formValueModel.addValueListener(validator);
-            validator.validate();
-        }
+        return constraint;
     }
 
     private class ValidatingFormValueModel extends ValueModelWrapper {
         private BeanPropertyExpression setterConstraint;
 
+        private BeanPropertyExpression validationRule;
+
+        private boolean valueIsSetting;
+
         public ValidatingFormValueModel(String domainObjectProperty,
-                ValueModel model) {
+                ValueModel model, BeanPropertyExpression validationRule) {
             super(model);
             this.setterConstraint = new ValueSetterConstraint(
                     getWrappedModel(), domainObjectProperty);
+            this.validationRule = validationRule;
+            addValueListener(new ValueListener() {
+                public void valueChanged() {
+                    // validatee any changes that didn't occur as the result
+                    // of an explicit set(value) call...maybe value was updated
+                    // underneath via another mechanism... this is kinda
+                    // tricky...
+                    if (!valueIsSetting) {
+                        validate();
+                    }
+                }
+            });
         }
 
         public void set(Object value) {
+            valueIsSetting = true;
             if (!setterConstraint.test(value)) {
                 PropertyResults results = new PropertyResults(setterConstraint
                         .getPropertyName(), value, setterConstraint);
                 constraintViolated(setterConstraint, this, results);
-            } else {
+            }
+            else {
                 constraintSatisfied(setterConstraint, this);
+                // we validate after a set attempt
+                validate();
+            }
+            valueIsSetting = false;
+        }
+
+        public void validate() {
+            if (validationRule == null) { return; }
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Validating domain object property '"
+                        + validationRule.getPropertyName() + "']");
+            }
+            BeanValidationResultsCollector collector = new BeanValidationResultsCollector(
+                    ValidatingFormModel.this);
+            PropertyResults results = (PropertyResults)collector
+                    .collectPropertyResults(validationRule);
+            if (results == null) {
+                constraintSatisfied(validationRule, this);
+            }
+            else {
+                constraintViolated(validationRule, this, results);
             }
         }
+
     }
 
-    private static class ValueSetterConstraint implements
-            BeanPropertyExpression, TypeResolvable {
+    private class ValueSetterConstraint implements BeanPropertyExpression,
+            TypeResolvable {
         private ValueModel valueModel;
 
         private String property;
@@ -211,57 +251,28 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
 
         public boolean test(Object value) {
+            //@TODO this error handling needs work - message source resolvable?
             try {
                 valueModel.set(value);
                 return true;
             }
             catch (NullPointerException e) {
+                logger.warn("Null pointer exception occured setting value", e);
                 type = "required";
                 return false;
             }
             catch (IllegalArgumentException e) {
+                logger.warn("Illegal argument exception occured setting value");
                 type = "typeMismatch";
                 return false;
             }
             catch (Exception e) {
+                logger.warn("Exception occured setting value", e);
                 type = "unknown";
                 return false;
             }
         }
     }
-
-    private class FormValueModelValidator implements ValueListener {
-        private BeanPropertyExpression constraint;
-
-        private ValueModel formValueModel;
-
-        public FormValueModelValidator(BeanPropertyExpression constraint,
-                ValueModel formValueModel) {
-            this.constraint = constraint;
-            this.formValueModel = formValueModel;
-        }
-
-        public void valueChanged() {
-            validate();
-        }
-
-        public void validate() {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[Validating domain object property '"
-                        + constraint.getPropertyName() + "']");
-            }
-            BeanValidationResultsCollector collector = new BeanValidationResultsCollector(
-                    ValidatingFormModel.this);
-            PropertyResults results = (PropertyResults)collector
-                    .collectPropertyResults(constraint);
-            if (results == null) {
-                constraintSatisfied(constraint, formValueModel);
-            }
-            else {
-                constraintViolated(constraint, formValueModel, results);
-            }
-        }
-    };
 
     protected void constraintSatisfied(BeanPropertyExpression exp,
             ValueModel formValueModel) {

@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  */
 public class ValuePropertyChangeListenerMediator implements
         PropertyChangeListener, ValueListener {
-    private Log logger = LogFactory.getLog(ValueModel.class);
+    private Log logger = LogFactory.getLog(getClass());
 
     private Object domainObject;
 
@@ -67,7 +67,7 @@ public class ValuePropertyChangeListenerMediator implements
                 logger
                         .debug("[Subscribing to domain object for property changes.]");
             }
-            getPublisher().addPropertyChangeListener(this, propertyName);
+            getPublisher().addPropertyChangeListener(propertyName, this);
         }
     }
 
@@ -77,7 +77,7 @@ public class ValuePropertyChangeListenerMediator implements
                 logger
                         .debug("[Unsubscribing to domain object for property changes.]");
             }
-            getPublisher().removePropertyChangeListener(this, propertyName);
+            getPublisher().removePropertyChangeListener(propertyName, this);
         }
     }
 

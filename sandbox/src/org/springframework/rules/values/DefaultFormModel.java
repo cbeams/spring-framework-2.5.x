@@ -26,8 +26,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public class DefaultFormModel implements MutableFormModel {
-    protected static final Log logger = LogFactory
-            .getLog(DefaultFormModel.class);
+    protected final Log logger = LogFactory.getLog(getClass());
 
     private MutableAspectAccessStrategy domainObjectAccessStrategy;
 
@@ -144,10 +143,12 @@ public class DefaultFormModel implements MutableFormModel {
                 formValueModel);
         formValueModels.put(domainObjectProperty, formValueModel);
         if (logger.isDebugEnabled()) {
-            logger.debug("Registering '" + domainObjectProperty
-                    + "' form property, property value model=" + formValueModel);
+            logger
+                    .debug("Registering '" + domainObjectProperty
+                            + "' form property, property value model="
+                            + formValueModel);
         }
-        postProcessFormValueModel(domainObjectProperty, formValueModel);
+        postProcessNewFormValueModel(domainObjectProperty, formValueModel);
         return formValueModel;
     }
 
@@ -156,7 +157,7 @@ public class DefaultFormModel implements MutableFormModel {
         return formValueModel;
     }
 
-    protected void postProcessFormValueModel(String domainObjectProperty,
+    protected void postProcessNewFormValueModel(String domainObjectProperty,
             ValueModel formValueModel) {
 
     }
