@@ -48,6 +48,7 @@ public class ActionExecutionException extends NestedRuntimeException {
 	public ActionExecutionException(ActionState.NamedAction action, Throwable cause) {
 		super("Executing action '" + action + "' in state '" + action.getState().getId() + "' of flow '"
 				+ action.getState().getFlow().getId() + "' threw an unrecoverable exception", cause);
+        this.action = action;
 	}
 
 	/**
