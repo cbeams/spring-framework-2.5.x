@@ -154,8 +154,8 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	public static void applyTransactionTimeout(
 			Query query, PersistenceManagerFactory pmf, JdoDialect jdoDialect) throws JDOException {
-		PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
-				TransactionSynchronizationManager.getResource(pmf);
+		PersistenceManagerHolder pmHolder =
+		    (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
 		if (pmHolder != null && pmHolder.hasTimeout()) {
 			jdoDialect.applyQueryTimeout(query, pmHolder.getTimeToLiveInSeconds());
 		}
@@ -206,9 +206,17 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @param pmf PersistenceManagerFactory that the PersistenceManager was created with
 	 */
 	public static void closePersistenceManagerIfNecessary(PersistenceManager pm, PersistenceManagerFactory pmf) {
-		if (pm == null || TransactionSynchronizationManager.hasResource(pmf)) {
+		if (pm == null) {
 			return;
 		}
+
+		PersistenceManagerHolder pmHolder =
+		    (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
+		if (pmHolder != null && pm == pmHolder.getPersistenceManager()) {
+			// It's the transactional PersistenceManager: Don't close it.
+			return;
+		}
+
 		logger.debug("Closing JDO persistence manager");
 		try {
 			pm.close();
@@ -244,8 +252,9 @@ public abstract class PersistenceManagerFactoryUtils {
 
 		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
-			closePersistenceManagerIfNecessary(this.persistenceManagerHolder.getPersistenceManager(),
-			                                   this.persistenceManagerFactory);
+			closePersistenceManagerIfNecessary(
+			    this.persistenceManagerHolder.getPersistenceManager(),
+			    this.persistenceManagerFactory);
 		}
 	}
 

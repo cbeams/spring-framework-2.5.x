@@ -166,10 +166,13 @@ public abstract class DataSourceUtils {
 	 */
 	protected static Connection doGetConnection(DataSource ds, boolean allowSynchronization)
 			throws SQLException {
+
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
 		if (conHolder != null) {
 			return conHolder.getConnection();
 		}
+
+		logger.debug("Opening JDBC connection");
 		Connection con = ds.getConnection();
 		if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JDBC connection");
@@ -291,12 +294,20 @@ public abstract class DataSourceUtils {
 	 * @see TransactionAwareDataSourceProxy
 	 */
 	protected static void doCloseConnectionIfNecessary(Connection con, DataSource ds) throws SQLException {
-		if (con == null || TransactionSynchronizationManager.hasResource(ds)) {
+		if (con == null) {
 			return;
 		}
+
+		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(ds);
+		if (conHolder != null && con == conHolder.getConnection()) {
+			// It's the transactional Connection: Don't close it.
+			return;
+		}
+		
 		// Leave the Connection open only if the DataSource is our
 		// special data source, and it wants the Connection left open.
 		if (!(ds instanceof SmartDataSource) || ((SmartDataSource) ds).shouldClose(con)) {
+			logger.debug("Closing JDBC connection");
 			con.close();
 		}
 	}

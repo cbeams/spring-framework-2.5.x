@@ -517,11 +517,14 @@ public abstract class SessionFactoryUtils {
 		if (holderMap == null || !holderMap.containsKey(sessionFactory)) {
 			throw new IllegalStateException("Deferred close not active for SessionFactory [" + sessionFactory + "]");
 		}
+
 		logger.debug("Processing deferred close of Hibernate sessions");
 		Set sessions = (Set) holderMap.remove(sessionFactory);
 		for (Iterator it = sessions.iterator(); it.hasNext();) {
 			doClose((Session) it.next());
+
 		}
+		
 		if (holderMap.isEmpty()) {
 			deferredCloseHolder.set(null);
 		}
@@ -537,11 +540,14 @@ public abstract class SessionFactoryUtils {
 		if (session == null) {
 			return;
 		}
+
 		SessionHolder sessionHolder =
 		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && sessionHolder.containsSession(session)) {
+			// It's a transactional Session: Don't close it.
 			return;
 		}
+
 		closeSessionOrRegisterDeferredClose(session, sessionFactory);
 	}
 
@@ -609,6 +615,7 @@ public abstract class SessionFactoryUtils {
 		private SpringSessionSynchronization(
 				SessionHolder sessionHolder, SessionFactory sessionFactory,
 				SQLExceptionTranslator jdbcExceptionTranslator, boolean newSession) {
+
 			this.sessionHolder = sessionHolder;
 			this.sessionFactory = sessionFactory;
 			this.jdbcExceptionTranslator = jdbcExceptionTranslator;

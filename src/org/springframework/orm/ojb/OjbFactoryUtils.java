@@ -16,6 +16,8 @@
 
 package org.springframework.orm.ojb;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ojb.broker.OJBRuntimeException;
 import org.apache.ojb.broker.PBKey;
 import org.apache.ojb.broker.PersistenceBroker;
@@ -39,6 +41,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public abstract class OjbFactoryUtils {
+
+	private static final Log logger = LogFactory.getLog(OjbFactoryUtils.class);
 
 	/**
 	 * Get an OJB PersistenceBroker for the given PBKey. Is aware of a
@@ -70,8 +74,8 @@ public abstract class OjbFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
 	 * @throws IllegalStateException if no thread-bound PersistenceBroker found and allowCreate false
 	 */
-	public static PersistenceBroker getPersistenceBroker(PBKey pbKey, boolean allowCreate,
-	                                                     boolean allowSynchronization)
+	public static PersistenceBroker getPersistenceBroker(
+	    PBKey pbKey, boolean allowCreate, boolean allowSynchronization)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 
 		PersistenceBrokerHolder pbHolder =
@@ -81,13 +85,16 @@ public abstract class OjbFactoryUtils {
 		}
 
 		if (!allowCreate) {
-			throw new IllegalStateException("No OJB persistence broker bound to thread, and configuration " +
-																			"does not allow creation of new one here");
+			throw new IllegalStateException(
+			    "No OJB persistence broker bound to thread, and configuration " +
+			    "does not allow creation of new one here");
 		}
 
+		logger.debug("Opening OJB persistence broker");
 		try {
 			PersistenceBroker pb = PersistenceBrokerFactory.createPersistenceBroker(pbKey);
 			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
+				logger.debug("Registering transaction synchronization for OJB persistence broker");
 				pbHolder = new PersistenceBrokerHolder(pb);
 				TransactionSynchronizationManager.bindResource(pbKey, pbHolder);
 				TransactionSynchronizationManager.registerSynchronization(
@@ -107,9 +114,18 @@ public abstract class OjbFactoryUtils {
 	 * @param pbKey PBKey that the PersistenceBroker was created with
 	 */
 	public static void closePersistenceBrokerIfNecessary(PersistenceBroker pb, PBKey pbKey) {
-		if (pb == null || TransactionSynchronizationManager.hasResource(pbKey)) {
+		if (pb == null) {
 			return;
 		}
+
+		PersistenceBrokerHolder pbHolder =
+		    (PersistenceBrokerHolder) TransactionSynchronizationManager.getResource(pbKey);
+		if (pbHolder != null && pb == pbHolder.getPersistenceBroker()) {
+			// It's the transactional PersistenceBroker: Don't close it.
+			return;
+		}
+
+		logger.debug("Closing OJB persistence broker");
 		pb.close();
 	}
 
