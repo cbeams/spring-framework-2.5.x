@@ -27,6 +27,7 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
@@ -139,7 +140,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		if (isActive() && isOptimize()) {
 			throw new AopConfigException("Can't change target with an optimized CGLIB proxy: it has its own target");
 		}
-		this.targetSource = targetSource;
+		this.targetSource = (targetSource != null ? targetSource : EMPTY_TARGET_SOURCE);
 	}
 	
 	public TargetSource getTargetSource() {
@@ -412,6 +413,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private void addAdvisorInternal(int pos, Advisor advice) throws AopConfigException {
 		if (isFrozen()) {
 			throw new AopConfigException("Cannot add advisor: config is frozen");
+		}
+		if (pos > this.advisors.size()) {
+			throw new IllegalArgumentException(
+					"Illegal position " + pos + " in advisor list with size " + this.advisors.size());
 		}
 		this.advisors.add(pos, advice);
 		updateAdvisorArray();

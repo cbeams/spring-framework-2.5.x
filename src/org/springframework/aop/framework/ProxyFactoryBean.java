@@ -219,8 +219,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * @see org.springframework.aop.TargetSource#getTargetClass
 	 */
 	public Class getObjectType() {
-		return (this.singletonInstance != null) ?
-		    this.singletonInstance.getClass() : getTargetSource().getTargetClass();
+		return (this.singletonInstance != null ?
+		    this.singletonInstance.getClass() : getTargetSource().getTargetClass());
 	}
 
 	public boolean isSingleton() {
@@ -230,7 +230,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	private Object getSingletonInstance() {
 		if (this.singletonInstance == null) {
-			this.singletonInstance = this.createAopProxy().getProxy();
+			this.singletonInstance = createAopProxy().getProxy();
 		}
 		return this.singletonInstance;
 	}
@@ -291,29 +291,31 @@ public class ProxyFactoryBean extends AdvisedSupport
 				continue;
 			}
 			else if (i == this.interceptorNames.length - 1 && this.targetSource == EMPTY_TARGET_SOURCE) {
-				// The last name in the chain may be an Advisor/Advice or a target/TargetSource
-				// Unfortunately we don't know. We must
-				// Look at type of the bean
-				if (!isNamedBeanAnAdvisorOrAdvice(interceptorNames[i])) {
-						// Must be an interceptor
-						this.targetName = this.interceptorNames[i];
-						logger.info("Bean with name '" + interceptorNames[i] + "' concluding interceptor chain is not an advisor class: " +
+				// The last name in the chain may be an Advisor/Advice or a target/TargetSource.
+				// Unfortunately we don't know; we must look at type of the bean.
+				if (!isNamedBeanAnAdvisorOrAdvice(this.interceptorNames[i])) {
+					// Must be an interceptor.
+					this.targetName = this.interceptorNames[i];
+					if (logger.isInfoEnabled()) {
+						logger.info("Bean with name '" + this.interceptorNames[i] +
+								"' concluding interceptor chain is not an advisor class: " +
 								"treating it as a target or TargetSource");
-						continue;
+					}
+					continue;
 				}
 				// If it IS an advice, or we can't tell, fall through and treat it as an advice...
 			}
 	
-			// if we get here, we need to add a named interceptor
-			// we must check if it's a singleton or prototype
+			// If we get here, we need to add a named interceptor.
+			// We must check if it's a singleton or prototype.
 			Object advice = null;
 			if (isSingleton() || this.beanFactory.isSingleton(this.interceptorNames[i])) {
-				// Add the real Advisor/Advice to the chain
+				// Add the real Advisor/Advice to the chain.
 				advice = this.beanFactory.getBean(this.interceptorNames[i]);
 			}
 			else {
-				// It's a prototype Advice or Advisor: replace with a prototype
-				//avoid unnecessary creation of prototype bean just for advisor chain initialization
+				// It's a prototype Advice or Advisor: replace with a prototype.
+				// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
 				advice = new PrototypePlaceholderAdvisor(interceptorNames[i]);
 			}
 			addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
@@ -359,7 +361,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 				freshAdvisors.add(refreshedAdvisor);
 			}
 			else {
-				// Add the shared instance
+				// Add the shared instance.
 				freshAdvisors.add(advisors[i]);
 			}
 		}
@@ -410,11 +412,11 @@ public class ProxyFactoryBean extends AdvisedSupport
 			logger.debug("Adding advisor or TargetSource [" + next + "] with name [" + name + "]");
 		}
 		
-		// We need to convert to an Advisor if necessary so that our source reference matches
-		// what we find from superclass interceptors.
+		// We need to convert to an Advisor if necessary so that our source reference
+		// matches what we find from superclass interceptors.
 		Advisor advisor = namedBeanToAdvisor(next);
 		
-			// if it wasn't just updating the TargetSource
+		// If it wasn't just updating the TargetSource.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding advisor with name [" + name + "]");
 		}			
@@ -422,10 +424,10 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 	
 	/**
-	 * @return a TargetSource to use when creating a proxy. If the target was not
-	 * specified at the end of the interceptorNames list, the TargetSource will be this
-	 * class's TargetSource member. Otherwise, we get the target bean and wrap it
-	 * in a TargetSource if necessary.
+	 * Return a TargetSource to use when creating a proxy. If the target was not
+	 * specified at the end of the interceptorNames list, the TargetSource will be
+	 * this class' TargetSource member. Otherwise, we get the target bean and wrap
+	 * it in a TargetSource if necessary.
 	 */
 	private TargetSource freshTargetSource() {
 		if (this.targetName == null) {
@@ -444,8 +446,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 
 	/**
-	 * Convert the following object sourced from calling getBean() on a name in the interceptorNames array to an
-	 * Advisor or TargetSource.
+	 * Convert the following object sourced from calling getBean() on a name in the
+	 * interceptorNames array to an Advisor or TargetSource.
 	 */
 	private Advisor namedBeanToAdvisor(Object next) {
 		try {
@@ -462,17 +464,18 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 
 	/**
-	 * @see org.springframework.aop.framework.AdvisedSupportListener#activated(org.springframework.aop.framework.AdvisedSupport)
+	 * @see org.springframework.aop.framework.AdvisedSupportListener#activated
 	 */
 	public void activated(AdvisedSupport advisedSupport) {
-		// Nothing to do
+		// Nothing to do.
 	}
 
 	/**
 	 * Blow away and recache singleton on an advice change.
+	 * @see org.springframework.aop.framework.AdvisedSupportListener#adviceChanged
 	 */
 	public void adviceChanged(AdvisedSupport advisedSupport) {
-		if (singleton) {
+		if (this.singleton) {
 			logger.info("Advice has changed; recaching singleton instance");
 			this.singletonInstance = null;
 			getSingletonInstance();
@@ -482,15 +485,16 @@ public class ProxyFactoryBean extends AdvisedSupport
 	
 	/**
 	 * Used in the interceptor chain where we need to replace a bean with a prototype
-	 * on creating a proxy
+	 * on creating a proxy.
 	 */
-	public static class PrototypePlaceholderAdvisor implements Advisor {
+	private static class PrototypePlaceholderAdvisor implements Advisor {
+
 		private final String beanName;
-		private final String mesg;
+		private final String message;
 		
 		public PrototypePlaceholderAdvisor(String beanName) {
 			this.beanName = beanName;
-			this.mesg = "Placeholder for prototype Advisor/Advice with bean name ='" + beanName + "'";
+			this.message = "Placeholder for prototype Advisor/Advice with bean name ='" + beanName + "'";
 		}
 		
 		public String getBeanName() {
@@ -498,17 +502,16 @@ public class ProxyFactoryBean extends AdvisedSupport
 		}
 		
 		public Advice getAdvice() {
-			throw new UnsupportedOperationException("Cannot invoke methods: " + mesg);
+			throw new UnsupportedOperationException("Cannot invoke methods: " + message);
 		}
 		
 		public boolean isPerInstance() {
-			throw new UnsupportedOperationException("Cannot invoke methods: " + mesg);
+			throw new UnsupportedOperationException("Cannot invoke methods: " + message);
 		}
 		
 		public String toString() {
-			return mesg;
+			return message;
 		}
-	}	// class PrototypePlaceholderAdvisor
-	
+	}
 
 }

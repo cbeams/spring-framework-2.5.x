@@ -283,9 +283,8 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertSame(itb, doit.tb);
 	}
 	
-	
 	/**
-	 * Should see effect immediately on behaviour.
+	 * Should see effect immediately on behavior.
 	 */
 	public void testCanAddAndRemoveAspectInterfacesOnSingleton() {
 		try {
@@ -345,8 +344,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		// not invoked again
 		assertTrue(debugInterceptor.getCount() == 1);
 	}
-	
-	
+
 	/**
 	 * Try adding and removing interfaces and interceptors on prototype.
 	 * Changes will only affect future references obtained from the factory.
@@ -413,14 +411,11 @@ public class ProxyFactoryBeanTests extends TestCase {
 		// Our own timestamped reference should still work
 		assertEquals(time, ts.getTimeStamp());
 	}
-	
-	
-	
+
 	/**
 	 * Note that we can't add or remove interfaces without reconfiguring the
 	 * singleton. 
 	 * TODO address this?
-	 *
 	 */
 	public void testCanAddAndRemoveAspectInterfacesOnSingletonByCasting() {
 		ITestBean it = (ITestBean) factory.getBean("test1");
@@ -433,8 +428,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertEquals(25, it.getAge());
 		assertEquals(2, di.getCount());
 	}
-	
-	
+
 	public void testMethodPointcuts() {
 		ITestBean tb = (ITestBean) factory.getBean("pointcuts");
 		PointcutForVoid.reset();
@@ -485,8 +479,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		// One match
 		assertEquals(1, th.getCalls("servletException"));
 	}
-	
-	
+
 	// These two fail the whole bean factory
 	// TODO put in sep file to check quality of error message
 	/*
@@ -504,7 +497,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		ITestBean tb = (ITestBean) factory.getBean("noInterceptorNamesWithoutTarget");
 	}
 	*/
-	
+
 	public void testEmptyInterceptorNames() {
 		try {
 			ITestBean tb = (ITestBean) factory.getBean("emptyInterceptorNames");
@@ -514,7 +507,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 			// Ok
 		}
 	}
-	
+
 	/**
 	 * Globals must be followed by a target.
 	 */
@@ -658,7 +651,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryBeanAutowiringTests.xml", getClass()));
 		bf.getBean("testBean");
 	}
-	
+
 
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
