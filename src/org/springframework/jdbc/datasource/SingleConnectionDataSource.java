@@ -1,7 +1,6 @@
 package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -41,7 +40,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * Constructor for bean-style configuration.
 	 */
 	public SingleConnectionDataSource() {
-		super();
 	}
 
 	/**
@@ -68,7 +66,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 */
 	public SingleConnectionDataSource(Connection source, boolean suppressClose)
 	    throws CannotGetJdbcConnectionException, InvalidDataAccessApiUsageException {
-		super();
 		if (source == null) {
 			throw new InvalidDataAccessApiUsageException("Connection is null in SingleConnectionDataSource");
 		}
@@ -93,51 +90,47 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	}
 
 	/**
-	 * Initialize the underlying connection.
-	 * @param source the JDBC Connection to use,
-	 * or null for initialization via DriverManager
-	 */
-	protected void init(Connection source) throws CannotGetJdbcConnectionException {
-		if (source == null) {
-			// no JDBC Connection given -> initialize via DriverManager
-			try {
-				source = DriverManager.getConnection(getUrl(), getUsername(), getPassword());
-			}
-			catch (SQLException ex) {
-				throw new CannotCloseJdbcConnectionException("Could not create connection", ex);
-			}
-		}
-
-		// prepare connection
-		try {
-			source.setAutoCommit(true);
-		}
-		catch (SQLException ex) {
-			throw new CannotGetJdbcConnectionException("Could not set autoCommit", ex);
-		}
-
-		// wrap connection?
-		this.connection = this.suppressClose ? DataSourceUtils.getCloseSuppressingConnectionProxy(source) : source;
-	}
-
-	/**
 	 * This is a single connection: Do not close it when returning to the "pool".
 	 */
 	public boolean shouldClose(Connection conn) {
 		return false;
 	}
 
-	public Connection getConnection() throws SQLException {
-		if (this.connection == null) {
-			// No underlying connection -> lazy init via DriverManager
-			init(null);
+	/**
+	 * Initialize the underlying connection via DriverManager.
+	 */
+	protected void init() throws CannotGetJdbcConnectionException {
+		try {
+			init(getConnectionFromDriverManager());
 		}
-		logger.debug("SingleConnectionConnectionFactory.getConnection: " + connection);
+		catch (SQLException ex) {
+			throw new CannotGetJdbcConnectionException("Could not create connection", ex);
+		}
+	}
+
+	/**
+	 * Initialize the underlying connection.
+	 * Wraps the connection with a close-suppressing proxy if necessary.
+	 * @param source the JDBC Connection to use
+	 */
+	protected void init(Connection source) throws CannotGetJdbcConnectionException {
+		// wrap connection?
+		this.connection = this.suppressClose ? DataSourceUtils.getCloseSuppressingConnectionProxy(source) : source;
+	}
+
+	public Connection getConnection() throws SQLException {
+		synchronized (this) {
+			if (this.connection == null) {
+				// no underlying connection -> lazy init via DriverManager
+				init();
+			}
+		}
 		if (this.connection.isClosed()) {
 			throw new SQLException("Connection was closed in SingleConnectionDataSource. " +
 			                       "Check that user code checks shouldClose() before closing connections, " +
 			                       "or set suppressClose to true");
 		}
+		logger.debug("Returning single connection: " + this.connection);
 		return this.connection;
 	}
 
@@ -158,10 +151,12 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * Close the underlying connection.
 	 * The provider of this DataSource needs to care for proper shutdown.
 	 * <p>As this bean implements DisposableBean, a bean factory will
-	 * automatically invoke this on destruction of its cached singletons. 
+	 * automatically invoke this on destruction of its cached singletons.
 	 */
 	public void destroy() throws SQLException {
-		this.connection.close();
+		if (this.connection != null) {
+			this.connection.close();
+		}
 	}
 
 }

@@ -14,25 +14,15 @@ import com.mockobjects.sql.MockConnection;
 
  /**
  * @author Rod Johnson
- * @version $Id: DriverManagerDataSourceTests.java,v 1.1.1.1 2003-08-14 16:21:12 trisberg Exp $
+ * @version $Id: DriverManagerDataSourceTests.java,v 1.2 2003-08-26 16:44:11 jhoeller Exp $
  */
 public class DriverManagerDataSourceTests extends TestCase {
 
-	/**
-	 * Constructor for DriverManagerDataSourceTests.
-	 * @param arg0
-	 */
-	public DriverManagerDataSourceTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testValidUsage() throws Exception {
 		final String url = "url";
 		final String uname = "uname";
 		final String pwd = "pwd";
 		final MockConnection con = new MockConnection();
-		// Ensure the connection is set to autocommit before it's returned to us
-		con.setExpectedAutoCommit(true);
 		class TestDriverManagerDataSource extends DriverManagerDataSource {
 			protected Connection getConnectionFromDriverManager(String purl, String pusername, String ppassword)
 				throws SQLException {
