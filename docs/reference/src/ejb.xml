@@ -207,7 +207,7 @@ public void setMyComponent(MyComponent myComponent) {
     <title>Using Spring convenience EJB implementation classes</title>
 
     <para>Spring also provides convenience classes to help you implement EJBs.
-    These are designed to encourage the good practTo ice of putting business
+    These are designed to encourage the good practice of putting business
     logic behind EJBs in POJOs, leaving EJBs responsible for transaction
     demarcation and (optionally) remoting.</para>
 
