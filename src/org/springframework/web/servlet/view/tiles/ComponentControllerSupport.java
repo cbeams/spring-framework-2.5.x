@@ -24,37 +24,49 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public abstract class ComponentControllerSupport extends WebApplicationObjectSupport implements Controller {
 
 	/**
-	 * This implementation delegates to the simplified doPerform,
-	 * as the ServletContext is provided by getServletContext anyway.
+	 * This implementation delegates to doPerform, lazy-initializing the application context
+	 * reference if necessary, and converting non-Servlet/IO Exceptions to ServletException.
 	 * @see #doPerform
-	 * @see #getServletContext
 	 */
 	public final void perform(ComponentContext componentContext, HttpServletRequest request,
 	                          HttpServletResponse response, ServletContext servletContext)
 	    throws ServletException, IOException {
-		// TODO the following is inserted because ComponentControllerSupport does NOT
-		// work when inserting tiles directly with the tiles:insert tag in JSPs, since
-		// the org.apache.struts.taglib.tiles.InsertTag (line 869) manually creates
-		// and executes controllers. For now, we'll check for the applicationcontext and
-		// set it if necessary!
-		if (getWebApplicationContext() == null) {
-			setApplicationContext(RequestContextUtils.getWebApplicationContext(request));
+		// TODO the following is inserted because ComponentControllerSupport does NOT work when
+		// inserting tiles directly with the tiles:insert tag in JSPs, since the <tiles:insert> tag
+		// - org.apache.struts.taglib.tiles.InsertTag (line 869) - manually creates and executes
+		// controllers. For now, we'll check for the application context and set it if necessary!
+		synchronized (this) {
+			if (getWebApplicationContext() == null) {
+				setApplicationContext(RequestContextUtils.getWebApplicationContext(request));
+			}
 		}
-		doPerform(componentContext, request, response);
+		try {
+			doPerform(componentContext, request, response);
+		}
+		catch (ServletException ex) {
+			throw ex;
+		}
+		catch (IOException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new ServletException(ex.getMessage(), ex);
+		}
 	}
 
 	/**
-	 * Perform the actual preparation for the component.
+	 * Perform the preparation for the component, allowing for any Exception to be thrown.
 	 * The ServletContext can be retrieved via getServletContext, if necessary.
+	 * The Spring WebApplicationContext can be accessed via getWebApplicationContext.
 	 * @param componentContext current Tiles component context
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @throws ServletException in case of execution errors
-	 * @throws IOException in case of I/O errors
+	 * @throws Exception in case of errors
 	 * @see org.apache.struts.tiles.Controller#perform
 	 * @see #getServletContext
+	 * @see #getWebApplicationContext
 	 */
 	protected abstract void doPerform(ComponentContext componentContext, HttpServletRequest request,
-	                                  HttpServletResponse response) throws ServletException, IOException;
+	                                  HttpServletResponse response) throws Exception;
 
 }
