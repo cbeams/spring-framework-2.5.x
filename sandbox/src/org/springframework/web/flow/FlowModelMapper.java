@@ -18,11 +18,12 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 /**
- * A service interface that maps attributes of a parent flow model down to a
- * child flow model, as <i>input </i> when the child is spawned as a subflow.
+ * A service interface that maps attributes between flow models.
  * <p>
- * In addition, this interface maps attributes of a child flow model back up to
- * a resuming parent flow, as <i>output </i> when the child session ends and
+ * A model mapper maps the attributes of a parent flow model down to a
+ * child flow model, as <i>input</i> when the child is spawned as a subflow.
+ * In addition, a model mapper maps attributes of a child flow model back up to
+ * a resuming parent flow, as <i>output</i> when the child session ends and
  * control is returned to the parent flow.
  * <p>
  * For example, say you have the following parent flow session:

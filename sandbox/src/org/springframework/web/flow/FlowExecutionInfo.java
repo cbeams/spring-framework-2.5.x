@@ -79,7 +79,7 @@ public interface FlowExecutionInfo extends FlowModel, Serializable {
 	public boolean isRootFlowActive();
 
 	/**
-	 * @return The id of the current state of this flow execution.
+	 * Returns the id of the current state of this flow execution.
 	 */
 	public String getCurrentStateId();
 

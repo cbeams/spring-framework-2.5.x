@@ -30,7 +30,7 @@ public abstract class ServiceLookupException extends RuntimeException {
 	private Class serviceImplementationClass;
 
 	/**
-	 * Create a new service lookup exception
+	 * Create a new service lookup exception.
 	 * @param serviceId The id of the service that cannot be found
 	 */
 	public ServiceLookupException(String serviceId) {
@@ -39,7 +39,7 @@ public abstract class ServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * Create a new service lookup exception
+	 * Create a new service lookup exception.
 	 * @param serviceId The id of the service that cannot be found
 	 * @param cause The underlying cause of this exception
 	 */
@@ -49,7 +49,7 @@ public abstract class ServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * Create a new service lookup exception
+	 * Create a new service lookup exception.
 	 * @param serviceId The id of the service that cannot be found
 	 * @param message Descriptive message
 	 * @param cause The underlying cause of this exception
@@ -60,7 +60,7 @@ public abstract class ServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * Create a new service lookup exception
+	 * Create a new service lookup exception.
 	 * @param serviceImplementationClass The required implementation class of
 	 *        the service that cannot be found
 	 */
@@ -70,7 +70,7 @@ public abstract class ServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * Create a new service lookup exception
+	 * Create a new service lookup exception.
 	 * @param serviceImplementationClass The required implementation class of
 	 *        the service that cannot be found
 	 * @param cause The underlying cause of this exception
@@ -81,7 +81,7 @@ public abstract class ServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * Create a new service lookup exception
+	 * Create a new service lookup exception.
 	 * @param serviceImplementationClass The required implementation class of
 	 *        the service that cannot be found
 	 * @param message Descriptive message
@@ -109,28 +109,28 @@ public abstract class ServiceLookupException extends RuntimeException {
 	}
 
 	/**
-	 * @return true if lookup by service id failed, false otherwise
+	 * Returns true if lookup by service id failed, false otherwise.
 	 */
 	public boolean isServiceIdLookupFailure() {
 		return StringUtils.hasText(serviceId);
 	}
 
 	/**
-	 * @return true if lookup by service type failed, false otherwise
+	 * Returns true if lookup by service type failed, false otherwise.
 	 */
 	public boolean isServiceTypeLookupFailure() {
 		return serviceImplementationClass != null;
 	}
 
 	/**
-	 * @return the id of the service that cannot be found
+	 * Returns the id of the service that cannot be found.
 	 */
 	public String getServiceId() {
 		return serviceId;
 	}
 
 	/**
-	 * @return the required implementation class of the service that cannot be found
+	 * Returns the required implementation class of the service that cannot be found.
 	 */
 	public Class getServiceImplementationClass() {
 		return serviceImplementationClass;

@@ -16,7 +16,10 @@
 package org.springframework.web.flow;
 
 /**
- * Abstract superclass of all navigation exceptions.
+ * Abstract superclass of all flow navigation exceptions. A flow
+ * navigation exception signals a problem while navigating inside
+ * a web flow, e.g. when the target state of a transition cannot
+ * be found.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -66,7 +69,7 @@ public abstract class FlowNavigationException extends RuntimeException {
 	}
 
 	/**
-	 * @return The flow in which the navigation exception occured.
+	 * Returns the flow in which the navigation exception occured.
 	 */
 	protected Flow getFlow() {
 		return flow;

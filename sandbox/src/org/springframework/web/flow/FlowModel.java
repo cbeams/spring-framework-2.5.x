@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.closure.Constraint;
 
 /**
- * An interface that provides access to the data model of a executing flow
+ * An interface that provides access to the data model of an executing flow
  * session. All attributes in the flow model are in "flow scope"; that is, they
  * exist for the life of a flow session and will be cleaned up when the flow
  * session ends. All attributes in the flow model are automatically exported for
@@ -86,7 +86,7 @@ public interface FlowModel {
 	 * it is of the required type, throwing an exception if no attribute exists
 	 * with the provided name in the model.
 	 * @param attributeName The attribute name
-	 * @param requiredType the expected attribute value type
+	 * @param requiredType The expected attribute value type
 	 * @return The attribute value
 	 * @throws IllegalStateException if no attribute value exists with the
 	 *         provided attribute name, or a value exists but not of the
@@ -114,7 +114,7 @@ public interface FlowModel {
 	/**
 	 * Assert that given request is participating in the active transaction of
 	 * the model.
-	 * @param request The current HTTP request
+	 * @param request the current HTTP request
 	 * @param reset indicates whether or not the transaction should end after
 	 *        checking it
 	 * @throws IllegalStateException The request is not participating in the
@@ -140,7 +140,7 @@ public interface FlowModel {
 
 	/**
 	 * Is given request participating in the active transaction of the model?
-	 * @param request The current HTTP request
+	 * @param request the current HTTP request
 	 * @param reset indicates whether or not the transaction should end after
 	 *        checking it
 	 * @return True when the request is participating in the active transaction

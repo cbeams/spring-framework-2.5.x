@@ -28,7 +28,7 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	private Transition transition;
 
 	/**
-	 * Create a new state transition exception.
+	 * Create a new state transition execution exception.
 	 * @param state The source state of the transition
 	 * @param cause The underlying cause of this exception
 	 */
@@ -38,7 +38,7 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	}
 	
 	/**
-	 * Creates a new state transition exception.
+	 * Creates a new state transition execution exception.
 	 * @param state The source state
 	 * @param message The message of what went wrong.
 	 */
@@ -48,7 +48,7 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	}
 
 	/**
-	 * Create a new state transition exception.
+	 * Create a new state transition execution exception.
 	 * @param transition The transition that was executing
 	 * @param cause The underlying cause of this exception
 	 */

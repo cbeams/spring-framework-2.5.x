@@ -18,8 +18,8 @@ package org.springframework.web.flow;
 import org.springframework.util.DefaultObjectStyler;
 
 /**
- * Thrown the event identified by <code>eventId</code> does not map to a valid
- * transition in the current state. That is, there is no "handler" trasition for
+ * Thrown when the event identified by <code>eventId</code> does not map to a valid
+ * transition in the current state. That is, there is no "handler" transition for
  * the given event in the current state.
  * 
  * @author Keith Donald
@@ -32,7 +32,7 @@ public class EventNotSupportedException extends FlowNavigationException {
 	private String eventId;
 
 	/**
-	 * Create a new unsupported event exception
+	 * Create a new unsupported event exception.
 	 * @param state State that does not support the event
 	 * @param eventId Unsupported event
 	 */
@@ -43,7 +43,7 @@ public class EventNotSupportedException extends FlowNavigationException {
 	}
 
 	/**
-	 * Create a new unsupported event exception
+	 * Create a new unsupported event exception.
 	 * @param state State that does not support the event
 	 * @param eventId Unsupported event
 	 * @param cause Underlying cause of this exception

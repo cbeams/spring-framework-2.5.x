@@ -18,15 +18,16 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 /**
- * Extension of flow model allowing for mutable operations. If you dont need
- * mutability, pass the immutable FlowModel interface around instead.
+ * Extension of flow model allowing for mutable operations. If you don't need
+ * mutability, pass the immutable {@link FlowModel} interface around instead.
  * <p>
  * The attributes stored in the flow model ("flow scope") are changed using this
  * interface. Each flow model is associated with a exactly one flow session in
  * an ongoing flow execution.
  * <p>
- * Implementers of this interface (e.g. the flow model) can have an <i>active
- * transaction </i> and to start and stop transactions.
+ * Implementers of this interface (e.g. the flow session) can have an <i>active
+ * transaction</i> and provide methods to start and stop transactions.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
