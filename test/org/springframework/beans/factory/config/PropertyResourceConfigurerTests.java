@@ -19,6 +19,7 @@ import org.springframework.context.support.StaticApplicationContext;
 
 /**
  * @author Juergen Hoeller
+ * @since 02.10.2003
  */
 public class PropertyResourceConfigurerTests extends TestCase {
 
@@ -84,12 +85,43 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals(System.getProperty("os.name"), tb1.getTouchy());
 	}
 
-	public void testPropertyPlaceholderConfigurerWithSystemPropertyOnly() {
+	public void testPropertyPlaceholderConfigurerWithSystemPropertyFallback() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("touchy", "${os.name}");
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals(System.getProperty("os.name"), tb.getTouchy());
+	}
+
+	public void testPropertyPlaceholderConfigurerWithSystemPropertyNotUsed() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("touchy", "${os.name}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("os.name", "myos");
+		pvs.addPropertyValue("properties", props);
+		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("myos", tb.getTouchy());
+	}
+
+	public void testPropertyPlaceholderConfigurerWithOverridingSystemProperty() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("touchy", "${os.name}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("os.name", "myos");
+		pvs.addPropertyValue("properties", props);
+		pvs.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_OVERRIDE");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		ac.refresh();
 		TestBean tb = (TestBean) ac.getBean("tb");
@@ -102,7 +134,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		pvs.addPropertyValue("touchy", "${user.dir}");
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("checkSystemProperties", "false");
+		pvs.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_NEVER");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();

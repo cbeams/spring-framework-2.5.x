@@ -11,6 +11,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.core.Constants;
 
 /**
  * A property resource configurer that resolves placeholders in bean property values of
@@ -56,7 +57,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
  * <p>Default property values can be defined via "properties", to make overriding
  * definitions in properties files optional. A configurer will also check against
  * system properties (e.g. "user.dir") if it cannot resolve a placeholder with any
- * of the specified properties. This can be turned off via "checkSystemProperties".
+ * of the specified properties. This can be customized via "systemPropertiesMode".
  *
  * <p>Note that the context definition <i>is</i> aware of being incomplete;
  * this is immediately obvious when looking at the XML definition file.
@@ -68,9 +69,9 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
  * @see #setProperties
  * @see #setPlaceholderPrefix
  * @see #setPlaceholderSuffix
- * @see #setCheckSystemProperties
+ * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
- * @version $Id: PropertyPlaceholderConfigurer.java,v 1.6 2004-02-24 01:22:57 dkopylenko Exp $
+ * @version $Id: PropertyPlaceholderConfigurer.java,v 1.7 2004-02-25 17:11:12 jhoeller Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
@@ -79,11 +80,29 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
 
 
+	/** Never check system properties. */
+	public static final int SYSTEM_PROPERTIES_MODE_NEVER = 0;
+
+	/**
+	 * Check system properties if not resolvable in the specified properties.
+	 * This is the default.
+	 */
+	public static final int SYSTEM_PROPERTIES_MODE_FALLBACK = 1;
+
+	/**
+	 * Check system properties first, before trying the specified properties.
+	 * This allows system properties to override any other property source.
+	 */
+	public static final int SYSTEM_PROPERTIES_MODE_OVERRIDE = 2;
+
+
+	private static final Constants constants = new Constants(PropertyPlaceholderConfigurer.class);
+
 	private String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
 
 	private String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
-	private boolean checkSystemProperties = true;
+	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
 
 	/**
@@ -105,14 +124,29 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	}
 
 	/**
-	 * Whether to check system properties if not being able to resolve a
-	 * placeholder with the specified properties. For example, will resolve
-	 * ${user.dir} to the "user.dir" system property (if not overridden
-	 * in the specified properties).
-	 * <p>Default is true.
+	 * Set how to check system properties: as fallback, as override, or never.
+	 * For example, will resolve ${user.dir} to the "user.dir" system property.
+	 * <p>The default is "fallback": If not being able to resolve a placeholder
+	 * with the specified properties, a system property will be tried.
+	 * "override" will check for a system property first, before trying the
+	 * specified properties. "never" will not check system properties at all.
+	 * @see #SYSTEM_PROPERTIES_MODE_NEVER
+	 * @see #SYSTEM_PROPERTIES_MODE_FALLBACK
+	 * @see #SYSTEM_PROPERTIES_MODE_OVERRIDE
 	 */
-	public void setCheckSystemProperties(boolean checkSystemProperties) {
-		this.checkSystemProperties = checkSystemProperties;
+	public void setSystemPropertiesMode(int systemPropertiesMode) {
+		this.systemPropertiesMode = systemPropertiesMode;
+	}
+
+	/**
+	 * Set the system property mode by the name of the corresponding constant,
+	 * e.g. "SYSTEM_PROPERTIES_MODE_OVERRIDE".
+	 * @param constantName name of the constant
+	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
+	 * @see #setSystemPropertiesMode
+	 */
+	public void setSystemPropertiesModeName(String constantName) throws IllegalArgumentException {
+		this.systemPropertiesMode = constants.asNumber(constantName).intValue();
 	}
 
 
@@ -285,9 +319,14 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 					throw new BeanDefinitionStoreException("Circular placeholder reference '" + placeholder +
 																								 "' in property definitions [" + props + "]");
 				}
-				String propVal = resolvePlaceholder(placeholder, props);
-				if (propVal == null && this.checkSystemProperties) {
-					// try system property (e.g. "user.dir")
+				String propVal = null;
+				if (this.systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
+					propVal = System.getProperty(placeholder);
+				}
+				if (propVal == null) {
+					propVal = resolvePlaceholder(placeholder, props);
+				}
+				if (propVal == null && this.systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
 					propVal = System.getProperty(placeholder);
 				}
 				if (propVal != null) {
@@ -313,9 +352,12 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	 * <p>Subclasses can override this for customized placeholder-to-key mappings
 	 * or custom resolution strategies, possibly just using the given properties
 	 * as fallback.
+	 * <p>Note that system properties will still be checked before respectively
+	 * after this method is invoked, according to the system properties mode.
 	 * @param placeholder the placeholder to resolve
 	 * @param props the merged properties of this configurer
 	 * @return the resolved value
+	 * @see #setSystemPropertiesMode
 	 */
 	protected String resolvePlaceholder(String placeholder, Properties props) {
 		return props.getProperty(placeholder);
