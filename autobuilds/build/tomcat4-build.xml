@@ -6,7 +6,7 @@
 	Targets to compile and build the sample apps and test server
 	environments and run various HttpUnit tests against them.
 	
-	$Id: tomcat4-build.xml,v 1.1 2003-12-19 01:44:36 davison Exp $
+	$Id: tomcat4-build.xml,v 1.2 2003-12-30 02:17:55 davison Exp $
 -->
 <project name="autobuilds-tomcat4" basedir="." default="usage">
 
@@ -96,7 +96,7 @@ autobuilds directory for information.
 		<echo message="##  ----------------------------------------------------------------" />
 		<java 
 			classname="org.apache.catalina.startup.Bootstrap"
-			output="${reports.dir}/tomcat4_server.log"
+			output="${reports.dir}/${target.server}_server.log"
 			fork="true">
 		
 			<arg value="start"/>
@@ -122,7 +122,7 @@ autobuilds directory for information.
 		<echo message="##  ----------------------------------------------------------------" />
 		<java 
 			classname="org.apache.catalina.startup.Bootstrap"
-			output="${reports.dir}/tomcat4_server.log"
+			output="${reports.dir}/${target.server}_server.log"
 			fork="true">
 		
 			<arg value="stop"/>
