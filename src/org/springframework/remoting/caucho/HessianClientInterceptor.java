@@ -11,7 +11,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
-import org.springframework.remoting.support.AuthorizableRemoteProxySupport;
+import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
  * Interceptor for accessing a Hessian service.
@@ -28,16 +28,34 @@ import org.springframework.remoting.support.AuthorizableRemoteProxySupport;
  * @author Juergen Hoeller
  * @since 29.09.2003
  */
-public class HessianClientInterceptor extends AuthorizableRemoteProxySupport
-    implements MethodInterceptor, InitializingBean {
+public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
+
+	private final HessianProxyFactory proxyFactory = new HessianProxyFactory();
 
 	private Object hessianProxy;
 
+	/**
+	 * Set the username that this factory should use to access the remote service.
+	 */
+	public void setUsername(String username) {
+		this.proxyFactory.setUser(username);
+	}
+
+	/**
+	 * Set the password that this factory should use to access the remote service.
+	 */
+	public void setPassword(String password) {
+		this.proxyFactory.setPassword(password);
+	}
+
 	public void afterPropertiesSet() throws MalformedURLException {
-		HessianProxyFactory proxyFactory = new HessianProxyFactory();
-		proxyFactory.setUser(getUsername());
-		proxyFactory.setPassword(getPassword());
-		this.hessianProxy = proxyFactory.create(getServiceInterface(), getServiceUrl());
+		if (getServiceInterface() == null) {
+			throw new IllegalArgumentException("serviceInterface is required");
+		}
+		if (getServiceUrl() == null) {
+			throw new IllegalArgumentException("serviceUrl is required");
+		}
+		this.hessianProxy = this.proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -48,6 +66,7 @@ public class HessianClientInterceptor extends AuthorizableRemoteProxySupport
 			throw new RemoteAccessException("Cannot access Hessian service", ex.getUndeclaredThrowable());
 		}
 		catch (InvocationTargetException ex) {
+			logger.debug("Hessian service [" + getServiceUrl() + "] threw exception", ex.getTargetException());
 			if (ex.getTargetException() instanceof HessianRuntimeException) {
 				HessianRuntimeException hre = (HessianRuntimeException) ex.getTargetException();
 				Throwable rootCause = (hre.getRootCause() != null) ? hre.getRootCause() : hre;

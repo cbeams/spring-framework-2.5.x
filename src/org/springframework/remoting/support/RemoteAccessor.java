@@ -5,8 +5,11 @@
 
 package org.springframework.remoting.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
- * Abstract base class for factory beans proxying a remote service.
+ * Abstract base class for classes that proxy a remote service.
  * Exposes the proxy when used as bean reference. Used e.g. by the
  * Caucho and RMI proxy factory implementations.
  *
@@ -23,14 +26,15 @@ package org.springframework.remoting.support;
  * @since 13.05.2003
  * @see org.springframework.remoting.RemoteAccessException
  */
-public abstract class RemoteProxySupport {
+public abstract class RemoteAccessor {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Class serviceInterface;
 
-	private String serviceUrl;
-
 	/**
 	 * Set the interface of the service that this factory should create a proxy for.
+	 * The interface must be suitable for the particular service and remoting tool.
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (!serviceInterface.isInterface()) {
@@ -39,19 +43,11 @@ public abstract class RemoteProxySupport {
 		this.serviceInterface = serviceInterface;
 	}
 
+	/**
+	 * Return the interface of the service that this factory should create a proxy for.
+	 */
 	protected Class getServiceInterface() {
 		return serviceInterface;
-	}
-
-	/**
-	 * Set the URL of the service that this factory should create a proxy for.
-	 */
-	public void setServiceUrl(String serviceUrl) {
-		this.serviceUrl = serviceUrl;
-	}
-
-	protected String getServiceUrl() {
-		return serviceUrl;
 	}
 
 }

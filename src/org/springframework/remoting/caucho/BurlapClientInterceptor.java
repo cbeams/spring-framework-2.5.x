@@ -12,7 +12,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
-import org.springframework.remoting.support.AuthorizableRemoteProxySupport;
+import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
  * Interceptor for accessing a Burlap service.
@@ -29,16 +29,34 @@ import org.springframework.remoting.support.AuthorizableRemoteProxySupport;
  * @author Juergen Hoeller
  * @since 29.09.2003
  */
-public class BurlapClientInterceptor extends AuthorizableRemoteProxySupport
-    implements MethodInterceptor, InitializingBean {
+public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
+
+	private final BurlapProxyFactory proxyFactory = new BurlapProxyFactory();
 
 	private Object burlapProxy;
 
+	/**
+	 * Set the username that this factory should use to access the remote service.
+	 */
+	public void setUsername(String username) {
+		this.proxyFactory.setUser(username);
+	}
+
+	/**
+	 * Set the password that this factory should use to access the remote service.
+	 */
+	public void setPassword(String password) {
+		this.proxyFactory.setPassword(password);
+	}
+
 	public void afterPropertiesSet() throws MalformedURLException {
-		BurlapProxyFactory proxyFactory = new BurlapProxyFactory();
-		proxyFactory.setUser(getUsername());
-		proxyFactory.setPassword(getPassword());
-		this.burlapProxy = proxyFactory.create(getServiceInterface(), getServiceUrl());
+		if (getServiceInterface() == null) {
+			throw new IllegalArgumentException("serviceInterface is required");
+		}
+		if (getServiceUrl() == null) {
+			throw new IllegalArgumentException("serviceUrl is required");
+		}
+		this.burlapProxy = this.proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -46,6 +64,7 @@ public class BurlapClientInterceptor extends AuthorizableRemoteProxySupport
 			return invocation.getMethod().invoke(this.burlapProxy, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
+			logger.debug("Burlap service [" + getServiceUrl() + "] threw exception", ex.getTargetException());
 			if (ex.getTargetException() instanceof HessianRuntimeException) {
 				BurlapRuntimeException bre = (BurlapRuntimeException) ex.getTargetException();
 				Throwable rootCause = (bre.getRootCause() != null) ? bre.getRootCause() : bre;
@@ -53,7 +72,7 @@ public class BurlapClientInterceptor extends AuthorizableRemoteProxySupport
 			}
 			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
 				UndeclaredThrowableException utex = (UndeclaredThrowableException) ex.getTargetException();
-				throw new RemoteAccessException("Cannot access Hessian service", utex.getUndeclaredThrowable());
+				throw new RemoteAccessException("Cannot access Burlap service", utex.getUndeclaredThrowable());
 			}
 			throw ex.getTargetException();
 		}
