@@ -32,6 +32,7 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.Factory;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.transform.impl.UndeclaredThrowableStrategy;
 
 import org.aopalliance.aop.AspectException;
@@ -232,14 +233,14 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
         // choose a "direct to target" dispatcher (used for
         // unadvised calls to static targets that cannot return this)
         Callback targetDispatcher = isStatic ? (Callback) new StaticDispatcher(
-                advised.getTargetSource().getTarget()) : new NoOp();
+                advised.getTargetSource().getTarget()) : new SerializableNoOp();
 
         Callback[] mainCallbacks = new Callback[] { aopInterceptor, // For
                 // normal
                 // advice
                 targetInterceptor, // invoke target without considering
                 // advice, if optimized
-                new NoOp(), // no override for methods mapped to this.
+                new SerializableNoOp(), // no override for methods mapped to this.
                 targetDispatcher, advisedDispatcher,
                 new EqualsInterceptor(this.advised)
 
@@ -870,8 +871,9 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
     /**
      * Serializable replacement for CGLIB's NoOp interface.
+     * Public to allow use elsewhere in the framework.
      */
-    private class NoOp implements net.sf.cglib.proxy.NoOp, Serializable {
+    public static class SerializableNoOp implements NoOp, Serializable {
     }
 
     /**
