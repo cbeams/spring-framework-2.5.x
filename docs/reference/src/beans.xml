@@ -2046,7 +2046,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   <sect1>
     <title>Setting a bean property or constructor arg from a field value</title>
 
-    <para>FileRetrievingFactoryBean is a FactoryBean which retrieves a static
+    <para>FieldRetrievingFactoryBean is a FactoryBean which retrieves a static
     or non-static field value. It is typically used for retrieving public
     static final constants, which may then be used to set a property value or
     constructor arg for another bean.</para>

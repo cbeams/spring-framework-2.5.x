@@ -631,7 +631,7 @@
         unchecked exception by the AOP proxy.</para>
 
         <para>An example of a before advice in Spring, which counts all
-        methods that return normally:</para>
+        method invocations:</para>
 
         <programlisting>public class CountingBeforeAdvice implements MethodBeforeAdvice {
     private int count;
