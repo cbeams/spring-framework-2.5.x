@@ -3,8 +3,11 @@ package org.springframework.web.context;
 import java.util.Locale;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
@@ -22,6 +25,7 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 	private WebApplicationContext root;
 
 	protected ConfigurableApplicationContext createContext() throws Exception {
+		InitAndIB.constructed = false;
 		root = new XmlWebApplicationContext();
 		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, "/org/springframework/web/context/WEB-INF/applicationContext.xml");
@@ -109,6 +113,64 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 
 		rod = (ITestBean) this.root.getBean("rod");
 		assertTrue("Bean from root context", "Roderick".equals(rod.getName()));
+	}
+
+	public void testInitializingBeanAndInitMethod() throws Exception {
+		assertFalse(InitAndIB.constructed);
+		InitAndIB iib = (InitAndIB) this.applicationContext.getBean("init-and-ib");
+		assertTrue(InitAndIB.constructed);
+		assertTrue(iib.afterPropertiesSetInvoked && iib.initMethodInvoked);
+		assertTrue(!iib.destroyed && !iib.customDestroyed);
+		this.applicationContext.close();
+		assertTrue(!iib.destroyed && !iib.customDestroyed);
+		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) this.applicationContext.getParent();
+		parent.close();
+		assertTrue(iib.destroyed && iib.customDestroyed);
+		parent.close();
+		assertTrue(iib.destroyed && iib.customDestroyed);
+	}
+
+
+	public static class InitAndIB implements InitializingBean, DisposableBean {
+
+		public static boolean constructed;
+
+		public boolean afterPropertiesSetInvoked, initMethodInvoked, destroyed, customDestroyed;
+
+		public InitAndIB() {
+			constructed = true;
+		}
+
+		public void afterPropertiesSet() {
+			if (this.initMethodInvoked)
+				fail();
+			this.afterPropertiesSetInvoked = true;
+		}
+
+		/** Init method */
+		public void customInit() throws ServletException {
+			if (!this.afterPropertiesSetInvoked)
+				fail();
+			this.initMethodInvoked = true;
+		}
+
+		public void destroy() {
+			if (this.customDestroyed)
+				fail();
+			if (this.destroyed) {
+				throw new IllegalStateException("Already destroyed");
+			}
+			this.destroyed = true;
+		}
+
+		public void customDestroy() {
+			if (!this.destroyed)
+				fail();
+			if (this.customDestroyed) {
+				throw new IllegalStateException("Already customDestroyed");
+			}
+			this.customDestroyed = true;
+		}
 	}
 
 }

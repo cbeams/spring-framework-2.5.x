@@ -14,4 +14,10 @@ import org.springframework.beans.factory.ListableBeanFactory;
  */
 public interface ConfigurableListableBeanFactory extends ListableBeanFactory, ConfigurableBeanFactory {
 
+	/**
+	 * Ensure that all singletons are instantiated.
+	 * To be invoked at the end of factory setup, if desired.
+	 */
+	void preInstantiateSingletons();
+
 }

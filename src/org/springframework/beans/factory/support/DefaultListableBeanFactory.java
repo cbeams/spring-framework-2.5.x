@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.1 2003-11-22 17:20:29 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.2 2003-11-25 20:12:18 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory implements ConfigurableListableBeanFactory {
 
@@ -205,13 +205,11 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory implements C
 	// Public methods
 	//---------------------------------------------------------------------
 
-	/**
-	 * Ensure that even potentially unreferenced singletons are instantiated.
-	 * Subclasses or callers should invoke this if they want this behavior.
-	 */
 	public void preInstantiateSingletons() {
 		// Ensure that unreferenced singletons are instantiated
-		logger.info("Pre-instantiating singletons in factory [" + this + "]");
+		if (logger.isInfoEnabled()) {
+			logger.info("Pre-instantiating singletons in factory [" + this + "]");
+		}
 		String[] beanNames = getBeanDefinitionNames();
 		for (int i = 0; i < beanNames.length; i++) {
 			RootBeanDefinition bd = getMergedBeanDefinition(beanNames[i], false);

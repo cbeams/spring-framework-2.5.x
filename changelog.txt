@@ -1,6 +1,13 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.50 2003-11-25 11:08:31 jhoeller Exp $
+$Id: changelog.txt,v 1.51 2003-11-25 20:12:04 jhoeller Exp $
+
+
+Changes in version 1.0 RC1 (XX.12.2003)
+---------------------------------------
+* dissolved event propagation support in BeanWrapper and DataBinder
+* added "preInstantiateSingletons" method to ConfigurableListableBeanFactory interface
+* fixed "lazy-init" support in AbstractApplicationContext, delegating to the factory's "preInstantiateSingletons" now
 
 
 Changes in version 1.0 M3 (25.11.2003)
@@ -176,6 +183,7 @@ Changes in version 1.0 M2 (23.10.2003)
 * combined webapp-typical/hibernate/aop skeletons into one single webapp-typical with multiple context definitions
 * introduced alternative Hibernate implementation of Petclinic, now shipping as the default configuration
 
+
 Changes in version 1.0 M1 (30.8.2003)
 -------------------------------------
 * changed package structure from com.interface21 to org.springframework
@@ -221,6 +229,7 @@ Changes in version 1.0 M1 (30.8.2003)
 * introduced support for Spring-aware Tiles component controller
 * added customization in AbstractPdfView
 
+
 Changes in version 0.9.1 (8.8.2003)
 -----------------------------------
 * revised distribution jar files (spring-beans, spring-jdbc, spring-full)
@@ -260,6 +269,7 @@ Changes in version 0.9.1 (8.8.2003)
 * new MVC-step-by-step tutorial
 * new article "The Spring Framework - A Lightweight Container"
 * new article "Container Resources vs Local Resources"
+
 
 Changes in version 0.9 (25.6.2003)
 ----------------------------------
