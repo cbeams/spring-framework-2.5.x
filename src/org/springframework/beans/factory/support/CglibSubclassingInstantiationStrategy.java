@@ -15,8 +15,6 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
@@ -26,11 +24,9 @@ import org.springframework.beans.factory.BeanFactory;
  * will still run without CGLIB being available.
  * 
  * @author Rod Johnson
- * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.1 2004-06-23 21:12:24 johnsonr Exp $
+ * @version $Id: CglibSubclassingInstantiationStrategy.java,v 1.2 2004-06-24 07:17:40 johnsonr Exp $
  */
 class CglibSubclassingInstantiationStrategy extends DefaultInstantiationStrategy {
-
-	private final Log log = LogFactory.getLog(getClass());
 
 	/** 
 	 * Index in the CGLIB callback array for passthrough behaviour,
