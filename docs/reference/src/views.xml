@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.17 2004-04-18 18:45:34 colins Exp $-->
+<!--$Id: views.xml,v 1.18 2004-05-08 22:55:56 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -7,8 +7,8 @@
     <title>Introduction</title>
 
     <para>One of the areas in which Spring excels is in the separation of view
-    technologies from the rest of the MVC framework. For example, deciding to use Velocity
-    or XSLT in place of an existing JSP is primarily a matter of
+    technologies from the rest of the MVC framework. For example, deciding to
+    use Velocity or XSLT in place of an existing JSP is primarily a matter of
     configuration. This chapter covers the major view technologies that work
     with Spring and touches briefly on how to add new ones. This chapter
     assumes you are already familiar with <xref linkend="mvc-viewresolver" />
@@ -20,8 +20,8 @@
     <title>Using Spring together with JSP &amp; JSTL</title>
 
     <para>Spring provides a couple of out-of-the-box solutions for JSP and
-    JSTL views (which are the most popular ones, incidentally). Using JSP
-    or JSTL is done using a normal viewresolver defined in the
+    JSTL views (which are the most popular ones, incidentally). Using JSP or
+    JSTL is done using a normal viewresolver defined in the
     WebApplicationContext. Furthermore, of course you need to write some JSPs
     that will actually render the view. This part describes some of the
     additional features Spring provides to facilitate JSP development.</para>
@@ -60,17 +60,17 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 &lt;/bean&gt;</programlisting>
 
       <para>The InternalResourceBundleViewResolver can be configured for using
-      JSPs as described above. As a best practice, we
-      strongly encourage placing your JSP files in a a directory under the WEB-INF
-      directory, so there can be no direct access by clients.</para>
+      JSPs as described above. As a best practice, we strongly encourage
+      placing your JSP files in a a directory under the WEB-INF directory, so
+      there can be no direct access by clients.</para>
     </sect2>
 
     <sect2 id="view-jsp-jstl">
       <title>'Plain-old' JSPs versus JSTL</title>
 
-      <para>When using Java Standard Tag Library you must use a special
-      view class, the <literal>JstlView</literal>, as JSTL needs some
-      preparation before things such as the i18N features will work.</para>
+      <para>When using Java Standard Tag Library you must use a special view
+      class, the <literal>JstlView</literal>, as JSTL needs some preparation
+      before things such as the i18N features will work.</para>
     </sect2>
 
     <sect2 id="view-jsp-tags">
@@ -79,11 +79,11 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       <para>Spring provides data binding of request parameters to command
       objects as described in earlier chapters. To facilitate the development
       of JSP pages in combination with those data binding features, Spring
-      provides a few tags that make things even easier. 
-      All Spring tags have <emphasis>html escaping</emphasis> features to
-      enable or disable escaping of characters.</para>
+      provides a few tags that make things even easier. All Spring tags have
+      <emphasis>html escaping</emphasis> features to enable or disable
+      escaping of characters.</para>
 
-      <para>The tag libarry descriptor (TLD) is included in the
+      <para>The tag library descriptor (TLD) is included in the
       <literal>spring.jar</literal> as well in the distribution itself. More
       information about the individual tags can be found online: <ulink
       url="http://www.springframework.org/docs/taglib/index.html"></ulink>.</para>
@@ -138,7 +138,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       Tiles concepts, please have a look at <ulink
       url="http://jakarta.apache.org/struts"></ulink>. In Spring this is done
       using the <literal>TilesConfigurer</literal>. Have a look at the
-      following piece of example ApplicationContext configuration: 
+      following piece of example ApplicationContext configuration:
       <programlisting>&lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer"&gt;
     &lt;property name="factoryClass"&gt;
         &lt;value&gt;org.apache.struts.tiles.xmlDefinition.I18nFactorySet&lt;/value&gt;
@@ -208,9 +208,10 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
     <title>Velocity</title>
 
     <para>Velocity is a view technology developed by the Jakarta Project. More
-    information about Velocity can be found at
-    http://jakarta.apache.org/velocity. This section describes how to
-    integrate the Velocity view technology for use with Spring.</para>
+    information about Velocity can be found at <ulink
+    url="http://jakarta.apache.org/velocity">http://jakarta.apache.org/velocity</ulink>.
+    This section describes how to integrate the Velocity view technology for
+    use with Spring.</para>
 
     <sect2 id="view-velocity-dependencies">
       <title>Dependencies</title>
@@ -233,65 +234,65 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       <title>Dispatcher Servlet Context</title>
 
       <para>The configuration file for your Spring dispatcher servlet (usually
-      <literal>WEB-INF/[servletname]-servlet.xml</literal>) should already
-      contain a bean definition for the view resolver. We'll also add a bean
-      here to configure the Velocity environment. I've chosen to call my
-      dispatcher 'frontcontroller' so my config file names reflect
-      this.</para>
+      <literal>WEB-INF/[servletname]-servlet.xml</literal>) will require a
+      bean definition for the view resolver. We'll also add a bean here to
+      configure the Velocity environment. I've chosen to call my dispatcher
+      'frontcontroller' so my config file names reflect this. This example
+      uses the convenience <literal>VelocityViewResolver</literal> as it
+      offers the simplest configuration. More flexibility when required can be
+      obtained from different types of view resolution strategy.</para>
 
-      <para>The following code examples show the various configuration files
-      with appropriate comments.</para>
+      <para>The following code examples show the two beans in the simplest
+      configuration. See the JavaDocs for these classes for more information
+      on the various options available.</para>
 
       <programlisting>&lt;!-- ===========================================================--&gt;
-&lt;!-- View resolver. Required by web framework.                  --&gt;
-&lt;!-- ===========================================================--&gt;
-&lt;!--
-  View resolvers can be configured with ResourceBundles or XML files.  If you need
-  different view resolving based on Locale, you have to use the resource bundle resolver, 
-  otherwise it makes no difference.  I simply prefer to keep the Spring configs and 
-  contexts in XML.  See Spring documentation for more info.
---&gt;
-&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.XmlViewResolver"&gt;
-    &lt;property name="cache"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="location"&gt;&lt;value&gt;/WEB-INF/frontcontroller-views.xml&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;
-
-&lt;!-- ===========================================================--&gt;
 &lt;!-- Velocity configurer.                                       --&gt;
 &lt;!-- ===========================================================--&gt;
 &lt;!--
-  The next bean sets up the Velocity environment for us based on a properties file, the 
-  location of which is supplied here and set on the bean in the normal way.  My example shows
-  that the bean will expect to find our velocity.properties file in the root of the 
-  WEB-INF folder.  In fact, since this is the default location, it's not necessary for me
-  to supply it here.  Another possibility would be to specify all of the velocity
-  properties here in a property set called "velocityProperties" and dispense with the
-  actual velocity.properties file altogether.
+  This bean sets up the Velocity environment for us based on a root path for templates.
+  Optionally, a properties file can be specified for more control over the Velocity
+  environment, but the defaults are pretty sane for file based template loading.
 --&gt;
 &lt;bean 
     id="velocityConfig" 
     class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
     singleton="true"&gt;
-    &lt;property name="configLocation"&gt;&lt;value&gt;/WEB-INF/velocity.properties&lt;/value&gt;&lt;/property&gt;          
+    &lt;property name="resourceLoaderPath"&gt;&lt;value&gt;/WEB-INF/velocity/&lt;/value&gt;&lt;/property&gt;          
+&lt;/bean&gt;
+
+&lt;!-- ===========================================================--&gt;
+&lt;!-- View resolver. Required by web framework.                  --&gt;
+&lt;!-- ===========================================================--&gt;
+&lt;!--
+  View resolvers can also be configured with ResourceBundles or XML files.  If you need
+  different view resolving based on Locale, you have to use the resource bundle resolver.
+--&gt;
+&lt;bean 
+    id="viewResolver" 
+    class="org.springframework.web.servlet.view.velocity.VelocityViewResolver"&gt;
+    &lt;property name="cache"&gt;&lt;value&gt;true&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="prefix"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
+    &lt;property name="suffix"&gt;&lt;value&gt;.vm&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting>
     </sect2>
 
     <sect2 id="view-velocity-configuration-velocityprops">
       <title>Velocity.properties</title>
 
-      <para>This file contains the values that are passed to the Velocity
-      runtime in order to configure velocity itself. Only a few properties are
-      actually required, but many more optional properties are available - see
-      the Velocity docs for more information. Here, I'm just demonstrating the
-      bare minimum to get Velocity up and running in your Spring MVC
-      application.</para>
+      <para>This file is completely optional, but if specified, contains the
+      values that are passed to the Velocity runtime in order to configure
+      velocity itself. Only a few properties are actually required, but many
+      more optional properties are available - see the Velocity docs for more
+      information. If you need this file, specify its location on the
+      <literal>VelocityConfigurer</literal> bean definition above.</para>
 
       <sect3 id="view-velocity-template-locations">
         <title>Template Locations</title>
 
-        <para>The main property values concern the location of the Velocity
-        templates themselves. Velocity templates can be loaded from the
-        classpath or the file system and there are pros and cons for both.
+        <para>The most important property values concern the location of the
+        Velocity templates themselves. Velocity templates can be loaded from
+        the classpath or the file system and there are pros and cons for both.
         Loading from the classpath is entirely portable and will work on all
         target servers, but you may find that the templates clutter your java
         packages (unless you create a new source tree for them). A further
@@ -383,62 +384,6 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
     &lt;/props&gt;
 &lt;/property&gt;</programlisting>
       </sect3>
-
-      <sect3 id="view-velocity-default-properties">
-        <title>Default configuration (file resource loaders)</title>
-
-        <para>Note that as of Spring version 1.0-m4 you can avoid using a
-        properties file or inline properties to define file system loading of
-        templates by putting the following property in the Velocity config
-        bean which will cause the other values to be figured out.</para>
-
-        <programlisting>&lt;property name="resourceLoaderPath"&gt;&lt;value&gt;/WEB-INF/velocity/&lt;/value&gt;&lt;/property&gt;</programlisting>
-      </sect3>
-    </sect2>
-
-    <sect2 id="view-velocity-configuration-viewconfig">
-      <title>View configuration</title>
-
-      <para>The last step in configuration is to define some views that will
-      be rendered with velocity templates. Views are always defined in a
-      consistent manner in Spring context files. As noted earlier, this
-      example uses an XML file to define view beans, but a properties file
-      (ResourceBundle) can also be used. The name of the view definition file
-      was defined earlier in the ViewResolver bean - part of the
-      <literal>WEB-INF/frontcontroller-servlet.xml</literal> file.</para>
-
-      <programlisting>&lt;!--
-  Views can be hierarchical, here's an example of a parent view that 
-  simply defines the class to use and sets a default template which
-  will normally be overridden in child definitions.
---&gt;
-&lt;bean id="parentVelocityView" class="org.springframework.web.servlet.view.velocity.VelocityView"&gt;
-    &lt;property name="url"&gt;&lt;value&gt;mainTemplate.vm&lt;/value&gt;&lt;/property&gt;        
-&lt;/bean&gt;
-
-&lt;!--
-  - The main view for the home page.  Since we don't set a template name, the value
-  from the parent is used.
---&gt;
-&lt;bean id="welcomeView" parent="parentVelocityView"&gt;
-  &lt;property name="attributes"&gt;
-      &lt;props&gt;
-          &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
-      &lt;/props&gt;
-  &lt;/property&gt;     
-&lt;/bean&gt;  
-
-&lt;!--
-  - Another view - this one defines a different velocity template.
---&gt;
-&lt;bean id="secondaryView" parent="parentVelocityView"&gt;
-    &lt;property name="url"&gt;&lt;value&gt;secondaryTemplate.vm&lt;/value&gt;&lt;/property&gt;  
-    &lt;property name="attributes"&gt;
-        &lt;props&gt;
-            &lt;prop key="title"&gt;My Velocity Secondary Page&lt;/prop&gt;
-        &lt;/props&gt;
-    &lt;/property&gt;    
-&lt;/bean&gt;</programlisting>
     </sect2>
 
     <sect2 id="view-velocity-templates">
@@ -447,22 +392,21 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
       <para>Finally, you simply need to create the actual velocity templates.
       We have defined views that reference two templates, mainTemplate.vm and
       secondaryTemplate.vm Both of these files will live in
-      <literal>WEB-INF/velocity/</literal> as noted in the velocity.properties
-      file above. If you chose a classpath loader in velocity.properties,
-      these files would live in the default package
+      <literal>WEB-INF/velocity/</literal> as noted in the Velocity config
+      above. If you chose a classpath loader in velocity.properties, these
+      files would live in the default package
       (<literal>WEB-INF/classes</literal>), or in a jar file under
-      <literal>WEB-INF/lib</literal>. Here's what our 'secondaryView' might
-      look like (simplified HTML)</para>
+      <literal>WEB-INF/lib</literal>. Here's what our<literal>
+      /WEB-INF/velocity/firstView.vm</literal> template might look
+      like.</para>
 
-      <programlisting>## $title is set in the view definition file for this view.
+      <programlisting>## model objects are set in the controller and referenced
+## via bean properties or method names.  See the Velocity 
+## docs for info
 &lt;html&gt;
     &lt;head&gt;&lt;title&gt;$title&lt;/title&gt;&lt;/head&gt;
     &lt;body&gt;
         &lt;h1&gt;This is $title!!&lt;/h1&gt;
-
-        ## model objects are set in the controller and referenced
-        ## via bean properties o method names.  See the Velocity 
-        ## docs for info
 
         Model Value: $model.value
         Model Method Return Value: $model.getReturnVal()
@@ -471,8 +415,8 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
 &lt;/html&gt;</programlisting>
 
       <para>Now, when your controllers return a ModelAndView with the
-      "secondaryView" set as the view to render, Velocity should kick in with
-      the above page.</para>
+      "firstView" set as the view to render, Velocity should kick in with the
+      above page.</para>
     </sect2>
 
     <sect2 id="view-velocity-forms">
@@ -496,23 +440,22 @@ runtime.log.logsystem.log4j.category=com.mycompany.myapplication </programlistin
         order to gain access to the messages, the
         <literal>RequestContext</literal> object needs to be exposed to your
         Velocity templates in the <literal>VelocityContext</literal>. Amend
-        your template definition in views.properties or views.xml file to give
-        a name to this attribute (giving it a name is what causes it to be
+        your configurer definition in *-servlet.xml or your individual view
+        definitions in views.properties or views.xml file to give a name to
+        this attribute (giving it a name is what causes it to be
         exposed)</para>
 
-        <programlisting>&lt;bean id="welcomeView" parent="parentVelocityView"&gt;
-    &lt;property name="requestContextAttribute"&gt;&lt;value&gt;rc&lt;/value&gt;&lt;/property&gt;  
-    &lt;property name="attributes"&gt;
-        &lt;props&gt;
-            &lt;prop key="title"&gt;My Velocity Home Page&lt;/prop&gt;
-        &lt;/props&gt;
-    &lt;/property&gt;     
+        <programlisting>&lt;bean 
+    id="viewResolver" 
+    class="org.springframework.web.servlet.view.velocity.VelocityViewResolver"&gt;
+     &lt;!-- other props omitted --&gt;
+    &lt;property name="requestContextAttribute"&gt;&lt;value&gt;rc&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
         <para>The example above is based on our earlier example and sets the
-        RequestContext attribute name to be rc. All Velocity views that
-        inherit from this parent view will now have an additional object
-        available to them via the reference <literal>$rc</literal></para>
+        RequestContext attribute name to be rc. All Velocity views that are
+        resolved by this bean will now have an additional object available to
+        them via the reference <literal>$rc</literal></para>
       </sect3>
 
       <sect3 id="view-velocity-macrohelper">
@@ -737,18 +680,16 @@ public class HomePage extends AbstractXsltView {
         <para>The views.properties file (or equivalent xml definition if
         you're using an XML based view resolver as we did in the Velocity
         examples above) looks like this for the one-view application that is
-        'My First Words'.. <programlisting>
-home.class=xslt.HomePage
+        'My First Words'.. <programlisting>home.class=xslt.HomePage
 home.stylesheetLocation=/WEB-INF/xsl/home.xslt
-home.root=words
-</programlisting> Here, you can see how the view is tied in with the HomePage
-        class just written which handles the model domification in the first
-        property '.class'. The stylesheetLocation property obviously points to
-        the XSLT file which will handle the XML transformation into HTML for
-        us and the final property '.root' is the name that will be used as the
-        root of the XML document. This gets passed to the HomePage class above
-        in the second parameter to the <literal>createDomNode</literal>
-        method.</para>
+home.root=words</programlisting> Here, you can see how the view is tied in
+        with the HomePage class just written which handles the model
+        domification in the first property '.class'. The stylesheetLocation
+        property obviously points to the XSLT file which will handle the XML
+        transformation into HTML for us and the final property '.root' is the
+        name that will be used as the root of the XML document. This gets
+        passed to the HomePage class above in the second parameter to the
+        <literal>createDomNode</literal> method.</para>
       </sect3>
 
       <sect3 id="view-xslt-transforming">
