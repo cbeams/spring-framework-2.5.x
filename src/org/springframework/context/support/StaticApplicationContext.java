@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -65,7 +66,7 @@ public class StaticApplicationContext extends AbstractApplicationContext {
 	protected void refreshBeanFactory() {
 	}
 
-	protected ListableBeanFactoryImpl getBeanFactory() {
+	protected ConfigurableListableBeanFactory getBeanFactory() {
 		return defaultBeanFactory;
 	}
 

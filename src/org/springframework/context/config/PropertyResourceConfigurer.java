@@ -7,8 +7,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 
@@ -41,11 +41,11 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 
 	private Properties properties;
 
-	public final void setOrder(int order) {
+	public void setOrder(int order) {
 	  this.order = order;
 	}
 
-	public final int getOrder() {
+	public int getOrder() {
 	  return order;
 	}
 
@@ -66,13 +66,13 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 		this.properties = properties;
 	}
 
-	public void postProcessBeanFactory(ListableBeanFactoryImpl beanFactory) throws BeansException {
-		Properties prop = new Properties();
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		Properties props = new Properties();
 
 		if (this.location != null) {
 			logger.info("Loading properties file [" + this.location + "]");
 			try {
-				prop.load(getApplicationContext().getResourceAsStream(this.location));
+				props.load(getApplicationContext().getResourceAsStream(this.location));
 			}
 			catch (IOException ex) {
 				logger.warn("Could not load properties [" + this.location + "]: " + ex.getMessage());
@@ -82,17 +82,18 @@ public abstract class PropertyResourceConfigurer extends ApplicationObjectSuppor
 		if (this.properties != null) {
 			if (logger.isDebugEnabled())
 				logger.debug("Applying directly specified properties [" + this.properties + "]");
-			prop.putAll(this.properties);
+			props.putAll(this.properties);
 		}
 
 		if (this.location != null || this.properties != null) {
-			processProperties(beanFactory, prop);
+			processProperties(beanFactory, props);
 		}
 		else {
 			logger.warn("No property resource location specified");
 		}
 	}
 
-	protected abstract void processProperties(ListableBeanFactoryImpl beanFactory, Properties prop) throws BeansException;
+	protected abstract void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
+			throws BeansException;
 
 }

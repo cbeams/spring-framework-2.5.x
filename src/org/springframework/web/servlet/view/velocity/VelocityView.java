@@ -58,7 +58,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.8 2003-10-31 17:01:20 jhoeller Exp $
+ * @version $Id: VelocityView.java,v 1.9 2003-11-04 23:10:04 jhoeller Exp $
  * @see VelocityConfiguration
  * @see VelocityConfigurer
  */
@@ -142,7 +142,8 @@ public class VelocityView extends AbstractView {
 			throw new ApplicationContextException("Must set templateName property on VelocityView");
 		}
 
-		Map configs = BeanFactoryUtils.beansOfTypeIncludingAncestors(VelocityConfiguration.class, getWebApplicationContext());
+		Map configs = BeanFactoryUtils.beansOfTypeIncludingAncestors(getWebApplicationContext(),
+																																 VelocityConfiguration.class, true, true);
 		if (configs.size() == 1) {
 			// We need exactly one VelocityConfiguration bean
 			VelocityConfiguration vconfig = (VelocityConfiguration) configs.values().iterator().next();

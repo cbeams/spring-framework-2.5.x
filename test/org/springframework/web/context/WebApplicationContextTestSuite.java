@@ -6,9 +6,9 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.ITestBean;
 import org.springframework.context.AbstractApplicationContextTests;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
+import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockServletContext;
 
@@ -21,14 +21,14 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 	
 	private WebApplicationContext root;
 
-	protected ApplicationContext createContext() throws Exception {
+	protected ConfigurableApplicationContext createContext() throws Exception {
 		root = new XmlWebApplicationContext();
 		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, "/org/springframework/web/context/WEB-INF/applicationContext.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM, "/org/springframework/web/context/WEB-INF/");
 		this.servletContext = sc;
 		root.setServletContext(sc);
-		WebApplicationContext wac = new XmlWebApplicationContext(root, "test-servlet");
+		XmlWebApplicationContext wac = new XmlWebApplicationContext(root, "test-servlet");
 		wac.setServletContext(sc);
 		return wac;
 	}

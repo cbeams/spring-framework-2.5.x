@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -88,7 +89,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.11 2003-11-02 13:05:26 johnsonr Exp $
+ * @version $Id: DispatcherServlet.java,v 1.12 2003-11-04 23:10:03 jhoeller Exp $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -255,7 +256,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initHandlerMappings() throws ServletException {
 		//Find all HandlerMappings in the ApplicationContext
-		this.handlerMappings = new ArrayList(getWebApplicationContext().getBeansOfType(HandlerMapping.class).values());
+		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerMapping.class, true, false);
+		this.handlerMappings = new ArrayList(matchingBeans.values());
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings.isEmpty()) {
@@ -289,7 +291,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initHandlerAdapters() throws ServletException {
 		//Find all HandlerAdapters in the ApplicationContext
-		this.handlerAdapters = new ArrayList(getWebApplicationContext().getBeansOfType(HandlerAdapter.class).values());
+		Map matchingBeans = getWebApplicationContext().getBeansOfType(HandlerAdapter.class, true, false);
+		this.handlerAdapters = new ArrayList(matchingBeans.values());
 		// Ensure we have at least one HandlerAdapter, by registering
 		// a default HandlerAdapter if no other adapters are found.
 		if (this.handlerAdapters.isEmpty()) {

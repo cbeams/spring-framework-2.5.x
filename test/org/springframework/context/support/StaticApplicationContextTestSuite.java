@@ -20,24 +20,23 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.LBIInit;
 import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.context.ACATest;
 import org.springframework.context.AbstractApplicationContextTests;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.BeanThatListens;
+import org.springframework.context.config.ConfigurableApplicationContext;
 
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.8 2003-10-31 17:01:29 jhoeller Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.9 2003-11-04 23:10:04 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
 	protected StaticApplicationContext sac;
 
 	/** Run for each test */
-	protected ApplicationContext createContext() throws Exception {
+	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 		parent.addListener(parentListener) ;
 		Map m = new HashMap();
@@ -109,7 +108,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 		ACATest acaPr = (ACATest) getListableBeanFactory().getBean("aca-prototype");
 		acaPr.getApplicationContext();
 		TestInterceptor ti = (TestInterceptor) getListableBeanFactory().getBean("testInterceptorForCreator");
-		assertEquals(4, ti.nrOfInvocations);
+		assertEquals(2, ti.nrOfInvocations);
 		TestAutoProxyCreator tapc = (TestAutoProxyCreator) getListableBeanFactory().getBean("testAutoProxyCreator");
 		assertEquals(3, tapc.testInterceptor.nrOfInvocations);
 	}
@@ -124,8 +123,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 			setOrder(0);
 		}
 
-		protected Object[] getInterceptorsAndPointcutsForBean(Object bean, String name,
-		                                                      RootBeanDefinition definition) {
+		protected Object[] getInterceptorsAndPointcutsForBean(Object bean, String name) {
 			if (bean instanceof StaticMessageSource)
 				return DO_NOT_PROXY;
 			else if (name.startsWith("aca"))

@@ -31,7 +31,7 @@ import com.mockobjects.servlet.MockHttpServletResponse;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.4 2003-10-31 17:01:21 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.5 2003-11-04 23:10:05 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -39,7 +39,7 @@ public class VelocityViewTests extends TestCase {
 		VelocityView vv = new VelocityView();
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getBeansOfType(VelocityConfiguration.class);
+		wac.getBeansOfType(VelocityConfiguration.class, true, true);
 		wmc.setReturnValue(new HashMap());
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
@@ -110,7 +110,7 @@ public class VelocityViewTests extends TestCase {
 				};
 			}
 		};
-		wac.getBeansOfType(VelocityConfiguration.class);
+		wac.getBeansOfType(VelocityConfiguration.class, true, true);
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);
@@ -172,7 +172,7 @@ public class VelocityViewTests extends TestCase {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
 		};
-		wac.getBeansOfType(VelocityConfiguration.class);
+		wac.getBeansOfType(VelocityConfiguration.class, true, true);
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);

@@ -8,11 +8,11 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,14 +29,17 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
-import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * Abstract superclass that makes implementing a BeanFactory very easy.
@@ -55,9 +58,9 @@ import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.11 2003-10-31 17:01:25 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.12 2003-11-04 23:10:02 jhoeller Exp $
  */
-public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
+public abstract class AbstractBeanFactory implements HierarchicalBeanFactory, ConfigurableBeanFactory {
 
 	/**
 	 * Used to dereference a FactoryBean and distinguish it from
@@ -117,30 +120,18 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		return parentBeanFactory;
 	}
 
-	/**
-	 * Add a new BeanPostPrcoessor that will get applied to
-	 * beans created with this factory.
-	 */
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		this.beanPostProcessors.add(beanPostProcessor);
 	}
 
 	/**
-	 * Return the list of BeanPostProcessors that will get applied to
-	 * beans created with this factory.
+	 * Return the list of BeanPostProcessors that will get applied
+	 * to beans created with this factory.
 	 */
 	public List getBeanPostProcessors() {
 		return beanPostProcessors;
 	}
 
-	/**
-	 * Ignore the given dependency type for autowiring.
-	 * <p>This will typically be used for dependencies that are resolved
-	 * in other ways, like BeanFactory through BeanFactoryAware or
-	 * ApplicationContext through ApplicationContextAware.
-	 * @see BeanFactoryAware
-	 * @see org.springframework.context.ApplicationContextAware
-	 */
 	public void ignoreDependencyType(Class type) {
 		this.ignoreDependencyTypes.add(type);
 	}
@@ -183,7 +174,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * checking the parent bean factory if not found.
 	 * @param name name of the bean to retrieve
 	 */
-	public final Object getBean(String name) {
+	public Object getBean(String name) {
 		if (name == null)
 			throw new NoSuchBeanDefinitionException(null, "Cannot get bean with null name");
 		try {
@@ -203,7 +194,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		}
 	}
 
-	public final Object getBean(String name, Class requiredType) throws BeansException {
+	public Object getBean(String name, Class requiredType) throws BeansException {
 		Object bean = getBean(name);
 		Class clazz = bean.getClass();
 		if (!requiredType.isAssignableFrom(clazz)) {
@@ -225,7 +216,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		}
 	}
 
-	public final String[] getAliases(String pname) {
+	public String[] getAliases(String pname) {
 		String name = transformedBeanName(pname);
 		List aliases = new ArrayList();
 		for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
@@ -250,7 +241,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * at least not if we pre-instantiate singletons.
 	 * @param pname name that may include factory dereference prefix
 	 */
-	private final synchronized Object getSharedInstance(String pname) throws BeansException {
+	private synchronized Object getSharedInstance(String pname) throws BeansException {
 		// Get rid of the dereference prefix if there is one
 		String name = transformedBeanName(pname);
 
@@ -353,7 +344,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
 		callLifecycleMethodsIfNecessary(bean, name, mergedBeanDefinition, instanceWrapper);
 
-		return applyBeanPostProcessors(bean, name, mergedBeanDefinition);
+		return applyBeanPostProcessors(bean, name);
 	}
 
 	/**
@@ -381,13 +372,12 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param bean the new bean instance
 	 * @param name the name of the bean
-	 * @param definition the definition that the bean was created with
 	 * @return the bean instance to use, either the original or a wrapped one
 	 */
-	private Object applyBeanPostProcessors(Object bean, String name, RootBeanDefinition definition) {
+	private Object applyBeanPostProcessors(Object bean, String name) {
 		Object result = bean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
-			result = ((BeanPostProcessor) it.next()).postProcessBean(result, name, definition);
+			result = ((BeanPostProcessor) it.next()).postProcessBean(result, name);
 		}
 		return result;
 	}
@@ -559,6 +549,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	private void callLifecycleMethodsIfNecessary(Object bean, String name, RootBeanDefinition rbd, BeanWrapper bw)
 	    throws BeansException {
 
+		if (bean instanceof BeanNameAware) {
+			((BeanNameAware) bean).setBeanName(name);
+		}
+
 		if (bean instanceof InitializingBean) {
 			logger.debug("Calling afterPropertiesSet() on bean with name '" + name + "'");
 			try {
@@ -593,7 +587,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * Make a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
 	 * @return a merged RootBeanDefinition with overriden properties
 	 */
-	protected final RootBeanDefinition getMergedBeanDefinition(String name) throws NoSuchBeanDefinitionException {
+	protected RootBeanDefinition getMergedBeanDefinition(String name) throws NoSuchBeanDefinitionException {
 		try {
 			AbstractBeanDefinition bd = getBeanDefinition(name);
 			if (bd instanceof RootBeanDefinition) {
@@ -633,7 +627,26 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		}
 		return parent;
 	}
-	
+
+	/**
+	 * Register property value for a specific bean, overriding an existing value.
+	 * If no previous value exists, a new one will be added.
+	 * <p>This is intended for bean factory post processing, i.e. overriding
+	 * certain property values after parsing the original bean definitions.
+	 * @param beanName name of the bean
+	 * @param pv property name and value
+	 * @throws org.springframework.beans.BeansException if the property values of the specified bean are immutable
+	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
+	 */
+	public void overridePropertyValue(String beanName, PropertyValue pv) throws BeansException {
+		AbstractBeanDefinition bd = getBeanDefinition(beanName);
+		if (!(bd.getPropertyValues() instanceof MutablePropertyValues)) {
+			throw new FatalBeanException("Cannot modify immutable property values for bean '" + beanName + "'");
+		}
+		MutablePropertyValues pvs = (MutablePropertyValues) bd.getPropertyValues();
+		pvs.addOrOverridePropertyValue(pv);
+	}
+
 	/**
 	 * Given a bean name, create an alias. This must respect prototype/
 	 * singleton behaviour. We typically use this method to support
@@ -641,8 +654,8 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * @param name name of the bean
 	 * @param alias alias that will behave the same as the bean names
 	 */
-	public final void registerAlias(String name, String alias) throws BeansException {
-		logger.debug("Creating alias '" + alias + "' for bean with name '" + name + "'");
+	public void registerAlias(String name, String alias) throws BeansException {
+		logger.debug("Registering alias '" + alias + "' for bean with name '" + name + "'");
 		Object registeredName = this.aliasMap.get(alias);
 		if (registeredName != null) {
 			throw new FatalBeanException("Cannot register alias '" + alias + "' for bean name '" + name +
@@ -651,11 +664,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		this.aliasMap.put(alias, name);
 	}
 
-	/**
-	 * Destroy all cached singletons in this factory.
-	 * To be called on shutdown of a factory.
-	 */
-	public final void destroySingletons() {
+	public void destroySingletons() {
 		logger.info("Destroying singletons in factory {" + this + "}");
 
 		for (Iterator it = this.singletonCache.keySet().iterator(); it.hasNext();) {

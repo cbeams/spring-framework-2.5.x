@@ -4,9 +4,9 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.springframework.context.AbstractApplicationContextTests;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockServletContext;
@@ -218,13 +218,13 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 		return themeMsgSource.getMessage(code, args, defaultMessage, locale);
 	}
 
-	protected ApplicationContext createContext() throws Exception {
+	protected ConfigurableApplicationContext createContext() throws Exception {
 		root = new XmlWebApplicationContext();
 		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, "/org/springframework/web/context/WEB-INF/applicationContext.xml");
 		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM, "/org/springframework/web/context/WEB-INF/");
 		root.setServletContext(sc);
-		WebApplicationContext wac = new XmlWebApplicationContext(root, "test-servlet");
+		XmlWebApplicationContext wac = new XmlWebApplicationContext(root, "test-servlet");
 		wac.setServletContext(sc);
 
 		Theme theme = wac.getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);

@@ -6,11 +6,11 @@ import java.util.Locale;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.web.context.WebApplicationContext;
+import com.mockobjects.servlet.MockPageContext;
+
+import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.servlet.DispatcherServlet;
-
-import com.mockobjects.servlet.MockPageContext;
 
 /**
  * @author Juergen Hoeller
@@ -140,7 +140,7 @@ public class MessageTestSuite extends AbstractTagTest {
 	
 	public void testNullMessageSource() throws JspException {
 		MockPageContext pc = createPageContext();
-		WebApplicationContext ctx = (WebApplicationContext)pc.getRequest().getAttribute(
+		ConfigurableApplicationContext ctx = (ConfigurableApplicationContext)pc.getRequest().getAttribute(
 			DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		ctx.close();
 		

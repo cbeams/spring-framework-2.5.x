@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
@@ -100,7 +101,10 @@ public class ContextLoader {
 	 */
 	public static void closeContext(ServletContext servletContext) {
 		servletContext.log("Closing root WebApplicationContext");
-		WebApplicationContextUtils.getWebApplicationContext(servletContext).close();
+		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+		if (wac instanceof ConfigurableApplicationContext) {
+			((ConfigurableApplicationContext) wac).close();
+		}
 	}
 
 }

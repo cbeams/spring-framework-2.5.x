@@ -35,7 +35,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * </ul>
  *
  * @author Rod Johnson
- * @version $Id: ApplicationContext.java,v 1.4 2003-09-02 21:59:09 johnsonr Exp $
+ * @version $Id: ApplicationContext.java,v 1.5 2003-11-04 23:10:02 jhoeller Exp $
  */
 public interface ApplicationContext extends MessageSource, ListableBeanFactory, HierarchicalBeanFactory {
 	
@@ -65,24 +65,6 @@ public interface ApplicationContext extends MessageSource, ListableBeanFactory, 
 	 * @return context options (must not be null).
 	 */
 	ContextOptions getOptions();
-
-	/**
-	 * Load or refresh the persistent representation of the configuration,
-	 * which might for example be an XML file, properties file or
-	 * relational database schema.
-	 * @throws ApplicationContextException if the config cannot be loaded
-	 * @throws BeansException if the bean factory could not be initialized
-	 */
-	void refresh() throws ApplicationContextException, BeansException;
-
-	/**
-	 * Close this application context, releasing all resources and locks
-	 * that the implementation might hold. This includes disposing all
-	 * cached singleton beans.
-	 * <p>Note: Does <i>not</i> invoke close on a parent context.
-	 * @throws ApplicationContextException if there were fatal errors
-	 */
-	void close() throws ApplicationContextException;
 
 	/**
 	 * Notify all listeners registered with this application of an application

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 import javax.servlet.ServletException;
 
@@ -31,7 +32,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.9 2003-10-31 17:01:28 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.10 2003-11-04 23:10:04 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -295,14 +296,42 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 	public void testAutoAliasing() throws Exception {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		List beanNames = Arrays.asList(xbf.getBeanDefinitionNames());
+
 		TestBean tb1 = (TestBean) xbf.getBean("aliased");
 		TestBean alias1 = (TestBean) xbf.getBean("myalias");
 		assertTrue(tb1 == alias1);
+		List tb1Aliases = Arrays.asList(xbf.getAliases("aliased"));
+		assertEquals(1, tb1Aliases.size());
+		assertTrue(tb1Aliases.contains("myalias"));
+		assertTrue(beanNames.contains("aliased"));
+		assertFalse(beanNames.contains("myalias"));
+
 		TestBean tb2 = (TestBean) xbf.getBean("multiAliased");
 		TestBean alias2 = (TestBean) xbf.getBean("alias1");
 		TestBean alias3 = (TestBean) xbf.getBean("alias2");
 		assertTrue(tb2 == alias2);
 		assertTrue(tb2 == alias3);
+		List tb2Aliases = Arrays.asList(xbf.getAliases("multiAliased"));
+		assertEquals(2, tb2Aliases.size());
+		assertTrue(tb2Aliases.contains("alias1"));
+		assertTrue(tb2Aliases.contains("alias2"));
+		assertTrue(beanNames.contains("multiAliased"));
+		assertFalse(beanNames.contains("alias1"));
+		assertFalse(beanNames.contains("alias2"));
+
+		TestBean tb3 = (TestBean) xbf.getBean("aliasWithoutId1");
+		TestBean alias4 = (TestBean) xbf.getBean("aliasWithoutId2");
+		TestBean alias5 = (TestBean) xbf.getBean("aliasWithoutId3");
+		assertTrue(tb3 == alias4);
+		assertTrue(tb3 == alias5);
+		List tb3Aliases = Arrays.asList(xbf.getAliases("aliasWithoutId1"));
+		assertEquals(2, tb2Aliases.size());
+		assertTrue(tb3Aliases.contains("aliasWithoutId2"));
+		assertTrue(tb3Aliases.contains("aliasWithoutId3"));
+		assertTrue(beanNames.contains("aliasWithoutId1"));
+		assertFalse(beanNames.contains("aliasWithoutId2"));
+		assertFalse(beanNames.contains("aliasWithoutId3"));
 	}
 
 	public void testEmptyMap() throws Exception {

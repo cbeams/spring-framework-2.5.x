@@ -13,7 +13,7 @@ import org.springframework.beans.PropertyValues;
  * "inherited", although it's possible to override them by redefining
  * them in the property values associated with the child.
  * @author Rod Johnson
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
@@ -36,6 +36,10 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 		if (!(obj instanceof ChildBeanDefinition))
 			return false;
 		return super.equals(obj) && ((ChildBeanDefinition) obj).getParentName().equals(this.getParentName());
+	}
+
+	public String toString() {
+		return "Child bean definition with parent '" + getParentName() + "'";
 	}
 
 }

@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -62,7 +64,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.13 2003-10-31 17:01:27 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.14 2003-11-04 23:10:02 jhoeller Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -281,27 +283,35 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 	/**
 	 * Parse an element definition: We know this is a BEAN element.
+	 * Bean elements specify their canonical name as id attribute
+	 * and their aliases as a delimited name attribute.
+	 * If no id specified, use the first name in the name attribute as
+	 * canonical name, registering all others as aliases.
 	 */
 	private void loadBeanDefinition(Element el, String defaultDependencyCheck, String defaultAutowire) {
-		// The DTD guarantees an id attribute is present
 		String id = el.getAttribute(ID_ATTRIBUTE);
-		logger.debug("Parsing bean definition with id '" + id + "'");
-
-		// Create BeanDefinition now: we'll build up PropertyValues later
-		AbstractBeanDefinition beanDefinition;
-
+		String nameAttr = el.getAttribute(NAME_ATTRIBUTE);
+		List aliases = new ArrayList();
+		if (nameAttr != null && !"".equals(nameAttr)) {
+			aliases.addAll(Arrays.asList(StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS, true, true)));
+		}
 		PropertyValues pvs = getPropertyValueSubElements(el);
-		beanDefinition = parseBeanDefinition(el, id, pvs, defaultDependencyCheck, defaultAutowire);
-		registerBeanDefinition(id, beanDefinition);
+		AbstractBeanDefinition beanDefinition = parseBeanDefinition(el, id, pvs, defaultDependencyCheck, defaultAutowire);
 
-		String name = el.getAttribute(NAME_ATTRIBUTE);
-		if (name != null && !"".equals(name)) {
-			// Automatically create aliases from the name.
-			// Used for names that aren't legal in id attributes.
-			String[] aliases = StringUtils.tokenizeToStringArray(name, BEAN_NAME_DELIMITERS, true, true);
-			for (int i = 0; i < aliases.length; i++) {
-				registerAlias(id, aliases[i]);
+		if (id == null || "".equals(id)) {
+			if (aliases.isEmpty()) {
+				throw new BeanDefinitionStoreException(beanDefinition + " has neither id nor name");
 			}
+			id = (String) aliases.remove(0);
+			if (logger.isDebugEnabled()) {
+				logger.debug("No XML id specified - using '" + id + "' as id and " + aliases + " as aliases");
+			}
+		}
+
+		logger.debug("Registering bean definition with id '" + id + "'");
+		registerBeanDefinition(id, beanDefinition);
+		for (Iterator it = aliases.iterator(); it.hasNext();) {
+			registerAlias(id, (String) it.next());
 		}
 	}
 
@@ -327,7 +337,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 			if (el.hasAttribute(PARENT_ATTRIBUTE))
 				parent = el.getAttribute(PARENT_ATTRIBUTE);
 			if (className == null && parent == null) {
-				throw new FatalBeanException("No className or parent in bean definition '" + beanName + "'", null);
+				throw new FatalBeanException("No class or parent in bean definition '" + beanName + "'", null);
 			}
 			if (className != null) {
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();

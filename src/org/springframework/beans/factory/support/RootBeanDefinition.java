@@ -6,8 +6,6 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -21,7 +19,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 /** 
 * Root bean definitions have a class and properties.
 * @author Rod Johnson
-* @version $Id: RootBeanDefinition.java,v 1.5 2003-10-31 17:01:27 jhoeller Exp $
+* @version $Id: RootBeanDefinition.java,v 1.6 2003-11-04 23:10:02 jhoeller Exp $
 */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
@@ -146,7 +144,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	public String toString() {
-		return "RootBeanDefinition for class '" + getBeanClass().getName() + "'; " + super.toString();
+		return "Root bean definition with class [" + getBeanClass().getName() + "]";
 	}
 
 }

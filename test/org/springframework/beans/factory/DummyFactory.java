@@ -18,7 +18,7 @@ import org.springframework.beans.factory.support.AbstractFactoryBean;
  * factories get this lifecycle callback if they want.
  * @author Rod Johnson
  * @since 10-Mar-2003
- * version $Id: DummyFactory.java,v 1.3 2003-10-10 13:59:54 jhoeller Exp $
+ * version $Id: DummyFactory.java,v 1.4 2003-11-04 23:10:04 jhoeller Exp $
  */
 public class DummyFactory extends AbstractFactoryBean implements InitializingBean, PropertyValuesProviderFactoryBean {
 	
@@ -74,6 +74,10 @@ public class DummyFactory extends AbstractFactoryBean implements InitializingBea
 			//System.out.println("prot name is " + prototype.getName());
 			return prototype;
 		}
+	}
+
+	public Class getObjectType() {
+		return TestBean.class;
 	}
 
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.LifecycleBean;
+import org.springframework.context.config.ConfigurableApplicationContext;
 
 /**
  * @author Rod Johnson
@@ -16,7 +17,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	/** Must be supplied as XML */
 	public static final String TEST_NAMESPACE = "testNamespace";
 
-	protected ApplicationContext applicationContext;
+	protected ConfigurableApplicationContext applicationContext;
 
 	/** Subclass must register this */
 	protected TestListener listener = new TestListener();
@@ -37,7 +38,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	 * Parent must register rod with name Roderick
 	 * and father with name Albert.
 	 */
-	protected abstract ApplicationContext createContext() throws Exception;
+	protected abstract ConfigurableApplicationContext createContext() throws Exception;
 
 	public void testContextAwareSingletonWasCalledBack() throws Exception {
 		ACATest aca = (ACATest) applicationContext.getBean("aca");
@@ -83,12 +84,12 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		assertTrue("Not destroyed", !lb.isDestroyed());
 		applicationContext.close();
 		if (applicationContext.getParent() != null) {
-			applicationContext.getParent().close();
+			((ConfigurableApplicationContext) applicationContext.getParent()).close();
 		}
 		assertTrue("Destroyed", lb.isDestroyed());
 		applicationContext.close();
 		if (applicationContext.getParent() != null) {
-			applicationContext.getParent().close();
+			((ConfigurableApplicationContext) applicationContext.getParent()).close();
 		}
 		assertTrue("Destroyed", lb.isDestroyed());
 	}

@@ -12,10 +12,10 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.LBIInit;
 import org.springframework.context.ACATest;
 import org.springframework.context.AbstractApplicationContextTests;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.BeanThatListens;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.config.ConfigurableApplicationContext;
 
 /**
  * @author Rod Johnson/Tony Falabella
@@ -214,7 +214,7 @@ public class StaticMessageSourceTestSuite
 	}
 
 	/** Run for each test */
-	protected ApplicationContext createContext() throws Exception {
+	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 		parent.addListener(parentListener);
 

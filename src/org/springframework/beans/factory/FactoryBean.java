@@ -20,7 +20,7 @@ package org.springframework.beans.factory;
  * @author Rod Johnson
  * @since March 08, 2003
  * @see org.springframework.beans.factory.BeanFactory
- * @version $Id: FactoryBean.java,v 1.5 2003-10-31 17:01:24 jhoeller Exp $
+ * @version $Id: FactoryBean.java,v 1.6 2003-11-04 23:09:48 jhoeller Exp $
  */
 public interface FactoryBean {
 
@@ -28,7 +28,8 @@ public interface FactoryBean {
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory. As with a BeanFactory, this allows
 	 * support for both the Singleton and Prototype design pattern.
-	 * @return an instance of the bean
+	 * @return an instance of the bean (should never be null)
+	 * @throws Exception in case of creation errors
 	 */
 	Object getObject() throws Exception;
 

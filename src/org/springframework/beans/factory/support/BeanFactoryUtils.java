@@ -5,12 +5,10 @@
  
 package org.springframework.beans.factory.support;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,7 +23,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * hierarchy a bean factory may participate in.
  * @author Rod Johnson
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtils.java,v 1.2 2003-10-31 17:01:26 jhoeller Exp $
+ * @version $Id: BeanFactoryUtils.java,v 1.3 2003-11-04 23:10:02 jhoeller Exp $
  */
 public abstract class BeanFactoryUtils {
 	
@@ -63,18 +61,18 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Get all bean names for the given type, including those defined in ancestor
 	 * factories. Will return unique names in case of overridden bean definitions.
-	 * @param type the type that beans must match
 	 * @param lbf ListableBeanFactory. If this isn't also a HierarchicalBeanFactory,
 	 * this method will return the same as it's own getBeanDefinitionNames() method.
+	 * @param type the type that beans must match
 	 * @return the array of bean names, or an empty array if none
 	 */
-	public static String[] beanNamesIncludingAncestors(Class type, ListableBeanFactory lbf) {
+	public static String[] beanNamesIncludingAncestors(ListableBeanFactory lbf, Class type) {
 		Set result = new HashSet();
 		result.addAll(Arrays.asList(lbf.getBeanDefinitionNames(type)));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() != null && hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
-				String[] parentResult = beanNamesIncludingAncestors(type, (ListableBeanFactory) hbf.getParentBeanFactory());
+				String[] parentResult = beanNamesIncludingAncestors((ListableBeanFactory) hbf.getParentBeanFactory(), type);
 				result.addAll(Arrays.asList(parentResult));
 			}
 		}
@@ -86,18 +84,20 @@ public abstract class BeanFactoryUtils {
 	 * up beans defined in ancestor bean factories if the current
 	 * bean factory is a HierarchicalBeanFactory.
 	 * Useful convenience method when we don't care about bean names.
+	 * @param lbf the bean factory
 	 * @param type type of bean to match. The return list will only
 	 * contain beans of this type.
-	 * @param lbf the bean factory
 	 * @return the Map of bean instances, or an empty Map if none
 	 */
-	public static Map beansOfTypeIncludingAncestors(Class type, ListableBeanFactory lbf) {
+	public static Map beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type,
+																									boolean includePrototypes, boolean includeFactoryBeans) {
 		Map result = new HashMap();
-		result.putAll(lbf.getBeansOfType(type));
+		result.putAll(lbf.getBeansOfType(type, includePrototypes, includeFactoryBeans));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() != null && hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
-				Map parentResult = beansOfTypeIncludingAncestors(type, (ListableBeanFactory) hbf.getParentBeanFactory());
+				Map parentResult = beansOfTypeIncludingAncestors((ListableBeanFactory) hbf.getParentBeanFactory(),
+																												 type, includePrototypes, includeFactoryBeans);
 				for (Iterator it = parentResult.keySet().iterator(); it.hasNext();) {
 					Object key = it.next();
 					if (!result.containsKey(key)) {

@@ -11,15 +11,25 @@ package org.springframework.beans.factory;
  * and lifecycle callbacks.
  * @author Rod Johnson
  * @since 12-Mar-2003
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
-public class LifecycleBean implements InitializingBean, BeanFactoryAware, DisposableBean {
+public class LifecycleBean implements BeanNameAware, InitializingBean, BeanFactoryAware, DisposableBean {
+
+	private String beanName;
 
 	private boolean inited;
 
 	private BeanFactory owningFactory;
 	
 	private boolean destroyed;
+
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
+	public String getBeanName() {
+		return beanName;
+	}
 
 	public void afterPropertiesSet() {
 		this.inited = true;

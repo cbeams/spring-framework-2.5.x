@@ -28,9 +28,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.support.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.support.BeanPostProcessor;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationEvent;
@@ -41,6 +41,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NestingMessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticasterImpl;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -65,13 +66,13 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
  * @see #MESSAGE_SOURCE_BEAN_NAME
  */
-public abstract class AbstractApplicationContext implements ApplicationContext {
+public abstract class AbstractApplicationContext implements ConfigurableApplicationContext {
 
 	/**
 	 * Name of options bean in the factory.
@@ -342,12 +343,12 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 */
 	private void refreshListeners() {
 		logger.info("Refreshing listeners");
-		Collection listeners = getBeansOfType(ApplicationListener.class).values();
+		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
 		logger.debug("Found " + listeners.size() + " listeners in bean factory");
 		for (Iterator it = listeners.iterator(); it.hasNext();) {
 			ApplicationListener listener = (ApplicationListener) it.next();
 			addListener(listener);
-			logger.info("Bean listener added: [" + listener + "]");
+			logger.info("Application listener [" + listener + "] added");
 		}
 	}
 
@@ -492,8 +493,8 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 		return getBeanFactory().getBeanDefinitionNames(type);
 	}
 
-	public Map getBeansOfType(Class type) {
-		return getBeanFactory().getBeansOfType(type);
+	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+		return getBeanFactory().getBeansOfType(type, includePrototypes, includeFactoryBeans);
 	}
 
 	public BeanFactory getParentBeanFactory() {
@@ -533,6 +534,6 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	 * repeatedly without a performance penalty.
 	 * @return this application context's internal bean factory
 	 */
-	protected abstract ListableBeanFactoryImpl getBeanFactory();
+	protected abstract ConfigurableListableBeanFactory getBeanFactory();
 
 }

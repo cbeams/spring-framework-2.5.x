@@ -9,9 +9,9 @@ import java.util.Properties;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
-import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.RuntimeBeanReference;
 
 /**
  * A property resource configurer that resolves placeholders in bean property values of
@@ -85,7 +85,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 		this.placeholderSuffix = placeholderSuffix;
 	}
 
-	protected void processProperties(ListableBeanFactoryImpl beanFactory, Properties prop) throws BeansException {
+	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
+			throws BeansException {
 		String[] beanNames = beanFactory.getBeanDefinitionNames();
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
@@ -96,7 +97,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
 					if (pv.getValue() instanceof String) {
 						String strVal = (String) pv.getValue();
-						String newStrVal = parseValue(prop, strVal);
+						String newStrVal = parseValue(props, strVal);
 						if (!newStrVal.equals(strVal)) {
 							beanFactory.overridePropertyValue(beanName, new PropertyValue(pv.getName(), newStrVal));
 							logger.debug("Property '" + beanName + "." + pv.getName() + "' set to [" + newStrVal + "]");
@@ -104,7 +105,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 					}
 					else if (pv.getValue() instanceof RuntimeBeanReference) {
             RuntimeBeanReference ref = (RuntimeBeanReference) pv.getValue();
-            String newBeanName = parseValue(prop, ref.getBeanName());
+            String newBeanName = parseValue(props, ref.getBeanName());
 						if (!newBeanName.equals(ref.getBeanName())) {
 							RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
               beanFactory.overridePropertyValue(beanName, new PropertyValue(pv.getName(), newRef));
@@ -118,7 +119,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 							Object elem = listVal.get(k);
 							if (elem instanceof String) {
 								String strVal = (String) elem;
-								String newStrVal = parseValue(prop, strVal);
+								String newStrVal = parseValue(props, strVal);
 								if (!newStrVal.equals(strVal)) {
 									listVal.set(k, newStrVal);
 									logger.debug("Property '" + beanName + "." + pv.getName() + "' set to [" + newStrVal + "]");
@@ -126,7 +127,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 							}
 							else if (elem instanceof RuntimeBeanReference) {
 								RuntimeBeanReference ref = (RuntimeBeanReference) elem;
-								String newBeanName = parseValue(prop, ref.getBeanName());
+								String newBeanName = parseValue(props, ref.getBeanName());
 								if (!newBeanName.equals(ref.getBeanName())) {
 									RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
 									listVal.set(k, newRef);
@@ -144,7 +145,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 							Object elem = mapVal.get(key);
 							if (elem instanceof String) {
 								String strVal = (String) elem;
-								String newStrVal = parseValue(prop, strVal);
+								String newStrVal = parseValue(props, strVal);
 								if (!newStrVal.equals(strVal)) {
 									mapVal.put(key, newStrVal);
 									logger.debug("Property '" + beanName + "." + pv.getName() + "' set to [" + newStrVal + "]");
@@ -152,7 +153,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 							}
 							else if (elem instanceof RuntimeBeanReference) {
 								RuntimeBeanReference ref = (RuntimeBeanReference) elem;
-								String newBeanName = parseValue(prop, ref.getBeanName());
+								String newBeanName = parseValue(props, ref.getBeanName());
 								if (!newBeanName.equals(ref.getBeanName())) {
 									RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
 									mapVal.put(key, newRef);

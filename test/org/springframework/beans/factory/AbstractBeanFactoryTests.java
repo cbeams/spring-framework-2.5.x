@@ -28,7 +28,7 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
  * @version $RevisionId$
  * REQUIRES THE FOLLOWING BEAN DEFINITIONS:
  * see lbiinit
- * @version $Id: AbstractBeanFactoryTests.java,v 1.4 2003-10-16 19:02:41 jhoeller Exp $
+ * @version $Id: AbstractBeanFactoryTests.java,v 1.5 2003-11-04 23:10:04 jhoeller Exp $
  */
 public abstract class AbstractBeanFactoryTests extends TestCase {
 
@@ -75,6 +75,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	 */
 	public void testLifecycleCallbacks() {
 		LifecycleBean lb = (LifecycleBean) getBeanFactory().getBean("lifecycle");
+		assertEquals("lifecycle", lb.getBeanName());
 		// The dummy business method will throw an exception if the
 		// necessary callbacks weren't invoked in the right order
 		lb.businessMethod();

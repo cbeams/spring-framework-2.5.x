@@ -64,7 +64,7 @@ public class LBIInit {
 		
 		m.put("lifecycle.class", "org.springframework.beans.factory.LifecycleBean");
 		
-		lbf.registerBeanDefinitions(m, null);
+		lbf.registerBeanDefinitions(m);
 	}
 
 }
