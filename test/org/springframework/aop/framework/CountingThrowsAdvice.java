@@ -22,18 +22,16 @@ import org.springframework.aop.ThrowsAdvice;
 import org.springframework.dao.DataAccessException;
 
 /**
- * 
  * @author Rod Johnson
  */
 public class CountingThrowsAdvice extends MethodCounter implements ThrowsAdvice {
-	
-	 public void afterThrowing(ServletException sex) throws Throwable {
-        count(ServletException.class.getName());
-    }
-	 
-	 public void afterThrowing(DataAccessException ex) throws Throwable {
-        count(DataAccessException.class.getName());
-    }
 
+	public void afterThrowing(ServletException sex) throws Throwable {
+		count(ServletException.class.getName());
+	}
+
+	public void afterThrowing(DataAccessException ex) throws Throwable {
+		count(DataAccessException.class.getName());
+	}
 
 }

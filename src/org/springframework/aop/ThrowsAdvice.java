@@ -20,14 +20,17 @@ import org.aopalliance.aop.Advice;
 
 /**
  * Tag interface for throws advice.
- * There aren't any methods on this interface, as methods are invoked by reflection.
- * Implementing classes should implement methods of the form:
+ *
+ * <p>There aren't any methods on this interface, as methods are invoked by reflection.
+ * Implementing classes should implement methods of the form:<br>
  * <code>
  * afterThrowing([Method], [args], [target], Throwable subclass) 
  * </code>
- * The first three arguments are optional, and only useful if
+ *
+ * <p>The first three arguments are optional, and only useful if
  * we want further information about the joinpoint, as in AspectJ
  * <b>after throwing</b> advice.
+ *
  * @author Rod Johnson
  */
 public interface ThrowsAdvice extends Advice {
