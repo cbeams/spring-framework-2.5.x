@@ -23,15 +23,19 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 
 /**
- * Configuration interface to be implemented by most if not all bean factories.
- * Provides means to configure a bean factory in addition to the bean
+ * Configuration interface to be implemented by most bean factories.
+ * Provides facilities to configure a bean factory, in addition to the bean
  * factory client methods in the BeanFactory interface.
  *
- * <p>Allows for framework-internal plug'n'play even when needing access
- * to bean factory configuration methods.
+ * <p>This subinterface of BeanFactory is not meant to be used in normal
+ * application code: Stick to BeanFactory or ListableBeanFactory for typical
+ * use cases. This interface is just meant to allow for framework-internal
+ * plug'n'play even when needing access to bean factory configuration methods.
  *
  * @author Juergen Hoeller
  * @since 03.11.2003
+ * @see org.springframework.beans.factory.BeanFactory
+ * @see org.springframework.beans.factory.ListableBeanFactory
  * @see ConfigurableListableBeanFactory
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
@@ -53,18 +57,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 
 	/**
-	 * Ignore the given dependency type for autowiring.
-	 * To be invoked during factory configuration.
-	 * <p>This will typically be used for dependencies that are resolved
-	 * in other ways, like BeanFactory through BeanFactoryAware or
-	 * ApplicationContext through ApplicationContextAware.
-	 * @see org.springframework.beans.factory.BeanFactoryAware
-	 * @see org.springframework.context.ApplicationContextAware
-	 */
-	void ignoreDependencyType(Class type);
-
-	/**
-	 * Add a new BeanPostPrcoessor that will get applied to beans created
+	 * Add a new BeanPostProcessor that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
 	 * @param beanPostProcessor the bean processor to register
 	 */
@@ -91,6 +84,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * used for runtime registration of singletons. Therefore, a factory
 	 * implementation should synchronize singleton access; it will have
 	 * to do this anyway if it supports lazy initialization of singletons.
+	 * <p>Note that this fe
 	 * @param beanName name of the bean
 	 * @param singletonObject the existing object
 	 * @throws BeansException if the singleton could not be registered

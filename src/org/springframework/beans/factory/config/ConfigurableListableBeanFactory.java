@@ -20,11 +20,14 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
- * SPI interface to be implemented by most if not all listable bean factories.
- * In addition to ConfigurableBeanFactory, it provides means to evaluate bean
- * definitions and to pre-instantiate singletons.
+ * Configuration interface to be implemented by most listable bean factories.
+ * In addition to ConfigurableBeanFactory, it provides facilities to analyze
+ * and modify bean definitions, and to pre-instantiate singletons.
  *
- * <p>Allows for framework-internal plug'n'play, e.g. in AbstractApplicationContext.
+ * <p>This subinterface of BeanFactory is not meant to be used in normal
+ * application code: Stick to BeanFactory or ListableBeanFactory for typical
+ * use cases. This interface is just meant to allow for framework-internal
+ * plug'n'play even when needing access to bean factory configuration methods.
  *
  * @author Juergen Hoeller
  * @since 03.11.2003
@@ -32,6 +35,19 @@ import org.springframework.beans.factory.ListableBeanFactory;
  */
 public interface ConfigurableListableBeanFactory
 		extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory {
+
+	/**
+	 * Ignore the given dependency type for autowiring.
+	 * To be invoked during factory configuration.
+	 * <p>This will typically be used by application contexts to register
+	 * dependencies that are resolved in other ways, like BeanFactory through
+	 * BeanFactoryAware (which bean factories are supposed to provide by default),
+	 * or ApplicationContext through ApplicationContextAware.
+	 * @param type the dependency type to ignore
+	 * @see org.springframework.beans.factory.BeanFactoryAware
+	 * @see org.springframework.context.ApplicationContextAware
+	 */
+	void ignoreDependencyType(Class type);
 
 	/**
 	 * Return the registered BeanDefinition for the given bean, allowing access
