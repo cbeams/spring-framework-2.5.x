@@ -52,20 +52,54 @@ public class Transition implements Serializable {
 		return toState;
 	}
 
-	public ViewDescriptor execute(Flow flow, FlowSessionExecutionStack sessionExecution,
+	public ViewDescriptor execute(Flow flow, TransitionableState fromState, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) {
+		String qualifiedActiveFlowId = null;
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing transition from state '" + sessionExecution.getCurrentStateId()
-					+ "' to state '" + getToState() + "' in flow '" + flow.getId() + "'");
+			qualifiedActiveFlowId = sessionExecution.getQualifiedActiveFlowId();
 		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Event '" + getId() + "' within this state '" + getId() + "' for flow '"
+					+ qualifiedActiveFlowId + "' was signaled; processing...");
+		}
+		sessionExecution.setLastEventId(getId());
+
+		if (flow.isLifecycleListenerSet()) {
+			flow.getFlowLifecycleListener().flowEventSignaled(flow, getId(), fromState, sessionExecution, request);
+		}
+
 		try {
-			sessionExecution.setLastEventId(getId());
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Executing transition from state '" + sessionExecution.getCurrentStateId()
+						+ "' to state '" + getToState() + "' in flow '" + qualifiedActiveFlowId + "'");
+			}
+
 			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecution, request,
 					response);
+
+			if (flow.isLifecycleListenerSet()) {
+				flow.getFlowLifecycleListener().flowEventProcessed(flow, getId(), fromState, sessionExecution, request);
+			}
+
+			if (logger.isDebugEnabled()) {
+				if (sessionExecution.isActive()) {
+					logger.debug("Event '" + getId() + "' within now previous state '" + fromState.getId()
+							+ "' for flow '" + qualifiedActiveFlowId
+							+ "' was processed; as a result, the new qualified flow state is '"
+							+ sessionExecution.getQualifiedActiveFlowId() + "." + sessionExecution.getCurrentStateId()
+							+ "'");
+				}
+				else {
+					logger.debug("Event '" + getId() + "' within now previous state '" + fromState.getId()
+							+ "' for flow '" + qualifiedActiveFlowId
+							+ "' was processed; as a result, flow session execution has ended");
+				}
+			}
 			return descriptor;
 		}
 		catch (NoSuchFlowStateException e) {
-			throw new CannotExecuteStateTransitionException(this, flow, sessionExecution.getCurrentStateId(), e);
+			throw new CannotExecuteStateTransitionException(this, flow, fromState.getId(), e);
 		}
 	}
 

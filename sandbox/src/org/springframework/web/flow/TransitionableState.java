@@ -94,37 +94,7 @@ public abstract class TransitionableState extends AbstractState {
 	 */
 	public ViewDescriptor execute(String eventId, Flow flow, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws IllegalArgumentException {
-		String qualifiedActiveFlowId = null;
-		if (logger.isDebugEnabled()) {
-			qualifiedActiveFlowId = sessionExecution.getQualifiedActiveFlowId();
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Event '" + eventId + "' within this state '" + getId() + "' for flow '"
-					+ qualifiedActiveFlowId + "' was signaled; processing...");
-		}
-		if (flow.isLifecycleListenerSet()) {
-			flow.getFlowLifecycleListener().flowEventSignaled(flow, eventId, this, sessionExecution, request);
-		}
-
-		ViewDescriptor descriptor = getTransition(eventId, flow)
-				.execute(flow, sessionExecution, request, response);
-
-		if (logger.isDebugEnabled()) {
-			if (sessionExecution.isActive()) {
-				logger.debug("Event '" + eventId + "' within this state '" + getId() + "' for flow '"
-						+ sessionExecution.getQualifiedActiveFlowId()
-						+ "' was processed; as a result, the new flow state is '"
-						+ sessionExecution.getCurrentStateId() + "'");
-			}
-			else {
-				logger.debug("Event '" + eventId + "' within this state '" + getId() + "' for flow '"
-						+ qualifiedActiveFlowId + "' was processed; as a result, the entire flow has ended");
-			}
-		}
-		if (flow.isLifecycleListenerSet()) {
-			flow.getFlowLifecycleListener().flowEventProcessed(flow, eventId, this, sessionExecution, request);
-		}
-		return descriptor;
+		return getTransition(eventId, flow).execute(flow, this, sessionExecution, request, response);
 	}
 
 	public String toString() {

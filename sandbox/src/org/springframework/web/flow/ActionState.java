@@ -220,7 +220,7 @@ public class ActionState extends TransitionableState {
 			ActionBeanEvent event = actionBean.execute(request, response, sessionExecution);
 			beanExecutionCount++;
 			if (triggersTransition(event, flow)) {
-				return getTransition(event, flow).execute(flow, sessionExecution, request, response);
+				return getTransition(event, flow).execute(flow, this, sessionExecution, request, response);
 			}
 			else {
 				if (event != null) {
