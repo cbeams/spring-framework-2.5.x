@@ -45,8 +45,6 @@
 	<classpathentry kind="lib" path="lib/httpunit/httpunit.jar"/>
 	<classpathentry kind="lib" path="lib/jdom/jdom.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit/Tidy.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jaxrpc.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/axis/axis.jar"/>
@@ -84,5 +82,7 @@
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/itext/pdfbox-0.6.5.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api-2.1rc1.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler-2.1rc1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
