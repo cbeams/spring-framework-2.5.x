@@ -222,15 +222,17 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			throw new InvalidMetadataException(
 					"No ManagedResource attribute found for class: " + beanClass.getName());
 		}
+		if (mr.getCurrencyTimeLimit() > 0) {
+			mbeanDescriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(mr.getCurrencyTimeLimit()));
+		}
 		mbeanDescriptor.setField(LOG, mr.isLog() ? "true" : "false");
 		if (mr.getLogFile() != null) {
 			mbeanDescriptor.setField(LOG_FILE, mr.getLogFile());
 		}
-		mbeanDescriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(mr.getCurrencyTimeLimit()));
 		mbeanDescriptor.setField(PERSIST_POLICY, mr.getPersistPolicy());
 		mbeanDescriptor.setField(PERSIST_PERIOD, Integer.toString(mr.getPersistPeriod()));
-		mbeanDescriptor.setField(PERSIST_LOCATION, mr.getPersistLocation());
 		mbeanDescriptor.setField(PERSIST_NAME, mr.getPersistName());
+		mbeanDescriptor.setField(PERSIST_LOCATION, mr.getPersistLocation());
 	}
 
 	/**
