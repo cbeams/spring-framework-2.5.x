@@ -17,7 +17,8 @@ package org.springframework.rules.closure;
 
 import org.springframework.rules.NoArgClosure;
 
-public abstract class NoArgBlock extends AbstractClosure implements NoArgClosure {
+public abstract class NoArgBlock extends AbstractClosure implements
+        NoArgClosure {
 
     public final Object call(Object argument) {
         return call();
@@ -28,10 +29,10 @@ public abstract class NoArgBlock extends AbstractClosure implements NoArgClosure
         return NULL_VALUE;
     }
 
-    protected Object handle() {
+    protected void handle() {
         throw new UnsupportedOperationException(
-                "You must override handle() for a block that returns no value, or "
-                        + "override call() for blocks that return a single value");
+                "You must override call() for a noArg block that returns a value, or "
+                        + "override handle() for a noArg block that returns no value");
     }
 
 }
