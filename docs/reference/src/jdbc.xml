@@ -255,7 +255,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * @author trisberg
  */
-public class ExecuteAQuery {
+public class RunAQuery {
   private JdbcTemplate jt;
   private DataSource dataSource;
   
@@ -351,21 +351,21 @@ public class ExecuteAQuery {
 
       <para>Implementation of <literal>SmartDataSource</literal> that wraps a
       single connection which is not closed after use. Obviously, this is not
-      multi-threading capable. Note that at shutdown, someone should close the
-      underlying connection via the <literal>close()</literal> method. Client
-      code will never call close on the connection handle if it is
-      SmartDataSource-aware (e.g. uses
-      <literal>DataSourceUtils.closeConnectionIfNecessary</literal>). If
-      client code will call close in the assumption of a pooled connection,
-      like when using persistence tools, set <literal>suppressClose</literal>
-      to true. This will return a close-suppressing proxy instead of the
-      physical connection. Be aware that you will not be able to cast this to
-      a native Oracle Connection or the like anymore. This is primarily a test
-      class. For example, it enables easy testing of code outside an
-      application server, in conjunction with a simple JNDI environment. In
-      contrast to <literal>DriverManagerDataSource</literal>, it reuses the
-      same connection all the time, avoiding excessive creation of physical
-      connections. </para>
+      multi-threading capable.</para>
+
+      <para>If client code will call close in the assumption of a pooled
+      connection, like when using persistence tools, set
+      <literal>suppressClose</literal> to true. This will return a
+      close-suppressing proxy instead of the physical connection. Be aware
+      that you will not be able to cast this to a native Oracle Connection or
+      the like anymore.</para>
+
+      <para>This is primarily a test class. For example, it enables easy
+      testing of code outside an application server, in conjunction with a
+      simple JNDI environment. In contrast to
+      <literal>DriverManagerDataSource</literal>, it reuses the same
+      connection all the time, avoiding excessive creation of physical
+      connections.</para>
     </sect2>
 
     <sect2 id="jdbc-DriverManagerDataSource">
@@ -373,12 +373,14 @@ public class ExecuteAQuery {
 
       <para>Implementation of <literal>SmartDataSource</literal> that
       configures a plain old JDBC Driver via bean properties, and returns a
-      new connection every time. Useful for test or standalone environments
-      outside of a J2EE container, either as a <literal>DataSource</literal>
-      bean in a respective ApplicationContext, or in conjunction with a simple
-      JNDI environment. Pool-assuming <literal>Connection.close()</literal>
-      calls will simply close the connection, so any DataSource-aware
-      persistence code should work. </para>
+      new connection every time.</para>
+
+      <para>Useful for test or standalone environments outside of a J2EE
+      container, either as a <literal>DataSource</literal> bean in a
+      respective ApplicationContext, or in conjunction with a simple JNDI
+      environment. Pool-assuming <literal>Connection.close()</literal> calls
+      will simply close the connection, so any DataSource-aware persistence
+      code should work. </para>
     </sect2>
 
     <sect2 id="jdbc-DataSourceTransactionManager">
@@ -386,8 +388,10 @@ public class ExecuteAQuery {
 
       <para>PlatformTransactionManager implementation for single JDBC data
       sources. Binds a JDBC connection from the specified data source to the
-      thread, potentially allowing for one thread connection per data source.
-      Application code is required to retrieve the JDBC connection via
+      thread, potentially allowing for one thread connection per data
+      source.</para>
+
+      <para>Application code is required to retrieve the JDBC connection via
       <literal>DataSourceUtils.getConnection(DataSource)</literal> instead of
       J2EE's standard <literal>DataSource.getConnection</literal>. This is
       recommended anyway, as it throws unchecked
@@ -395,41 +399,134 @@ public class ExecuteAQuery {
       <literal>SQLException</literal>. All framework classes like
       <literal>JdbcTemplate</literal> use this strategy implicitly. If not
       used with this transaction manager, the lookup strategy behaves exactly
-      like the common one - it can thus be used in any case. Supports custom
-      isolation levels, and timeouts that get applied as appropriate JDBC
-      statement query timeouts. To support the latter, application code must
-      either use <literal>JdbcTemplate</literal> or call
+      like the common one - it can thus be used in any case.</para>
+
+      <para>Supports custom isolation levels, and timeouts that get applied as
+      appropriate JDBC statement query timeouts. To support the latter,
+      application code must either use <literal>JdbcTemplate</literal> or call
       <literal>DataSourceUtils.<literal>applyTransactionTimeout</literal></literal>
-      method for each created statement. This implementation can be used
-      instead of <literal>JtaTransactionManager</literal> in the single
-      resource case, as it does not require the container to support JTA.
-      Switching between both is just a matter of configuration, if you stick
-      to the required connection lookup pattern. Note that JTA does not
-      support custom isolation levels!</para>
+      method for each created statement.</para>
+
+      <para>This implementation can be used instead of
+      <literal>JtaTransactionManager</literal> in the single resource case, as
+      it does not require the container to support JTA. Switching between both
+      is just a matter of configuration, if you stick to the required
+      connection lookup pattern. Note that JTA does not support custom
+      isolation levels!</para>
     </sect2>
   </sect1>
 
   <sect1 id="jdbc-object">
     <title>Modeling JDBC operations as Java objects</title>
 
+    <para>The <literal>org.springframework.jdbc.object</literal> package
+    contains the classes that allow you to access the database in a more
+    object oriented manner. You can execute queries and get the results back
+    as a list containing business objects with the relational column data
+    mapped to the properties of the business obejct. You can also execute
+    stored procedures and run update, delete and insert statemente.</para>
+
     <sect2 id="jdbc-SqlQuery">
       <title>SqlQuery</title>
+
+      <para>Reusable threadsafe object to represent an SQL query. Subclasses
+      must implement the newResultReader() method to provide an object that
+      can save the results while iterating over the ResultSet. This class is
+      rarely used directly since the <literal>MappingSqlQuery</literal>, that
+      extends this class, provides a much more covenient inplementation for
+      mapping rows to java classes. Other implementations that extend
+      <literal>SqlQuery</literal> are
+      <literal>MappingSqlQueryWithParameters</literal> and
+      <literal>UpdatableSqlQuery</literal>.</para>
     </sect2>
 
     <sect2 id="jdbc-MappingSqlQuery">
       <title>MappingSqlQuery</title>
+
+      <para><literal>MappingSqlQuery</literal> is a reusable query in which
+      concrete subclasses must implement the abstract
+      <literal>mapRow(ResultSet, int)</literal> method to convert each row of
+      the JDBC <literal>ResultSet</literal> into an object.</para>
+
+      <para>Of all the <literal>SqlQuery</literal> implementations, this is
+      the one used most often and it is also the one that is the easiest to
+      use.</para>
+
+      <para>Here is a brief example of a custom query that maps the data from
+      the customer table to a Java object called Customer.</para>
+
+      <programlisting>  private class CustomerMappingQuery extends MappingSqlQuery {
+    public CustomerMappingQuery(DataSource ds) {
+      super(ds, "SELECT id, name FROM customer WHERE id = ?");
+      super.declareParameter(new SqlParameter("id", Types.INTEGER));
+      compile();
+    }
+    public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
+      Customer cust = new Customer();
+      cust.setId((Integer) rs.getObject("id"));
+      cust.setName(rs.getString("name"));
+      return cust;
+    } 
+  }</programlisting>
+
+      <para>We provide a constructor for this customer query that takes the
+      <literal>DataSource</literal> as the only parameter. In this constructor
+      we call the constructor on the superclass with the
+      <literal>DataSource</literal> and the SQL that should be executed to
+      retrieve the rows for this query. This SQL will be used to create a
+      <literal>PreparedStatement</literal> so it may contain placeholders for
+      any parameters to be passed in during execution. Each parameter must be
+      declared using the <literal>declareParameter</literal> method passing in
+      an <literal>SqlParameter</literal>. The <literal>SqlParameter</literal>
+      takes a name and the JDBC type as defined in
+      <literal>java.sql.Types</literal>. After all paramaters have been
+      defined we call the <literal>compile</literal> method so the statement
+      can be prepared and later be executed.</para>
+
+      <para>Let's take a look at the code where this custom query is
+      instantiated and executed:</para>
+
+      <programlisting>  public Customer getCustomer(Integer id) {
+    CustomerMappingQuery custQry = new CustomerMappingQuery(dataSource); 
+    Object[] parms = new Object[1];
+    parms[0] = id;
+    List customers = custQry.execute(parms);
+    if (customers.size() &gt; 0)
+      return (Customer) customers.get(0);
+    else
+      return null;
+  }</programlisting>
+
+      <para>The method in this example retrieves the customer with the id that
+      is passed in as the only parameter. After creating an instance of the
+      <literal>CustomerMappingQuery</literal> class we create an array of
+      objects that will contain all parameters that are passed in. In this
+      case there is only one parameter and it is passed in as an
+      <literal>Integer</literal>. Now we are ready to execute the query using
+      this array of parameters and we get a <literal>List</literal> that
+      contains a <literal>Customer</literal> object for each row that was
+      returned for our query. In this case it will only be one entry if there
+      was a match.</para>
     </sect2>
 
     <sect2 id="jdbc-SqlUpdate">
       <title>SqlUpdate</title>
+
+      <para>ToDo</para>
     </sect2>
 
     <sect2 id="jdbc-StoredProcedure">
       <title>StoredProcedure</title>
+
+      <para>ToDo</para>
     </sect2>
 
     <sect2 id="jdbc-SqlFunction">
       <title>SqlFunction</title>
+
+      <para>ToDo</para>
+
+      <para></para>
     </sect2>
   </sect1>
 </chapter>
