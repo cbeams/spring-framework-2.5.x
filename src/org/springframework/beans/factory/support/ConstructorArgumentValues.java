@@ -3,6 +3,7 @@ package org.springframework.beans.factory.support;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class ConstructorArgumentValues {
 	public Object getGenericArgumentValue(Class requiredType) {
 		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
 			Object value = it.next();
-			if (requiredType.isInstance(value)) {
+			if (requiredType.isInstance(value) || (requiredType.isArray() && value instanceof List)) {
 				return value;
 			}
 		}
