@@ -52,6 +52,13 @@ public class PropertiesPersisterTests extends TestCase {
 		loadProperties(propCopy, false);
 	}
 
+	public void testPropertiesPersisterWithEmptyValue() throws IOException {
+		String propString = "code1=message1\ncode2:message2\ncode3=";
+		Properties props = loadProperties(propString, false);
+		String propCopy = storeProperties(props, null, false);
+		loadProperties(propCopy, false);
+	}
+
 	public void testPropertiesPersisterWithReader() throws IOException {
 		String propString = "code1=message1\ncode2:message2";
 		Properties props = loadProperties(propString, true);
@@ -70,6 +77,13 @@ public class PropertiesPersisterTests extends TestCase {
 		String propString = "code1\t=\tmessage1\n  code2 \t  : \t message2";
 		Properties props = loadProperties(propString, true);
 		String propCopy = storeProperties(props, "myHeader", true);
+		loadProperties(propCopy, false);
+	}
+
+	public void testPropertiesPersisterWithReaderAndEmptyValue() throws IOException {
+		String propString = "code1=message1\ncode2:message2\ncode3=";
+		Properties props = loadProperties(propString, true);
+		String propCopy = storeProperties(props, null, true);
 		loadProperties(propCopy, false);
 	}
 

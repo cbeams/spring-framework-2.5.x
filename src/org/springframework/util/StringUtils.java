@@ -106,6 +106,9 @@ public abstract class StringUtils {
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static String trimLeadingWhitespace(String str) {
+		if (str.length() == 0) {
+			return str;
+		}
 		StringBuffer buf = new StringBuffer(str);
 		while (Character.isWhitespace(buf.charAt(0))) {
 			buf.deleteCharAt(0);
@@ -120,6 +123,9 @@ public abstract class StringUtils {
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static String trimTrailingWhitespace(String str) {
+		if (str.length() == 0) {
+			return str;
+		}
 		StringBuffer buf = new StringBuffer(str);
 		while (Character.isWhitespace(buf.charAt(buf.length() - 1))) {
 			buf.deleteCharAt(buf.length() - 1);
