@@ -1,1 +1,1 @@
-.\ant.bat warfile
+ant.bat warfile

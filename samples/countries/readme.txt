@@ -1,33 +1,37 @@
--- Spring Countries demo --
+=========================================
+== Spring Countries sample application ==
+=========================================
 @author Jean-Pierre Pawlak
 
 This directory contains the web app source.
 For deployment, it needs to be built with Apache Ant.
 The only requirements are JDK >=1.3 and Ant >=1.5.
 
-Run "ant" in this directory for available targets
-(e.g. "ant build", "ant warfile"). Note that to start
-Ant this way, you'll need an XML parser in your
-classpath (e.g. jre/lib/ext; included in JDK 1.4).
-You can also invoke Ant manually, in this directory.
-For windows systems, you can alternatively use warfile.bat
-instead of "ant warfile".
+Run "ant.bat" in this directory for available targets (e.g. "ant build",
+"ant warfile"). Note that to start Ant this way, you'll need an XML
+parser in your classpath (e.g. in jre/lib/ext; included in JDK 1.4).
+You can use "warfile.bat" as a shortcut for war file creation.
+The war file will be created in the 'dist' directory.
 
-Your warfile will be cretad in the 'dist' directory.
+Note on enabling Log4J:
+- Log4J is disabled by default, due to JBoss issues
+- drop a log4j.jar into the deployed war/WEB-INF/lib directory
+- uncomment the root category in war/WEB-INF/classes/log4j.properties
+- uncomment the Log4J listener in war/WEB-INF/web.xml
 
-The application is set for the first scenario, 
-generating data in memory.
-This will normally run as is in most application servers.
+Default scenario
+----------------
 
-For the additional scenarios, you will find below 
-the instructions for JBoss 3.2.x. 
-For other servers you will to have to make yourself the 
-database mapping between the server and the application
-by bounding the JNDI locations as does the file 'jboss-web.xml'
-for JBoss.
+The application is configured for the first scenario, generating data
+in memory. This will normally run as is in most application servers.
 
-Passing to scenario 2
----------------------
+For the additional scenarios, you find the instructions for JBoss 3.2.x
+below. For other servers you will to have to create the database mapping
+between the server and the application by binding the JNDI locations
+as does the file jboss-web.xml for JBoss.
+
+Moving to scenario 2
+--------------------
 This scenario will use the memoryDao like the first.
 But, in addition, it will set a secondary databaseDao.
 So, you will be able, using the application, to read the data from
@@ -64,8 +68,8 @@ new generated war file.
 Test the application, and go to the new choice "Copy". A message tell you about 
 the work. If you see that the data were not copied, you will have to check the logs.
 
-Passing to scenario 3
----------------------
+Moving to scenario 3
+--------------------
 This is the ultimate goal. You come back to using only one DAO, but you use the
 database one instead the memory one as in the first scenario.
 1) in war/WEB-INF/applicationContext.xml: comment the scenario 2 and uncomment the 3.
@@ -101,7 +105,3 @@ Switching between databases is done in Spring 'applicationContext.xml' file.
 - In Countries:
 On the application side, only one configuration is known. The switching is done 
 in the binding with the app. server (jboss-web.xml in the case of Jboss).
-
-
-
-

@@ -153,8 +153,6 @@
 			</fileset>
 		</copy>
 
-		<copy file="${spring.root}/lib/log4j/log4j-1.2.8.jar" tofile="${weblib.dir}/log4j-1.2.8.renametojar"/>
-
 	</target>
 
 

@@ -104,9 +104,6 @@
 				<include name="jstl.jar"/>
 				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/log4j">
-				<include name="log4j*.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
