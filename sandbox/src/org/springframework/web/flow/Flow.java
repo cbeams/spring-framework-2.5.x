@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.support.AbstractConstraint;
@@ -133,7 +134,7 @@ import org.springframework.util.closure.support.AbstractConstraint;
  * @author Colin Sampaleanu
  * @see FlowEventProcessor
  */
-public class Flow implements FlowEventProcessor, Serializable {
+public class Flow implements FlowEventProcessor, InitializingBean, Serializable {
 
 	private static final long serialVersionUID = 3258695403305513015L;
 
@@ -300,7 +301,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public Flow(String id) {
 		this.id = id;
-		initFlow();
 	}
 
 	/**
@@ -310,7 +310,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public Flow(String id, FlowDao flowDao) {
 		this.id = id;
 		setFlowDao(flowDao);
-		initFlow();
 	}
 
 	/**
@@ -323,7 +322,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 		setFlowDao(flowDao);
 		addAll(states);
 		setStartState(startStateId);
-		initFlow();
 	}
 
 	/**
@@ -341,6 +339,10 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public void setFlowLifecycleListener(FlowLifecycleListener listener) {
 		this.flowLifecycleListener = listener;
+	}
+
+	public void afterPropertiesSet() {
+		initFlow();
 	}
 
 	/**
@@ -671,8 +673,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @param subFlowAttributes
 	 * @return
 	 */
-	public ViewDescriptor spawnIn(FlowSessionExecutionStack sessionExecution, String stateId, HttpServletRequest request,
-			HttpServletResponse response, Map inputAttributes) {
+	public ViewDescriptor spawnIn(FlowSessionExecutionStack sessionExecution, String stateId,
+			HttpServletRequest request, HttpServletResponse response, Map inputAttributes) {
 		TransitionableState state = getRequiredTransitionableState(stateId);
 		return new StartState(state).enter(this, sessionExecution, request, response, inputAttributes);
 	}
@@ -721,200 +723,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	// flow config factory methods
-
-	/**
-	 * @param actionStateId
-	 * @param transition
-	 * @return
-	 */
-	public ActionState createActionState(String actionStateId, Transition transition) {
-		return new ActionState(actionStateId, transition);
-	}
-
-	/**
-	 * @param actionStateId
-	 * @param actionBeanName
-	 * @param transition
-	 * @return
-	 */
-	public ActionState createActionState(String actionStateId, String actionBeanName, Transition transition) {
-		return new ActionState(actionStateId, actionBeanName, transition);
-	}
-
-	/**
-	 * @param actionStateId
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createActionState(String actionStateId, Transition[] transitions) {
-		return new ActionState(actionStateId, transitions);
-	}
-
-	/**
-	 * @param actionStateId
-	 * @param actionBeanName
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createActionState(String actionStateId, String actionBeanName, Transition[] transitions) {
-		return new ActionState(actionStateId, actionBeanName, transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @return
-	 */
-	public ActionState createCreateState(String stateIdPrefix) {
-		return createCreateState(stateIdPrefix, onSuccessView(stateIdPrefix));
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
-	 */
-	public ActionState createCreateState(String stateIdPrefix, Transition transition) {
-		return createCreateState(stateIdPrefix, new Transition[] { transition });
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createCreateState(String stateIdPrefix, Transition[] transitions) {
-		return createActionState(create(stateIdPrefix), transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @return
-	 */
-	public ActionState createGetState(String stateIdPrefix) {
-		return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
-	 */
-	public ActionState createGetState(String stateIdPrefix, Transition transition) {
-		return createGetState(stateIdPrefix, new Transition[] { transition });
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
-		return createActionState(get(stateIdPrefix), transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @return
-	 */
-	public ActionState createSetState(String stateIdPrefix) {
-		return createSetState(stateIdPrefix, onSuccessView(stateIdPrefix));
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
-	 */
-	public ActionState createSetState(String stateIdPrefix, Transition transition) {
-		return createSetState(stateIdPrefix, new Transition[] { transition });
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createSetState(String stateIdPrefix, Transition[] transitions) {
-		return createActionState(set(stateIdPrefix), transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @return
-	 */
-	public ActionState createLoadState(String stateIdPrefix) {
-		return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
-	 */
-	public ActionState createLoadState(String stateIdPrefix, Transition transition) {
-		return createGetState(stateIdPrefix, new Transition[] { transition });
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createLoadState(String stateIdPrefix, Transition[] transitions) {
-		return createActionState(load(stateIdPrefix), transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @return
-	 */
-	public ActionState createSearchState(String stateIdPrefix) {
-		return createSearchState(stateIdPrefix, onSuccessView(stateIdPrefix));
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
-	 */
-	public ActionState createSearchState(String stateIdPrefix, Transition transition) {
-		return createSearchState(stateIdPrefix, new Transition[] { transition });
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createSearchState(String stateIdPrefix, Transition[] transitions) {
-		return createActionState(search(stateIdPrefix), transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @return
-	 */
-	public ActionState createPopulateState(String stateIdPrefix) {
-		return createPopulateState(stateIdPrefix, onSuccessView(stateIdPrefix));
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transition
-	 * @return
-	 */
-	public ActionState createPopulateState(String stateIdPrefix, Transition transition) {
-		return createPopulateState(stateIdPrefix, new Transition[] { transition });
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createPopulateState(String stateIdPrefix, Transition[] transitions) {
-		return createActionState(populate(stateIdPrefix), transitions);
-	}
 
 	/**
 	 * @param stateIdPrefix
@@ -974,6 +782,392 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
+	 * @param actionStateId
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createActionState(String actionStateId, Transition transition) {
+		return new ActionState(actionStateId, transition);
+	}
+
+	/**
+	 * @param actionStateId
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createActionState(String actionStateId, ActionBean actionBean, Transition transition) {
+		return new ActionState(actionStateId, actionBean, transition);
+	}
+
+	/**
+	 * @param actionStateId
+	 * @param actionBeanName
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createActionState(String actionStateId, String actionBeanName, Transition transition) {
+		return new ActionState(actionStateId, actionBeanName, transition);
+	}
+
+	/**
+	 * @param actionStateId
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createActionState(String actionStateId, Transition[] transitions) {
+		return new ActionState(actionStateId, transitions);
+	}
+
+	/**
+	 * @param actionStateId
+	 * @param actionBean
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createActionState(String actionStateId, ActionBean actionBean, Transition[] transitions) {
+		return new ActionState(actionStateId, actionBean, transitions);
+	}
+
+	/**
+	 * @param actionStateId
+	 * @param actionBeanName
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createActionState(String actionStateId, String actionBeanName, Transition[] transitions) {
+		return new ActionState(actionStateId, actionBeanName, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createCreateState(String stateIdPrefix) {
+		return createCreateState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createCreateState(String stateIdPrefix, ActionBean actionBean) {
+		return createCreateState(stateIdPrefix, actionBean, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createCreateState(String stateIdPrefix, Transition transition) {
+		return createCreateState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createCreateState(String stateIdPrefix, ActionBean actionBean, Transition transition) {
+		return createCreateState(stateIdPrefix, actionBean, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createCreateState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(create(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createCreateState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(create(stateIdPrefix), actionBean, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createGetState(String stateIdPrefix) {
+		return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createGetState(String stateIdPrefix, ActionBean actionBean) {
+		return createGetState(stateIdPrefix, actionBean, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createGetState(String stateIdPrefix, Transition transition) {
+		return createGetState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createGetState(String stateIdPrefix, ActionBean actionBean, Transition transition) {
+		return createGetState(stateIdPrefix, actionBean, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(get(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createGetState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(get(stateIdPrefix), actionBean, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix) {
+		return createSetState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix, ActionBean actionBean) {
+		return createSetState(stateIdPrefix, actionBean, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix, Transition transition) {
+		return createSetState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix, ActionBean actionBean, Transition transition) {
+		return createSetState(stateIdPrefix, actionBean, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(set(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createSetState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(set(stateIdPrefix), actionBean, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix) {
+		return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix, ActionBean actionBean) {
+		return createLoadState(stateIdPrefix, actionBean, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix, Transition transition) {
+		return createGetState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix, ActionBean actionBean, Transition transition) {
+		return createLoadState(stateIdPrefix, actionBean, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(load(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(load(stateIdPrefix), actionBean, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix) {
+		return createSearchState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix, ActionBean actionBean) {
+		return createSearchState(stateIdPrefix, actionBean, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix, Transition transition) {
+		return createSearchState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix, ActionBean actionBean, Transition transition) {
+		return createSearchState(stateIdPrefix, actionBean, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(search(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createSearchState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(search(stateIdPrefix), actionBean, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createPopulateState(String stateIdPrefix) {
+		return createPopulateState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createPopulateState(String stateIdPrefix, ActionBean actionBean) {
+		return createPopulateState(stateIdPrefix, actionBean, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createPopulateState(String stateIdPrefix, Transition transition) {
+		return createPopulateState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createPopulateState(String stateIdPrefix, ActionBean actionBean, Transition transition) {
+		return createPopulateState(stateIdPrefix, actionBean, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createPopulateState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(populate(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createPopulateState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(populate(stateIdPrefix), actionBean, transitions);
+	}
+
+	/**
 	 * @param stateIdPrefix
 	 * @return
 	 */
@@ -984,11 +1178,12 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param stateIdPrefix
-	 * @param transition
+	 * @param actionBean
 	 * @return
 	 */
-	public ActionState createBindAndValidateState(String stateIdPrefix, Transition transition) {
-		return createBindAndValidateState(stateIdPrefix, new Transition[] { transition });
+	public ActionState createBindAndValidateState(String stateIdPrefix, ActionBean actionBean) {
+		return createBindAndValidateState(stateIdPrefix, actionBean, new Transition[] { onSuccessEnd(),
+				onErrorView(stateIdPrefix) });
 	}
 
 	/**
@@ -1002,38 +1197,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param stateIdPrefix
-	 * @return
-	 */
-	public ActionState createAddState(String stateIdPrefix) {
-		return createAddState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
-	}
-
-	/**
-	 * @param stateIdPrefix
 	 * @param transitions
 	 * @return
 	 */
-	public ActionState createAddState(String stateIdPrefix, Transition[] transitions) {
-		return createActionState(add(stateIdPrefix), transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param successStateId
-	 * @return
-	 */
-	public ActionState createAddState(String stateIdPrefix, String successStateId) {
-		return createAddState(stateIdPrefix, new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param addActionBeanName
-	 * @param transitions
-	 * @return
-	 */
-	public ActionState createAddState(String stateIdPrefix, String addActionBeanName, Transition[] transitions) {
-		return createActionState(add(stateIdPrefix), addActionBeanName, transitions);
+	public ActionState createBindAndValidateState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(bindAndValidate(stateIdPrefix), actionBean, transitions);
 	}
 
 	/**
@@ -1046,12 +1214,43 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createSaveState(String stateIdPrefix, ActionBean actionBean) {
+		return createSaveState(stateIdPrefix, actionBean,
+				new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+	}
+
+	/**
+	 * @param stateIdPrefix
 	 * @param successStateId
 	 * @return
 	 */
 	public ActionState createSaveState(String stateIdPrefix, String successStateId) {
 		return createSaveState(stateIdPrefix,
 				new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param successStateId
+	 * @return
+	 */
+	public ActionState createSaveState(String stateIdPrefix, ActionBean actionBean, String successStateId) {
+		return createSaveState(stateIdPrefix,
+				new Transition[] { onSuccess(successStateId), onErrorView(stateIdPrefix) });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createSaveState(String stateIdPrefix, ActionBean actionBean, Transition transition) {
+		return createSaveState(stateIdPrefix, actionBean, new Transition[] { transition });
 	}
 
 	/**
@@ -1075,10 +1274,29 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createSaveState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(save(stateIdPrefix), actionBean, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
 	 * @return
 	 */
 	public ActionState createDeleteState(String stateIdPrefix) {
 		return createDeleteState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createDeleteState(String stateIdPrefix, ActionBean actionBean) {
+		return createDeleteState(stateIdPrefix, actionBean, new Transition[] { onSuccessEnd(),
+				onErrorView(stateIdPrefix) });
 	}
 
 	/**
@@ -1089,6 +1307,27 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public ActionState createDeleteState(String stateIdPrefix, String successAndErrorStateId) {
 		return createDeleteState(stateIdPrefix, new Transition[] { onSuccess(successAndErrorStateId),
 				onErrorView(successAndErrorStateId) });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param successAndErrorStateId
+	 * @return
+	 */
+	public ActionState createDeleteState(String stateIdPrefix, ActionBean actionBean, String successAndErrorStateId) {
+		return createDeleteState(stateIdPrefix, actionBean, new Transition[] { onSuccess(successAndErrorStateId),
+				onErrorView(successAndErrorStateId) });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createDeleteState(String stateIdPrefix, ActionBean actionBean, Transition transition) {
+		return createDeleteState(stateIdPrefix, actionBean, new Transition[] { transition });
 	}
 
 	/**
@@ -1112,10 +1351,29 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	/**
 	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createDeleteState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(delete(stateIdPrefix), actionBean, transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
 	 * @return
 	 */
 	public ActionState createValidateState(String stateIdPrefix) {
 		return createValidateState(stateIdPrefix, new Transition[] { onSuccessEnd(), onErrorView(stateIdPrefix) });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param actionBean
+	 * @return
+	 */
+	public ActionState createValidateState(String stateIdPrefix, ActionBean actionBean) {
+		return createValidateState(stateIdPrefix, actionBean, new Transition[] { onSuccessEnd(),
+				onErrorView(stateIdPrefix) });
 	}
 
 	/**
@@ -1128,10 +1386,27 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createValidateState(String stateIdPrefix, ActionBean actionBean, Transition[] transitions) {
+		return createActionState(validate(stateIdPrefix), actionBean, transitions);
+	}
+
+	public EndState createEndState(String endStateId, String viewName) {
+		return new EndState(endStateId, viewName);
+	}
+
+	public EndState createEndState(String endStateId) {
+		return new EndState(endStateId);
+	}
+
+	/**
 	 * @return
 	 */
 	public EndState createFinishEndState() {
-		return new EndState(getDefaultFinishEndStateId());
+		return createEndState(getDefaultFinishEndStateId());
 	}
 
 	/**
@@ -1139,37 +1414,37 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 * @return
 	 */
 	public EndState createFinishEndState(String viewName) {
-		return new EndState(getDefaultFinishEndStateId(), viewName);
+		return createEndState(getDefaultFinishEndStateId(), viewName);
 	}
 
 	/**
 	 * @return
 	 */
-	public AbstractState createBackEndState() {
-		return new EndState(getDefaultBackEndStateId());
+	public EndState createBackEndState() {
+		return createEndState(getDefaultBackEndStateId());
 	}
 
 	/**
 	 * @param backViewName
 	 * @return
 	 */
-	public AbstractState createBackEndState(String backViewName) {
-		return new EndState(getDefaultBackEndStateId(), backViewName);
+	public EndState createBackEndState(String viewName) {
+		return createEndState(getDefaultBackEndStateId(), viewName);
 	}
 
 	/**
 	 * @return
 	 */
 	public EndState createCancelEndState() {
-		return new EndState(getDefaultCancelEndStateId());
+		return createEndState(getDefaultCancelEndStateId());
 	}
 
 	/**
 	 * @param cancelViewName
 	 * @return
 	 */
-	public EndState createCancelEndState(String cancelViewName) {
-		return new EndState(getDefaultCancelEndStateId(), cancelViewName);
+	public EndState createCancelEndState(String viewName) {
+		return createEndState(getDefaultCancelEndStateId(), viewName);
 	}
 
 	/**
