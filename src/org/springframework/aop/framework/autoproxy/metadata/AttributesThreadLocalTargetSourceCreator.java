@@ -12,16 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy.metadata;
 
 import java.util.Collection;
 
-import org.springframework.aop.framework.autoproxy.target.AbstractPrototypeBasedTargetSourceCreator;
-import org.springframework.aop.target.AbstractPrototypeBasedTargetSource;
+import org.springframework.aop.framework.autoproxy.target.AbstractBeanFactoryBasedTargetSourceCreator;
+import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.metadata.Attributes;
 
 /**
@@ -30,20 +29,51 @@ import org.springframework.metadata.Attributes;
  * @author Rod Johnson
  * @see org.springframework.aop.target.ThreadLocalTargetSource
  */
-public class AttributesThreadLocalTargetSourceCreator extends AbstractPrototypeBasedTargetSourceCreator {
+public class AttributesThreadLocalTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 
-	private final Attributes attributes;
+	/**
+	 * Underlying Attributes implementation that we're using.
+	 */
+	private Attributes attributes;
 
+	/**
+	 * Create a new AttributesThreadLocalTargetSourceCreator.
+	 * @see #setAttributes
+	 */
+	public AttributesThreadLocalTargetSourceCreator() {
+	}
+
+	/**
+	 * Create a new AttributesThreadLocalTargetSourceCreator.
+	 * @param attributes the Attributes implementation to use
+	 */
 	public AttributesThreadLocalTargetSourceCreator(Attributes attributes) {
+		if (attributes == null) {
+			throw new IllegalArgumentException("Attributes is required");
+		}
 		this.attributes = attributes;
 	}
 
-	protected AbstractPrototypeBasedTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory bf) {
-		Class beanClass = bean.getClass();
-		// See if there's a pooling attribute
-		Collection atts = attributes.getAttributes(beanClass, ThreadLocalAttribute.class);
+	/**
+	 * Set the Attributes implementation to use.
+	 */
+	public void setAttributes(Attributes attributes) {
+		this.attributes = attributes;
+	}
+
+	public void afterPropertiesSet() {
+		if (this.attributes == null) {
+			throw new IllegalArgumentException("'attributes' is required");
+		}
+	}
+
+	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
+			Class beanClass, String beanName) {
+
+		// See if there's a pooling attribute.
+		Collection atts = this.attributes.getAttributes(beanClass, ThreadLocalAttribute.class);
 		if (atts.isEmpty()) {
-			// No pooling attribute: don't create a custom TargetSource
+			// No pooling attribute: don't create a custom TargetSource.
 			return null;
 		}
 		else {

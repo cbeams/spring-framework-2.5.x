@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy.metadata;
 
@@ -21,7 +21,6 @@ import java.util.Collection;
 import org.springframework.aop.framework.autoproxy.target.AbstractPoolingTargetSourceCreator;
 import org.springframework.aop.framework.autoproxy.target.PoolingAttribute;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.metadata.Attributes;
 
 /**
@@ -30,22 +29,52 @@ import org.springframework.metadata.Attributes;
  */
 public class AttributesPoolingTargetSourceCreator extends AbstractPoolingTargetSourceCreator {
 
-	private final Attributes attributes;
+	/**
+	 * Underlying Attributes implementation that we're using.
+	 */
+	private Attributes attributes;
 
+	/**
+	 * Create a new AttributesPoolingTargetSourceCreator.
+	 * @see #setAttributes
+	 */
+	public AttributesPoolingTargetSourceCreator() {
+	}
+
+	/**
+	 * Create a new AttributesPrototypeTargetSourceCreator.
+	 * @param attributes the Attributes implementation to use
+	 */
 	public AttributesPoolingTargetSourceCreator(Attributes attributes) {
+		if (attributes == null) {
+			throw new IllegalArgumentException("Attributes is required");
+		}
 		this.attributes = attributes;
 	}
 
-	protected PoolingAttribute getPoolingAttribute(Object bean, String beanName, BeanFactory beanFactory) {
-		Class beanClass = bean.getClass();
-		// See if there's a pooling attribute
-		Collection atts = attributes.getAttributes(beanClass, PoolingAttribute.class);
+	/**
+	 * Set the Attributes implementation to use.
+	 */
+	public void setAttributes(Attributes attributes) {
+		this.attributes = attributes;
+	}
+
+	public void afterPropertiesSet() {
+		if (this.attributes == null) {
+			throw new IllegalArgumentException("'attributes' is required");
+		}
+	}
+
+	protected PoolingAttribute getPoolingAttribute(Class beanClass, String beanName) {
+		// See if there's a pooling attribute.
+		Collection atts = this.attributes.getAttributes(beanClass, PoolingAttribute.class);
 		if (atts.isEmpty()) {
-			// No pooling attribute
+			// No pooling attribute found.
 			return null;
 		}
 		else if (atts.size() > 1) {
-			throw new BeanDefinitionStoreException("Cannot have more than one pooling attribute on " + beanClass);
+			throw new BeanDefinitionStoreException(
+					"Cannot have more than one pooling attribute on [" + beanClass.getName() + "]");
 		}
 		else {
 			return (PoolingAttribute) atts.iterator().next();

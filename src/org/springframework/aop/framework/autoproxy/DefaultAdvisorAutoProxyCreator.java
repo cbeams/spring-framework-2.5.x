@@ -67,7 +67,7 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 
 	/**
 	 * Set the prefix for bean names that will cause them to be included for
-	 * autoproxying by this object. This prefix should be set to avoid circular
+	 * auto-proxying by this object. This prefix should be set to avoid circular
 	 * references. Default value is the bean name of this object + a dot.
 	 * @param advisorBeanNamePrefix the exclusion prefix
 	 */
@@ -77,14 +77,14 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 
 	/**
 	 * Return the prefix for bean names that will cause them to be included
-	 * for autoproxying by this object.
+	 * for auto-proxying by this object.
 	 */
 	public String getAdvisorBeanNamePrefix() {
 		return this.advisorBeanNamePrefix;
 	}
 
 	public void setBeanName(String name) {
-		// if no infrastructure bean name prefix has been set, override it
+		// If no infrastructure bean name prefix has been set, override it.
 		if (this.advisorBeanNamePrefix == null) {
 			this.advisorBeanNamePrefix = name + SEPARATOR;
 		}
@@ -92,7 +92,7 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 
 
 	/**
-	 * Find all candidate advices to use in auto proxying.
+	 * Find all candidate advices to use in auto-proxying.
 	 * @return list of Advice
 	 */
 	protected List findCandidateAdvisors() {

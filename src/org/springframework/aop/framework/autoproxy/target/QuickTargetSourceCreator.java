@@ -12,15 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy.target;
 
-import org.springframework.aop.target.AbstractPrototypeBasedTargetSource;
+import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
-import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Convenient TargetSourceCreator using bean name prefixes to create one of three
@@ -33,7 +32,7 @@ import org.springframework.beans.factory.BeanFactory;
  * @see org.springframework.aop.target.ThreadLocalTargetSource
  * @see org.springframework.aop.target.PrototypeTargetSource
  */
-public class QuickTargetSourceCreator extends AbstractPrototypeBasedTargetSourceCreator {
+public class QuickTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 
 	public static final String PREFIX_COMMONS_POOL = ":";
 
@@ -41,8 +40,9 @@ public class QuickTargetSourceCreator extends AbstractPrototypeBasedTargetSource
 
 	public static final String PREFIX_PROTOTYPE = "!";
 
-	protected final AbstractPrototypeBasedTargetSource createPrototypeTargetSource(
-			Object bean, String beanName, BeanFactory factory) {
+	protected final AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
+			Class beanClass, String beanName) {
+
 		if (beanName.startsWith(PREFIX_COMMONS_POOL)) {
 			CommonsPoolTargetSource cpts = new CommonsPoolTargetSource();
 			cpts.setMaxSize(25);

@@ -12,14 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.dynamic;
 
-import java.util.List;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
+import org.springframework.aop.framework.autoproxy.TargetSourceCreator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
@@ -34,10 +33,6 @@ public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAuto
 	
 	private int expirySeconds;
 	
-	/**
-	 * @param defaultPollIntervalSeconds
-	 *            The defaultPollIntervalSeconds to set.
-	 */
 	public void setExpirySeconds(int defaultPollIntervalSeconds) {
 		this.expirySeconds = defaultPollIntervalSeconds;
 	}
@@ -46,11 +41,14 @@ public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAuto
 		return expirySeconds;
 	}
 
+	public void setCustomTargetSourceCreators(TargetSourceCreator[] targetSourceCreators) {
+		throw new UnsupportedOperationException(
+				"Custom target sources are not supported for DynamicObjectAutoProxyCreators");
+	}
 
-	/**
-	 * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#getAdvicesAndAdvisorsForBean(java.lang.Object, java.lang.String, TargetSource)
-	 */
-	protected Object[] getAdvicesAndAdvisorsForBean(Object bean, String beanName, TargetSource targetSource) throws BeansException {
+	protected Object[] getAdvicesAndAdvisorsForBean(
+			Class beanClass, String beanName, TargetSource targetSource) throws BeansException {
+
 		if (targetSource == null) {
 			return DO_NOT_PROXY;
 		}
@@ -68,27 +66,18 @@ public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAuto
 	}
 	
 	/**
-	 * Return null if the object should not be managed as a dynamic object
-	 * @return
+	 * Return null if the object should not be managed as a dynamic object.
 	 */
-	protected abstract AbstractRefreshableTargetSource createRefreshableTargetSource(Object bean, ConfigurableListableBeanFactory beanFactory, String beanName);
-	
+	protected abstract AbstractRefreshableTargetSource createRefreshableTargetSource(
+			Object bean, ConfigurableListableBeanFactory beanFactory, String beanName);
 
-	/**
-	 * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#getCustomTargetSource(java.lang.Object, java.lang.String)
-	 */
 	protected TargetSource getCustomTargetSource(Object bean, String beanName) {
-		AbstractRefreshableTargetSource ts = createRefreshableTargetSource(bean, (ConfigurableListableBeanFactory) getBeanFactory(), beanName);
+		AbstractRefreshableTargetSource ts = createRefreshableTargetSource(
+				bean, (ConfigurableListableBeanFactory) getBeanFactory(), beanName);
 		if (ts != null) {
 			ts.setExpirySeconds(expirySeconds);
 		}
 		return ts;
 	}
-	
-	/**
-	 * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#setCustomTargetSourceCreators(java.util.List)
-	 */
-	public void setCustomTargetSourceCreators(List targetSourceCreators) {
-		throw new UnsupportedOperationException("Custom target sources are not supported for DynamicObjectAutoProxyCreators");
-	}
+
 }

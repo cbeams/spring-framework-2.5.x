@@ -49,7 +49,6 @@ import org.springframework.core.io.ResourceLoader;
  * via factory-bean/factory-method bean definitions in the same context.
  *
  * @author Rod Johnson
- * @since 1.2
  */
 public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoProxyCreator 
 	implements ScriptContext, ApplicationContextAware, BeanFactoryPostProcessor, BeanNameAware {
@@ -222,15 +221,15 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	 * advisor in place. We need to add to the ProxyFactory
 	 * all interfaces implemented by the script.
 	 */
-	protected void customizeProxyFactory(Object bean, ProxyFactory pf) {
-		if (pf.getTargetSource() instanceof DynamicScriptTargetSource) {
+	protected void customizeProxyFactory(ProxyFactory proxyFactory) {
+		if (proxyFactory.getTargetSource() instanceof DynamicScriptTargetSource) {
 			// If we created it...
-			DynamicScriptTargetSource ts = (DynamicScriptTargetSource) pf.getTargetSource();
+			DynamicScriptTargetSource ts = (DynamicScriptTargetSource) proxyFactory.getTargetSource();
 			Script script = ts.getScript();
 			
 			// Add Script interfaces
 			for (int i = 0; i < script.getInterfaces().length; i++) {
-				pf.addInterface(script.getInterfaces()[i]);
+				proxyFactory.addInterface(script.getInterfaces()[i]);
 			}
 		}
 	}

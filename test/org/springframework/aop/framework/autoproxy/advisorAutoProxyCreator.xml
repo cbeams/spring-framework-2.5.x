@@ -77,7 +77,7 @@
 	
 	<bean id="singletonDependency" class="org.springframework.beans.TestBean" singleton="true"/>
 		
-	<bean id="prototypeDependency" class="org.springframework.beans.TestBean" singleton="false" />
+	<bean id="prototypeDependency" class="org.springframework.beans.TestBean" singleton="false"/>
 	
 	<!-- ====== End test for prototype definitions to try to provoke circular references ========================= -->
 

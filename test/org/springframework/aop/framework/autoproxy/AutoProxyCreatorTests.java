@@ -71,7 +71,6 @@ public class AutoProxyCreatorTests extends TestCase {
 
 	public void testBeanNameAutoProxyCreator() {
 		StaticApplicationContext sac = new StaticApplicationContext();
-
 		sac.registerSingleton("testInterceptor", TestInterceptor.class, null);
 
 		RootBeanDefinition proxyCreator = new RootBeanDefinition(BeanNameAutoProxyCreator.class, null);
@@ -134,8 +133,8 @@ public class AutoProxyCreatorTests extends TestCase {
 			setOrder(0);
 		}
 
-		protected Object[] getAdvicesAndAdvisorsForBean(Object bean, String name, TargetSource customTargetSource) {
-			if (bean instanceof StaticMessageSource) {
+		protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String name, TargetSource customTargetSource) {
+			if (StaticMessageSource.class.equals(beanClass)) {
 				return DO_NOT_PROXY;
 			}
 			else if (name.endsWith("ToBeProxied")) {
