@@ -476,15 +476,91 @@ public class ValidationTestSuite extends TestCase {
 
 		assertEquals(1, errors.getFieldErrorCount("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("NOT_ROD", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCode());
-		assertEquals("NOT_ROD.tb.array[0].nestedIndexedBean.list[0].name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[0]);
-		assertEquals("NOT_ROD.tb.array[0].nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[1]);
-		assertEquals("NOT_ROD.tb.array.nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[2]);
-		assertEquals("NOT_ROD.array[0].nestedIndexedBean.list[0].name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[3]);
-		assertEquals("NOT_ROD.array[0].nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[4]);
-		assertEquals("NOT_ROD.array.nestedIndexedBean.list.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[5]);
+		assertEquals("NOT_ROD.tb.array[0].nestedIndexedBean.list[0].name",
+				errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[0]);
+		assertEquals("NOT_ROD.tb.array[0].nestedIndexedBean.list.name",
+				errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[1]);
+		assertEquals("NOT_ROD.tb.array.nestedIndexedBean.list.name",
+				errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[2]);
+		assertEquals("NOT_ROD.array[0].nestedIndexedBean.list[0].name",
+				errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[3]);
+		assertEquals("NOT_ROD.array[0].nestedIndexedBean.list.name",
+				errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[4]);
+		assertEquals("NOT_ROD.array.nestedIndexedBean.list.name",
+				errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[5]);
 		assertEquals("NOT_ROD.name", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[6]);
-		assertEquals("NOT_ROD.java.lang.String", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[7]);
+		assertEquals("NOT_ROD.java.lang.String",
+				errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[7]);
 		assertEquals("NOT_ROD", errors.getFieldError("array[0].nestedIndexedBean.list[0].name").getCodes()[8]);
+	}
+
+	public void testEditorForNestedIndexedField() {
+		IndexedTestBean tb = new IndexedTestBean();
+		tb.getArray()[0].setNestedIndexedBean(new IndexedTestBean());
+		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("list" + text);
+			}
+			public String getAsText() {
+				return ((String) getValue()).substring(4);
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "test1");
+		pvs.addPropertyValue("array[1].nestedIndexedBean.list[1].name", "test2");
+		binder.bind(pvs);
+		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("listtest2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
+		assertEquals("test1", binder.getErrors().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
+		assertEquals("test2", binder.getErrors().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
+	}
+
+	public void testSpecificEditorForNestedIndexedField() {
+		IndexedTestBean tb = new IndexedTestBean();
+		tb.getArray()[0].setNestedIndexedBean(new IndexedTestBean());
+		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(String.class, "array[0].nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("list" + text);
+			}
+			public String getAsText() {
+				return ((String) getValue()).substring(4);
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "test1");
+		pvs.addPropertyValue("array[1].nestedIndexedBean.list[1].name", "test2");
+		binder.bind(pvs);
+		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("test2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
+		assertEquals("test1", binder.getErrors().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
+		assertEquals("test2", binder.getErrors().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
+	}
+
+	public void testInnerSpecificEditorForNestedIndexedField() {
+		IndexedTestBean tb = new IndexedTestBean();
+		tb.getArray()[0].setNestedIndexedBean(new IndexedTestBean());
+		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list[0].name", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("list" + text);
+			}
+			public String getAsText() {
+				return ((String) getValue()).substring(4);
+			}
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "test1");
+		pvs.addPropertyValue("array[1].nestedIndexedBean.list[1].name", "test2");
+		binder.bind(pvs);
+		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("test2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
+		assertEquals("test1", binder.getErrors().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
+		assertEquals("test2", binder.getErrors().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
 
 	public void testDirectBindingToIndexedField() {

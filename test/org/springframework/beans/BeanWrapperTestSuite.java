@@ -19,6 +19,7 @@ package org.springframework.beans;
 
 import java.beans.PropertyEditorSupport;
 import java.beans.PropertyVetoException;
+import java.beans.PropertyEditor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 
 /**
  * @author Rod Johnson
@@ -958,15 +960,24 @@ public class BeanWrapperTestSuite extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array" + text);
 			}
+			public String getAsText() {
+				return ((String) getValue()).substring(5);
+			}
 		});
 		bw.registerCustomEditor(String.class, "list.nestedIndexedBean.list.name", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
+			public String getAsText() {
+				return ((String) getValue()).substring(4);
+			}
 		});
 		bw.registerCustomEditor(String.class, "map.nestedIndexedBean.map.name", new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("map" + text);
+			}
+			public String getAsText() {
+				return ((String) getValue()).substring(4);
 			}
 		});
 		assertEquals("name0", tb0.getName());
@@ -1002,6 +1013,53 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals("listname2", bw.getPropertyValue("list[1].nestedIndexedBean.list[1].name"));
 		assertEquals("mapname1", bw.getPropertyValue("map['key1'].nestedIndexedBean.map[key1].name"));
 		assertEquals("mapname0", bw.getPropertyValue("map[key2].nestedIndexedBean.map[\"key2\"].name"));
+	}
+
+	public void testNestedIndexedPropertiesWithIndexedCustomEditorForProperty() {
+		IndexedTestBean bean = new IndexedTestBean();
+		TestBean tb0 = bean.getArray()[0];
+		TestBean tb1 = bean.getArray()[1];
+		TestBean tb2 = ((TestBean) bean.getList().get(0));
+		TestBean tb3 = ((TestBean) bean.getList().get(1));
+		TestBean tb4 = ((TestBean) bean.getMap().get("key1"));
+		TestBean tb5 = ((TestBean) bean.getMap().get("key2"));
+		tb0.setNestedIndexedBean(new IndexedTestBean());
+		tb1.setNestedIndexedBean(new IndexedTestBean());
+		tb2.setNestedIndexedBean(new IndexedTestBean());
+		tb3.setNestedIndexedBean(new IndexedTestBean());
+		tb4.setNestedIndexedBean(new IndexedTestBean());
+		tb5.setNestedIndexedBean(new IndexedTestBean());
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.registerCustomEditor(String.class, "array[0].nestedIndexedBean.array[0].name", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("array" + text);
+			}
+		});
+		bw.registerCustomEditor(String.class, "list.nestedIndexedBean.list[1].name", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("list" + text);
+			}
+		});
+		bw.registerCustomEditor(String.class, "map[key1].nestedIndexedBean.map.name", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue("map" + text);
+			}
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("array[0].nestedIndexedBean.array[0].name", "name5");
+		pvs.addPropertyValue("array[1].nestedIndexedBean.array[1].name", "name4");
+		pvs.addPropertyValue("list[0].nestedIndexedBean.list[0].name", "name3");
+		pvs.addPropertyValue("list[1].nestedIndexedBean.list[1].name", "name2");
+		pvs.addPropertyValue("map[key1].nestedIndexedBean.map[\"key1\"].name", "name1");
+		pvs.addPropertyValue("map['key2'].nestedIndexedBean.map[key2].name", "name0");
+		bw.setPropertyValues(pvs);
+		assertEquals("arrayname5", tb0.getNestedIndexedBean().getArray()[0].getName());
+		assertEquals("name4", tb1.getNestedIndexedBean().getArray()[1].getName());
+		assertEquals("name3", ((TestBean) tb2.getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("listname2", ((TestBean) tb3.getNestedIndexedBean().getList().get(1)).getName());
+		assertEquals("mapname1", ((TestBean) tb4.getNestedIndexedBean().getMap().get("key1")).getName());
+		assertEquals("name0", ((TestBean) tb5.getNestedIndexedBean().getMap().get("key2")).getName());
 	}
 
 	public void testIndexedPropertiesWithDirectAccess() {
@@ -1188,6 +1246,21 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals("list1", ((TestBean) bean.getList().get(0)).getName());
 		bw.setPropertyValue("list[0]", "test");
 		assertEquals("test", bean.getList().get(0));
+	}
+
+	public void testUninitializedArrayPropertyWithCustomEditor() {
+		IndexedTestBean bean = new IndexedTestBean(false);
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		PropertyEditor pe = new CustomNumberEditor(Integer.class, true);
+		bw.registerCustomEditor(null, "list.age", pe);
+		TestBean tb = new TestBean();
+		bw.setPropertyValue("list", new ArrayList());
+		bw.setPropertyValue("list[0]", tb);
+		assertEquals(tb, bean.getList().get(0));
+		assertEquals(pe, bw.findCustomEditor(int.class, "list.age"));
+		assertEquals(pe, bw.findCustomEditor(null, "list.age"));
+		assertEquals(pe, bw.findCustomEditor(int.class, "list[0].age"));
+		assertEquals(pe, bw.findCustomEditor(null, "list[0].age"));
 	}
 
 	public void testArrayToArrayConversion() throws PropertyVetoException {

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -271,9 +272,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 			// check property-specific editor first
 			PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
 			if (editor == null) {
-				int keyIndex = propertyPath.indexOf(PROPERTY_KEY_PREFIX);
-				if (keyIndex != -1) {
-					editor = getCustomEditor(propertyPath.substring(0, keyIndex), requiredType);
+				List strippedPaths = new LinkedList();
+				addStrippedPropertyPaths(strippedPaths, "", propertyPath);
+				for (Iterator it = strippedPaths.iterator(); it.hasNext() && editor == null;) {
+					String strippedPath = (String) it.next();
+					editor = getCustomEditor(strippedPath, requiredType);
 				}
 			}
 			if (editor != null) {
@@ -319,6 +322,31 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return null;
 	}
 
+
+	/**
+	 * Add property paths with all variations of stripped keys and/or indexes.
+	 * Invokes itself recursively with nested paths
+	 * @param strippedPaths the result list to add to
+	 * @param nestedPath the current nested path
+	 * @param propertyPath the property path to check for keys/indexes to strip
+	 */
+	private void addStrippedPropertyPaths(List strippedPaths, String nestedPath, String propertyPath) {
+		int startIndex = propertyPath.indexOf(PROPERTY_KEY_PREFIX_CHAR);
+		if (startIndex != -1) {
+			int endIndex = propertyPath.indexOf(PROPERTY_KEY_SUFFIX_CHAR);
+			if (endIndex != -1) {
+				String prefix = propertyPath.substring(0, startIndex);
+				String key = propertyPath.substring(startIndex, endIndex + 1);
+				String suffix = propertyPath.substring(endIndex + 1, propertyPath.length());
+				// strip the first key
+				strippedPaths.add(nestedPath + prefix + suffix);
+				// search for further keys to strip, with the first key stripped
+				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix, suffix);
+				// search for further keys to strip, with the first key not stripped
+				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix + key, suffix);
+			}
+		}
+	}
 
 	/**
 	 * Determine the first respectively last nested property separator in
@@ -924,7 +952,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				}
 			}
 		}
-		catch (NullValueInNestedPathException ex) {
+		catch (InvalidPropertyException ex) {
 			// consider as not determinable
 		}
 		return null;
