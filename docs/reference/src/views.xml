@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.11 2004-03-01 16:57:18 aarendsen Exp $-->
+<!--$Id: views.xml,v 1.12 2004-03-01 18:36:04 davison Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -93,7 +93,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       url="http://www.springframework.org/docs/taglib/index.html"></ulink>.</para>
     </sect2>
   </sect1>
-  
+
   <sect1 id="view-tiles">
     <title>Using Tiles</title>
     <para>
@@ -977,11 +977,11 @@ public class PDFPage extends AbstractPdfView {
         <listitem>
           <para><emphasis>User Interface Layer:</emphasis></para>
 
-          <para>- concerned with the user interface </para>
+          <para>- concerned with the user interface</para>
 
-          <para>- contains some application logic </para>
+          <para>- contains some application logic</para>
 
-          <para>- provided by Tapestry </para>
+          <para>- provided by Tapestry</para>
 
           <para>- aside from providing UI via Tapestry, code in this layer
           does its work via objects which implement interfaces from the
@@ -993,79 +993,72 @@ public class PDFPage extends AbstractPdfView {
         <listitem>
           <para><emphasis>Service Layer:</emphasis></para>
 
-          <para> - application specific 'service'
-          code</para>
+          <para>- application specific 'service' code</para>
 
-          <para> - works with domain objects, and uses the
-          Mapper API to get those domain objects into and out of some sort of
-          repository (database)</para>
+          <para>- works with domain objects, and uses the Mapper API to get
+          those domain objects into and out of some sort of repository
+          (database)</para>
 
-          <para> - hosted in one or more Spring
-          contexts</para>
+          <para>- hosted in one or more Spring contexts</para>
 
-          <para> - code in this layer manipulates objects
-          in the domain model, in an application specific fashion. It does its
-          work via other code in this layer, and via the Mapper API. An object
-          in this layer is given the specific mapper implementations it needs
-          to work with, via the Spring context.</para>
+          <para>- code in this layer manipulates objects in the domain model,
+          in an application specific fashion. It does its work via other code
+          in this layer, and via the Mapper API. An object in this layer is
+          given the specific mapper implementations it needs to work with, via
+          the Spring context.</para>
 
-          <para> - since code in this layer is hosted in
-          the Spring context, it may be transactionally wrapped by the Spring
-          context, as opposed to managing its own
-          transactions</para>
+          <para>- since code in this layer is hosted in the Spring context, it
+          may be transactionally wrapped by the Spring context, as opposed to
+          managing its own transactions</para>
         </listitem>
 
         <listitem>
           <para><emphasis>Domain Model:</emphasis></para>
 
-          <para> - domain specific object hierarchy, which
-          deals with data and logic specific to this
-          domain</para>
+          <para>- domain specific object hierarchy, which deals with data and
+          logic specific to this domain</para>
 
-          <para> - although the domain object hierarchy is
-          built with the idea that it is persisted somehow and makes some
-          general concessions to this (for example, bidirectional
-          relationships), it generally has no knowledge of other layers. As
-          such, it may be tested in isolation, and used with different mapping
-          implementations for production vs.
+          <para>- although the domain object hierarchy is built with the idea
+          that it is persisted somehow and makes some general concessions to
+          this (for example, bidirectional relationships), it generally has no
+          knowledge of other layers. As such, it may be tested in isolation,
+          and used with different mapping implementations for production vs.
           testing.</para>
 
-          <para> - these objects may be standalone, or
-          used in conjunction with a Spring application context to take
-          advantage of some of the benefits of the context, e.g., isolation,
-          inversion of control, different strategy implementations,
-          etc.</para>
+          <para>- these objects may be standalone, or used in conjunction with
+          a Spring application context to take advantage of some of the
+          benefits of the context, e.g., isolation, inversion of control,
+          different strategy implementations, etc.</para>
         </listitem>
 
         <listitem>
           <para><emphasis>Data Source Layer:</emphasis></para>
 
-          <para> - Mapper API (also called Data Access Objects): an API used
-          to persist the domain model to a repository of some sort (generally
-          a DB, but could be the filesystem, memeory, etc.)</para>
+          <para>- Mapper API (also called Data Access Objects): an API used to
+          persist the domain model to a repository of some sort (generally a
+          DB, but could be the filesystem, memeory, etc.)</para>
 
-          <para> - Mapper API implementations: one or more specific
+          <para>- Mapper API implementations: one or more specific
           implementations of the Mapper API, for example, a Hibernate-specific
           mapper, a JDO-specific mapper, JDBC-specific mapper, or a memory
           mapper.</para>
 
-          <para> - mapper implementations live in one or more Spring
+          <para>- mapper implementations live in one or more Spring
           Application Contexts. A service layer object is given the mapper
-          objects it needs to work with via the context. </para>
+          objects it needs to work with via the context.</para>
         </listitem>
 
         <listitem>
           <para><emphasis>Database, filesystem, or other
           repositories:</emphasis></para>
 
-          <para> - objects in the domain model are stored
-          into one or more repositories via one or more mapper
-          implementations</para>
+          <para>- objects in the domain model are stored into one or more
+          repositories via one or more mapper implementations</para>
 
-          <para> - a repository may be very simpe (e.g.
-          filesystem), or may have its own representation of the data from the
-          domain model (i.e. a schema in a db). It does not know about other
-          layers howerver.</para>
+          <para>- a repository may be very simpe (e.g. filesystem), or may
+          have its own representation of the data from the domain model (i.e.
+          a schema in a db). It does not know about other layers
+          howerver.</para>
         </listitem>
       </itemizedlist>
     </sect2>
@@ -1166,13 +1159,13 @@ public class PDFPage extends AbstractPdfView {
       <sect3 id="view-tapestry-appctx">
         <title>Obtaining beans in Tapestry pages</title>
 
-        <para>At this point, the application context is available to a web-app
-        by calling Spring's static utility function
-        WebApplicationContextUtils.getApplicationContext(servletContext),
-        where servletContext is the standard ServletContext from the J2EE
-        Servlet spec. As such, one simple mechanism for a page to get an
-        instance of the UserService, for example, would be with code such as:
-        <programlisting>
+        <para>At this point, the application context is available to a web
+        application by calling Spring's static utility function
+        <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>,
+        where servletContext is the standard <literal>ServletContext</literal>
+        from the J2EE Servlet specification. As such, one simple mechanism for
+        a page to get an instance of the UserService, for example, would be
+        with code such as: <programlisting>
    WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
            getRequestCycle().getRequestContext().getServlet().getServletContext());
    UserService userService = appContext.getBean("userService");
@@ -1186,23 +1179,25 @@ public class PDFPage extends AbstractPdfView {
         by name, and in fact, the page would ideally not know about the
         context at all.</para>
 
-        <para>Luckilly, there is a mechanism to allow this. We rely upon the
+        <para>Luckily, there is a mechanism to allow this. We rely upon the
         fact that Tapestry already has a mechanism to declaratively add
         properties to a page, and it is in fact the preferred approach to
         manage all properties on a page in this declarative fashion, so that
-        Tapestry can properly maange their lifecycle as part of the page and
+        Tapestry can properly manage their lifecycle as part of the page and
         component lifecycle.</para>
       </sect3>
 
       <sect3 id="view-tapestry-exposeappctx">
         <title>Exposing the application context to Tapestry</title>
 
-        <para>First we need to make the Application Context available to the
-        Tapestry page or Component without having to have the ServletContext;
-        this is because at the stage in the page's/component's lifecycle when
-        we need to access the Application Context, the ServletContext won't be
-        easily available to the page, so we can't use
-        WebApplicationContextUtils.getApplicationContext(servletContext)
+        <para>First we need to make the <literal>ApplicationContext</literal>
+        available to the Tapestry page or Component without having to have the
+        <literal>ServletContext</literal>; this is because at the stage in the
+        page's/component's lifecycle when we need to access the
+        <literal>ApplicationContext</literal>, the
+        <literal>ServletContext</literal> won't be easily available to the
+        page, so we can't use
+        <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>
         directly. One way is by defining a custom version of the Tapestry
         IEngine which exposes this for us: <programlisting>
  package com.whatever.web.xportal;
@@ -1230,12 +1225,11 @@ public class PDFPage extends AbstractPdfView {
      }
    }
  }
-</programlisting> This engine class places the Spring Application Context as
-        an attribute called "appContext" in this Tapestry app's 'Global'
-        object. Make sure to register the fact that this special IEngine
-        instance should be used for this Tapestry application, with an entry
-        in the Tapestry application definition file. For example:
-        <programlisting>
+</programlisting>This engine class places the Spring Application Context as an
+        attribute called "appContext" in this Tapestry app's 'Global' object.
+        Make sure to register the fact that this special IEngine instance
+        should be used for this Tapestry application, with an entry in the
+        Tapestry application definition file. For example: <programlisting>
  file: xportal.application:
  
  &lt;?xml version="1.0" encoding="UTF-8"?&gt;
@@ -1465,13 +1459,13 @@ public class PDFPage extends AbstractPdfView {
       <title>Summary</title>
 
       <para>In this example, we've managed to allow service beans defined in
-      the Spring Application Context to be provided to the page in a
-      declarative fashion. The page class does not know where the service
-      implementations are coming from, and in fact it is easy to slip in
-      another implementation, for example, during testing. This inversion of
-      control is one of the prime goals and benefits of the Spring Framework,
-      and we have managed to extend it all the way up the J2EE stack in this
-      Tapestry application.</para>
+      the Spring <literal>ApplicationContext</literal> to be provided to the
+      page in a declarative fashion. The page class does not know where the
+      service implementations are coming from, and in fact it is easy to slip
+      in another implementation, for example, during testing. This inversion
+      of control is one of the prime goals and benefits of the Spring
+      Framework, and we have managed to extend it all the way up the J2EE
+      stack in this Tapestry application.</para>
     </sect2>
   </sect1>
 
