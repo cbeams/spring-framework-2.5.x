@@ -26,12 +26,12 @@ import java.util.Set;
 
 /**
  * This class can be used to parse other classes containing constant definitions
- * in public static final members. The asXXXX() methods of this class allow these
- * constant values to be accessed via their string names.
+ * in public static final members. The <code>asXXXX</code> methods of this class
+ * allow these constant values to be accessed via their string names.
  *
- * <p>Consider class Foo containing public final static int CONSTANT1 = 66;
- * An instance of this class wrapping Foo.class will return the constant value
- * of 66 from its asInt() method given the argument "CONSTANT1".
+ * <p>Consider class Foo containing <code>public final static int CONSTANT1 = 66;</code>
+ * An instance of this class wrapping <code>Foo.class</code> will return the constant value
+ * of 66 from its <code>asNumber</code> method given the argument <code>"CONSTANT1"</code>.
  *
  * <p>This class is ideal for use in PropertyEditors, enabling them to
  * recognize the same names as the constants themselves, and freeing them
@@ -39,7 +39,7 @@ import java.util.Set;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 16-Mar-2003
+ * @since 16.03.2003
  */
 public class Constants {
 
