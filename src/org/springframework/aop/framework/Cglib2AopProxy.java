@@ -50,9 +50,9 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Rob Harrop
- * @version $Id: Cglib2AopProxy.java,v 1.8 2004-06-04 09:59:57 robharrop Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.9 2004-06-24 13:10:48 robharrop Exp $
  */
-public class Cglib2AopProxy implements AopProxy, CallbackFilter {
+public class Cglib2AopProxy implements AopProxy {
 
 	// Constants for CGLIB callback array indices
 	private static final int AOP_PROXY = 0;
@@ -150,7 +150,7 @@ public class Cglib2AopProxy implements AopProxy, CallbackFilter {
 			Class rootClass = advised.getTargetSource().getTargetClass();
 
 			e.setSuperclass(rootClass);
-			e.setCallbackFilter(this);
+			e.setCallbackFilter(new ProxyCallbackFilter(advised));
 
 			e.setStrategy(new UndeclaredThrowableStrategy(
 					UndeclaredThrowableException.class));
@@ -282,166 +282,9 @@ public class Cglib2AopProxy implements AopProxy, CallbackFilter {
 	}
 
 	/**
-	 * Implementation of CallbackFilter.accept() to return the index of the
-	 * callback we need.
-	 * 
-	 * The callbacks for each proxy are built up of a set of fixed callbacks for
-	 * general use and then a set of callbacks that are specific to a method for
-	 * use on static targets with a fixed advice chain.
-	 * 
-	 * The callback used is determined thus:
-	 * <dl>
-	 * <dt>For exposed proxies</dt>
-	 * <dd>Exposing the proxy requires code to execute before and after the
-	 * method/chain invocation. This means we must use
-	 * DynamicAdvisedInterceptor, since all other interceptors can avoid the
-	 * need for a try/catch block</dd>
-	 * <dt>For Object.finalize():</dt>
-	 * <dd>No override for this method is used</dd>
-	 * <dt>For equals():</dt>
-	 * <dd>The EqualsInterceptor is used to redirect equals() calls to a special handler to this
-	 * proxy.</dd>
-	 * <dt>For methods on the Advised class:</dt>
-	 * <dd>the AdvisedDispatcher is used to dispatch the call directly to the
-	 * target</dd>
-	 * <dt>For advised methods:</dt>
-	 * <dd>If the target is static and the advice chain is frozen then a
-	 * FixedChainStaticTargetInterceptor specific to the method is used to
-	 * invoke the advice chain. Otherwise a DyanmicAdvisedInterceptor is used.
-	 * </dd>
-	 * <dt>For non-advised methods:</dt>
-	 * <dd>Where it can be determined that the method will not return
-	 * <code>this</code> or when ProxyFactory.getExposeProxy() return false
-	 * then a Dispatcher is used. For static targets the StaticDispatcher is
-	 * used and for dynamic targets a DynamicUnadvisedInterceptor is used. If it possible
-	 * for the method to return <code>this</code> then a StaticUnadvisedInterceptor is
-	 * used for static targets - the DynamicUnadvisedInterceptor already considers this.</dd>
-	 * </dl>
-	 * 
-	 * @see net.sf.cglib.proxy.CallbackFilter#accept(java.lang.reflect.Method)
-	 */
-	public int accept(Method method) {
-
-		if (method.getDeclaringClass() == Object.class
-				&& method.getName().equals("finalize")) {
-			logger.info("Object.finalize () method found - using NO_OVERRIDE");
-			return NO_OVERRIDE;
-		}
-
-		if (method.getDeclaringClass() == Advised.class) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Method " + method
-						+ " is declared on Advised - using DISPATCH_ADVISED");
-			}
-			return DISPATCH_ADVISED;
-		}
-
-		// We must always proxy equals, to direct calls to this
-		if (isEqualsMethod(method)) {
-			logger.info("Found equals() method - using INVOKE_EQUALS");
-			return INVOKE_EQUALS;
-		}
-
-		// Could consider more aggressive optimization in which we have a
-		// distinct
-		// callback with the advice chain for each method, but it's probably not
-		// worth it
-
-		// We can apply optimizations
-		// The optimization means that we evaluate whether or not there's an
-		// advice chain once only, befre each invocation.
-
-		Class targetClass = advised.getTargetSource().getTargetClass();
-
-		// Proxy is not yet available, but that shouldn't matter
-
-		List chain = advised.getAdvisorChainFactory()
-				.getInterceptorsAndDynamicInterceptionAdvice(advised, null,
-						method, targetClass);
-
-		boolean haveAdvice = !chain.isEmpty();
-		boolean exposeProxy = advised.getExposeProxy();
-		boolean isStatic = advised.getTargetSource().isStatic();
-		boolean isFrozen = advised.isFrozen();
-
-		if (haveAdvice) {
-
-			// if exposing the proxy then AOP_PROXY must be used.
-			if (exposeProxy) {
-				return AOP_PROXY;
-			}
-
-			String key = method.toString();
-
-			// check to see if we have fixed interceptor to serve this method
-			// else use the AOP_PROXY
-			if (isStatic && isFrozen && fixedInterceptorMap.containsKey(key)) {
-				if (logger.isInfoEnabled()) {
-					logger
-							.info("Method "
-									+ method
-									+ " has Advice and optimisations are enabled - using specific FixedChainStaticTargetInterceptor");
-				}
-
-				// we know that we are optimising so we can use the
-				// FixedStaticChainInterceptors
-				int index = ((Integer) fixedInterceptorMap.get(key)).intValue();
-				return (index + fixedInterceptorOffset);
-			} else {
-				return AOP_PROXY;
-			}
-
-		} else {
-			// see if the return type of the method is outside the
-			// class hierarchy of the target type. If so we know it never
-			// needs to have return type massge and can use a dispatcher.
-
-			// if the proxy is being exposed then
-			// must use the interceptor
-			// the correct one is already configued.
-			// if the target is not static cannot use
-			// a Dispatcher because the target can not then be released.
-			if (exposeProxy || !isStatic) {
-				return INVOKE_TARGET;
-			}
-
-			Class returnType = method.getReturnType();
-
-			if (targetClass == returnType) {
-				if (logger.isInfoEnabled()) {
-					logger
-							.info("Method "
-									+ method
-									+ "has return type same as target type (may return this) - using INVOKE_TARGET");
-				}
-				return INVOKE_TARGET;
-			} else if (returnType.isPrimitive()
-					|| !returnType.isAssignableFrom(targetClass)) {
-				if (logger.isInfoEnabled()) {
-					logger
-							.info("Method "
-									+ method
-									+ "has return type that ensures this cannot be returned- using DISPATCH_TARGET");
-				}
-				return DISPATCH_TARGET;
-			} else {
-				if (logger.isInfoEnabled()) {
-					logger
-							.info("Method "
-									+ method
-									+ "has return type that is assignable from the target type (may return this) - using INVOKE_TARGET");
-				}
-				return INVOKE_TARGET;
-			}
-		}
-	}
-
-	/**
-	 * Equality means interceptors and interfaces are ==.
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 * @param other
-	 *            may be a dynamic proxy wrapping an instance of this class
+	 * Checks to see if this CallbackFilter
+	 * is the same CallbackFilter used 
+	 * for another proxy
 	 */
 	public boolean equals(Object other) {
 		if (other == null)
@@ -808,6 +651,190 @@ public class Cglib2AopProxy implements AopProxy, CallbackFilter {
 		}
 	}
 
+	private class ProxyCallbackFilter implements CallbackFilter {
+		
+		private AdvisedSupport advised = null;
+		
+		public ProxyCallbackFilter(AdvisedSupport advised) {
+			this.advised = advised;
+		}
+		
+		/**
+		 * Implementation of CallbackFilter.accept() to return the index of the
+		 * callback we need.
+		 * 
+		 * The callbacks for each proxy are built up of a set of fixed callbacks for
+		 * general use and then a set of callbacks that are specific to a method for
+		 * use on static targets with a fixed advice chain.
+		 * 
+		 * The callback used is determined thus:
+		 * <dl>
+		 * <dt>For exposed proxies</dt>
+		 * <dd>Exposing the proxy requires code to execute before and after the
+		 * method/chain invocation. This means we must use
+		 * DynamicAdvisedInterceptor, since all other interceptors can avoid the
+		 * need for a try/catch block</dd>
+		 * <dt>For Object.finalize():</dt>
+		 * <dd>No override for this method is used</dd>
+		 * <dt>For equals():</dt>
+		 * <dd>The EqualsInterceptor is used to redirect equals() calls to a special handler to this
+		 * proxy.</dd>
+		 * <dt>For methods on the Advised class:</dt>
+		 * <dd>the AdvisedDispatcher is used to dispatch the call directly to the
+		 * target</dd>
+		 * <dt>For advised methods:</dt>
+		 * <dd>If the target is static and the advice chain is frozen then a
+		 * FixedChainStaticTargetInterceptor specific to the method is used to
+		 * invoke the advice chain. Otherwise a DyanmicAdvisedInterceptor is used.
+		 * </dd>
+		 * <dt>For non-advised methods:</dt>
+		 * <dd>Where it can be determined that the method will not return
+		 * <code>this</code> or when ProxyFactory.getExposeProxy() return false
+		 * then a Dispatcher is used. For static targets the StaticDispatcher is
+		 * used and for dynamic targets a DynamicUnadvisedInterceptor is used. If it possible
+		 * for the method to return <code>this</code> then a StaticUnadvisedInterceptor is
+		 * used for static targets - the DynamicUnadvisedInterceptor already considers this.</dd>
+		 * </dl>
+		 * 
+		 * @see net.sf.cglib.proxy.CallbackFilter#accept(java.lang.reflect.Method)
+		 */
+		public int accept(Method method) {
+
+			if (method.getDeclaringClass() == Object.class
+					&& method.getName().equals("finalize")) {
+				logger.info("Object.finalize () method found - using NO_OVERRIDE");
+				return NO_OVERRIDE;
+			}
+
+			if (method.getDeclaringClass() == Advised.class) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Method " + method
+							+ " is declared on Advised - using DISPATCH_ADVISED");
+				}
+				return DISPATCH_ADVISED;
+			}
+
+			// We must always proxy equals, to direct calls to this
+			if (isEqualsMethod(method)) {
+				logger.info("Found equals() method - using INVOKE_EQUALS");
+				return INVOKE_EQUALS;
+			}
+
+			// Could consider more aggressive optimization in which we have a
+			// distinct
+			// callback with the advice chain for each method, but it's probably not
+			// worth it
+
+			// We can apply optimizations
+			// The optimization means that we evaluate whether or not there's an
+			// advice chain once only, befre each invocation.
+
+			Class targetClass = advised.getTargetSource().getTargetClass();
+
+			// Proxy is not yet available, but that shouldn't matter
+
+			List chain = advised.getAdvisorChainFactory()
+					.getInterceptorsAndDynamicInterceptionAdvice(advised, null,
+							method, targetClass);
+
+			boolean haveAdvice = !chain.isEmpty();
+			boolean exposeProxy = advised.getExposeProxy();
+			boolean isStatic = advised.getTargetSource().isStatic();
+			boolean isFrozen = advised.isFrozen();
+
+			if (haveAdvice) {
+
+				// if exposing the proxy then AOP_PROXY must be used.
+				if (exposeProxy) {
+					return AOP_PROXY;
+				}
+
+				String key = method.toString();
+
+				// check to see if we have fixed interceptor to serve this method
+				// else use the AOP_PROXY
+				if (isStatic && isFrozen && fixedInterceptorMap.containsKey(key)) {
+					if (logger.isInfoEnabled()) {
+						logger
+								.info("Method "
+										+ method
+										+ " has Advice and optimisations are enabled - using specific FixedChainStaticTargetInterceptor");
+					}
+
+					// we know that we are optimising so we can use the
+					// FixedStaticChainInterceptors
+					int index = ((Integer) fixedInterceptorMap.get(key)).intValue();
+					return (index + fixedInterceptorOffset);
+				} else {
+					return AOP_PROXY;
+				}
+
+			} else {
+				// see if the return type of the method is outside the
+				// class hierarchy of the target type. If so we know it never
+				// needs to have return type massge and can use a dispatcher.
+
+				// if the proxy is being exposed then
+				// must use the interceptor
+				// the correct one is already configued.
+				// if the target is not static cannot use
+				// a Dispatcher because the target can not then be released.
+				if (exposeProxy || !isStatic) {
+					return INVOKE_TARGET;
+				}
+
+				Class returnType = method.getReturnType();
+
+				if (targetClass == returnType) {
+					if (logger.isInfoEnabled()) {
+						logger
+								.info("Method "
+										+ method
+										+ "has return type same as target type (may return this) - using INVOKE_TARGET");
+					}
+					return INVOKE_TARGET;
+				} else if (returnType.isPrimitive()
+						|| !returnType.isAssignableFrom(targetClass)) {
+					if (logger.isInfoEnabled()) {
+						logger
+								.info("Method "
+										+ method
+										+ "has return type that ensures this cannot be returned- using DISPATCH_TARGET");
+					}
+					return DISPATCH_TARGET;
+				} else {
+					if (logger.isInfoEnabled()) {
+						logger
+								.info("Method "
+										+ method
+										+ "has return type that is assignable from the target type (may return this) - using INVOKE_TARGET");
+					}
+					return INVOKE_TARGET;
+				}
+			}
+		}
+		
+		public int hashCode() {
+			return 0;
+		}
+		
+		public boolean equals(Object other) {
+			if (other == null)
+				return false;
+			if (other == this)
+				return true;
+
+			ProxyCallbackFilter otherCallbackFilter = null;
+			if (other instanceof ProxyCallbackFilter) {
+				otherCallbackFilter = (ProxyCallbackFilter) other;
+			} else {
+				// Not a valid comparison
+				return false;
+			}
+
+			return AopProxyUtils.equalsInProxy(advised, otherCallbackFilter.advised);
+		}
+	}
 	/**
 	 * Implementation of AOP Alliance MethodInvocation used by this AOP proxy
 	 */
