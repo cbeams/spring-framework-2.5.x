@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanWrapperTestSuite.java,v 1.23 2004-06-11 23:42:29 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.24 2004-06-15 16:56:53 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
@@ -672,7 +672,7 @@ public class BeanWrapperTestSuite extends TestCase {
 		TestBean tb6 = ((TestBean) bean.getSet().toArray()[0]);
 		TestBean tb7 = ((TestBean) bean.getSet().toArray()[1]);
 		TestBean tb4 = ((TestBean) bean.getMap().get("key1"));
-		TestBean tb5 = ((TestBean) bean.getMap().get("key2"));
+		TestBean tb5 = ((TestBean) bean.getMap().get("key.3"));
 		assertEquals("name0", tb0.getName());
 		assertEquals("name1", tb1.getName());
 		assertEquals("name2", tb2.getName());
@@ -688,9 +688,9 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals("name6", bw.getPropertyValue("set[0].name"));
 		assertEquals("name7", bw.getPropertyValue("set[1].name"));
 		assertEquals("name4", bw.getPropertyValue("map[key1].name"));
-		assertEquals("name5", bw.getPropertyValue("map[key2].name"));
+		assertEquals("name5", bw.getPropertyValue("map[key.3].name"));
 		assertEquals("name4", bw.getPropertyValue("map['key1'].name"));
-		assertEquals("name5", bw.getPropertyValue("map[\"key2\"].name"));
+		assertEquals("name5", bw.getPropertyValue("map[\"key.3\"].name"));
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("array[0].name", "name5");
@@ -700,7 +700,7 @@ public class BeanWrapperTestSuite extends TestCase {
 		pvs.addPropertyValue("set[0].name", "name8");
 		pvs.addPropertyValue("set[1].name", "name9");
 		pvs.addPropertyValue("map[key1].name", "name1");
-		pvs.addPropertyValue("map['key2'].name", "name0");
+		pvs.addPropertyValue("map['key.3'].name", "name0");
 		bw.setPropertyValues(pvs);
 		assertEquals("name5", tb0.getName());
 		assertEquals("name4", tb1.getName());
@@ -715,7 +715,7 @@ public class BeanWrapperTestSuite extends TestCase {
 		assertEquals("name8", bw.getPropertyValue("set[0].name"));
 		assertEquals("name9", bw.getPropertyValue("set[1].name"));
 		assertEquals("name1", bw.getPropertyValue("map[\"key1\"].name"));
-		assertEquals("name0", bw.getPropertyValue("map['key2'].name"));
+		assertEquals("name0", bw.getPropertyValue("map['key.3'].name"));
 	}
 
 	public void testIndexedPropertiesWithCustomEditorForType() {

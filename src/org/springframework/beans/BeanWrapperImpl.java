@@ -76,7 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.44 2004-06-14 14:18:50 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.45 2004-06-15 16:56:52 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -342,6 +342,34 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 
 	/**
+	 * Determine the first respectively last nested property separator in
+	 * the given property path, ignoring dots in keys (like "map[my.key]").
+	 * @param propertyPath the property path to check
+	 * @param last whether to return the last separator rather than the first
+	 * @return the index of the nested property separator, or -1 if none
+	 */
+	private int getNestedPropertySeparatorIndex(String propertyPath, boolean last) {
+		boolean inKey = false;
+		int i = (last ? propertyPath.length()-1 : 0);
+		while ((last && i >= 0) || i < propertyPath.length()) {
+			switch (propertyPath.charAt(i)) {
+				case PROPERTY_KEY_PREFIX_CHAR:
+					inKey = true;
+					break;
+				case PROPERTY_KEY_SUFFIX_CHAR:
+					inKey = false;
+					break;
+				case NESTED_PROPERTY_SEPARATOR_CHAR:
+					if (!inKey) {
+						return i;
+					}
+			}
+			if (last) i--; else i++;
+		}
+		return -1;
+	}
+
+	/**
 	 * Get the last component of the path. Also works if not nested.
 	 * @param bw BeanWrapper to work on
 	 * @param nestedPath property path we know is nested
@@ -351,7 +379,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		if (bw == this) {
 			return nestedPath;
 		}
-		return nestedPath.substring(nestedPath.lastIndexOf(NESTED_PROPERTY_SEPARATOR) + 1);
+		return nestedPath.substring(getNestedPropertySeparatorIndex(nestedPath, true) + 1);
 	}
 
 	/**
@@ -360,7 +388,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @return a BeanWrapper for the target bean
 	 */
 	protected BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) throws BeansException {
-		int pos = propertyPath.indexOf(NESTED_PROPERTY_SEPARATOR);
+		int pos = getNestedPropertySeparatorIndex(propertyPath, false);
 		// handle nested properties recursively
 		if (pos > -1) {
 			String nestedProperty = propertyPath.substring(0, pos);
@@ -382,7 +410,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	protected List getBeanWrappersForPropertyPath(String propertyPath) throws BeansException {
 		List beanWrappers = new ArrayList();
-		int pos = propertyPath.indexOf(NESTED_PROPERTY_SEPARATOR);
+		int pos = getNestedPropertySeparatorIndex(propertyPath, false);
 		// handle nested properties recursively
 		if (pos > -1) {
 			String nestedProperty = propertyPath.substring(0, pos);

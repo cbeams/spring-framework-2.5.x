@@ -56,6 +56,7 @@ public class IndexedTestBean {
 		this.map = new HashMap();
 		this.map.put("key1", tb4);
 		this.map.put("key2", tb5);
+		this.map.put("key.3", tb5);
 	}
 
 	public TestBean[] getArray() {
