@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.42 2003-11-14 11:43:13 jhoeller Exp $
+$Id: changelog.txt,v 1.43 2003-11-14 17:05:16 jhoeller Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
@@ -17,6 +17,7 @@ Changes in version 1.0 M3 (XX.11.2003)
 * reworked BeanPostProcessor and BeanFactoryPostProcessor interfaces and moved them to beans.factory.config package
 * made AbstractBeanFactory and ListableBeanFactoryImpl methods non-final
 * reworked AbstractBeanDefinition/RootBeanDefinition/ChildBeanDefinition for more consistency
+* fixed RootBeanDefinition bug that caused an unnecessary additional invocation of the constructor of the defined bean
 * added support for lazy initialization of singleton beans in AbstractBeanFactory and subclasses
 * redefined autowiring to ignore if no matching bean found but still complain in case of more than one matching bean
 * ignore specified dependency types on autowiring, like BeanFactory and ApplicationContext
@@ -69,6 +70,7 @@ Changes in version 1.0 M3 (XX.11.2003)
 * added "attributesMap" property to AbstractView, for setting attribute values like bean references via a Map
 * fixed potential NPE in debug log statement of VelocityView
 * renamed BaseCommandController's "userObject" method to "getCommand" for clearer naming
+* check both ".x" and ".y" as submit image suffixes in AbstractWizardFormController
 
 Changes in version 1.0 M2 (23.10.2003)
 --------------------------------------
