@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Linux)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20031122;220000">
+	<META NAME="CHANGED" CONTENT="20031122;22385400">
 	<STYLE>
 	<!--
 		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
@@ -17,15 +17,15 @@
 <BODY LANG="en-US" DIR="LTR">
 <P ALIGN=CENTER STYLE="margin-bottom: 0in"><FONT SIZE=4><B>Developing
 a Spring Framework MVC application step-by-step</B></FONT></P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0in">Part 4 &ndash;
-Implementing Database Persistence</P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">Part 4 – Implementing
+Database Persistence</P>
 <P ALIGN=CENTER STYLE="margin-bottom: 0in"><B>Thomas Risberg</B>
 <BR>August, 2003</P>
 <P ALIGN=CENTER STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in">This is Part 4 of a step-by-step
 account of how to develop a web application from scratch using the
-Spring Framework. In Part 1 (Steps 1 &ndash; 12) we configured the
+Spring Framework. In Part 1 (Steps 1 – 12) we configured the
 environment and set up a basic application that we will build upon.
 Part 2 (Steps 13-18) improved the application in several ways. Part 3
 (Steps 19-22) Added some unit tests to the application and we also
@@ -33,9 +33,9 @@ added a Form for performing a price increase. In Part 4 it is time to
 deal with database persistence. We saw in the earlier parts how we
 loaded some business objects using bean definitions in a
 configuration file. It is obvious that this would never work in real
-life &ndash; whenever we re-start the server we are back to the
-original prices. We need to add code to actually persist these
-changes to a database.</P>
+life – whenever we re-start the server we are back to the original
+prices. We need to add code to actually persist these changes to a
+database.</P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <DIV ID="Section1" DIR="LTR" STYLE="background: #e6e6ff">
@@ -88,8 +88,8 @@ changes to a database.</P>
 </DIV>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0in"><B>Step 23 &ndash; Add Ant tasks to
-create and load test data</B></P>
+<P STYLE="margin-bottom: 0in"><B>Step 23 – Add Ant tasks to create
+and load test data</B></P>
 <P STYLE="margin-bottom: 0in">Before we can start developing the
 persistence code, we should create the database tables that we need
 for our development and testing. We also need a database. I am
@@ -223,8 +223,8 @@ load and delete test data.
 </TABLE>
 <P STYLE="margin-bottom: 0in">Now I execute some of these tasks to
 set up the test database. This will create a db folder under the
-springapp directory. Run 'ant createTables loadData printData' &ndash;
-I have included my output below.</P>
+springapp directory. Run 'ant createTables loadData printData' – I
+have included my output below.</P>
 <TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
 	<TR>
@@ -259,14 +259,14 @@ I have included my output below.</P>
 </TABLE>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0in"><B>Step 24 &ndash; Create a Data Access
+<P STYLE="margin-bottom: 0in"><B>Step 24 – Create a Data Access
 Object (DAO) implementation for JDBC.</B></P>
 <P STYLE="margin-bottom: 0in">I begin with creating a new
 'springapp/src/db' directory to contain any classes that are used for
 database access. In this directory I create a new interface called
 'ProductManagerDao.java'. This will be the interface that defines the
-functionality that the DAO implementation classes will provide &ndash;
-we could choose to have more than one implementation. 
+functionality that the DAO implementation classes will provide – we
+could choose to have more than one implementation. 
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -414,12 +414,12 @@ syntax as a prepared statement in JDBC. In fact, that is what
 SqlUpdate creates behind the scenes. For the parameters, we have to
 give them a name and declare what type they are so that the framework
 can set them before the prepared statement is executed. After all
-parameters have been declared, we &ldquo;compile&rdquo; the statement
-in JDO fashion. This will signal that we are done declaring
-parameters, and the framework will check to make sure that we have a
-matching declaration for each placeholder in the SQL statement. Next
-we declare an Object array that will hold the parameter values that
-we are going to pass in to the prepared statement. This array gets
+parameters have been declared, we “compile” the statement in JDO
+fashion. This will signal that we are done declaring parameters, and
+the framework will check to make sure that we have a matching
+declaration for each placeholder in the SQL statement. Next we
+declare an Object array that will hold the parameter values that we
+are going to pass in to the prepared statement. This array gets
 passed into the update method of SqlUpdate. The update method does
 return the count of rows affected.</P>
 <P STYLE="margin-bottom: 0in">I need to store the value of the
@@ -578,8 +578,8 @@ move on and modify the web application to make use of these new
 database persistence capabilities.</P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0in"><B>Step 25 &ndash; Modify web
-application to use database persistence.</B></P>
+<P STYLE="margin-bottom: 0in"><B>Step 25 – Modify web application
+to use database persistence.</B></P>
 <P STYLE="margin-bottom: 0in">If we structured our application
 properly, we should only have to change the business classes to take
 advantage of the database persistence. The view and controller
@@ -615,9 +615,11 @@ option.</P>
 <FONT COLOR="#800000">        this.pmd = pmd;</FONT>
 <FONT COLOR="#800000">    }</FONT>
 
-<FONT COLOR="#800000"><STRIKE>    public void setProducts(List p) {</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>        products = p;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>    }</STRIKE></FONT>
+<FONT COLOR="#808080">/*  </FONT>
+<FONT COLOR="#808080">    public void setProducts(List p) {</FONT>
+<FONT COLOR="#808080">        products = p;</FONT>
+<FONT COLOR="#808080">    }</FONT>
+<FONT COLOR="#808080">*/</FONT>
 
 <FONT COLOR="#000000">    public List getProducts() {</FONT>
 <FONT COLOR="#800000">        products = pmd.getProductList();</FONT>
@@ -628,8 +630,10 @@ option.</P>
 <FONT COLOR="#000000">        ListIterator li = products.listIterator();</FONT>
 <FONT COLOR="#000000">        while (li.hasNext()) {</FONT>
 <FONT COLOR="#000000">            Product p = (Product) li.next();</FONT>
-<FONT COLOR="#800000">            double newPrice = p.getPrice().doubleValue() * (100 + pct)/100;</FONT>
-<FONT COLOR="#800000">            p.setPrice(new Double(newPrice));</FONT>
+<FONT COLOR="#808080">/*</FONT>
+<FONT COLOR="#808080">            double newPrice = p.getPrice().doubleValue() * (100 + pct)/100;</FONT>
+<FONT COLOR="#808080">            p.setPrice(new Double(newPrice));</FONT>
+<FONT COLOR="#808080">*/</FONT>
 <FONT COLOR="#800000">            pmd.increasePrice(p, pct);</FONT>
 <FONT COLOR="#000000">        }</FONT>
 <FONT COLOR="#000000">        </FONT>
@@ -645,8 +649,7 @@ will go out and query the database. The increasePrice method will now
 delegate to the DAO to increase the price and the new price will be
 reflected the next time we call the getProducts method.</P>
 <P STYLE="margin-bottom: 0in">Next we need to modify the
-configuration file for the web application &ndash;
-springapp-servlet.xml.</P>
+configuration file for the web application – springapp-servlet.xml.</P>
 <TABLE WIDTH=955 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=945>
 	<TR>
@@ -707,29 +710,33 @@ springapp-servlet.xml.</P>
 <FONT COLOR="#800000">        &lt;property name=&quot;productManagerDao&quot;&gt;</FONT>
 <FONT COLOR="#800000">            &lt;ref bean=&quot;prodManDao&quot;/&gt;</FONT>
 <FONT COLOR="#800000">        &lt;/property&gt;</FONT>
-<FONT COLOR="#800000"><STRIKE>        &lt;property name=&quot;products&quot;&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>            &lt;list&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product1&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product2&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product3&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>            &lt;/list&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>        &lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#808080">&lt;!--</FONT>
+<FONT COLOR="#808080">        &lt;property name=&quot;products&quot;&gt;</FONT>
+<FONT COLOR="#808080">            &lt;list&gt;</FONT>
+<FONT COLOR="#808080">                &lt;ref bean=&quot;product1&quot;/&gt;</FONT>
+<FONT COLOR="#808080">                &lt;ref bean=&quot;product2&quot;/&gt;</FONT>
+<FONT COLOR="#808080">                &lt;ref bean=&quot;product3&quot;/&gt;</FONT>
+<FONT COLOR="#808080">            &lt;/list&gt;</FONT>
+<FONT COLOR="#808080">        &lt;/property&gt;</FONT>
+<FONT COLOR="#808080">--&gt;</FONT>
 <FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 <FONT COLOR="#800000">    </FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Lamp&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;5.75&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>        </STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product2&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Table&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;75.25&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</STRIKE></FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">&lt;!--</SPAN></FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Lamp&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;5.75&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</FONT>
+<FONT COLOR="#808080">        </FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product2&quot; class=&quot;bus.Product&quot;&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Table&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;75.25&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</FONT>
 
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product3&quot; class=&quot;bus.Product&quot;&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Chair&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;22.79&lt;/value&gt;&lt;/property&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</STRIKE></FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;bean id=&quot;product3&quot; class=&quot;bus.Product&quot;&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;description&quot;&gt;&lt;value&gt;Chair&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">        </SPAN>&lt;property name=&quot;price&quot;&gt;&lt;value&gt;22.79&lt;/value&gt;&lt;/property&gt;</FONT>
+<FONT COLOR="#808080"><SPAN STYLE="text-decoration: none">    </SPAN>&lt;/bean&gt;</FONT>
+<FONT COLOR="#808080">--&gt;</FONT>
 
 <FONT COLOR="#000000">    &lt;bean id=&quot;messageSource&quot; class=&quot;org.springframework.context.support.ResourceBundleMessageSource&quot;&gt;</FONT>
 <FONT COLOR="#000000">        &lt;property name=&quot;basename&quot;&gt;&lt;value&gt;messages&lt;/value&gt;&lt;/property&gt;</FONT>
@@ -760,8 +767,8 @@ products that were passed in to the ProductManager. I replace this by
 adding beans for a DataSource and a ProductManagerDaoJdbc
 implementation. The URL provided for the datasource includes the full
 path for the database location
-(/home/trisberg/workspace/springapp2/db/test). You will of course
-have to adjust this to match your setup. 
+(/home/trisberg/workspace/springapp/db/test). You will of course have
+to adjust this to match your setup. 
 </P>
 <P STYLE="margin-bottom: 0in">Now we can build and deploy the
 modified application. Run 'ant undeploy deploy' to clean out any of
@@ -773,10 +780,9 @@ increases remaining in effect even after you cycle the application
 server.</P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0in"><B>Step 26 &ndash; Fix the broken
-tests.</B></P>
+<P STYLE="margin-bottom: 0in"><B>Step 26 – Fix the broken tests.</B></P>
 <P STYLE="margin-bottom: 0in">We have radically changed the
-ProductManager implementation &ndash; we pushed all the functionality
+ProductManager implementation – we pushed all the functionality
 down to the ProductManagerDao implementation, so now the old tests
 fail. To fix this I will create a mock implementation of the
 ProductManagerDao. This implementation will basically mimic the
@@ -823,7 +829,7 @@ the 'TestSpringappController' and 'TestProductManager' tests to use
 this mock implementation. For the 'TestSpringappController' I will
 modify the 'springapp-servlet.xml' file that I copied into the
 tests/WEB-INF directory (I knew it would be a good idea to make a
-copy of this file). Do not modify the one located in war/WEB-INF &ndash;
+copy of this file). Do not modify the one located in war/WEB-INF –
 we need that one to stay as is so we can run the application in
 Tomcat. We move the list of products from the ProductManager to the
 ProductManagerDao and give ProductManager a reference to this DAO.</P>
@@ -866,13 +872,15 @@ ProductManagerDao and give ProductManager a reference to this DAO.</P>
 <FONT COLOR="#800000">        &lt;property name=&quot;productManagerDao&quot;&gt;</FONT>
 <FONT COLOR="#800000">            &lt;ref bean=&quot;prodManDao&quot;/&gt;</FONT>
 <FONT COLOR="#800000">        &lt;/property&gt;</FONT>
-<FONT COLOR="#800000"><STRIKE>        &lt;property name=&quot;products&quot;&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>            &lt;list&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product1&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product2&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>                &lt;ref bean=&quot;product3&quot;/&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>            &lt;/list&gt;</STRIKE></FONT>
-<FONT COLOR="#800000"><STRIKE>        &lt;/property&gt;</STRIKE></FONT>
+<FONT COLOR="#808080">/*</FONT>
+<FONT COLOR="#808080">        &lt;property name=&quot;products&quot;&gt;</FONT>
+<FONT COLOR="#808080">            &lt;list&gt;</FONT>
+<FONT COLOR="#808080">                &lt;ref bean=&quot;product1&quot;/&gt;</FONT>
+<FONT COLOR="#808080">                &lt;ref bean=&quot;product2&quot;/&gt;</FONT>
+<FONT COLOR="#808080">                &lt;ref bean=&quot;product3&quot;/&gt;</FONT>
+<FONT COLOR="#808080">            &lt;/list&gt;</FONT>
+<FONT COLOR="#808080">        &lt;/property&gt;</FONT>
+<FONT COLOR="#808080">*/</FONT>
 <FONT COLOR="#000000">    &lt;/bean&gt;</FONT>
 
 <FONT COLOR="#000000">    &lt;bean id=&quot;product1&quot; class=&quot;bus.Product&quot;&gt;</FONT>
@@ -931,7 +939,9 @@ public class TestProductManager extends TestCase {
         p.setDescription(&quot;Table&quot;);
         p.setPrice(new Double(&quot;150.10&quot;));
         al.add(p);
-<FONT COLOR="#800000"><STRIKE>        pm.setProducts(al);</STRIKE></FONT>
+<FONT COLOR="#808080">/*</FONT>
+<FONT COLOR="#808080">        pm.setProducts(al);</FONT>
+<FONT COLOR="#808080">*/</FONT>
 <FONT COLOR="#800000">        MockProductManagerDaoImpl pmdao = new MockProductManagerDaoImpl();</FONT>
 <FONT COLOR="#800000">        pmdao.setProducts(al);</FONT>
 <FONT COLOR="#800000">        pm.setProductManagerDao(pmdao);</FONT>
@@ -969,7 +979,7 @@ connection at a time. This of course will not scale. Another issue
 that we are not dealing with is concurrency. Two users could increase
 prices simultaneously and they would be a bit surprised by seeing the
 combined effect of their actions. I'll leave these improvements up to
-you for now &ndash; I might add them in an additional part to this
+you for now – I might add them in an additional part to this
 document in the future.</P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
