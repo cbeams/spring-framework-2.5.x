@@ -37,29 +37,35 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class LobTypeTests extends TestCase {
 
-	public void testClobStringType() throws Exception {
-		MockControl rsControl = MockControl.createControl(ResultSet.class);
-		ResultSet rs = (ResultSet) rsControl.getMock();
-		MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement ps = (PreparedStatement) psControl.getMock();
-		MockControl lobHandlerControl = MockControl.createControl(LobHandler.class);
-		LobHandler lobHandler = (LobHandler) lobHandlerControl.getMock();
-		MockControl lobCreatorControl = MockControl.createControl(LobCreator.class);
-		LobCreator lobCreator = (LobCreator) lobCreatorControl.getMock();
+	private MockControl rsControl = MockControl.createControl(ResultSet.class);
+	private ResultSet rs = (ResultSet) rsControl.getMock();
+	private MockControl psControl = MockControl.createControl(PreparedStatement.class);
+	private PreparedStatement ps = (PreparedStatement) psControl.getMock();
 
+	private MockControl lobHandlerControl = MockControl.createControl(LobHandler.class);
+	private LobHandler lobHandler = (LobHandler) lobHandlerControl.getMock();
+	private MockControl lobCreatorControl = MockControl.createControl(LobCreator.class);
+	private LobCreator lobCreator = (LobCreator) lobCreatorControl.getMock();
+
+	protected void setUp() throws SQLException {
 		rs.findColumn("column");
 		rsControl.setReturnValue(1);
-		lobHandler.getClobAsString(rs, 1);
-		lobHandlerControl.setReturnValue("content");
+
 		lobHandler.getLobCreator();
 		lobHandlerControl.setReturnValue(lobCreator);
-		lobCreator.setClobAsString(ps, 1, "content");
-		lobCreatorControl.setVoidCallable(1);
 		lobCreator.close();
 		lobCreatorControl.setVoidCallable(1);
 
 		rsControl.replay();
 		psControl.replay();
+	}
+
+	public void testClobStringType() throws Exception {
+		lobHandler.getClobAsString(rs, 1);
+		lobHandlerControl.setReturnValue("content");
+		lobCreator.setClobAsString(ps, 1, "content");
+		lobCreatorControl.setVoidCallable(1);
+
 		lobHandlerControl.replay();
 		lobCreatorControl.replay();
 
@@ -82,37 +88,15 @@ public class LobTypeTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
-
-		rsControl.verify();
-		psControl.verify();
-		lobHandlerControl.verify();
-		lobCreatorControl.verify();
 	}
 
 	public void testBlobByteArrayType() throws Exception {
-		MockControl rsControl = MockControl.createControl(ResultSet.class);
-		ResultSet rs = (ResultSet) rsControl.getMock();
-		MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement ps = (PreparedStatement) psControl.getMock();
-		MockControl lobHandlerControl = MockControl.createControl(LobHandler.class);
-		LobHandler lobHandler = (LobHandler) lobHandlerControl.getMock();
-		MockControl lobCreatorControl = MockControl.createControl(LobCreator.class);
-		LobCreator lobCreator = (LobCreator) lobCreatorControl.getMock();
-
 		byte[] content = "content".getBytes();
-		rs.findColumn("column");
-		rsControl.setReturnValue(1);
 		lobHandler.getBlobAsBytes(rs, 1);
 		lobHandlerControl.setReturnValue(content);
-		lobHandler.getLobCreator();
-		lobHandlerControl.setReturnValue(lobCreator);
 		lobCreator.setBlobAsBytes(ps, 1, content);
 		lobCreatorControl.setVoidCallable(1);
-		lobCreator.close();
-		lobCreatorControl.setVoidCallable(1);
 
-		rsControl.replay();
-		psControl.replay();
 		lobHandlerControl.replay();
 		lobCreatorControl.replay();
 
@@ -135,7 +119,9 @@ public class LobTypeTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+	}
 
+	protected void tearDown() {
 		rsControl.verify();
 		psControl.verify();
 		lobHandlerControl.verify();
