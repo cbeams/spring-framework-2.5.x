@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.Styler;
 
@@ -36,7 +36,7 @@ import org.springframework.util.Styler;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class Scope implements AttributeSetter, Map, Serializable {
+public class Scope implements MutableAttributeSource, Map, Serializable {
 
 	/**
 	 * The scope type; e.g FLOW or REQUEST. 

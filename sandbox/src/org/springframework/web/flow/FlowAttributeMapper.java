@@ -17,8 +17,8 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
-import org.springframework.binding.AttributeAccessor;
-import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.AttributeSource;
+import org.springframework.binding.MutableAttributeSource;
 
 /**
  * A service interface that maps attributes between flow scopes.
@@ -84,7 +84,7 @@ public interface FlowAttributeMapper {
 	 * @return a map of attributes (name=value pairs) to pass as input to the
 	 *         spawning child subflow.
 	 */
-	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowAttributes);
+	public Map createSubFlowInputAttributes(AttributeSource parentFlowAttributes);
 
 	/**
 	 * Map relavent attributes of an ending sub flow session back up to a
@@ -97,5 +97,5 @@ public interface FlowAttributeMapper {
 	 *        to, where output attributes of the child sub flow will be set as
 	 *        input.
 	 */
-	public void mapSubFlowOutputAttributes(AttributeAccessor subFlowAttributes, AttributeSetter parentFlowAttributes);
+	public void mapSubFlowOutputAttributes(AttributeSource subFlowAttributes, MutableAttributeSource parentFlowAttributes);
 }

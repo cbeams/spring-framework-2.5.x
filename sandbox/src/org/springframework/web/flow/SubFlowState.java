@@ -18,8 +18,8 @@ package org.springframework.web.flow;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.binding.AttributeAccessor;
-import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.AttributeSource;
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.util.Assert;
 
 /**
@@ -153,7 +153,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 		return context.spawn(getSubFlow(), createSubFlowInputAttributes(context.getFlowScope()));
 	}
 
-	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowAttributes) {
+	public Map createSubFlowInputAttributes(AttributeSource parentFlowAttributes) {
 		if (getFlowAttributeMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attribute mapper to map parent-flow attributes "
@@ -172,7 +172,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 		}
 	}
 
-	public void mapSubFlowOutputAttributes(AttributeAccessor subFlowAttributes, AttributeSetter parentFlowAttributes) {
+	public void mapSubFlowOutputAttributes(AttributeSource subFlowAttributes, MutableAttributeSource parentFlowAttributes) {
 		if (getFlowAttributeMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attribute mapper to map sub flow attributes back up to the resuming parent flow -- "

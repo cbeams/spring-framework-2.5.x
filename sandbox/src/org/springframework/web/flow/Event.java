@@ -18,7 +18,7 @@ package org.springframework.web.flow;
 import java.util.EventObject;
 import java.util.Map;
 
-import org.springframework.binding.AttributeAccessor;
+import org.springframework.binding.AttributeSource;
 import org.springframework.util.ToStringCreator;
 
 /**
@@ -39,7 +39,7 @@ import org.springframework.util.ToStringCreator;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class Event extends EventObject implements AttributeAccessor {
+public abstract class Event extends EventObject implements AttributeSource {
 
 	/**
 	 * Constructs a new event with the specified source.

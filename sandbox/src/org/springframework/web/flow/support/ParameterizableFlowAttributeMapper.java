@@ -23,10 +23,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.binding.AttributeAccessor;
+import org.springframework.binding.AttributeSource;
 import org.springframework.binding.AttributeMapper;
-import org.springframework.binding.AttributeSetter;
-import org.springframework.binding.support.MapAttributeSetterAdapter;
+import org.springframework.binding.MutableAttributeSource;
+import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
 import org.springframework.web.flow.FlowAttributeMapper;
 
@@ -183,10 +183,10 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 		this.outputMapper = new ParameterizableAttributeMapper(outputMappings);
 	}
 
-	public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {
+	public Map createSubFlowInputAttributes(AttributeSource parentFlowModel) {
 		if (this.inputMapper != null) {
 			Map subFlowInputAttributes = new HashMap();
-			this.inputMapper.map(parentFlowModel, new MapAttributeSetterAdapter(subFlowInputAttributes));
+			this.inputMapper.map(parentFlowModel, new MapAttributeSource(subFlowInputAttributes));
 			return Collections.unmodifiableMap(subFlowInputAttributes);
 		}
 		else {
@@ -194,7 +194,7 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 		}
 	}
 
-	public void mapSubFlowOutputAttributes(AttributeAccessor subFlowModel, AttributeSetter parentFlowModel) {
+	public void mapSubFlowOutputAttributes(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
 		if (this.outputMapper != null) {
 			this.outputMapper.map(subFlowModel, parentFlowModel);
 		}

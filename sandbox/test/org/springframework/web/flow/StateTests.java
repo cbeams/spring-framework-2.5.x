@@ -20,8 +20,8 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.springframework.binding.AttributeAccessor;
-import org.springframework.binding.AttributeSetter;
+import org.springframework.binding.AttributeSource;
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.StringUtils;
 
@@ -163,13 +163,13 @@ public class StateTests extends TestCase {
 	}
 
 	public static class InputOutputMapper implements FlowAttributeMapper {
-		public Map createSubFlowInputAttributes(AttributeAccessor parentFlowModel) {
+		public Map createSubFlowInputAttributes(AttributeSource parentFlowModel) {
 			Map inputMap = new HashMap(1);
 			inputMap.put("childInputAttribute", parentFlowModel.getAttribute("parentInputAttribute"));
 			return inputMap;
 		}
 
-		public void mapSubFlowOutputAttributes(AttributeAccessor subFlowModel, AttributeSetter parentFlowModel) {
+		public void mapSubFlowOutputAttributes(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
 			parentFlowModel.setAttribute("parentOutputAttribute", subFlowModel.getAttribute("childInputAttribute"));
 		}
 	}
