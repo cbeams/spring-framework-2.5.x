@@ -62,6 +62,9 @@ import org.springframework.jmx.proxy.JmxProxyFactoryBean;
 public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         BeanFactoryAware, BeanFactoryPostProcessor {
 
+    /**
+     * <code>Log</code> instance for this class.
+     */
     private static final Log log = LogFactory.getLog(JmxMBeanAdapter.class);
 
     /**
@@ -70,10 +73,15 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
     private Map beans;
 
     /**
-     * Stores the ModelMBeanInfoAssembler to use for this adapter
+     * Stores the <code>ModelMBeanInfoAssembler</code> to use for this
+     * adaptor.
      */
     private ModelMBeanInfoAssembler assembler = new ReflectiveModelMBeanInfoAssembler();
 
+    /**
+     * The <code>MBeanInvoker</code> to use for invoking methods against
+     * MBeans created by this adaptor.
+     */
     private MBeanInvoker invoker = new ReflectiveMBeanInvoker();
 
     /**
@@ -142,6 +150,17 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         this.server = server;
     }
 
+    /**
+     * Setting this to <code>true</code> will use the <code>ModelMBean</code>
+     * implementation provided by your JMX implementation rather than the Spring
+     * implementation when creating MBeans for your Spring beans. Using your
+     * providers implementation may be desirable in some cases. Note that when
+     * using an implementation other than that provided by Spring the choice of
+     * <code>MBeanInvoker</code> is irrelevant since the invocation semantics
+     * are specific to the <code>ModelMBean</code> implementation used.
+     * 
+     * @param useRequiredModelMBean
+     */
     public void setUseRequiredModelMBean(boolean useRequiredModelMBean) {
         this.useRequiredModelMBean = useRequiredModelMBean;
     }
@@ -200,8 +219,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
                             + "the management interface metadata.", ex);
         } catch (InvalidTargetObjectTypeException ex) {
             // we should never get this
-            log
-                    .warn("Received InvalidTargetObjectTypeException - this should not occur!");
+            log.warn("Received InvalidTargetObjectTypeException - this should not occur!");
             throw new MBeanAssemblyException(
                     "An invalid object type was used when specifying a managed resource. "
                             + "This is a serious error and points to an error in the Spring JMX Code",
@@ -217,8 +235,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         AutodetectCapableModelMBeanInfoAssembler autodetectAssembler = (AutodetectCapableModelMBeanInfoAssembler) assembler;
 
         String[] beanNames = beanFactory.getBeanDefinitionNames();
-        String[] excludeBeans = beanFactory
-                .getBeanDefinitionNames(JmxProxyFactoryBean.class);
+        String[] excludeBeans = beanFactory.getBeanDefinitionNames(JmxProxyFactoryBean.class);
 
         for (int x = 0; x < beanNames.length; x++) {
             String beanName = beanNames[x].trim();
@@ -292,8 +309,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         if (beanFactory instanceof ConfigurableListableBeanFactory) {
             this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
         } else {
-            log
-                    .info("Not using a ConfigurableListableBeanFactory - auto detection of managed beans is disabled");
+            log.info("Not using a ConfigurableListableBeanFactory - auto detection of managed beans is disabled");
         }
     }
 
