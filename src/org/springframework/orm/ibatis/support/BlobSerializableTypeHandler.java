@@ -29,19 +29,45 @@ import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
+ * iBATIS TypeHandler implementation for arbitrary objects that get serialized to BLOBs.
+ * Retrieves the LobHandler to use from SqlMapClientFactoryBean at config time.
+ *
+ * <p>Can also be defined in generic iBATIS mappings, as DefaultLobCreator will
+ * work with most JDBC-compliant database drivers. In this case, the field type
+ * does not have to be BLOB: For databases like MySQL and MS SQL Server, any
+ * large enough binary type will work.
+ *
  * @author Juergen Hoeller
- * @since 1.2
+ * @since 1.1.5
+ * @see org.springframework.orm.ibatis.SqlMapClientFactoryBean#setLobHandler
  */
 public class BlobSerializableTypeHandler extends AbstractLobTypeHandler {
 
+	/**
+	 * Constructor used by iBATIS: fetches config-time LobHandler from
+	 * SqlMapClientFactoryBean.
+	 * @see org.springframework.orm.ibatis.SqlMapClientFactoryBean#getConfigTimeLobHandler
+	 */
+	public BlobSerializableTypeHandler() {
+		super();
+	}
+
+	/**
+	 * Constructor used for testing: takes an explicit LobHandler.
+	 */
+	protected BlobSerializableTypeHandler(LobHandler lobHandler) {
+		super(lobHandler);
+	}
+
 	protected void setParameterInternal(
-			PreparedStatement ps, int index, Object parameter, String jdbcType, LobCreator lobCreator)
+			PreparedStatement ps, int index, Object value, String jdbcType, LobCreator lobCreator)
 			throws SQLException, IOException {
-		if (parameter != null) {
+
+		if (value != null) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
 			try {
-				oos.writeObject(parameter);
+				oos.writeObject(value);
 				oos.flush();
 				lobCreator.setBlobAsBytes(ps, index, baos.toByteArray());
 			}
@@ -54,9 +80,10 @@ public class BlobSerializableTypeHandler extends AbstractLobTypeHandler {
 		}
 	}
 
-	protected Object getResultInternal(ResultSet rs, int columnIndex, LobHandler lobHandler)
+	protected Object getResultInternal(ResultSet rs, int index, LobHandler lobHandler)
 			throws SQLException, IOException {
-		InputStream is = lobHandler.getBlobAsBinaryStream(rs, columnIndex);
+
+		InputStream is = lobHandler.getBlobAsBinaryStream(rs, index);
 		if (is != null) {
 			ObjectInputStream ois = new ObjectInputStream(is);
 			try {
@@ -75,7 +102,7 @@ public class BlobSerializableTypeHandler extends AbstractLobTypeHandler {
 	}
 
 	public Object valueOf(String s) {
-		return s.getBytes();
+		return s;
 	}
 
 }

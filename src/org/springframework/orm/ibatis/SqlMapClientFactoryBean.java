@@ -33,6 +33,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
  * FactoryBean that creates an iBATIS Database Layer SqlMapClient as singleton
@@ -54,6 +55,24 @@ import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
  */
 public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 
+	private static ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
+
+	/**
+	 * Return the LobHandler for the currently configured iBATIS SqlMapClient,
+	 * to be used by TypeHandler implementations like ClobStringTypeHandler.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * SqlMapClient, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setLobHandler
+	 * @see org.springframework.orm.ibatis.support.ClobStringTypeHandler
+	 * @see org.springframework.orm.ibatis.support.BlobByteArrayTypeHandler
+	 * @see org.springframework.orm.ibatis.support.BlobSerializableTypeHandler
+	 */
+	public static LobHandler getConfigTimeLobHandler() {
+		return (LobHandler) configTimeLobHandlerHolder.get();
+	}
+
+
 	private Resource configLocation;
 
 	private Properties sqlMapClientProperties;
@@ -65,6 +84,8 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 	private Class transactionConfigClass = ExternalTransactionConfig.class;
 
 	private Properties transactionConfigProperties;
+
+	private LobHandler lobHandler;
 
 	private SqlMapClient sqlMapClient;
 
@@ -206,28 +227,56 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 		this.transactionConfigProperties = transactionConfigProperties;
 	}
 
+	/**
+	 * Set the LobHandler to be used by the SqlMapClient.
+	 * Will be exposed at config time for TypeHandler implementations.
+	 * @see #getConfigTimeLobHandler
+	 * @see com.ibatis.sqlmap.engine.type.TypeHandler
+	 * @see org.springframework.orm.ibatis.support.ClobStringTypeHandler
+	 * @see org.springframework.orm.ibatis.support.BlobByteArrayTypeHandler
+	 * @see org.springframework.orm.ibatis.support.BlobSerializableTypeHandler
+	 */
+	public void setLobHandler(LobHandler lobHandler) {
+		this.lobHandler = lobHandler;
+	}
+
 
 	public void afterPropertiesSet() throws Exception {
 		if (this.configLocation == null) {
 			throw new IllegalArgumentException("configLocation is required");
 		}
 
-		// Build the SqlMapClient.
-		InputStream is = this.configLocation.getInputStream();
-		this.sqlMapClient = (this.sqlMapClientProperties != null) ?
-				SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is), this.sqlMapClientProperties) :
-				SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is));
+		if (this.lobHandler != null) {
+			// Make given LobHandler available for SqlMapClient configuration.
+			// Do early because because mapping resource might refer to custom types.
+			configTimeLobHandlerHolder.set(this.lobHandler);
+		}
 
-		// Tell the SqlMapClient to use the given DataSource, if any.
-		if (this.dataSource != null) {
-			TransactionConfig transactionConfig = (TransactionConfig) this.transactionConfigClass.newInstance();
-			DataSource dataSourceToUse = this.dataSource;
-			if (this.useTransactionAwareDataSource && !(this.dataSource instanceof TransactionAwareDataSourceProxy)) {
-				dataSourceToUse = new TransactionAwareDataSourceProxy(this.dataSource);
+		try {
+			// Build the SqlMapClient.
+			InputStream is = this.configLocation.getInputStream();
+			this.sqlMapClient = (this.sqlMapClientProperties != null) ?
+					SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is), this.sqlMapClientProperties) :
+					SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is));
+
+			// Tell the SqlMapClient to use the given DataSource, if any.
+			if (this.dataSource != null) {
+				TransactionConfig transactionConfig = (TransactionConfig) this.transactionConfigClass.newInstance();
+				DataSource dataSourceToUse = this.dataSource;
+				if (this.useTransactionAwareDataSource && !(this.dataSource instanceof TransactionAwareDataSourceProxy)) {
+					dataSourceToUse = new TransactionAwareDataSourceProxy(this.dataSource);
+				}
+				transactionConfig.setDataSource(dataSourceToUse);
+				transactionConfig.initialize(this.transactionConfigProperties);
+				applyTransactionConfig(this.sqlMapClient, transactionConfig);
 			}
-			transactionConfig.setDataSource(dataSourceToUse);
-			transactionConfig.initialize(this.transactionConfigProperties);
-			applyTransactionConfig(this.sqlMapClient, transactionConfig);
+		}
+
+		finally {
+			if (this.lobHandler != null) {
+				// Reset LobHandler holder.
+				configTimeLobHandlerHolder.set(null);
+			}
 		}
 	}
 
