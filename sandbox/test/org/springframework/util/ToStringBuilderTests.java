@@ -46,7 +46,9 @@ public class ToStringBuilderTests extends TestCase {
         String str = new ToStringBuilder(array).toString();
         System.out.println(str);
         assertEquals(
-            "[@" + ObjectUtils.getIdentity(array) + " array<ToStringBuilderTests.SomeObject>[A, B, C]]",
+            "[@"
+                + ObjectUtils.getIdentity(array)
+                + " array<ToStringBuilderTests.SomeObject>[A, B, C]]",
             str);
     }
 
@@ -136,9 +138,9 @@ public class ToStringBuilderTests extends TestCase {
             }
         };
     }
-    
+
     public static class SomeObject {
-        
+
     }
 
 }
