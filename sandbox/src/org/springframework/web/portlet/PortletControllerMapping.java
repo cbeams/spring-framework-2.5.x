@@ -23,9 +23,8 @@ import javax.portlet.PortletRequest;
  * portlet requests and controller objects.
  *
  * <p>This class can be implemented by application developers, although this
- * is not necessary, as BeanNamePortletModeControllerMapping and SimplePortletModeMapping
- * are included in the framework. The former is the default if no
- * PortletControllerMapping bean is registered in the portlet application context.
+ * is not necessary, as PortletModeControllerMapping
+ * is included in the framework.
  *
  * <p>PortletControllerMapping implementations can support mapped interceptors but do
  * not have to. A controller will always be wrapped in a PortletControllerExecutionChain
@@ -34,17 +33,13 @@ import javax.portlet.PortletRequest;
  * method in the given order, finally invoking the controller itself if all
  * preController methods have returned "true".
  *
- * <p>The ability to parameterize this mapping is a powerful and unusual
- * capability of this MVC framework. For example, it is possible to write
- * a custom mapping based on session state, PortletMode or many other
- * variables. No other MVC framework seems to be equally flexible.
- *
  * <p>Note: Implementations can implement the Ordered interface to be able
  * to specify a sorting order and thus a priority for getting applied by
  * DispatcherPortlet. Non-Ordered instances get treated as lowest priority.
  *
  * @author William G. Thompson, Jr.
  * @see org.springframework.core.Ordered
+ * @version $Id: PortletControllerMapping.java,v 1.2 2004-05-08 01:31:24 dkopylenko Exp $
  */
 public interface PortletControllerMapping {
 	

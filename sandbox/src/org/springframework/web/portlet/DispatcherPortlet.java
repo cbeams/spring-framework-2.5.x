@@ -46,28 +46,15 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
  * Concrete front controller for use within the portlet MVC framework.
- * Dispatches to registered controllers for processing portlet requests.
- *
- * <p>This class and the MVC approach it delivers is based on the discussion in Chapter 12 of
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002).
- *
- * <p>This portlet is very flexible: It can be used with just about any workflow,
- * with the installation of the appropriate adapter classes. It offers the
- * following functionality that distinguishes it from other MVC frameworks:
+ * Dispatches to registered portlet  controllers for processing portlet requests.
  *
  * <ul>
  * <li>It is based around a JavaBeans configuration mechanism.
  *
- * <li>It can use any ControllerMapping implementation - whether standard, or provided
- * as part of an application - to control the routing of requests to controller objects.
- * Additional ControllerMapping objects can be added through defining beans in the
- * servlet's application context that implement the ControllerMapping interface in this
+ * <li>It uses PortletModeControllerMapping implementation.
+ * Additional PortletControllerMapping objects can be added through defining beans in the
+ * portlet's application context that implement the PortletControllerMapping interface in this
  * package. ControllerMappings can be given any bean name (they are tested by type).
- *
- * <li>It can use any ControllerAdapter. Default is SimpleControllerControllerAdapter;
- * additional ControllerAdapter objects can be added through the application context.
- * Like ControllerMappings, ControllerAdapters can be given any bean name (tested by type).
  *
  * <li>Its view resolution strategy can be specified via a ViewResolver implementation.
  * Standard implementations support mapping URLs to bean names, and explicit mappings.
@@ -83,9 +70,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author William G. Thompson, Jr.
- * @version $Id: DispatcherPortlet.java,v 1.3 2004-05-07 20:18:17 wgthom Exp $
- * @see ControllerMapping
- * @see ControllerAdapter
+ * @version $Id: DispatcherPortlet.java,v 1.4 2004-05-08 01:26:36 dkopylenko Exp $
+ * @see PortletControllerMapping
  * @see ViewResolver
  * @see org.springframework.web.portlet.context.PortletApplicationContext
  * @see org.springframework.web.portlet.context.FrameworkPortlet
