@@ -60,6 +60,7 @@
 			<include name="hsqldb.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/hibernate">
+			<include name="ehcache.jar"/>
 			<include name="odmg.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
@@ -201,6 +202,7 @@
 			<include name="WEB-INF/applicationContext*.xml"/>
 			<include name="WEB-INF/petclinic-servlet.xml"/>
 			<include name="WEB-INF/jboss-web.xml"/>
+			<include name="WEB-INF/*.properties"/>
 			<include name="WEB-INF/classes/*.properties"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
@@ -216,9 +218,6 @@
 		<property name="db.url" value="${hsql.url}"/>
 		<property name="db.user" value="${hsql.user}"/>
 		<property name="db.pw" value="${hsql.pw}"/>
-		<condition property="useJBossHSQL">
-			<isset property="jboss.root"/>
-		</condition>
 
 	</target>
 
