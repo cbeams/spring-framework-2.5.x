@@ -13,10 +13,9 @@
 	<property name="dist.dir" value="dist"/>
 	<property name="db.dir" value="db"/>
 
-	<property name="test.dir" value="test"/>
-	<property name="testsrc.dir" value="${test.dir}/src"/>
-	<property name="testbuild.dir" value="${test.dir}/.classes"/>
-	<property name="testreports.dir" value="${test.dir}/reports"/>
+	<property name="testsrc.dir" value="test"/>
+	<property name="testbuild.dir" value=".testclasses"/>
+	<property name="testreports.dir" value="junit-reports"/>
 	<property name="testhtml.dir" value="${testreports.dir}/html"/>
 
 	<property name="spring.root" value="../.."/>
@@ -25,7 +24,6 @@
 
 
 	<path id="master-classpath">
-
 		<fileset dir="${spring.root}/lib/hibernate">
 			<include name="hibernate2.jar"/>
 		</fileset>
@@ -39,8 +37,37 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
-
 	</path>
+
+	<path id="test-classpath">
+		<fileset dir="${lib.dir}">
+			<include name="hsqldb.jar"/>
+			<include name="mysql*.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/aop-alliance">
+			<include name="aopalliance.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/cglib">
+			<include name="cglib-asm.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/hibernate">
+			<include name="dom4j.jar"/>
+			<include name="odmg.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-beanutils.jar"/>
+			<include name="commons-collections.jar"/>
+			<include name="commons-lang.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="servlet.jar"/>
+			<include name="jdbc2_0-stdext.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/dist">
+			<include name="spring.jar"/>
+		</fileset>
+	</path>
+
 
 
 	<target name="usage">
@@ -121,13 +148,12 @@
 				<include name="jstl.jar"/>
 				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/log4j">
-				<include name="log4j*.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
 		</copy>
+
+		<copy file="${spring.root}/lib/log4j/log4j-1.2.8.jar" tofile="${weblib.dir}/log4j-1.2.8.renametojar"/>
 
 	</target>
 
@@ -227,13 +253,14 @@
 
 		<junit printsummary="true" fork="yes">
 			<formatter type="xml"/>
-			<test name="petclinic.OwnerTest" todir="${testreports.dir}"/>
-			<test name="petclinic.jdbc.JdbcClinicTest" todir="${testreports.dir}"/>
-			<test name="petclinic.hibernate.HibernateClinicTest" todir="${testreports.dir}"/>
+			<test name="org.springframework.samples.petclinic.OwnerTests" todir="${testreports.dir}"/>
+			<test name="org.springframework.samples.petclinic.jdbc.JdbcClinicTests" todir="${testreports.dir}"/>
+			<test name="org.springframework.samples.petclinic.hibernate.HibernateClinicTests" todir="${testreports.dir}"/>
 			<classpath path="${build.dir}"/>
 			<classpath path="${testbuild.dir}"/>
 			<classpath path="${testsrc.dir}"/>
 			<classpath refid="master-classpath"/>
+			<classpath refid="test-classpath"/>
 		</junit>
 
 		<junitreport todir="${testhtml.dir}">
