@@ -89,7 +89,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 */
 	protected Connection getTransactionAwareConnectionProxy(Connection target, DataSource ds) {
 		return (Connection) Proxy.newProxyInstance(
-				Thread.currentThread().getContextClassLoader(),
+				ConnectionProxy.class.getClassLoader(),
 				new Class[] {ConnectionProxy.class},
 				new TransactionAwareInvocationHandler(target, ds));
 	}

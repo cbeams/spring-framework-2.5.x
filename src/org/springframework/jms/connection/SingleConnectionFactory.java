@@ -227,7 +227,7 @@ public class SingleConnectionFactory
 			classes.add(TopicConnection.class);
 		}
 		return (Connection) Proxy.newProxyInstance(
-				Thread.currentThread().getContextClassLoader(),
+				Connection.class.getClassLoader(),
 				(Class[]) classes.toArray(new Class[classes.size()]),
 				new CloseSuppressingInvocationHandler(target));
 	}

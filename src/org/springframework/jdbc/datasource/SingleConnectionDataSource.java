@@ -72,8 +72,9 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * @param suppressClose if the returned connection should be a
 	 * close-suppressing proxy or the physical connection.
 	 */
-	public SingleConnectionDataSource(String driverClassName, String url, String username, String password,
-	                                  boolean suppressClose) throws CannotGetJdbcConnectionException {
+	public SingleConnectionDataSource(
+			String driverClassName, String url, String username, String password, boolean suppressClose)
+			throws CannotGetJdbcConnectionException {
 		super(driverClassName, url, username, password);
 		this.suppressClose = suppressClose;
 	}
@@ -155,9 +156,9 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 			}
 		}
 		if (this.connection.isClosed()) {
-			throw new SQLException("Connection was closed in SingleConnectionDataSource. " +
-			                       "Check that user code checks shouldClose() before closing connections, " +
-			                       "or set suppressClose to true");
+			throw new SQLException(
+					"Connection was closed in SingleConnectionDataSource. Check that user code checks " +
+					"shouldClose() before closing connections, or set suppressClose to true");
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning single connection: " + this.connection);
@@ -187,9 +188,10 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	 * @return the wrapped Connection
 	 */
 	protected Connection getCloseSuppressingConnectionProxy(Connection target) {
-		return (Connection) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-		                                           new Class[] {ConnectionProxy.class},
-		                                           new CloseSuppressingInvocationHandler(target));
+		return (Connection) Proxy.newProxyInstance(
+				ConnectionProxy.class.getClassLoader(),
+				new Class[] {ConnectionProxy.class},
+				new CloseSuppressingInvocationHandler(target));
 	}
 
 
