@@ -15,13 +15,16 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * ClassEditor trims class name strings and converts empty strings into null values
-* CustomBooleanEditor only accepts default "true/"on"/"yes" and "false"/"off"/"no" if not given explicit Strings
+* CustomBooleanEditor accepts "1" (true) and "0" (false) values too
+* CustomBooleanEditor only accepts default "true/"on"/"yes"/"1" and "false"/"off"/"no"/"0" if not given explicit Strings
+* added overloaded StringTrimmerEditor constructor that takes a set of chars to delete (e.g. for unwanted line breaks)
 * added "getBeanNamesForType" method to ListableBeanFactory interface, also checking FactoryBeans and manual singletons
 * added "beanNamesForTypeIncludingAncestors" method to BeanFactoryUtils, corresponding to "getBeanNamesForType"
 * renamed FactoryBeanCircularReferenceException to FactoryBeanNotInitializedException, reflecting general causes
 * fixed AbstractAutowireCapableBeanFactory to ignore further satisfiable constructors with less arguments
 * added "getResourceLoader" method to BeanDefinitionReader interface, plus setter in AbstractBeanDefinitionReader
 * moved "loadBeanDefinitions(Resource[])" method from AbstractBeanDefinitionReader to BeanDefinitionReader interface
+* fixed PropertiesBeanDefinitionReader to not consider dots in map/props keys as separator between name and property
 * DefaultXmlBeanDefinitionParser supports "classpath:" and standard URLs as resource locations for the "import" tag
 
 Package org.springframework.context
@@ -31,6 +34,9 @@ Package org.springframework.context
 
 Package org.springframework.core
 * fixed FileSystemResource's "createRelative" to correctly apply a given relative path when starting from a directory
+
+Package org.springframework.ejb
+* added "homeInterface" property to AbstractRemoteSlsbInvokerInterceptor, for specifying the home interface to narrow to
 
 Package org.springframework.jdbc
 * added "int[] batchUpdate(String[] sql)" method to JdbcTemplate, for executing a group of SQL statements as a batch
@@ -51,6 +57,7 @@ Package org.springframework.mock
 * upgraded MockHttpServletRequest to Servlet API 2.4 (added getRemotePort, getLocalName, getLocalAddr, getLocalPort)
 * upgraded MockPageContext to JSP API 2.0 (added getExpressionEvaluator, getVariableResolver, overloaded include)
 * added MockExpressionEvaluator for JSP 2.0, delegating to the Jakarta JSTL ExpressionEvaluatorManager
+* deprecated MockHttpServletRequest's "addRole" method in favor of the new "addUserRole" method
 * fixed MockHttpServletRequest to create a new HttpSession if the previous session has been invalidated
 * fixed MockHttpServletResponse to use "ISO-8859-1" as default character encoding
 
@@ -91,8 +98,11 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * Log4jWebConfigurer supports a "log4jExposeWebAppRoot" context-param, for turning off exposure of the system property
+* added overloaded "getXxxParameter" methods to RequestUtils, returning wrapper types or null (instead of primitives)
 * added "contextOverride" option to ServletContextPropertyPlaceholderConfigurer, letting web.xml override local settings
 * added "searchContextAttributes" option to ServletContextPropertyPlaceholderConfigurer, resolving context attributes
+* added "clear" and "isEmpty" methods to ModelAndView, allowing to clear the view of a given ModelAndView object
+* DispatcherServlet only attempts to render a ModelAndView object if it isn't empty (empty = nothing to render)
 * reworked DispatcherServlet's fallback to default strategies, reading in default strategy names from a properties file
 * DispatcherServlet does not override "doHead" anymore, leveraging HttpServlet's default "HEAD" handling via "doGet"
 * factored out protected "resolveViewName" method from DispatcherServlet's "render" implementation
@@ -105,6 +115,7 @@ Package org.springframework.web
 * factored out AbstractJasperReportsSingleFormatView from AbstractJasperReportsView
 * added JasperReportsMultiFormatView, allowing to specify the output format dynamically via a discriminator in the model
 * JSP EL expressions in Spring's JSP tags will be parsed with JSP 2.0 ExpressionEvaluator on JSP 2.0 (Jakarta JSTL else)
+* changed "spring:transform" tag's "value" attribute from String to Object, to allow for expressions resolved by JSP 2.0
 
 
 Changes in version 1.1.4 (31.1.2005)

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet;
 
@@ -400,7 +400,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			throw new ServletException(ex.getMessage(), ex);
 		}
 		finally {
-			long processingTime = System.currentTimeMillis() - startTime;
 			if (failureCause != null) {
 				logger.error("Could not complete request", failureCause);
 			}
@@ -409,6 +408,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			}
 			if (isPublishEvents()) {
 				// Whether or not we succeeded, publish an event.
+				long processingTime = System.currentTimeMillis() - startTime;
 				this.webApplicationContext.publishEvent(
 						new RequestHandledEvent(this, request.getRequestURI(), processingTime, request.getRemoteAddr(),
 								request.getMethod(), getServletConfig().getServletName(), WebUtils.getSessionId(request),

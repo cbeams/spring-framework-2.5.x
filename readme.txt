@@ -94,27 +94,27 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, AOP Alliance, (CGLIB, Commons Attributes)
 
-* "spring-context" (~265 KB)
+* "spring-context" (~270 KB)
 - Contents: application context, validation, UI support, mail, JNDI, JMS, EJB, remoting, scheduling, caching
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, JMS, EJB, JAX-RPC, Hessian, Burlap, Quartz, EHCache)
 
-* "spring-dao" (~240 KB)
+* "spring-dao" (~245 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
-* "spring-orm" (~190 KB)
+* "spring-orm" (~200 KB)
 - Contents: Hibernate support, JDO support, Apache OJB, iBATIS SQL Maps support
 - Dependencies: spring-dao, (Hibernate, JDO, Apache OJB, iBATIS SQL Maps)
 
 * "spring-web" (~115 KB)
-- Contents: web application context, multipart resolver, Struts support, web utilities
-- Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts)
+- Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
+- Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
 * "spring-webmvc" (~185 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, JasperReports)
 
-* "spring" (~1400 KB)
+* "spring" (~1415 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
