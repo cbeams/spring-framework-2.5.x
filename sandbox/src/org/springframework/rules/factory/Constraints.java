@@ -50,7 +50,7 @@ import org.springframework.util.closure.Constraint;
 import org.springframework.util.closure.support.AlgorithmsAccessor;
 
 /**
- * A factory for easing the construction and composition of predicates.
+ * A factory for easing the construction and composition of constraints.
  *
  * @author Keith Donald
  */
@@ -168,32 +168,32 @@ public class Constraints extends AlgorithmsAccessor {
 	}
 
 	/**
-	 * AND two predicates.
+	 * AND two constraints.
 	 *
-	 * @param predicate1
+	 * @param constraint1
 	 *            the first constraint
-	 * @param predicate2
+	 * @param constraint2
 	 *            the second constraint
 	 * @return The compound AND constraint
 	 */
-	public Constraint and(Constraint predicate1, Constraint predicate2) {
-		return new And(predicate1, predicate2);
+	public Constraint and(Constraint constraint1, Constraint constraint2) {
+		return new And(constraint1, constraint2);
 	}
 
 	/**
-	 * Return the conjunction (all constraint) for all predicates.
+	 * Return the conjunction (all constraint) for all constraints.
 	 *
-	 * @param predicates
-	 *            the predicates
+	 * @param constraints
+	 *            the constraints
 	 * @return The compound AND constraint
 	 */
-	public Constraint all(Constraint[] predicates) {
-		return new And(predicates);
+	public Constraint all(Constraint[] constraints) {
+		return new And(constraints);
 	}
 
 	/**
 	 * Returns a new, empty conjunction prototype, capable of composing
-	 * individual predicates where 'ALL' must test true.
+	 * individual constraints where 'ALL' must test true.
 	 *
 	 * @return the UnaryAnd
 	 */
@@ -202,27 +202,27 @@ public class Constraints extends AlgorithmsAccessor {
 	}
 
 	/**
-	 * OR two predicates.
+	 * OR two constraints.
 	 *
-	 * @param predicate1
+	 * @param constraint1
 	 *            the first constraint
-	 * @param predicate2
+	 * @param constraint2
 	 *            the second constraint
 	 * @return The compound OR constraint
 	 */
-	public Constraint or(Constraint predicate1, Constraint predicate2) {
-		return new Or(predicate1, predicate2);
+	public Constraint or(Constraint constraint1, Constraint constraint2) {
+		return new Or(constraint1, constraint2);
 	}
 
 	/**
-	 * Return the disjunction (any constraint) for all predicates.
+	 * Return the disjunction (any constraint) for all constraints.
 	 *
-	 * @param predicates
-	 *            the predicates
+	 * @param constraints
+	 *            the constraints
 	 * @return The compound AND constraint
 	 */
-	public Constraint any(Constraint[] predicates) {
-		return new Or(predicates);
+	public Constraint any(Constraint[] constraints) {
+		return new Or(constraints);
 	}
 
 	/**
@@ -243,7 +243,7 @@ public class Constraints extends AlgorithmsAccessor {
 
 	/**
 	 * Returns a new, empty disjunction prototype, capable of composing
-	 * individual predicates where 'ANY' must test true.
+	 * individual constraints where 'ANY' must test true.
 	 *
 	 * @return the UnaryAnd
 	 */
@@ -606,6 +606,12 @@ public class Constraints extends AlgorithmsAccessor {
 		return new CompoundPropertyConstraint(new And(min, max));
 	}
 
+	/**
+	 * Create a unique property value constraint that will test a collection of domain objects,
+	 * returning true if all objects have unique values for the provided propertyName.
+	 * @param propertyName The property name
+	 * @return The constraint
+	 */
 	public PropertyConstraint unique(String propertyName) {
 		return new UniquePropertyValueConstraint(propertyName);
 	}
