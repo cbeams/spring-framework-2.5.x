@@ -57,4 +57,13 @@ public interface NestingFormModel extends FormModel {
     public MutableFormModel createChild(String childFormModelName,
             ValueModel childFormObjectHolder);
 
+    /**
+     * Retrieve a child form model by name.
+     * 
+     * @param childModelName
+     *            the contained form model's name
+     * @return the child form model, or <code>null</code> if none found.
+     */
+    public FormModel getChildFormModel(String childModelName);
+
 }

@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 /**
  * @author Keith Donald
  */
-public class CompoundFormModel extends AbstractFormModel implements FormModel,
+public class CompoundFormModel extends AbstractFormModel implements
         NestingFormModel {
 
     private Map formModels = new LinkedHashMap(9);
@@ -167,7 +167,7 @@ public class CompoundFormModel extends AbstractFormModel implements FormModel,
         model.removeValidationListener(listener);
     }
 
-    private FormModel getChildFormModel(String childModelName) {
+    public FormModel getChildFormModel(String childModelName) {
         return (FormModel)formModels.get(childModelName);
     }
 
