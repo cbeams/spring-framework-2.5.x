@@ -904,6 +904,8 @@ public abstract class SessionFactoryUtils {
 
 		private final TransactionManager jtaTransactionManager;
 
+		private boolean beforeCompletionCalled = false;
+
 		private JtaSessionSynchronization(
 				SpringSessionSynchronization springSessionSynchronization, TransactionManager jtaTransactionManager) {
 			this.springSessionSynchronization = springSessionSynchronization;
@@ -929,6 +931,11 @@ public abstract class SessionFactoryUtils {
 					logger.error("Could not set JTA transaction rollback-only", ex2);
 				}
 			}
+			// Unbind the SessionHolder from the thread early, to avoid issues
+			// with strict JTA implementations that issue warnings when doing JDBC
+			// operations after transaction completion (e.g. Connection.getWarnings).
+			this.beforeCompletionCalled = true;
+			this.springSessionSynchronization.beforeCompletion();
 		}
 
 		/**
@@ -939,8 +946,11 @@ public abstract class SessionFactoryUtils {
 		 * @see SpringSessionSynchronization#afterCompletion
 		 */
 		public void afterCompletion(int status) {
-			// unbind the SessionHolder from the thread
-			this.springSessionSynchronization.beforeCompletion();
+			if (!this.beforeCompletionCalled) {
+				// beforeCompletion not called before (probably because of JTA rollback).
+				// Unbind the SessionHolder from the thread here.
+				this.springSessionSynchronization.beforeCompletion();
+			}
 			// Reset the synchronizedWithTransaction flag,
 			// and clear the Hibernate Session after a rollback (if necessary).
 			switch (status) {
