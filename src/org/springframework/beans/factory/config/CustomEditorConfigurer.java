@@ -1,0 +1,82 @@
+package org.springframework.beans.factory.config;
+
+import java.beans.PropertyEditor;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanInitializationException;
+
+/**
+ * BeanFactoryPostProcessor implementation that allows for convenient
+ * registration of custom property editors.
+ *
+ * <p>Configuration example, assuming XML bean definitions and inner
+ * beans for PropertyEditor instances:
+ *
+ * <p><code>
+ * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;<br>
+ * &nbsp;&nbsp;&lt;property name="customEditors"&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;map&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;entry key="java.util.Date"&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;bean class="mypackage.MyCustomDateEditor"/&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/entry&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;entry key="mypackage.MyObject"&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;bean id="myEditor" class="mypackage.MObjectEditor"&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;property name="myParam"&gt;&lt;value&gt;myValue&lt;/value&gt;&lt;/property&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/bean&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/entry&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/map&gt;<br>
+ * &nbsp;&nbsp;&lt;/property&gt;<br>
+ * &lt;/bean&gt;
+ * </code>
+ *
+ * @author Juergen Hoeller
+ * @since 27.02.2004
+ */
+public class CustomEditorConfigurer implements BeanFactoryPostProcessor {
+
+	private Map customEditors;
+
+	/**
+	 * Specify the custom editors to register via a Map, using the class name
+	 * of the required type as key and the PropertyEditor instance as value.
+	 * @see ConfigurableListableBeanFactory#registerCustomEditor
+	 */
+	public void setCustomEditors(Map customEditors) {
+		this.customEditors = customEditors;
+	}
+
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		if (this.customEditors != null) {
+			for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
+				Object key = it.next();
+				Class requiredType = null;
+				if (key instanceof Class) {
+					requiredType = (Class) key;
+				}
+				else if (key instanceof String) {
+					String className = (String) key;
+					try {
+						requiredType = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+					}
+					catch (ClassNotFoundException ex) {
+						throw new BeanInitializationException("Could not load required type [" + className +
+						                                      "] for custom editor", ex);
+					}
+				}
+				else {
+					throw new BeanInitializationException("Invalid key [" + key + "] for custom editor - " +
+					                                      "needs to be Class or String");
+				}
+				Object value = this.customEditors.get(key);
+				if (!(value instanceof PropertyEditor)) {
+					throw new BeanInitializationException("Mapped value for custom editor is not of type " +
+					                                      "java.beans.PropertyEditor");
+				}
+				beanFactory.registerCustomEditor(requiredType, (PropertyEditor) value);
+			}
+		}
+	}
+
+}
