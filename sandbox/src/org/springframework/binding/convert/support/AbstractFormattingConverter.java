@@ -6,13 +6,21 @@ package org.springframework.binding.convert.support;
 import org.springframework.binding.format.FormatterLocator;
 
 public abstract class AbstractFormattingConverter extends AbstractConverter {
-	private FormatterLocator formatterSource;
+	private FormatterLocator formatterLocator;
 
-	protected FormatterLocator getFormatterSource() {
-		return this.formatterSource;
+	protected AbstractFormattingConverter() {
+
 	}
 
-	public void setFormatterSource(FormatterLocator formatterSource) {
-		this.formatterSource = formatterSource;
+	protected AbstractFormattingConverter(FormatterLocator formatterLocator) {
+		setFormatterLocator(formatterLocator);
+	}
+
+	protected FormatterLocator getFormatterLocator() {
+		return this.formatterLocator;
+	}
+
+	public void setFormatterLocator(FormatterLocator formatterSource) {
+		this.formatterLocator = formatterSource;
 	}
 }

@@ -3,6 +3,8 @@
  */
 package org.springframework.binding.convert.support;
 
+import org.springframework.binding.format.FormatterLocator;
+
 public class TextToNumberConverter extends AbstractFormattingConverter {
 	private Class numberClass;
 
@@ -11,6 +13,11 @@ public class TextToNumberConverter extends AbstractFormattingConverter {
 	}
 
 	public TextToNumberConverter(Class numberClass) {
+		this.numberClass = numberClass;
+	}
+
+	public TextToNumberConverter(Class numberClass, FormatterLocator locator) {
+		super(locator);
 		this.numberClass = numberClass;
 	}
 
@@ -23,6 +30,6 @@ public class TextToNumberConverter extends AbstractFormattingConverter {
 	}
 
 	protected Object doConvert(Object o) throws Exception {
-		return getFormatterSource().getNumberFormatter(numberClass).parseValue((String)o);
+		return getFormatterLocator().getNumberFormatter(numberClass).parseValue((String)o);
 	}
 }
