@@ -1046,8 +1046,18 @@
         <listitem>
           <para><literal>interceptorNames</literal>: String array of Advisor,
           interceptor or other advice names to apply. Ordering is significant.
-          The names are bean names in the current factory, including bean
-          names from ancestor factories.</para>
+          First come, first serve that is. The first interceptor in the list
+          will be the first to be able to interceptor the invocation (of
+          course if it concerns a regular <literal>MethodInterceptor</literal> or
+          <literal>BeforeAdvice</literal>.</para>
+          <para>The names are bean names in the current factory, including bean
+          names from ancestor factories. You can't mention bean references
+          here since doing so would result in the ProxyFactoryBean ignoring
+          the singleton setting of the advise.</para>
+          <para>You can append an interceptor name with an asterisk (*).
+          This will result in the application of all advisor beans with names starting
+          with the part before the asterisk to be applied. An example of using
+          this feature can be found below.</para>
         </listitem>
 
         <listitem>
@@ -1230,6 +1240,29 @@
       dynamic proxies. As of Spring 1.0, dynamic proxies are slightly faster.
       However, this may change in the future. Performance should not be a
       decisive consideration in this case.</para>
+    </sect2>
+    <sect2>
+        <title>Using 'global' advisors</title>
+        <para>
+            By appending an asterisk to an interceptor name, all advisors with
+            bean names matching the part before the asterisk, will be added
+            to the advisor chain. This can come in handy if you need to add a
+            standard set of 'global' advisors:
+<programlisting><![CDATA[
+<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+  <property name="target"><ref bean="service"/></property>
+  <property name="interceptorNames">
+    <list>
+      <value>global*</value>
+    </list>
+  </property>
+</bean>
+
+<bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/>
+<bean id="global_performance"
+  class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/>
+]]></programlisting>
+        </para>
     </sect2>
   </sect1>
 
