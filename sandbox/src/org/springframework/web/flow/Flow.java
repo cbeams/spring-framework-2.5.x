@@ -718,7 +718,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 				"The currently executing flow stack is not active - this should not happen");
 		FlowSessionExecutionStack sessionExecutionInternal = ((FlowSessionExecutionStack)sessionExecution);
 		fireRequestSubmitted(sessionExecutionInternal, request);
-		Flow activeFlow = ((FlowSessionExecutionStack)sessionExecution).getActiveFlow();
+		Flow activeFlow = sessionExecutionInternal.getActiveFlow();
 		TransitionableState state = activeFlow.getRequiredTransitionableState(stateId);
 		ViewDescriptor view = state.execute(eventId, sessionExecutionInternal, request, response);
 		fireRequestProcessed(sessionExecutionInternal, request);
