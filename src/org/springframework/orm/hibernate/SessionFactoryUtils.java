@@ -277,7 +277,8 @@ public abstract class SessionFactoryUtils {
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && !sessionHolder.isEmpty()) {
 			// pre-bound Hibernate Session
-			if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			if (TransactionSynchronizationManager.isSynchronizationActive() &&
+					sessionHolder.doesNotHoldNonDefaultSession()) {
 				// Spring transaction management is active ->
 				// register pre-bound Session with it for transactional flushing.
 				if (allowSynchronization && !sessionHolder.isSynchronizedWithTransaction()) {
