@@ -31,8 +31,8 @@
     <classpathentry exported="true" kind="lib" path="lib/hibernate/commons-collections.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/regexp/jakarta-oro-2.0.7.jar"/>
     <classpathentry exported="true" kind="lib" path="lib/aop-alliance/aopalliance.jar"/>
-    <classpathentry kind="lib" path="lib/poi/poi-2.0-pre3-20030728.jar"/>
-    <classpathentry kind="lib" path="C:/checkouts/0.2/Implementation/lib/xercesImpl.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
+    <classpathentry exported="true" kind="lib" path="lib/poi/poi-2.0-pre3-20030728.jar"/>
     <classpathentry kind="src" path="load"/>
     <classpathentry kind="src" path="sandbox"/>
     <classpathentry kind="output" path="bin"/>
