@@ -15,6 +15,7 @@
 <!ENTITY mvc				SYSTEM "mvc.xml">
 <!ENTITY views				SYSTEM "views.xml">
 <!ENTITY ejb				SYSTEM "ejb.xml">
+<!ENTITY scheduling			SYSTEM "scheduling.xml">
 <!ENTITY background			SYSTEM "background.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 ]>
@@ -98,6 +99,8 @@
 	    <!-- &remoting; -->
 	    
 	    &mail;
+	    
+	    &scheduling;
 	
 	    &dtd;
 	
