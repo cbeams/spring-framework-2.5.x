@@ -67,7 +67,7 @@ public abstract class AopProxyUtils {
 		}
 		catch (IllegalArgumentException ex) {
 			throw new AspectException("AOP configuration seems to be invalid: tried calling " +
-			    method + " on [" + target + "]: " +  ex);
+			    method + " on [" + target + "]: ", ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new AspectException("Couldn't access method " + method, ex);
