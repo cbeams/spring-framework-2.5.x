@@ -60,12 +60,17 @@ public class StartStateMarker implements Serializable {
 
 	public ViewDescriptor startIn(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response, Map inputAttributes) {
-		sessionExecution.activate(flow.createSession(inputAttributes));
+		sessionExecution.activate(createSession(flow, inputAttributes));
 		return getStartState().enter(sessionExecution, request, response);
 	}
 
 	protected FlowExecutionStack createFlowSessionExecutionStack() {
 		return new FlowExecutionStack();
 	}
+
+	protected FlowSession createSession(Flow flow, Map input) {
+		return new FlowSession(flow, input);
+	}
+
 
 }
