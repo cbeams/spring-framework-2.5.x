@@ -53,11 +53,11 @@ public class InputStreamEditor extends PropertyEditorSupport {
 		this.resourceEditor.setAsText(text);
 		Resource resource = (Resource) this.resourceEditor.getValue();
 		try {
-			setValue(resource.getInputStream());
+			setValue(resource != null ? resource.getInputStream() : null);
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Could not retrieve InputStream from " +
-			                                   resource + ": " + ex.getMessage());
+			throw new IllegalArgumentException(
+					"Could not retrieve InputStream for " + resource + ": " + ex.getMessage());
 		}
 	}
 
