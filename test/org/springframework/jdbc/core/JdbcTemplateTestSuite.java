@@ -33,7 +33,7 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.11 2004-02-02 11:53:57 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.12 2004-02-07 00:19:21 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -1229,6 +1229,12 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		template.setNativeJdbcExtractor(new NativeJdbcExtractor() {
 			public boolean isNativeConnectionNecessaryForNativeStatements() {
+				return false;
+			}
+			public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
+				return false;
+			}
+			public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 				return false;
 			}
 			public Connection getNativeConnection(Connection con) {
