@@ -13,6 +13,7 @@ import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 
@@ -28,8 +29,7 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 	}
 
 	public void testRequestsWithoutHandlers() throws Exception {
-		HandlerMapping hm = new BeanNameUrlHandlerMapping();
-		hm.setApplicationContext(wac);
+		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/nonsense.html");
 		req.setContextPath("/myapp");
@@ -42,8 +42,7 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 	}
 
 	public void testRequestsWithSubPaths() throws Exception {
-		HandlerMapping hm = new BeanNameUrlHandlerMapping();
-		hm.setApplicationContext(wac);
+		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 		Object bean = wac.getBean("godCtrl");
 
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/welcome.html");
@@ -111,8 +110,7 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 	}
 
 	public void testAsteriskMatches() throws ServletException {
-		HandlerMapping hm = new BeanNameUrlHandlerMapping();
-		hm.setApplicationContext(wac);
+		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 		Object bean = wac.getBean("godCtrl");
 
 		MockHttpServletRequest req = new MockHttpServletRequest(null, "GET", "/mypath/test.html");
