@@ -31,7 +31,14 @@ public class DefaultServiceManager implements ServiceManager
      * The array of service beans.
      *
      */
-    private ServiceBean[] _serviceBeans;
+    private Object[] _serviceBeans;
+
+
+    /**
+     * Flag to call stop then destroy when application is terminated
+     * normally.  
+     */
+    private boolean enableShutdownHook;
 
     /**
      * Simple constructor.
@@ -39,8 +46,14 @@ public class DefaultServiceManager implements ServiceManager
      */
     public DefaultServiceManager()
     {
-
+        // Register a shutdown thread
+        Runtime.getRuntime().addShutdownHook(new ServiceShutdownThread(this));
     }
+
+
+
+
+
 
     /**
      * {@inheritDoc}
@@ -72,7 +85,9 @@ public class DefaultServiceManager implements ServiceManager
     {
         for (int i = 0; i < _serviceBeans.length; i++)
         {
-            _serviceBeans[i].initialize();
+            if (_serviceBeans[i] instanceof ServiceBean) {     
+             ((ServiceBean)_serviceBeans[i]).initialize();
+            }
         }
 
     }
@@ -85,34 +100,45 @@ public class DefaultServiceManager implements ServiceManager
     {
         for (int i = 0; i < _serviceBeans.length; i++)
         {
-            _serviceBeans[i].start();
+            if (_serviceBeans[i] instanceof ServiceBean) {            
+             ((ServiceBean)_serviceBeans[i]).start();
+            }
+        
         }
 
     }
 
     /**
-     * Loop over all registered managed beans and call their stop method.
+     * Loop over all registered managed beans and call their stop method.  The
+     * beans are called in the reverse order in which they were registered.
      * @see org.springframework.service.ServiceBean#stop()
      */
     public void stop()
     {
-        for (int i = 0; i < _serviceBeans.length; i++)
+        for (int i = _serviceBeans.length-1 ; i >=0 ; i--)
         {
-            _serviceBeans[i].stop();
+            if (_serviceBeans[i] instanceof ServiceBean) {    
+             ((ServiceBean)_serviceBeans[i]).stop();
+            }
         }
     }
 
     /**
      * Loop over all registered managed beans and call their dispose method.
+     * The beans are called in the reverse order in which they were registered
      * @see org.springframework.service.ServiceBean#dispose()
      */
     public void dispose()
     {
-        for (int i = 0; i < _serviceBeans.length; i++)
+        for (int i = _serviceBeans.length - 1 ; i >= 0; i--)
         {
-            _serviceBeans[i].dispose();
+            if (_serviceBeans[i] instanceof ServiceBean) {    
+              ((ServiceBean)_serviceBeans[i]).dispose();
+            }
         }
     }
+    
+    
 
     /**
      * Set the application context.  This class needs it to look up
@@ -131,22 +157,44 @@ public class DefaultServiceManager implements ServiceManager
      * order that the ServiceBeans will be put through their lifecycle.
      * @param managedBeans the list of managed beans.
      */
-    public void setServiceBeans(ServiceBean[] serviceBeans)
+    public void setServiceBeans(Object[] serviceBeans)
     {
         _serviceBeans = serviceBeans;
 
     }
 
+
+
     /**
      * Call the stop() and dispose() methods when the Spring BeanFactory is destroyed,
      * for example when the application shuts down.  This only occurs if the ServiceManager
-     * is a singleton, which is should be.
+     * is a singleton, which is should be.  In stand alone applications, setting the
+     * enableShutdownHook to true will perform the same operation.  You should chose one
+     * way of having the destroy method called in your application.
      * @see org.springframework.beans.factory.DisposableBean#destroy()
      */
     public void destroy() throws Exception
     {
         stop();
         dispose();        
+    }
+
+
+
+    /**
+     * @return
+     */
+    public boolean isEnableShutdownHook()
+    {
+        return enableShutdownHook;
+    }
+
+    /**
+     * @param b
+     */
+    public void setEnableShutdownHook(boolean b)
+    {
+        enableShutdownHook = b;
     }
 
 }
