@@ -50,7 +50,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -660,33 +659,33 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	protected int getDependencyCheck(String att) {
-		int dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_NONE;
+		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
 		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_ALL;
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
 		}
 		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
 		}
 		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
 		}
 		// else leave default value
 		return dependencyCheckCode;
 	}
 
 	protected int getAutowireMode(String att) {
-		int autowire = RootBeanDefinition.AUTOWIRE_NO;
+		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
 		if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
-			autowire = RootBeanDefinition.AUTOWIRE_BY_NAME;
+			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
 		}
 		else if (AUTOWIRE_BY_TYPE_VALUE.equals(att)) {
-			autowire = RootBeanDefinition.AUTOWIRE_BY_TYPE;
+			autowire = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
 		}
 		else if (AUTOWIRE_CONSTRUCTOR_VALUE.equals(att)) {
-			autowire = RootBeanDefinition.AUTOWIRE_CONSTRUCTOR;
+			autowire = AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR;
 		}
 		else if (AUTOWIRE_AUTODETECT_VALUE.equals(att)) {
-			autowire = RootBeanDefinition.AUTOWIRE_AUTODETECT;
+			autowire = AbstractBeanDefinition.AUTOWIRE_AUTODETECT;
 		}
 		// else leave default value
 		return autowire;
