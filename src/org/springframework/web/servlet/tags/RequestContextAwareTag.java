@@ -36,7 +36,12 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 * @see HtmlEscapeTag#setDefaultHtmlEscape
 	 */
 	public final void setHtmlEscape(String htmlEscape) throws JspException {
-		this.htmlEscape = new Boolean(ExpressionEvaluationUtils.evaluateBoolean("htmlEscape", htmlEscape, pageContext));
+		this.htmlEscape =
+			new Boolean(
+				ExpressionEvaluationUtils.evaluateBoolean(
+					"htmlEscape",
+					htmlEscape,
+					pageContext));
 	}
 
 	/**
@@ -44,8 +49,10 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 * or the default setting if not overridden.
 	 */
 	protected final boolean isHtmlEscape() {
-		return (this.htmlEscape != null ? this.htmlEscape.booleanValue() :
-				HtmlEscapeTag.isDefaultHtmlEscape(this.pageContext));
+		return (
+			this.htmlEscape != null
+				? this.htmlEscape.booleanValue()
+				: HtmlEscapeTag.isDefaultHtmlEscape(this.pageContext));
 	}
 
 	/**
@@ -61,16 +68,15 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 */
 	public final int doStartTag() throws JspException {
 		try {
-			this.requestContext = new RequestContext((HttpServletRequest) this.pageContext.getRequest());
+			this.requestContext =
+				new RequestContext(
+					(HttpServletRequest) this.pageContext.getRequest());
 			return doStartTagInternal();
-		}
-		catch (JspException ex) {
+		} catch (JspException ex) {
 			throw ex;
-		}
-		catch (RuntimeException ex) {
+		} catch (RuntimeException ex) {
 			throw ex;
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			pageContext.getServletContext().log("Exception in custom tag", ex);
 			throw new JspTagException(ex.getMessage());
 		}
@@ -83,6 +89,8 @@ public abstract class RequestContextAwareTag extends TagSupport {
 	 * a JspException gets wrapped in a JspException by doStartTag
 	 * @see javax.servlet.jsp.tagext.TagSupport#doStartTag
 	 */
-	protected abstract int doStartTagInternal() throws Exception;
+	protected int doStartTagInternal() throws Exception {
+		return super.doStartTag();
+	}
 
 }
