@@ -1263,16 +1263,16 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 			and for example override specific views in certain circumstances. Chaining is view resolvers
 			is pretty straightforward: just add more than one resolver to your application context and
 			if necessary, set the <literal>order</literal> property to specify an order. Remember: the higher
-			the order property, the later the view resolver will be positioned in the chain.			
+			the order property, the later the view resolver will be positioned in the chain.
 		</para>
 		<para>
 			A chain of view resolvers for example could consist of two, one <literal>InternalResourceViewResolver</literal> (positioned
 			as the last resolver) and an <literal>XmlViewResolver</literal> specifying Excel views (those are not supported
 			by the InternalResourceViewResolver):
 		<programlisting><![CDATA[
-<bean id="jspViewResolver" 
+<bean id="jspViewResolver"
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-	<property name="order"><value>2</value></property>
+    <!-- no order property here, resulting in the resolver to be the last in the chain -->
 	<property name="viewClass">
 		<value>org.springframework.web.servlet.view.JstlView</value>
 	</property>
@@ -1292,7 +1292,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 	<bean name="report" class="org.springframework.example.ReportExcelView"/>
 </beans>
 ]]></programlisting>
-		</para>
+ </para>
 		<para>
 			If a specific view resolver does not result in a view, Spring will
 				inspect the context to see if other view resolvers are configured. If not,
@@ -1306,10 +1306,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 			for example simply cannot detect whether or not the view exists (it uses the RequestDispatcher
 			internally, and dispatching is the only way to figure out if for example a JSP exists--this can
 			only be done once). The same holds for the VelocityViewResolver and some others. Check the
-			JavaDoc for the view resolver to see if you're dealing with a view resolver that does not 
-			report non-existing views. As a result of this, putting an <literal>InternalResourceViewResolver</literal> in the chain
-			on a place other than the last, will result in the chain not being fully inspected, since the
-			<literal>InternalResourceViewResolver</literal> will <emphasis>always</emphasis> return a view!
+			JavaDoc for the view resolver to see if you're dealing with a view resolver that does not
+			report non-existing views. <emphasis>The <literal>InternalResourceViewResolver</literal> as well as
+            any other view resolver that is not able to figure out if a view exists, does not implement the
+            <literal>Ordered</literal> interface hence not exposing the <literal>order</order> property and
+            always ending up last in the chain.
 		</para>
 	</sect2>
   </sect1>
