@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.MessageSourceResolvable;
@@ -31,6 +30,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -64,6 +64,8 @@ public class RequestContext {
 
 	private boolean defaultHtmlEscape;
 
+	private UrlPathHelper urlPathHelper;
+
 	private Map errorsMap;
 
 
@@ -75,7 +77,7 @@ public class RequestContext {
 	 * It will typically be used within JSPs or custom tags.
 	 * @param request current HTTP request
 	 */
-	public RequestContext(HttpServletRequest request) throws ServletException {
+	public RequestContext(HttpServletRequest request) {
 		this(request, null);
 	}
 
@@ -87,13 +89,14 @@ public class RequestContext {
 	 * @param request current HTTP request
 	 * @param model the model attributes for the current view
 	 */
-	public RequestContext(HttpServletRequest request, Map model) throws ServletException {
+	public RequestContext(HttpServletRequest request, Map model) {
 		this.request = request;
 		this.model = model;
 		this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request);
 		this.locale = RequestContextUtils.getLocale(request);
 		this.theme = RequestContextUtils.getTheme(request);
 		this.defaultHtmlEscape = WebUtils.isDefaultHtmlEscape(this.webApplicationContext.getServletContext());
+		this.urlPathHelper = new UrlPathHelper();
 	}
 
 	/**
@@ -102,15 +105,6 @@ public class RequestContext {
 	 */
 	protected HttpServletRequest getRequest() {
 		return request;
-	}
-
-	/**
-	 * Return the context path of the current request,
-	 * i.e. the path that indicates the current web application.
-	 * @see javax.servlet.http.HttpServletRequest#getContextPath
-	 */
-	public String getContextPath() {
-		return this.request.getContextPath();
 	}
 
 	/**
@@ -134,6 +128,7 @@ public class RequestContext {
 		return theme;
 	}
 
+
 	/**
 	 * (De)activate default HTML escaping for messages and errors, for the scope
 	 * of this RequestContext. The default is the application-wide setting
@@ -149,6 +144,57 @@ public class RequestContext {
 	 */
 	public boolean isDefaultHtmlEscape() {
 		return defaultHtmlEscape;
+	}
+
+	/**
+	 * Set the UrlPathHelper to use for context path and request URI decoding.
+	 * Can be used to pass a shared UrlPathHelper instance in.
+	 * <p>A default UrlPathHelper is always available.
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = (urlPathHelper != null ? urlPathHelper : new UrlPathHelper());
+	}
+
+	/**
+	 * Return the UrlPathHelper used for context path and request URI decoding.
+	 * Can be used to configure the current UrlPathHelper.
+	 * <p>A default UrlPathHelper is always available.
+	 */
+	public UrlPathHelper getUrlPathHelper() {
+		return urlPathHelper;
+	}
+
+
+	/**
+	 * Return the context path of the current request,
+	 * i.e. the path that indicates the current web application.
+	 * <p>Delegates to the UrlPathHelper for decoding.
+	 * @see javax.servlet.http.HttpServletRequest#getContextPath
+	 * @see #getUrlPathHelper
+	 */
+	public String getContextPath() {
+		return this.urlPathHelper.getContextPath(this.request);
+	}
+
+	/**
+	 * Return the request URI of the current request, i.e. the invoked URL
+	 * without parameters. This is particularly useful as HTML form action target.
+	 * <p><b>Note that you should create your RequestContext instance <i>before</i>
+	 * forwarding to your JSP view, if you intend to determine the request URI!</b>
+	 * The optimal way to do so is to set "requestContextAttribute" on your view.
+	 * Else, you'll get the URI of your JSP rather than the one of your controller.
+	 * <p>Side note: As alternative for an HTML form action, either specify
+	 * an empty "action" or omit the "action" attribute completely. This is
+	 * not covered by the HTML spec, though, but known to work reliably on
+	 * all current browsers.
+	 * <p>Delegates to the UrlPathHelper for decoding.
+	 * @see javax.servlet.http.HttpServletRequest#getRequestURI
+	 * @see #getUrlPathHelper
+	 * @see org.springframework.web.servlet.view.AbstractView#setRequestContextAttribute
+	 * @see org.springframework.web.servlet.view.UrlBasedViewResolver#setRequestContextAttribute
+	 */
+	public String getRequestUri() {
+		return this.urlPathHelper.getRequestUri(this.request);
 	}
 
 
