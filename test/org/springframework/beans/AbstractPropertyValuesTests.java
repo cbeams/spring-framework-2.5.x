@@ -21,28 +21,14 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-
 /**
- *
  * @author Rod Johnson
- * @version $RevisionId$
  */
 public abstract class AbstractPropertyValuesTests extends TestCase { 
 
-
-	/** Creates new SeatingPlanTest */
-	public AbstractPropertyValuesTests(String name) {
-		super(name);
-	}
-
-	/** Run for each test */
-	protected void setUp() throws Exception {
-	}
-
-/** Must contain: forname=Tony surname=Blair age=50
- * 
- */
-	
+	/**
+	 * Must contain: forname=Tony surname=Blair age=50
+	 */
 	protected void testTony(PropertyValues pvs) throws Exception {
 		
 		assertTrue("Contains 3", pvs.getPropertyValues().length == 3);
@@ -65,9 +51,6 @@ public abstract class AbstractPropertyValuesTests extends TestCase {
 		}
 		assertTrue("Map size is 0", m.size() == 0);
 	}
-	
-	// NULL TESTS ETC.
 
-	
 
 }

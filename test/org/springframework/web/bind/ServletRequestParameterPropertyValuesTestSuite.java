@@ -21,17 +21,10 @@ import java.util.Arrays;
 import org.springframework.beans.AbstractPropertyValuesTests;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-
 /**
- *
  * @author Rod Johnson
- * @version $RevisionId$
  */
 public class ServletRequestParameterPropertyValuesTestSuite extends AbstractPropertyValuesTests {
-
-	public ServletRequestParameterPropertyValuesTestSuite(String name) {
-		super(name);
-	}
 
 	public void testNoPrefix() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
