@@ -68,14 +68,13 @@ public abstract class ClassLoaderUtils {
 	 * Given an	input class	object,	returns	a string which consists	of the class's package
 	 * name	as a pathname, i.e., a leading '/' is added, and all dots ('.')	are	replaced by
 	 * slashes ('/'). A	trailing slash is <b>not</b> added.
-	 * @param clazz	the	input class
+	 * @param clazz	the	input class. A null value will result in "/" being returned.
 	 * @return a path which	represents the package name, including a leading slash
 	 */
 	public static String classPackageAsResourcePath(Class clazz) {
 		StringBuffer retval	= new StringBuffer("/");
-		if (clazz == null)
-			return retval.toString();
-		retval.append(clazz.getPackage().getName().replace('.', '/'));
+		if (clazz != null)
+			retval.append(clazz.getPackage().getName().replace('.', '/'));
 		return retval.toString();
 	}
   
