@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.14 2003-11-16 23:02:18 colins Exp $
+    $Id: build.xml,v 1.15 2003-11-17 20:47:08 colins Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -43,16 +43,17 @@
 
 	<target name="clean" description="Clean output dirs (build, dist, test, clover)">
 
-		<delete dir="${target.classes.dir}"/>
 		<delete dir="${dist.dir}"/>
 		<delete dir="${javadocs.dir}"/>
+
 		<delete dir="${target.clover.dir}"/>
+		<delete dir="${target.classes.dir}"/>
 		<delete dir="${target.junit.reports.dir}"/>
 		<delete dir="${target.livetestlasses.dir}"/>
+		<delete dir="${target.loadclasses.dir}"/>
 		<delete dir="${target.otherclasses.dir}"/>
 		<delete dir="${target.release.dir}"/>
 		<delete dir="${target.testclasses.dir}"/>
-		<delete dir="${target.loadclasses.dir}"/>
 	
         <!-- just kill target dir (it's safer). No need at this point to keep it -->
 		<delete dir="${target.dir}"/>
