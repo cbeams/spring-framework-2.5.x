@@ -1,25 +1,49 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.36 2003-11-04 18:02:49 johnsonr Exp $
+$Id: changelog.txt,v 1.37 2003-11-05 11:30:58 jhoeller Exp $
 
 Changes in version 1.0 M3 (XX.11.2003)
 --------------------------------------
-* can now cast any AOP proxy to ProxyConfig to manipulate it
-* can force CGLIB proxying using new proxyTargetClass property on DefaultProxyConfig
-* CGLIB proxies support introductions
-* refactored JDBC core package so that SQLErrorCodeExceptionTranslator can be subclassed by users and passed into JdbcTemplate
-* refactored JDBC object package so that JdbcTemplate is now in root RdbmsOperation class, and one JdbcTemplate can be used to configure multiple RdbmsOperations
-* added "default-dependency-check" and "default-autowire" attributes to root tag in XML bean definitions
 * redefined autowiring to ignore if no matching bean found but still complain in case of more than one matching bean
 * ignore specified dependency types on autowiring, like BeanFactory and ApplicationContext
 * introduced "getBeansOfType" method in ListableBeanFactory, retrieving both normal beans and FactoryBean-created beans
 * introduced "getObjectType" method in FactoryBean, to avoid unnecessary bean creation on autowire checks
+* reworked BeanFactoryUtils' beanNamesIncludingAncestors and beansOfTypeIncludingAncestors methods
 * introduced FactoryBeanCircularReferenceException and refined circular reference handling with a FactoryBean involved
+* introduced BeanNameAware interface to be implemented by beans that want to be aware of their bean factory name
+* introduced ConfigurableBeanFactory and ConfigurableListableBeanFactory interfaces in beans.factory.config package
+* reworked BeanPostProcessor and BeanFactoryPostProcessor interfaces and moved them to beans.factory.config package
+* made AbstractBeanFactory and ListableBeanFactoryImpl methods non-final
+* reworked AbstractBeanDefinition/RootBeanDefinition/ChildBeanDefinition for more consistency
+* added support for lazy initialization of singleton beans in AbstractBeanFactory and subclasses
+* added "lazy-init" attribute to "bean" tag in XML bean definition format, default being "false"
+* made "id" attribute of "bean" tag in XML bean definition format optional, using the first given name as primary name
+* added "default-dependency-check" and "default-autowire" attributes to root tag in XML bean definitions
+* reworked PropertiesFactoryBean to allow for loaded and local properties
 * added "targetClass" argument to StaticMethodPointcut.applies()
+* can now cast any AOP proxy to ProxyConfig to manipulate it
+* can force CGLIB proxying using new proxyTargetClass property on DefaultProxyConfig
+* CGLIB proxies support introductions now
+* split ApplicationContext interface into ApplicationContext client interface and ConfigurableApplicationContext SPI
 * added support for placeholders in bean reference names to PropertyPlaceholderConfigurer
 * added support for cross-referencing placeholders in placeholder values to PropertyPlaceholderConfigurer
-* reworked commit exception handling in HibernateTransactionManager, triggering rollback if not TransactionException
-* reworked commit exception handling in JdoTransactionManager, triggering rollback if not JDOFatalException
+* refactored JDBC core package so that SQLErrorCodeExceptionTranslator can be subclassed by and passed into JdbcTemplate
+* refactored JDBC object package so that one JdbcTemplate can be used to configure multiple RdbmsOperations
+* reworked JdbcBeanFactory to extend ListableBeanFactoryImpl instead of using a refreshable delegate
+* moved commit exception handling from concrete implementations up to the generic AbstractPlatformTransactionManager
+* added "rollbackOnCommitFailure" bean property to AbstractPlatformTransactionManager
+* added "cleanupAfterCompletion" template method to AbstractPlatformTransactionManager
+* reworked commit exception handling in HibernateTransactionManager and JdoTransactionManager
+* reworked cleanup code in DataSourceTransactionManager, HibernateTransactionManager, and JdoTransactionManager
+* added setter methods for data access templates to JdbcDaoSupport, HibernateDaoSupport, and JdoDaoSupport
+* made LocalSessionFactoryBean and LocalPersistenceManagerFactoryBean methods non-final
+* reworked HibernateAccessor/HibernateTemplate/HibernateInterceptor flush handling
+* added "jdbcExceptionTranslator" property to HibernateTemplate, allowing to set a SQLExceptionTranslator for SQL ex's
+* added "jdbcExceptionTranslator" property to HibernateTransactionManager, applied to flushing failures on commit
+* introduced JdoAccessor as common base class for JdoTemplate and JdoInterceptor
+* introduced JdoDialect interface with getJdbcConnection and flush methods
+* added support for JdoDialect in JdoTransactionManager and JdoAccessor/JdoTemplate/JdoInterceptor
+* renamed BaseCommandController's "userObject" method to "getCommand" for clearer naming
 * fixed potential NPE in debug log statement of VelocityView
 
 Changes in version 1.0 M2 (23.10.2003)
@@ -93,7 +117,7 @@ Changes in version 1.0 M1 (30.8.2003)
 * revised RdbmsOperation hierarchy to allow for all of JdbcTemplate's options
 * SingleConnectionDataSource implements DisposableBean
 * SingleConnectionDataSource does not override auto-commit anymore
-* renamed XxxExtracter to XxxExtractor and XxxTranslater to XxxTranslator  
+* renamed XxxExtracter to XxxExtractor and XxxTranslater to XxxTranslator
 * support for returning Types.ARRAY from stored procedure
 * LocalSessionFactoryBean implements DisposableBean
 * added HibernateTemplate.deleteAll for batch deletes
