@@ -5,7 +5,6 @@
  
 package org.springframework.ejb.support;
 
-import javax.ejb.CreateException;
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
 
@@ -27,7 +26,7 @@ import javax.ejb.MessageDrivenContext;
  * ejbCreate() methods.
  *
  * @author Rod Johnson
- * @version $Id: AbstractMessageDrivenBean.java,v 1.2 2003-11-14 20:19:33 colins Exp $
+ * @version $Id: AbstractMessageDrivenBean.java,v 1.3 2003-11-18 15:04:08 colins Exp $
  */
 public abstract class AbstractMessageDrivenBean 
 				extends AbstractEnterpriseBean 

@@ -6,7 +6,6 @@
 package org.springframework.validation;
 
 import java.util.List;
-import java.beans.PropertyEditor;
 
 /**
  * Interface to be implemented by objects that can store and expose
