@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1 final (17.8.2004)
-----------------------------------------
+Changes in version 1.1 RC2 (19.8.2004)
+--------------------------------------
 
 Package org.springframework.aop
 * added "customizeProxyFactory" hook method in AbstractAutoProxyCreator
@@ -21,6 +21,7 @@ Package org.springframework.beans
 * CustomEditorConfigurer and ClassEditor delegate to same ClassUtils.forName method, understanding array class names
 * added FieldRetrievingFactoryBean, for retrieving static fields (and also non-static field values of target objects)
 * fixed AbstractBeanFactory's "getSingletonNames" implementation to properly synchronize on the singletonCache Map
+* a constructor argument value without index will now just be considered once, rather than matched multiple times
 * introduced BeanDefinitionReader interface, implemented by AbstractBeanDefinitionReader and subclasses
 * reworked XmlBeanDefinitionParser SPI (warning: not backwards-compatible!) to receive a bean definition reader
 
@@ -35,6 +36,7 @@ Package org.springframework.core
 Package org.springframework.jdbc
 * added explicit "query" methods that accept a RowMapper parameter to JdbcOperations and JdbcTemplate
 * added special Date checks in StatementCreatorUtils, to automatically convert to java.sql.Date/Time/Timestamp
+* fixed JdbcTemplate's check for parameter placeholders in plain statements, to ignore question marks in literals
 
 Package org.springframework.jms
 * fixed JmsTemplate's "doReceive" implementation to not try to acknowledge message if null returned after timeout
@@ -86,6 +88,8 @@ Package org.springframework.web
 * turned AbstractWizardFormController's "validatePage" and "processCancel" non-abstract with empty implementations
 * added overloaded "validatePage" method with "finish" flag to AbstractWizardFormController
 * fixed TransformTag to derive from HtmlEscapingAwareTag and actually HTML-escape results (matching the TLD now)
+* fixed AbstractXsltView to apply the response encoding for XSLT transformation (doTransform takes encoding param now)
+* added form simplification macros for Velocity and FreeMarker, providing HTML input macros etc for easy form building
 * introduced JSF support in the form of a DelegatingVariableResolver that can resolve variable names as Spring beans
 
 

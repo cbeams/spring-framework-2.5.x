@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.1 (August 2004)
------------------------------------------------
+THE SPRING FRAMEWORK, release 1.1 RC2 (August 2004)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -114,7 +114,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI)
 
-* "spring" (~1225 KB)
+* "spring" (~1235 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
