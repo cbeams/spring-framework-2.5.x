@@ -539,7 +539,9 @@
     AOP capabilities.</remark>
 
     <sect2>
-      <title>BeanNameAutoProxyCreator, another declarative approach</title>
+      <title
+      id="beannameautoproxycreator-for-transactions">BeanNameAutoProxyCreator,
+      another declarative approach</title>
 
       <para><classname>TransactionProxyFactoryBean</classname> is very useful,
       and gives you full control when wrapping objects with a transactional
