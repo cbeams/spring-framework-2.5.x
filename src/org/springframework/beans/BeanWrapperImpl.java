@@ -38,32 +38,34 @@ import org.springframework.util.StringUtils;
  * Default implementation of the BeanWrapper interface that should be sufficient
  * for all normal uses. Caches introspection results for efficiency.
  *
- * <p>Note: this class never tries to load a class by name, as this can pose
+ * <p>Note: This class never tries to load a class by name, as this can pose
  * class loading problems in J2EE applications with multiple deployment modules.
- * For example, loading a class by name won't work in some application servers
- * if the class is used in a WAR but was loaded by the EJB class loader and the
- * class to be loaded is in the WAR. (This class would use the EJB class loader,
- * which couldn't see the required class.) We don't attempt to solve such problems
- * by obtaining the classloader at runtime, because this violates the EJB
- * programming restrictions.
+ * The caller is responsible for loading a target class.
  *
- * <p>Note: Regards property editors in org.springframework.beans.propertyeditors.
- * Also explictly register the default ones to care for JREs that do not use
- * the thread context class loader for editor search paths.
+ * <p>Note: Auto-registers all default property editors (not the custom ones)
+ * in the org.springframework.beans.propertyeditors package.
  * Applications can either use a standard PropertyEditorManager to register a
  * custom editor before using a BeanWrapperImpl instance, or call the instance's
  * registerCustomEditor method to register an editor for the particular instance.
  *
- * <p>Collections custom property editors can be written against comma delimited String
- * as String arrays are converted in such a format if the array itself is not assignable.
+ * <p>BeanWrapperImpl will convert List and array values to the corresponding
+ * target arrays, if necessary. Custom property editors that deal with Lists or
+ * arrays can be written against a comma delimited String as String arrays are
+ * converted in such a format if the array itself is not assignable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.28 2004-03-08 10:06:27 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.29 2004-03-09 08:16:12 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
+ * @see org.springframework.beans.propertyeditors.ClassEditor
+ * @see org.springframework.beans.propertyeditors.FileEditor
+ * @see org.springframework.beans.propertyeditors.LocaleEditor
+ * @see org.springframework.beans.propertyeditors.PropertiesEditor
+ * @see org.springframework.beans.propertyeditors.StringArrayPropertyEditor
+ * @see org.springframework.beans.propertyeditors.URLEditor
  */
 public class BeanWrapperImpl implements BeanWrapper {
 
@@ -665,19 +667,21 @@ public class BeanWrapperImpl implements BeanWrapper {
 			Class componentType = requiredType.getComponentType();
 			if (newValue instanceof List) {
 				List list = (List) newValue;
-				Object[] result = (Object[]) Array.newInstance(componentType, list.size());
+				Object result = Array.newInstance(componentType, list.size());
 				for (int i = 0; i < list.size(); i++) {
-					result[i] = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
-																									null, list.get(i), componentType);
+					Object value = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
+																										 null, list.get(i), componentType);
+					Array.set(result, i, value);
 				}
 				return result;
 			}
 			else if (newValue instanceof Object[]) {
 				Object[] array = (Object[]) newValue;
-				Object[] result = (Object[]) Array.newInstance(componentType, array.length);
+				Object result = Array.newInstance(componentType, array.length);
 				for (int i = 0; i < array.length; i++) {
-					result[i] = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
-																									null, array[i], componentType);
+					Object value = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
+																										 null, array[i], componentType);
+					Array.set(result, i, value);
 				}
 				return result;
 			}
