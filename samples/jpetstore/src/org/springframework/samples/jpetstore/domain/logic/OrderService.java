@@ -6,7 +6,8 @@ import org.springframework.samples.jpetstore.domain.Order;
  * Separate OrderService interface, implemented by PetStoreImpl
  * in addition to PetStoreFacade.
  *
- * <p>Mainly targetted at usage as remote service interface.
+ * <p>Mainly targeted at usage as remote service interface,
+ * just exposing the getOrder method.
  *
  * @author Juergen Hoeller
  * @since 26.12.2003

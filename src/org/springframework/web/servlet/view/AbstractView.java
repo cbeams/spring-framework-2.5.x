@@ -34,7 +34,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.5 2003-12-15 03:53:40 colins Exp $
+ * @version $Id: AbstractView.java,v 1.6 2004-01-15 18:37:54 jhoeller Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View {
@@ -210,12 +210,12 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/** 
 	 * Subclasses must implement this method to render the view.
 	 * <p>The first take will be preparing the request: This may include setting
-	 * the model elements as attributes, e.g. in the case of a JSP view.
-	 * @param model combined output Map, with dynamic values
-	 * taking precedence over static attributes
+	 * the model elements as request attributes, e.g. in the case of a JSP view.
+	 * @param model combined output Map, with dynamic values taking precedence
+	 * over static attributes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @throws ServletException if rendering failed
+	 * @throws Exception if rendering failed
 	 */
 	protected abstract void renderMergedOutputModel(Map model, HttpServletRequest request,
 	                                                HttpServletResponse response) throws Exception;

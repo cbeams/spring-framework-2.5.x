@@ -32,13 +32,15 @@ To execute the web application with its default settings, start a MySQL instance
 your local machine. The JDBC settings can be adapted in "WEB-INF/jdbc.properties";
 you'll find commented Oracle properties there too. You need to create the "imagedb"
 table with the respective schema script in the "db" subdirectory. Note that you need
-to include the JDBC driver in "WEB-INF/lib": You can put it there in the web app
-source before building the WAR, or add it to the expanded WAR after deployment.
+to make a corresponding JDBC driver available: You can put it in "WEB-INF/lib" in the
+web app source before building the WAR, add it to the expanded WAR after deployment,
+or drop it into the server's lib directory.
 
 The "standalone" subdirectory includes a sample standalone program that lists all
 image descriptors in the database. It accesses the very same "applicationContext.xml"
 file in "war/WEB-INF" as the web application: Thus, it needs to be executed in the
 web app root directory. The included "standalone.bat" can be used for out-of-the-box
 execution in the distribution structure. Note that you need to build the web app
-with the build script in this directory before running the standalone tool.
+with the build script in this directory before running the standalone tool, and put
+a corresponding JDBC driver in "WEB-INF/lib" or your JVM's "jre/lib/ext" directory.
 
