@@ -153,7 +153,8 @@
 
 <!--
 	Optional FlowAttributeMapper implementation class that will map data to and from
-	the spawned sub flow.
+	the spawned sub flow. For "by type" mapper lookup to work, there must be exactly
+    one attribute mapper implementation exported of that type.
 -->
 <!ATTLIST subflow-state attribute-mapper-class CDATA #IMPLIED>
 

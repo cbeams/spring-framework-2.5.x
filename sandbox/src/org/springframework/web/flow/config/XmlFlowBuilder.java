@@ -137,6 +137,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String ATTRIBUTE_MAPPER_ATTRIBUTE = "attribute-mapper";
 
+    private static final String ATTRIBUTE_MAPPER_CLASS_ATTRIBUTE = "attribute-mapper-class"; 
+
 	private static final String END_STATE_ELEMENT = "end-state";
 
 	private static final String TRANSITION_ELEMENT = "transition";
@@ -271,7 +273,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 					throw ex;
 				}
 
-				public void warning(SAXParseException ex) throws SAXException {
+				public void warning(SAXParseException ex) {
 					logger.warn("Ignored XML validation warning: " + ex.getMessage(), ex);
 				}
 			});
@@ -370,10 +372,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		String flowName = element.getAttribute(FLOW_ATTRIBUTE);
 		Flow subFlow = getFlowServiceLocator().getFlow(flowName);
-		FlowAttributeMapper mapper = null;
-		if (element.hasAttribute(ATTRIBUTE_MAPPER_ATTRIBUTE)) {
-			mapper = getFlowServiceLocator().getFlowAttributeMapper(element.getAttribute(ATTRIBUTE_MAPPER_ATTRIBUTE));
-		}
+		FlowAttributeMapper mapper = parseAttributeMapper(element);
 		Transition[] transitions = parseTransitions(element);
 		new SubFlowState(flow, id, subFlow, mapper, transitions);
 	}
@@ -504,4 +503,24 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String to = element.getAttribute(TO_ATTRIBUTE);
 		return new Transition(event, to);
 	}
+
+    /**
+     * Obtain an attribute mapper reference from given element and return the
+     * identified mapper, or null if no mapper is referenced.
+     */
+    protected FlowAttributeMapper parseAttributeMapper(Element element) {
+        String mapperId = element.getAttribute(ATTRIBUTE_MAPPER_ATTRIBUTE);
+        if (StringUtils.hasText(mapperId)) {
+            // mapper id specified
+            return getFlowServiceLocator().getFlowAttributeMapper(mapperId);
+        }
+        else {
+            // try lookup by type
+            String mapperClassName = element.getAttribute(ATTRIBUTE_MAPPER_CLASS_ATTRIBUTE);
+            if (StringUtils.hasText(mapperClassName)) {
+                return getFlowServiceLocator().getFlowAttributeMapper(mapperClassName);
+            }
+        }
+        return null;
+    }
 }
