@@ -7,7 +7,6 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 
-import org.aopalliance.intercept.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.oro.text.regex.MalformedPatternException;
@@ -15,57 +14,73 @@ import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
-
 import org.springframework.aop.ClassFilter;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Perl5 regular expression pointcut bean. JavaBean properties are:
  * <li>pattern: Perl5 regular expression for the fully-qualified method names to match
- * <li>interceptor: interceptor to invoke if the pointcut matches
+ * <li>patterns: alternative property taking a String array of patterns. The result will
+ * be the union of these patterns. 
+ * <li>interceptor: AOP Alliance interceptor to invoke if the pointcut matches
  * Matching is based purely on method name.
  *
- * <p>Note: the regular expression must be a match. For example,
+ * <p>Note: the regular expressions must be a match. For example,
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
  * <code>get.*</code> will not.
  *
- * <p>Currently using Jakarta ORO regular expression library.
+ * <p>Currently uses Jakarta ORO regular expression library.
  * Does not require J2SE 1.4, although it runs under 1.4.
  *
  * @author Rod Johnson
  * @since July 22, 2003
- * @version $Id: RegexpMethodPointcut.java,v 1.3 2004-01-13 18:47:48 johnsonr Exp $
+ * @version $Id: RegexpMethodPointcut.java,v 1.4 2004-01-13 22:33:49 johnsonr Exp $
  */
-public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements ClassFilter, InitializingBean { 
+public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements ClassFilter { 
 	
 	private Log logger = LogFactory.getLog(getClass());
 	
 	/** Regular expression to match */
-	private String pattern;
+	private String[] patterns = new String[0];
 	
 	/** ORO's compiled form of this pattern */
-	private Pattern compiledPattern;
+	private Pattern[] compiledPatterns = new Pattern[0];
 	
 	/** ORO pattern matcher to use */
 	private PatternMatcher matcher;
 
 	/**
-	 * @return the regular expression for method matching
+	 * @return the regular expressions for method matching
 	 */
-	public String getPattern() {
-		return pattern;
+	public String[] getPatterns() {
+		return patterns;
+	}
+	
+	/**
+	 * Convenience method when we have only a single pattern.
+	 * Use either this method or setPatterns(), not both.
+	 * @param pattern
+	 * @throws MalformedPatternException
+	 */
+	public void setPattern(String pattern) throws MalformedPatternException {
+		setPatterns(new String[] { pattern });
 	}
 
 	/**
-	 * Set the regular expression defining methods to match
-	 * @param pattern Perl5 regular expression describing methods
+	 * Set the regular expressions defining methods to match.
+	 * Matching will be the union of all these; if any match,
+	 * the pointcut matches.
+	 * @param patterns Perl5 regular expressions describing methods
 	 * to match
 	 */
-	public void setPattern(String pattern) throws MalformedPatternException {
-		this.pattern = pattern;
+	public void setPatterns(String[] patterns) throws MalformedPatternException {
+		this.patterns = patterns;
+		this.compiledPatterns = new Pattern[patterns.length];
+		
 		Perl5Compiler compiler = new Perl5Compiler();
-		// Compile the pattern to be threadsafe
-		this.compiledPattern = compiler.compile(pattern, Perl5Compiler.READ_ONLY_MASK);
+		for (int i = 0; i < patterns.length; i++) {
+			// Compile the pattern to be threadsafe
+			this.compiledPatterns[i] = compiler.compile(patterns[i], Perl5Compiler.READ_ONLY_MASK);
+		}
 		this.matcher = new Perl5Matcher();
 	}
 
@@ -80,10 +95,14 @@ public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements
 	public boolean matches(Method m, Class targetClass) { 
 		// TODO use target class here?
 		String patt = m.getDeclaringClass().getName() + "." + m.getName();
-		boolean matched =  this.matcher.matches(patt, this.compiledPattern);
-		if (logger.isDebugEnabled())
-			logger.debug("Candidate is: '" + patt + "'; pattern is " + this.compiledPattern.getPattern() + "; matched=" + matched);
-		return matched;
+		for (int i = 0; i < this.compiledPatterns.length; i++) {
+			boolean matched = this.matcher.matches(patt, this.compiledPatterns[i]);
+			if (logger.isDebugEnabled())
+				logger.debug("Candidate is: '" + patt + "'; pattern is " + this.compiledPatterns[i].getPattern() + "; matched=" + matched);
+			if (matched)
+				return true;
+		}
+		return false;
 	}
 
 	public boolean matches(Class clazz) {
@@ -93,17 +112,6 @@ public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements
 	
 	public ClassFilter getClassFilter() {
 		return this;
-	}
-
-	/**
-	 * We implement initializing bean only to do this validation. 
-	 * It doesn't matter if callers other than the Spring IoC container
-	 * don't bother to call this method.
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
-	public void afterPropertiesSet() throws Exception {
-		if (pattern == null)
-			throw new AspectException("Pattern must be supplied in " + getClass().getName());
 	}
 
 }

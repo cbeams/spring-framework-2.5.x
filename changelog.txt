@@ -1,11 +1,12 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.76 2004-01-12 16:57:03 johnsonr Exp $
+$Id: changelog.txt,v 1.77 2004-01-13 22:33:21 johnsonr Exp $
 
 
 Changes in version 1.0 RC1 (xx.01.2003)
 ---------------------------------------
 
+* RegexpMethodPointcut now also handles multiple patterns. Backward compatible.
 * changed AbstractAutoProxyCreator interceptors property to interceptorNames to handle prototypes correctly
 * added "xdoclet/xjavadoc.jar" to release target in the framework build script (needed for building with attributes)
 * put Commons Attributes and XDoclet jars in Ant classpath instead of expecting them in Ant's lib directory
