@@ -25,12 +25,12 @@ public class LogicalOperator {
     /**
      * The <code>AND</code> operator
      */
-    public static final LogicalOperator AND = new LogicalOperator("and");
+    public static final LogicalOperator AND = new LogicalOperator("&&");
     
     /**
      * The <code>OR</code> operator
      */
-    public static final LogicalOperator OR = new LogicalOperator("or");
+    public static final LogicalOperator OR = new LogicalOperator("||");
     
     private String name;
 
