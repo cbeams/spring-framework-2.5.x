@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionContext;
-import org.springframework.web.flow.LocalEvent;
 import org.springframework.web.flow.action.AbstractAction;
 
 public class AddItemAction extends AbstractAction {
@@ -31,7 +30,7 @@ public class AddItemAction extends AbstractAction {
 		if (!context.getTransactionSynchronizer().inTransaction(true)) {
 			// the transaction was not valid so cannot continue normal
 			// processing
-			return new LocalEvent("txError");
+			return result("txError");
 		}
 		List list = (List)context.getRequestScope().getAttribute("list");
 		if (list == null) {
