@@ -37,7 +37,7 @@ import org.springframework.aop.TargetSource;
  * underlying (target) class is threadsafe.
  *
  * @author Rod Johnson
- * @version $Id: Cglib2AopProxy.java,v 1.1 2003-12-19 10:20:00 johnsonr Exp $
+ * @version $Id: Cglib2AopProxy.java,v 1.2 2004-02-19 18:25:11 colins Exp $
  */
 class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	
@@ -209,8 +209,8 @@ class Cglib2AopProxy implements AopProxy, MethodInterceptor, CallbackFilter {
 	 * the given interface. Uses the given class loader.
 	 */
 	public Object getProxy(ClassLoader cl) {
-		if (logger.isInfoEnabled())
-			logger.info("Creating CGLIB proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
+		if (logger.isDebugEnabled())
+			logger.debug("Creating CGLIB proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
 		
 		Enhancer e = new Enhancer();
 		try {
