@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.1.5 (March 2005)
-------------------------------------------------
+THE SPRING FRAMEWORK, release 1.1.5 (February 2005)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -98,7 +98,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: application context, validation, UI support, mail, JNDI, JMS, EJB, remoting, scheduling, caching
 - Dependencies: spring-core, (Velocity, FreeMarker, JavaMail, JMS, EJB, JAX-RPC, Hessian, Burlap, Quartz, EHCache)
 
-* "spring-dao" (~235 KB)
+* "spring-dao" (~240 KB)
 - Contents: DAO support, transaction infrastructure, JDBC support
 - Dependencies: spring-core, (spring-aop, JTA)
 
@@ -106,15 +106,15 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate support, JDO support, Apache OJB, iBATIS SQL Maps support
 - Dependencies: spring-dao, (Hibernate, JDO, Apache OJB, iBATIS SQL Maps)
 
-* "spring-web" (~110 KB)
+* "spring-web" (~115 KB)
 - Contents: web application context, multipart resolver, Struts support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts)
 
-* "spring-webmvc" (~180 KB)
+* "spring-webmvc" (~185 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, JasperReports)
 
-* "spring" (~1380 KB)
+* "spring" (~1400 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
@@ -152,10 +152,10 @@ to be able to build and run it, the Spring distribution comes with all required 
 The Spring JPetStore is an adapted version of Clinton Begin's JPetStore (available from http://www.ibatis.com).
 It leverages Spring's support for the iBATIS SQL Maps to improve the original JPetStore in terms of
 internal structure and wiring. On top of a Spring-managed middle tier, it offers two alternative web
-tier implementations: one using Spring's web MVC plus JSTL, and one using Struts 1.1 plus JSTL. Furthermore,
+tier implementations: one using Spring's web MVC plus JSTL, and one using Struts 1.2 plus JSTL. Furthermore,
 it illustrates remoting via 5 different strategies: Hessian, Burlap, HTTP invoker, RMI invoker, and JAX-RPC.
 
 The Image Database sample is a simple one-screen image management web app that illustrates various
-Spring-integrated technologies: BLOB/CLOB handling with MySQL and Oracle, Velocity and FreeMarker for
-web views, scheduling via Quartz and Timer, and mail sending via JavaMail.
+Spring-integrated technologies: C3P0 as connection pool, BLOB/CLOB handling with MySQL and Oracle,
+Velocity and FreeMarker for web views, scheduling via Quartz and Timer, and mail sending via JavaMail.
 
