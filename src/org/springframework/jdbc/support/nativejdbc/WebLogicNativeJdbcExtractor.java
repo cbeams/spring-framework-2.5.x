@@ -24,13 +24,14 @@ import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for WebLogic Server.
- * Returns the underlying native Connection to application code instead of
- * WebLogic's wrapper implementation; unwraps the Connection for native statements.
- * The returned JDBC classes can then safely be cast, e.g. to OracleConnection.
+ * Returns the underlying native Connection to application code instead
+ * of WebLogic's wrapper implementation; unwraps the Connection for
+ * native statements. The returned JDBC classes can then safely be cast,
+ * e.g. to OracleConnection.
  *
- * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with a
- * WebLogic DataSource: If a given object is not a WebLogic Connection wrapper,
- * it will be returned as-is.
+ * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working
+ * with a WebLogic DataSource: If a given object is not a WebLogic
+ * Connection wrapper, it will be returned as-is.
  *
  * <p>Currently just tested with BEA WebLogic 8.1 SP2.
  *
@@ -54,7 +55,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 */
 	public WebLogicNativeJdbcExtractor() throws ClassNotFoundException, NoSuchMethodException {
 		this.jdbcExtensionClass = getClass().getClassLoader().loadClass(JDBC_EXTENSION_NAME);
-		this.getVendorConnectionMethod = this.jdbcExtensionClass.getMethod("getVendorConnection", new Class[] {});
+		this.getVendorConnectionMethod = this.jdbcExtensionClass.getMethod("getVendorConnection", null);
 	}
 
 	/**
@@ -84,7 +85,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	public Connection getNativeConnection(Connection con) throws SQLException {
 		if (this.jdbcExtensionClass.isAssignableFrom(con.getClass())) {
 			try {
-				return (Connection) this.getVendorConnectionMethod.invoke(con, new Object[] {});
+				return (Connection) this.getVendorConnectionMethod.invoke(con, null);
 			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException("Could not invoke WebLogic's getVendorConnection method", ex);
