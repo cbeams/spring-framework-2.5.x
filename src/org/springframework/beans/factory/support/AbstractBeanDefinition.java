@@ -25,7 +25,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  * functionality from RootBeanDefinition and ChildBeanDefinition.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractBeanDefinition.java,v 1.14 2004-06-23 21:15:09 johnsonr Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.15 2004-06-24 08:45:59 jhoeller Exp $
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -40,6 +40,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	private boolean lazyInit = false;
 	
 	private MethodOverrides methodOverrides = new MethodOverrides();
+
 
 	/**
 	 * Create a new bean definition.
@@ -64,14 +65,20 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		return null;
 	}
 
+	/**
+	 * Specify method overrides for the bean, if any.
+	 */
+	public void setMethodOverrides(MethodOverrides methodOverrides) {
+		this.methodOverrides = methodOverrides;
+	}
+	
+	/**
+	 * Return method overrides for the bean, if any.
+	 */
 	public MethodOverrides getMethodOverrides() {
 		return this.methodOverrides;
 	}
-	
-	public void setMethodOverrides(MethodOverrides lookupOverrides) {
-		this.methodOverrides = lookupOverrides;
-	}
-	
+
 	/**
 	 * Set a description of the resource that this bean definition
 	 * came from (for the purpose of showing context in case of errors).

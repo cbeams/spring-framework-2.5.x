@@ -32,7 +32,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: RootBeanDefinition.java,v 1.22 2004-06-23 21:14:39 johnsonr Exp $
+ * @version $Id: RootBeanDefinition.java,v 1.23 2004-06-24 08:45:59 jhoeller Exp $
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
@@ -322,17 +322,20 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		return this.destroyMethodName;
 	}
 	
+	/**
+	 * Specify a static factory method, if any. This method will be invoked with
+	 * constructor arguments, or with no arguments if none are specified.
+	 * The static method will be invoked on the specifed beanClass.
+	 * @param staticFactoryMethod static factory method name, or null if normal
+	 * constructor creation should be used
+	 * @see #getBeanClass
+	 */
 	public void setStaticFactoryMethod(String staticFactoryMethod) {
 		this.staticFactoryMethod = staticFactoryMethod;
 	}
 	
 	/**
-	 * String specifying a factory method, if one is specified.
-	 * The method will be invoked with constructor arguments, or with
-	 * no arguments if none is specified. The static method will be invoked
-	 * on the beanClass specified.
-	 * @return static factory method string, or null if normal
-	 * constructor creation should be used.
+	 * Return a static factory method, if any.
 	 */
 	public String getStaticFactoryMethod() {
 		return this.staticFactoryMethod;

@@ -1,30 +1,41 @@
 /*
- * The Spring Framework is published under the terms
- * of the Apache Software License.
+ * Copyright 2002-2004 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
- 
+
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
 
 /**
- * Represents an override of a method that looks up
- * an object in the same IoC context. 
- * <p>
- * Methods eligible for lookup override must not have arguments.
+ * Represents an override of a method that looks up an object in the same IoC context.
+ *
+ * <p>Methods eligible for lookup override must not have arguments.
+ *
  * @author Rod Johnson
- * @version $Id: LookupOverride.java,v 1.1 2004-06-23 21:14:05 johnsonr Exp $
+ * @version $Id: LookupOverride.java,v 1.2 2004-06-24 08:45:59 jhoeller Exp $
  */
 public class LookupOverride extends MethodOverride {
 	
 	private final String beanName;
 
 	/**
-	 * Construct a new LookupOverride
+	 * Construct a new LookupOverride.
 	 * @param methodName name of the method to override. This
 	 * method must have no arguments.
 	 * @param beanName name of the bean in the current BeanFactory
-	 * or ApplicationContext that the overriden method should return.
+	 * or ApplicationContext that the overriden method should return
 	 */
 	public LookupOverride(String methodName, String beanName) {
 		super(methodName);
@@ -32,23 +43,22 @@ public class LookupOverride extends MethodOverride {
 	}
 	
 	/**
-	 * @return the name of the bean that should be returned
-	 * by this method
+	 * Return the name of the bean that should be returned
+	 * by this method.
 	 */
 	public String getBeanName() {
 		return beanName;
 	}
 
 	/**
-	 * Doesn't allow for overloading, so matching method name
-	 * is fine
-	 * @see org.springframework.beans.factory.support.MethodOverride#matches(java.lang.reflect.Method)
+	 * Doesn't allow for overloading, so matching method name is fine.
 	 */
-	public boolean matches(Method m) {
-		return m.getName().equals(getMethodName());
+	public boolean matches(Method method) {
+		return method.getName().equals(getMethodName());
 	}
 
 	public String toString() {
 		return "LookupOverride for method '" + getMethodName() + "'; will return bean '" + beanName + "'";
 	}
+
 }
