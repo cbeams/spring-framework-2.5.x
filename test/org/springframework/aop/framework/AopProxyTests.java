@@ -29,7 +29,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.9 2003-11-14 09:21:45 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.10 2003-11-14 16:38:17 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 
@@ -59,6 +59,67 @@ public class AopProxyTests extends TestCase {
 			// Ok
 		}
 	}
+	
+	/**
+	 * Check that the two MethodInvocations necessary are independent and
+	 * don't conflict
+	 */
+	public void testOneAdvisedObjectCallsAnother() {
+		int age1 = 33;
+		int age2 = 37;
+		
+		TestBean target1 = new TestBean();
+		ProxyFactory pf1 = new ProxyFactory(target1);
+		DebugInterceptor di1 = new DebugInterceptor();
+		pf1.addInterceptor(0, di1);
+		ITestBean advised1 = (ITestBean) pf1.getProxy();
+		advised1.setAge(age1); // = 1 invocation
+		
+		TestBean target2 = new TestBean();
+		ProxyFactory pf2 = new ProxyFactory(target2);
+		DebugInterceptor di2 = new DebugInterceptor();
+		pf2.addInterceptor(0, di2);
+		ITestBean advised2 = (ITestBean) pf2.getProxy();
+		advised2.setAge(age2);
+		advised1.setSpouse(advised2); // = 2 invocations
+		
+		assertEquals("Advised one has correct age", age1, advised1.getAge()); // = 3 invocations
+		assertEquals("Advised two has correct age", age2, advised2.getAge());
+		// Means extra call on advised 2
+		assertEquals("Advised one spouse has correct age", age2, advised1.getSpouse().getAge()); // = 4 invocations on 1 and another one on 2
+		
+		assertEquals("one was invoked correct number of times", 4, di1.getCount());
+		// Got hit by call to advised1.getSpouse().getAge()
+		assertEquals("one was invoked correct number of times", 3, di2.getCount());
+	}
+	
+	
+	/**
+	 * Check that if an object invokes itself it will not be advised
+	 *
+	 */
+	public void testReentrance() {
+		int age1 = 33;
+	
+		TestBean target1 = new TestBean();
+		ProxyFactory pf1 = new ProxyFactory(target1);
+		DebugInterceptor di1 = new DebugInterceptor();
+		pf1.addInterceptor(0, di1);
+		ITestBean advised1 = (ITestBean) pf1.getProxy();
+		advised1.setAge(age1); // = 1 invocation
+		advised1.setSpouse(advised1); // = 2 invocations
+	
+		assertEquals("one was invoked correct number of times", 2, di1.getCount());
+		
+		assertEquals("Advised one has correct age", age1, advised1.getAge()); // = 3 invocations
+		assertEquals("one was invoked correct number of times", 3, di1.getCount());
+		
+		// = 5 invocations, as reentrant call to spouse is advised also
+		assertEquals("Advised spouse has correct age", age1, advised1.getSpouse().getAge()); 
+		
+		assertEquals("one was invoked correct number of times", 5, di1.getCount());
+	}
+	
 
 	public void testInterceptorIsInvoked() throws Throwable {
 		// Test return value
