@@ -68,11 +68,11 @@
  *   by user config.
  -->
 <#macro bind path>
-    <#if htmlEscape?exists>
-        <#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
-    <#else>
-        <#assign status = springMacroRequestContext.getBindStatus(path)>
-    </#if>
+	<#if htmlEscape?exists>
+		<#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
+	<#else>
+		<#assign status = springMacroRequestContext.getBindStatus(path)>
+	</#if>
 </#macro>
 
 <#--
@@ -82,7 +82,7 @@
  * than relying on the default HTML escape setting.
  -->
 <#macro bindEscaped path, htmlEscape>
-    <#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
+	<#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
 </#macro>
 
 <#--
@@ -96,8 +96,8 @@
  *        or CSS styles or size
  -->
 <#macro formInput path attributes="" >
-    <@bind path/>
-    <input type="text" name="${spring.status.expression}" value="${spring.status.value?string?default("")}" ${attributes} <@closeTag/>
+	<@bind path/>
+	<input type="text" name="${spring.status.expression}" value="${spring.status.value?default("")}" ${attributes} <@closeTag/>
 </#macro>
 
 <#--
@@ -110,8 +110,8 @@
  *        or CSS styles or size
  -->
 <#macro formTextarea path attributes="" >
-    <@bind path/>
-    <textarea name="${spring.status.expression}" ${attributes}>${spring.status.value?string?default("")}</textarea>
+	<@bind path/>
+	<textarea name="${spring.status.expression}" ${attributes}>${spring.status.value?default("")}</textarea>
 </#macro>
 
 <#--
@@ -126,13 +126,13 @@
  *        or CSS styles or size
 -->
 <#macro formSingleSelect path options attributes="">
-    <@bind path/>
-    <select name="${spring.status.expression}" ${attributes}>
-        <#list options?keys as value>
-        <option value="${value}" 
-        <#if spring.status.value?string?default("") == value>selected="selected"</#if>>${options[value]}</option>
-        </#list>
-    </select>
+	<@bind path/>
+	<select name="${spring.status.expression}" ${attributes}>
+		<#list options?keys as value>
+		<option value="${value}" 
+		<#if spring.status.value?default("") == value>selected="selected"</#if>>${options[value]}</option>
+		</#list>
+	</select>
 </#macro>
 
 <#--
@@ -147,13 +147,13 @@
  *        or CSS styles or size
 -->
 <#macro formMultiSelect path options attributes="">
-    <@bind path/>
-    <select multiple="multiple" name="${spring.status.expression}" ${attributes}>
-        <#list options?keys as value>
-        <#assign isSelected = contains(spring.status.value?string?default([""]), value)>
-        <option value="${value}" <#if isSelected>selected="selected"</#if>>${options[value]}</option>
-        </#list>
-    </select>
+	<@bind path/>
+	<select multiple="multiple" name="${spring.status.expression}" ${attributes}>
+		<#list options?keys as value>
+		<#assign isSelected = contains(spring.status.value?default([""]), value)>
+		<option value="${value}" <#if isSelected>selected="selected"</#if>>${options[value]}</option>
+		</#list>
+	</select>
 </#macro>
 
 <#--
@@ -169,13 +169,13 @@
  *        or CSS styles or size
 -->
 <#macro formRadioButtons path options separator attributes="">
-    <@bind path/>
-    <#list options?keys as value>
-    <input type="radio" name="${spring.status.expression}" value="${value}"
-      <#if spring.status.value?string?default("") == value>checked="checked"</#if> ${attributes}
-    <@closeTag/>
-    ${options[value]}${separator}
-    </#list>
+	<@bind path/>
+	<#list options?keys as value>
+	<input type="radio" name="${spring.status.expression}" value="${value}"
+	  <#if spring.status.value?default("") == value>checked="checked"</#if> ${attributes}
+	<@closeTag/>
+	${options[value]}${separator}
+	</#list>
 </#macro>
 
 <#--
@@ -191,13 +191,13 @@
  *        or CSS styles or size
 -->
 <#macro formCheckboxes path options separator attributes="">
-    <@bind path/>
-    <#list options?keys as value>
-    <#assign isSelected = contains(spring.status.value?string?default([""]), value)>
-    <input type="checkbox" name="${spring.status.expression}" value="${value}"
-      <#if isSelected>checked="checked"</#if> ${attributes}
-    <@closeTag/>
-    ${options[value]}${separator}
+	<@bind path/>
+	<#list options?keys as value>
+	<#assign isSelected = contains(spring.status.value?default([""]), value)>
+	<input type="checkbox" name="${spring.status.expression}" value="${value}"
+	  <#if isSelected>checked="checked"</#if> ${attributes}
+	<@closeTag/>
+	${options[value]}${separator}
   </#list>
 </#macro>
 
@@ -215,14 +215,14 @@
  *        will be used.
 -->
 <#macro showErrors separator classOrStyle="">
-    <#list spring.status.errorMessages as error>
-    <#if classOrStyle == "">
-    <b>${error}</b>
-    <#else>
-    <#if classOrStyle?index_of(":") == -1><#assign attr="class"><#else><#assign attr="style"></#if>
-    <span ${attr}="${classOrStyle}">${error}</span>
-    </#if>${separator}
-    </#list>
+	<#list spring.status.errorMessages as error>
+	<#if classOrStyle == "">
+	<b>${error}</b>
+	<#else>
+	<#if classOrStyle?index_of(":") == -1><#assign attr="class"><#else><#assign attr="style"></#if>
+	<span ${attr}="${classOrStyle}">${error}</span>
+	</#if>${separator}
+	</#list>
 </#macro>
 
 <#--
@@ -237,10 +237,10 @@
  * @return true if item is found in the list, false otherwise.
 -->
 <#function contains list item>
-    <#list list as nextInList>
-    <#if nextInList == item><#return true></#if>
-    </#list>
-    <#return false>
+	<#list list as nextInList>
+	<#if nextInList == item><#return true></#if>
+	</#list>
+	<#return false>
 </#function>
 
 <#--
@@ -251,5 +251,5 @@
  * of this library.
 -->
 <#macro closeTag>
-    <#if xhtmlCompliant?exists && xhtmlCompliant>/><#else>></#if>
+	<#if xhtmlCompliant?exists && xhtmlCompliant>/><#else>></#if>
 </#macro>
