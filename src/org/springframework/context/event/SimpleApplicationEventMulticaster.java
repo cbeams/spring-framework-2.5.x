@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationListener;
 
 /**
  * Simple implementation of the ApplicationEventMulticaster interface.
+ * Multicasts all events to all registered listeners.
  *
  * <p>Doesn't permit multiple instances of the same listener, as it keeps
  * listeners in a HashSet.
@@ -43,7 +44,7 @@ import org.springframework.context.ApplicationListener;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class ApplicationEventMulticasterImpl implements ApplicationEventMulticaster {
+public class SimpleApplicationEventMulticaster implements ApplicationEventMulticaster {
 
 	/** Set of listeners */
 	private final Set applicationListeners = new HashSet();
@@ -56,16 +57,16 @@ public class ApplicationEventMulticasterImpl implements ApplicationEventMulticas
 		this.applicationListeners.remove(listener);
 	}
 
-	public void onApplicationEvent(ApplicationEvent event) {
+	public void removeAllListeners() {
+		this.applicationListeners.clear();
+	}
+
+	public void multicastEvent(ApplicationEvent event) {
 		Iterator it = this.applicationListeners.iterator();
 		while (it.hasNext()) {
 			ApplicationListener listener = (ApplicationListener) it.next();
 			listener.onApplicationEvent(event);
 		}
-	}
-
-	public void removeAllListeners() {
-		this.applicationListeners.clear();
 	}
 
 }

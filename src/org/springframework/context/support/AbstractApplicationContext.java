@@ -46,9 +46,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.event.ApplicationEventMulticaster;
-import org.springframework.context.event.ApplicationEventMulticasterImpl;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -78,7 +78,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -92,6 +92,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see MessageSource
 	 */
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
+
+	/**
+	 * Name of the ApplicationEventMulticaster bean in the factory.
+	 * If none is supplied, a default SimpleApplicationEventMulticaster is used.
+	 * @see org.springframework.context.event.ApplicationEventMulticaster
+	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
+	 */
+	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
 
 
 	//---------------------------------------------------------------------
@@ -117,7 +125,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private MessageSource messageSource;
 
 	/** Helper class used in event publishing */
-	private final ApplicationEventMulticaster applicationEventMulticaster = new ApplicationEventMulticasterImpl();
+	private ApplicationEventMulticaster applicationEventMulticaster;
 
 
 	//---------------------------------------------------------------------
@@ -185,7 +193,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event.toString());
 		}
-		this.applicationEventMulticaster.onApplicationEvent(event);
+		this.applicationEventMulticaster.multicastEvent(event);
 		if (this.parent != null) {
 			this.parent.publishEvent(event);
 		}
@@ -257,6 +265,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// initialize message source for this context
 		initMessageSource();
+
+		// initialize event multicaster for this context
+		initApplicationEventMulticaster();
 
 		// initialize other special beans in specific context subclasses
 		onRefresh();
@@ -334,9 +345,25 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			logger.info("No MessageSource found for context [" + getDisplayName() + "]: using empty StaticMessageSource");
+			logger.info("No MessageSource found for context [" + getDisplayName() + "]: using empty default");
 			// use empty message source to be able to accept getMessage calls
 			this.messageSource = new StaticMessageSource();
+		}
+	}
+
+	/**
+	 * Initialize the ApplicationEventMulticaster.
+	 * Use SimpleApplicationEventMulticaster if none defined in the context.
+	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
+	 */
+	private void initApplicationEventMulticaster() throws BeansException {
+		try {
+			this.applicationEventMulticaster =
+					(ApplicationEventMulticaster) getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			logger.info("No ApplicationEventMulticaster found for context [" + getDisplayName() + "]: using default");
+			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster();
 		}
 	}
 

@@ -16,6 +16,7 @@
 
 package org.springframework.context.event;
 
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
 /**
@@ -23,7 +24,7 @@ import org.springframework.context.ApplicationListener;
  * listeners that can broadcast events to other listeners.
  * @author Rod Johnson
  */
-public interface ApplicationEventMulticaster extends ApplicationListener {
+public interface ApplicationEventMulticaster {
 
 	/**
 	 * Add a listener to be notified of all events.
@@ -43,5 +44,11 @@ public interface ApplicationEventMulticaster extends ApplicationListener {
 	 * listeners are registered.
 	 */
 	void removeAllListeners();
+
+	/**
+	 * Multicast the given application event to appropriate listeners.
+	 * @param event the event to multicast
+	 */
+	void multicastEvent(ApplicationEvent event);
 
 }
