@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CachingMapTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.ActionStateAction;
@@ -43,31 +44,23 @@ import org.springframework.web.flow.RequestContext;
  * unnamed. So the follow state definition
  * 
  * <pre>
- * 
  *     &lt;action-state id=&quot;search&quot;&gt;
  *          &lt;action bean=&quot;my.search.action&quot;/&gt;
  *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
  *     &lt;/action-state&gt;
- *  
  * </pre>
- * 
  * ... will execute the method:
- * 
  * <pre>
- * 
  *     public Event search(RequestContext context) throws Exception
- *  
- * </pre>
+* </pre>
  * 
  * Alternatively you could have used a named action to execute the above method:
  * 
  * <pre>
- * 
  *     &lt;action-state id=&quot;searchState&quot;&gt;
  *          &lt;action name=&quot;search&quot; bean=&quot;my.search.action&quot;/&gt;
  *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
  *     &lt;/action-state&gt;
- *  
  * </pre>
  * 
  * <p>
@@ -231,9 +224,9 @@ public class MultiAction extends AbstractAction {
 		public String getMethodName(RequestContext context, MultiAction action) {
 			Assert.isInstanceOf(ActionState.class, context.getCurrentState());
 			ActionStateAction actionStateAction = ((ActionState)context.getCurrentState()).getAction(action);
-			if (actionStateAction.isNamed()) {
+			if (StringUtils.hasText(actionStateAction.getExecuteMethodName())) {
 				// use action name as method name
-				return actionStateAction.getName();
+				return actionStateAction.getExecuteMethodName();
 			}
 			else {
 				// use current state name as method name
