@@ -67,10 +67,20 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	private SqlMapClient sqlMapClient;
 
+
 	/**
 	 * Create a new SqlMapClientTemplate.
 	 */
 	public SqlMapClientTemplate() {
+	}
+
+	/**
+	 * Create a new SqlMapTemplate.
+	 * @param sqlMapClient iBATIS SqlMapClient that defines the mapped statements
+	 */
+	public SqlMapClientTemplate(SqlMapClient sqlMapClient) {
+		setSqlMapClient(sqlMapClient);
+		afterPropertiesSet();
 	}
 
 	/**
@@ -80,7 +90,8 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	 */
 	public SqlMapClientTemplate(DataSource dataSource, SqlMapClient sqlMapClient) {
 		setDataSource(dataSource);
-		this.sqlMapClient = sqlMapClient;
+		setSqlMapClient(sqlMapClient);
+		afterPropertiesSet();
 	}
 
 	/**
@@ -97,17 +108,19 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		return sqlMapClient;
 	}
 
+	/**
+	 * If no DataSource specified, use SqlMapClient's DataSource.
+	 * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource
+	 */
+	public DataSource getDataSource() {
+		DataSource ds = super.getDataSource();
+		return (ds != null ? ds : this.sqlMapClient.getDataSource());
+	}
+
 	public void afterPropertiesSet() {
 		if (this.sqlMapClient == null) {
 			throw new IllegalArgumentException("sqlMapClient is required");
 		}
-
-		// if no DataSource specified, use SqlMapClient's DataSource
-		if (getDataSource() == null) {
-			setDataSource(this.sqlMapClient.getDataSource());
-		}
-
-		// call this last, to guarantee available DataSource
 		super.afterPropertiesSet();
 	}
 
