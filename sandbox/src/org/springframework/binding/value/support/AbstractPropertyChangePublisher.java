@@ -6,11 +6,15 @@ import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.value.PropertyChangePublisher;
 import org.springframework.util.ObjectUtils;
 
 public abstract class AbstractPropertyChangePublisher implements
         PropertyChangePublisher {
+
+    protected final Log logger = LogFactory.getLog(getClass());
 
     private transient PropertyChangeSupport changeSupport;
 

@@ -20,8 +20,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.value.BoundValueModel;
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
@@ -33,8 +31,6 @@ import org.springframework.util.closure.Closure;
  * @author Keith Donald
  */
 public abstract class AbstractValueModel extends AbstractPropertyChangePublisher implements BoundValueModel {
-	protected final Log logger = LogFactory.getLog(getClass());
-
 	private Set listeners;
 
 	public void addValueChangeListener(ValueChangeListener l) {
