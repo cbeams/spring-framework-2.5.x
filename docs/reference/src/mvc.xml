@@ -952,6 +952,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
             - without tying yourself to a specific view technology - render
             models in a browser. Out-of-the-box, Spring enables you to use
             for example Java Server Pages, Velocity templates and XSLT views.
+			<xref linkend="view"/> has details of integrating various view
+			technologies.
         </para>
         <para>
             The two classes which are important to the way Spring handles views

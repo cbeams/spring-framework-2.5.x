@@ -6,13 +6,13 @@
 <!ENTITY beans						SYSTEM "beans.xml">
 <!ENTITY mail						SYSTEM "mail.xml">
 <!ENTITY validation					SYSTEM "validation.xml">
-<!ENTITY transaction				SYSTEM "transaction.xml">
+<!ENTITY transaction					SYSTEM "transaction.xml">
 <!ENTITY aop						SYSTEM "aop.xml">
 <!ENTITY metadata					SYSTEM "metadata.xml">
 <!ENTITY jdbc						SYSTEM "jdbc.xml">
 <!ENTITY orm						SYSTEM "orm.xml">
 <!ENTITY mvc			        	SYSTEM "mvc.xml">
-<!ENTITY integration				SYSTEM "integration.xml">
+<!ENTITY views                      SYSTEM "views.xml">
 <!ENTITY ejb						SYSTEM "ejb.xml">
 <!ENTITY background					SYSTEM "background.xml">
 <!ENTITY dtd					    SYSTEM "dtd.xml">
@@ -37,8 +37,6 @@
             </author>
         </authorgroup>            
     </bookinfo>
-    
-    
 
     <toc/>
 
@@ -62,7 +60,7 @@
 
 	    &mvc;
 	    
-	    &integration;
+	    &views;
 	    
 	    &ejb;
 	    
@@ -71,7 +69,7 @@
 	    <!-- &remoting; -->
 	    
 	    &mail;
-	    
+	
 	    &dtd;
 	    
 
