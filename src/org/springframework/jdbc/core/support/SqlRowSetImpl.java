@@ -52,7 +52,7 @@ public class SqlRowSetImpl implements SqlRowSet {
 	/**
 	 *  Set the underlying RowSet
 	 */
-	public void setRowSet(RowSet rowSet) {
+	public void setRowSet(RowSet rowSet) throws DataAccessResourceFailureException {
 		this.rowSet = rowSet;
 		try {
 			rowSetMetaData = new SqlRowSetMetaDataImpl((RowSetMetaData)rowSet.getMetaData());
@@ -110,9 +110,9 @@ public class SqlRowSetImpl implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getArray(int)
 	 */
-	public Array getArray(int i) throws DataRetrievalFailureException {
+	public Array getArray(int columnIndex) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getArray(i);
+			return rowSet.getArray(columnIndex);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage());
@@ -122,9 +122,9 @@ public class SqlRowSetImpl implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getArray(java.lang.String)
 	 */
-	public Array getArray(String colName) throws DataRetrievalFailureException {
+	public Array getArray(String columnName) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getArray(colName);
+			return rowSet.getArray(columnName);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage());
@@ -372,9 +372,9 @@ public class SqlRowSetImpl implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getObject(java.lang.String, java.util.Map)
 	 */
-	public Object getObject(String colName, Map map) throws DataRetrievalFailureException {
+	public Object getObject(String columnName, Map map) throws DataRetrievalFailureException {
 		try {
-			return rowSet.getObject(colName, map);
+			return rowSet.getObject(columnName, map);
 		}
 		catch (SQLException se) {
 			throw new DataRetrievalFailureException(se.getMessage());
