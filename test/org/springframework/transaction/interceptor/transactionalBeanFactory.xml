@@ -8,7 +8,7 @@
 	</bean>
 
 	<!-- Simple target -->
-	<bean id="target" class="org.springframework.beans.DerivedTestBean">
+	<bean id="target" class="org.springframework.beans.DerivedTestBean" lazy-init="true">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
 		<property name="spouse"><ref local="targetDependency"/></property>
@@ -63,6 +63,14 @@
 	<bean id="proxyFactory2Cglib" parent="baseProxyFactory">
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="target"><ref local="target"/></property>
+	</bean>
+
+	<bean id="proxyFactory2Lazy" parent="baseProxyFactory">
+		<property name="target">
+			<bean class="org.springframework.aop.target.LazyInitTargetSource">
+				<property name="targetBeanName"><idref local="target"/></property>		
+			</bean>
+		</property>
 	</bean>
 
 	<bean id="proxyFactory3" parent="baseProxyFactory">

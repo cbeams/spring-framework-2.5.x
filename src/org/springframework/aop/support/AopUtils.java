@@ -148,17 +148,6 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given object implements as array,
-	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as array
-	 */
-	public static Class[] getAllInterfaces(Object object) {
-		List interfaces = getAllInterfacesAsList(object);
-		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
-	}
-	
-	/**
 	 * Build a String that consists of the names of the interfaces
 	 * in the given collection.
 	 * @param interfaces collection of Class objects that represent interfaces.
@@ -178,14 +167,45 @@ public abstract class AopUtils {
 	}
 
 	/**
+	 * Return all interfaces that the given object implements as array,
+	 * including ones implemented by superclasses.
+	 * @param object the object to analyse for interfaces
+	 * @return all interfaces that the given object implements as array
+	 */
+	public static Class[] getAllInterfaces(Object object) {
+		List interfaces = getAllInterfacesAsList(object);
+		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
+	}
+
+	/**
+	 * Return all interfaces that the given class implements as array,
+	 * including ones implemented by superclasses.
+	 * @param clazz the class to analyse for interfaces
+	 * @return all interfaces that the given object implements as array
+	 */
+	public static Class[] getAllInterfacesForClass(Class clazz) {
+		List interfaces = getAllInterfacesForClassAsList(clazz);
+		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
+	}
+
+	/**
 	 * Return all interfaces that the given object implements as List,
 	 * including ones implemented by superclasses.
 	 * @param object the object to analyse for interfaces
 	 * @return all interfaces that the given object implements as List
 	 */
 	public static List getAllInterfacesAsList(Object object) {
+		return getAllInterfacesForClassAsList(object.getClass());
+	}
+
+	/**
+	 * Return all interfaces that the given class implements as List,
+	 * including ones implemented by superclasses.
+	 * @param clazz the class to analyse for interfaces
+	 * @return all interfaces that the given object implements as List
+	 */
+	public static List getAllInterfacesForClassAsList(Class clazz) {
 		List interfaces = new ArrayList();
-		Class clazz = object.getClass();
 		while (clazz != null) {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {
 				Class ifc = clazz.getInterfaces()[i];

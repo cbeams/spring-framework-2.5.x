@@ -19,6 +19,7 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -52,8 +53,6 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 	public void setUp() {
 		this.factory = new XmlBeanFactory(new ClassPathResource("transactionalBeanFactory.xml", getClass()));
-		ITestBean testBean = (ITestBean) factory.getBean("target");
-		testBean.setAge(666);
 	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory1() throws NoSuchMethodException {
@@ -75,6 +74,13 @@ public class BeanFactoryTransactionTests extends TestCase {
 		doTestGetsAreNotTransactional(testBean);
 	}
 	
+	public void testProxyFactory2Lazy() throws NoSuchMethodException {
+		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Lazy");
+		assertFalse(Arrays.asList(factory.getSingletonNames()).contains("target"));
+		assertEquals(666, testBean.getAge());
+		assertTrue(Arrays.asList(factory.getSingletonNames()).contains("target"));
+	}
+
 	public void testCglibTransactionProxyImplementsNoInterfaces() throws NoSuchMethodException {
 		ImplementsNoInterfaces ini = (ImplementsNoInterfaces) factory.getBean("cglibNoInterfaces");
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(ini));

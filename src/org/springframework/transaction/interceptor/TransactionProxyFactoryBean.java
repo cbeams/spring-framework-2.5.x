@@ -21,7 +21,6 @@ import java.util.Properties;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -87,7 +86,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	 * @see TransactionInterceptor#setTransactionManager
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
-		this.transactionInterceptor.setTransactionManager( transactionManager);
+		this.transactionInterceptor.setTransactionManager(transactionManager);
 	}
 
 	/**
@@ -97,6 +96,9 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	 * This enables the use of a pooling or prototype TargetSource etc.
 	 * @see org.springframework.aop.TargetSource
 	 * @see org.springframework.aop.target.SingletonTargetSource
+	 * @see org.springframework.aop.target.LazyInitTargetSource
+	 * @see org.springframework.aop.target.PrototypeTargetSource
+	 * @see org.springframework.aop.target.CommonsPoolTargetSource
 	 */
 	public void setTarget(Object target) {
 		this.target = target;
@@ -221,19 +223,17 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 		proxyFactory.copyFrom(this);
 
-		proxyFactory.setTargetSource(createTargetSource(this.target));
+		TargetSource targetSource = createTargetSource(this.target);
+		proxyFactory.setTargetSource(targetSource);
+
 		if (this.proxyInterfaces != null) {
 			proxyFactory.setInterfaces(this.proxyInterfaces);
 		}
 		else if (!isProxyTargetClass()) {
-			if (this.target instanceof TargetSource) {
-				throw new AopConfigException(
-						"Either 'proxyInterfaces' or 'proxyTargetClass' is required " +
-						"when using a TargetSource as 'target");
-			}
 			// Rely on AOP infrastructure to tell us what interfaces to proxy.
-			proxyFactory.setInterfaces(AopUtils.getAllInterfaces(this.target));
+			proxyFactory.setInterfaces(AopUtils.getAllInterfacesForClass(targetSource.getTargetClass()));
 		}
+		
 		this.proxy = proxyFactory.getProxy();
 	}
 
