@@ -110,6 +110,11 @@ import org.springframework.web.flow.ViewState;
  */
 public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
+	/**
+	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>.
+	 */
+	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
+
 	public final void init() throws FlowBuilderException {
 		setFlow(createFlow(flowId()));
 	}
@@ -1774,8 +1779,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return
 	 */
 	protected String attributesMapper(String attributesMapperBeanNamePrefix) {
-		if (!attributesMapperBeanNamePrefix.endsWith(FlowConstants.ATTRIBUTES_MAPPER_ID_SUFFIX)) {
-			return attributesMapperBeanNamePrefix + DOT_SEPARATOR + FlowConstants.ATTRIBUTES_MAPPER_ID_SUFFIX;
+		if (!attributesMapperBeanNamePrefix.endsWith(ATTRIBUTES_MAPPER_ID_SUFFIX)) {
+			return attributesMapperBeanNamePrefix + DOT_SEPARATOR + ATTRIBUTES_MAPPER_ID_SUFFIX;
 		}
 		else {
 			return attributesMapperBeanNamePrefix;

@@ -22,26 +22,84 @@ package org.springframework.web.flow;
  * @author Erwin Vervaet
  */
 public abstract class FlowConstants {
+	
+	/**
+	 * Protected constructor: no need to instantiate this class but allow
+	 * for subclassing.
+	 */
+	protected FlowConstants() {
+	}
+	
+	// general purpose constants
 
+	/**
+	 * Separator (".").
+	 */
 	public static final String DOT_SEPARATOR = ".";
 
 	// controller constants
 	
+	/**
+	 * The current state of the flow execution will be exposed to the
+	 * view in a model attribute with this name ("currentStateId"). 
+	 */
 	public static final String CURRENT_STATE_ID_ATTRIBUTE = "currentStateId";
 
-	public static final String FLOW_EXECUTION_ID_ATTRIBUTE = "flowExecutionId";
-
-	public static final String EVENT_ID_ATTRIBUTE = "_mapped_eventId";
-
-	public static final String FLOW_ID_PARAMETER = "_flowId";
-
-	public static final String FLOW_EXECUTION_ID_PARAMETER = "_flowExecutionId";
-
+	/**
+	 * Clients can send the current state to a controller in a request
+	 * parameter with this name ("_currentStateId").
+	 */
 	public static final String CURRENT_STATE_ID_PARAMETER = "_currentStateId";
 
+	/**
+	 * The id of the flow execution will be exposed to the
+	 * view in a model attribute with this name ("flowExecutionId"). 
+	 */
+	public static final String FLOW_EXECUTION_ID_ATTRIBUTE = "flowExecutionId";
+
+	/**
+	 * Clients can send the flow execution id to a controller in a request
+	 * parameter with this name ("_flowExecutionId").
+	 */
+	public static final String FLOW_EXECUTION_ID_PARAMETER = "_flowExecutionId";
+
+	/**
+	 * The event to executed can be sent to a controller using a request
+	 * attribute with this name ("_mapped_eventId"). Use this when you
+	 * can't use the EVENT_ID_PARAMETER to pass in the event.
+	 */
+	public static final String EVENT_ID_REQUEST_ATTRIBUTE = "_mapped_eventId";
+
+	/**
+	 * Clients can send the event to be executed to a controller in a request
+	 * parameter with this name ("_eventId").
+	 */
 	public static final String EVENT_ID_PARAMETER = "_eventId";
 
+	/**
+	 * Event id value indicating that the event has not been set ("@NOT_SET@").
+	 */
 	public static String NOT_SET_EVENT_ID = "@NOT_SET@";
+	
+	/**
+	 * Clients can send the id (name) of the flow to be started to a
+	 * controller using a request parameter with this name ("_flowId").
+	 */
+	public static final String FLOW_ID_PARAMETER = "_flowId";
+	
+	// transaction management constants
+	
+	/**
+	 * The transaction synchronizer token will be stored in the model using
+	 * an attribute with this name ("txToken").
+	 */
+	public static final String TRANSACTION_TOKEN_ATTRIBUTE_NAME = "txToken";
+
+	/**
+	 * A client can send the transaction synchronizer token to a controller
+	 * using a request parameter with this name ("_txToken").
+	 */
+	public static final String TRANSACTION_TOKEN_PARAMETER_NAME = "_txToken";
 
 	// event and state constants
 	
@@ -190,15 +248,4 @@ public abstract class FlowConstants {
 	 */
 	public static final String SELECT = "select";
 
-	/**
-	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
-	 */
-	public static final String ATTRIBUTES_MAPPER_ID_SUFFIX = "attributesMapper";
-
-	public static final String TRANSACTION_TOKEN_ATTRIBUTE_NAME = "txToken";
-
-	public static final String TRANSACTION_TOKEN_PARAMETER_NAME = "_txToken";
-
-	protected FlowConstants() {
-	}
 }

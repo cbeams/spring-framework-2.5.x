@@ -82,8 +82,8 @@ public class FlowController extends AbstractController {
 		return FlowConstants.EVENT_ID_PARAMETER;
 	}
 
-	private String getEventIdAttributeName() {
-		return FlowConstants.EVENT_ID_ATTRIBUTE;
+	private String getEventIdRequestAttributeName() {
+		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
 	}
 
 	protected String getNotSetEventIdParameterMarker() {
@@ -135,14 +135,14 @@ public class FlowController extends AbstractController {
 					logger.debug("No '" + getEventIdParameterName()
 							+ "' parameter was found; falling back to request attribute");
 				}
-				eventId = (String)request.getAttribute(getEventIdAttributeName());
+				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 			}
 			if (eventId == null) {
 				throw new IllegalArgumentException(
 						"The '"
 								+ getEventIdParameterName()
 								+ "' request parameter (or '"
-								+ getEventIdAttributeName()
+								+ getEventIdRequestAttributeName()
 								+ "' request attribute) is required to signal an event in the current state of this executing flow '"
 								+ flowExecution.getCaption() + "' -- programmer error?");
 			}
