@@ -123,7 +123,7 @@ public abstract class TransitionableState extends State {
 	 * Throws and exception when when there is no corresponding transition.
 	 * @throws NoSuchTransitionException when the transition cannot be found
 	 */
-	protected Transition getRequiredTransition(RequestContext context) throws NoSuchTransitionException {
+	public Transition getRequiredTransition(RequestContext context) throws NoSuchTransitionException {
 		Transition transition = getTransition(context);
 		if (transition != null) {
 			return transition;

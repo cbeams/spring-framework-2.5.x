@@ -119,7 +119,7 @@ public class Transition {
 	 * @return the source state
 	 * @throws IllegalStateException if the source state has not been set
 	 */
-	protected TransitionableState getSourceState() throws IllegalStateException {
+	public TransitionableState getSourceState() throws IllegalStateException {
 		Assert.state(sourceState != null,
 			"The source state is not yet been set -- this transition must be added to exactly one owning state definition!");
 		return sourceState;
@@ -145,7 +145,7 @@ public class Transition {
 	 * @return the target state
 	 * @throws NoSuchFlowStateException when the target state cannot be found
 	 */
-	protected State getTargetState() throws NoSuchFlowStateException {
+	public State getTargetState() throws NoSuchFlowStateException {
 		synchronized (this) {
 			if (this.targetState != null) {
 				return this.targetState;
