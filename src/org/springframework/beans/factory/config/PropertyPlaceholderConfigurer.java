@@ -28,6 +28,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.support.BeanDefinitionHolder;
 import org.springframework.core.Constants;
 import org.springframework.util.ObjectUtils;
 
@@ -89,7 +90,7 @@ import org.springframework.util.ObjectUtils;
  * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesMode
  * @see System#getProperty(String)
- * @version $Id: PropertyPlaceholderConfigurer.java,v 1.13 2004-06-02 19:55:50 jhoeller Exp $
+ * @version $Id: PropertyPlaceholderConfigurer.java,v 1.14 2004-06-16 15:00:43 jhoeller Exp $
  */
 public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 
@@ -257,6 +258,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 		}
 		else if (value instanceof BeanDefinition) {
 			parseBeanDefinition(props, (BeanDefinition) value);
+		}
+		else if (value instanceof BeanDefinitionHolder) {
+			parseBeanDefinition(props, ((BeanDefinitionHolder) value).getBeanDefinition());
 		}
 		return value;
 	}

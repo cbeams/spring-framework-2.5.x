@@ -34,6 +34,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionHolder;
 import org.springframework.context.support.StaticApplicationContext;
 
 /**
@@ -92,7 +93,8 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		MutablePropertyValues innerPvs = new MutablePropertyValues();
 		innerPvs.addPropertyValue("touchy", "${os.name}");
 		someMap.put("key3", new RootBeanDefinition(TestBean.class, innerPvs));
-		someMap.put("key4", new ChildBeanDefinition("tb1", innerPvs));
+		MutablePropertyValues innerPvs2 = new MutablePropertyValues(innerPvs);
+		someMap.put("key4", new BeanDefinitionHolder(new ChildBeanDefinition("tb1", innerPvs2), "child"));
 		pvs.addPropertyValue("someMap", someMap);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, cas, pvs);
