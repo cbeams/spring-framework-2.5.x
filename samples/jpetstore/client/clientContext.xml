@@ -59,11 +59,6 @@
 		<property name="serviceName">
 			<value>JaxRpcOrderServiceService</value>
 		</property>
-		<property name="servicePostProcessors">
-			<list>
-				<bean class="org.springframework.samples.jpetstore.service.client.BeanMappingServicePostProcessor"/>
-			</list>
-		</property>
 		<property name="portName">
 			<value>OrderService</value>
 		</property>
@@ -72,7 +67,7 @@
 		</property>
 		<!--
 		If you want to work with a JAX-RPC port stub underneath, you need to specify
-		the RMI interface to use at the JAX-RPC port level. This might give advantages
+		an RMI interface to use at the JAX-RPC port level. This might give advantages
 		on certain JAX-RPC implementations. If not specified, JAX-RPC dynamic calls
 		will be used, which has been tested to work nicely on Apache Axis.
 		-->
@@ -81,6 +76,11 @@
 			<value>org.springframework.samples.jpetstore.service.RemoteOrderService</value>
 		</property>
 		-->
+		<property name="servicePostProcessors">
+			<list>
+				<bean class="org.springframework.samples.jpetstore.service.client.BeanMappingServicePostProcessor"/>
+			</list>
+		</property>
 	</bean>
 
 	<!-- Proxy for the RMI-exported OrderService -->
