@@ -191,7 +191,7 @@ public class HttpFlowExecutionManager {
 	 * ("_mapped_eventId")
 	 * <p>
 	 * This is useful when working with image buttons and javscript
-	 * restrictions. For example, a intercepting servlet filter can process a
+	 * restrictions. For example, an intercepting servlet filter can process a
 	 * image button with a name in the format "_pname__eventId_pvalue_submit"
 	 * and set the proper "mapped' eventId attribute in the request.
 	 */
@@ -202,7 +202,7 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Returns the marker value indicating that the event id parameter was not
 	 * set properly in the request because of view configuration error (
-	 * {@link FlowConstants.NOT_SET_EVENT_ID)
+	 * {@link FlowConstants.NOT_SET_EVENT_ID}).
 	 * <p>
 	 * This is useful when a view relies on an dynamic means to set the eventId
 	 * request parameter, for example, using javascript. This approach assumes
