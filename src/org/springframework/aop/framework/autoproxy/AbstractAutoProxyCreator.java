@@ -25,10 +25,17 @@ import org.springframework.core.Ordered;
 /**
  * BeanPostProcessor implementation that wraps a group of beans with AOP proxies
  * that delegate to the given interceptors before invoking the bean itself.
- * Also supports additional specific interceptors per bean instance.
+ * 
+ * <p>This class distinguishes between "common" interceptors: shared for all proxies it
+ * creators, and "specific" interceptors: unique per bean instance. There need not
+ * be any common interceptors. If there are, they are set using the interceptorNames
+ * property. As with ProxyFactoryBean, interceptors names in the current factory
+ * are used rather than bean references to allow correct handling of prototype
+ * advisors and interceptors: for example, to support stateful mixins. 
+ * Any advice type is supported for "interceptorNames" entries. 
  *
- * <p>This is particularly useful if there's a large number of beans that need
- * to get wrapped with similar proxies, i.e. delegating to the same interceptors.
+ * <p>Such autoproxying is particularly useful if there's a large number of beans that need
+ * to be wrapped with similar proxies, i.e. delegating to the same interceptors.
  * Instead of x repetitive proxy definitions for x target beans, you can register
  * one single such post processor with the bean factory to achieve the same effect.
  *
@@ -50,7 +57,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.2 2004-01-07 12:40:12 jhoeller Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.3 2004-01-12 16:56:48 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, BeanFactoryAware, Ordered {
 
@@ -71,7 +78,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
-	private Object[] interceptors;
+	/**
+	 * Names of interceptors. We must use bean name rather than object references
+	 * to handle prototype advisors/interceptors.
+	 */
+	private String[] interceptorNames = new String[0];
 
 	private boolean applyCommonInterceptorsFirst = true;
 	
@@ -103,11 +114,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	}
 
 	/**
-	 * Set the MethodInterceptors, MethodBeforeAdvices and pointcuts that the automatic proxies
-	 * should delegate to before invoking the bean itself.
+	 * Set the common interceptors. These must be bean names
+	 * in the current factory. They can be of any advice or#
+	 * advisor type Spring supports. If this property isn't
+	 * set, there will be zero common interceptors. This is
+	 * perfectly valid, if "specific" interceptors such as
+	 * matching Advisors are all we want.
 	 */
-	public void setInterceptors(Object[] interceptors) {
-		this.interceptors = interceptors;
+	public void setInterceptorNames(String[] interceptorNames) {
+		this.interceptorNames = interceptorNames;
 	}
 	
 
@@ -154,23 +169,26 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 		
 		Object[] specificInterceptors = getInterceptorsAndAdvisorsForBean(bean, name);
 		
+		// Handle prototypes correctly
+		Advisor[] commonInterceptors = resolveInterceptorNames();
+		
 		// Proxy if we have advice or if a TargetSourceCreator wants to do some
 		// fancy stuff such as pooling
 		if (specificInterceptors != null || !(targetSource instanceof SingletonTargetSource)) {
 			List allInterceptors = new ArrayList();
 			if (specificInterceptors != null) {
 				allInterceptors.addAll(Arrays.asList(specificInterceptors));
-				if (this.interceptors != null) {
+				if (commonInterceptors != null) {
 					if (this.applyCommonInterceptorsFirst) {
-						allInterceptors.addAll(0, Arrays.asList(this.interceptors));
+						allInterceptors.addAll(0, Arrays.asList(commonInterceptors));
 					}
 					else {
-						allInterceptors.addAll(Arrays.asList(this.interceptors));
+						allInterceptors.addAll(Arrays.asList(commonInterceptors));
 					}
 				}
 			}
 			if (logger.isInfoEnabled()) {
-				int nrOfCommonInterceptors = this.interceptors != null ? this.interceptors.length : 0;
+				int nrOfCommonInterceptors = commonInterceptors != null ? commonInterceptors.length : 0;
 				int nrOfSpecificInterceptors = specificInterceptors != null ? specificInterceptors.length : 0;
 				logger.info("Creating implicit proxy for bean '" +  name + "' with " + nrOfCommonInterceptors +
 										" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
@@ -201,6 +219,16 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 		}
 	}
 	
+
+	private Advisor[] resolveInterceptorNames() {
+		Advisor[] advisors = new Advisor[interceptorNames.length];
+		for (int i = 0; i < this.interceptorNames.length; i++) {
+			Object next = this.owningBeanFactory.getBean(interceptorNames[i]);
+			advisors[i] = GlobalAdvisorAdapterRegistry.getInstance().wrap(next);
+		}
+		return advisors;
+	}
+
 	protected boolean isInfrastructureClass(Object bean, String name) {
 		return Advisor.class.isAssignableFrom(bean.getClass()) ||
 			MethodInterceptor.class.isAssignableFrom(bean.getClass()) ||

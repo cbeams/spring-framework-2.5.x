@@ -10,6 +10,8 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.CountingBeforeAdvice;
+import org.springframework.aop.framework.Lockable;
+import org.springframework.aop.framework.LockedException;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.ITestBean;
@@ -21,7 +23,7 @@ import org.springframework.core.TimeStamped;
 /**
  * EnterpriseServices test that ources attributes from source-level metadata.
  * @author Rod Johnson
- * @version $Id: BeanNameAutoProxyCreatorTests.java,v 1.1 2003-12-12 16:50:43 johnsonr Exp $
+ * @version $Id: BeanNameAutoProxyCreatorTests.java,v 1.2 2004-01-12 16:56:40 johnsonr Exp $
  */
 public class BeanNameAutoProxyCreatorTests extends TestCase {
 
@@ -65,6 +67,30 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 		assertEquals(0, ((TimeStamped) tb).getTimeStamp());
 		assertEquals(3, nop.getCount());		
 		assertEquals("introductionUsingJdk", tb.getName());
+	
+		ITestBean tb2 = (ITestBean) bf.getBean("second-introductionUsingJdk");
+			
+		// Check two per-instance mixins were distinct
+		Lockable lockable1 = (Lockable) tb;
+		Lockable lockable2 = (Lockable) tb2;
+		assertFalse(lockable1.locked());
+		assertFalse(lockable2.locked());
+		tb.setAge(65);
+		assertEquals(65, tb.getAge());
+		lockable1.lock();
+		assertTrue(lockable1.locked());
+		// Shouldn't affect second
+		assertFalse(lockable2.locked());
+		// Can still mod second object
+		tb2.setAge(12);
+		// But can't mod first
+		try {
+			tb.setAge(6);
+			fail("Mixin should have locked this object");
+		}
+		catch (LockedException ex) {
+			// Ok
+		}
 	}
 	
 	public void testJdkProxyWithWildcardMatch() {

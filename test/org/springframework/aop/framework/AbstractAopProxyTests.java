@@ -42,7 +42,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.15 2004-01-05 18:47:01 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.16 2004-01-12 16:56:48 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -553,7 +553,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	public void testMixin() throws Throwable {
 		TestBean tb = new TestBean();
 		ProxyFactory pc = new ProxyFactory(new Class[] { Lockable.class, ITestBean.class });
-		pc.addAdvisor(new SimpleIntroductionAdvisor(new LockMixin(), Lockable.class));
+		pc.addAdvisor(new LockMixinAdvisor());
 		pc.setTarget(tb);
 		
 		int newAge = 65;

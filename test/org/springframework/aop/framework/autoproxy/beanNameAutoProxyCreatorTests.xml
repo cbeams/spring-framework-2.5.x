@@ -8,9 +8,9 @@
 			Automatically proxies using JDK dynamic proxies
 		</description>
 	  <property name="beanNames"><value>jdk*,onlyJdk</value></property>
-	  <property name="interceptors">
+	  <property name="interceptorNames">
 		<list>
-		  <ref local="nopInterceptor"/>
+		  <value>nopInterceptor</value>
 		</list>
 	  </property>
 	</bean>
@@ -21,11 +21,11 @@
 	  	<description>Use the inherited ProxyConfig property to force CGLIB proxying</description>
 	  	<value>true</value>
 	  </property>
-		<property name="interceptors">
+		<property name="interceptorNames">
 		<description>Interceptors and Advisors to apply automatically</description>
 		<list>
-		  <ref local="nopInterceptor"/>
-		  <ref local="countingBeforeAdvice"/>
+		  <value>nopInterceptor</value>
+		  <value>countingBeforeAdvice</value>
 		</list>
 		</property>
 	</bean>
@@ -34,17 +34,28 @@
 		<description>
 			Illustrates a JDK introduction
 		</description>
-	  <property name="beanNames"><value>introductionUsingJdk</value></property>
-	  <property name="interceptors">
+	  <property name="beanNames"><value>*introductionUsingJdk</value></property>
+	  <property name="interceptorNames">
 		<list>
-		  <ref local="introductionNopInterceptor"/>
-		  <ref local="timestampIntroduction"/>
+		  <value>introductionNopInterceptor</value>
+		  <value>timestampIntroduction</value>
+		  <value>lockableAdvisor</value>
 		</list>
 	  </property>
 	</bean>
 	
 	<bean id="timestampIntroduction"
 		class="org.springframework.aop.framework.TimestampIntroductionAdvisor">
+	</bean>
+	
+	<!--
+		Stateful mixin.
+		Note that singleton property is false.
+	-->
+	<bean id="lockableAdvisor"
+		class="org.springframework.aop.framework.LockMixinAdvisor"
+		singleton="false"
+	>
 	</bean>
 	
 	
@@ -61,6 +72,10 @@
 	
 	<bean id="introductionUsingJdk" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>introductionUsingJdk</value></property>
+	</bean>
+	
+	<bean id="second-introductionUsingJdk" class="org.springframework.beans.TestBean">	
+		<property name="name"><value>second-introductionUsingJdk</value></property>
 	</bean>
 	
 	<bean id="jdk1" class="org.springframework.beans.TestBean">	

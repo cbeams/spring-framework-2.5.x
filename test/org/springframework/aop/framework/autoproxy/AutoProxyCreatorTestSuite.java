@@ -2,6 +2,7 @@ package org.springframework.aop.framework.autoproxy;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,8 +15,6 @@ import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DummyFactory;
-import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.context.ACATest;
 import org.springframework.context.BeanThatListens;
 import org.springframework.context.support.StaticApplicationContext;
@@ -24,7 +23,7 @@ import org.springframework.context.support.StaticMessageSource;
 /**
  * @author Juergen Hoeller
  * @since 09.12.2003
- * @version $Id: AutoProxyCreatorTestSuite.java,v 1.2 2003-12-19 09:32:03 johnsonr Exp $
+ * @version $Id: AutoProxyCreatorTestSuite.java,v 1.3 2004-01-12 16:56:40 johnsonr Exp $
  */
 public class AutoProxyCreatorTestSuite extends TestCase {
 
@@ -51,9 +50,9 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 		sac.registerSingleton("testInterceptorForCreator", TestInterceptor.class, new MutablePropertyValues());
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("beanNames", "autoProxyTest,prototypeFac*");
-		List interceptors = new ManagedList();
-		interceptors.add(new RuntimeBeanReference("testInterceptorForCreator"));
-		pvs.addPropertyValue("interceptors", interceptors);
+		List interceptors = new LinkedList();
+		interceptors.add("testInterceptorForCreator");
+		pvs.addPropertyValue("interceptorNames", interceptors);
 		sac.registerSingleton("beanNameAutoProxyCreator", BeanNameAutoProxyCreator.class, pvs);
 		sac.registerSingleton("beanThatListens", BeanThatListens.class, new MutablePropertyValues());
 		sac.registerSingleton("aca", ACATest.class, new MutablePropertyValues());

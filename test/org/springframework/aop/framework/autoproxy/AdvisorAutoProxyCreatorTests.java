@@ -12,7 +12,9 @@ import javax.servlet.ServletException;
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.support.AopUtils;
+import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
@@ -24,7 +26,7 @@ import org.springframework.transaction.CountingTxManager;
 /**
  * Tests for auto proxy creation by advisor recognition.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.7 2003-12-21 12:58:10 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.8 2004-01-12 16:56:40 johnsonr Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends TestCase {
 	
@@ -69,6 +71,37 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 		assertTrue(AopUtils.isAopProxy(test));
+	}
+	
+	/**
+	 * Check that we can provide a common interceptor that will
+	 * appear in the chain before "specific" interceptors,
+	 * which are sourced from matching advisors
+	 * @throws Exception
+	 */
+	public void testCommonInterceptorAndAdvisor() throws Exception {
+		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/advisorAutoProxyCreatorWithCommonInterceptors.xml");
+		ITestBean test1 = (ITestBean) bf.getBean("test1");
+		assertTrue(AopUtils.isAopProxy(test1));
+		
+		Lockable lockable1 = (Lockable) test1;
+		NopInterceptor nop = (NopInterceptor) bf.getBean("nopInterceptor");
+		assertEquals(0, nop.getCount());
+		
+		ITestBean test2 = (ITestBean) bf.getBean("test2");
+		Lockable lockable2 = (Lockable) test2;
+		
+		// Locking should be independent; nop is shared
+		assertFalse(lockable1.locked());
+		assertFalse(lockable2.locked());
+		// equals 2 calls on shared nop, because it's first
+		// and sees calls against the Lockable interface introduced
+		// by the specific advisor
+		assertEquals(2, nop.getCount());
+		lockable1.lock();
+		assertTrue(lockable1.locked());
+		assertFalse(lockable2.locked());
+		assertEquals(5, nop.getCount());
 	}
 	
 	/**
