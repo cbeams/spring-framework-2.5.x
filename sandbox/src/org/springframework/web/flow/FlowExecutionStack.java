@@ -18,7 +18,6 @@ package org.springframework.web.flow;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -199,7 +198,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 	public void setLastEventId(String eventId) {
 		Assert.notNull(eventId, "The eventId is required");
 		this.lastEventId = eventId;
-		this.lastEventTimestamp = new Date().getTime();
+		this.lastEventTimestamp = System.currentTimeMillis();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Event '" + eventId + "' within state '" + getCurrentStateId() + "' for flow '"
 					+ getActiveFlowId() + "' signaled");
@@ -266,6 +265,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 
 	public ModelAndView start(Map input, HttpServletRequest request, HttpServletResponse response) {
 		Assert.state(!isActive(), "This flow execution is already started");
+		this.lastEventTimestamp = System.currentTimeMillis();
 		activate(createFlowSession(this.rootFlow, input));
 		return this.rootFlow.getStartState().enter(this, request, response);
 	}

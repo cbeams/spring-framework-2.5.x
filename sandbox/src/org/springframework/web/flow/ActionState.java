@@ -292,10 +292,8 @@ public class ActionState extends TransitionableState {
 			String eventId = namedAction.execute(request, response, flowExecution);
 			executionCount++;
 			eventIds[executionCount - 1] = eventId;
-			Transition transition = getTransition(eventId);
-			if (transition != null) {
-				flowExecution.setLastEventId(eventId);
-				return transition.execute(flowExecution, request, response);
+			if (supportsEvent(eventId)) {
+				return signalEvent(eventId, flowExecution, request, response);
 			}
 			else {
 				if (logger.isDebugEnabled()) {

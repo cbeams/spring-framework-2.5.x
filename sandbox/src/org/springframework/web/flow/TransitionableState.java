@@ -164,6 +164,16 @@ public abstract class TransitionableState extends AbstractState {
 		}
 		return null;
 	}
+	
+	/**
+	 * Check if given event id is supported by this state, in other words,
+	 * check if this state has a transition that executes on given event id.
+	 * @param eventId the event id to check
+	 * @return true or false
+	 */
+	public boolean supportsEvent(String eventId) {
+		return getTransition(eventId) != null;
+	}
 
 	protected void createToString(ToStringCreator creator) {
 		creator.append("transitions", this.transitions);
