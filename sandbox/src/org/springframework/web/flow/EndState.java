@@ -64,9 +64,7 @@ public class EndState extends AbstractState {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Flow session '" + endingFlowSession.getFlowId() + "' ended, details=" + endingFlowSession);
 		}
-		if (flow.isLifecycleListenerSet()) {
-			flow.getLifecycleListener().flowEnded(flow, endingFlowSession, sessionExecutionStack, request);
-		}
+		flow.fireEnded(endingFlowSession, sessionExecutionStack, request);
 		if (!sessionExecutionStack.isEmpty()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Resuming parent flow '" + sessionExecutionStack.getQualifiedActiveFlowId()

@@ -65,35 +65,25 @@ public class Transition implements Serializable {
 					+ qualifiedActiveFlowId + "' signaled; processing...");
 		}
 		sessionExecution.setLastEventId(getId());
-
-		if (flow.isLifecycleListenerSet()) {
-			flow.getFlowLifecycleListener().flowEventSignaled(flow, getId(), fromState, sessionExecution, request);
-		}
-
+		flow.fireEventSignaled(getId(), fromState, sessionExecution, request);
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing transition from state '" + fromState.getId() + "' to state '" + getToState()
 						+ "' in flow '" + qualifiedActiveFlowId + "'");
 			}
-
 			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecution, request,
 					response);
-
-			if (flow.isLifecycleListenerSet()) {
-				flow.getFlowLifecycleListener().flowEventProcessed(flow, getId(), fromState, sessionExecution, request);
-			}
-
+			flow.fireEventProcessed(getId(), fromState, sessionExecution, request);
 			if (logger.isDebugEnabled()) {
 				if (sessionExecution.isActive()) {
-					logger.debug("Event '" + getId() + "' within last state '" + fromState.getId()
-							+ "' for flow '" + qualifiedActiveFlowId
-							+ "' was processed; as a result, the new state is '" + sessionExecution.getCurrentStateId()
-							+ "' in flow '" + sessionExecution.getQualifiedActiveFlowId() + "'");
+					logger.debug("Event '" + getId() + "' within last state '" + fromState.getId() + "' for flow '"
+							+ qualifiedActiveFlowId + "' was processed; as a result, the new state is '"
+							+ sessionExecution.getCurrentStateId() + "' in flow '"
+							+ sessionExecution.getQualifiedActiveFlowId() + "'");
 				}
 				else {
-					logger.debug("Event '" + getId() + "' within last state '" + fromState.getId()
-							+ "' for flow '" + qualifiedActiveFlowId
-							+ "' was processed; as a result, flow session execution has ended");
+					logger.debug("Event '" + getId() + "' within last state '" + fromState.getId() + "' for flow '"
+							+ qualifiedActiveFlowId + "' was processed; as a result, flow session execution has ended");
 				}
 			}
 			return descriptor;

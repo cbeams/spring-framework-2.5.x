@@ -25,8 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.EventListenerListHelper;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.support.AbstractConstraint;
+import org.springframework.util.closure.support.Block;
 
 /**
  * Singleton definition of a web flow.
@@ -293,7 +295,8 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private transient FlowDao flowDao;
 
-	private transient FlowLifecycleListener flowLifecycleListener;
+	private transient EventListenerListHelper flowLifecycleListeners = new EventListenerListHelper(
+			FlowLifecycleListener.class);
 
 	protected Flow() {
 
@@ -342,11 +345,27 @@ public class Flow implements FlowEventProcessor, Serializable {
 		this.flowDao = dao;
 	}
 
+	public void addFlowLifecycleListener(FlowLifecycleListener listener) {
+		this.flowLifecycleListeners.add(listener);
+	}
+
+	public void removeFlowLifecycleListener(FlowLifecycleListener listener) {
+		this.flowLifecycleListeners.remove(listener);
+	}
+
 	/**
 	 * @param listener
 	 */
 	public void setFlowLifecycleListener(FlowLifecycleListener listener) {
-		this.flowLifecycleListener = listener;
+		this.flowLifecycleListeners.clear();
+		this.flowLifecycleListeners.add(listener);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isLifecycleListenerSet() {
+		return flowLifecycleListeners.getListenerCount() > 0;
 	}
 
 	/**
@@ -370,13 +389,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 	private void assertFlowDaoSet() {
 		Assert.notNull(flowDao,
 				"The flow DAO reference is required to load subflows and action beans - programmer error?");
-	}
-
-	/**
-	 * @return Returns the listener. A listener is not required.
-	 */
-	public FlowLifecycleListener getFlowLifecycleListener() {
-		return flowLifecycleListener;
 	}
 
 	/**
@@ -472,7 +484,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return addSubFlowState(id, attributesMapperId, new Transition[] { onBack(subFlowDefaultFinishStateId),
 				onCancel(subFlowDefaultFinishStateId), onFinish(subFlowDefaultFinishStateId) });
 	}
-
 
 	/**
 	 * @param id
@@ -719,20 +730,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 		else {
 			return getFlowDao().getFlow(activeFlowId);
 		}
-	}
-
-	/**
-	 * @return
-	 */
-	protected FlowLifecycleListener getLifecycleListener() {
-		return flowLifecycleListener;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isLifecycleListenerSet() {
-		return flowLifecycleListener != null;
 	}
 
 	/**
@@ -2028,6 +2025,80 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public String getDefaultFlowAttributesMapperId() {
 		return attributesMapper(getId());
+	}
+
+	// lifecycle event publishers
+	
+	/**
+	 * @param eventId
+	 * @param fromState
+	 * @param sessionExecution
+	 * @param request
+	 */
+	protected void fireEventSignaled(final String eventId, final TransitionableState fromState,
+			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowEventSignaled(Flow.this, eventId, fromState, sessionExecution, request);
+			}
+		});
+	}
+
+	/**
+	 * @param eventid
+	 * @param fromState
+	 * @param sessionExecution
+	 * @param request
+	 */
+	protected void fireEventProcessed(final String eventId, final TransitionableState fromState,
+			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowEventProcessed(Flow.this, eventId, fromState, sessionExecution, request);
+			}
+		});
+	}
+
+	/**
+	 * @param oldState
+	 * @param state
+	 * @param sessionExecution
+	 * @param request
+	 */
+	protected void fireStateTransitioned(final AbstractState oldState, final AbstractState newState,
+			final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowStateTransitioned(Flow.this, oldState, newState, sessionExecution,
+						request);
+			}
+		});
+	}
+
+	/**
+	 * @param sessionExecutionStack
+	 * @param request
+	 */
+	protected void fireStarted(final FlowSessionExecution sessionExecution, final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowStarted(Flow.this, sessionExecution, request);
+			}
+		});
+	}
+
+	/**
+	 * @param endingFlowSession
+	 * @param sessionExecutionStack
+	 * @param request
+	 */
+	protected void fireEndEnded(final FlowSession endingFlowSession, final FlowSessionExecution sessionExecution,
+			final HttpServletRequest request) {
+		this.flowLifecycleListeners.forEach(new Block() {
+			protected void handle(Object o) {
+				((FlowLifecycleListener)o).flowEnded(Flow.this, endingFlowSession, sessionExecution, request);
+			}
+		});
 	}
 
 	public String toString() {
