@@ -16,6 +16,8 @@
 package org.springframework.rules.constraint;
 
 import org.springframework.rules.BinaryConstraint;
+import org.springframework.rules.Constraint;
+import org.springframework.rules.factory.Constraints;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -45,6 +47,10 @@ public class EqualTo extends AbstractBinaryConstraint {
 
     public static BinaryConstraint instance() {
         return INSTANCE;
+    }
+    
+    public static Constraint value(Object value) {
+        return Constraints.instance().bind(instance(), value);
     }
 
     public String toString() {

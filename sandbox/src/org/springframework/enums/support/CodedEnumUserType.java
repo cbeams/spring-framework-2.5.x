@@ -15,6 +15,7 @@
  */
 package org.springframework.enums.support;
 
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,14 +39,14 @@ import org.springframework.util.ObjectUtils;
 /**
  * @author Keith Donald
  */
-public class CodedEnumUserType implements UserType {
-    private final Log logger = LogFactory.getLog(getClass());
+public class CodedEnumUserType implements UserType, Serializable {
+    private transient final Log logger = LogFactory.getLog(getClass());
 
     private String enumType;
 
     private Class enumClass;
 
-    private CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
+    private transient CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
 
     private NullableType codePersistentType;
 
