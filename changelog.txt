@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.82 2004-01-25 19:30:48 johnsonr Exp $
+$Id: changelog.txt,v 1.83 2004-01-26 18:09:44 jhoeller Exp $
 
 
 Changes in version 1.0 RC1 (xx.01.2003)
@@ -34,14 +34,34 @@ Package org.springframework.beans
 Package org.springframework.context
 * ApplicationContext interface does not extend AutowireCapableBeanFactory anymore (use ConfigurableApplicationContext)
 
+Package org.springframework.core
+* added InputStreamSource interface to package core.io, as super-interface of Resource
+
+Package org.springframework.jdbc
+* added support for transaction suspension to DataSourceTransactionManager
+* fixed handling of null values in DefaultLobHandler and OracleLobHandler
+* added getExceptionTranslator convenience method to JdbcDaoSupport
+
+Package org.springframework.mail
+* added MimeMessageHelper to package mail.javamail, providing simple access to a MimeMessage including attachments
+
 Package org.springframework.orm
 * revised Hibernate-JTA synchronization to close the Session early in case of a Hibernate TransactionManagerLookup
+* added support for transaction suspension to HibernateTransactionManager and JdoTransactionManager
+* added convertHibernateAccessException convenience method to HibernateDaoSupport
+* added convertJdoAccessException convenience method to JdoDaoSupport
 
 Package org.springframework.samples
 * introduced Image Database sample application, illustrating LobHandler and HTTP multipart file uploads
 
 Package org.springframework.transaction
+* added propagation behaviors "REQUIRES_NEW", "NOT_SUPPORTED", and "NEVER" to TransactionDefinition
 * refactored TransactionStatus into minimal interface, with DefaultTransactionStatus as default implementation
+* reworked TransactionSynchronizationManager to move callback triggering to AbstractPlatformTransactionManager
+* added support for transaction suspension (including synchronization) to AbstractPlatformTransactionManager
+
+Package org.springframework.ui
+* added VelocityEngineUtils utility class for convenient merging of a Velocity template with a model
 
 Package org.springframework.validation
 * apply custom editor on Errors.getFieldValue to manually rejected field values too
