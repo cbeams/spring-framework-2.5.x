@@ -6,11 +6,13 @@
 
 package org.springframework.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 /**
@@ -22,7 +24,7 @@ import java.util.TreeSet;
  * strings, such as CSV strings, and collections and arrays.
  * @author  Rod Johnson
  * @since 16 April 2001
- * @version $Id: StringUtils.java,v 1.3 2003-10-08 14:18:39 jhoeller Exp $
+ * @version $Id: StringUtils.java,v 1.4 2003-10-09 18:18:41 jhoeller Exp $
  */
 public abstract class StringUtils {
 
@@ -96,6 +98,32 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Tokenize the given String into a String array via a StringTokenizer.
+	 * @param s the String to tokenize
+	 * @param delimiters the delimiter characters, assembled as String
+	 * @param trimTokens trim the tokens via String.trim
+	 * @param ignoreEmptyTokens omit empty tokens from the result array
+	 * @return an array of the tokens
+	 * @see java.util.StringTokenizer
+	 * @see java.lang.String#trim
+	 */
+	public static String[] tokenizeToStringArray(String s, String delimiters,
+	                                             boolean trimTokens, boolean ignoreEmptyTokens) {
+		StringTokenizer st = new StringTokenizer(s, delimiters);
+		List tokens = new ArrayList();
+		while (st.hasMoreTokens()) {
+			String token = st.nextToken();
+			if (trimTokens) {
+				token = token.trim();
+			}
+			if (!(ignoreEmptyTokens && token.length() == 0)) {
+				tokens.add(token);
+			}
+		}
+		return (String[]) tokens.toArray(new String[tokens.size()]);
+	}
+
+	/**
 	 * Take a String which is a delimited list and convert it to a String array
 	 * @param s String
 	 * @param delimiter delimiter. This will not be returned
@@ -106,15 +134,6 @@ public abstract class StringUtils {
 			return new String[0];
 		if (delimiter == null)
 			return new String[]{s};
-
-		/*
-		StringTokenizer st = new StringTokenizer(s, delimiter);
-		String[] tokens = new String[st.countTokens()];
-		for (int i = 0; i < tokens.length; i++) {
-			tokens[i] = st.nextToken();
-		}
-		return tokens;
-	  */
 
 		List l = new LinkedList();
 		int pos = 0;
