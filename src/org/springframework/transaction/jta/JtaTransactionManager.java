@@ -9,6 +9,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -57,43 +58,56 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * exact afterCompletion callbacks for transactional cache handling with Hibernate.
  * In such a scenario, use Hibernate >=2.1 which features automatic JTA detection.
  *
- * <p>This implementation supports timeouts but not custom isolation levels. The
- * latter need to be interpreted in JtaDialect implementations, to be applied
- * for specific JTA implementations. Transaction suspension is just available with
- * a JtaDialect too. Note that some resource-specific transaction managers like
- * DataSourceTransactionManager and HibernateTransactionManager do support
- * timeouts, custom isolation levels, and transaction suspension.
+ * <p>Transaction suspension (REQUIRES_NEW, NOT_SUPPORTED) is just available with
+ * a JTA TransactionManager being registered. The location of this internal JTA
+ * object is <i>not</i> specified by J2EE; it is individual for each J2EE server,
+ * often kept in JNDI. Some well-known JNDI locations are:
+ * <ul>
+ * <li>"java:comp/UserTransaction" for Resin and Orion
+ * <li>"java:/TransactionManager" for JBoss and JRun4
+ * <li>"javax.transaction.TransactionManager" for BEA WebLogic
+ * </ul>
+ *
+ * <p>JOTM (used in JOnAS) and IBM WebSphere are known to require static accessor
+ * methods to obtain the JTA TransactionManager: Therefore, they have their own
+ * FactoryBean implementations, to be wired with the "transactionManager" property.
+ *
+ * <p>The internal JTA TransactionManager can also be used to register custom
+ * synchronizations with the JTA transaction itself instead of Spring's
+ * transaction manager. LocalSessionFactoryBean supports to plug a given
+ * TransactionManager into Hibernate's TransactionManagerLookup mechanism,
+ * used for registering cache synchronization.
+ *
+ * <p>JtaTransactionManager supports timeouts but not custom isolation levels.
+ * Custom subclasses can override applyIsolationLevel for specific JTA
+ * implementations. Note that some resource-specific transaction managers like
+ * DataSourceTransactionManager and HibernateTransactionManager do support timeouts,
+ * custom isolation levels, and transaction suspension without any restrictions.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
- * @see #setTransactionSynchronization
- * @see #setJtaDialect
- * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+ * @see #setUserTransactionName
+ * @see #setTransactionManagerName
+ * @see JotmFactoryBean
+ * @see WebSphereTransactionManagerFactoryBean
+ * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
+ * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  */
 public class JtaTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
 	public static final String DEFAULT_USER_TRANSACTION_NAME = "java:comp/UserTransaction";
 
-	private JtaDialect jtaDialect;
-
 	private JndiTemplate jndiTemplate = new JndiTemplate();
 
 	private String userTransactionName = DEFAULT_USER_TRANSACTION_NAME;
 
-	private boolean cacheUserTransaction = true;
+	private String transactionManagerName;
 
-	private UserTransaction cachedUserTransaction;
+	private UserTransaction userTransaction;
 
+	private TransactionManager transactionManager;
 
-	/**
-	 * Set the JTA dialect to use for this transaction manager.
-	 * <p>A dialect is necessary for suspending and resuming transactions, and for
-	 * applying custom isolation levels - both are not supported by standard JTA.
-	 */
-	public void setJtaDialect(JtaDialect jtaDialect) {
-		this.jtaDialect = jtaDialect;
-	}
 
 	/**
 	 * Set the JndiTemplate to use for JNDI lookup.
@@ -107,7 +121,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	/**
-	 * Set the JNDI name of the UserTransaction.
+	 * Set the JNDI name of the JTA UserTransaction.
 	 * The default one is used if not set.
 	 * @see #DEFAULT_USER_TRANSACTION_NAME
 	 */
@@ -116,39 +130,53 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	/**
-	 * Set whether the JTA UserTransaction object should be cached, i.e.
-	 * looked up from JNDI on afterPropertiesSet. Else, each getTransaction
-	 * call will perform a fresh JNDI lookup. Default is true.
-	 * <p>As JNDI lookups are expensive even in local JNDI environments,
-	 * it is highly advisable to leave this activated. Only turn this off if
-	 * your application server does not allow for caching the UserTransaction.
+	 * Set the JTA UserTransaction to use as direct reference.
+	 * Typically just used for local JTA setups; in a J2EE environment,
+	 * the UserTransaction will always be fetched from JNDI.
 	 */
-	public void setCacheUserTransaction(boolean cacheUserTransaction) {
-		this.cacheUserTransaction = cacheUserTransaction;
+	public void setUserTransaction(UserTransaction userTransaction) {
+		this.userTransaction = userTransaction;
+	}
+
+	/**
+	 * Set the JNDI name of the JTA TransactionManager.
+	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
+	 * as this not supported by the UserTransaction interface.
+	 */
+	public void setTransactionManagerName(String transactionManagerName) {
+		this.transactionManagerName = transactionManagerName;
+	}
+
+	/**
+	 * Set the JTA TransactionManager to use as direct reference.
+	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
+	 * as this not supported by the UserTransaction interface.
+	 */
+	public void setTransactionManager(TransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
 	}
 
 
-	/**
-	 * Eagerly fetch the UserTransaction if cacheUserTransaction is true.
-	 * @see #setCacheUserTransaction
-	 * @see #lookupUserTransaction
-	 */
 	public void afterPropertiesSet() throws CannotCreateTransactionException {
-		if (this.cacheUserTransaction) {
-			this.cachedUserTransaction = lookupUserTransaction();
+		if (this.userTransaction == null) {
+			if (this.userTransactionName == null) {
+				throw new IllegalArgumentException("Either userTransactionName or userTransaction must be set");
+			}
+			this.userTransaction = lookupUserTransaction();
+		}
+		if (this.transactionManager == null && this.transactionManagerName != null) {
+			this.transactionManager = lookupTransactionManager();
 		}
 	}
 
 	/**
-	 * Look up the JTA UserTransaction from JNDI via the configured name.
+	 * Look up the JTA UserTransaction in JNDI via the configured name.
+	 * Called by afterPropertiesSet if no direct UserTransaction reference was set.
 	 * Can be overridden in subclasses to provide a different UserTransaction object.
-	 * <p>Called either on afterPropertiesSet or on doGetTransaction,
-	 * depending on the cacheUserTransaction setting.
 	 * @return the UserTransaction object
 	 * @throws CannotCreateTransactionException if the JNDI lookup failed
 	 * @see #setJndiTemplate
 	 * @see #setUserTransactionName
-	 * @see #setCacheUserTransaction
 	 */
 	protected UserTransaction lookupUserTransaction() throws CannotCreateTransactionException {
 		try {
@@ -165,8 +193,32 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+	/**
+	 * Look up the JTA TransactionManager in JNDI via the configured name.
+	 * Called by afterPropertiesSet if no direct TransactionManager reference was set.
+	 * Can be overridden in subclasses to provide a different TransactionManager object.
+	 * @return the UserTransaction object
+	 * @throws CannotCreateTransactionException if the JNDI lookup failed
+	 * @see #setJndiTemplate
+	 * @see #setTransactionManagerName
+	 */
+	protected TransactionManager lookupTransactionManager() throws CannotCreateTransactionException {
+		try {
+			TransactionManager tm = (TransactionManager) this.jndiTemplate.lookup(this.userTransactionName);
+			if (logger.isInfoEnabled()) {
+				logger.info("Using JTA TransactionManager [" + tm + "] from JNDI location [" +
+				            this.userTransactionName + "]");
+			}
+			return tm;
+		}
+		catch (NamingException ex) {
+			throw new CannotCreateTransactionException("JTA UserTransaction is not available at JNDI location [" +
+			                                           this.userTransactionName + "]", ex);
+		}
+	}
+
 	protected Object doGetTransaction() {
-		return (this.cachedUserTransaction != null ? this.cachedUserTransaction : lookupUserTransaction());
+		return (this.userTransaction != null ? this.userTransaction : lookupUserTransaction());
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
@@ -184,15 +236,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			logger.debug("Beginning JTA transaction [" + transaction + "] ");
 		}
 		UserTransaction ut = (UserTransaction) transaction;
-
-		if (this.jtaDialect != null) {
-			this.jtaDialect.applyIsolationLevel(ut, definition.getIsolationLevel());
-		}
-		else if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			throw new InvalidIsolationLevelException("JtaTransactionManager does not support custom isolation levels " +
-			                                         "without a JtaDialect");
-		}
-
+		applyIsolationLevel(definition.getIsolationLevel());
 		try {
 			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
 				ut.setTransactionTimeout(definition.getTimeout());
@@ -214,12 +258,26 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+	/**
+	 * Apply the given transaction isolation level. Default implementation
+	 * will throw an exception for any level other than ISOLATION_DEFAULT.
+	 * To be overridden in subclasses for specific JTA implementations.
+	 * @param isolationLevel isolation level taken from transaction definition
+	 * @throws InvalidIsolationLevelException if the given isolation level
+	 * cannot be applied
+	 */
+	protected void applyIsolationLevel(int isolationLevel) throws InvalidIsolationLevelException {
+		if (isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
+			throw new InvalidIsolationLevelException("JtaTransactionManager does not support custom isolation levels");
+		}
+	}
+
 	protected Object doSuspend(Object transaction) {
-		if (this.jtaDialect == null) {
-			throw new IllegalTransactionStateException("JtaTransactionManager needs a JtaDialect for suspending a transaction");
+		if (this.transactionManager == null) {
+			throw new IllegalTransactionStateException("JtaTransactionManager needs a TransactionManager for suspending a transaction");
 		}
 		try {
-			return this.jtaDialect.getInternalTransactionManager().suspend();
+			return this.transactionManager.suspend();
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on suspend", ex);
@@ -227,11 +285,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doResume(Object transaction, Object suspendedResources) {
-		if (this.jtaDialect == null) {
-			throw new IllegalTransactionStateException("JtaTransactionManager needs a JtaDialect for resuming a transaction");
+		if (this.transactionManager == null) {
+			throw new IllegalTransactionStateException("JtaTransactionManager needs a TransactionManager for resuming a transaction");
 		}
 		try {
-			this.jtaDialect.getInternalTransactionManager().resume((Transaction) suspendedResources);
+			this.transactionManager.resume((Transaction) suspendedResources);
 		}
 		catch (InvalidTransactionException ex) {
 			throw new IllegalTransactionStateException("Tried to resume invalid JTA transaction", ex);

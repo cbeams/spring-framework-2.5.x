@@ -16,8 +16,6 @@ import org.easymock.MockControl;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.jndi.support.SimpleNamingContext;
 import org.springframework.transaction.jta.JtaTransactionManager;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -834,46 +832,6 @@ public class JtaTransactionTestSuite extends TestCase {
 		}
 
 		utControl.verify();
-	}
-
-	public void testJtaTransactionManagerWithNotCacheUserTransaction() {
-		JndiTemplate jndiTemplate = new JndiTemplate() {
-			protected Context createInitialContext() throws NamingException {
-				MockControl utControl = MockControl.createControl(UserTransaction.class);
-				UserTransaction ut = (UserTransaction) utControl.getMock();
-				try {
-					ut.getStatus();
-					utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
-					ut.begin();
-					utControl.setVoidCallable(1);
-					ut.rollback();
-					utControl.setVoidCallable(2);
-				}
-				catch (Exception ex) {
-				}
-				utControl.replay();
-				Context mockContext = new SimpleNamingContext();
-				mockContext.bind("ut", ut);
-				return mockContext;
-			}
-		};
-		JtaTransactionManager tm = new JtaTransactionManager();
-		tm.setJndiTemplate(jndiTemplate);
-		tm.setUserTransactionName("ut");
-		tm.setCacheUserTransaction(false);
-		tm.afterPropertiesSet();
-		TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition());
-		tm.rollback(status1);
-		TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition());
-		tm.rollback(status2);
-		DefaultTransactionStatus defStatus1 = (DefaultTransactionStatus) status1;
-		DefaultTransactionStatus defStatus2 = (DefaultTransactionStatus) status2;
-		assertTrue(defStatus1.getTransaction() != defStatus2.getTransaction());
-	}
-
-	protected void tearDown() {
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }

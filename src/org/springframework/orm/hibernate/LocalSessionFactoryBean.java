@@ -6,6 +6,7 @@ import java.sql.Statement;
 import java.util.Properties;
 
 import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.transaction.jta.JtaDialect;
 
 /**
  * FactoryBean that creates a local Hibernate SessionFactory instance.
@@ -105,7 +105,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private DataSource dataSource;
 
-	private JtaDialect jtaDialect;
+	private TransactionManager jtaTransactionManager;
 
 	private LobHandler lobHandler;
 
@@ -172,15 +172,16 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
-	 * Set the JTA dialect to be used for Hibernate's TransactionManagerLookup.
-	 * If set, this will override corresponding settings in Hibernate properties.
-	 * Allows to use Spring's JTA dialect for Hibernate's cache synchronization.
+	 * Set the JTA TransactionManager to be used for Hibernate's
+	 * TransactionManagerLookup. If set, this will override corresponding
+	 * settings in Hibernate properties. Allows to use a Spring-managed
+	 * JTA TransactionManager for Hibernate's cache synchronization.
 	 * <p>Note: If this is set, the Hibernate settings should not define a
 	 * transaction manager lookup to avoid meaningless double configuration.
-	 * @see JtaDialectTransactionManagerLookup
+	 * @see LocalTransactionManagerLookup
 	 */
-	public void setJtaDialect(JtaDialect jtaDialect) {
-		this.jtaDialect = jtaDialect;
+	public void setJtaTransactionManager(TransactionManager jtaTransactionManager) {
+		this.jtaTransactionManager = jtaTransactionManager;
 	}
 
 	/**
@@ -284,9 +285,9 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			LocalDataSourceConnectionProvider.configTimeDataSourceHolder.set(this.dataSource);
 		}
 
-		if (this.jtaDialect != null) {
-			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, JtaDialectTransactionManagerLookup.class.getName());
-			JtaDialectTransactionManagerLookup.configTimeJtaDialectHolder.set(this.jtaDialect);
+		if (this.jtaTransactionManager != null) {
+			config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
+			LocalTransactionManagerLookup.configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
 		}
 
 		if (this.entityInterceptor != null) {
@@ -301,9 +302,9 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		logger.info("Building new Hibernate SessionFactory");
 		this.sessionFactory = newSessionFactory(config);
 
-		if (this.jtaDialect != null) {
-			// reset JtaDialect holder
-			JtaDialectTransactionManagerLookup.configTimeJtaDialectHolder.set(null);
+		if (this.jtaTransactionManager != null) {
+			// reset TransactionManager holder
+			LocalTransactionManagerLookup.configTimeTransactionManagerHolder.set(null);
 		}
 
 		if (this.dataSource != null) {
