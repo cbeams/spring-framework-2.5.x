@@ -46,6 +46,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -83,7 +84,7 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 
 	private String contentType;
 
-	private final Hashtable	parameters = new Hashtable();
+	private final Map	parameters = CollectionFactory.createLinkedMapIfPossible(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -268,7 +269,7 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 	}
 
 	public Enumeration getParameterNames() {
-		return this.parameters.keys();
+		return Collections.enumeration(this.parameters.keySet());
 	}
 
 	public String[] getParameterValues(String name) {
