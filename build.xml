@@ -373,8 +373,8 @@
 				<include name="org/springframework/**"/>
 			</packageset>
 			<!-- Unfortunately, jDocs have switched off their package listing, so we can't link to jDocs :( -->
-			<link href="http://java.sun.com/j2se/1.4.2/docs/api"/>
 			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
+			<link href="http://java.sun.com/j2se/1.4.2/docs/api"/>
 			<link href="http://aopalliance.sourceforge.net/doc"/>
 			<!-- BSH -->
 			<!-- BURLAP -->
@@ -390,9 +390,9 @@
 			<!-- Groovy -->
 			<link href="http://www.hibernate.org/hib_docs/api/"/>
 			<link href="http://httpunit.sourceforge.net/doc/api/"/>
-			<!-- iBatis -->
-			<!-- Commons Attributes (api + compiler -->
+			<link href="http://www.ibatis.com/common/javadocs/"/>
 			<!-- iText -->
+			<!-- Commons Attributes (api + compiler -->
 			<link href="http://jakarta.apache.org/commons/beanutils/commons-beanutils-1.7.0/docs/api"/>
 			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
 			<link href="http://jakarta.apache.org/commons/dbcp/apidocs/"/>
@@ -408,7 +408,7 @@
 			<!-- JasperReports -->
 			<!-- JDO -->
 			<link href="http://www.jdom.org/docs/apidocs/"/>
-			<!-- jexcelapi will be part of the libs for 1.2  -->
+			<!-- jexcelapi will be part of the libs for 1.2 -->
 			<link href="http://www.jmock.org/docs/javadoc/"/>
 			<!-- JMX -->
 			<!-- JOTM -->
@@ -489,10 +489,11 @@
 				<include name="lib/hsqldb/**"/>
 				<include name="lib/ibatis/**"/>
 				<include name="lib/itext/**"/>
+				<include name="lib/j2ee/**"/>
 				<include name="lib/jakarta-commons/**"/>
 				<include name="lib/jakarta-taglibs/**"/>
+				<include name="lib/jamon/**"/>
 				<include name="lib/jasperreports/**"/>
-				<include name="lib/j2ee/**"/>
 				<include name="lib/jdo/**"/>
 				<include name="lib/jdom/**"/>
 				<include name="lib/jotm/**"/>
