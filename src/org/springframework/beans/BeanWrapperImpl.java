@@ -26,12 +26,12 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.PropertyValuesEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the BeanWrapper interface that should be sufficient
@@ -53,10 +53,14 @@ import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
  * custom editor before using a BeanWrapperImpl instance, or call the instance's
  * registerCustomEditor method to register an editor for the particular instance.
  *
+ * <p>Collections custom property editors can be written against comma delimited String
+ * as String arrays are converted in such a format if the array itself is not assignable.</p>
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.2 2003-08-17 20:31:48 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.3 2003-08-18 21:50:17 pawlakjp Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -317,27 +321,34 @@ public class BeanWrapperImpl implements BeanWrapper {
 			// We may need to change the value of newValue
 			// custom editor for this type?
 			PropertyEditor pe = findCustomEditor(requiredType, propertyName);
-			if ((pe != null || !requiredType.isAssignableFrom(newValue.getClass())) && (newValue instanceof String)) {
-				if (logger.isDebugEnabled())
-					logger.debug("Convert: String to " + requiredType);
-				if (pe == null) {
-					// no custom editor -> check BeanWrapper's default editors
-					pe = (PropertyEditor) defaultEditors.get(requiredType);
-					if (pe == null) {
-						// no BeanWrapper default editor -> check standard editors
-						pe = PropertyEditorManager.findEditor(requiredType);
-					}
+			if ((pe != null || !requiredType.isAssignableFrom(newValue.getClass()))) {
+				if (newValue instanceof String[]) {
+					newValue = StringUtils.arrayToCommaDelimitedString((String[])newValue);
+					if (logger.isDebugEnabled())
+						logger.debug("Convert: StringArray to CommaDelimitedString");
 				}
-				if (logger.isDebugEnabled())
-					logger.debug("Using property editor [" + pe + "]");
-				if (pe != null) {
-					try {
-						pe.setAsText((String) newValue);
-						newValue = pe.getValue();
+				if (newValue instanceof String) {
+					if (logger.isDebugEnabled())
+						logger.debug("Convert: String to " + requiredType);
+					if (pe == null) {
+						// no custom editor -> check BeanWrapper's default editors
+						pe = (PropertyEditor) defaultEditors.get(requiredType);
+						if (pe == null) {
+							// no BeanWrapper default editor -> check standard editors
+							pe = PropertyEditorManager.findEditor(requiredType);
+						}
 					}
-					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchException(
-								new PropertyChangeEvent(target, propertyName, oldValue, newValue), requiredType, ex);
+					if (logger.isDebugEnabled())
+						logger.debug("Using property editor [" + pe + "]");
+					if (pe != null) {
+						try {
+							pe.setAsText((String) newValue);
+							newValue = pe.getValue();
+						}
+						catch (IllegalArgumentException ex) {
+							throw new TypeMismatchException(
+									new PropertyChangeEvent(target, propertyName, oldValue, newValue), requiredType, ex);
+						}
 					}
 				}
 			}
