@@ -1046,7 +1046,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		ITestBean proxied = (ITestBean) createProxy(pc);
 		
 		String proxyConfigString = ((Advised) proxied).toProxyConfigString();
-		System.err.println(proxyConfigString);
+		//System.err.println(proxyConfigString);
 		assertTrue(proxyConfigString.indexOf(advisor.toString()) != -1);
 		assertTrue(proxyConfigString.indexOf("1 interface") != -1);
 	}
