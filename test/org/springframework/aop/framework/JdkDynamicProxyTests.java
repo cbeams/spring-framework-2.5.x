@@ -126,5 +126,6 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		//MethodInvocation minv =  tii.invocation;
 		//assertTrue("invoked on iother, not " + minv.getMethod().getDeclaringClass(), minv.getMethod().getDeclaringClass() == IOther.class);
 		//assertTrue(target.invocation == tii.invocation);
-		}
+	}
+
 }
