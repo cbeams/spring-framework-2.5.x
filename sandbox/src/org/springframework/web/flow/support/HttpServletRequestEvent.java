@@ -20,8 +20,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.web.bind.RequestUtils;
-import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowConstants;
 
@@ -46,18 +45,17 @@ public class HttpServletRequestEvent extends Event {
 		super(request);
 	}
 
+	/**
+	 * Returns the HTTP servlet request that originated this event.
+	 */
 	public HttpServletRequest getRequest() {
 		return (HttpServletRequest)getSource();
 	}
 
 	public String getId() {
-		try {
-			//TODO remove dependency on spring mvc
-			return RequestUtils.getRequiredStringParameter(getRequest(), getEventIdParameterName());
-		}
-		catch (ServletRequestBindingException e) {
-			throw new IllegalArgumentException("The event id is not present in the request: " + e.getMessage());
-		}
+		String eventId=getRequest().getParameter(getEventIdParameterName());
+		Assert.hasText(eventId, "The event id is not present in the request");
+		return eventId;
 	}
 
 	public long getTimestamp() {
