@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the HandlerMapping interface to map from URLs to beans with names
@@ -37,14 +36,11 @@ public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 		// take anything beginning with a slash in the bean name
 		for (int i = 0; i < urlMaps.length; i++) {
 			String[] urls = checkForUrl(urlMaps[i]);
-			if (urls != null) {
+			if (urls.length > 0) {
 				logger.debug("Found URL mapping [" + urlMaps[i] + "]");
-				Object handler = initHandler(getApplicationContext().getBean(urlMaps[i]),
-				                             StringUtils.arrayToCommaDelimitedString(urls));
-
 				// create a mapping to each part of the path
 				for (int j = 0; j < urls.length; j++) {
-					registerHandler(urls[j], handler);
+					registerHandler(urls[j], urlMaps[i]);
 				}
 			}
 			else {
@@ -57,7 +53,7 @@ public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * Check name and aliases of the given bean for URLs,
 	 * detected by starting with "/".
 	 */
-	private String[] checkForUrl(String beanName) {
+	protected String[] checkForUrl(String beanName) {
 		List urls = new ArrayList();
 		if (beanName.startsWith("/")) {
 			urls.add(beanName);

@@ -9,17 +9,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.springframework.context.ApplicationContextException;
+import org.springframework.beans.BeansException;
 
 /**
- * Implementation of the HandlerMapping interface to map from URLs
- * to request handler beans.
+ * Implementation of the HandlerMapping interface to map from URLs to
+ * request handler beans. Supports both mapping to bean instances and
+ * mapping to bean names: The latter is required for prototype handlers.
  *
- * <p>The "urlMap" property is suitable for populating the map values
- * as bean references, e.g. via the map element in XML bean definitions.
+ * <p>The "urlMap" property is suitable for populating the handler map
+ * with bean references, e.g. via the map element in XML bean definitions.
  *
- * <p>Mappings can also be set via the "mappings" property, in a form
- * accepted by the java.util.Properties class, like as follows:<br>
+ * <p>Mappings to bean names can be set via the "mappings" property, in a
+ * form accepted by the java.util.Properties class, like as follows:<br>
  * <code>
  * /welcome.html=ticketController
  * /show.html=ticketController
@@ -30,9 +31,9 @@ import org.springframework.context.ApplicationContextException;
  * <p>Supports direct matches (given "/test" -> registered "/test")
  * and "*" matches (given "/test" -> registered "/t*").
  *
- * @see org.springframework.web.servlet.DispatcherServlet
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see org.springframework.web.servlet.DispatcherServlet
  * @see java.util.Properties
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
@@ -56,42 +57,19 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 		this.urlMap = mappings;
 	}
 
-	public void initApplicationContext() throws ApplicationContextException {
-		if (this.urlMap == null) {
+	public void initApplicationContext() throws BeansException {
+		if (this.urlMap == null || this.urlMap.isEmpty()) {
 			throw new IllegalArgumentException("Either 'urlMap' or 'mappings' is required");
 		}
-		
-		if (!this.urlMap.isEmpty()) {
-			Iterator itr = this.urlMap.keySet().iterator();
-			while (itr.hasNext()) {
-				String url = (String) itr.next();
-				Object handler = this.urlMap.get(url);
-
-				if (handler instanceof String) {
-					// convert bean name (assumably from "mappings") to bean instance
-					handler = getApplicationContext().getBean((String) handler);
-				}
-				initHandler(handler, url);
-
-				if ("*".equals(url)) {
-					// register default handler
-					if (getDefaultHandler() != null) {
-						throw new IllegalArgumentException("Cannot apply * mapping: default handler is already set");
-					}
-					setDefaultHandler(handler);
-				}
-				else {
-					// register specific handler
-					// prepend with slash if it's not present
-					if (!url.startsWith("/")) {
-						url = "/" + url;
-					}
-					registerHandler(url, handler);
-				}
+		Iterator itr = this.urlMap.keySet().iterator();
+		while (itr.hasNext()) {
+			String url = (String) itr.next();
+			Object handler = this.urlMap.get(url);
+			// prepend with slash if it's not present
+			if (!url.startsWith("/")) {
+				url = "/" + url;
 			}
-		}
-		else {
-			logger.warn("No mappings defined in " + getClass().getName());
+			registerHandler(url, handler);
 		}
 	}
 

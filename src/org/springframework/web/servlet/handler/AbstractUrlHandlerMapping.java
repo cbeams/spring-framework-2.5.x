@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.WebUtils;
@@ -45,7 +46,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @param request current HTTP request
 	 * @return the looked up handler instance, or null
 	 */
-	protected Object getHandlerInternal(HttpServletRequest request) {
+	protected Object getHandlerInternal(HttpServletRequest request) throws BeansException {
 		String lookupPath = WebUtils.getLookupPathForRequest(request, this.alwaysUseFullPath);
 		logger.debug("Looking up handler for [" + lookupPath + "]");
 		return lookupHandler(lookupPath);
@@ -60,56 +61,49 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @return the associated handler instance, or null if not found
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected final Object lookupHandler(String urlPath) {
+	protected Object lookupHandler(String urlPath) throws BeansException {
 		// direct match?
 		Object handler = this.handlerMap.get(urlPath);
-		if (handler != null) {
-			return handler;
-		}
-
-		// pattern match?
-		for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
-			String registeredPath = (String) it.next();
-			if (PathMatcher.match(registeredPath, urlPath)) {
-				return this.handlerMap.get(registeredPath);
+		if (handler == null) {
+			// pattern match?
+			for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
+				String registeredPath = (String) it.next();
+				if (PathMatcher.match(registeredPath, urlPath)) {
+					handler = this.handlerMap.get(registeredPath);
+				}
 			}
 		}
-
-		// no match found
-		return null;
+		return handler;
 	}
 
 	/**
 	 * Register the given handler instance for the given URL path.
 	 * @param urlPath URL the bean is mapped to
 	 * @param handler the handler instance
-	 * @throws ApplicationContextException if there is already a
-	 * handler mapped to the given URL path
+	 * @throws BeansException if the handler couldn't be registered
 	 */
-	protected final void registerHandler(String urlPath, Object handler) throws ApplicationContextException {
+	protected void registerHandler(String urlPath, Object handler) throws BeansException {
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
 			throw new ApplicationContextException("Cannot map handler [" + handler + "] to URL path [" + urlPath +
 			                                      "]: there's already handler [" + mappedHandler + "] mapped");
 		}
-		this.handlerMap.put(urlPath, handler);
-		logger.info("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
-	}
 
-	/**
-	 * Initialize the given handler object for the given URL.
-	 * Sets the mapped URL if the handler is UrlHandlerAware.
-	 * @param handler name of the bean in the application context
-	 * @param urlPath URL the bean is mapped to
-	 * @return the initialized handler instance
-	 * @see UrlAwareHandler
-	 */
-	protected final Object initHandler(Object handler, String urlPath) {
-		logger.debug("Initializing handler [" + handler + "] for URL path [" + urlPath + "]");
-		if (handler instanceof UrlAwareHandler) {
-			((UrlAwareHandler) handler).setUrlMapping(urlPath);
+		// eagerly resolve handler if referencing singleton via name
+		if (handler instanceof String) {
+			String handlerName = (String) handler;
+			if (getApplicationContext().isSingleton(handlerName)) {
+				handler = getApplicationContext().getBean(handlerName);
+			}
 		}
-		return handler;
+
+		if (urlPath.equals("/*")) {
+			setDefaultHandler(handler);
+		}
+		else {
+			this.handlerMap.put(urlPath, handler);
+			logger.info("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
+		}
 	}
 
 }

@@ -1,6 +1,5 @@
 package org.springframework.web.servlet.handler;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -74,13 +73,18 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the looked up handler instance, or the default handler
 	 * @see #getHandlerInternal
 	 */
-	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws ServletException {
+	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
 			handler = this.defaultHandler;
 		}
 		if (handler == null) {
 			return null;
+		}
+		// bean name of resolved handler?
+		if (handler instanceof String) {
+			String handlerName = (String) handler;
+			handler = getApplicationContext().getBean(handlerName);
 		}
 		return new HandlerExecutionChain(handler, this.interceptors);
 	}
@@ -91,8 +95,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * will lead to the default handler, if one is set.
 	 * @param request current HTTP request
 	 * @return the looked up handler instance, or null
-	 * @throws ServletException if there is an internal error
+	 * @throws Exception if there is an internal error
 	 */
-	protected abstract Object getHandlerInternal(HttpServletRequest request) throws ServletException;
+	protected abstract Object getHandlerInternal(HttpServletRequest request) throws Exception;
 
 }
