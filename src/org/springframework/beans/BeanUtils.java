@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
 
@@ -230,13 +230,13 @@ public abstract class BeanUtils {
 	public static boolean isAssignable(Class targetType, Class valueType) {
 		return (targetType.isAssignableFrom(valueType)) ||
 				(targetType.equals(boolean.class) && valueType.equals(Boolean.class)) ||
-		    (targetType.equals(byte.class) && valueType.equals(Byte.class)) ||
-		    (targetType.equals(char.class) && valueType.equals(Character.class)) ||
-		    (targetType.equals(short.class) && valueType.equals(Short.class)) ||
-		    (targetType.equals(int.class) && valueType.equals(Integer.class)) ||
-		    (targetType.equals(long.class) && valueType.equals(Long.class)) ||
-		    (targetType.equals(float.class) && valueType.equals(Float.class)) ||
-		    (targetType.equals(double.class) && valueType.equals(Double.class));
+				(targetType.equals(byte.class) && valueType.equals(Byte.class)) ||
+				(targetType.equals(char.class) && valueType.equals(Character.class)) ||
+				(targetType.equals(short.class) && valueType.equals(Short.class)) ||
+				(targetType.equals(int.class) && valueType.equals(Integer.class)) ||
+				(targetType.equals(long.class) && valueType.equals(Long.class)) ||
+				(targetType.equals(float.class) && valueType.equals(Float.class)) ||
+				(targetType.equals(double.class) && valueType.equals(Double.class));
 	}
 
 	/**
@@ -248,8 +248,8 @@ public abstract class BeanUtils {
 	 */
 	public static boolean isSimpleProperty(Class clazz) {
 		return clazz.isPrimitive() || isPrimitiveArray(clazz) || isPrimitiveWrapperArray(clazz) ||
-		    clazz.equals(String.class) || clazz.equals(String[].class) ||
-		    clazz.equals(Class.class) || clazz.equals(Class[].class);
+				clazz.equals(String.class) || clazz.equals(String[].class) ||
+				clazz.equals(Class.class) || clazz.equals(Class[].class);
 	}
 
 	/**
@@ -258,8 +258,8 @@ public abstract class BeanUtils {
 	 */
 	public static boolean isPrimitiveArray(Class clazz) {
 		return boolean[].class.equals(clazz) || byte[].class.equals(clazz) || char[].class.equals(clazz) ||
-		    short[].class.equals(clazz) || int[].class.equals(clazz) || long[].class.equals(clazz) ||
-		    float[].class.equals(clazz) || double[].class.equals(clazz);
+				short[].class.equals(clazz) || int[].class.equals(clazz) || long[].class.equals(clazz) ||
+				float[].class.equals(clazz) || double[].class.equals(clazz);
 	}
 
 	/**
@@ -268,8 +268,8 @@ public abstract class BeanUtils {
 	 */
 	public static boolean isPrimitiveWrapperArray(Class clazz) {
 		return Boolean[].class.equals(clazz) || Byte[].class.equals(clazz) || Character[].class.equals(clazz) ||
-		    Short[].class.equals(clazz) || Integer[].class.equals(clazz) || Long[].class.equals(clazz) ||
-		    Float[].class.equals(clazz) || Double[].class.equals(clazz);
+				Short[].class.equals(clazz) || Integer[].class.equals(clazz) || Long[].class.equals(clazz) ||
+				Float[].class.equals(clazz) || Double[].class.equals(clazz);
 	}
 
 	/**
@@ -279,7 +279,7 @@ public abstract class BeanUtils {
 	 * @throws IllegalArgumentException if the classes of source and target do not match
 	 */
 	public static void copyProperties(Object source, Object target)
-	    throws IllegalArgumentException, BeansException {
+			throws IllegalArgumentException, BeansException {
 		copyProperties(source, target, null);
 	}
 
@@ -292,7 +292,7 @@ public abstract class BeanUtils {
 	 * @throws IllegalArgumentException if the classes of source and target do not match
 	 */
 	public static void copyProperties(Object source, Object target, String[] ignoreProperties)
-	    throws IllegalArgumentException, BeansException {
+			throws IllegalArgumentException, BeansException {
 		if (source == null || target == null) {
 			throw new IllegalArgumentException("Source and target must not be null");
 		}
@@ -305,21 +305,21 @@ public abstract class BeanUtils {
 			String name = sourceDesc.getName();
 			PropertyDescriptor targetDesc = targetBw.getPropertyDescriptor(name);
 			if (targetDesc.getWriteMethod() != null && targetDesc.getReadMethod() != null &&
-			    (ignoreProperties == null || (!ignoreList.contains(name)))) {
+					(ignoreProperties == null || (!ignoreList.contains(name)))) {
 				values.addPropertyValue(new PropertyValue(name, sourceBw.getPropertyValue(name)));
 			}
 		}
 		targetBw.setPropertyValues(values);
 	}
 
-    /**
-     * Retreives the <code>PropertyDescriptor</code>s of a given <code>Class</code>.
-     * @param clazz any <code>Class</code> instance.
-     * @return an array of <code>PropertyDescriptors</code> for the supplied <code>Class</code>.
-     */
-    public static PropertyDescriptor[] getPropertyDescriptors(Class clazz){
-        CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
-        return cr.getBeanInfo().getPropertyDescriptors();
-    }
+	/**
+	 * Retrieve the JavaBeans <code>PropertyDescriptor</code>s of a given class.
+	 * @param clazz the Class to retrieve the PropertyDescriptors for
+	 * @return an array of <code>PropertyDescriptors</code> for the given class
+	 */
+	public static PropertyDescriptor[] getPropertyDescriptors(Class clazz) {
+		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
+		return cr.getBeanInfo().getPropertyDescriptors();
+	}
 
 }
