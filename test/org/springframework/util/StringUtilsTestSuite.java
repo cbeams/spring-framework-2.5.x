@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 /**
  *
  * @author Rod Johnson
- * @version $Id: StringUtilsTestSuite.java,v 1.1.1.1 2003-08-14 16:21:21 trisberg Exp $
+ * @version $Id: StringUtilsTestSuite.java,v 1.2 2003-09-21 12:40:53 johnsonr Exp $
  */
 public class StringUtilsTestSuite extends TestCase { 
 
@@ -164,9 +164,20 @@ public class StringUtilsTestSuite extends TestCase {
 		assertTrue("Has no CR", cleaned.indexOf("\n") == -1);
 		assertTrue("Has no tab", cleaned.indexOf("\t") == -1);
 		assertTrue("Has no sp", cleaned.indexOf(" ") == -1);
-		assertTrue("Still has chars", cleaned.length
-		() > 10);
-		System.out.println("CLEANED IS " + cleaned);
+		assertTrue("Still has chars", cleaned.length() > 10);
+	} 
+	
+	public void testClassNameNoFqn() {
+		Class clazz = Exception.class;
+		assertEquals(StringUtils.classNameWithoutPackagePrefix(clazz), "Exception");
+		
+		// Test with inner class
+		clazz = MyInnerClass.class;
+		assertEquals(StringUtils.classNameWithoutPackagePrefix(clazz), "StringUtilsTestSuite$MyInnerClass");
+	}
+	
+	// Purely for testing class name resolution
+	public static class MyInnerClass {
 	} 
 
 }
