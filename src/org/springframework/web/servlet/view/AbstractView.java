@@ -32,32 +32,29 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Abstract view superclass. Standard framework view implementations
- * and application-specific custom views can extend this class
+ * Abstract View superclass. Standard framework View implementations
+ * and application-specific custom Views can extend this class
  * to simplify their implementation. Subclasses should be JavaBeans.
  *
- * <p>Extends ApplicationObjectSupport, which will be helpful to some views.
+ * <p>Extends WebApplicationObjectSupport, which will be helpful to some views.
  * Handles static attributes, and merging static with dynamic attributes.
  * Subclasses just need to implement the actual rendering.
  *
- * <p>It's recommended that subclasses <b>don't</b> cache anything, in the
- * quest for efficiency. This class offers caching. However, it's possible
- * to disable this class's caching, which is useful during development.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.9 2004-03-18 02:46:11 trisberg Exp $
+ * @version $Id: AbstractView.java,v 1.10 2004-05-04 08:39:31 jhoeller Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View, BeanNameAware {
 
-	/** The name by which this View is known */
+	/** Default content type. Overridable as bean property. */
+	public static final String DEFAULT_CONTENT_TYPE = "text/html; charset=ISO-8859-1";
+
+
 	private String beanName;
 
-	/** Default content type. Overridable as bean property. */
-	private String contentType = "text/html; charset=ISO-8859-1";
+	private String contentType = DEFAULT_CONTENT_TYPE;
 
-	/** Name of request context attribute, or null if not needed */
 	private String requestContextAttribute;
 
 	/** Map of static attributes, keyed by attribute name (String) */
@@ -77,7 +74,6 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Return the view's name. Should never be null,
 	 * if the view was correctly configured.
-	 * @return the view's name
 	 */
 	public String getBeanName() {
 		return beanName;
@@ -85,9 +81,11 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Set the content type for this view.
-	 * May be ignored by subclasses if the view itself is assumed
+	 * Default is "text/html; charset=ISO-8859-1".
+	 * <p>May be ignored by subclasses if the view itself is assumed
 	 * to set the content type, e.g. in case of JSPs.
 	 * @param contentType content type for this view
+	 * @see #DEFAULT_CONTENT_TYPE
 	 */
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
@@ -95,15 +93,14 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Return the content type for this view.
-	 * @return content type for this view
 	 */
-	protected String getContentType() {
+	public String getContentType() {
 		return this.contentType;
 	}
 
 	/**
-	 * Set the name of the RequestContext attribute for this view,
-	 * or null if not needed.
+	 * Set the name of the RequestContext attribute for this view.
+	 * Default is none.
 	 * @param requestContextAttribute name of the RequestContext attribute
 	 */
 	public void setRequestContextAttribute(String requestContextAttribute) {
@@ -144,27 +141,28 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Set static attributes as a CSV string.
-	 * Format is attname0={value1},attname1={value1}
+	 * Format is: attname0={value1},attname1={value1}
 	 */
 	public void setAttributesCSV(String propString) throws IllegalArgumentException {
-		if (propString == null)
-			// Leave static attributes unchanged
+		if (propString == null) {
+			// leave static attributes unchanged
 			return;
+		}
 
 		StringTokenizer st = new StringTokenizer(propString, ",");
 		while (st.hasMoreTokens()) {
 			String tok = st.nextToken();
-			int eqindx = tok.indexOf("=");
-			if (eqindx == -1)
+			int eqIdx = tok.indexOf("=");
+			if (eqIdx == -1) {
 				throw new IllegalArgumentException("Expected = in View string '" + propString + "'");
-
-			if (eqindx >= tok.length() - 2)
+			}
+			if (eqIdx >= tok.length() - 2) {
 				throw new IllegalArgumentException("At least 2 characters ([]) required in View string '" + propString + "'");
+			}
+			String name = tok.substring(0, eqIdx);
+			String val = tok.substring(eqIdx + 1);
 
-			String name = tok.substring(0, eqindx);
-			String val = tok.substring(eqindx + 1);
-
-			// Delete first and last characters of value: { and }
+			// celete first and last characters of value: { and }
 			val = val.substring(1);
 			val = val.substring(0, val.length() - 1);
 
@@ -203,13 +201,15 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Rendering view with name '" + this.beanName + "' with model=[" + model +
-				"] and static attributes=[" + this.staticAttributes + "]");
+			logger.debug("Rendering view with name '" + this.beanName + "' with model " + model +
+				" and static attributes " + this.staticAttributes);
 		}
 
-		// Consolidate static and dynamic model attributes
+		// consolidate static and dynamic model attributes
 		Map mergedModel = new HashMap(this.staticAttributes);
-		mergedModel.putAll(model);
+		if (model != null) {
+			mergedModel.putAll(model);
+		}
 
 		// expose RequestContext?
 		if (this.requestContextAttribute != null) {
@@ -220,11 +220,13 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/** 
-	 * Subclasses must implement this method to render the view.
-	 * <p>The first take will be preparing the request: This may include setting
-	 * the model elements as request attributes, e.g. in the case of a JSP view.
-	 * @param model combined output Map, with dynamic values taking precedence
-	 * over static attributes
+	 * Subclasses must implement this method to actually render the view.
+	 * <p>The first step will be preparing the request: In the JSP case,
+	 * this would mean setting model objects as request attributes.
+	 * The second step will be the actual rendering of the view,
+	 * for example including the JSP via a RequestDispatcher.
+	 * @param model combined output Map, with dynamic values taking
+	 * precedence over static attributes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @throws Exception if rendering failed

@@ -44,9 +44,12 @@ public interface View {
 
 	/**
 	 * Render the view given the specified model.
-	 * The first step will be preparing the request: In the JSP case,
+	 * <p>The first step will be preparing the request: In the JSP case,
 	 * this would mean setting model objects as request attributes.
-	 * @param model Map of model attributes (model name String mapped to model object)
+	 * The second step will be the actual rendering of the view,
+	 * for example including the JSP via a RequestDispatcher.
+	 * @param model Map with name Strings as keys and corresponding model
+	 * objects as values (Map can also be null in case of empty model)
 	 * @param request current HTTP request
 	 * @param response HTTP response we are building
 	 * @throws Exception if rendering failed
