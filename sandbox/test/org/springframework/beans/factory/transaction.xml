@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"
+>
+
+<beans>
+
+	<description>
+		Generic autoproxy definitions enabling declarative transaction management, 
+		based on Commons Attributes attributes. The application context must define
+		a single PlatformTransactionManager for autoproxying to work.
+		
+		This file is generic, and not specific to JPetStore. You can use it unchanged
+		as an application context definition file for your own applications to get
+		attribute-driven declarative transaction management.
+		
+		The power of this approach is more apparent when you have many transactional
+		business objects, not just one as in this simple application.
+		
+		Add more Advisor definitions if you want, for additional declarative services.
+	</description>
+
+	<!--
+		This bean is a postprocessor that will automatically apply relevant advisors
+		to any bean in child factories.
+	-->
+	<bean id="autoproxy" 
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
+	</bean>
+
+	<bean id="transactionAttributeSource"
+		class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"
+		autowire="constructor">
+	</bean>
+	
+	<bean id="transactionInterceptor"
+		class="org.springframework.transaction.interceptor.TransactionInterceptor"
+		autowire="byType">
+	</bean>
+	
+	<!--
+		AOP advisor that will provide declarative transaction management
+		based on attributes.
+		It's possible to add arbitrary custom Advisor implementations as
+		well, and they will also be evaluated and applied automatically.
+	-->
+	<bean id="transactionAdvisor"
+		class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
+		autowire="constructor" >
+	</bean>
+	
+	<!--
+		Commons Attributes Attributes implementation. Replace with another
+		implementation of org.springframework.metadata.Attributes to source
+		attributes from a different source.
+	-->
+	<bean id="attributes"
+		class="org.springframework.metadata.commons.CommonsAttributes"
+	/>
+	
+</beans>
