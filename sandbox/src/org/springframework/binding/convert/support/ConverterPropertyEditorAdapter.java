@@ -43,13 +43,10 @@ public class ConverterPropertyEditorAdapter extends PropertyEditorSupport {
 			setValue(converterExecutor.call(text));
 		}
 		catch (ConversionException e) {
-			/*
-			IllegalArgumentException iae = new IllegalArgumentException("Converter could not convert String '"
-					+ e + "'");
+			IllegalArgumentException iae = new IllegalArgumentException("Converter could not convert String '" + e
+					+ "'");
 			iae.initCause(e);
 			throw iae;
-			*/
-			throw e;
 		}
 	}
 

@@ -16,6 +16,7 @@
 package org.springframework.binding.convert.support;
 
 import org.springframework.binding.format.FormatterLocator;
+import org.springframework.util.enums.LabeledEnum;
 
 /**
  * Converter that converts textual representations of <coded>CodedEnum</code>
@@ -25,6 +26,10 @@ import org.springframework.binding.format.FormatterLocator;
 public class TextToLabeledEnumConverter extends AbstractFormattingConverter {
 
 	private Class[] labeledEnumClasses;
+
+	public TextToLabeledEnumConverter(FormatterLocator formatterLocator) {
+		super(formatterLocator);
+	}
 
 	public TextToLabeledEnumConverter(Class labeledEnumClasses, FormatterLocator formatterLocator) {
 		this(new Class[] { labeledEnumClasses }, formatterLocator);
@@ -40,7 +45,11 @@ public class TextToLabeledEnumConverter extends AbstractFormattingConverter {
 	}
 
 	public Class[] getTargetClasses() {
-		return labeledEnumClasses;
+		if (labeledEnumClasses == null) {
+			return new Class[] { LabeledEnum.class };
+		} else {
+			return labeledEnumClasses;
+		}
 	}
 
 	protected Object doConvert(Object source, Class targetClass) throws Exception {

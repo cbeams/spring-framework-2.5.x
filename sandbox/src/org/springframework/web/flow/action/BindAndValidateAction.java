@@ -16,6 +16,8 @@
 package org.springframework.web.flow.action;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.binding.format.InvalidFormatException;
+import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
@@ -160,7 +162,7 @@ public class BindAndValidateAction extends AbstractAction {
 	/**
 	 * Returns the validators for this controller.
 	 */
-	public final Validator[] getValidators() {
+	public Validator[] getValidators() {
 		return validators;
 	}
 
@@ -200,14 +202,24 @@ public class BindAndValidateAction extends AbstractAction {
 	 * Set if we create a new form object instance everytime this action is
 	 * invoked.
 	 */
-	public final void setFormObjectScope(ScopeType scopeType) {
+	public void setFormObjectScope(ScopeType scopeType) {
 		this.formObjectScope = scopeType;
+	}
+
+	/**
+	 * Convenience setter that performs a string to ScopeType conversion for
+	 * you.
+	 * @param encodedScopeType the encoded scope type string
+	 * @throws InvalidFormatException The encoded value was invalid
+	 */
+	public void setFormObjectScopeAsString(String encodedScopeType) throws InvalidFormatException {
+		this.formObjectScope = (ScopeType)new LabeledEnumFormatter(ScopeType.class).parseValue(encodedScopeType);
 	}
 
 	/**
 	 * Return the strategy to use for resolving errors into message codes.
 	 */
-	public final MessageCodesResolver getMessageCodesResolver() {
+	public MessageCodesResolver getMessageCodesResolver() {
 		return messageCodesResolver;
 	}
 
@@ -219,7 +231,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
 	 */
-	public final void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
+	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
 		this.messageCodesResolver = messageCodesResolver;
 	}
 
@@ -273,8 +285,8 @@ public class BindAndValidateAction extends AbstractAction {
 	 *         loaded
 	 * @throws IllegalStateException the form object loaded was null
 	 */
-	protected final Object loadRequiredFormObject(FlowExecutionContext context)
-			throws FormObjectRetrievalFailureException, IllegalStateException {
+	protected Object loadRequiredFormObject(FlowExecutionContext context) throws FormObjectRetrievalFailureException,
+			IllegalStateException {
 		try {
 			// get the form object
 			Object formObject = loadFormObject(context);
@@ -421,7 +433,7 @@ public class BindAndValidateAction extends AbstractAction {
 	 * @param binder the binder to use for binding
 	 * @return the action result outcome
 	 */
-	protected final Event bindAndValidate(FlowExecutionContext context, DataBinder binder) {
+	protected Event bindAndValidate(FlowExecutionContext context, DataBinder binder) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Binding allowed matching request parameters to object '" + binder.getObjectName()
 					+ "', details='" + binder.getTarget() + "'");

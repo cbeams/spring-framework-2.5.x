@@ -47,6 +47,7 @@
 	<bean id="person.Search.criteria.bindAndValidate" class="org.springframework.web.flow.action.BindAndValidateAction">
 		<property name="formObjectName"><value>query</value></property>
 		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.PhoneBookQuery</value></property>
+		<property name="formObjectScopeAsString"><value>flow</value></property>
 		<property name="validator">
 			<bean id="queryValidator" class="org.springframework.samples.phonebook.domain.PhoneBookQueryValidator"/>
 		</property>
