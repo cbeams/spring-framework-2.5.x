@@ -20,8 +20,8 @@
 		<property name="resourceLoaderPath"><value>WEB-INF/views/</value></property>
 	</bean>
 
-	<!-- Configurer that sets up a VelocityEngine for Velocity views -->
-	<bean id="freemarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+	<!-- Configurer that sets up a FreeMarker Configurer for FreeMarker views -->
+	<bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
 		<property name="templateLoaderPath"><value>WEB-INF/views/</value></property>
 	</bean>
 
