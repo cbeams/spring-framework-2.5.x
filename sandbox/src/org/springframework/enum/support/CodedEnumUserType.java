@@ -102,6 +102,9 @@ public class CodedEnumUserType implements UserType {
     public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
             throws HibernateException, SQLException {
         Object code = rs.getObject(names[0]);
+        if (code == null) {
+            return null;
+        }
         String type = ClassUtils.getShortNameAsProperty(enumClass);
         return enumResolver.getEnum(type, code);
     }

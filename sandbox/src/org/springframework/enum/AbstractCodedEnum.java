@@ -31,10 +31,11 @@ public abstract class AbstractCodedEnum implements CodedEnum,
     private String label;
 
     protected AbstractCodedEnum(Comparable code) {
-        this.code = code;
+        this(code, null);
     }
 
     protected AbstractCodedEnum(Comparable code, String label) {
+        Assert.notNull(code);
         this.code = code;
         this.label = label;
     }
