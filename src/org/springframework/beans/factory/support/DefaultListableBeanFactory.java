@@ -5,6 +5,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,11 +17,11 @@ import java.util.Set;
 
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
-import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.StringUtils;
@@ -31,7 +32,7 @@ import org.springframework.util.StringUtils;
  * or as a superclass for custom bean factories.
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.10 2003-12-22 10:46:57 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.11 2003-12-24 14:13:41 johnsonr Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -197,6 +198,32 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 				}
 			}
 		}
+	}
+	
+	
+	/**
+	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#registerBeanOfClass(java.lang.String, java.lang.Class, boolean)
+	 */
+	public Object registerBeanOfClass(String beanName, Class beanClass, boolean dependencyCheck) throws BeansException {
+		int dependencyCheckCode = dependencyCheck ? 
+										RootBeanDefinition.DEPENDENCY_CHECK_NONE :
+										RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
+		int autowire = RootBeanDefinition.AUTOWIRE_CONSTRUCTOR;
+
+		// Work out whether this is a Type 2 (JavaBean) or Type 3 (constructor) object.
+		// If it has a no-args constructor it's deemed to be Type 2, otherwise
+		// we try Type 3 autowiring.
+		Constructor[] constructors = beanClass.getConstructors();
+		for (int i = 0; i < constructors.length; i++) {
+			if (constructors[i].getParameterTypes().length == 0) {
+				autowire = RootBeanDefinition.AUTOWIRE_BY_TYPE;
+			}
+		}
+		
+		RootBeanDefinition rbd = new RootBeanDefinition(beanClass, new MutablePropertyValues(), true, 
+				dependencyCheckCode, autowire);
+		registerBeanDefinition(beanName, rbd);
+		return getBean(beanName);
 	}
 
 

@@ -7,10 +7,12 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NestedTestBean;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.BeanFactoryUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -480,6 +482,84 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
+		}
+	}
+	
+	
+	public static class NoDependencies {
+	
+	}
+	
+	public void testRegisterBeanOfClassWithNoDependencies() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
+		lbf.registerBeanDefinition("rod", bd);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		String name = "nametag";
+		Object registered = lbf.registerBeanOfClass(name, NoDependencies.class, true);
+		assertEquals(2, lbf.getBeanDefinitionCount());
+		assertTrue(lbf.getBean(name) instanceof NoDependencies);
+		assertSame(registered, lbf.getBean(name));
+	}
+	
+	public void testRegisterBeanOfClassWithSatisfiedJavaBeanDependency() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
+		lbf.registerBeanDefinition("rod", bd);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		String name = "kerry";
+		// Depends on age, name and spouse (TestBean)
+		Object registered = lbf.registerBeanOfClass(name, DependenciesBean.class, true);
+		assertEquals(2, lbf.getBeanDefinitionCount());
+		DependenciesBean kerry = (DependenciesBean) lbf.getBean(name);
+		assertSame(registered, kerry);
+		TestBean rod = (TestBean) lbf.getBean("rod");
+		assertSame(rod, kerry.getSpouse());
+	}
+	
+	public static class ConstructorDependency {
+		public TestBean spouse;
+		public ConstructorDependency(TestBean spouse) {
+			this.spouse = spouse;
+		}
+	}
+	
+	public static class UnsatisfiedConstructorDependency {
+		public UnsatisfiedConstructorDependency(TestBean t, SideEffectBean b) {
+		}
+	}
+	
+	public void testRegisterBeanOfClassWithSatisfiedConstructorDependency() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
+		lbf.registerBeanDefinition("rod", bd);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		String name = "kerry";
+		Object registered = lbf.registerBeanOfClass(name, ConstructorDependency.class, true);
+		assertEquals(2, lbf.getBeanDefinitionCount());
+		ConstructorDependency kerry = (ConstructorDependency) lbf.getBean(name);
+		assertSame(registered, kerry);
+		TestBean rod = (TestBean) lbf.getBean("rod");
+		assertSame(rod, kerry.spouse);
+	}
+	
+	public void testRegisterBeanOfClassWithUnsatisfiedConstructorDependency() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
+		lbf.registerBeanDefinition("rod", bd);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		try {
+			lbf.registerBeanOfClass("foo", UnsatisfiedConstructorDependency.class, true);
+			fail("Should have unsatisfied constructor dependency on SideEffectBean");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Ok
 		}
 	}
 
