@@ -30,8 +30,8 @@ import org.apache.commons.fileupload.FileItem;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockServletContext;
@@ -184,7 +184,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		wac.registerSingleton("filterMultipartResolver", MockCommonsMultipartResolver.class, new MutablePropertyValues());
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		wac.refresh();
-		WebApplicationContextUtils.publishWebApplicationContext(wac);
+		wac.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
 		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
 
@@ -231,7 +231,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		wac.refresh();
 		wac.registerSingleton("myMultipartResolver", MockCommonsMultipartResolver.class, new MutablePropertyValues());
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
-		WebApplicationContextUtils.publishWebApplicationContext(wac);
+		wac.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
 		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
 
