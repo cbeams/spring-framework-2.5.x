@@ -96,23 +96,21 @@ public class BeanPropertyAccessStrategy implements
     /**
      * Get the last component of the path. Also works if not nested.
      * 
-     * @param bw
-     *            BeanWrapper to work on
+     * @param pas
+     *            BeanAccessStrategy to work on
      * @param nestedPath
      *            property path we know is nested
      * @return last component of the path (the property on the target bean)
      */
-    private String getFinalPath(PropertyAccessStrategy bw, String nestedPath) {
-        if (bw == this) { return nestedPath; }
+    private String getFinalPath(PropertyAccessStrategy pas, String nestedPath) {
+        if (pas == this) { return nestedPath; }
         return nestedPath.substring(getNestedPropertySeparatorIndex(nestedPath,
                 true) + 1);
     }
 
-    public Object getPropertyValue(String propertyPath) throws BeansException {
-        if (beanHolder.get() == null) {
-            return null;
-        }
-        return beanWrapper.getPropertyValue(propertyPath);
+    public Object getPropertyValue(String propertyName) throws BeansException {
+        if (beanHolder.get() == null) { return null; }
+        return beanWrapper.getPropertyValue(propertyName);
     }
 
     public void setPropertyValue(PropertyValue pv) throws BeansException {
@@ -170,11 +168,10 @@ public class BeanPropertyAccessStrategy implements
      * 
      * @param propertyPath
      *            property property path, which may be nested
-     * @return a BeanWrapper for the target bean
+     * @return a access strategy for the target bean
      */
     public MutablePropertyAccessStrategy getPropertyAccessStrategyForPath(
             String propertyPath) throws BeansException {
-        System.out.println(propertyPath);
         int pos = getNestedPropertySeparatorIndex(propertyPath, false);
         // handle nested properties recursively
         if (pos > -1) {
@@ -196,7 +193,7 @@ public class BeanPropertyAccessStrategy implements
      * 
      * @param nestedPropertyName
      *            property to create the BeanWrapper for
-     * @return the BeanWrapper instance, either cached or newly created
+     * @return the access strategy instance, either cached or newly created
      */
     protected PropertyAccessStrategy getNestedPropertyAccessStrategy(
             String nestedPropertyName) throws BeansException {
