@@ -63,16 +63,15 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	
 	/**
 	 * Implementation of abstract getTarget() method.
-	 * We look for a target held in a ThreadLocal. If
-	 * we don't find one, we create one and bind it to the thread.
-	 * No synchronization is required.
+	 * We look for a target held in a ThreadLocal. If we don't find one,
+	 * we create one and bind it to the thread. No synchronization is required.
 	 */
 	public Object getTarget() {
 		++this.invocations;
 		Object target = this.targetInThread.get();
 		if (target == null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("No target for apartment prototype '" + getTargetBeanName() + "' found in thread: " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("No target for prototype '" + getTargetBeanName() + "' found in thread: " +
 				    "creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
 			}
 			// associate target with ThreadLocal
@@ -86,7 +85,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 		return target;
 	}
 	
-	public void releaseTarget(Object o) {
+	public void releaseTarget(Object target) {
 		// do nothing
 	}
 
@@ -94,7 +93,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	 * Dispose of targets if necessary; clear ThreadLocal.
 	 */
 	public void destroy() {
-		logger.info("Destroying ThreadLocal bindings");
+		logger.info("Destroying ThreadLocalTargetSource bindings");
 		for (Iterator it = this.targetSet.iterator(); it.hasNext(); ) {
 			Object target = it.next();
 			if (target instanceof DisposableBean) {
@@ -103,8 +102,8 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 				}
 				catch (Exception ex) {
 					// do nothing
-					logger.warn("Thread-bound target of class '" + target.getClass() +
-											"' threw exception from destroy() method", ex);
+					logger.warn("Thread-bound target of class [" + target.getClass() +
+					    "] threw exception from destroy() method", ex);
 				}
 			}
 		}
@@ -152,7 +151,7 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 
 	/**
 	 * Return an introduction advisor mixin that allows the AOP proxy to be
-	 * case to ThreadLocalInvokerStats.
+	 * cast to ThreadLocalInvokerStats.
 	 */
 	public IntroductionAdvisor getStatsMixin() {
 		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
