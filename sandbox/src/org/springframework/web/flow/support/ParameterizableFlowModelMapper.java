@@ -35,9 +35,8 @@ import org.springframework.web.flow.FlowModelMapper;
 import org.springframework.web.flow.MutableFlowModel;
 
 /**
- * Simple attributes mapper that allows mappings to be configured in the Spring
- * application context.
- * 
+ * Generic flow model mapper implementation that allows mappings to be
+ * configured programatically or in a Spring application context.
  * <p>
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
@@ -76,19 +75,17 @@ import org.springframework.web.flow.MutableFlowModel;
  * placed in the parent flow model.</td>
  * </tr>
  * </table>
- * 
  * <p>
  * The mappings defined using the above configuration properties fully support
  * bean property access. So an entry name in a mapping can either be "beanName"
  * or "beanName.propName". Nested property values are also supported
  * ("beanName.propName.propName").
  * </p>
- * 
  * @author Erwin Vervaet
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-public class ParameterizableFlowAttributesMapper implements FlowModelMapper, Serializable {
+public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());;
 
@@ -107,10 +104,10 @@ public class ParameterizableFlowAttributesMapper implements FlowModelMapper, Ser
 	 * flow, and a String value naming the attribute in the child flow. If the
 	 * list item is itself a List, then that list is itself evaluated
 	 * recursively, and must itself contain Strings, Lists, or Maps.
-	 * 
 	 * <p>
-	 * Only <strong>one </strong> of setInputMappings or setInputMappingsMap
-	 * must be called.
+	 * Note: only <strong>one </strong> of setInputMappings or
+	 * setInputMappingsMap must be called.
+	 * @param inputMappings The input mappings
 	 */
 	public void setInputMappings(Collection inputMappings) {
 		this.inputMappings = new HashMap();
@@ -120,14 +117,14 @@ public class ParameterizableFlowAttributesMapper implements FlowModelMapper, Ser
 	/**
 	 * Set the mappings that will be executed when mapping model data to the sub
 	 * flow. This is essentially just a short form of calling
+	 * <p>
+	 * Note: only <strong>one </strong> of setInputMappings or
+	 * setInputMappingsMap must be called.
 	 * @link ParameterizableFlowAttributesMapper#setInputMappings(List) with a
 	 *       List containing one item which is a Map. Each map entry must be a
 	 *       String key naming the attribute in the parent flow, and a String
 	 *       value naming the attribute in the child flow.
-	 * 
-	 * <p>
-	 * Only <strong>one </strong> of setInputMappings or setInputMappingsMap
-	 * must be called.
+	 * @param inputMappings The input mappings
 	 */
 	public void setInputMappingsMap(Map inputMappings) {
 		this.inputMappings = new HashMap(inputMappings);
@@ -142,10 +139,10 @@ public class ParameterizableFlowAttributesMapper implements FlowModelMapper, Ser
 	 * flow, and a String value naming the attribute in the parent flow. If the
 	 * list item is itself a List, then that list is itself evaluated
 	 * recursively, and must itself contain Strings, Lists, or Maps.
-	 * 
 	 * <p>
-	 * Only <strong>one </strong> of setOutputMappings or setOutputMappingsMap
-	 * must be called.
+	 * Note: only <strong>one </strong> of setOutputMappings or
+	 * setOutputMappingsMap must be called.
+	 * @param outputMappings The output mappings
 	 */
 	public void setOutputMappings(Collection outputMappings) {
 		this.outputMappings = new HashMap(outputMappings.size());
@@ -155,22 +152,22 @@ public class ParameterizableFlowAttributesMapper implements FlowModelMapper, Ser
 	/**
 	 * Set the mappings that will be executed when mapping model data from the
 	 * sub flow. This is essentially just a short form of calling
+	 * <p>
+	 * Note: Only <strong>one </strong> of setOutputMappings or
+	 * setOutputMappingsMap must be called.
+	 * @param outputMappings The output mappings
 	 * @link ParameterizableFlowAttributesMapper#setOutputMappings(List) with a
 	 *       List containing one item which is a Map. Each map entry must be a
 	 *       String key naming the attribute in the sub flow, and a String value
 	 *       naming the attribute in the parent flow.
-	 * 
-	 * <p>
-	 * Only <strong>one </strong> of setOutputMappings or setOutputMappingsMap
-	 * must be called.
 	 */
 	public void setOutputMappingsMap(Map outputMappings) {
 		this.outputMappings = new HashMap(outputMappings);
 	}
 
 	/**
-	 * Internal worker function to convert given mappingsList to a
-	 * simple mappings map.
+	 * Internal worker function to convert given mappingsList to a simple
+	 * mappings map.
 	 */
 	private void putCollectionMappings(Map map, Collection mappingsList) {
 		Iterator it = mappingsList.iterator();
@@ -202,16 +199,16 @@ public class ParameterizableFlowAttributesMapper implements FlowModelMapper, Ser
 	}
 
 	/**
-	 * <p>Set whether or not missing attributes in the model should
-	 * be mapped to a null value or shouldn't be mapped at all.
+	 * Set whether or not missing attributes in the model should be mapped to a
+	 * null value or shouldn't be mapped at all.
 	 */
 	public void setMapMissingAttributesToNull(boolean toNull) {
 		this.mapMissingAttributesToNull = toNull;
 	}
 
 	/**
-	 * <p>Get whether or not missing attributes in the model should
-	 * be mapped to a null value or shouldn't be mapped at all.
+	 * Get whether or not missing attributes in the model should be mapped to a
+	 * null value or shouldn't be mapped at all.
 	 */
 	public boolean isMapMissingAttributesToNull() {
 		return this.mapMissingAttributesToNull;
