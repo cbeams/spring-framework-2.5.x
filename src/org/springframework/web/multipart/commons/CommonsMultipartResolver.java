@@ -53,7 +53,7 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 	 * Determines the servlet container's temporary directory via the application context.
 	 */
 	public CommonsMultipartResolver() {
-		this.fileUpload = initFileUpload();
+		this.fileUpload = newFileUpload();
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class CommonsMultipartResolver extends WebApplicationObjectSupport implem
 	 * Can be overridden to use a custom subclass, e.g. for testing purposes.
 	 * @return the new DiskFileUpload instance
 	 */
-	protected DiskFileUpload initFileUpload() {
+	protected DiskFileUpload newFileUpload() {
 		return new DiskFileUpload();
 	}
 
