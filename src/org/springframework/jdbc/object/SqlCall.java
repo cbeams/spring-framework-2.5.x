@@ -34,7 +34,7 @@ import org.springframework.jdbc.core.SqlReturnResultSet;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
- * @version $Id: SqlCall.java,v 1.7 2004-04-07 12:26:50 trisberg Exp $
+ * @version $Id: SqlCall.java,v 1.8 2004-04-21 18:43:22 jhoeller Exp $
  */
 public abstract class SqlCall extends RdbmsOperation {
 
@@ -64,43 +64,35 @@ public abstract class SqlCall extends RdbmsOperation {
 	 */
 	private String callString;
 
+
 	/**
-	 * Set the flag used to indicate that this call is for a function
-	 * @param function true or false
+	 * Set whether this call is for a function.
 	 */
 	public void setFunction(boolean function) {
 		this.function = function;
 	}
 
 	/**
-	 * Get the flag used to indicate that this call is for a function.
-	 * @return boolean
+	 * Get whether this call is for a function.
 	 */
 	public boolean isFunction() {
 		return function;
 	}
 
 	/**
-	 * @return Returns the sqlReadyForUse indicating whether the sql can be used as is.
-	 */
-	public boolean isSqlReadyForUse() {
-		return sqlReadyForUse;
-	}
-	/**
-	 * @param sqlReadyForUse The sqlReadyForUse to set to indicate whether sql can be used as is.
-	 * @todo Generated comment
+	 * Set whether the SQL can be used as is.
 	 */
 	public void setSqlReadyForUse(boolean sqlReadyForUse) {
 		this.sqlReadyForUse = sqlReadyForUse;
 	}
 
 	/**
-	 * Get the call string.
-	 * @return boolean
+	 * Return whether the SQL can be used as is.
 	 */
-	public String getCallString() {
-		return this.callString;
+	public boolean isSqlReadyForUse() {
+		return sqlReadyForUse;
 	}
+
 
 	/**
 	 * Return a CallableStatementCreator to perform an operation
@@ -126,7 +118,6 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * @see RdbmsOperation#compileInternal()
 	 */
 	protected final void compileInternal() {
-		
 		if (isSqlReadyForUse()) {
 			this.callString = getSql();
 		}
@@ -154,12 +145,18 @@ public abstract class SqlCall extends RdbmsOperation {
 			}
 			this.callString += ")}";
 		}
-
-		logger.info("Compiled stored procedure. Call string is [" + getCallString() + "]");
-
+		if (logger.isInfoEnabled()) {
+			logger.info("Compiled stored procedure. Call string is [" + getCallString() + "]");
+		}
 		this.callableStatementFactory = new CallableStatementCreatorFactory(getCallString(), getDeclaredParameters());
-
 		onCompileInternal();
+	}
+
+	/**
+	 * Get the call string.
+	 */
+	public String getCallString() {
+		return this.callString;
 	}
 
 	/**

@@ -124,7 +124,7 @@ public abstract class SessionFactoryUtils {
 	 * @see #getSession(SessionFactory, Interceptor, SQLExceptionTranslator, boolean)
 	 */
 	public static Session getSession(SessionFactory sessionFactory, Interceptor entityInterceptor,
-									 SQLExceptionTranslator jdbcExceptionTranslator) {
+	                                 SQLExceptionTranslator jdbcExceptionTranslator) {
 		return getSession(sessionFactory, entityInterceptor, jdbcExceptionTranslator, true);
 	}
 
@@ -141,7 +141,7 @@ public abstract class SessionFactoryUtils {
 	 * or EJB CMT) via TransactionSynchronizationManager, to allow for
 	 * transaction-scoped Hibernate Sessions without JtaTransactionManager.
 	 * This only applies when a JTA TransactionManagerLookup is specified in the
-	 * Hibernate configuration, and if "allowSynchronization" is true.
+	 * Hibernate configuration, and when "allowSynchronization" is true.
 	 * <p>Supports setting a Session-level Hibernate entity interceptor that allows
 	 * to inspect and change property values before writing to and reading from the
 	 * database. Such an interceptor can also be set at the SessionFactory level
@@ -165,7 +165,7 @@ public abstract class SessionFactoryUtils {
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public static Session getSession(SessionFactory sessionFactory, Interceptor entityInterceptor,
-									 SQLExceptionTranslator jdbcExceptionTranslator, boolean allowSynchronization)
+	                                 SQLExceptionTranslator jdbcExceptionTranslator, boolean allowSynchronization)
 			throws DataAccessResourceFailureException {
 
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);

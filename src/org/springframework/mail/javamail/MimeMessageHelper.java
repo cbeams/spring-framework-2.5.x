@@ -98,6 +98,18 @@ public class MimeMessageHelper {
 
 	/**
 	 * Create new MimeMessageHelper for the given MimeMessage,
+	 * assuming a simple text message (no multipart content).
+	 * @param mimeMessage MimeMessage to work on
+	 * @param encoding the character encoding to use for the message
+	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
+	 */
+	public MimeMessageHelper(MimeMessage mimeMessage, String encoding) {
+		this(mimeMessage);
+		this.encoding = encoding;
+	}
+
+	/**
+	 * Create new MimeMessageHelper for the given MimeMessage,
 	 * in multipart mode (supporting attachments) if requested.
 	 * @param mimeMessage MimeMessage to work on
 	 * @param multipart whether to create a multipart message that
@@ -109,18 +121,6 @@ public class MimeMessageHelper {
 			this.mimeMultipart = new MimeMultipart();
 			this.mimeMessage.setContent(this.mimeMultipart);
 		}
-	}
-
-	/**
-	 * Create new MimeMessageHelper for the given MimeMessage,
-	 * assuming a simple text message (no multipart content).
-	 * @param mimeMessage MimeMessage to work on
-	 * @param encoding the character encoding to use for the message
-	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, boolean)
-	 */
-	public MimeMessageHelper(MimeMessage mimeMessage, String encoding) {
-		this(mimeMessage);
-		this.encoding = encoding;
 	}
 
 	/**
