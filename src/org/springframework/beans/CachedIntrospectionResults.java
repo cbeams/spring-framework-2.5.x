@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @since 05 May 2001
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 final class CachedIntrospectionResults {
 
@@ -38,9 +38,9 @@ final class CachedIntrospectionResults {
 	private static Map $cache = new HashMap();
 
 	/**
-	 * We might use this from the EJB tier, so we don't want to use
-	 * synchronization. Object references are atomic, so we
-	 * can live with doing the occasional unnecessary lookup at startup only.
+	 * We might use this from the EJB tier, so we don't want to use synchronization.
+	 * Object references are atomic, so we can live with doing the occasional
+	 * unnecessary lookup at startup only.
 	 */
 	protected static CachedIntrospectionResults forClass(Class clazz) throws BeansException {
 		Object o = $cache.get(clazz);
@@ -58,12 +58,13 @@ final class CachedIntrospectionResults {
 		}
 
 		// o is now an exception or CachedIntrospectionResults
-
 		// We already have data for this class in the cache
-		if (o instanceof BeansException)
+		if (o instanceof BeansException) {
 			throw (BeansException) o;
+		}
 		return (CachedIntrospectionResults) o;
 	}
+
 
 	private BeanInfo beanInfo;
 
@@ -79,25 +80,25 @@ final class CachedIntrospectionResults {
 	private CachedIntrospectionResults(Class clazz) throws BeansException {
 		try {
 			logger.debug("Getting BeanInfo for class [" + clazz.getName() + "]");
-			beanInfo = Introspector.getBeanInfo(clazz);
+			this.beanInfo = Introspector.getBeanInfo(clazz);
 
 			logger.debug("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
-			propertyDescriptorMap = new HashMap();
+			this.propertyDescriptorMap = new HashMap();
 			// This call is slow so we do it once
-			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
 				logger.debug("Found property '" + pds[i].getName() + "' of type [" + pds[i].getPropertyType() +
 										 "]; editor=[" + pds[i].getPropertyEditorClass() + "]");
-				propertyDescriptorMap.put(pds[i].getName(), pds[i]);
+				this.propertyDescriptorMap.put(pds[i].getName(), pds[i]);
 			}
 
 			logger.debug("Caching MethodDescriptors for class [" + clazz.getName() + "]");
-			methodDescriptorMap = new HashMap();
+			this.methodDescriptorMap = new HashMap();
 			// This call is slow so we do it once
-			MethodDescriptor[] mds = beanInfo.getMethodDescriptors();
+			MethodDescriptor[] mds = this.beanInfo.getMethodDescriptors();
 			for (int i = 0; i < mds.length; i++) {
 				logger.debug("Found method '" + mds[i].getName() + "' of type [" + mds[i].getMethod().getReturnType() + "]");
-				methodDescriptorMap.put(mds[i].getName(), mds[i]);
+				this.methodDescriptorMap.put(mds[i].getName(), mds[i]);
 			}
 		}
 		catch (IntrospectionException ex) {
@@ -114,16 +115,18 @@ final class CachedIntrospectionResults {
 	}
 
 	protected PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
-		PropertyDescriptor pd = (PropertyDescriptor) propertyDescriptorMap.get(propertyName);
-		if (pd == null)
-			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass() + "]", null);
+		PropertyDescriptor pd = (PropertyDescriptor) this.propertyDescriptorMap.get(propertyName);
+		if (pd == null) {
+			throw new FatalBeanException("No property '" + propertyName + "' in class [" + getBeanClass().getName() + "]", null);
+		}
 		return pd;
 	}
 
 	protected MethodDescriptor getMethodDescriptor(String methodName) throws BeansException {
-		MethodDescriptor md = (MethodDescriptor) methodDescriptorMap.get(methodName);
-		if (md == null)
-			throw new FatalBeanException("No method '" + methodName + "' in class [" + getBeanClass() + "]", null);
+		MethodDescriptor md = (MethodDescriptor) this.methodDescriptorMap.get(methodName);
+		if (md == null) {
+			throw new FatalBeanException("No method '" + methodName + "' in class [" + getBeanClass().getName() + "]", null);
+		}
 		return md;
 	}
 
