@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.scheduling.quartz;
 
@@ -40,9 +40,8 @@ import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 
 import org.springframework.beans.TestBean;
-import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.scheduling.TestMethodInvokingTask;
 
 /**
@@ -111,15 +110,14 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
-			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
-					throws SchedulerException {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
 		};
 		Map schedulerContext = new HashMap();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
-		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -129,7 +127,7 @@ public class QuartzSupportTests extends TestCase {
 
 		schedulerControl.verify();
 	}
-	
+
 	public void testSchedulerFactoryBeanWithListeners() throws Exception {
 		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
 		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
@@ -157,16 +155,15 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
-			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
-					throws SchedulerException {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
 		};
-		schedulerFactoryBean.setSchedulerListeners(new SchedulerListener[] {schedulerListener});
-		schedulerFactoryBean.setGlobalJobListeners(new JobListener[] {globalJobListener});
-		schedulerFactoryBean.setJobListeners(new JobListener[] {jobListener});
-		schedulerFactoryBean.setGlobalTriggerListeners(new TriggerListener[] {globalTriggerListener});
-		schedulerFactoryBean.setTriggerListeners(new TriggerListener[] {triggerListener});
+		schedulerFactoryBean.setSchedulerListeners(new SchedulerListener[]{schedulerListener});
+		schedulerFactoryBean.setGlobalJobListeners(new JobListener[]{globalJobListener});
+		schedulerFactoryBean.setJobListeners(new JobListener[]{jobListener});
+		schedulerFactoryBean.setGlobalTriggerListeners(new TriggerListener[]{globalTriggerListener});
+		schedulerFactoryBean.setTriggerListeners(new TriggerListener[]{triggerListener});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -206,22 +203,22 @@ public class QuartzSupportTests extends TestCase {
 		SimpleTriggerBean trigger0 = new SimpleTriggerBean();
 		trigger0.setBeanName("myTrigger1");
 		trigger0.setJobDetail(jobDetail1);
-		trigger0.setStartDelay(0);		
+		trigger0.setStartDelay(0);
 		trigger0.setRepeatInterval(1);
 		trigger0.setRepeatCount(1);
 		trigger0.afterPropertiesSet();
-		
+
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
 		trigger1.setJobDetail(jobDetail1);
-		trigger1.setStartDelay(1000L);		
+		trigger1.setStartDelay(1000L);
 		trigger1.setRepeatInterval(1);
 		trigger1.setRepeatCount(1);
 		trigger1.afterPropertiesSet();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-		schedulerFactoryBean.setJobDetails(new JobDetail[] { jobDetail1 } );
-		schedulerFactoryBean.setTriggers(new Trigger[] { trigger1, trigger0} );
+		schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail1});
+		schedulerFactoryBean.setTriggers(new Trigger[]{trigger1, trigger0});
 		schedulerFactoryBean.afterPropertiesSet();
 		
 		// ok scheduler is set up... let's wait for like 4 seconds
@@ -231,7 +228,7 @@ public class QuartzSupportTests extends TestCase {
 		catch (InterruptedException ex) {
 			// fall through
 		}
-		
+
 		if (concurrent) {
 			assertEquals(2, task1.counter);
 			task1.stop();
@@ -242,15 +239,15 @@ public class QuartzSupportTests extends TestCase {
 			assertEquals(1, task1.counter);
 			task1.stop();
 			// we need to check whether or not the test succeed with non-concurrent jobs
-		}		
-		
+		}
+
 		try {
 			Thread.sleep(4000);
 		}
 		catch (InterruptedException ex) {
 			// fall through
 		}
-		
+
 		task1.stop();
 		assertEquals(2, task1.counter);
 		
@@ -320,13 +317,12 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
-			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
-					throws SchedulerException {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
 		};
-		schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0, jobDetail1});
-		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail0, jobDetail1});
+		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -353,8 +349,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
-			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName)
-					throws SchedulerException {
+			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
 		};
@@ -396,7 +391,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testJobDetailBeanWithListenerNames() {
 		JobDetailBean jobDetail = new JobDetailBean();
-		String[] names = new String[] {"test1", "test2"};
+		String[] names = new String[]{"test1", "test2"};
 		jobDetail.setJobListenerNames(names);
 		List result = Arrays.asList(jobDetail.getJobListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -404,7 +399,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testCronTriggerBeanWithListenerNames() {
 		CronTriggerBean trigger = new CronTriggerBean();
-		String[] names = new String[] {"test1", "test2"};
+		String[] names = new String[]{"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -412,23 +407,30 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testSimpleTriggerBeanWithListenerNames() {
 		SimpleTriggerBean trigger = new SimpleTriggerBean();
-		String[] names = new String[] {"test1", "test2"};
+		String[] names = new String[]{"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);
 	}
 
-    /** Tests the creation of multiple schedulers (#SPR772) */
-    public void testMultipleSchedulers() throws Exception {
-        ApplicationContext ctx = new ClassPathXmlApplicationContext(
-                "/org/springframework/scheduling/quartz/multiple-schedulers.xml");
+	/**
+	 * Tests the creation of multiple schedulers (SPR-772)
+	 */
+	public void testMultipleSchedulers() throws Exception {
+		ClassPathXmlApplicationContext ctx =
+				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleSchedulers.xml");
 
-        Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
-        Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
+		try {
+			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
+			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
 
-        assertNotSame(scheduler1, scheduler2);
-        assertFalse(scheduler1.getSchedulerName().equals(scheduler2.getSchedulerName()));
-    }
+			assertNotSame(scheduler1, scheduler2);
+			assertFalse(scheduler1.getSchedulerName().equals(scheduler2.getSchedulerName()));
+		}
+		finally {
+			ctx.close();
+		}
+	}
 
 
 	private static class TestSchedulerListener implements SchedulerListener {
