@@ -59,8 +59,8 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		// Prepare report for rendering.
 		JRAbstractExporter exporter = createExporter();
 
-		if (getExporterParameters() != null) {
-			exporter.setParameters(getExporterParameters());
+		if (getConvertedExporterParameters() != null) {
+			exporter.setParameters(getConvertedExporterParameters());
 		}
 
 		if (useWriter()) {

@@ -43,10 +43,10 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 					JasperPrint filledReport, Map model, HttpServletResponse response)
 					throws Exception {
 
-				assertEquals("Invalid number of exporter parameters", 1, getExporterParameters().size());
+				assertEquals("Invalid number of exporter parameters", 1, getConvertedExporterParameters().size());
 
 				JRExporterParameter key = JRHtmlExporterParameter.IMAGES_URI;
-				Object value = getExporterParameters().get(key);
+				Object value = getConvertedExporterParameters().get(key);
 
 				assertNotNull("Value not mapped to correct key", value);
 				assertEquals("Incorrect value for parameter", "/foo/bar", value);
@@ -68,6 +68,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 		try {
 			view.setExporterParameters(params);
+			view.convertExporterParameters();
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
@@ -84,6 +85,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 		try {
 			view.setExporterParameters(params);
+			view.convertExporterParameters();
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
@@ -100,6 +102,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 		try {
 			view.setExporterParameters(params);
+			view.convertExporterParameters();
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {

@@ -162,9 +162,15 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	private Properties headers;
 
 	/**
-	 * Stores the <code>String</code> keyed exporter parameters passed in by the user.
+	 * Stores the exporter parameters passed in by the user as passed in by the user. May be keyed as
+	 * <code>String</code>s with the fully qualified name of the exporter parameter field.
 	 */
 	private Map exporterParameters;
+
+	/**
+	 * Stores the converted exporter parameters - keyed by <code>JRExporterParameter</code>.
+	 */
+	private Map convertedExporterParameters;
 
 	/**
 	 * Stores the <code>DataSource</code>, if any, used as the report data source.
@@ -245,32 +251,26 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * and the value you wish to assign to the parameter as value
 	 */
 	public void setExporterParameters(Map parameters) {
-		if (parameters != null) {
-			this.exporterParameters = new HashMap(parameters.size());
-			for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				Object key = entry.getKey();
-				JRExporterParameter parameter = null;
-				if (key instanceof JRExporterParameter) {
-					parameter = (JRExporterParameter) key;
-				}
-				else if (key instanceof String) {
-					parameter = convertToExporterParameter((String) key);
-				}
-				else {
-					throw new IllegalArgumentException(
-							"Key [" + key + "] is invalid type. Should be either String or JRExporterParameter");
-				}
-				this.exporterParameters.put(parameter, entry.getValue());
-			}
-		}
+		// NOTE: removed conversion from here since configuraion of parameters
+		// can also happen through access to the underlying Map using
+		// getExporterParameters(). Conversion now happens in initApplicationContext
+		// and subclasses use getConvertedExporterParameters() to access the coverted
+		// parameter Map - robh.
+		this.exporterParameters = parameters;
 	}
 
 	/**
 	 * Return the exporter parameters that this view uses, if any.
 	 */
-	protected Map getExporterParameters() {
-		return exporterParameters;
+	public Map getExporterParameters() {
+		return this.exporterParameters;
+	}
+
+	/**
+	 * Allows subclasses to retrieve the converted exporter parameters.
+	 */
+	protected Map getConvertedExporterParameters() {
+		 return this.convertedExporterParameters;
 	}
 
 	/**
@@ -315,11 +315,44 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 		}
 
+		// convert user supplied exporterParameters
+		convertExporterParameters();
+
 		if (this.headers == null) {
 			this.headers = new Properties();
 		}
 		if (!this.headers.containsKey(HEADER_CONTENT_DISPOSITION)) {
 			this.headers.setProperty(HEADER_CONTENT_DISPOSITION, CONTENT_DISPOSITION_INLINE);
+		}
+	}
+
+	/**
+	 * Converts the exporter parameters passed in by the user which may be keyed by <code>String</code>s
+	 * corresponding to the fully qualified name of the <code>JRExporterParameter</code> into parameters
+	 * which are keyed by <code>JRExporterParameter</code>.
+	 */
+	protected void convertExporterParameters() {
+		if (this.exporterParameters != null) {
+			this.convertedExporterParameters = new HashMap(exporterParameters.size());
+
+			for (Iterator it = exporterParameters.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				Object key = entry.getKey();
+
+				JRExporterParameter parameter = null;
+				if (key instanceof JRExporterParameter) {
+					parameter = (JRExporterParameter) key;
+				}
+				else if (key instanceof String) {
+					parameter = convertToExporterParameter((String) key);
+				}
+				else {
+					throw new IllegalArgumentException(
+							"Key [" + key + "] is invalid type. Should be either String or JRExporterParameter");
+				}
+
+				this.convertedExporterParameters.put(parameter, entry.getValue());
+			}
 		}
 	}
 
