@@ -49,4 +49,30 @@ public interface Application extends ApplicationContextAware
      */
     void setDescription(String desc);
     
+    /**
+     * Set the threads that will be registered with Runtime.getRuntime().addShutdownHook(Thread t)
+     * @param threads The threads that will be registered.
+     */
+    //void setShutdownHookThreads(Thread[] threads);
+    
+    /**
+     * Classes that implement ShutdownHook interface have their shutdown method called
+     * in the order of registration on a single shutdown thread.
+     * @param hooks
+     */
+   // void setShutdownHooks(ShutdownHook[] hooks);
+    
+    /**
+     * Classes that do not implement the ShutdownHook interface can specify a method,object
+     * key-value pair to be called on shutdown.  The method must return void and contain
+     * zero args. If it name to
+     * be called on the 
+     * and the object 
+     * a method name
+     * for a zero parameter method that returns void.  
+     * method name to be called on an object when 
+     * @param methodObjectMap
+     */
+   // void setShutdownMethods(Map methodObjectMap);
+    
 }

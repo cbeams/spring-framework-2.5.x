@@ -6,42 +6,45 @@ package org.springframework.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+
 
 /**
  * Registered callback with Runtime.addShutdownHook.  Calls destroy on
- * the ServiceManager.
+ * the BeanFactory.
  * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
  */
-public class ServiceShutdownThread extends Thread
+public class ApplicationShutdownThread extends Thread
 {
 
     /**
      * The log instance
      */
-    private static Log LOG = LogFactory.getLog(ServiceShutdownThread.class);
+    private static Log LOG = LogFactory.getLog(ApplicationShutdownThread.class);
 
     /**
-     * The service manager instance.
+     * The Appcontext instance.
      */
-    private ServiceManager _serviceManager;
+    private ConfigurableBeanFactory _beanFactory;
 
     /**
      * Create the shutdown callback with a reference to the service manager.
-     * @param mgr the service manager instance.
+     * @param bf the bean factory.
      */
-    public ServiceShutdownThread(ServiceManager mgr)
+    public ApplicationShutdownThread(ConfigurableBeanFactory bf)
     {
-        _serviceManager = mgr;
+        _beanFactory = bf;
     }
 
     /**
-     * Call the destroy method of the service manager, log any exceptions thrown.
+     * Call the destroy method of the bean factory. Log any exceptions thrown.
      */
     public void run()
     {
         try
         {
-            _serviceManager.destroy();
+            LOG.info("Destroying all singletons registered in the BeanFactory");
+            _beanFactory.destroySingletons();
         } catch (Exception e)
         {
             try
@@ -51,8 +54,8 @@ public class ServiceShutdownThread extends Thread
             {
                 //If somehow the logging got shutdown before this was called....
                 System.err.println(
-                    "ServiceShutdownThread: Error destroying service manager.  Exception Message = "
-                        + t.getMessage());
+                    "ApplicationShutdownThread:  Error destroying service manager.  Exception Message = "
+                        + e.getMessage());
             }
         }
     }

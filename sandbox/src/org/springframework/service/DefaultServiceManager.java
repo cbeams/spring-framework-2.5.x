@@ -166,11 +166,11 @@ public class DefaultServiceManager implements ServiceManager
 
 
     /**
-     * Call the stop() and dispose() methods when the Spring BeanFactory is destroyed,
-     * for example when the application shuts down.  This only occurs if the ServiceManager
-     * is a singleton, which is should be.  In stand alone applications, setting the
-     * enableShutdownHook to true will perform the same operation.  You should chose one
-     * way of having the destroy method called in your application.
+     * Call the stop() and dispose() methods on registered services.  ConfigurableApplicationContext.destroySingletons()
+     * will call this method since the ServiceManager should be made a singleton.  
+     * In stand alone applications, setting the enableShutdownHook to true call call
+     * ConfigurableApplicationContext.destroy method on exit.  
+     *
      * @see org.springframework.beans.factory.DisposableBean#destroy()
      */
     public void destroy() throws Exception

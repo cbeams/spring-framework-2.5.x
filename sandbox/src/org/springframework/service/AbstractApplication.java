@@ -4,8 +4,12 @@
  */
 package org.springframework.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Implementation of interface Application methods.
@@ -14,9 +18,14 @@ import org.springframework.context.ApplicationContextException;
 public abstract class AbstractApplication implements Application
 {
     /**
+     * The logger instance.
+     */
+    private static Log LOG = LogFactory.getLog(AbstractApplication.class);
+
+    /**
      * The application context reference.
      */
-    private ApplicationContext appContext_;
+    private ConfigurableApplicationContext appContext_;
 
     /**
      * The version of the application.
@@ -32,16 +41,35 @@ public abstract class AbstractApplication implements Application
      * The long description of the application.
      */
     private String description_;
-    
+
     /**
      * Set the application context.  Called by BeanFactory
      * @param ctx the Application context.
      * @throws org.springframework.context.ApplicationContextException from spring.
      */
-    public final void setApplicationContext(final ApplicationContext ctx)
-        throws ApplicationContextException
+    public void setApplicationContext(ApplicationContext ctx)
+        throws BeansException
     {
-        appContext_ = ctx;
+        if (ctx instanceof ConfigurableApplicationContext)
+        {
+            appContext_ = (ConfigurableApplicationContext) ctx;
+            if (appContext_.getBeanFactory()
+                instanceof ConfigurableBeanFactory)
+            {
+                Runtime.getRuntime().addShutdownHook(
+                    new ApplicationShutdownThread(
+                        (ConfigurableBeanFactory) appContext_
+                            .getBeanFactory()));
+            } else
+            {
+                LOG.warn(
+                    "Did not register ApplicationShutdownThread.  BeanFactory not of type ConfigurableBeanFactory");
+            }
+        } else
+        {
+            LOG.warn(
+                "Did not register ApplicationShutdownThread.  ApplicationContext not of type ConfigurableApplicationContext");
+        }
     }
 
     /**
@@ -90,7 +118,7 @@ public abstract class AbstractApplication implements Application
     {
         version_ = version;
     }
-    
+
     /**
      * Get the description of the application.
      * @return the description of the application.
@@ -108,8 +136,7 @@ public abstract class AbstractApplication implements Application
     {
         description_ = string;
     }
-    
-    
+
     /**
      * A suggestion for an application banner that displays name 
      * and version of applicstion.
@@ -124,7 +151,7 @@ public abstract class AbstractApplication implements Application
         sb.append("** Name:  " + getName() + "\n");
         sb.append("**\n");
         sb.append("** Description: " + getDescription() + "\n");
-        sb.append("**\n");        
+        sb.append("**\n");
         sb.append("** Version:  " + getVersion() + "\n");
         sb.append("**\n");
         sb.append("*************************\n");
