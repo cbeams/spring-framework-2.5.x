@@ -30,17 +30,18 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.dynamic.AutoRefreshDynamicBeanTargetSource;
-import org.springframework.beans.factory.dynamic.DynamicBeanTargetSource;
+import org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ResourceLoader;
 
 /**
+ * TODO could make generic: only candidate evaluation differs
+ * Separate out post processor
  * 
  * @author Rod Johnson
- * @version $Id: AbstractScriptFactory.java,v 1.2 2004-08-04 16:49:48 johnsonr Exp $
+ * @version $Id: AbstractScriptFactory.java,v 1.3 2004-08-04 18:39:39 johnsonr Exp $
  */
 public abstract class AbstractScriptFactory implements ScriptContext, ApplicationContextAware, BeanFactoryAware,
 		BeanPostProcessor {
@@ -187,28 +188,14 @@ public abstract class AbstractScriptFactory implements ScriptContext, Applicatio
 			for (int i = 0; i < intfs.length; i++) {
 				pf.addInterface(intfs[i]);
 			}
+	
+			AbstractRefreshableTargetSource targetSource = new DynamicScriptTargetSource(bean, beanFactory, beanName, script);
+			targetSource.setExpirySeconds(expirySeconds);
+			//targetSource.setExpirableObject(script);
+			pf.setTargetSource(targetSource);
 			
-	
-			// DynamicObjectInterceptor needs to know how to get this
-			pf.setExposeProxy(true);
-	
-			pf.setOptimize(false);
-	
-			// Add the DynamicScript introduction
-			DynamicScriptInterceptor dii = new DynamicScriptInterceptor(script);
-			pf.addAdvisor(new DefaultIntroductionAdvisor(dii, DynamicScript.class));
-	
-
-			pf.setTargetSource(new DynamicBeanTargetSource(bean, beanFactory, beanName));
-			if (expirySeconds == 0) {
-				
-			}
-			else {
-				AutoRefreshDynamicBeanTargetSource targetSource = new AutoRefreshDynamicBeanTargetSource(bean, beanFactory, beanName, script);
-				targetSource.setExpirySeconds(this.expirySeconds);
-				pf.setTargetSource(targetSource);
-			}
-	
+			pf.addAdvisor(new DefaultIntroductionAdvisor(targetSource, DynamicScript.class));
+			
 			log.info("Installed refreshable TargetSource " + pf.getTargetSource() + " for bean '" + beanName + "'");
 	
 			Object wrapped = pf.getProxy();

@@ -17,19 +17,22 @@
 package org.springframework.beans.factory.script;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.dynamic.DynamicObjectInterceptor;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.dynamic.DynamicBeanTargetSource;
 
 /**
  * Introduction interceptor that provides DynamicScript implementation for all Groovy objects. <br>
  * 
  * @author Rod Johnson
- * @version $Id: DynamicScriptInterceptor.java,v 1.3 2004-08-04 16:49:48 johnsonr Exp $
+ * @version $Id: DynamicScriptTargetSource.java,v 1.1 2004-08-04 18:39:39 johnsonr Exp $
  */
-public class DynamicScriptInterceptor extends DynamicObjectInterceptor implements DynamicScript {
+public class DynamicScriptTargetSource extends DynamicBeanTargetSource implements DynamicScript {
 
 	private Script script;
 
-	public DynamicScriptInterceptor(Script script) {
+	public DynamicScriptTargetSource(Object initialTarget, BeanFactory factory, String name, Script script) {
+		super(initialTarget, factory, name);
+		setExpirableObject(script);
 		this.script = script;
 	}
 	
