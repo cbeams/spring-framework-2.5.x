@@ -42,7 +42,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.14 2004-06-02 00:47:17 jhoeller Exp $
+ * @version $Id: BeanWrapper.java,v 1.15 2004-06-03 00:08:26 jhoeller Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -202,7 +202,8 @@ public interface BeanWrapper {
 	 * the property descriptor or checking the value in case of an indexed or
 	 * mapped element.
 	 * @param propertyName property to check status for
-	 * @return the property type for the particular property
+	 * @return the property type for the particular property, or null if not
+	 * determinable (can only happen with an indexed or mapped element)
 	 * @throws InvalidPropertyException if there is no such property
 	 */
 	Class getPropertyType(String propertyName) throws BeansException;
