@@ -35,20 +35,26 @@ import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 
+import org.springframework.jms.support.converter.SimpleMessageConverter102;
+import org.springframework.jms.support.destination.DynamicDestinationResolver;
+
 /**
- * A subclass of JmsTemplate that uses the JMS 1.0.2 specification,
- * rather than the JMS 1.1 methods used by JmsTemplate itself.
- * This class can be used for JMS 1.0.2 providers, offering the same
- * API as JmsTemplate does for JMS 1.1 providers.
+ * A subclass of JmsTemplate that uses the JMS 1.0.2 specification, rather than
+ * the JMS 1.1 methods used by JmsTemplate itself. This class can be used for JMS
+ * 1.0.2 providers, offering the same API as JmsTemplate does for JMS 1.1 providers.
  *
  * <p>You must specify the domain or style of messaging to be either
  * Point-to-Point (Queues) or Publish/Subscribe(Topics), using the
  * "pubSubDomain" property. Point-to-Point (Queues) is the default domain.
  *
- * <p>The "pubSubDomain" property is an important setting due to the use
- * of similar but seperate class hierarchies in the JMS 1.0.2 API. JMS 1.1
- * provides a new domain-independent API that allows for easy mix-and-match
- * use of Point-to-Point and Publish/Subscribe domain.
+ * <p>The "pubSubDomain" property is an important setting due to the use of similar
+ * but seperate class hierarchies in the JMS 1.0.2 API. JMS 1.1 provides a new
+ * domain-independent API that allows for easy mix-and-match use of Point-to-Point
+ * and Publish/Subscribe domain.
+ *
+ * <p>This template uses a DynamicDestinationResolver and a SimpleMessageConverter102
+ * as default strategies for resolving a destination name respectively converting
+ * a message.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
@@ -56,6 +62,8 @@ import javax.jms.TopicSession;
  * @see #setConnectionFactory
  * @see #setPubSubDomain
  * @see JmsTemplate
+ * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+ * @see org.springframework.jms.support.converter.SimpleMessageConverter102
  */
 public class JmsTemplate102 extends JmsTemplate {
 
@@ -78,9 +86,23 @@ public class JmsTemplate102 extends JmsTemplate {
 	 * @see #setPubSubDomain
 	 */
 	public JmsTemplate102(ConnectionFactory connectionFactory, boolean pubSubDomain) {
+		this();
 		setConnectionFactory(connectionFactory);
 		setPubSubDomain(pubSubDomain);
 		afterPropertiesSet();
+	}
+
+	/**
+	 * Initialize the default implementations for the template's strategies:
+	 * DynamicDestinationResolver and SimpleMessageConverter102.
+	 * @see #setDestinationResolver
+	 * @see #setMessageConverter
+	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+	 * @see org.springframework.jms.support.converter.SimpleMessageConverter102
+	 */
+	protected void initDefaultStrategies() {
+		setDestinationResolver(new DynamicDestinationResolver());
+		setMessageConverter(new SimpleMessageConverter102());
 	}
 
 	/**

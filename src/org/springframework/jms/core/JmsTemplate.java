@@ -54,12 +54,20 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * parameters are ignored when a JMS Session is created inside an active
  * transaction, no matter if a JTA transaction or a Spring-managed transaction.
  *
+ * <p>This template uses a DynamicDestinationResolver and a SimpleMessageConverter
+ * as default strategies for resolving a destination name respectively converting
+ * a message.
+ *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setConnectionFactory
  * @see #setPubSubDomain
  * @see JmsTemplate102
+ * @see #setDestinationResolver
+ * @see #setMessageConverter
+ * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+ * @see org.springframework.jms.support.converter.SimpleMessageConverter
  */
 public class JmsTemplate implements JmsOperations, InitializingBean {
 
@@ -103,12 +111,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * Delegate management of JNDI lookups and dynamic destination creation
 	 * to a DestinationResolver implementation.
 	 */
-	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
+	private DestinationResolver destinationResolver;
 
 	/**
 	 * The messageConverter to use for send(object) methods.
 	 */
-	private MessageConverter messageConverter = new SimpleMessageConverter();
+	private MessageConverter messageConverter;
 
 	/**
 	 * The timeout to use for receive operations.
@@ -145,6 +153,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * @see #setConnectionFactory
 	 */
 	public JmsTemplate() {
+		initDefaultStrategies();
 	}
 
 	/**
@@ -152,8 +161,22 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * @param connectionFactory the ConnectionFactory to obtain connections from
 	 */
 	public JmsTemplate(ConnectionFactory connectionFactory) {
+		this();
 		setConnectionFactory(connectionFactory);
 		afterPropertiesSet();
+	}
+
+	/**
+	 * Initialize the default implementations for the template's strategies:
+	 * DynamicDestinationResolver and SimpleMessageConverter.
+	 * @see #setDestinationResolver
+	 * @see #setMessageConverter
+	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+	 * @see org.springframework.jms.support.converter.SimpleMessageConverter
+	 */
+	protected void initDefaultStrategies() {
+		setDestinationResolver(new DynamicDestinationResolver());
+		setMessageConverter(new SimpleMessageConverter());
 	}
 
 
