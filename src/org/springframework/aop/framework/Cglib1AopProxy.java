@@ -36,8 +36,7 @@ import org.springframework.aop.TargetSource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: Cglib1AopProxy.java,v 1.1 2003-12-01 15:40:46 johnsonr Exp $
- * @see java.lang.reflect.Proxy
+ * @version $Id: Cglib1AopProxy.java,v 1.2 2003-12-01 18:42:00 johnsonr Exp $
  * @see net.sf.cglib.Enhancer
  */
 class Cglib1AopProxy implements AopProxy, MethodInterceptor {
@@ -66,10 +65,10 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 		 }
 	}
 	
-	private final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Config used to configure this proxy */
-	private final AdvisedSupport advised;
+	protected final AdvisedSupport advised;
 	
 	/**
 	 * 
@@ -83,6 +82,9 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE)
 			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
 		this.advised = config;
+		if (this.advised.getTargetSource().getTargetClass() == null) {
+			throw new AopConfigException("Either an interface or a target is required for proxy creation");
+		}
 	}
 	
 	
@@ -143,7 +145,8 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 			}
 			else {
 				// We need to create a method invocation...
-				invocation = advised.getMethodInvocationFactory().getMethodInvocation(proxy, method, targetClass, target, args, chain, advised);
+				invocation = new CglibMethodInvocation(proxy, target, targetClass, method, args, 
+							targetClass, chain, methodProxy);
 			
 				if (this.advised.getExposeInvocation()) {
 					// Make invocation available if necessary.
@@ -191,9 +194,9 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 				AopContext.setCurrentProxy(oldProxy);
 			}
 			
-			if (invocation != null) {
-				advised.getMethodInvocationFactory().release(invocation);
-			}
+			//if (invocation != null) {
+			//	advised.getMethodInvocationFactory().release(invocation);
+			//}
 		}
 	}
 	
@@ -211,11 +214,6 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 	 * the given interface. Uses the given class loader.
 	 */
 	public Object getProxy(ClassLoader cl) {
-		// Use CGLIB
-		if (this.advised.getTargetSource().getTargetClass() == null) {
-			throw new IllegalArgumentException("Either an interface or a target is required for proxy creation");
-		}
-		// proxy the given class itself: CGLIB necessary
 		if (logger.isInfoEnabled())
 			logger.info("Creating CGLIB proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
 		// delegate to inner class to avoid AopProxy runtime dependency on CGLIB
@@ -223,7 +221,7 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 		return createProxy();
 	}
 	
-	private Object createProxy() {
+	protected Object createProxy() {
 		try {
 			return Enhancer.enhance(advised.getTargetSource().getTargetClass(), AopProxyUtils.completeProxiedInterfaces(advised),
 				this
@@ -277,8 +275,5 @@ class Cglib1AopProxy implements AopProxy, MethodInterceptor {
 			
 		return true;
 	}
-
-
-
 
 }
