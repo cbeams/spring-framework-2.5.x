@@ -43,6 +43,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
+	public static final String METHOD_HEAD = "HEAD";
+
 	public static final String METHOD_GET = "GET";
 
 	public static final String METHOD_POST = "POST";
@@ -55,7 +57,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/** Set of supported methods. GET and POST by default. */
-	private Set	supportedMethods;
+	private Set	supportedMethods = new HashSet();
 
 	private boolean requireSession = false;
 
@@ -68,26 +70,23 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	private int cacheSeconds = -1;
 
 
-	/**
-	 * Create a new WebContentGenerator supporting GET and POST methods.
-	 */
 	public WebContentGenerator() {
-		this.supportedMethods = new HashSet();
+		this.supportedMethods.add(METHOD_HEAD);
 		this.supportedMethods.add(METHOD_GET);
 		this.supportedMethods.add(METHOD_POST);
 	}
 
 	/**
 	 * Set the HTTP methods that this content generator should support.
-	 * Default is GET and POST.
+	 * Default is HEAD, GET and POST.
 	 */
-	public final void setSupportedMethods(String[] supportedMethodsArray) {
-		if (supportedMethodsArray == null || supportedMethodsArray.length == 0) {
+	public final void setSupportedMethods(String[] methods) {
+		if (methods == null || methods.length == 0) {
 			throw new IllegalArgumentException("supportedMethods must not be empty");
 		}
 		this.supportedMethods.clear();
-		for (int i = 0; i < supportedMethodsArray.length; i++) {
-			this.supportedMethods.add(supportedMethodsArray[i]);
+		for (int i = 0; i < methods.length; i++) {
+			this.supportedMethods.add(methods[i]);
 		}
 	}
 
