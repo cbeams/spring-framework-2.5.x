@@ -28,8 +28,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * <p>This filter works similar to the AOP HibernateInterceptor: It just makes
  * Hibernate Sessions available via the thread. It is suitable for non-transactional
- * execution but also for middle tier transactions via HibernateTransactionManager.
- * The latter will automatically use Sessions pre-bound by this filter.
+ * execution but also for middle tier transactions via HibernateTransactionManager
+ * or JtaTransactionManager. In the latter case, Sessions pre-bound by this filter
+ * will automatically be used for the transactions and flushed accordingly.
  *
  * <p><b>WARNING:</b> Applying this filter to existing logic can cause issues that
  * have not appeared before, through the use of a single Hibernate Session for the

@@ -24,6 +24,8 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	private Transaction transaction;
 
+	private boolean synchronizedWithTransaction;
+
 	public SessionHolder(Session session) {
 		this.session = session;
 	}
@@ -38,6 +40,14 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	public Transaction getTransaction() {
 		return transaction;
+	}
+
+	public void setSynchronizedWithTransaction(boolean synchronizedWithTransaction) {
+		this.synchronizedWithTransaction = synchronizedWithTransaction;
+	}
+
+	public boolean isSynchronizedWithTransaction() {
+		return synchronizedWithTransaction;
 	}
 
 }

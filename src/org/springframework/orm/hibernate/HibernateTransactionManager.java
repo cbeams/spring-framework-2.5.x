@@ -227,6 +227,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		try {
+			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 			Session session = txObject.getSessionHolder().getSession();
 			if (debugEnabled) {
 				logger.debug("Beginning Hibernate transaction on session [" + session + "]");

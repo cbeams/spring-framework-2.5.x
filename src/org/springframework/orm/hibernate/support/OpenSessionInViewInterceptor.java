@@ -23,8 +23,9 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>This interceptor works similar to the AOP HibernateInterceptor: It just makes
  * Hibernate Sessions available via the thread. It is suitable for non-transactional
- * execution but also for middle tier transactions via HibernateTransactionManager.
- * The latter will automatically use Sessions pre-bound by this filter.
+ * execution but also for middle tier transactions via HibernateTransactionManager
+ * or JtaTransactionManager. In the latter case, Sessions pre-bound by this interceptor
+ * will automatically be used for the transactions and flushed accordingly.
  *
  * <p>In contrast to OpenSessionInViewFilter, this interceptor is set up in a Spring
  * application context and can thus take advantage of bean wiring. It derives from
