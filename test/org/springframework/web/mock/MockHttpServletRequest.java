@@ -1,6 +1,5 @@
 package org.springframework.web.mock;
 
-
 import java.io.BufferedReader;
 import java.io.Serializable;
 import java.security.Principal;
@@ -19,12 +18,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-
 /**
  * Dummy request for use outside a server to unit test servlets and
  * RequestHandlers. Can never fully implement methods, but should at least
  * finish off attribute and parameter methods (the main purpose of this class).
- * @author  Rod Johnson
+ * @author Rod Johnson
  * @since November 28, 2000
  */
 public class MockHttpServletRequest implements HttpServletRequest, Serializable {
@@ -131,8 +129,8 @@ public class MockHttpServletRequest implements HttpServletRequest, Serializable 
 		return true;
 	}
 
-	public java.lang.String getHeader(String p1) {
-		return null;
+	public String getHeader(String p1) {
+		return (String) headers.get(p1);
 	}
 
 	public String getRemoteUser() {
