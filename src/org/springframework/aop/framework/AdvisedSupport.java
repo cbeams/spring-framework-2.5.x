@@ -22,9 +22,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.MethodInterceptor;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * methods, which are provided by subclasses.
  *
  * @author Rod Johnson
- * @version $Id: AdvisedSupport.java,v 1.30 2004-05-27 08:42:15 jhoeller Exp $
+ * @version $Id: AdvisedSupport.java,v 1.31 2004-06-18 11:02:39 johnsonr Exp $
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -205,10 +205,17 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public boolean removeInterface(Class intf) {
 		return this.interfaces.remove(intf);
 	}
-
+	
+	/**
+	 * @deprecated
+	 */
 	public void addInterceptor(Interceptor interceptor) throws AopConfigException {
+		addAdvice(interceptor);
+	}
+
+	public void addAdvice(Advice advice) throws AopConfigException {
 		int pos = (this.advisors != null) ? this.advisors.size() : 0;
-		addInterceptor(pos, interceptor);
+		addAdvice(pos, advice);
 	}
 	
 	public boolean isInterfaceProxied(Class intf) {
@@ -222,23 +229,44 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Cannot add IntroductionInterceptors this way.
+	 * @deprecated
+	 * @see org.springframework.aop.framework.Advised#addInterceptor(int, org.aopalliance.intercept.Interceptor)
 	 */
 	public void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException {
-		if (!(interceptor instanceof MethodInterceptor)) {
-			throw new AopConfigException(getClass().getName() + " only handles MethodInterceptors");
+		addAdvice(pos, interceptor);
+	}
+	
+	/**
+	 * Cannot add IntroductionInterceptors this way.
+	 */
+	public void addAdvice(int pos, Advice advice) throws AopConfigException {
+		if (advice instanceof Interceptor) {
+			if (!(advice instanceof MethodInterceptor)) {
+				throw new AopConfigException(getClass().getName() + " only handles MethodInterceptors");
+			}
+			if (advice instanceof IntroductionInterceptor) {
+				throw new AopConfigException("IntroductionInterceptors may only be added as part of IntroductionAdvice");
+			}
 		}
-		if (interceptor instanceof IntroductionInterceptor) {
-			throw new AopConfigException("IntroductionInterceptors may only be added as part of IntroductionAdvice");
-		}
-		addAdvisor(pos, new DefaultPointcutAdvisor(interceptor));
+		addAdvisor(pos, new DefaultPointcutAdvisor(advice));
 	}
 	
 	/**
 	 * Convenience method to remove an interceptor.
+	 * @deprecated
 	 */
 	public final boolean removeInterceptor(Interceptor interceptor) throws AopConfigException {
-		int index = indexOf(interceptor);
+		return removeAdvice(interceptor);
+	}
+	
+	/**
+	 * Remove the Advisor containing the given advice
+	 * @param advice advice to remove
+	 * @return whether the Advice was found and removed (false if
+	 * there was no such advice)
+	 */
+	public final boolean removeAdvice(Advice advice) throws AopConfigException {
+		int index = indexOf(advice);
 		if (index == -1) {
 			return false;
 		}
@@ -248,14 +276,26 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	}
 
+	/**
+	 * @deprecated
+	 * @see org.springframework.aop.framework.Advised#addAfterReturningAdvice(org.springframework.aop.AfterReturningAdvice)
+	 */
 	public void addAfterReturningAdvice(final AfterReturningAdvice ara) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ara));
 	}
 	
+	/**
+	 * @deprecated
+	 * @see org.springframework.aop.framework.Advised#addBeforeAdvice(org.springframework.aop.MethodBeforeAdvice)
+	 */
 	public void addBeforeAdvice(final MethodBeforeAdvice ba) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, ba));
 	}
 	
+	/**
+	 * @deprecated
+	 * @see org.springframework.aop.framework.Advised#addThrowsAdvice(org.springframework.aop.ThrowsAdvice)
+	 */
 	public void addThrowsAdvice(final ThrowsAdvice throwsAdvice) throws AopConfigException {
 		addAdvisor(new DefaultPointcutAdvisor(throwsAdvice));
 	}
@@ -268,11 +308,27 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param interceptor AOP Alliance interceptor to search for
 	 * @return index from 0 of this interceptor, or -1 if there's
 	 * no such advice.
+	 * @deprecated
 	 */
 	public int indexOf(Interceptor interceptor) {
+		// Invoke generic form of this method that's recommended
+		// post 1.0.3
+		return indexOf((Advice) interceptor);
+	}
+	
+	/**
+	 * Return the index (from 0) of the given AOP Alliance Advice,
+	 * or -1 if no such advice is an advice for this proxy.
+	 * The return value of this method can be used to index into
+	 * the Advisors array.
+	 * @param advice AOP Alliance advice to search for
+	 * @return index from 0 of this advice, or -1 if there's
+	 * no such advice.
+	 */
+	public int indexOf(Advice advice) {
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
-			if (advisor.getAdvice() == interceptor) {
+			if (advisor.getAdvice() == advice) {
 				return i;
 			}
 		}
@@ -392,14 +448,24 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Is this interceptor included in any advisor?
 	 * @param mi interceptor to check inclusion of
 	 * @return whether this interceptor instance could be run in an invocation
+	 * @deprecated
 	 */
 	public final boolean interceptorIncluded(Interceptor mi) {
+		return adviceIncluded(mi);
+	}
+	
+	/**
+	 * Is this advice included in any advisor?
+	 * @param advice advice to check inclusion of
+	 * @return whether this advice instance could be run in an invocation
+	 */
+	public final boolean adviceIncluded(Advice advice) {
 		if (this.advisors.size() == 0) {
 			return false;
 		}
 		for (int i = 0; i < this.advisors.size(); i++) {
-			Advisor advice = (Advisor) this.advisors.get(i);
-			if (advice.getAdvice() == mi) {
+			Advisor advisor = (Advisor) this.advisors.get(i);
+			if (advisor.getAdvice() == advice) {
 				return true;
 			}
 		}
@@ -410,8 +476,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Count interceptors of the given class
 	 * @param interceptorClass class of the interceptor to check
 	 * @return the count of the interceptors of this class or subclasses
+	 * @deprecated
 	 */
 	public final int countInterceptorsOfType(Class interceptorClass) {
+		return countAdvicesOfType(interceptorClass);
+	}
+	
+	/**
+	 * Count advices of the given class
+	 * @param interceptorClass class of the interceptor to check
+	 * @return the count of the interceptors of this class or subclasses
+	 */
+	public final int countAdvicesOfType(Class interceptorClass) {
 		if (this.advisors.size() == 0) {
 			return 0;
 		}

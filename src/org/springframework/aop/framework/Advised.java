@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
@@ -26,14 +27,14 @@ import org.springframework.aop.ThrowsAdvice;
 /**
  * Interface to be implemented by classes that hold the configuration
  * of a factory of AOP proxies. This configuration includes
- * the Interceptors and Advisors, and the proxied interfaces.
+ * the Interceptors and other advice, and Advisors, and the proxied interfaces.
  *
  * <p>Any AOP proxy obtained from Spring can be cast to this interface to allow
  * manipulation of its AOP advice.
  *
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: Advised.java,v 1.12 2004-04-14 18:55:18 johnsonr Exp $
+ * @version $Id: Advised.java,v 1.13 2004-06-18 11:02:39 johnsonr Exp $
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
@@ -83,29 +84,50 @@ public interface Advised {
 	boolean isInterfaceProxied(Class intf);
 	
 	/**
-	 * Add the given AOP Alliance interceptor to the tail of the advice (interceptor) chain.
-	 * This will be wrapped in a DefaultPointcutAdvistor with a pointcut that
-	 * always applies, and returned from the getAdvisors() method in this
-	 * wrapped form.
+	 * Add the given AOP Alliance interceptor to the tail of the advice (interceptor) chain..
+	 * Use addAdvice method instead.
 	 * @param interceptor to add to the tail of the chain
 	 * @see #addInterceptor(int, Interceptor)
 	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
+	 * @deprecated will be removed in Spring 1.2
 	 */
 	void addInterceptor(Interceptor interceptor) throws AopConfigException;
+	
+	/**
+	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
+	 * This will be wrapped in a DefaultPointcutAdvisor with a pointcut that
+	 * always applies, and returned from the getAdvisors() method in this
+	 * wrapped form.
+	 * @param advice advice to add to the tail of the chain
+	 * @see #addAdvice(int, Advice)
+	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
+	 */
+	void addAdvice(Advice advice) throws AopConfigException;
 
 	/**
 	 * Add the given AOP Alliance interceptor at the specified position in the interceptor chain.
+	 * Use addAdvice(int, Advice) instead.
 	 * @param pos index from 0 (head)
 	 * @param interceptor interceptor to add at the specified position in the
 	 * interceptor chain
+	 * @deprecated
 	 */
 	void addInterceptor(int pos, Interceptor interceptor) throws AopConfigException;
+	
+	/**
+	 * Add the given AOP Alliance Advice at the specified position in the interceptor chain.
+	 * @param pos index from 0 (head)
+	 * @param advice advice to add at the specified position in the
+	 * interceptor chain
+	 */
+	void addAdvice(int pos, Advice advice) throws AopConfigException;
 	
 	/**
 	 * Add an AfterReturningAdvice to the tail of the advice chain
 	 * @param afterReturningAdvice AfterReturningAdvice to add
 	 * @throws AopConfigException if the advice cannot be added--for example, because
 	 * the proxy configuration is frozen
+	 * @deprecated
 	 */
 	void addAfterReturningAdvice(AfterReturningAdvice afterReturningAdvice) throws AopConfigException;
 	
@@ -114,6 +136,7 @@ public interface Advised {
 	 * @param beforeAdvice MethodBeforeAdvice to add
 	 * @throws AopConfigException if the advice cannot be added--for example, because
 	 * the proxy configuration is frozen
+	 * @deprecated
 	 */		
 	void addBeforeAdvice(MethodBeforeAdvice beforeAdvice) throws AopConfigException;
 	
@@ -122,6 +145,7 @@ public interface Advised {
 	 * @param throwsAdvice ThrowsAdvice to add
 	 * @throws AopConfigException if the advice cannot be added--for example, because
 	 * the proxy configuration is frozen
+	 * @deprecated
 	 */
 	void addThrowsAdvice(ThrowsAdvice throwsAdvice) throws AopConfigException;
 
@@ -167,6 +191,14 @@ public interface Advised {
 	void removeAdvisor(int index) throws AopConfigException;
 	
 	/**
+	 * Remove the Advisor containing the given advice
+	 * @param advice advice to remove
+	 * @return whether the Advice was found and removed (false if
+	 * there was no such advice)
+	 */
+	boolean removeAdvice(Advice advice) throws AopConfigException;
+	
+	/**
 	 * Replace the given advisor.
 	 * <b>NB:</b>If the advisor is an IntroductionAdvisor
 	 * and the replacement is not or implements different interfaces,
@@ -186,7 +218,7 @@ public interface Advised {
 	boolean isFrozen();
 	
 	/**
-	 * As toString() will normally pass to the target, 
+	 * As toString() will normally be delegated to the target, 
 	 * this returns the equivalent for the AOP proxy
 	 * @return a string description of the proxy configuration
 	 */
