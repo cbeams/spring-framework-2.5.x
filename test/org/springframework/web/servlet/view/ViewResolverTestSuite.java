@@ -35,7 +35,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
@@ -252,8 +251,8 @@ public class ViewResolverTestSuite extends TestCase {
 	public static class TestView extends InternalResourceView {
 
 		public void setLocation(Resource location) {
-			if (!(location instanceof FileSystemResource)) {
-				throw new IllegalArgumentException("Expecting FileSystemResource, not " + location.getClass().getName());
+			if (!(location instanceof ClassPathResource)) {
+				throw new IllegalArgumentException("Expecting ClassPathResource, not " + location.getClass().getName());
 			}
 		}
 	}

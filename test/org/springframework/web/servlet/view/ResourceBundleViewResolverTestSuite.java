@@ -20,23 +20,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.View;
 
 /**
- *
  * @author Rod Johnson
- * @version $RevisionId$
  */
 public class ResourceBundleViewResolverTestSuite extends TestCase {
 
@@ -132,12 +129,12 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 		public int initCount;
 
 		public void setLocation(Resource location) {
-			if (!(location instanceof FileSystemResource)) {
-				throw new IllegalArgumentException("Expecting FileSystemResource, not " + location.getClass().getName());
+			if (!(location instanceof ClassPathResource)) {
+				throw new IllegalArgumentException("Expecting ClassPathResource, not " + location.getClass().getName());
 			}
 		}
 
-		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) {
 		}
 
 		protected void initApplicationContext() {
@@ -146,4 +143,3 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 	}
 
 }
-
