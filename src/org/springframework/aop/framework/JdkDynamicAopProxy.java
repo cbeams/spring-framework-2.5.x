@@ -8,7 +8,6 @@ package org.springframework.aop.framework;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInvocation;
@@ -20,27 +19,28 @@ import org.springframework.aop.TargetSource;
  * InvocationHandler implementation for the Spring AOP framework,
  * based on J2SE 1.3+ dynamic proxies.
  *
- * <p>Creates a J2SE proxy when proxied interfaces are given, a CGLIB proxy
- * for the actual target class if not. Note that the latter will only work
- * if the target class does not have final methods, as a dynamic subclass
- * will be created at runtime.
+ * <p>Creates a J2SE proxy, implementing the interfaces exposed by the
+ * proxy. Dynamic proxies cannot be used to proxy methods defined in
+ * classes, rather than interface.
  *
  * <p>Objects of this type should be obtained through proxy factories,
- * configured by a ProxyConfig implementation. This class is internal
+ * configured by an AdvisedSupport class. This class is internal
  * to the Spring framework and need not be used directly by client code.
  *
- * <p>Proxies created using this class can be threadsafe if the
+ * <p>Proxies created using this class will be threadsafe if the
  * underlying (target) class is threadsafe.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdkDynamicAopProxy.java,v 1.2 2003-12-02 11:54:10 johnsonr Exp $
+ * @version $Id: JdkDynamicAopProxy.java,v 1.3 2003-12-02 15:08:34 johnsonr Exp $
  * @see java.lang.reflect.Proxy
+ * @see org.springframework.aop.framework.AdvisedSupport
+ * @see org.springframework.aop.framework.ProxyFactory
  */
 final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 	
 	/*
-	 * NOTE: we could avoid the code duplication between this class and the CGLIB
+	 * NOTE: We could avoid the code duplication between this class and the CGLIB
 	 * proxies by refactoring invoke() into a template method. However, this approach
 	 * adds at least 10% performance overhead versus a copy-paste solution, so we sacrifice
 	 * elegance for performance. (We have a good test suite to ensure that the different
@@ -48,14 +48,13 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 	 * This way, we can also more easily take advantage of minor optimizations in each class.
 	 */
 	
-	
 	private final Log logger = LogFactory.getLog(getClass());
 
 	/** Config used to configure this proxy */
 	private final AdvisedSupport advised;
 
 	/**
-	 * 
+	 * Construct a new JDK proxy.
 	 * @throws AopConfigException if the config is invalid. We try
 	 * to throw an informative exception in this case, rather than let
 	 * a mysterious failure happen later.
@@ -67,7 +66,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
 		this.advised = config;
 	}
-
 	
 	
 	/**
@@ -84,17 +82,17 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 		boolean setProxyContext = false;
 	
 		TargetSource targetSource = advised.getTargetSource();
-		Class targetClass = null;//targetSource.getTargetClass();
+		Class targetClass = null;
 		Object target = null;		
 		
 		try {
 			// Try special rules for equals() method and implementation of the
-			// ProxyConfig AOP configuration interface
+			// Advised AOP configuration interface
 			if (AopProxyUtils.EQUALS_METHOD.equals(method)) {
 				// What if equals throws exception!?
 
 				// This class implements the equals() method itself
-				return method.invoke(this, args);
+				return new Boolean(equals(args[0]));
 			}
 			else if (Advised.class.equals(method.getDeclaringClass())) {
 				// Service invocations on ProxyConfig with the proxy config
@@ -110,13 +108,12 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 				targetClass = target.getClass();
 			}
 		
+			// Get the interception chain for this method
 			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
-			
-			
 			
 			// Check whether we only have one InvokerInterceptor: that is, no real advice,
 			// but just reflective invocation of the target.
-			// We can only do this if the Advised config object lets us.
+			// We can only do this if the AdvisedSupport config object lets us.
 			if (advised.canOptimizeOutEmptyAdviceChain() && 
 					chain.isEmpty()) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
@@ -145,7 +142,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 					setProxyContext = true;
 				}
 				
-				// If we get here, we need to create a MethodInvocation
+				// Proceed to the joinpoint through the interception chain
 				retVal = invocation.proceed();
 				
 			}
@@ -178,7 +175,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 				advised.getMethodInvocationFactory().release(invocation);
 			}
 		}
-	}
+	}	// invoke
 	
 
 	/**
@@ -194,7 +191,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 	 * the given interface. Uses the given class loader.
 	 */
 	public Object getProxy(ClassLoader cl) {
-		// Proxy specific interfaces: J2SE dynamic proxy is sufficient
 		if (logger.isInfoEnabled())
 			logger.info("Creating J2SE proxy for [" + this.advised.getTargetSource().getTargetClass() + "]");
 		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(advised);
@@ -202,7 +198,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
 	}
 
 	
-
 	/**
 	 * Equality means interceptors and interfaces and
 	 * TargetSource are equal.
