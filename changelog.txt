@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.1 (28.9.2004)
+Changes in version 1.1.1 (30.9.2004)
 ------------------------------------
 
 Package org.springframework.aop
@@ -44,6 +44,7 @@ Package org.springframework.ejb
 * fixed AbstractSlsbInvokerInterceptor's "create" to invoke on correct Method reference in case of "cacheHome"=false
 
 Package org.springframework.jdbc
+* deprecated DataSourceUtils' "getDataSourceFromJndi" methods, in favor of fetching from JNDI via JndiObjectFactoryBean
 * SingleConnectionDataSource and TransactionAwareDataSourceProxy do not use thread context class loader for proxies
 * clarified that LobHandler's getters are supposed to return Java null in case of SQL NULL (following the JDBC spec)
 * OracleLobHandler's getter implementations return null rather than an empty array/stream in case of SQL NULL
