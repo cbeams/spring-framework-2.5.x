@@ -32,7 +32,7 @@ import org.springframework.core.TimeStamped;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AopProxyTests.java,v 1.16 2003-11-28 11:17:42 johnsonr Exp $
+ * @version $Id: AopProxyTests.java,v 1.17 2003-11-28 12:44:34 johnsonr Exp $
  */
 public class AopProxyTests extends TestCase {
 
@@ -52,7 +52,7 @@ public class AopProxyTests extends TestCase {
 
 	public void testNoInterceptors() {
 		AdvisedSupport pc =
-			new AdvisedSupport(new Class[] { ITestBean.class }, false);
+			new AdvisedSupport(new Class[] { ITestBean.class });
 		// Add no interceptors
 		try {
 			AopProxy aop = new AopProxy(pc);
@@ -281,7 +281,7 @@ public class AopProxyTests extends TestCase {
 		MockControl miControl = MockControl.createControl(MethodInterceptor.class);
 		MethodInterceptor mi = (MethodInterceptor) miControl.getMock();
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class }, false);
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
 		pc.addInterceptor(mi);
 		AopProxy aop = new AopProxy(pc);
 
@@ -326,7 +326,8 @@ public class AopProxyTests extends TestCase {
 				return s;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class }, context);
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		pc.setExposeInvocation(context);
 		pc.addInterceptor(mi);
 		AopProxy aop = new AopProxy(pc);
 
@@ -350,7 +351,7 @@ public class AopProxyTests extends TestCase {
 		};
 		InvokerInterceptor ii = new InvokerInterceptor(raw);
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class }, false);
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
 		pc.addInterceptor(ii);
 		AopProxy aop = new AopProxy(pc);
 
@@ -364,7 +365,7 @@ public class AopProxyTests extends TestCase {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
 		InvokerInterceptor ii = new InvokerInterceptor(raw);
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class}, false);
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		pc.addInterceptor(ii);
 		AopProxy aop = new AopProxy(pc);
 
@@ -377,7 +378,7 @@ public class AopProxyTests extends TestCase {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
 		InvokerInterceptor ii = new InvokerInterceptor(raw);
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {}, false);
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {});
 		pc.addInterceptor(ii);
 		AopProxy aop = new AopProxy(pc);
 
@@ -397,7 +398,7 @@ public class AopProxyTests extends TestCase {
 		TestBean raw = new EqualsTestBean();
 		InvokerInterceptor ii = new InvokerInterceptor(raw);
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class }, false);
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
 		pc.addInterceptor(ii);
 		AopProxy aop = new AopProxy(pc);
 
@@ -409,7 +410,7 @@ public class AopProxyTests extends TestCase {
 		assertTrue("test equals proxy", tb.equals(aop));
 
 		// Test with AOP proxy with additional interceptor
-		AdvisedSupport pc2 = new AdvisedSupport(new Class[] { ITestBean.class }, false);
+		AdvisedSupport pc2 = new AdvisedSupport(new Class[] { ITestBean.class });
 		pc2.addInterceptor(new DebugInterceptor());
 		assertTrue(!tb.equals(new AopProxy(pc2)));
 
@@ -456,7 +457,8 @@ public class AopProxyTests extends TestCase {
 				throw ex;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class }, true);
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		pc.setExposeInvocation(true);
 		pc.addInterceptor(mi);
 		AopProxy aop = new AopProxy(pc);
 
@@ -469,6 +471,31 @@ public class AopProxyTests extends TestCase {
 			assertTrue("exception matches: not " + thrown, ex == thrown);
 		}
 	}
+	
+	/**
+	 * Check that although a method is eligible for advice chain optimization and
+	 * direct reflective invocation, it doesn't happen if we've asked to see the proxy,
+	 * so as to guarantee a consistent programming model.
+	 * @throws Throwable
+	 */
+	public void testTargetCanGetInvocationEvenIfNoAdviceChain() throws Throwable {
+		NeedsToSeeProxy target = new NeedsToSeeProxy();
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { INeedsToSeeProxy.class } );
+		pc.addInterceptor(new InvokerInterceptor(target));
+		assertTrue(pc.canOptimizeOutEmptyAdviceChain());
+		pc.setExposeInvocation(true);
+		assertFalse(pc.canOptimizeOutEmptyAdviceChain());
+		pc.setExposeInvocation(false);
+		assertTrue(pc.canOptimizeOutEmptyAdviceChain());
+		pc.setExposeProxy(true);
+		assertFalse(pc.canOptimizeOutEmptyAdviceChain());
+		
+		// Now let's try it with the special target
+		AopProxy aop = new AopProxy(pc);
+		INeedsToSeeProxy proxied = (INeedsToSeeProxy) aop.getProxy();
+		// It will complain if it can't get the proxy
+		proxied.incrementViaProxy();
+	}
 
 	public void testTargetCanGetInvocation() throws Throwable {
 		final ContextTestBean expectedTarget = new ContextTestBean() {
@@ -479,7 +506,8 @@ public class AopProxyTests extends TestCase {
 			}
 		};
 		
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class }, true);
+		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
+		pc.setExposeInvocation(true);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				// Assert that target matches BEFORE invocation returns

@@ -6,6 +6,7 @@
 package org.springframework.aop.framework;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -20,6 +21,7 @@ import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.interceptor.InvokerInterceptor;
 
 /**
  * InvocationHandler implementation for the Spring AOP framework,
@@ -39,7 +41,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopProxy.java,v 1.11 2003-11-28 11:17:17 johnsonr Exp $
+ * @version $Id: AopProxy.java,v 1.12 2003-11-28 12:44:44 johnsonr Exp $
  * @see java.lang.reflect.Proxy
  * @see net.sf.cglib.Enhancer
  */
@@ -103,40 +105,51 @@ public class AopProxy implements InvocationHandler {
 				// Service invocations on ProxyConfig with the proxy config
 				return method.invoke(this.advised, args);
 			}
-			/*
-			else if no advice... and have target
-				// Service invocations on ProxyConfig with the proxy config
-				return method.invoke(this.config.getTarget(), args);
-			}
-			*/
 			
-			// Looks like we need to create a method invocation...
+			Object retVal = null;
+			
 			Class targetClass = advised.getTarget() != null ? advised.getTarget().getClass() : method.getDeclaringClass();
 		
 			List chain = advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(this.advised, proxy, method, targetClass);
-			invocation = advised.getMethodInvocationFactory().getMethodInvocation(this.advised, proxy, method, targetClass, args, chain);
-		
-			if (this.advised.getExposeInvocation()) {
-				// Make invocation available if necessary.
-				// Save the old value to reset when this method returns
-				// so that we don't blow away any existing state
-				oldInvocation = AopContext.setCurrentInvocation(invocation);
-				// We need to know whether we actually set it, as
-				// this block may not have been reached even if exposeInvocation
-				// is true
-				setInvocationContext = true;
+			
+			// Check whether we only have one InvokerInterceptor: that is, no real advice,
+			// but just reflective invocation of the target.
+			// We can only do this if the Advised config object lets us.
+			if (advised.canOptimizeOutEmptyAdviceChain() && 
+					chain.size() == 1 && chain.get(0).getClass() == InvokerInterceptor.class) {
+				// We can skip creating a MethodInvocation: just invoke the target directly
+				// Note that the final invoker must be an InvokerInterceptor so we know it does
+				// nothing but a reflective operation on the target, and no hot swapping or fancy proxying
+				retVal = directInvoke(advised.getTarget(), method, args);
+			}
+			else {
+				// We need to create a method invocation...
+				invocation = advised.getMethodInvocationFactory().getMethodInvocation(this.advised, proxy, method, targetClass, args, chain);
+			
+				if (this.advised.getExposeInvocation()) {
+					// Make invocation available if necessary.
+					// Save the old value to reset when this method returns
+					// so that we don't blow away any existing state
+					oldInvocation = AopContext.setCurrentInvocation(invocation);
+					// We need to know whether we actually set it, as
+					// this block may not have been reached even if exposeInvocation
+					// is true
+					setInvocationContext = true;
+				}
+				
+				if (this.advised.getExposeProxy()) {
+					// Make invocation available if necessary
+					oldProxy = AopContext.setCurrentProxy(proxy);
+					setProxyContext = true;
+				}
+				
+				// If we get here, we need to create a MethodInvocation
+				retVal = invocation.proceed();
 			}
 			
-			if (this.advised.getExposeProxy()) {
-				// Make invocation available if necessary
-				oldProxy = AopContext.setCurrentProxy(proxy);
-				setProxyContext = true;
-			}
-			
-			// If we get here, we need to create a MethodInvocation
-			Object retVal = invocation.proceed();
-			if (retVal != null && retVal == invocation.getThis()) {
-				// Special case: it returned this
+			// Massage return value if necessary
+			if (retVal != null && retVal == advised.getTarget()) {
+				// Special case: it returned "this"
 				// Note that we can't help if the target sets
 				// a reference to itself in another returned object
 				retVal = proxy;
@@ -157,6 +170,28 @@ public class AopProxy implements InvocationHandler {
 				advised.getMethodInvocationFactory().release(invocation);
 			}
 		}
+	}
+	
+	
+	/**
+	 * Invoke the target directly via reflection
+	 * @return
+	 */
+	private Object directInvoke(Object target, Method m, Object[] args) throws Throwable {
+		//		Use reflection to invoke the method
+		 try {
+			 Object rval = m.invoke(target, args);
+			 return rval;
+		 }
+		 catch (InvocationTargetException ex) {
+			 // Invoked method threw a checked exception. 
+			 // We must rethrow it. The client won't see the interceptor
+			 Throwable t = ex.getTargetException();
+			 throw t;
+		 }
+		 catch (IllegalAccessException ex) {
+			 throw new AspectException("Couldn't access method " + m, ex);
+		 }
 	}
 
 	/**
