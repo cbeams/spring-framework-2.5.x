@@ -9,12 +9,13 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.aopalliance.intercept.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.framework.MethodInvocationImpl;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.aop.support.SimpleIntroductionAdvice;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.DisposableBean;
 
 /**
  * Invoker interceptor that maintains a pool of instances, acquiring and
@@ -22,7 +23,7 @@ import org.springframework.beans.factory.BeanInitializationException;
  *
  * <p>This implementation is independent of pooling technology.
  *
- * <p>Subclasses must implement the acquireTarget() and releastTarget() methods
+ * <p>Subclasses must implement the acquireTarget() and releaseTarget() methods
  * to work with their chosen pool. The createTarget() method in this class can
  * be used to create objects to put in the pool.
  *
@@ -30,27 +31,29 @@ import org.springframework.beans.factory.BeanInitializationException;
  * a destroy() method to close down their pool.
  *
  * @author Rod Johnson
- * @version $Id: AbstractPoolingInvokerInterceptor.java,v 1.2 2003-11-13 11:51:25 jhoeller Exp $
+ * @version $Id: AbstractPoolingInvokerInterceptor.java,v 1.3 2003-11-24 11:29:16 johnsonr Exp $
  */
-public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvokerInterceptor implements DisposableBean {
+public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvokerInterceptor implements PoolingConfig, DisposableBean {
 	
 	/** The size of the pool */
-	private int poolSize;
+	private int maxSize;
+	
+	private int invocations;
 
 	/**
 	 * Return the size of the pool
 	 * @return the size of the pool
 	 */
-	public int getPoolSize() {
-		return this.poolSize;
+	public int getMaxSize() {
+		return this.maxSize;
 	}
 
 	/**
 	 * Set the size of the pool
 	 * @param poolSize the size for the pool
 	 */
-	public void setPoolSize(int poolSize) {
-		this.poolSize = poolSize;
+	public void setMaxSize(int maxSize) {
+		this.maxSize = maxSize;
 	}
 
 	/**
@@ -100,12 +103,20 @@ public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvoker
 	 */
 	protected abstract void releaseTarget(Object target) throws Exception; 
 	
+	/**
+	 * @see org.springframework.aop.interceptor.PoolingConfig#getInvocations()
+	 */
+	public int getInvocations() {
+		return this.invocations;
+	}
+	
 	
 	/**
 	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(MethodInvocation)
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Object target = acquireTarget();
+		++invocations;
 		
 		// Set the target on the invocation
 		if (invocation instanceof MethodInvocationImpl) {
@@ -127,6 +138,12 @@ public abstract class AbstractPoolingInvokerInterceptor extends PrototypeInvoker
 		finally {
 			releaseTarget(target);
 		}
+	}
+	
+	
+	public SimpleIntroductionAdvice getPoolingConfigMixin() {
+		DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
+		return new SimpleIntroductionAdvice(dii, PoolingConfig.class);
 	}
 
 }

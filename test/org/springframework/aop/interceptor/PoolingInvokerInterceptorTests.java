@@ -16,7 +16,7 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
  * TODO need to make these tests stronger: it's hard to
  * make too many assumptions about a pool
  * @author Rod Johnson
- * @version $Id: PoolingInvokerInterceptorTests.java,v 1.1 2003-10-08 08:13:04 johnsonr Exp $
+ * @version $Id: PoolingInvokerInterceptorTests.java,v 1.2 2003-11-24 11:29:58 johnsonr Exp $
  */
 public class PoolingInvokerInterceptorTests extends TestCase {
 
@@ -61,5 +61,15 @@ public class PoolingInvokerInterceptorTests extends TestCase {
 		//assertEquals(INITIAL_COUNT + 1, apartment.getCount() );
 	}
 	
+	public void testConfigMixin() {
+		SideEffectBean pooled = (SideEffectBean) beanFactory.getBean("pooledWithMixin");
+		assertEquals(INITIAL_COUNT, pooled.getCount() );
+		PoolingConfig conf = (PoolingConfig) beanFactory.getBean("pooledWithMixin");
+		// TODO one invocation from setup
+		assertEquals(1, conf.getInvocations());
+		pooled.doWork();
+		assertEquals(2, conf.getInvocations());
+		assertEquals(25, conf.getMaxSize());
+	}
 
 }

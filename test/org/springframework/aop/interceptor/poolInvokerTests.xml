@@ -11,9 +11,14 @@
 	
 	<bean id="poolingInvokerInterceptor" class="org.springframework.aop.interceptor.CommonsPoolingInvokerInterceptor">	
 		<property name="targetBeanName"><value>prototypeTest</value></property>
-		<property name="poolSize"><value>25</value></property>
+		<property name="maxSize"><value>25</value></property>
 	</bean>
 	
+	
+	<bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="target"><ref local="poolingInvokerInterceptor" /></property>
+		<property name="targetMethod"><value>getPoolingConfigMixin</value></property>
+	</bean>
 	
 	<!--
 		This will create a bean for each thread ("apartment")
@@ -22,6 +27,16 @@
 			class="org.springframework.aop.framework.ProxyFactoryBean"
 	>	
 		<property name="interceptorNames"><value>poolingInvokerInterceptor</value></property>
+		
+	</bean>
+	
+	<bean id="pooledWithMixin" 
+			class="org.springframework.aop.framework.ProxyFactoryBean"
+	>	
+		<property name="interceptorNames"><value>poolConfigAdvisor,poolingInvokerInterceptor</value></property>
+		<!-- Necessary as have a mixin and want to avoid losing the class,
+			 because there's no target interface -->
+		<property name="proxyTargetClass"><value>true</value></property>
 		
 	</bean>
 

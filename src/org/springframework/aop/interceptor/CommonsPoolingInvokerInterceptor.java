@@ -13,7 +13,7 @@ import org.springframework.beans.factory.BeanFactory;
 /**
  * Jakarta Commons pooling implementation extending AbstractPoolingInvokerInterceptor
  * @author Rod Johnson
- * @version $Id: CommonsPoolingInvokerInterceptor.java,v 1.1 2003-10-08 08:13:20 johnsonr Exp $
+ * @version $Id: CommonsPoolingInvokerInterceptor.java,v 1.2 2003-11-24 11:29:16 johnsonr Exp $
  */
 public class CommonsPoolingInvokerInterceptor 
 				extends AbstractPoolingInvokerInterceptor
@@ -40,7 +40,7 @@ public class CommonsPoolingInvokerInterceptor
 	 */
 	protected ObjectPool createObjectPool() {
 		GenericObjectPool gop = new GenericObjectPool(this);
-		gop.setMaxActive(getPoolSize());
+		gop.setMaxActive(getMaxSize());
 		return gop;
 	}
 
@@ -56,6 +56,20 @@ public class CommonsPoolingInvokerInterceptor
 	 */
 	protected void releaseTarget(Object target) throws Exception {
 		this.pool.returnObject(target);
+	}
+	
+	/**
+	 * @see org.springframework.aop.interceptor.PoolingConfig#getActive()
+	 */
+	public int getActive() {
+		return this.pool.getNumActive();
+	}
+
+	/**
+	 * @see org.springframework.aop.interceptor.PoolingConfig#getFree()
+	 */
+	public int getFree() {
+		return this.pool.getNumIdle();
 	}
 	
 	
