@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.26 2004-01-04 23:43:08 jhoeller Exp $
+    $Id: build.xml,v 1.27 2004-01-05 17:07:31 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -331,7 +331,7 @@
 				<include name="lib/regexp/**"/>
 				<include name="lib/struts/**"/>
 				<include name="lib/velocity/**"/>
-				<include name="lib/xjavadoc/**"/>
+				<include name="lib/xdoclet/**"/>
 			</zipfileset>
 		</zip>
 
