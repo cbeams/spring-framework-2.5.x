@@ -33,7 +33,7 @@ import org.springframework.core.io.ClassPathResource;
  * Tests for static application context.
  * @author Rod Johnson
  */
-public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
+public class StaticApplicationContextTests extends AbstractApplicationContextTests {
 
 	protected StaticApplicationContext sac;
 

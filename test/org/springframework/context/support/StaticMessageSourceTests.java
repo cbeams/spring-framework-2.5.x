@@ -34,12 +34,16 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Rod Johnson
  */
-public class StaticMessageSourceTestSuite extends AbstractApplicationContextTests {
+public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
-	protected static final String MSG_TXT1_US = "At '{1,time}' on \"{1,date}\", there was \"{2}\" on planet {0,number,integer}.";
-	protected static final String MSG_TXT1_UK = "At '{1,time}' on \"{1,date}\", there was \"{2}\" on station number {0,number,integer}.";
-	protected static final String MSG_TXT2_US = "This is a test message in the message catalog with no args.";
-	protected static final String MSG_TXT3_US = "This is another test message in the message catalog with no args.";
+	protected static final String MSG_TXT1_US =
+			"At '{1,time}' on \"{1,date}\", there was \"{2}\" on planet {0,number,integer}.";
+	protected static final String MSG_TXT1_UK =
+			"At '{1,time}' on \"{1,date}\", there was \"{2}\" on station number {0,number,integer}.";
+	protected static final String MSG_TXT2_US =
+			"This is a test message in the message catalog with no args.";
+	protected static final String MSG_TXT3_US =
+			"This is another test message in the message catalog with no args.";
 
 	protected StaticApplicationContext sac;
 
@@ -57,17 +61,15 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 	public void testGetMessageWithDefaultPassedInAndFoundInMsgCatalog() {
 		// Try with Locale.US
 		assertTrue("valid msg from staticMsgSource with default msg passed in returned msg from msg catalog for Locale.US",
-		           sac.getMessage("message.format.example2", null, "This is a default msg if not found in MessageSource.", Locale.US
-		           )
-		           .equals("This is a test message in the message catalog with no args."));
+				sac.getMessage("message.format.example2", null, "This is a default msg if not found in MessageSource.", Locale.US)
+				.equals("This is a test message in the message catalog with no args."));
 	}
 
 	public void testGetMessageWithDefaultPassedInAndNotFoundInMsgCatalog() {
 		// Try with Locale.US
 		assertTrue("bogus msg from staticMsgSource with default msg passed in returned default msg for Locale.US",
-		           sac.getMessage("bogus.message", null, "This is a default msg if not found in MessageSource.", Locale.US
-		           )
-		           .equals("This is a default msg if not found in MessageSource."));
+				sac.getMessage("bogus.message", null, "This is a default msg if not found in MessageSource.", Locale.US)
+				.equals("This is a default msg if not found in MessageSource."));
 	}
 
 	/**
@@ -100,9 +102,8 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 
 		// Now msg better be as expected even with different args
 		assertTrue("2nd search within MsgFormat cache with different args returned expected message for Locale.US",
-		           sac.getMessage("message.format.example1", newArguments, Locale.US
-		           )
-		           .indexOf("there was \"a disturbance in the Force\" on planet 8.") != -1);
+				sac.getMessage("message.format.example1", newArguments, Locale.US)
+				.indexOf("there was \"a disturbance in the Force\" on planet 8.") != -1);
 	}
 
 	/**
@@ -123,20 +124,18 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 		 minutes of the time might not be the same.
 		 */
 		assertTrue("msg from staticMsgSource for Locale.US substituting args for placeholders is as expected",
-		           sac.getMessage("message.format.example1", arguments, Locale.US
-		           )
-		           .indexOf("there was \"a disturbance in the Force\" on planet 7.") != -1);
+				sac.getMessage("message.format.example1", arguments, Locale.US)
+				.indexOf("there was \"a disturbance in the Force\" on planet 7.") != -1);
 
 		// Try with Locale.UK
 		assertTrue("msg from staticMsgSource for Locale.UK substituting args for placeholders is as expected",
-		           sac.getMessage("message.format.example1", arguments, Locale.UK
-		           )
-		           .indexOf("there was \"a disturbance in the Force\" on station number 7.") != -1);
+				sac.getMessage("message.format.example1", arguments, Locale.UK)
+				.indexOf("there was \"a disturbance in the Force\" on station number 7.") != -1);
 
 		// Try with Locale.US - Use a different test msg that requires no args
 		assertTrue("msg from staticMsgSource for Locale.US that requires no args is as expected",
-		           sac.getMessage("message.format.example2", null, Locale.US)
-		           .equals("This is a test message in the message catalog with no args."));
+				sac.getMessage("message.format.example2", null, Locale.US)
+				.equals("This is a test message in the message catalog with no args."));
 	}
 
 	public void testGetMessageWithNoDefaultPassedInAndNotFoundInMsgCatalog() {
@@ -147,8 +146,7 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 
 			fail("bogus msg from staticMsgSource for Locale.US without default msg should have thrown exception");
 		} catch (NoSuchMessageException tExcept) {
-			assertTrue("bogus msg from staticMsgSource for Locale.US without default msg threw expected exception",
-			           true);
+			assertTrue("bogus msg from staticMsgSource for Locale.US without default msg threw expected exception", true);
 		}
 	}
 
@@ -157,7 +155,6 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 		String[] codes1 = new String[] {"message.format.example3", "message.format.example2"};
 		MessageSourceResolvable resolvable1 = new DefaultMessageSourceResolvable(codes1, null, "default");
 		try {
-			System.out.println(sac.getMessage(resolvable1, Locale.US));
 			assertTrue("correct message retrieved", MSG_TXT3_US.equals(sac.getMessage(resolvable1, Locale.US)));
 		}
 		catch (NoSuchMessageException ex) {
@@ -213,14 +210,11 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 
 		this.sac = new StaticApplicationContext(parent);
 
-		sac.registerSingleton("beanThatListens", BeanThatListens.class,
-		                      new MutablePropertyValues());
+		sac.registerSingleton("beanThatListens", BeanThatListens.class, new MutablePropertyValues());
 
 		sac.registerSingleton("aca", ACATest.class, new MutablePropertyValues());
 
-		sac.registerPrototype("aca-prototype", ACATest.class,
-		                      new MutablePropertyValues());
-
+		sac.registerPrototype("aca-prototype", ACATest.class, new MutablePropertyValues());
 
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
 		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
@@ -229,18 +223,12 @@ public class StaticMessageSourceTestSuite extends AbstractApplicationContextTest
 
 		StaticMessageSource staticMsgSrc = (StaticMessageSource) sac.getBean(
 		    AbstractApplicationContext.MESSAGE_SOURCE_BEAN_NAME);
-		staticMsgSrc.addMessage("message.format.example1", Locale.US,
-		                        MSG_TXT1_US);
-		staticMsgSrc.addMessage("message.format.example2", Locale.US,
-		                        MSG_TXT2_US);
-		staticMsgSrc.addMessage("message.format.example3", Locale.US,
-		                        MSG_TXT3_US);
-		staticMsgSrc.addMessage("message.format.example1", Locale.UK,
-		                        MSG_TXT1_UK);
+		staticMsgSrc.addMessage("message.format.example1", Locale.US, MSG_TXT1_US);
+		staticMsgSrc.addMessage("message.format.example2", Locale.US, MSG_TXT2_US);
+		staticMsgSrc.addMessage("message.format.example3", Locale.US, MSG_TXT3_US);
+		staticMsgSrc.addMessage("message.format.example1", Locale.UK, MSG_TXT1_UK);
 
 		return sac;
 	}
 
-	protected void tearDown() {
-	}
 }
