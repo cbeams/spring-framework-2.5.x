@@ -16,6 +16,8 @@
 
 package org.springframework.ejb.access;
 
+import javax.naming.NamingException;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
@@ -24,7 +26,7 @@ import org.springframework.beans.factory.FactoryBean;
  * If you want control over interceptor chaining, use an AOP ProxyFactoryBean
  * with SimpleRemoteSlsbInvokerInterceptor rather than rely on this class.
  * 
- * <p>See {@link org.springframework.jndi.AbstractJndiLocator} for info on
+ * <p>See {@link org.springframework.jndi.JndiObjectLocator} for info on
  * how to specify the JNDI location of the target EJB.
  * 
  * <p>In a bean container, this class is normally best used as a singleton. However,
@@ -86,7 +88,8 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 		return businessInterface;
 	}
 
-	public void afterLocated() {
+	public void afterPropertiesSet() throws NamingException {
+		super.afterPropertiesSet();
 		if (this.businessInterface == null) {
 			throw new IllegalArgumentException("businessInterface is required");
 		}

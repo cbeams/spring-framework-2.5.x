@@ -52,12 +52,12 @@ public class RemoteInvocation implements Serializable {
 	/**
 	 * Create a new RemoteInvocation for the given parameters.
 	 * @param methodName the name of the method to invoke
-	 * @param argumentTypes the argument types of the method
+	 * @param parameterTypes the parameter types of the method
 	 * @param arguments the arguments for the invocation
 	 */
-	public RemoteInvocation(String methodName, Class[] argumentTypes, Object[] arguments) {
+	public RemoteInvocation(String methodName, Class[] parameterTypes, Object[] arguments) {
 		this.methodName = methodName;
-		this.parameterTypes = argumentTypes;
+		this.parameterTypes = parameterTypes;
 		this.arguments = arguments;
 	}
 

@@ -18,15 +18,18 @@ package org.springframework.remoting.caucho;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 
 import com.caucho.burlap.client.BurlapProxyFactory;
 import com.caucho.burlap.client.BurlapRuntimeException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
@@ -53,7 +56,8 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * @see BurlapProxyFactoryBean
  * @see com.caucho.burlap.client.BurlapProxyFactory
  */
-public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
+public class BurlapClientInterceptor extends UrlBasedRemoteAccessor
+    implements MethodInterceptor, InitializingBean {
 
 	private final BurlapProxyFactory proxyFactory = new BurlapProxyFactory();
 
@@ -119,15 +123,33 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 			if (ex.getTargetException() instanceof BurlapRuntimeException) {
 				BurlapRuntimeException bre = (BurlapRuntimeException) ex.getTargetException();
 				Throwable rootCause = (bre.getRootCause() != null) ? bre.getRootCause() : bre;
-				throw new RemoteAccessException(
-						"Cannot access Burlap service at [" + getServiceUrl() + "]", rootCause);
+				throw convertBurlapAccessException(rootCause);
 			}
 			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
 				UndeclaredThrowableException utex = (UndeclaredThrowableException) ex.getTargetException();
-				throw new RemoteAccessException(
-						"Cannot access Burlap service at [" + getServiceUrl() + "]", utex.getUndeclaredThrowable());
+				throw convertBurlapAccessException(utex.getUndeclaredThrowable());
 			}
 			throw ex.getTargetException();
+		}
+		catch (Throwable ex) {
+			throw new AspectException("Failed to invoke Burlap service [" + getServiceUrl() + "]", ex);
+		}
+	}
+
+	/**
+	 * Convert the given Burlap access exception to an appropriate
+	 * Spring RemoteAccessException.
+	 * @param ex the exception to convert
+	 * @return the RemoteAccessException to throw
+	 */
+	protected RemoteAccessException convertBurlapAccessException(Throwable ex) {
+		if (ex instanceof ConnectException) {
+			throw new RemoteConnectFailureException(
+					"Cannot connect to Burlap service at [" + getServiceUrl() + "]", ex);
+		}
+		else {
+			throw new RemoteAccessException(
+			    "Cannot access Burlap service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

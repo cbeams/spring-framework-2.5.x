@@ -24,8 +24,8 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;
 
@@ -35,17 +35,7 @@ import org.springframework.jndi.JndiTemplate;
 public class LocalSlsbInvokerInterceptorTests extends TestCase {
 
 	/**
-	 * Constructor for SimpleRemoteSlsbInvokerInterceptorTests.
-	 * @param arg0
-	 */
-	public LocalSlsbInvokerInterceptorTests(String arg0) {
-		super(arg0);
-	}
-	
-	
-	/**
-	 * Test that it performs the correct lookup
-	 * @throws java.lang.Exception
+	 * Test that it performs the correct lookup.
 	 */
 	public void testPerformsLookup() throws Exception {
 		MockControl ejbControl = MockControl.createControl(LocalInterface.class);
@@ -84,13 +74,14 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 		}
 	}
 	
-	
 	public void testInvokesMethodOnEjbInstance() throws Exception {
 		Object retVal = new Object();
 		MockControl ejbControl = MockControl.createControl(LocalInterface.class);
 		final LocalInterface ejb = (LocalInterface) ejbControl.getMock();
 		ejb.targetMethod();
 		ejbControl.setReturnValue(retVal, 1);
+		ejb.remove();
+		ejbControl.setVoidCallable(1);
 		ejbControl.replay();
 	
 		final String jndiName= "foobar";
@@ -99,7 +90,7 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 	
 		ProxyFactory pf = new ProxyFactory(new Class[] { LocalInterface.class } );
-		pf.addInterceptor(si);
+		pf.addAdvice(si);
 		LocalInterface target = (LocalInterface) pf.getProxy();
 	
 		assertTrue(target.targetMethod() == retVal);
@@ -121,7 +112,7 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 
 		ProxyFactory pf = new ProxyFactory(new Class[] { LocalInterface.class } );
-		pf.addInterceptor(si);
+		pf.addAdvice(si);
 		LocalInterface target = (LocalInterface) pf.getProxy();
 
 		try {
@@ -139,9 +130,7 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 	public void testApplicationException() throws Exception {
 		testException(new ApplicationException());
 	}
-	
-	
-	
+
 	protected MockControl contextControl(final String jndiName, final LocalInterface ejbInstance) throws Exception {
 		MockControl homeControl = MockControl.createControl(SlsbHome.class);
 		final SlsbHome mockHome = (SlsbHome) homeControl.getMock();
@@ -177,21 +166,24 @@ public class LocalSlsbInvokerInterceptorTests extends TestCase {
 	
 	
 	/** 
-	 * Needed so that we can mock create() method
+	 * Needed so that we can mock create() method.
 	 */
 	protected interface SlsbHome extends EJBLocalHome {
 		LocalInterface create() throws CreateException;
 	}
-	
+
+
 	protected interface BusinessMethods {
 		Object targetMethod() throws ApplicationException;
 	}
-		
+
+
 	protected interface LocalInterface extends EJBLocalObject, BusinessMethods {
-		
 	}
-	
+
+
 	protected class ApplicationException extends Exception {
+
 		public ApplicationException() {
 			super("appException");
 		}

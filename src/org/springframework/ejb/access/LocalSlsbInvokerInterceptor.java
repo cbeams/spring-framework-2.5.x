@@ -29,7 +29,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * <p>Invoker for a local Stateless Session Bean.
  * Caches the home object. A local EJB home can never go stale.
  * 
- * <p>See {@link org.springframework.jndi.AbstractJndiLocator} for info on
+ * <p>See {@link org.springframework.jndi.JndiObjectLocator} for info on
  * how to specify the JNDI location of the target EJB.
  *
  * <p>In a bean container, this class is normally best used as a singleton. However,
@@ -42,12 +42,74 @@ import org.aopalliance.intercept.MethodInvocation;
  * the "lazy-init" attribute.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
 	/**
+	 * This implementation "creates" a new EJB instance for each invocation.
+	 * Can be overridden for custom invocation strategies.
+	 * <p>Alternatively, override getSessionBeanInstance and
+	 * releaseSessionBeanInstance to change EJB instance creation,
+	 * for example to hold a single shared EJB instance.
+	 */
+	public Object invoke(MethodInvocation invocation) throws Throwable {
+		EJBLocalObject ejb = null;
+		try {
+			ejb = getSessionBeanInstance();
+			return invocation.getMethod().invoke(ejb, invocation.getArguments());
+		}
+		catch (InvocationTargetException ex) {
+			Throwable targetEx = ex.getTargetException();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Method of local EJB [" + getJndiName() + "] threw exception", targetEx);
+			}
+			if (targetEx instanceof CreateException) {
+				throw new AspectException("Could not create local EJB [" + getJndiName() + "]", targetEx);
+			}
+			else {
+				throw targetEx;
+			}
+		}
+		catch (NamingException ex) {
+			throw new AspectException("Failed to locate local EJB [" + getJndiName() + "]", ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new AspectException("Could not access method [" + invocation.getMethod().getName() +
+			    "] of local EJB [" + getJndiName() + "]", ex);
+		}
+		finally {
+			releaseSessionBeanInstance(ejb);
+		}
+	}
+
+	/**
+	 * Return an EJB instance to delegate the call to.
+	 * Default implementation delegates to newSessionBeanInstance.
+	 * @throws NamingException if thrown by JNDI
+	 * @throws InvocationTargetException if thrown by the create method
+	 * @see #newSessionBeanInstance
+	 */
+	protected EJBLocalObject getSessionBeanInstance() throws NamingException, InvocationTargetException {
+		return newSessionBeanInstance();
+	}
+
+	/**
+	 * Release the given EJB instance.
+	 * Default implementation delegates to removeSessionBeanInstance.
+	 * @param ejb the EJB instance to release
+	 * @see #removeSessionBeanInstance
+	 */
+	protected void releaseSessionBeanInstance(EJBLocalObject ejb) {
+		removeSessionBeanInstance(ejb);
+	}
+
+	/**
 	 * Return a new instance of the stateless session bean.
 	 * Can be overridden to change the algorithm.
+	 * @throws NamingException if thrown by JNDI
+	 * @throws InvocationTargetException if thrown by the create method
+	 * @see #create
 	 */
 	protected EJBLocalObject newSessionBeanInstance() throws NamingException, InvocationTargetException {
 		if (logger.isDebugEnabled()) {
@@ -67,38 +129,16 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	}
 
 	/**
-	 * This is the last invoker in the chain: invoke the EJB.
+	 * Remove the given EJB instance.
+	 * @param ejb the EJB instance to remove
+	 * @see javax.ejb.EJBLocalObject#remove
 	 */
-	public Object invoke(MethodInvocation invocation) throws Throwable {
-		EJBLocalObject ejb = null;
+	protected void removeSessionBeanInstance(EJBLocalObject ejb) {
 		try {
-			ejb = newSessionBeanInstance();
-			return invocation.getMethod().invoke(ejb, invocation.getArguments());
-		}
-		catch (InvocationTargetException ex) {
-			Throwable targetException = ex.getTargetException();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Method of local EJB [" + getJndiName() + "] threw exception", targetException);
-			}
-			if (targetException instanceof CreateException) {
-				throw new AspectException("Could not create local EJB [" + getJndiName() + "]", targetException);
-			}
-			else {
-				throw targetException;
-			}
+			ejb.remove();
 		}
 		catch (Throwable ex) {
-			throw new AspectException("Failed to invoke local EJB [" + getJndiName() + "]", ex);
-		}
-		finally {
-			if (ejb != null) {
-				try {
-					ejb.remove();
-				}
-				catch (Throwable ex) {
-					logger.warn("Could not invoke 'remove' on local EJB proxy", ex);
-				}
-			}
+			logger.warn("Could not invoke 'remove' on local EJB proxy", ex);
 		}
 	}
 

@@ -18,15 +18,18 @@ package org.springframework.remoting.caucho;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.client.HessianRuntimeException;
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
 /**
@@ -53,7 +56,8 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * @see HessianProxyFactoryBean
  * @see com.caucho.hessian.client.HessianProxyFactory
  */
-public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
+public class HessianClientInterceptor extends UrlBasedRemoteAccessor
+    implements MethodInterceptor, InitializingBean {
 
 	private final HessianProxyFactory proxyFactory = new HessianProxyFactory();
 
@@ -119,15 +123,33 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 			if (ex.getTargetException() instanceof HessianRuntimeException) {
 				HessianRuntimeException hre = (HessianRuntimeException) ex.getTargetException();
 				Throwable rootCause = (hre.getRootCause() != null) ? hre.getRootCause() : hre;
-				throw new RemoteAccessException(
-						"Cannot access Hessian service at [" + getServiceUrl() + "]", rootCause);
+				throw convertHessianAccessException(rootCause);
 			}
 			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
 				UndeclaredThrowableException utex = (UndeclaredThrowableException) ex.getTargetException();
-				throw new RemoteAccessException(
-						"Cannot access Hessian service at [" + getServiceUrl() + "]", utex.getUndeclaredThrowable());
+				throw convertHessianAccessException(utex.getUndeclaredThrowable());
 			}
 			throw ex.getTargetException();
+		}
+		catch (Throwable ex) {
+			throw new AspectException("Failed to invoke Hessian service [" + getServiceUrl() + "]", ex);
+		}
+	}
+
+	/**
+	 * Convert the given Hessian access exception to an appropriate
+	 * Spring RemoteAccessException.
+	 * @param ex the exception to convert
+	 * @return the RemoteAccessException to throw
+	 */
+	protected RemoteAccessException convertHessianAccessException(Throwable ex) {
+		if (ex instanceof ConnectException) {
+			throw new RemoteConnectFailureException(
+					"Cannot connect to Hessian service at [" + getServiceUrl() + "]", ex);
+		}
+		else {
+			throw new RemoteAccessException(
+			    "Cannot access Hessian service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

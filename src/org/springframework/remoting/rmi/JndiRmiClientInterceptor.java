@@ -16,15 +16,20 @@
 
 package org.springframework.remoting.rmi;
 
+import java.rmi.ConnectException;
 import java.rmi.Remote;
 
+import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
+import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jndi.AbstractJndiLocator;
+import org.springframework.jndi.JndiObjectLocator;
+import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteLookupFailureException;
 
 /**
  * Interceptor for accessing RMI services from JNDI.
@@ -63,12 +68,19 @@ import org.springframework.jndi.AbstractJndiLocator;
  * @see java.rmi.Remote
  * @see javax.rmi.PortableRemoteObject#narrow
  */
-public class JndiRmiClientInterceptor extends AbstractJndiLocator
-		implements MethodInterceptor, InitializingBean {
+public class JndiRmiClientInterceptor extends JndiObjectLocator
+    implements MethodInterceptor, InitializingBean {
 
 	private Class serviceInterface;
 
-	private Object rmiProxy;
+	private boolean lookupRmiProxyOnStartup = true;
+
+	private boolean cacheRmiProxy = true;
+
+	private boolean refreshRmiProxyOnConnectFailure = false;
+
+	private Remote cachedRmiProxy;
+
 
 	/**
 	 * Set the interface of the service to access.
@@ -90,17 +102,183 @@ public class JndiRmiClientInterceptor extends AbstractJndiLocator
 		return serviceInterface;
 	}
 
-	protected void located(Object jndiObject) {
-		Object proxy = jndiObject;
+	/**
+	 * Set whether to look up the RMI proxy on startup. Default is true.
+	 * <p>Can be turned off to allow for late start of the RMI server.
+	 * In this case, the RMI proxy will be fetched on first access.
+	 * @see #setCacheRmiProxy
+	 */
+	public void setLookupRmiProxyOnStartup(boolean lookupRmiProxyOnStartup) {
+		this.lookupRmiProxyOnStartup = lookupRmiProxyOnStartup;
+	}
+
+	/**
+	 * Set whether to cache the RMI proxy once it has been located.
+	 * Default is true.
+	 * <p>Can be turned off to allow for hot restart of the RMI server.
+	 * In this case, the RMI proxy will be fetched for each invocation.
+	 * @see #setLookupRmiProxyOnStartup
+	 */
+	public void setCacheRmiProxy(boolean cacheRmiProxy) {
+		this.cacheRmiProxy = cacheRmiProxy;
+	}
+
+	/**
+	 * Set whether to refresh the RMI proxy on connect failure.
+	 * Default is false.
+	 * <p>Can be turned on to allow for hot restart of the RMI server.
+	 * If a cached RMI proxy throws a ConnectException, a fresh proxy
+	 * will be fetched and the invocation will be retried.
+	 * @see java.rmi.ConnectException
+	 */
+	public void setRefreshRmiProxyOnConnectFailure(boolean refreshRmiProxyOnConnectFailure) {
+		this.refreshRmiProxyOnConnectFailure = refreshRmiProxyOnConnectFailure;
+	}
+
+
+	/**
+	 * Fetches RMI proxy on startup, if necessary.
+	 * @see #setLookupRmiProxyOnStartup
+	 * @see #lookupRmiProxy
+	 */
+	public void afterPropertiesSet() throws NamingException {
+		super.afterPropertiesSet();
+		// cache RMI proxy on initialization?
+		if (this.lookupRmiProxyOnStartup) {
+			Remote rmiProxy = lookupRmiProxy();
+			if (this.cacheRmiProxy) {
+				this.cachedRmiProxy = rmiProxy;
+			}
+		}
+	}
+
+	/**
+	 * Create the RMI proxy, typically by looking it up.
+	 * Called on interceptor initialization if cacheRmiProxy is true;
+	 * else called for each invocation by getRmiProxy().
+	 * <p>Default implementation looks up the service URL via java.rmi.Naming.
+	 * Can be overridden in subclasses.
+	 * @return the RMI proxy to store in this interceptor
+	 * @throws NamingException if proxy creation failed
+	 * @see #setCacheRmiProxy
+	 * @see #getRmiProxy()
+	 * @see java.rmi.Naming#lookup
+	 */
+	protected Remote lookupRmiProxy() throws NamingException {
+		Object proxy = lookup();
 		if (getServiceInterface() != null && Remote.class.isAssignableFrom(getServiceInterface())) {
 			proxy = PortableRemoteObject.narrow(proxy, getServiceInterface());
 		}
-		this.rmiProxy = proxy;
+		if (!(proxy instanceof Remote)) {
+			throw new AspectException("Located RMI proxy [" + proxy + "] does not implement java.rmi.Remote");
+		}
+		return (Remote) proxy;
 	}
 
+	/**
+	 * Return the RMI proxy to use. Called for each invocation.
+	 * <p>Default implementation returns the proxy created on initialization,
+	 * if any; else, it invokes createRmiProxy to get a new proxy for each
+	 * invocation.
+	 * <p>Can be overridden in subclasses, for example to cache a proxy for
+	 * a given amount of time before recreating it, or to test the proxy
+	 * whether it is still alive.
+	 * @return the RMI proxy to use for an invocation
+	 * @throws NamingException if proxy creation failed
+	 * @see #lookupRmiProxy
+	 */
+	protected Remote getRmiProxy() throws NamingException {
+		if (!this.cacheRmiProxy || (this.lookupRmiProxyOnStartup && !this.refreshRmiProxyOnConnectFailure)) {
+			return (this.cachedRmiProxy != null ? this.cachedRmiProxy : lookupRmiProxy());
+		}
+		else {
+			synchronized (this) {
+				if (this.cachedRmiProxy == null) {
+					this.cachedRmiProxy = lookupRmiProxy();
+				}
+				return this.cachedRmiProxy;
+			}
+		}
+	}
+
+
+	/**
+	 * Fetches an RMI proxy and delegates to doInvoke.
+	 * If configured to refresh on connect failure, it will call
+	 * refreshAndRetry on ConnectException.
+	 * @see #getRmiProxy
+	 * @see #doInvoke
+	 * @see #refreshAndRetry
+	 * @see java.rmi.ConnectException
+	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		Remote rmiProxy = null;
+		try {
+			rmiProxy = getRmiProxy();
+		}
+		catch (Throwable ex) {
+			throw new RemoteLookupFailureException("RMI lookup for service [" + getJndiName() + "] failed", ex);
+		}
+		try {
+			return doInvoke(invocation, rmiProxy);
+		}
+		catch (RemoteConnectFailureException ex) {
+			return handleRemoteConnectFailure(invocation, ex);
+		}
+		catch (ConnectException ex) {
+			return handleRemoteConnectFailure(invocation, ex);
+		}
+	}
+
+	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
+		if (this.refreshRmiProxyOnConnectFailure) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not connect to RMI service [" + getJndiName() + "] - retrying", ex);
+			}
+			else if (logger.isWarnEnabled()) {
+				logger.warn("Could not connect to RMI service [" + getJndiName() + "] - retrying");
+			}
+			return refreshAndRetry(invocation);
+		}
+		else {
+			throw ex;
+		}
+	}
+
+	/**
+	 * Refresh the RMI proxy and retry the given invocation.
+	 * Called by invoke on connect failure.
+	 * @param invocation the AOP method invocation
+	 * @return the invocation result, if any
+	 * @throws Throwable in case of invocation failure
+	 * @see #invoke
+	 */
+	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
+		Remote freshRmiProxy = null;
+		synchronized (this) {
+			try {
+				freshRmiProxy = lookupRmiProxy();
+				if (this.cacheRmiProxy) {
+					this.cachedRmiProxy = freshRmiProxy;
+				}
+			}
+			catch (Throwable ex) {
+				throw new RemoteLookupFailureException("RMI lookup for service [" + getJndiName() + "] failed", ex);
+			}
+		}
+		return doInvoke(invocation, freshRmiProxy);
+	}
+
+	/**
+	 * Perform the given invocation on the given RMI proxy.
+	 * @param invocation the AOP method invocation
+	 * @param rmiProxy the RMI proxy to invoke
+	 * @return the invocation result, if any
+	 * @throws Throwable in case of invocation failure
+	 */
+	protected Object doInvoke(MethodInvocation invocation, Remote rmiProxy) throws Throwable {
 		// traditional RMI proxy invocation
-		return RmiClientInterceptorUtils.invoke(invocation, this.rmiProxy, getJndiName());
+		return RmiClientInterceptorUtils.invoke(invocation, rmiProxy, getJndiName());
 	}
 
 }

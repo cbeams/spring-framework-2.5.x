@@ -24,7 +24,7 @@ import javax.naming.NamingException;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 
-import org.springframework.jndi.AbstractJndiLocator;
+import org.springframework.jndi.JndiObjectLocator;
 
 /**
  * Superclass for AOP interceptors invoking remote or local Stateless Session Beans.
@@ -33,86 +33,148 @@ import org.springframework.jndi.AbstractJndiLocator;
  * In this case, there is no target object.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
-public abstract class AbstractSlsbInvokerInterceptor extends AbstractJndiLocator
+public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 		implements MethodInterceptor {
+
+	private boolean lookupHomeOnStartup = true;
 
 	private boolean cacheHome = true;
 
 	/**
-	 * The EJB's home interface.
+	 * The EJB's home object, potentially cached.
 	 * The type must be Object as it could be either EJBHome or EJBLocalHome.
 	 */
 	private Object cachedHome;
 
 	/**
-	 * The no-arg create() method required on EJB homes,
-	 * but not part of EJBLocalHome. We cache this in the located() method.
+	 * The no-arg create() method required on EJB homes, potentially cached.
 	 */
 	private Method createMethod;
 
+
 	/**
-	 * Set whether to cache the EJB home object. Default is true.
-	 * <p>Can be turned off to allow for hot redeploy of the target EJB
-	 * respectively restart of the EJB container.
+	 * Set whether to look up the EJB home object on startup.
+	 * Default is true.
+	 * <p>Can be turned off to allow for late start of the EJB server.
+	 * In this case, the EJB home object will be fetched on first access.
+	 * @see #setCacheHome
+	 */
+	public void setLookupHomeOnStartup(boolean lookupHomeOnStartup) {
+		this.lookupHomeOnStartup = lookupHomeOnStartup;
+	}
+
+	/**
+	 * Set whether to cache the EJB home object once it has been located.
+	 * Default is true.
+	 * <p>Can be turned off to allow for hot restart of the EJB server.
+	 * In this case, the EJB home object will be fetched for each invocation.
+	 * @see #setLookupHomeOnStartup
 	 */
 	public void setCacheHome(boolean cacheHome) {
 		this.cacheHome = cacheHome;
 	}
 
+
 	/**
- 	 * Implementation of AbstractJndiLocator's callback, to cache the home wrapper.
-	 * Invokes afterLocated() after execution.
-	 * @see #afterLocated
+	 * Fetches EJB home on startup, if necessary.
+	 * @see #setLookupHomeOnStartup
+	 * @see #refreshHome
 	 */
-	protected void located(Object jndiObject) {
-		// cache the home object
-		this.cachedHome = jndiObject;
+	public void afterPropertiesSet() throws NamingException {
+		super.afterPropertiesSet();
+		if (this.lookupHomeOnStartup) {
+			// look up EJB home and create method
+			refreshHome();
+		}
+	}
+
+	/**
+	 * Refresh the cached home object, if applicable.
+	 * Also caches the create method on the home object.
+	 * @throws NamingException if thrown by the JNDI lookup
+	 * @see #lookup
+	 * @see #getCreateMethod
+	 */
+	protected void refreshHome() throws NamingException {
+		Object home = lookup();
+		this.createMethod = getCreateMethod(home);
+		if (this.cacheHome) {
+			this.cachedHome = home;
+		}
+	}
+
+	/**
+	 * Determine the create method of the given EJB home object.
+	 * @param home the EJB home object
+	 * @return the create method
+	 * @throws AspectException if the method couldn't be retrieved
+	 */
+	protected Method getCreateMethod(Object home) throws AspectException {
 		try {
 			// cache the EJB create() method that must be declared on the home interface
-			this.createMethod = this.cachedHome.getClass().getMethod("create", null);
+			return home.getClass().getMethod("create", null);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new AspectException(
-					"Cannot create EJB proxy: EJB home [" + this.cachedHome + "] has no no-arg create() method");
+					"EJB home [" + this.cachedHome + "] has no no-arg create() method");
 		}
-		
-		// invoke any subclass initialization behavior
-		afterLocated();
 	}
 
 	/**
-	 * Initialization hook after the AbstractJndiLocator's located callback.
-	 * This implementation does nothing.
-	 * @see #located
+	 * Return the EJB home object to use. Called for each invocation.
+	 * <p>Default implementation returns the home created on initialization,
+	 * if any; else, it invokes lookup to get a new proxy for each invocation.
+	 * <p>Can be overridden in subclasses, for example to cache a home for
+	 * a given amount of time before recreating it, or to test the home
+	 * whether it is still alive.
+	 * @return the EJB home object to use for an invocation
+	 * @throws NamingException if proxy creation failed
+	 * @see #lookup
+	 * @see #getCreateMethod
 	 */
-	protected void afterLocated() {
+	protected Object getHome() throws NamingException {
+		if (!this.cacheHome || (this.lookupHomeOnStartup && !isHomeRefreshable())) {
+			return (this.cachedHome != null ? this.cachedHome: lookup());
+		}
+		else {
+			synchronized (this) {
+				if (this.cachedHome == null) {
+					this.cachedHome = lookup();
+					this.createMethod = getCreateMethod(this.cachedHome);
+				}
+				return this.cachedHome;
+			}
+		}
 	}
 
 	/**
-	 * Return the cached home object.
+	 * Return whether the cached EJB home object is potentially
+	 * subject to on-demand refreshing. Default is false.
 	 */
-	protected Object getCachedEjbHome() {
-		return cachedHome;
+	protected boolean isHomeRefreshable() {
+		return false;
 	}
 
 	/**
 	 * Invoke the create() method on the cached EJB home.
 	 * @return a new EJBObject or EJBLocalObject
+	 * @throws NamingException if thrown by JNDI
+	 * @throws InvocationTargetException if thrown by the create method
 	 */
 	protected Object create() throws NamingException, InvocationTargetException {
-		if (!this.cacheHome) {
-			lookup();
-		}
 		try {
-			return this.createMethod.invoke(this.cachedHome, null);
-		}
-		catch (IllegalArgumentException ex) {
-			// can't happen
-			throw new AspectException("Inconsistent state: could not call ejbCreate() method without arguments", ex);
+			Object home = getHome();
+			Method createMethod = this.createMethod;
+			if (createMethod == null) {
+				createMethod = getCreateMethod(home);
+			}
+			// invoke cached EJB home object
+			return this.createMethod.invoke(home, null);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Could not access ejbCreate() method", ex);
+			throw new AspectException("Could not access EJB home create() method", ex);
 		}
 	}
 

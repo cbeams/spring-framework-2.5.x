@@ -47,7 +47,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBean() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote createRmiProxy() {
+			protected Remote lookupRmiProxy() {
 				return new RemoteBean();
 			}
 		};
@@ -63,7 +63,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithRemoteException() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote createRmiProxy() {
+			protected Remote lookupRmiProxy() {
 				return new RemoteBean();
 			}
 		};
@@ -83,7 +83,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithBusinessInterface() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote createRmiProxy() {
+			protected Remote lookupRmiProxy() {
 				return new RemoteBean();
 			}
 		};
@@ -99,7 +99,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndRemoteException() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote createRmiProxy() {
+			protected Remote lookupRmiProxy() {
 				return new RemoteBean();
 			}
 		};

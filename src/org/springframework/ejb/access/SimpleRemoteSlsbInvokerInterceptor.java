@@ -17,23 +17,23 @@
 package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBObject;
+import javax.naming.NamingException;
 
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
  * <p>Basic invoker for a remote Stateless Session Bean.
  * "Creates" a new EJB instance for each invocation.
  * 
- * <p>See {@link org.springframework.jndi.AbstractJndiLocator} for info on
+ * <p>See {@link org.springframework.jndi.JndiObjectLocator} for info on
  * how to specify the JNDI location of the target EJB.
  *
  * <p>In a bean container, this class is normally best used as a singleton. However,
@@ -60,84 +60,62 @@ import org.springframework.remoting.RemoteAccessException;
 public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {
 	
 	/**
-	 * Constructor for use as JavaBean.
-	 * Sets "resourceRef" to false by default.
-	 * @see #setResourceRef
-	 */
-	public SimpleRemoteSlsbInvokerInterceptor() {
-		setResourceRef(false);
-	}
-	
-	/**
-	 * Convenient constructor for programmatic use.
-	 * @see org.springframework.jndi.AbstractJndiLocator#setJndiName
-	 * @see org.springframework.jndi.AbstractJndiLocator#setResourceRef
-	 */
-	public SimpleRemoteSlsbInvokerInterceptor(String jndiName, boolean resourceRef) throws AspectException {
-		setJndiName(jndiName);
-		setResourceRef(resourceRef);
-		try {
-			afterPropertiesSet();
-		}
-		catch (Exception ex) {
-			throw new AspectException("Failed to create EJB invoker interceptor", ex);
-		}
-	}
-	
-	/**
-	 * This is the last invoker in the chain.
-	 * "Creates" a new EJB instance for each invocation.
+	 * This implementation "creates" a new EJB instance for each invocation.
 	 * Can be overridden for custom invocation strategies.
+	 * <p>Alternatively, override getSessionBeanInstance and
+	 * releaseSessionBeanInstance to change EJB instance creation,
+	 * for example to hold a single shared EJB instance.
 	 */
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		EJBObject ejb = null;
 		try {
-			ejb = newSessionBeanInstance();
-			Method method = invocation.getMethod();
-			if (method.getDeclaringClass().isInstance(ejb)) {
-				// directly implemented
-				return method.invoke(ejb, invocation.getArguments());
-			}
-			else {
-				// not directly implemented
-				Method proxyMethod = ejb.getClass().getMethod(method.getName(), method.getParameterTypes());
-				return proxyMethod.invoke(ejb, invocation.getArguments());
-			}
+			ejb = getSessionBeanInstance();
+			return RmiClientInterceptorUtils.doInvoke(invocation, ejb);
 		}
 		catch (InvocationTargetException ex) {
-			Throwable targetException = ex.getTargetException();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Method of remote EJB [" + getJndiName() + "] threw exception", ex.getTargetException());
+			Throwable targetEx = ex.getTargetException();
+			if (targetEx instanceof RemoteException) {
+				throw RmiClientInterceptorUtils.convertRmiAccessException(
+				    invocation.getMethod(), (RemoteException) targetEx, getJndiName());
 			}
-			if (targetException instanceof RemoteException &&
-					!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
-				throw new RemoteAccessException("Could not invoke remote EJB [" + getJndiName() + "]", targetException);
+			else if (targetEx instanceof CreateException) {
+				throw RmiClientInterceptorUtils.convertRmiAccessException(
+				    invocation.getMethod(), targetEx, "Could not create remote EJB [" + getJndiName() + "]");
 			}
-			else if (targetException instanceof CreateException) {
-				if (!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
-					throw new RemoteAccessException("Could not create remote EJB [" + getJndiName() + "]", targetException);
-				}
-				else {
-					throw new RemoteException("Could not create remote EJB [" + getJndiName() + "]", targetException);
-				}
-			}
-			else {
-				throw targetException;
-			}
+			throw targetEx;
+		}
+		catch (NamingException ex) {
+			throw new RemoteLookupFailureException("Failed to locate remote EJB [" + getJndiName() + "]", ex);
 		}
 		catch (Throwable ex) {
 			throw new AspectException("Failed to invoke remote EJB [" + getJndiName() + "]", ex);
 		}
 		finally {
 			if (ejb != null) {
-				try {
-					ejb.remove();
-				}
-				catch (Throwable ex) {
-					logger.warn("Could not invoke 'remove' on remote EJB proxy", ex);
-				}
+				releaseSessionBeanInstance(ejb);
 			}
 		}
+	}
+
+	/**
+	 * Return an EJB instance to delegate the call to.
+	 * Default implementation delegates to newSessionBeanInstance.
+	 * @throws NamingException if thrown by JNDI
+	 * @throws InvocationTargetException if thrown by the create method
+	 * @see #newSessionBeanInstance
+	 */
+	protected EJBObject getSessionBeanInstance() throws NamingException, InvocationTargetException {
+		return newSessionBeanInstance();
+	}
+
+	/**
+	 * Release the given EJB instance.
+	 * Default implementation delegates to removeSessionBeanInstance.
+	 * @param ejb the EJB instance to release
+	 * @see #removeSessionBeanInstance
+	 */
+	protected void releaseSessionBeanInstance(EJBObject ejb) {
+		removeSessionBeanInstance(ejb);
 	}
 
 }

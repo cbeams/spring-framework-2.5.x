@@ -18,6 +18,8 @@ package org.springframework.remoting.rmi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.rmi.ConnectException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 
@@ -27,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteConnectFailureException;
 
 /**
  * Factored-out methods for performing invocations within an RMI client.
@@ -54,34 +57,96 @@ public abstract class RmiClientInterceptorUtils {
 	 * @see java.rmi.RemoteException
 	 * @see org.springframework.remoting.RemoteAccessException
 	 */
-	public static Object invoke(MethodInvocation invocation, Object rmiProxy, String serviceName) throws Throwable {
+	public static Object invoke(MethodInvocation invocation, Remote rmiProxy, String serviceName) throws Throwable {
 		try {
-			Method method = invocation.getMethod();
-			if (method.getDeclaringClass().isInstance(rmiProxy)) {
-				// directly implemented
-				return method.invoke(rmiProxy, invocation.getArguments());
-			}
-			else {
-				// not directly implemented
-				Method proxyMethod = rmiProxy.getClass().getMethod(method.getName(), method.getParameterTypes());
-				return proxyMethod.invoke(rmiProxy, invocation.getArguments());
-			}
+			return doInvoke(invocation, rmiProxy);
 		}
 		catch (InvocationTargetException ex) {
-			Throwable targetException = ex.getTargetException();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Remote method of service [" + serviceName + "] threw exception", targetException);
-			}
-			if (targetException instanceof RemoteException &&
-					!Arrays.asList(invocation.getMethod().getExceptionTypes()).contains(RemoteException.class)) {
-				throw new RemoteAccessException("Cannot access remote service [" + serviceName + "]", targetException);
+			Throwable targetEx = ex.getTargetException();
+			if (targetEx instanceof RemoteException) {
+				throw convertRmiAccessException(invocation.getMethod(), (RemoteException) targetEx, serviceName);
 			}
 			else {
-				throw targetException;
+				throw targetEx;
 			}
 		}
 		catch (Throwable ex) {
 			throw new AspectException("Failed to invoke remote service [" + serviceName + "]", ex);
+		}
+	}
+
+	/**
+	 * Perform a raw method invocation on the given RMI proxy,
+	 * letting reflection exceptions through as-is.
+	 * @param invocation the AOP MethodInvocation
+	 * @param rmiProxy the RMI proxy
+	 * @return the invocation result, if any
+	 * @throws NoSuchMethodException if thrown by reflection
+	 * @throws IllegalAccessException if thrown by reflection
+	 * @throws InvocationTargetException if thrown by reflection
+	 */
+	public static Object doInvoke(MethodInvocation invocation, Remote rmiProxy)
+	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		Method method = invocation.getMethod();
+		if (method.getDeclaringClass().isInstance(rmiProxy)) {
+			// directly implemented
+			return method.invoke(rmiProxy, invocation.getArguments());
+		}
+		else {
+			// not directly implemented
+			Method proxyMethod = rmiProxy.getClass().getMethod(method.getName(), method.getParameterTypes());
+			return proxyMethod.invoke(rmiProxy, invocation.getArguments());
+		}
+	}
+
+	/**
+	 * Convert the given RemoteException that happened during remote access
+	 * to Spring's RemoteAccessException if the method signature does not
+	 * support RemoteException. Else, return the original RemoteException.
+	 * @param method the invoked method
+	 * @param ex the RemoteException that happended
+	 * @param serviceName the name of the service (for debugging purposes)
+	 * @return the exception to be thrown to the caller
+	 */
+	public static Exception convertRmiAccessException(Method method, RemoteException ex, String serviceName) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Remote service [" + serviceName + "] threw exception", ex);
+		}
+		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
+			if (ex instanceof ConnectException) {
+				return new RemoteConnectFailureException("Cannot connect to remote service [" + serviceName + "]", ex);
+			}
+			else {
+				return new RemoteAccessException("Cannot access remote service [" + serviceName + "]", ex);
+			}
+		}
+		else {
+			return ex;
+		}
+	}
+
+	/**
+	 * Wrap the given arbitrary exception that happened during remote access
+	 * in either a RemoteException or a Spring RemoteAccessException (if the
+	 * method signature does not support RemoteException).
+	 * <p>Only call this for remote access exceptions, not for exceptions
+	 * thrown by the target service itself!
+	 * @param method the invoked method
+	 * @param ex the exception that happened, to be used as cause for the
+	 * RemoteAccessException respectively RemoteException
+	 * @param message the message for the RemoteAccessException respectively
+	 * RemoteException
+	 * @return the exception to be thrown to the caller
+	 */
+	public static Exception convertRmiAccessException(Method method, Throwable ex, String message) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(message, ex);
+		}
+		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
+			return new RemoteAccessException(message, ex);
+		}
+		else {
+			return new RemoteException(message, ex);
 		}
 	}
 

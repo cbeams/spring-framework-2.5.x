@@ -82,6 +82,8 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		final RemoteInterface ejb = (RemoteInterface) ejbControl.getMock();
 		ejb.targetMethod();
 		ejbControl.setReturnValue(retVal, 1);
+		ejb.remove();
+		ejbControl.setVoidCallable(1);
 		ejbControl.replay();
 	
 		final String jndiName= "foobar";
@@ -90,7 +92,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 	
 		ProxyFactory pf = new ProxyFactory(new Class[] { RemoteInterface.class } );
-		pf.addInterceptor(si);
+		pf.addAdvice(si);
 		RemoteInterface target = (RemoteInterface) pf.getProxy();
 	
 		assertTrue(target.targetMethod() == retVal);
@@ -113,7 +115,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 
 		ProxyFactory pf = new ProxyFactory(new Class[] { RemoteInterface.class } );
-		pf.addInterceptor(si);
+		pf.addAdvice(si);
 		RemoteInterface target = (RemoteInterface) pf.getProxy();
 
 		try {
@@ -142,7 +144,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 
 		ProxyFactory pf = new ProxyFactory(new Class[] { BusinessInterface.class } );
-		pf.addInterceptor(si);
+		pf.addAdvice(si);
 		BusinessInterface target = (BusinessInterface) pf.getProxy();
 
 		assertTrue(target.targetMethod() == retVal);
@@ -165,7 +167,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 
 		ProxyFactory pf = new ProxyFactory(new Class[] { BusinessInterface.class } );
-		pf.addInterceptor(si);
+		pf.addAdvice(si);
 		BusinessInterface target = (BusinessInterface) pf.getProxy();
 
 		try {
@@ -193,7 +195,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(contextControl, jndiName);
 
 		ProxyFactory pf = new ProxyFactory(new Class[] { RemoteInterface.class } );
-		pf.addInterceptor(si);
+		pf.addAdvice(si);
 		RemoteInterface target = (RemoteInterface) pf.getProxy();
 
 		try {
@@ -215,7 +217,6 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 	public void testRemoteException() throws Exception {
 		testException(new RemoteException());
 	}
-	
 	
 	protected MockControl contextControl(final String jndiName, final RemoteInterface ejbInstance) throws Exception {
 		MockControl homeControl = MockControl.createControl(SlsbHome.class);
@@ -239,7 +240,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 		final Context mockCtx = (Context) contextControl.getMock();
 		SimpleRemoteSlsbInvokerInterceptor si = new SimpleRemoteSlsbInvokerInterceptor();
 		si.setJndiTemplate(new JndiTemplate() {
-			protected Context createInitialContext() throws NamingException {
+			protected Context createInitialContext() {
 				return mockCtx;
 			}
 		});
@@ -251,7 +252,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests extends TestCase {
 	
 	
 	/** 
-	 * Needed so that we can mock create() method
+	 * Needed so that we can mock create() method.
 	 */
 	protected interface SlsbHome extends EJBHome {
 
