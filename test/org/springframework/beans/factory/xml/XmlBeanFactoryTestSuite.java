@@ -65,7 +65,7 @@ import org.springframework.util.StopWatch;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.56 2004-07-27 09:25:01 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.57 2004-07-27 14:22:28 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -433,6 +433,11 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 
 		TestBean tb4 = (TestBean) xbf.getBean(TestBean.class.getName());
 		assertEquals(null, tb4.getName());
+
+		Map drs = xbf.getBeansOfType(DummyReferencer.class, false, false);
+		assertEquals(2, drs.size());
+		assertTrue(drs.containsKey(DummyReferencer.class.getName()));
+		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#2"));
 	}
 
 	public void testEmptyMap() throws Exception {

@@ -61,11 +61,14 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
- * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.31 2004-07-09 14:04:21 jhoeller Exp $
+ * @version $Id: DefaultXmlBeanDefinitionParser.java,v 1.32 2004-07-27 14:22:25 jhoeller Exp $
  */
 public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	public static final String BEAN_NAME_DELIMITERS = ",; ";
+
+	public static final String GENERATED_ID_SEPARATOR = "#";
+	
 
 	/**
 	 * Value of a T/F attribute that represents true.
@@ -239,7 +242,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		if (!StringUtils.hasLength(id)) {
 			if (beanDefinition instanceof RootBeanDefinition) {
-				id = ((RootBeanDefinition) beanDefinition).getBeanClassName();
+				String className = ((RootBeanDefinition) beanDefinition).getBeanClassName();
+				id = className;
+				int counter = 1;
+				while (this.beanFactory.containsBeanDefinition(id)) {
+					counter++;
+					id = className + GENERATED_ID_SEPARATOR + counter;
+				}
 				logger.debug("Neither XML 'id' nor 'name' specified - using bean class name [" + id + "] as ID");
 			}
 			else if (beanDefinition instanceof ChildBeanDefinition) {
