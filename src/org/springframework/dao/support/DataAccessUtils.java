@@ -59,11 +59,11 @@ public abstract class DataAccessUtils {
 	 * result object or none at all has been found in the given Collection
 	 */
 	public static Object requiredUniqueResult(Collection results) throws IncorrectResultSizeDataAccessException {
-		Object result = uniqueResult(results);
-		if (result == null) {
-			throw new IncorrectResultSizeDataAccessException(1, 0);
+		int size = results.size();
+		if (size != 1) {
+			throw new IncorrectResultSizeDataAccessException(1, size);
 		}
-		return result;
+		return results.iterator().next();
 	}
 
 	/**
