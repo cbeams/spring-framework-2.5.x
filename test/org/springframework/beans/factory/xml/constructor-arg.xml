@@ -73,6 +73,6 @@
 		</property>
 	</bean>
 
-	<bean id="other" class="org.springframework.beans.factory.LifecycleBean"/>
+	<bean id="other" class="org.springframework.beans.IndexedTestBean"/>
 
 </beans>

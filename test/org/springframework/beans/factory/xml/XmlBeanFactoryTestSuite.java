@@ -16,6 +16,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
@@ -25,7 +26,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.HasMap;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -35,7 +35,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.28 2003-12-30 00:25:24 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.29 2004-01-14 07:38:00 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 	
@@ -660,16 +660,26 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		// Should have been autowired
 		assertEquals(kerry, rod1.getSpouse());
 
+		DependenciesBean rod1a = (DependenciesBean) xbf.getBean("rod1a");
+		// Should have been autowired
+		assertEquals(kerry, rod1a.getSpouse());
+
 		DependenciesBean rod2 = (DependenciesBean) xbf.getBean("rod2");
 		// Should have been autowired
 		assertEquals(kerry, rod2.getSpouse());
 
 		ConstructorDependenciesBean rod3 = (ConstructorDependenciesBean) xbf.getBean("rod3");
-		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
+		IndexedTestBean other = (IndexedTestBean) xbf.getBean("other");
 		// Should have been autowired
 		assertEquals(kerry, rod3.getSpouse1());
 		assertEquals(kerry, rod3.getSpouse2());
 		assertEquals(other, rod3.getOther());
+
+		ConstructorDependenciesBean rod3a = (ConstructorDependenciesBean) xbf.getBean("rod3a");
+		// Should have been autowired
+		assertEquals(kerry, rod3a.getSpouse1());
+		assertEquals(kerry, rod3a.getSpouse2());
+		assertEquals(other, rod3a.getOther());
 
 		try {
 			ConstructorDependenciesBean rod4 = (ConstructorDependenciesBean) xbf.getBean("rod4");
@@ -722,7 +732,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(null, rod2.getName());
 
 		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod3");
-		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
+		IndexedTestBean other = (IndexedTestBean) xbf.getBean("other");
 		// Should have been autowired
 		assertEquals(kerry, rod.getSpouse1());
 		assertEquals(kerry, rod.getSpouse2());
@@ -744,7 +754,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		ConstructorDependenciesBean rod5 = (ConstructorDependenciesBean) xbf.getBean("rod5");
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
-		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
+		IndexedTestBean other = (IndexedTestBean) xbf.getBean("other");
 		// Should have been autowired
 		assertEquals(kerry2, rod5.getSpouse1());
 		assertEquals(kerry1, rod5.getSpouse2());

@@ -28,7 +28,7 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
  * @version $RevisionId$
  * REQUIRES THE FOLLOWING BEAN DEFINITIONS:
  * see lbiinit
- * @version $Id: AbstractBeanFactoryTests.java,v 1.7 2003-12-04 18:45:15 jhoeller Exp $
+ * @version $Id: AbstractBeanFactoryTests.java,v 1.8 2004-01-14 07:38:00 jhoeller Exp $
  */
 public abstract class AbstractBeanFactoryTests extends TestCase {
 
@@ -248,7 +248,6 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("singletonFactory");
 		assertTrue("Singleton references ==", tb == tb2);
-		assertTrue("Created bean is BeanFactoryAware", tb.getBeanFactory() != null);
 		assertTrue("FactoryBean is BeanFactoryAware", factory.getBeanFactory() != null);
 	}
 	

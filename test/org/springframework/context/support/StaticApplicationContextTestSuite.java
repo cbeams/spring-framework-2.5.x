@@ -21,7 +21,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.23 2004-01-01 23:40:31 jhoeller Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.24 2004-01-14 07:38:00 jhoeller Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -58,7 +58,7 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 
 	/** Overridden */
 	public void testCount() {
-		assertCount(15);
+		assertCount(16);
 	}
 
 }

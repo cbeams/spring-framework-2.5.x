@@ -24,6 +24,8 @@
 		</property>
 	</bean>
 
+	<bean id="lifecyclePostProcessor" class="org.springframework.beans.factory.LifecycleBean$PostProcessor"/>
+
 	<!-- ===========================================================-->
 	<!-- Listeners							-->
 	<!-- ===========================================================-->

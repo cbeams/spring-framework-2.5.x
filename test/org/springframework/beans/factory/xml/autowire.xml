@@ -9,6 +9,12 @@
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
+	<bean id="rod1a" class="org.springframework.beans.factory.xml.DependenciesBean"
+		autowire="autodetect"
+		dependency-check="objects">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
 	<bean id="rod2" class="org.springframework.beans.factory.xml.DependenciesBean"
 		autowire="byName"
 		dependency-check="objects">
@@ -17,6 +23,12 @@
 
 	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
 		autowire="constructor"
+		dependency-check="objects">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod3a" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
+		autowire="autodetect"
 		dependency-check="objects">
 		<!-- Should pick up spouse automatically -->
 	</bean>
@@ -33,7 +45,7 @@
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="other" class="org.springframework.beans.factory.LifecycleBean"/>
+	<bean id="other" class="org.springframework.beans.IndexedTestBean"/>
 
 	<bean id="parentAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
 		<constructor-arg>

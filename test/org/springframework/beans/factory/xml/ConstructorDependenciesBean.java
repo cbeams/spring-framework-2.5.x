@@ -5,6 +5,7 @@
  
 package org.springframework.beans.factory.xml;
 
+import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.LifecycleBean;
 
@@ -23,13 +24,13 @@ public class ConstructorDependenciesBean {
 
 	private TestBean spouse2;
 
-	private LifecycleBean other;
+	private IndexedTestBean other;
 
 	public ConstructorDependenciesBean(TestBean spouse1) {
 		this.spouse1 = spouse1;
 	}
 
-	public ConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, LifecycleBean other) {
+	public ConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, IndexedTestBean other) {
 		this.spouse1 = spouse1;
 		this.spouse2 = spouse2;
 		this.other = other;
@@ -51,7 +52,7 @@ public class ConstructorDependenciesBean {
 		return spouse2;
 	}
 
-	public LifecycleBean getOther() {
+	public IndexedTestBean getOther() {
 		return other;
 	}
 

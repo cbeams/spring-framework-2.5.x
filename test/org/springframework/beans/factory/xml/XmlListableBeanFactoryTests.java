@@ -10,6 +10,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DummyFactory;
+import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -39,7 +40,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		// Load from classpath, NOT a file path
 		this.factory = new XmlBeanFactory(new ClassPathResource("test.xml", getClass()), parent);
 		this.factory.addBeanPostProcessor(new BeanPostProcessor() {
-			public Object postProcessBean(Object bean, String name) throws BeansException {
+			public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 				if (bean instanceof TestBean) {
 					((TestBean) bean).setPostProcessed(true);
 				}
@@ -48,7 +49,11 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 				}
 				return bean;
 			}
+			public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
+				return bean;
+			}
 		});
+		this.factory.addBeanPostProcessor(new LifecycleBean.PostProcessor());
 		this.factory.preInstantiateSingletons();
 	}
 

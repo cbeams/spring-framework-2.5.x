@@ -56,7 +56,7 @@ public class StaticMessageSourceTestSuite
 	/** Overridden */
 	public void testCount() {
 		// These are only checked for current Ctx (not parent ctx)
-		assertCount(15);
+		assertCount(16);
 	}
 
 	public void testMessageSource() throws NoSuchMessageException {
@@ -67,7 +67,7 @@ public class StaticMessageSourceTestSuite
 	public void testGetMessageWithDefaultPassedInAndFoundInMsgCatalog() {
 		// Try with Locale.US
 		assertTrue("valid msg from staticMsgSource with default msg passed in returned msg from msg catalog for Locale.US",
-		           sac.getMessage("message.format.example2", null, "This is a default msg if not found in msg.cat.", Locale.US
+		           sac.getMessage("message.format.example2", null, "This is a default msg if not found in MessageSource.", Locale.US
 		           )
 		           .equals("This is a test message in the message catalog with no args."));
 	}
@@ -75,9 +75,9 @@ public class StaticMessageSourceTestSuite
 	public void testGetMessageWithDefaultPassedInAndNotFoundInMsgCatalog() {
 		// Try with Locale.US
 		assertTrue("bogus msg from staticMsgSource with default msg passed in returned default msg for Locale.US",
-		           sac.getMessage("bogus.message", null, "This is a default msg if not found in msg.cat.", Locale.US
+		           sac.getMessage("bogus.message", null, "This is a default msg if not found in MessageSource.", Locale.US
 		           )
-		           .equals("This is a default msg if not found in msg.cat."));
+		           .equals("This is a default msg if not found in MessageSource."));
 	}
 
 	/**
