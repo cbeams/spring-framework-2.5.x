@@ -21,7 +21,7 @@ import org.springframework.functor.predicates.BindConstantUnaryPredicate;
  * @author Keith Donald
  */
 public class PredicateFactory {
-    public static UnaryPredicate bindConstant(BinaryPredicate predicate,
+    public static UnaryPredicate bind(BinaryPredicate predicate,
             Object value) {
         return new BindConstantUnaryPredicate(predicate, value);
     }

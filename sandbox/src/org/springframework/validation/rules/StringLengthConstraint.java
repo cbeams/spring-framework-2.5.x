@@ -16,7 +16,7 @@ public class StringLengthConstraint implements UnaryPredicate {
 
     public StringLengthConstraint(BinaryOperator operator, int length) {
         BinaryPredicate comparer = operator.getPredicate();
-        UnaryPredicate lengthConstraint = PredicateFactory.bindConstant(
+        UnaryPredicate lengthConstraint = PredicateFactory.bind(
                 comparer, new Integer(length));
         this.predicate = PredicateFactory.attachResultEvaluator(
                 lengthConstraint, StringLengthFunction.instance());
