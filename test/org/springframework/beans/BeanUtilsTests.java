@@ -77,17 +77,17 @@ public class BeanUtilsTests extends TestCase {
 		assertTrue("Touchy copied", tb2.getTouchy().equals(tb.getTouchy()));
 	}
 
-	public void testCopyPropertiesWithIgnore() throws IllegalAccessException, PropertyVetoException {
+	public void testCopyPropertiesWithIgnore() {
 		TestBean tb = new TestBean();
-		tb.setName("rod");
+		assertTrue("Name empty", tb.getName() == null);
 		tb.setAge(32);
 		TestBean tb2 = new TestBean();
-		assertTrue("Name empty", tb2.getName() == null);
+		tb2.setName("rod");
 		assertTrue("Age empty", tb2.getAge() == 0);
 		assertTrue("Touchy empty", tb2.getTouchy() == null);
 
 		BeanUtils.copyProperties(tb, tb2, new String[] {"spouse", "touchy", "age"});
-		assertTrue("Name copied", tb2.getName().equals(tb.getName()));
+		assertTrue("Name copied", tb2.getName() == null);
 		assertTrue("Age still empty", tb2.getAge() == 0);
 		assertTrue("Touchy still empty", tb2.getTouchy() == null);
 	}
