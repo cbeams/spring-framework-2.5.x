@@ -122,7 +122,7 @@ public interface JdoDialect {
 	 * to allow for proper release of the retrieved Connection handle.
 	 * <p>An implementation might simply do nothing, if the Connection returned
 	 * by <code>getJdbcConnection</code> will be implicitly closed when the JDO
-	 * transaction completes respectively when the PersistenceManager is closed.
+	 * transaction completes or when the PersistenceManager is closed.
 	 * @param conHandle the JDBC Connection handle to release
 	 * @param pm the current JDO PersistenceManager
 	 * @throws JDOException if thrown by JDO methods

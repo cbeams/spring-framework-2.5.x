@@ -422,8 +422,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	/**
-	 * Determine the first respectively last nested property separator in
-	 * the given property path, ignoring dots in keys (like "map[my.key]").
+	 * Determine the first (or last) nested property separator in the
+	 * given property path, ignoring dots in keys (like "map[my.key]").
 	 * @param propertyPath the property path to check
 	 * @param last whether to return the last separator rather than the first
 	 * @return the index of the nested property separator, or -1 if none

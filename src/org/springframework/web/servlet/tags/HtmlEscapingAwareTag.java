@@ -24,12 +24,12 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * Superclass for tags that emit content that might get HTML-escaped.
  *
  * <p>Provides a "htmlEscape" property for explicitly specifying whether to
- * apply HTML escaping. If not set, a page-level default is used (e.g. from
- * the HtmlEscapeTag), respectively an application-wide default (the
- * "defaultHtmlEscape" context-param in web.xml).
+ * apply HTML escaping. If not set, a page-level default (e.g. from the
+ * HtmlEscapeTag) or an application-wide default (the "defaultHtmlEscape"
+ * context-param in web.xml) is used.
  *
  * @author Juergen Hoeller
- * @since 24.07.2004
+ * @since 1.1
  * @see #setHtmlEscape
  * @see HtmlEscapeTag
  * @see org.springframework.web.servlet.support.RequestContext#isDefaultHtmlEscape

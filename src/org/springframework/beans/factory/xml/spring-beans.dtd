@@ -28,7 +28,7 @@
 	Inner beans are typically anonymous prototypes.
 
 	There is also support for lists, sets, maps, and java.util.Properties
-	as bean property types respectively constructor argument types.
+	as bean property types or constructor argument types.
 
 	As the format is simple, a DTD is sufficient, and there's no need
 	for a schema at this point.

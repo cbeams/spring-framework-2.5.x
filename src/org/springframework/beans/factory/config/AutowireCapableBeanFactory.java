@@ -89,7 +89,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @param dependencyCheck whether to perform a dependency check for objects
 	 * (not applicable to autowiring a constructor, thus ignored there)
 	 * @return the new bean instance
-	 * @throws BeansException if instantiation respectively wiring failed
+	 * @throws BeansException if instantiation or wiring failed
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_BY_TYPE
 	 * @see #AUTOWIRE_CONSTRUCTOR

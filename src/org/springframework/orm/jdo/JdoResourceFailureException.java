@@ -25,7 +25,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * JDO-specific subclass of DataAccessResourceFailureException.
  * Converts JDO's JDODataStoreException and JDOFatalDataStoreException.
  * @author Juergen Hoeller
- * @since 12.06.2004
+ * @since 1.1
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException
  */
 public class JdoResourceFailureException extends DataAccessResourceFailureException {

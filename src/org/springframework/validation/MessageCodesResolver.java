@@ -25,7 +25,7 @@ package org.springframework.validation;
  * MessageSourceResolvable (as implemented by ObjectError and FieldError).
  *
  * @author Juergen Hoeller
- * @since 27.03.2004
+ * @since 1.0.1
  * @see ObjectError
  * @see FieldError
  * @see org.springframework.context.MessageSourceResolvable#getCodes

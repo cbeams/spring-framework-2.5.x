@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet.view.tiles;
 
@@ -61,9 +61,11 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	 * <p>This is the only execution method available in Struts 1.1.
 	 * @see #execute
 	 */
-	public final void perform(ComponentContext componentContext, HttpServletRequest request,
-	                          HttpServletResponse response, ServletContext servletContext)
+	public final void perform(
+			ComponentContext componentContext, HttpServletRequest request,
+			HttpServletResponse response, ServletContext servletContext)
 	    throws ServletException, IOException {
+
 		try {
 			execute(componentContext, request, response, servletContext);
 		}
@@ -86,9 +88,11 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	 * @see #perform
 	 * @see #doPerform
 	 */
-	public final void execute(ComponentContext componentContext, HttpServletRequest request,
-	                          HttpServletResponse response, ServletContext servletContext)
+	public final void execute(
+			ComponentContext componentContext, HttpServletRequest request,
+			HttpServletResponse response, ServletContext servletContext)
 	    throws Exception {
+
 		synchronized (this) {
 			if (this.webApplicationContext == null) {
 				this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request, servletContext);
@@ -150,7 +154,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	 * The ServletContext can be retrieved via getServletContext, if necessary.
 	 * The Spring WebApplicationContext can be accessed via getWebApplicationContext.
 	 * <p>This method will be called both in the Struts 1.1 and Struts 1.2 case,
-	 * by <code>perform</code> respectively <code>execute</code>.
+	 * by <code>perform</code> or <code>execute</code>, respectively.
 	 * @param componentContext current Tiles component context
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -161,7 +165,8 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	 * @see #perform
 	 * @see #execute
 	 */
-	protected abstract void doPerform(ComponentContext componentContext, HttpServletRequest request,
-	                                  HttpServletResponse response) throws Exception;
+	protected abstract void doPerform(
+			ComponentContext componentContext, HttpServletRequest request, HttpServletResponse response)
+			throws Exception;
 
 }

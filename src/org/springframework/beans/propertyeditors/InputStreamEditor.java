@@ -23,15 +23,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 
 /**
- * One-way PropertyEditor, which can convert from a text string to an
- * InputStream, allowing InputStream properties to be set directly as
- * a text string. The string should be suitable for feeding to a 
- * ResourceEditor, since this is what is actually used to produce a
- * Resource from the text, which is then asked for an InputStream.
- * Note that in the default usage the stream is not 
- * closed by Spring itself!
+ * One-way PropertyEditor, which can convert from a text string to an InputStream,
+ * allowing InputStream properties to be set directly as a text string.
+ *
+ * <p>The string should be suitable for feeding to a ResourceEditor,
+ * since this is what is actually used to produce a Resource from the text,
+ * which is then asked for an InputStream.
+ *
+ * <p>Note that in the default usage, the stream is not closed by Spring itself!
  * @author Juergen Hoeller
- * @since 01.04.2004
+ * @since 1.0.1
  */
 public class InputStreamEditor extends PropertyEditorSupport {
 

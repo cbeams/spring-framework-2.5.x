@@ -20,7 +20,7 @@ package org.springframework.transaction;
  * Exception thrown when attempting to work with a nested transaction
  * but nested transactions are not supported by the underlying backend.
  * @author Juergen Hoeller
- * @since 18.06.2004
+ * @since 1.1
  */
 public class NestedTransactionNotSupportedException extends CannotCreateTransactionException {
 

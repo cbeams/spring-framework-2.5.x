@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.support.AopUtils;
 
 /**
@@ -142,11 +143,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	/**
 	 * Subclasses should implement this to return all attributes for this method.
 	 * We need all because of the need to analyze rollback rules.
-	 * @param m method to retrieve attributes for
+	 * @param method the method to retrieve attributes for
 	 * @return all attributes associated with this method.
 	 * May return null.
 	 */
-	protected abstract Collection findAllAttributes(Method m);
+	protected abstract Collection findAllAttributes(Method method);
 	
 	/**
 	 * Subclasses should implement this to return all attributes for this class.	 
@@ -177,7 +178,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 
 		TransactionAttribute txAttribute = null;
-		// Check there is a transaction attribute
+		// Check there is a transaction attribute.
 		for (Iterator itr = atts.iterator(); itr.hasNext() && txAttribute == null; ) {
 			Object att = itr.next();
 			if (att instanceof TransactionAttribute) {

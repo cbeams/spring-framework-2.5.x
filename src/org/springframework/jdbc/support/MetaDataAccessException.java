@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support;
 
@@ -26,7 +26,7 @@ import org.springframework.core.NestedCheckedException;
  * metadata is usually not a fatal problem.
  *
  * @author Thomas Risberg
- * @since 06.04.2004
+ * @since 1.0.1
  */
 public class MetaDataAccessException extends NestedCheckedException {
 

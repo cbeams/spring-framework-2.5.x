@@ -47,7 +47,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
  * </pre>
  *
  * @author Juergen Hoeller
- * @since 27.06.2004
+ * @since 1.1
  * @see java.sql.PreparedStatement#setObject(int, Object, int)
  * @see org.springframework.jdbc.object.StoredProcedure
  */

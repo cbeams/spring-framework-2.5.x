@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods that are useful for bean definition readers implementations.
  * @author Juergen Hoeller
- * @since 09.07.2004
+ * @since 1.1
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
  */

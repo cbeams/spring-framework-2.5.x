@@ -447,7 +447,7 @@ public class MimeMessageHelper {
 
 	/**
 	 * Set the given text directly as content in non-multipart mode
-	 * respectively as default body part in multipart mode.
+	 * or as default body part in multipart mode.
 	 * Always applies the default content type "text/plain".
 	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
 	 * readers might not be able to resolve inline references correctly.
@@ -461,7 +461,7 @@ public class MimeMessageHelper {
 
 	/**
 	 * Set the given text directly as content in non-multipart mode
-	 * respectively as default body part in multipart mode.
+	 * or as default body part in multipart mode.
 	 * The "html" flag determines the content type to apply.
 	 * <p><b>NOTE:</b> Invoke addInline <i>after</i> setText; else, mail
 	 * readers might not be able to resolve inline references correctly.

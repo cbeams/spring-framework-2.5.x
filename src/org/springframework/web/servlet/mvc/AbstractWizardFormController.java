@@ -317,6 +317,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	protected final ModelAndView showPage(HttpServletRequest request, BindException errors, int page)
 	    throws Exception {
+
 		if (page >= 0 && page < this.pages.length) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
@@ -458,7 +459,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		if (targetPage != currentPage) {
 			if (!errors.hasErrors() || (this.allowDirtyBack && targetPage < currentPage) ||
 					(this.allowDirtyForward && targetPage > currentPage)) {
-				// allowed to go to target page
+				// Allowed to go to target page.
 				return showPage(request, errors, targetPage);
 			}
 		}
@@ -475,18 +476,18 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #getPageSessionAttributeName
 	 */
 	protected int getCurrentPage(HttpServletRequest request) {
-		// check for overriding attribute in request
+		// Check for overriding attribute in request.
 		String pageAttrName = getPageSessionAttributeName(request);
 		Integer pageAttr = (Integer) request.getAttribute(pageAttrName);
 		if (pageAttr != null) {
 			return pageAttr.intValue();
 		}
-		// check for explicit request parameter
+		// Check for explicit request parameter.
 		String pageParam = request.getParameter(PARAM_PAGE);
 		if (pageParam != null) {
 			return Integer.parseInt(pageParam);
 		}
-		// check for original attribute in session
+		// Check for original attribute in session.
 		if (isSessionForm()) {
 			pageAttr = (Integer) request.getSession().getAttribute(pageAttrName);
 			if (pageAttr != null) {

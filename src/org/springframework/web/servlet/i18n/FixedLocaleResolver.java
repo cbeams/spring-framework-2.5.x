@@ -29,7 +29,7 @@ import org.springframework.web.servlet.LocaleResolver;
  * <p>Note: Does not support setLocale, because the fixed Locale cannot be changed.
  *
  * @author Juergen Hoeller
- * @since 16.06.2004
+ * @since 1.1
  */
 public class FixedLocaleResolver implements LocaleResolver {
 

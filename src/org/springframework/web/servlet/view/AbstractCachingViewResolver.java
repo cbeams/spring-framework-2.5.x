@@ -47,8 +47,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	private boolean cache = true;
 
 	/**
-	 * Enable respectively disable caching. Disable this only for debugging
-	 * and development. Default is for caching to be enabled.
+	 * Enable or disable caching. Disable this only for debugging and development.
+	 * Default is for caching to be enabled.
 	 * <p><b>Warning: Disabling caching can severely impact performance.</b>
 	 * Tests indicate that turning caching off reduces performance by at least 20%.
 	 * Increased object churn probably eventually makes the problem even worse.

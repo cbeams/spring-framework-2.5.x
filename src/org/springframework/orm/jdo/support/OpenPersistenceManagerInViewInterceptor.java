@@ -48,7 +48,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * It derives from JdoAccessor to inherit common JDO configuration properties.
  *
  * @author Juergen Hoeller
- * @since 12.06.2004
+ * @since 1.1
  * @see OpenPersistenceManagerInViewFilter
  * @see org.springframework.orm.jdo.JdoInterceptor
  * @see org.springframework.orm.jdo.JdoTransactionManager

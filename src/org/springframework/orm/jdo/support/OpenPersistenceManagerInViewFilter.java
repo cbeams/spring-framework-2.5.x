@@ -52,7 +52,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * root application context will get initialized <i>after</i> this filter).
  *
  * @author Juergen Hoeller
- * @since 12.06.2004
+ * @since 1.1
  * @see OpenPersistenceManagerInViewInterceptor
  * @see org.springframework.orm.jdo.JdoInterceptor
  * @see org.springframework.orm.jdo.JdoTransactionManager

@@ -25,7 +25,7 @@ import org.springframework.util.MethodInvoker;
  * Subclass of MethodInvoker that tries to convert the given arguments
  * for the actual target method via BeanWrapperImpl.
  * @author Juergen Hoeller
- * @since 09.06.2004
+ * @since 1.1
  * @see org.springframework.beans.BeanWrapperImpl#doTypeConversionIfNecessary
  */
 public class ArgumentConvertingMethodInvoker extends MethodInvoker {

@@ -68,10 +68,10 @@ import org.springframework.util.Assert;
  * HierarchicalBeanFactory interface (superinterface of ConfigurableBeanFactory).
  *
  * <p>The main template methods to be implemented by subclasses are
- * <code>getBeanDefinition</code> and <code>createBean</code>, retrieving a bean
- * definition for a given bean name respectively creating a bean instance for a
+ * <code>getBeanDefinition</code> and <code>createBean</code>, retrieving a
+ * bean definition for a given bean name or creating a bean instance for a
  * given bean definition. Default implementations for those can be found in
- * DefaultListableBeanFactory respectively AbstractAutowireCapableBeanFactory.
+ * DefaultListableBeanFactory or AbstractAutowireCapableBeanFactory, respectively.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

@@ -21,7 +21,7 @@ package org.springframework.jdbc.core;
  * to be invoked after the value has been set and the corresponding
  * statement has been executed.
  * @author Juergen Hoeller
- * @since 27.06.2004
+ * @since 1.1
  * @see org.springframework.jdbc.core.support.SqlLobValue
  */
 public interface DisposableSqlTypeValue extends SqlTypeValue {

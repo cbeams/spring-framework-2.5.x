@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
 
@@ -20,7 +20,7 @@ package org.springframework.beans;
  * Exception thrown when referring to an invalid bean property.
  * Carries the offending bean class and property name.
  * @author Juergen Hoeller
- * @since 31.05.2004
+ * @since 1.0.2
  */
 public class InvalidPropertyException extends FatalBeanException {
 

@@ -42,7 +42,7 @@ import org.springframework.jdbc.datasource.ConnectionProxy;
  * unless there's a more efficient version for a specific pool.
  *
  * @author Juergen Hoeller
- * @since 02.06.2004
+ * @since 1.1
  * @see #getNativeConnection
  * @see #getNativeConnectionFromStatement
  */

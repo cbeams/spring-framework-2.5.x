@@ -68,7 +68,7 @@ import org.springframework.web.context.WebApplicationContext;
  * 1.0.5, for example.
  *
  * @author Juergen Hoeller
- * @since 22.06.2004
+ * @since 1.1
  * @see FacesContextUtils#getRequiredWebApplicationContext
  */
 public class DelegatingVariableResolver extends VariableResolver {

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy.metadata;
 
@@ -28,12 +28,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class DummyAttributesMetadataAutoProxyTests extends AbstractMetadataAutoProxyTests {
 
 	protected BeanFactory getBeanFactory() throws IOException {
-		// Load from classpath
-		BeanFactory bf = new ClassPathXmlApplicationContext(new String[] {
+		// Load from class path.
+		return new ClassPathXmlApplicationContext(
+				new String[] {
 					"/org/springframework/aop/framework/autoproxy/metadata/dummyAttributes.xml",
 					"/org/springframework/aop/framework/autoproxy/metadata/enterpriseServices.xml"});
-		return bf;
 	}
-	
-	
+
 }

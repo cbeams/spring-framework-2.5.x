@@ -23,7 +23,7 @@ package org.springframework.transaction;
  * @author Juergen Hoeller
  * @since 21.01.2004
  */
-public class IllegalTransactionStateException extends CannotCreateTransactionException {
+public class IllegalTransactionStateException extends TransactionUsageException {
 
 	/**
 	 * Constructor for IllegalTransactionStateException.

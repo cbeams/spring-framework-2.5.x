@@ -31,9 +31,9 @@ import org.springframework.web.util.JavaScriptUtils;
  * applying HTML escaping and/or JavaScript escaping.
  *
  * <p>Provides a "htmlEscape" property for explicitly specifying whether to
- * apply HTML escaping. If not set, a page-level default is used (e.g. from
- * the HtmlEscapeTag), respectively an application-wide default (the
- * "defaultHtmlEscape" context-param in web.xml).
+ * apply HTML escaping. If not set, a page-level default (e.g. from the
+ * HtmlEscapeTag) or an application-wide default (the "defaultHtmlEscape"
+ * context-param in web.xml) is used.
  *
  * <p>Provides a "javaScriptEscape" property for specifying whether to apply
  * JavaScript escaping. Can be combined with HTML escaping or used standalone.

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
 	Test that inner bean for target means that we can use
 	autowire without ambiguity from target and proxy.
-	$Id: innerBeanTarget.xml,v 1.1 2004-06-18 10:56:54 johnsonr Exp $
+	$Id: innerBeanTarget.xml,v 1.2 2005-02-27 19:21:32 jhoeller Exp $
 -->
 
 <beans>

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction;
 
@@ -20,7 +20,7 @@ package org.springframework.transaction;
  * Thrown when an attempt to commit a transaction resulted
  * in an unexpected rollback.
  * @author Rod Johnson
- * @since 17-Mar-2003
+ * @since 17.03.2003
  */
 public class UnexpectedRollbackException extends TransactionException {
 

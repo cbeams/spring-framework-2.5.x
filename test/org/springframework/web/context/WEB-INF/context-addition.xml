@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 
@@ -21,7 +21,6 @@
 		<property name="age"><value>34</value></property>
 		<property name="spouse"><ref bean="rod"/></property>
 	</bean>
-
 
 	<bean id="typeMismatch" class="org.springframework.beans.TestBean" singleton="false">
 		<property name="name"><value>typeMismatch</value></property>

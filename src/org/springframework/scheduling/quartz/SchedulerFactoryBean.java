@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.scheduling.quartz;
 
@@ -677,7 +677,7 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Add the given calendar to the Scheduler, checking for the
-	 * corresponding Quartz 1.4 respectively Quartz 1.3 method
+	 * corresponding Quartz 1.4 or Quartz 1.3 method
 	 * (which differ in 1.4's additional "updateTriggers" flag).
 	 * @param calendarName the name of the calendar
 	 * @param calendar the Calendar object

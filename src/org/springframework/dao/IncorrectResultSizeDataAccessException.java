@@ -20,7 +20,7 @@ package org.springframework.dao;
  * Data access exception thrown when a result was not of the expected size,
  * for example when expecting a single row but getting 0 or more than 1 rows.
  * @author Juergen Hoeller
- * @since 26.05.2004
+ * @since 1.0.2
  */
 public class IncorrectResultSizeDataAccessException extends InvalidDataAccessApiUsageException {
 

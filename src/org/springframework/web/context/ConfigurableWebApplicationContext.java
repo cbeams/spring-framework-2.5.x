@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.context;
 
@@ -63,7 +63,7 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 	/**
 	 * Set the config locations for this web application context.
 	 * If not set, the implementation is supposed to use a default for the
-	 * given namespace respectively the root web application context.
+	 * given namespace or the root web application context, as appropriate.
 	 */
 	void setConfigLocations(String[] configLocations);
 

@@ -38,7 +38,7 @@ import org.springframework.dao.DataAccessException;
  * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
  *
  * @author Juergen Hoeller
- * @since 12.06.2004
+ * @since 1.1
  * @see JdoTemplate
  * @see javax.jdo.PersistenceManager
  * @see JdoTransactionManager

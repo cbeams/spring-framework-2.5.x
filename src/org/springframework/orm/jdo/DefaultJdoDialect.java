@@ -53,7 +53,7 @@ import org.springframework.transaction.TransactionException;
  * special transaction semantics and more sophisticated exception translation.
  *
  * @author Juergen Hoeller
- * @since 12.06.2004
+ * @since 1.1
  * @see JdoAccessor#setJdoDialect
  * @see JdoTransactionManager#setJdoDialect
  */

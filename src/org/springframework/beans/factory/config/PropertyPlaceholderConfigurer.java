@@ -437,13 +437,13 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 */
 	protected String resolvePlaceholder(String placeholder, Properties props, int systemPropertiesMode) {
 		String propVal = null;
-		if (this.systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
+		if (systemPropertiesMode == SYSTEM_PROPERTIES_MODE_OVERRIDE) {
 			propVal = System.getProperty(placeholder);
 		}
 		if (propVal == null) {
 			propVal = resolvePlaceholder(placeholder, props);
 		}
-		if (propVal == null && this.systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
+		if (propVal == null && systemPropertiesMode == SYSTEM_PROPERTIES_MODE_FALLBACK) {
 			propVal = System.getProperty(placeholder);
 		}
 		return propVal;

@@ -35,8 +35,8 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
  *
  * <p>Note that this class is a <b>non-thread-safe object</b>, in contrast
  * to all other JDBC operations objects in this package. You need to create
- * a new instance of it for each use, respectively call <code>reset</code>
- * before reuse within the same thread.
+ * a new instance of it for each use, or call <code>reset</code> before
+ * reuse within the same thread.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -105,9 +105,9 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 	/**
 	 * Set the number of statements that will trigger an automatic intermediate
-	 * flush. <code>update</code> calls respectively the given statement
-	 * parameters will be queued until the batch size is met, at which point
-	 * it will empty the queue and execute the batch.
+	 * flush. <code>update</code> calls or the given statement parameters will
+	 * be queued until the batch size is met, at which point it will empty the
+	 * queue and execute the batch.
 	 * <p>You can also flush already queued statements with an explicit
 	 * <code>flush</code> call. Note that you need to this after queueing
 	 * all parameters to guarantee that all statements have been flushed.
@@ -183,8 +183,8 @@ public class BatchSqlUpdate extends SqlUpdate {
 	}
 
 	/**
-	 * Return the current number of statements respectively statement
-	 * parameters in the queue.
+	 * Return the current number of statements or statement parameters
+	 * in the queue.
 	 */
 	public int getQueueCount() {
 		return this.parameterQueue.size();

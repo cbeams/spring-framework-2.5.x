@@ -31,7 +31,7 @@ import java.sql.SQLException;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @since 24.06.2004
+ * @since 1.1
  * @see java.sql.Types
  * @see java.sql.PreparedStatement#setObject
  * @see JdbcTemplate#update(String, Object[], int[])
@@ -41,9 +41,9 @@ import java.sql.SQLException;
 public interface SqlTypeValue {
 
 	/**
-	 * Constant that indicates an unknown (respectively unspecified) SQL type.
-	 * Passed into setTypeValue if the original operation method does not specify
-	 * a SQL type.
+	 * Constant that indicates an unknown (or unspecified) SQL type.
+	 * Passed into setTypeValue if the original operation method does
+	 * not specify a SQL type.
 	 * @see java.sql.Types
 	 * @see JdbcOperations#update(String, Object[])
 	 */

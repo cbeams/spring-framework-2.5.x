@@ -29,7 +29,7 @@ import javax.naming.NamingException;
  * <strong>false</strong>) and no other scheme like "java:" is given.
  *
  * @author Juergen Hoeller
- * @since 20.07.2004
+ * @since 1.1
  * @see #setJndiTemplate
  * @see #setJndiEnvironment
  * @see #setResourceRef

@@ -27,8 +27,8 @@ import javax.jms.TopicSession;
  * resolving destination names as dynamic destinations.
  *
  * <p>This implementation will work on both JMS 1.1 and JMS 1.0.2,
- * because it uses the QueueSession respectively TopicSession methods
- * if possible, falling back to JMS 1.1's generic Session methods.
+ * because it uses the QueueSession or TopicSession methods if possible,
+ * falling back to JMS 1.1's generic Session methods.
  *
  * @author Juergen Hoeller
  * @since 1.1

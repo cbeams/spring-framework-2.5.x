@@ -20,7 +20,7 @@ package org.springframework.web.multipart;
  * MultipartException subclass thrown when an upload exceeds the
  * maximum allowed size.
  * @author Juergen Hoeller
- * @since 31.03.2004
+ * @since 1.0.1
  */
 public class MaxUploadSizeExceededException extends MultipartException {
 

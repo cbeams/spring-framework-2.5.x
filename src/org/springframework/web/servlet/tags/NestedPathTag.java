@@ -35,7 +35,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  *
  * @author Seth Ladd
  * @author Juergen Hoeller
- * @since 28.07.2004
+ * @since 1.1
  */
 public class NestedPathTag extends TagSupport {
 

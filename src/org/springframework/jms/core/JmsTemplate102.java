@@ -53,8 +53,8 @@ import org.springframework.jms.support.destination.DynamicDestinationResolver;
  * and Publish/Subscribe domain.
  *
  * <p>This template uses a DynamicDestinationResolver and a SimpleMessageConverter102
- * as default strategies for resolving a destination name respectively converting
- * a message.
+ * as default strategies for resolving a destination name or converting a message,
+ * respectively.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller

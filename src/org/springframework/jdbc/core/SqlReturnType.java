@@ -38,9 +38,9 @@ import java.sql.SQLException;
 public interface SqlReturnType {
 
 	/**
-	 * Constant that indicates an unknown (respectively unspecified) SQL type.
-	 * Passed into setTypeValue if the original operation method does not specify
-	 * a SQL type.
+	 * Constant that indicates an unknown (or unspecified) SQL type.
+	 * Passed into setTypeValue if the original operation method does
+	 * not specify a SQL type.
 	 * @see java.sql.Types
 	 * @see JdbcOperations#update(String, Object[])
 	 */

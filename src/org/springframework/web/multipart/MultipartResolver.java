@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.multipart;
 
@@ -49,8 +49,8 @@ import javax.servlet.http.HttpServletRequest;
  *   ...
  * }</pre>
  *
- * <p>Instead of direct access, command respectively form controllers can register
- * a ByteArrayMultipartFileEditor or StringMultipartFileEditor with their data
+ * <p>Instead of direct access, command or form controllers can register a
+ * ByteArrayMultipartFileEditor or StringMultipartFileEditor with their data
  * binder, to automatically apply multipart content to command bean properties.
  *
  * <p>As an alternative to using a MultipartResolver with a DispatcherServlet,

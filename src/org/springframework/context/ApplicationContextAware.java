@@ -30,8 +30,7 @@ import org.springframework.beans.BeansException;
  * <p>This interface can also be implemented if an object needs access to file
  * resources, i.e. wants to call getResource, or access to the MessageSource.
  * However, it is preferable to implement the more specific ResourceLoaderAware
- * interface respectively receive a reference to the MessageSource bean in that
- * scenario.
+ * interface or receive a reference to the MessageSource bean in that scenario.
  *
  * <p>Note that Resource dependencies can also be exposed as bean properties
  * of type Resource, populated via Strings with automatic type conversion by

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -25,8 +25,8 @@ import org.springframework.core.CollectionFactory;
 /**
  * AdvisorChainFactory implementation that caches by method.
  *
- * <p>Uses IdentityHashMap on JDK >= 1.4 respectively Commons Collections 3.x'
- * IdentityMap (if available), which skip expensive Method.hashCode() calls.
+ * <p>Uses IdentityHashMap on JDK >= 1.4 or Commons Collections 3.x' IdentityMap
+ * (if available), which skip expensive Method.hashCode() calls.
  * Falls back to standard HashMap on plain JDK 1.3.
  *
  * @author Rod Johnson

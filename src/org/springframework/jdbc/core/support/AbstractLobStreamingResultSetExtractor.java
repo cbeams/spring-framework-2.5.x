@@ -49,7 +49,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  * );</pre>
  *
  * @author Juergen Hoeller
- * @since 28.04.2004
+ * @since 1.0.2
  * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.jdbc.LobRetrievalFailureException
  */

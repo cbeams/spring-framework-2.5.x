@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.support.lob;
 
@@ -122,7 +122,7 @@ public interface LobCreator {
 	 * Will not need to do anything if using PreparedStatement's standard methods,
 	 * but might be necessary to free database resources if using proprietary means.
 	 * <p><b>NOTE</b>: Needs to be invoked after the involved PreparedStatements have
-	 * been executed respectively the affected O/R mapping sessions have been flushed.
+	 * been executed or the affected O/R mapping sessions have been flushed.
 	 * Else, the database resources for the temporary BLOBs might stay allocated.
 	 */
 	void close();

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
 
@@ -20,7 +20,7 @@ package org.springframework.beans;
  * Exception thrown on an attempt to get the value of a property
  * that isn't readable, because there's no getter method.
  * @author Juergen Hoeller
- * @since 01.06.2004
+ * @since 1.0.2
  */
 public class NotReadablePropertyException extends InvalidPropertyException {
 

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction;
 
@@ -20,7 +20,7 @@ package org.springframework.transaction;
  * Exception thrown when a transaction can't be created using an
  * underlying transaction API such as JTA.
  * @author Rod Johnson
- * @since 17-Mar-2003
+ * @since 17.03.2003
  */
 public class CannotCreateTransactionException extends TransactionException {
 

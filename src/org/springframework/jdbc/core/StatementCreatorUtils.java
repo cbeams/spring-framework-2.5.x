@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @since 26.06.2004
+ * @since 1.1
  * @see PreparedStatementCreator
  * @see CallableStatementCreator
  * @see PreparedStatementCreatorFactory

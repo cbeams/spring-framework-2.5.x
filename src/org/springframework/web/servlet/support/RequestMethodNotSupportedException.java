@@ -22,7 +22,7 @@ import javax.servlet.ServletException;
  * Exception thrown when a web content generator does not support a
  * specific request method.
  * @author Juergen Hoeller
- * @since 03.08.2004
+ * @since 1.1
  * @see WebContentGenerator
  */
 public class RequestMethodNotSupportedException extends ServletException {

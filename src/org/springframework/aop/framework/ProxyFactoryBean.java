@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -123,6 +123,11 @@ public class ProxyFactoryBean extends AdvisedSupport
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
+	 * Indicates whether the proxy should be frozen before creation.
+	 */
+	private boolean freezeProxy = false;
+
+	/**
 	 * Owning bean factory, which cannot be changed after this
 	 * object is initialized.
 	 */
@@ -134,14 +139,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private String targetName;
 
-
 	/** If this is a singleton, the cached singleton proxy instance */
 	private Object singletonInstance;
-    
-    /**
-     * Inidicates whether the proxy should be frozen before creation.
-     */
-    private boolean freezeProxy;
 
 
 	/**
@@ -195,6 +194,10 @@ public class ProxyFactoryBean extends AdvisedSupport
 		this.advisorAdapterRegistry = advisorAdapterRegistry;
 	}
 
+	public void setFrozen(boolean frozen) {
+		this.freezeProxy = frozen;
+	}
+
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 		createAdvisorChain();
@@ -207,10 +210,6 @@ public class ProxyFactoryBean extends AdvisedSupport
 			addListener(this);
 		}
 	}
-
-    public void setFrozen(boolean frozen) {
-        this.freezeProxy = frozen;
-    }
 
 	/**
 	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
@@ -240,7 +239,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	private Object getSingletonInstance() {
 		if (this.singletonInstance == null) {
-            super.setFrozen(freezeProxy);
+			super.setFrozen(this.freezeProxy);
 			this.singletonInstance = createAopProxy().getProxy();
 		}
 		return this.singletonInstance;

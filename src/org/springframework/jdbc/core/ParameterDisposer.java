@@ -26,7 +26,7 @@ package org.springframework.jdbc.core;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @since 09.06.2004
+ * @since 1.1
  * @see PreparedStatementCreator
  * @see PreparedStatementSetter
  * @see DisposableSqlTypeValue

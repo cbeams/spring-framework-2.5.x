@@ -154,7 +154,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 	/**
 	 * Prepare for rendering, and determine the request dispatcher path
-	 * to forward to respectively to include.
+	 * to forward to (or to include).
 	 * <p>This implementation simply returns the configured URL.
 	 * Subclasses can override this to determine a resource to render,
 	 * typically interpreting the URL in a different manner.

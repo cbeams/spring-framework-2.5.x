@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy.metadata;
 
@@ -25,24 +25,26 @@ import org.springframework.metadata.commons.CommonsAttributeCompilerUtils;
 /**
  * Metadata auto proxy creator test that sources attributes 
  * using Jakarta Commons Attributes.
- * <b>Requires source-level metadata compilation.</b>
- * <br>See the commonsBuild.xml Ant build script.
+ *
+ * <p><b>Requires source-level metadata compilation.</b>
+ * See the commonsBuild.xml Ant build script.
+ *
  * @author Rod Johnson
- * @since 13-Mar-2003
+ * @since 13.03.2003
  */
 public class CommonsAttributesMetadataAutoProxyTests extends AbstractMetadataAutoProxyTests {
 	
 	static {
-		// If we're within an IDE, compile the attributes programmatically
+		// If we're within an IDE, compile the attributes programmatically.
 		CommonsAttributeCompilerUtils.compileAttributesIfNecessary("**/autoproxy/metadata/*.java");
 	}
 
 	protected BeanFactory getBeanFactory() throws IOException {
-		// Load from classpath, NOT a file path
-		BeanFactory bf = new ClassPathXmlApplicationContext(new String[] {
+		// Load from class path, NOT a file path.
+		return new ClassPathXmlApplicationContext(
+				new String[] {
 					"/org/springframework/aop/framework/autoproxy/metadata/commonsAttributes.xml",
 					"/org/springframework/aop/framework/autoproxy/metadata/enterpriseServices.xml"});
-		return bf;
 	}
 	
 }

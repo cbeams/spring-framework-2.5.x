@@ -37,7 +37,7 @@ import javax.jms.TextMessage;
  *
  * <p>Converts a String to a JMS TextMessage, a byte array to a JMS BytesMessage,
  * a Map to a JMS MapMessage, and a Serializable object to a JMS ObjectMessage
- * (respectively vice versa).
+ * (or vice versa).
  *
  * <p>This converter implementation works for both JMS 1.1 and JMS 1.0.2,
  * except when extracting a byte array from a BytesMessage. So for converting

@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 	
-	
-	<bean id="prototypeTest" class="org.springframework.aop.interceptor.SideEffectBean" 
-		singleton="false">	
+	<bean id="prototypeTest" class="org.springframework.aop.interceptor.SideEffectBean" singleton="false">
 		<property name="count"><value>10</value></property>
 	</bean>
 	
@@ -26,30 +24,22 @@
 	<!--
 		This will create a bean for each thread ("apartment")
 	-->
-	<bean id="apartment" 
-			class="org.springframework.aop.framework.ProxyFactoryBean"
-	>	
+	<bean id="apartment" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interceptorNames"><value>debugInterceptor,statsAdvisor</value></property>
-		
 		<property name="targetSource"><ref local="threadLocalTs"/></property>
-		
 		<!-- Necessary as have a mixin and want to avoid losing the class,
 			 because there's no target interface -->
 		<property name="proxyTargetClass"><value>true</value></property>
-		
 	</bean>
-	
-	
+
 	<!-- ================ Definitions for second ThreadLocalTargetSource ====== -->
 	
-	<bean id="test" singleton="false"
-		class="org.springframework.beans.TestBean">
+	<bean id="test" class="org.springframework.beans.TestBean" singleton="false">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
 	</bean>
 	
-	<bean id="wife"
-		class="org.springframework.beans.TestBean">
+	<bean id="wife" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 	</bean>
 	
@@ -57,14 +47,9 @@
 		<property name="targetBeanName"><value>test</value></property>
 	</bean>
 	
-	<bean id="threadLocal2" 
-			class="org.springframework.aop.framework.ProxyFactoryBean"
-	>	
-		
+	<bean id="threadLocal2" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="targetSource"><ref local="threadLocalTs2"/></property>
-		
 	</bean>
 
 </beans>		
-	
 	

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 
@@ -8,32 +8,22 @@
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
 	</bean>
-	
 
-	
-	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.SerializableNopInterceptor">
-	</bean>
-	
+	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.SerializableNopInterceptor"/>
+
 	<bean id="settersAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
 		<property name="advice"><ref local="nopInterceptor"/></property>
 		<property name="pattern"><value>.*set.*</value></property>
 	</bean>
 	
-	<bean id="settersAdvised" 
-			class="org.springframework.aop.framework.ProxyFactoryBean"
-	>	
+	<bean id="settersAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
-		
-		<property name="target"><ref local="test"/></property>	
+		<property name="target"><ref local="test"/></property>
 		<property name="interceptorNames"><value>settersAdvisor</value></property>		
-		
 	</bean>
 	
-	<bean id="serializableSettersAdvised" 
-			class="org.springframework.aop.framework.ProxyFactoryBean"
-	>	
-		
-		<property name="proxyInterfaces"><value>org.springframework.beans.Person</value></property>		
+	<bean id="serializableSettersAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces"><value>org.springframework.beans.Person</value></property>
 		<property name="target">
 			<bean class="org.springframework.beans.SerializablePerson">
 				<property name="name"><value>serializableSettersAdvised</value></property>
@@ -41,8 +31,7 @@
 		</property>
 		<property name="interceptorNames"><value>settersAdvisor</value></property>	
 	</bean>
-	
-	
+
 	<!-- Illustrates use of multiple patterns -->
 	<bean id="settersAndAbsquatulateAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
 		<property name="advice"><ref local="nopInterceptor"/></property>
@@ -54,19 +43,12 @@
 		</property>
 	</bean>
 	
-	<bean id="settersAndAbsquatulateAdvised" 
-			class="org.springframework.aop.framework.ProxyFactoryBean"
-	>	
+	<bean id="settersAndAbsquatulateAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
-		
 		<!-- Force CGLIB so we can cast to TestBean -->
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="target"><ref local="test"/></property>	
 		<property name="interceptorNames"><value>settersAndAbsquatulateAdvisor</value></property>		
-		
 	</bean>
-	
 
 </beans>		
-	
-	

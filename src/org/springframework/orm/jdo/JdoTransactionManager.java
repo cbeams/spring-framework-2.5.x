@@ -44,7 +44,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * this transaction management mechanism.
  *
  * <p>This implementation is appropriate for applications that solely use JDO for
- * transactional data access. JTA respectively JtaTransactionManager is necessary for
+ * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
  * accessing multiple transactional resources. Note that you need to configure your JDO
  * tool accordingly to make it participate in JTA transactions. In contrast to Hibernate,
  * this cannot be transparently provided by the Spring transaction manager implementation.

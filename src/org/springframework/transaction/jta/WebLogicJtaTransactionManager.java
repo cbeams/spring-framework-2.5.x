@@ -23,7 +23,6 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.TransactionUsageException;
 
 /**
  * Special JtaTransactionManager version for BEA WebLogic.
@@ -39,7 +38,7 @@ import org.springframework.transaction.TransactionUsageException;
  * "transactionManagerName" property value.
  *
  * <p>Will work out-of-the-box on BEA WebLogic 8.1 and higher (tested on 8.1 SP2).
- * On WebLogic 7.0 SP2, a "forceResume" call on the TransactionManager reference
+ * On WebLogic 7.0 SP5, a "forceResume" call on the TransactionManager reference
  * obtained from JNDI unfortunately fails with a mysterious, WebLogic-internal
  * NullPointerException. (Thanks to Eugene Kuleshov and Dmitri Maximovich for
  * tracking down and reporting this issue!)
@@ -48,7 +47,7 @@ import org.springframework.transaction.TransactionUsageException;
  * with a WebLogicServerTransactionManagerFactoryBean. This factory bean provides
  * a reference to the ServerTransactionManagerImpl via WebLogic's TxHelper class.
  * This has been tested on WebLogic 7.0 SP5. The TxHelper lookup is available on
- * WebLogic 8.1, but deprecated - so we recommend the default JNDI lookup there.
+ * WebLogic 8.1, but deprecated, so we recommend the default JNDI lookup there.
  *
  * <pre>
  * &lt;bean id="wlsTm" class="org.springframework.transaction.jta.WebLogicServerTransactionManagerFactoryBean"/&gt;
@@ -81,7 +80,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	 * This constructor retrieves the WebLogic JTA TransactionManager interface,
 	 * so we can invoke the forceResume method using reflection.
 	 */
-	public WebLogicJtaTransactionManager() {
+	public WebLogicJtaTransactionManager() throws TransactionSystemException {
 		setTransactionManagerName(DEFAULT_TRANSACTION_MANAGER_NAME);
 		try {
 			Class transactionManagerClass =
@@ -90,7 +89,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			    transactionManagerClass.getMethod("forceResume", new Class[] {Transaction.class});
 		}
 		catch (Exception ex) {
-			throw new TransactionUsageException(
+			throw new TransactionSystemException(
 					"Couldn't initialize WebLogicJtaTransactionManager because WebLogic API classes are not available",
 			    ex);
 		}

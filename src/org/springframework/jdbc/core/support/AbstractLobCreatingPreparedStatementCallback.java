@@ -49,7 +49,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * );</pre>
  *
  * @author Juergen Hoeller
- * @since 27.04.2004
+ * @since 1.0.2
  * @see org.springframework.jdbc.support.lob.LobCreator
  */
 public abstract class AbstractLobCreatingPreparedStatementCallback implements PreparedStatementCallback {

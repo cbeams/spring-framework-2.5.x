@@ -22,7 +22,7 @@ import java.sql.Connection;
  * Simple implementation of the ConnectionHandle interface,
  * containing a given JDBC Connection.
  * @author Juergen Hoeller
- * @since 14.06.2004
+ * @since 1.1
  */
 public class SimpleConnectionHandle implements ConnectionHandle {
 

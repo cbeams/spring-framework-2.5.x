@@ -32,7 +32,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Determine if the given objects are equal, returning true if both are null
-	 * respectively false if only one is null.
+	 * or false if only one is null.
 	 * @param o1 first Object to compare
 	 * @param o2 second Object to compare
 	 * @return whether the given objects are equal

@@ -57,8 +57,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * transaction, no matter if a JTA transaction or a Spring-managed transaction.
  *
  * <p>This template uses a DynamicDestinationResolver and a SimpleMessageConverter
- * as default strategies for resolving a destination name respectively converting
- * a message.
+ * as default strategies for resolving a destination name or converting a message,
+ * respectively.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller

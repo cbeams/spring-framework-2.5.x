@@ -21,9 +21,9 @@ import java.io.IOException;
 import org.springframework.dao.DataRetrievalFailureException;
 
 /**
- * Exception thrown when a BLOB/CLOB could not be read.
+ * Exception to be thrown when a LOB could not be retrieved.
  * @author Juergen Hoeller
- * @since 28.04.2004
+ * @since 1.0.2
  */
 public class LobRetrievalFailureException extends DataRetrievalFailureException {
 

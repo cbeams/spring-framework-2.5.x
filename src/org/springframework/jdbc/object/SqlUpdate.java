@@ -127,7 +127,7 @@ public class SqlUpdate extends SqlOperation {
 
 	/**
 	 * Check the given number of affected rows against the
-	 * specified maximum number respectively required number.
+	 * specified maximum number or required number.
 	 * @param rowsAffected the number of affected rows
 	 * @throws JdbcUpdateAffectedIncorrectNumberOfRowsException
 	 * if the actually affected rows are out of bounds

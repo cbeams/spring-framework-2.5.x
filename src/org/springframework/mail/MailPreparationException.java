@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.mail;
 
@@ -20,7 +20,7 @@ package org.springframework.mail;
  * Exception to be thrown by user code if a mail cannot be prepared properly,
  * for example when a Velocity template cannot be rendered for the mail text.
  * @author Juergen Hoeller
- * @since 09.07.2004
+ * @since 1.1
  * @see org.springframework.ui.velocity.VelocityEngineUtils#mergeTemplateIntoString
  * @see org.springframework.ui.freemarker.FreeMarkerTemplateUtils#processTemplateIntoString
  */

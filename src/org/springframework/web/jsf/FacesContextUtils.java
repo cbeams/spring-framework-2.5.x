@@ -28,7 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
  * <p>Analogous to Spring's WebApplicationContextUtils for the ServletContext.
  *
  * @author Juergen Hoeller
- * @since 02.08.2004
+ * @since 1.1
  * @see org.springframework.web.context.ContextLoader
  * @see org.springframework.web.context.support.WebApplicationContextUtils
  */

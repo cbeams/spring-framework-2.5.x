@@ -44,7 +44,7 @@ import org.springframework.transaction.support.SmartTransactionObject;
  * <p>Note that savepoints are only supported for JDBC 3.0.
  *
  * @author Juergen Hoeller
- * @since 18.06.2004
+ * @since 1.1
  * @see java.sql.Savepoint
  */
 public abstract class JdbcTransactionObjectSupport implements SavepointManager, SmartTransactionObject {

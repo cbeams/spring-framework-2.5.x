@@ -12,15 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction;
 
 /**
- * Exception that represents a transaction failure caused by heuristics.
+ * Exception that represents a transaction failure caused by a heuristic
+ * decision on the side of the transaction coordinator.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 17-Mar-2003
+ * @since 17.03.2003
  */
 public class HeuristicCompletionException extends TransactionException {
 

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.servlet;
 
@@ -75,8 +75,8 @@ public interface HandlerInterceptor {
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
 	 * @return <code>true</code> if the execution chain should proceed with the
-	 * next interceptor respectively the handler itself. Else, DispatcherServlet
-	 * assumes that this interceptor has already dealt with the response itself.
+	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
+	 * that this interceptor has already dealt with the response itself.
 	 * @throws Exception in case of errors
 	 */
 	boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)

@@ -22,7 +22,7 @@ import java.sql.Connection;
  * Simple interface to be implemented by handles for a JDBC Connection.
  * Used by JdoDialect, for example.
  * @author Juergen Hoeller
- * @since 14.06.2004
+ * @since 1.1
  * @see SimpleConnectionHandle
  * @see ConnectionHolder
  * @see org.springframework.orm.jdo.JdoDialect#getJdbcConnection

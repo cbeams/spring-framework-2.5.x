@@ -215,8 +215,7 @@ public abstract class BeanUtils {
 	 * @return if the type is assignable from the value
 	 */
 	public static boolean isAssignable(Class type, Object value) {
-		return (value != null && isAssignable(type, value.getClass()) ||
-				(value == null) && !type.isPrimitive());
+		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
 	}
 
 	/**

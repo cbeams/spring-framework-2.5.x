@@ -50,7 +50,7 @@ import java.util.List;
  * you can have executable query objects (containing row-mapping logic) there.
  *
  * @author Juergen Hoeller
- * @since 25.05.2004
+ * @since 1.0.2
  * @see RowMapper
  * @see org.springframework.dao.support.DataAccessUtils#uniqueResult
  * @see org.springframework.jdbc.object.MappingSqlQuery

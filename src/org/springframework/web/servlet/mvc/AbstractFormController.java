@@ -395,9 +395,9 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Prepare model and view for the given form, including reference and errors.
-	 * In session form mode: Re-puts the form object in the session when returning
-	 * to the form, as it has been removed by getCommand.
-	 * Can be used in subclasses to redirect back to a specific form page.
+	 * <p>In session form mode: Re-puts the form object in the session when
+	 * returning to the form, as it has been removed by getCommand.
+	 * <p>Can be used in subclasses to redirect back to a specific form page.
 	 * @param request current HTTP request
 	 * @param errors validation errors holder
 	 * @param viewName name of the form view
@@ -405,26 +405,27 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showForm(HttpServletRequest request, BindException errors, String viewName)
-	    	throws Exception {
+			throws Exception {
 		return showForm(request, errors, viewName, null);
 	}
 
 	/**
 	 * Prepare model and view for the given form, including reference and errors,
 	 * adding a controller-specific control model.
-	 * In session form mode: Re-puts the form object in the session when returning
+	 * <p>In session form mode: Re-puts the form object in the session when returning
 	 * to the form, as it has been removed by getCommand.
-	 * Can be used in subclasses to redirect back to a specific form page.
+	 * <p>Can be used in subclasses to redirect back to a specific form page.
 	 * @param request current HTTP request
 	 * @param errors validation errors holder
 	 * @param viewName name of the form view
 	 * @param controlModel model map containing controller-specific control data
-	 * (e.g. current page in wizard-style controllers).
+	 * (e.g. current page in wizard-style controllers or special error message)
 	 * @return the prepared form view
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showForm(
 			HttpServletRequest request, BindException errors, String viewName, Map controlModel) throws Exception {
+
 		if (isSessionForm()) {
 			request.getSession().setAttribute(getFormSessionAttributeName(request), errors.getTarget());
 		}
@@ -459,7 +460,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Process form submission request. Called by handleRequestInternal in case
 	 * of a form submission, with or without binding errors. Implementations
 	 * need to proceed properly, typically showing a form view in case of
-	 * binding errors respectively performing a submit action else.
+	 * binding errors or performing a submit action else.
 	 * <p>Subclasses can implement this to provide custom submission handling
 	 * like triggering a custom action. They can also provide custom validation
 	 * and call showForm or proceed with the submission accordingly.

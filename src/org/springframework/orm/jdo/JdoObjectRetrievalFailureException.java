@@ -25,7 +25,7 @@ import org.springframework.orm.ObjectRetrievalFailureException;
  * JDO-specific subclass of ObjectRetrievalFailureException.
  * Converts JDO's JDOObjectNotFoundException.
  * @author Juergen Hoeller
- * @since 12.06.2004
+ * @since 1.1
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException
  */
 public class JdoObjectRetrievalFailureException extends ObjectRetrievalFailureException {

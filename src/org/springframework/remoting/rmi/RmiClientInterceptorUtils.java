@@ -119,7 +119,7 @@ public abstract class RmiClientInterceptorUtils {
 	 * thrown by the target service itself!
 	 * @param method the invoked method
 	 * @param ex the exception that happened, to be used as cause for the
-	 * RemoteAccessException respectively RemoteException
+	 * RemoteAccessException or RemoteException
 	 * @param message the message for the RemoteAccessException respectively
 	 * RemoteException
 	 * @return the exception to be thrown to the caller

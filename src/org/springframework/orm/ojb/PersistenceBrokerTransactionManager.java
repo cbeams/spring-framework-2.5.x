@@ -46,7 +46,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * OJB access code supporting this transaction management mechanism.
  *
  * <p>This implementation is appropriate for applications that solely use OJB for
- * transactional data access. JTA respectively JtaTransactionManager is necessary
+ * transactional data access. JTA (usually through JtaTransactionManager) is necessary
  * for accessing multiple transactional resources, in combination with transactional
  * DataSources as connection pools (to be specified in OJB's configuration).
  *

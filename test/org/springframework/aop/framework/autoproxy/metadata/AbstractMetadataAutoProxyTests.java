@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.autoproxy.metadata;
 
@@ -33,12 +33,11 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.transaction.CountingTxManager;
 
 /**
- * Abstract tests for EnterpriseServices. Subclasses must
- * load the appropriate bean factory defining the necessary beans
- * and their transaction attributes.
- * See the enterpriseServices.xml file for definitions of beans;
- * define the EnterpriseServices bean in a separate file to
- * change how attributes are source. 
+ * Abstract tests for auto-proxying. Subclasses must load the appropriate
+ * bean factory defining the necessary beans and their transaction attributes.
+ *
+ * <p>See the enterpriseServices.xml file for definitions of beans.
+ *
  * @author Rod Johnson
  */
 public abstract class AbstractMetadataAutoProxyTests extends TestCase {

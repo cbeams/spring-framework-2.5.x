@@ -34,7 +34,7 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * @author Juergen Hoeller
  * @author Keith Donald
- * @since 25.04.2004
+ * @since 1.0.2
  */
 public abstract class AbstractFactoryBean implements FactoryBean, InitializingBean {
 

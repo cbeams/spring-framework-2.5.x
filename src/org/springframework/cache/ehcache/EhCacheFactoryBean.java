@@ -89,7 +89,7 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	}
 
 	/**
-	 * Set a name for which to retrieve respectively create a cache instance.
+	 * Set a name for which to retrieve or create a cache instance.
 	 * Default is the bean name of this EhCacheFactoryBean.
 	 */
 	public void setCacheName(String cacheName) {

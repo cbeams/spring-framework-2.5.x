@@ -127,8 +127,8 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return a new instance of the implementation of a RowCallbackHandler,
 	 * usable for returned ResultSets. This implementation invokes a given
-	 * RowMapper via the RowMapperResultReader adapter, respectively returns
-	 * a given RowCallbackHandler directly.
+	 * RowMapper via the RowMapperResultReader adapter, of returns a given
+	 * RowCallbackHandler directly.
 	 * @see RowMapperResultReader
 	 */
 	public RowCallbackHandler getRowCallbackHandler() {

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction;
 
@@ -21,7 +21,7 @@ import org.springframework.core.NestedRuntimeException;
 /**
  * Superclass for all transaction exceptions.
  * @author Rod Johnson
- * @since 17-Mar-2003
+ * @since 17.03.2003
  */
 public abstract class TransactionException extends NestedRuntimeException {
 

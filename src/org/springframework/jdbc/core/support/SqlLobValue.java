@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jdbc.core.support;
 
@@ -57,7 +57,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  *   
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @since 04.06.2004
+ * @since 1.1
  * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.jdbc.support.lob.LobCreator
  * @see org.springframework.jdbc.core.JdbcTemplate#update(String, Object[], int[])

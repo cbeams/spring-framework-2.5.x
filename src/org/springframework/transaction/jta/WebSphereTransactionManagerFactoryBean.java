@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.jta;
 
@@ -31,7 +31,9 @@ import org.springframework.transaction.TransactionSystemException;
  * WebSphere application servers (versions 5.1, 5.0 and 4).
  *
  * <p>Uses WebSphere's static access methods to obtain the JTA
- * TransactionManager (different for WebSphere 5.1, 5.0 and 4).
+ * TransactionManager, which is different for WebSphere 5.1, 5.0 and 4.
+ * (Please, dear WebSphere team, stop changing your TransactionManager
+ * access methods from version to version!)
  *
  * <p>The strategy has been kindly borrowed from Hibernate's
  * WebSphereTransactionManagerLookup class.

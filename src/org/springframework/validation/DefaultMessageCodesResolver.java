@@ -68,7 +68,7 @@ import java.util.List;
  * </ul>
  *
  * @author Juergen Hoeller
- * @since 27.03.2004
+ * @since 1.0.1
  */
 public class DefaultMessageCodesResolver implements MessageCodesResolver, Serializable {
 

@@ -52,7 +52,7 @@ import java.sql.SQLException;
  * a particular target DataSource requires it.
  *
  * @author Juergen Hoeller
- * @since 28.05.2004
+ * @since 1.0.2
  * @see #getConnection
  */
 public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {

@@ -28,7 +28,7 @@ package org.springframework.transaction;
  * but is independent from any specific persistence technology.
  *
  * @author Juergen Hoeller
- * @since 18.06.2004
+ * @since 1.1
  * @see TransactionDefinition#PROPAGATION_NESTED
  * @see java.sql.Savepoint
  */

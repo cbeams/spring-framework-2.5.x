@@ -52,7 +52,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor);
 
 	/**
-	 * Load respectively refresh the persistent representation of the configuration,
+	 * Load or refresh the persistent representation of the configuration,
 	 * which might an XML file, properties file, or relational database schema.
 	 * @throws BeansException if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh

@@ -30,7 +30,7 @@ import org.springframework.core.io.ResourceLoader;
  * Subclass of Quartz' JobSchedulingDataProcessor that considers
  * given filenames as Spring resource locations.
  * @author Juergen Hoeller
- * @since 07.06.2004
+ * @since 1.1
  * @see org.springframework.core.io.ResourceLoader
  */
 public class ResourceJobSchedulingDataProcessor extends JobSchedulingDataProcessor

@@ -32,7 +32,7 @@ import org.springframework.beans.factory.InitializingBean;
  * Abstract because it is meant to be to be subclasses, overriding specific methods
  * that should not simply delegate to the target.
  * @author Juergen Hoeller
- * @since 19.07.2004
+ * @since 1.1
  */
 public abstract class DelegatingDataSource implements DataSource, InitializingBean {
 

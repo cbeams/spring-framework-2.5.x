@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.filter;
 
@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet 2.3 Filter that allows to specify a character encoding for requests.
  * This is useful because current browsers typically do not set a character
- * encoding even if specified in the HTML page respectively form.
+ * encoding even if specified in the HTML page or form.
  *
  * <p>Can either just apply this filter's encoding if the request does not
  * already specify an encoding, or apply this filter's encoding in any case.
