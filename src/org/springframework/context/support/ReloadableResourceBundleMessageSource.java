@@ -349,18 +349,20 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		}
 
 		public synchronized MessageFormat getMessageFormat(String code) {
-			MessageFormat result = (MessageFormat) this.cachedMessageFormats.get(code);
-			if (result != null) {
+			synchronized (this.cachedMessageFormats) {
+				MessageFormat result = (MessageFormat) this.cachedMessageFormats.get(code);
+				if (result != null) {
+					return result;
+				}
+				else {
+					String msg = this.properties.getProperty(code);
+					if (msg != null) {
+						result = new MessageFormat(msg);
+						this.cachedMessageFormats.put(code, result);
+					}
+				}
 				return result;
 			}
-			else {
-				String msg = this.properties.getProperty(code);
-				if (msg != null) {
-					result = new MessageFormat(msg);
-					this.cachedMessageFormats.put(code, result);
-				}
-			}
-			return result;
 		}
 	}
 

@@ -108,29 +108,30 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * @param code the message code to retrieve
 	 * @return the resulting MessageFormat
 	 */
-	protected synchronized MessageFormat getMessageFormat(ResourceBundle bundle, String code)
-	    throws MissingResourceException {
-		Map codeMap = (Map) this.cachedMessageFormats.get(bundle);
-		if (codeMap != null) {
-			MessageFormat result = (MessageFormat) codeMap.get(code);
-			if (result != null) {
+	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code) throws MissingResourceException {
+		synchronized (this.cachedMessageFormats) {
+			Map codeMap = (Map) this.cachedMessageFormats.get(bundle);
+			if (codeMap != null) {
+				MessageFormat result = (MessageFormat) codeMap.get(code);
+				if (result != null) {
+					return result;
+				}
+			}
+			String msg = bundle.getString(code);
+			if (msg != null) {
+				MessageFormat result = new MessageFormat(msg);
+				if (codeMap != null) {
+					codeMap.put(code, result);
+				}
+				else {
+					codeMap = new HashMap();
+					codeMap.put(code, result);
+					this.cachedMessageFormats.put(bundle, codeMap);
+				}
 				return result;
 			}
+			return null;
 		}
-		String msg = bundle.getString(code);
-		if (msg != null) {
-			MessageFormat result = new MessageFormat(msg);
-			if (codeMap != null) {
-				codeMap.put(code, result);
-			}
-			else {
-				codeMap = new HashMap();
-				codeMap.put(code, result);
-				this.cachedMessageFormats.put(bundle, codeMap);
-			}
-			return result;
-		}
-		return null;
 	}
 
 	/**
