@@ -42,11 +42,8 @@
 	<target name="makelib" >
 	
 		<!-- Build Spring -->
-		<!-- Screws directories
-		<ant antfile="build.xml" dir="${spring.home}" target="fulljar"/>
-		<ant antfile="build.xml" dir="${spring.home}" target="loadjar"/>
-	
-		-->
+		<ant dir="${spring.home}" target="fulljar" inheritall="false"/>
+		<ant dir="${spring.home}" target="loadjar" inheritall="false"/>
 		
 		<mkdir dir="${lib.dir}"/>
 			<copy todir="${lib.dir}">
