@@ -51,9 +51,9 @@
 	</bean>
 	-->
 
-  <!--
-	  - A parent bean definition which is a base definition for transaction proxies.
-		- It is markes as abstract, since it is never supposed to be instantiated itself.
+	<!--
+		- A parent bean definition which is a base definition for transaction proxies.
+		- It's marked as abstract, since it's not supposed to be instantiated itself.
 		- We set shared transaction attributes here, following our naming patterns.
 		- The attributes can still be overridden in child bean definitions.
     -->

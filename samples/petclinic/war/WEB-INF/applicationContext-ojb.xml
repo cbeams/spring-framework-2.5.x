@@ -49,6 +49,11 @@
 	<bean id="clinicTarget" class="org.springframework.samples.petclinic.ojb.PersistenceBrokerClinic"/>
 
 	<!--
+		- Note that in a real-life app with multiple tx proxies such as the 
+		- following, you will probably want to use parent and child bean
+		- definitions as described in the manual to reduce duplicaiton.
+    -->
+	<!--
 		- Transactional proxy for Petclinic's central data access object.
     -->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
