@@ -31,8 +31,10 @@ import javax.servlet.http.HttpServletRequest;
  * @see #setDefaultMethodName
  */
 public class ParameterMethodNameResolver implements MethodNameResolver {
-	
-	private String paramName = "action";
+
+	public static final String DEFAULT_PARAM_NAME = "action";
+
+	private String paramName = DEFAULT_PARAM_NAME;
 
 	private String defaultMethodName;
 

@@ -56,10 +56,13 @@ import org.springframework.web.servlet.mvc.SessionRequiredException;
  * checking. It is similar to a Struts 1.1 DispatchAction, but more sophisticated.
  * Also supports delegation to another object.
  *
- * <p>Inherits superclass bean properties. Adds methodNameResolver bean property.
- * An implementation of the MethodNameResolver interface defined in this package
+ * <p>An implementation of the MethodNameResolver interface defined in this package
  * should return a method name for a given request, based on any aspect of the request,
- * such as its URL or an "action" or like attribute. The default behavior is URL based.
+ * such as its URL or an "action" parameter. The actual strategy can be configured
+ * via the "methodNameResolver" bean property, for each MultiActionController.
+ *
+ * <p>The default MethodNameResolver is InternalPathMethodNameResolver; further included
+ * strategies are PropertiesMethodNameResolver and ParameterMethodNameResolver.
  *
  * <p>Subclasses can implement custom exception handler methods with names such as:
  *
@@ -79,7 +82,11 @@ import org.springframework.web.servlet.mvc.SessionRequiredException;
  * <p>Note that method overloading isn't allowed.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see MethodNameResolver
+ * @see InternalPathMethodNameResolver
+ * @see PropertiesMethodNameResolver
+ * @see ParameterMethodNameResolver
  * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
  */
 public class MultiActionController extends AbstractController implements LastModified  {
