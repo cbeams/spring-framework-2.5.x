@@ -76,7 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.49 2004-07-01 20:04:36 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.50 2004-07-02 09:31:31 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -908,7 +908,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 						}
 						return result;
 					}
-					else if (convertedValue.getClass().isArray()) {
+					else if (convertedValue != null && convertedValue.getClass().isArray()) {
 						// convert individual elements to array elements
 						int arrayLength = Array.getLength(convertedValue);
 						Object result = Array.newInstance(componentType, arrayLength);
