@@ -29,9 +29,9 @@ import org.springframework.dao.DataRetrievalFailureException;
  * Mirror interface for <code>javax.sql.RowSet</code>, representing
  * disconnected <code>java.sql.ResultSet</code> data.
  *
- * <p>The main difference to the standard JDBC RowSet is that no SQLException
- * is thrown here. This allows a SqlRowSet to be used without having to deal
- * with checked exceptions. A SqlRowSet will throw Spring's
+ * <p>The main difference to the standard JDBC RowSet is that an SQLException
+ * is never thrown here. This allows an SqlRowSet to be used without having to deal
+ * with checked exceptions. An SqlRowSet will throw Spring's
  * <code>org.springframework.dao.DataRetrievalFailureException</code> instead
  * (when appropriate).
  *
