@@ -57,7 +57,6 @@
 	<classpathentry kind="lib" path="lib/caucho/burlap-2.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/hessian-2.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
-	<classpathentry kind="lib" path="lib/itext/itext-1.02b.jar"/>
 	<classpathentry kind="lib" path="lib/aopalliance/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/axis/saaj.jar"/>
 	<classpathentry kind="lib" path="lib/axis/wsdl4j.jar"/>
@@ -90,11 +89,12 @@
 	<classpathentry kind="lib" path="lib/activemq/activemq-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxtools.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jamon/JAMon.jar"/>
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/struts/struts.jar"/>
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-view-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/cayenne/cayenne-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/itext/itext-1.1.4.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.3.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
