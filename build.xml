@@ -813,6 +813,7 @@
 				<include name="lib/axis/**"/>
 				<include name="lib/aopalliance/**"/>
 				<include name="lib/bsh/**"/>
+				<include name="lib/c3p0/**"/>
 				<include name="lib/caucho/**"/>
 				<include name="lib/cglib/**"/>
 				<include name="lib/cos/**"/>
