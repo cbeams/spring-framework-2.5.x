@@ -127,9 +127,9 @@ import org.springframework.web.flow.ViewState;
 public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
-	 * The default model mapper ID suffix ("attributeMapper").
+	 * The default attribute mapper ID suffix ("attributeMapper").
 	 */
-	public static final String MODEL_MAPPER_ID_SUFFIX = "attributeMapper";
+	public static final String ATTRIBUTE_MAPPER_ID_SUFFIX = "attributeMapper";
 
 	/**
 	 * Create an instance of a abstract flow builder; default constructor.
@@ -239,7 +239,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * FlowServiceLocator.
 	 * @param id the state id, must be unique among all states of the flow built
 	 *        by this builder. This id also acts as the id of the subFlow.
-	 * @param attributeMapper The model mapper to map attributes between the flow
+	 * @param attributeMapper The attribute mapper to map attributes between the flow
 	 *        built by this builder and the subflow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
 	 *        subflow ends (this assumes you always transition to the same state
@@ -257,7 +257,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * ID.
 	 * @param id the state id, must be unique among all states
 	 * @param subFlow the Flow definition to be spawned as a subflow
-	 * @param attributeMapper The model mapper to map attributes between the flow
+	 * @param attributeMapper The attribute mapper to map attributes between the flow
 	 *        built by this builder and the subflow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
 	 *        subflow ends (this assumes you always transition to the same state
@@ -282,7 +282,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param id the state id, must be unique among all states of the flow built
 	 *        by this builder. The state id will also act as the subflow id.
 	 * @param subFlowBuilderImplementation The flow builder implementation
-	 * @param attributeMapper The model mapper to map attributes between the the
+	 * @param attributeMapper The attribute mapper to map attributes between the the
 	 *        flow built by this builder and the subflow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
 	 *        subflow ends (this assumes you always transition to the same state
@@ -302,7 +302,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * ID.
 	 * @param id the state id
 	 * @param subFlow The flow definition to be used as the subflow
-	 * @param attributeMapper The model mapper to map attributes between the flow
+	 * @param attributeMapper The attribute mapper to map attributes between the flow
 	 *        built by this builder and the subflow
 	 * @param transitions The eligible set of state transitions
 	 * @throws IllegalArgumentException the state id is not unique
@@ -324,7 +324,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param id the state id, must be unique among all states of the flow built
 	 *        by this builder. The state id will also act as the subflow id.
 	 * @param subFlowBuilderImplementation The flow builder implementation
-	 * @param attributeMapper The model mapper to map attributes between the the
+	 * @param attributeMapper The attribute mapper to map attributes between the the
 	 *        flow built by this builder and the subflow
 	 * @param transitions The eligible set of state transitions
 	 * @throws IllegalArgumentException the state id is not unique
@@ -426,15 +426,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the model mapper with the specified name prefix be used to
+	 * Request that the attribute mapper with the specified name prefix be used to
 	 * map attributes between a parent flow and a spawning subflow when the
 	 * subflow state being constructed is entered.
-	 * @param attributeMapperIdPrefix The id prefix of the model mapper that will
+	 * @param attributeMapperIdPrefix The id prefix of the attribute mapper that will
 	 *        map attributes between the the flow built by this builder and the
-	 *        subflow; note, the id prefix will have the model mapper suffix
+	 *        subflow; note, the id prefix will have the attribute mapper suffix
 	 *        appended to produce the qualified service identifier (e.g
 	 *        userId.attributeMapper) See: {@link #attributeMapper(String)}
-	 * @return The model mapper
+	 * @return The attribute mapper
 	 * @throws NoSuchFlowAttributeMapperException no FlowAttributeMapper
 	 *         implementation was exported with the specified id.
 	 */
@@ -450,9 +450,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Request that the mapper of the specified implementation be used to map
 	 * attributes between a parent flow and a spawning subflow when the subflow
 	 * state being built is entered.
-	 * @param flowAttributeMapperImplementationClass The model mapper
+	 * @param flowAttributeMapperImplementationClass The attribute mapper
 	 *        implementation, there must be only one instance in the registry.
-	 * @return The model mapper
+	 * @return The attribute mapper
 	 * @throws NoSuchFlowAttributeMapperException no FlowAttributeMapper
 	 *         implementation was exported with the specified implementation, or
 	 *         more than one existed.
@@ -3562,16 +3562,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Appends the identifying 'attributeMapper' suffix to the specified prefix
-	 * qualifier, returning a fully-qualified model mapper service identifier.
+	 * qualifier, returning a fully-qualified attribute mapper service identifier.
 	 * For example: <code>attributeMapper("customerId")</code> results in
 	 * <code>customerId.attributeMapper</code>.
-	 * @param attributeMapperIdPrefix The model mapper ID qualifier
-	 * @return The qualified model mapper id.
+	 * @param attributeMapperIdPrefix The attribute mapper ID qualifier
+	 * @return The qualified attribute mapper id.
 	 */
 	protected String attributeMapper(String attributeMapperIdPrefix) {
-		Assert.notNull(attributeMapperIdPrefix, "The model mapper id prefix is required");
-		if (!attributeMapperIdPrefix.endsWith(MODEL_MAPPER_ID_SUFFIX)) {
-			return attributeMapperIdPrefix + getQualifierDelimiter() + MODEL_MAPPER_ID_SUFFIX;
+		Assert.notNull(attributeMapperIdPrefix, "The attribute mapper id prefix is required");
+		if (!attributeMapperIdPrefix.endsWith(ATTRIBUTE_MAPPER_ID_SUFFIX)) {
+			return attributeMapperIdPrefix + getQualifierDelimiter() + ATTRIBUTE_MAPPER_ID_SUFFIX;
 		}
 		else {
 			return attributeMapperIdPrefix;
@@ -3579,10 +3579,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Returns the default model mapper id for the flow built by this builder.
+	 * Returns the default attribute mapper id for the flow built by this builder.
 	 * <p>
 	 * By default, returns "${flowId}.attributeMapper"
-	 * @return the default model mapper id.
+	 * @return the default attribute mapper id.
 	 */
 	protected String getDefaultFlowAttributeMapperId() {
 		return attributeMapper(flowId());

@@ -77,7 +77,6 @@ public interface Action {
 	 * <p>
 	 * Note: as flow scoped attributes are typically managed in the HTTP
 	 * session, they must be <code>Serializable</code>.
-	 * 
 	 * @param context The action execution context, for accessing and setting
 	 *        data in "flow scope" or "request scope"
 	 * @return A logical result outcome, used as grounds for a transition in the
