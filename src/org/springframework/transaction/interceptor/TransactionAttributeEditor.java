@@ -35,8 +35,9 @@ import org.springframework.util.StringUtils;
  * a "-" that they should roll back.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 24-Apr-2003
- * @version $Id: TransactionAttributeEditor.java,v 1.4 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: TransactionAttributeEditor.java,v 1.5 2004-04-09 05:43:27 jhoeller Exp $
  * @see org.springframework.transaction.TransactionDefinition
  * @see org.springframework.core.Constants
  */
@@ -57,12 +58,12 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 			RuleBasedTransactionAttribute attr = new RuleBasedTransactionAttribute();
 
 			for (int i = 0; i < tokens.length; i++) {
-				String token = tokens[i];
+				String token = tokens[i].trim();
 				if (token.startsWith(TransactionDefinition.PROPAGATION_CONSTANT_PREFIX)) {
-					attr.setPropagationBehaviorName(tokens[i]);
+					attr.setPropagationBehaviorName(token);
 				}
 				else if (token.startsWith(TransactionDefinition.ISOLATION_CONSTANT_PREFIX)) {
-					attr.setIsolationLevelName(tokens[i]);
+					attr.setIsolationLevelName(token);
 				}
 				else if (token.startsWith(DefaultTransactionAttribute.TIMEOUT_PREFIX)) {
 					String value = token.substring(DefaultTransactionAttribute.TIMEOUT_PREFIX.length());
@@ -78,7 +79,7 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 					attr.getRollbackRules().add(new RollbackRuleAttribute(token.substring(1)));
 				}
 				else {
-					throw new IllegalArgumentException("Illegal transaction token: " + token);
+					throw new IllegalArgumentException("Illegal transaction attribute token: [" + token + "]");
 				}
 			}
 

@@ -24,10 +24,11 @@ import junit.framework.TestCase;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
- * Tests to check conversion from String to TransactionAttribute
- * @since 26-Apr-2003
- * @version $Id: TransactionAttributeEditorTests.java,v 1.4 2004-03-18 03:01:17 trisberg Exp $
+ * Tests to check conversion from String to TransactionAttribute.
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @since 26-Apr-2003
+ * @version $Id: TransactionAttributeEditorTests.java,v 1.5 2004-04-09 05:43:26 jhoeller Exp $
  */
 public class TransactionAttributeEditorTests extends TestCase {
 	
@@ -45,9 +46,6 @@ public class TransactionAttributeEditorTests extends TestCase {
 		assertTrue(ta == null);
 	}
 	
-	/**
-	 * Format is PROPAGATION
-	 */
 	public void testValidPropagationCodeOnly() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		pe.setAsText("PROPAGATION_REQUIRED");
@@ -71,7 +69,7 @@ public class TransactionAttributeEditorTests extends TestCase {
 	
 	public void testValidPropagationCodeAndIsolationCode() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
-		pe.setAsText("PROPAGATION_REQUIRED,ISOLATION_READ_UNCOMMITTED");
+		pe.setAsText("PROPAGATION_REQUIRED, ISOLATION_READ_UNCOMMITTED");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertTrue(ta != null);
 		assertTrue(ta.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED);
