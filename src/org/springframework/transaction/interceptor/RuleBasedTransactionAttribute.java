@@ -35,12 +35,15 @@ import org.apache.commons.logging.LogFactory;
  * The TransactionAttributeEditor property editor creates objects
  * of this class.
  * @since 09-Apr-2003
- * @version $Id: RuleBasedTransactionAttribute.java,v 1.3 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: RuleBasedTransactionAttribute.java,v 1.4 2004-07-26 17:49:48 johnsonr Exp $
  * @author Rod Johnson
  */
 public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
 	
-	protected final Log logger = LogFactory.getLog(getClass());
+	/**
+	 * Static for optimal serializability
+	 */
+	protected static final Log logger = LogFactory.getLog(RuleBasedTransactionAttribute.class);
 
 	private List rollbackRules;
 	

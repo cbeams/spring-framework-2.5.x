@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.support;
 
+import java.io.Serializable;
+
 import org.springframework.core.Constants;
 import org.springframework.transaction.TransactionDefinition;
 
@@ -30,8 +32,9 @@ import org.springframework.transaction.TransactionDefinition;
  * @since 08.05.2003
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
+ *  @version $Id: DefaultTransactionDefinition.java,v 1.8 2004-07-26 17:50:20 johnsonr Exp $
  */
-public class DefaultTransactionDefinition implements TransactionDefinition {
+public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
 	/** Prefix for transaction timeout values in description strings */
 	public static final String TIMEOUT_PREFIX = "timeout_";
