@@ -12,45 +12,69 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.metadata.Attributes;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of TransactionAttributeSource that uses
  * attributes from an Attributes implementation.
- *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see org.springframework.metadata.Attributes
  * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource
  */
-public class AttributesTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource {
+public class AttributesTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
+		implements InitializingBean {
 	
 	/**
-	 * Underlying Attributes implementation we're using
+	 * Underlying Attributes implementation that we're using.
 	 */
-	private final Attributes attributes;
+	private Attributes attributes;
 
+	/**
+	 * Create a new AttributesTransactionAttributeSource.
+	 * @see #setAttributes
+	 */
+	public AttributesTransactionAttributeSource() {
+	}
+
+	/**
+	 * Create a new AttributesTransactionAttributeSource.
+	 * @param attributes the Attributes implementation to use
+	 */
 	public AttributesTransactionAttributeSource(Attributes attributes) {
 		this.attributes = attributes;
 	}
 
+	/**
+	 * Set the Attributes implementation to use.
+	 */
+	public void setAttributes(Attributes attributes) {
+		this.attributes = attributes;
+	}
 
-	/**
-	 * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource#findAllAttributes(java.lang.Class)
-	 */
+	public void afterPropertiesSet() {
+		if (this.attributes == null) {
+			throw new IllegalArgumentException("'attributes' is required");
+		}
+	}
+
 	protected Collection findAllAttributes(Class clazz) {
-		return attributes.getAttributes(clazz);
+		Assert.notNull(this.attributes, "'attributes' is required");
+		return this.attributes.getAttributes(clazz);
 	}
-	/**
-	 * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource#findAllAttributes(java.lang.reflect.Method)
-	 */
-	protected Collection findAllAttributes(Method m) {
-		return attributes.getAttributes(m);
+
+	protected Collection findAllAttributes(Method method) {
+		Assert.notNull(this.attributes, "'attributes' is required");
+		return this.attributes.getAttributes(method);
 	}
+
 }
