@@ -275,13 +275,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		request.getSession().removeAttribute(getPageSessionAttributeName());
 
 		// cancel?
-		if (WebUtils.hasSubmitParameter(request, PARAM_CANCEL)) {
+		if (isCancel(request)) {
 			logger.debug("Cancelling wizard (form bean: " + getBeanName() + ")");
 			return processCancel(request, response, command, errors);
 		}
 
 		// finish?
-		if (WebUtils.hasSubmitParameter(request, PARAM_FINISH)) {
+		if (isFinish(request)) {
 			logger.debug("Finishing wizard (form bean: " + getBeanName() + ")");
 			return validatePagesAndFinish(request, response, command, errors);
 		}
@@ -290,22 +290,15 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		logger.debug("Validating wizard page " + page + " (form bean: " + getBeanName() + ")");
 		validatePage(command, errors, page);
 
-		Enumeration paramNames = request.getParameterNames();
-		while (paramNames.hasMoreElements()) {
-			String paramName = (String) paramNames.nextElement();
-			if (paramName.startsWith(PARAM_TARGET)) {
-				if (paramName.endsWith(WebUtils.SUBMIT_IMAGE_SUFFIX)) {
-					paramName = paramName.substring(0, paramName.length() - WebUtils.SUBMIT_IMAGE_SUFFIX.length());
-				}
-				int target = Integer.parseInt(paramName.substring(PARAM_TARGET.length()));
-				if (!errors.hasErrors() || (this.allowDirtyBack && target < page) ||
-				    (this.allowDirtyForward && target > page)) {
-					// allowed to go to target page
-					return showPage(request, errors, target);
-				}
-			}
+		int target = getTargetPage(request);
+		if (target != page) {
+			if (!errors.hasErrors() || (this.allowDirtyBack && target < page) ||
+				(this.allowDirtyForward && target > page)) {
+				// allowed to go to target page
+				return showPage(request, errors, target);
+			}		
 		}
-
+		
 		// showing current page again
 		return showPage(request, errors, page);
 	}
@@ -366,4 +359,39 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	                                              Object command, BindException errors)
 	    throws ServletException, IOException;
 
+	/**
+	 * Return if finish action is specified in request.
+	 * @param request current HTTP request
+	 */
+	protected boolean isFinish(HttpServletRequest request) {
+		return WebUtils.hasSubmitParameter(request, PARAM_FINISH);
+	}
+
+	/**
+	 * Return if cancel action is specified in request.
+	 * @param request current HTTP request
+	 */
+	protected boolean isCancel(HttpServletRequest request) {
+		return WebUtils.hasSubmitParameter(request, PARAM_CANCEL);
+	}
+
+	/**
+	 * Return the page specified in request.
+	 * @param request current HTTP request
+	 * @return the page specified in request (or currentpage if not specified)
+	 */
+	protected int getTargetPage(HttpServletRequest request) {
+		Enumeration paramNames = request.getParameterNames();
+		while (paramNames.hasMoreElements()) {
+			String paramName = (String) paramNames.nextElement();
+			if (paramName.startsWith(PARAM_TARGET)) {
+				if (paramName.endsWith(WebUtils.SUBMIT_IMAGE_SUFFIX)) {
+					paramName = paramName.substring(0, paramName.length() - WebUtils.SUBMIT_IMAGE_SUFFIX.length());
+				}
+				return Integer.parseInt(paramName.substring(PARAM_TARGET.length()));
+			}
+		}
+		return getCurrentPage(request);
+	}
+	
 }
