@@ -54,6 +54,8 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 
 	private MessageCodesResolver messageCodesResolver;
 
+	protected static final ActionBeanEvent USE_DEFAULT_EVENT = new ActionBeanEvent(null, null);
+	
 	/**
 	 * Set the name of the formObject in the model. The formObject object will
 	 * be included in the model under this name.
@@ -188,7 +190,7 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 		ServletRequestDataBinder binder = createBinder(request, formObject, model);
 		ActionBeanEvent event = bindAndValidate(request, model, binder);
 		exportErrors(binder.getErrors(), model);
-		if (event != null) {
+		if (event != null && event != USE_DEFAULT_EVENT) {
 			return event;
 		}
 		else {
@@ -429,12 +431,17 @@ public class BindAndValidateAction extends AbstractActionBean implements Initial
 		if (!errors.hasErrors()) {
 			return onBindAndValidateSuccess(request, model, formObject, errors);
 		}
-		return null;
+		return USE_DEFAULT_EVENT;
 	}
 
 	protected ActionBeanEvent onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
 			Object formObject, BindException errors) {
-		return null;
+		return onBindAndValidateSuccess(request, model, formObject, errors);
+	}
+
+	protected ActionBeanEvent onBindAndValidateSuccess(HttpServletRequest request, MutableAttributesAccessor model,
+			Object formObject) {
+		return USE_DEFAULT_EVENT;
 	}
 
 }
