@@ -30,9 +30,21 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * by this class are still necessary in JDBC 3.0.
  *
  * @author Rod Johnson
- * @version $Id: StoredProcedure.java,v 1.2 2003-08-22 08:18:33 jhoeller Exp $
+ * @version $Id: StoredProcedure.java,v 1.3 2003-08-26 17:31:16 jhoeller Exp $
  */
 public abstract class StoredProcedure extends RdbmsOperation {
+
+	/** DataSource to use to obtain connections */
+	private DataSource dataSource;
+
+	/** Helper to translate SQL exceptions to DataAccessExceptions */
+	private SQLExceptionTranslator exceptionTranslator;
+
+	/**
+	 * Flag used to indicate that this call is for a function and to
+	 * use the {? = call get_invoice_count(?)} syntax.
+	 */
+	private boolean function = false;
 
 	/**
 	 * Call string as defined in java.sql.CallableStatement.
@@ -42,22 +54,9 @@ public abstract class StoredProcedure extends RdbmsOperation {
 	 */
 	private String callString;
 
-	/**
-	 * Flag used to indicate that this call is for a function and to
-	 * use the {? = call get_invoice_count(?)} syntax.
-	 */
-	private boolean function = false;
-
-	/** Helper to translate SQL exceptions to DataAccessExceptions */
-	private SQLExceptionTranslator exceptionTranslator;
-
-
-	//---------------------------------------------------------------------
-	// Constructors
-	//---------------------------------------------------------------------
 
 	/**
-	 * Allow use as a bean
+	 * Allow use as a bean.
 	 */
 	protected StoredProcedure() {
 	}
@@ -73,10 +72,12 @@ public abstract class StoredProcedure extends RdbmsOperation {
 		setSql(name);
 	}
 
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
 	/**
 	 * Set the exception translator used in this class.
-	 * As in the JdbcTemplate class, this can be parameterized
-	 * @see org.springframework.jdbc.core.SQLExceptionTranslator
 	 */
 	public void setExceptionTranslator(SQLExceptionTranslator exceptionTranslator) {
 		this.exceptionTranslator = exceptionTranslator;
@@ -88,7 +89,7 @@ public abstract class StoredProcedure extends RdbmsOperation {
 	 */
 	protected SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
-			this.exceptionTranslator = SQLExceptionTranslatorFactory.getInstance().getDefaultTranslator(getDataSource());
+			this.exceptionTranslator = SQLExceptionTranslatorFactory.getInstance().getDefaultTranslator(this.dataSource);
 		}
 		return this.exceptionTranslator;
 	}
@@ -110,13 +111,8 @@ public abstract class StoredProcedure extends RdbmsOperation {
 	}
 
 
-	//---------------------------------------------------------------------
-	// Overridden methods
-	//---------------------------------------------------------------------
-
 	/**
-	 * Overridden method.
-	 * Add a parameter.
+	 * Overridden method. Add a parameter.
 	 * <b>NB: Calls to addParameter must be made in the same
 	 * order as they appear in the database's stored procedure parameter
 	 * list.</b> Names are purely used to help mapping
@@ -136,6 +132,9 @@ public abstract class StoredProcedure extends RdbmsOperation {
 	 * the RDBMS stored procedure.
 	 */
 	protected void compileInternal() {
+		if (this.dataSource == null)
+			throw new InvalidDataAccessApiUsageException("DataSource must be set in class " + getClass().getName());
+
 		List parameters = getDeclaredParameters();
 		int firstParameter = 0;
 		if (isFunction()) {
@@ -155,10 +154,6 @@ public abstract class StoredProcedure extends RdbmsOperation {
 	}
 
 
-	//---------------------------------------------------------------------
-	// Public methods
-	//---------------------------------------------------------------------
-
 	/**
 	 * Execute the stored procedure. Subclasses should define a strongly typed
 	 * execute method (with a meaningful name) that invokes this method, populating
@@ -175,7 +170,7 @@ public abstract class StoredProcedure extends RdbmsOperation {
 	 */
 	protected Map execute(final Map inParams) {
 		return execute(new ParameterMapper() {
-			public Map createMap(Connection con) throws SQLException {
+			public Map createMap(Connection conn) throws SQLException {
 				return inParams;
 			}
 		});
@@ -198,8 +193,7 @@ public abstract class StoredProcedure extends RdbmsOperation {
 		if (!isCompiled())
 			throw new InvalidDataAccessApiUsageException("Stored procedure must be compiled before execution");
 
-		DataSource ds = getDataSource();
-		Connection con = DataSourceUtils.getConnection(ds);
+		Connection con = DataSourceUtils.getConnection(this.dataSource);
 		try {
 			Map inParams = mapper.createMap(con);
 			CallableStatement call = con.prepareCall(this.callString);
@@ -219,7 +213,7 @@ public abstract class StoredProcedure extends RdbmsOperation {
 			throw getExceptionTranslator().translate("Call to stored procedure '" + getSql() + "'", this.callString, ex);
 		}
 		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, ds);
+			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 		}
 	}
 
@@ -280,27 +274,23 @@ public abstract class StoredProcedure extends RdbmsOperation {
 	}
 
 
-	//---------------------------------------------------------------------
-	// Inner classes
-	//---------------------------------------------------------------------
-
 	/**
 	 * Implement this interface when parameters need to be customized based
 	 * on the connection. We might need to do this to make
 	 * use of proprietary features, available only with a specific
 	 * Connection type.
 	 */
-	protected interface ParameterMapper {
+	protected static interface ParameterMapper {
 
 		/**
-		 * @param con JDBC connection. This is useful (and the purpose
+		 * @param conn JDBC connection. This is useful (and the purpose
 		 * of this interface) if we need to do something RDBMS-specific
 		 * with a proprietary Connection implementation. This class conceals
 		 * such proprietary details. However, it is best to avoid using
 		 * such proprietary RDBMS features if possible.
 		 * @return input parameters, keyed by name
 		 */
-		Map createMap(Connection con) throws SQLException;
+		Map createMap(Connection conn) throws SQLException;
 	}
 
 

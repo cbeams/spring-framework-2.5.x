@@ -698,7 +698,7 @@ public class SqlQueryTestSuite extends TestCase {
 			cust.getForename().equals("rod"));
 	}
 
-	// Could implement an interface
+
 	private static class StringQuery extends MappingSqlQuery {
 
 		public StringQuery(DataSource ds, String sql) {
@@ -721,31 +721,11 @@ public class SqlQueryTestSuite extends TestCase {
 		}
 	}
 
-	private static class ManCustQuery extends MappingSqlQuery {
 
-		public ManCustQuery(DataSource ds, String sql) {
-			super(ds, sql);
-			compile();
-		}
+	private static class Customer {
 
-		/*
-		 * @see CustomExtractionQueryCommand#extract(ResultSet, int)
-		 */
-		protected Object mapRow(ResultSet rs, int rownum)
-			throws SQLException {
-			Customer cust = new Customer();
-			cust.setId(rs.getInt(COLUMN_NAMES[0]));
-			cust.setForename(rs.getString(COLUMN_NAMES[1]));
-			return cust;
-		}
-	}
-
-	public static class Customer {
 		private int id;
 		private String forename;
-
-		public Customer() {
-		}
 
 		/**
 		 * Gets the id.

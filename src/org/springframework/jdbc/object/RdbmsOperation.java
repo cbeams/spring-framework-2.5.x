@@ -8,10 +8,9 @@ package org.springframework.jdbc.object;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlParameter;
@@ -23,39 +22,30 @@ import org.springframework.jdbc.core.SqlParameter;
  *
  * <p>An "RDBMS operation" is a multithreaded, reusable object representing
  * a query, update or stored procedure. An RDBMS operation is <b>not</b> a command,
- * as a command isn't be reusable. However, execute methods may take commands as
+ * as a command isn't reusable. However, execute methods may take commands as
  * arguments. Subclasses should be Java beans, allowing easy configuration.
  *
  * <p>This class and subclasses throw runtime exceptions, defined in the
  * org.springframework.dao package (and as thrown by the org.springframework.jdbc.core
  * package, which the classes in this package use to perform raw JDBC actions).
  *
- * <p>Subclasses should set DataSource, sql and add parameters, before invoking
- * the compile() method. The order in which parameters are added is significant.
+ * <p>Subclasses should set SQL and add parameters before invoking the
+ * compile() method. The order in which parameters are added is significant.
  * The appropriate execute or update method can then be invoked.
  *
+ * @author Rod Johnson
+ * @version $Id: RdbmsOperation.java,v 1.2 2003-08-26 17:31:16 jhoeller Exp $
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
- * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.1.1.1 2003-08-14 16:20:32 trisberg Exp $
  */
 public abstract class RdbmsOperation implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * DataSource to use to obtain connections.
-	 */
-	private DataSource dataSource;
-
-	/**
-	 * List of SqlParameter objects
-	 */
+	/** List of SqlParameter objects */
 	private List declaredParameters = new LinkedList();
 
-	/**
-	 * SQL statement
-	 */
+	/** SQL statement */
 	private String sql;
 
 	/**
@@ -64,30 +54,6 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * but subclasses may also implement their own custom validation.
 	 */
 	private boolean compiled;
-
-
-	/**
-	 * Create a new RdbmsOperation.
-	 */
-	protected RdbmsOperation() {
-	}
-
-
-	/**
-	 * Sets the DataSource used to obtain connections.
-	 * @param dataSource the DataSource to use
-	 */
-	public final void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	/**
-	 * Gets the DataSource used to obtain connections.
-	 * @return the DataSource used to obtain connections
-	 */
-	protected final DataSource getDataSource() {
-		return this.dataSource;
-	}
 
 	/**
 	 * Add anonymous parameters, specifying only their SQL types as defined in the
@@ -123,7 +89,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
-	 * Return a list of the declared SqlParameter objects
+	 * Return a list of the declared SqlParameter objects.
 	 * @return a list of the declared SqlParameter objects
 	 */
 	protected List getDeclaredParameters() {
@@ -131,10 +97,10 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
-	 * Set the SQL executed by this operation
+	 * Set the SQL executed by this operation.
 	 * @param sql the SQL executed by this operation
 	 */
-	public void setSql(String sql) {
+	public final void setSql(String sql) {
 		this.sql = sql;
 	}
 
@@ -147,7 +113,6 @@ public abstract class RdbmsOperation implements InitializingBean {
 		return sql;
 	}
 
-
 	/**
 	 * Ensures compilation if used in a bean factory.
 	 */
@@ -155,14 +120,13 @@ public abstract class RdbmsOperation implements InitializingBean {
 		compile();
 	}
 
-
 	/**
 	 * Is this operation "compiled"? Compilation, as in JDO,
 	 * means that the operation is fully configured, and ready to use.
 	 * The exact meaning of compilation will vary between subclasses.
 	 * @return whether this operation is compiled, and ready to use.
 	 */
-	public boolean isCompiled() {
+	public final boolean isCompiled() {
 		return compiled;
 	}
 
@@ -176,12 +140,10 @@ public abstract class RdbmsOperation implements InitializingBean {
 		if (!isCompiled()) {
 			if (this.sql == null)
 				throw new InvalidDataAccessApiUsageException("Sql must be set in class " + getClass().getName());
-			if (this.dataSource == null)
-				throw new InvalidDataAccessApiUsageException("DataSource must be set in class " + getClass().getName());
 			// Invoke subclass compile
 			compileInternal();
 			this.compiled = true;
-			logger.info("Compiled OK");
+			logger.info("RdbmsOperation with SQL [" + getSql() + "] compiled");
 		}
 	}
 
@@ -196,7 +158,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	protected abstract void compileInternal() throws InvalidDataAccessApiUsageException;
 
 	/**
-	 * Validate the parameters passed to an execute methodbased on declared parameters.
+	 * Validate the parameters passed to an execute method based on declared parameters.
 	 * Subclasses should invoke this method before every execute() or update() method.
 	 * @param parameters parameters supplied. May be null.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
