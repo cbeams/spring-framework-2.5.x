@@ -226,6 +226,28 @@ public class LobTypeTests extends TestCase {
 		}
 	}
 
+	public void testBlobSerializableTypeWithNull() throws Exception {
+		lobHandler.getBlobAsBinaryStream(rs, 1);
+		lobHandlerControl.setReturnValue(null);
+		lobCreator.setBlobAsBytes(ps, 1, null);
+
+		lobHandlerControl.replay();
+		lobCreatorControl.replay();
+
+		BlobSerializableType type = new BlobSerializableType(lobHandler, null);
+		assertEquals(null, type.nullSafeGet(rs, new String[] {"column"}, null));
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			type.nullSafeSet(ps, null, 1);
+			List synchs = TransactionSynchronizationManager.getSynchronizations();
+			assertEquals(1, synchs.size());
+			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+	}
+
 	public void testBlobSerializableTypeWithJtaSynchronization() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();

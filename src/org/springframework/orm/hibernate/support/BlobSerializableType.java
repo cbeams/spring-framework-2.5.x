@@ -114,30 +114,40 @@ public class BlobSerializableType extends AbstractLobType {
 	protected Object nullSafeGetInternal(ResultSet rs, int index, LobHandler lobHandler)
 			throws SQLException, IOException, HibernateException {
 		InputStream is = lobHandler.getBlobAsBinaryStream(rs, index);
-		ObjectInputStream ois = new ObjectInputStream(is);
-		try {
-			return ois.readObject();
+		if (is != null) {
+			ObjectInputStream ois = new ObjectInputStream(is);
+			try {
+				return ois.readObject();
+			}
+			catch (ClassNotFoundException ex) {
+				throw new HibernateException("Could not deserialize BLOB contents", ex);
+			}
+			finally {
+				ois.close();
+			}
 		}
-		catch (ClassNotFoundException ex) {
-			throw new HibernateException("Could not deserialize BLOB contents", ex);
-		}
-		finally {
-			ois.close();
+		else {
+			return null;
 		}
 	}
 
 	protected void nullSafeSetInternal(
 			PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException, IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(baos);
-		try {
-			oos.writeObject(value);
-			oos.flush();
-			lobCreator.setBlobAsBytes(ps, index, baos.toByteArray());
+		if (value != null) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			try {
+				oos.writeObject(value);
+				oos.flush();
+				lobCreator.setBlobAsBytes(ps, index, baos.toByteArray());
+			}
+			finally {
+				oos.close();
+			}
 		}
-		finally {
-			oos.close();
+		else {
+			lobCreator.setBlobAsBytes(ps, index, null);
 		}
 	}
 
