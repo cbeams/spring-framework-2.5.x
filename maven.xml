@@ -155,7 +155,7 @@
       </copy>
 <!--
      <style   basedir="${basedir}/${doc.ref.dir}/src/"
-              destdir="${dist.ref.dir}/html"
+              destdir="${doc.ref.dir}/html"
               style="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"
               includes="index.xml"
       >
@@ -199,11 +199,21 @@
          <arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
          <arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
       </java>
-
+      
    </goal>
 
-
-   <goal name="refdoc" prereqs="dochtml,dochtmlsingle,docpdf" description="Generate and copy reference documentation"/>
+   <goal name="refdoc" prereqs="dochtml,dochtmlsingle,docpdf" description="Generate and copy reference documentation">
+      <mkdir dir="${maven.build.dir}/docs"/>   
+      <mkdir dir="${maven.build.dir}/docs/ref"/>
+      
+      <copy todir="${maven.build.dir}/docs/ref">
+         <fileset dir="${doc.ref.dir}/html"/>
+      </copy>
+      <copy file="${doc.ref.dir}/pdf/spring-reference.pdf" 
+          todir="${maven.build.dir}/docs/ref"/> 
+      <copy file="${doc.ref.dir}/html_single/index.html" 
+          tofile="${maven.build.dir}/docs/ref/spring-reference.html"/>           
+   </goal>
 
 
 </project>
