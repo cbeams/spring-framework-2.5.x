@@ -30,14 +30,14 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
- * Web controller for the Spring MVC framework that handles requests
- * using a web flow.
+ * Web controller for the Spring MVC framework that handles requests using a web
+ * flow.
  * 
  * @author Erwin Vervaet
  * @author Keith Donald
  */
 public class FlowController extends AbstractController implements InitializingBean {
-	
+
 	private HttpFlowExecutionManager manager;
 
 	private Flow flow;
@@ -45,17 +45,17 @@ public class FlowController extends AbstractController implements InitializingBe
 	private Collection flowExecutionListeners = new ArrayList(3);
 
 	/**
-	 * Set the top level fow started by this controller. This is optional.
-	 * When not specified, the controller will try to obtain a flow id from
-	 * the incoming request.
+	 * Set the top level fow started by this controller. This is optional. When
+	 * not specified, the controller will try to obtain a flow id from the
+	 * incoming request.
 	 */
 	public void setFlow(Flow flow) {
 		this.flow = flow;
 	}
 
 	/**
-	 * Set the flow execution listener that should be notified of flow
-	 * execution lifecycle events.
+	 * Set the flow execution listener that should be notified of flow execution
+	 * lifecycle events.
 	 */
 	public void setFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners.clear();
@@ -70,10 +70,10 @@ public class FlowController extends AbstractController implements InitializingBe
 		this.flowExecutionListeners.clear();
 		this.flowExecutionListeners.addAll(Arrays.asList(listeners));
 	}
-	
+
 	public void afterPropertiesSet() throws Exception {
 		//instantiate our flow execution manager
-		manager=new HttpFlowExecutionManager(logger, flow, getApplicationContext(), flowExecutionListeners);
+		manager = new HttpFlowExecutionManager(logger, flow, getApplicationContext(), flowExecutionListeners);
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
@@ -83,9 +83,9 @@ public class FlowController extends AbstractController implements InitializingBe
 	}
 
 	/**
-	 * Create a reference data map for the given request. This map
-	 * will be used as input data when a new flow execution would be
-	 * started for this request.
+	 * Create a reference data map for the given request. This map will be used
+	 * as input data when a new flow execution would be started for this
+	 * request.
 	 * 
 	 * <p>
 	 * Default implementation returns null. Subclasses can override if needed.

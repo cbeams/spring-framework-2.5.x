@@ -42,43 +42,40 @@ import org.springframework.web.util.WebUtils;
  * @author Erwin Vervaet
  */
 public class HttpFlowExecutionManager {
-	
+
 	private Log logger;
-	
+
 	private Flow flow;
 
 	private BeanFactory beanFactory;
-	
+
 	private Collection flowExecutionListeners;
-	
+
 	public HttpFlowExecutionManager(Log logger, Flow flow, BeanFactory beanFactory, Collection flowExecutionListeners) {
-		Assert.notNull(logger);
+		Assert.notNull(logger, "The logger is required");
+		Assert.notNull(beanFactory, "The bean factory is required");
 		this.logger = logger;
-		
 		this.flow = flow;
-		
-		Assert.notNull(beanFactory);
 		this.beanFactory = beanFactory;
-		
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
-	
+
 	protected String getCurrentStateIdAttributeName() {
 		return FlowConstants.CURRENT_STATE_ID_ATTRIBUTE;
 	}
-	
+
 	protected String getCurrentStateIdParameterName() {
 		return FlowConstants.CURRENT_STATE_ID_PARAMETER;
 	}
-	
+
 	protected String getFlowExecutionIdAttributeName() {
 		return FlowConstants.FLOW_EXECUTION_ID_ATTRIBUTE;
 	}
-	
+
 	protected String getFlowExecutionIdParameterName() {
 		return FlowConstants.FLOW_EXECUTION_ID_PARAMETER;
 	}
-	
+
 	protected String getFlowExecutionAttributeName() {
 		return FlowExecution.ATTRIBUTE_NAME;
 	}
@@ -99,7 +96,8 @@ public class HttpFlowExecutionManager {
 		return FlowConstants.FLOW_ID_PARAMETER;
 	}
 
-	public ModelAndView process(HttpServletRequest request, HttpServletResponse response, Map inputData) throws Exception {
+	public ModelAndView process(HttpServletRequest request, HttpServletResponse response, Map inputData)
+			throws Exception {
 		FlowExecution flowExecution;
 		ModelAndView modelAndView;
 		if (isNewFlowExecutionRequest(request)) {
@@ -175,15 +173,16 @@ public class HttpFlowExecutionManager {
 		}
 		return modelAndView;
 	}
-	
+
 	/**
 	 * Obtain a flow to use from given request.
-	 * @throws ServletRequestBindingException When no flow id was bound to the request 
+	 * @throws ServletRequestBindingException When no flow id was bound to the
+	 *         request
 	 */
 	public Flow createFlow(HttpServletRequest request) throws ServletRequestBindingException {
 		return (Flow)beanFactory.getBean(RequestUtils.getRequiredStringParameter(request, getFlowIdParameterName()));
 	}
-	
+
 	/**
 	 * Create a new flow execution for given flow.
 	 * @param flow The flow
@@ -191,7 +190,7 @@ public class HttpFlowExecutionManager {
 	 */
 	public FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = new FlowExecutionStack(flow);
-		if (flowExecutionListeners!=null && !flowExecutionListeners.isEmpty()) {
+		if (flowExecutionListeners != null && !flowExecutionListeners.isEmpty()) {
 			flowExecution.getListenerList().add(
 					(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));
 		}
@@ -199,8 +198,8 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * Check if given request is a request for a new flow execution, or
-	 * a continuation of an existing one.
+	 * Check if given request is a request for a new flow execution, or a
+	 * continuation of an existing one.
 	 * @param request the HTTP request to check
 	 * @return true or false
 	 */
@@ -209,8 +208,8 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * Save the flow execution in the HTTP session associated with
-	 * given request.
+	 * Save the flow execution in the HTTP session associated with given
+	 * request.
 	 */
 	public void saveInHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
@@ -218,16 +217,14 @@ public class HttpFlowExecutionManager {
 		}
 		request.getSession(false).setAttribute(flowExecution.getId(), flowExecution);
 	}
-	
+
 	/**
-	 * Get the flow execution with given unique id from the HTTP
-	 * session associated with given request.
-	 * @throws NoSuchFlowExecutionException If there is no flow execution
-	 *         with specified id in the HTTP session associated with
-	 *         given request.
+	 * Get the flow execution with given unique id from the HTTP session
+	 * associated with given request.
+	 * @throws NoSuchFlowExecutionException If there is no flow execution with
+	 *         specified id in the HTTP session associated with given request.
 	 */
-	public FlowExecution getRequiredFlowExecution(HttpServletRequest request)
-			throws NoSuchFlowExecutionException {
+	public FlowExecution getRequiredFlowExecution(HttpServletRequest request) throws NoSuchFlowExecutionException {
 		String flowExecutionId;
 		try {
 			flowExecutionId = RequestUtils.getRequiredStringParameter(request, getFlowExecutionIdParameterName());
@@ -245,8 +242,8 @@ public class HttpFlowExecutionManager {
 	}
 
 	/**
-	 * Remove given flow execution from the HTTP session associated
-	 * with given request.
+	 * Remove given flow execution from the HTTP session associated with given
+	 * request.
 	 */
 	public void removeFromHttpSession(FlowExecution flowExecution, HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
@@ -254,5 +251,4 @@ public class HttpFlowExecutionManager {
 		}
 		request.getSession(false).removeAttribute(flowExecution.getId());
 	}
-
 }

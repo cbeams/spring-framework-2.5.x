@@ -22,23 +22,24 @@ import org.springframework.web.flow.Flow;
 
 /**
  * Factory bean that acts as a director for assembling flows, delegating to a
- * <code>FlowBuilder</code> builder to construct the Flow.
+ * <code>FlowBuilder</code> builder to construct the Flow.  This is the core top level
+ * class for assembling a <code>Flow</code> from top-level configuration information.
  * <p>
- * For example, a Spring-managed FlowFactoryBean definition might look like
+ * As an example, a Spring-managed FlowFactoryBean definition might look like
  * this:
  * 
- * <pre>
+ * <code>
  * 	<bean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean">
  *		<property name="flowBuilder">
- *			<bean class="com.mycompany..web.flow.user.UserRegistrationFlowBuilder"/>
+ *			<bean class="com.mycompany.myapp.web.flow.user.UserRegistrationFlowBuilder"/>
  *		</property>
  *	</bean>
- * </pre>
+ * </code>
  * 
  * The above definition is configured with a specific, java-based FlowBuilder
  * implementation. A XmlFlowBuilder could instead be used, for example:
  * 
- * <pre>
+ * <code>
  * 	<bean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean">
  *		<property name="flowBuilder">
  *			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
@@ -48,8 +49,7 @@ import org.springframework.web.flow.Flow;
  *          </bean>
  *		</property>
  *	</bean>
- * </pre>
- * 
+ * </code>
  * </p>
  * Flow factory beans, as POJOs, can also be used outside of a Spring bean
  * factory, in a standalone, programmatic fashion:
