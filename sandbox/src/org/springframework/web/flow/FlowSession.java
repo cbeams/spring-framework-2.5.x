@@ -46,16 +46,16 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	private Map attributes = new HashMap();
 
-	protected FlowSession() {
-		this(new Flow(""), null);
-	}
-
 	public FlowSession(Flow flow, Map input) {
 		Assert.notNull(flow, "The flow is required");
 		this.flow = flow;
 		if (input != null) {
 			setAttributes(input);
 		}
+	}
+
+	protected FlowSession() {
+		this(new Flow(""), null);
 	}
 
 	public String getFlowId() {
