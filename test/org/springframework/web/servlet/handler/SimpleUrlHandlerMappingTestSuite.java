@@ -1,7 +1,5 @@
 package org.springframework.web.servlet.handler;
 
-import java.io.IOException;
-
 import junit.framework.TestCase;
 
 import org.springframework.web.context.WebApplicationContext;

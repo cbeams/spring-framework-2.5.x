@@ -7,21 +7,20 @@ import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
 import junit.framework.TestCase;
+
 import org.apache.struts.taglib.tiles.ComponentConstants;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.PathAttribute;
-
-import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.context.ApplicationContext;
 
 /**
  * @author Alef Arendsen

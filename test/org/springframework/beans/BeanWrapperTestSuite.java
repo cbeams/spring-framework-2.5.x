@@ -3,12 +3,9 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyEditorManager;
-import java.beans.PropertyEditorSupport;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
