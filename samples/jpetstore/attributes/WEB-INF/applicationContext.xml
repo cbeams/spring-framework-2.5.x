@@ -5,8 +5,8 @@
 
 	<description>
 		This file illustrates reliance on declarative transaction management
-		provided by the autoproxy definitions in declarateServices.xml.
-		There's no need to use a TransactionFactoryProxyBean: any bean with
+		provided by the autoproxy definitions in declarativeServices.xml.
+		There's no need to use a TransactionFactoryProxyBean: Any bean with
 		source-level transaction attributes will automatically benefit from
 		declarative transaction management.
 		
