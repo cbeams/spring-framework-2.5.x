@@ -96,6 +96,13 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		return qualifiedName.toString();
 	}
 
+	/**
+	 * @return
+	 */
+	public String getQualifiedFlowSessionId() {
+		return "[sessionId=" + getId() + ", " + getQualifiedActiveFlowId() + "]";
+	}
+
 	public Map getAttributes() {
 		return getActiveFlowSession().getAttributes();
 	}
@@ -242,10 +249,9 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	}
 
 	public String toString() {
-		return executingFlowSessions.isEmpty() ? "[Empty FlowSessionExecutionStack; no flows are active]"
-				: new ToStringCreator(this).append("activeFlowId", getActiveFlowId()).append("currentStateId",
-						getCurrentStateId()).append("rootFlow", isRootFlow()).append("executingFlowSessions",
-						executingFlowSessions).toString();
+		return executingFlowSessions.isEmpty() ? "[Empty FlowSessionExecutionStack " + getId()
+				+ "; no flows are active]" : new ToStringCreator(this).append("id", getId()).append("activeFlowId",
+				getActiveFlowId()).append("currentStateId", getCurrentStateId()).append("rootFlow", isRootFlow())
+				.append("executingFlowSessions", executingFlowSessions).toString();
 	}
-
 }

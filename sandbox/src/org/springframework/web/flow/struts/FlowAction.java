@@ -36,7 +36,6 @@ import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.AbstractActionBean;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
-import org.springframework.web.util.SessionKeyUtils;
 
 /**
  * Struts Action that provides an entry point into the workflow mechanism for
@@ -85,9 +84,7 @@ public class FlowAction extends TemplateAction {
 	 */
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		String flowSessionId = getStringParameter(request, FLOW_SESSION_ID_PARAMETER);
-		FlowSessionExecutionStack executionStack;
-		ViewDescriptor viewDescriptor = null;
+
 		if (form instanceof BindingActionForm) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Setting binding action form key '" + ACTION_FORM_ATTRIBUTE_NAME + "' to form " + form);
@@ -96,7 +93,11 @@ public class FlowAction extends TemplateAction {
 			// attribute so it'll be accessible to binding flow action beans
 			request.setAttribute(ACTION_FORM_ATTRIBUTE_NAME, form);
 		}
-		if (flowSessionId == null) {
+
+		FlowSessionExecutionStack executionStack;
+		ViewDescriptor viewDescriptor = null;
+
+		if (getStringParameter(request, FLOW_SESSION_ID_PARAMETER) == null) {
 			// No existing flow session, create a new one
 			executionStack = createFlowSessionExecutionStack();
 			saveFlowSession(executionStack, request);
@@ -104,13 +105,14 @@ public class FlowAction extends TemplateAction {
 		}
 		else {
 			// Client is participating in an existing flow session, retrieve it
-			executionStack = getRequiredFlowSessionExecutionStack(flowSessionId, request);
+			executionStack = getRequiredFlowSessionExecutionStack(getRequiredStringParameter(request,
+					FLOW_SESSION_ID_PARAMETER), request);
 			String currentStateIdParam = getStringParameter(request, CURRENT_STATE_ID_PARAMETER);
 			if (currentStateIdParam == null) {
 				if (logger.isWarnEnabled()) {
 					logger
-							.warn("Current state id was not provided in request for flow '"
-									+ flowSessionId
+							.warn("Current state id was not provided in request for flow session '"
+									+ executionStack.getQualifiedFlowSessionId()
 									+ "' - pulling current state id from session - "
 									+ "note: if the user has been using the with browser back/forward buttons in browser, the currentState could be incorrect.");
 				}
@@ -132,17 +134,19 @@ public class FlowAction extends TemplateAction {
 
 		if (executionStack.isEmpty()) {
 			// event execution resulted in the entire flow ending, cleanup
-			removeFlowSession(mapping, flowSessionId, request);
+			removeFlowSession(mapping, executionStack.getId(), request);
 		}
 		else {
 			// We're still in the flow, inject flow model into request
 			if (viewDescriptor != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("[Placing information about the new current flow state in request scope]");
-					logger.debug("    - " + getFlowSessionIdAttributeName() + "=" + flowSessionId);
-					logger.debug("    - " + getCurrentStateIdAttributeName() + "=" + executionStack.getCurrentStateId());
+					logger.debug("    - " + getFlowSessionIdAttributeName() + "=" + executionStack.getId());
+					logger
+							.debug("    - " + getCurrentStateIdAttributeName() + "="
+									+ executionStack.getCurrentStateId());
 				}
-				request.setAttribute(getFlowSessionIdAttributeName(), flowSessionId);
+				request.setAttribute(getFlowSessionIdAttributeName(), executionStack.getId());
 				request.setAttribute(getCurrentStateIdAttributeName(), executionStack.getCurrentStateId());
 				String actionPathName = StringUtils.replace(getFlowId(mapping), ".", "/");
 				String actionFormBeanName = actionPathName + "Form";
@@ -204,10 +208,6 @@ public class FlowAction extends TemplateAction {
 			}
 			return null;
 		}
-	}
-
-	protected String generateUniqueFlowSessionId(FlowSessionExecutionStack stack) {
-		return SessionKeyUtils.generateMD5SessionKey(String.valueOf(stack.hashCode()), true);
 	}
 
 	protected FlowSessionExecutionStack getRequiredFlowSessionExecutionStack(String flowSessionId,
