@@ -131,6 +131,8 @@
 
 	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
 
+	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
+
 	<bean id="emptyMap" class="org.springframework.beans.factory.HasMap">
 		<property name="map">
 			<map>
