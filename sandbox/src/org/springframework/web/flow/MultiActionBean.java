@@ -33,8 +33,7 @@ public class MultiActionBean extends AbstractActionBean {
 		String eventId = sessionExecution.getLastEventId();
 		String handlerMethodName = methodNameResolver.getMethodName(eventId);
 		try {
-			Method handlerMethod = getDelegate().getClass().getMethod(handlerMethodName,
-					new Class[] { HttpServletRequest.class, HttpServletResponse.class, AttributesAccessor.class });
+			Method handlerMethod = getHandlerMethod(handlerMethodName);
 			return (ActionBeanEvent)handlerMethod.invoke(getDelegate(), new Object[] { request, response, model });
 		}
 		catch (NoSuchMethodException e) {
@@ -51,6 +50,12 @@ public class MultiActionBean extends AbstractActionBean {
 					"Action bean handlers should only throw runtime exceptions - programmer error");
 			throw (RuntimeException)target;
 		}
+	}
+
+	protected Method getHandlerMethod(String eventHandlerMethodName) throws NoSuchMethodException,
+			IllegalAccessException {
+		return getDelegate().getClass().getMethod(eventHandlerMethodName,
+				new Class[] { HttpServletRequest.class, HttpServletResponse.class, AttributesAccessor.class });
 	}
 
 	protected Object getDelegate() {
