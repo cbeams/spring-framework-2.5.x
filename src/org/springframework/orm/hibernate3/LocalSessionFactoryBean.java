@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,9 +190,9 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @see org.hibernate.cfg.AnnotationConfiguration
 	 */
 	public void setConfigurationClass(Class configurationClass) {
-		if (!Configuration.class.isAssignableFrom(configurationClass)) {
+		if (configurationClass == null || !Configuration.class.isAssignableFrom(configurationClass)) {
 			throw new IllegalArgumentException(
-					"configurationClass needs to be assignable to [org.hibernate.cfg.Configuration]");
+					"configurationClass must be assignable to [org.hibernate.cfg.Configuration]");
 		}
 		this.configurationClass = configurationClass;
 	}

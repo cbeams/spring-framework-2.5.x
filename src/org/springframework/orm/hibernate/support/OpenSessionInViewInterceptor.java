@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,8 @@ import org.springframework.web.servlet.ModelAndView;
  * in views (but not providing a first-level cache for the entire request).
  *
  * <p><b>NOTE</b>: This interceptor will by default not flush the Hibernate session,
- * as it assumes to be used in combination with middle tier transactions that care for
- * the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
+ * as it assumes to be used in combination with business layer transactions that care
+ * for the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
  * interceptor to flush after the handler has been invoked but before view rendering,
  * set the flushMode of this interceptor to FLUSH_AUTO in such a scenario. Note that
  * the flushMode of this interceptor will just apply in single session mode!

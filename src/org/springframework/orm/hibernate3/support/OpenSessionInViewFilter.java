@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * application context will get initialized <i>after</i> this filter).
  *
  * <p><b>NOTE</b>: This filter will by default not flush the Hibernate session, as
- * it assumes to be used in combination with middle tier transactions that care for
+ * it assumes to be used in combination with business layer transactions that care for
  * the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
  * filter to flush after completed request processing, override closeSession and
  * invoke flush on the Session before closing it. Note that closeSession will just
