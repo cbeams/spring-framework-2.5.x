@@ -3,14 +3,14 @@
  * of the Apache Software License.
  */
 
-package org.springframework.util;
+package org.springframework.core;
 
 /**
  * Interface to be implemented by objects that can return information about
  * the current call stack. Useful in AOP (as in AspectJ cflow concept)
  * but not AOP-specific.
  * @author Rod Johnson
- * @version $Id: ControlFlow.java,v 1.2 2003-12-30 01:24:06 jhoeller Exp $
+ * @version $Id: ControlFlow.java,v 1.1 2004-02-02 11:22:31 jhoeller Exp $
  */
 public interface ControlFlow {
 	

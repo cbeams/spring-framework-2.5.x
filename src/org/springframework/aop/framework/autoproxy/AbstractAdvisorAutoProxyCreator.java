@@ -12,9 +12,9 @@ import java.util.List;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.core.ControlFlow;
+import org.springframework.core.ControlFlowFactory;
 import org.springframework.core.OrderComparator;
-import org.springframework.util.ControlFlow;
-import org.springframework.util.ControlFlowFactory;
 
 /**
  * Abstract BeanPostProcessor implementation that creates AOP proxies. 
@@ -33,7 +33,7 @@ import org.springframework.util.ControlFlowFactory;
  * the Ordered interface will be considered to be unordered, and will appear
  * at the end of the advisor chain in undefined order.
  * @author Rod Johnson
- * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.4 2004-01-13 14:00:26 johnsonr Exp $
+ * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.5 2004-02-02 11:22:54 jhoeller Exp $
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 	
@@ -101,12 +101,12 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * when our own infrastructure (such as this class) depends on advisors that depend
 	 * on beans... We use a ControlFlow object to check that we didn't arrived at this
 	 * call via this classes findCandidateAdvisors() method.
-	 * @see org.springframework.util.ControlFlow
+	 * @see org.springframework.core.ControlFlow
 	 */
 	protected boolean shouldSkip(Object bean, String name) {
 		// TODO consider pulling this test into AbstractBeanFactory.applyPostProcessors(),
 		// to protect all PostProcessors
-		ControlFlow cflow = ControlFlowFactory.getInstance().createControlFlow();
+		ControlFlow cflow = ControlFlowFactory.createControlFlow();
 		if (cflow.under(getClass(), "findCandidateAdvisors")) {
 			//System.err.println("Skipping " + name + ": " + cflow);
 			return true;

@@ -10,16 +10,16 @@ import java.lang.reflect.Method;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
-import org.springframework.util.ControlFlow;
-import org.springframework.util.ControlFlowFactory;
+import org.springframework.core.ControlFlow;
+import org.springframework.core.ControlFlowFactory;
 
 /**
  * Pointcut and method matcher for use in simple <b>cflow</b>-style pointcut.
  * Note that evaluating such pointcuts is 10-15 times slower than evaluating
  * normal pointcuts, but they are useful in some cases.
- * @see org.springframework.util.ControlFlow
+ * @see org.springframework.core.ControlFlow
  * @author Rod Johnson
- * @version $Id: ControlFlowPointcut.java,v 1.4 2003-12-30 01:07:12 jhoeller Exp $
+ * @version $Id: ControlFlowPointcut.java,v 1.5 2004-02-02 11:22:53 jhoeller Exp $
  */
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher {
 	
@@ -66,7 +66,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	public boolean matches(Method m, Class targetClass, Object[] args) {
 		++evaluations;
-		ControlFlow cflow = ControlFlowFactory.getInstance().createControlFlow();
+		ControlFlow cflow = ControlFlowFactory.createControlFlow();
 		return (methodName != null) ? cflow.under(clazz, methodName) : cflow.under(clazz);
 	}
 
