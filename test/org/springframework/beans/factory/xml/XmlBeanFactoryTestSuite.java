@@ -18,6 +18,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -29,11 +30,12 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.26 2003-12-19 15:49:59 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.27 2003-12-22 10:47:11 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 	
@@ -662,114 +664,104 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertNotNull(a.getSpouse());
 	}
 
-	public void testSatisfiedAutowireByType() throws Exception {
+	public void testAutowire() throws Exception {
 		InputStream is = getClass().getResourceAsStream("autowire.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		DependenciesBean rod = (DependenciesBean) xbf.getBean("rod1");
-		TestBean kerry = (TestBean) xbf.getBean("spouse");
-		// Should have been autowired
-		assertEquals(kerry, rod.getSpouse());
+		TestBean spouse = new TestBean("kerry", 0);
+		xbf.registerSingleton("spouse", spouse);
+		doTestAutowire(xbf);
 	}
 
-	public void testSatisfiedAutowireByName() throws Exception {
+	public void testAutowireWithParent() throws Exception {
 		InputStream is = getClass().getResourceAsStream("autowire.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		DependenciesBean rod = (DependenciesBean) xbf.getBean("rod2");
-		TestBean kerry = (TestBean) xbf.getBean("spouse");
-		// Should have been autowired
-		assertEquals(kerry, rod.getSpouse());
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "kerry");
+		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class, pvs));
+		xbf.setParentBeanFactory(lbf);
+		doTestAutowire(xbf);
 	}
 
-	public void testSatisfiedAutowireByConstructor() throws Exception {
-		InputStream is = getClass().getResourceAsStream("autowire.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod3");
+	private void doTestAutowire(XmlBeanFactory xbf) throws Exception {
+		DependenciesBean rod1 = (DependenciesBean) xbf.getBean("rod1");
 		TestBean kerry = (TestBean) xbf.getBean("spouse");
+		// Should have been autowired
+		assertEquals(kerry, rod1.getSpouse());
+
+		DependenciesBean rod2 = (DependenciesBean) xbf.getBean("rod2");
+		// Should have been autowired
+		assertEquals(kerry, rod2.getSpouse());
+
+		ConstructorDependenciesBean rod3 = (ConstructorDependenciesBean) xbf.getBean("rod3");
 		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
 		// Should have been autowired
-		assertEquals(kerry, rod.getSpouse1());
-		assertEquals(kerry, rod.getSpouse2());
-		assertEquals(other, rod.getOther());
-	}
+		assertEquals(kerry, rod3.getSpouse1());
+		assertEquals(kerry, rod3.getSpouse2());
+		assertEquals(other, rod3.getOther());
 
-	public void testExceptionIfNoDefaultConstructor() throws Exception {
-		InputStream is = getClass().getResourceAsStream("autowire.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		try {
-			ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod4");
+			ConstructorDependenciesBean rod4 = (ConstructorDependenciesBean) xbf.getBean("rod4");
 			fail("Should not have thrown FatalBeanException");
 		}
 		catch (FatalBeanException ex) {
 			// expected
 		}
-	}
 
-	public void testAutowireByConstructorWithDefaultConstructor() throws Exception {
-		InputStream is = getClass().getResourceAsStream("autowire.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		DependenciesBean rod = (DependenciesBean) xbf.getBean("rod5");
+		DependenciesBean rod5 = (DependenciesBean) xbf.getBean("rod5");
 		// Should not have been autowired
-		assertNull(rod.getSpouse());
-	}
+		assertNull(rod5.getSpouse());
 
-	public void testAutowireByConstructorWithClassPathXmlApplicationContext() throws Exception {
-		InputStream is = getClass().getResourceAsStream("autowire.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		BeanFactory appCtx = (BeanFactory) xbf.getBean("childAppCtx");
 		assertTrue(appCtx.getBean("rod1") != null);
 		assertTrue(appCtx.getBean("dependingBean") != null);
 		assertTrue(appCtx.getBean("jenny") != null);
 	}
 
-	public void testSatisfiedAutowireByTypeWithDefault() throws Exception {
+	public void testAutowireWithDefault() throws Exception {
 		InputStream is = getClass().getResourceAsStream("default-autowire.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		DependenciesBean rod = (DependenciesBean) xbf.getBean("rod1");
+		DependenciesBean rod1 = (DependenciesBean) xbf.getBean("rod1");
 		// Should have been autowired
-		assertNotNull(rod.getSpouse());
-		assertTrue(rod.getSpouse().getName().equals("Kerry"));
+		assertNotNull(rod1.getSpouse());
+		assertTrue(rod1.getSpouse().getName().equals("Kerry"));
+
+		DependenciesBean rod2 = (DependenciesBean) xbf.getBean("rod2");
+		// Should have been autowired
+		assertNotNull(rod2.getSpouse());
+		assertTrue(rod2.getSpouse().getName().equals("Kerry"));
 	}
 
-	public void testSatisfiedAutowireByNameWithDefault() throws Exception {
-		InputStream is = getClass().getResourceAsStream("default-autowire.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		DependenciesBean rod = (DependenciesBean) xbf.getBean("rod2");
-		// Should have been autowired
-		assertNotNull(rod.getSpouse());
-		assertTrue(rod.getSpouse().getName().equals("Kerry"));
-	}
-
-	public void testSatisfiedGenericConstructorArg() throws Exception {
+	public void testAutowireByConstructor() throws Exception {
 		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod1");
+		ConstructorDependenciesBean rod1 = (ConstructorDependenciesBean) xbf.getBean("rod1");
 		TestBean kerry = (TestBean) xbf.getBean("kerry2");
 		// Should have been autowired
-		assertEquals(kerry, rod.getSpouse1());
-		assertEquals(kerry, rod.getSpouse2());
-		assertEquals(0, rod.getAge());
-		assertEquals(null, rod.getName());
-	}
+		assertEquals(kerry, rod1.getSpouse1());
+		assertEquals(kerry, rod1.getSpouse2());
+		assertEquals(0, rod1.getAge());
+		assertEquals(null, rod1.getName());
 
-	public void testSatisfiedIndexedConstructorArg() throws Exception {
-		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod2");
+		ConstructorDependenciesBean rod2 = (ConstructorDependenciesBean) xbf.getBean("rod2");
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
 		// Should have been autowired
-		assertEquals(kerry2, rod.getSpouse1());
-		assertEquals(kerry1, rod.getSpouse2());
-		assertEquals(0, rod.getAge());
-		assertEquals(null, rod.getName());
-	}
+		assertEquals(kerry2, rod2.getSpouse1());
+		assertEquals(kerry1, rod2.getSpouse2());
+		assertEquals(0, rod2.getAge());
+		assertEquals(null, rod2.getName());
 
-	public void testSatisfiedConstructorArgWithAutowire() throws Exception {
-		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod3");
-		TestBean kerry = (TestBean) xbf.getBean("kerry2");
 		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
+		// Should have been autowired
+		assertEquals(kerry, rod.getSpouse1());
+		assertEquals(kerry, rod.getSpouse2());
+		assertEquals(other, rod.getOther());
+		assertEquals(0, rod.getAge());
+		assertEquals(null, rod.getName());
+
+		ConstructorDependenciesBean rod4 = (ConstructorDependenciesBean) xbf.getBean("rod4");
 		// Should have been autowired
 		assertEquals(kerry, rod.getSpouse1());
 		assertEquals(kerry, rod.getSpouse2());
@@ -778,48 +770,27 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(null, rod.getName());
 	}
 
-	public void testSatisfiedConstructorArgWithAutowireAndMultipleConstructors() throws Exception {
+	public void testAutowireByConstructorWithSimpleValues() throws Exception {
 		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod4");
-		TestBean kerry = (TestBean) xbf.getBean("kerry2");
-		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
-		// Should have been autowired
-		assertEquals(kerry, rod.getSpouse1());
-		assertEquals(kerry, rod.getSpouse2());
-		assertEquals(other, rod.getOther());
-		assertEquals(0, rod.getAge());
-		assertEquals(null, rod.getName());
-	}
-
-	public void testSatisfiedConstructorArgWithSimpleValuesAndGreedyConstructor() throws Exception {
-		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod5");
+		ConstructorDependenciesBean rod5 = (ConstructorDependenciesBean) xbf.getBean("rod5");
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
 		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
 		// Should have been autowired
-		assertEquals(kerry2, rod.getSpouse1());
-		assertEquals(kerry1, rod.getSpouse2());
-		assertEquals(other, rod.getOther());
-		assertEquals(99, rod.getAge());
-		assertEquals("myname", rod.getName());
-	}
+		assertEquals(kerry2, rod5.getSpouse1());
+		assertEquals(kerry1, rod5.getSpouse2());
+		assertEquals(other, rod5.getOther());
+		assertEquals(99, rod5.getAge());
+		assertEquals("myname", rod5.getName());
 
-	public void testSatisfiedConstructorArgWithSimpleValuesAndHumbleConstructor() throws Exception {
-		InputStream is = getClass().getResourceAsStream("constructor-arg.xml");
-		XmlBeanFactory xbf = new XmlBeanFactory(is);
-		ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod6");
-		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
-		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
-		LifecycleBean other = (LifecycleBean) xbf.getBean("other");
+		ConstructorDependenciesBean rod6 = (ConstructorDependenciesBean) xbf.getBean("rod6");
 		// Should have been autowired
-		assertEquals(kerry2, rod.getSpouse1());
-		assertEquals(kerry1, rod.getSpouse2());
-		assertEquals(other, rod.getOther());
-		assertEquals(0, rod.getAge());
-		assertEquals(null, rod.getName());
+		assertEquals(kerry2, rod6.getSpouse1());
+		assertEquals(kerry1, rod6.getSpouse2());
+		assertEquals(other, rod6.getOther());
+		assertEquals(0, rod6.getAge());
+		assertEquals(null, rod6.getName());
 	}
 
 	public void testThrowsExceptionOnTooManyArguments() throws Exception {

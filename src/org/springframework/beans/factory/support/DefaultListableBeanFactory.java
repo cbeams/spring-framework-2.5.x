@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
  * or as a superclass for custom bean factories.
  * @author Rod Johnson
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.9 2003-12-19 10:22:32 johnsonr Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.10 2003-12-22 10:46:57 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -258,7 +258,7 @@ public class DefaultListableBeanFactory extends AbstractBeanFactory
 	}
 
 	protected Map findMatchingBeans(Class requiredType) {
-		return getBeansOfType(requiredType, true, true);
+		return BeanFactoryUtils.beansOfTypeIncludingAncestors(this, requiredType, true, true);
 	}
 
 

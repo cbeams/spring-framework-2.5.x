@@ -33,12 +33,6 @@
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="spouse" class="org.springframework.beans.TestBean">
-		<property name="name">
-			<value>Kerry</value>
-		</property>
-	</bean>
-
 	<bean id="other" class="org.springframework.beans.factory.LifecycleBean"/>
 
 	<bean id="parentAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
