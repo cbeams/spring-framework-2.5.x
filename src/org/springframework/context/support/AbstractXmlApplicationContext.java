@@ -19,17 +19,14 @@ package org.springframework.context.support;
 import java.io.IOException;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.core.io.Resource;
 
 /**
  * Convenient abstract superclass for ApplicationContext implementations,
  * drawing configuration from XML documents containing bean definitions
- * understood by an XmlBeanDefinitionParser.
+ * understood by an XmlBeanDefinitionReader.
  *
  * <p>Subclasses just have to implement the <code>getConfigLocations</code>
  * method. Furthermore, they might override the <code>getResourceByPath</code>
@@ -41,12 +38,9 @@ import org.springframework.core.io.Resource;
  * @see #getConfigLocations
  * @see #getResourceByPath
  * @see #getResourcePatternResolver
- * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
+ * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
-public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
-
-	/** Bean factory for this context */
-	private ConfigurableListableBeanFactory beanFactory;
+public abstract class AbstractXmlApplicationContext extends AbstractRefreshableApplicationContext  {
 
 	/**
 	 * Create a new AbstractXmlApplicationContext with no parent.
@@ -62,51 +56,17 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		super(parent);
 	}
 
-	protected final void refreshBeanFactory() throws BeansException {
-		// Shut down previous bean factory, if any.
-		if (this.beanFactory != null) {
-			this.beanFactory.destroySingletons();
-			this.beanFactory = null;
-		}
-
-		// Initialize fresh bean factory.
-		try {
-			DefaultListableBeanFactory beanFactory = createBeanFactory();
-			XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
-			beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
-			initBeanDefinitionReader(beanDefinitionReader);
-			loadBeanDefinitions(beanDefinitionReader);
-			this.beanFactory = beanFactory;
-			if (logger.isInfoEnabled()) {
-				logger.info("Bean factory for application context [" + getDisplayName() + "]: " + beanFactory);
-			}
-		}
-		catch (IOException ex) {
-			throw new ApplicationContextException(
-					"I/O error parsing XML document for application context [" + getDisplayName() + "]", ex);
-		}
-	}
-
-	public final ConfigurableListableBeanFactory getBeanFactory() {
-		if (this.beanFactory == null) {
-			throw new IllegalStateException("BeanFactory not initialized - " +
-					"call 'refresh' before accessing beans via the context: " + this);
-
-		}
-		return this.beanFactory;
-	}
-
 	/**
-	 * Create the bean factory for this context.
-	 * <p>Default implementation creates a DefaultListableBeanFactory with the
-	 * internal bean factory of this context's parent as parent bean factory.
-	 * <p>Can be overridden in subclasses.
-	 * @return the bean factory for this context
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
-	 * @see #getInternalParentBeanFactory
+	 * Loads the bean definitions via an XmlBeanDefinitionReader.
+	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+	 * @see #initBeanDefinitionReader
+	 * @see #loadBeanDefinitions
 	 */
-	protected DefaultListableBeanFactory createBeanFactory() {
-		return new DefaultListableBeanFactory(getInternalParentBeanFactory());
+	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws IOException {
+		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
+		initBeanDefinitionReader(beanDefinitionReader);
+		loadBeanDefinitions(beanDefinitionReader);
 	}
 
 	/**
@@ -138,10 +98,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
 			for (int i = 0; i < configLocations.length; i++) {
-				Resource[] configResources = getResources(configLocations[i]);
-				for (int j = 0; j < configResources.length; j++) {
-					reader.loadBeanDefinitions(configResources[j]);
-				}
+				reader.loadBeanDefinitions(getResources(configLocations[i]));
 			}
 		}
 	}
