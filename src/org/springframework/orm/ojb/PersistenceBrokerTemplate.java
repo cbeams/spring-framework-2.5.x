@@ -31,8 +31,8 @@ import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Helper class that simplifies OJB PersistenceBroker data access code,
- * and converts PersistenceBrokerExceptions into exceptions compatible
- * to the org.springframework.dao exception hierarchy.
+ * and converts PersistenceBrokerExceptions into Spring DataAccessExceptions,
+ * following the <code>org.springframework.dao</code> exception hierarchy.
  *
  * <p>The central method is "execute", supporting OJB code implementing
  * the PersistenceBrokerCallback interface. It provides PersistenceBroker handling

@@ -34,8 +34,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Helper class that simplifies JDO data access code, and converts
- * JDOExceptions into JdoUsage/JdoSystemException, compatible to the
- * org.springframework.dao exception hierarchy.
+ * JDOExceptions into Spring DataAccessExceptions, following the
+ * <code>org.springframework.dao</code> exception hierarchy.
  *
  * <p>The central method is "execute", supporting JDO code implementing
  * the JdoCallback interface. It provides JDO PersistenceManager handling
