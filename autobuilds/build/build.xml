@@ -1,0 +1,349 @@
+<?xml version="1.0"?>
+
+<!--
+	autobuilds project build file
+	
+	Targets to compile and build the sample apps and test server
+	environments and run various HttpUnit tests against them.
+	
+	This script should normally be managed from a shell script or 
+	batch file (supplied).
+	
+	$Id: build.xml,v 1.1 2003-12-19 01:44:36 davison Exp $
+-->
+<project name="autobuilds" basedir="." default="usage">
+
+	<!-- autobuilds properties - these should not need amending -->
+	<property name="autobuilds.dir" value=".." />
+	<property name="spring.root.dir" value="../.." />
+	<property name="target.root.dir" value="${spring.root.dir}/target/autobuilds" />
+	<property name="servers.conf.dir" value="${autobuilds.dir}/conf/servers" />
+	<property name="servers.install.dir" value="${target.root.dir}/server-installs" />
+	<property name="src.dir" value="${autobuilds.dir}/src" />
+	<property name="bin.dir" value="${target.root.dir}/classes" />
+	<property name="reports.dir" value="${target.root.dir}/reports" />
+	<property name="dev.mail.list" value="springframework-developer@lists.sourceforge.net" />
+	<property name="autobuilds.server.port" value="13084" />
+	
+	<!-- build.properties is local per user -->
+	<property file="build.properties"/>
+	
+	
+	
+	<!--
+	**************************************************************************
+	
+	the following properties should all be in a local build.properties in
+	the same directory as this file where their values will take precedence.
+	
+	**************************************************************************
+	-->
+
+	<!-- 
+		rsh program to use when accessing Spring's CVS 
+		repository - usually ssh 
+	-->
+	<property name="cvs.rsh" value="ssh" />
+	
+	<!-- 
+		how long to give the app server after starting it before 
+		running the tests (seconds)
+	-->
+	<property name="server.timewait" value="15" />
+	
+	<!-- 
+		directory where the server tarballs are stored locally.  If the relevant 
+		server is not found in this directory, it will be downloaded from it's
+		http location
+	-->
+	<property name="tarballs.dir" value="${java.io.tmpdir}" />
+	
+	<!-- 
+		Version numbers and file names for each server that we can deploy to
+	-->	
+	<property name="tomcat4.version" value="4.1.29" />	
+	<property name="tomcat4.tarball" value="jakarta-tomcat-4.1.29.tar.gz" />
+	<property name="jboss3.version" value="3.2.2" />
+	<property name="jboss3.tarball" value="jboss-3.2.2.tgz" />
+	<property name="tomcat5.version" value="5.0.14" />
+	<property name="tomcat5.tarball" value="jakarta-tomcat-5.0.14.tar.gz" />
+	<property name="jetty4.version" value="4.2.14" />
+	<property name="jetty4.tarball" value="Jetty-4.2.14-all.tar.gz" />
+	<property name="resin2.version" value="2.1.11" />
+	<property name="resin2.tarball" value="resin-2.1.11.tar.gz" />
+	
+	<!--
+	**************************************************************************
+	-->
+	
+	
+	
+	<!--
+		test-classpath
+		
+		classpath for test code
+	-->
+	<path id="test-classpath">
+		<!-- spring.jar will be built as part of any autobuilds build -->
+		<fileset dir="${spring.root.dir}/dist">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${spring.root.dir}/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	
+	
+	<!--
+		usage
+		
+		output the available targets in this build file
+	-->
+	<target name="usage">		
+        <echo>
+Spring Framework
+-----------------------------------------------------------------------------
+
+${ant.file}
+	
+autobuilds build file - automatic deployment and testing 
+of Spring sample applications.
+
+This build file should be called from a shell script that sets the correct
+command line parameters (properties) for this build to operate as designed.
+
+-----------------------------------------------------------------------------
+        	
+Usage (available targets):
+
+main            --> kick off the main autobuild.  Expects properties 
+                    target.app and target.server to have been set on the 
+                    command line or in build.properties file.
+                    
+spring-update   --> do a CVS update of the Spring source tree (only).  This 
+                    target expects that a CVS checkout has already been 
+                    performed of the Spring project and a property called
+                    cvs.update must be set.
+        	                    
+realclean       --> delete ALL server installations AND downloads
+                    delete all build products
+
+=============================================================================
+        </echo>
+
+	</target>
+	
+	
+	
+	<!--
+		main
+		
+		workflow task for autobuilds
+	-->
+	<target name="main" depends="setup,taskdefs">
+		<tstamp>		
+            <format property="TODAY_UK" pattern="" locale="en"/>
+        </tstamp>
+		<echo message="     #  ----------------------------------------------------------------" />
+		<echo message="     #" />
+		<echo message="     #  Spring Autobuilds - automatic application deployment and testing" />			
+		<echo message="     # " />
+		<echo message="     #  This build is starting with the following properties set:" />
+		<echo message="     # " />
+		<echoproperties />
+		<echo message="     # " />
+		<echo message="     #  ----------------------------------------------------------------" />
+		
+		<antcall target="spring-update" />
+		
+		<ant dir="${spring.root.dir}" target="build" inheritall="false" />
+		<ant dir="${spring.root.dir}" target="fulljar" inheritall="false" />
+		
+		<ant dir="${spring.root.dir}/samples/${target.app}" target="dist" inheritall="false" />
+		
+		<ant dir="." antfile="${target.server}-build.xml" target="deploy" />
+		
+		<ant dir="${spring.root.dir}/samples/${target.app}" target="clean" inheritall="false" />	
+		
+		<parallel>
+			<antcall target="start-hsql" />
+			<ant dir="." antfile="${target.server}-build.xml" target="start-server" />
+			<sequential>
+				<echo message="waiting ${server.timewait} seconds for server to warmup..."/>
+				<sleep seconds="${server.timewait}"/>
+				
+				<antcall target="tests"/>
+				
+				<!-- separate target so they can be called manually -->
+				<antcall target="stop-server"/>
+			</sequential>
+		</parallel>
+		
+	</target>
+	
+	
+	
+	<!--
+		setup
+		
+		create required environment
+	-->
+	<target name="setup">
+		<mkdir dir="${target.root.dir}" />
+		<mkdir dir="${bin.dir}" />
+		<mkdir dir="${reports.dir}" />
+		<mkdir dir="${servers.install.dir}" />
+		
+		<condition property="hsql.required">
+			<or>
+				<equals arg1="petclinic" arg2="${target.app}" />
+				<equals arg1="jpetstore" arg2="${target.app}" />
+			</or>
+		</condition>
+	</target>
+	
+	
+	
+	<!--
+		spring-update
+		
+		run a  CVS update on the Spring source tree
+	-->
+	<target name="spring-update" if="cvs.update">
+		<echo message="#  ----------------------------------------------------------------" />
+		<echo message="#  Performing CVS update" />
+		<echo message="#  ----------------------------------------------------------------" />
+		<cvs failonerror="false" cvsrsh="${cvs.rsh}" command="update" dest="${spring.root.dir}/src" />
+	</target>
+	
+	
+	
+	<!--
+		build
+		
+		compile classes used in the deployment and testing
+	-->
+	<target name="build">
+		<javac srcdir="${src.dir}" destdir="${bin.dir}">
+			<classpath refid="test-classpath"/>
+		</javac>
+	</target>
+				
+	
+	
+	<!--
+		taskdefs
+		
+		declare the custom tasks
+	-->
+	<target name="taskdefs" depends="build">
+		<taskdef 
+			name="spring-runtests" 
+			classname="org.springframework.autobuilds.ant.AppTestLauncher"
+			classpath="${bin.dir}">
+			
+			<classpath refid="test-classpath"/>
+			<classpath path="${bin.dir}" />
+		</taskdef>
+			
+		<taskdef 
+			name="spring-killhsql" 
+			classname="org.springframework.autobuilds.ant.HsqlShutdown"
+			classpath="${bin.dir}">
+			
+			<classpath refid="test-classpath"/>
+			<classpath path="${bin.dir}" />
+		</taskdef>
+	</target>
+	
+	
+	
+	<!--
+		start-hsql
+		
+		start hsql with the relevant database
+	-->
+	<target name="start-hsql" if="hsql.required">
+		<echo message="#  ----------------------------------------------------------------" />
+		<echo message="#  Starting HSQLDB" />
+		<echo message="#  ----------------------------------------------------------------" />		
+		<copy todir="${target.root.dir}" overwrite="true">
+			<fileset dir="${spring.root.dir}/samples/${target.app}/db">
+				<include name="**/${target.app}.*" />
+			</fileset>
+		</copy>
+		
+		<java 
+			classname="org.hsqldb.Server"
+			output="${reports.dir}/hsqldb.log"
+			fork="true"
+			dir="${target.root.dir}/hsqldb">
+		
+			<arg value="-database"/>
+			<arg value="${target.app}"/>
+			
+      		<classpath>
+      			<fileset dir="${spring.root.dir}/lib/hsqldb">
+      				<include name="**/*.jar" />
+      			</fileset>
+   			</classpath>      		
+      	</java>
+	</target>
+	
+	
+	
+	<!--
+		tests
+		
+		run httpunit tests
+	-->
+	<target name="tests" depends="taskdefs">
+		<echo message="#  ----------------------------------------------------------------" />
+		<echo message="#  Starting unit tests for ${target.app}" />
+		<echo message="#  ----------------------------------------------------------------" />
+		<spring-runtests application="${target.app}" port="${autobuilds.server.port}"/>
+	</target>
+	
+	
+	
+	<!--
+		stop-hsql
+		
+		stop hsql gracefully
+	-->
+	<target name="stop-hsql" if="hsql.required" depends="taskdefs">
+		<echo message="#  ----------------------------------------------------------------" />
+		<echo message="#  Stopping HSQLDB" />
+		<echo message="#  ----------------------------------------------------------------" />	
+		<spring-killhsql
+			host="localhost"
+			port="9001"
+		/>
+	</target>
+	
+	
+	
+	<!--
+		stop-server
+		
+		close all servers
+	-->
+	<target name="stop-server" unless="autobuilds.keepalive" depends="stop-hsql">
+		<ant dir="." antfile="${target.server}-build.xml" target="stop-server" />		
+	</target>
+	
+	
+	
+	<!--
+		realclean
+		
+		removes all classes, server installs and reports
+	-->
+	<target name="realclean">
+		<delete dir="${target.root.dir}" />
+		<mkdir dir="${target.root.dir}" />
+		<mkdir dir="${reports.dir}" />
+	</target>	
+	
+</project>
