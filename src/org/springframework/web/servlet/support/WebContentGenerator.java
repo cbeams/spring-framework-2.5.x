@@ -131,7 +131,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Check and prepare the given request and response according to the settings
 	 * of this generator. Checks for supported methods and a required session,
-	 * and applies the specified number of cache seconds.
+	 * and applies the number of cache seconds specified for this generator.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param lastModified if the mapped handler provides Last-Modified support
@@ -139,6 +139,23 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	protected final void checkAndPrepare(HttpServletRequest request, HttpServletResponse response,
 	                                     boolean lastModified)
+	    throws ServletException {
+		checkAndPrepare(request, response, this.cacheSeconds, lastModified);
+	}
+
+	/**
+	 * Check and prepare the given request and response according to the settings
+	 * of this generator. Checks for supported methods and a required session,
+	 * and applies the given number of cache seconds.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param cacheSeconds positive number of seconds into the future that the
+	 * response should be cacheable for, 0 to prevent caching
+	 * @param lastModified if the mapped handler provides Last-Modified support
+	 * @throws ServletException if the request cannot be handled because a check failed
+	 */
+	protected final void checkAndPrepare(HttpServletRequest request, HttpServletResponse response,
+	                                     int cacheSeconds, boolean lastModified)
 	    throws ServletException {
 
 		// check whether we should support the request method
@@ -157,7 +174,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 		// do declarative cache control
 		// revalidate if the controller supports last-modified
-		applyCacheSeconds(response, this.cacheSeconds, lastModified);
+		applyCacheSeconds(response, cacheSeconds, lastModified);
 	}
 
 	/**
