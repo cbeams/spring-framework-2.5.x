@@ -23,10 +23,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.springframework.jdbc.datasource.ConnectionProxy;
+
 /**
  * Abstract adapter class for the NativeJdbcExtractor interface,
  * for simplified implementation of basic extractors.
  * Returns the passed-in JDBC objects on all methods.
+ *
+ * <p><code>getNativeConnection</code> checks for a ConnectionProxy chain,
+ * for example from a TransactionAwareDataSourceProxy, before delegating to
+ * <code>doGetNativeConnection</code> for actual unwrapping. You can override
+ * either of the two for a specific connection pool, but the latter is
+ * recommended to participate in ConnectionProxy unwrapping.
  *
  * <p>The <code>getNativeConnectionFromStatement</code> method is implemented
  * to simply delegate to <code>getNativeConnection</code> with the Statement's
@@ -35,8 +43,8 @@ import java.sql.Statement;
  *
  * @author Juergen Hoeller
  * @since 02.06.2004
- * @see #getNativeConnectionFromStatement
  * @see #getNativeConnection
+ * @see #getNativeConnectionFromStatement
  */
 public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor {
 
@@ -62,9 +70,28 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	}
 
 	/**
-	 * Not able to unwrap: return passed-in Connection.
+	 * Check for a ConnectionProxy chain, then delegate to doGetNativeConnection.
+	 * <p>ConnectionProxy is used by Spring's TransactionAwareDataSourceProxy
+	 * and SingleConnectionDataSource. The target connection behind it is typically
+	 * one from a local connection pool, to be unwrapped by the doGetNativeConnection
+	 * implementation of a concrete subclass.
+	 * @see #doGetNativeConnection
+	 * @see org.springframework.jdbc.datasource.ConnectionProxy
+	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
+	 * @see org.springframework.jdbc.datasource.SingleConnectionDataSource
 	 */
 	public Connection getNativeConnection(Connection con) throws SQLException {
+		Connection conToUse = con;
+		while (conToUse instanceof ConnectionProxy) {
+			conToUse = ((ConnectionProxy) conToUse).getTargetConnection();
+		}
+		return doGetNativeConnection(conToUse);
+	}
+
+	/**
+	 * Not able to unwrap: return passed-in Connection.
+	 */
+	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		return con;
 	}
 

@@ -54,7 +54,7 @@ public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String GET_INNERMOST_DELEGATE_METHOD_NAME = "getInnermostDelegate";
 
-	public Connection getNativeConnection(Connection con) throws SQLException {
+	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (con instanceof DelegatingConnection) {
 			Connection nativeCon = ((DelegatingConnection) con).getInnermostDelegate();
 			// For some reason, the innermost delegate can be null: not for a

@@ -70,7 +70,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via WebSphere's <code>getNativeConnection</code> method.
 	 */
-	public Connection getNativeConnection(Connection con) throws SQLException {
+	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.jdbcAdapterConnectionClass.isAssignableFrom(con.getClass())) {
 			try {
 				return (Connection) this.getNativeConnectionMethod.invoke(null, new Object[] {con});

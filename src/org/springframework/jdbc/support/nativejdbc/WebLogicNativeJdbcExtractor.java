@@ -82,7 +82,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via WebLogic's <code>getVendorConnection</code> method.
 	 */
-	public Connection getNativeConnection(Connection con) throws SQLException {
+	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.jdbcExtensionClass.isAssignableFrom(con.getClass())) {
 			try {
 				return (Connection) this.getVendorConnectionMethod.invoke(con, null);

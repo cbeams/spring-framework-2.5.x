@@ -75,7 +75,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	/**
 	 * Retrieve the Connection via JBoss' <code>getUnderlyingConnection</code> method.
 	 */
-	public Connection getNativeConnection(Connection con) throws SQLException {
+	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.wrappedConnectionClass.isAssignableFrom(con.getClass())) {
 			try {
 				return (Connection) this.getUnderlyingConnectionMethod.invoke(con, null);

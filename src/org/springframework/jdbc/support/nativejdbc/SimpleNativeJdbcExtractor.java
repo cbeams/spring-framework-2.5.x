@@ -155,7 +155,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * result in the native JDBC Connection with many connection pools.
 	 * @see java.sql.DatabaseMetaData#getConnection
 	 */
-	public Connection getNativeConnection(Connection con) throws SQLException {
+	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		Connection nativeCon = con.getMetaData().getConnection();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning native Connection [" + nativeCon + "] for given Connection handle [" + con + "]");

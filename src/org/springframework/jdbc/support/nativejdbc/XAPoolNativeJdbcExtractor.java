@@ -55,7 +55,7 @@ public class XAPoolNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		return true;
 	}
 
-	public Connection getNativeConnection(Connection con) throws SQLException {
+	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (con instanceof CoreConnection) {
 			return ((CoreConnection) con).con;
 		}
