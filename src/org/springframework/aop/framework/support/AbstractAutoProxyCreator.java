@@ -37,7 +37,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.13 2003-11-11 18:31:51 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.14 2003-11-11 21:11:49 dkopylenko Exp $
  */
 public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ordered {
 
@@ -114,7 +114,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 			return bean;
 		}
 		
-		Object[] specificInterceptors = getInterceptorsAndAdviceForBean(bean, name);
+		Object[] specificInterceptors = getInterceptorsAndAdvicesForBean(bean, name);
 		if (specificInterceptors != null) {
 			List allInterceptors = new ArrayList();
 			allInterceptors.addAll(Arrays.asList(specificInterceptors));
@@ -206,7 +206,7 @@ public abstract class AbstractAutoProxyCreator implements BeanPostProcessor, Ord
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
-	protected abstract Object[] getInterceptorsAndAdviceForBean(Object bean, String beanName)
+	protected abstract Object[] getInterceptorsAndAdvicesForBean(Object bean, String beanName)
 	    throws BeansException;
 
 }
