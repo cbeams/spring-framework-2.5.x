@@ -78,9 +78,9 @@ public class RulesTestSuite extends TestCase {
 
     public void testFunctionResultConstraint() {
         String s = "12345";
-        UnaryFunctionResultConstraint p =
-            new UnaryFunctionResultConstraint(StringLength.instance(),
-                constraints.bind(EqualTo.instance(), new Integer(s.length())));
+        UnaryFunctionResultConstraint p = new UnaryFunctionResultConstraint(
+                StringLength.instance(), constraints.bind(EqualTo.instance(),
+                        new Integer(s.length())));
         assertTrue(p.test(s));
         assertFalse(p.test("1234567"));
     }
@@ -97,12 +97,12 @@ public class RulesTestSuite extends TestCase {
         assertTrue(p.test("o1"));
         assertTrue(p.test(o1));
         assertFalse(p.test("o4"));
-        p = constraints.inGroup(new Object[] { o1, o2, o1, o3 } );
+        p = constraints.inGroup(new Object[] { o1, o2, o1, o3 });
         assertTrue(p.test("o1"));
         assertTrue(p.test(o1));
         assertFalse(p.test("o4"));
     }
-    
+
     public void testLike() {
         String keithDonald = "keith donald";
         String keith = "keith";
@@ -114,7 +114,7 @@ public class RulesTestSuite extends TestCase {
         p = constraints.like("%keith donald%");
         assertTrue(p.test("keith donald"));
         assertFalse(p.test("Keith Donald"));
-        
+
         p = constraints.like("keith%");
         assertTrue(p.test(keithDonald));
         assertTrue(p.test(keith));
@@ -124,11 +124,9 @@ public class RulesTestSuite extends TestCase {
         assertTrue(p.test(keithDonald));
         assertTrue(p.test(donald));
         assertFalse(p.test(keith));
-        
-        
-        
+
     }
-    
+
     public void testRequired() {
         UnaryPredicate req = Required.instance();
         assertFalse(req.test(""));
@@ -246,19 +244,18 @@ public class RulesTestSuite extends TestCase {
         BeanPropertiesExpression p = new BeanPropertiesExpression("test",
                 EqualTo.instance(), "confirmTest");
         assertTrue(p.test(new TestBean()));
-        
+
         p = new BeanPropertiesExpression("test", EqualTo.instance(), "min");
         assertFalse(p.test(new TestBean()));
     }
 
     public void testParameterizedBeanPropertyExpression() {
-        ParameterizedBeanPropertyExpression p =
-            new ParameterizedBeanPropertyExpression(
+        ParameterizedBeanPropertyExpression p = new ParameterizedBeanPropertyExpression(
                 "test", EqualTo.instance(), "testValue");
         assertTrue(p.test(new TestBean()));
 
-        p = new ParameterizedBeanPropertyExpression("test",
-                EqualTo.instance(), "test2Value");
+        p = new ParameterizedBeanPropertyExpression("test", EqualTo.instance(),
+                "test2Value");
         assertFalse(p.test(new TestBean()));
     }
 
@@ -278,8 +275,8 @@ public class RulesTestSuite extends TestCase {
 
     public void testBasicCompoundRules() {
         Rules r = Rules.createRules(TestBean.class);
-        r.add(constraints.inRangeProperties("number", "min", "max")).
-          add(constraints.eqProperty("test", "confirmTest"));
+        r.add(constraints.inRangeProperties("number", "min", "max")).add(
+                constraints.eqProperty("test", "confirmTest"));
         assertTrue(r.test(new TestBean()));
 
         r.add("test2", constraints.maxLength(4));
@@ -290,13 +287,11 @@ public class RulesTestSuite extends TestCase {
         Rules r = Rules.createRules(TestBean.class);
         // test must be required, and have a length in range 3 to 25
         // or test must just equal confirmTest
-        UnaryPredicate rules = constraints.
-            or(constraints.all("test",
-                new UnaryPredicate[] {
-                   constraints.required(),
-                   constraints.maxLength(25),
-                   constraints.minLength(3) }),
-               constraints.eqProperty("test", "confirmTest"));
+        UnaryPredicate rules = constraints.or(constraints.all("test",
+                new UnaryPredicate[] { constraints.required(),
+                        constraints.maxLength(25),
+                        constraints.minLength(3) }), constraints.eqProperty(
+                "test", "confirmTest"));
         r.add(rules);
         assertTrue(r.test(new TestBean()));
         TestBean b = new TestBean();

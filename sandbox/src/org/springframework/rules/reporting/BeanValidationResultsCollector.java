@@ -15,22 +15,17 @@
  */
 package org.springframework.rules.reporting;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.rules.Algorithms;
 import org.springframework.rules.Rules;
 import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.UnaryProcedure;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
-import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyExpression;
 import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 import org.springframework.util.Assert;
-import org.springframework.util.ToStringBuilder;
-import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
 
 /**
@@ -38,22 +33,14 @@ import org.springframework.util.visitor.Visitor;
  */
 public class BeanValidationResultsCollector extends ValidationResultsCollector
         implements Visitor {
-    private static final Log logger = LogFactory
-            .getLog(BeanValidationResultsCollector.class);
-    private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
     private Object bean;
     private GetProperty getProperty;
-    private boolean collectAllErrors;
     private BeanValidationResultsBuilder resultsBuilder;
 
     public BeanValidationResultsCollector(Object bean) {
         super();
         this.bean = bean;
         this.getProperty = new GetProperty(bean);
-    }
-
-    public void setCollectAllErrors(boolean collectAllErrors) {
-        this.collectAllErrors = collectAllErrors;
     }
 
     public BeanValidationResults collectResults(Rules rules) {
@@ -66,18 +53,19 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
         });
         return resultsBuilder;
     }
-    
-    private void setResultsBuilder(BeanValidationResultsBuilder builder) {
+
+    public void setResultsBuilder(BeanValidationResultsBuilder builder) {
         super.setResultsBuilder(builder);
         this.resultsBuilder = builder;
     }
 
-    public PropertyResults collectPropertyResults(BeanPropertyExpression rootExpression) {
+    public PropertyResults collectPropertyResults(
+            BeanPropertyExpression rootExpression) {
         Assert.notNull(rootExpression);
         setResultsBuilder(new BeanValidationResultsBuilder(bean));
         return collectPropertyResultsInternal(rootExpression);
     }
-    
+
     private PropertyResults collectPropertyResultsInternal(
             BeanPropertyExpression rootExpression) {
         resultsBuilder.setPropertyName(rootExpression.getPropertyName());
@@ -139,21 +127,11 @@ public class BeanValidationResultsCollector extends ValidationResultsCollector
         return result;
     }
 
-    boolean visit(UnaryAnd and) {
-        return super.visit(and);
-    }
-
     boolean visit(UnaryPredicate constraint) {
         Object propertyValue = getProperty.evaluate(resultsBuilder
                 .getPropertyName());
         setArgument(propertyValue);
         return super.visit(constraint);
-    }
-
-    public String toString() {
-        return new ToStringBuilder(this).append("bean", bean).append(
-                "collectAllErrors", collectAllErrors).append(
-                "validationResultsBuilder", resultsBuilder).toString();
     }
 
 }

@@ -33,12 +33,13 @@ import org.springframework.util.visitor.Visitor;
  * @author Keith Donald
  */
 public class ValidationResultsCollector implements Visitor {
-    private static final Log logger = LogFactory
+    protected static final Log logger = LogFactory
             .getLog(ValidationResultsCollector.class);
     protected ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
-    private boolean collectAllErrors;
     private ValidationResultsBuilder resultsBuilder;
     private ValidationResults results;
+    private boolean collectAllErrors;
+    
     private Object argument;
 
     public ValidationResultsCollector() {
