@@ -31,28 +31,29 @@ import org.springframework.util.ToStringCreator;
 /**
  * Singleton definition of a web flow.
  * <p>
- * At a high level, a Flow captures the definition (configuration information)
- * of a logical page flow within a web application. A logical page flow
- * typically fulfills a business process that takes place over a series of steps
- * (modeled as states.)
+ * At a high level, a Flow is a reusable, self-contained module that captures
+ * the definition (configuration information) of a logical page flow within a
+ * web application. A logical page flow typically fulfills a business process
+ * that takes place over a series of steps (modeled as states.)
  * <p>
  * Structurally, a Flow is composed of a set of states. A state is a point in
- * the flow where something happens; for instance, showing a view, executing an
- * action, or spawning a sub flow.
+ * the flow where something happens; for example, showing a view, executing an
+ * action, spawning a sub flow, or terminating the flow.
  * <p>
  * Each state has one or more transitions that are used to move to another
- * state. A transition is triggered by an event. An event is a string identifier
- * signalling the occurence of something: e.g "submit", "back", "success",
- * "error".
+ * state. A transition is triggered by a supported event. An event is a string
+ * identifier signalling the occurence of something: e.g "submit", "back",
+ * "success", "error".
  * <p>
  * Each Flow has exactly one start state. A start state is simply a marker for
- * the state the Flow execution should start in.
+ * the state FlowExecutions (client instances of this flow) should start in.
  * <p>
  * Instances of this class are typically built by a FlowBuilder implementation,
- * but may also be subclassed. It, and the rest of the web.flow system, has been
- * purposefully designed with minimal dependencies on other parts of Spring, and
- * is easily usable in a standalone fashion (and in the context of other
- * request-driven frameworks like Struts or Webwork, for example).
+ * but may also be subclassed. This class, and the rest of the web.flow system,
+ * has been purposefully designed with minimal dependencies on other parts of
+ * Spring, and are easily usable in a standalone fashion (as well as in the
+ * context of other request-driven frameworks like Struts or Webwork, for
+ * example).
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -125,7 +126,7 @@ public class Flow implements Serializable {
 	 * managed and notified by a <code>FlowExecution</code> and not by the
 	 * flow itself! You can use this when you want certain listeners to always
 	 * be notified when a flow execution is created for this flow, irrespective
-	 * of the web controller that is driving the execution.
+	 * of the client that is driving the execution.
 	 * 
 	 * @return The set of flow execution listeners
 	 */
