@@ -26,9 +26,10 @@ public final class StreamUtils {
      *            The input stream.
      * @param output
      *            The output stream.
-     * 
-     * @exception java.io.IOException
-     *                If an exception occurred while reading from the stream.
+     * @throws java.io.IOException
+     *             If an exception occurred while reading from the stream.
+     * @throws IllegalArgumentException
+     *             If the input or output stream parameters are null.
      */
     public static final OutputStream readStreamIntoStream(
         InputStream input,
@@ -51,8 +52,10 @@ public final class StreamUtils {
      * @param input
      *            The stream to read from.
      * @return The contents of the stream, as a <code>byte</code> array.
-     * @exception java.io.IOException
-     *                If an exception occurred while reading from the stream.
+     * @throws java.io.IOException
+     *             if an exception occurred while reading from the stream.
+     * @throws IllegalArgumentException
+     *             if the input stream parameter is null.
      */
     public static final byte[] readStreamIntoByteArray(InputStream input)
         throws IOException {
@@ -62,8 +65,8 @@ public final class StreamUtils {
 
     /*
      * Fully read an <code> InputStream </code> , writing the data read to a
-     * <code> ByteArrayOutputStream. Returns a reference to the resulting
-     * stream.
+     * <code> ByteArrayOutputStream </code> . Returns a reference to the
+     * resulting stream.
      */
     private static final ByteArrayOutputStream writeByteArrayStreamFrom(InputStream input)
         throws IOException {
