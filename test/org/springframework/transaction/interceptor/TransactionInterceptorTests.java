@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
@@ -29,8 +29,7 @@ import org.springframework.util.SerializationTestUtils;
 /**
  * Mock object based tests for TransactionInterceptor.
  * @author Rod Johnson
- * @since 16-Mar-2003
-*  @version $Id: TransactionInterceptorTests.java,v 1.15 2004-07-26 18:00:33 johnsonr Exp $
+ * @since 16.03.2003
  */
 public class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 	
@@ -68,17 +67,20 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		assertTrue(ti.getTransactionManager() instanceof SerializableTransactionManager);
 	}
 
+
 	/**
 	 * We won't use this: we just want to know it's serializable.
-	 * Static to avoid holding a reference to this enclosing class.
 	 */
 	private static class SerializableTransactionManager implements PlatformTransactionManager, Serializable {
+
 		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 			throw new UnsupportedOperationException();
 		}
+
 		public void commit(TransactionStatus status) throws TransactionException {
 			throw new UnsupportedOperationException();
 		}
+
 		public void rollback(TransactionStatus status) throws TransactionException {
 			throw new UnsupportedOperationException();
 		}

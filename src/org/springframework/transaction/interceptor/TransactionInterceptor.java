@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
@@ -23,11 +23,12 @@ import org.aopalliance.intercept.MethodInvocation;
  * AOP Alliance MethodInterceptor providing declarative transaction
  * management using the common Spring transaction infrastructure.
  *
- * <p>Derives from the TransactionAspectSupport class.
- * That class contains the necessary calls into Spring's underlying
- * transaction API: subclasses such as this are responsible for calling
- * superclass methods such as createTransactionIfNecessary()
- * in the correct order, in the event of normal invocation return or an exception. 
+ * <p>Derives from the TransactionAspectSupport class. That class contains
+ * the necessary calls into Spring's underlying transaction API:
+ * subclasses such as this are responsible for calling superclass methods
+ * such as <code>createTransactionIfNecessary</code> in the correct order,
+ * in the event of normal invocation return or an exception.
+ *
  * <p>TransactionInterceptors are thread-safe.
  *
  * @author Rod Johnson
@@ -45,7 +46,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		// as well as the method, which may be from an interface
 		Class targetClass = (invocation.getThis() != null) ? invocation.getThis().getClass() : null;
 		
-		// Create transaction if necessary
+		// Create transaction if necessary.
 		TransactionInfo txInfo = createTransactionIfNecessary(invocation.getMethod(), targetClass);
 
 		Object retVal = null;
@@ -64,7 +65,6 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 			doFinally(txInfo);
 		}
 		doCommitTransactionAfterReturning(txInfo);
-
 		return retVal;
 	}
 	

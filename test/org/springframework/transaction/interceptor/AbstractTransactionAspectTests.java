@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
@@ -38,15 +38,16 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * True unit test in that it tests how the transaction aspect uses
  * the PlatformTransactionManager helper, rather than indirectly
  * testing the helper implementation.
- * This is a superclass to allow testing both the AOP Alliance MethodInterceptor
- * and AspectJ aspect.
+ *
+ * <ü>This is a superclass to allow testing both the AOP Alliance MethodInterceptor
+ * and the AspectJ aspect.
+ *
  * @author Rod Johnson
- * @since 16-Mar-2003
-*  @version $Id: AbstractTransactionAspectTests.java,v 1.8 2004-10-06 16:58:21 jhoeller Exp $
+ * @since 16.03.2003
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
 	
-	protected Method  exceptionalMethod;
+	protected Method exceptionalMethod;
 	
 	protected Method getNameMethod;
 	
@@ -74,8 +75,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	 * return target.
 	 * @return transactional advised object
 	 */
-	protected abstract Object advised(Object target, PlatformTransactionManager ptm,
-	                                  TransactionAttributeSource tas) throws Exception;
+	protected abstract Object advised(
+			Object target, PlatformTransactionManager ptm, TransactionAttributeSource tas) throws Exception;
 
 	public void testNoTransaction() throws Exception {
 		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
@@ -314,8 +315,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	 * @param ex exception to be thrown by the target
 	 * @param shouldRollback whether this should cause a transaction rollback
 	 */
-	protected void doTestRollbackOnException(final Exception ex, final boolean shouldRollback,
-	                                         boolean rollbackException) throws Exception {
+	protected void doTestRollbackOnException(
+			final Exception ex, final boolean shouldRollback, boolean rollbackException) throws Exception {
 
 		TransactionAttribute txatt = new DefaultTransactionAttribute() {
 			public boolean rollbackOn(Throwable t) {
@@ -410,8 +411,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	}
 	
 	/**
-	 * @return a TransactionStatus object configured
-	 * for a new transaction
+	 * @return a TransactionStatus object configured for a new transaction
 	 */
 	private TransactionStatus transactionStatusForNewTransaction() {
 		return new DefaultTransactionStatus(new Object(), true, false, false, false, null);
@@ -420,7 +420,6 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	/**
 	 * Simulate a transaction infrastructure failure.
 	 * Shouldn't invoke target method.
-	 * @throws java.lang.Exception
 	 */
 	public void testCannotCreateTransaction() throws Exception {
 		TransactionAttribute txatt = new DefaultTransactionAttribute();
@@ -439,7 +438,8 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		TestBean tb = new TestBean() {
 			public String getName() {
-				throw new UnsupportedOperationException("Shouldn't have invoked target method when couldn't create transaction for transactional method");
+				throw new UnsupportedOperationException(
+						"Shouldn't have invoked target method when couldn't create transaction for transactional method");
 			}
 		};		
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);

@@ -12,27 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction.interceptor;
 
 import org.springframework.transaction.TransactionDefinition;
 
 /**
- * This interface adds a rollBackOn specification to TransactionDefinition.
- * As custom rollBackOn is only possible with AOP, this class resides
+ * This interface adds a <code>rollbackOn</code> specification to TransactionDefinition.
+ * As custom <code>rollbackOn</code> is only possible with AOP, this class resides
  * in the AOP transaction package.
- *
  * @author Rod Johnson
- * @since 16-Mar-2003
- * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
+ * @since 16.03.2003
+ * @see DefaultTransactionAttribute
+ * @see RuleBasedTransactionAttribute
  */
 public interface TransactionAttribute extends TransactionDefinition {
 	
 	/**
-	 * Should we roll back on a checked exception?
+	 * Should we roll back on the given exception?
 	 * @param ex the exception to evaluate
-	 * @return boolean rollback or not
+	 * @return whether to perform a rollback or not
 	 */
 	boolean rollbackOn(Throwable ex);
 	
