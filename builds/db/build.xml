@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+
+<project name="db" default="usage" basedir=".">
+	<import id="toplevel" file="../build.xml" />
+
+	<!-- Hibernate compilation/runtime classpath -->
+	<path id="hibernate.classpath">
+		<pathelement location="${hibernate.jar}" />
+		<pathelement location="${cglib.jar}" />
+		<pathelement location="${ehcache.jar}" />
+		<pathelement location="${odmg.jar}" />
+		<pathelement location="${commons.collections.jar}" />
+		<pathelement location="${commons.logging.jar}" />
+		<pathelement location="${dom4j.jar}" />
+	</path>
+
+	<target name="start.hsqldb" description="Start the HSQLB database">
+		<mkdir dir="${db.bin.dir}" />
+		<java dir="${db.bin.dir}" classname="org.hsqldb.Server" fork="true" failonerror="true" maxmemory="128m">
+			<arg value="-database" />
+			<arg value="${db.bin.dir}" />
+			<classpath>
+				<pathelement location="${hsqldb.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="start.hsqldb.manager" description="Start the HSQLB database manager">
+		<java classname="org.hsqldb.util.DatabaseManager" fork="true" failonerror="true" maxmemory="128m">
+			<arg value="-driver" />
+			<arg value="${jdbc.driver}" />
+			<arg value="-url" />
+			<arg value="${jdbc.url}" />
+			<arg value="-user" />
+			<arg value="${jdbc.username}" />
+			<arg value="-dir" />
+			<arg value="${db.dir}" />
+			<classpath>
+				<pathelement location="${hsqldb.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="schema.export" depends="dist" description="Create the database schema and export it to an .sql file.">
+		<taskdef name="schemaexport" classname="net.sf.hibernate.tool.hbm2ddl.SchemaExportTask" classpathref="project.compile.classpath" />
+		<schemaexport properties="${test.dir}/hibernate.properties" quiet="no" text="no" drop="no" delimiter=";" output="${db.schema.sql}">
+			<fileset dir="${target.classes.dir}">
+				<include name="**/*.hbm.xml" />
+			</fileset>
+		</schemaexport>
+	</target>
+
+	<target name="update.schema" depends="schema.export" description="Copy in a new hsql schema">
+		<copy file="${db.schema.sql}" todir="${db.dir}" />
+	</target>
+</project>
