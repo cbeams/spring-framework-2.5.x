@@ -19,26 +19,21 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 /**
- * Editor for java.util.Properties objects. Handles conversion from String
- * to Properties object. Also handles Map to Properties conversion, for
- * populating a Properties object via XML "map" entries.
+ * Editor for <code>java.util.Properties</code> objects.
+ * Handles conversion from String to Properties object.
+ * Also handles Map to Properties conversion, for populating
+ * a Properties object via XML "map" entries.
  *
- * <p>This editor must be registered before it will be available. Standard
- * editors in this package are automatically registered by BeanWrapperImpl.
- *
- * <p>The required format is defined in java.util.Properties documentation.
- * Each property must be on a new line.
+ * <p>The required format is defined in <code>java.util.Properties</code>
+ * documentation. Each property must be on a new line.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.beans.BeanWrapperImpl
  * @see java.util.Properties#load
  */
 public class PropertiesEditor extends PropertyEditorSupport {
@@ -69,7 +64,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * Convert Map into Properties.
+	 * Take Properties as-is; convert <code>java.util.Map</code> into Properties.
 	 */
 	public void setValue(Object value) {
 		if (!(value instanceof Properties) && value instanceof Map) {
@@ -83,26 +78,18 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * Remove comment lines. We shouldn't need to do this, according to
-	 * java.util.Properties documentation, but if we don't we end up with
-	 * properties like "#this=is a comment" if we have whitespace before
-	 * the comment marker.
+	 * Remove comment lines, even if they contain whitespace before the
+	 * comment marker. This happens automatically on JDK >= 1.4, but we
+	 * need to do this manually on JDK 1.3.
 	 */
 	private void dropComments(Properties props) {
 		Iterator keys = props.keySet().iterator();
-		List commentKeys = new ArrayList();
 		while (keys.hasNext()) {
 			String key = (String) keys.next();
 			// A comment line starts with one of our comment markers
 			if (key.length() > 0 && COMMENT_MARKERS.indexOf(key.charAt(0)) != -1) {
-				// We can't actually remove it as we'll get a 
-				// concurrent modification exception with the iterator
-				commentKeys.add(key);
+				keys.remove();
 			}
-		}
-		for (Iterator it = commentKeys.iterator(); it.hasNext();) {
-			String key = (String) it.next();
-			props.remove(key);
 		}
 	}
 
