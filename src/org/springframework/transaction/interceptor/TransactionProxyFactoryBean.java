@@ -19,6 +19,7 @@ package org.springframework.transaction.interceptor;
 import java.util.Properties;
 
 import org.aopalliance.intercept.AspectException;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
@@ -60,7 +61,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionInterceptor
  * @see #setTransactionAttributes
- * @version $Id: TransactionProxyFactoryBean.java,v 1.22 2004-03-18 02:46:05 trisberg Exp $
+ * @version $Id: TransactionProxyFactoryBean.java,v 1.23 2004-03-18 14:32:29 jhoeller Exp $
  */
 public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryBean, InitializingBean {
 
@@ -70,7 +71,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 
 	private Class[] proxyInterfaces;
 
-	private Properties transactionAttributes;
+	private TransactionAttributeSource transactionAttributeSource;
 
 	private Pointcut pointcut;
 
@@ -79,6 +80,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	private Object[] postInterceptors;
 
 	private Object proxy;
+
 
 	/**
 	 * Set the transaction manager. This will perform actual
@@ -110,15 +112,34 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	}
 
 	/**
+	 * Set the transaction attribute source which is used to find transaction
+	 * attributes. If specifying a String property value, a PropertyEditor
+	 * will create a MethodMapTransactionAttributeSource from the value.
+	 * @see #setTransactionAttributes
+	 * @see TransactionAttributeSourceEditor
+	 * @see MethodMapTransactionAttributeSource
+	 * @see NameMatchTransactionAttributeSource
+	 */
+	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
+		this.transactionAttributeSource = transactionAttributeSource;
+	}
+
+	/**
 	 * Set properties with method names as keys and transaction attribute
 	 * descriptors (parsed via TransactionAttributeEditor) as values:
 	 * e.g. key = "myMethod", value = "PROPAGATION_REQUIRED,readOnly".
 	 * <p>Note: Method names are always applied to the target class,
 	 * no matter if defined in an interface or the class itself.
+	 * <p>Internally, a NameMatchTransactionAttributeSource will be
+	 * created from the given properties.
+	 * @see #setTransactionAttributeSource
 	 * @see TransactionAttributeEditor
+	 * @see NameMatchTransactionAttributeSource
 	 */
 	public void setTransactionAttributes(Properties transactionAttributes) {
-		this.transactionAttributes = transactionAttributes;
+		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
+		tas.setProperties(transactionAttributes);
+		this.transactionAttributeSource = tas;
 	}
 
 	/**
@@ -161,16 +182,14 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 			throw new AopConfigException("Target must be set");
 		}
 		
-		if (this.transactionAttributes == null) {
-			throw new AopConfigException("'transactionAttributes' property must be set: if there are no transaction methods, don't use a transactional proxy");
+		if (this.transactionAttributeSource == null) {
+			throw new AopConfigException("Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
+																	 "If there are no transactional methods, don't use a transactional proxy.");
 		}
-
-		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
-		tas.setProperties(this.transactionAttributes);
 
 		TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 		transactionInterceptor.setTransactionManager(this.transactionManager);
-		transactionInterceptor.setTransactionAttributeSource(tas);
+		transactionInterceptor.setTransactionAttributeSource(this.transactionAttributeSource);
 		transactionInterceptor.afterPropertiesSet();
 
 		ProxyFactory proxyFactory = new ProxyFactory();
