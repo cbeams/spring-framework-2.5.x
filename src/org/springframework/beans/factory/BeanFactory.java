@@ -32,7 +32,7 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface BeanFactory {
 
@@ -46,6 +46,7 @@ public interface BeanFactory {
 	 * @param name name of the bean to return
 	 * @return the instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
+	 * @throws BeansException if the bean could not be created
 	 */
 	Object getBean(String name) throws BeansException;
 
@@ -53,8 +54,6 @@ public interface BeanFactory {
 	 * Return an instance (possibly shared or independent) of the given bean name.
 	 * Provides a measure of type safety by throwing an exception if the bean is not
 	 * of the required type.
-	 * This method allows a bean factory to be used as a replacement for
-	 * the Singleton or Prototype design pattern.
 	 * <p>Note that callers should retain references to returned objects. There is
 	 * no guarantee that this method will be implemented to be efficient. For example,
 	 * it may be synchronized, or may need to run an RDBMS query.
@@ -71,8 +70,8 @@ public interface BeanFactory {
 	/**
 	 * Is this bean a singleton? That is, will getBean() always return the same object?
 	 * @param name name of the bean to query
-	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @return is this bean a singleton
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 */
 	boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
 
