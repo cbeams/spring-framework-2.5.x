@@ -320,8 +320,8 @@ sender.send(message);
 			]]></programlisting>
 			<emphasis>Inline resources are added to the mime message using the Content-ID specified
 			as you've seen just now (<literal>identifier1234</literal> in this case). The order in 
-			which you're adding the text and the resource are VERY important. First add the resource
-			and after that the text. If you're doing it the other way around, it won't work!</emphasis>
+			which you're adding the text and the resource are VERY important. First add the text
+			and after that the resources. If you're doing it the other way around, it won't work!</emphasis>
 		</para>
 	</sect2>
   </sect1>
