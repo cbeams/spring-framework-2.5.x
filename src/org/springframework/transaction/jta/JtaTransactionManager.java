@@ -146,7 +146,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
- * @version $Id: JtaTransactionManager.java,v 1.20 2004-07-27 10:22:22 jhoeller Exp $
+ * @version $Id: JtaTransactionManager.java,v 1.21 2004-08-12 08:59:47 jhoeller Exp $
  * @see #setUserTransactionName
  * @see #setUserTransaction
  * @see #setTransactionManagerName
@@ -403,9 +403,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Beginning JTA transaction [" + transaction + "] ");
-		}
+		logger.debug("Beginning JTA transaction");
 		try {
 			applyIsolationLevel(definition.getIsolationLevel());
 			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -445,6 +443,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+
 	protected Object doSuspend(Object transaction) {
 		if (getTransactionManager() == null) {
 			throw new TransactionSuspensionNotSupportedException(
@@ -452,11 +451,22 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 					"specify the 'transactionManager' or 'transactionManagerName' property");
 		}
 		try {
-			return getTransactionManager().suspend();
+			return doJtaSuspend();
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on suspend", ex);
 		}
+	}
+
+	/**
+	 * Perform a JTA suspend on the JTA TransactionManager.
+	 * <p>Can be overridden in subclasses, for specific JTA implementations.
+	 * @return the suspended JTA Transaction object
+	 * @throws SystemException if thrown by JTA methods
+	 * @see #getTransactionManager
+	 */
+	protected Transaction doJtaSuspend() throws SystemException {
+		return getTransactionManager().suspend();
 	}
 
 	protected void doResume(Object transaction, Object suspendedResources) {
@@ -466,7 +476,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 					"specify the 'transactionManager' or 'transactionManagerName' property");
 		}
 		try {
-			getTransactionManager().resume((Transaction) suspendedResources);
+			doJtaResume((Transaction) suspendedResources);
 		}
 		catch (InvalidTransactionException ex) {
 			throw new IllegalTransactionStateException("Tried to resume invalid JTA transaction", ex);
@@ -475,6 +485,19 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 			throw new TransactionSystemException("JTA failure on resume", ex);
 		}
 	}
+
+	/**
+	 * Perform a JTA resume on the JTA TransactionManager.
+	 * <p>Can be overridden in subclasses, for specific JTA implementations.
+	 * @param suspendedTransaction the suspended JTA Transaction object
+	 * @throws InvalidTransactionException if thrown by JTA methods
+	 * @throws SystemException if thrown by JTA methods
+	 * @see #getTransactionManager
+	 */
+	protected void doJtaResume(Transaction suspendedTransaction) throws InvalidTransactionException, SystemException {
+		getTransactionManager().resume(suspendedTransaction);
+	}
+
 
 	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
 		try {
@@ -486,9 +509,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doCommit(DefaultTransactionStatus status) {
-		if (status.isDebug()) {
-			logger.debug("Committing JTA transaction [" + status.getTransaction() + "]");
-		}
+		logger.debug("Committing JTA transaction");
 		try {
 			getUserTransaction().commit();
 		}
@@ -507,9 +528,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doRollback(DefaultTransactionStatus status) {
-		if (status.isDebug()) {
-			logger.debug("Rolling back JTA transaction [" + status.getTransaction() + "]");
-		}
+		logger.debug("Rolling back JTA transaction");
 		try {
 			getUserTransaction().rollback();
 		}
@@ -520,7 +539,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager im
 
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		if (status.isDebug()) {
-			logger.debug("Setting JTA transaction [" + status.getTransaction() + "] rollback-only");
+			logger.debug("Setting JTA transaction rollback-only");
 		}
 		try {
 			getUserTransaction().setRollbackOnly();
