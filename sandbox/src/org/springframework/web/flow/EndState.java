@@ -54,17 +54,19 @@ public class EndState extends AbstractState {
 		}
 		FlowSession endingFlowSession = sessionExecution.endActiveSession();
 		Assert.isTrue(endingFlowSession.getCurrentState().equals(this),
-				"The ending flow session current state should equal this end state - this should not happen");
+				"The ending flow session's current state should always equal this end state, but it doesn't "
+						+ "-- this should not happen");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Flow session '" + endingFlowSession.getFlowId() + "' ended, details=" + endingFlowSession);
+			logger.debug("Session for flow '" + getFlow().getId() + "' ended, details=" + endingFlowSession);
 		}
 		if (sessionExecution.isActive()) {
-			// session is still active, resume in parent
+			// session execution is still active, resume in parent
 			if (logger.isDebugEnabled()) {
 				logger.debug("Resuming parent flow '" + sessionExecution.getQualifiedActiveFlowId() + "' in state '"
 						+ sessionExecution.getCurrentStateId() + "'");
 			}
 			Flow resumingParentFlow = sessionExecution.getActiveFlow();
+			Assert.isInstanceOf(SubFlowState.class, sessionExecution.getCurrentState());
 			SubFlowState resumingState = (SubFlowState)sessionExecution.getCurrentState();
 			if (resumingState.getAttributesMapper() != null) {
 				if (logger.isDebugEnabled()) {
@@ -76,8 +78,8 @@ public class EndState extends AbstractState {
 						sessionExecution.getActiveFlowSession());
 			}
 			else {
-				if (logger.isInfoEnabled()) {
-					logger.info("No attributes mapper is configured for the resuming state '" + getId()
+				if (logger.isDebugEnabled()) {
+					logger.debug("No attributes mapper is configured for the resuming state '" + getId()
 							+ "' - note: as a result, no attributes in the ending subflow '"
 							+ endingFlowSession.getFlowId() + "' scope will be passed to the resuming parent flow '"
 							+ resumingParentFlow.getId() + "'");
@@ -86,12 +88,11 @@ public class EndState extends AbstractState {
 			// treat the returned end state as a transitional event in the
 			// resuming state, this is so cool!
 			String eventId = endingFlowSession.getCurrentStateId();
-			descriptor = ((TransitionableState)sessionExecution.getCurrentState()).execute(eventId, sessionExecution,
-					request, response);
+			descriptor = resumingState.execute(eventId, sessionExecution, request, response);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Root flow '" + endingFlowSession.getFlowId() + "' ended");
+				logger.debug("Session execution for root flow '" + getFlow().getId() + "' has ended");
 			}
 		}
 		if (logger.isDebugEnabled()) {

@@ -172,7 +172,7 @@ public class ActionState extends TransitionableState {
 
 	protected ViewDescriptor doEnterState(FlowSessionExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		Iterator it = actionBeanIterator(sessionExecution.getActiveFlow());
+		Iterator it = actionBeanIterator();
 		int beanExecutionCount = 0;
 		while (it.hasNext()) {
 			ActionBean actionBean = (ActionBean)it.next();
@@ -192,19 +192,19 @@ public class ActionState extends TransitionableState {
 			}
 		}
 		if (beanExecutionCount > 0) {
-			throw new CannotExecuteStateTransitionException(sessionExecution.getActiveFlow(), getId(),
-					new IllegalStateException("No valid event was signaled by any of the " + beanExecutionCount
+			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
+					"No valid event was signaled by any of the " + beanExecutionCount
 							+ " action bean(s) that executed in this action state '" + getId() + "' of flow '"
-							+ sessionExecution.getActiveFlowId() + "' - programmer error?"));
+							+ getFlow().getId() + "' -- programmer error?"));
 		}
 		else {
-			throw new CannotExecuteStateTransitionException(sessionExecution.getActiveFlow(), getId(),
-					new IllegalStateException("No action beans executed, thus I cannot execute any state transition "
-							+ "- programmer configuration error"));
+			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
+					"No action beans executed, thus I cannot execute any state transition "
+							+ "-- programmer configuration error"));
 		}
 	}
 
-	protected Iterator actionBeanIterator(final Flow flow) {
+	protected Iterator actionBeanIterator() {
 		final Iterator it = this.actionBeans.iterator();
 		return new Iterator() {
 			public Object next() {
@@ -213,7 +213,7 @@ public class ActionState extends TransitionableState {
 					return holder.actionBean;
 				}
 				else {
-					ActionBean actionBean = (ActionBean)flow.getServiceLocator().getActionBean(holder.actionBeanName);
+					ActionBean actionBean = (ActionBean)getFlowServiceLocator().getActionBean(holder.actionBeanName);
 					Assert.notNull(actionBean, "The action bean retrieved from the registry must not be null");
 					return actionBean;
 				}
