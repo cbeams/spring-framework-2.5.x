@@ -69,7 +69,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			return getFlow(flowDefinitionId);
 		}
 		try {
-			String flowFactoryBeanId = "&" + flowDefinitionId;
+			String flowFactoryBeanId = BeanFactory.FACTORY_BEAN_PREFIX + flowDefinitionId;
 			FlowFactoryBean factoryBean = (FlowFactoryBean)getBeanFactory().getBean(flowFactoryBeanId,
 					FlowFactoryBean.class);
 			if (factoryBean.buildsWith(requiredBuilderImplementationClass)) {
@@ -77,7 +77,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			}
 			else {
 				throw new NoSuchFlowDefinitionException(flowDefinitionId, new IllegalStateException(
-						"The flow factory must produce flows using FlowBuilder of type '"
+						"The flow factory must produce flows using a FlowBuilder of type '"
 								+ requiredBuilderImplementationClass + "' but it doesn't"));
 			}
 		}
