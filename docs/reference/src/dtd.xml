@@ -47,18 +47,18 @@
 	&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd"&gt;
 
-	$Id: dtd.xml,v 1.6 2004-09-30 21:10:45 jhoeller Exp $
+	$Id: dtd.xml,v 1.7 2004-10-05 08:37:54 jhoeller Exp $
 --&gt;
 
 
 &lt;!--
-	The document root.
-	At least one bean definition is required.
+	The document root. A document can contain bean definitions only,
+	imports only, or a mixture of both (typically with imports first).
 --&gt;
 &lt;!ELEMENT beans (
 	description?,
 	import*,
-	bean+
+	bean*
 )&gt;
 
 &lt;!--
