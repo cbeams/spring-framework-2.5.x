@@ -16,17 +16,8 @@
 
 package org.springframework.aop.support;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.IntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.AopProxyUtils;
 
@@ -50,19 +41,13 @@ import org.springframework.aop.framework.AopProxyUtils;
  *
  * @author Rod Johnson
  */
-public class DelegatingIntroductionInterceptor implements IntroductionInterceptor, Serializable {
-
-	protected transient Log logger = LogFactory.getLog(getClass());
+public class DelegatingIntroductionInterceptor extends IntroductionAdviceSupport implements IntroductionInterceptor {
 		
-	/** Set of Class */
-	private Set publishedInterfaces = new HashSet();
-	
 	/**
 	 * Object that actually implements the interfaces.
 	 * May be "this" if a subclass implements the introduced interfaces.
 	 */
 	private Object delegate;
-	
 	
 	/**
 	 * Construct a new DelegatingIntroductionInterceptor, providing
@@ -91,37 +76,13 @@ public class DelegatingIntroductionInterceptor implements IntroductionIntercepto
 			throw new IllegalArgumentException("Delegate cannot be null in DelegatingIntroductionInterceptor");
 		}
 		this.delegate = delegate;
-		this.publishedInterfaces.addAll(AopUtils.getAllInterfacesAsList(delegate));
+		implementInterfacesOnObject(delegate);
 		// We don't want to expose the control interface
 		suppressInterface(IntroductionInterceptor.class);
+		suppressInterface(IntroductionAdvice.class);
 	}
 		
 	
-	/**
-	 * Suppress the specified interface, which will have
-	 * been autodetected due to its implementation by
-	 * the delegate.
-	 * Does nothing if it's not implemented by the delegate
-	 * @param intf interface to suppress
-	 */
-	public void suppressInterface(Class intf) {
-		this.publishedInterfaces.remove(intf);
-	}
-
-	public Class[] getIntroducedInterfaces() {
-		return (Class[]) this.publishedInterfaces.toArray(new Class[this.publishedInterfaces.size()]);
-	}
-	
-	public boolean implementsInterface(Class intf) {
-		for (Iterator it = this.publishedInterfaces.iterator(); it.hasNext();) {
-			Class pubIntf = (Class) it.next();
-			if (intf.isInterface() && intf.isAssignableFrom(pubIntf)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * Subclasses may need to override this if they want to  perform custom
 	 * behaviour in around advice. However, subclasses should invoke this
@@ -139,37 +100,6 @@ public class DelegatingIntroductionInterceptor implements IntroductionIntercepto
 		
 		// If we get here, just pass the invocation on
 		return mi.proceed();
-	}
-
-	/**
-	 * Is this method on an introduced interface?
-	 * @param mi method invocation
-	 * @return whether the method is on an introduced interface
-	 */
-	protected final boolean isMethodOnIntroducedInterface(MethodInvocation mi) {
-		return implementsInterface(mi.getMethod().getDeclaringClass());
-	}
-	
-	//---------------------------------------------------------------------
-	// Serialization support
-	//---------------------------------------------------------------------
-	/**
-	 * This method is implemented only to restore the logger.
-	 * We don't make the logger static as that would mean that subclasses
-	 * would use this class's log category.
-	 */
-	private void readObject(ObjectInputStream ois) throws IOException {
-		// Rely on default serialization, just initialize state after deserialization
-		try {
-			ois.defaultReadObject();
-		}
-		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize Spring DelegatingIntroductionInterceptor:" +
-					"Check that Spring AOP libraries and implementation class for the introduction are available on the client side");
-		}
-		
-		// Initialize transient fields
-		this.logger = LogFactory.getLog(getClass());
 	}
 
 }
