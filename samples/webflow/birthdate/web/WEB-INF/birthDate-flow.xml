@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD WEB FLOW//EN"
-	"http://www.springframework.org/dtd/web-flow.dtd">
 
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
+	
 <!-- 
 	This simple flow demonstrates the use of the FormAction: a multi-action
 	that allows you to mimic the exact behaviour of the SimpleFormController in a flow.
@@ -11,7 +12,7 @@
 	Note that this flow implements the exact flow of the SimpleFormController as an example.
 	If you only need this flow, it is advised that you just use the SimpleFormController.
 -->
-<web-flow id="BirthDate" start-state="setupForm">
+<webflow id="BirthDate" start-state="setupForm">
 
 	<!--
 		Prepare to display a new form. This is very similar to the showNewForm() method
@@ -56,4 +57,4 @@
 	-->
 	<end-state id="successView" view="displayAge"/>
 
-</web-flow>
+</webflow>

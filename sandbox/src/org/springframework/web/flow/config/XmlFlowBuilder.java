@@ -56,7 +56,7 @@ import org.xml.sax.SAXParseException;
  * 
  * <pre>
  *    &lt;!DOCTYPE webflow PUBLIC &quot;-//SPRING//DTD WEBFLOW//EN&quot;
- * 		&quot;http://www.springframework.org/dtd/webflow.dtd&quot;&gt;
+ * 		&quot;http://www.springframework.org/dtd/spring-webflow.dtd&quot;&gt;
  * </pre>
  * 
  * Consult the web flow DTD for more information on the XML definition format.
