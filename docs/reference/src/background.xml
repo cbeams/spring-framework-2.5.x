@@ -5,10 +5,10 @@
     <sect1 id="background-ioc">
     	<title>Inversion of Control / Dependency Injection</title>
     	<para>
-    		Early 2004, Martin Fowler asked the readers of his site: when talking about Inversion 
+    		In early 2004, Martin Fowler asked the readers of his site: when talking about Inversion 
     		of Control: <emphasis>"the question, is what aspect of control are they inverting?"</emphasis>.
-    		After talking a bit about the term Inversion of Control Martin suggests to rename the 
-    		pattern or at least, give it a more self-explanatory name and starts to use the
+    		After talking about the term Inversion of Control Martin suggests renaming the 
+    		pattern, or at least giving it a more self-explanatory name, and starts to use the
     		term <emphasis>Dependency Injection</emphasis>. His article continues to explain some of 
     		the ideas behind Inversion of Control or Dependency Injection. If you need a decent
     		insight: <ulink url="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</ulink>.
