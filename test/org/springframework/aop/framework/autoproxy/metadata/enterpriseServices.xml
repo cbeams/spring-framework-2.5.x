@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+	Common bean definitions for EnterpriseServices
+	tests.
+-->
+<beans>
+
+<bean id="enterpriseServices" 
+		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">	
+	
+	<!-- Change default exclusion prefix -->
+	<property name="infrastructureBeanNamePrefix"><value>es.</value></property>
+		
+		<property name="customTargetSourceCreators">
+			<list>
+				<ref local="es.poolingTargetSourceCreator" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="es.poolingTargetSourceCreator"
+		class="org.springframework.aop.framework.autoproxy.metadata.AttributesPoolingTargetSourceCreator"
+		autowire="constructor" >
+	</bean>
+
+	<bean id="es.txManager"
+		class="org.springframework.transaction.CountingTxManager">
+	</bean>
+	
+	<bean id="es.TAS"
+		class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"
+		autowire="constructor">
+	</bean>
+	
+	<bean id="es.txAdviceInterceptor"
+		class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager"> <ref bean="es.txManager"/></property>
+		<property name="transactionAttributeSource"><ref bean="es.TAS"/></property>
+	</bean>
+	
+	<bean id="es.txAdvice"
+		class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor"
+		autowire="constructor" >
+	</bean>
+	
+	
+	<bean id="txClass"
+		class="org.springframework.aop.framework.autoproxy.metadata.TxClass">
+	</bean>
+	
+	<bean id="txClassWithClassAttribute" singleton="false"
+		class="org.springframework.aop.framework.autoproxy.metadata.TxClassWithClassAttribute">
+	</bean>
+	
+	<bean id="noProxy"
+		class="org.springframework.beans.TestBean">
+	</bean>
+	
+	
+	
+	<!--
+		Must NOT be a singleton. Used in stateful introductions.
+	-->
+	<bean id="es.modifiableAdvice"
+		class="org.springframework.aop.framework.autoproxy.metadata.ModifiableAdvisor"
+		singleton="false"
+	>
+		<property name="attributes"><ref bean="attributes"/></property>
+	</bean>
+	
+	<bean id="modifiable1"
+		class="org.springframework.aop.framework.autoproxy.metadata.ModifiableTestBean" />
+
+	
+	<bean id="modifiable2"
+		class="org.springframework.aop.framework.autoproxy.metadata.ModifiableTestBean" />
+	
+
+</beans>		
+	
+	
