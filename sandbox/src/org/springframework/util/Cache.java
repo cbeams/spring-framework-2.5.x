@@ -10,6 +10,7 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -23,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author Bob Lee
  * @see http://www.crazybob.org
- * @version $Id: Cache.java,v 1.3 2004-03-12 04:49:14 kdonald Exp $
+ * @version $Id: Cache.java,v 1.4 2004-04-11 00:57:10 kdonald Exp $
  */
 public abstract class Cache {
     private static final Log logger = LogFactory.getLog(Cache.class);
@@ -115,9 +116,17 @@ public abstract class Cache {
     public void clear() {
         map.clear();
     }
-
-    public Map contents() {
-        return Collections.unmodifiableMap(map);
+    
+    public Iterator keys() {
+        return map.keySet().iterator();
+    }
+    
+    public Iterator values() {
+        return map.values().iterator();
+    }
+    
+    public Iterator entries() {
+        return map.entrySet().iterator();
     }
 
     private Object internalGet(Object key) {

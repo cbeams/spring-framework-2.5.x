@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  */
 public class BeanPropertyValueConstraint
-    extends AbstractBeanPropertyExpression
+    extends AbstractBeanPropertyConstraint
     implements UnaryPredicate {
     private UnaryPredicate valueConstraint;
 

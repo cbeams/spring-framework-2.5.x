@@ -15,7 +15,7 @@
  */
 package org.springframework.rules;
 
-import org.springframework.rules.predicates.BeanPropertyExpression;
+import org.springframework.rules.predicates.BeanPropertiesExpression;
 import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.BinaryFunctionResultConstraint;
 import org.springframework.rules.predicates.EqualTo;
@@ -264,7 +264,7 @@ public class PredicateFactory {
     public static UnaryPredicate greaterThanProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpression(
+        return new BeanPropertiesExpression(
             propertyName,
             otherPropertyName,
             GreaterThan.instance());
@@ -282,7 +282,7 @@ public class PredicateFactory {
     public static UnaryPredicate equalsProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpression(
+        return new BeanPropertiesExpression(
             propertyName,
             otherPropertyName,
             EqualTo.instance());
@@ -300,7 +300,7 @@ public class PredicateFactory {
     public static UnaryPredicate greaterThanEqualToProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpression(
+        return new BeanPropertiesExpression(
             propertyName,
             otherPropertyName,
             GreaterThanEqualTo.instance());
@@ -318,7 +318,7 @@ public class PredicateFactory {
     public static UnaryPredicate lessThanProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpression(
+        return new BeanPropertiesExpression(
             propertyName,
             otherPropertyName,
             LessThan.instance());
@@ -336,7 +336,7 @@ public class PredicateFactory {
     public static UnaryPredicate lessThanEqualToProperty(
         String propertyName,
         String otherPropertyName) {
-        return new BeanPropertyExpression(
+        return new BeanPropertiesExpression(
             propertyName,
             otherPropertyName,
             LessThanEqualTo.instance());
@@ -377,13 +377,13 @@ public class PredicateFactory {
         String propertyName,
         String minPropertyName,
         String maxPropertyName) {
-        BeanPropertyExpression min =
-            new BeanPropertyExpression(
+        BeanPropertiesExpression min =
+            new BeanPropertiesExpression(
                 propertyName,
                 minPropertyName,
                 GreaterThanEqualTo.instance());
-        BeanPropertyExpression max =
-            new BeanPropertyExpression(
+        BeanPropertiesExpression max =
+            new BeanPropertiesExpression(
                 propertyName,
                 maxPropertyName,
                 LessThanEqualTo.instance());

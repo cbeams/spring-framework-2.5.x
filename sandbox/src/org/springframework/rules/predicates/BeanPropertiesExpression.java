@@ -16,7 +16,6 @@
 package org.springframework.rules.predicates;
 
 import org.springframework.rules.BinaryPredicate;
-import org.springframework.rules.UnaryPredicate;
 import org.springframework.rules.functions.GetProperty;
 import org.springframework.util.Assert;
 
@@ -26,9 +25,8 @@ import org.springframework.util.Assert;
  * 
  * @author Keith Donald
  */
-public class BeanPropertyExpression
-    extends AbstractBeanPropertyExpression
-    implements UnaryPredicate {
+public class BeanPropertiesExpression
+    extends AbstractBeanPropertyConstraint {
     private String otherPropertyName;
     private BinaryPredicate beanPropertyExpression;
 
@@ -43,7 +41,7 @@ public class BeanPropertyExpression
      *            The expression predicate that will test the two bean property
      *            values.
      */
-    public BeanPropertyExpression(
+    public BeanPropertiesExpression(
         String propertyName,
         String otherPropertyName,
         BinaryPredicate beanPropertyExpression) {

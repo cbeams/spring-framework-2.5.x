@@ -16,7 +16,6 @@
 package org.springframework.rules.predicates;
 
 import org.springframework.rules.BinaryPredicate;
-import org.springframework.rules.UnaryPredicate;
 
 /**
  * A unary predicate that returns the result of a <code>boolean</code>
@@ -25,8 +24,8 @@ import org.springframework.rules.UnaryPredicate;
  * 
  * @author Keith Donald
  */
-public class ParameterizedBeanPropertyExpression implements UnaryPredicate {
-    private UnaryPredicate parameterizedExpression;
+public class ParameterizedBeanPropertyExpression implements BeanPropertyConstraint {
+    private BeanPropertyConstraint parameterizedExpression;
 
     /**
      * Creates a BeanPropertyExpressionTester.
@@ -48,6 +47,13 @@ public class ParameterizedBeanPropertyExpression implements UnaryPredicate {
             new BeanPropertyValueConstraint(propertyName, valueConstraint);
     }
 
+    /**
+     * @see org.springframework.rules.predicates.BeanPropertyConstraint#getPropertyName()
+     */
+    public String getPropertyName() {
+        return parameterizedExpression.getPropertyName();
+    }
+    
     /**
      * Tests the value of the configured propertyName for this bean against the
      * configured parameter value using the configured binary predicate.

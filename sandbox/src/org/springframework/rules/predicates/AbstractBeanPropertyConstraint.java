@@ -4,23 +4,23 @@
  */
 package org.springframework.rules.predicates;
 
-import org.springframework.rules.UnaryPredicate;
 import org.springframework.util.Assert;
 
 /**
- * @author  Keith Donald
+ * @author Keith Donald
  */
-public abstract class AbstractBeanPropertyExpression implements UnaryPredicate {
+public abstract class AbstractBeanPropertyConstraint
+    implements BeanPropertyConstraint {
     private String propertyName;
-    
-    public AbstractBeanPropertyExpression(String propertyName) {
+
+    public AbstractBeanPropertyConstraint(String propertyName) {
         setPropertyName(propertyName);
     }
-    
-    protected String getPropertyName() {
+
+    public String getPropertyName() {
         return propertyName;
     }
-    
+
     protected void setPropertyName(String propertyName) {
         Assert.notNull(propertyName);
         this.propertyName = propertyName;
