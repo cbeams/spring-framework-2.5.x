@@ -84,7 +84,6 @@
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler.jar"/>
 	<classpathentry kind="lib" path="lib/bsh/bsh-2.0b1.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/ojb/db-ojb-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxremote.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxremote_optional.jar"/>
@@ -93,5 +92,6 @@
 	<classpathentry kind="lib" path="lib/activemq/activemq-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/xdoclet/xjavadoc-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxtools.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-0.6.2.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
