@@ -215,7 +215,7 @@ public class RulesTestSuite extends TestCase {
                 "test2Value");
         assertFalse(p.test(new TestBean()));
     }
-    
+
     public void testNoRules() {
         Rules r = Rules.createRules(TestBean.class);
         assertTrue(r.test(new TestBean()));
@@ -226,5 +226,14 @@ public class RulesTestSuite extends TestCase {
         r.add(PredicateFactory.inRangeProperty("number", "min", "max"));
         assertTrue(r.test(new TestBean()));
     }
-    
+
+    public void testBasicCompoundRules() {
+        Rules r = Rules.createRules(TestBean.class);
+        r.add(PredicateFactory.inRangeProperty("number", "min", "max")).add(
+            PredicateFactory.equalsProperty("test", "confirmTest"));
+        assertTrue(r.test(new TestBean()));
+        r.add("test2", PredicateFactory.maxLength(4));
+        assertFalse(r.test(new TestBean()));
+    }
+
 }

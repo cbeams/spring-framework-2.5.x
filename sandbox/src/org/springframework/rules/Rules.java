@@ -18,6 +18,7 @@ package org.springframework.rules;
 import java.util.Iterator;
 
 import org.springframework.rules.predicates.BeanPropertyExpression;
+import org.springframework.rules.predicates.BeanPropertyValueConstraint;
 import org.springframework.rules.predicates.UnaryAnd;
 import org.springframework.util.Assert;
 import org.springframework.util.Cache;
@@ -91,6 +92,18 @@ public class Rules implements UnaryPredicate, Validator {
                 results.collectResults(rule);
             }
         });
+    }
+
+    /**
+     * Adds a value constraint for the specified property.
+     * 
+     * @param propertyName
+     *            The property name.
+     * @param valueConstraint
+     *            The value constraint.
+     */
+    public void add(String propertyName, UnaryPredicate valueConstraint) {
+        add(new BeanPropertyValueConstraint(propertyName, valueConstraint));
     }
 
 }
