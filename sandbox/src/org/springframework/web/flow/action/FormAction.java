@@ -78,6 +78,18 @@ import org.springframework.web.flow.ScopeType;
  * {@link #bindAndValidate(RequestContext) bindAndValidate}. It allows you to
  * register any custom property editors required by the form and form object.
  * <p>
+ * Note that this action does not provide a <i>referenceData()</i> hook method
+ * similar to that of the <code>SimpleFormController</code>. If you need to
+ * setup reference data you should create a seperate state in your flow to do
+ * just that and make sure you pass through that state before showing the form
+ * view. Note that you can add the method that handles this reference data
+ * setup logic to a subclass of this class since this is a multi-action! Typically
+ * you would define an action execute method like
+ * <pre>
+ *    public Event setupReferenceData(RequestContext context) throws Exception
+ * </pre>
+ * in that case.
+ * <p>
  * <b>Exposed configuration properties</b><br>
  * <table border="1">
  * <tr>
@@ -399,7 +411,6 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *         checked or unchecked
 	 */
 	protected Event doFormObjectProcessing(RequestContext context, boolean forceBindAndValidate) throws Exception {
-		setupFormReferenceData(context);
 		Object formObject = loadFormObject(context);
 		DataBinder binder = createBinder(context, formObject);
 		Event result = null;
@@ -568,18 +579,6 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	// subclassing hook methods
-
-	/**
-	 * Hook method subclasses may override to prepare supporting reference data
-	 * needed for rendering the form. This is typically used to retrieve model
-	 * data from a backing service to populate drop down boxes.
-	 * @param context the action execution context, for accessing and setting
-	 *        data in "flow scope" or "request scope"
-	 * @throws Exception an <b>unrecoverable</b> exception occured, either
-	 *         checked or unchecked
-	 */
-	protected void setupFormReferenceData(RequestContext context) throws Exception {
-	}
 	
 	/**
 	 * Return whether to suppress validation for the given action execution
