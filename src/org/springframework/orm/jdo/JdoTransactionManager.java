@@ -1,11 +1,13 @@
 package org.springframework.orm.jdo;
 
 import javax.jdo.JDOException;
+import javax.jdo.JDOFatalException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -134,8 +136,15 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		try {
 			txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction().commit();
 		}
-		catch (JDOException ex) {
+		catch (JDOFatalException ex) {
+			// assumably from commit call to underlying JDBC connection
 			throw new TransactionSystemException("Cannot commit JDO transaction", ex);
+		}
+		catch (JDOException ex) {
+			// assumably failed to flush changes to database
+			DataAccessException dae = PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+			doRollbackOnException(status, dae);
+			throw dae;
 		}
 		finally {
 			closePersistenceManager(txObject);

@@ -182,17 +182,35 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Perform a rollback, handling rollback exceptions properly.
+	 * Invoke rollback, handling rollback exceptions properly.
 	 * @param status object representing the transaction
 	 * @param ex the thrown application exception or error
 	 * @throws TransactionException in case of a rollback error
+	 * @see #rollback
 	 */
 	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
 		try {
 			rollback(status);
 		}
 		catch (TransactionException tex) {
-			logger.error("TransactionSynchronization exception overridden by rollback exception", ex);
+			logger.error("Commit exception overridden by rollback exception", ex);
+			throw tex;
+		}
+	}
+
+	/**
+	 * Invoke doRollback, handling rollback exceptions properly.
+	 * @param status object representing the transaction
+	 * @param ex the thrown application exception or error
+	 * @throws TransactionException in case of a rollback error
+	 * @see #doRollback
+	 */
+	protected void doRollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
+		try {
+			doRollback(status);
+		}
+		catch (TransactionException tex) {
+			logger.error("Commit exception overridden by rollback exception", ex);
 			throw tex;
 		}
 	}

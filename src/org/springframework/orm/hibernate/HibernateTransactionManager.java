@@ -13,6 +13,7 @@ import net.sf.hibernate.SessionFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.CannotCreateTransactionException;
@@ -261,11 +262,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				txObject.getSessionHolder().getSession().flush();
 			}
 			catch (HibernateException ex) {
-				rollbackOnException(status, ex);
-				throw SessionFactoryUtils.convertHibernateAccessException(ex);
+				DataAccessException dae = SessionFactoryUtils.convertHibernateAccessException(ex);
+				doRollbackOnException(status, dae);
+				throw dae;
 			}
 			catch (Error err) {
-				rollbackOnException(status, err);
+				doRollbackOnException(status, err);
 				throw err;
 			}
 
@@ -279,30 +281,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().getTransaction().commit();
 		}
 		catch (net.sf.hibernate.TransactionException ex) {
+			// assumably from commit call to underlying JDBC connection
 			throw new TransactionSystemException("Cannot commit Hibernate transaction", ex);
 		}
 		catch (HibernateException ex) {
 			// shouldn't really happen, as we force a flush before commit
-			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+			DataAccessException dae = SessionFactoryUtils.convertHibernateAccessException(ex);
+			doRollbackOnException(status, dae);
+			throw dae;
 		}
 		finally {
 			closeSession(txObject);
-		}
-	}
-
-	/**
-	 * Perform a rollback, handling rollback exceptions properly.
-	 * @param status object representing the transaction
-	 * @param ex the thrown application exception or error
-	 * @throws TransactionException in case of a rollback error
-	 */
-	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
-		try {
-			doRollback(status);
-		}
-		catch (TransactionException tex) {
-			logger.error("Application exception overridden by rollback exception", ex);
-			throw tex;
 		}
 	}
 
@@ -316,7 +305,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			throw new TransactionSystemException("Cannot rollback Hibernate transaction", ex);
 		}
 		catch (HibernateException ex) {
-			throw new TransactionSystemException("Cannot rollback Hibernate transaction", ex);
+			// shouldn't really happen, as a rollback doesn't cause a flush
+			throw SessionFactoryUtils.convertHibernateAccessException(ex);
 		}
 		finally {
 			closeSession(txObject);
