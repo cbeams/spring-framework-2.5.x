@@ -77,7 +77,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			return (Flow)BeanFactoryUtils.beanOfType(getListableBeanFactory(), flowDefinitionImplementationClass);
 		}
 		catch (BeansException e) {
-			throw new NoSuchActionBeanException(flowDefinitionImplementationClass, e);
+			throw new NoSuchFlowDefinitionException(flowDefinitionImplementationClass, e);
 		}
 	}
 
