@@ -7,6 +7,7 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 
+import org.aopalliance.intercept.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.oro.text.regex.MalformedPatternException;
@@ -16,6 +17,7 @@ import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 
 import org.springframework.aop.ClassFilter;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Perl5 regular expression pointcut bean. JavaBean properties are:
@@ -32,9 +34,9 @@ import org.springframework.aop.ClassFilter;
  *
  * @author Rod Johnson
  * @since July 22, 2003
- * @version $Id: RegexpMethodPointcut.java,v 1.2 2003-11-21 22:45:29 jhoeller Exp $
+ * @version $Id: RegexpMethodPointcut.java,v 1.3 2004-01-13 18:47:48 johnsonr Exp $
  */
-public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements ClassFilter { 
+public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements ClassFilter, InitializingBean { 
 	
 	private Log logger = LogFactory.getLog(getClass());
 	
@@ -91,6 +93,17 @@ public class RegexpMethodPointcut extends StaticMethodMatcherPointcut implements
 	
 	public ClassFilter getClassFilter() {
 		return this;
+	}
+
+	/**
+	 * We implement initializing bean only to do this validation. 
+	 * It doesn't matter if callers other than the Spring IoC container
+	 * don't bother to call this method.
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+	 */
+	public void afterPropertiesSet() throws Exception {
+		if (pattern == null)
+			throw new AspectException("Pattern must be supplied in " + getClass().getName());
 	}
 
 }
