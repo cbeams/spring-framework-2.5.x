@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ package org.springframework.beans.factory.config;
  * @author Juergen Hoeller
  * @since 1.0.2
  * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#resolveValueIfNecessary
- * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser#parseBeanDefinition
+ * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser#parseBeanDefinitionElement(org.w3c.dom.Element)
  * @see org.springframework.beans.factory.BeanNameAware
  */
 public class BeanDefinitionHolder {
