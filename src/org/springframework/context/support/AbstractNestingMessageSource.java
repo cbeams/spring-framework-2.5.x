@@ -51,7 +51,7 @@ public abstract class AbstractNestingMessageSource implements NestingMessageSour
 		this.useCodeAsDefaultMessage = useCodeAsDefaultMessage;
 	}
 
-	public final String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
+	public final String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
 		try {
 			return getMessage(code, args, locale);
 		}
@@ -60,7 +60,50 @@ public abstract class AbstractNestingMessageSource implements NestingMessageSour
 		}
 	}
 
-	public final String getMessage(String code, Object args[], Locale locale) throws NoSuchMessageException {
+	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+		try {
+			return getMessageInternal(code, args, locale);
+		}
+		catch (NoSuchMessageException ex) {
+			if (this.useCodeAsDefaultMessage) {
+				return code;
+			}
+			else {
+				throw ex;
+			}
+		}
+	}
+
+	public final String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
+		String[] codes = resolvable.getCodes();
+		for (int i = 0; i < codes.length; i++) {
+			try {
+				return getMessageInternal(codes[i], resolvable.getArguments(), locale);
+			}
+			catch (NoSuchMessageException ex) {
+				// swallow it, we'll retry the other codes
+			}
+		}
+		if (resolvable.getDefaultMessage() != null) {
+			return resolvable.getDefaultMessage();
+		}
+		else if (this.useCodeAsDefaultMessage && codes.length > 0) {
+			return codes[0];
+		}
+		else {
+			throw new NoSuchMessageException(codes[codes.length-1], locale);
+		}
+	}
+
+	/**
+	 * Resolve the given code and arguments as message in the given Locale,
+	 * throwing a NoSuchMessageException if not found. Does <i>not</i> fall
+	 * back to the code as default message. Invoked by getMessage methods.
+	 * @see #getMessage(String, Object[], Locale)
+	 * @see #getMessage(MessageSourceResolvable, Locale)
+	 * @see #setUseCodeAsDefaultMessage
+	 */
+	protected String getMessageInternal(String code, Object[] args, Locale locale) throws NoSuchMessageException {
 		if (locale == null) {
 			locale = Locale.getDefault();
 		}
@@ -76,31 +119,8 @@ public abstract class AbstractNestingMessageSource implements NestingMessageSour
 				if (logger.isDebugEnabled()) {
 					logger.debug("Could not resolve message code [" + code + "] in locale [" + locale + "]");
 				}
-				if (this.useCodeAsDefaultMessage) {
-					return code;
-				}
-				else {
-					throw new NoSuchMessageException(code, locale);
-				}
+				throw new NoSuchMessageException(code, locale);
 			}
-		}
-	}
-
-	public final String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
-		String[] codes = resolvable.getCodes();
-		for (int i = 0; i < codes.length; i++) {
-			try {
-				return getMessage(codes[i], resolvable.getArguments(), locale);
-			}
-			catch (NoSuchMessageException ex) {
-				// swallow it, we'll retry the other codes
-			}
-		}
-		if (resolvable.getDefaultMessage() != null) {
-			return resolvable.getDefaultMessage();
-		}
-		else {
-			throw new NoSuchMessageException(codes[codes.length-1], locale);
 		}
 	}
 

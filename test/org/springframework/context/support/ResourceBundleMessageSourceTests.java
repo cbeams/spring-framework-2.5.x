@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.MessageSourceResolvable;
 
 /**
  * @author Juergen Hoeller
@@ -46,6 +47,8 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		assertEquals("nochricht2", ac.getMessage("code2", null, new Locale("DE", "at")));
 		assertEquals("noochricht2", ac.getMessage("code2", null, new Locale("DE", "at", "oo")));
 		assertEquals("message3", ac.getMessage("code3", null, Locale.ENGLISH));
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"code4", "code3"}, null);
+		assertEquals("message3", ac.getMessage(resolvable, Locale.ENGLISH));
 
 		try {
 			assertEquals("code4", ac.getMessage("code4", null, Locale.GERMAN));
