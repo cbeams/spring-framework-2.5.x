@@ -44,17 +44,15 @@ import org.springframework.jmx.proxy.JmxProxyFactoryBean;
 import org.springframework.jmx.util.JmxUtils;
 
 /**
- * A bean that allows for any Spring managed to be exposed to an MBeanServer
+ * A bean that allows for any Spring managed to be exposed to an <code>MBeanServer</code>
  * without the need to define any JMX specific information in the bean classes.
  * 
  * If the bean implements one of the JMX management interface then
  * JmxMBeanAdapter will simply register the MBean with the server automatically.
  * 
  * If the bean does not implement on the JMX management interface then
- * JmxMBeanAdapter will create the management information using the supplied
- * <tt>MetadataAssembler</tt> implementation. Once the MBean data is created
- * JmxMBeanAdapter handles requests to invoke methods on the managed bean using
- * one the <tt>MBeanInvoker</tt> implementations.
+ * <code>JmxMBeanAdapter</code> will create the management information using the supplied
+ * <code>ModelMBeanMetadataAssembler</code> implementation. 
  * 
  * @author Rob Harrop
  * @since 1.2
@@ -105,6 +103,9 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
      */
     private ConfigurableListableBeanFactory beanFactory = null;
 
+    /**
+     * 
+     */
     public void afterPropertiesSet() throws Exception {
 
         // the beans property may be null
@@ -124,27 +125,62 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         }
     }
 
+    /**
+     * Supply a <code>Map</code> of beans to be registered with the JMX
+     * <code>MBeanServer</code>.
+     * @param beans a <code>Map</code> whose entries are the beans to register via JMX.
+     */
     public void setBeans(Map beans) {
         this.beans = beans;
     }
 
+    /**
+     * Set the implementation of the <code>ModelMBeanInfoAssembler</code> interface
+     * to use for this instance.
+     * @param assembler an implementation of the <code>ModelMBeanInfoAssembler</code> interface.
+     */
     public void setAssembler(ModelMBeanInfoAssembler assembler) {
         this.assembler = assembler;
     }
 
 
+    /**
+     * Set the implementation of the <code>ObjectNamingStrategy</code> interface to
+     * use for this instance.
+     * @param namingStrategy an implementation of the <code>ObjectNamingStrategy</code> interface.
+     */
     public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
         this.namingStrategy = namingStrategy;
     }
 
+    /**
+     * Specify an instance <code>MBeanServer</code> with which all beans should
+     * be registered. The <code>JmxMBeanAdapter</code> will attempt to locate an
+     * existing <code>MBeanServer</code> if none is supplied.
+     * @param server an instance of <code>MBeanServer</code>.
+     */
     public void setServer(MBeanServer server) {
         this.server = server;
     }
 
-
-
     /**
-     * Register the defined beans with the MBeanServer
+     * Set the implementation of the <code>ModelMBeanProvider</code> interface to
+     * use for this instance.
+     * @param mbeanProvider an implementation of the <code>ModelMBeanProvider</code> interface.
+     */
+    public void setBeanProvider(ModelMBeanProvider mbeanProvider) {
+        this.mbeanProvider = mbeanProvider;
+    }
+    
+    /**
+     * Registers the defined beans with the <code>MBeanServer</code>. Each bean is exposed
+     * to the <code>MBeanServer</code> via a <code>ModelMBean</code>. The actual implemetation
+     * of the <code>ModelMBean</code> interface used depends on the implementation of the
+     * <code>ModelMBeanProvider</code> interface that is configuerd. By default the <code>
+     * RequiredModelMBean</code> class that is supplied with all JMX implementations is used. The management
+     * interface produced for each bean is dependent on te <code>ModelMBeanInfoAssembler</code> 
+     * implementation being used. The <code>ObjectName</code> given to each bean is dependent on
+     * the implementation of the <code>ObjectNamingStrategy</code> interface being used.
      *  
      */
     public void registerBeans() {
@@ -206,8 +242,11 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
     }
 
     /**
-     * Invoked when using an AutodetectCapableModelMBeanInfoAssembler - gives
-     * the assembler the chance to autodetect beans.
+     * Invoked when using an <code>AutodetectCapableModelMBeanInfoAssembler</code>. Gives the
+     * assembler the opportunity to additional beans from the <code>BeanFactory</code> to the list
+     * of beans to be exposed via JMX. This implementation prevents a bean from being added to the
+     * list automatically if it has already been added manually and it prevents certain internal
+     * classes from being registered automatically.
      */
     private void autodetectBeans() {
         AutodetectCapableModelMBeanInfoAssembler autodetectAssembler = (AutodetectCapableModelMBeanInfoAssembler) assembler;
@@ -247,7 +286,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
     }
 
     /**
-     * Unregister all the beans
+     * Unregisters all the beans when the enclosing <code>BeanFactory</code> is destroyed.
      */
     public void destroy() throws Exception {
         log.info("Unregistering all beans");
@@ -260,7 +299,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
     }
 
     /**
-     * Implemented to grab the BeanFactory to allow for auto detection of
+     * Implemented to grab the <code>BeanFactory</code> to allow for auto detection of
      * managed bean resources
      */
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -272,8 +311,8 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
     }
 
     /**
-     * Used to invoke the registerBeans() method automatically when running in
-     * an <tt>ApplicationContext</tt> even if the bean is not a singleton
+     * Invokes the <code>registerBeans()</code> method automatically when running in
+     * an <code>ApplicationContext</code> even if the bean is not a singleton
      */
     public void postProcessBeanFactory(
             ConfigurableListableBeanFactory beanFactory) throws BeansException {
