@@ -444,10 +444,12 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		}
 
 		// Normal submit: validate current page and show specified target page.
-		if (logger.isDebugEnabled()) {
-			logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
+		if (!suppressValidation(request)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
+			}
+			validatePage(command, errors, currentPage, false);
 		}
-		validatePage(command, errors, currentPage, false);
 
 		int targetPage = getTargetPage(request, command, errors, currentPage);
 		if (logger.isDebugEnabled()) {
@@ -571,11 +573,13 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			return showPage(request, errors, currentPage);
 		}
 
-		// In case of remaining errors on a page -> show the page.
-		for (int page = 0; page < this.pages.length; page++) {
-			validatePage(command, errors, page, true);
-			if (errors.hasErrors()) {
-				return showPage(request, errors, page);
+		if (!suppressValidation(request)) {
+			// In case of remaining errors on a page -> show the page.
+			for (int page = 0; page < this.pages.length; page++) {
+				validatePage(command, errors, page, true);
+				if (errors.hasErrors()) {
+					return showPage(request, errors, page);
+				}
 			}
 		}
 
