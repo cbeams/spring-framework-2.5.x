@@ -16,6 +16,7 @@
 package org.springframework.samples.phonebook.web.flow;
 
 import org.springframework.binding.TypeConverters;
+import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.QueryAction;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Transition;
@@ -62,7 +63,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setId) });
 
 		// set a user id in the model (selected from result list)
-		Action setAction = new SetAction(ID, TypeConverters.instance().getTypeConverter(Long.class));
+		Action setAction = new SetAction(new Mapping(ID, TypeConverters.instance().getTypeConverter(Long.class)));
 		addActionState(setId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
 
 		// view details for selected user id
