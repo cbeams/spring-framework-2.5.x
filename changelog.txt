@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.3 (9.12.2004)
-------------------------------------
+Changes in version 1.1.3 (12.12.2004)
+-------------------------------------
 
 Package org.springframework.aop
 * introduced ProxyMethodInvocation interface, to let DelegatingIntroductionInterceptor access proxies in a clean fashion
@@ -14,6 +14,7 @@ Package org.springframework.beans
 * BeanWrapperImpl automatically registers a default ResourceArrayPropertyEditor
 * fixed reported bean class in BeanWrapperImpl to always point to the root class at the top of the path
 * deprecated setting of a nested path without specifying the root object in BeanWrapperImpl
+* added CustomCollectionEditor, by default registered to convert between Set, SortedSet and List (when necessary)
 * fixed TypeMismatchException constructor to avoid NullPointerException in case of null as required type
 * added "getPropertyDescriptors" method to BeanUtils, as alternative to retrieving the descriptors via a BeanWrapper
 * added "fileEncoding" and "propertiesPersister" properties to PropertyResourceConfigurer
@@ -23,17 +24,22 @@ Package org.springframework.beans
 * moved management of ignored dependency types from AbstractBeanFactory down to AbstractAutowireCapableBeanFactory
 * fixed AbstractAutowireCapableBeanFactory to not create prototype beans referenced by a "factory-bean" attribute twice
 * factored out AbstractAutowireCapableBeanFactory's BeanWrapper creation into protected "createBeanWrapper" method
+* fixed DefaultListableBeanFactory's "getBeansOfType" to ignore failures that contain a BeanCurrentlyInCreationException
 * reworked DefaultListableBeanFactory's "getBeansOfType" to return FactoryBean instances when passed a FactoryBean type
 * reworked StaticListableBeanFactory's "getBeansOfType" to return FactoryBean instances when passed a FactoryBean type
 * moved "loadBeanDefinitions(Resource[])" method from XmlBeanDefinitionReader up to AbstractBeanDefinitionReader
+* DefaultXmlBeanDefinitionParser resolves "set" tag as LinkedHashSet on JDK 1.4, falling back to HashSet on JDK 1.3
 
 Package org.springframework.context
 * ApplicationContext interface extends ResourcePatternResolver, offering "Resource[] getResources(locationPattern)" now
+* AbstractApplicationContext passes the parent MessageSource to its fallback StaticMessageSource, if any
 * factored out AbstractRefreshableApplicationContext as base class of AbstractXmlApplicationContext
 * added "setResourceLoader" method to GenericApplicationContext, for overriding the default resource loading strategy
 * added "isContextRequired" method to ApplicationObjectSupport, allowing to enforce running in an ApplicationContext
 
 Package org.springframework.core
+* added "contains" method to NestedRuntime/CheckedException, checking for a given exception class in the nested causes
+* added "createLinkedSetIfPossible" to CollectionFactory, creating a JDK 1.4 LinkedHashSet or Commons ListOrderedSet
 * added initial capacity check to CollectionFactory, to always pass a positive capacity number to Commons Collections
 * added FileSystemResourceLoader, resolving paths as file system resources rather than as class path resources
 * fixed AbstractPathResolvingPropertyEditor to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
@@ -51,6 +57,7 @@ Package org.springframework.mock
 * implemented "getResourcePaths" in MockServletContext, to allow for pattern matching via the ServletContext
 
 Package org.springframework.orm
+* fixed Hibernate/JTA synchronization to also work with EJB remote transaction propagation (with >1 thread involved)
 * fixed HibernateTransactionManager to not pre-initialize the SQLExceptionTranslator, lazily creating a specific one
 * SqlMapClientFactoryBean forces the iBATIS ExternalTransactionConfig to always keep the original auto-commit value
 * SqlMapClientFactoryBean lets lazy loading and direct SqlMapClient access participate in Spring-managed transactions
@@ -85,7 +92,10 @@ Package org.springframework.web
 * turned AbstractWizardFormController's "getPageSessionAttributeName" method non-final, to allow for specifying the name
 * changed AbstractWizardFormController's "validatePagesAndFinish" to show the offending page for global errors too
 * changed SimpleMappingExceptionResolver's "exceptionMappings" to support exception patterns (similar to rollback rules)
+* changed SimpleMappingExceptionResolver's "mappedHandlers" property from List to Set (reflecting its actual role)
 * changed CookieLocaleResolver's cookie value separator from space to underscore, for Resin and Tomcat 5.5 compatibility
+* added overloaded "getMessage" methods to RequestContext, taking a List of arguments (as alternative to Object array)
+* added overloaded "getThemeMessage" methods to RequestContext, taking a List of arguments (alternative to Object array)
 * fixed BindStatus to look for plain target object in model map first (to also work in Velocity and FreeMarker views)
 * UrlBasedViewResolver supports a "forward:" prefix too, for forwards to other controllers through special view names
 * added "attributes" (Properties) and "attributesMap" (Map) properties to UrlBasedViewResolver, for static attributes
@@ -98,6 +108,7 @@ Package org.springframework.web
 * factored out "doRender" and "getTemplate(name, Locale)" methods in FreeMarkerView, for easy subclassing
 * changed value for "selected" attribute from "true" to "selected" in Velocity and FreeMarker macros (spring.vm/ftl)
 * added JasperReportsXxxView to allow for convenient rendering of CSV/HTML/PDF/XLS web views with Jasper Reports
+* added "getModuleConfig" method to the Struts ContextLoaderPlugIn, to allow access to the ModuleConfig in subclasses
 * added MappingDispatchActionSupport class, as convenience subclass of Struts 1.2's MappingDispatchAction
 
 
