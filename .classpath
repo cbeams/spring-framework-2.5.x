@@ -6,16 +6,17 @@
 	<classpathentry output="target/load-classes" kind="src" path="load"/>
 	<classpathentry output="target/mock-classes" kind="src" path="mock"/>
 	<classpathentry kind="src" path="samples/countries/src"/>
-	<classpathentry output="samples/petclinic/.classes" kind="src" path="samples/petclinic/src"/>
+	<classpathentry kind="src" path="samples/imagedb/src"/>
+	<classpathentry kind="src" path="samples/jasperdemo/src/java"/>
 	<classpathentry kind="src" path="samples/jpetstore/src"/>
 	<classpathentry kind="src" path="samples/jpetstore/annotation/src"/>
+	<classpathentry output="samples/petclinic/.classes" kind="src" path="samples/petclinic/src"/>
 	<classpathentry kind="src" path="samples/tiles-example/src"/>
-	<classpathentry kind="src" path="samples/imagedb/src"/>
+	<classpathentry kind="src" path="samples/webapp-minimal/src"/>
 	<classpathentry kind="src" path="samples/webflow/phonebook/src"/>
+	<classpathentry kind="src" path="samples/webflow/phonebook/test"/>
 	<classpathentry kind="src" path="samples/webflow/itemlist/src"/>
 	<classpathentry kind="src" path="samples/webflow/fileupload/src"/>
-	<classpathentry kind="src" path="samples/webapp-minimal/src"/>
-	<classpathentry kind="src" path="samples/jasperdemo/src/java"/>
 	<classpathentry output="target/autobuilds/classes" kind="src" path="autobuilds/src"/>
 	<classpathentry output="target/sandbox/classes" kind="src" path="sandbox/src"/>
 	<classpathentry output="target/sandbox/test-classes" kind="src" path="sandbox/test"/>

@@ -18,7 +18,6 @@ package org.springframework.samples.phonebook.web.flow.action;
 import junit.framework.TestCase;
 
 import org.easymock.MockControl;
-import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.samples.phonebook.domain.Person;
 import org.springframework.samples.phonebook.domain.PhoneBook;
 import org.springframework.web.flow.Event;

@@ -15,7 +15,6 @@
  */
 package org.springframework.samples.phonebook.web.flow.action;
 
-import org.springframework.samples.phonebook.domain.ArrayListPhoneBook;
 import org.springframework.samples.phonebook.domain.Person;
 import org.springframework.samples.phonebook.domain.PhoneBook;
 import org.springframework.web.flow.Event;

@@ -26,6 +26,7 @@ import org.springframework.binding.AttributeSource;
 
 /**
  * Support class for generally useful JUnit assertions.
+ * @TODO - move to spring-mock.jar, test.support package
  * @author Keith Donald
  */
 public class JUnitAssertSupport extends Assert {
