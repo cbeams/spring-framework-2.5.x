@@ -68,7 +68,6 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
      *            The enum class.
      */
     public void registerStaticEnums(final Class clazz) {
-        System.out.println(clazz);
         new FieldGenerator(clazz).forEachRun(new UnaryProcedure() {
             public void run(Object o) {
                 Field f = (Field)o;
