@@ -22,19 +22,22 @@ package org.springframework.beans.factory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since September 3, 2003
- * @version $Id: UnsatisfiedDependencyException.java,v 1.7 2004-03-18 02:46:07 trisberg Exp $
+ * @version $Id: UnsatisfiedDependencyException.java,v 1.8 2004-05-27 08:55:00 jhoeller Exp $
  */
-public class UnsatisfiedDependencyException extends BeanDefinitionStoreException {
+public class UnsatisfiedDependencyException extends BeanCreationException {
 
-	public UnsatisfiedDependencyException(String beanName, int ctorArgIndex, Class ctorArgType, String msg) {
-		super("Bean with name '" + beanName + "' has an unsatisfied dependency expressed through " +
-					"constructor argument with index " + ctorArgIndex + " of type [" + ctorArgType.getName() + "]" +
+	public UnsatisfiedDependencyException(String resourceDescription, String beanName, int ctorArgIndex,
+																				Class ctorArgType, String msg) {
+		super(resourceDescription, beanName,
+					"Unsatisfied dependency expressed through constructor argument with index " +
+					ctorArgIndex + " of type [" + ctorArgType.getName() + "]" +
 					(msg != null ? ": " + msg : ""));
 	}
 
-	public UnsatisfiedDependencyException(String beanName, String propertyName, String msg) {
-		super("Bean with name '" + beanName + "' has an unsatisfied dependency expressed through property '" +
-					propertyName + "': set this property value or disable dependency checking for this bean" +
+	public UnsatisfiedDependencyException(String resourceDescription, String beanName, String propertyName,
+																				String msg) {
+		super(resourceDescription, beanName,
+					"Unsatisfied dependency expressed through bean property '" + propertyName + "'" +
 					(msg != null ? ": " + msg : ""));
 	}
 
