@@ -98,10 +98,11 @@ import org.springframework.util.closure.support.AbstractConstraint;
  * view resource. This logical view name gets mapped to a physical view resource
  * (jsp, etc.) by the calling front controller.
  * <li>A "submit" transition to a submit action state, indentified by the
- * default ID 'personDetails.submit'. This means when a 'submit' event is signaled by
- * the view (for example, on a submit button click), the submit action state
- * will be entered and the <code>personDetails.submit</code> <code>ActionBean</code>
- * will be executed. This example assumes personDetails.submit is an 
+ * default ID 'personDetails.submit'. This means when a 'submit' event is
+ * signaled by the view (for example, on a submit button click), the submit
+ * action state will be entered and the
+ * <code>personDetails.submit</code> <code>ActionBean</code> will be
+ * executed. This example assumes personDetails.submit is an
  * <code>ActionBean</code> that does data binding, validation, and save/update
  * DAO invocation.
  * </ol>
@@ -136,103 +137,126 @@ public class Flow implements FlowEventProcessor, Serializable {
 
 	private static final long serialVersionUID = 3258695403305513015L;
 
-    /**
-     * The <code>ADD</code> action state/event identifier.
-     */
-    public static final String ADD = "add";
-    /**
-     * The <code>BACK</code> action state/event identifier.
-     */
-    public static final String BACK = "back";
-    /**
-     * The <code>BIND_AND_VALIDATE</code> action state/event identifier.
-     */
-    public static final String BIND_AND_VALIDATE = "bindAndValidate";
-    /**
-     * The <code>CANCEL</code> action state/event identifier.
-     */
-    public static final String CANCEL = "cancel";
+	/**
+	 * The <code>ADD</code> action state/event identifier.
+	 */
+	public static final String ADD = "add";
+
+	/**
+	 * The <code>BACK</code> action state/event identifier.
+	 */
+	public static final String BACK = "back";
+
+	/**
+	 * The <code>BIND_AND_VALIDATE</code> action state/event identifier.
+	 */
+	public static final String BIND_AND_VALIDATE = "bindAndValidate";
+
+	/**
+	 * The <code>CANCEL</code> action state/event identifier.
+	 */
+	public static final String CANCEL = "cancel";
+
 	/**
 	 * The <code>CREATE</code> action state/event identifier.
 	 */
 	public static final String CREATE = "create";
-    /**
-     * The <code>DELETE</code> action state/event identifier.
-     */
-    public static final String DELETE = "delete";
-    /**
-     * The <code>EDIT</code> action state/event identifier.
-     */
-    public static final String EDIT = "edit";
-    /**
-     * The <code>ERROR</code> event id
-     */
-    public static final String ERROR = "error";
-    /**
-     * The <code>FINISH</code> action state/event identifier.
-     */
-    public static final String FINISH = "finish";
-    /**
-     * The <code>GET</code> action state/event identifier.
-     */
-    public static final String GET = "get";
-    /**
-     * The <code>FIND</code> action state/event identifier.
-     */
-    public static final String FIND = "find";
 
-    /**
-     * The <code>LINK</code> action state/event identifier.
-     */
-    public static final String LINK = "link";
-    /**
-     * The <code>REMOVE</code> action state/event identifier.
-     */
-    public static final String REMOVE = "remove";
-    /**
-     * The <code>POPULATE</code> form action state/event identifier.
-     */
-    public static final String POPULATE = "populate";
-    /**
-     * The <code>RESET</code> action state/event identifier.
-     */
-    public static final String RESET = "reset";
-    /**
-     * The <code>RESUME</code> action state/event identifier.
-     */
-    public static final String RESUME = "resume";
-    /**
-     * The <code>SAVE</code> action state/event identifier.
-     */
-    public static final String SAVE = "save";
-    /**
-     * The <code>SEARCH</code> action state/event identifier.
-     */
-    public static final String SEARCH = "search";
-    /**
-     * The <code>SUCCESS</code> action state/event identifier.
-     */
-    public static final String SUCCESS = "success";
-    /**
-     * The <code>SUBMIT</code> action state/event identifier.
-     */
-    public static final String SUBMIT = "submit";
-    /**
-     * The <code>UNLINK</code> action state/event identifier.
-     */
-    public static final String UNLINK = "unlink";
-    /**
-     * The <code>VALIDATE</code> action state/event identifier.
-     */
-    public static final String VALIDATE = "validate";
-    /**
-     * The <code>VIEW</code> view state identifier.
-     */
-    public static final String VIEW = "view";
-    /**
-     * The <code>SELECT</code> event identifier.
-     */
+	/**
+	 * The <code>DELETE</code> action state/event identifier.
+	 */
+	public static final String DELETE = "delete";
+
+	/**
+	 * The <code>EDIT</code> action state/event identifier.
+	 */
+	public static final String EDIT = "edit";
+
+	/**
+	 * The <code>ERROR</code> event id
+	 */
+	public static final String ERROR = "error";
+
+	/**
+	 * The <code>FINISH</code> action state/event identifier.
+	 */
+	public static final String FINISH = "finish";
+
+	/**
+	 * The <code>GET</code> action state/event identifier.
+	 */
+	public static final String GET = "get";
+
+	/**
+	 * The <code>FIND</code> action state/event identifier.
+	 */
+	public static final String FIND = "find";
+
+	/**
+	 * The <code>LINK</code> action state/event identifier.
+	 */
+	public static final String LINK = "link";
+
+	/**
+	 * The <code>REMOVE</code> action state/event identifier.
+	 */
+	public static final String REMOVE = "remove";
+
+	/**
+	 * The <code>POPULATE</code> form action state/event identifier.
+	 */
+	public static final String POPULATE = "populate";
+
+	/**
+	 * The <code>RESET</code> action state/event identifier.
+	 */
+	public static final String RESET = "reset";
+
+	/**
+	 * The <code>RESUME</code> action state/event identifier.
+	 */
+	public static final String RESUME = "resume";
+
+	/**
+	 * The <code>SAVE</code> action state/event identifier.
+	 */
+	public static final String SAVE = "save";
+
+	/**
+	 * The <code>SEARCH</code> action state/event identifier.
+	 */
+	public static final String SEARCH = "search";
+
+	/**
+	 * The <code>SUCCESS</code> action state/event identifier.
+	 */
+	public static final String SUCCESS = "success";
+
+	/**
+	 * The <code>SUBMIT</code> action state/event identifier.
+	 */
+	public static final String SUBMIT = "submit";
+
+	/**
+	 * The <code>UNLINK</code> action state/event identifier.
+	 */
+	public static final String UNLINK = "unlink";
+
+	/**
+	 * The <code>VALIDATE</code> action state/event identifier.
+	 */
+	public static final String VALIDATE = "validate";
+
+	/**
+	 * The <code>VIEW</code> view state identifier.
+	 */
+	public static final String VIEW = "view";
+
+	/**
+	 * The <code>SELECT</code> event identifier.
+	 */
 	public static final String SELECT = "select";
+
 	/**
 	 * The default <code>ATTRIBUTES_MAPPER_ID_SUFFIX</code>
 	 */
@@ -592,24 +616,23 @@ public class Flow implements FlowEventProcessor, Serializable {
 				response);
 		return viewDescriptor;
 	}
-    
-    // javadoc in superclass
-    public ViewDescriptor resume(FlowSessionExecutionStack sessionExecutionStack, String stateId, 
-            HttpServletRequest request, HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("A new session resuming in state '" + stateId + "' for flow '" + getId()
-                    + "' was requested; processing...");
-        }
-        
-        AbstractState abstractState = getRequiredState(stateId);
-        if (!(abstractState instanceof TransitionableState))
-            throw new IllegalArgumentException(
-                    "Asked to resume flow at state which is not a TransitionableState: " + abstractState);
-        TransitionableState state = (TransitionableState) abstractState;
-        
-        return new StartState(state).enter(this, sessionExecutionStack, request, response,
-                inputAttributes);
-    }
+
+	// javadoc in superclass
+	public ViewDescriptor resume(FlowSessionExecutionStack sessionExecutionStack, String stateId,
+			HttpServletRequest request, HttpServletResponse response, Map inputAttributes) throws IllegalStateException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("A new session resuming in state '" + stateId + "' for flow '" + getId()
+					+ "' was requested; processing...");
+		}
+
+		AbstractState abstractState = getRequiredState(stateId);
+		if (!(abstractState instanceof TransitionableState))
+			throw new IllegalArgumentException("Asked to resume flow at state which is not a TransitionableState: "
+					+ abstractState);
+		TransitionableState state = (TransitionableState)abstractState;
+
+		return new StartState(state).enter(this, sessionExecutionStack, request, response, inputAttributes);
+	}
 
 	/**
 	 * @param sessionExecutionStack
@@ -1056,6 +1079,19 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
+	 * @param eventId
+	 * @param newState
+	 * @return
+	 */
+	public Transition[] onEvents(String[] eventIds, String newState) {
+		Transition[] transitions = new Transition[eventIds.length];
+		for (int i = 0; i < eventIds.length; i++) {
+			transitions[i] = new Transition(eventIds[i], newState);
+		}
+		return transitions;
+	}
+
+	/**
 	 * @param successStateId
 	 * @return
 	 */
@@ -1177,7 +1213,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public Transition onEdit(String editStateId) {
 		return onEvent(getEditEventId(), editStateId);
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -1312,6 +1348,32 @@ public class Flow implements FlowEventProcessor, Serializable {
 	}
 
 	/**
+	 * @param stateId
+	 * @return
+	 */
+	public Transition[] onAnyEndEvent(String stateId) {
+		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() }, stateId);
+	}
+
+	/**
+	 * @param viewStateIdPrefix
+	 * @return
+	 */
+	public Transition[] onAnyEndEventView(String viewStateIdPrefix) {
+		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() },
+				view(viewStateIdPrefix));
+	}
+
+	/**
+	 * @param viewStateIdPrefix
+	 * @return
+	 */
+	public Transition[] onAnyEndEventGet(String getStateIdPrefix) {
+		return onEvents(new String[] { getBackEventId(), getCancelEventId(), getFinishEventId() },
+				get(getStateIdPrefix));
+	}
+
+	/**
 	 * @param saveActionStateIdPrefix
 	 * @return
 	 */
@@ -1319,16 +1381,16 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return onFinish(save(saveActionStateIdPrefix));
 	}
 
-    public Transition onReset(String resetStateIdPrefix) {
-        return onEvent(getResetEventId(), resetStateIdPrefix);
-    }
+	public Transition onReset(String resetStateIdPrefix) {
+		return onEvent(getResetEventId(), resetStateIdPrefix);
+	}
 
-    /**
-     * @return
-     */
-    public String getResetEventId() {
-        return RESET;
-    }
+	/**
+	 * @return
+	 */
+	public String getResetEventId() {
+		return RESET;
+	}
 
 	public Transition onResume(String resumeStateIdPrefix) {
 		return onEvent(getResumeEventId(), resumeStateIdPrefix);
@@ -1355,7 +1417,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public String getSelectEventId() {
 		return SELECT;
 	}
-    
+
 	/**
 	 * @param viewStateIdPrefix
 	 * @return
@@ -1378,7 +1440,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public String getErrorEventId() {
 		return ERROR;
 	}
-    
+
 	/**
 	 * @param viewStateIdPrefix
 	 * @return
