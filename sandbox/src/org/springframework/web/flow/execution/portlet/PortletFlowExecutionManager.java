@@ -34,7 +34,7 @@ import org.springframework.web.flow.execution.FlowExecutionManager;
  * the portlet session.
  * 
  * @author J.Enrique Ruiz
- * @author César Ordiñana
+ * @author Caesar Ordinana
  */
 public class PortletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
 

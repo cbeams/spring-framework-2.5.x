@@ -32,13 +32,19 @@ import org.springframework.web.flow.State;
 public class MockFlowExecutionListener implements FlowExecutionListener {
 
 	private boolean started = false;
+
 	private int flowNestingLevel;
+
 	private boolean requestInProcess;
+
 	private int requestsSubmitted;
+
 	private int requestsProcessed;
+
 	private int eventsSignaled;
+
 	private int stateTransitions;
-	
+
 	/**
 	 * Make sure the flow execution has already been started.
 	 */
@@ -129,14 +135,14 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 	public int countRequestsProcessed() {
 		return requestsProcessed;
 	}
-	
+
 	/**
 	 * Returns the number of events signaled so far.
 	 */
 	public int countEventsSignaled() {
 		return eventsSignaled;
 	}
-	
+
 	/**
 	 * Returns the number of state transitions executed so far.
 	 */
