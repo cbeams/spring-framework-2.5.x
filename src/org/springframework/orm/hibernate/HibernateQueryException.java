@@ -19,7 +19,7 @@ public class HibernateQueryException extends InvalidDataAccessResourceUsageExcep
 	 * Return the HQL query string that was invalid.
 	 */
 	public String getQueryString() {
-		return ((QueryException) getRootCause()).getQueryString();
+		return ((QueryException) getCause()).getQueryString();
 	}
 
 }
