@@ -212,14 +212,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					minNrOfArgs = index + 1;
 				}
 				String argName = "constructor argument with index " + index;
-				Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, entry.getValue());
-				resolvedValues.addIndexedArgumentValue(index, resolvedValue);
+				ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) entry.getValue();
+				Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
+				resolvedValues.addIndexedArgumentValue(index, resolvedValue, valueHolder.getType());
 			}
 			for (Iterator it = cargs.getGenericArgumentValues().iterator(); it.hasNext();) {
-				Object value = it.next();
+				ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) it.next();
 				String argName = "constructor argument";
-				Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, value);
-				resolvedValues.addGenericArgumentValue(resolvedValue);
+				Object resolvedValue = resolveValueIfNecessary(beanName, mergedBeanDefinition, argName, valueHolder.getValue());
+				resolvedValues.addGenericArgumentValue(resolvedValue, valueHolder.getType());
 			}
 		}
 

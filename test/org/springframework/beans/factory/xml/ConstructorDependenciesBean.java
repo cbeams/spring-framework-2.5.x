@@ -7,7 +7,6 @@ package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.LifecycleBean;
 
 /**
  * Simple bean used to check constructor dependency checking.
@@ -25,6 +24,14 @@ public class ConstructorDependenciesBean {
 	private TestBean spouse2;
 
 	private IndexedTestBean other;
+
+	public ConstructorDependenciesBean(int age) {
+		this.age = age;
+	}
+
+	public ConstructorDependenciesBean(String name) {
+		this.name = name;
+	}
 
 	public ConstructorDependenciesBean(TestBean spouse1) {
 		this.spouse1 = spouse1;

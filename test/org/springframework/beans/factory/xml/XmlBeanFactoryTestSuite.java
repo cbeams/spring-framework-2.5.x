@@ -45,7 +45,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.35 2004-02-09 10:13:35 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.36 2004-02-22 21:07:59 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -818,6 +818,12 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		assertEquals(other, rod6.getOther());
 		assertEquals(0, rod6.getAge());
 		assertEquals(null, rod6.getName());
+
+		ConstructorDependenciesBean rod9 = (ConstructorDependenciesBean) xbf.getBean("rod9");
+		assertEquals(99, rod9.getAge());
+
+		ConstructorDependenciesBean rod10 = (ConstructorDependenciesBean) xbf.getBean("rod10");
+		assertEquals("rod10", rod10.getName());
 	}
 
 	public void testThrowsExceptionOnTooManyArguments() throws Exception {

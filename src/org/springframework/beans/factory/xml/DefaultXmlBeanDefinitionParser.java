@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
 /**
  * Default implementation of the XmlBeanDefinitionParser interface.
  * Parses bean definitions according to the "spring-beans" DTD. 
+ * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 18.12.2003
  */
@@ -65,6 +66,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
 	public static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
 	public static final String INDEX_ATTRIBUTE = "index";
+	public static final String TYPE_ATTRIBUTE = "type";
 	public static final String PROPERTY_ELEMENT = "property";
 	public static final String REF_ELEMENT = "ref";
 	public static final String IDREF_ELEMENT = "idref";
@@ -283,7 +285,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse constructor argument subelements of the given bean element.
 	 */
-	protected ConstructorArgumentValues getConstructorArgSubElements(String beanName, Element beanEle) {
+	protected ConstructorArgumentValues getConstructorArgSubElements(String beanName, Element beanEle)
+			throws ClassNotFoundException {
 		NodeList nl = beanEle.getChildNodes();
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -314,16 +317,22 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Parse a constructor-arg element.
 	 */
 	protected void parseConstructorArgElement(String beanName, ConstructorArgumentValues cargs, Element ele)
-			throws DOMException {
+			throws DOMException, ClassNotFoundException {
 		Object val = getPropertyValue(ele, beanName);
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
+		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
 		if (!"".equals(indexAttr)) {
 			try {
 				int index = Integer.parseInt(indexAttr);
 				if (index < 0) {
 					throw new BeanDefinitionStoreException(this.resource, beanName, "'index' cannot be lower than 0");
 				}
-				cargs.addIndexedArgumentValue(index, val);
+				if (!"".equals(typeAttr)) {
+					cargs.addIndexedArgumentValue(index, val, typeAttr);
+				}
+				else {
+					cargs.addIndexedArgumentValue(index, val);
+				}
 			}
 			catch (NumberFormatException ex) {
 				throw new BeanDefinitionStoreException(this.resource, beanName,
@@ -331,7 +340,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 		else {
-			cargs.addGenericArgumentValue(val);
+			if (!"".equals(typeAttr)) {
+				cargs.addGenericArgumentValue(val, typeAttr);
+			}
+			else {
+				cargs.addGenericArgumentValue(val);
+			}
 		}
 	}
 
@@ -370,7 +384,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 		if (valueRefOrCollectionElement == null) {
-			throw new BeanDefinitionStoreException("<property> element must have a value, ref, or collection subelement");
+			throw new BeanDefinitionStoreException("<property> element must have a subelement like 'value' or 'ref'");
 		}
 		return parsePropertySubelement(valueRefOrCollectionElement, beanName);
 	}
@@ -429,9 +443,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 																					 "Unknown subelement of <property>: <" + ele.getTagName() + ">");
 	}
 
-	/**
-	 * Return list of collection.
-	 */
 	protected List getList(Element collectionEle, String beanName) {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList l = new ManagedList();
@@ -444,9 +455,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return l;
 	}
 
-	/**
-	 * Return list of collection.
-	 */
 	protected Set getSet(Element collectionEle, String beanName) {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet s = new ManagedSet();

@@ -166,14 +166,13 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	protected void parseIndexedArgumentValues(Properties props, Map ias) {
 		for (Iterator it = ias.keySet().iterator(); it.hasNext();) {
 			Integer index = (Integer) it.next();
-			Object val = ias.get(index);
+			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) ias.get(index);
+			Object val = valueHolder.getValue();
 
 			if (val instanceof String) {
 				String strVal = (String) val;
 				String newStrVal = parseValue(props, strVal, null);
-				if (!newStrVal.equals(strVal)) {
-					ias.put(index, newStrVal);
-				}
+				valueHolder.setValue(newStrVal);
 			}
 
 			else if (val instanceof RuntimeBeanReference) {
@@ -181,7 +180,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
         String newBeanName = parseValue(props, ref.getBeanName(), null);
 				if (!newBeanName.equals(ref.getBeanName())) {
 					RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
-					ias.put(index, newRef);
+					valueHolder.setValue(newRef);
 				}
 			}
 
@@ -196,27 +195,20 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 	}
 
 	protected void parseGenericArgumentValues(Properties props, Set gas) {
-
-		Set itemsToAdd = new HashSet();
-
 		for (Iterator it = gas.iterator(); it.hasNext();) {
-			Object val = it.next();
+			ConstructorArgumentValues.ValueHolder valueHolder = (ConstructorArgumentValues.ValueHolder) it.next();
+			Object val = valueHolder.getValue();
 
 			if (val instanceof String) {
 				String strVal = (String) val;
 				String newStrVal = parseValue(props, strVal, null);
-				if (!newStrVal.equals(strVal)) {
-					it.remove();
-					itemsToAdd.add(newStrVal);
-				}
+				valueHolder.setValue(newStrVal);
 			}
 			else if (val instanceof RuntimeBeanReference) {
 				RuntimeBeanReference ref = (RuntimeBeanReference) val;
 				String newBeanName = parseValue(props, ref.getBeanName(), null);
 				if (!newBeanName.equals(ref.getBeanName())) {
-					RuntimeBeanReference newRef = new RuntimeBeanReference(newBeanName);
-					it.remove();
-                    itemsToAdd.add(newRef);
+					valueHolder.setValue(new RuntimeBeanReference(newBeanName));
 				}
 			}
 			else if (val instanceof List) {
@@ -226,7 +218,6 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer {
 				parseMap(props, (Map) val);
 			}
 		}
-		gas.addAll(itemsToAdd);
 	}
 
 	/**

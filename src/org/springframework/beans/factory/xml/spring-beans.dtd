@@ -29,10 +29,10 @@
 	for a schema at this point.
 
 	XML documents that conform to this DTD should declare the following doctype:
-	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 		"http://www.springframework.org/dtd/spring-beans.dtd">
 
-	$Id: spring-beans.dtd,v 1.22 2004-01-29 23:31:17 aarendsen Exp $
+	$Id: spring-beans.dtd,v 1.23 2004-02-22 21:07:59 jhoeller Exp $
 -->
 
 <!--
@@ -47,7 +47,7 @@
 	At least one bean definition is required.
 -->
 <!ELEMENT beans (
-		description?,
+        description?,
         bean+
 )>
 
@@ -63,8 +63,8 @@
 	Defines a single named bean.
 -->
 <!ELEMENT bean (
-	description?,
-    (constructor-arg | property)*
+        description?,
+        (constructor-arg | property)*
 )>
 
 <!--
@@ -198,11 +198,19 @@
 )>
 
 <!--
-	The constructor-arg than can have an optional index attribute,
+	The constructor-arg tag can have an optional index attribute,
 	to specify the exact index in the constructor argument list. Only needed
 	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
 -->
 <!ATTLIST constructor-arg index CDATA #IMPLIED>
+
+<!--
+	The constructor-arg tag can have an optional type attribute,
+	to specify the exact type of the constructor argument. Only needed
+	to avoid ambiguities, e.g. in case of 2 single argument constructors
+	that can both be converted from a String.
+-->
+<!ATTLIST constructor-arg type CDATA #IMPLIED>
 
 <!--
 	Bean definitions can have zero or more properties.

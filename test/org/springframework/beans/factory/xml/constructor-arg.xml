@@ -61,6 +61,14 @@
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
+	<bean id="rod9" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" singleton="false">
+		<constructor-arg type="int"><value>99</value></constructor-arg>
+	</bean>
+
+	<bean id="rod10" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" singleton="false">
+		<constructor-arg index="0" type="java.lang.String"><value>rod10</value></constructor-arg>
+	</bean>
+
 	<bean id="kerry1" class="org.springframework.beans.TestBean">
 		<property name="name">
 			<value>Kerry1</value>
