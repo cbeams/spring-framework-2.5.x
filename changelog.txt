@@ -12,6 +12,8 @@ General
 
 Package org.springframework.aop
 * reworked ProxyFactoryBean and AbstractPrototypeBasedTargetSource to leverage BeanFactory's "getType" method
+* moved "invokeJoinpointUsingReflection" method from aop.framework.AopProxyUtils to aop.support.AopUtils
+* JdkDynamicAopProxy handles "hashCode" method locally too, in addition to "equals" (mainly for remoting proxies)
 * added "perl5" flag to RegexpMethodPointcutAdvisor: on uses ORO (the default), off uses the JDK 1.4 regexp package
 * reworked DebugInterceptor to log to Commons Logging at debug level rather than to the console
 
@@ -27,6 +29,7 @@ Package org.springframework.beans
 * added PropertyPathFactoryBean, allowing to evaluate the property path of a target bean and expose the result
 * FieldRetrievingFactoryBean considers its bean name as static field expression if no other properties specified
 * fixed PropertiesBeanDefinitionReader to allow bean names that contain dots
+* deprecated constructing an XmlBeanFactory with InputStream, in favor of using Resource which retains location info
 * DefaultXmlBeanDefinitionParser allows unnamed child bean definitions too (using class or parent as bean name)
 * allow "bean*" rather than "bean+" in XML bean definitions, i.e. no bean definitions in a file (just imports)
 
@@ -39,6 +42,9 @@ Package org.springframework.core
 Package org.springframework.orm
 * fixed LocalSessionFactoryBean to call "configure" after "setNamingStrategy" (in case of a specified "configLocation")
 * added "load(entity, id)" method to HibernateOperations and HibernateTemplate
+
+Package org.springframework.remoting
+* HttpInvokerClientInterceptor and RmiClientInterceptor handle "toString" method locally now, returning proxy info
 
 Package org.springframework.scheduling
 * moved "configTimeDataSourceHolder" from LocalDataSourceJobStore to SchedulerFactoryBean
