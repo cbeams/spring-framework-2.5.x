@@ -22,14 +22,41 @@ import org.springframework.web.flow.Flow;
 
 /**
  * Factory bean that acts as a director for assembling flows, delegating to a
- * builder to construct the Flow.
- * 
+ * <code>FlowBuilder</code> builder to construct the Flow.
  * <p>
- * This factory bean can also be used outside of a Spring bean factory, in 
- * a standalone fashion:
+ * For example, a Spring-managed FlowFactoryBean definition might look like
+ * this:
+ * 
  * <pre>
- * FlowBuilder builder=...;
- * Flow flow=new FlowFactoryBean(builder).getFlow();
+ * 	<bean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean">
+ *		<property name="flowBuilder">
+ *			<bean class="com.mycompany..web.flow.user.UserRegistrationFlowBuilder"/>
+ *		</property>
+ *	</bean>
+ * </pre>
+ * 
+ * The above definition is configured with a specific, java-based FlowBuilder
+ * implementation. A XmlFlowBuilder could instead be used, for example:
+ * 
+ * <pre>
+ * 	<bean id="user.RegistrationFlow" class="org.springframework.web.flow.config.FlowFactoryBean">
+ *		<property name="flowBuilder">
+ *			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+ *              <property name="resource">
+ *                  <value>UserRegistrationFlow.xml</value>
+ *              </property>
+ *          </bean>
+ *		</property>
+ *	</bean>
+ * </pre>
+ * 
+ * </p>
+ * Flow factory beans, as POJOs, can also be used outside of a Spring bean
+ * factory, in a standalone, programmatic fashion:
+ * 
+ * <pre>
+ * FlowBuilder builder = ...;
+ * Flow flow = new FlowFactoryBean(builder).getFlow();
  * </pre>
  * 
  * @author Keith Donald
@@ -54,7 +81,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	public FlowFactoryBean(FlowBuilder flowBuilder) {
 		setFlowBuilder(flowBuilder);
 	}
-	
+
 	/**
 	 * @return The builder the factory uses to build flows.
 	 */
@@ -74,7 +101,8 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * Does this factory bean build flows with the specified FlowBuilder implementation?
+	 * Does this factory bean build flows with the specified FlowBuilder
+	 * implementation?
 	 * @param builderImplementationClass The builder implementation
 	 * @return true if yes, false otherwise
 	 */
@@ -83,9 +111,9 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 			return false;
 		}
 		if (!FlowBuilder.class.isAssignableFrom(builderImplementationClass)) {
-			throw new IllegalArgumentException("The flow builder implementation class '"
-					+ builderImplementationClass + "' you provided to this method does not implement the '"
-					+ FlowBuilder.class.getName() + "' interface");
+			throw new IllegalArgumentException("The flow builder implementation class '" + builderImplementationClass
+					+ "' you provided to this method does not implement the '" + FlowBuilder.class.getName()
+					+ "' interface");
 		}
 		return getFlowBuilder().getClass().equals(builderImplementationClass);
 	}
@@ -114,7 +142,8 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
-	 * Helper class to direct flow construction using the builder.
+	 * Helper class to direct flow construction using the builder. This object
+	 * is the "director" in the GoF builder pattern.
 	 */
 	private static class FlowAssembler {
 		private FlowBuilder builder;
