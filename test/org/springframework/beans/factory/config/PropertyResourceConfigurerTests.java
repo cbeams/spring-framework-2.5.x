@@ -1,4 +1,4 @@
-package org.springframework.context;
+package org.springframework.beans.factory.config;
 
 import java.util.List;
 import java.util.Map;
@@ -9,10 +9,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.context.config.PropertyOverrideConfigurer;
-import org.springframework.context.config.PropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.context.support.StaticApplicationContext;
 
 /**
@@ -44,12 +42,12 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "name${var}");
+		pvs.addPropertyValue("name", "name${var}${");
 		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb1", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "name${age}");
+		pvs.addPropertyValue("name", "${var}name${age}");
 		List friends = new ManagedList();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
@@ -71,8 +69,8 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		TestBean tb2 = (TestBean) ac.getBean("tb2");
 		assertEquals(98, tb1.getAge());
 		assertEquals(98, tb2.getAge());
-		assertEquals("namemyvar", tb1.getName());
-		assertEquals("name98", tb2.getName());
+		assertEquals("namemyvar${", tb1.getName());
+		assertEquals("myvarname98", tb2.getName());
 		assertEquals(tb2, tb1.getSpouse());
 		assertEquals(2, tb2.getFriends().size());
 		assertEquals("na98me", tb2.getFriends().iterator().next());

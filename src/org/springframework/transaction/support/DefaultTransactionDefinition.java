@@ -26,6 +26,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 	/** Constants instance for TransactionDefinition */
 	private static final Constants constants = new Constants(TransactionDefinition.class);
 
+
 	private int propagationBehavior = PROPAGATION_REQUIRED;
 
 	private int isolationLevel = ISOLATION_DEFAULT;
@@ -33,6 +34,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 	private int timeout = TIMEOUT_DEFAULT;
 
 	private boolean readOnly = false;
+
 
 	public DefaultTransactionDefinition() {
 	}
@@ -42,7 +44,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 	}
 
 	/**
-	 * Set the propagation behavior by the name of the respective constant in
+	 * Set the propagation behavior by the name of the corresponding constant in
 	 * TransactionDefinition, e.g. "PROPAGATION_REQUIRED".
 	 * @param constantName name of the constant
 	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
@@ -67,7 +69,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 	}
 
 	/**
-	 * Set the isolation level by the name of the respective constant in
+	 * Set the isolation level by the name of the corresponding constant in
 	 * TransactionDefinition, e.g. "ISOLATION_DEFAULT".
 	 * @param constantName name of the constant
 	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
@@ -110,6 +112,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 		return readOnly;
 	}
 
+
 	/**
 	 * This implementation of equals compares the toString results.
 	 * @see #toString
@@ -124,6 +127,18 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 	 */
 	public int hashCode() {
 		return toString().hashCode();
+	}
+
+	/**
+	 * Return an identifying description of this transaction definition.
+	 * The format matches the one used by TransactionAttributeEditor,
+	 * to be able to feed toString results into TransactionAttribute properties.
+	 * <p>Has to be overridden in subclasses for correct equals and hashCode
+	 * behavior. Alternatively, equals and hashCode can be overridden themselves.
+	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
+	 */
+	public String toString() {
+		return getDefinitionDescription().toString();
 	}
 
 	/**
@@ -144,18 +159,6 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 			desc.append(READ_ONLY_MARKER);
 		}
 		return desc;
-	}
-
-	/**
-	 * Return an identifying description of this transaction definition.
-	 * The format matches the one used by TransactionAttributeEditor,
-	 * to be able to feed toString results into TransactionAttribute properties.
-	 * <p>Has to be overridden in subclasses for correct equals and hashCode
-	 * behavior. Alternatively, equals and hashCode can be overridden themselves.
-	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
-	 */
-	public String toString() {
-		return getDefinitionDescription().toString();
 	}
 
 }

@@ -5,15 +5,14 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
+
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.beans.DerivedTestBean;
@@ -22,6 +21,7 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.CountingTxManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -31,15 +31,14 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.14 2003-12-21 17:16:59 jhoeller Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.15 2003-12-30 00:24:19 jhoeller Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
 	private BeanFactory factory;
 
 	public void setUp() {
-		InputStream is = getClass().getResourceAsStream("transactionalBeanFactory.xml");
-		this.factory = new XmlBeanFactory(is, null);
+		this.factory = new XmlBeanFactory(new ClassPathResource("transactionalBeanFactory.xml", getClass()));
 		ITestBean testBean = (ITestBean) factory.getBean("target");
 		testBean.setAge(666);
 	}
@@ -110,9 +109,8 @@ public class BeanFactoryTransactionTests extends TestCase {
 	 * set any transaction attributes.
 	 */
 	public void testNoTransactionAttributeSource() {
-		InputStream is = getClass().getResourceAsStream("noTransactionAttributeSource.xml");
 		try {
-			XmlBeanFactory bf = new XmlBeanFactory(is, null);
+			XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("noTransactionAttributeSource.xml", getClass()));
 			ITestBean testBean = (ITestBean) bf.getBean("noTransactionAttributeSource");
 			fail("Should require TransactionAttributeSource to be set");
 		}
