@@ -1,10 +1,15 @@
 package org.springframework.beans.factory.support;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 
 /**
@@ -108,65 +113,69 @@ public class BeanFactoryBootstrapTests extends TestCase {
 //	}
 	
 	
-//	public void testDummyBeanFactory() throws Exception {
-//		Properties p = new Properties();
-//		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class", 
-//		"org.springframework.beans.factory.support.BeanFactoryBootstrapTests$DummyBeanFactory");
-//		//p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".url", 
-//		//"c:/checkouts/book/framework/src/org/springframework/beans/factory/support/bs.xml");
-//		
-//		
-//		System.setProperties(p);
-//		System.getProperties().list(System.out);
-//		
-//		BeanFactoryBootstrap.reinitialize();
-//
-//		try {
-//			BeanFactoryBootstrap bsb = BeanFactoryBootstrap.getInstance();
-//			System.out.println("Got bean factory");
-//			assertNotNull("Bsb instance is not null", bsb);
-//			assertTrue("Is dummy", bsb.getBeanFactory() instanceof DummyBeanFactory);
-//			TestBean tb = (TestBean) bsb.getBeanFactory().getBean("test");
-//			assertNotNull("Test bean is not null", tb);
-//			System.out.println(tb);
-//			//assertTrue("Property set", tb.getFoo().equals("bar"));
-//		}
-//		catch (Exception ex) {
-//			ex.printStackTrace();
-//			throw ex;
-//		}
-//	}
-//	
-//	
-//	
-//	public static class DummyBeanFactory implements BeanFactory {
-//		
-//		public Map m = new HashMap();
-//		
-//		 {
-//			m.put("test", new TestBean());
-//			m.put("s", new String());
-//		}
-//		
-//		/**
-//		 * @see org.springframework.beans.factory.BeanFactory#getBean(String, Class)
-//		 */
-//		public Object getBean(String name, Class requiredType) throws BeansException {
-//			return getBean(name, null);	// HACK
-//		}
-//
-//		/**
-//		 * @see org.springframework.beans.factory.BeanFactory#getBean(String)
-//		 */
-//		public Object getBean(String name) throws BeansException {
-//			Object bean = m.get(name);
-//			if (bean == null)
-//				throw new NoSuchBeanDefinitionException(name);
-//			return bean;
-//		}
-//		
-//		public boolean isSingleton(String name) {
-//			return true;
-//		)
+	public void testDummyBeanFactory() throws Exception {
+		Properties p = new Properties();
+		p.put(BeanFactoryBootstrap.BEAN_FACTORY_BEAN_NAME + ".class", 
+		"org.springframework.beans.factory.support.BeanFactoryBootstrapTests$DummyBeanFactory");
+		
+		
+		System.setProperties(p);
+		System.getProperties().list(System.out);
+		
+		BeanFactoryBootstrap.reinitialize();
+
+		try {
+			BeanFactoryBootstrap bsb = BeanFactoryBootstrap.getInstance();
+			System.out.println("Got bean factory");
+			assertNotNull("Bsb instance is not null", bsb);
+			assertTrue("Is dummy", bsb.getBeanFactory() instanceof DummyBeanFactory);
+			TestBean tb = (TestBean) bsb.getBeanFactory().getBean("test");
+			assertNotNull("Test bean is not null", tb);
+			System.out.println(tb);
+			//assertTrue("Property set", tb.getFoo().equals("bar"));
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			throw ex;
+		}
+	}
+
+	public static class DummyBeanFactory implements BeanFactory {
+		
+		public Map m = new HashMap();
+		
+		 {
+			m.put("test", new TestBean());
+			m.put("s", new String());
+		}
+		
+		/**
+		 * @see org.springframework.beans.factory.BeanFactory#getBean(String, Class)
+		 */
+		public Object getBean(String name, Class requiredType) throws BeansException {
+			return getBean(name, null);	// HACK
+		}
+
+		/**
+		 * @see org.springframework.beans.factory.BeanFactory#getBean(String)
+		 */
+		public Object getBean(String name) throws BeansException {
+			Object bean = m.get(name);
+			if (bean == null)
+				throw new NoSuchBeanDefinitionException(name, "no message");
+			return bean;
+		}
+		
+		public boolean isSingleton(String name) {
+			return true;
+		}
+
+		/**
+		 * @see org.springframework.beans.factory.BeanFactory#getAliases(java.lang.String)
+		 */
+		public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
+			throw new UnsupportedOperationException("getAliases");
+		}
+	}
 
 }

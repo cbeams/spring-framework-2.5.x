@@ -10,9 +10,29 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
- * One singleton to rule them all
+ * One singleton to rule them all.
+ * Reads System properties, which must contain the definition of
+ * a bootstrap bean factory using the Properties syntax supported
+ * by ListableBeanFactoryImpl.
+ * <br>
+ * The name of the bootstrap factory must be
+ * "bootstrapBeanFactory".
+ * 
+ * Thus a typical definition might be:
+ * <code>
+ * bootstrapBeanFactory.class=com.mycompany.MyBeanFactory
+ * </code>
+ * <br>
+ * Use as follows:
+ * 
+ * BeanFactory bf = BeanFactoryBootstrap.getInstance().getBeanFactory();
+ * 
+ * 
+ * TODO take properties from other sources besides System properties?
  * @author Rod Johnson
- * @since 02-Dec-02
+ * @since December 2, 2002
+ * @see org.springframework.beans.factory.support.ListableBeanFactoryImpl
+ * @version $Id: BeanFactoryBootstrap.java,v 1.2 2003-09-02 06:43:23 johnsonr Exp $
  */
 public class BeanFactoryBootstrap {
 	
@@ -31,11 +51,19 @@ public class BeanFactoryBootstrap {
 		}
 	}
 	
+	// Do initialization when this class is loaded to avoid
+	// potential concurrency issues or the need to synchronize
+	// later
 	static {
 		initializeSingleton();
 	}
 	
 	
+	/**
+	 * Return the singleton instance of the bootstrap factory
+	 * @return BeanFactoryBootstrap
+	 * @throws BeansException
+	 */
 	public static BeanFactoryBootstrap getInstance() throws BeansException {
 		if (startupException != null)
 			throw startupException;
@@ -47,8 +75,8 @@ public class BeanFactoryBootstrap {
 	
 	
 	/**
-	 * For testing only. Cleans and reinitalizes the instance.
-	 * Do not use in a production application!
+	 * <b>For testing only. Cleans and reinitalizes the instance.
+	 * Do not use in a production application!</b>
 	 */
 	static void reinitialize() {
 		instance = null;
@@ -56,15 +84,14 @@ public class BeanFactoryBootstrap {
 		initializeSingleton();
 	}
 	
+	/** The Singleton instance */
 	private BeanFactory bootstrapFactory;
 	
-	// ALSO NEED TO TEST WITH REAL SYSTEM PROPERTIES...
 	
 	/**
 	 * Apply rules to load factory
 	 */
 	private BeanFactoryBootstrap() throws BeansException {
-		
 		
 		ListableBeanFactoryImpl startupFactory = new ListableBeanFactoryImpl();
 		try {
@@ -83,6 +110,10 @@ public class BeanFactoryBootstrap {
 	}
 	
 	
+	/**
+	 * Return the BeanFactory managed by the Bootstrap
+	 * @return BeanFactory
+	 */
 	public BeanFactory getBeanFactory() {
 		return bootstrapFactory;
 	}
