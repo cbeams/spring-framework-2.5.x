@@ -49,7 +49,7 @@ public class FreeMarkerViewTests extends TestCase {
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getBeansOfType(FreeMarkerConfig.class, true, true);
+		wac.getBeansOfType(FreeMarkerConfig.class, true, false);
 		wmc.setReturnValue(new HashMap());
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
@@ -93,7 +93,7 @@ public class FreeMarkerViewTests extends TestCase {
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getBeansOfType(FreeMarkerConfig.class, true, true);
+		wac.getBeansOfType(FreeMarkerConfig.class, true, false);
 		Map configs = new HashMap();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());

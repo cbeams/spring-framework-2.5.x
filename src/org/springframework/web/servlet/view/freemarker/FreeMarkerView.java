@@ -103,6 +103,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 		return configuration;
 	}
 
+
 	/**
 	 * Invoked on startup. Looks for a single FreeMarkerConfig bean to
 	 * find the relevant Configuration for this factory.
@@ -114,24 +115,47 @@ public class FreeMarkerView extends AbstractTemplateView {
 	protected void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 
-		if (this.configuration == null) {
-			try {
-				FreeMarkerConfig freemarkerConfig = (FreeMarkerConfig)
-						BeanFactoryUtils.beanOfTypeIncludingAncestors(
-								getApplicationContext(), FreeMarkerConfig.class, true, true);
-				this.configuration = freemarkerConfig.getConfiguration();
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				throw new ApplicationContextException(
-						"Must define a single FreeMarkerConfig bean in this web application context " +
-						"(may be inherited): FreeMarkerConfigurer is the usual implementation. " +
-						"This bean may be given any name.", ex);
-			}
+		if (getConfiguration() == null) {
+			// No explicit Configuration instance: try to autodetect one.
+			setConfiguration(autodetectConfiguration());
 		}
 
+		checkTemplate();
+	}
+
+	/**
+	 * Autodetect a FreeMarker Configuration object via the ApplicationContext.
+	 * Called if no explicit Configuration instance has been specified.
+	 * @return the Configuration instance to use for FreeMarkerViews
+	 * @throws BeansException if no Configuration instance could be found
+	 * @see #getApplicationContext
+	 * @see #setConfiguration
+	 */
+	protected Configuration autodetectConfiguration() throws BeansException {
 		try {
-			// check that we can get the template, even if we might subsequently get it again
-			getTemplate(this.configuration.getLocale());
+			FreeMarkerConfig freemarkerConfig = (FreeMarkerConfig)
+					BeanFactoryUtils.beanOfTypeIncludingAncestors(
+							getApplicationContext(), FreeMarkerConfig.class, true, false);
+			return freemarkerConfig.getConfiguration();
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			throw new ApplicationContextException(
+					"Must define a single FreeMarkerConfig bean in this web application context " +
+					"(may be inherited): FreeMarkerConfigurer is the usual implementation. " +
+					"This bean may be given any name.", ex);
+		}
+	}
+
+	/**
+	 * Check that the FreeMarker template used for this view exists and is valid.
+	 * <p>Can be overridden to customize the behavior, for example in case of
+	 * multiple templates to be rendered into a single view.
+	 * @throws ApplicationContextException if the template cannot be found or is invalid
+	 */
+	protected void checkTemplate() throws ApplicationContextException {
+		try {
+			// Check that we can get the template, even if we might subsequently get it again.
+			getTemplate(getConfiguration().getLocale());
 		}
 		catch (ParseException ex) {
 		    throw new ApplicationContextException(
@@ -145,38 +169,15 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 
 	/**
-	 * Process the model map by merging it with the FreeMarker template. Output is
-	 * directed to the response. This method can be overridden if custom behavior
-	 * is needed.
+	 * Process the model map by merging it with the FreeMarker template.
+	 * Output is directed to the response.
+	 * This method can be overridden if custom behavior is needed.
 	 */
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-	   
-		// grab the locale-specific version of the template
-		Template template = getTemplate(RequestContextUtils.getLocale(request));
-		if (logger.isDebugEnabled()) {
-			logger.debug("Preparing to process FreeMarker template [" + template.getName() +
-					"] with model [" + model + "] ");
-		}
-
 		response.setContentType(getContentType());
 		exposeHelpers(model, request);
-		processTemplate(template, model, response);
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Processed FreeMarker template [" + getUrl() + "] in VelocityView '" + getBeanName() + "'");
-		}
-	}
-
-	/**
-	 * Retrieve the FreeMarker template for the given locale.
-	 * @param locale the current locale
-	 * @return the FreeMarker template to process
-	 * @throws IOException if the template file could not be retrieved
-	 */
-	protected Template getTemplate(Locale locale) throws IOException {
-		return (this.encoding != null ? this.configuration.getTemplate(getUrl(), locale, this.encoding) :
-				this.configuration.getTemplate(getUrl(), locale));
+		doRender(model, request, response);
 	}
 
 	/**
@@ -191,6 +192,64 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
 	}
+	/**
+	 * Render the FreeMarker view to the given response, using the given model
+	 * map which contains the complete template model to use.
+	 * <p>The default implementation renders the template specified by the "url"
+	 * bean property, retrieved via <code>getTemplate</code>. It delegates to the
+	 * <code>processTemplate</code> method to merge the template instance with
+	 * the given template model.
+	 * <p>Can be overridden to customize the behavior, for example to render
+	 * multiple templates into a single view.
+	 * @param model the template model to use for rendering
+	 * @param request current HTTP request
+	 * @param response servlet response (use this to get the OutputStream or Writer)
+	 * @throws IOException if the template file could not be retrieved
+	 * @throws Exception if rendering failed
+	 * @see #setUrl
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 * @see #getTemplate(java.util.Locale)
+	 * @see #processTemplate
+	 */
+	protected void doRender(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Rendering FreeMarker template [" + getUrl() + "] in FreeMarkerView '" + getBeanName() + "'");
+		}
+		// Grab the locale-specific version of the template.
+		Locale locale = RequestContextUtils.getLocale(request);
+		processTemplate(getTemplate(locale), model, response);
+	}
+
+	/**
+	 * Retrieve the FreeMarker template for the given locale,
+	 * to be rendering by this view.
+	 * <p>By default, the template specified by the "url" bean property
+	 * will be retrieved.
+	 * @param locale the current locale
+	 * @return the FreeMarker template to render
+	 * @throws IOException if the template file could not be retrieved
+	 * @see #setUrl
+	 * @see #getTemplate(String, java.util.Locale)
+	 */
+	protected Template getTemplate(Locale locale) throws IOException {
+		return getTemplate(getUrl(), locale);
+	}
+
+	/**
+	 * Retrieve the FreeMarker template specified by the given name,
+	 * using the encoding specified by the "encoding" bean property.
+	 * <p>Can be called by subclasses to retrieve a specific template,
+	 * for example to render multiple templates into a single view.
+	 * @param name the file name of the desired template
+	 * @param locale the current locale
+	 * @return the FreeMarker template
+	 * @throws IOException if the template file could not be retrieved
+	 */
+	protected Template getTemplate(String name, Locale locale) throws IOException {
+		return (getEncoding() != null ?
+				getConfiguration().getTemplate(name, locale, getEncoding()) :
+				getConfiguration().getTemplate(name, locale));
+	}
 
 	/**
 	 * Process the FreeMarker template to the servlet response.
@@ -198,6 +257,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @param template the template to process
 	 * @param model the model for the template
 	 * @param response servlet response (use this to get the OutputStream or Writer)
+	 * @throws IOException if the template file could not be retrieved
+	 * @throws TemplateException if thrown by FreeMarker
 	 * @see freemarker.template.Template#process(Object, java.io.Writer)
 	 */
 	protected void processTemplate(Template template, Map model, HttpServletResponse response)

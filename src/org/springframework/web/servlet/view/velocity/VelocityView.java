@@ -81,37 +81,20 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  */
 public class VelocityView extends AbstractTemplateView {
 
-	private String encoding = null;
-
 	private String velocityFormatterAttribute;
 
 	private String dateToolAttribute;
 
 	private String numberToolAttribute;
 	
-	private boolean cacheTemplate;
+	private String encoding;
+
+	private boolean cacheTemplate = false;
 
 	private VelocityEngine velocityEngine;
 
 	private Template template;
 
-
-	/**
-	 * Set the encoding of the Velocity template file. Default is determined
-	 * by the VelocityEngine: "ISO-8859-1" if not specified otherwise.
-	 * <p>Specify the encoding in the VelocityEngine rather than per template
-	 * if all your templates share a common encoding.
-	 */
-	public void setEncoding(String encoding) {
-		this.encoding = encoding;
-	}
-
-	/**
-	 * Return the encoding for the Velocity template.
-	 */
-	protected String getEncoding() {
-		return encoding;
-	}
 
 	/**
 	 * Set the name of the VelocityFormatter helper object to expose in the
@@ -141,7 +124,24 @@ public class VelocityView extends AbstractTemplateView {
 		this.numberToolAttribute = numberToolAttribute;
 	}
 	
-    /**
+	/**
+	 * Set the encoding of the Velocity template file. Default is determined
+	 * by the VelocityEngine: "ISO-8859-1" if not specified otherwise.
+	 * <p>Specify the encoding in the VelocityEngine rather than per template
+	 * if all your templates share a common encoding.
+	 */
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+
+	/**
+	 * Return the encoding for the Velocity template.
+	 */
+	protected String getEncoding() {
+		return encoding;
+	}
+
+	/**
 	 * Set whether the Velocity template should be cached. Default is false.
 	 * It should normally be true in production, but setting this to false enables us to
 	 * modify Velocity templates without restarting the application (similar to JSPs).
@@ -184,23 +184,46 @@ public class VelocityView extends AbstractTemplateView {
 	protected void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 
-		if (this.velocityEngine == null) {
-			try {
-				VelocityConfig velocityConfig = (VelocityConfig)
-						BeanFactoryUtils.beanOfTypeIncludingAncestors(
-								getApplicationContext(), VelocityConfig.class, true, true);
-				this.velocityEngine = velocityConfig.getVelocityEngine();
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				throw new ApplicationContextException(
-						"Must define a single VelocityConfig bean in this web application context " +
-						"(may be inherited): VelocityConfigurer is the usual implementation. " +
-						"This bean may be given any name.", ex);
-			}
+		if (getVelocityEngine() == null) {
+			// No explicit VelocityEngine: try to autodetect one.
+			setVelocityEngine(autodetectVelocityEngine());
 		}
 
+		checkTemplate();
+	}
+
+	/**
+	 * Autodetect a VelocityEngine via the ApplicationContext.
+	 * Called if no explicit VelocityEngine has been specified.
+	 * @return the VelocityEngine to use for VelocityViews
+	 * @throws BeansException if no VelocityEngine could be found
+	 * @see #getApplicationContext
+	 * @see #setVelocityEngine
+	 */
+	protected VelocityEngine autodetectVelocityEngine() throws BeansException {
 		try {
-			// check that we can get the template, even if we might subsequently get it again
+			VelocityConfig velocityConfig = (VelocityConfig)
+					BeanFactoryUtils.beanOfTypeIncludingAncestors(
+							getApplicationContext(), VelocityConfig.class, true, false);
+			return velocityConfig.getVelocityEngine();
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			throw new ApplicationContextException(
+					"Must define a single VelocityConfig bean in this web application context " +
+					"(may be inherited): VelocityConfigurer is the usual implementation. " +
+					"This bean may be given any name.", ex);
+		}
+	}
+
+	/**
+	 * Check that the Velocity template used for this view exists and is valid.
+	 * <p>Can be overridden to customize the behavior, for example in case of
+	 * multiple templates to be rendered into a single view.
+	 * @throws ApplicationContextException if the template cannot be found or is invalid
+	 */
+	protected void checkTemplate() throws ApplicationContextException {
+		try {
+			// Check that we can get the template, even if we might subsequently get it again.
 			this.template = getTemplate();
 		}
 		catch (ResourceNotFoundException ex) {
@@ -213,20 +236,13 @@ public class VelocityView extends AbstractTemplateView {
 		}
 	}
 
+
 	/**
 	 * Process the model map by merging it with the Velocity template. Output is directed
 	 * to the response. This method can be overridden if custom behavior is needed.
 	 */
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-		// We already hold a reference to the template, but we might want to load it
-		// if not caching. As Velocity itself caches templates, so our ability to
-		// cache templates in this class is a minor optimization only.
-		Template template = this.template;
-		if (!isCacheTemplate()) {
-			template = getTemplate();
-		}
 
 		response.setContentType(getContentType());
 		exposeHelpers(model, request);
@@ -236,20 +252,7 @@ public class VelocityView extends AbstractTemplateView {
 		exposeHelpers(velocityContext, request);
 		exposeToolAttributes(velocityContext, request);
 
-		mergeTemplate(template, velocityContext, response);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Merged with Velocity template [" + getUrl() + "] in VelocityView '" + getBeanName() + "'");
-		}
-	}
-
-	/**
-	 * Retrieve the Velocity template.
-	 * @return the Velocity template to process
-	 * @throws Exception if thrown by Velocity
-	 */
-	protected Template getTemplate() throws Exception {
-		return (this.encoding != null ? this.velocityEngine.getTemplate(getUrl(), this.encoding) :
-				this.velocityEngine.getTemplate(getUrl()));
+		doRender(velocityContext, response);
 	}
 
 	/**
@@ -300,7 +303,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * @see #setDateToolAttribute
 	 * @see #setNumberToolAttribute
 	 */
-	protected final void exposeToolAttributes(Context velocityContext, HttpServletRequest request) {
+	protected void exposeToolAttributes(Context velocityContext, HttpServletRequest request) {
 		if (this.velocityFormatterAttribute != null) {
 			velocityContext.put(this.velocityFormatterAttribute, new VelocityFormatter(velocityContext));
 		}
@@ -317,11 +320,74 @@ public class VelocityView extends AbstractTemplateView {
 	}
 
 	/**
+	 * Render the Velocity view to the given response, using the given Velocity
+	 * context which contains the complete template model to use.
+	 * <p>The default implementation renders the template specified by the "url"
+	 * bean property, retrieved via <code>getTemplate</code>. It delegates to the
+	 * <code>mergeTemplate</code> method to merge the template instance with the
+	 * given Velocity context.
+	 * <p>Can be overridden to customize the behavior, for example to render
+	 * multiple templates into a single view.
+	 * @param context the Velocity context to use for rendering
+	 * @param response servlet response (use this to get the OutputStream or Writer)
+	 * @throws Exception if thrown by Velocity
+	 * @see #setUrl
+	 * @see #getTemplate()
+	 * @see #mergeTemplate
+	 */
+	protected void doRender(Context context, HttpServletResponse response) throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Rendering Velocity template [" + getUrl() + "] in VelocityView '" + getBeanName() + "'");
+		}
+		mergeTemplate(getTemplate(), context, response);
+	}
+
+	/**
+	 * Retrieve the Velocity template to be rendered by this view.
+	 * <p>By default, the template specified by the "url" bean property will be
+	 * retrieved: either returning a cached template instance or loading a fresh
+	 * instance (according to the "cacheTemplate" bean property)
+	 * @return the Velocity template to render
+	 * @throws Exception if thrown by Velocity
+	 * @see #setUrl
+	 * @see #setCacheTemplate
+	 * @see #getTemplate(String)
+	 */
+	protected Template getTemplate() throws Exception {
+		// We already hold a reference to the template, but we might want to load it
+		// if not caching. Velocity itself caches templates, so our ability to
+		// cache templates in this class is a minor optimization only.
+		if (isCacheTemplate() && this.template != null) {
+			return this.template;
+		}
+		else {
+			return getTemplate(getUrl());
+		}
+	}
+
+	/**
+	 * Retrieve the Velocity template specified by the given name,
+	 * using the encoding specified by the "encoding" bean property.
+	 * <p>Can be called by subclasses to retrieve a specific template,
+	 * for example to render multiple templates into a single view.
+	 * @param name the file name of the desired template
+	 * @return the Velocity template
+	 * @throws Exception if thrown by Velocity
+	 * @see org.apache.velocity.app.VelocityEngine#getTemplate
+	 */
+	protected Template getTemplate(String name) throws Exception {
+		return (getEncoding() != null ?
+				getVelocityEngine().getTemplate(name, getEncoding()) :
+				getVelocityEngine().getTemplate(name));
+	}
+
+	/**
 	 * Merge the template with the context.
 	 * Can be overridden to customize the behavior.
 	 * @param template the template to merge
-	 * @param context the Velocity context
+	 * @param context the Velocity context to use for rendering
 	 * @param response servlet response (use this to get the OutputStream or Writer)
+	 * @throws Exception if thrown by Velocity
 	 * @see org.apache.velocity.Template#merge
 	 */
 	protected void mergeTemplate(Template template, Context context, HttpServletResponse response)

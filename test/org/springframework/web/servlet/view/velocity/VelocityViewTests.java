@@ -42,6 +42,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
@@ -53,7 +54,7 @@ public class VelocityViewTests extends TestCase {
 		VelocityView vv = new VelocityView();
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getBeansOfType(VelocityConfig.class, true, true);
+		wac.getBeansOfType(VelocityConfig.class, true, false);
 		wmc.setReturnValue(new HashMap());
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
@@ -124,7 +125,7 @@ public class VelocityViewTests extends TestCase {
 				};
 			}
 		};
-		wac.getBeansOfType(VelocityConfig.class, true, true);
+		wac.getBeansOfType(VelocityConfig.class, true, false);
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);
@@ -182,7 +183,7 @@ public class VelocityViewTests extends TestCase {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
 		};
-		wac.getBeansOfType(VelocityConfig.class, true, true);
+		wac.getBeansOfType(VelocityConfig.class, true, false);
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);
@@ -236,7 +237,7 @@ public class VelocityViewTests extends TestCase {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
 		};
-		wac.getBeansOfType(VelocityConfig.class, true, true);
+		wac.getBeansOfType(VelocityConfig.class, true, false);
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);
@@ -308,6 +309,10 @@ public class VelocityViewTests extends TestCase {
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
 		assertEquals("Correct view class", RedirectView.class, view.getClass());
 		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+
+		view = vr.resolveViewName("forward:myUrl", Locale.getDefault());
+		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct URL", "myUrl", ((InternalResourceView) view).getUrl());
 	}
 
 }
