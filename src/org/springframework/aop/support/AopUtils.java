@@ -32,18 +32,31 @@ import org.springframework.aop.PointcutAdvisor;
  * Not intended to be used directly by applications.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AopUtils.java,v 1.1 2004-04-01 15:36:02 jhoeller Exp $
+ * @version $Id: AopUtils.java,v 1.2 2004-05-23 20:50:29 jhoeller Exp $
  */
 public abstract class AopUtils {
-	
-	public static boolean isCglibProxy(Object o) {
-		return o.getClass().getName().indexOf("$$") != -1;
-	}
-	
+
+	/**
+	 * Return whether the given object is a J2SE dynamic proxy.
+	 * @see java.lang.reflect.Proxy#isProxyClass
+	 */
 	public static boolean isJdkDynamicProxy(Object o) {
 		return Proxy.isProxyClass(o.getClass());
 	}
-	
+
+	/**
+	 * Return whether the given object is a CGLIB proxy.
+	 */
+	public static boolean isCglibProxy(Object o) {
+		return o.getClass().getName().indexOf("$$") != -1;
+	}
+
+	/**
+	 * Return whether the given object is either a J2SE dynamic
+	 * proxy or a CGLIB proxy.
+	 * @see #isJdkDynamicProxy
+	 * @see #isCglibProxy
+	 */
 	public static boolean isAopProxy(Object o) {
 		return isJdkDynamicProxy(o) || isCglibProxy(o);
 	}
@@ -51,15 +64,14 @@ public abstract class AopUtils {
 	/**
 	 * Given a method, which may come from an interface, and a targetClass
 	 * used in the current AOP invocation, find the most specific method
-	 * if there is one. E.g. the method may be IFoo.bar() and the 
-	 * target class may be DefaultFoo. In this case, the method may be
-	 * DefaultFoo.bar(). This enables attributes on that method to be
-	 * found.
+	 * if there is one. E.g. the method may be IFoo.bar() and the target
+	 * class may be DefaultFoo. In this case, the method may be
+	 * DefaultFoo.bar(). This enables attributes on that method to be found.
 	 * @param method method to be invoked, which may come from an interface
 	 * @param targetClass target class for the curren invocation. May
 	 * be null or may not even implement the method.
-	 * @return the more specific method, or the original method if the targetClass
-	 * doesn't specialize it or implement it, or is null.
+	 * @return the more specific method, or the original method if the
+	 * targetClass doesn't specialize it or implement it or is null
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
 		if (targetClass != null) {
@@ -77,8 +89,8 @@ public abstract class AopUtils {
 	/**
 	 * Convenience method to convert a string array of interface names
 	 * to a class array.
-	 * @throws java.lang.ClassNotFoundException if any of the classes can't be loaded
-	 * @throws org.aopalliance.aop.AspectException if any of the classes is not an interface
+	 * @throws IllegalArgumentException if any of the classes is not an interface
+	 * @throws ClassNotFoundException if any of the classes can't be loaded
 	 * @return an array of interface classes
 	 */
 	public static Class[] toInterfaceArray(String[] interfaceNames)
