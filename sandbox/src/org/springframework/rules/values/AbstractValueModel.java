@@ -56,13 +56,15 @@ public abstract class AbstractValueModel implements ValueModel {
     }
 
     protected void fireValueChanged() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Firing value changed event; newValue="
-                    + DefaultObjectStyler.evaluate(get()) + "]");
-        }
-        Iterator it = listeners.iterator();
-        while (it.hasNext()) {
-            ((ValueListener)it.next()).valueChanged();
+        if (listeners != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Firing value changed event; newValue="
+                        + DefaultObjectStyler.evaluate(get()) + "]");
+            }
+            Iterator it = listeners.iterator();
+            while (it.hasNext()) {
+                ((ValueListener)it.next()).valueChanged();
+            }
         }
     }
 
