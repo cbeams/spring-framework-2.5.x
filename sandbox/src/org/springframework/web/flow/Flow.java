@@ -781,14 +781,6 @@ public class Flow implements FlowEventProcessor, Serializable {
 		return new StartStateMarker(this, state).startIn(sessionExecution, request, response, inputAttributes);
 	}
 
-	/**
-	 * @param input
-	 * @return
-	 */
-	protected FlowSession createSession(Map input) {
-		return new FlowSession(this, input);
-	}
-
 	// lifecycle event publishers
 
 	protected void fireRequestSubmitted(final FlowExecution sessionExecution, final HttpServletRequest request) {
