@@ -13,16 +13,16 @@
 
 	<view-state id="detail.view" view="person.Detail.view">
 		<transition event="back" to="finish"/>
-		<transition event="select" to="collegueId.set"/>
+		<transition event="select" to="colleagueId.set"/>
 	</view-state>
 
-	<action-state id="collegueId.set">
-		<action bean="person.Detail.collegueId.set"/>
-		<transition event="success" to="collegue.Detail"/>
+	<action-state id="colleagueId.set">
+		<action bean="person.Detail.colleagueId.set"/>
+		<transition event="success" to="colleague.Detail"/>
 		<transition event="error" to="error"/>
 	</action-state>
 	
-	<sub-flow-state id="collegue.Detail" flow="person.Detail" model-mapper="collegueId.modelMapper">
+	<sub-flow-state id="colleague.Detail" flow="person.Detail" model-mapper="colleagueId.modelMapper">
 		<transition event="finish" to="detail.get"/>
 		<transition event="error" to="error"/>
 	</sub-flow-state>
