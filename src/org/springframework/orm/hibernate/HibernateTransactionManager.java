@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate;
 
@@ -123,6 +123,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	private DataSource dataSource;
 
+	private boolean autodetectDataSource = true;
+
 	private Object entityInterceptor;
 
 	private SQLExceptionTranslator jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
@@ -176,6 +178,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
 	 * or JdbcTemplate. The Connection will be taken from the Hibernate Session.
+	 * @see #setAutodetectDataSource
 	 * @see LocalDataSourceConnectionProvider
 	 * @see LocalSessionFactoryBean#setDataSource
 	 */
@@ -188,6 +191,18 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	public DataSource getDataSource() {
 		return dataSource;
+	}
+
+	/**
+	 * Set whether to autodetect a JDBC DataSource used by the Hibernate SessionFactory,
+	 * if set via LocalSessionFactoryBean's <code>setDataSource</code>. Default is true.
+	 * <p>Can be turned off to deliberately ignore an available DataSource,
+	 * to not expose Hibernate transactions as JDBC transactions for that DataSource.
+	 * @see #setDataSource
+	 * @see LocalSessionFactoryBean#setDataSource
+	 */
+	public void setAutodetectDataSource(boolean autodetectDataSource) {
+		this.autodetectDataSource = autodetectDataSource;
 	}
 
 	/**
@@ -305,12 +320,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		getJdbcExceptionTranslator();
 
 		// check for SessionFactory's DataSource
-		if (getDataSource() == null) {
+		if (this.autodetectDataSource && getDataSource() == null) {
 			DataSource sfds = SessionFactoryUtils.getDataSource(getSessionFactory());
 			if (sfds != null) {
 				// use the SessionFactory's DataSource for exposing transactions to JDBC code
-				logger.info("Using DataSource [" + sfds +
-										"] of Hibernate SessionFactory for HibernateTransactionManager");
+				if (logger.isInfoEnabled()) {
+					logger.info("Using DataSource [" + sfds +
+							"] of Hibernate SessionFactory for HibernateTransactionManager");
+				}
 				setDataSource(sfds);
 			}
 		}

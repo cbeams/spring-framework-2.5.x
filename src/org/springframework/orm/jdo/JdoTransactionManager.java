@@ -89,6 +89,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	private DataSource dataSource;
 
+	private boolean autodetectDataSource = true;
+
 	private JdoDialect jdoDialect = new DefaultJdoDialect();
 
 
@@ -135,9 +137,9 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * or JdbcTemplate. The Connection will be taken from the JDO PersistenceManager.
 	 * <p>Note that you need to use a JDO dialect for a specific JDO implementation
 	 * to allow for exposing JDO transactions as JDBC transactions.
+	 * @see #setAutodetectDataSource
 	 * @see #setJdoDialect
 	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory
-	 * @see LocalPersistenceManagerFactoryBean#setDataSource
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -148,6 +150,18 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 */
 	public DataSource getDataSource() {
 		return dataSource;
+	}
+
+	/**
+	 * Set whether to autodetect a JDBC DataSource used by the JDO PersistenceManagerFactory,
+	 * as returned by the <code>getConnectionFactory()</code> method. Default is true.
+	 * <p>Can be turned off to deliberately ignore an available DataSource,
+	 * to not expose JDO transactions as JDBC transactions for that DataSource.
+	 * @see #setDataSource
+	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory
+	 */
+	public void setAutodetectDataSource(boolean autodetectDataSource) {
+		this.autodetectDataSource = autodetectDataSource;
 	}
 
 	/**
@@ -183,13 +197,15 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		getJdoDialect();
 
 		// check for DataSource as connection factory
-		if (getDataSource() == null) {
+		if (this.autodetectDataSource && getDataSource() == null) {
 			Object pmfcf = getPersistenceManagerFactory().getConnectionFactory();
 			if (pmfcf instanceof DataSource) {
 				// use the PersistenceManagerFactory's DataSource for exposing transactions to JDBC code
-				logger.info("Using DataSource [" + pmfcf +
-										"] of JDO PersistenceManagerFactory for JdoTransactionManager");
 				this.dataSource = (DataSource) pmfcf;
+				if (logger.isInfoEnabled()) {
+					logger.info("Using DataSource [" + this.dataSource +
+							"] of JDO PersistenceManagerFactory for JdoTransactionManager");
+				}
 			}
 		}
 	}
