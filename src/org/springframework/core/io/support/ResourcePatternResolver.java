@@ -19,9 +19,16 @@ package org.springframework.core.io.support;
 import java.io.IOException;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
- * Strategy interface for resolving a location pattern into Resource objects.
+ * Strategy interface for resolving a location pattern (for example,
+ * an Ant-style path pattern) into Resource objects.
+ *
+ * <p>This is an extension to the base ResourceLoader interface.
+ * A passed-in ResourceLoader (for example, an ApplicationContext passed in
+ * via ResourceLoaderAware when running in a context) can be checked whether
+ * it implements this extended interface too.
  *
  * <p>Can be used with any sort of location pattern (e.g. "/WEB-INF/*-context.xml"):
  * Input patterns have to match the strategy implementation. This interface just
@@ -33,11 +40,14 @@ import org.springframework.core.io.Resource;
  * JAR files or classes directories can contain multiple files of the same name.
  *
  * @author Juergen Hoeller
- * @since 01.05.2004
+ * @since 1.0.2
  * @see #CLASSPATH_URL_PREFIX
  * @see PathMatchingResourcePatternResolver
+ * @see org.springframework.core.io.Resource
+ * @see org.springframework.context.ApplicationContext
+ * @see org.springframework.context.ResourceLoaderAware
  */
-public interface ResourcePatternResolver {
+public interface ResourcePatternResolver extends ResourceLoader {
 
 	/**
 	 * Pseudo URL prefix for all matching resources from the class path.

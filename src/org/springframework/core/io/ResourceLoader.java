@@ -18,16 +18,23 @@ package org.springframework.core.io;
 
 /**
  * Interface to be implemented by objects that can load resources.
- * An ApplicationContext is required to provide this functionality.
+ * An ApplicationContext is required to provide this functionality,
+ * plus extended ResourcePatternResolver support.
  *
  * <p>DefaultResourceLoader is a standalone implementation that is
  * usable outside an ApplicationContext, also used by ResourceEditor.
+ *
+ * <p>Bean properties of type Resource and Resource array can be
+ * populated from Strings when running in an ApplicationContext,
+ * using the particular context's resource loading strategy.
  *
  * @author Juergen Hoeller
  * @since 10.03.2004
  * @see DefaultResourceLoader
  * @see ResourceEditor
+ * @see org.springframework.core.io.support.ResourcePatternResolver
  * @see org.springframework.context.ApplicationContext
+ * @see org.springframework.context.ResourceLoaderAware
  */
 public interface ResourceLoader {
 

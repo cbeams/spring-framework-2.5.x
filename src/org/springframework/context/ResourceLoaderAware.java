@@ -19,8 +19,10 @@ package org.springframework.context;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * Interface to be implemented by any object that wishes to be notified
- * of the ResourceLoader (typically the ApplicationContext) that it runs in.
+ * Interface to be implemented by any object that wishes to be notified of
+ * the <b>ResourceLoader</b> (typically the ApplicationContext) that it runs in.
+ * This is an alternative to a full ApplicationContext dependency via the
+ * ApplicationContextAware interface.
  *
  * <p>Note that Resource dependencies can also be exposed as bean properties
  * of type Resource, populated via Strings with automatic type conversion by
@@ -32,12 +34,25 @@ import org.springframework.core.io.ResourceLoader;
  * strategy is to make the object use a DefaultResourceLoader but still
  * implement ResourceLoaderAware to allow for overriding when running in an
  * ApplicationContext. See ReloadableResourceBundleMessageSource for an example.
+ *
+ * <p>A passed-in ResourceLoader can also be checked for the
+ * <b>ResourcePatternResolver</b> interface and cast accordingly, to be able
+ * to resolve resource patterns into arrays of Resource objects. This will always
+ * work when running in an ApplicationContext (the context interface extends
+ * ResourcePatternResolver). Use a PathMatchingResourcePatternResolver as default.
+ *
+ * <p>As alternative to a ResourcePatternResolver dependency, consider exposing
+ * bean properties of type Resource array, populated via pattern Strings with
+ * automatic type conversion by the bean factory.
  * 
  * @author Juergen Hoeller
  * @since 10.03.2004
  * @see ApplicationContextAware
  * @see org.springframework.beans.factory.InitializingBean
+ * @see org.springframework.core.io.Resource
  * @see org.springframework.core.io.DefaultResourceLoader
+ * @see org.springframework.core.io.support.ResourcePatternResolver
+ * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
  * @see org.springframework.context.support.ReloadableResourceBundleMessageSource
  */
 public interface ResourceLoaderAware {

@@ -76,7 +76,7 @@ import org.springframework.util.StringUtils;
  * resolver will return a single resource via the underlying ResourceLoader.
  *
  * @author Juergen Hoeller
- * @since 01.05.2004
+ * @since 1.0.2
  * @see #CLASSPATH_URL_PREFIX
  * @see org.springframework.util.PathMatcher
  * @see org.springframework.core.io.ResourceLoader#getResource
@@ -152,6 +152,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		return classLoader;
 	}
 
+
+	public Resource getResource(String location) {
+		return this.resourceLoader.getResource(location);
+	}
 
 	public Resource[] getResources(String locationPattern) throws IOException {
 		if (locationPattern.startsWith(CLASSPATH_URL_PREFIX)) {
