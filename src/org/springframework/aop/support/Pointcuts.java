@@ -25,7 +25,7 @@ import org.springframework.aop.Pointcut;
 /**
  * Pointcut constants for matching getters and setters,
  * and static methods useful for manipulating and evaluating pointcuts.
- * This methods are particularly useful for composing pointcuts
+ * These methods are particularly useful for composing pointcuts
  * using the union and intersection methods.
  * @author Rod Johnson
  */
