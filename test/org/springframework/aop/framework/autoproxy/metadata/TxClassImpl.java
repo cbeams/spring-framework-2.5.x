@@ -22,7 +22,7 @@ public class TxClassImpl implements TxClass {
 	/**
 	 * The following constant requires TransactionDefinition to be imported.
 	 * Of course an FQN could be used...
-	 * @DefaultTransactionAttribute (TransactionDefinition.PROPAGATION_REQUIRED)
+	 * @@DefaultTransactionAttribute (TransactionDefinition.PROPAGATION_REQUIRED)
 	 */
 	public int defaultTxAttribute() {
 		return ++invocations;
@@ -37,9 +37,9 @@ public class TxClassImpl implements TxClass {
 	 * need to be imported, as it would be imported for use in the business method.
 	 * Note that both FQN and relying on the import above work.
 	 * 
-	 * @RuleBasedTransactionAttribute()
-	 * @RollbackRuleAttribute (Exception.class)
-	 * @org.springframework.transaction.interceptor.NoRollbackRuleAttribute ("ServletException")
+	 * @@RuleBasedTransactionAttribute()
+	 * @@RollbackRuleAttribute (Exception.class)
+	 * @@org.springframework.transaction.interceptor.NoRollbackRuleAttribute ("ServletException")
 	 */
 	public void echoException(Exception ex) throws Exception {
 		if (ex != null)

@@ -23,7 +23,7 @@ import org.springframework.samples.jpetstore.domain.Product;
  * as in the default applicationContext.xml in the war/WEB-INF directory.
  *
  * <p>The following attribute definition uses Commons Attributes attribute syntax.
- * @org.springframework.transaction.interceptor.DefaultTransactionAttribute()
+ * @@org.springframework.transaction.interceptor.DefaultTransactionAttribute()
  *
  * @author Juergen Hoeller
  * @since 30.11.2003

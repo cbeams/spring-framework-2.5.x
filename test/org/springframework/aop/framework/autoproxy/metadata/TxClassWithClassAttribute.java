@@ -12,9 +12,9 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * Illustrates class and method attributes
  * <br>The attribute syntax is that of Commons Attributes.
  * 
- * @org.springframework.aop.framework.autoproxy.target.PoolingAttribute (10)
+ * @@org.springframework.aop.framework.autoproxy.target.PoolingAttribute (10)
  * 
- * @org.springframework.transaction.interceptor.DefaultTransactionAttribute ()
+ * @@org.springframework.transaction.interceptor.DefaultTransactionAttribute ()
  * 
  * @author Rod Johnson
  */
@@ -44,9 +44,9 @@ public class TxClassWithClassAttribute {
 	}
 
 	/**
-	 * @org.springframework.transaction.interceptor.RuleBasedTransactionAttribute ()
-	 * @org.springframework.transaction.interceptor.RollbackRuleAttribute (Exception.class)
-	 * @org.springframework.transaction.interceptor.NoRollbackRuleAttribute ("ServletException")
+	 * @@org.springframework.transaction.interceptor.RuleBasedTransactionAttribute ()
+	 * @@org.springframework.transaction.interceptor.RollbackRuleAttribute (Exception.class)
+	 * @@org.springframework.transaction.interceptor.NoRollbackRuleAttribute ("ServletException")
 	 */
 	public void echoException(Exception ex) throws Exception {
 		if (ex != null)

@@ -14,9 +14,9 @@ package org.springframework.web.servlet.handler.metadata;
  * Application code must use the Commons Attributes indexer
  * tool to use this option.
  * @author Rod Johnson
- * @version $Id: PathMap.java,v 1.1 2003-12-25 08:56:12 johnsonr Exp $
+ * @version $Id: PathMap.java,v 1.2 2004-01-14 08:52:47 johnsonr Exp $
  * 
- * @org.apache.commons.attributes.Indexed()
+ * @@org.apache.commons.attributes.Indexed()
  */
 public class PathMap {
 	
