@@ -15,8 +15,6 @@
  */
 package org.springframework.rules;
 
-import java.io.Serializable;
-
 /**
  * A function object that evaluates one argument and returns a single result.
  * <p>
@@ -27,7 +25,7 @@ import java.io.Serializable;
  * 
  * @author Keith Donald
  */
-public interface UnaryFunction extends Serializable {
+public interface UnaryFunction {
 
     /**
      * Evaluate the function with the provided argument, returning the result.

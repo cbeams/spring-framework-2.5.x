@@ -15,8 +15,6 @@
  */
 package org.springframework.rules;
 
-import java.io.Serializable;
-
 /**
  * A function object that tests two arguments and returns a single
  * <code>boolean</code> result.
@@ -28,7 +26,7 @@ import java.io.Serializable;
  * 
  * @author Keith Donald
  */
-public interface BinaryPredicate extends Serializable {
+public interface BinaryPredicate {
 
     /**
      * Test the provided arguments against this predicates conditional
