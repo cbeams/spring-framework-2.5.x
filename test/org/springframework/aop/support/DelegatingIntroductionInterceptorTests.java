@@ -31,7 +31,7 @@ import org.springframework.beans.TestBean;
  * 
  * @author Rod Johnson
  * @since 13-May-2003
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DelegatingIntroductionInterceptorTests extends TestCase {
 
@@ -73,7 +73,47 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		tsControl.verify();
 	}
 	
-	
+	public void testIntroductionInterceptorWithInterfaceHierarchy() throws Exception {
+		TestBean raw = new TestBean();
+		assertTrue(! (raw instanceof SubTimeStamped));
+		ProxyFactory factory = new ProxyFactory(raw);
+
+		MockControl tsControl = MockControl.createControl(SubTimeStamped.class);
+		SubTimeStamped ts = (SubTimeStamped) tsControl.getMock();
+		ts.getTimeStamp();
+		long timestamp = 111L;
+		tsControl.setReturnValue(timestamp, 1);
+		tsControl.replay();
+
+		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), SubTimeStamped.class));
+
+		SubTimeStamped tsp = (SubTimeStamped) factory.getProxy();
+		assertTrue(tsp.getTimeStamp() == timestamp);
+
+		tsControl.verify();
+	}
+
+	public void testIntroductionInterceptorWithSuperInterface() throws Exception {
+		TestBean raw = new TestBean();
+		assertTrue(! (raw instanceof TimeStamped));
+		ProxyFactory factory = new ProxyFactory(raw);
+
+		MockControl tsControl = MockControl.createControl(SubTimeStamped.class);
+		SubTimeStamped ts = (SubTimeStamped) tsControl.getMock();
+		ts.getTimeStamp();
+		long timestamp = 111L;
+		tsControl.setReturnValue(timestamp, 1);
+		tsControl.replay();
+
+		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), TimeStamped.class));
+
+		TimeStamped tsp = (TimeStamped) factory.getProxy();
+		assertTrue(!(tsp instanceof SubTimeStamped));
+		assertTrue(tsp.getTimeStamp() == timestamp);
+
+		tsControl.verify();
+	}
+
 	public void testAutomaticInterfaceRecognitionInDelegate() throws Exception {
 		final long t = 1001L;
 		class Test implements TimeStamped, ITest {
@@ -141,12 +181,8 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		Object o = pf.getProxy();
 		assertTrue(!(o instanceof TimeStamped));
 	}
-	
-	
-	// should fail with delegate itself and no subclass?
-	//public void testNoInterfaces() {
-	//}
-	
+
+
 	public static class TargetClass extends TestBean implements TimeStamped {
 		long t;
 		public TargetClass(long t) {
@@ -178,9 +214,14 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 		// From introduction interceptor, not target
 		assertTrue(ts.getTimeStamp() == t);
 	}
-	
-	static interface ITest {
+
+
+	private static interface ITest {
 		void foo() throws Exception;
+	}
+
+
+	private static interface SubTimeStamped extends TimeStamped {
 	}
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.aop.support;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.aopalliance.intercept.MethodInvocation;
@@ -42,7 +43,7 @@ import org.springframework.aop.IntroductionInterceptor;
  * owning AOP proxy.
  *
  * @author Rod Johnson
- * @version $Id: DelegatingIntroductionInterceptor.java,v 1.3 2004-04-01 15:36:02 jhoeller Exp $
+ * @version $Id: DelegatingIntroductionInterceptor.java,v 1.4 2004-04-21 10:26:21 jhoeller Exp $
  */
 public class DelegatingIntroductionInterceptor implements IntroductionInterceptor {
 
@@ -106,11 +107,14 @@ public class DelegatingIntroductionInterceptor implements IntroductionIntercepto
 		return (Class[]) this.publishedInterfaces.toArray(new Class[this.publishedInterfaces.size()]);
 	}
 	
-	/**
-	 * @see org.springframework.aop.IntroductionInterceptor#implementsInterface(java.lang.Class)
-	 */
 	public boolean implementsInterface(Class intf) {
-		return this.publishedInterfaces.contains(intf);
+		for (Iterator it = this.publishedInterfaces.iterator(); it.hasNext();) {
+			Class pubIntf = (Class) it.next();
+			if (intf.isAssignableFrom(pubIntf)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -120,8 +124,9 @@ public class DelegatingIntroductionInterceptor implements IntroductionIntercepto
 	 */
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		if (isMethodOnIntroducedInterface(mi)) {
-			if (logger.isDebugEnabled())
-				logger.debug("invoking self on invocation [" + mi + "]; breaking interceptor chain");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking self on invocation [" + mi + "]; breaking interceptor chain");
+			}
 			return mi.getMethod().invoke(this.delegate, mi.getArguments());
 		}
 		
@@ -135,7 +140,7 @@ public class DelegatingIntroductionInterceptor implements IntroductionIntercepto
 	 * @return whether the method is on an introduced interface
 	 */
 	protected final boolean isMethodOnIntroducedInterface(MethodInvocation mi) {
-		return this.publishedInterfaces.contains(mi.getMethod().getDeclaringClass());
+		return implementsInterface(mi.getMethod().getDeclaringClass());
 	}
 
 }
