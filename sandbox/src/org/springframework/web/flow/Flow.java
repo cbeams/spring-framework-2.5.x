@@ -258,8 +258,6 @@ public class Flow implements FlowExecutionFactory, Serializable {
 							+ "' - state ids must be locally unique to the flow definition; existing stateIds of this flow include: "
 							+ DefaultObjectStyler.call(getStateIds()));
 		}
-		state.setFlow(this);
-
 		boolean firstAdd;
 		if (states.isEmpty()) {
 			firstAdd = true;
@@ -267,6 +265,7 @@ public class Flow implements FlowExecutionFactory, Serializable {
 		else {
 			firstAdd = true;
 		}
+		state.setFlow(this);
 		this.states.add(state);
 		if (firstAdd) {
 			setStartState((TransitionableState)statesIterator().next());
