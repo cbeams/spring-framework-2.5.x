@@ -20,9 +20,13 @@ import java.util.Locale;
 
 import javax.servlet.ServletException;
 
-import org.springframework.beans.ITestBean;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
@@ -32,6 +36,7 @@ import org.springframework.web.mock.MockServletContext;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class WebApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -43,6 +48,21 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 		MockServletContext sc = new MockServletContext("");
 		root.setServletContext(sc);
 		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
+		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
+			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
+					public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
+						if (bean instanceof TestBean) {
+							((TestBean) bean).getFriends().add("myFriend");
+						}
+						return bean;
+					}
+					public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
+						return bean;
+					}
+				});
+			}
+		});
 		root.refresh();
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
 		wac.setParent(root);
@@ -96,15 +116,18 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 	}
 
 	public void testContextNesting() {
-		ITestBean father = (ITestBean) this.applicationContext.getBean("father");
+		TestBean father = (TestBean) this.applicationContext.getBean("father");
 		assertTrue("Bean from root context", father != null);
+		assertTrue("Custom BeanPostProcessor applied", father.getFriends().contains("myFriend"));
 
-		ITestBean rod = (ITestBean) this.applicationContext.getBean("rod");
+		TestBean rod = (TestBean) this.applicationContext.getBean("rod");
 		assertTrue("Bean from child context", "Rod".equals(rod.getName()));
 		assertTrue("Bean has external reference", rod.getSpouse() == father);
+		assertTrue("Custom BeanPostProcessor not applied", !rod.getFriends().contains("myFriend"));
 
-		rod = (ITestBean) this.root.getBean("rod");
+		rod = (TestBean) this.root.getBean("rod");
 		assertTrue("Bean from root context", "Roderick".equals(rod.getName()));
+		assertTrue("Custom BeanPostProcessor applied", rod.getFriends().contains("myFriend"));
 	}
 
 	public void testInitializingBeanAndInitMethod() throws Exception {
