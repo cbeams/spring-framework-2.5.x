@@ -24,15 +24,27 @@ import org.springframework.web.context.WebApplicationContext;
  * Convenience methods to retrieve the root WebApplicationContext for a given
  * ServletContext. This is e.g. useful for accessing a Spring context from
  * within custom web views or Struts actions.
+ *
+ * <p>Note that there are more convenient ways of accessing the root context for
+ * many web frameworks, either part of Spring or available as external library.
+ * This helper class is just the most generic way to access the root context.
+ *
  * @author Juergen Hoeller
- * @version $Id: WebApplicationContextUtils.java,v 1.10 2004-03-22 10:32:17 jhoeller Exp $
  * @see org.springframework.web.context.ContextLoader
+ * @see org.springframework.web.servlet.FrameworkServlet
+ * @see org.springframework.web.servlet.DispatcherServlet
+ * @see org.springframework.web.struts.ActionSupport
+ * @see org.springframework.web.struts.DelegatingActionProxy
+ * @see org.springframework.web.jsf.FacesContextUtils
+ * @see org.springframework.web.jsf.DelegatingVariableResolver
  */
 public abstract class WebApplicationContextUtils {
 	
 	/**
 	 * Find the root WebApplicationContext for this web app, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
+	 * <p>Will rethrow an exception that happened on root context startup,
+	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
 	 * @return the root WebApplicationContext for this web app, or null if none
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
@@ -57,6 +69,8 @@ public abstract class WebApplicationContextUtils {
 	/**
 	 * Find the root WebApplicationContext for this web app, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
+	 * <p>Will rethrow an exception that happened on root context startup,
+	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
 	 * @return the root WebApplicationContext for this web app
 	 * @throws IllegalStateException if the root WebApplicationContext could not be found
