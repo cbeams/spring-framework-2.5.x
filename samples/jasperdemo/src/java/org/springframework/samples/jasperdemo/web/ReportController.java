@@ -16,16 +16,16 @@
 
 package org.springframework.samples.jasperdemo.web;
 
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
 /**
  * Simple <code>Controller</code> implementation returning
@@ -42,6 +42,16 @@ public class ReportController extends MultiActionController {
 	public ModelAndView handleSimpleReport(HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		return new ModelAndView("simpleReport", getModel());
+	}
+
+	public ModelAndView handleSimpleReportPost(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+
+		String reportTitle = request.getParameter("reportTitle");
+		Map model = getModel();
+		model.put("ReportTitle", reportTitle);
+
+		return new ModelAndView("simpleReportCompile", model);
 	}
 
 	public ModelAndView handleSimpleReportCompile(HttpServletRequest request,

@@ -41,6 +41,8 @@
 		<property name="mappings">
 			<props>
 				<prop key="/simpleReport.pdf">controller</prop>
+				<prop key="/simpleReportPost.pdf">controller</prop>
+				<prop key="/simpleReportPost.action">controller</prop>
 				<prop key="/simpleReportCompile.pdf">controller</prop>
 				<prop key="/simpleReportHtml.html">controller</prop>
 				<prop key="/simpleReportCsv.csv">controller</prop>
@@ -60,6 +62,8 @@
 		<property name="mappings">
 			<props>
 				<prop key="/simpleReport.pdf">handleSimpleReport</prop>
+				<prop key="/simpleReportPost.pdf">handleSimpleReportPost</prop>
+				<prop key="/simpleReportPost.action">handleSimpleReportPost</prop>
 				<prop key="/simpleReportCompile.pdf">handleSimpleReportCompile</prop>
 				<prop key="/simpleReportHtml.html">handleSimpleReportHtml</prop>
 				<prop key="/simpleReportCsv.csv">handleSimpleReportCsv</prop>

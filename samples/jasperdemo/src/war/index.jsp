@@ -12,5 +12,17 @@
 		<a href="simpleReportExcel.xls">Excel</a><br>
         <h1>Sub-Reports</h1>
         <a href="subReport.pdf">In PDF Format</a>
+				
+				<h1>Using a POST</h1>
+				<h2>With .pdf Extension</h2>
+				<form name="testForm1" method="POST" action="simpleReportPost.pdf">
+					<input name="reportTitle" value="foo" type="test"/>
+					<input type="Submit" value="Try with a POST"/>
+				</form>
+				<h2>With .action Extension</h2>
+				<form name="testForm2" method="POST" action="simpleReportPost.action">
+					<input name="reportTitle" value="foo" type="test"/>
+					<input type="Submit" value="Try with a POST"/>
+				</form>
 	</body>
 </html>

@@ -14,6 +14,11 @@
 
 	<servlet-mapping>
 		<servlet-name>jrtest</servlet-name>
+		<url-pattern>*.action</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>jrtest</servlet-name>
 		<url-pattern>*.pdf</url-pattern>
 	</servlet-mapping>
 
