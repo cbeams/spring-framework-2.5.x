@@ -344,12 +344,11 @@ public class BindTestSuite extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new ServletRequestDataBinder(tb, "tb");
-		binder.registerCustomEditor(TestBean.class, null,
-																new PropertyEditorSupport() {
-																	public String getAsText() {
-																		return "something";
-																	}
-																});
+		binder.registerCustomEditor(TestBean.class, null, new PropertyEditorSupport() {
+			public String getAsText() {
+				return "something";
+			}
+		});
 		BindException errors = binder.getErrors();
 		errors.rejectValue("array[0]", "code1", "message1");
 		errors.rejectValue("array[0]", "code2", "message2");
@@ -365,6 +364,30 @@ public class BindTestSuite extends AbstractTagTests {
 		// because of the custom editor getValue() should return a String
 		assertTrue("Value is TestBean", status.getValue() instanceof String);
 		assertTrue("Correct value", "something".equals(status.getValue()));
+	}
+
+	public void testBindTagWithFieldButWithoutErrorsInstance() throws JspException {
+		PageContext pc = createPageContext();
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.name");
+		pc.getRequest().setAttribute("tb", new TestBean("juergen", 99));
+		tag.doStartTag();
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("name", status.getExpression());
+		assertEquals("juergen", status.getValue());
+	}
+
+	public void testBindTagButWithoutErrorsInstance() throws JspException {
+		PageContext pc = createPageContext();
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb");
+		pc.getRequest().setAttribute("tb", new TestBean("juergen", 99));
+		tag.doStartTag();
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertNull(status.getExpression());
+		assertNull(status.getValue());
 	}
 
 	public void testBindTagWithoutBean() throws JspException {

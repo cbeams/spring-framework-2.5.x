@@ -97,6 +97,14 @@ public class RequestContext {
 	}
 
 	/**
+	 * Return the underlying HttpServletRequest.
+	 * Only intended for cooperating classes in this package.
+	 */
+	protected HttpServletRequest getRequest() {
+		return request;
+	}
+
+	/**
 	 * Return the context path of the current request,
 	 * i.e. the path that indicates the current web application.
 	 * @see javax.servlet.http.HttpServletRequest#getContextPath

@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
@@ -97,42 +98,66 @@ public class BindStatus {
 		}
 
 		this.errors = requestContext.getErrors(beanName, false);
-		if (this.errors == null)
-			throw new IllegalStateException("Could not find Errors instance for bean [" + beanName +
-																			"] in request: add the Errors model to your ModelAndView via errors.getModel()");
 
-		List objectErrors = null;
+		if (this.errors != null) {
+			// Usual case: An Errors instance is available as request attribute.
+			// Can determine error codes and messages for the given expression.
+			// Can use a custom PropertyEditor, as registered by a form controller.
 
-		if (this.expression != null) {
-			if ("*".equals(this.expression)) {
-				objectErrors = this.errors.getAllErrors();
-			}
-			else if (this.expression.endsWith("*")) {
-				objectErrors = this.errors.getFieldErrors(this.expression);
-			}
-			else {
-				objectErrors = this.errors.getFieldErrors(this.expression);
-				this.value = this.errors.getFieldValue(this.expression);
-				if (this.errors instanceof BindException) {
-					this.editor = ((BindException) this.errors).getCustomEditor(this.expression);
+			List objectErrors = null;
+
+			if (this.expression != null) {
+				if ("*".equals(this.expression)) {
+					objectErrors = this.errors.getAllErrors();
+				}
+				else if (this.expression.endsWith("*")) {
+					objectErrors = this.errors.getFieldErrors(this.expression);
 				}
 				else {
-					logger.debug("Cannot not expose custom property editor because Errors instance [" + this.errors +
-											 "] is not of type BindException");
-				}
-				if (htmlEscape && this.value instanceof String) {
-					this.value = HtmlUtils.htmlEscape((String) this.value);
+					objectErrors = this.errors.getFieldErrors(this.expression);
+					this.value = this.errors.getFieldValue(this.expression);
+					if (this.errors instanceof BindException) {
+						this.editor = ((BindException) this.errors).getCustomEditor(this.expression);
+					}
+					else {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Cannot not expose custom property editor because Errors instance [" +
+									this.errors + "] is not of type BindException");
+						}
+					}
+					if (htmlEscape && this.value instanceof String) {
+						this.value = HtmlUtils.htmlEscape((String) this.value);
+					}
 				}
 			}
+			else {
+				objectErrors = this.errors.getGlobalErrors();
+			}
+
+			this.errorCodes = getErrorCodes(objectErrors);
+			this.errorMessages = getErrorMessages(objectErrors);
 		}
+
 		else {
-			objectErrors = this.errors.getGlobalErrors();
+			// No Errors instance available as request attribute:
+			// Probably forwarded directly to a form view.
+			// Let's do the best we can: extract a plain value if appropriate.
+
+			Object target = requestContext.getRequest().getAttribute(beanName);
+			if (target == null) {
+				throw new IllegalStateException("Neither Errors instance nor plain target object for bean name " +
+						beanName + " available as request attribute");
+			}
+
+			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
+				BeanWrapperImpl bw = new BeanWrapperImpl(target);
+				this.value = bw.getPropertyValue(this.expression);
+			}
+
+			this.errorCodes = new String[0];
+			this.errorMessages = new String[0];
 		}
-
-		this.errorCodes = getErrorCodes(objectErrors);
-		this.errorMessages = getErrorMessages(objectErrors);
 	}
-
 
 	/**
 	 * Extract the error codes from the given ObjectError list.
@@ -240,7 +265,6 @@ public class BindStatus {
 	public String getErrorMessagesAsString(String delimiter) {
 		return StringUtils.arrayToDelimitedString(this.errorMessages, delimiter);
 	}
-
 
 	/**
 	 * Return the Errors instance that this bind status is currently bound to.
