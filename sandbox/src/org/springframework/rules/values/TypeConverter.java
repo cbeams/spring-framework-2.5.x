@@ -26,30 +26,34 @@ public class TypeConverter implements ValueModel {
 
     private ValueModel wrappedModel;
 
-    private UnaryFunction convertTo;
-
     private UnaryFunction convertFrom;
+
+    private UnaryFunction convertTo;
 
     public TypeConverter(ValueModel wrappedModel, UnaryFunction convertTo,
             UnaryFunction convertFrom) {
         this.wrappedModel = wrappedModel;
-        this.convertTo = convertTo;
-        this.convertFrom = convertFrom;
+        this.convertFrom = convertTo;
+        this.convertTo = convertFrom;
     }
 
     public TypeConverter(ValueModel wrappedModel,
             final PropertyEditor propertyEditor) {
         this.wrappedModel = wrappedModel;
-        this.convertTo = new UnaryFunction() {
+        this.convertFrom = new UnaryFunction() {
             public Object evaluate(Object o) {
                 propertyEditor.setValue(o);
                 return propertyEditor.getAsText();
             }
         };
-        this.convertFrom = new UnaryFunction() {
+        this.convertTo = new UnaryFunction() {
             public Object evaluate(Object o) {
-                propertyEditor.setAsText((String)o);
-                return propertyEditor.getValue();
+                if (o instanceof String) {
+                    propertyEditor.setAsText((String)o);
+                    return propertyEditor.getValue();
+                } else {
+                    return o;
+                }
             }
         };
     }
@@ -58,14 +62,14 @@ public class TypeConverter implements ValueModel {
      * @see org.springframework.rules.values.ValueModel#get()
      */
     public Object get() {
-        return convertTo.evaluate(wrappedModel.get());
+        return convertFrom.evaluate(wrappedModel.get());
     }
 
     /**
      * @see org.springframework.rules.values.ValueModel#set(java.lang.Object)
      */
     public void set(Object value) {
-        wrappedModel.set(convertFrom.evaluate(value));
+        wrappedModel.set(convertTo.evaluate(value));
     }
 
     public Object getWrappedValue() {
