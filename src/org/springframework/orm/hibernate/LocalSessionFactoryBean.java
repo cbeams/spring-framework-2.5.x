@@ -155,6 +155,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private DataSource dataSource;
 
+	private boolean useTransactionAwareDataSource = false;
+
 	private TransactionManager jtaTransactionManager;
 
 	private LobHandler lobHandler;
@@ -271,6 +273,42 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
+	 * Set whether to use a transaction-aware DataSource for the SessionFactory,
+	 * i.e. whether to automatically wrap the passed-in DataSource with Spring's
+	 * TransactionAwareDataSourceProxy.
+	 * <p>Default is false: LocalSessionFactoryBean is usually used with Spring's
+	 * HibernateTransactionManager or JtaTransactionManager, which expect the
+	 * SessionFactory to work on the plain DataSource, with Hibernate Sessions
+	 * managed by Spring's transaction infrastructure.
+	 * <p>If you switch this flag to true, Spring's Hibernate access will be able to
+	 * participate in JDBC-based transactions managed outside of Hibernate (for example,
+	 * by Spring's DataSourceTransactionManager). This can be convenient if you need
+	 * a different local transaction strategy for another O/R mapping tool, for example,
+	 * but still want Hibernate access to join into those transactions.
+	 * <p>A further benefit of this option is that plain Sessions (opened directly
+	 * via the SessionFactory, outside of Spring's Hibernate support) will still
+	 * participate in active Spring-managed transactions.
+	 * <p>As a further effect, using a transaction-aware DataSource will apply
+	 * remaining transaction timeouts to all created JDBC Statements.
+	 * This means that all operations performed by the SessionFactory will
+	 * automatically participate in Spring-managed transaction timeouts.
+	 * <p><b>Note that this option does not add any value for JtaTransactionManager,
+	 * or for HibernateTransactionManager in combination with HibernateTemplate.</b>
+	 * Transaction participation and transaction timeouts are already fully handled
+	 * by that infrastructure combination. Just use it to let Hibernate participate
+	 * in any other local transaction strategy, like DataSourceTransactionManager.
+	 * @see #setDataSource
+	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
+	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+	 * @see org.springframework.orm.hibernate.HibernateTransactionManager
+	 * @see HibernateTemplate
+	 * @see net.sf.hibernate.SessionFactory#openSession
+	 */
+	public void setUseTransactionAwareDataSource(boolean useTransactionAwareDataSource) {
+		this.useTransactionAwareDataSource = useTransactionAwareDataSource;
+	}
+
+	/**
 	 * Set the JTA TransactionManager to be used for Hibernate's
 	 * TransactionManagerLookup. If set, this will override corresponding
 	 * settings in Hibernate properties. Allows to use a Spring-managed
@@ -384,7 +422,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 			if (this.dataSource != null) {
 				// Set Spring-provided DataSource as Hibernate property.
-				config.setProperty(Environment.CONNECTION_PROVIDER, LocalDataSourceConnectionProvider.class.getName());
+				config.setProperty(Environment.CONNECTION_PROVIDER,
+						this.useTransactionAwareDataSource ?
+						TransactionAwareDataSourceConnectionProvider.class.getName() :
+						LocalDataSourceConnectionProvider.class.getName());
 			}
 
 			if (this.jtaTransactionManager != null) {

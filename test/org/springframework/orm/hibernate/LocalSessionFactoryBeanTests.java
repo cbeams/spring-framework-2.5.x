@@ -46,6 +46,69 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  */
 public class LocalSessionFactoryBeanTests extends TestCase {
 
+	public void testLocalSessionFactoryBeanWithDataSource() throws Exception {
+		final DriverManagerDataSource ds = new DriverManagerDataSource();
+		final List invocations = new ArrayList();
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public Configuration addInputStream(InputStream is) {
+						try {
+							is.close();
+						}
+						catch (IOException ex) {
+						}
+						invocations.add("addResource");
+						return this;
+					}
+				};
+			}
+			protected SessionFactory newSessionFactory(Configuration config) {
+				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
+				    config.getProperty(Environment.CONNECTION_PROVIDER));
+				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
+				invocations.add("newSessionFactory");
+				return null;
+			}
+		};
+		sfb.setDataSource(ds);
+		sfb.afterPropertiesSet();
+		assertTrue(sfb.getConfiguration() != null);
+		assertEquals("newSessionFactory", invocations.get(0));
+	}
+
+	public void testLocalSessionFactoryBeanWithTransactionAwareDataSource() throws Exception {
+		final DriverManagerDataSource ds = new DriverManagerDataSource();
+		final List invocations = new ArrayList();
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public Configuration addInputStream(InputStream is) {
+						try {
+							is.close();
+						}
+						catch (IOException ex) {
+						}
+						invocations.add("addResource");
+						return this;
+					}
+				};
+			}
+			protected SessionFactory newSessionFactory(Configuration config) {
+				assertEquals(TransactionAwareDataSourceConnectionProvider.class.getName(),
+				    config.getProperty(Environment.CONNECTION_PROVIDER));
+				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
+				invocations.add("newSessionFactory");
+				return null;
+			}
+		};
+		sfb.setDataSource(ds);
+		sfb.setUseTransactionAwareDataSource(true);
+		sfb.afterPropertiesSet();
+		assertTrue(sfb.getConfiguration() != null);
+		assertEquals("newSessionFactory", invocations.get(0));
+	}
+
 	public void testLocalSessionFactoryBeanWithDataSourceAndMappingResources() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.orm.hibernate;
 
@@ -38,6 +38,8 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
 	private DataSource dataSource;
 
+	private DataSource dataSourceToUse;
+
 	public void configure(Properties props) throws HibernateException {
 		this.dataSource = LocalSessionFactoryBean.getConfigTimeDataSource();
 		// absolutely needs thread-bound DataSource to initialize
@@ -45,6 +47,20 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 			throw new HibernateException("No local DataSource found for configuration - " +
 			    "dataSource property must be set on LocalSessionFactoryBean");
 		}
+		this.dataSourceToUse = getDataSourceToUse(this.dataSource);
+	}
+
+	/**
+	 * Return the DataSource to use for retrieving Connections.
+	 * <p>This implementation returns the passed-in DataSource as-is.
+	 * @param originalDataSource the DataSource as configured by the user
+	 * on LocalSessionFactoryBean
+	 * @return the DataSource to actually retrieve Connections from
+	 * (potentially wrapped)
+	 * @see LocalSessionFactoryBean#setDataSource
+	 */
+	protected DataSource getDataSourceToUse(DataSource originalDataSource) {
+		return originalDataSource;
 	}
 
 	/**
@@ -56,25 +72,26 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
 	public Connection getConnection() throws SQLException {
 		try {
-			return this.dataSource.getConnection();
+			return this.dataSourceToUse.getConnection();
 		}
-		catch (SQLException sqle) {
-			JDBCExceptionReporter.logExceptions(sqle);
-			throw sqle;
+		catch (SQLException ex) {
+			JDBCExceptionReporter.logExceptions(ex);
+			throw ex;
 		}
 	}
 
-	public void closeConnection(Connection conn) throws SQLException {
+	public void closeConnection(Connection con) throws SQLException {
 		try {
-			conn.close();
+			con.close();
 		}
-		catch (SQLException sqle) {
-			JDBCExceptionReporter.logExceptions(sqle);
-			throw sqle;
+		catch (SQLException ex) {
+			JDBCExceptionReporter.logExceptions(ex);
+			throw ex;
 		}
 	}
 
 	public void close() {
+		// Do nothing here - it's an externally managed DataSource.
 	}
 
 }
