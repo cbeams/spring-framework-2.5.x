@@ -1,4 +1,4 @@
-<chapter id="mail">
+ <chapter id="mail">
 
     <title>Sending Email with Spring mail abstraction layer</title>
     
@@ -26,11 +26,11 @@
 			<emphasis>to</emphasis>, <emphasis>cc</emphasis>, <emphasis>subject</emphasis>, <emphasis>text</emphasis>
 			called <literal>SimpleMailMessage</literal>. This package also conatins a hierarchy of checked exceptions
 			which provide a higher level of abstraction over the lower level mail system expetions with the root exception
-			being <literal>MailException</leteral>
+			being <literal>MailException</literal>
 		</para>
 		
 		<para>
-			Spring also provides a subinterface of <literal>MailSender</literal> for spesialized <emph>JavaMail</emphasis>
+			Spring also provides a subinterface of <literal>MailSender</literal> for spesialized <emphasis>JavaMail</emphasis>
 			features such as MIME messages, namely <literal>org.springframework.mail.javamail.JavaMail</literal>
 			It also provides a callback interface for praparation of JavaMail MIME messages, 
 			namely <literal>org.springframework.mail.javamail.MimeMessage</literal>
@@ -123,7 +123,9 @@ public interface MimeMessagePreparator {
 }
 			]]></programlisting>
 		</para>
-		<sect1 id="mail-usage">
+	</sect1>
+			
+	<sect1 id="mail-usage">
 		<title>Using Spring mail abstraction</title>
 		
 		<para>
@@ -252,7 +254,7 @@ public class OrderManagerImpl implements OrderManager {
 				your fingertips
 			</para>
 			
-			
+		</sect1>
 				
 		
 </chapter>
