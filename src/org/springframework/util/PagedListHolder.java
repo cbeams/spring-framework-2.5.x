@@ -1,5 +1,6 @@
 package org.springframework.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +38,7 @@ import org.springframework.beans.SortDefinition;
  * @see RefreshablePagedListHolder
  * @see org.springframework.beans.MutableSortDefinition
  */
-public class PagedListHolder {
+public class PagedListHolder implements Serializable {
 
 	public static final int DEFAULT_PAGE_SIZE = 10;
 

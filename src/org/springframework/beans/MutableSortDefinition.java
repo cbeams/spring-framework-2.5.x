@@ -1,5 +1,7 @@
 package org.springframework.beans;
 
+import java.io.Serializable;
+
 /**
  * Mutable implementation of SortDefinition.
  * Supports toggling the ascending value on setting the same property again.
@@ -8,7 +10,7 @@ package org.springframework.beans;
  * @since 26.05.2003
  * @see #setToggleAscendingOnProperty
  */
-public class MutableSortDefinition implements SortDefinition {
+public class MutableSortDefinition implements SortDefinition, Serializable {
 
 	private String property = "";
 
