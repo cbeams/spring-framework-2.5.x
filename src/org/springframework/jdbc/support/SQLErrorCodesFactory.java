@@ -46,7 +46,7 @@ import org.springframework.core.io.Resource;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SQLErrorCodesFactory.java,v 1.18 2004-07-01 02:34:43 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.19 2004-07-22 13:13:43 trisberg Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -222,9 +222,24 @@ public class SQLErrorCodesFactory {
 				// should always be the case outside of test environments
 				String dbName = (String) dbmdInfo.get("DatabaseProductName");
 				String driverVersion = (String) dbmdInfo.get("DriverVersion");
-				// special check for DB2
+				// special check for DB2 -- !!! DEPRECATED AS OF Spring 1.1RC1 !!!
+				// !!! This will be removed in a future version !!!
+				// We have added wildcard support so you should add a
+				// <property name="databaseProductName"><value>DB2*</value></property>
+				// entry to your custom sql-error-cdes.xml instead
 				if (dbName != null && dbName.startsWith("DB2")) {
 					dbName = "DB2";
+				}
+				// special check for wild card match - we can match on a database name like 'DB2*' meaning
+				// the database name starts with 'DB2'
+				Iterator dbNameIter = this.rdbmsErrorCodes.keySet().iterator();
+				while (dbNameIter.hasNext()) {
+					String checkDbName = (String) dbNameIter.next();
+					if (checkDbName != null && checkDbName.endsWith("*")) {
+						if (dbName != null && dbName.startsWith(checkDbName.substring(0, (checkDbName.length() - 1)))) {
+							dbName = checkDbName;
+						}
+					}
 				}
 				if (dbName != null) {
 					this.dataSourceProductName.put(ds, dbName);
