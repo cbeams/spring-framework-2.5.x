@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.interceptor;
 
@@ -30,8 +30,9 @@ import org.apache.commons.logging.LogFactory;
  * @author Juergen Hoeller
  */
 public class DebugInterceptor implements MethodInterceptor, Serializable {
-	
-	protected final Log logger = LogFactory.getLog(getClass());
+
+	/** Static to avoid serializing the logger */
+	protected static final Log logger = LogFactory.getLog(DebugInterceptor.class);
 
 	private int count;
 
@@ -42,7 +43,7 @@ public class DebugInterceptor implements MethodInterceptor, Serializable {
 		}
 		try {
 			Object rval = invocation.proceed();
-			if (logger.isInfoEnabled()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("Invocation successfully returned (count=" + this.count + "): " + invocation);
 			}
 			return rval;
@@ -54,20 +55,19 @@ public class DebugInterceptor implements MethodInterceptor, Serializable {
 			throw ex;
 		}
 	}
-	
+
 	/**
 	 * Return the number of times this interceptor has been invoked.
 	 */
 	public int getCount() {
 		return this.count;
 	}
-    
-    /**
-     * Reset the invocation count to zero.
-     *
-     */
-    public void resetCount() {
-        this.count = 0;
-    }
+
+	/**
+	 * Reset the invocation count to zero.
+	 */
+	public void resetCount() {
+		this.count = 0;
+	}
 
 }
