@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2002-2004 the original author or authors.
  * 
@@ -17,44 +16,13 @@
 
 package org.springframework.beans;
 
+
 /**
- * Interface used for test beans.
  * 
  * @author Rod Johnson
- * @version $Id: ITestBean.java,v 1.6 2004-07-24 10:26:10 johnsonr Exp $
+ * @version $Id: Person.java,v 1.1 2004-07-24 10:26:10 johnsonr Exp $
  */
-public interface ITestBean extends Person {
-	
-	//int getAge(); -- inherited
-	
-	void setAge(int age);
-	
-	//String getName(); -- inherited
-	
-	void setName(String name);
-	
-	ITestBean getSpouse();
-	
-	void setSpouse(ITestBean spouse);
-	
-	/**
-	 * t null no error
-	 */
-	void exceptional(Throwable t) throws Throwable;
-	
-	Object returnsThis();
-	
-	INestedTestBean getDoctor();
-	
-	INestedTestBean getLawyer();
-
-	IndexedTestBean getNestedIndexedBean();
-	
-	/**
-	 * Increment the age by one
-	 * @return the previous age
-	 *
-	 */
-	int haveBirthday();
-
+public interface Person {
+	String getName();
+	int getAge();
 }

@@ -36,6 +36,7 @@ import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptorTests;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -45,6 +46,8 @@ import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.Person;
+import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.SerializationTestUtils;
@@ -54,7 +57,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.36 2004-07-24 09:46:45 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.37 2004-07-24 10:26:07 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -238,46 +241,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		Object proxy = createAopProxy(pf).getProxy();
 		
 		assertFalse(SerializationTestUtils.isSerializable(proxy));
-	}
-	
-	/**
-	 * Test classes for serialization
-	 */
-	protected interface Person {
-		String getName();
-		int getAge();
-	}
-	
-	protected static class SerializablePerson implements Person, Serializable {
-		private String name;
-		private int age;
-
-		public int getAge() {
-			return age;
-		}
-		
-		public void setAge(int age) {
-			this.age = age;
-		}
-		
-		public String getName() {
-			return name;
-		}
-		
-		public void setName(String name) {
-			this.name = name;
-		}
-		
-		public boolean equals(Object other) {
-			if (!(other instanceof SerializablePerson))
-				return false;
-			SerializablePerson p = (SerializablePerson) other;
-			return p.age == age && ObjectUtils.nullSafeEquals(name, p.name);
-		}
-	}
-	
-	public static class SerializableNopInterceptor extends NopInterceptor implements Serializable {
-		
 	}
 	
 	public void testSerializationSerializableTargetAndAdvice() throws Exception {
@@ -648,8 +611,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	static class ContextTestBean2 extends ContextTestBean {
 		protected void assertions(MethodInvocation invocation) {
 			assertTrue(invocation.getThis() == this);
-			assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
-					ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
+			assertTrue("Invocation should be on Person: " + invocation.getMethod(), 
+					Person.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
 		}
 	}
 

@@ -39,6 +39,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.Person;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
@@ -47,6 +48,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * Test cases for AOP FactoryBean, using XML bean factory.
@@ -54,7 +56,7 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.30 2004-06-19 22:36:29 johnsonr Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.31 2004-07-24 10:26:07 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -554,6 +556,43 @@ public class ProxyFactoryBeanTests extends TestCase {
 		}
 		catch (ClassCastException ex) {
 		}
+	}
+	
+	public void testSerializableSingletonProxy() throws Exception {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("serializationTests.xml", getClass()));
+		Person p = (Person) bf.getBean("serializableSingleton");
+		assertSame("Should be a Singleton", p, bf.getBean("serializableSingleton"));
+		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		assertEquals(p, p2);
+		assertNotSame(p, p2);
+		assertEquals("serializableSingleton", p2.getName());
+		
+		// Add unserializable advice
+		Advice nop = new NopInterceptor();
+		((Advised) p).addAdvice(nop);
+		// Check it still works
+		assertEquals(p2.getName(), p2.getName());
+		assertFalse("Not serializable because an interceptor isn't serializable", SerializationTestUtils.isSerializable(p));
+		
+		// Remove offending interceptor...
+		assertTrue(((Advised) p).removeAdvice(nop));
+		assertTrue("Serializable again because offending interceptor was removed", SerializationTestUtils.isSerializable(p));	
+	}
+	
+	public void testSerializablePrototypeProxy() throws Exception {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("serializationTests.xml", getClass()));
+		Person p = (Person) bf.getBean("serializablePrototype");
+		assertNotSame("Should not be a Singleton", p, bf.getBean("serializablePrototype"));
+		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		assertEquals(p, p2);
+		assertNotSame(p, p2);
+		assertEquals("serializablePrototype", p2.getName());
+	}
+	
+	public void testProxyNotSerializableBecauseOfAdvice() throws Exception {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("serializationTests.xml", getClass()));
+		Person p = (Person) bf.getBean("interceptorNotSerializableSingleton");
+		assertFalse("Not serializable because an interceptor isn't serializable", SerializationTestUtils.isSerializable(p));
 	}
 	
 
