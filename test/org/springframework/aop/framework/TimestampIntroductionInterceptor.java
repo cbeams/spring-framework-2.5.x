@@ -32,7 +32,7 @@ public class TimestampIntroductionInterceptor extends DelegatingIntroductionInte
 	 * @see org.springframework.core.TimeStamped#getTimeStamp()
 	 */
 	public long getTimeStamp() {
-		System.out.println("Invoked getTimeStamp method");
+		//System.out.println("Invoked getTimeStamp method");
 		return ts;
 	}
 

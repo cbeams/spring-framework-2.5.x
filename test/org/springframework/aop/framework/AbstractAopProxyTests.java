@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Id: AbstractAopProxyTests.java,v 1.5 2003-12-02 22:28:10 johnsonr Exp $
+ * @version $Id: AbstractAopProxyTests.java,v 1.6 2003-12-03 11:30:37 johnsonr Exp $
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 	
@@ -1012,26 +1012,34 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 	}
 
-	/*
 	public void testEquals() {
 		IOther a = new AllInstancesAreEqual();
 		IOther b = new AllInstancesAreEqual();
-		NopInterceptor i = new NopInterceptor();
+		NopInterceptor i1 = new NopInterceptor();
+		NopInterceptor i2 = new NopInterceptor();
 		ProxyFactory pfa = new ProxyFactory(a);
-		pfa.addInterceptor(i);
+		pfa.addInterceptor(i1);
 		ProxyFactory pfb = new ProxyFactory(b);
+		pfb.addInterceptor(i2);
 		IOther proxyA = (IOther) createProxy(pfa);
 		IOther proxyB = (IOther) createProxy(pfb);
-		
+	
+		assertEquals(pfa.getAdvisors().length, pfb.getAdvisors().length);
+	
 		assertTrue(a.equals(b));
 		assertTrue(proxyA.equals(proxyB));
-		assertTrue(a.equals(proxyA));
+		//assertTrue(a.equals(proxyA));
 		assertFalse(proxyA.equals(a));
-		
+	
 		// Equality checks were handled by the proxy
-		assertEquals(0, i.getCount());
+		assertEquals(0, i1.getCount());
+	
+		// When we invoke A, it's NopInterceptor will have count == 1
+		// and won't think it's equal to B's NopInterceptor
+		proxyA.absquatulate();
+		assertEquals(1, i1.getCount());
+		assertFalse(proxyA.equals(proxyB));
 	}
-	*/
 	
 
 }
