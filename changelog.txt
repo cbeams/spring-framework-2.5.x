@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.70 2004-01-02 00:31:13 jhoeller Exp $
+$Id: changelog.txt,v 1.71 2004-01-04 23:46:56 jhoeller Exp $
 
 
-Changes in version 1.0 M4 (02.01.2003)
+Changes in version 1.0 M4 (04.01.2003)
 --------------------------------------
 
 Package org.springframework.aop
@@ -72,12 +72,14 @@ Package org.springframework.jdbc
 * moved SQLExceptionTranslator interface plus implementations from package jdbc.core to jdbc.support
 * moved DataFieldMaxValueIncrementer interface plus implementations from jdbc.core.support to jdbc.support.incrementer
 * reworked QueryExecutor interface into NativeJdbcExtractor in package jdbc.support
-* reworked CommonsDbcpQueryExecutor implementation into CommonsDbcpNativeJdbcExtractor in package jdbc.support
-* added SimpleNativeJdbcExtractor for any pools that just wrap Connections but not Statements/ResultSets
-* introduced BlobCreator interface plus DefaultBlobCreator implementation in package jdbc.support.lob
-* added OracleBlobCreator implementation for the peculiar requirements of Oracle's JDBC driver
-* dissolved setExceptionTranslator on RdbmsOperation, set an appropriately configured JdbcTemplate instead
-* added DatabaseStartupValidator that allows to defer the initialization of database-dependent components 
+* reworked CommonsDbcpQueryExecutor implementation into CommonsDbcpNativeJdbcExtractor for DBCP 1.1
+* added JBossNativeJdbcExtractor for the JBoss 3.2 connection pool
+* added SimpleNativeJdbcExtractor for any pools that just wrap Connections but not Statements
+* introduced LobHandler and BlobCreator interfaces in package jdbc.support.lob
+* added DefaultLobHandler for any standard JDBC compliant driver
+* added OracleLobHandler implementation for the peculiar requirements of Oracle's JDBC driver
+* added DatabaseStartupValidator that allows to defer the initialization of database-dependent components
+* removed setExceptionTranslator from RdbmsOperation, set an appropriately configured JdbcTemplate instead
 
 Package org.springframework.orm
 * introduced support for iBATIS Database Layer, in package org.springframework.orm.ibatis
@@ -106,7 +108,7 @@ Package org.springframework.transaction
 * reworked transaction synchronization, allowing for synchronization even on "empty" transactions
 * removed TransactionProxyFactoryBean's "proxyInterfacesOnly" property in favour of ProxyConfig's "proxyTargetClass"
 * TransactionInterceptor now keeps TransactionStatus in its own ThreadLocal, not MethodInvocation
-* introduced PropertiesTransactionAttributeSource, for reusing TransactionFactoryProxyBean's parsing standalone
+* merged TransactionFactoryProxyBean's parsing into NameMatchTransactionAttributeSource
 * added TransactionAttributeSourceTransactionAroundAdvisor to allow pointcut to be used for transaction interception
 
 Package org.springframework.ui
@@ -124,7 +126,7 @@ Package org.springframework.web
 * added "isEmpty" method to MultipartFile interface, for checking whether a file has been chosen in a multipart form
 * renamed CommonsMultipartResolver's "maximumFileSize"/"maximumInMemorySize" to "maxUploadSize"/"maxInMemorySize"
 * renamed CosMultipartResolver's "maximumFileSize" to "maxUploadSize"
-* reworked CommonsMultipartResolver's/CosMultipartResolver's "uploadTempDir" from String to java.io.File
+* reworked CommonsMultipartResolver's/CosMultipartResolver's "uploadTempDir" from String to core.io.Resource
 * fixed multipart cleanup with a local MultipartResolver in DispatcherServlet
 * added "getRequiredWebApplicationContext" method to WebApplicationContextUtils
 * dissolved support for exposing "config" objects as ServletContext attributes
@@ -467,3 +469,4 @@ Changes in version 0.9 (25.6.2003)
 * (many new convenience classes and methods)
 * (too many minor improvements to list)
 * (lots of minor bugfixes)
+
