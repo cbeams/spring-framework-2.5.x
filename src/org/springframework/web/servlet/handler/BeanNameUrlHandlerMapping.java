@@ -1,5 +1,8 @@
 package org.springframework.web.servlet.handler;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -23,24 +26,21 @@ import org.springframework.util.StringUtils;
  */
 public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	
-	/** Delimiter between multiple URLs in mappings */
-	public static final String MULTI_URL_DELIMITER = " ";
-
 	public void initApplicationContext() {
 		logger.debug("Looking for URL mappings...");
 		String[] urlMaps = getApplicationContext().getBeanDefinitionNames();
 
 		// take anything beginning with a slash in the bean name
 		for (int i = 0; i < urlMaps.length; i++) {
-			String url = checkForUrl(urlMaps[i]);
-			if (url != null) {
+			String[] urls = checkForUrl(urlMaps[i]);
+			if (urls != null) {
 				logger.debug("Found URL mapping [" + urlMaps[i] + "]");
-				Object handler = initHandler(getApplicationContext().getBean(urlMaps[i]), url);
+				Object handler = initHandler(getApplicationContext().getBean(urlMaps[i]),
+				                             StringUtils.arrayToCommaDelimitedString(urls));
 
 				// create a mapping to each part of the path
-				String[] mappedUrls = StringUtils.delimitedListToStringArray(url, MULTI_URL_DELIMITER);
-				for (int j = 0; j < mappedUrls.length; j++) {
-					registerHandler(mappedUrls[j], handler);
+				for (int j = 0; j < urls.length; j++) {
+					registerHandler(urls[j], handler);
 				}
 			}
 			else {
@@ -49,17 +49,22 @@ public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 		}
 	}
 
-	private String checkForUrl(String beanName) {
+	/**
+	 * Check name and aliases of the given bean for URLs,
+	 * detected by starting with "/".
+	 */
+	private String[] checkForUrl(String beanName) {
+		List urls = new ArrayList();
 		if (beanName.startsWith("/")) {
-			return beanName;
+			urls.add(beanName);
 		}
 		String[] aliases = getApplicationContext().getAliases(beanName);
 		for (int j = 0; j < aliases.length; j++) {
 			if (aliases[j].startsWith("/")) {
-				return aliases[j];
+				urls.add(aliases[j]);
 			}
 		}
-		return null;
+		return (String[]) urls.toArray(new String[urls.size()]);
 	}
 
 }
