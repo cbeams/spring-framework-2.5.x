@@ -8,15 +8,15 @@ import org.springframework.rules.Constraint;
 
 /**
  * A predicate that constrains a bean property in some way.
- * 
+ *
  * @author Keith Donald
  */
 public interface PropertyConstraint extends Constraint {
-    
-    /**
-     * Returns the constrained property name.
-     * 
-     * @return The property name
-     */
-    public String getPropertyName();
+
+	/**
+	 * Returns the constrained property name.
+	 *
+	 * @return The property name
+	 */
+	public String getPropertyName();
 }

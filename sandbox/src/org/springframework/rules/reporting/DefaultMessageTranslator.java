@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -22,6 +22,7 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -34,8 +35,8 @@ import org.springframework.rules.constraint.ParameterizedBinaryConstraint;
 import org.springframework.rules.constraint.Range;
 import org.springframework.rules.constraint.StringLengthConstraint;
 import org.springframework.rules.constraint.property.CompoundPropertyConstraint;
-import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.ParameterizedPropertyConstraint;
+import org.springframework.rules.constraint.property.PropertiesConstraint;
 import org.springframework.rules.constraint.property.PropertyConstraint;
 import org.springframework.rules.constraint.property.PropertyValueConstraint;
 import org.springframework.util.Assert;
@@ -48,205 +49,208 @@ import org.springframework.util.visitor.Visitor;
  * @author Keith Donald
  */
 public class DefaultMessageTranslator implements Visitor {
-    protected static final Log logger = LogFactory
-            .getLog(DefaultMessageTranslator.class);
 
-    private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
+	protected static final Log logger = LogFactory
+			.getLog(DefaultMessageTranslator.class);
 
-    private boolean appendValue = false;
+	private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
 
-    PropertyResults results;
+	private boolean appendValue = false;
 
-    private List args = new ArrayList();
+	PropertyResults results;
 
-    private MessageSource messages;
+	private List args = new ArrayList();
 
-    public DefaultMessageTranslator(MessageSource messages) {
-        setMessageSource(messages);
-    }
+	private MessageSource messages;
 
-    public void setMessageSource(MessageSource messages) {
-        Assert.notNull(messages);
-        this.messages = messages;
-    }
+	public DefaultMessageTranslator(MessageSource messages) {
+		setMessageSource(messages);
+	}
 
-    public String getMessage(Constraint constraint) {
-        String objectName = null;
-        if (constraint instanceof PropertyConstraint) {
-            objectName = ((PropertyConstraint)constraint).getPropertyName();
-        }
-        String message = buildMessage(objectName, null, constraint, Locale.getDefault());
-        return message;
-    }
+	public void setMessageSource(MessageSource messageSource) {
+		Assert.notNull(messageSource, "messageSource is required");
+		this.messages = messageSource;
+	}
 
-    public String getMessage(String objectName, Constraint constraint) {
-        return buildMessage(objectName, null, constraint, Locale.getDefault());
-    }
+	public String getMessage(Constraint constraint) {
+		String objectName = null;
+		if (constraint instanceof PropertyConstraint) {
+			objectName = ((PropertyConstraint) constraint).getPropertyName();
+		}
+		String message = buildMessage(objectName, null, constraint, Locale.getDefault());
+		return message;
+	}
 
-    public String getMessage(String objectName, Object rejectedValue,
-            Constraint constraint) {
-        return buildMessage(objectName, rejectedValue, constraint, Locale
-                .getDefault());
-    }
+	public String getMessage(String objectName, Constraint constraint) {
+		return buildMessage(objectName, null, constraint, Locale.getDefault());
+	}
 
-    public String getMessage(String objectName, ValidationResults results) {
-        return buildMessage(objectName, results.getRejectedValue(), results
-                .getViolatedConstraint(), Locale.getDefault());
-    }
+	public String getMessage(String objectName, Object rejectedValue,
+			Constraint constraint) {
+		return buildMessage(objectName, rejectedValue, constraint, Locale
+				.getDefault());
+	}
 
-    public String getMessage(PropertyResults results) {
-        Assert.notNull(results);
-        return buildMessage(results.getPropertyName(), results
-                .getRejectedValue(), results.getViolatedConstraint(), Locale
-                .getDefault());
-    }
+	public String getMessage(String objectName, ValidationResults results) {
+		return buildMessage(objectName, results.getRejectedValue(), results
+				.getViolatedConstraint(), Locale.getDefault());
+	}
 
-    private String buildMessage(String objectName, Object rejectedValue,
-            Constraint constraint, Locale locale) {
-        StringBuffer buf = new StringBuffer(255);
-        MessageSourceResolvable[] args = resolveArguments(constraint);
-        if (logger.isDebugEnabled()) {
-            logger.debug(DefaultObjectStyler.call(args));
-        }
-        if (objectName != null) {
-            buf.append(messages.getMessage(resolvableObjectName(objectName),
-                    locale));
-            buf.append(' ');
-            if (appendValue) {
-                if (rejectedValue != null) {
-                    buf.append("'" + rejectedValue + "'");
-                    buf.append(' ');
-                }
-            }
-        }
-        for (int i = 0; i < args.length - 1; i++) {
-            MessageSourceResolvable arg = args[i];
-            buf.append(messages.getMessage(arg, locale));
-            buf.append(' ');
-        }
-        buf.append(messages.getMessage(args[args.length - 1], locale));
-        buf.append(".");
-        return buf.toString();
-    }
+	public String getMessage(PropertyResults results) {
+		Assert.notNull(results, "No property results specified");
+		return buildMessage(results.getPropertyName(), results
+				.getRejectedValue(), results.getViolatedConstraint(), Locale
+				.getDefault());
+	}
 
-    private MessageSourceResolvable[] resolveArguments(Constraint constraint) {
-        visitorSupport.invokeVisit(this, constraint);
-        return (MessageSourceResolvable[])args
-                .toArray(new MessageSourceResolvable[0]);
-    }
+	private String buildMessage(String objectName, Object rejectedValue,
+			Constraint constraint, Locale locale) {
+		StringBuffer buf = new StringBuffer(255);
+		MessageSourceResolvable[] args = resolveArguments(constraint);
+		if (logger.isDebugEnabled()) {
+			logger.debug(DefaultObjectStyler.call(args));
+		}
+		if (objectName != null) {
+			buf.append(messages.getMessage(resolvableObjectName(objectName),
+					locale));
+			buf.append(' ');
+			if (appendValue) {
+				if (rejectedValue != null) {
+					buf.append("'" + rejectedValue + "'");
+					buf.append(' ');
+				}
+			}
+		}
+		for (int i = 0; i < args.length - 1; i++) {
+			MessageSourceResolvable arg = args[i];
+			buf.append(messages.getMessage(arg, locale));
+			buf.append(' ');
+		}
+		buf.append(messages.getMessage(args[args.length - 1], locale));
+		buf.append(".");
+		return buf.toString();
+	}
 
-    void visit(CompoundPropertyConstraint rule) {
-        visitorSupport.invokeVisit(this, rule.getPredicate());
-    }
+	private MessageSourceResolvable[] resolveArguments(Constraint constraint) {
+		visitorSupport.invokeVisit(this, constraint);
+		return (MessageSourceResolvable[]) args
+				.toArray(new MessageSourceResolvable[0]);
+	}
 
-    void visit(PropertiesConstraint e) {
-        add(
-                getMessageCode(e.getPredicate()),
-                new Object[] { resolvableObjectName(e.getOtherPropertyName()) },
-                e.toString());
-    }
+	void visit(CompoundPropertyConstraint rule) {
+		visitorSupport.invokeVisit(this, rule.getPredicate());
+	}
 
-    void visit(ParameterizedPropertyConstraint e) {
-        add(getMessageCode(e.getPredicate()),
-                new Object[] { e.getParameter() }, e.toString());
-    }
+	void visit(PropertiesConstraint e) {
+		add(
+				getMessageCode(e.getPredicate()),
+				new Object[]{resolvableObjectName(e.getOtherPropertyName())},
+				e.toString());
+	}
 
-    private void add(String code, Object[] args, String defaultMessage) {
-        MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
-                new String[] { code }, args, defaultMessage);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding resolvable: " + resolvable);
-        }
-        this.args.add(resolvable);
-    }
+	void visit(ParameterizedPropertyConstraint e) {
+		add(getMessageCode(e.getPredicate()),
+				new Object[]{e.getParameter()}, e.toString());
+	}
 
-    private MessageSourceResolvable resolvableObjectName(String objectName) {
-        return new DefaultMessageSourceResolvable(new String[] { objectName },
-                null, new DefaultBeanPropertyNameRenderer()
-                        .renderShortName(objectName));
-    }
+	private void add(String code, Object[] args, String defaultMessage) {
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
+				new String[]{code}, args, defaultMessage);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Adding resolvable: " + resolvable);
+		}
+		this.args.add(resolvable);
+	}
 
-    void visit(PropertyValueConstraint valueConstraint) {
-        visitorSupport.invokeVisit(this, valueConstraint.getPredicate());
-    }
+	private MessageSourceResolvable resolvableObjectName(String objectName) {
+		return new DefaultMessageSourceResolvable(new String[]{objectName},
+				null, new DefaultBeanPropertyNameRenderer()
+				.renderShortName(objectName));
+	}
 
-    void visit(And and) {
-        Iterator it = and.iterator();
-        while (it.hasNext()) {
-            Constraint p = (Constraint)it.next();
-            visitorSupport.invokeVisit(this, p);
-            if (it.hasNext()) {
-                add("and", null, "add");
-            }
-        }
-    }
+	void visit(PropertyValueConstraint valueConstraint) {
+		visitorSupport.invokeVisit(this, valueConstraint.getPredicate());
+	}
 
-    void visit(Or or) {
-        Iterator it = or.iterator();
-        while (it.hasNext()) {
-            Constraint p = (Constraint)it.next();
-            visitorSupport.invokeVisit(this, p);
-            if (it.hasNext()) {
-                add("or", null, "or");
-            }
-        }
-    }
+	void visit(And and) {
+		Iterator it = and.iterator();
+		while (it.hasNext()) {
+			Constraint p = (Constraint) it.next();
+			visitorSupport.invokeVisit(this, p);
+			if (it.hasNext()) {
+				add("and", null, "add");
+			}
+		}
+	}
 
-    void visit(Not not) {
-        add("not", null, "not");
-        visitorSupport.invokeVisit(this, not.getPredicate());
-    }
+	void visit(Or or) {
+		Iterator it = or.iterator();
+		while (it.hasNext()) {
+			Constraint p = (Constraint) it.next();
+			visitorSupport.invokeVisit(this, p);
+			if (it.hasNext()) {
+				add("or", null, "or");
+			}
+		}
+	}
 
-    //@TODO - consider standard visitor here...
-    void visit(StringLengthConstraint constraint) {
-        ClosureResultConstraint c = (ClosureResultConstraint)constraint
-                .getPredicate();
-        Object p = c.getPredicate();
-        MessageSourceResolvable resolvable;
-        if (p instanceof ParameterizedBinaryConstraint) {
-            resolvable = handleParameterizedBinaryPredicate((ParameterizedBinaryConstraint)p);
-        }
-        else {
-            resolvable = handleRange((Range)p);
-        }
-        Object[] args = new Object[] { resolvable };
-        add(getMessageCode(constraint), args, constraint.toString());
-    }
+	void visit(Not not) {
+		add("not", null, "not");
+		visitorSupport.invokeVisit(this, not.getPredicate());
+	}
 
-    void visit(ClosureResultConstraint c) {
-        visitorSupport.invokeVisit(this, c.getPredicate());
-    }
+	//@TODO - consider standard visitor here...
+	void visit(StringLengthConstraint constraint) {
+		ClosureResultConstraint c = (ClosureResultConstraint) constraint
+				.getPredicate();
+		Object p = c.getPredicate();
+		MessageSourceResolvable resolvable;
+		if (p instanceof ParameterizedBinaryConstraint) {
+			resolvable = handleParameterizedBinaryPredicate((ParameterizedBinaryConstraint) p);
+		}
+		else {
+			resolvable = handleRange((Range) p);
+		}
+		Object[] args = new Object[]{resolvable};
+		add(getMessageCode(constraint), args, constraint.toString());
+	}
 
-    private MessageSourceResolvable handleParameterizedBinaryPredicate(
-            ParameterizedBinaryConstraint p) {
-        MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
-                new String[] { getMessageCode(p.getPredicate()) },
-                new Object[] { p.getParameter() }, p.toString());
-        return resolvable;
-    }
+	void visit(ClosureResultConstraint c) {
+		visitorSupport.invokeVisit(this, c.getPredicate());
+	}
 
-    private MessageSourceResolvable handleRange(Range r) {
-        MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
-                new String[] { getMessageCode(r) }, new Object[] { r.getMin(),
-                        r.getMax() }, r.toString());
-        return resolvable;
-    }
+	private MessageSourceResolvable handleParameterizedBinaryPredicate(
+			ParameterizedBinaryConstraint p) {
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
+				new String[]{getMessageCode(p.getPredicate())},
+				new Object[]{p.getParameter()}, p.toString());
+		return resolvable;
+	}
 
-    void visit(Constraint constraint) {
-        if (constraint instanceof Range) {
-            this.args.add(handleRange((Range)constraint));
-        }
-        else {
-            add(getMessageCode(constraint), null, constraint.toString());
-        }
-    }
+	private MessageSourceResolvable handleRange(Range r) {
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(
+				new String[]{getMessageCode(r)}, new Object[]{r.getMin(),
+																											r.getMax()}, r.toString());
+		return resolvable;
+	}
 
-    private String getMessageCode(Object o) {
-        if (o instanceof TypeResolvable) {
-            String type = ((TypeResolvable)o).getType();
-            if (type != null) { return type; }
-        }
-        return ClassUtils.getShortNameAsProperty(o.getClass());
-    }
+	void visit(Constraint constraint) {
+		if (constraint instanceof Range) {
+			this.args.add(handleRange((Range) constraint));
+		}
+		else {
+			add(getMessageCode(constraint), null, constraint.toString());
+		}
+	}
+
+	private String getMessageCode(Object o) {
+		if (o instanceof TypeResolvable) {
+			String type = ((TypeResolvable) o).getType();
+			if (type != null) {
+				return type;
+			}
+		}
+		return ClassUtils.getShortNameAsProperty(o.getClass());
+	}
 
 }

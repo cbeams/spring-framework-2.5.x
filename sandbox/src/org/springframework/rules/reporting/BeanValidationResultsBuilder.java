@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -29,78 +29,79 @@ import org.springframework.rules.constraint.property.PropertyConstraint;
  * @author Keith Donald
  */
 public class BeanValidationResultsBuilder extends ValidationResultsBuilder
-        implements BeanValidationResults {
-    private String currentProperty;
+		implements BeanValidationResults {
 
-    private Object currentPropertyValue;
+	private String currentProperty;
 
-    private Map beanResults = new HashMap();
+	private Object currentPropertyValue;
 
-    private PropertyAccessStrategy beanPropertyAccessStrategy;
+	private Map beanResults = new HashMap();
 
-    public BeanValidationResultsBuilder(Object bean) {
-        super();
-        if (bean instanceof PropertyAccessStrategy) {
-            this.beanPropertyAccessStrategy = (PropertyAccessStrategy)bean;
-        }
-        else {
-            this.beanPropertyAccessStrategy = new BeanPropertyAccessStrategy(
-                    bean);
-        }
-    }
+	private PropertyAccessStrategy beanPropertyAccessStrategy;
 
-    public Map getResults() {
-        return Collections.unmodifiableMap(beanResults);
-    }
+	public BeanValidationResultsBuilder(Object bean) {
+		super();
+		if (bean instanceof PropertyAccessStrategy) {
+			this.beanPropertyAccessStrategy = (PropertyAccessStrategy) bean;
+		}
+		else {
+			this.beanPropertyAccessStrategy = new BeanPropertyAccessStrategy(
+					bean);
+		}
+	}
 
-    public PropertyResults getResults(String propertyName) {
-        return (PropertyResults)beanResults.get(propertyName);
-    }
+	public Map getResults() {
+		return Collections.unmodifiableMap(beanResults);
+	}
 
-    public int getViolatedCount() {
-        int count = 0;
-        Iterator it = beanResults.values().iterator();
-        while (it.hasNext()) {
-            count += ((PropertyResults)it.next()).getViolatedCount();
-        }
-        return count;
-    }
+	public PropertyResults getResults(String propertyName) {
+		return (PropertyResults) beanResults.get(propertyName);
+	}
 
-    protected void constraintViolated(Constraint constraint) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Done] collecting results for property '"
-                    + getCurrentPropertyName() + "'.  Constraints violated: ["
-                    + constraint + "]");
-        }
-        PropertyResults results = new PropertyResults(getCurrentPropertyName(),
-                getCurrentPropertyValue(), constraint);
-        beanResults.put(getCurrentPropertyName(), results);
-    }
+	public int getViolatedCount() {
+		int count = 0;
+		Iterator it = beanResults.values().iterator();
+		while (it.hasNext()) {
+			count += ((PropertyResults) it.next()).getViolatedCount();
+		}
+		return count;
+	}
 
-    protected void constraintSatisfied() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Done] collecting results for property '"
-                    + getCurrentPropertyName() + "'.  All constraints met.");
-        }
-    }
+	protected void constraintViolated(Constraint constraint) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("[Done] collecting results for property '"
+					+ getCurrentPropertyName() + "'.  Constraints violated: ["
+					+ constraint + "]");
+		}
+		PropertyResults results = new PropertyResults(getCurrentPropertyName(),
+				getCurrentPropertyValue(), constraint);
+		beanResults.put(getCurrentPropertyName(), results);
+	}
 
-    public String getCurrentPropertyName() {
-        return currentProperty;
-    }
+	protected void constraintSatisfied() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("[Done] collecting results for property '"
+					+ getCurrentPropertyName() + "'.  All constraints met.");
+		}
+	}
 
-    public Object getCurrentPropertyValue() {
-        return currentPropertyValue;
-    }
+	public String getCurrentPropertyName() {
+		return currentProperty;
+	}
 
-    public void setCurrentBeanPropertyExpression(
-            PropertyConstraint expression) {
-        this.currentProperty = expression.getPropertyName();
-        this.currentPropertyValue = getPropertyValue(this.currentProperty);
-        super.clear();
-    }
+	public Object getCurrentPropertyValue() {
+		return currentPropertyValue;
+	}
 
-    private Object getPropertyValue(String propertyName) {
-        return beanPropertyAccessStrategy.getPropertyValue(propertyName);
-    }
+	public void setCurrentBeanPropertyExpression(
+			PropertyConstraint expression) {
+		this.currentProperty = expression.getPropertyName();
+		this.currentPropertyValue = getPropertyValue(this.currentProperty);
+		super.clear();
+	}
+
+	private Object getPropertyValue(String propertyName) {
+		return beanPropertyAccessStrategy.getPropertyValue(propertyName);
+	}
 
 }

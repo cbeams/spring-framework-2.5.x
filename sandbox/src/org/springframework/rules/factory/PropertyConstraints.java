@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,77 +21,79 @@ import org.springframework.util.Assert;
 
 /**
  * Helper class for creating bean property constraints.
- * 
+ *
  * @author Keith Donald
  */
 public class PropertyConstraints {
-    private Constraints c = Constraints.instance();
-    private String propertyName;
 
-    public PropertyConstraints(String propertyName) {
-        setPropertyName(propertyName);
-    }
+	private Constraints c = Constraints.instance();
 
-    public void setPropertyName(String propertyName) {
-        Assert.notNull(propertyName);
-        this.propertyName = propertyName;
-    }
+	private String propertyName;
 
-    public PropertyConstraint all(Constraint[] valueConstraints) {
-        return c.all(propertyName, valueConstraints);
-    }
+	public PropertyConstraints(String propertyName) {
+		setPropertyName(propertyName);
+	}
 
-    public PropertyConstraint any(Constraint[] valueConstraints) {
-        return c.any(propertyName, valueConstraints);
-    }
+	public void setPropertyName(String propertyName) {
+		Assert.notNull(propertyName, "propertyName is required");
+		this.propertyName = propertyName;
+	}
 
-    public PropertyConstraint eq(Object value) {
-        return c.eq(propertyName, value);
-    }
+	public PropertyConstraint all(Constraint[] valueConstraints) {
+		return c.all(propertyName, valueConstraints);
+	}
 
-    public PropertyConstraint lt(Object value) {
-        return c.lt(propertyName, value);
-    }
+	public PropertyConstraint any(Constraint[] valueConstraints) {
+		return c.any(propertyName, valueConstraints);
+	}
 
-    public PropertyConstraint lte(Object value) {
-        return c.lte(propertyName, value);
-    }
+	public PropertyConstraint eq(Object value) {
+		return c.eq(propertyName, value);
+	}
 
-    public PropertyConstraint gt(Object value) {
-        return c.gte(propertyName, value);
-    }
+	public PropertyConstraint lt(Object value) {
+		return c.lt(propertyName, value);
+	}
 
-    public PropertyConstraint gte(Object value) {
-        return c.gte(propertyName, value);
-    }
+	public PropertyConstraint lte(Object value) {
+		return c.lte(propertyName, value);
+	}
 
-    public PropertyConstraint eqProperty(String otherPropertyName) {
-        return c.eqProperty(propertyName, otherPropertyName);
-    }
+	public PropertyConstraint gt(Object value) {
+		return c.gte(propertyName, value);
+	}
 
-    public PropertyConstraint ltProperty(String otherPropertyName) {
-        return c.ltProperty(propertyName, otherPropertyName);
-    }
+	public PropertyConstraint gte(Object value) {
+		return c.gte(propertyName, value);
+	}
 
-    public PropertyConstraint lteProperty(String otherPropertyName) {
-        return c.lteProperty(propertyName, otherPropertyName);
-    }
+	public PropertyConstraint eqProperty(String otherPropertyName) {
+		return c.eqProperty(propertyName, otherPropertyName);
+	}
 
-    public PropertyConstraint gtProperty(String otherPropertyName) {
-        return c.gtProperty(propertyName, otherPropertyName);
-    }
+	public PropertyConstraint ltProperty(String otherPropertyName) {
+		return c.ltProperty(propertyName, otherPropertyName);
+	}
 
-    public PropertyConstraint gteProperty(String otherPropertyName) {
-        return c.gteProperty(propertyName, otherPropertyName);
-    }
+	public PropertyConstraint lteProperty(String otherPropertyName) {
+		return c.lteProperty(propertyName, otherPropertyName);
+	}
 
-    public PropertyConstraint inRange(Comparable min, Comparable max) {
-        return c.inRange(propertyName, min, max);
-    }
+	public PropertyConstraint gtProperty(String otherPropertyName) {
+		return c.gtProperty(propertyName, otherPropertyName);
+	}
 
-    public PropertyConstraint inRangeProperties(String minProperty,
-            String maxProperty) {
-        return c.inRangeProperties(propertyName, minProperty, maxProperty);
-    }
+	public PropertyConstraint gteProperty(String otherPropertyName) {
+		return c.gteProperty(propertyName, otherPropertyName);
+	}
+
+	public PropertyConstraint inRange(Comparable min, Comparable max) {
+		return c.inRange(propertyName, min, max);
+	}
+
+	public PropertyConstraint inRangeProperties(String minProperty,
+			String maxProperty) {
+		return c.inRangeProperties(propertyName, minProperty, maxProperty);
+	}
 
 }

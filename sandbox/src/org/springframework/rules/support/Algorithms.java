@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -28,107 +28,112 @@ import org.springframework.rules.factory.Closures;
 /**
  * Convenience utility class which provides a number of algorithms involving
  * functor objects such as predicates.
- * 
+ *
  * @author Keith Donald
  */
 public class Algorithms {
-    private static final Algorithms INSTANCE = new Algorithms();
 
-    private Closures closures = Closures.instance();
+	private static final Algorithms INSTANCE = new Algorithms();
 
-    public static Algorithms instance() {
-        return INSTANCE;
-    }
+	private Closures closures = Closures.instance();
 
-    public boolean any(Collection collection, Constraint constraint) {
-        return any(collection.iterator(), constraint);
-    }
+	public static Algorithms instance() {
+		return INSTANCE;
+	}
 
-    /**
-     * Returns true if any elements in the given collection meet the specified
-     * predicate condition.
-     * 
-     * @param collection
-     * @param constraint
-     * @return true or false
-     */
-    public boolean any(Iterator it, Constraint constraint) {
-        return findFirst(it, constraint) != null;
-    }
+	public boolean any(Collection collection, Constraint constraint) {
+		return any(collection.iterator(), constraint);
+	}
 
-    public boolean all(Collection collection, Constraint constraint) {
-        return all(collection.iterator(), constraint);
-    }
-    
-    /**
-     * Returns true if any elements in the given collection meet the specified
-     * predicate condition.
-     * 
-     * @param collection
-     * @param constraint
-     * @return true or false
-     */
-    public boolean all(Iterator it, Constraint constraint) {
-        while (it.hasNext()) {
-            if (!constraint.test(it.next())) { return false; }
-        }
-        return true;
-    }
+	/**
+	 * Returns true if any elements in the given collection meet the specified
+	 * predicate condition.
+	 *
+	 * @param collection
+	 * @param constraint
+	 * @return true or false
+	 */
+	public boolean any(Iterator it, Constraint constraint) {
+		return findFirst(it, constraint) != null;
+	}
 
-    /**
-     * Find the first element in the collection matching the specified unary
-     * predicate.
-     * 
-     * @param collection
-     *            the collection
-     * @param constraint
-     *            the predicate
-     * @return The first object match, or null if no match
-     */
-    public Object findFirst(Collection collection, Constraint constraint) {
-        return findFirst(collection.iterator(), constraint);
-    }
+	public boolean all(Collection collection, Constraint constraint) {
+		return all(collection.iterator(), constraint);
+	}
 
-    /**
-     * Find the first element in the collection matching the specified unary
-     * predicate.
-     * 
-     * @param collection
-     *            the collection
-     * @param constraint
-     *            the predicate
-     * @return The first object match, or null if no match
-     */
-    public Object findFirst(Iterator it, Constraint constraint) {
-        while (it.hasNext()) {
-            Object element = it.next();
-            if (constraint.test(element)) { return element; }
-        }
-        return null;
-    }
+	/**
+	 * Returns true if any elements in the given collection meet the specified
+	 * predicate condition.
+	 *
+	 * @param collection
+	 * @param constraint
+	 * @return true or false
+	 */
+	public boolean all(Iterator it, Constraint constraint) {
+		while (it.hasNext()) {
+			if (!constraint.test(it.next())) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-    public Collection findAll(Collection collection, Constraint constraint) {
-        return findAll(collection.iterator(), constraint);
-    }
+	/**
+	 * Find the first element in the collection matching the specified unary
+	 * predicate.
+	 *
+	 * @param collection
+	 *            the collection
+	 * @param constraint
+	 *            the predicate
+	 * @return The first object match, or null if no match
+	 */
+	public Object findFirst(Collection collection, Constraint constraint) {
+		return findFirst(collection.iterator(), constraint);
+	}
 
-    public Collection findAll(Iterator it, final Constraint constraint) {
-        final Collection results = new ArrayList();
-        ProcessTemplate generator = closures.createFilteredGenerator(
-                new IteratorElementGenerator(it), constraint);
-        generator.run(new Block() {
-            protected void handle(Object element) {
-                results.add(element);
-            }
-        });
-        return results;
-    }
+	/**
+	 * Find the first element in the collection matching the specified unary
+	 * predicate.
+	 *
+	 * @param collection
+	 *            the collection
+	 * @param constraint
+	 *            the predicate
+	 * @return The first object match, or null if no match
+	 */
+	public Object findFirst(Iterator it, Constraint constraint) {
+		while (it.hasNext()) {
+			Object element = it.next();
+			if (constraint.test(element)) {
+				return element;
+			}
+		}
+		return null;
+	}
 
-    public void forEach(Collection collection, Closure closure) {
-        forEach(collection.iterator(), closure);
-    }
+	public Collection findAll(Collection collection, Constraint constraint) {
+		return findAll(collection.iterator(), constraint);
+	}
 
-    public void forEach(Iterator it, Closure closure) {
-        new IteratorElementGenerator(it).run(closure);
-    }
+	public Collection findAll(Iterator it, final Constraint constraint) {
+		final Collection results = new ArrayList();
+		ProcessTemplate generator = closures.createFilteredGenerator(
+				new IteratorElementGenerator(it), constraint);
+		generator.run(new Block() {
+			protected void handle(Object element) {
+				results.add(element);
+			}
+		});
+		return results;
+	}
+
+	public void forEach(Collection collection, Closure closure) {
+		forEach(collection.iterator(), closure);
+	}
+
+	public void forEach(Iterator it, Closure closure) {
+		new IteratorElementGenerator(it).run(closure);
+	}
 
 }

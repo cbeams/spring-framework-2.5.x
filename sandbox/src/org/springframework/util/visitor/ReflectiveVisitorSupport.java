@@ -210,7 +210,7 @@ public class ReflectiveVisitorSupport {
      * @see org.springframework.utils.visitor.Visitor#visit(java.lang.Object)
      */
     public final Object invokeVisit(Visitor visitor, Object argument) {
-        Assert.notNull(visitor);
+        Assert.notNull(visitor, "No Visitor specified");
         if (argument instanceof Visitable) {
             callAccept((Visitable)argument, visitor);
             return null;

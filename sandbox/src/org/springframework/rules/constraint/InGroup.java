@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,30 +24,31 @@ import org.springframework.rules.Constraint;
 /**
  * A predicate that tests if an argument is one of a group.  Similiar to
  * a database's 'in' operator, and more convenient than using a bunch of ORs.
- * 
+ *
  * @author  Keith Donald
  */
 public class InGroup implements Constraint {
-    private Set group;
-    
-    public InGroup(Set group) {
-        this.group = new HashSet(group);
-    }
-    
-    public InGroup(Object[] group) {
-        this.group = new HashSet(Arrays.asList(group));
-    }
-    
-    /**
-     * Tests the variable argument value is in this group.
-     * 
-     * @see org.springframework.rules.Constraint#test(java.lang.Object)
-     */
-    public boolean test(Object value) {
-        return group.contains(value);
-    }
 
-    public String toString() {
-        return "inGroup [" + group + "]";
-    }
+	private Set group;
+
+	public InGroup(Set group) {
+		this.group = new HashSet(group);
+	}
+
+	public InGroup(Object[] group) {
+		this.group = new HashSet(Arrays.asList(group));
+	}
+
+	/**
+	 * Tests the variable argument value is in this group.
+	 *
+	 * @see org.springframework.rules.Constraint#test(java.lang.Object)
+	 */
+	public boolean test(Object value) {
+		return group.contains(value);
+	}
+
+	public String toString() {
+		return "inGroup [" + group + "]";
+	}
 }

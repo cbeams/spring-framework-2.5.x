@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,68 +21,70 @@ import org.springframework.util.StringUtils;
 
 /**
  * A like predicate, supporting "starts with%", "%ends with", and "%contains%".
- * 
+ *
  * @author Keith Donald
  */
 public class Like implements Constraint {
-    public static class LikeType extends StringCodedEnum {
-        private LikeType(String code) {
-            super(code);
-        }
-    };
 
-    public static final LikeType STARTS_WITH = new LikeType("startsWith");
+	public static class LikeType extends StringCodedEnum {
 
-    public static final LikeType ENDS_WITH = new LikeType("endsWith");
+		private LikeType(String code) {
+			super(code);
+		}
+	};
 
-    public static final LikeType CONTAINS = new LikeType("contains");
+	public static final LikeType STARTS_WITH = new LikeType("startsWith");
 
-    private LikeType type;
+	public static final LikeType ENDS_WITH = new LikeType("endsWith");
 
-    private String stringToMatch;
+	public static final LikeType CONTAINS = new LikeType("contains");
 
-    public Like(LikeType type, String likeString) {
-        this.type = type;
-        this.stringToMatch = likeString;
-    }
+	private LikeType type;
 
-    public Like(String encodedLikeString) {
-        if (encodedLikeString.startsWith("%")) {
-            if (encodedLikeString.endsWith("%")) {
-                this.type = CONTAINS;
-            }
-            else {
-                this.type = ENDS_WITH;
-            }
-        }
-        else if (encodedLikeString.endsWith("%")) {
-            this.type = STARTS_WITH;
-        }
-        else {
-            this.type = CONTAINS;
-        }
-        stringToMatch = StringUtils.deleteAny(encodedLikeString, "%");
-    }
+	private String stringToMatch;
 
-    public boolean test(Object argument) {
-        String value = String.valueOf(argument);
-        if (type == STARTS_WITH) {
-            return value.startsWith(stringToMatch);
-        }
-        else if (type == ENDS_WITH) {
-            return value.endsWith(stringToMatch);
-        }
-        else {
-            return value.indexOf(stringToMatch) != -1;
-        }
-    }
+	public Like(LikeType type, String likeString) {
+		this.type = type;
+		this.stringToMatch = likeString;
+	}
 
-    public String getType() {
-        return type.getKey();
-    }
+	public Like(String encodedLikeString) {
+		if (encodedLikeString.startsWith("%")) {
+			if (encodedLikeString.endsWith("%")) {
+				this.type = CONTAINS;
+			}
+			else {
+				this.type = ENDS_WITH;
+			}
+		}
+		else if (encodedLikeString.endsWith("%")) {
+			this.type = STARTS_WITH;
+		}
+		else {
+			this.type = CONTAINS;
+		}
+		stringToMatch = StringUtils.deleteAny(encodedLikeString, "%");
+	}
 
-    public String getString() {
-        return stringToMatch;
-    }
+	public boolean test(Object argument) {
+		String value = String.valueOf(argument);
+		if (type == STARTS_WITH) {
+			return value.startsWith(stringToMatch);
+		}
+		else if (type == ENDS_WITH) {
+			return value.endsWith(stringToMatch);
+		}
+		else {
+			return value.indexOf(stringToMatch) != -1;
+		}
+	}
+
+	public String getType() {
+		return type.getKey();
+	}
+
+	public String getString() {
+		return stringToMatch;
+	}
 
 }

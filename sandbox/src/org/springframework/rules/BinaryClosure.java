@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -23,20 +23,20 @@ package org.springframework.rules;
  * A binary predicate is a function object that tests two arguments against some
  * conditional expression. For example, a "GreaterThan" binary predicate will
  * return true if the first argument is greater than the second.
- * 
+ *
  * @author Keith Donald
  */
 public interface BinaryClosure extends Closure {
 
-    /**
-     * Test the provided arguments against this predicates conditional
-     * expression.
-     * 
-     * @param argument1
-     *            the first argument
-     * @param argument2
-     *            the second argument
-     * @return true if the condition was satisfied, false otherwise
-     */
-    public Object call(Object argument1, Object argument2);
+	/**
+	 * Test the provided arguments against this predicates conditional
+	 * expression.
+	 *
+	 * @param argument1
+	 *            the first argument
+	 * @param argument2
+	 *            the second argument
+	 * @return true if the condition was satisfied, false otherwise
+	 */
+	public Object call(Object argument1, Object argument2);
 }

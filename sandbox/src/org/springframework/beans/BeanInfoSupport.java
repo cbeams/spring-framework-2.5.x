@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.Cache;
 import org.springframework.util.ClassUtils;
@@ -68,7 +69,7 @@ public class BeanInfoSupport {
      *             if the class argument is null.
      */
     public void setRootBeanType(Class beanType) {
-        Assert.notNull(beanType);
+        Assert.notNull(beanType, "beanType is required");
         this.rootBeanType = beanType;
         beanInfoProperties.clear();
         this.rootBeanInfo = getBeanInfo(this.rootBeanType);
@@ -98,7 +99,7 @@ public class BeanInfoSupport {
      *             if the property is null or does not exist.
      */
     public BeanInfo getParentBeanInfo(String propertyNamePath) {
-        Assert.notNull(propertyNamePath);
+        Assert.notNull(propertyNamePath, "No property name path specified");
         int lastDot = propertyNamePath.lastIndexOf('.');
         if (lastDot == -1) {
             PropertyDescriptor property =
@@ -151,7 +152,7 @@ public class BeanInfoSupport {
      *             if the propertyName is null or does not exist.
      */
     public PropertyDescriptor getPropertyDescriptor(String propertyNamePath) {
-        Assert.hasText(propertyNamePath);
+        Assert.hasText(propertyNamePath, "No property name path specified");
         List propertyList = buildNestedPropertyTokens(propertyNamePath);
         return getPropertyDescriptor(rootBeanInfo, propertyList);
     }
@@ -222,8 +223,8 @@ public class BeanInfoSupport {
     public PropertyDescriptor getPropertyDescriptor(
         BeanInfo beanInfo,
         String propertyName) {
-        Assert.notNull(beanInfo);
-        Assert.notNull(propertyName);
+        Assert.notNull(beanInfo, "No bean info specified");
+        Assert.notNull(propertyName, "No property name specified");
         Map beanProperties = (Map)beanInfoProperties.get(beanInfo);
         return (PropertyDescriptor)beanProperties.get(propertyName);
     }

@@ -10,43 +10,44 @@ import org.springframework.util.Assert;
 
 /**
  * Convenience superclass for bean property expressions.
- * 
+ *
  * @author Keith Donald
  */
 public abstract class AbstractPropertyConstraint implements
-        PropertyConstraint {
-    private String propertyName;
+		PropertyConstraint {
 
-    protected AbstractPropertyConstraint() {
-    }
+	private String propertyName;
 
-    protected AbstractPropertyConstraint(String propertyName) {
-        setPropertyName(propertyName);
-    }
+	protected AbstractPropertyConstraint() {
+	}
 
-    public String getPropertyName() {
-        return propertyName;
-    }
+	protected AbstractPropertyConstraint(String propertyName) {
+		setPropertyName(propertyName);
+	}
 
-    protected void setPropertyName(String propertyName) {
-        Assert.notNull(propertyName);
-        this.propertyName = propertyName;
-    }
+	public String getPropertyName() {
+		return propertyName;
+	}
 
-    public boolean test(Object o) {
-        if (o instanceof PropertyAccessStrategy) {
-            return test((PropertyAccessStrategy)o);
-        }
-        else {
-            return test(new BeanPropertyAccessStrategy(o));
-        }
-    }
+	protected void setPropertyName(String propertyName) {
+		Assert.notNull(propertyName, "propertyName is required");
+		this.propertyName = propertyName;
+	}
 
-    protected abstract boolean test(
-            PropertyAccessStrategy domainObjectAccessStrategy);
+	public boolean test(Object o) {
+		if (o instanceof PropertyAccessStrategy) {
+			return test((PropertyAccessStrategy) o);
+		}
+		else {
+			return test(new BeanPropertyAccessStrategy(o));
+		}
+	}
 
-    public String toString() {
-        return getPropertyName();
-    }
+	protected abstract boolean test(
+			PropertyAccessStrategy domainObjectAccessStrategy);
+
+	public String toString() {
+		return getPropertyName();
+	}
 
 }

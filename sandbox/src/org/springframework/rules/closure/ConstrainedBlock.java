@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,27 +20,28 @@ import org.springframework.rules.Constraint;
 
 /**
  * Only execute the specified procedure if a provided constraint is also true.
- * 
+ *
  * @author keith
  */
 public class ConstrainedBlock extends Block {
-    private Closure closure;
 
-    private Constraint constraint;
+	private Closure closure;
 
-    public ConstrainedBlock(Closure closure, Constraint constraint) {
-        this.closure = closure;
-        this.constraint = constraint;
-    }
+	private Constraint constraint;
 
-    /**
-     * Will only invoke the wrapped closure against the provided argument if the
-     * constraint permits; else no action will be taken.
-     */
-    protected void handle(Object argument) {
-        if (constraint.test(argument)) {
-            closure.call(argument);
-        }
-    }
+	public ConstrainedBlock(Closure closure, Constraint constraint) {
+		this.closure = closure;
+		this.constraint = constraint;
+	}
+
+	/**
+	 * Will only invoke the wrapped closure against the provided argument if the
+	 * constraint permits; else no action will be taken.
+	 */
+	protected void handle(Object argument) {
+		if (constraint.test(argument)) {
+			closure.call(argument);
+		}
+	}
 
 }

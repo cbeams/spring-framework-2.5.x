@@ -107,7 +107,7 @@ public class SingletonServiceLocatorLoader implements BeanFactoryPostProcessor, 
 	 *            The configured service locator bean ids.
 	 */
 	public SingletonServiceLocatorLoader(String[] beanIds) {
-		Assert.hasElements(beanIds);
+		Assert.notEmpty(beanIds, "No bean IDs specified");
 		this.locatorBeanIds = beanIds;
 	}
 
@@ -119,7 +119,7 @@ public class SingletonServiceLocatorLoader implements BeanFactoryPostProcessor, 
 	 *            The load method name, <code>load</code> is used by default.
 	 */
 	public void setLoadMethodName(String loadMethodName) {
-		Assert.notNull(loadMethodName);
+		Assert.notNull(loadMethodName, "loadMethodName is required");
 		this.loadMethodName = loadMethodName;
 	}
 

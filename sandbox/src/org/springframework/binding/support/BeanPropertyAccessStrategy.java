@@ -26,6 +26,7 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -86,7 +87,7 @@ public class BeanPropertyAccessStrategy implements
     }
 
     public BeanPropertyAccessStrategy(final ValueModel beanHolder) {
-        Assert.notNull(beanHolder);
+        Assert.notNull(beanHolder, "No bean holder specified");
         this.beanWrapper = new BeanWrapperImpl();
         this.beanHolder = beanHolder;
         Assert

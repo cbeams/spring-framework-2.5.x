@@ -1,12 +1,12 @@
 /*
  * Copyright 2001-2004 The Apache Software Foundation.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,107 +27,108 @@ import org.springframework.beans.BeanWrapperImpl;
  * properties.
  */
 public class BeanPropertyComparator implements Comparator, Serializable {
-    private String property;
 
-    private Comparator comparator;
+	private String property;
 
-    /**
-     * Constructs a BeanPropertyComparator without a property set. Until
-     * {@link #setProperty} is called with a non-null value, this comparator
-     * will compare the beans by natural-order only.
-     */
-    public BeanPropertyComparator() {
-        this(null);
-    }
+	private Comparator comparator;
 
-    /**
-     * Constructs a property-based comparator for beans. This compares two beans
-     * by the property specified in the property parameter. This constructor
-     * creates a <code>BeanPropertyComparator</code> that uses a
-     * <code>ComparableComparator</code> to compare the property values.
-     * 
-     * Passing <code>null</code> to this constructor will cause the
-     * BeanPropertyComparator to compare beans based on natural order, that is
-     * <code>java.lang.Comparable</code>.
-     * 
-     * @param property
-     *            String Name of a bean property, which may contain the name of
-     *            a simple, nested, indexed, mapped, or combined property. If
-     *            the property passed in is null then the actual objects, which
-     *            must be comparables in this case, will be compared.
-     */
-    public BeanPropertyComparator(String property) {
-        this(property, ComparableComparator.instance());
-    }
+	/**
+	 * Constructs a BeanPropertyComparator without a property set. Until
+	 * {@link #setProperty} is called with a non-null value, this comparator
+	 * will compare the beans by natural-order only.
+	 */
+	public BeanPropertyComparator() {
+		this(null);
+	}
 
-    /**
-     * Constructs a property-based comparator for beans. This constructor
-     * creates a BeanPropertyComparator that uses the supplied Comparator to
-     * compare the property values.
-     * 
-     * @param property
-     *            Name of a bean property; may contain the name of a simple,
-     *            nested, indexed, mapped, or combined property.
-     * @param comparator
-     *            BeanPropertyComparator will pass the values of the specified
-     *            bean property to this Comparator.
-     */
-    public BeanPropertyComparator(String property, Comparator comparator) {
-        setProperty(property);
-        this.comparator = comparator;
-    }
+	/**
+	 * Constructs a property-based comparator for beans. This compares two beans
+	 * by the property specified in the property parameter. This constructor
+	 * creates a <code>BeanPropertyComparator</code> that uses a
+	 * <code>ComparableComparator</code> to compare the property values.
+	 *
+	 * Passing <code>null</code> to this constructor will cause the
+	 * BeanPropertyComparator to compare beans based on natural order, that is
+	 * <code>java.lang.Comparable</code>.
+	 *
+	 * @param property
+	 *            String Name of a bean property, which may contain the name of
+	 *            a simple, nested, indexed, mapped, or combined property. If
+	 *            the property passed in is null then the actual objects, which
+	 *            must be comparables in this case, will be compared.
+	 */
+	public BeanPropertyComparator(String property) {
+		this(property, ComparableComparator.instance());
+	}
 
-    /**
-     * Sets the method to be called to compare two JavaBeans
-     * 
-     * @param property
-     *            String method name to call to compare If the property passed
-     *            in is null then the actual objects will be compared
-     */
-    public void setProperty(String property) {
-        this.property = property;
-    }
+	/**
+	 * Constructs a property-based comparator for beans. This constructor
+	 * creates a BeanPropertyComparator that uses the supplied Comparator to
+	 * compare the property values.
+	 *
+	 * @param property
+	 *            Name of a bean property; may contain the name of a simple,
+	 *            nested, indexed, mapped, or combined property.
+	 * @param comparator
+	 *            BeanPropertyComparator will pass the values of the specified
+	 *            bean property to this Comparator.
+	 */
+	public BeanPropertyComparator(String property, Comparator comparator) {
+		setProperty(property);
+		this.comparator = comparator;
+	}
 
-    /**
-     * Gets the property attribute of the BeanComparator
-     * 
-     * @return String method name to call to compare. A null value indicates
-     *         that the actual objects will be compared
-     */
-    public String getProperty() {
-        return property;
-    }
+	/**
+	 * Sets the method to be called to compare two JavaBeans
+	 *
+	 * @param property
+	 *            String method name to call to compare If the property passed
+	 *            in is null then the actual objects will be compared
+	 */
+	public void setProperty(String property) {
+		this.property = property;
+	}
 
-    /**
-     * Gets the Comparator being used to compare beans.
-     */
-    public Comparator getComparator() {
-        return comparator;
-    }
+	/**
+	 * Gets the property attribute of the BeanComparator
+	 *
+	 * @return String method name to call to compare. A null value indicates
+	 *         that the actual objects will be compared
+	 */
+	public String getProperty() {
+		return property;
+	}
 
-    /**
-     * Compare two JavaBeans by their shared property. If {@link #getProperty}
-     * is null then the actual objects will be compared.
-     * 
-     * @param o1
-     *            Object The first bean to get data from to compare against
-     * @param o2
-     *            Object The second bean to get data from to compare
-     * @return int negative or positive based on order
-     */
-    public int compare(Object o1, Object o2) {
-        if (property == null) {
-            // compare the actual comparable objects
-            return comparator.compare(o1, o2);
-        }
-        BeanWrapper wrapper = new BeanWrapperImpl(o1);
-        wrapper.setWrappedInstance(o1);
-        Object value1 = wrapper.getPropertyValue(property);
+	/**
+	 * Gets the Comparator being used to compare beans.
+	 */
+	public Comparator getComparator() {
+		return comparator;
+	}
 
-        wrapper.setWrappedInstance(o2);
-        Object value2 = wrapper.getPropertyValue(property);
-        return comparator.compare(value1, value2);
-    }
+	/**
+	 * Compare two JavaBeans by their shared property. If {@link #getProperty}
+	 * is null then the actual objects will be compared.
+	 *
+	 * @param o1
+	 *            Object The first bean to get data from to compare against
+	 * @param o2
+	 *            Object The second bean to get data from to compare
+	 * @return int negative or positive based on order
+	 */
+	public int compare(Object o1, Object o2) {
+		if (property == null) {
+			// compare the actual comparable objects
+			return comparator.compare(o1, o2);
+		}
+		BeanWrapper wrapper = new BeanWrapperImpl(o1);
+		wrapper.setWrappedInstance(o1);
+		Object value1 = wrapper.getPropertyValue(property);
+
+		wrapper.setWrappedInstance(o2);
+		Object value2 = wrapper.getPropertyValue(property);
+		return comparator.compare(value1, value2);
+	}
 
 }
 

@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -27,133 +27,136 @@ import org.springframework.util.Assert;
 
 /**
  * Abstract base class for unary constraints which compose other constraints.
- * 
+ *
  * @author Keith Donald
  */
 public abstract class CompoundConstraint extends AbstractConstraint {
-    private List constraints = new ArrayList();
 
-    /**
-     * Constructs a compound predicate with no initial members. It is expected
-     * the client will call "add" to add individual constraints.
-     */
-    public CompoundConstraint() {
+	private List constraints = new ArrayList();
 
-    }
+	/**
+	 * Constructs a compound predicate with no initial members. It is expected
+	 * the client will call "add" to add individual constraints.
+	 */
+	public CompoundConstraint() {
 
-    /**
-     * Creates a CompoundUnaryPredicate composed of two constraints.
-     * 
-     * @param predicate1
-     *            the first predicate
-     * @param predicate2
-     *            the second predicate
-     */
-    public CompoundConstraint(Constraint predicate1, Constraint predicate2) {
-        Assert.isTrue(predicate1 != null && predicate2 != null);
-        constraints.add(predicate1);
-        constraints.add(predicate2);
-    }
+	}
 
-    /**
-     * Creates a CompoundUnaryPredicate composed of the specified constraints.
-     * 
-     * @param constraints
-     *            the aggregated constraints
-     */
-    public CompoundConstraint(Constraint[] constraints) {
-        this.constraints.addAll(Arrays.asList(constraints));
-    }
+	/**
+	 * Creates a CompoundUnaryPredicate composed of two constraints.
+	 *
+	 * @param predicate1
+	 *            the first predicate
+	 * @param predicate2
+	 *            the second predicate
+	 */
+	public CompoundConstraint(Constraint predicate1, Constraint predicate2) {
+		Assert.isTrue(predicate1 != null && predicate2 != null, "Both predicates are required");
+		constraints.add(predicate1);
+		constraints.add(predicate2);
+	}
 
-    /**
-     * Add the specified predicate to the set of constraints aggregated by this
-     * compound predicate.
-     * 
-     * @param predicate
-     *            the predicate to add
-     * @return A reference to this, to support chaining.
-     */
-    public CompoundConstraint add(Constraint predicate) {
-        this.constraints.add(predicate);
-        return this;
-    }
+	/**
+	 * Creates a CompoundUnaryPredicate composed of the specified constraints.
+	 *
+	 * @param constraints
+	 *            the aggregated constraints
+	 */
+	public CompoundConstraint(Constraint[] constraints) {
+		this.constraints.addAll(Arrays.asList(constraints));
+	}
 
-    /**
-     * Add the list of constraints to the set of constraints aggregated by this
-     * compound predicate.
-     * 
-     * @param constraints
-     *            the list of constraints to add
-     * @return A reference to this, to support chaining.
-     */
-    public CompoundConstraint addAll(List constraints) {
-        Algorithms.instance().forEach(constraints, new Block() {
-            protected void handle(Object o) {
-                add((Constraint)o);
-            }
-        });
-        return this;
-    }
+	/**
+	 * Add the specified predicate to the set of constraints aggregated by this
+	 * compound predicate.
+	 *
+	 * @param predicate
+	 *            the predicate to add
+	 * @return A reference to this, to support chaining.
+	 */
+	public CompoundConstraint add(Constraint predicate) {
+		this.constraints.add(predicate);
+		return this;
+	}
 
-    public void remove(Constraint predicate) {
-        constraints.remove(predicate);
-    }
+	/**
+	 * Add the list of constraints to the set of constraints aggregated by this
+	 * compound predicate.
+	 *
+	 * @param constraints
+	 *            the list of constraints to add
+	 * @return A reference to this, to support chaining.
+	 */
+	public CompoundConstraint addAll(List constraints) {
+		Algorithms.instance().forEach(constraints, new Block() {
+			protected void handle(Object o) {
+				add((Constraint) o);
+			}
+		});
+		return this;
+	}
 
-    public int indexOf(Constraint child) {
-        return constraints.indexOf(child);
-    }
+	public void remove(Constraint predicate) {
+		constraints.remove(predicate);
+	}
 
-    public Constraint get(int index) {
-        return (Constraint)constraints.get(index);
-    }
+	public int indexOf(Constraint child) {
+		return constraints.indexOf(child);
+	}
 
-    public void copyInto(CompoundConstraint p) {
-        p.constraints.clear();
-        p.constraints.addAll(constraints);
-    }
+	public Constraint get(int index) {
+		return (Constraint) constraints.get(index);
+	}
 
-    public void set(int index, Constraint predicate) {
-        constraints.set(index, predicate);
-    }
+	public void copyInto(CompoundConstraint p) {
+		p.constraints.clear();
+		p.constraints.addAll(constraints);
+	}
 
-    /**
-     * Return an iterator over the aggregated constraints.
-     * 
-     * @return An iterator
-     */
-    public Iterator iterator() {
-        return constraints.iterator();
-    }
+	public void set(int index, Constraint predicate) {
+		constraints.set(index, predicate);
+	}
 
-    /**
-     * Returns the number of constraints aggregated by this compound predicate.
-     * 
-     * @return The size.
-     */
-    public int size() {
-        return constraints.size();
-    }
+	/**
+	 * Return an iterator over the aggregated constraints.
+	 *
+	 * @return An iterator
+	 */
+	public Iterator iterator() {
+		return constraints.iterator();
+	}
 
-    public abstract boolean test(Object argument);
+	/**
+	 * Returns the number of constraints aggregated by this compound predicate.
+	 *
+	 * @return The size.
+	 */
+	public int size() {
+		return constraints.size();
+	}
 
-    /**
-     * Utility method that validates that each predicate aggregated by this
-     * compound predicate is of the specified class OR is another compound
-     * predicate.
-     * 
-     * @param clazz
-     *            the class to validate
-     */
-    public void validateTypeSafety(final Class clazz) {
-        Constraint predicate = new Constraint() {
-            public boolean test(Object o) {
-                return clazz.getClass().isAssignableFrom(o.getClass());
-            }
-        };
-        Object violator = findFirst(constraints, predicate);
-        if (violator != null) { throw new IllegalArgumentException(violator
-                .getClass()
-                + " class not allowed"); }
-    }
+	public abstract boolean test(Object argument);
+
+	/**
+	 * Utility method that validates that each predicate aggregated by this
+	 * compound predicate is of the specified class OR is another compound
+	 * predicate.
+	 *
+	 * @param clazz
+	 *            the class to validate
+	 */
+	public void validateTypeSafety(final Class clazz) {
+		Constraint predicate = new Constraint() {
+			public boolean test(Object o) {
+				return clazz.getClass().isAssignableFrom(o.getClass());
+			}
+		};
+		Object violator = findFirst(constraints, predicate);
+		if (violator != null) {
+			throw new IllegalArgumentException(violator
+					.getClass()
+					+ " class not allowed");
+		}
+	}
 
 }
