@@ -14,6 +14,7 @@ Package org.springframework.beans
 
 Package org.springframework.core
 * fixed AbstractPathResolvingPropertyEditor to avoid StringBuffer.indexOf(String), which is just available on JDK >=1.4
+* PathMatchingResourcePatternResolver supports path matching in jar files now (for both "classpath:" and "classpath*:")
 
 Package org.springframework.jndi
 * added optional "proxyInterface" property to JndiObjectFactoryBean, for exposing a proxy rather than the plain object
@@ -23,11 +24,15 @@ Package org.springframework.remoting
 * added "codebaseUrl" property to HttpInvokerClientInterceptor, specifying a URL for dynamic class download
 * added support for dynamic class downloading to AbstractHttpInvokerRequestExecutor and its subclasses
 
-Package org.springframework.ui.jasperreports
-* moved this package into the main distribution from the sandbox
+Package org.springframework.ui
+* activated caching by default in VelocityEngineFactory, with file timestamp check for resources in the file system
+* added "preferFileSystemAccess" property to VelocityEngineFactory, to be able to suppress file system access
+* added "preferFileSystemAccess" property to FreeMarkerConfigurationFactory, to be able to suppress file system access
+* added JasperReportsUtils to allow for convenient creation of CSV/HTML/PDF/XLS reports with Jasper Reports
 
-Package org.springframework.web.servlet.view.jasperreports
-* moved this package into the main distribution from the sandbox
+Package org.springframework.web
+* changed value for "selected" attribute from "true" to "selected" in Velocity and FreeMarker macros (spring.vm/ftl)
+* added JasperReportsXxxView to allow for convenient creation of CSV/HTML/PDF/XLS web views with Jasper Reports
 
 
 Changes in version 1.1.2 (14.11.2004)
@@ -86,7 +91,7 @@ Package org.springframework.context
 Package org.springframework.core
 * ResourceEditor resolves all placeholders in a path as system properties now, not just the first one
 * PathMatchingResourcePatternResolver handles "classpath:*-context.xml" style patterns now too (without leading slash)
-* added ResourceArrayPropertyEditor, converting location patterns to Resource arrays (via a ResourcePatternResolver) 
+* added ResourceArrayPropertyEditor, converting location patterns to Resource arrays (via a ResourcePatternResolver)
 
 Package org.springframework.dao
 * deprecated IncorrectUpdateSemanticsDataAccessException's "getDataWasUpdated" method in favor of "wasDataUpdated"
