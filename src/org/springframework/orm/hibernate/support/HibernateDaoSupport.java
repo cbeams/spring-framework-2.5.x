@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate.HibernateTemplate;
@@ -153,11 +152,9 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 * Close the given Hibernate Session if necessary, created via this bean's
 	 * SessionFactory, if it isn't bound to the thread.
 	 * @param session Session to close
-	 * @throws DataAccessResourceFailureException if the Session couldn't be closed
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#closeSessionIfNecessary
 	 */
-	protected final void closeSessionIfNecessary(Session session)
-	    throws CleanupFailureDataAccessException {
+	protected final void closeSessionIfNecessary(Session session) {
 		SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
 	}
 

@@ -29,7 +29,6 @@ import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -364,13 +363,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		catch (Exception ex) {
-			try {
-				SessionFactoryUtils.closeSessionIfNecessary(session, this.sessionFactory);
-			}
-			catch (CleanupFailureDataAccessException ex2) {
-				// just log it, to keep the transaction-related exception
-				logger.error("Could not close Hibernate session after transaction begin failed", ex2);
-			}
+			SessionFactoryUtils.closeSessionIfNecessary(session, this.sessionFactory);
 			throw new CannotCreateTransactionException("Could not create Hibernate transaction", ex);
 		}
 	}
@@ -505,13 +498,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing Hibernate session [" + session + "] after transaction");
 			}
-			try {
-				SessionFactoryUtils.closeSessionIfNecessary(session, this.sessionFactory);
-			}
-			catch (CleanupFailureDataAccessException ex) {
-				// just log it, to keep a transaction-related exception
-				logger.error("Could not close Hibernate session after transaction", ex);
-			}
+			SessionFactoryUtils.closeSessionIfNecessary(session, this.sessionFactory);
 		}
 		else {
 			if (logger.isDebugEnabled()) {

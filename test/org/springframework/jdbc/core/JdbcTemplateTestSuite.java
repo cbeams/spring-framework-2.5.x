@@ -34,7 +34,6 @@ import javax.sql.DataSource;
 
 import org.easymock.MockControl;
 
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.UncategorizedDataAccessException;
@@ -51,7 +50,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.26 2004-05-27 14:47:34 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.27 2004-06-21 09:08:29 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 
@@ -739,19 +738,22 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		ctrlConnection.verify();
 	}
 	
-	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedViaBeanProperty() throws Exception {
-		testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(true);
+	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedViaBeanProperty()
+			throws Exception {
+		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(true);
 	}
 	
-	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedInAfterPropertiesSet() throws Exception {
-		testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(false);
+	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedInAfterPropertiesSet()
+			throws Exception {
+		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(false);
 	}
 	
 	/**
 	 * If beanProperty is true, initialize via exception translator bean property;
 	 * if false, use afterPropertiesSet().
 	 */
-	private void testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(boolean beanProperty) throws SQLException {
+	private void doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(boolean beanProperty)
+			throws SQLException {
 		SQLException sex = new SQLException("foo", "07xxx");
 
 		ctrlConnection = MockControl.createControl(Connection.class);
@@ -879,24 +881,37 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 	}
 
 	public void testCouldntClose() throws Exception {
+		MockControl ctrlStatement = MockControl.createControl(Statement.class);
+		Statement mockStatement = (Statement) ctrlStatement.getMock();
+		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+		String sql = "SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3";
+		mockStatement.executeQuery(sql);
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
 		SQLException sex = new SQLException("bar");
+		mockResultSet.close();
+		ctrlResultSet.setThrowable(sex);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setThrowable(sex);
 		mockConnection.close();
 		ctrlConnection.setThrowable(sex);
 
+		ctrlStatement.replay();
+		ctrlResultSet.replay();
 		replay();
 
-		try {
-			JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
-			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			template2.query(
-				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
-				rcch);
-			fail("Should throw exception on failure to close");
-		}
-		catch (CleanupFailureDataAccessException ex) {
-			// pass
-			assertTrue("Check root cause", ex.getCause() == sex);
-		}
+		JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
+		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+		template2.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
+
+		ctrlStatement.verify();
+		ctrlResultSet.verify();
 	}
 
 	/**
@@ -913,10 +928,8 @@ public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
 
-		MockControl ctrlStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement =
-			(PreparedStatement) ctrlStatement.getMock();
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
 		mockStatement.executeQuery(sql);
 		ctrlStatement.setReturnValue(mockResultSet);
 		mockStatement.getWarnings();

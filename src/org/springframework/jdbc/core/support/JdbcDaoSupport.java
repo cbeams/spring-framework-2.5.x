@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.CannotCloseJdbcConnectionException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -118,10 +117,8 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 * Close the given JDBC Connection if necessary, created via this bean's
 	 * DataSource, if it isn't bound to the thread.
 	 * @param con Connection to close
-	 * @throws org.springframework.jdbc.CannotCloseJdbcConnectionException if the attempt to close the
-	 * Connection failed
 	 */
-	protected final void closeConnectionIfNecessary(Connection con) throws CannotCloseJdbcConnectionException {
+	protected final void closeConnectionIfNecessary(Connection con) {
 		DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
 	}
 

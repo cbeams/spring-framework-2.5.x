@@ -30,7 +30,6 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.jdbc.CannotCloseJdbcConnectionException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jndi.AbstractJndiLocator;
 import org.springframework.jndi.JndiTemplate;
@@ -50,7 +49,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * to another DataSource is just a matter of configuration then: You can even
  * replace the definition of the FactoryBean with a non-JNDI DataSource!
  *
- * @version $Id: DataSourceUtils.java,v 1.11 2004-06-14 11:01:46 jhoeller Exp $
+ * @version $Id: DataSourceUtils.java,v 1.12 2004-06-21 09:08:30 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DataSourceTransactionManager
@@ -183,12 +182,9 @@ public abstract class DataSourceUtils {
 	 * @param con Connection to close if necessary
 	 * (if this is null, the call will be ignored)
 	 * @param ds DataSource that the Connection came from
-	 * @throws org.springframework.jdbc.CannotCloseJdbcConnectionException
-	 * if the attempt to close the Connection failed
 	 * @see SmartDataSource#shouldClose
 	 */
-	public static void closeConnectionIfNecessary(Connection con, DataSource ds)
-	    throws CannotCloseJdbcConnectionException {
+	public static void closeConnectionIfNecessary(Connection con, DataSource ds) {
 		if (con == null || TransactionSynchronizationManager.hasResource(ds)) {
 			return;
 		}
@@ -199,7 +195,7 @@ public abstract class DataSourceUtils {
 				con.close();
 			}
 			catch (SQLException ex) {
-				throw new CannotCloseJdbcConnectionException("Could not close JDBC connection", ex);
+				logger.error("Could not close JDBC connection", ex);
 			}
 		}
 	}
@@ -269,7 +265,7 @@ public abstract class DataSourceUtils {
 			TransactionSynchronizationManager.bindResource(this.dataSource, this.connectionHolder);
 		}
 
-		public void beforeCompletion() throws CannotCloseJdbcConnectionException {
+		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.dataSource);
 			closeConnectionIfNecessary(this.connectionHolder.getConnection(), this.dataSource);
 		}

@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.jdo.JdoTemplate;
@@ -142,10 +141,8 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	 * PersistenceManagerFactory, if it isn't bound to the thread.
 	 * @param pm PersistenceManager to close
 	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be closed
-	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#closePersistenceManagerIfNecessary
 	 */
-	protected final void closeSessionIfNecessary(PersistenceManager pm)
-	    throws CleanupFailureDataAccessException {
+	protected final void closeSessionIfNecessary(PersistenceManager pm) {
 		PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
 	}
 

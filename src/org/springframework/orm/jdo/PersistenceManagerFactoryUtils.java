@@ -30,7 +30,6 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -187,10 +186,8 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * if it isn't bound to the thread.
 	 * @param pm PersistenceManager to close
 	 * @param pmf PersistenceManagerFactory that the PersistenceManager was created with
-	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be closed
 	 */
-	public static void closePersistenceManagerIfNecessary(PersistenceManager pm, PersistenceManagerFactory pmf)
-	    throws CleanupFailureDataAccessException {
+	public static void closePersistenceManagerIfNecessary(PersistenceManager pm, PersistenceManagerFactory pmf) {
 		if (pm == null || TransactionSynchronizationManager.hasResource(pmf)) {
 			return;
 		}
@@ -199,7 +196,7 @@ public abstract class PersistenceManagerFactoryUtils {
 			pm.close();
 		}
 		catch (JDOException ex) {
-			throw new CleanupFailureDataAccessException("Cannot close JDO persistence manager", ex);
+			logger.error("Cannot close JDO persistence manager", ex);
 		}
 	}
 
@@ -227,7 +224,7 @@ public abstract class PersistenceManagerFactoryUtils {
 			TransactionSynchronizationManager.bindResource(this.persistenceManagerFactory, this.persistenceManagerHolder);
 		}
 
-		public void beforeCompletion() throws CleanupFailureDataAccessException {
+		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.persistenceManagerFactory);
 			closePersistenceManagerIfNecessary(this.persistenceManagerHolder.getPersistenceManager(),
 			                                   this.persistenceManagerFactory);

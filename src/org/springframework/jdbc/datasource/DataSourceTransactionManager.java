@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -67,7 +66,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @version $Id: DataSourceTransactionManager.java,v 1.16 2004-06-19 10:02:22 jhoeller Exp $
+ * @version $Id: DataSourceTransactionManager.java,v 1.17 2004-06-21 09:08:30 jhoeller Exp $
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -196,13 +195,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 
 		catch (SQLException ex) {
-			try {
-				DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
-			}
-			catch (CleanupFailureDataAccessException ex2) {
-				// just log it, to keep the transaction-related exception
-				logger.error("Could not close JDBC connection after transaction begin failed", ex2);
-			}
+			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 			throw new CannotCreateTransactionException("Could not configure JDBC connection for transaction", ex);
 		}
 	}
@@ -304,13 +297,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing JDBC connection [" + con + "] after transaction");
 		}
-		try {
-			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
-		}
-		catch (CleanupFailureDataAccessException ex) {
-			// just log it, to keep a transaction-related exception
-			logger.error("Could not close JDBC connection after transaction", ex);
-		}
+		DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
 	}
 
 }

@@ -22,7 +22,6 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
@@ -275,22 +274,12 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		catch (TransactionException ex) {
-			cleanupAfterTransactionBeginFailed(pm);
+			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, this.persistenceManagerFactory);
 			throw ex;
 		}
 		catch (Exception ex) {
-			cleanupAfterTransactionBeginFailed(pm);
-			throw new CannotCreateTransactionException("Could not create JDO transaction", ex);
-		}
-	}
-
-	private void cleanupAfterTransactionBeginFailed(PersistenceManager pm) {
-		try {
 			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, this.persistenceManagerFactory);
-		}
-		catch (CleanupFailureDataAccessException ex) {
-			// just log it, to keep the transaction-related exception
-			logger.error("Could not close JDO persistence manager after transaction begin failed", ex);
+			throw new CannotCreateTransactionException("Could not create JDO transaction", ex);
 		}
 	}
 
@@ -384,13 +373,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing JDO persistence manager [" + pm + "] after transaction");
 			}
-			try {
-				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, this.persistenceManagerFactory);
-			}
-			catch (CleanupFailureDataAccessException ex) {
-				// just log it, to keep a transaction-related exception
-				logger.error("Could not close JDO persistence manager after transaction", ex);
-			}
+			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, this.persistenceManagerFactory);
 		}
 		else {
 			logger.debug("Not closing pre-bound JDO persistence manager after transaction");

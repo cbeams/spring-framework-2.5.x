@@ -27,7 +27,6 @@ import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate.SessionFactoryUtils;
 import org.springframework.orm.hibernate.SessionHolder;
@@ -162,10 +161,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * closing it. See class-level javadoc for a discussion of flush handling.
 	 * @param session the Session used for filtering
 	 * @param sessionFactory the SessionFactory that this filter uses
-	 * @throws DataAccessResourceFailureException if the Session could not be closed
 	 */
-	protected void closeSession(Session session, SessionFactory sessionFactory)
-			throws CleanupFailureDataAccessException {
+	protected void closeSession(Session session, SessionFactory sessionFactory) {
 		SessionFactoryUtils.closeSessionIfNecessary(session, sessionFactory);
 	}
 

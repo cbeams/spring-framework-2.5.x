@@ -44,7 +44,6 @@ import net.sf.hibernate.engine.SessionImplementor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.dao.CleanupFailureDataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -383,10 +382,8 @@ public abstract class SessionFactoryUtils {
 	 * if it isn't bound to the thread.
 	 * @param session Session to close
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
-	 * @throws DataAccessResourceFailureException if the Session couldn't be closed
 	 */
-	public static void closeSessionIfNecessary(Session session, SessionFactory sessionFactory)
-	    throws CleanupFailureDataAccessException {
+	public static void closeSessionIfNecessary(Session session, SessionFactory sessionFactory) {
 		if (session == null || TransactionSynchronizationManager.hasResource(sessionFactory)) {
 			return;
 		}
@@ -396,10 +393,10 @@ public abstract class SessionFactoryUtils {
 		}
 		catch (JDBCException ex) {
 			// SQLException underneath
-			throw new CleanupFailureDataAccessException("Could not close Hibernate session", ex.getSQLException());
+			logger.error("Could not close Hibernate session", ex.getSQLException());
 		}
 		catch (HibernateException ex) {
-			throw new CleanupFailureDataAccessException("Could not close Hibernate session", ex);
+			logger.error("Could not close Hibernate session");
 		}
 	}
 
@@ -464,7 +461,7 @@ public abstract class SessionFactoryUtils {
 			}
 		}
 
-		public void beforeCompletion() throws CleanupFailureDataAccessException {
+		public void beforeCompletion() {
 			if (this.newSession) {
 				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 				if (this.hibernateTransactionCompletion) {
