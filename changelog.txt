@@ -1,14 +1,16 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.106 2004-03-12 15:29:06 jhoeller Exp $
+$Id: changelog.txt,v 1.107 2004-03-14 21:41:53 jhoeller Exp $
 
 
 Changes in version 1.0 final (20.3.2003)
 ----------------------------------------
 
 Package org.springframework.beans
-* fixed custom editor detection for indexed and mapped properties
-* fixed default editor registration to use classes rather than instances, for thread-safety
+* fixed BeanWrapperImpl's custom editor detection for indexed and mapped properties
+* fixed BeanWrapperImpl's default editor registration to use classes rather than instances, for thread-safety
+* fixed BeanWrapperImpl's conversion of Lists to arrays to correctly convert to primitive arrays
+* refined AbstractAutowireCapableBeanFactory's use of synchronization, particularly with custom editors
 * fixed type difference weight algorithm in AbstractAutowireCapableBeanFactory to ignore non-matching arguments
 * added "ignoreUnresolvablePlaceholders" property to PropertyPlaceholderConfigurer
 * reworked PropertiesFactoryBean to work with PropertiesPersister strategy
@@ -18,9 +20,10 @@ Package org.springframework.context
 * added ResourceLoaderAware and MessageSourceAware interfaces, for expressing simpler dependencies
 * AbstractMessageSource supports resolution of message arguments that are MessageSourceResolvables themselves
 * renamed AbstractMessageSource's "resolve" method to "resolveCode"
+* refined ReloadableResourceBundleMessageSource's use of synchronization
 * reworked ReloadableResourceBundleMessageSource to work with ResourceLoader instead of ApplicationContext
 * reworked ReloadableResourceBundleMessageSource to work with PropertiesPersister strategy
-* added charset support to ReloadableResourceBundleMessageSource, via "defaultCharset" and "fileCharsets" properties
+* added encoding support to ReloadableResourceBundleMessageSource, via "defaultEncoding" and "fileEncodings"
 
 Package org.springframework.core
 * added ResourceLoader interface, extended by the ApplicationContext interface
@@ -38,6 +41,8 @@ Package org.springframework.jndi
 * added "jndiEnvironment" property to AbstractJndiLocator, for simplified configuration of JNDI environment settings
 
 Package org.springframework.orm
+* reworked LocalSessionFactoryBean's schema support, providing "drop/create/updateDatabaseSchema" methods
+* LocalSessionFactoryBean keeps the Hibernate Configuration object, allowing access via the "getConfiguration" method
 * added "createCriteria" method to HibernateTemplate, for creating Criteria objects that respect transaction timeouts
 * added "loadAll(Class)" method to HibernateTemplate and HibernateOperations, for retrieving all instances of a class
 * allow for ClobStringType to be instantiated without LobHandler, for use with Hibernate's SchemaExport tool
@@ -49,6 +54,13 @@ Package org.springframework.scheduling
 
 Package org.springframework.transaction
 * do not attempt rollback when afterCompletion callback throws an exception, avoiding a meaningless rollback failure
+
+Package org.springframework.ui
+* added SpringResourceLoader adapter that can load a Velocity resource via any Spring ResourceLoader
+* reworked Velocity resource loader path handling to automatically adapt to any kind of Spring resource location
+* added overloaded "mergeTemplate" methods that support file encodings to VelocityEngineUtils
+* removed "exposeModelAsContextAttributes" method from VelocityEngineUtils
+* added FreeMarker support (analogous to Velocity): FreemarkerConfigurationFactory, FreemarkerConfigurationFactoryBean
 
 Package org.springframework.util
 * added PropertiesPersister interface, to factor out properties parsing strategies
@@ -66,7 +78,13 @@ Package org.springframework.web
 * added ServletContextAware interface for application beans, to be detected by web application contexts
 * reworked CommonsMultipartResolver and CosMultipartResolver to implement ServletContextAware
 * fixed AbstractCachingViewResolver's caching to use appropriate synchronization
+* added "contextRelative" flag to RedirectView, to automatically prepend the context path to a given URL
 * fetch DefinitionsFactory on initialization of TilesView, throwing a proper exception if not found
+* removed default config location from VelocityConfigurer (specify a custom config location instead)
+* removed unused "writerPoolSize" property from VelocityView
+* added "encoding" property to VelocityView, for specifying a view-specific file encoding
+* removed model attribute conversion of dots to underscores from VelocityView
+* added FreeMarker support (analogous to Velocity): FreemarkerConfig, FreemarkerConfigurer, FreemarkerView
 
 
 Changes in version 1.0 RC2 (1.3.2003)

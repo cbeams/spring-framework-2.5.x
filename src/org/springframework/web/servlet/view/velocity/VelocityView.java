@@ -16,16 +16,14 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.app.tools.VelocityFormatter;
 import org.apache.velocity.context.Context;
-import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
-import org.apache.velocity.util.SimplePool;
 
-import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
@@ -37,6 +35,8 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * <ul>
  * <li><b>url</b>: the location of the Velocity template to be wrapped,
  * relative to the Velocity resource loader path (see VelocityConfigurer).
+ * <li><b>encoding</b> (optional, default is determined by Velocity configuration):
+ * the encoding of the Velocity template file
  * <li><b>velocityFormatterAttribute</b> (optional, default=null): the name of
  * the VelocityFormatter helper object to expose in the Velocity context of this
  * view, or null if not needed. VelocityFormatter is part of standard Velocity.
@@ -51,15 +51,20 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * this to false enables us to modify Velocity templates without restarting the
  * application (similar to JSPs). Note that this is a minor optimization only,
  * as Velocity itself caches templates in a modification-aware fashion.
- * <li><b>writerPoolSize</b> (optional, default=40): number of Velocity writers
- * (refer to Velocity documentation to see exactly what this means)
  * </ul>
  *
- * <p>Depends on a VelocityConfig object such as VelocityConfigurer
- * being accessible in the current web application context.
+ * <p>Depends on a VelocityConfig object such as VelocityConfigurer being
+ * accessible in the current web application context, with any bean name.
+ * Alternatively, you can set the VelocityEngine object as bean property.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: VelocityView.java,v 1.23 2004-03-05 19:46:32 davison Exp $
+ * @version $Id: VelocityView.java,v 1.24 2004-03-14 21:40:05 jhoeller Exp $
+ * @see VelocityConfig
+ * @see VelocityConfigurer
+ * @see #setUrl
+ * @see #setEncoding
+ * @see #setVelocityEngine
  * @see VelocityConfig
  * @see VelocityConfigurer
  */
@@ -70,6 +75,8 @@ public class VelocityView extends AbstractUrlBasedView {
 	public static final int OUTPUT_BUFFER_SIZE = 4096;
 
 
+	private String encoding = null;
+
 	private String velocityFormatterAttribute;
 
 	private String dateToolAttribute;
@@ -78,18 +85,27 @@ public class VelocityView extends AbstractUrlBasedView {
 
 	private boolean cacheTemplate;
 
-	/** Cache of writers */
-	private SimplePool writerPool;
-
-	/** The encoding to use when generating output */
-	private String encoding = null;
-
-	/** Instance of the VelocityEngine */
 	private VelocityEngine velocityEngine;
 
-	/** Velocity Template */
-	private Template velocityTemplate;
+	private Template template;
 
+
+	/**
+	 * Set the encoding of the Velocity template file. Default is determined
+	 * by the VelocityEngine: "ISO-8859-1" if not specified otherwise.
+	 * <p>Specify the encoding in the VelocityEngine rather than per template
+	 * if all your templates share a common encoding.
+	 */
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+
+	/**
+	 * Return the encoding for the Velocity template.
+	 */
+	protected String getEncoding() {
+		return encoding;
+	}
 
 	/**
 	 * Set the name of the VelocityFormatter helper object to expose in the
@@ -131,11 +147,20 @@ public class VelocityView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set the number of Velocity writers. Default is 40.
-	 * Refer to Velocity documentation to see exactly what this means.
+	 * Set the VelocityEngine to be used by this view.
+	 * If this is not set, the default lookup will occur: A single VelocityConfig
+	 * is expected in the current web application context, with any bean name.
+	 * @see VelocityConfig
 	 */
-	public void setWriterPoolSize(int writerPoolSize) {
-		this.writerPool = new SimplePool(writerPoolSize);
+	public void setVelocityEngine(VelocityEngine velocityEngine) {
+		this.velocityEngine = velocityEngine;
+	}
+
+	/**
+	 * Return the VelocityEngine used by this view.
+	 */
+	protected VelocityEngine getVelocityEngine() {
+		return velocityEngine;
 	}
 
 
@@ -143,60 +168,34 @@ public class VelocityView extends AbstractUrlBasedView {
  	 * Invoked on startup. Looks for a single VelocityConfig bean to
  	 * find the relevant VelocityEngine for this factory.
  	 */
-	protected void initApplicationContext() throws ApplicationContextException {
+	protected void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
 
+		if (this.velocityEngine == null) {
+			try {
+				VelocityConfig velocityConfig = (VelocityConfig)
+						BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(),
+																													VelocityConfig.class, true, true);
+				this.velocityEngine = velocityConfig.getVelocityEngine();
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				throw new ApplicationContextException("Must define a single VelocityConfig bean in this web application " +
+																							"context (may be inherited): VelocityConfigurer is the usual implementation. " +
+																							"This bean may be given any name.", ex);
+			}
+		}
+
 		try {
-			VelocityConfig vconfig = (VelocityConfig)
-					BeanFactoryUtils.beanOfTypeIncludingAncestors(getWebApplicationContext(),
-					                                              VelocityConfig.class, true, true);
-			this.velocityEngine = vconfig.getVelocityEngine();
-		}
-		catch (BeanDefinitionStoreException ex) {
-			throw new ApplicationContextException("Must define a single VelocityConfig bean in this web application " +
-			                                      "context (may be inherited): VelocityConfigurer is the usual implementation. " +
-			                                      "This bean may be given any name.", ex);
-		}
-
-		if (this.writerPool == null) {
-			this.writerPool = new SimplePool(DEFAULT_WRITER_POOL_SIZE);
-		}
-
-		this.encoding = (String) this.velocityEngine.getProperty(VelocityEngine.OUTPUT_ENCODING);
-		if (this.encoding == null) {
-			this.encoding = VelocityEngine.ENCODING_DEFAULT;
-		}
-
-		// check that we can get the template, even if we might subsequently get it again
-		loadTemplate();
-	}
-
-	/**
-	 * Load the Velocity template to back this view.
-	 */
-	private void loadTemplate() throws ApplicationContextException {
-		try {
-			this.velocityTemplate = this.velocityEngine.getTemplate(getUrl());
+			// check that we can get the template, even if we might subsequently get it again
+			this.template = getTemplate();
 		}
 		catch (ResourceNotFoundException ex) {
-			handleException("Can't load Velocity template '" + getUrl() +
-											"': is it available in the template directory?", ex);
-		}
-		catch (ParseErrorException ex) {
-			handleException("Error parsing Velocity template '" + getUrl() + "'", ex);
+			throw new ApplicationContextException("Cannot find Velocity template for URL [" + getUrl() +
+																						"]: Did you specify the correct resource loader path?", ex);
 		}
 		catch (Exception ex) {
-			handleException("Unexpected error getting Velocity template '" + getUrl() + "'", ex);
+			throw new ApplicationContextException("Cannot load Velocity template for URL [" + getUrl() + "]", ex);
 		}
-	}
-
-	/**
-	 * Re-throw the given exception as ApplicationContextException with proper message.
-	 */
-	private void handleException(String message, Exception ex) throws ApplicationContextException {
-		String actualMessage = "Velocity resource loader is '" +
-				this.velocityEngine.getProperty(VelocityEngine.RESOURCE_LOADER) + "': " + message;
-		throw new ApplicationContextException(actualMessage, ex);
 	}
 
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request,
@@ -205,13 +204,13 @@ public class VelocityView extends AbstractUrlBasedView {
 		// We already hold a reference to the template, but we might want to load it
 		// if not caching. As Velocity itself caches templates, so our ability to
 		// cache templates in this class is a minor optimization only.
+		Template template = this.template;
 		if (!this.cacheTemplate) {
-			loadTemplate();
+			template = getTemplate();
 		}
 
 		response.setContentType(getContentType());
-		Context velocityContext = new VelocityContext();
-		VelocityEngineUtils.exposeModelAsContextAttributes(model, velocityContext);
+		Context velocityContext = new VelocityContext(model);
 		exposeHelpers(velocityContext, request);
 
 		if (this.velocityFormatterAttribute != null) {
@@ -228,10 +227,20 @@ public class VelocityView extends AbstractUrlBasedView {
 			}
 		}
 
-		mergeTemplate(this.velocityTemplate, velocityContext, response);
+		mergeTemplate(template, velocityContext, response);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Merged with Velocity template '" + getUrl() + "' in VelocityView '" + getBeanName() + "'");
 		}
+	}
+
+	/**
+	 * Retrieve the Velocity template.
+	 * @return the Velocity template to process
+	 * @throws Exception if thrown by Velocity
+	 */
+	protected Template getTemplate() throws Exception {
+		return (this.encoding != null ? this.velocityEngine.getTemplate(getUrl(), this.encoding) :
+				this.velocityEngine.getTemplate(getUrl()));
 	}
 
 	/**
@@ -249,10 +258,11 @@ public class VelocityView extends AbstractUrlBasedView {
 
 	/**
 	 * Merge the template with the context.
-	 * Can be overridden if custom behaviour needs to be defined.
-	 * @param template template object returned by the handleRequest() method
-	 * @param context context the Velocity context
-	 * @param response servlet reponse (use this to get the OutputStream or Writer)
+	 * Can be overridden to customize the behavior.
+	 * @param template the template to merge
+	 * @param context the Velocity context
+	 * @param response servlet response (use this to get the OutputStream or Writer)
+	 * @see org.apache.velocity.Template#merge
 	 */
 	protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
 		template.merge(context, response.getWriter());

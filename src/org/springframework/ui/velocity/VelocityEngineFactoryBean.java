@@ -5,9 +5,14 @@
 
 package org.springframework.ui.velocity;
 
+import java.io.IOException;
+
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.VelocityException;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ResourceLoaderAware;
 
 /**
  * Factory bean that configures a VelocityEngine and provides it as bean
@@ -24,26 +29,24 @@ import org.springframework.beans.factory.FactoryBean;
  * @see CommonsLoggingLogSystem
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
  */
-public class VelocityEngineFactoryBean extends VelocityEngineFactory implements FactoryBean {
+public class VelocityEngineFactoryBean extends VelocityEngineFactory
+		implements FactoryBean, InitializingBean, ResourceLoaderAware {
 
-	/**
-     * @see org.springframework.beans.factory.FactoryBean#getObject()
-     */
-    public Object getObject() {
-		return getVelocityEngine();
+	private VelocityEngine velocityEngine;
+
+	public void afterPropertiesSet() throws IOException, VelocityException {
+		this.velocityEngine = createVelocityEngine();
 	}
 
-	/**
-     * @see org.springframework.beans.factory.FactoryBean#getObjectType()
-     */
-    public Class getObjectType() {
+	public Object getObject() {
+		return this.velocityEngine;
+	}
+
+	public Class getObjectType() {
 		return VelocityEngine.class;
 	}
 
-	/**
-     * @see org.springframework.beans.factory.FactoryBean#isSingleton()
-     */
-    public boolean isSingleton() {
+	public boolean isSingleton() {
 		return true;
 	}
 

@@ -25,7 +25,6 @@ import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.easymock.MockControl;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -34,11 +33,11 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.14 2004-02-23 18:01:08 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.15 2004-03-14 21:40:04 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
 
-	public void testNoVelocityConfiguration() throws Exception {
+	public void testNoVelocityConfig() throws Exception {
 		VelocityView vv = new VelocityView();
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
@@ -53,7 +52,7 @@ public class VelocityViewTests extends TestCase {
 			vv.setApplicationContext(wac);
 			fail();
 		}
-		catch (NoSuchBeanDefinitionException ex) {
+		catch (ApplicationContextException ex) {
 			// Check there's a helpful error message
 			assertTrue(ex.getMessage().indexOf("VelocityConfig") != -1);
 		}
@@ -158,8 +157,6 @@ public class VelocityViewTests extends TestCase {
 	private void testValidTemplateName(final Exception mergeTemplateFailureException) throws Exception {
 		Map model = new HashMap();
 		model.put("foo", "bar");
-		// This should be escaped to get rid of the illegal .
-		model.put("has.dot", "escaped");
 
 		final String templateName = "test.vm";
 
@@ -179,7 +176,6 @@ public class VelocityViewTests extends TestCase {
 		wmc.setReturnValue(configurers);
 		wmc.replay();
 
-		// Let it ask for locale
 		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest req = (HttpServletRequest) reqControl.getMock();
 		reqControl.replay();
@@ -191,8 +187,6 @@ public class VelocityViewTests extends TestCase {
 				assertTrue(template == expectedTemplate);
 				assertTrue(context.getKeys().length >= 1);
 				assertTrue(context.get("foo").equals("bar"));
-				// Check escaping of illegal dots
-				assertTrue("escaped".equals(context.get("has_dot")));
 				assertTrue(response == expectedResponse);
 				if (mergeTemplateFailureException != null) {
 					throw mergeTemplateFailureException;

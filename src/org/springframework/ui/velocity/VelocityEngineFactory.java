@@ -13,8 +13,11 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.VelocityException;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * Factory that configures a VelocityEngine. Can be used standalone, but
@@ -40,6 +43,8 @@ import org.springframework.core.io.Resource;
  * @see #setConfigLocation
  * @see #setVelocityProperties
  * @see #setResourceLoaderPath
+ * @see #setOverrideLogging
+ * @see #createVelocityEngine
  * @see CommonsLoggingLogSystem
  * @see VelocityEngineFactoryBean
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
@@ -52,19 +57,16 @@ public class VelocityEngineFactory {
 
 	private Properties velocityProperties;
 
-	private Resource resourceLoaderPath;
+	private String resourceLoaderPath;
+
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	private boolean overrideLogging = true;
 
-	/** It's the job of this class to initialize and expose this */
-	private VelocityEngine velocityEngine;
-
 
 	/**
-	 * Set location of the Velocity config file. Default value is determined
-	 * by getDefaultFileLocation, which will be applied <i>only</i> if neither
-	 * "configLocation" nor "velocityProperties" nor "resourceLoaderPath" is set.
-	 * @see #getDefaultConfigLocation
+	 * Set the location of the Velocity config file.
+	 * Alternatively, you can specify all properties locally.
 	 * @see #setVelocityProperties
 	 * @see #setResourceLoaderPath
 	 */
@@ -83,18 +85,30 @@ public class VelocityEngineFactory {
 	}
 
 	/**
-	 * Set the Velocity resource loader path via a Resource.
+	 * Set the Velocity resource loader path via a Spring resource location.
 	 * <p>When populated via a String, standard URLs like "file:" and "classpath:"
 	 * pseudo URLs are supported, as understood by ResourceEditor. Allows for
 	 * relative paths when running in an ApplicationContext.
 	 * <p>Will define a path for the default Velocity resource loader with the name
-	 * "file", of type org.apache.velocity.runtime.resource.loader.FileResourceLoader.
+	 * "file". If the specified resource cannot be resolved to a java.io.File, the
+	 * generic SpringResourceLoader will be used, without modification detection.
 	 * @see org.springframework.core.io.ResourceEditor
 	 * @see org.springframework.context.ApplicationContext#getResource
 	 * @see org.apache.velocity.runtime.resource.loader.FileResourceLoader
+	 * @see SpringResourceLoader
 	 */
-	public void setResourceLoaderPath(Resource resourceLoaderPath) {
+	public void setResourceLoaderPath(String resourceLoaderPath) {
 		this.resourceLoaderPath = resourceLoaderPath;
+	}
+
+	/**
+	 * Set the Spring ResourceLoader to use for loading Velocity template files.
+	 * The default is DefaultResourceLoader. Will get overridden by the
+	 * ApplicationContext if running in a context.
+	 * @see org.springframework.core.io.DefaultResourceLoader
+	 */
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
 	}
 
 	/**
@@ -108,100 +122,88 @@ public class VelocityEngineFactory {
 
 
 	/**
-	 * Prepare the VelocityEngine instance.
-	 * @throws VelocityInitializationException on Velocity initialization failure
+	 * Prepare the VelocityEngine instance and return it.
+	 * @return the VelocityEngine instance
+	 * @throws IOException if the config file wasn't found
+	 * @throws VelocityException on Velocity initialization failure
 	 */
-	public synchronized void initVelocityEngine() throws VelocityInitializationException {
-		this.velocityEngine = newVelocityEngine();
+	public VelocityEngine createVelocityEngine() throws IOException, VelocityException {
+		VelocityEngine velocityEngine = newVelocityEngine();
 		Properties props = new Properties();
 
-		// try default config location as fallback
-		Resource actualLocation = this.configLocation;
-		if (this.configLocation == null && this.velocityProperties == null && this.resourceLoaderPath == null) {
-			actualLocation = getDefaultConfigLocation();
-		}
-
-		try {
-			// load config file if set
-			if (actualLocation != null) {
-				logger.info("Loading Velocity config from [" + actualLocation + "]");
-				InputStream is = actualLocation.getInputStream();
-				try {
-					props.load(is);
-				}
-				finally {
-					is.close();
-				}
+		// load config file if set
+		if (this.configLocation != null) {
+			logger.info("Loading Velocity config from [" + this.configLocation + "]");
+			InputStream is = this.configLocation.getInputStream();
+			try {
+				props.load(is);
 			}
-		}
-		catch (IOException ex) {
-			throw new VelocityInitializationException("Error loading Velocity config from " + actualLocation, ex);
+			finally {
+				is.close();
+			}
 		}
 
 		// merge local properties if set
-		if (this.velocityProperties != null) {
-			props.putAll(this.velocityProperties);
+		if (velocityProperties != null) {
+			props.putAll(velocityProperties);
 		}
 
 		// set properties
 		for (Iterator it = props.keySet().iterator(); it.hasNext();) {
 			String key = (String) it.next();
-			this.velocityEngine.setProperty(key, props.getProperty(key));
+			velocityEngine.setProperty(key, props.getProperty(key));
+		}
+
+		// set a resource loader path, if required
+		if (this.resourceLoaderPath != null) {
+			try {
+				Resource path = this.resourceLoader.getResource(this.resourceLoaderPath);
+				velocityEngine.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH,
+																				path.getFile().getAbsolutePath());
+			}
+			catch (IOException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cannot resolve resource loader path [" + this.resourceLoaderPath +
+											 "] to File: using SpringResourceLoader", ex);
+				}
+				else if (logger.isInfoEnabled()) {
+					logger.info("Cannot resolve resource loader path [" + this.resourceLoaderPath +
+											"] to File: using SpringResourceLoader");
+				}
+				velocityEngine.setProperty(VelocityEngine.RESOURCE_LOADER,
+																				SpringResourceLoader.NAME);
+				velocityEngine.setProperty(SpringResourceLoader.SPRING_RESOURCE_LOADER_CLASS,
+																				SpringResourceLoader.class.getName());
+				velocityEngine.setApplicationAttribute(SpringResourceLoader.SPRING_RESOURCE_LOADER,
+																										this.resourceLoader);
+				velocityEngine.setApplicationAttribute(SpringResourceLoader.SPRING_RESOURCE_LOADER_PATH,
+																										this.resourceLoaderPath);
+			}
+		}
+
+		// log via Commons Logging?
+		if (this.overrideLogging) {
+			velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
 		}
 
 		try {
-			// set a resource loader path, if required
-			if (this.resourceLoaderPath != null) {
-				if (!this.resourceLoaderPath.exists()) {
-					throw new VelocityInitializationException("Specified resource loader path does not exist: " +
-																										this.resourceLoaderPath);
-				}
-				this.velocityEngine.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH,
-																				this.resourceLoaderPath.getFile().getAbsolutePath());
-			}
-
-			// log via Commons Logging?
-			if (this.overrideLogging) {
-				this.velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
-			}
-
 			// perform initialization
-			this.velocityEngine.init();
-		}
-		catch (VelocityInitializationException ex) {
-			throw ex;
+			velocityEngine.init();
 		}
 		catch (Exception ex) {
-			throw new VelocityInitializationException("Could not initialize Velocity engine", ex);
+			logger.error("Why does VelocityEngine throw a generic checked exception, after all?", ex);
+			throw new VelocityException(ex.getMessage());
 		}
-	}
 
-	/**
-	 * Return a default config location, if any. If neither "configLocation" nor
-	 * "velocityProperties" nor "resourceLoaderPath" is set, this will be used as
-	 * config location. Default is none: can be overridden in subclasses.
-	 */
-	protected Resource getDefaultConfigLocation() {
-		return null;
+		return velocityEngine;
 	}
 
 	/**
 	 * Return a new VelocityEngine. Subclasses can override this for
-	 * custom initialization, or tests can override it
+	 * custom initialization, or for using a mock object for testing.
 	 */
 	protected VelocityEngine newVelocityEngine() {
 		return new VelocityEngine();
-	}
-
-	/**
-	 * Return the prepared VelocityEngine instance.
-	 * @throws VelocityInitializationException on Velocity initialization failure
-	 */
-	public synchronized VelocityEngine getVelocityEngine() throws VelocityInitializationException {
-		if (this.velocityEngine == null) {
-			initVelocityEngine();
-		}
-		return this.velocityEngine;
 	}
 
 }
