@@ -30,7 +30,7 @@ import org.springframework.core.NestedRuntimeException;
 public abstract class BeansException extends NestedRuntimeException {
 
 	/**
-	 * Constructs a <code>BeansException</code> with the specified message.
+	 * Create a new BeansException with the specified message.
 	 * @param msg the detail message
 	 */
 	public BeansException(String msg) {
@@ -38,7 +38,7 @@ public abstract class BeansException extends NestedRuntimeException {
 	}
 
 	/**
-	 * Constructs a <code>BeansException</code> with the specified message
+	 * Create a new BeansException with the specified message
 	 * and root cause.
 	 * @param msg the detail message
 	 * @param ex the root cause

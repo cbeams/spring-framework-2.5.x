@@ -19,37 +19,32 @@ package org.springframework.beans;
 
 /**
  * Exception thrown when navigation of a valid nested property
- * path encounters a null pointer exception. For example,
- * navigating spouse.age fails because the spouse property of the
- * target object has a null value.
+ * path encounters a NullPointerException.
+ *
+ * <p>For example, navigating "spouse.age" could fail because the
+ * spouse property of the target object has a null value.
+ *
  * @author Rod Johnson
  */
-public class NullValueInNestedPathException extends FatalBeanException {
-
-	private String property;
-
-	private Class clazz;
+public class NullValueInNestedPathException extends InvalidPropertyException {
 
 	/**
-	 * Constructor for NullValueInNestedPathException.
-	 * @param clazz
-	 * @param propertyName
+	 * Create a new NullValueInNestedPathException.
+	 * @param beanClass the offending bean class
+	 * @param propertyName the offending property
 	 */
-	public NullValueInNestedPathException(Class clazz, String propertyName) {
-		super("Value of nested property '" + propertyName + "' is null in " + clazz, null);
-		this.property = propertyName;
-		this.clazz = clazz;
+	public NullValueInNestedPathException(Class beanClass, String propertyName) {
+		super(beanClass, propertyName, "Value of nested property '" + propertyName + "' is null");
 	}
 
 	/**
-	 * @return the name of the offending property
+	 * Create a new NullValueInNestedPathException.
+	 * @param beanClass the offending bean class
+	 * @param propertyName the offending property
+	 * @param msg the detail message
 	 */
-	public String getPropertyName() {
-		return property;
-	}
-
-	public Class getBeanClass() {
-		return clazz;
+	public NullValueInNestedPathException(Class beanClass, String propertyName, String msg) {
+		super(beanClass, propertyName, msg);
 	}
 
 }

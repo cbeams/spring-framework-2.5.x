@@ -25,10 +25,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.NullValueInNestedPathException;
 
 /**
  * PropertyComparator performs a comparison of two beans,
@@ -41,9 +41,10 @@ public class PropertyComparator implements Comparator {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private SortDefinition sortDefinition;
+	private final SortDefinition sortDefinition;
 
-	private Map cachedBeanWrappers = new HashMap();
+	private final Map cachedBeanWrappers = new HashMap();
+
 
 	public PropertyComparator(SortDefinition sortDefinition) {
 		this.sortDefinition = sortDefinition;
@@ -58,49 +59,61 @@ public class PropertyComparator implements Comparator {
 		}
 		int result;
 		
-		// Put the null property at the end of the sort
+		// Put a null property at the end of the sort.
 		try {
 			if (v1 != null) {
 				if (v2 != null) {
 					result = ((Comparable) v1).compareTo(v2);
-				} else {
+				}
+				else {
 					result = -1;
 				}
 			}
 			else {
 				if (v2 != null) {
 					result = 1;
-				} else {
+				}
+				else {
 					result = 0;
 				}
 			}
 		}
 		catch (RuntimeException ex) {
-			logger.warn("Could not sort objects [" + o1 + "] and [" + o2 + "]", ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not sort objects [" + o1 + "] and [" + o2 + "]", ex);
+			}
 			return 0;
 		}
 		return (this.sortDefinition.isAscending() ? result : -result);
 	}
 
-	private Object getPropertyValue(Object o) throws BeansException {
-		BeanWrapper bw = (BeanWrapper) this.cachedBeanWrappers.get(o);
+	/**
+	 * Get the SortDefinition's property value for the given object.
+	 * @param obj the object to get the property value for
+	 * @return the property value
+	 */
+	private Object getPropertyValue(Object obj) {
+		BeanWrapper bw = (BeanWrapper) this.cachedBeanWrappers.get(obj);
 		if (bw == null) {
-			bw = new BeanWrapperImpl(o);
-			this.cachedBeanWrappers.put(o, bw);
+			bw = new BeanWrapperImpl(obj);
+			this.cachedBeanWrappers.put(obj, bw);
 		}
 
-		// If a parent is null, simply done the property as null
+		// If a nested property cannot be read, simply return null
+		// (similar to JSTL EL). If the property doesn't exist in the
+		// first place, let the exception through.
 		try {
 			return bw.getPropertyValue(this.sortDefinition.getProperty());
-		} catch (NullValueInNestedPathException e) {
-			logger.info("Null value in nested properties path");
+		}
+		catch (BeansException ex) {
+			logger.info("PropertyComparator could not access property - treating as null for sorting", ex);
 			return null;
 		}
 	}
 
 
 	/**
-	 * Sorts the given List according to the given sort definition.
+	 * Sort the given List according to the given sort definition.
 	 * <p>Note: Contained objects have to provide the given property
 	 * in the form of a bean property, i.e. a getXXX method.
 	 * @param source the input List
@@ -112,7 +125,7 @@ public class PropertyComparator implements Comparator {
 	}
 
 	/**
-	 * Sorts the given source according to the given sort definition.
+	 * Sort the given source according to the given sort definition.
 	 * <p>Note: Contained objects have to provide the given property
 	 * in the form of a bean property, i.e. a getXXX method.
 	 * @param source input source

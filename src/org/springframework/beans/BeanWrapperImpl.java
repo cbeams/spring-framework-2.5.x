@@ -75,7 +75,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.40 2004-05-28 11:08:36 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.41 2004-06-02 00:47:17 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -155,10 +155,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	/**
 	 * Create new BeanWrapperImpl for the given object.
-	 * @param object object wrapped by this BeanWrapper.
-	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
+	 * @param object object wrapped by this BeanWrapper
 	 */
-	public BeanWrapperImpl(Object object) throws BeansException {
+	public BeanWrapperImpl(Object object) {
 		this();
 		setWrappedInstance(object);
 	}
@@ -166,9 +165,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	/**
 	 * Create new BeanWrapperImpl, wrapping a new instance of the specified class.
 	 * @param clazz class to instantiate and wrap
-	 * @throws BeansException if the class cannot be wrapped by a BeanWrapper
 	 */
-	public BeanWrapperImpl(Class clazz) throws BeansException {
+	public BeanWrapperImpl(Class clazz) {
 		this();
 		setWrappedInstance(BeanUtils.instantiateClass(clazz));
 	}
@@ -178,9 +176,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper.
 	 * @param nestedPath the nested path of the object
-	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
-	public BeanWrapperImpl(Object object, String nestedPath) throws BeansException {
+	public BeanWrapperImpl(Object object, String nestedPath) {
 		this();
 		setWrappedInstance(object, nestedPath);
 	}
@@ -191,9 +188,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @param object object wrapped by this BeanWrapper.
 	 * @param nestedPath the nested path of the object
 	 * @param superBw the containing BeanWrapper (must not be null)
-	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
-	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) throws BeansException {
+	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
 		this.defaultEditors = superBw.defaultEditors;
 		setWrappedInstance(object, nestedPath);
 	}
@@ -207,9 +203,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * Switch the target object, replacing the cached introspection results only
 	 * if the class of the new object is different to that of the replaced object.
 	 * @param object new target
-	 * @throws BeansException if the object cannot be changed
 	 */
-	public void setWrappedInstance(Object object) throws BeansException {
+	public void setWrappedInstance(Object object) {
 		setWrappedInstance(object, "");
 	}
 
@@ -218,11 +213,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * if the class of the new object is different to that of the replaced object.
 	 * @param object new target
 	 * @param nestedPath the nested path of the object
-	 * @throws BeansException if the object cannot be changed
 	 */
-	public void setWrappedInstance(Object object, String nestedPath) throws BeansException {
+	public void setWrappedInstance(Object object, String nestedPath) {
 		if (object == null) {
-			throw new FatalBeanException("Cannot set BeanWrapperImpl target to a null object");
+			throw new IllegalArgumentException("Cannot set BeanWrapperImpl target to a null object");
 		}
 		this.object = object;
 		this.nestedPath = nestedPath;
@@ -250,7 +244,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			List bws = getBeanWrappersForPropertyPath(propertyPath);
 			for (Iterator it = bws.iterator(); it.hasNext();) {
 				BeanWrapperImpl bw = (BeanWrapperImpl) it.next();
-				bw.doRegisterCustomEditor(requiredType, getFinalPath(propertyPath), propertyEditor);
+				bw.doRegisterCustomEditor(requiredType, getFinalPath(bw, propertyPath), propertyEditor);
 			}
 		}
 		else {
@@ -275,8 +269,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
 		if (propertyPath != null) {
-			BeanWrapperImpl bw = getBeanWrapperForPropertyPath(propertyPath);
-			return bw.doFindCustomEditor(requiredType, getFinalPath(propertyPath));
+			BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyPath);
+			return nestedBw.doFindCustomEditor(requiredType, getFinalPath(nestedBw, propertyPath));
 		}
 		else {
 			return doFindCustomEditor(requiredType, propertyPath);
@@ -307,7 +301,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 					}
 				}
 			}
-			catch (BeansException ex) {
+			catch (InvalidPropertyException ex) {
 				// probably an indexed or mapped property
 				// we need to retrieve the value to determine the type
 				Object value = getPropertyValue(propertyName);
@@ -323,21 +317,15 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 
 	/**
-	 * Is the property nested? That is, does it contain the nested
-	 * property separator (usually ".").
-	 * @param path property path
-	 * @return boolean is the property nested
-	 */
-	private boolean isNestedProperty(String path) {
-		return path.indexOf(NESTED_PROPERTY_SEPARATOR) != -1;
-	}
-
-	/**
 	 * Get the last component of the path. Also works if not nested.
+	 * @param bw BeanWrapper to work on
 	 * @param nestedPath property path we know is nested
 	 * @return last component of the path (the property on the target bean)
 	 */
-	private String getFinalPath(String nestedPath) {
+	private String getFinalPath(BeanWrapper bw, String nestedPath) {
+		if (bw == this) {
+			return nestedPath;
+		}
 		return nestedPath.substring(nestedPath.lastIndexOf(NESTED_PROPERTY_SEPARATOR) + 1);
 	}
 
@@ -346,7 +334,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @param propertyPath property property path, which may be nested
 	 * @return a BeanWrapper for the target bean
 	 */
-	private BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) {
+	private BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) throws BeansException {
 		int pos = propertyPath.indexOf(NESTED_PROPERTY_SEPARATOR);
 		// handle nested properties recursively
 		if (pos > -1) {
@@ -367,7 +355,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @param propertyPath property property path, which may be nested
 	 * @return a BeanWrapper for the target bean
 	 */
-	private List getBeanWrappersForPropertyPath(String propertyPath) {
+	private List getBeanWrappersForPropertyPath(String propertyPath) throws BeansException {
 		List beanWrappers = new ArrayList();
 		int pos = propertyPath.indexOf(NESTED_PROPERTY_SEPARATOR);
 		// handle nested properties recursively
@@ -379,21 +367,27 @@ public class BeanWrapperImpl implements BeanWrapper {
 				if (propertyType.isArray()) {
 					Object[] array = (Object[]) getPropertyValue(nestedProperty);
 					for (int i = 0; i < array.length; i++) {
-						beanWrappers.addAll(getBeanWrappersForNestedProperty(nestedProperty + "[" + i + "]", nestedPath));
+						beanWrappers.addAll(
+								getBeanWrappersForNestedProperty(nestedProperty + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+																								 nestedPath));
 					}
 					return beanWrappers;
 				}
 				else if (List.class.isAssignableFrom(propertyType)) {
 					List list = (List) getPropertyValue(nestedProperty);
 					for (int i = 0; i < list.size(); i++) {
-						beanWrappers.addAll(getBeanWrappersForNestedProperty(nestedProperty + "[" + i + "]", nestedPath));
+						beanWrappers.addAll(
+								getBeanWrappersForNestedProperty(nestedProperty + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+																								 nestedPath));
 					}
 					return beanWrappers;
 				}
 				else if (Map.class.isAssignableFrom(propertyType)) {
 					Map map = (Map) getPropertyValue(nestedProperty);
 					for (Iterator it = map.keySet().iterator(); it.hasNext();) {
-						beanWrappers.addAll(getBeanWrappersForNestedProperty(nestedProperty + "[" + it.next() + "]", nestedPath));
+						beanWrappers.addAll(
+								getBeanWrappersForNestedProperty(nestedProperty + PROPERTY_KEY_PREFIX + it.next() + PROPERTY_KEY_SUFFIX,
+																								 nestedPath));
 					}
 					return beanWrappers;
 				}
@@ -407,7 +401,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
-	private List getBeanWrappersForNestedProperty(String nestedProperty, String nestedPath) {
+	private List getBeanWrappersForNestedProperty(String nestedProperty, String nestedPath) throws BeansException {
 		BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
 		return nestedBw.getBeanWrappersForPropertyPath(nestedPath);
 	}
@@ -420,7 +414,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @param nestedProperty property to create the BeanWrapper for
 	 * @return the BeanWrapper instance, either cached or newly created
 	 */
-	private BeanWrapperImpl getNestedBeanWrapper(String nestedProperty) {
+	private BeanWrapperImpl getNestedBeanWrapper(String nestedProperty) throws BeansException {
 		if (this.nestedBeanWrappers == null) {
 			this.nestedBeanWrappers = new HashMap();
 		}
@@ -429,7 +423,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		Object propertyValue = getPropertyValue(tokens[0], tokens[1], tokens[2]);
 		String canonicalName = tokens[0];
 		if (propertyValue == null) {
-			throw new NullValueInNestedPathException(getWrappedClass(), canonicalName);
+			throw new NullValueInNestedPathException(getWrappedClass(), this.nestedPath + canonicalName);
 		}
 
 		// lookup cached sub-BeanWrapper, create new one if not found
@@ -477,36 +471,33 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		String canonicalName = actualName;
 		if (key != null) {
-			canonicalName += "[" + key + "]";
+			canonicalName += PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;
 		}
 		return new String[] {canonicalName, actualName, key};
 	}
 
 
 	public Object getPropertyValue(String propertyName) throws BeansException {
-		if (isNestedProperty(propertyName)) {
-			BeanWrapper nestedBw = getBeanWrapperForPropertyPath(propertyName);
-			return nestedBw.getPropertyValue(getFinalPath(propertyName));
-		}
-		String[] tokens = getPropertyNameTokens(propertyName);
-		return getPropertyValue(tokens[0], tokens[1], tokens[2]);
+		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
+		String[] tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
+		return nestedBw.getPropertyValue(tokens[0], tokens[1], tokens[2]);
 	}
 
-	private Object getPropertyValue(String propertyName, String actualName, String key) {
-		PropertyDescriptor pd = getPropertyDescriptor(actualName);
-		Method readMethod = pd.getReadMethod();
-		if (readMethod == null) {
-			throw new FatalBeanException("Cannot get property '" + actualName + "': not readable", null);
+	private Object getPropertyValue(String propertyName, String actualName, String key) throws BeansException {
+		PropertyDescriptor pd = getPropertyDescriptorInternal(actualName);
+		if (pd == null || pd.getReadMethod() == null) {
+			throw new NotReadablePropertyException(getWrappedClass(), this.nestedPath + propertyName);
 		}
 		if (logger.isDebugEnabled())
-			logger.debug("About to invoke read method [" + readMethod +
+			logger.debug("About to invoke read method [" + pd.getReadMethod() +
 			             "] on object of class [" + this.object.getClass().getName() + "]");
 		try {
-			Object value = readMethod.invoke(this.object, null);
+			Object value = pd.getReadMethod().invoke(this.object, null);
 			if (key != null) {
 				if (value == null) {
-					throw new FatalBeanException("Cannot access indexed value in property referenced in indexed property path '" +
-					                             propertyName + "': returned null");
+					throw new NullValueInNestedPathException(getWrappedClass(), this.nestedPath + propertyName,
+																									 "Cannot access indexed value of property referenced in indexed " +
+																									 "property path '" + propertyName + "': returned null");
 				}
 				else if (value.getClass().isArray()) {
 					return Array.get(value, Integer.parseInt(key));
@@ -526,16 +517,19 @@ public class BeanWrapperImpl implements BeanWrapper {
 							return elem;
 						}
 					}
-					throw new FatalBeanException("Cannot get element with index " + index + " from Set of size " +
-																			 set.size() + ", accessed using property path '" + propertyName + "'");
+					throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																						 "Cannot get element with index " + index + " from Set of size " +
+																						 set.size() + ", accessed using property path '" + propertyName + "'");
 				}
 				else if (value instanceof Map) {
 					Map map = (Map) value;
 					return map.get(key);
 				}
 				else {
-					throw new FatalBeanException("Property referenced in indexed property path '" + propertyName +
-					                             "' is neither an array nor a List nor a Map; returned value was [" + value + "]");
+					throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																						 "Property referenced in indexed property path '" + propertyName +
+																						 "' is neither an array nor a List nor a Map; returned value was [" +
+																						 value + "]");
 				}
 			}
 			else {
@@ -543,37 +537,35 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 		}
 		catch (InvocationTargetException ex) {
-			throw new FatalBeanException("Getter for property '" + actualName + "' threw exception", ex);
+			throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																				 "Getter for property '" + actualName + "' threw exception", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new FatalBeanException("Illegal attempt to get property '" + actualName + "' threw exception", ex);
+			throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																				 "Illegal attempt to get property '" + actualName + "' threw exception", ex);
 		}
 		catch (IndexOutOfBoundsException ex) {
-			throw new FatalBeanException("Index of out of bounds in property path '" + propertyName + "'", ex);
+			throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																				 "Index of out of bounds in property path '" + propertyName + "'", ex);
 		}
 		catch (NumberFormatException ex) {
-			throw new FatalBeanException("Invalid index in property path '" + propertyName + "'");
+			throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																				 "Invalid index in property path '" + propertyName + "'", ex);
 		}
 	}
 
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
-		if (isNestedProperty(propertyName)) {
-			try {
-				BeanWrapper nestedBw = getBeanWrapperForPropertyPath(propertyName);
-				nestedBw.setPropertyValue(new PropertyValue(getFinalPath(propertyName), value));
-				return;
-			}
-			catch (NullValueInNestedPathException ex) {
-				// let this through
-				throw ex;
-			}
-			catch (FatalBeanException ex) {
-				// error in the nested path
-				throw new NotWritablePropertyException(propertyName, getWrappedClass(), ex);
-			}
+		BeanWrapperImpl nestedBw = null;
+		try {
+			nestedBw = getBeanWrapperForPropertyPath(propertyName);
 		}
-		String[] tokens = getPropertyNameTokens(propertyName);
-		setPropertyValue(tokens[0], tokens[1], tokens[2], value);
+		catch (NotReadablePropertyException ex) {
+			throw new NotWritablePropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																						 "Nested property in path '" + propertyName + "' does not exist",
+																						 ex);
+		}
+		String[] tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
+		nestedBw.setPropertyValue(tokens[0], tokens[1], tokens[2], value);
 	}
 
 	private void setPropertyValue(String propertyName, String actualName, String key, Object value)
@@ -583,15 +575,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 			try {
 				propValue = getPropertyValue(actualName);
 			}
-			catch (BeansException ex) {
-				throw new NotWritablePropertyException("Cannot access indexed value in property referenced " +
+			catch (NotReadablePropertyException ex) {
+				throw new NotWritablePropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																							 "Cannot access indexed value in property referenced " +
 																							 "in indexed property path '" + propertyName + "'",
-																							 getWrappedClass(), ex);
+																							 ex);
 			}
 			if (propValue == null) {
-				throw new NotWritablePropertyException("Cannot access indexed value in property referenced " +
-																							 "in indexed property path '" + propertyName + "': returned null",
-																							 getWrappedClass());
+				throw new NullValueInNestedPathException(getWrappedClass(), this.nestedPath + propertyName,
+																								 "Cannot access indexed value in property referenced " +
+																								 "in indexed property path '" + propertyName + "': returned null");
 			}
 			else if (propValue.getClass().isArray()) {
 				Object newValue = doTypeConversionIfNecessary(propertyName, propertyName, null, value,
@@ -611,10 +604,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 							list.add(null);
 						}
 						catch (NullPointerException ex) {
-							throw new NotWritablePropertyException("Cannot set element with index " + index + " in List of size " +
-																										 list.size() + ", accessed using property path '" + propertyName +
-																										 "': List does not support filling up gaps with null elements",
-																										 getWrappedClass());
+							throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																								 "Cannot set element with index " + index + " in List of size " +
+																								 list.size() + ", accessed using property path '" + propertyName +
+																								 "': List does not support filling up gaps with null elements");
 						}
 					}
 					list.add(newValue);
@@ -626,14 +619,15 @@ public class BeanWrapperImpl implements BeanWrapper {
 				map.put(key, newValue);
 			}
 			else {
-				throw new NotWritablePropertyException("Property referenced in indexed property path '" + propertyName +
-																							 "' is neither an array nor a List nor a Map; returned value was [" +
-																							 value + "]", getWrappedClass());
+				throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																					 "Property referenced in indexed property path '" + propertyName +
+																					 "' is neither an array nor a List nor a Map; returned value was [" +
+																					 value + "]");
 			}
 		}
 		else {
 			if (!isWritableProperty(propertyName)) {
-				throw new NotWritablePropertyException(propertyName, getWrappedClass());
+				throw new NotWritablePropertyException(getWrappedClass(), this.nestedPath + propertyName);
 			}
 			PropertyDescriptor pd = getPropertyDescriptor(propertyName);
 			Method writeMethod = pd.getWriteMethod();
@@ -657,7 +651,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 					String msg = "Invoked write method [" + writeMethod + "] with value ";
 					// only cause toString invocation of new value in case of simple property
 					if (newValue == null || BeanUtils.isSimpleProperty(pd.getPropertyType())) {
-						logger.debug(msg + "[" + newValue + "]");
+						logger.debug(msg + PROPERTY_KEY_PREFIX + newValue + PROPERTY_KEY_SUFFIX);
 					}
 					else {
 						logger.debug(msg + "of type [" + pd.getPropertyType().getName() + "]");
@@ -665,25 +659,24 @@ public class BeanWrapperImpl implements BeanWrapper {
 				}
 			}
 			catch (InvocationTargetException ex) {
-				// TODO could consider getting rid of PropertyChangeEvents as exception parameters
-				// as they can never contain anything but null for the old value as we no longer
-				// support event propagation.
 				PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
 																																					null, newValue);
 				if (ex.getTargetException() instanceof ClassCastException) {
 					throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
 				}
 				else {
-					throw new MethodInvocationException(ex.getTargetException(), propertyChangeEvent);
+					throw new MethodInvocationException(propertyChangeEvent, ex.getTargetException());
 				}
-			}
-			catch (IllegalAccessException ex) {
-				throw new FatalBeanException("Illegal attempt to set property [" + value + "] threw exception", ex);
 			}
 			catch (IllegalArgumentException ex) {
 				PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
 																																					null, newValue);
 				throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex);
+			}
+			catch (IllegalAccessException ex) {
+				PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(this.object, this.nestedPath + propertyName,
+																																					null, newValue);
+				throw new MethodInvocationException(propertyChangeEvent, ex);
 			}
 		}
 	}
@@ -713,12 +706,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 		PropertyValue[] pvs = propertyValues.getPropertyValues();
 		for (int i = 0; i < pvs.length; i++) {
 			try {
-				// This method may throw ReflectionException, which won't be caught
+				// This method may throw any BeansException, which won't be caught
 				// here, if there is a critical failure such as no matching field.
 				// We can attempt to deal only with less serious exceptions.
 				setPropertyValue(pvs[i]);
 			}
-			// fatal ReflectionExceptions will just be rethrown
 			catch (NotWritablePropertyException ex) {
 				if (!ignoreUnknown) {
 					throw ex;
@@ -733,7 +725,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			}
 		}
 
-		// if we encountered individual exceptions, throw the composite exception
+		// If we encountered individual exceptions, throw the composite exception.
 		if (!propertyAccessExceptions.isEmpty()) {
 			Object[] paeArray = propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
 			throw new PropertyAccessExceptionsException(this, (PropertyAccessException[]) paeArray);
@@ -784,7 +776,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 					List list = (List) newValue;
 					Object result = Array.newInstance(componentType, list.size());
 					for (int i = 0; i < list.size(); i++) {
-						Object value = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
+						Object value = doTypeConversionIfNecessary(propertyName,
+																											 propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
 																											 null, list.get(i), componentType);
 						Array.set(result, i, value);
 					}
@@ -794,7 +787,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 					Object[] array = (Object[]) newValue;
 					Object result = Array.newInstance(componentType, array.length);
 					for (int i = 0; i < array.length; i++) {
-						Object value = doTypeConversionIfNecessary(propertyName, propertyName + "[" + i + "]",
+						Object value = doTypeConversionIfNecessary(propertyName,
+																											 propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
 																											 null, array[i], componentType);
 						Array.set(result, i, value);
 					}
@@ -881,13 +875,25 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
 		if (propertyName == null) {
-			throw new FatalBeanException("Can't find property descriptor for null property");
+			throw new IllegalArgumentException("Can't find property descriptor for null property");
 		}
-		if (isNestedProperty(propertyName)) {
-			BeanWrapper nestedBw = getBeanWrapperForPropertyPath(propertyName);
-			return nestedBw.getPropertyDescriptor(getFinalPath(propertyName));
+		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+		if (pd != null) {
+			return pd;
 		}
-		return this.cachedIntrospectionResults.getPropertyDescriptor(propertyName);
+		else {
+			throw new InvalidPropertyException(getWrappedClass(), this.nestedPath + propertyName,
+																				 "No property '" + propertyName + "' found");
+		}
+	}
+
+	/**
+	 * Internal version of getPropertyDescriptor:
+	 * Returns null if not found rather than throwing an exception.
+	 */
+	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
+		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
+		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
 
 	public Class getPropertyType(String propertyName) throws BeansException {
@@ -895,7 +901,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		try {
 			type = getPropertyDescriptor(propertyName).getPropertyType();
 		}
-		catch (BeansException ex) {
+		catch (InvalidPropertyException ex) {
 			// probably an indexed or mapped element
 			Object value = getPropertyValue(propertyName);
 			if (value != null) {
@@ -907,14 +913,15 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	public boolean isReadableProperty(String propertyName) {
 		// This is a programming error, although asking for a property
-		// that doesn't exist is not
+		// that doesn't exist is not.
 		if (propertyName == null) {
-			throw new FatalBeanException("Can't find readability status for null property");
+			throw new IllegalArgumentException("Can't find readability status for null property");
 		}
 		try {
-			return getPropertyDescriptor(propertyName).getReadMethod() != null;
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			return (pd != null && pd.getReadMethod() != null);
 		}
-		catch (BeansException ex) {
+		catch (InvalidPropertyException ex) {
 			// doesn't exist, so can't be readable
 			return false;
 		}
@@ -924,12 +931,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// This is a programming error, although asking for a property
 		// that doesn't exist is not.
 		if (propertyName == null) {
-			throw new FatalBeanException("Can't find writability status for null property");
+			throw new IllegalArgumentException("Can't find writability status for null property");
 		}
 		try {
-			return getPropertyDescriptor(propertyName).getWriteMethod() != null;
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			return (pd != null && pd.getWriteMethod() != null);
 		}
-		catch (BeansException ex) {
+		catch (InvalidPropertyException ex) {
 			// doesn't exist, so can't be writable
 			return false;
 		}

@@ -17,29 +17,20 @@
 package org.springframework.beans;
 
 /**
- * Thrown on an unrecoverable problem encountered in the
- * beans packages or sub-packages, e.g. bad class or field.
- * @author Rod Johnson
- * @version $Revision: 1.5 $
+ * Exception thrown on an attempt to get the value of a property
+ * that isn't readable, because there's no getter method.
+ * @author Juergen Hoeller
+ * @since 01.06.2004
  */
-public class FatalBeanException extends BeansException {
+public class NotReadablePropertyException extends InvalidPropertyException {
 
 	/**
-	 * Create a new FatalBeanException with the specified message.
-	 * @param msg the detail message
+	 * Create a new NotReadablePropertyException.
+	 * @param beanClass the offending bean class
+	 * @param propertyName the offending property
 	 */
-	public FatalBeanException(String msg) {
-		super(msg);
-	}
-
-	/**
-	 * Create a new FatalBeanException with the specified message
-	 * and root cause.
-	 * @param msg the detail message
-	 * @param ex the root cause
-	 */
-	public FatalBeanException(String msg, Throwable ex) {
-		super(msg, ex);
+	public NotReadablePropertyException(Class beanClass, String propertyName) {
+		super(beanClass, propertyName, "Property '" + propertyName + "' is not readable");
 	}
 
 }

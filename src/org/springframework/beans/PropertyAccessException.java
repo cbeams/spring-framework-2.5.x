@@ -24,18 +24,29 @@ import org.springframework.core.ErrorCoded;
  * Superclass for exceptions related to a property access,
  * such as type mismatch or invocation target exception.
  * @author Rod Johnson
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class PropertyAccessException extends BeansException implements ErrorCoded {
 
-	private PropertyChangeEvent propertyChangeEvent;
+	private final PropertyChangeEvent propertyChangeEvent;
 
-	public PropertyAccessException(String msg, PropertyChangeEvent propertyChangeEvent) {
+	/**
+	 * Create a new PropertyAccessException.
+	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
+	 * @param msg the detail message
+	 */
+	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg) {
 		super(msg);
 		this.propertyChangeEvent = propertyChangeEvent;
 	}
 
-	public PropertyAccessException(String msg, PropertyChangeEvent propertyChangeEvent, Throwable ex) {
+	/**
+	 * Create a new PropertyAccessException.
+	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
+	 * @param msg the detail message
+	 * @param ex the root cause
+	 */
+	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg, Throwable ex) {
 		super(msg, ex);
 		this.propertyChangeEvent = propertyChangeEvent;
 	}

@@ -28,13 +28,14 @@ import junit.framework.TestCase;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanWrapperTestSuite.java,v 1.20 2004-05-28 11:09:23 jhoeller Exp $
+ * @version $Id: BeanWrapperTestSuite.java,v 1.21 2004-06-02 00:46:00 jhoeller Exp $
  */
 public class BeanWrapperTestSuite extends TestCase {
 
 	public void testSetWrappedInstanceOfSameClass()throws Exception {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
+		assertTrue(bw.isReadableProperty("age"));
 		tb.setAge(11);
 
 		TestBean tb2 = new TestBean();
@@ -77,7 +78,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			bw.isReadableProperty(null);
 			fail("Can't inquire into readability of null property");
 		}
-		catch (BeansException ex) {
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 	}
@@ -89,7 +90,7 @@ public class BeanWrapperTestSuite extends TestCase {
 			bw.isWritableProperty(null);
 			fail("Can't inquire into writability of null property");
 		}
-		catch (BeansException ex) {
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 	}
@@ -428,7 +429,8 @@ public class BeanWrapperTestSuite extends TestCase {
 		}
 		catch (NullValueInNestedPathException ex) {
 			// ok
-			assertTrue("it was the spouse property that was null, not " + ex.getPropertyName(), ex.getPropertyName().equals("spouse"));
+			assertTrue("it was the spouse.spouse property that was null, not " + ex.getPropertyName(),
+								 ex.getPropertyName().equals("spouse.spouse"));
 		}
 	}
 
@@ -453,11 +455,12 @@ public class BeanWrapperTestSuite extends TestCase {
 		BeanWrapper bw = new BeanWrapperImpl(rod);
 		try {
 			bw.setPropertyValue("spouse.age", new Integer(31));
-			fail("Shouldn't have succeded with null path");
+			fail("Shouldn't have succeeded with null path");
 		}
 		catch (NullValueInNestedPathException ex) {
-			// ok
-			assertTrue("it was the spouse property that was null, not " + ex.getPropertyName(), ex.getPropertyName().equals("spouse"));
+			// expected
+			assertTrue("it was the spouse property that was null, not " + ex.getPropertyName(),
+								 ex.getPropertyName().equals("spouse"));
 		}
 	}
 
@@ -513,9 +516,8 @@ public class BeanWrapperTestSuite extends TestCase {
 			BeanWrapper bw = new BeanWrapperImpl((Object) null);
 			fail ("Must throw an exception when constructed with null object");
 		}
-		catch (BeansException ex) {
-			// We should get here
-			//ex.printStackTrace();
+		catch (IllegalArgumentException ex) {
+			// expected
 		}
 	}
 

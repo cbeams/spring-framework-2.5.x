@@ -21,20 +21,26 @@ package org.springframework.beans;
  * that isn't writable, because there's no setter method.
  * @author Rod Johnson
  */
-public class NotWritablePropertyException extends BeansException {
+public class NotWritablePropertyException extends InvalidPropertyException {
 
 	/**
-	 * Creates new NotWritablePropertyException.
+	 * Create a new NotWritablePropertyException.
+	 * @param beanClass the offending bean class
+	 * @param propertyName the offending property
 	 */
-	public NotWritablePropertyException(String propertyName, Class beanClass) {
-		super("Property '" + propertyName + "' is not writable in bean class [" + beanClass.getName() + "]");
+	public NotWritablePropertyException(Class beanClass, String propertyName) {
+		super(beanClass, propertyName, "Property '" + propertyName + "' is not writable");
 	}
 
 	/**
-	 * Creates new NotWritablePropertyException with a root cause.
+	 * Create a new NotWritablePropertyException.
+	 * @param beanClass the offending bean class
+	 * @param propertyName the offending property
+	 * @param msg the detail message
+	 * @param ex the root cause
 	 */
-	public NotWritablePropertyException(String propertyName, Class beanClass, Throwable ex) {
-		super("Property '" + propertyName + "' is not writable in bean class [" + beanClass.getName() + "]", ex);
+	public NotWritablePropertyException(Class beanClass, String propertyName, String msg, Throwable ex) {
+		super(beanClass, propertyName, msg, ex);
 	}
 
 }

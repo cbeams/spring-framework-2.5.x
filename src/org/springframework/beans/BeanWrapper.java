@@ -42,7 +42,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.13 2004-03-29 20:19:13 jhoeller Exp $
+ * @version $Id: BeanWrapper.java,v 1.14 2004-06-02 00:47:17 jhoeller Exp $
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -54,13 +54,25 @@ public interface BeanWrapper {
 	 */
 	String NESTED_PROPERTY_SEPARATOR = ".";
 
+	/**
+	 * Marker that indicates the start of a property key for an
+	 * indexed or mapped property like "person.addresses[0]".
+	 */
+	String PROPERTY_KEY_PREFIX = "[";
+
+	/**
+	 * Marker that indicates the end of a property key for an
+	 * indexed or mapped property like "person.addresses[0]".
+	 */
+	String PROPERTY_KEY_SUFFIX = "]";
+
 
 	/**
 	 * Change the wrapped object. Implementations are required
 	 * to allow the type of the wrapped object to change.
 	 * @param obj wrapped object that we are manipulating
 	 */
-	void setWrappedInstance(Object obj) throws BeansException;
+	void setWrappedInstance(Object obj);
 
 	/**
 	 * Return the bean wrapped by this object (cannot be null).
@@ -164,7 +176,7 @@ public interface BeanWrapper {
 	 * Properties that were successfully updated stay changed.
 	 * <p>Does not allow unknown fields.
 	 * @param pvs PropertyValues to set on the target object
-	 * @param ignoreUnknown should we ignore unknown values (not found in the bean!?)
+	 * @param ignoreUnknown should we ignore unknown values (not found in the bean)
 	 */
 	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
 	    throws BeansException;
@@ -181,7 +193,7 @@ public interface BeanWrapper {
 	 * Get the property descriptor for a particular property.
 	 * @param propertyName property to check status for
 	 * @return the property descriptor for the particular property
-	 * @throws FatalBeanException if there is no such property
+	 * @throws InvalidPropertyException if there is no such property
 	 */
 	PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException;
 
@@ -191,7 +203,7 @@ public interface BeanWrapper {
 	 * mapped element.
 	 * @param propertyName property to check status for
 	 * @return the property type for the particular property
-	 * @throws FatalBeanException if there is no such property
+	 * @throws InvalidPropertyException if there is no such property
 	 */
 	Class getPropertyType(String propertyName) throws BeansException;
 
@@ -201,7 +213,7 @@ public interface BeanWrapper {
 	 * @param propertyName property to check status for
 	 * @return whether this property is readable
 	 */
-	boolean isReadableProperty(String propertyName);
+	boolean isReadableProperty(String propertyName) throws BeansException;
 
 	/**
 	 * Return whether this property is writable.
@@ -209,6 +221,6 @@ public interface BeanWrapper {
 	 * @param propertyName property to check status for
 	 * @return whether this property is writable
 	 */
-	boolean isWritableProperty(String propertyName);
+	boolean isWritableProperty(String propertyName) throws BeansException;
 
 }
