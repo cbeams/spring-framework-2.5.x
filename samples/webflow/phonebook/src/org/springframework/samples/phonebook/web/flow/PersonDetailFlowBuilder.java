@@ -18,9 +18,9 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 	public void buildStates() throws FlowBuilderException {
 		addGetState(flowId());
-		String setCollegueId = set("collegueId");
+		String setCollegueId = qualify(set("collegueId"));
 		addViewState(flowId(), new Transition[] { onBack("finish"), onSelect(setCollegueId) });
-		addActionState(setCollegueId, qualify(setCollegueId), onSuccess("collegue.Detail"));
+		addActionState(setCollegueId, onSuccess("collegue.Detail"));
 		addSubFlowState("collegue.Detail", PersonDetailFlowBuilder.class, useModelMapper("collegueId"),
 				new Transition[] { onFinishGet(flowId()), onError("error") });
 		addEndState("finish");

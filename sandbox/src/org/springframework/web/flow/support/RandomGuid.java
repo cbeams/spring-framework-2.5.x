@@ -50,7 +50,6 @@ import java.util.Random;
  * expected to be random and most often are easy/possible to guess given a
  * sample from a given generator. SQL Server, for example generates GUID that
  * are unique but sequencial within a given instance.
- * 
  * <p>
  * GUIDs can be used as security devices to hide things such as files within a
  * filesystem where listings are unavailable (e.g. files that are served up from
@@ -60,13 +59,11 @@ import java.util.Random;
  * in a database where you want to ensure that the keys are secret. Random GUIDs
  * can then be used in a URL to prevent hackers (or users) from accessing
  * records by guessing or simply by incrementing sequential numbers.
- * 
  * <p>
  * There are many other possiblities of using GUIDs in the realm of security and
  * encryption where the element of randomness is important. This class was
  * written for these purposes but can also be used as a general purpose GUID
  * generator as well.
- * 
  * <p>
  * RandomGuid generates truly random GUIDs by using the system's IP address
  * (name/IP), system time in milliseconds (as an integer), and a very large
@@ -77,7 +74,6 @@ import java.util.Random;
  * generated GUIDs. It is generally not possible to access the seed information
  * (IP, time, random number) from the resulting GUIDs as the MD5 hash algorithm
  * provides one way encryption.
- * 
  * <p>
  * <b>Security of RandomGuid</b>: RandomGuid can be called one of two ways --
  * with the basic java Random number generator or a cryptographically strong
