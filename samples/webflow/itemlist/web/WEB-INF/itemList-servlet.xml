@@ -12,10 +12,10 @@
 		<property name="cacheSeconds"><value>0</value></property>
 		 <!-- serialize all operations within a session -->
 		<property name="synchronizeOnSession"><value>true</value></property>
-		<property name="flow"><ref bean="itemListFlow"/></property>
+		<property name="flow"><ref bean="ItemList"/></property>
 	</bean>
 	
-	<bean id="itemList" class="org.springframework.web.flow.config.FlowFactoryBean">
+	<bean id="ItemList" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
 				<property name="resource"><value>/WEB-INF/itemList-flow.xml</value></property>

@@ -10,8 +10,8 @@
 		<DIV align="left">
 			<FORM name="submitForm" action="itemList.htm">
 				<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
-				<INPUT type="hidden" name="_currentStateId" value="item">
-				<INPUT type="hidden" name="_eventId" value="add">
+				<INPUT type="hidden" name="_currentStateId" value="item.view">
+				<INPUT type="hidden" name="_eventId" value="submit">
 				<%-- make sure we send the transaction token back to the server --%>
 				<INPUT type="hidden" name="_txToken" value="<%=request.getAttribute("txToken") %>">
 				<TABLE>

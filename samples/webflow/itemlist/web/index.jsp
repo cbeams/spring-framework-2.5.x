@@ -12,7 +12,7 @@
 		
 		<DIV align="left">
 			<P>
-				<A href="itemList/il">Item List</A>
+				<A href="itemList.htm">Item List</A>
 			</P>
 			
 			<P>

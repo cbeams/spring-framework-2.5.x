@@ -9,8 +9,8 @@
 	<BODY>
 		<FORM name="newItemForm" action="itemList.htm">
 			<INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>">
-			<INPUT type="hidden" name="_currentStateId" value="list">
-			<INPUT type="hidden" name="_eventId" value="new">
+			<INPUT type="hidden" name="_currentStateId" value="itemList.view">
+			<INPUT type="hidden" name="_eventId" value="add">
 		</FORM>
 		<DIV align="left">Item List</DIV>
 		<HR>
