@@ -1,6 +1,7 @@
 /*
  * Created on Jul 5, 2004
  */
+
 package org.springframework.jmx;
 
 import javax.management.MBeanServer;
@@ -36,6 +37,7 @@ public abstract class AbstractJmxTests extends TestCase {
 	public void tearDown() throws Exception {
 		ctx.close();
 		MBeanServerFactory.releaseMBeanServer(server);
+		assertTrue("MBeanServers not fully cleaned up", MBeanServerFactory.findMBeanServer(null).isEmpty());
 	}
 
 }
