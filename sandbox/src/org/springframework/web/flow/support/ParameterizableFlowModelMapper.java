@@ -37,8 +37,14 @@ import org.springframework.web.flow.MutableFlowModel;
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
  * <tr>
+ * <td>inputMapper</td>
+ * <td><i>null</i></td>
+ * <td>The AttributesMapper strategy responsible for mapping starting subflow
+ * input attributes from a suspending parent flow.</td>
+ * </tr>
+ * <tr>
  * <td>inputMappings</td>
- * <td>empty</td>
+ * <td><i>empty</i></td>
  * <td>Mappings executed when mapping <i>input data </i> from the parent flow
  * to a newly spawned sub flow. The provided list contains the names of the
  * attributes in the parent to pass to the subflow for access. The same name is
@@ -46,15 +52,20 @@ import org.springframework.web.flow.MutableFlowModel;
  * </tr>
  * <tr>
  * <td>inputMappingsMap</td>
- * <td>empty</td>
+ * <td><i>empty</i></td>
  * <td>Mappings executed when mapping <i>input data </i> from the parent flow
  * to a newly spawned sub flow. The keys in given map are the names of entries
  * in the parent model that will be mapped. The value associated with a key is
  * the name of the target entry that will be placed in the subflow model.</td>
  * </tr>
+ * <td>outputMapper</td>
+ * <td><i>null</i></td>
+ * <td>The AttributesMapper strategy responsible for mapping ending subflow
+ * output attributes to a resuming parent flow as input.</td>
+ * </tr>
  * <tr>
  * <td>outputMappings</td>
- * <td>empty</td>
+ * <td><i>empty</i></td>
  * <td>Mappings executed when mapping subflow <i>output </i> data back to the
  * parent flow (once the subflow ends and the parent flow resumes). The provided
  * list contains the names of the attributes in the subflow to pass to the
@@ -63,7 +74,7 @@ import org.springframework.web.flow.MutableFlowModel;
  * </tr>
  * <tr>
  * <td>outputMappingsMap</td>
- * <td>empty</td>
+ * <td><i>empty</i></td>
  * <td>Mappings executed when mapping subflow <i>output </i> data back to the
  * parent flow (once the subflow ends and the parent flow resumes). The keys in
  * given map are the names of entries in the subflow model that will be mapped.
@@ -194,9 +205,18 @@ public class ParameterizableFlowModelMapper implements FlowModelMapper, Serializ
 		}
 	}
 
+	/**
+	 * Adapter class to set data in a map using the <code>AttributeSetter</code>
+	 * interface.
+	 */
 	public static class MapAttributeSetterAdapter implements AttributeSetter {
+		
 		private Map map;
 
+		/**
+		 * Create a new map attribute setter adapter.
+		 * @param map the map to wrap
+		 */
 		public MapAttributeSetterAdapter(Map map) {
 			this.map = map;
 		}
