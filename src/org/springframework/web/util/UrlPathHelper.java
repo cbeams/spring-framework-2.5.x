@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.util;
 
@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Helper class for URL path matching. Provides support for URL paths
@@ -40,13 +42,14 @@ import org.apache.commons.logging.LogFactory;
 public class UrlPathHelper {
 
 	/**
-	 * Standard servlet spec request attributes for include URI and paths.
+	 * Standard Servlet spec request attributes for include URI and paths.
 	 * <p>If included via a RequestDispatcher, the current resource will see the
 	 * original request. Its own URI and paths are exposed as request attributes.
 	 */
 	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
 	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.context_path";
 	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.servlet_path";
+
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -170,7 +173,7 @@ public class UrlPathHelper {
 	public String getPathWithinApplication(HttpServletRequest request) {
 		String contextPath = getContextPath(request);
 		String requestUri = getRequestUri(request);
-		if (requestUri.startsWith(contextPath)) {
+		if (StringUtils.startsWithIgnoreCase(requestUri, contextPath)) {
 			// Normal case: URI contains context path.
 			return requestUri.substring(contextPath.length());
 		}
