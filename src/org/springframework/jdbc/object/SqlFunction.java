@@ -15,9 +15,14 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * SQL function wrapper that returns a single row of results. The default
- * behavior is to return an int, but that can be overridden by using the methods
- * with an extra return type parameter.Intended to use to call SQL functions.
+ * SQL "function" wrapper for a query that returns a single row of results. 
+ * The default behavior is to return an int, but that can be overridden by 
+ * using the methods with an extra return type parameter.  
+ * Intended to use to call SQL functions that return a single result using a 
+ * query like "select user()" or "select sysdate from dual".  It is not intended
+ * for calling more complex stored functions or for using a callableStatement to 
+ * invoke a stored procedure or stored function.  Use StoredProcedure or SqlCall 
+ * for this type of processing.
  *
  * <p>This is a concrete class, which there is normally no need to subclass.
  * Code using this package can create an object of this type, declaring SQL
@@ -29,11 +34,12 @@ import org.springframework.jdbc.support.JdbcUtils;
  * @author Rod Johnson
  * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
+ * @see org.springframework.jdbc.object.StoredProcedure
  *
  * History :
  * 20/04/2003 : modified by IM to allow returning something else than an int
  * 09/05/2003 : modified by JPP, added case Types.BIGINT in function extract
- * @version $Id: SqlFunction.java,v 1.4 2003-12-05 17:03:14 jhoeller Exp $
+ * @version $Id: SqlFunction.java,v 1.5 2003-12-15 13:52:02 trisberg Exp $
  */
 
 public class SqlFunction extends MappingSqlQuery {
