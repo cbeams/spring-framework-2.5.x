@@ -38,11 +38,11 @@ class TrueMethodMatcher implements MethodMatcher, Serializable {
 		return false;
 	}
 
-	public boolean matches(Method m, Class targetClass) {
+	public boolean matches(Method method, Class targetClass) {
 		return true;
 	}
 
-	public boolean matches(Method m, Class targetClass, Object[] args) {
+	public boolean matches(Method method, Class targetClass, Object[] args) {
 		// should never be invoked as isRuntime returns false
 		throw new UnsupportedOperationException();
 	}

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -30,8 +30,8 @@ public abstract class StaticMethodMatcher implements MethodMatcher {
 		return false;
 	}
 
-	public final boolean matches(Method m, Class targetClass, Object[] args) {
-		// Should never be invoked because isRuntime() returns false
+	public final boolean matches(Method method, Class targetClass, Object[] args) {
+		// should never be invoked because isRuntime() returns false
 		throw new UnsupportedOperationException("Illegal MethodMatcher usage");
 	}
 

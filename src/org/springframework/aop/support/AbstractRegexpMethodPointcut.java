@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -112,12 +112,12 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * of the method's declaring class, plus the name of the method.
 	 * Note that the declaring class is that class that originally declared
 	 * the method, not necessarily the class that's currently exposing it.
-	 * <p>For example, <code>java.lang.Object.hashCode</code> matches
-	 * any subclass of object's hashCode() method.
+	 * <p>For example, "java.lang.Object.hashCode" matches any subclass
+	 * of Object's <code>hashCode()</code> method.
 	 */
-	public final boolean matches(Method m, Class targetClass) { 
+	public final boolean matches(Method method, Class targetClass) {
 		// TODO use target class here?
-		String patt = m.getDeclaringClass().getName() + "." + m.getName();
+		String patt = method.getDeclaringClass().getName() + "." + method.getName();
 		for (int i = 0; i < this.patterns.length; i++) {
 			boolean matched = matches(patt, i);
 			if (matched) {

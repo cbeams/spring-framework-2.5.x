@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework.adapter;
 
@@ -61,15 +61,15 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 		Method[] methods = throwsAdvice.getClass().getMethods();
 		exceptionHandlerHash = new HashMap();
 		for (int i = 0; i < methods.length; i++) {
-			Method m = methods[i];
-			if (m.getName().equals(AFTER_THROWING) &&
+			Method method = methods[i];
+			if (method.getName().equals(AFTER_THROWING) &&
 					//m.getReturnType() == null &&
-					(m.getParameterTypes().length == 1 || m.getParameterTypes().length == 4) &&
-					Throwable.class.isAssignableFrom(m.getParameterTypes()[m.getParameterTypes().length - 1])
+					(method.getParameterTypes().length == 1 || method.getParameterTypes().length == 4) &&
+					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterTypes().length - 1])
 				) {
 				// Have an exception handler
-				exceptionHandlerHash.put(m.getParameterTypes()[m.getParameterTypes().length - 1], m);
-				logger.info("Found exception handler method [" + m + "]");
+				exceptionHandlerHash.put(method.getParameterTypes()[method.getParameterTypes().length - 1], method);
+				logger.info("Found exception handler method [" + method + "]");
 			}
 		}
 		
@@ -109,28 +109,28 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 		try {
 			return mi.proceed();
 		}
-		catch (Throwable t) {
-			Method handlerMethod = getExceptionHandler(t);
+		catch (Throwable ex) {
+			Method handlerMethod = getExceptionHandler(ex);
 			if (handlerMethod != null) {
-				invokeHandlerMethod(mi, t, handlerMethod);
+				invokeHandlerMethod(mi, ex, handlerMethod);
 			}
-			throw t;
+			throw ex;
 		}
 	}
 	
-	private void invokeHandlerMethod(MethodInvocation mi, Throwable t, Method m) throws Throwable {
+	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
-		if (m.getParameterTypes().length == 1) {
-			handlerArgs = new Object[] { t };
+		if (method.getParameterTypes().length == 1) {
+			handlerArgs = new Object[] { ex };
 		}
 		else {
-			handlerArgs = new Object[] { mi.getMethod(), mi.getArguments(), mi.getThis(), t };
+			handlerArgs = new Object[] { mi.getMethod(), mi.getArguments(), mi.getThis(), ex };
 		}
 		try {
-			m.invoke(this.throwsAdvice, handlerArgs);
+			method.invoke(this.throwsAdvice, handlerArgs);
 		}
-		catch (InvocationTargetException ex) {
-			throw ex.getTargetException();
+		catch (InvocationTargetException targetEx) {
+			throw targetEx.getTargetException();
 		}
 	}
 

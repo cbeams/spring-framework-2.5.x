@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -33,10 +33,10 @@ public abstract class Pointcuts {
 	
 	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 		public static SetterPointcut INSTANCE = new SetterPointcut();
-		public boolean matches(Method m, Class targetClass) {
-			return m.getName().startsWith("set") && 
-				m.getParameterTypes().length == 1 &&
-				m.getReturnType() == Void.TYPE;
+		public boolean matches(Method method, Class targetClass) {
+			return method.getName().startsWith("set") &&
+				method.getParameterTypes().length == 1 &&
+				method.getReturnType() == Void.TYPE;
 		}
 		private Object readResolve() {
 			return INSTANCE;
@@ -45,9 +45,9 @@ public abstract class Pointcuts {
 	
 	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 		public static GetterPointcut INSTANCE = new GetterPointcut();
-		public boolean matches(Method m, Class targetClass) {
-			return m.getName().startsWith("get") && 
-				m.getParameterTypes().length == 0;
+		public boolean matches(Method method, Class targetClass) {
+			return method.getName().startsWith("get") &&
+				method.getParameterTypes().length == 0;
 		}
 		private Object readResolve() {
 			return INSTANCE;
@@ -90,7 +90,7 @@ public abstract class Pointcuts {
 	/**
 	 * Perform the least expensive check for a match.
 	 */
-	public static boolean matches(Pointcut pc, Method m, Class targetClass, Object[] arguments) {
+	public static boolean matches(Pointcut pc, Method method, Class targetClass, Object[] arguments) {
 		if (pc == Pointcut.TRUE) {
 			return true;
 		}
@@ -98,9 +98,9 @@ public abstract class Pointcuts {
 		if (pc.getClassFilter().matches(targetClass)) {
 			// Only check if it gets past first hurdle
 			MethodMatcher mm = pc.getMethodMatcher();
-			if (mm.matches(m, targetClass)) { 
+			if (mm.matches(method, targetClass)) {
 				// We may need additional runtime (argument) check
-				return  mm.isRuntime() ? mm.matches(m, targetClass, arguments) : true;
+				return  mm.isRuntime() ? mm.matches(method, targetClass, arguments) : true;
 			}
 		}
 		return false;

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -67,7 +67,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * Subclasses can override this if it's possible to filter out
 	 * some candidate classes.
 	 */
-	public boolean matches(Method m, Class targetClass) {
+	public boolean matches(Method method, Class targetClass) {
 		return true;
 	}
 
@@ -75,10 +75,10 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		return true;
 	}
 
-	public boolean matches(Method m, Class targetClass, Object[] args) {
-		++evaluations;
+	public boolean matches(Method method, Class targetClass, Object[] args) {
+		++this.evaluations;
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
-		return (methodName != null) ? cflow.under(clazz, methodName) : cflow.under(clazz);
+		return (this.methodName != null) ? cflow.under(this.clazz, this.methodName) : cflow.under(this.clazz);
 	}
 
 	/**

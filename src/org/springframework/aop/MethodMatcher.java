@@ -46,12 +46,12 @@ public interface MethodMatcher {
 	/**
 	 * Perform static checking. If this returns false, or if the isRuntime() method
 	 * returns false, no runtime check will be made.
-	 * @param m candidate method
+	 * @param method the candidate method
 	 * @param targetClass target class (may be null, in which case the candidate
 	 * class must be taken to be the method's declaring class)
 	 * @return whether or not this method matches statically
 	 */
-	boolean matches(Method m, Class targetClass);
+	boolean matches(Method method, Class targetClass);
 	
 	/**
 	 * Is this MethodMatcher dynamic?
@@ -73,13 +73,13 @@ public interface MethodMatcher {
 	 * and target class, and if the isRuntime() method returns true.
 	 * Invoked immediately before potentially running of the advice, after any
 	 * advice earlier in the advice chain has run.
-	 * @param m candidate method
+	 * @param method the candidate method
 	 * @param targetClass target class
 	 * @param args arguments to the method
 	 * @return whether there's a runtime match
 	 * @see MethodMatcher#matches(Method, Class)
 	 */
-	boolean matches(Method m, Class targetClass, Object[] args);
+	boolean matches(Method method, Class targetClass, Object[] args);
 	
 	
 	/**

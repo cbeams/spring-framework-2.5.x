@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -145,17 +145,17 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 
 			if (this.advised.exposeProxy) {
-				// Make invocation available if necessary
+				// make invocation available if necessary
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				setProxyContext = true;
 			}
 
-			// Get the interception chain for this method
+			// get the interception chain for this method
 			List chain = this.advised.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
 					this.advised, proxy, method, targetClass);
 
-			// Check whether we have any advice. If we don't, we can fallback on
-			// direct reflective invocation of the target, and avoid creating a MethodInvocation
+			// Check whether we have any advice. If we don't, we can fallback on direct
+			// reflective invocation of the target, and avoid creating a MethodInvocation.
 			if (chain.isEmpty()) {
 				// We can skip creating a MethodInvocation: just invoke the target directly
 				// Note that the final invoker must be an InvokerInterceptor so we know it does
@@ -170,7 +170,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				invocation = new ReflectiveMethodInvocation(
 						proxy, target, method, args, targetClass, chain);
 
-				// proceed to the joinpoint through the interceptor chain.
+				// proceed to the joinpoint through the interceptor chain
 				retVal = invocation.proceed();
 			}
 

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -57,21 +57,23 @@ class UnionPointcut implements Pointcut, Serializable {
 		// Complicated: we need to consider both class filter and method matcher
 		return mm; 
 	}
-	
+
+
 	private class PointcutUnionMethodMatcher implements MethodMatcher, Serializable {
 
-		public boolean matches(Method m, Class targetClass) {
-			return (a.getClassFilter().matches(targetClass) && a.getMethodMatcher().matches(m, targetClass)) || 
-				 (b.getClassFilter().matches(targetClass) && b.getMethodMatcher().matches(m, targetClass));
+		public boolean matches(Method method, Class targetClass) {
+			return (a.getClassFilter().matches(targetClass) && a.getMethodMatcher().matches(method, targetClass)) ||
+				 (b.getClassFilter().matches(targetClass) && b.getMethodMatcher().matches(method, targetClass));
 		}
 	
 		public boolean isRuntime() {
 			return a.getMethodMatcher().isRuntime() || b.getMethodMatcher().isRuntime();
 		}
 	
-		public boolean matches(Method m, Class targetClass, Object[] args) {
-			// 2-arg matcher will already have run, so we don't need to do class filtering again
-			return a.getMethodMatcher().matches(m, targetClass, args) || b.getMethodMatcher().matches(m, targetClass, args);
+		public boolean matches(Method method, Class targetClass, Object[] args) {
+			// 2-arg matcher will already have run, so we don't need to do class filtering again.
+			return a.getMethodMatcher().matches(method, targetClass, args) ||
+					b.getMethodMatcher().matches(method, targetClass, args);
 		}
 	
 	}

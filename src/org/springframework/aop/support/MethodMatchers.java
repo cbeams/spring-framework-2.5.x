@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.support;
 
@@ -49,16 +49,16 @@ public abstract class MethodMatchers {
 			this.b = b;
 		}
 
-		public boolean matches(Method m, Class targetClass) {
-			return a.matches(m, targetClass) || b.matches(m, targetClass);
+		public boolean matches(Method method, Class targetClass) {
+			return a.matches(method, targetClass) || b.matches(method, targetClass);
 		}
 		
 		public boolean isRuntime() {
 			return a.isRuntime() || b.isRuntime();
 		}
 		
-		public boolean matches(Method m, Class targetClass, Object[] args) {
-			return a.matches(m, targetClass, args) || b.matches(m, targetClass, args);
+		public boolean matches(Method method, Class targetClass, Object[] args) {
+			return a.matches(method, targetClass, args) || b.matches(method, targetClass, args);
 		}
 	}
 	
@@ -73,20 +73,20 @@ public abstract class MethodMatchers {
 			this.b = b;
 		}
 
-		public boolean matches(Method m, Class targetClass) {
-			return a.matches(m, targetClass) && b.matches(m, targetClass);
+		public boolean matches(Method method, Class targetClass) {
+			return a.matches(method, targetClass) && b.matches(method, targetClass);
 		}
 		
 		public boolean isRuntime() {
 			return a.isRuntime() || b.isRuntime();
 		}
 		
-		public boolean matches(Method m, Class targetClass, Object[] args) {
+		public boolean matches(Method method, Class targetClass, Object[] args) {
 			// Because a dynamic intersection may be composed of a static and dynamic part,
 			// we must avoid calling the 3-arg matches method on a dynamic matcher, as
 			// it will probably be an unsupported operation.
-			boolean aMatches = a.isRuntime() ? a.matches(m, targetClass, args) : a.matches(m, targetClass);
-			boolean bMatches = b.isRuntime() ? b.matches(m, targetClass, args) : b.matches(m, targetClass);
+			boolean aMatches = a.isRuntime() ? a.matches(method, targetClass, args) : a.matches(method, targetClass);
+			boolean bMatches = b.isRuntime() ? b.matches(method, targetClass, args) : b.matches(method, targetClass);
 			return aMatches && bMatches;
 		}
 	}

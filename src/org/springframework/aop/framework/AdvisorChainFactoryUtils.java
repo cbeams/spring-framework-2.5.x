@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -61,14 +61,15 @@ public abstract class AdvisorChainFactoryUtils {
 	 * @return list of MethodInterceptor and InterceptionAdvice (if there's a dynamic
 	 * method matcher that needs evaluation at runtime)
 	 */
-	public static List calculateInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy,
-																																			 Method method, Class targetClass) {
+	public static List calculateInterceptorsAndDynamicInterceptionAdvice(
+			Advised config, Object proxy, Method method, Class targetClass) {
+
 		List interceptors = new ArrayList(config.getAdvisors().length);
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
 		for (int i = 0; i < config.getAdvisors().length; i++) {
 			Advisor advisor = config.getAdvisors()[i];
 			if (advisor instanceof PointcutAdvisor) {
-				// Add it conditionally
+				// add it conditionally
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
 				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
 					MethodInterceptor interceptor = (MethodInterceptor) registry.getInterceptor(advisor);

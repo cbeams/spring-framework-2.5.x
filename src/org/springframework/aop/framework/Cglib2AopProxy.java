@@ -674,9 +674,9 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 		private final MethodProxy methodProxy;
 
-		public CglibMethodInvocation(Object proxy, Object target, Method m, Object[] arguments,
+		public CglibMethodInvocation(Object proxy, Object target, Method method, Object[] arguments,
 		    Class targetClass, List interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
-			super(proxy, target, m, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
+			super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
 			this.methodProxy = methodProxy;
 		}
 

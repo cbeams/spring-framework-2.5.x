@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.aop.framework;
 
@@ -20,14 +20,14 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.AfterReturningAdvice;
 
-
 /**
  * Simple before advice example that we can use for counting checks.
- * 
  * @author Rod Johnson
  */
 public class CountingAfterReturningAdvice extends MethodCounter implements AfterReturningAdvice {
+
 	public void afterReturning(Object o, Method m, Object[] args, Object target) throws Throwable {
 		count(m);
 	}
+
 }
