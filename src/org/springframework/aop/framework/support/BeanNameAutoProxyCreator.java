@@ -29,19 +29,20 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	/**
 	 * Identify as bean to proxy if the name is in the configured list of names.
 	 */
-	protected boolean isBeanToProxy(Object bean, String name, RootBeanDefinition definition) {
+	protected Object[] getInterceptorsAndPointcutsForBean(Object bean, String name,
+	                                                      RootBeanDefinition definition) {
 		if (this.beanNames != null) {
 			if (this.beanNames.contains(name)) {
-				return true;
+				return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
 			}
 			for (Iterator it = this.beanNames.iterator(); it.hasNext();) {
 				String mappedName = (String) it.next();
 				if (mappedName.endsWith("*") && name.startsWith(mappedName.substring(0, mappedName.length() - 1))) {
-					return true;
+					return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
 				}
 			}
 		}
-		return false;
+		return DO_NOT_PROXY;
 	}
 
 }
