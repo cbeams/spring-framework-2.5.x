@@ -4,14 +4,13 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.springframework.context.AbstractApplicationContextTests;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
-
 
 /**
  * Creates a WebApplicationContext that points to a "web.xml" file that
@@ -32,7 +31,6 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
  * @author Rod Johnson
  * @author Tony Falabella
  * @author Jean-Pierre Pawlak
- * @version
  */
 public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationContextTests {
 

@@ -8,7 +8,7 @@ import javax.servlet.jsp.tagext.Tag;
 
 import com.mockobjects.servlet.MockPageContext;
 
-import org.springframework.context.config.ConfigurableApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.servlet.DispatcherServlet;
 

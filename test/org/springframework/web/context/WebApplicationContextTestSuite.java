@@ -8,9 +8,9 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.AbstractApplicationContextTests;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
-import org.springframework.context.config.ConfigurableApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockServletContext;
 
