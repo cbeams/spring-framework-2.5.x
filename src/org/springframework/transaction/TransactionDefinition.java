@@ -44,8 +44,8 @@ public interface TransactionDefinition {
 	int PROPAGATION_MANDATORY = 2;
 
 	/**
-	 * Use default isolation level of the underlying database.
-	 * All other levels correspond to java.sql.Connection.
+	 * Use the default isolation level of the underlying datastore.
+	 * All other levels correspond to the JDBC isolation levels.
 	 * @see java.sql.Connection
 	 */
 	int ISOLATION_DEFAULT          = -1;
@@ -59,7 +59,7 @@ public interface TransactionDefinition {
 	int ISOLATION_SERIALIZABLE     = Connection.TRANSACTION_SERIALIZABLE;
 
 	/**
-	 * Use default timeout of the underlying transaction system,
+	 * Use the default timeout of the underlying transaction system,
 	 * respectively none if timeouts are not supported. 
 	 */
 	int TIMEOUT_DEFAULT = -1;
@@ -89,7 +89,7 @@ public interface TransactionDefinition {
 	 * throw an exception when given any other timeout than TIMEOUT_DEFAULT.
 	 * @see #TIMEOUT_DEFAULT
 	 */
-	public int getTimeout();
+	int getTimeout();
 
 	/**
 	 * Return whether to optimize as read-only transaction.
@@ -99,6 +99,6 @@ public interface TransactionDefinition {
 	 * A transaction manager that cannot interpret the read-only hint
 	 * will <i>not</i> throw an exception when given readOnly=true.
 	 */
-	public boolean isReadOnly();
+	boolean isReadOnly();
 
 }
