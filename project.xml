@@ -358,6 +358,11 @@
          <id>itext</id>
          <version>1.02b</version>
       </dependency>
+      <dependency>
+         <groupId>jamon</groupId>
+         <artifactId>jamon</artifactId>
+         <version>1.0</version>
+      </dependency>
        <dependency>
          <groupId>jasperreports</groupId>
          <artifactId>jasperreports</artifactId>
