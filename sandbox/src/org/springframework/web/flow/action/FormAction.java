@@ -440,7 +440,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 			result = bindAndValidateInternal(context, binder);
 		}
 		exposeFormObjectAndErrors(context, formObject, binder.getErrors());
-		return result != null ? result : getDefaultActionResult(context, formObject, binder.getErrors());
+		return result != null ? result : calculateResult(context, formObject, binder.getErrors());
 	}
 
 	/**
@@ -563,7 +563,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 			logger.debug("Binding completed for object '" + binder.getObjectName() + "', details='"
 					+ binder.getTarget() + "'");
 		}
-		if (getValidator() != null && isValidateOnBinding() && shouldValidate(context)) {
+		if (getValidator() != null && isValidateOnBinding() && validationEnabled(context)) {
 			validate(context, binder.getTarget(), binder.getErrors());
 		}
 		return onBindAndValidate(context, binder.getTarget(), binder.getErrors());
@@ -614,7 +614,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * @param errors possible binding errors
 	 * @return success() when there are no binding errors, error() otherwise
 	 */
-	protected Event getDefaultActionResult(RequestContext context, Object formObject, BindException errors) {
+	protected Event calculateResult(RequestContext context, Object formObject, BindException errors) {
 		return errors.hasErrors() ? error() : success();
 	}
 
@@ -631,7 +631,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *        data in "flow scope" or "request scope"
 	 * @return whether or not validation is enabled
 	 */
-	protected boolean shouldValidate(RequestContext context) {
+	protected boolean validationEnabled(RequestContext context) {
 		return true;
 	}
 
