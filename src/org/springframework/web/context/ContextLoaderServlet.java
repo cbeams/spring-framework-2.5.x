@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
  * Simply delegates to ContextLoader.
  *
  * <p>This servlet should have a lower load-on-startup value in web.xml
- * than any servlets that access the root application context.
+ * than any servlets that access the root web application context.
  *
  * <p><i>Note that this class has been deprecated for containers implementing
  * Servlet API 2.4 or higher in favour of ContextLoaderListener.</i><br>
@@ -24,25 +24,30 @@ import javax.servlet.http.HttpServletResponse;
  * <p>Servlet 2.3 containers known to work with listeners are:
  * <ul>
  * <li>Apache Tomcat 4.x
- * <li>Jetty 4.x (JBossWeb 3.x)
+ * <li>Jetty 4.x
  * <li>Resin 2.1.8+
  * <li>Orion 2.0.2+
- * <li>Oracle OC4J 9.0.3+
- * <li>IBM WebSphere 5.x
  * </ul>
  * For working with any of them, ContextLoaderListener is recommended.
  *
  * <p>Servlet 2.3 containers known <i>not</i> to work with listeners are:
  * <ul>
  * <li>BEA WebLogic up to 8.1
+ * <li>IBM WebSphere 5.x
+ * <li>Oracle OC4J 9.0.3
  * </ul>
  * If you happen to work with such a server, this servlet has to be used.
  *
+ * <p>So unfortunately, the only context initialization option that is compatible
+ * with <i>all</i> Servlet 2.3 containers is this servlet.
+ *
+ * <p>Note that a startup failure of this servlet will not stop the rest of the
+ * web application from starting, in contrast to a listener failure. This can
+ * lead to peculiar side effects if other servlets get started that depend on
+ * initialization of the root web application context.
+ *
  * @author Juergen Hoeller
  * @author Darren Davison
- * @deprecated beyond Servlet 2.3 - use ContextLoaderListener in a
- * Servlet 2.4 compliant container, or a 2.3 container that initializes
- * listeners before load-on-startup servlets.
  * @see ContextLoader
  * @see ContextLoaderListener
  */
