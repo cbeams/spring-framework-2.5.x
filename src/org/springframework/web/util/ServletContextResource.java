@@ -67,7 +67,7 @@ public class ServletContextResource extends AbstractResource {
 	}
 
 	public String getDescription() {
-		return "resource [" + this.path + "] of ServletContext '" + this.servletContext.getServletContextName() + "'";
+		return "resource [" + this.path + "] of ServletContext";
 	}
 
 }
