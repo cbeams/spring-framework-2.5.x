@@ -1,20 +1,22 @@
 <?xml version="1.0"?>
 
 <!--
-    Build file for the Spring Framework core.
+    Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.23 2003-12-25 08:56:12 johnsonr Exp $
+    $Id: build.xml,v 1.24 2004-01-01 23:54:09 jhoeller Exp $
 
-    This script requires a /lib directory containing the
-    necessary third party JAR files.
+    This script requires a "lib" directory containing the necessary third party JAR files.
+    See project.properties for the definitions of the properties used in this file.
 
-    See project.properties for the definitions of the properties
-    used in this file.
-    
-    Some targets depend on Jakarta Commons Attributes. You'll need to copy
-    the Commons Attributes compiler Jar, commons-collection.jar and xjavadoc.jar (from XDoclet)
-    into your $ANT_HOME/lib directory to use this file. All these files are
-    in the lib directory in Spring CVS, or available from their respective projects.
+		Building Spring requires J2SE 1.4; the "dist" JARs are build with Sun's JDK 1.4.2.
+		Note: To successfully run the tests, you need to use Xerces or any other JAXP parser
+		that properly supports XML includes. A simple way to achieve this is to put
+		xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
+
+    Some targets depend on Jakarta Commons Attributes. You'll need to copy the
+    Commons Attributes compiler Jar, commons-collection.jar, and xjavadoc.jar (from XDoclet)
+    into your "ANT_HOME/lib" directory to use this file. All these files are included
+		in Spring's lib directory, or available from their respective projects.
 -->
 
 <project name="spring-core" default="usage" basedir=".">
@@ -32,6 +34,7 @@
 
 
 	<target name="usage">
+
 		<echo message=""/>
 		<echo message="${name} build file"/>
 		<echo message="------------------------------------------------------"/>
@@ -47,6 +50,7 @@
 		<echo message="2. xjavadoc.jar, from XDoclet project"/>
 		<echo message="3. commons-collections.jar from Apache Commons"/>
 		<echo message="All 3 jars are in Spring CVS, and available from the respective projects"/>
+
 	</target>
 
 
@@ -62,30 +66,30 @@
 		<delete dir="${target.otherclasses.dir}"/>
 		<delete dir="${target.release.dir}"/>
 		<delete dir="${target.testclasses.dir}"/>
-	
-        <!-- just kill target dir (it's safer). No need at this point to keep it -->
+
+		<!-- just kill target dir (it's safer). No need at this point to keep it -->
 		<delete dir="${target.dir}"/>
 
 	</target>
-	
+
+
 	<!--
 		Use Jakarta Commons Attributes to compile the attributes for the main source tree.
 	-->
 	<target name="compileSrcAttributes">
- 	
+
 	 	<!-- Bring in Jakarta Commons attribute compilation -->
-	  	<taskdef resource="org/apache/commons/attributes/anttasks.properties"/>
-	  
-	 	<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
-	 	 <attribute-compiler 
-	 	 	destdir="${commons.attributes.tempdir.src}" 
-	 	 >
-	 	 	<!-- 
-	 	 		Only the PathMap attribute in the org.springframework.web.servlet.handler.metadata
-	 	 	 package currently needs to be shipped with an attribute, to support indexing.
-	 	 	 -->
-	         <fileset dir="${src.dir}" includes="**/metadata/*.java"/>
-	     </attribute-compiler>
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties"/>
+
+		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
+		<attribute-compiler destdir="${commons.attributes.tempdir.src}">
+	 	 	<!--
+	 	 	Only the PathMap attribute in the org.springframework.web.servlet.handler.metadata
+	 	 	package currently needs to be shipped with an attribute, to support indexing.
+	 	  -->
+			<fileset dir="${src.dir}" includes="**/metadata/*.java"/>
+		</attribute-compiler>
+
  	</target>
 
 
@@ -94,7 +98,7 @@
 		This task depends on the Commons Attributes compile step,
 		as some classes must ship with attributes.
 	-->
-	<target name="build" 
+	<target name="build"
 		depends="compileSrcAttributes"
 		description="Compile main source tree java files into class files (no-jarring)">
 
@@ -142,7 +146,6 @@
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/core/**"/>
-				<include name="org/springframework/util/ClassLoaderUtils*"/>
 				<include name="org/springframework/util/StringUtils*"/>
 			</fileset>
 			<manifest>
@@ -163,6 +166,7 @@
 				<include name="org/springframework/beans/**"/>
 				<include name="org/springframework/context/**"/>
 				<include name="org/springframework/core/**"/>
+				<include name="org/springframework/metadata/**"/>
 				<include name="org/springframework/util/**"/>
 				<include name="org/springframework/ui/**"/>
 				<include name="org/springframework/validation/**"/>
@@ -188,6 +192,8 @@
 				<include name="org/springframework/dao/**"/>
 				<include name="org/springframework/jdbc/**"/>
 				<include name="org/springframework/jndi/**"/>
+				<include name="org/springframework/mail/**"/>
+				<include name="org/springframework/metadata/**"/>
 				<include name="org/springframework/transaction/**"/>
 				<include name="org/springframework/validation/**"/>
 				<include name="org/springframework/ui/**"/>
@@ -266,58 +272,74 @@
 		<mkdir dir="${target.release.dir}"/>
 
 		<delete file="${target.release.dir}/${release.zip}"/>
+		<delete file="${target.release.dir}/${release-with-dependencies.zip}"/>
+
+		<fileset id="main" dir=".">
+			<include name="dist/*.jar"/>
+			<include name="dist/*.dtd"/>
+			<include name="dist/*.tld"/>
+			<include name="docs/**"/>
+			<exclude name="docs/reference/**"/>
+			<include name="samples/countries/**"/>
+			<include name="samples/petclinic/**"/>
+			<include name="samples/jpetstore/**"/>
+			<include name="samples/tiles-example/**"/>
+			<include name="samples/webapp-minimal/**"/>
+			<include name="samples/webapp-typical/**"/>
+			<include name="src/**"/>
+			<include name="test/**"/>
+			<include name="*.txt"/>
+			<include name="*.xml"/>
+			<include name="*.properties"/>
+		</fileset>
 
 		<zip zipfile="${target.release.dir}/${release.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+		</zip>
+
+		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
 			<zipfileset dir="." prefix="${release.path}">
-				<include name="dist/*.jar"/>
-				<include name="dist/*.dtd"/>
-				<include name="dist/*.tld"/>
-				<include name="docs/**"/>
-				<exclude name="docs/reference/**"/>
 				<include name="lib/ant/**"/>
+				<include name="lib/axis/**"/>
 				<include name="lib/aop-alliance/**"/>
+				<include name="lib/caucho/**"/>
 				<include name="lib/cglib/**"/>
+				<include name="lib/cos/**"/>
 				<include name="lib/dom4j/**"/>
+				<include name="lib/easymock/**"/>
 				<include name="lib/hsqldb/**"/>
 				<include name="lib/hibernate/**"/>
 				<include name="lib/ibatis/**"/>
 				<include name="lib/itext-pdf/**"/>
-				<include name="lib/jakarta-commons/commons-beanutils.jar"/>
-				<include name="lib/jakarta-commons/commons-collections.jar"/>
-				<include name="lib/jakarta-commons/commons-digester.jar"/>
-				<include name="lib/jakarta-commons/commons-lang.jar"/>
-				<include name="lib/jakarta-commons/commons-logging.jar"/>
-				<include name="lib/j2ee/servlet.jar"/>
-				<include name="lib/j2ee/jdbc2_0-stdext.jar"/>
+				<include name="lib/jakarta-commons/**"/>
+				<include name="lib/jakarta-taglibs/**"/>
+				<include name="lib/j2ee/**"/>
+				<include name="lib/jdo/**"/>
 				<include name="lib/jdom/**"/>
-				<include name="lib/jstl/**"/>
 				<include name="lib/junit/**"/>
+				<include name="lib/log4j/**"/>
+				<include name="lib/mockobjects/**"/>
 				<include name="lib/poi/**"/>
+				<include name="lib/regexp/**"/>
 				<include name="lib/struts/**"/>
-				<include name="samples/countries/**"/>
-				<include name="samples/petclinic/**"/>
-				<include name="samples/jpetstore/**"/>
-				<include name="samples/tiles-example/**"/>
-				<include name="samples/webapp-minimal/**"/>
-				<include name="samples/webapp-typical/**"/>
-				<include name="src/**"/>
-				<include name="*.txt"/>
+				<include name="lib/velocity/**"/>
+				<include name="lib/xjavadoc/**"/>
 			</zipfileset>
 		</zip>
 
 	</target>
-	
-	
+
+
  	<target name="compileTestAttributes" depends="build">
- 	
-	  	<taskdef resource="org/apache/commons/attributes/anttasks.properties"/>
-	  
+
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties"/>
+
 	 	<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
-	 	 <attribute-compiler 
-	 	 	destdir="${commons.attributes.tempdir.test}" 
-	 	 >
-	         <fileset dir="${test.dir}" includes="**/autoproxy/metadata/*.java"/>
-	     </attribute-compiler>
+		<attribute-compiler destdir="${commons.attributes.tempdir.test}">
+			<fileset dir="${test.dir}" includes="**/autoproxy/metadata/*.java"/>
+		</attribute-compiler>
+
  	</target>
 
 	<!--
@@ -379,7 +401,7 @@
 		</junit>
 
 	</target>
- 
+
 
 	<target name="clover.build" description="Compile main source tree java files WITH CLOVER into class files">
 
@@ -606,7 +628,7 @@
 
 
 	<target name="refdoc"
-		depends="dochtml,dochtmlsingle,docpdf" 
+		depends="dochtml,dochtmlsingle,docpdf"
 		description="Generate and copy reference documentation">
 	</target>
 
