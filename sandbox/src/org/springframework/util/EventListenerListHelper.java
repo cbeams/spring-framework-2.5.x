@@ -40,19 +40,19 @@ import org.springframework.util.closure.support.IteratorProcessTemplate;
  * private ListenerListHelper fooListeners = new ListenerListHelper(FooListener.class);
  * 
  * public void addFooListener(FooListener listener) {
- * 	fooListeners.add(listener);
+ * 	  fooListeners.add(listener);
  * }
  * 
  * public void removeFooListener(FooListener listener) {
- * 	fooListeners.remove(listener);
+ * 	  fooListeners.remove(listener);
  * }
  * 
  * protected void fireFooXXX() {
- * 	fooListeners.fire(&quot;fooXXX&quot;, new Event());
+ * 	  fooListeners.fire(&quot;fooXXX&quot;, new Event());
  * }
  * 
  * protected void fireFooYYY() {
- * 	fooListeners.fire(&quot;fooYYY&quot;);
+ * 	  fooListeners.fire(&quot;fooYYY&quot;);
  * }
  * </pre>
  * 
