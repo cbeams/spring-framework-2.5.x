@@ -10,6 +10,7 @@ Changes in version 1.0 M1 (xx.8.2003)
 * SingleConnectionDataSource implements DisposableBean
 * LocalSessionFactoryBean implements DisposableBean
 * fixed typeMismatch reporting for nested bean properties
+* added PropertiesFactoryBean as alternative to properties file loading
 * added getValues and toCode methods to Constants utility class
 * DynamicMethodPointcut now takes method, args and AttributeRegistry arguments instead of MethodInvocation
 * JndiObjectFactoryBean does not prepend container prefix if scheme is given
@@ -26,6 +27,8 @@ Changes in version 1.0 M1 (xx.8.2003)
 * added support for transaction timeouts via Hibernate query timeouts to HibernateTransactionManager
 * fixed RMI registry detection in RmiServiceExporter
 * fixed custom editor usage for rejected field values
+* revised initHandler method in AbstractUrlHandlerMapping 
+* added "urlMap" property to SimpleUrlHandlerMapping
 * revised exception behavior of RequestContext and BindErrorsTag
 * re-added deprecated ContextLoaderServlet for Servlet 2.2 containers
 * refactored Log4jConfigListener into Log4jWebConfigurer and listener
