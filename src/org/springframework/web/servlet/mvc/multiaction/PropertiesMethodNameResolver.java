@@ -8,13 +8,8 @@ package org.springframework.web.servlet.mvc.multiaction;
 import java.util.Iterator;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.util.WebUtils;
 
 /**
  * The most sophisticated and useful framework implementation of 
@@ -38,55 +33,37 @@ import org.springframework.web.util.WebUtils;
  * @see java.util.Properties
  * @see org.springframework.util.PathMatcher
  */
-public class PropertiesMethodNameResolver implements MethodNameResolver, InitializingBean {
+public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
+		implements InitializingBean {
 	
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private boolean alwaysUseFullPath = false;
-
 	private Properties mappings;
-
-	/**
-	 * Set if URL lookup should always use full path within current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is false.
-	 */
-	public final void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-		this.alwaysUseFullPath = alwaysUseFullPath;
-	}
 
 	/**
 	 * Set URL to method name mappings from a Properties object.
 	 * @param mappings properties with URL as key and method name as value
 	 */
-	public final void setMappings(Properties mappings) {
+	public void setMappings(Properties mappings) {
 		this.mappings = mappings;
 	}
 	
 	public void afterPropertiesSet() {
-		if (this.mappings == null) {
+		if (this.mappings == null || this.mappings.isEmpty()) {
 			throw new IllegalArgumentException("'mappings' property is required");
-		}
-		else if (this.mappings.isEmpty()) {
-			logger.warn("No mappings defined in " + getClass().getName());
 		}
 	}
 
-	public String getHandlerMethodName(HttpServletRequest request) throws NoSuchRequestHandlingMethodException {
-		String urlPath = WebUtils.getLookupPathForRequest(request, this.alwaysUseFullPath);
+	protected String getHandlerMethodNameForUrlPath(String urlPath) {
 		String name = this.mappings.getProperty(urlPath);
-		if (name == null) {
-			for (Iterator it = this.mappings.keySet().iterator(); it.hasNext();) {
-				String registeredPath = (String) it.next();
-				if (PathMatcher.match(registeredPath, urlPath)) {
-					return (String) this.mappings.get(registeredPath);
-				}
-			}
-			throw new NoSuchRequestHandlingMethodException(request);
+		if (name != null) {
+			return name;
 		}
-		logger.debug("Returning MultiActionController method name '" + name + "' for lookup path '" + urlPath + "'");
-		return name;
+		for (Iterator it = this.mappings.keySet().iterator(); it.hasNext();) {
+			String registeredPath = (String) it.next();
+			if (PathMatcher.match(registeredPath, urlPath)) {
+				return (String) this.mappings.get(registeredPath);
+			}
+		}
+		return null;
 	}
 
 }

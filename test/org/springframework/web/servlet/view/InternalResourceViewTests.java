@@ -8,12 +8,12 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.mock.MockHttpServletResponse;
 import org.springframework.web.mock.MockRequestDispatcher;
-import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Rod Johnson
@@ -60,7 +60,7 @@ public class InternalResourceViewTests extends TestCase {
 			reqControl.setVoidCallable(1);
 		}
 
-		request.getAttribute(WebUtils.INCLUDE_URI_REQUEST_ATTRIBUTE);
+		request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE);
 		reqControl.setReturnValue(null);
 		request.getRequestDispatcher(url);
 		reqControl.setReturnValue(new MockRequestDispatcher(url));
@@ -99,7 +99,7 @@ public class InternalResourceViewTests extends TestCase {
 			reqControl.setVoidCallable(1);
 		}
 
-		request.getAttribute(WebUtils.INCLUDE_URI_REQUEST_ATTRIBUTE);
+		request.getAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE);
 		reqControl.setReturnValue("somepath");
 		request.getRequestDispatcher(url);
 		reqControl.setReturnValue(new MockRequestDispatcher(url));

@@ -1,11 +1,5 @@
 package org.springframework.web.servlet.mvc.multiaction;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.web.util.WebUtils;
-
 /**
  * Simple implementation of MethodNameResolver that maps URL to method
  * name. Although this is the default implementation used by the
@@ -21,13 +15,10 @@ import org.springframework.web.util.WebUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
 */
-public class InternalPathMethodNameResolver implements MethodNameResolver {
+public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolver {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	public String getHandlerMethodName(HttpServletRequest request) {
-		String lookupPath = WebUtils.getLookupPathForRequest(request, false);
-		String name = lookupPath;
+	protected String getHandlerMethodNameForUrlPath(String urlPath) {
+		String name = urlPath;
 		// look at resource name after last slash
 		int slashIndex = name.lastIndexOf('/');
 		if (slashIndex != -1) {
@@ -38,7 +29,7 @@ public class InternalPathMethodNameResolver implements MethodNameResolver {
 		if (dotIndex != -1) {
 			name = name.substring(0, dotIndex);
 		}
-		logger.debug("Returning MultiActionController method name '" + name + "' for lookup path '" + lookupPath + "'");
 		return name;
 	}
+
 }

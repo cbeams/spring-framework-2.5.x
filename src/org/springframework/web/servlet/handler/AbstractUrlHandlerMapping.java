@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Abstract base class for URL-mapped HandlerMapping implementations.
@@ -23,11 +23,12 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @since 16.04.2003
  * @see #setAlwaysUseFullPath
+ * @see #setUrlDecode
  * @see org.springframework.util.PathMatcher
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
-	private boolean alwaysUseFullPath = false;
+	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private Map handlerMap = new HashMap();
 
@@ -36,9 +37,24 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * context. Else, the path within the current servlet mapping is used
 	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
 	 * Default is false.
+	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
-	public final void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-		this.alwaysUseFullPath = alwaysUseFullPath;
+	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
+	}
+
+	/**
+	 * Set if context path and request URI should be URL-decoded.
+	 * Both are returned <i>undecoded</i> by the Servlet API,
+	 * in contrast to the servlet path.
+	 * <p>Uses either the request encoding or the default encoding according
+	 * to the Servlet spec (ISO-8859-1).
+	 * <p>Note: Setting this to true requires J2SE 1.4, as J2SE 1.3's
+	 * URLDecoder class does not offer a way to specify the encoding.
+	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
+	 */
+	public void setUrlDecode(boolean urlDecode) {
+		this.urlPathHelper.setUrlDecode(urlDecode);
 	}
 
 	/**
@@ -47,7 +63,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @return the looked up handler instance, or null
 	 */
 	protected Object getHandlerInternal(HttpServletRequest request) throws BeansException {
-		String lookupPath = WebUtils.getLookupPathForRequest(request, this.alwaysUseFullPath);
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
 		logger.debug("Looking up handler for [" + lookupPath + "]");
 		return lookupHandler(lookupPath);
 	}

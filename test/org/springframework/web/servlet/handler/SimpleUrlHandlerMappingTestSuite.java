@@ -9,7 +9,7 @@ import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Rod Johnson
@@ -68,17 +68,17 @@ public class SimpleUrlHandlerMappingTestSuite extends TestCase {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
 		req = new MockHttpServletRequest(null, "GET", "/original-welcome.html");
-		req.setAttribute(WebUtils.INCLUDE_URI_REQUEST_ATTRIBUTE, "/welcome.html");
+		req.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/welcome.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
 		req = new MockHttpServletRequest(null, "GET", "/original-show.html");
-		req.setAttribute(WebUtils.INCLUDE_URI_REQUEST_ATTRIBUTE, "/show.html");
+		req.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/show.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
 		req = new MockHttpServletRequest(null, "GET", "/original-bookseats.html");
-		req.setAttribute(WebUtils.INCLUDE_URI_REQUEST_ATTRIBUTE, "/bookseats.html");
+		req.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "/bookseats.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}

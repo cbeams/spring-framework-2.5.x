@@ -1,22 +1,16 @@
 package org.springframework.web.util;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeanUtils;
 
 /**
  * Miscellaneous utilities for web applications.
@@ -26,7 +20,11 @@ import org.springframework.beans.BeanUtils;
  */
 public abstract class WebUtils {
 
-	private static final Log logger = LogFactory.getLog(WebUtils.class);
+	/**
+	 * Standard Servlet spec context attribute that specifies a temporary
+	 * directory for the current web application, of type java.io.File
+	 */
+	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
 
 	/**
 	 * Web app root key parameter at the servlet context level
@@ -36,23 +34,6 @@ public abstract class WebUtils {
 
 	/** Default web app root key: "webapp.root" */
 	public static final String DEFAULT_WEB_APP_ROOT_KEY = "webapp.root";
-
-	/**
-	 * Standard Servlet spec context attribute that specifies a temporary
-	 * directory for the current web application, of type java.io.File
-	 */
-	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
-
-	/**
-	 * Standard servlet spec request attributes for include URI and paths.
-	 * <p>If included via a RequestDispatcher, the current resource will see the
-	 * original request. Its own URI and paths are exposed as request attributes. 
-	 */
-	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
-	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.context_path";
-	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.servlet_path";
-
-	public static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";
 
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
@@ -138,38 +119,35 @@ public abstract class WebUtils {
 	 * @param name the name of the session attribute
 	 * @param clazz the class to instantiate for a new attribute
 	 * @return the value of the session attribute, newly created if not found
+	 * @throws ServletException if the session attribute could not be instantiated
 	 */
-	public static Object getOrCreateSessionAttribute(HttpServletRequest request, String name, Class clazz) {
+	public static Object getOrCreateSessionAttribute(HttpServletRequest request, String name, Class clazz)
+			throws ServletException {
 		Object sessionObject = getSessionAttribute(request, name);
 		if (sessionObject == null) {
-			sessionObject = BeanUtils.instantiateClass(clazz);
+			try {
+				sessionObject = clazz.newInstance();
+			}
+			catch (InstantiationException ex) {
+				throw new ServletException("Could not instantiate class [" + clazz.getName() +
+																	 "] for session attribute '" + name + "'");
+			}
+			catch (IllegalAccessException e) {
+				throw new ServletException("Could not access default constructor of class [" + clazz.getName() +
+																	 "] for session attribute '" + name + "'");
+			}
 			request.getSession(true).setAttribute(name, sessionObject);
 		}
 		return sessionObject;
 	}
 
 	/**
-	 * Decode the given source string with a URLEncoder. The encoding will be taken
-	 * from the request, falling back to the default "ISO-8859-1".
+	 * Return the URL of the root of the current application.
 	 * @param request current HTTP request
-	 * @param source the String to decode
-	 * @return the decoded String
-	 * @see #DEFAULT_CHARACTER_ENCODING
-	 * @see javax.servlet.ServletRequest#getCharacterEncoding
-	 * @see java.net.URLDecoder
 	 */
-	public static String decodeRequestString(ServletRequest request, String source) {
-		String enc = request.getCharacterEncoding();
-		if (enc == null) {
-			enc = DEFAULT_CHARACTER_ENCODING;
-		}
-		try {
-			return URLDecoder.decode(source, enc);
-		}
-		catch (UnsupportedEncodingException ex) {
-			logger.warn("Could not decode request string [" + source + "] with encoding '" + enc + "'");
-			return source;
-		}
+	public String getUrlToApplication(HttpServletRequest request) {
+		return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() +
+				request.getContextPath() + "/";
 	}
 
 	/**
@@ -187,118 +165,6 @@ public abstract class WebUtils {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Return the URL of the root of the current application.
-	 * @param request current HTTP request
-	 */
-	public static String getUrlToApplication(HttpServletRequest request) {
-		return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
-	}
-
-	/**
-	 * Return the request URI for the given request, regarding an include request
-	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by request.getRequestURI() is <i>not</i> decoded by
-	 * the servlet container, this method will decode it.
-	 * <p>The URI that the web container resolves <i>should</i> be correct, but some
-	 * containers like JBoss/Jetty incorrectly include ";" strings like ";jsessionid"
-	 * in the URI. This method cuts off such incorrect appendices.
-	 * @param request current HTTP request
-	 * @return the request URI
-	 */
-	public static String getRequestUri(HttpServletRequest request) {
-		String uri = (String) request.getAttribute(INCLUDE_URI_REQUEST_ATTRIBUTE);
-		if (uri == null) {
-			uri = request.getRequestURI();
-		}
-		uri = decodeRequestString(request, uri);
-		int semicolonIndex = uri.indexOf(';');
-		return (semicolonIndex != -1 ? uri.substring(0, semicolonIndex) : uri);
-	}
-
-	/**
-	 * Return the context path for the given request, regarding an include request
-	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by request.getContextPath() is <i>not</i> decoded by
-	 * the servlet container, this method will decode it.
-	 * @param request current HTTP request
-	 * @return the context path
-	 */
-	public static String getContextPath(HttpServletRequest request) {
-		String contextPath = (String) request.getAttribute(INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE);
-		if (contextPath == null) {
-			contextPath = request.getContextPath();
-		}
-		return decodeRequestString(request, contextPath);
-	}
-
-	/**
-	 * Return the servlet path for the given request, regarding an include request
-	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by request.getServletPath() is already decoded by
-	 * the servlet container, this method will not attempt to decode it.
-	 * @param request current HTTP request
-	 * @return the servlet path
-	 */
-	public static String getServletPath(HttpServletRequest request) {
-		String servletPath = (String) request.getAttribute(INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE);
-		if (servletPath == null) {
-			servletPath = request.getServletPath();
-		}
-		return decodeRequestString(request, servletPath);
-	}
-
-	/**
-	 * Return the path within the web application for the given request.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
-	 * @param request current HTTP request
-	 * @return the path within the web application
-	 */
-	public static String getPathWithinApplication(HttpServletRequest request) {
-		return getRequestUri(request).substring(getContextPath(request).length());
-	}
-
-	/**
-	 * Return the path within the servlet mapping for the given request,
-	 * i.e. the part of the request's URL beyond the part that called the servlet,
-	 * or "" if the whole URL has been used to identify the servlet.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
-	 * <p>E.g.: servlet mapping = "/test/*"; request URI = "/test/a" -> "/a".
-	 * <p>E.g.: servlet mapping = "/test"; request URI = "/test" -> "".
-	 * <p>E.g.: servlet mapping = "/*.test"; request URI = "/a.test" -> "".
-	 * @param request current HTTP request
-	 * @return the path within the servlet mapping, or ""
-	 */
-	public static String getPathWithinServletMapping(HttpServletRequest request) {
-		return getPathWithinApplication(request).substring(getServletPath(request).length());
-	}
-
-	/**
-	 * Return the mapping lookup path for the given request, within the current
-	 * servlet mapping if applicable, else within the web application.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
-	 * @param request current HTTP request
-	 * @param alwaysUseFullPath if the full path within the context
-	 * should be used in any case
-	 * @return the lookup path
-	 * @see #getPathWithinApplication
-	 * @see #getPathWithinServletMapping
-	 */
-	public static String getLookupPathForRequest(HttpServletRequest request, boolean alwaysUseFullPath) {
-		// always use full path within current servlet context?
-		if (alwaysUseFullPath) {
-			return WebUtils.getPathWithinApplication(request);
-		}
-		// else use path within current servlet mapping if applicable
-		String rest = WebUtils.getPathWithinServletMapping(request);
-		if (!"".equals(rest)) {
-			return rest;
-		}
-		else {
-			return WebUtils.getPathWithinApplication(request);
-		}
 	}
 
 	/**
