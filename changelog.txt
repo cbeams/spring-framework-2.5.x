@@ -3,22 +3,48 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.1.1 (26.9.2004)
+Changes in version 1.1.1 (27.9.2004)
 ------------------------------------
 
+Package org.springframework.beans
+* fixed DefaultListableBeanFactory's "getBeansOfType" implementation to correctly ignore abstract FactoryBeans
+* added "import" element for XML bean definitions, to allow for loading further bean definitions from relative paths
+
+Package org.springframework.context
+* factored out the "publishEvent" method into the ApplicationEventPublisher interface, extended by ApplicationContext
+* added ApplicationEventPublisherAware and MessageSourceAware interfaces, to be implemented by application objects
+* reworked EventPublicationInterceptor to implement ApplicationEventPublisherAware rather than ApplicationContextAware
+
+Package org.springframework.core
+* fixed "createRelative" implementation in ClassPathResource to correctly handle relative subdirectories
+* added constructor that takes an explicit ClassLoader to ClassPathResource
+
+Package org.springframework.ejb
+* fixed AbstractSlsbInvokerInterceptor's "create" to invoke on correct Method reference in case of "cacheHome"=false
+
+Package org.springframework.jdbc
+* SingleConnectionDataSource and TransactionAwareDataSourceProxy do not use thread context class loader for proxies
+
+Package org.springframework.jms
+* added "sessionAcknowledgeModeName" property to JmsTemplate, for specifying a JMS Session acknowledge constant by name
+* added acknowledge mode check to JmsTemplate and JmsTemplate102 before calling "acknowledge" on a received message
+* added SimpleMessageConverter102 subclass which handles BytesMessage without JMS 1.1's "getBodyLength" method
+
 Package org.springframework.mock
+* fixed MockServletContext's "getResource" implementation to correctly determine URL via Resource's "getURL" method
 * added full support for scoped attributes to MockPageContext, properly regarding request/session/application scope
 
 Package org.springframework.orm
+* LocalSessionFactoryBean exposes a config-time JTA TransactionManager before mapping resources get registered
 * pre-bound Hibernate Session gets set to FlushMode.AUTO for transaction synchronization, to enforce flush at commit
 * added "checkWriteOperations" flag to HibernateTemplate, to be able to suppress read-only check on save/update/delete
+* added null check to BlobByteArrayType's "deepCopy" implementation
+* added "deepCopy" implementation to BlobSerializableType, serializing and deserializing the given value
 
 Package org.springframework.web
+* fixed "createRelative" implementation in ServletContextResource to correctly handle relative subdirectories
 * turned protected getter methods in controller implementations to public, for introspection and testing purposes
 * fixed resetting of previous nested path in NestedPathTag, properly working in request scope (rather than page scope)
-
-Package org.springframework.context
-* Introduced ApplicationEventPublisher helper
 
 
 Changes in version 1.1 final (5.9.2004)
