@@ -123,7 +123,7 @@ public class CglibJmxObjectProxyFactory extends AbstractJmxObjectProxyFactory {
 
             e.setCallbackFilter(new JmxProxyCallbackFilter(info));
 
-            Callback[] callbacks = new Callback[4];
+            Callback[] callbacks = new Callback[5];
             callbacks[0] = new ReadAttributeInterceptor();
             callbacks[1] = new WriteAttributeInterceptor();
             callbacks[2] = new OperationInvokeInterceptor();
