@@ -10,9 +10,11 @@ Package org.springframework.aop
 * changed RegexpMethodPointcutAdvisor to use JdkRegexpMethodPointcut by default on JDK 1.4+, unless "perl5" is specified
 
 Package org.springframework.beans
+* CustomCollectionEditor's/InputStreamEditor's "getAsText" returns null to indicate that there is no text representation
 * fixed ServiceLocatorFactoryBean to explicitly check for calls of java.lang.Object methods (for JRockit compatibility)
 * AbstractAutowireCapableBeanFactory supports autowiring for factory methods too
 * DefaultXmlBeanDefinitionParser accepts entity references in text values
+* added "value"/"value-ref" attributes to XML "entry" tag for maps, as shortcut alternative to respective child elements
 * removed JndiBeanFactoryLocator, in favor of the existing default ContextJndiBeanFactoryLocator in the context package
 * deprecated SingletonBeanFactoryLocator's alias-through-String-bean feature, in favor of BeanReferenceFactoryBean
 
@@ -20,12 +22,15 @@ Package org.springframework.core
 * fixed PathMatchingResourcePatternResolver's jar entry matching to also work with BEA JRockit's additional slashes
 
 Package org.springframework.context
+* added "i18n" subpackage, with LocaleContext abstraction and global LocaleContextHolder (holding a thread-bound Locale)
+* reworked MessageSourceAccessor to use LocaleContextHolder to determine the default locale for the current thread
 * AbstractApplicationContext implements DisposableBean, to properly shut down when running in a bean factory itself
 
 Package org.springframework.ejb
 * added SmartSessionBean interface, exposing a "getSessionContext()" method, implemented by Spring's AbstractSessionBean
 
 Package org.springframework.jdbc
+* changed SmartDataSource interface to only have package visibility (it is only used internally)
 * added no-arg constructor plus "requiredType" bean property to SingleColumnRowMapper, to allow for property injection
 
 Package org.springframework.mail
@@ -40,11 +45,23 @@ Package org.springframework.orm
 * added "filterDefinitions" property to LocalSessionFactoryBean for Hibernate3, accepting FilterDefinition objects
 * added FilterDefinitionFactoryBean, to allow for defining Hibernate FilterDefinitions as Spring beans
 
+Package org.springframework.remoting
+* added RemoteInvocationTraceInterceptor, logging incoming remote calls and resulting exceptions on the server
+* RemoteExporter and its subclasses register a RemoteInvocationTraceInterceptor for the service proxy (by default)
+
 Package org.springframework.transaction
 * added "jndiEnvironment" property to JtaTransactionManager, as alternative to specifying a JndiTemplate instance
 * marked JDK 1.5+ Transactional annotation as "@Inherited" and "@Documented"
 
+Package org.springframework.util
+* refactored static PathMatcher class into PathMatcher interface and AntPathMatcher implementation
+
+Package org.springframework.validation
+* BindException's "getFieldValue" only transforms the value if the PropertyEditor's "getAsText" does not return null
+
 Package org.springframework.web
+* DispatcherServlet exposes the current LocaleResolver and its current Locale through the global LocaleContextHolder
+* EscapedErrors and BindTag perform HTML escaping for any non-null value (stringifying it), not just for String values
 * reworked AbstractJasperReportsView to work on JasperPrint instance rather than JasperReport instance
 * reworked JasperReportsMultiFormatView's "formatMappings" to replace existing properties, also replacing defaults
 * added support for reports with embedded SQL statements to AbstractJasperReportsView, via the "jdbcDataSource" property
