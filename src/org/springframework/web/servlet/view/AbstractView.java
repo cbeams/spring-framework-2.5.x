@@ -134,16 +134,16 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 						"At least 2 characters ([]) required in attributes CSV string '" + propString + "'");
 			}
 			String name = tok.substring(0, eqIdx);
-			String val = tok.substring(eqIdx + 1);
+			String value = tok.substring(eqIdx + 1);
 
 			// celete first and last characters of value: { and }
-			val = val.substring(1);
-			val = val.substring(0, val.length() - 1);
+			value = value.substring(1);
+			value = value.substring(0, value.length() - 1);
 
 			if (logger.isDebugEnabled()) {
-				logger.info("Set static attribute with name '" + name + "' and value [" + val + "] on view");
+				logger.debug("Set static attribute with name '" + name + "' and value [" + value + "] on view");
 			}
-			addStaticAttribute(name, val);
+			addStaticAttribute(name, value);
 		}
 	}
 
@@ -197,8 +197,10 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @param value object to expose
 	 */
 	public void addStaticAttribute(String name, Object value) {
-		logger.debug("Set static attribute with name '" + name + "' and value [" + value + "] on view");
 		this.staticAttributes.put(name, value);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Set static attribute with name '" + name + "' and value [" + value + "] on view");
+		}
 	}
 
 	/**
