@@ -69,6 +69,9 @@
                                     <xsl:value-of select="surname"/>
                                 </xsl:for-each>
                             </fo:block>
+                            <fo:block font-family="Helvetica" font-size="10pt" padding="1mm">
+                                <xsl:value-of select="bookinfo/copyright"/>  
+                            </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
                 </fo:table-body>
