@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--$Id: views.xml,v 1.26 2004-11-19 12:59:18 robharrop Exp $-->
+<!--$Id: views.xml,v 1.27 2004-11-29 10:56:12 robharrop Exp $-->
 <chapter id="view">
   <title>Integrating view technologies</title>
 
@@ -1856,6 +1856,48 @@ simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
       </sect2>
       <sect2 id="view=jasper-reports-model">
           <title>Populating the <literal>ModelAndView</literal></title>
+          <para>
+              In order to render your report correctly in the format you have chosen, you must supply Spring with all
+              of the data needed to populate your report. For JasperReports this means you must pass in all
+              report parameters along with the report datasource. Report parameters are simple name/value pairs
+              and can be added be to the <literal>Map</literal> for your model as you would add any name/value pair. 
+          </para>
+          <para>
+              When adding the datasource to the model you have two approaches to choose from. The first approach is to
+              add an instance of <literal>JRDataSource</literal> or <literal>Collection</literal> to the model 
+              <literal>Map</literal> under any arbitrary key. Spring will then locate this object in the model
+              and treat it as the report datasource. For example, you may populate your model like this:
+              <programlisting>private Map getModel() {
+  Map model = new HashMap();
+  Collection beanData = getBeanData();
+  model.put("myBeanData", beanData);
+  return model;
+}</programlisting>
+          </para>
+          <para>
+              The second approach is to add the instance of <literal>JRDataSource</literal> 
+              or <literal>Collection</literal> under a specific key and then configure this key using the <literal>reportDataKey</literal> 
+              property of the view class. In both cases Spring will instances of <literal>Collection</literal> in a 
+              <literal>JRBeanCollectionDataSource</literal> instance. For example:
+              <programlisting>private Map getModel() {
+  Map model = new HashMap();
+  Collection beanData = getBeanData();
+  Collection someData = getSomeData();
+  model.put("myBeanData", beanData);
+  model.put("someData", someData);
+  return model;
+}</programlisting>
+              Here you can see that two <literal>Collection</literal> instances are being added to the model. To 
+              ensure that the correct one is used, we simply modify our view configuration as appropriate:
+              <programlisting>simpleReport.class=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
+simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
+simpleReport.reportDataKey=myBeanData
+              </programlisting>
+          </para>
+          <para>Be aware that when using the first approach, Spring will use the first instance of <literal>JRDataSource</literal> 
+              or <literal>Collection</literal> that it encounters. If you need to place multiple instances of <literal>JRDataSource</literal> or
+              <literal>Collection</literal> into the model then you need to use the second approrach.
+          </para>
       </sect2>
   </sect1>
 </chapter>

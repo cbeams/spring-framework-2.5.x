@@ -64,6 +64,9 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  */
 public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
+    /**
+     * A <code>String</code> key used to lookup the <code>JRDataSource</code> in the model.
+     */
 	private String reportDataKey;
 
 	/**
