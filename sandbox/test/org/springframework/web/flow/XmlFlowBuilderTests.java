@@ -98,11 +98,13 @@ public class XmlFlowBuilderTests extends TestCase {
 		ActionState actionState1=(ActionState)flow.getState("actionState1");
 		assertNotNull(actionState1);
 		assertEquals(2, actionState1.getActionCount());
+		assertEquals(null, actionState1.getActionName(actionState1.getActions()[0]));
+		assertEquals("action2Name", actionState1.getActionName(actionState1.getActions()[1]));
 		assertEquals(2, actionState1.getTransitions().length);
 		assertNotNull(actionState1.getTransition("event1"));
 		assertEquals("viewState1", actionState1.getTransition("event1").getTargetStateId());
-		assertNotNull(actionState1.getTransition("event2"));
-		assertEquals("viewState2", actionState1.getTransition("event2").getTargetStateId());
+		assertNotNull(actionState1.getTransition("action2Name.event2"));
+		assertEquals("viewState2", actionState1.getTransition("action2Name.event2").getTargetStateId());
 		
 		ViewState viewState1=(ViewState)flow.getState("viewState1");
 		assertNotNull(viewState1);

@@ -18,6 +18,7 @@ package org.springframework.web.flow;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.flow.config.FlowConstants;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -113,6 +115,35 @@ public class ActionState extends TransitionableState {
 	public int getActionCount() {
 		return namedActions.size();
 	}
+	
+	/**
+	 * @return The list of actions executed by this action state.
+	 */
+	public Action[] getActions() {
+		Action[] actions=new Action[namedActions.size()];
+		int i=0;
+		for (Iterator it=namedActionIterator(); it.hasNext(); ) {
+			actions[i++]=((NamedAction)it.next()).getAction();
+		}
+		return actions;
+	}
+	
+	/**
+	 * @param action the action for which the named should be looked up
+	 * @return the name of given action or null if the action does not have a name
+	 * @throws NoSuchElementException when given action is not an action executed
+	 *         by this state
+	 */
+	public String getActionName(Action action) {
+		Assert.notNull(action, "The action should not be [null]");
+		for (Iterator it=namedActionIterator(); it.hasNext(); ) {
+			NamedAction namedAction=(NamedAction)it.next();
+			if (action==namedAction.getAction()) {
+				return namedAction.getName();
+			}
+		}
+		throw new NoSuchElementException("action '" + action + "' is not an action executed by state '" + this + "'");
+	}
 
 	/**
 	 * Hook method implementation that initiates state processing.
@@ -194,7 +225,7 @@ public class ActionState extends TransitionableState {
 				return null;
 			}
 			if (isNameSet()) {
-				return name + "." + result.getId();
+				return name + FlowConstants.DOT_SEPARATOR + result.getId();
 			}
 			else {
 				return result.getId();
