@@ -32,9 +32,10 @@ public class RequestHandledEvent extends ApplicationEvent {
 	private final String url;
 
 	/** Request processing time */
-	private final long timeMillis;
+	private final long processingTimeMillis;
 
-	private final String ipAddress;
+	/** IP address that the request came from */
+	private final String clientAddress;
 
 	/** Usually GET or POST */
 	private final String method;
@@ -44,7 +45,7 @@ public class RequestHandledEvent extends ApplicationEvent {
 	private String sessionId;
 
 	/** Usually the UserPrincipal */
-	private String username;
+	private String userName;
 
 	/** Cause of failure, if any */
 	private Throwable failureCause;
@@ -54,17 +55,17 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * Create a new RequestHandledEvent.
 	 * @param source the component that published the event
 	 * @param url the URL of the request
-	 * @param timeMillis the processing time of the request in milliseconds
-	 * @param ipAddress the IP address that the request came from
+	 * @param processingTimeMillis the processing time of the request in milliseconds
+	 * @param clientAddress the IP address that the request came from
 	 * @param method the HTTP method of the request (usually GET or POST)
 	 * @param servletName the name of the servlet that handled the request
 	 */
-	public RequestHandledEvent(Object source, String url, long timeMillis, String ipAddress,
+	public RequestHandledEvent(Object source, String url, long processingTimeMillis, String clientAddress,
 	                           String method, String servletName) {
 		super(source);
 		this.url = url;
-		this.timeMillis = timeMillis;
-		this.ipAddress = ipAddress;
+		this.processingTimeMillis = processingTimeMillis;
+		this.clientAddress = clientAddress;
 		this.method = method;
 		this.servletName = servletName;
 	}
@@ -73,60 +74,68 @@ public class RequestHandledEvent extends ApplicationEvent {
 	 * Create a new RequestHandledEvent.
 	 * @param source the component that published the event
 	 * @param url the URL of the request
-	 * @param timeMillis the processing time of the request in milliseconds
-	 * @param ipAddress the IP address that the request came from
+	 * @param processingTimeMillis the processing time of the request in milliseconds
+	 * @param clientAddress the IP address that the request came from
 	 * @param method the HTTP method of the request (usually GET or POST)
 	 * @param servletName the name of the servlet that handled the request
 	 * @param failureCause the cause of failure, if any
 	 */
-	public RequestHandledEvent(Object source, String url, long timeMillis, String ipAddress,
+	public RequestHandledEvent(Object source, String url, long processingTimeMillis, String clientAddress,
 	                           String method, String servletName, Throwable failureCause) {
-		this(source, url, timeMillis, ipAddress, method, servletName);
+		this(source, url, processingTimeMillis, clientAddress, method, servletName);
 		this.failureCause = failureCause;
 	}
 
 	/**
-	 * Create a new RequestHandledEvent.
+	 * Create a new RequestHandledEvent with session information.
 	 * @param source the component that published the event
 	 * @param url the URL of the request
-	 * @param timeMillis the processing time of the request in milliseconds
-	 * @param ipAddress the IP address that the request came from
+	 * @param processingTimeMillis the processing time of the request in milliseconds
+	 * @param clientAddress the IP address that the request came from
 	 * @param method the HTTP method of the request (usually GET or POST)
 	 * @param servletName the name of the servlet that handled the request
 	 * @param sessionId the id of the HTTP session, if any
-	 * @param username the username that was associated with the request
-	 * (usually the UserPrincipal)
+	 * @param userName the name of the user that was associated with the
+	 * request, if any (usually the UserPrincipal)
 	 */
-	public RequestHandledEvent(Object source, String url, long timeMillis, String ipAddress,
-	                           String method, String servletName, String sessionId, String username) {
-		this(source, url, timeMillis, ipAddress, method, servletName);
+	public RequestHandledEvent(Object source, String url, long processingTimeMillis, String clientAddress,
+	                           String method, String servletName, String sessionId, String userName) {
+		this(source, url, processingTimeMillis, clientAddress, method, servletName);
 		this.sessionId = sessionId;
-		this.username = username;
+		this.userName = userName;
 	}
 
 	/**
-	 * Create a new RequestHandledEvent.
+	 * Create a new RequestHandledEvent with session information.
 	 * @param source the component that published the event
 	 * @param url the URL of the request
-	 * @param timeMillis the processing time of the request in milliseconds
-	 * @param ipAddress the IP address that the request came from
+	 * @param processingTimeMillis the processing time of the request in milliseconds
+	 * @param clientAddress the IP address that the request came from
 	 * @param method the HTTP method of the request (usually GET or POST)
 	 * @param servletName the name of the servlet that handled the request
 	 * @param sessionId the id of the HTTP session, if any
-	 * @param username the username that was associated with the request
-	 * (usually the UserPrincipal)
+	 * @param userName the name of the user that was associated with the
+	 * request, if any (usually the UserPrincipal)
 	 * @param failureCause the cause of failure, if any
 	 */
-	public RequestHandledEvent(Object source, String url, long timeMillis, String ipAddress,
-	                           String method, String servletName, String sessionId, String username,
+	public RequestHandledEvent(Object source, String url, long processingTimeMillis, String clientAddress,
+	                           String method, String servletName, String sessionId, String userName,
 														 Throwable failureCause) {
-		this(source, url, timeMillis, ipAddress, method, servletName, sessionId, username);
+		this(source, url, processingTimeMillis, clientAddress, method, servletName, sessionId, userName);
 		this.failureCause = failureCause;
 	}
 
 
 	/**
 	 * Return the URL of the request.
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * Return the URL of the request.
+	 * @deprecated in favor of {@link #getUrl getUrl}
 	 */
 	public String getURL() {
 		return url;
@@ -135,15 +144,31 @@ public class RequestHandledEvent extends ApplicationEvent {
 	/**
 	 * Return the processing time of the request in milliseconds.
 	 */
+	public long getProcessingTimeMillis() {
+		return processingTimeMillis;
+	}
+
+	/**
+	 * Return the processing time of the request in milliseconds.
+	 * @deprecated in favor of {@link #getProcessingTimeMillis getProcessingTimeMillis}
+	 */
 	public long getTimeMillis() {
-		return timeMillis;
+		return processingTimeMillis;
 	}
 
 	/**
 	 * Return the IP address that the request came from.
 	 */
+	public String getClientAddress() {
+		return clientAddress;
+	}
+
+	/**
+	 * Return the IP address that the request came from.
+	 * @deprecated in favor of {@link #getClientAddress getClientAddress}
+	 */
 	public String getIpAddress() {
-		return ipAddress;
+		return clientAddress;
 	}
 
 	/**
@@ -168,12 +193,12 @@ public class RequestHandledEvent extends ApplicationEvent {
 	}
 
 	/**
-	 * Return the username that was associated with the request
+	 * Return the name of the user that was associated with the request
 	 * (usually the UserPrincipal).
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal
 	 */
-	public String getUsername() {
-		return username;
+	public String getUserName() {
+		return userName;
 	}
 
 	/**
@@ -193,20 +218,21 @@ public class RequestHandledEvent extends ApplicationEvent {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("RequestHandledEvent: ");
-		sb.append("URL=[").append(this.url).append("]; ");
-		sb.append("time=").append(this.timeMillis).append("ms; ");
-		sb.append("client=").append(this.ipAddress).append("; ");
-		sb.append("method=").append(this.method).append("; ");
+		sb.append("url=[").append(this.url).append("]; ");
+		sb.append("time=[").append(this.processingTimeMillis).append("ms]; ");
+		sb.append("client=[").append(this.clientAddress).append("]; ");
+		sb.append("method=[").append(this.method).append("]; ");
 		sb.append("servlet=[").append(this.servletName).append("]; ");
-		sb.append("session=").append(this.sessionId).append("; ");
-		sb.append("user=[").append(this.username).append("]; ");
-		sb.append("status=");
+		sb.append("session=[").append(this.sessionId).append("]; ");
+		sb.append("user=[").append(this.userName).append("]; ");
+		sb.append("status=[");
 		if (!wasFailure()) {
 			sb.append("OK");
 		}
 		else {
 			sb.append("failed: ").append(this.failureCause);
 		}
+		sb.append(']');
 		return sb.toString();
 	}
 

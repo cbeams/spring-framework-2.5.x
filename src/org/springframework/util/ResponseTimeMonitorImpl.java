@@ -26,7 +26,7 @@ import java.util.Date;
  *
  * @author Rod Johnson
  * @since November 21, 2000
- * @version $Id: ResponseTimeMonitorImpl.java,v 1.4 2004-04-08 16:24:57 jhoeller Exp $
+ * @version $Id: ResponseTimeMonitorImpl.java,v 1.5 2004-06-09 18:54:39 jhoeller Exp $
  */
 public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 
@@ -45,38 +45,47 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 	/** The worst response time this object has recorded */
 	private int worstResponseTimeMillis = Integer.MIN_VALUE;
 
+
 	/**
 	 * Create a new ResponseTimeMonitorImpl.
 	 */
 	public ResponseTimeMonitorImpl() {
-		initedMillis = System.currentTimeMillis();
+		this.initedMillis = System.currentTimeMillis();
+	}
+
+	/**
+	 * Return the date when this object was loaded.
+	 */
+	public Date getLoadDate() {
+		return new Date(this.initedMillis);
 	}
 
 	/**
 	 * Return the number of hits this object has handled.
 	 */
-	public final int getAccessCount() {
+	public int getAccessCount() {
 		return accessCount;
 	}
 
 	/**
 	 * Return the number of milliseconds since this object was loaded.
 	 */
-	public final long getUptime() {
+	public long getUptimeMillis() {
 		return System.currentTimeMillis() - this.initedMillis;
 	}
 
 	/**
-	 * Return the date when this object was loaded.
+	 * Return the number of milliseconds since this object was loaded.
+	 * @deprecated in favor of {@link #getUptimeMillis getUptimeMillis}
 	 */
-	public final Date getLoadDate() {
-		return new Date(this.initedMillis);
+	public long getUptime() {
+		return getUptimeMillis();
 	}
 
 	/**
 	 * Return the average response time achieved by this object.
 	 */
-	public final int getAverageResponseTimeMillis() {
+	public int getAverageResponseTimeMillis() {
 		// avoid division by 0
 		if (getAccessCount() == 0) {
 			return 0;
@@ -87,25 +96,25 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 	/**
 	 * Return the best (lowest) response time achieved by this object.
 	 */
-	public final int getBestResponseTimeMillis() {
+	public int getBestResponseTimeMillis() {
 		return bestResponseTimeMillis;
 	}
 
 	/**
 	 * Return the worst (slowest) response time achieved by this object.
 	 */
-	public final int getWorstResponseTimeMillis() {
+	public int getWorstResponseTimeMillis() {
 		return worstResponseTimeMillis;
 	}
 
 	/**
 	 * Utility method to record this response time, updating
 	 * the best and worst response times if necessary.
-	 * @param responseTime the response time of this request
+	 * @param responseTimeMillis the response time of this request
 	 */
-	public final void recordResponseTime(long responseTime) {
+	public void recordResponseTime(long responseTimeMillis) {
 		++this.accessCount;
-		int iResponseTime = (int) responseTime;
+		int iResponseTime = (int) responseTimeMillis;
 		this.totalResponseTimeMillis += iResponseTime;
 		if (iResponseTime < this.bestResponseTimeMillis) {
 			this.bestResponseTimeMillis = iResponseTime;
@@ -120,10 +129,12 @@ public class ResponseTimeMonitorImpl implements ResponseTimeMonitor {
 	 * data recorded by this object.
 	 */
 	public String toString() {
-		return "hits=" + getAccessCount() + 
-			"; avg=" + getAverageResponseTimeMillis() + 
-			"; best=" + getBestResponseTimeMillis() + 
-			"; worst=" + getWorstResponseTimeMillis();
+		StringBuffer sb = new StringBuffer();
+		sb.append("hits=[").append(getAccessCount()).append("]; ");
+		sb.append("average=[").append(getAverageResponseTimeMillis()).append("ms]; ");
+		sb.append("best=[").append(getBestResponseTimeMillis()).append("ms]; ");
+		sb.append("worst=[").append(getWorstResponseTimeMillis()).append("ms]");
+		return sb.toString();
 	}
 
 }

@@ -39,12 +39,12 @@ public class PerformanceMonitorListener implements ApplicationListener {
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof RequestHandledEvent) {
 			RequestHandledEvent rhe = (RequestHandledEvent) event;
-			// Could use one monitor per URL
-			this.responseTimeMonitor.recordResponseTime(rhe.getTimeMillis());
+			// could use one monitor per URL
+			this.responseTimeMonitor.recordResponseTime(rhe.getProcessingTimeMillis());
 			if (logger.isInfoEnabled()) {
 				// Stringifying objects is expensive. Don't do it unless it will show.
-				logger.info("PerformanceMonitorListener: last=" + rhe.getTimeMillis() + "ms; " +
-										this.responseTimeMonitor + "; client was " + rhe.getIpAddress());
+				logger.info("PerformanceMonitorListener: last=[" + rhe.getProcessingTimeMillis() + "ms]; " +
+										this.responseTimeMonitor + "; client=[" + rhe.getClientAddress() + "]");
 			}
 		}
 	}
