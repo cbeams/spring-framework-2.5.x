@@ -17,6 +17,7 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditorSupport;
+import java.util.Iterator;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -124,6 +125,35 @@ public class ValidationTestSuite extends TestCase {
 		assertTrue("There is one element in map", m.size() == 2);
 		TestBean tb = (TestBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
+	}
+	
+	/**
+	 * Tests for required field, both null, non-existing and empty strings
+	 */
+	public void testBindingWithRequiredFields() throws Exception {
+		TestBean alef = new TestBean();		
+		
+		DataBinder binder = new DataBinder(alef, "person");
+		binder.setRequiredFields(new String[] {"name", "touchy", "date"});		
+		
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("touchy", ""));
+		pvs.addPropertyValue(new PropertyValue("name", null));
+		
+		binder.bind(pvs);
+		
+		BindException ex = binder.getErrors();
+		assertEquals("Wrong amount of errors", 3, ex.getErrorCount());		
+		
+		/*// for debugging purposes
+		assertTrue("Error available for name", ex.getFieldError("name") != null);
+		assertTrue("Error available for touchy", ex.getFieldError("touchy") != null);
+		assertTrue("Error available for date", ex.getFieldError("date") != null);
+		*/
+		
+		assertEquals("required", ex.getFieldError("touchy").getCode());
+		assertEquals("required", ex.getFieldError("name").getCode());
+		assertEquals("required", ex.getFieldError("date").getCode());
 	}
 
 	public void testCustomEditorForSingleProperty() {

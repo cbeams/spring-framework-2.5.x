@@ -43,7 +43,7 @@ import org.springframework.beans.PropertyValues;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DataBinder.java,v 1.13 2004-03-29 20:18:37 jhoeller Exp $
+ * @version $Id: DataBinder.java,v 1.14 2004-04-03 11:51:20 aarendsen Exp $
  * @see #bind
  * @see #getErrors
  * @see org.springframework.web.bind.ServletRequestDataBinder
@@ -205,7 +205,7 @@ public class DataBinder {
 		if (this.requiredFields != null) {
 			for (int i = 0; i < this.requiredFields.length; i++) {
 				PropertyValue pv = pvs.getPropertyValue(this.requiredFields[i]);
-				if (pv == null || "".equals(pv.getValue())) {
+				if (pv == null || "".equals(pv.getValue()) || pv.getValue() == null) {
 					// create field error with code "required"
 					this.errors.addError(
 							new FieldError(this.errors.getObjectName(), this.requiredFields[i], "", true,
