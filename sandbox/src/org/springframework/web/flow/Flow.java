@@ -143,31 +143,35 @@ public class Flow implements Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * The flow identifier uniquely identifying this flow among all other flows
+	 */
 	private String id;
 
+	/**
+	 * The default start state for this flow.
+	 */
 	private TransitionableState startState;
 
+	/**
+	 * The set of state definitions for this flow
+	 */
 	private Set states = new LinkedHashSet(6);
 
+	/**
+	 * The list of listeners that should receive event callbacks during managed
+	 * flow executions (client sessions.)
+	 */
 	private transient EventListenerListHelper flowExecutionListeners = new EventListenerListHelper(
 			FlowExecutionListener.class);
 
 	/**
-	 * @param id
+	 * Construct a new flow definition with the given id. The id should be
+	 * unique among all flows.
+	 * @param id The flow identifier.
 	 */
 	public Flow(String id) {
 		setId(id);
-	}
-
-	/**
-	 * @param id
-	 * @param startStateId
-	 * @param states
-	 */
-	public Flow(String id, AbstractState[] states, String startStateId) {
-		setId(id);
-		addAll(states);
-		setStartState(startStateId);
 	}
 
 	protected void setId(String id) {
@@ -188,46 +192,63 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * @param listener
+	 * Add a flow execution listener; the added listener will receive callbacks
+	 * on events occuring in all client flow executions created for this flow
+	 * definition.
+	 * 
+	 * @param listener The execution listener to add
 	 */
 	public void addFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners.add(listener);
 	}
 
 	/**
-	 * @param listener
+	 * Remove an existing flow execution listener; the removed listener will no
+	 * longer receive callbacks and if left unreferenced will be eligible for
+	 * garbage collection.
+	 * @param listener The execution listener to remove.
 	 */
 	public void removeFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners.remove(listener);
 	}
 
 	/**
-	 * @return
+	 * Returns the number of execution listeners associated with this flow
+	 * definition.
+	 * @return The flow execution listener count
 	 */
 	public int getFlowExecutionListenerCount() {
 		return flowExecutionListeners.getListenerCount();
 	}
 
 	/**
-	 * @param listenerClass
-	 * @return
+	 * Is at least one instance of the provided FlowExecutionListener
+	 * implementation present in the listener list?
+	 * @param listenerImplementationClass The flow execution listener
+	 *        implementation, must be a impl of FlowExecutionListener
+	 * @return true if present, false otherwise
 	 */
-	public boolean isFlowExecutionListenerAdded(Class listenerClass) {
-		Assert.isTrue(FlowExecutionListener.class.isAssignableFrom(listenerClass),
+	public boolean isFlowExecutionListenerAdded(Class listenerImplementationClass) {
+		Assert.isTrue(FlowExecutionListener.class.isAssignableFrom(listenerImplementationClass),
 				"Listener class must be a FlowSessionExecutionListener");
-		return this.flowExecutionListeners.isAdded(listenerClass);
+		return this.flowExecutionListeners.isAdded(listenerImplementationClass);
 	}
 
 	/**
-	 * @param listener
-	 * @return
+	 * Is the provid FlowExecutionListener instance present in the listener
+	 * list?
+	 * @param listener The execution listener
+	 * @return true if present, false otherwise.
 	 */
 	public boolean isFlowExecutionListenerAdded(FlowExecutionListener listener) {
 		return this.flowExecutionListeners.isAdded(listener);
 	}
 
 	/**
-	 * @return
+	 * Return a process template that knows how to iterate over the list of flow
+	 * execution listeners and dispatch each listener to a handler callback for
+	 * processing.
+	 * @return The iterator process template.
 	 */
 	public ProcessTemplate getFlowExecutionListenerIteratorTemplate() {
 		return flowExecutionListeners;
@@ -240,6 +261,16 @@ public class Flow implements Serializable {
 		return id;
 	}
 
+	/**
+	 * Add the state definition to this flow definition. Marked protected, as
+	 * this method is to be called by the (privileged) state definition classes
+	 * themselves during state construction as part of a FlowBuilder invocation.
+	 * 
+	 * @param state The state, if already added noting happens, if another
+	 *        instance is added with the same id, an exception is thrown
+	 * @throws IllegalStateException another state exists with the same ID as
+	 *         the one provided
+	 */
 	protected void add(AbstractState state) {
 		if (containsInstance(state)) {
 			return;
@@ -270,27 +301,30 @@ public class Flow implements Serializable {
 		}
 	}
 
-	protected void addAll(AbstractState[] states) {
-		for (int i = 0; i < states.length; i++) {
-			add(states[i]);
-		}
-	}
-
+	/**
+	 * Returns an ordered iterator over the state definitions of this flow. The
+	 * order is determined by the order in which the states were added.
+	 * @return The states iterator
+	 */
 	public Iterator statesIterator() {
 		return this.statesIterator();
 	}
 
 	/**
-	 * @param startStateId
-	 * @throws NoSuchFlowStateException
+	 * Set the start state for this flow to the state with the provided
+	 * <code>stateId</code>
+	 * @param stateId The new start state
+	 * @throws NoSuchFlowStateException No state exists with the id you provided
 	 */
-	protected void setStartState(String startStateId) throws NoSuchFlowStateException {
-		setStartState(getRequiredTransitionableState(startStateId));
+	protected void setStartState(String stateId) throws NoSuchFlowStateException {
+		setStartState(getRequiredTransitionableState(stateId));
 	}
 
 	/**
-	 * @param state
-	 * @throws NoSuchFlowStateException
+	 * Set the start state for this flow to the state provided
+	 * @param state The new start state
+	 * @throws NoSuchFlowStateException The state has not been added to this
+	 *         flow
 	 */
 	protected void setStartState(TransitionableState state) throws NoSuchFlowStateException {
 		assertValidState(state);
@@ -301,25 +335,29 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * @return
-	 * @throws IllegalStateException
+	 * Return the start state, throwing an exception if it has not yet been
+	 * marked.
+	 * @return The start state
+	 * @throws IllegalStateException No start state has been marked.
 	 */
 	public TransitionableState getStartState() throws IllegalStateException {
+		if (startState == null) {
+			throw new IllegalStateException(
+					"No start state has been set for this Flow; flow builder configuration error?");
+		}
 		return startState;
 	}
 
-	/**
-	 * @param state
-	 * @throws NoSuchFlowStateException
-	 */
 	private void assertValidState(AbstractState state) throws NoSuchFlowStateException {
 		getRequiredState(state.getId());
 	}
 
 	/**
-	 * @param stateId
-	 * @return
-	 * @throws NoSuchFlowStateException
+	 * Return the state with the provided id, throwing a exception if no state
+	 * exists with that id.
+	 * @param stateId the state id
+	 * @return The state with that ID
+	 * @throws NoSuchFlowStateException No state exists with that ID.
 	 */
 	public AbstractState getRequiredState(String stateId) throws NoSuchFlowStateException {
 		AbstractState state = getState(stateId);
@@ -330,8 +368,10 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * @param stateId
-	 * @return
+	 * Return the state with the provided id, returning <code>null</code> if
+	 * no state exists with that id.
+	 * @param stateId The state id
+	 * @return The state with that id, or null if none exists.
 	 */
 	public AbstractState getState(String stateId) {
 		Iterator it = statesIterator();
@@ -344,6 +384,11 @@ public class Flow implements Serializable {
 		return null;
 	}
 
+	/**
+	 * Is this state instance present in this flow?
+	 * @param state the state
+	 * @return true if yes (the same instance is present), false otherwise
+	 */
 	protected boolean containsInstance(AbstractState state) {
 		Iterator it = statesIterator();
 		while (it.hasNext()) {
@@ -356,17 +401,21 @@ public class Flow implements Serializable {
 	}
 
 	/**
-	 * @param stateId
-	 * @return
+	 * Is a state with the provided id present in this flow?
+	 * @param stateId the state id
+	 * @return true if yes, false otherwise
 	 */
 	public boolean containsState(String stateId) {
 		return getState(stateId) != null;
 	}
 
 	/**
+	 * Return the <code>TransitionableState</code> with this <id>stateId
+	 * </id>, throwing an exception if not found.
 	 * @param stateId
-	 * @return
-	 * @throws NoSuchFlowStateException
+	 * @return The transitionableState
+	 * @throws NoSuchFlowStateException No transitionable state exists by this
+	 *         id
 	 */
 	public TransitionableState getRequiredTransitionableState(String stateId) throws NoSuchFlowStateException {
 		AbstractState state = getRequiredState(stateId);
@@ -375,6 +424,12 @@ public class Flow implements Serializable {
 		return (TransitionableState)state;
 	}
 
+	/**
+	 * Convenience accessor that returns an ordered array of the String
+	 * <code>ids</code> for the state definitions associated with this flow
+	 * definition.
+	 * @return The state ids
+	 */
 	public String[] getStateIds() {
 		Iterator it = statesIterator();
 		List stateIds = new ArrayList();
