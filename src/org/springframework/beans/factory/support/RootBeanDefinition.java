@@ -127,8 +127,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 				
 		if (hasBeanClass()) {
 			if (FactoryBean.class.isAssignableFrom(getBeanClass()) && !isSingleton()) {
-				throw new BeanDefinitionValidationException("FactoryBean must be defined as singleton: " +
-				                                            "FactoryBeans themselves are not allowed to be prototypes");
+				throw new BeanDefinitionValidationException(
+				    "FactoryBean must be defined as singleton - " +
+				    "FactoryBeans themselves are not allowed to be prototypes");
 			}
 		}
 	}
