@@ -10,8 +10,11 @@
 	<!-- ===========================================================-->
 
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-		<property name="basename">
-			<value>org/springframework/web/context/WEB-INF/${message-file}</value>
+		<property name="basenames">
+			<list>
+				<value>org/springframework/web/context/WEB-INF/${message-file}</value>
+				<value>org/springframework/web/context/WEB-INF/more-context-messages</value>
+			</list>
 		</property>
 	</bean>
 

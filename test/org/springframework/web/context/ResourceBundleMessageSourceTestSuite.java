@@ -174,6 +174,12 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 		}
 	}
 
+	public void testGetMultipleBasenamesForMessageSource() throws NoSuchMessageException {
+		assertEquals("message1", root.getMessage("code1", null, Locale.UK));
+		assertEquals("message2", root.getMessage("code2", null, Locale.UK));
+		assertEquals("message3", root.getMessage("code3", null, Locale.UK));
+	}
+
 	/**
 	 * @see org.springframework.context.support.AbstractNestingMessageSource for more details.
 	 * NOTE:  Messages are contained within the "test/org/springframework/web/context/WEB-INF/themeXXX.properties" files.
