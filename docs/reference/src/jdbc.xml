@@ -1,191 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="jdbc">
-
   <title>Data Access using JDBC</title>
 
   <sect1 id="jdbc-introduction">
     <title>Introduction</title>
-    <para>
-      The JDBC abstraction framework provided by Spring consists of three different packages
-      <literal>core</literal>, <literal>datasource</literal> and <literal>object</literal>.  
-    </para>
-    <para>
-      The <literal>org.springframework.jdbc.core</literal> 
-      package does as its name suggests contain the classes that provide the
-      core functionality.  This includes various SQLExceptionTranslator and DataFieldMaxValueIncrementer 
-      implementations as well as a DAO base class for JdbcTemplate usage.
-    </para>
-    <para>
-      The <literal>org.springframework.jdbc.datasource</literal> 
-      package contains a utility class for easy DataSource access,
-      and various simple DataSource implementations that can be used for testing and running unmodified
-      JDBC code outside of a J2EE container.  The utility class provides static methods to obtain connections 
-      from JNDI and to close connections if necessary. It has support for thread-bound connections, 
-      e.g. for use with DataSourceTransactionManager.
-    </para>
-    <para>
-      Finally, the <literal>org.springframework.jdbc.object</literal> 
-      package contains classes that represent RDBMS queries, updates,
-      and stored procedures as threadsafe, reusable objects. This approach is modelled by JDO, although of 
-      course objects returned by queries are <quote>disconnected</quote> from the database.  This higher level 
-      of JDBC abstraction depends on the lower-level abstraction in the <literal>org.springframework.jdbc.core</literal>
-      package.
-    </para>
-    <para>
-      Exceptions thrown during JDBC processing are translated to exceptions defined in the 
-      <literal>org.springframework.dao</literal> package.  This means that code using the Spring JDBC abstraction 
-      layer does not need to implement JDBC or RDBMS-specific error handling.  All translated exceptions are 
-      unchecked giving you the option of catching the exceptions that you can recover from while allowing other 
-      exceptions to be propageted to the caller.      
-    </para>
+
+    <para>The JDBC abstraction framework provided by Spring consists of four
+    different packages <literal>core</literal>,
+    <literal><literal>datasource</literal></literal>, <literal>object and
+    <literal>support</literal></literal>.</para>
+
+    <para>The <literal>org.springframework.jdbc.core</literal> package does as
+    its name suggests contain the classes that provide the core functionality.
+    This includes various SQLExceptionTranslator and
+    DataFieldMaxValueIncrementer implementations as well as a DAO base class
+    for JdbcTemplate usage.</para>
+
+    <para>The <literal>org.springframework.jdbc.datasource</literal> package
+    contains a utility class for easy DataSource access, and various simple
+    DataSource implementations that can be used for testing and running
+    unmodified JDBC code outside of a J2EE container. The utility class
+    provides static methods to obtain connections from JNDI and to close
+    connections if necessary. It has support for thread-bound connections,
+    e.g. for use with DataSourceTransactionManager.</para>
+
+    <para>Next, the <literal>org.springframework.jdbc.object</literal> package
+    contains classes that represent RDBMS queries, updates, and stored
+    procedures as threadsafe, reusable objects. This approach is modelled by
+    JDO, although of course objects returned by queries are
+    <quote>disconnected</quote> from the database. This higher level of JDBC
+    abstraction depends on the lower-level abstraction in the
+    <literal>org.springframework.jdbc.core</literal> package.</para>
+
+    <para>Finally the <literal>org.springframework.jdbc.support</literal>
+    package is where you find the <literal>SQLException</literal> transalation
+    functionality and some utility classes.</para>
+
+    <para>Exceptions thrown during JDBC processing are translated to
+    exceptions defined in the <literal>org.springframework.dao</literal>
+    package. This means that code using the Spring JDBC abstraction layer does
+    not need to implement JDBC or RDBMS-specific error handling. All
+    translated exceptions are unchecked giving you the option of catching the
+    exceptions that you can recover from while allowing other exceptions to be
+    propageted to the caller.</para>
   </sect1>
-  
+
   <sect1 id="jdbc-core">
-    <title>Using the JDBC Core classes to control basic JDBC processing and error handling</title>
-      <sect2 id="jdbc-JdbcTemplate">
-    	  <title>JdbcTemplate</title>
-			</sect2>
-			<para>
-			This is the central class in the JDBC core package.  It simplifies the use of JDBC since it handles the creation and release
-			of resources.  This helps to avoid common errors like forgetting to always close the connection. It executes the core JDBC 
-			workflow like statement creation and execution, leaving application code to provide SQL and extract results. This class executes
-			SQL queries, update statments or stored procedure calls, initating iteration over ResultSets and extraction of returned parameter values.  
-			It also catches JDBC exceptions and translates them to the generic, more informative, exception hierarchy defined in the 
-			<literal>org.springframework.dao</literal> package.
-      </para>
-			<para>
-      Code using this class only need to implement callback interfaces, giving them a clearly defined contract. The <literal>PreparedStatementCreator</literal> 
-			callback interface creates a prepared statement given a Connection provided by this class, providing SQL and any necessary parameters.  
-			The same is true for the <literal>CallableStatementCreateor</literal> interface which creates callable statement.  The <literal>RowCallbackHandler</literal> interface 
-			extracts values from each row of a ResultSet.
-      </para>
-			<para>
-      This class can be used within a service implementation via direct instantiation with a DataSource reference, or get prepared in an 
-			application context and given to services as bean reference. Note: The DataSource should always be configured as a bean in the 
-			application context, in the first case given to the service directly, in the second case to the prepared template.  Because this 
-			class is parameterizable by the callback interfaces and the SQLExceptionTranslator interface, it isn't necessary to subclass it. 
-			All SQL issued by this class is logged. 
-			</para>
-      <sect2 id="jdbc-SQLExceptionTranslator">
-    	  <title>SQLExceptionTranslator</title>
-				<para>
-				Interface to be implemented by classes that can translate between SQLExceptions and our data access strategy-agnostic 
-				<literal>org.springframework.dao.DataAccessException</literal>.
-				</para>
-				<para>
-				Implementations can be generic (for example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error codes) 
-				for greater precision. 
-        </para>
-				<para>
-				<literal>SQLErrorCodeSQLExceptionTranslator</literal> is the implementation of SQLExceptionTranslator that is used by default.  
-				This implementation uses specific vendor codes. More precise than <literal>SQLState</literal> implementation, but vendor specific.  
-				The error code translations are based on codes held in a JavaBean type class named <literal>SQLErrorCodes</literal>.  This class is
-				created and populated by an <literal>SQLErrorCodesFactory</literal> which as the name suggests is a factory for creating 
-				<literal>SQLErrorCodes</literal> based on the contents of a configuration file named "sql-error-codes.xml".  This file is populated with 
-				vendor codes and based on the DatabaseProductName taken from the DatabaseMetaData, the codes for the current database are used.
-				</para>
-				<para>
-				The <literal>SQLErrorCodeSQLExceptionTranslator</literal> applies the following matching rules:
-				<itemizedlist spacing="compact">
-				<listitem>
-				<para>
-				Try custom translation implemented by any subclass. Note that this class is concrete and is typically used itself, in which case 
-				this rule doesn't apply.
-				</para>
-				</listitem>
-				<listitem>
-				<para>
-				Apply error code matching. Error codes are obtained from the SQLErrorCodesFactory by default. This looks up error 
-				codes from the classpath and keys into them from the database name from the database metadata.
-				</para>
-				</listitem>
-				<listitem>
-				<para>
-				Use the fallback translator. SQLStateSQLExceptionTranslator is the default fallback translator. 
-				</para>
-				</listitem>
-				</itemizedlist>
-       </para>
-			<para>
-				<literal>SQLErrorCodeSQLExceptionTranslator</literal> can be extended the following way:
-				<programlisting><![CDATA[
-public class MySQLErrorCodesTransalator extends SQLErrorCodeSQLExceptionTranslator {
+    <title>Using the JDBC Core classes to control basic JDBC processing and
+    error handling</title>
+
+    <sect2 id="jdbc-JdbcTemplate">
+      <title>JdbcTemplate</title>
+
+      <para>This is the central class in the JDBC core package. It simplifies
+      the use of JDBC since it handles the creation and release of resources.
+      This helps to avoid common errors like forgetting to always close the
+      connection. It executes the core JDBC workflow like statement creation
+      and execution, leaving application code to provide SQL and extract
+      results. This class executes SQL queries, update statments or stored
+      procedure calls, initating iteration over ResultSets and extraction of
+      returned parameter values. It also catches JDBC exceptions and
+      translates them to the generic, more informative, exception hierarchy
+      defined in the <literal>org.springframework.dao</literal>
+      package.</para>
+
+      <para>Code using this class only need to implement callback interfaces,
+      giving them a clearly defined contract. The
+      <literal>PreparedStatementCreator</literal> callback interface creates a
+      prepared statement given a Connection provided by this class, providing
+      SQL and any necessary parameters. The same is true for the
+      <literal>CallableStatementCreateor</literal> interface which creates
+      callable statement. The <literal>RowCallbackHandler</literal> interface
+      extracts values from each row of a ResultSet.</para>
+
+      <para>This class can be used within a service implementation via direct
+      instantiation with a DataSource reference, or get prepared in an
+      application context and given to services as bean reference. Note: The
+      DataSource should always be configured as a bean in the application
+      context, in the first case given to the service directly, in the second
+      case to the prepared template. Because this class is parameterizable by
+      the callback interfaces and the SQLExceptionTranslator interface, it
+      isn't necessary to subclass it. All SQL issued by this class is
+      logged.</para>
+    </sect2>
+
+    <sect2>
+      <title>DataSource</title>
+
+      <para>In order to work with data from a database, we need to obtain a
+      connection to the database. The way Spring does this is through a
+      <literal>DataSource</literal>. A <literal>DataSource</literal> is part
+      of the JDBC specification and can be seen as a generalized connection
+      factory. It allows a container or a framework to hide connection pooling
+      and transaction management issues from the application code. As a
+      developer, you don't need to know any details about how to connect to
+      the database, that is the responibility for the administrator that sets
+      up the datasource. You will most likely have to fulfil both roles while
+      you are developing and testing you code though, but you will not
+      necessarily have to know how the production data source is
+      configured.</para>
+
+      <para>When using Spring's JDBC layer, you can either obtain a data
+      source from JNDI or you can configure your own, using an implementation
+      that is provided in the Spring distribution. The latter comes in handy
+      for unit testing outside of a web container. We will use the
+      <literal>DriverManagerDataSource</literal> implementation for this
+      section but there are several additional implementations that will be
+      covered later on. The <literal>DriverManagerDataSource</literal> works
+      the same way that you probably are used to work when you obtain a JDBC
+      connection. You have to specify the fully qualified class name of the
+      JDBC driver that you are using so that the
+      <literal>DriverManager</literal> can load the driver class. Then you
+      have to provide a url that varies between JDBC drivers. You have to
+      consult the documentation for your driver for the correct value to use
+      here. Finally you must provide a username and a password that will be
+      used to connect to the database. Here is an example of how to configure
+      a <literal>DriverManagerDataSource:</literal></para>
+
+      <programlisting>DriverManagerDataSource dataSource = new DriverManagerDataSource();
+dataSource.setDriverClassName( "org.hsqldb.jdbcDriver");
+dataSource.setUrl( "jdbc:hsqldb:hsql://localhost:");
+dataSource.setUsername( "sa");
+dataSource.setPassword( ""); </programlisting>
+    </sect2>
+
+    <sect2 id="jdbc-SQLExceptionTranslator">
+      <title>SQLExceptionTranslator</title>
+
+      <para><literal>SQLExceptionTranslator</literal> is an interface to be
+      implemented by classes that can translate between SQLExceptions and our
+      data access strategy-agnostic
+      <literal>org.springframework.dao.DataAccessException</literal>.</para>
+
+      <para>Implementations can be generic (for example, using SQLState codes
+      for JDBC) or proprietary (for example, using Oracle error codes) for
+      greater precision.</para>
+
+      <para><literal>SQLErrorCodeSQLExceptionTranslator</literal> is the
+      implementation of SQLExceptionTranslator that is used by default. This
+      implementation uses specific vendor codes. More precise than
+      <literal>SQLState</literal> implementation, but vendor specific. The
+      error code translations are based on codes held in a JavaBean type class
+      named <literal>SQLErrorCodes</literal>. This class is created and
+      populated by an <literal>SQLErrorCodesFactory</literal> which as the
+      name suggests is a factory for creating <literal>SQLErrorCodes</literal>
+      based on the contents of a configuration file named
+      "sql-error-codes.xml". This file is populated with vendor codes and
+      based on the DatabaseProductName taken from the DatabaseMetaData, the
+      codes for the current database are used.</para>
+
+      <para>The <literal>SQLErrorCodeSQLExceptionTranslator</literal> applies
+      the following matching rules:<itemizedlist spacing="compact">
+          <listitem>
+            <para>Try custom translation implemented by any subclass. Note
+            that this class is concrete and is typically used itself, in which
+            case this rule doesn't apply.</para>
+          </listitem>
+
+          <listitem>
+            <para>Apply error code matching. Error codes are obtained from the
+            SQLErrorCodesFactory by default. This looks up error codes from
+            the classpath and keys into them from the database name from the
+            database metadata.</para>
+          </listitem>
+
+          <listitem>
+            <para>Use the fallback translator. SQLStateSQLExceptionTranslator
+            is the default fallback translator.</para>
+          </listitem>
+        </itemizedlist></para>
+
+      <para><literal>SQLErrorCodeSQLExceptionTranslator</literal> can be
+      extended the following way: <programlisting format="linespecific"
+      xml:space="preserve">public class MySQLErrorCodesTransalator extends SQLErrorCodeSQLExceptionTranslator {
   protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
     if (sqlex.getErrorCode() == -12345)
       return new DeadlockLoserDataAccessException(task, sqlex);
     return null;
   }
-}
-				]]></programlisting>
-				In this example the specific error code '-12345' is translated and any other errors are simply left to be translated 
-				by the default translator implementation.  To use this custom translator, it is necessary to pass it to the 
-				<literal>JdbcTemplate</literal> using the method <literal>setExceptionTranslator</literal> and to use this 
-				<literal>JdbcTemplate</literal> for all of the data access processing where this translator is needed. 
-				Here is an example of how this custom translator can be used:
-				<programlisting><![CDATA[
-    // create a JdbcTemplate and set data source
-    JdbcTemplate jt = new JdbcTemplate();
-    jt.setDataSource(dataSource);
-    // create a custom translator and set the datasource for the default translation lookup
-    MySQLErrorCodesTransalator tr = new MySQLErrorCodesTransalator(); 
-    tr.setDataSource(dataSource);
-    jt.setExceptionTranslator(tr);
-    // use the JdbcTemplate for this SqlUpdate
-    SqlUpdate su = new SqlUpdate();
-    su.setJdbcTemplate(jt);
-    su.setSql("update orders set shipping_charge = shipping_charge * 1.05");
-    su.compile();
-    su.update();
-				]]></programlisting>
-				The custom translator is passed a data source because we still want the default translation to use the meta data information
-				to look up the error codes in <literal>sql-error-codes.xml</literal>.
-				specified
-			</para>
+}</programlisting>In this example the specific error code '-12345' is
+      translated and any other errors are simply left to be translated by the
+      default translator implementation. To use this custom translator, it is
+      necessary to pass it to the <literal>JdbcTemplate</literal> using the
+      method <literal>setExceptionTranslator</literal> and to use this
+      <literal>JdbcTemplate</literal> for all of the data access processing
+      where this translator is needed. Here is an example of how this custom
+      translator can be used: <programlisting format="linespecific"
+      xml:space="preserve">// create a JdbcTemplate and set data source 
+JdbcTemplate jt = new JdbcTemplate(); 
+jt.setDataSource(dataSource); 
+// create a custom translator and set the datasource for the default translation lookup 
+MySQLErrorCodesTransalator tr = new MySQLErrorCodesTransalator(); 
+tr.setDataSource(dataSource); 
+jt.setExceptionTranslator(tr); 
+// use the JdbcTemplate for this SqlUpdate 
+SqlUpdate su = new SqlUpdate(); 
+su.setJdbcTemplate(jt); 
+su.setSql("update orders set shipping_charge = shipping_charge * 1.05"); 
+su.compile(); 
+su.update();</programlisting>The custom translator is passed a data source
+      because we still want the default translation to look up the error codes
+      in <literal>sql-error-codes.xml</literal>.</para>
+    </sect2>
 
-			</sect2>
+    <sect2>
+      <title>Executing Statements</title>
 
+      <para>ToDo</para>
+    </sect2>
+
+    <sect2>
+      <title>Running Queries</title>
+
+      <para>ToDo</para>
+    </sect2>
+
+    <sect2>
+      <title>Updating the database</title>
+
+      <para>ToDo</para>
+    </sect2>
   </sect1>
-	
+
   <sect1 id="jdbc-datasource">
     <title>Controling how we connect to the database</title>
-      <sect2 id="jdbc-DataSourceUtils">
-    	  <title>DataSourceUtils</title>
-			</sect2>
-      <sect2 id="jdbc-SmartDataSource">
-    	  <title>SmartDataSource</title>
-			</sect2>
-      <sect2 id="jdbc-AbstractDataSource">
-    	  <title>AbstractDataSource</title>
-			</sect2>
-      <sect2 id="jdbc-SingleConnectionDataSource">
-    	  <title>SingleConnectionDataSource</title>
-			</sect2>
-      <sect2 id="jdbc-DriverManagerDataSource">
-    	  <title>DriverManagerDataSource</title>
-			</sect2>
-      <sect2 id="jdbc-DataSourceTransactionManager">
-    	  <title>DataSourceTransactionManager</title>
-			</sect2>
+
+    <sect2 id="jdbc-DataSourceUtils">
+      <title>DataSourceUtils</title>
+    </sect2>
+
+    <sect2 id="jdbc-SmartDataSource">
+      <title>SmartDataSource</title>
+    </sect2>
+
+    <sect2 id="jdbc-AbstractDataSource">
+      <title>AbstractDataSource</title>
+    </sect2>
+
+    <sect2 id="jdbc-SingleConnectionDataSource">
+      <title>SingleConnectionDataSource</title>
+    </sect2>
+
+    <sect2 id="jdbc-DriverManagerDataSource">
+      <title>DriverManagerDataSource</title>
+    </sect2>
+
+    <sect2 id="jdbc-DataSourceTransactionManager">
+      <title>DataSourceTransactionManager</title>
+    </sect2>
   </sect1>
-	
+
   <sect1 id="jdbc-object">
     <title>Modeling JDBC operations as Java objects</title>
-      <sect2 id="jdbc-SqlQuery">
-    	  <title>SqlQuery</title>
-			</sect2>
-      <sect2 id="jdbc-MappingSqlQuery">
-    	  <title>MappingSqlQuery</title>
-			</sect2>
-      <sect2 id="jdbc-SqlUpdate">
-    	  <title>SqlUpdate</title>
-			</sect2>
-      <sect2 id="jdbc-StoredProcedure">
-    	  <title>StoredProcedure</title>
-			</sect2>
-      <sect2 id="jdbc-SqlFunction">
-    	  <title>SqlFunction</title>
-			</sect2>
+
+    <sect2 id="jdbc-SqlQuery">
+      <title>SqlQuery</title>
+    </sect2>
+
+    <sect2 id="jdbc-MappingSqlQuery">
+      <title>MappingSqlQuery</title>
+    </sect2>
+
+    <sect2 id="jdbc-SqlUpdate">
+      <title>SqlUpdate</title>
+    </sect2>
+
+    <sect2 id="jdbc-StoredProcedure">
+      <title>StoredProcedure</title>
+    </sect2>
+
+    <sect2 id="jdbc-SqlFunction">
+      <title>SqlFunction</title>
+    </sect2>
   </sect1>
-
 </chapter>
-
-
