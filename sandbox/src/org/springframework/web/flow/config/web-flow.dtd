@@ -13,10 +13,9 @@
 		"http://www.springframework.org/dtd/web-flow.dtd">
 -->
 
-
 <!--
 	Defines the root element for a web flow definition. Web flows
-	are composed of a number of states.
+	are composed of one or more states.
 -->
 <!ELEMENT web-flow (
 	(action-state | view-state | sub-flow-state | end-state)+
@@ -33,7 +32,6 @@
 -->
 <!ATTLIST web-flow start-state IDREF #REQUIRED>
 
-
 <!--
 	Defines an action state: a state where an action is executed.
 	Transitions triggered by the action(s) lead on to other states.
@@ -46,7 +44,6 @@
 	Unique id of an action state.
 -->
 <!ATTLIST action-state id ID #REQUIRED>
-
 
 <!--
 	Defines a view state: a state where a view will be rendered.
@@ -70,14 +67,13 @@
 <!--
 	Indicates whether or not this view state is a marker view state.
 	A marker view state does not actually render a view, but just returns
-	controll to the client. Use this when an action has already generated
+	control to the client. Use this when an action has already generated
 	the response.
 -->
 <!ATTLIST view-state marker (true | false) "false">
 
-
 <!--
-	Defines a sub flow state: a state where a sub flow is executed. When the
+	Defines a sub flow state: a state where a sub flow is spawned. When the
 	sub flow reaches an end state, the corresponding transition in this state
 	is triggered to continue the flow.
 -->
@@ -91,7 +87,7 @@
 <!ATTLIST sub-flow-state id ID #REQUIRED>
 
 <!--
-	Name (bean id) of the sub flow that will be executed.
+	Name (unique bean id) of the sub flow that will be spawned.
 -->
 <!ATTLIST sub-flow-state flow CDATA #REQUIRED>
 
@@ -100,7 +96,6 @@
 	the sub flow.
 -->
 <!ATTLIST sub-flow-state attributes-mapper CDATA #IMPLIED>
-
 
 <!--
 	Defines an end state: a state that terminates the flow.
@@ -127,7 +122,6 @@
 -->
 <!ATTLIST end-state marker (true | false) "false">
 
-
 <!--
 	Defines a transition to another state.
 -->
@@ -142,7 +136,6 @@
 	Target state of the transition.
 -->
 <!ATTLIST transition to IDREF #REQUIRED>
-
 
 <!--
 	Defines an action that is executed by the flow in an action state.

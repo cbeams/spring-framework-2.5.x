@@ -46,6 +46,11 @@ public class SetupFormAction extends BindAndValidateAction {
 		this.prepopulateFromRequest = prepopulateFromRequest;
 	}
 
+	// validation doesn't happen on form setup by default
+	protected boolean suppressValidation(HttpServletRequest request) {
+		return true;
+	}
+
 	protected static class ReferenceDataSetupException extends RuntimeException {
 		public ReferenceDataSetupException(String message, Throwable cause) {
 			super(message, cause);
