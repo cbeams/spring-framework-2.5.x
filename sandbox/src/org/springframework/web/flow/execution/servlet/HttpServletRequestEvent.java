@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.execution.FlowExecutionRequestEvent;
+import org.springframework.web.flow.execution.ExternalEvent;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 
@@ -29,7 +29,7 @@ import org.springframework.web.util.WebUtils;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class HttpServletRequestEvent extends FlowExecutionRequestEvent {
+public class HttpServletRequestEvent extends ExternalEvent {
 
 	/**
 	 * The event to be signaled can also be sent using a request

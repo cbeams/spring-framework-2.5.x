@@ -19,7 +19,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.execution.FlowExecutionRequestEvent;
+import org.springframework.web.flow.execution.ExternalEvent;
 import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
 import org.springframework.web.portlet.util.PortletUtils;
 
@@ -27,10 +27,10 @@ import org.springframework.web.portlet.util.PortletUtils;
  * A flow event that originated from an incoming portlet request.
  * 
  * @author J.Enrique Ruiz
- * @author César Ordiñana
+ * @author Cï¿½sar Ordiï¿½ana
  * @author Erwin Vervaet
  */
-public class PortletRequestEvent extends FlowExecutionRequestEvent {
+public class PortletRequestEvent extends ExternalEvent {
 
 	/**
 	 * The response associated with the request that originated this event.
