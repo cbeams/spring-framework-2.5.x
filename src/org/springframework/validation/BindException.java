@@ -252,10 +252,10 @@ public class BindException extends Exception implements Errors {
 
 	public List getFieldErrors(String field) {
 		List result = new LinkedList();
-		field = fixedField(field);
+		String fixedField = fixedField(field);
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			Object error = it.next();
-			if (error instanceof FieldError && isMatchingFieldError(field, ((FieldError) error))) {
+			if (error instanceof FieldError && isMatchingFieldError(fixedField, ((FieldError) error))) {
 				result.add(error);
 			}
 		}
@@ -263,12 +263,12 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public FieldError getFieldError(String field) {
-		field = fixedField(field);
+		String fixedField = fixedField(field);
 		for (Iterator it = this.errors.iterator(); it.hasNext();) {
 			Object error = it.next();
 			if (error instanceof FieldError) {
 				FieldError fe = (FieldError) error;
-				if (isMatchingFieldError(field, fe)) {
+				if (isMatchingFieldError(fixedField, fe)) {
 					return fe;
 				}
 			}
@@ -288,13 +288,13 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public Object getFieldValue(String field) {
-		field = fixedField(field);
 		FieldError fe = getFieldError(field);
+		String fixedField = fixedField(field);
 		// use rejected value in case of error, current bean property value else
-		Object value = (fe != null) ? fe.getRejectedValue() : getBeanWrapper().getPropertyValue(field);
+		Object value = (fe != null) ? fe.getRejectedValue() : getBeanWrapper().getPropertyValue(fixedField);
 		// apply custom editor, but not on binding failures like type mismatches
 		if (value != null && (fe == null || !fe.isBindingFailure())) {
-			PropertyEditor customEditor = getBeanWrapper().findCustomEditor(value.getClass(), field);
+			PropertyEditor customEditor = getBeanWrapper().findCustomEditor(value.getClass(), fixedField);
 			if (customEditor != null) {
 				customEditor.setValue(value);
 				return customEditor.getAsText();
@@ -309,9 +309,9 @@ public class BindException extends Exception implements Errors {
 	 * @return the custom PropertyEditor, or null
 	 */
 	public PropertyEditor getCustomEditor(String field) {
-		field = fixedField(field);
-		Class type = getBeanWrapper().getPropertyType(field);
-		return getBeanWrapper().findCustomEditor(type, field);
+		String fixedField = fixedField(field);
+		Class type = getBeanWrapper().getPropertyType(fixedField);
+		return getBeanWrapper().findCustomEditor(type, fixedField);
 	}
 
 
@@ -345,10 +345,11 @@ public class BindException extends Exception implements Errors {
 	 * Returns diagnostic information about the errors held in this object.
 	 */
 	public String getMessage() {
-		StringBuffer sb = new StringBuffer("BindException: " + getErrorCount() + " errors");
+		StringBuffer sb = new StringBuffer("BindException: ");
+		sb.append(getErrorCount()).append(" errors");
 		Iterator it = this.errors.iterator();
 		while (it.hasNext()) {
-			sb.append("; " + it.next());
+			sb.append("; ").append(it.next());
 		}
 		return sb.toString();
 	}

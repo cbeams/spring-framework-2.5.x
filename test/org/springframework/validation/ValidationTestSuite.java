@@ -262,12 +262,17 @@ public class ValidationTestSuite extends TestCase {
 		TestBean tb2 = new TestBean();
 		tb2.setAge(34);
 		tb.setSpouse(tb2);
-		Errors errors = new BindException(tb, "tb");
+		DataBinder db = new DataBinder(tb, "tb");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("spouse.age", "argh");
+		db.bind(pvs);
+		Errors errors = db.getErrors();
 		Validator testValidator = new TestBeanValidator();
 		testValidator.validate(tb, errors);
 
 		errors.setNestedPath("spouse");
 		assertEquals("spouse.", errors.getNestedPath());
+		assertEquals("argh", errors.getFieldValue("age"));
 		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
@@ -301,9 +306,9 @@ public class ValidationTestSuite extends TestCase {
 		errors.pushNestedPath("spouse");
 		assertEquals("spouse.", errors.getNestedPath());
 
-		assertTrue(!errors.hasErrors());
+		assertEquals(1, errors.getErrorCount());
 		assertTrue(!errors.hasGlobalErrors());
-		assertTrue(!errors.hasFieldErrors("age"));
+		assertEquals(1, errors.getFieldErrorCount("age"));
 		assertTrue(!errors.hasFieldErrors("name"));
 	}
 
