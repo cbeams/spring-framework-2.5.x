@@ -1,5 +1,5 @@
-Important changes in the web framework from 1.0 M2 to 1.0 M3
-============================================================
+Changes in the web framework from 1.0 M2 to 1.0 M3
+==================================================
 
 * All Spring web controllers, from the base Controller interface to the command and form controller classes,
 can throw any Exception now to avoid the need for wrapping checked application exceptions coming from the middle
@@ -27,6 +27,11 @@ controller implementation hierarchy.
 * DataBinder and ServletRequestDataBinder do not derive from BindException anymore but rather contain a
 BindException now. This will not affect standard command and form controllers or BindUtils users, but manual
 ServletRequestDataBinder usage will need to be adapted.
+
+* The JSP tag library specifies a default URI now, to allow for auto-detection by the servlet container. So if
+you address it in your JSPs with <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>, you
+don't need to declare the taglib in your web.xml anymore. The TLD will automatically be discovered in spring.jar,
+and registered under the default URI. This is consistent with how the JSTL is typically used.
 
           -  Juergen Hoeller, November 23, 2003
 
