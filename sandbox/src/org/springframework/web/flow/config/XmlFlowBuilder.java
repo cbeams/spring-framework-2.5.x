@@ -26,6 +26,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
@@ -398,7 +399,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Action[] parseActions(Element element) {
 		List actions = new LinkedList();
-
 		NodeList childNodeList = element.getChildNodes();
 		for (int i = 0; i < childNodeList.getLength(); i++) {
 			Node childNode = childNodeList.item(i);

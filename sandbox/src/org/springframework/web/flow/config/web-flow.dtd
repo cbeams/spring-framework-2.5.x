@@ -17,9 +17,7 @@
 	Defines the root element for a web flow definition. Web flows
 	are composed of one or more states.
 -->
-<!ELEMENT web-flow (
-	(action-state | view-state | subflow-state | end-state)+
-)>
+<!ELEMENT web-flow ( (action-state | view-state | subflow-state | end-state)+ )>
 
 <!--
 	Unique id of the web flow.
@@ -36,9 +34,7 @@
 	Defines an action state: a state where an action is executed.
 	Transitions triggered by the action(s) lead on to other states.
 -->
-<!ELEMENT action-state (
-	action*, transition+
-)>
+<!ELEMENT action-state ( action+, transition+ )>
 
 <!--
 	Unique id of an action state.
@@ -46,37 +42,32 @@
 <!ATTLIST action-state id ID #REQUIRED>
 
 <!--
-	Convenience attribute when the action-state executes exactly one action.
-	This is the id of the action.
--->
-<!ATTLIST action-state action CDATA #IMPLIED>
-
-<!--
-	Convenience attribute when the action-state executes exactly one action.
-	This is the implementation class of the action.
--->
-<!ATTLIST action-state action-class CDATA #IMPLIED>
-
-<!--
-	Defines an action that is executed by the flow in an action state.
+	Defines a single action that should be executed when the action state is entered.
+	Use this element when you need to define more than one action per action state,
+	or need more control over action configuration.
 -->
 <!ELEMENT action EMPTY>
 
 <!--
-	id of the action implementation exported in the configured registry.
+	Unique id of the action implementation exported in the configured registry.
 	This is similar to the <ref bean="myBean"/> notation of the Spring beans DTD.
 -->
 <!ATTLIST action id CDATA #IMPLIED>
 
 <!--
-	Implementation class of the action exported in the configured registry.
-	For "by type" action lookup to work, there must be exactly one action implementation
-	exported of that type.
+	Fully qualified class of the Action implementation.  An instance of the
+	class will be instantiated and possibly auto-wireddepending on the value of the
+	autowire attribute.
 -->
 <!ATTLIST action class CDATA #IMPLIED>
+	
+<!--
+	Autowiring options for use when instantiating the action implementation with the class attribute.
+-->
+<!ATTLIST action autowire (no | byName | byType | constructor | autodetect | default) "default">
 
 <!--
-	Implementation class of the action exported in the configured registry.
+	Fully qualified implementation class of the action exported in the configured registry.
 	For "by type" action lookup to work, there must be exactly one action implementation
 	exported of that type.
 -->
@@ -90,19 +81,10 @@
 <!ATTLIST action name CDATA #IMPLIED>
 
 <!--
-	Name of the action. This is optional. When not specified, the action will
-	not have any name and the events signaled by the action will not get the
-	action name prepended to them.
--->
-<!ATTLIST action autowire (no | byName | byType | default) "default">
-
-<!--
 	Defines a view state: a state where a view will be rendered.
 	Transitions triggered by the view lead on to other states.
 -->
-<!ELEMENT view-state (
-	transition+
-)>
+<!ELEMENT view-state ( transition+ )>
 
 <!--
 	Unique id of a view state.
@@ -124,13 +106,13 @@
 <!ELEMENT transition EMPTY>
 
 <!--
-	Event that will trigger this transition.
+	ID of the event that will trigger this transition.
 	
-	The event name is of the form "[actionName'.']event". So
+	The event identifier is of the form "[actionName'.']event". So
 	the name of the event that will trigger the transition is prepended with
 	the name of the action that signals the event. Both are concatenated using
 	a dot. So when you have an action with name "myAction" that signals an
-	event "ok", the event of the corresponding transition should be "myAction.ok".
+	event "success", the event of the corresponding transition should be "myAction.success".
 	
 	For the events signaled by an action that does not have a name, or events
 	signaled in a view state or a subflow state, the transition event is simply
@@ -148,9 +130,7 @@
 	sub flow reaches an end state, the corresponding transition in this state
 	is triggered to continue the flow.
 -->
-<!ELEMENT subflow-state (
-	transition+
-)>
+<!ELEMENT subflow-state ( transition+ )>
 
 <!--
 	Unique id of a sub flow state.
