@@ -6,6 +6,7 @@
 package org.springframework.ui.velocity;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -126,7 +127,13 @@ public class VelocityEngineFactory {
 			// load config file if set
 			if (actualLocation != null) {
 				logger.info("Loading Velocity config from [" + actualLocation + "]");
-				props.load(actualLocation.getInputStream());
+				InputStream is = actualLocation.getInputStream();
+				try {
+					props.load(is);
+				}
+				finally {
+					is.close();
+				}
 			}
 		}
 		catch (IOException ex) {
