@@ -51,7 +51,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.21 2004-03-18 03:01:21 trisberg Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.22 2004-03-23 22:49:51 jhoeller Exp $
  */
 public class JdbcTemplateTestSuite extends JdbcTestCase {
 
@@ -1587,7 +1587,6 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
 		int i = template.queryForInt(sql);
 		assertEquals("Return of an int", 22, i);
 
@@ -1646,8 +1645,7 @@ public class JdbcTemplateTestSuite extends JdbcTestCase {
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
-		long l = template.queryForInt(sql);
+		long l = template.queryForLong(sql);
 		assertEquals("Return of a long", 87, l);
 
 		ctrlResultSet.verify();
