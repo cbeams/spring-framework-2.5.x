@@ -552,6 +552,92 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 
 	/**
+	 * Add the given bean to the list of disposable beans in this factory,
+	 * registering its DisposableBean interface and/or the given destroy method
+	 * to be called on factory shutdown (if applicable). Only applies to singletons.
+	 * <p>Also registers bean as dependent on other beans, according to the
+	 * "depends-on" configuration in the bean definition.
+	 * @param beanName the name of the bean
+	 * @param bean the bean instance
+	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @see RootBeanDefinition#isSingleton
+	 * @see RootBeanDefinition#getDependsOn
+	 * @see #registerDisposableBean
+	 * @see #registerDependentBean
+	 */
+	protected void registerDisposableBeanIfNecessary(
+			final String beanName, final Object bean, final RootBeanDefinition mergedBeanDefinition) {
+
+		if (mergedBeanDefinition.isSingleton()) {
+			final boolean isDisposableBean = (bean instanceof DisposableBean);
+			final boolean hasDestroyMethod = (mergedBeanDefinition.getDestroyMethodName() != null);
+
+			if (isDisposableBean || hasDestroyMethod || hasDestructionAwareBeanPostProcessors()) {
+				// Determine unique key for registration of disposable bean
+				int counter = 1;
+				String id = beanName;
+				while (this.disposableBeans.containsKey(id)) {
+					counter++;
+					id = beanName + "#" + counter;
+				}
+
+				// Register a DisposableBean implementation that performs all destruction
+				// work for the given bean: DestructionAwareBeanPostProcessors,
+				// DisposableBean interface, custom destroy method.
+
+				registerDisposableBean(id, new DisposableBean() {
+					public void destroy() throws Exception {
+
+						if (hasDestructionAwareBeanPostProcessors()) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
+							}
+							for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
+								Object beanProcessor = getBeanPostProcessors().get(i);
+								if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
+									((DestructionAwareBeanPostProcessor) beanProcessor).postProcessBeforeDestruction(bean, beanName);
+								}
+							}
+						}
+
+						if (isDisposableBean) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Invoking destroy() on bean with name '" + beanName + "'");
+							}
+							((DisposableBean) bean).destroy();
+						}
+
+						if (hasDestroyMethod) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Invoking custom destroy method on bean with name '" + beanName + "'");
+							}
+							invokeCustomDestroyMethod(beanName, bean, mergedBeanDefinition.getDestroyMethodName());
+						}
+					}
+				});
+			}
+
+			// Register bean as dependent on other beans, if necessary,
+			// for correct shutdown order.
+			String[] dependsOn = mergedBeanDefinition.getDependsOn();
+			if (dependsOn != null) {
+				for (int i = 0; i < dependsOn.length; i++) {
+					registerDependentBean(dependsOn[i], beanName);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add the given bean to the list of further disposable beans in this factory.
+	 * @param beanName the name of the bean
+	 * @param bean the bean instance
+	 */
+	protected void registerDisposableBean(String beanName, DisposableBean bean) {
+		this.disposableBeans.put(beanName, bean);
+	}
+
+	/**
 	 * Register a dependent bean for the given bean,
 	 * to be destroyed before the given bean is destroyed.
 	 * @param beanName the name of the bean
@@ -566,68 +652,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 			dependencies.add(dependentBeanName);
 		}
-	}
-
-	/**
-	 * Add the given bean to the list of disposable beans in this factory,
-	 * registering its DisposableBean interface and/or the given destroy method
-	 * to be called on factory shutdown (if applicable).
-	 * @param beanName the name of the bean
-	 * @param bean the bean instance
-	 * @param mergedBeanDefinition the bean definition for the bean (can be null)
-	 * @return whether the bean has actually been registered as disposable bean
-	 */
-	protected boolean registerDisposableBeanIfNecessary(
-			final String beanName, final Object bean, final RootBeanDefinition mergedBeanDefinition) {
-
-		final boolean isDisposableBean = (bean instanceof DisposableBean);
-		final boolean hasDestroyMethod =
-				(mergedBeanDefinition != null && mergedBeanDefinition.getDestroyMethodName() != null);
-
-		if (isDisposableBean || hasDestroyMethod || hasDestructionAwareBeanPostProcessors()) {
-			registerDisposableBean(beanName, new DisposableBean() {
-				public void destroy() throws Exception {
-
-					if (hasDestructionAwareBeanPostProcessors()) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + beanName + "'");
-						}
-						for (int i = getBeanPostProcessors().size() - 1; i >= 0; i--) {
-							Object beanProcessor = getBeanPostProcessors().get(i);
-							if (beanProcessor instanceof DestructionAwareBeanPostProcessor) {
-								((DestructionAwareBeanPostProcessor) beanProcessor).postProcessBeforeDestruction(bean, beanName);
-							}
-						}
-					}
-
-					if (isDisposableBean) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Invoking destroy() on bean with name '" + beanName + "'");
-						}
-						((DisposableBean) bean).destroy();
-					}
-
-					if (hasDestroyMethod) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Invoking custom destroy method on bean with name '" + beanName + "'");
-						}
-						invokeCustomDestroyMethod(beanName, bean, mergedBeanDefinition.getDestroyMethodName());
-					}
-				}
-			});
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Add the given bean to the list of further disposable beans in this factory.
-	 * @param beanName the name of the bean
-	 * @param bean the bean instance
-	 */
-	protected void registerDisposableBean(String beanName, DisposableBean bean) {
-		this.disposableBeans.put(beanName, bean);
 	}
 
 	public void destroySingletons() {

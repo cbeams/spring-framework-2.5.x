@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.16 2004-10-20 05:43:55 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.17 2005-01-14 17:09:51 jhoeller Exp $
  */
 
 /*
@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
 
 /**
  * Simple test bean used for testing bean factories,
@@ -37,7 +38,9 @@ import org.springframework.beans.factory.BeanFactoryAware;
  * @author  Rod Johnson
  * @since 15 April 2001
  */
-public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable {
+public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable {
+
+	private String beanName;
 
 	private BeanFactory beanFactory;
 
@@ -80,6 +83,14 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 		this.age = age;
 	}
 
+
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	public String getBeanName() {
+		return beanName;
+	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;

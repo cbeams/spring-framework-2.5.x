@@ -264,11 +264,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Create a bean instance for the given bean definition.
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
-	 * @param allowEagerCaching whether eager caching of singletons is allowed
-	 * (typically true for normal beans, but false for inner beans)
 	 * @param args arguments to use if this is a prototype constructed by a factory method.
 	 * In this case, this will override any args specified in the bean definitions.
 	 * This parameter should be null otherwise.
+	 * @param allowEagerCaching whether eager caching of singletons is allowed
+	 * (typically true for normal beans, but false for inner beans)
 	 * @return a new instance of the bean
 	 * @throws BeansException in case of errors
 	 */
@@ -358,17 +358,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Register bean as disposable, and also as dependent on specified "dependsOn" beans.
-		// This information is used on shutdown, destroying dependent beans before the beans
-		// that they depend on.
-		if (mergedBeanDefinition.isSingleton()) {
-			registerDisposableBeanIfNecessary(beanName, originalBean, mergedBeanDefinition);
-			String[] dependsOn = mergedBeanDefinition.getDependsOn();
-			if (dependsOn != null) {
-				for (int i = 0; i < dependsOn.length; i++) {
-					registerDependentBean(dependsOn[i], beanName);
-				}
-			}
-		}
+		registerDisposableBeanIfNecessary(beanName, originalBean, mergedBeanDefinition);
 
 		return bean;
 	}
@@ -941,15 +931,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Resolve an inner bean definition.
 	 */
-	private Object resolveInnerBeanDefinition(String beanName, final String innerBeanName, BeanDefinition innerBd)
+	private Object resolveInnerBeanDefinition(String beanName, String innerBeanName, BeanDefinition innerBd)
 	    throws BeansException {
-		final RootBeanDefinition mergedInnerBd = getMergedBeanDefinition(innerBeanName, innerBd);
-		final Object innerBean = createBean(innerBeanName, mergedInnerBd, null, false);
+		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resolving inner bean definition '" + innerBeanName + "' of bean '" + beanName + "'");
+		}
+		RootBeanDefinition mergedInnerBd = getMergedBeanDefinition(innerBeanName, innerBd);
+		Object innerBean = createBean(innerBeanName, mergedInnerBd, null, false);
 		if (mergedInnerBd.isSingleton()) {
-			// Keep reference to inner bean, to be able to destroy it on factory shutdown?
-			if (registerDisposableBeanIfNecessary(innerBeanName, innerBean, mergedInnerBd)) {
-				registerDependentBean(innerBeanName, beanName);
-			}
+			registerDependentBean(innerBeanName, beanName);
 		}
 		return getObjectForSharedInstance(innerBeanName, innerBean);
 	}

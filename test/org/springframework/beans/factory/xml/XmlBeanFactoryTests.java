@@ -106,12 +106,13 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(5, hasInnerBeans.getAge());
 		TestBean inner1 = (TestBean) hasInnerBeans.getSpouse();
 		assertNotNull(inner1);
+		assertEquals("innerBean", inner1.getBeanName());
 		assertEquals("inner1", inner1.getName());
 		assertEquals(6, inner1.getAge());
 
 		assertNotNull(hasInnerBeans.getFriends());
 		List friends = (List) hasInnerBeans.getFriends();
-		assertEquals(2, friends.size());
+		assertEquals(3, friends.size());
 		DerivedTestBean inner2 = (DerivedTestBean) friends.get(0);
 		assertEquals("inner2", inner2.getName());
 		assertEquals(DerivedTestBean.class.getName(), inner2.getBeanName());
@@ -120,9 +121,11 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(7, inner2.getAge());
 		TestBean innerFactory = (TestBean) friends.get(1);
 		assertEquals(DummyFactory.SINGLETON_NAME, innerFactory.getName());
+		TestBean inner5 = (TestBean) friends.get(2);
+		assertEquals("innerBean", inner5.getBeanName());
+
 		assertNotNull(hasInnerBeans.getSomeMap());
 		assertEquals(2, hasInnerBeans.getSomeMap().size());
-
 		TestBean inner3 = (TestBean) hasInnerBeans.getSomeMap().get("someKey");
 		assertEquals("Jenny", inner3.getName());
 		assertEquals(30, inner3.getAge());
@@ -134,6 +137,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inner1.wasDestroyed());
 		assertTrue(inner2.wasDestroyed());
 		assertTrue(innerFactory.getName() == null);
+		assertTrue(inner5.wasDestroyed());
 	}
 
 	public void testSingletonInheritanceFromParentFactorySingleton() throws Exception {

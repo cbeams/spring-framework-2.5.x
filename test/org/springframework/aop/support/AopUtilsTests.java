@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -44,7 +44,7 @@ public class AopUtilsTests extends TestCase {
 	public void testGetAllInterfaces() {
 		DerivedTestBean testBean = new DerivedTestBean();
 		List ifcs = Arrays.asList(AopUtils.getAllInterfaces(testBean));
-		assertEquals("Correct number of interfaces", 7, ifcs.size());
+		assertEquals("Correct number of interfaces", 8, ifcs.size());
 		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
 		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
 		assertTrue("Contains IOther", ifcs.contains(IOther.class));
