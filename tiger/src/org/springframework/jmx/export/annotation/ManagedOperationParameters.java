@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import java.lang.annotation.RetentionPolicy;
  * JDK 1.5+ method-level annotation used to provide metadata about
  * operation parameters, corresponding to an array of
  * <code>ManagedOperationParameter</code> attributes.
- *
  * @author Rob Harrop
- * @see org.springframework.jmx.export.metadata.ManagedOperationParameter
  * @since 1.2
+ * @see org.springframework.jmx.export.metadata.ManagedOperationParameter
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ManagedOperationParameters {
 
 	ManagedOperationParameter[] value() default {};
+
 }
