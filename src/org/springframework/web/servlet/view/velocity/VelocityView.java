@@ -54,12 +54,12 @@ import org.springframework.web.servlet.view.AbstractView;
  * <li>exposeCurrencyFormatter: whether to expose a Currency formatter helper object
  * </ul>
  * 
- * <p>Depends on a VelocityConfiguration object such as VelocityConfigurer
+ * <p>Depends on a VelocityConfig object such as VelocityConfigurer
  * being accessible in the current web application context.
  
  * @author Rod Johnson
- * @version $Id: VelocityView.java,v 1.12 2003-11-21 15:21:29 jhoeller Exp $
- * @see VelocityConfiguration
+ * @version $Id: VelocityView.java,v 1.13 2003-11-27 11:28:02 jhoeller Exp $
+ * @see VelocityConfig
  * @see VelocityConfigurer
  */
 public class VelocityView extends AbstractView {
@@ -134,7 +134,7 @@ public class VelocityView extends AbstractView {
 
 	
 	/**
- 	* Invoked on startup. Looks for a single VelocityConfiguration bean to
+ 	* Invoked on startup. Looks for a single VelocityConfig bean to
  	* find the relevant VelocityEngine for this factory.
  	*/
 	protected void initApplicationContext() throws ApplicationContextException {
@@ -143,13 +143,13 @@ public class VelocityView extends AbstractView {
 		}
 
 		try {
-			VelocityConfiguration vconfig = (VelocityConfiguration)
+			VelocityConfig vconfig = (VelocityConfig)
 					BeanFactoryUtils.beanOfTypeIncludingAncestors(getWebApplicationContext(),
-					                                              VelocityConfiguration.class, true, true);
+					                                              VelocityConfig.class, true, true);
 			this.velocityEngine = vconfig.getVelocityEngine();
 		}
 		catch (BeanDefinitionStoreException ex) {
-			throw new ApplicationContextException("Must define a single VelocityConfiguration bean in this web application " +
+			throw new ApplicationContextException("Must define a single VelocityConfig bean in this web application " +
 			                                      "context (may be inherited): VelocityConfigurer is the usual implementation. " +
 			                                      "This bean may be given any name.", ex);
 		}

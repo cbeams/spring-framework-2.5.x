@@ -32,7 +32,7 @@ import com.mockobjects.servlet.MockHttpServletResponse;
 
 /**
  * @author Rod Johnson
- * @version $Id: VelocityViewTests.java,v 1.7 2003-11-21 15:22:52 jhoeller Exp $
+ * @version $Id: VelocityViewTests.java,v 1.8 2003-11-27 11:28:02 jhoeller Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -40,7 +40,7 @@ public class VelocityViewTests extends TestCase {
 		VelocityView vv = new VelocityView();
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getBeansOfType(VelocityConfiguration.class, true, true);
+		wac.getBeansOfType(VelocityConfig.class, true, true);
 		wmc.setReturnValue(new HashMap());
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
@@ -53,7 +53,7 @@ public class VelocityViewTests extends TestCase {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Check there's a helpful error message
-			assertTrue(ex.getMessage().indexOf("VelocityConfiguration") != -1);
+			assertTrue(ex.getMessage().indexOf("VelocityConfig") != -1);
 		}
 
 		wmc.verify();
@@ -100,7 +100,7 @@ public class VelocityViewTests extends TestCase {
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
-		VelocityConfiguration vc = new VelocityConfiguration() {
+		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
 				return new VelocityEngine() {
 					public Template getTemplate(String tn)
@@ -111,7 +111,7 @@ public class VelocityViewTests extends TestCase {
 				};
 			}
 		};
-		wac.getBeansOfType(VelocityConfiguration.class, true, true);
+		wac.getBeansOfType(VelocityConfig.class, true, true);
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);
@@ -168,12 +168,12 @@ public class VelocityViewTests extends TestCase {
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
 		final Template expectedTemplate = new Template();
-		VelocityConfiguration vc = new VelocityConfiguration() {
+		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
 		};
-		wac.getBeansOfType(VelocityConfiguration.class, true, true);
+		wac.getBeansOfType(VelocityConfig.class, true, true);
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);

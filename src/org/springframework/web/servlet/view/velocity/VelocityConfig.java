@@ -11,10 +11,10 @@ import org.apache.velocity.app.VelocityEngine;
  * Interface to be implemented by objects that configure
  * and manage a VelocityEngine for automatic lookup.
  * @author Rod Johnson
- * @version $Id: VelocityConfiguration.java,v 1.2 2003-10-22 15:19:13 jhoeller Exp $
+ * @version $Id: VelocityConfig.java,v 1.1 2003-11-27 11:28:02 jhoeller Exp $
  * @see VelocityView
  */
-public interface VelocityConfiguration {
+public interface VelocityConfig {
 	
 	/**
 	 * Return the VelocityEngine for this web application context.
