@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.78 2004-01-14 07:44:06 jhoeller Exp $
+$Id: changelog.txt,v 1.79 2004-01-14 17:39:56 jhoeller Exp $
 
 
 Changes in version 1.0 RC1 (xx.01.2003)
@@ -30,6 +30,9 @@ Package org.springframework.context
 Package org.springframework.orm
 * revised Hibernate-JTA synchronization to close the Session early in case of a Hibernate TransactionManagerLookup
 
+Package org.springframework.samples
+* introduced Image Database sample application, illustrating LobHandler and HTTP multipart file uploads
+
 Package org.springframework.validation
 * apply custom editor on Errors.getFieldValue to manually rejected field values too
 
@@ -44,7 +47,7 @@ Package org.springframework.web
 * turned AbstractWizardFormController's "getCurrentPage" method non-final, to be overridden if determined by request
 * re-evaluate EL expressions on each tag rendering instead of on tag instance initialization in all Spring tags
 
-Building framework and samples
+Building
 * added "xdoclet/xjavadoc.jar" to release target in the framework build script (needed for building with attributes)
 * put Commons Attributes and XDoclet jars in Ant classpath instead of expecting them in Ant's lib directory
 * renamed all "ant.bat" files in the samples to "build.bat"
