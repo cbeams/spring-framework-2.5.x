@@ -266,6 +266,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 
 	/**
 	 * Return the prefix of the ModuleConfig that this PlugIn is associated with.
+	 * @see org.apache.struts.config.ModuleConfig#getPrefix
 	 */
 	public final String getModulePrefix() {
 		return this.moduleConfig.getPrefix();
@@ -297,7 +298,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 		}
 
 		// Publish the context as a servlet context attribute.
-		String attrName = SERVLET_CONTEXT_PREFIX + getModulePrefix();
+		String attrName = getServletContextAttributeName();
 		getServletContext().setAttribute(attrName, wac);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Published WebApplicationContext of Struts ActionServlet '" + getServletName() +
@@ -353,7 +354,17 @@ public class ContextLoaderPlugIn implements PlugIn {
 	}
 
 	/**
-	 * Return the ActionServlet's WebApplicationContext.
+	 * Return the ServletContext attribute name for this PlugIn's WebApplicationContext.
+	 * Default implementation returns SERVLET_CONTEXT_PREFIX + module prefix.
+	 * @see #SERVLET_CONTEXT_PREFIX
+	 * @see #getModulePrefix
+	 */
+	public String getServletContextAttributeName() {
+		return SERVLET_CONTEXT_PREFIX + getModulePrefix();
+	}
+
+	/**
+	 * Return this PlugIn's WebApplicationContext.
 	 */
 	public final WebApplicationContext getWebApplicationContext() {
 		return webApplicationContext;
