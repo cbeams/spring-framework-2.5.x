@@ -20,10 +20,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * JavaBean for holding JDBC Error Codes for a particular database.
- * Normally loaded through a BeanFactory
- * implementation. Used by the SQLErrorCodeSQLExceptionTranslator.
+ * JavaBean for holding JDBC error codes for a particular database.
+ * Normally loaded through a BeanFactory implementation.
+ * Used by the SQLErrorCodeSQLExceptionTranslator.
  * @author Thomas Risberg
+ * @see SQLErrorCodeSQLExceptionTranslator
+ * @see SQLErrorCodesFactory
  */
 public class SQLErrorCodes {
 
@@ -45,132 +47,85 @@ public class SQLErrorCodes {
 	
 	private List customTranslations = new LinkedList();
 
-	/**
-	 * Sets the badSqlGrammarCodes.
-	 */
-	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
-		this.badSqlGrammarCodes = badSqlGrammarCodes;
-	}
 
 	/**
-	 * Returns the badSqlGrammarCodes.
-	 */
-	public String[] getBadSqlGrammarCodes() {
-		return badSqlGrammarCodes;
-	}
-
-	/**
-	 * Sets the dataIntegrityViolationCodes.
-	 */
-	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
-		this.dataIntegrityViolationCodes = dataIntegrityViolationCodes;
-	}
-
-	/**
-	 * Returns the dataIntegrityViolationCodes.
-	 */
-	public String[] getDataIntegrityViolationCodes() {
-		return dataIntegrityViolationCodes;
-	}
-
-	/**
-	 * @return Returns the dataRetrievalFailureCodes.
-	 */
-	public String[] getDataRetrievalFailureCodes() {
-		return dataRetrievalFailureCodes;
-	}
-	/**
-	 * @param dataRetrievalFailureCodes The dataRetrievalFailureCodes to set.
-	 */
-	public void setDataRetrievalFailureCodes(String[] dataRetrievalFailureCodes) {
-		this.dataRetrievalFailureCodes = dataRetrievalFailureCodes;
-	}
-
-	/**
-	 * @return Returns the dataAccessResourceFailureCodes.
-	 */
-	public String[] getDataAccessResourceFailureCodes() {
-		return dataAccessResourceFailureCodes;
-	}
-
-	/**
-	 * @param dataAccessResourceFailureCodes The dataAccessResourceFailureCodes to set.
-	 */
-	public void setDataAccessResourceFailureCodes(
-			String[] dataAccessResourceFailureCodes) {
-		this.dataAccessResourceFailureCodes = dataAccessResourceFailureCodes;
-	}
-
-	/**
-	 * @return Returns the optimisticLockingFailureCodes.
-	 */
-	public String[] getOptimisticLockingFailureCodes() {
-		return optimisticLockingFailureCodes;
-	}
-	
-	/**
-	 * @param optimisticLockingFailureCodes The optimisticLockingFailureCodes to set.
-	 */
-	public void setOptimisticLockingFailureCodes(
-			String[] optimisticLockingFailureCodes) {
-		this.optimisticLockingFailureCodes = optimisticLockingFailureCodes;
-	}
-
-	/**
-	 * @return Returns the cannotAcquireLockCodes.
-	 */
-	public String[] getCannotAcquireLockCodes() {
-		return cannotAcquireLockCodes;
-	}
-	/**
-	 * @param cannotAcquireLockCodes The cannotAcquireLockCodes to set.
-	 */
-	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {
-		this.cannotAcquireLockCodes = cannotAcquireLockCodes;
-	}
-
-	/**
-	 * @return Returns the databaseProductName.
-	 */
-	public String getDatabaseProductName() {
-		return databaseProductName;
-	}
-
-	/**
-	 * @param databaseProductName The databaseProductName to set.
-	 * Set this property this if the database name contains spaces, in which case 
-	 * we can not use the bean id for lookup.  
+	 * Set this property if the database name contains spaces, in which case
+	 * we can not use the bean name for lookup.
 	 */
 	public void setDatabaseProductName(String databaseProductName) {
 		this.databaseProductName = databaseProductName;
 	}
 
-	/**
-	 * @return Returns the useStateCodeForTranslation.
-	 */
-	public boolean isUseSqlStateForTranslation() {
-		return useSqlStateForTranslation;
+	public String getDatabaseProductName() {
+		return databaseProductName;
 	}
 
 	/**
-	 * @param useStateCodeForTranslation The useStateCodeForTranslation to set.
-	 * Set this to true for databases that do not provide an error code but that
-	 * does provide SQL State (this includes PostgreSQL).
+	 * Set this propert to true for databases that do not provide an error code
+	 * but that do provide SQL State (this includes PostgreSQL).
 	 */
 	public void setUseSqlStateForTranslation(boolean useStateCodeForTranslation) {
 		this.useSqlStateForTranslation = useStateCodeForTranslation;
 	}
 
-	/**
-	 * @return Returns the customTranslations.
-	 */
-	public List getCustomTranslations() {
-		return customTranslations;
+	public boolean isUseSqlStateForTranslation() {
+		return useSqlStateForTranslation;
 	}
-	/**
-	 * @param customExceptions The customTranslations to set.
-	 */
+
+	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
+		this.badSqlGrammarCodes = badSqlGrammarCodes;
+	}
+
+	public String[] getBadSqlGrammarCodes() {
+		return badSqlGrammarCodes;
+	}
+
+	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
+		this.dataIntegrityViolationCodes = dataIntegrityViolationCodes;
+	}
+
+	public String[] getDataIntegrityViolationCodes() {
+		return dataIntegrityViolationCodes;
+	}
+
+	public void setDataRetrievalFailureCodes(String[] dataRetrievalFailureCodes) {
+		this.dataRetrievalFailureCodes = dataRetrievalFailureCodes;
+	}
+
+	public String[] getDataRetrievalFailureCodes() {
+		return dataRetrievalFailureCodes;
+	}
+
+	public void setOptimisticLockingFailureCodes(String[] optimisticLockingFailureCodes) {
+		this.optimisticLockingFailureCodes = optimisticLockingFailureCodes;
+	}
+
+	public String[] getOptimisticLockingFailureCodes() {
+		return optimisticLockingFailureCodes;
+	}
+
+	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {
+		this.cannotAcquireLockCodes = cannotAcquireLockCodes;
+	}
+
+	public String[] getCannotAcquireLockCodes() {
+		return cannotAcquireLockCodes;
+	}
+
+	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
+		this.dataAccessResourceFailureCodes = dataAccessResourceFailureCodes;
+	}
+
+	public String[] getDataAccessResourceFailureCodes() {
+		return dataAccessResourceFailureCodes;
+	}
+
 	public void setCustomTranslations(List customExceptions) {
 		this.customTranslations = customExceptions;
 	}
+
+	public List getCustomTranslations() {
+		return customTranslations;
+	}
+
 }
