@@ -100,7 +100,7 @@ public class MultiAction extends AbstractAction {
 	 * A cache for dispatched action execute methods.
 	 */
 	private DispatchMethodInvoker executeMethodDispatcher = new DispatchMethodInvoker(this,
-			new Class[] { RequestContext.class }, Event.class, "action", "public Event <methodName>(RequestContext)");
+			new Class[] { RequestContext.class }, Event.class, "action");
 
 	/**
 	 * The action execute method name resolver strategy.
@@ -148,7 +148,7 @@ public class MultiAction extends AbstractAction {
 	 * using reflection.
 	 */
 	protected Method getActionExecuteMethod(String actionExecuteMethodName) {
-		return (Method)this.executeMethodDispatcher.getMethod(actionExecuteMethodName);
+		return (Method)this.executeMethodDispatcher.getDispatchMethod(actionExecuteMethodName);
 	}
 
 	/**

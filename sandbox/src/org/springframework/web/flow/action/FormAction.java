@@ -210,8 +210,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	/**
 	 * A cache for dispatched action execute methods.
 	 */
-	private DispatchMethodInvoker validateMethodDispatcher = new DispatchMethodInvoker(new Class[] {
-			Object.class, Errors.class }, null, "validator", "public void <methodName>(Object, Errors)");
+	private DispatchMethodInvoker validateMethodDispatcher = new DispatchMethodInvoker();
 
 	/**
 	 * Return the name of the form object in the flow scope.
@@ -241,6 +240,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 */
 	public void setFormObjectClass(Class formObjectClass) {
 		this.formObjectClass = formObjectClass;
+		this.validateMethodDispatcher.setParameterTypes(new Class[] { formObjectClass, Errors.class});
 	}
 
 	/**
