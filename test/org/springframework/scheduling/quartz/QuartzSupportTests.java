@@ -164,16 +164,15 @@ public class QuartzSupportTests extends TestCase {
 		trigger1.afterPropertiesSet();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-		
-		
 		schedulerFactoryBean.setJobDetails(new JobDetail[] { jobDetail1 } );
 		schedulerFactoryBean.setTriggers(new Trigger[] { trigger1, trigger0} );
 		schedulerFactoryBean.afterPropertiesSet();
 		
-		// ok scheduler is set up... let's wait for like 1 seconds
+		// ok scheduler is set up... let's wait for like 4 seconds
 		try {
 			Thread.sleep(4000);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException ex) {
 			// fall through
 		}
 		
@@ -182,7 +181,8 @@ public class QuartzSupportTests extends TestCase {
 			task1.stop();
 			// we're done, both jobs have ran, let's call it a day
 			return;
-		} else {			
+		}
+		else {
 			assertEquals(1, task1.counter);
 			task1.stop();
 			// we need to check whether or not the test succeed with non-concurrent jobs
@@ -190,19 +190,18 @@ public class QuartzSupportTests extends TestCase {
 		
 		try {
 			Thread.sleep(4000);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException ex) {
 			// fall through
 		}
 		
 		task1.stop();
-		
 		assertEquals(2, task1.counter);
 		
-		// although we're destroying the scheduler, it does seem to keep things in memory,
-		// when executing both tests (concurrent and non-concurrent), the second test always
-		// fails
+		// Although we're destroying the scheduler, it does seem to keep things in memory:
+		// When executing both tests (concurrent and non-concurrent), the second test always
+		// fails.
 		schedulerFactoryBean.destroy();
-		
 	}
 
 	public void testSchedulerFactoryBeanWithPlainQuartzObjects() throws Exception {
