@@ -88,7 +88,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
             valueHolder = new BufferedValueModel(valueHolder);
         }
         if (valueHolder.get() == null) {
-            System.out.println("Is null - instantating...");
             valueHolder.set(BeanUtils
                     .instantiateClass(domainObjectAccessStrategy
                             .getMetaAspectAccessor().getAspectClass(
@@ -96,8 +95,6 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
             return createChild(childFormModelName, valueHolder, false);
         }
         else {
-            System.out.println("Is not null - using...");
-
             return createChild(childFormModelName, valueHolder, true);
         }
     }
