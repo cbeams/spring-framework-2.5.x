@@ -23,8 +23,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the MessageSourceResolvable interface.
- * Easy way to store all the necessary values needed to resolve
- * a message via a MessageSource.
+ * Offers an easy way to store all the necessary values needed to
+ * resolve a message via a MessageSource.
  * @author Juergen Hoeller
  * @since 13.02.2004
  * @see org.springframework.context.MessageSource#getMessage(MessageSourceResolvable, java.util.Locale)
@@ -44,6 +44,15 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 */
 	public DefaultMessageSourceResolvable(String[] codes) {
 		this(codes, null, null);
+	}
+
+	/**
+	 * Create a new DefaultMessageSourceResolvable.
+	 * @param codes the codes to be used to resolve this message
+	 * @param defaultMessage the default message to be used to resolve this message
+	 */
+	public DefaultMessageSourceResolvable(String[] codes, String defaultMessage) {
+		this(codes, null, defaultMessage);
 	}
 
 	/**
@@ -98,25 +107,14 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 
 	protected String resolvableToString() {
 		StringBuffer buf = new StringBuffer();
-		buf.append("codes=[").append(StringUtils.arrayToDelimitedString(getCodes(), ",")).append("]; arguments=[");
-		if (this.arguments == null) {
-			buf.append("null");
-		}
-		else {
-			for (int i = 0; i < getArguments().length; i++) {
-				buf.append('(').append(getArguments()[i].getClass().getName()).append(")[");
-				buf.append(getArguments()[i]).append(']');
-				if (i < getArguments().length - 1) {
-					buf.append(", ");
-				}
-			}
-		}
-		buf.append("]; defaultMessage=[").append(getDefaultMessage()).append(']');
+		buf.append("codes [").append(StringUtils.arrayToDelimitedString(this.codes, ","));
+		buf.append("]; arguments [" + StringUtils.arrayToDelimitedString(this.arguments, ","));
+		buf.append("]; default message [").append(this.defaultMessage).append(']');
 		return buf.toString();
 	}
 
 	public String toString() {
-		return resolvableToString();
+		return "MessageSourceResolvable: " + resolvableToString();
 	}
 
 }
