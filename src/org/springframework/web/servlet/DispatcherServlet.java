@@ -81,7 +81,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.21 2003-12-13 18:13:07 luke_t Exp $
+ * @version $Id: DispatcherServlet.java,v 1.22 2003-12-19 17:30:55 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -395,7 +395,10 @@ public class DispatcherServlet extends FrameworkServlet {
 					exMv = ((HandlerExceptionResolver) it.next()).resolveException(ex, mappedHandler.getHandler());
 				}
 				if (exMv != null) {
-					logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception", ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug("HandlerExceptionResolver returned ModelAndView [" + exMv + "] for exception");
+					}
+					logger.warn("Handler execution resulted in exception - forwarding to resolved error view", ex);
 					mv = exMv;
 				}
 				else {
