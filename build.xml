@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.17 2003-11-21 23:29:10 jhoeller Exp $
+    $Id: build.xml,v 1.18 2003-11-23 12:28:16 jhoeller Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -41,8 +41,7 @@
 	</target>
 
 
-	<target name="clean"
-	    description="Clean all output dirs (dist, javadocs, classes, test-classes, etc.)">
+	<target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc.)">
 
 		<delete dir="${dist.dir}"/>
 		<delete dir="${javadocs.dir}"/>
@@ -173,8 +172,6 @@
 			<fileset dir="${target.classes.dir}">
 				<include name="META-INF/**"/>
 				<include name="org/springframework/**"/>
-				<exclude name="org/springframework/enterpriseservices/**"/>
-				<exclude name="org/springframework/metadata/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Spring-Version" value="${spring-version}"/>
@@ -191,8 +188,6 @@
 		<zip zipfile="${dist.dir}/${spring-src.zip}">
 			<fileset dir="${src.dir}">
 				<include name="org/springframework/**"/>
-				<exclude name="org/springframework/enterpriseservices/**"/>
-				<exclude name="org/springframework/metadata/**"/>
 			</fileset>
 		</zip>
 
@@ -206,7 +201,7 @@
 
 
 	<!--
-		Note: Contained classes overlap, e.g. spring-full contains everything.
+		Note: Contained classes overlap, e.g. spring.jar contains everything.
 	-->
 	<target name="alljars" depends="beans,context,jdbc,fulljar,srczip" description="Create all JAR files"/>
 
@@ -222,8 +217,6 @@
 			<classpath refid="master-classpath"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
-				<exclude name="org/springframework/enterpriseservices/**"/>
-				<exclude name="org/springframework/metadata/**"/>
 			</packageset>
 		</javadoc>
 
@@ -242,15 +235,16 @@
 				<include name="dist/*.dtd"/>
 				<include name="dist/*.tld"/>
 				<include name="docs/**"/>
+				<exclude name="docs/reference/**"/>
 				<include name="src/**"/>
-				<exclude name="src/org/springframework/enterpriseservices/**"/>
-				<exclude name="src/org/springframework/metadata/**"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/aop-alliance/**"/>
 				<include name="lib/cglib/cglib-asm.jar"/>
+				<include name="lib/dom4j/**"/>
 				<include name="lib/hibernate/**"/>
 				<include name="lib/jakarta-commons/commons-beanutils.jar"/>
 				<include name="lib/jakarta-commons/commons-collections.jar"/>
+				<include name="lib/jakarta-commons/commons-digester.jar"/>
 				<include name="lib/jakarta-commons/commons-lang.jar"/>
 				<include name="lib/jakarta-commons/commons-logging.jar"/>
 				<include name="lib/j2ee/servlet.jar"/>
@@ -259,6 +253,7 @@
 				<include name="lib/jstl/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/poi/**"/>
+				<include name="lib/struts/**"/>
 				<include name="samples/countries/**"/>
 				<include name="samples/petclinic/**"/>
 				<include name="samples/tiles-example/**"/>
@@ -432,7 +427,8 @@
 		</jar>
 
 	</target>
-	
+
+
 	<target name="metadata" depends="build,initdist" description="Create JAR file for source level matadata support">
 
 		<delete file="${dist.dir}/${spring-metadata.jar}"/>
@@ -447,15 +443,21 @@
 		</jar>
 
 	</target>
-	
+
+
 	<target name="docclean" description="Delete temporary and distribution directories for docs">
+
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/pdf"/>
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html_single"/>
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html"/>
+
 	</target>
-		
+
+
 	<target name="docpdf" description="Compile reference documentation to pdf">
+
 		<mkdir dir="${basedir}/${dist.ref.dir}/pdf/images"/>
+
 		<copy todir="${basedir}/${dist.ref.dir}/pdf/images">
 			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
 				<include name="*.gif"/>
@@ -463,6 +465,7 @@
 				<include name="*.jpg"/>
 			</fileset>
 		</copy>
+
 		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
 			<classpath>
 				<fileset dir="${basedir}/${doc.ref.dir}/lib">
@@ -474,6 +477,7 @@
 			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
 			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
 		</java>
+
 		<java classname="org.apache.fop.apps.Fop" fork="true" dir="${doc.ref.dir}">
 			<classpath>
 				<fileset dir="${basedir}/${doc.ref.dir}/lib">
@@ -483,11 +487,16 @@
 			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
 			<arg value="${basedir}/${dist.ref.dir}/pdf/spring-reference.pdf"/>
 		</java>
+
 		<delete file="${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+
 	</target>
 
+
 	<target name="dochtml" description="Compile reference documentation to chunked html">
+
 		<mkdir dir="${dist.ref.dir}/html/images"/>
+
 		<copy todir="${basedir}/${dist.ref.dir}/html/images">
 			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
 				<include name="*.gif"/>
@@ -495,6 +504,7 @@
 				<include name="*.jpg"/>
 			</fileset>
 		</copy>
+
 		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.ref.dir}/html/">
 			<classpath>
 				<fileset dir="${basedir}/${doc.ref.dir}/lib">
@@ -504,10 +514,14 @@
 			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
 			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
 		</java>
+
 	</target>
 
+
 	<target name="dochtmlsingle" description="Compile reference documentation to single html">
+
 		<mkdir dir="${dist.ref.dir}/html_single/images"/>
+
 		<copy todir="${basedir}/${dist.ref.dir}/html_single/images">
 			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
 				<include name="*.gif"/>
@@ -515,6 +529,7 @@
 				<include name="*.jpg"/>
 			</fileset>
 		</copy>
+
 		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
 			<classpath>
 				<fileset dir="${basedir}/${doc.dir}/reference/lib">
@@ -526,11 +541,14 @@
 			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
 			<arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
 		</java>
+
 	</target>
 
-	<target name="refdoc" 
+
+	<target name="refdoc"
 		depends="dochtml,dochtmlsingle,docpdf" 
 		description="Generate and copy reference documentation">
 	</target>
+
 
 </project>
