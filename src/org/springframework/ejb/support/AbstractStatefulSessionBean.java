@@ -21,25 +21,25 @@ import org.springframework.beans.FatalBeanException;
 
 /**
  * Convenient superclass for stateful session beans.
- * SFSBs should extend this class, leaving them to implement
- * the ejbActivate() and ejbPassivate() lifecycle methods
- * to comply with the requirements of the EJB specification.
+ * SFSBs should extend this class, leaving them to implement the
+ * ejbActivate() and ejbPassivate() lifecycle methods to comply
+ * with the requirements of the EJB specification.
  *
- * <p><b>Note: Subclasses should invoke the loadBeanFactory()
- * method in their custom ejbCreate() and ejbActivate methods,
- * and should invoke the unloadBeanFactory() method in their
- * ejbPassive method.</b>
+ * <p><b>Note: Subclasses should invoke the loadBeanFactory() method in
+ * their custom ejbCreate and ejbActivate methods, and should invoke
+ * the unloadBeanFactory() method in their ejbPassivate method.</b>
  * 
- * <p><b>Note: The default BeanFactoryLoader used by this class's
- * superclass is <b>not</b> serializable. When using the default
- * BeanFactoryLoader, or another variant which is not serializable,
- * subclasses must call setBeanFactoryLoader(null) in ejbPassivate,
- * with a corresponding call to setBeanFactoryLoader(xxx) in 
- * ejbActivate unless relying on the default loader.
+ * <p><b>Note: The default BeanFactoryLocator used by this class's superclass
+ * (ContextJndiBeanFactoryLocator) is <b>not</b> serializable. Therefore,
+ * when using the default BeanFactoryLocator, or another variant which is
+ * not serializable, subclasses must call setBeanFactoryLocator(null) in
+ * ejbPassivate, with a corresponding call to setBeanFactoryLocator(xxx)
+ * in ejbActivate unless relying on the default locator.
  * 
- * @version $Id: AbstractStatefulSessionBean.java,v 1.8 2004-03-18 02:46:14 trisberg Exp $
+ * @version $Id: AbstractStatefulSessionBean.java,v 1.9 2004-03-18 19:17:53 jhoeller Exp $
  * @author Rod Johnson
  * @author Colin Sampaleanu
+ * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
  */
 public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 
@@ -58,11 +58,11 @@ public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 	
 	/**
 	 * Unload the Spring BeanFactory instance.
-	 * The default ejbRemove method invokes this method, but subclasses which
-	 * override ejbRemove must invoke this method themselves. Unless
-	 * the BeanFactory is known to be serializable, this method must
-	 * also be called from ejbPassivate, with a corresponding call to
-	 * loadBeanFactory from ejbActivate.
+	 * The default ejbRemove method invokes this method, but subclasses
+	 * which override ejbRemove must invoke this method themselves.
+	 * Unless the BeanFactory is known to be serializable, this method
+	 * must also be called from ejbPassivate, with a corresponding call
+	 * to loadBeanFactory from ejbActivate.
 	 */
 	protected void unloadBeanFactory() throws FatalBeanException {
 		super.unloadBeanFactory();
