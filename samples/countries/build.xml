@@ -44,7 +44,7 @@
 			<include name="*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/dist">
-			<include name="spring-full*.jar"/>
+			<include name="spring.jar"/>
 		</fileset>
 
 	</path>
@@ -106,7 +106,7 @@
 				<include name="log4j*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
-				<include name="spring-full*.jar"/>
+				<include name="spring.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/itext-pdf">
 				<include name="iText.jar"/>
