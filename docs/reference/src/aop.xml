@@ -6,12 +6,19 @@
     <title>Concepts</title>
 
     <para><emphasis>Aspect-Oriented Programming</emphasis> (<emphasis>AOP</emphasis>)
-    is a new paradigm</para>
+    complements OOP by providing another way of thinking about program
+    structure. While OO decomposes applications into a hierarchy of objects,
+    AOP decomposes programs into <emphasis>aspects</emphasis> or
+    <emphasis>concerns</emphasis>. This enables modularization of concerns
+    such as transaction management that would otherwise cut across multiple
+    objects. (Such concerns are often termed <emphasis>crosscutting</emphasis>
+    concerns.)</para>
 
-    <para>One of the key components of Spring is the AOP framework. While the
-    Spring IoC containers (BeanFactory and ApplicationContext) do not depend
-    on AOP (meaning you don&#39;t need to use AOP if you don&#39;t want to),
-    AOP complements Spring IoC to provide a very capable middleware solution.</para>
+    <para>One of the key components of Spring is the <emphasis>AOP framework</emphasis>.
+    While the Spring IoC containers (BeanFactory and ApplicationContext) do
+    not depend on AOP (meaning you don&#39;t need to use AOP if you don&#39;t
+    want to), AOP complements Spring IoC to provide a very capable middleware
+    solution.</para>
 
     <para>AOP is used in Spring:</para>
 
@@ -24,24 +31,34 @@
       </listitem>
 
       <listitem>
-        <para>To allow users to implement custom aspects.</para>
+        <para>To allow users to implement custom aspects, complementing their
+        use of OOP with AOP.</para>
       </listitem>
     </itemizedlist>
 
-    <para>If you are interested only in generic declarative services, you
+    <para>Thus you can view Spring AOP as either an enabling technology that
+    allows Spring to provide declarative transaction management without EJB;
+    or use the full power of the Spring AOP framework to implement custom
+    aspects.</para>
+
+    <remark>If you are interested only in generic declarative services or
+    other pre-packaged declarative middleware services such as pooling, you
     don&#39;t need to work directly with Spring AOP, and can skip most of this
-    chapter.</para>
+    chapter.</remark>
 
     <sect2 id="aop-introduction-defn">
       <title>AOP concepts</title>
 
-      <para>Let&#39;s begin by defining some central AOP concepts:</para>
+      <para>Let&#39;s begin by defining some central AOP concepts. These terms
+      are not Spring-specific. Unfortunately, AOP terminology is not
+      particularly intuitive; however, it would be still more confusing for
+      Spring to use its own terminology.</para>
 
       <itemizedlist>
         <listitem>
           <para><emphasis>Aspect</emphasis>: A modularization of a concern for
           which the implementation might otherwise cut across multiple
-          objects. Transaction management is a good example of a cross-cutting
+          objects. Transaction management is a good example of a crosscutting
           concern in J2EE applications. Aspects are implemented using Spring
           as Advisors or interceptors.</para>
         </listitem>
@@ -55,33 +72,45 @@
         </listitem>
 
         <listitem>
-          <para><emphasis>Advice</emphasis>: Action taken at a particular
-          joinpoint. Many AOP frameworks, including Spring, model advice as an
-          interceptor, maintaining a chain of interceptors &#34;around&#34;
-          the joinpoint.</para>
+          <para><emphasis>Advice</emphasis>: Action taken by the AOP framework
+          at a particular joinpoint. Different types of advice include
+          &#34;around,&#34; &#34;before&#34; and &#34;throws&#34; advice.
+          Advice types are discussed below. Many AOP frameworks, including
+          Spring, model an advice as an <emphasis>interceptor</emphasis>,
+          maintaining a chain of interceptors &#34;around&#34; the joinpoint.</para>
         </listitem>
 
         <listitem>
           <para><emphasis>Pointcut</emphasis>: A set of joinpoints specifying
-          when an advice should fire.</para>
+          when an advice should fire. An AOP framework must allow developers
+          to specify pointcuts: for example, using regular expressions.</para>
         </listitem>
 
         <listitem>
-          <para>Introduction: Adding methods or fields to an advised class.
-          Spring allows you to introduce new interfaces to any advised object.</para>
+          <para><emphasis>Introduction</emphasis>: Adding methods or fields to
+          an advised class. Spring allows you to introduce new interfaces to
+          any advised object. For example, you could use an introduction to
+          make any object implement an <literal>IsModified</literal>
+          interface, to simplify caching.</para>
         </listitem>
 
         <listitem>
           <para><emphasis>Target object</emphasis>: Object containing the
-          joinpoint.</para>
+          joinpoint. Also referred to as <emphasis>advised</emphasis> or
+          <emphasis>proxied</emphasis> object.</para>
         </listitem>
 
         <listitem>
-          <para><emphasis>AOP proxy</emphasis>: Advised object.</para>
+          <para><emphasis>AOP proxy</emphasis>: Object created by the AOP
+          framework, including advice. In Spring, an AOP proxy will be a JDK
+          dynamic proxy or a CGLIB proxy. </para>
         </listitem>
 
         <listitem>
-          <para><emphasis>Weaving</emphasis>: Assembling aspects</para>
+          <para><emphasis>Weaving</emphasis>: Assembling aspects to create an
+          advised object. Some technologies, such as AspectJ, perform weaving
+          at compile time. Spring, like other pure Java AOP frameworks,
+          performs weaving at runtime.</para>
         </listitem>
       </itemizedlist>
 
@@ -93,12 +122,15 @@
           joinpoint such as a method invocation. This is the most powerful
           kind of advice. Around advices will perform custom behaviour before
           and after the method invocation. They are responsible for choosing
-          whether to proceed to the method invocation, or replace their own
-          return value or throw their own exception.</para>
+          whether to proceed to the joinpoint or to shortcut executing by
+          returning their own return value or throwing an exception.</para>
         </listitem>
 
         <listitem>
-          <para><emphasis>Before advice</emphasis>:</para>
+          <para><emphasis>Before advice</emphasis>: Advice that executes
+          before a joinpoint, but which does not have the ability to prevent
+          execution flow proceeding to the joinpoint (unless it throws an
+          exception).</para>
         </listitem>
 
         <listitem>
@@ -112,32 +144,40 @@
         <listitem>
           <para><emphasis>After returning advice</emphasis>: Advice to be
           executed after a joinpoint completes normally: for example, if a
-          method returns without throwing an exception.</para>
+          method returns without throwing an exception. </para>
         </listitem>
       </itemizedlist>
 
-      <para>Around advice is the most important kind of advice. Most
-      interception-based AOP frameworks, such as Nanning Aspects and JBoss 4,
-      provide only around advice.</para>
+      <para>Around advice is the most general kind of advice. Most
+      interception-based AOP frameworks, such as Nanning Aspects and JBoss 4
+      (as or DR2), provide only around advice.</para>
 
       <para>As Spring, like AspectJ, provides a full range of advice types, we
       recommend that you use the least powerful advice type that can implement
-      your required behaviour. For example, if you really want only to update
-      a cache with the return value of a method, you are better off
-      implementing an after returning advice than an around advice (although
-      of course an around advice could accomplish the same thing). Using the
-      most specific advice type provides a simpler programming model with less
-      potential for errors. For example, you don&#39;t need to invoke the
-      proceed() method on the MethodInvocation used for around advice, and
-      hence can&#39;t fail to invoke it.</para>
+      the required behaviour. For example, if you need only to update a cache
+      with the return value of a method, you are better off implementing an
+      after returning advice than an around advice, although an around advice
+      can accomplish the same thing. Using the most specific advice type
+      provides a simpler programming model with less potential for errors. For
+      example, you don&#39;t need to invoke the <literal>proceed() </literal>method
+      on the MethodInvocation used for around advice, and hence can&#39;t fail
+      to invoke it.</para>
 
       <para>The pointcut concept is the key to AOP, distinguishing AOP from
-      older technologies offering interception. Pointcuts must be reusable
-      ***********</para>
+      older technologies offering interception. Pointcuts enable advice to be
+      targeted independently of the OO hierarchy. For example, an around
+      advice providing declarative transaction management can be applied to a
+      set of methods spanning multiple objects. Thus pointcuts provide the
+      structural element of AOP.</para>
     </sect2>
 
     <sect2 id="aop-introduction-spring-defn">
-      <title>Spring terminology</title>
+      <title>Spring AOP capabilities</title>
+
+      <para>Spring AOP is implemented in pure Java. There is no need for a
+      special compilation process. Spring AOP does not need to control the
+      class loader hierarchy, and is thus suitable for use in a J2EE web
+      container or application server.</para>
 
       <para>Spring currently supports interception of method invocations.
       Field interception is not implemented.</para>
@@ -146,13 +186,37 @@
       don&#39;t believe that it&#39;s wise in application development. If you
       require field interception, consider using AspectJ.</remark>
 
-      <para>Classes for pointcuts, Advisor etc.</para>
+      <para>Spring provides classes to represent pointcuts and different
+      advice types. Spring uses the term <emphasis>advisor</emphasis> for an
+      object representing an aspect, including both an advice and a pointcut
+      targeting it to specific joinpoints. </para>
 
-      <para>Spring implements the AOP Alliance interception interfaces. It is
-      possible to implement around advice as AOP Alliance MethodInterceptor so
-      that it will run in Spring or any other AOP Alliance compliant
-      implementation. Currently JAC implements the AOP Alliance interfaces,
-      and Nanning is likely to in early 2004.</para>
+      <para>Different advice and pointcut types are representing in an
+      interface hierarchy in the <literal>org.springframework.aop</literal>
+      package. The following UML class diagram shows the hierarchy:</para>
+
+      <figure>
+        <title>Spring Advisor hierarchy</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/aop-uml.gif" />
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>Note how each advisor type has a corresponding advice type:
+      ThrowsAdvisor and ThrowsAdvice; BeforeAdvisor and BeforeAdvice; and
+      InterceptionAroundAdvisor and Interceptor. We&#39;ll discuss advice
+      types in detail below.</para>
+
+      <para>Spring implements the <emphasis>AOP Alliance</emphasis>
+      interception interfaces (<link linkend="???">http://www.sourceforge.net/projects/aopalliance</link>).
+      Around advice must implement the AOP Alliance <literal>org.aopalliance.intercept.MethodInterceptor
+      </literal>interface. Implementations of this interface can run in Spring
+      or any other AOP Alliance compliant implementation. Currently JAC
+      implements the AOP Alliance interfaces, and Nanning is likely to in
+      early 2004.</para>
     </sect2>
 
     <sect2 id="aop-introduction-proxies">
@@ -164,9 +228,9 @@
 
       <para>Spring can also use CGLIB proxies. This is necessary to proxy
       classes, rather than interfaces. CGLIB is used by default if a business
-      object doesn&#39;t implement an interface. (As it&#39;s good practice to
+      object doesn&#39;t implement an interface. As it&#39;s good practice to
       <emphasis>program to interfaces rather than classes</emphasis>, business
-      objects normally will implement one or more business interfaces.)</para>
+      objects normally will implement one or more business interfaces.</para>
 
       <para>It is possible to force the use of CGLIB: we&#39;ll discuss this
       below, and explain why you&#39;d want to do this.</para>
@@ -215,38 +279,52 @@
     boolean matches(Method m, Class targetClass, Object[] args);
 }</programlisting>
 
-        <para>The matches(Method, Class) method is used to test whether this
-        pointcut ever match a given method on a target class. This evaluation
-        can be performed when an AOP proxy is created, to avoid the need for a
-        test on every method invocation. If the 2-argument matches method
-        returns true for a given method, and the isRuntime() method for the
-        MethodMatcher returns true, the 3-argument matches method will be
-        invoked on every method invocation. This enables a pointcut to look at
-        the arguments passed to the method invocation immediately before the
-        target advice is to execute.</para>
+        <para>The <literal>matches(Method, Class) </literal>method is used to
+        test whether this pointcut ever match a given method on a target
+        class. This evaluation can be performed when an AOP proxy is created,
+        to avoid the need for a test on every method invocation. If the
+        2-argument matches method returns true for a given method, and the
+        <literal>isRuntime() </literal>method for the MethodMatcher returns
+        true, the 3-argument matches method will be invoked on every method
+        invocation. This enables a pointcut to look at the arguments passed to
+        the method invocation immediately before the target advice is to
+        execute.</para>
 
-        <para>Most MethodMatchers are static, meaning that their isRuntime()
-        method returns false. In this case, the 3-argument matches method will
-        never be invoked. If possible, try to make pointcuts static. WHY
-        ******</para>
+        <para>Most MethodMatchers are static, meaning that their
+        <literal>isRuntime()</literal> method returns false. In this case, the
+        3-argument matches method will never be invoked. </para>
+
+        <remark>If possible, try to make pointcuts static, allowing the AOP
+        framework to cache the results of pointcut evaluation when an AOP
+        proxy is created.</remark>
       </sect3>
 
       <sect3>
         <title>Convenience pointcut implementations</title>
 
         <para>Spring provides several convenient pointcut implementations.
-        Some can be used out of the box, others are intended to be subclassed
+        Some can be used out of the box; others are intended to be subclassed
         in application-specific pointcuts.</para>
 
         <sect4>
           <title>Static pointcuts</title>
 
-          <para>Static pointcuts are sufficient</para>
+          <para>Static pointcuts are based on method and target class, and
+          cannot take account of method arguments.</para>
 
           <sect5>
             <title>Regexp</title>
 
-            <para>ererer</para>
+            <para>One obvious way to specific static pointcuts is regular
+            expressions. Several AOP frameworks besides Spring make this
+            possible. <literal>org.springframework.aop.support.RegexpMethodPointcut</literal>
+            is a generic regular expression pointcut, using Perl 5 regular
+            expression syntax. </para>
+
+            <para>**TODO EXAMPLE OF USING IT</para>
+
+            <remark> This class requires the Jakarta ORO regular expression
+            package.</remark>
           </sect5>
 
           <sect5>
@@ -280,14 +358,28 @@
           </sect5>
         </sect4>
       </sect3>
+
+      <sect3>
+        <title>Custom pointcuts</title>
+
+        <para>Because pointcuts in Spring are Java classes, rather than
+        language features (as in AspectJ) it&#39;s possible to declare custom
+        pointcuts, whether static or dynamic.</para>
+
+        <remark>Later versions of Spring may offer support for &#34;semantic
+        pointcuts&#34; as offered by JAC: for example, &#34;all methods that
+        change instance variables in the target object.&#34;</remark>
+      </sect3>
     </sect2>
 
     <sect2>
       <title>Advice lifecycles</title>
 
-      <para>Spring advices can be shared across all advised objects, or</para>
+      <para>Spring advices can be shared across all advised objects, or unique
+      to each advised object.</para>
 
-      <para>This corresponds to per-class or per-instance advice.</para>
+      <para>This corresponds to <emphasis>per-class</emphasis> or
+      <emphasis>per-instance</emphasis> advice.</para>
 
       <para>Per-class advice is used most often. It is appropriate for generic
       advice such as transaction advisors. These do not depend on the state of
@@ -308,7 +400,8 @@
       <sect3>
         <title>Interception around advice</title>
 
-        <para>The most fundamental advice type is interception around advice.</para>
+        <para>The most fundamental advice type in Spring is
+        <emphasis>interception around advice</emphasis>.</para>
 
         <para>Spring is compliant with the AOP Alliance interface for around
         advice using method interception. MethodInterceptors implementing
@@ -319,12 +412,14 @@
     Object invoke(MethodInvocation invocation) throws Throwable;
 }</programlisting>
 
-        <para>The MethodInvocation argument to the invoke() method exposes the
-        method being invoked; the target joinpoint; the arguments to the
-        method. The invoke() method should return the invocation&#39;s result:
-        the return value of the joinpoint.</para>
+        <para>The <emphasis>MethodInvocation</emphasis> argument to the
+        <emphasis>invoke()</emphasis> method exposes the method being invoked;
+        the target joinpoint; the arguments to the method. The i<emphasis>nvoke()</emphasis>
+        method should return the invocation&#39;s result: the return value of
+        the joinpoint.</para>
 
-        <para>A simple MethodInterceptor looks as follows:</para>
+        <para>A simple <emphasis>MethodInterceptor</emphasis> looks as
+        follows:</para>
 
         <programlisting>public class DebugInterceptor implements MethodInterceptor {
 
@@ -336,12 +431,13 @@
     }
 }</programlisting>
 
-        <para>Note the call to the MethodInvocation&#39;s proceed() method.
-        This proceeds down the interceptor chain towards the joinpoint. Most
-        interceptors will invoke this method, and return its return value.
-        However, a MethodInterceptor, like any around advice, can return a
-        different value or throw an exception rather than invoke the proceed
-        method. However, you don&#39;t want to do this without good reason!</para>
+        <para>Note the call to the MethodInvocation&#39;s
+        <emphasis>proceed() </emphasis>method. This proceeds down the
+        interceptor chain towards the joinpoint. Most interceptors will invoke
+        this method, and return its return value. However, a
+        MethodInterceptor, like any around advice, can return a different
+        value or throw an exception rather than invoke the proceed method.
+        However, you don&#39;t want to do this without good reason!</para>
 
         <remark>MethodInterceptors offer interoperability with other AOP
         Alliance-compliant AOP implementations. The other advice types
@@ -373,9 +469,11 @@
 
         <para>Note the the return type is void. Before advice can insert
         custom behaviour before the joinpoint executes, but cannot change the
-        return value. If it throws an exception ********</para>
+        return value. If it throws an exception, this will abort further
+        execution of the interceptor chain.</para>
 
-        <para>An example of a before advice in Spring:</para>
+        <para>An example of a before advice in Spring, which counts all
+        methods that return normally:</para>
 
         <programlisting>public class CountingBeforeAdvice implements MethodBeforeAdvice {
     private int count;
@@ -387,8 +485,6 @@
         return count; 
     }
 }</programlisting>
-
-        <para>er</para>
 
         <remark>Before advice can be used with any pointcut.</remark>
       </sect3>
@@ -408,7 +504,10 @@
         <para>Only the last argument is required. Thus there can be either one
         or four arguments, dependent on whether the advice method is
         interested in the method and arguments. The following are examples of
-        throws advices:</para>
+        throws advices.</para>
+
+        <para>This advice will be invoked if a <literal>RemoteException</literal>
+        is thrown (including subclasses):</para>
 
         <programlisting>public  class RemoteThrowsAdvice implements ThrowsAdvice {
 
@@ -417,7 +516,10 @@
     }
 }</programlisting>
 
-        <para>er</para>
+        <para>The following advice is invoked if a <emphasis>ServletException</emphasis>
+        is thrown. Unlike the above advice, it declares 4 arguments, so that
+        it has access to the invoked method, method arguments and target
+        object:</para>
 
         <programlisting>public static class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
 
@@ -426,7 +528,10 @@
     }
 }</programlisting>
 
-        <para>er</para>
+        <para>The final example illustrates how these two methods could be
+        used in a single class, which handles both <literal>RemoteException</literal>
+        and <literal>ServletException</literal>. Any number of throws advice
+        methods can be combined in a single class.</para>
 
         <programlisting>public static class CombinedThrowsAdvice implements ThrowsAdvice {
 
@@ -439,15 +544,11 @@
     }
 }</programlisting>
 
-        <para>er</para>
-
         <remark>Throws advice can be used with any pointcut.</remark>
       </sect3>
 
       <sect3>
         <title>After Returning advice</title>
-
-        <para>The after returning advice type looks as</para>
 
         <para>An after returning advice in Spring must implement the
         <emphasis>org.springframework.aop.MethodAfterReturningAdvice</emphasis>
@@ -457,6 +558,9 @@
 
     void afterReturning(Object returnValue, Method m, Object[] args, Object target) throws Throwable;
 }</programlisting>
+
+        <para>An after returning advice has access to the return value (which
+        it cannot modify), invoked method, methods arguments and target.</para>
 
         <para>The following after returning advice counts all successful
         method invocations, that have not thrown exceptions:</para>
@@ -473,7 +577,9 @@
     }
 }</programlisting>
 
-        <para>This advice doesn&#39;t change execution path. But its invoke</para>
+        <para>This advice doesn&#39;t change the execution path. If it throws
+        an exception, this will be thrown up the interceptor chain instead of
+        the return value.</para>
 
         <remark>After returning advice can be used with any pointcut.</remark>
       </sect3>
@@ -529,31 +635,32 @@
       Advisors typically incorporate both an advice and a pointcut.</para>
 
       <para>For each advice type listed above, there is a corresponding
-      advisor type. These are, respectively:</para>
+      advisor type in the <literal>org.springframework.aop</literal> package.
+      These are, respectively:</para>
 
       <itemizedlist>
         <listitem>
-          <para>org.springframework.aop.InterceptionAroundAdvisor</para>
+          <para>InterceptionAroundAdvisor</para>
         </listitem>
 
         <listitem>
-          <para>org.springframework.aop.BeforeAdvisor</para>
+          <para>BeforeAdvisor</para>
         </listitem>
 
         <listitem>
-          <para>org.springframework.aop.ThrowsAdvisor</para>
+          <para>ThrowsAdvisor</para>
         </listitem>
 
         <listitem>
-          <para>org.springframework.aop.AfterReturningAdvisor</para>
+          <para>AfterReturningAdvisor</para>
         </listitem>
       </itemizedlist>
 
       <para>There is a special advice type to support introductions,
-      org.springframework.aop.InterceptionIntroductionAdvisor. This</para>
+      <literal>InterceptionIntroductionAdvisor</literal>. This</para>
 
       <para>It is possible to mix advisor and advice types in Spring in the
-      one AOP proxy.</para>
+      one AOP proxy. WHAT DOES THIS MEAN?</para>
     </sect2>
   </sect1>
 
