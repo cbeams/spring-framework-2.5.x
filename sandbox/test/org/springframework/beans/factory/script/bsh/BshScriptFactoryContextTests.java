@@ -16,51 +16,19 @@
 
 package org.springframework.beans.factory.script.bsh;
 
-import junit.framework.TestCase;
-
-import org.springframework.beans.factory.dynamic.DynamicObject;
-import org.springframework.beans.factory.script.DynamicScript;
-import org.springframework.beans.factory.script.Hello;
-import org.springframework.beans.factory.script.Script;
+import org.springframework.beans.factory.script.AbstractScriptFactoryTests;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * 
  * @author Rod Johnson
  */
-public class BshScriptFactoryContextTests extends TestCase {
+public class BshScriptFactoryContextTests extends AbstractScriptFactoryTests {
 	
 	private static final String SIMPLE_XML = "/org/springframework/beans/factory/script/bsh/simple.xml";
 	
-//	public void testBadGroovySyntax() {
-//		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
-//		try {
-//			ac.getBean("bad");
-//			fail();
-//		}
-//		catch (BeanCreationException ex) {
-//			// Ok
-//			//ex.printStackTrace();
-//			//assertTrue(ex.getCause() instanceof CompilationException);
-//		}
-//	}
-	
-	public void testScriptDefinitionFromFile() {
-		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
-		Hello hello = (Hello) ac.getBean("simple");
-		assertEquals("hello world", hello.sayHello());
-		assertTrue(hello instanceof DynamicObject);
-		assertTrue(hello instanceof Script);
-		System.err.println(((DynamicScript) hello).getResourceString());
-	}
-	
-	public void testInlineScriptDefinition() {
-		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
-		Hello hello = (Hello) ac.getBean("inline");
-		assertEquals("hello world inline", hello.sayHello());
-		assertTrue(hello instanceof DynamicObject);
-		assertTrue(hello instanceof Script);
-		System.err.println(((DynamicScript) hello).getResourceString());
+	protected void setUp() {
+		applicationContext = new ClassPathXmlApplicationContext(SIMPLE_XML);
 	}
 	
 //	public void testStringProperty() {

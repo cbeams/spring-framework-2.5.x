@@ -17,11 +17,10 @@
 package org.springframework.beans.factory.script.groovy;
 
 import groovy.lang.GroovyObject;
-import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.dynamic.DynamicObject;
+import org.springframework.beans.factory.script.AbstractScriptFactoryTests;
 import org.springframework.beans.factory.script.DynamicScript;
 import org.springframework.beans.factory.script.Hello;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -30,48 +29,20 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * 
  * @author Rod Johnson
  */
-public class GroovyScriptFactoryContextTests extends TestCase {
+public class GroovyScriptFactoryContextTests extends AbstractScriptFactoryTests {
 	
 	private static final String SIMPLE_XML = "/org/springframework/beans/factory/script/groovy/simple.xml";
 	
-	private ClassPathXmlApplicationContext ac;
-	
 	protected void setUp() {
-		ac = new ClassPathXmlApplicationContext(SIMPLE_XML);
-	}
-	
-	protected void tearDown() {
-		ac.close();	
-	}
-	
-	public void testBadGroovySyntax() {
-		
-		try {
-			ac.getBean("bad");
-			fail();
-		}
-		catch (BeanCreationException ex) {
-			// Ok
-			//ex.printStackTrace();
-			//assertTrue(ex.getCause() instanceof CompilationException);
-		}
-	}
-	
-	public void testSimpleSingleton() {
-		
-		Hello hello = (Hello) ac.getBean("simpleSingleton");
-		assertEquals("hello world", hello.sayHello());
-		
-		Hello hello2 = (Hello) ac.getBean("simpleSingleton");
-		assertSame(hello, hello2);
+		applicationContext = new ClassPathXmlApplicationContext(SIMPLE_XML);
 	}
 	
 	public void testPrototypesAreDistinct() {
 		
-		Hello hello1 = (Hello) ac.getBean("propertyPrototype");
+		Hello hello1 = (Hello) applicationContext.getBean("propertyPrototype");
 		assertEquals("propertyPrototype", hello1.sayHello());
 		
-		Hello hello2 = (Hello) ac.getBean("propertyPrototype");
+		Hello hello2 = (Hello) applicationContext.getBean("propertyPrototype");
 		assertEquals("propertyPrototype", hello1.sayHello());
 		assertNotSame(hello1, hello2);
 		
@@ -86,7 +57,7 @@ public class GroovyScriptFactoryContextTests extends TestCase {
 	}
 	
 	public void testStringPropertySingleton() {
-		Hello hello = (Hello) ac.getBean("propertySingleton");
+		Hello hello = (Hello) applicationContext.getBean("propertySingleton");
 		Advised a = (Advised) hello;
 		System.err.println(a.toProxyConfigString());
 		assertEquals("hello world property", hello.sayHello());
@@ -94,16 +65,16 @@ public class GroovyScriptFactoryContextTests extends TestCase {
 	}
 	
 	public void testCanCastToGroovyObject() {		
-		GroovyObject groovyObj = (GroovyObject) ac.getBean("propertySingleton");
-		GroovyObject groovyObj2 = (GroovyObject) ac.getBean("propertyPrototype");
+		GroovyObject groovyObj = (GroovyObject) applicationContext.getBean("propertySingleton");
+		GroovyObject groovyObj2 = (GroovyObject) applicationContext.getBean("propertyPrototype");
 	}
 	
 	public void testDependencyOnReloadedGroovyBean() throws Throwable {
 		
-		Hello delegatingHello = (Hello) ac.getBean("dependsOnProperty");
+		Hello delegatingHello = (Hello) applicationContext.getBean("dependsOnProperty");
 		assertEquals("hello world property", delegatingHello.sayHello());
 		
-		DynamicObject script = (DynamicObject) ac.getBean("propertySingleton");
+		DynamicObject script = (DynamicObject) applicationContext.getBean("propertySingleton");
 		
 		//System.out.println("AOP CONFIG=" + ((Advised) script).toProxyConfigString());
 		

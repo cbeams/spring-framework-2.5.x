@@ -3,7 +3,7 @@
 
 <beans>
 	 
-	<bean id="simple"
+	<bean id="simpleSingleton"
 		factory-bean="scriptFactory"
 		factory-method="create"
 	>
@@ -20,6 +20,17 @@
 				String sayHello() {
 				   return "hello world inline";
 				}
+			</value></constructor-arg>
+		<constructor-arg index="1"><value>org.springframework.beans.factory.script.Hello</value></constructor-arg>
+	</bean>
+	
+	<bean id="bad"
+		factory-bean="scriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0">
+			<value>inline:
+				complete and utter rubbish
 			</value></constructor-arg>
 		<constructor-arg index="1"><value>org.springframework.beans.factory.script.Hello</value></constructor-arg>
 	</bean>

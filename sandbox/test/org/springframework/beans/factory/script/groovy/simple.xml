@@ -19,6 +19,21 @@
 		<constructor-arg index="0"><value>org/springframework/beans/factory/script/groovy/SimpleHello.groovy</value></constructor-arg>
 	</bean>
 	
+	<bean id="inline"
+		factory-bean="groovyScriptFactory"
+		factory-method="create"
+	>
+		<constructor-arg index="0">
+			<value>inline:
+				class Test implements org.springframework.beans.factory.script.Hello {
+
+				String sayHello() {
+					"hello world inline"
+				}
+			} 
+			</value></constructor-arg>
+	</bean>
+	
 	<!--
 		Must be a singleton or the DynamicScriptInterceptor
 		fails when getting the bean from the factory
