@@ -1,11 +1,16 @@
 package org.springframework.orm.jdo.support;
 
+import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.jdo.JdoTemplate;
+import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
 
 /**
  * Convenient super class for JDO data access objects.
@@ -71,6 +76,45 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	 * @throws Exception if initialization fails
 	 */
 	protected void initDao() throws Exception {
+	}
+
+	/**
+	 * Get a JDO PersistenceManager, either from the current transaction or
+	 * a new one. The latter is only allowed if the "allowCreate" setting
+	 * of this bean's JdoTemplate is true.
+	 * @return the JDO PersistenceManager
+	 * @throws DataAccessResourceFailureException if the Session couldn't be created
+	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
+	 */
+	protected final PersistenceManager getPersistenceManager() {
+		return getPersistenceManager(getJdoTemplate().isAllowCreate());
+	}
+
+	/**
+	 * Get a JDO PersistenceManager, either from the current transaction or
+	 * a new one. The latter is only allowed if "allowCreate" is true.
+	 * @param allowCreate if a new PersistenceManager should be created if no thread-bound found
+	 * @return the JDO PersistenceManager
+	 * @throws DataAccessResourceFailureException if the Session couldn't be created
+	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
+	 */
+	protected final PersistenceManager getPersistenceManager(boolean allowCreate)
+	    throws DataAccessResourceFailureException {
+		return PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), allowCreate);
+	}
+
+	/**
+	 * Close the given JDO PersistenceManager if necessary, created via this bean's
+	 * PersistenceManagerFactory, if it isn't bound to the thread.
+	 * @param pm PersistenceManager to close
+	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be closed
+	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#closePersistenceManagerIfNecessary
+	 */
+	protected final void closeSessionIfNecessary(PersistenceManager pm)
+	    throws CleanupFailureDataAccessException {
+		PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
 	}
 
 }
