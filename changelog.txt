@@ -7,12 +7,18 @@ Changes in version 1.1.2 (15.11.2004)
 -------------------------------------
 
 Package org.springframework.aop
+* reworked ProxyFactoryBean and AbstractPrototypeBasedTargetSource to leverage BeanFactory's "getType" method
 * reworked DebugInterceptor to log to Commons Logging at debug level rather than to the console
 
 Package org.springframework.beans
+* added "getType(name)" method to BeanFactory interface, checking the type of object that "getBean" would return
+* added "getBeansOfType(type)" convenience method to ListableBeanFactory interface, without explicit filters
+* moved "FACTORY_BEAN_PREFIX" constant from AbstractBeanFactory superclass up to BeanFactory interface
+* refactored AbstractBeanFactory's "getBean" implementation to do more aggressive upfront type checking
 * moved "destroyBean" implementation from AbstractAutowireCapableBeanFactory up to AbstractBeanFactory
 * refined internal structure and visibilities of AbstractBeanFactory and AbstractAutowireCapableBeanFactory
 * fixed PropertiesBeanDefinitionReader to allow bean names that contain dots
+* DefaultXmlBeanDefinitionParser allows unnamed child bean definitions too (using class or parent as bean name)
 
 Package org.springframework.web
 * fixed DispatcherServlet's HandlerExceptionResolver fallback in case of "detectAllHandlerExceptionResolvers"=false
