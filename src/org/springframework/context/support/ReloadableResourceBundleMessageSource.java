@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,9 +38,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * MessageSource that accesses the ResourceBundles with the specified basenames.
- * This class uses java.util.Properties instances as its internal data structure
- * for messages, loading them via a PropertiesPersister strategy: The default
- * strategy can load properties files with a specific encoding.
+ * This class uses <code>java.util.Properties</code> instances as its internal
+ * data structure for messages, loading them via a PropertiesPersister strategy:
+ * The default strategy can load properties files with a specific encoding.
  *
  * <p>In contrast to ResourceBundleMessageSource, this class supports reloading
  * of properties files through the "cacheSeconds" setting, and also through
@@ -318,7 +319,14 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 			List filenames = new ArrayList(7);
 			filenames.addAll(calculateFilenamesForLocale(basename, locale));
 			if (this.fallbackToSystemLocale && !locale.equals(Locale.getDefault())) {
-				filenames.addAll(calculateFilenamesForLocale(basename, Locale.getDefault()));
+				List fallbackFilenames = calculateFilenamesForLocale(basename, Locale.getDefault());
+				for (Iterator it = fallbackFilenames.iterator(); it.hasNext();) {
+					String fallbackFilename = (String) it.next();
+					if (!filenames.contains(fallbackFilename)) {
+						// entry for fallback locale that isn't alread in filenames list
+						filenames.add(fallbackFilename);
+					}
+				}
 			}
 			filenames.add(basename);
 			if (localeMap != null) {
