@@ -58,7 +58,6 @@ public class HessianServiceExporter extends RemoteExporter implements Controller
 			// try Hessian 3.x (with service interface argument)
 			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
 			this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getService(), getServiceInterface()});
-			logger.info("Created Hessian 2.x skeleton");
 		}
 		catch (NoSuchMethodException ex) {
 			// fall back to Hessian 2.x (without service interface argument)
