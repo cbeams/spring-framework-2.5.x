@@ -188,13 +188,13 @@ public class ModelAndView {
 
 	/**
 	 * Add all entries contained in the provided map to the model.
-	 * @param modelMap A map of modelName->modelObject pairs
+	 * @param modelMap a map of modelName->modelObject pairs
 	 * @return this ModelAndView, convenient to allow usages like
-	 * return modelAndView.addAllObject(myModelMap);
+	 * return modelAndView.addAllObjects(myModelMap);
 	 */
 	public ModelAndView addAllObjects(Map modelMap) {
-	    this.model.putAll(modelMap);
-	    return this;
+		this.model.putAll(modelMap);
+		return this;
 	}
 	
 
