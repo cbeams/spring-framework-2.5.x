@@ -4,12 +4,15 @@ SPRING FRAMEWORK CHANGELOG
 Changes in version 1.0 M1 (xx.8.2003)
 -------------------------------------
 * changed package structure from com.interface21 to org.springframework
-* DynamicMethodPointcut now takes method, args and AttributeRegistry arguments instead of MethodInvocation to allow for future optimization
+* DynamicMethodPointcut now takes method, args and AttributeRegistry arguments instead of MethodInvocation
 * introduced DisposableBean interface
 * introduced "destroy-method" attribute for XML bean definitions
 * SingleConnectionDataSource implements DisposableBean
 * LocalSessionFactoryBean implements DisposableBean
 * support for returning Types.ARRAY from stored procedure
+* removed support for non-transactional execution from AbstractPlatformTransactionManager
+* added support for transaction timeouts via JDBC statement timeouts to DataSourceTransactionManager
+* added support for transaction timeouts via Hibernate query timeouts to HibernateTransactionManager
 * fixed RMI registry detection in RmiServiceExporter
 * fixed custom editor usage for rejected field values
 * revised exception behavior of RequestContext and BindErrorsTag
