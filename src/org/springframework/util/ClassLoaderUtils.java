@@ -1,6 +1,7 @@
 package org.springframework.util;
 
 import java.io.InputStream;
+import java.util.StringTokenizer;
 
 /**
  * Utility class for class loading, and for diagnostic purposes
