@@ -135,6 +135,28 @@ public abstract class StringUtils {
 
 
 	/**
+	 * Test if the given String starts with the specified prefix,
+	 * ignoring upper/lower case.
+	 * @param str the String to check
+	 * @param prefix the prefix to look for
+	 * @see java.lang.String#startsWith
+	 */
+	public static boolean startsWithIgnoreCase(String str, String prefix) {
+		if (str == null || prefix == null) {
+			return false;
+		}
+		if (str.startsWith(prefix)) {
+			return true;
+		}
+		if (str.length() < prefix.length()) {
+			return false;
+		}
+		String lcStr = str.substring(0, prefix.length()).toLowerCase();
+		String lcPrefix = prefix.toLowerCase();
+		return lcStr.equals(lcPrefix);
+	}
+
+	/**
 	 * Count the occurrences of the substring in string s.
 	 * @param str string to search in. Return 0 if this is null.
 	 * @param sub string to search for. Return 0 if this is null.
