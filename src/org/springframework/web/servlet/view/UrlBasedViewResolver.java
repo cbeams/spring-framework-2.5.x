@@ -131,6 +131,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 		}
 	}
 
+	/**
+	 * Method creating the view, possibly overriden by subclasses. Remember that
+	 * this method does not fully initialize the view (for example,
+	 * ApplicationContextAware-methods haven't been called yet), clients should only
+	 * be using {@link AbstractCachingViewResolver#resolveViewName(String, Locale)}, which
+	 * does fully initialize the view objects found.
+	 */
 	protected View loadView(String viewName, Locale locale) {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(this.viewClass);
 		view.setBeanName(viewName);
