@@ -13,37 +13,35 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.springframework.util.enums.support;
 
-package org.springframework.enums.support;
-
-import org.springframework.enums.AbstractCodedEnum;
 import org.springframework.util.Assert;
 
 /**
  * @author Keith Donald
  */
-public class GenericLabeledCodedEnum extends AbstractCodedEnum {
+public class GenericEnum extends AbstractEnum {
 
 	private Comparable code;
 
 	private String type;
 
-	protected GenericLabeledCodedEnum() {
+	protected GenericEnum() {
 	}
 
-	public GenericLabeledCodedEnum(String type, int code, String label) {
+	public GenericEnum(String type, int code, String label) {
 		super(label);
 		setShortCode((short) code);
 		setType(type);
 	}
 
-	public GenericLabeledCodedEnum(String type, char code, String label) {
+	public GenericEnum(String type, char code, String label) {
 		super(label);
 		setLetterCode(code);
 		setType(type);
 	}
 
-	public GenericLabeledCodedEnum(String type, String code, String label) {
+	public GenericEnum(String type, String code, String label) {
 		super(label);
 		setStringCode(code);
 		setType(type);
@@ -102,5 +100,4 @@ public class GenericLabeledCodedEnum extends AbstractCodedEnum {
 	public String getType() {
 		return type;
 	}
-
 }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enums.support;
+package org.springframework.util.enums.support;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -21,34 +21,34 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.enums.CodedEnum;
 import org.springframework.orm.hibernate.HibernateTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.closure.support.Block;
+import org.springframework.util.enums.Enum;
 
 /**
  * A enum resolver that loads enums using the <code>Hibernate</code> data access apis.
  * @author Keith Donald
  */
-public class HibernateCodedEnumResolver extends AbstractCodedEnumResolver {
+public class HibernateEnumResolver extends AbstractEnumResolver {
 
 	private HibernateTemplate hibernateTemplate;
 
-	public HibernateCodedEnumResolver(HibernateTemplate template) {
+	public HibernateEnumResolver(HibernateTemplate template) {
 		super(false);
 		Assert.notNull(template, "The hibernate template is required");
 		this.hibernateTemplate = template;
 	}
 
-	public CodedEnum getEnum(String type, Comparable code, Locale locale) {
+	public Enum getEnum(String type, Comparable code, Locale locale) {
 		try {
 			Class clazz = ClassUtils.forName(type);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loading coded enum persistent implementation class '" + clazz.getName() + "' with id '"
 						+ code + "'");
 			}
-			return (CodedEnum)hibernateTemplate.load(clazz, (Serializable)code);
+			return (Enum)hibernateTemplate.load(clazz, (Serializable)code);
 		}
 		catch (ClassNotFoundException e) {
 			IllegalArgumentException iae = new IllegalArgumentException(
@@ -84,7 +84,7 @@ public class HibernateCodedEnumResolver extends AbstractCodedEnumResolver {
 		final Map map = new HashMap(all.size());
 		new Block() {
 			protected void handle(Object o) {
-				CodedEnum ce = (CodedEnum)o;
+				Enum ce = (Enum)o;
 				map.put(ce.getCode(), ce);
 			}
 		}.forEach(all);

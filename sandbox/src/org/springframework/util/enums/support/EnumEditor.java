@@ -13,26 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enums;
+package org.springframework.util.enums.support;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.util.Locale;
 
-import org.springframework.enums.support.StaticCodedEnumResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.enums.Enum;
+import org.springframework.util.enums.EnumResolver;
 
 /**
  * Property Editor converts the string form of a CodedEnum into a CodedEnum
  * instance using a CodedEnumResolver.
  * @author Keith Donald
  */
-public class CodedEnumEditor extends PropertyEditorSupport {
+public class EnumEditor extends PropertyEditorSupport {
 
 	private Locale locale = Locale.getDefault();
 
-	private CodedEnumResolver enumResolver = StaticCodedEnumResolver.instance();
+	private EnumResolver enumResolver = StaticEnumResolver.instance();
 
 	private boolean allowsEmpty = true;
 
@@ -40,19 +41,19 @@ public class CodedEnumEditor extends PropertyEditorSupport {
 
 	private PropertyEditor codeConverter;
 
-	public CodedEnumEditor() {
+	public EnumEditor() {
 	}
 
-	public CodedEnumEditor(Class type) {
+	public EnumEditor(Class type) {
 		setEnumClass(type);
 	}
 
-	public CodedEnumEditor(Class type, CodedEnumResolver enumResolver) {
+	public EnumEditor(Class type, EnumResolver enumResolver) {
 		setEnumClass(type);
 		setEnumResolver(enumResolver);
 	}
 
-	public CodedEnumEditor(Class type, CodedEnumResolver enumResolver, PropertyEditor codeConverter) {
+	public EnumEditor(Class type, EnumResolver enumResolver, PropertyEditor codeConverter) {
 		setEnumClass(type);
 		setEnumResolver(enumResolver);
 		setCodeConverter(codeConverter);
@@ -67,7 +68,7 @@ public class CodedEnumEditor extends PropertyEditorSupport {
 	 * 
 	 * @param resolver the coded enum resolver
 	 */
-	public void setEnumResolver(CodedEnumResolver resolver) {
+	public void setEnumResolver(EnumResolver resolver) {
 		Assert.notNull(resolver, "The enum resolver is required");
 		this.enumResolver = resolver;
 	}
@@ -111,13 +112,13 @@ public class CodedEnumEditor extends PropertyEditorSupport {
 		}
 		else {
 			type = this.enumClass.getName();
-			if (ShortCodedEnum.class.isAssignableFrom(this.enumClass)) {
+			if (ShortEnum.class.isAssignableFrom(this.enumClass)) {
 				code = doShortConversion(encodedCode);
 			}
-			else if (LetterCodedEnum.class.isAssignableFrom(this.enumClass)) {
+			else if (LetterEnum.class.isAssignableFrom(this.enumClass)) {
 				code = doLetterConversion(encodedCode);
 			}
-			else if (StringCodedEnum.class.isAssignableFrom(this.enumClass)) {
+			else if (StringEnum.class.isAssignableFrom(this.enumClass)) {
 				code = encodedCode;
 			}
 			else {
@@ -130,7 +131,7 @@ public class CodedEnumEditor extends PropertyEditorSupport {
 				}
 			}
 		}
-		CodedEnum ce = this.enumResolver.getEnum(type, code, getLocale());
+		Enum ce = this.enumResolver.getEnum(type, code, getLocale());
 		if (!allowsEmpty) {
 			Assert.notNull(ce, "The encoded code '" + encodedCode + "' did not map to a valid enum instance for type "
 					+ type);
@@ -185,7 +186,7 @@ public class CodedEnumEditor extends PropertyEditorSupport {
 	}
 
 	public String getAsText() {
-		CodedEnum ce = (CodedEnum)getValue();
+		Enum ce = (Enum)getValue();
 		return (ce != null ? ce.getLabel() : "");
 	}
 

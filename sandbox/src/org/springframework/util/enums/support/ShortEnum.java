@@ -13,42 +13,38 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
-package org.springframework.enums;
-
-import org.springframework.util.Assert;
+package org.springframework.util.enums.support;
 
 /**
- * Implementation of CodedEnum which uses a String as the code type.
+ * Implementation of CodedEnum which uses Short as the code type.
  * <p>
  * Should almsot always be subclassed, but for some simple situations it may be
  * used directly. Note that you will not be able to use unique type based
  * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.
  * @author Keith Donald
  */
-public class StringCodedEnum extends AbstractCodedEnum {
+public class ShortEnum extends AbstractEnum {
 
-	private String code;
+	private Short code;
 
-	protected StringCodedEnum() {
+	protected ShortEnum() {
 		super();
 	}
 
-	protected StringCodedEnum(String code) {
+	protected ShortEnum(int code) {
 		this(code, null);
 	}
 
-	protected StringCodedEnum(String code, String label) {
+	protected ShortEnum(int code, String label) {
 		super(label);
-		Assert.hasText(code, "The string code is required");
-		this.code = code;
+		this.code = new Short((short)code);
 	}
 
 	public Comparable getCode() {
 		return code;
 	}
 
-	public String getStringCode() {
-		return (String)getCode();
+	public short getShortCode() {
+		return ((Short)getCode()).shortValue();
 	}
 }

@@ -14,11 +14,13 @@
  * the License.
  */
 
-package org.springframework.enums;
+package org.springframework.util.enums;
 
 import junit.framework.TestCase;
 
-import org.springframework.enums.support.StaticCodedEnumResolver;
+import org.springframework.util.enums.Enum;
+import org.springframework.util.enums.support.ShortEnum;
+import org.springframework.util.enums.support.StaticEnumResolver;
 
 /**
  * @author Rod Johnson
@@ -26,14 +28,14 @@ import org.springframework.enums.support.StaticCodedEnumResolver;
 public class CodedEnumTests extends TestCase {
 
 	public void testForCodeFound() {
-		Dog golden = (Dog) StaticCodedEnumResolver.instance().getEnum(Dog.class, new Short((short) 11));
-		Dog borderCollie = (Dog) StaticCodedEnumResolver.instance().getEnum(Dog.class, new Short((short) 13));
+		Dog golden = (Dog) StaticEnumResolver.instance().getEnum(Dog.class, new Short((short) 11));
+		Dog borderCollie = (Dog) StaticEnumResolver.instance().getEnum(Dog.class, new Short((short) 13));
 		assertSame(golden, Dog.GOLDEN_RETRIEVER);
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
 	}
 
 	public void testDoesNotMatchWrongClass() {
-		CodedEnum none = StaticCodedEnumResolver.instance().getEnum(Dog.class, new Short((short) 1));
+		Enum none = StaticEnumResolver.instance().getEnum(Dog.class, new Short((short) 1));
 		assertEquals(null, none);
 	}
 
@@ -43,7 +45,7 @@ public class CodedEnumTests extends TestCase {
 	}
 
 
-	public static class Other extends ShortCodedEnum {
+	public static class Other extends ShortEnum {
 
 		public static Other THING1 = new Other(1, "Thing1");
 
@@ -55,7 +57,7 @@ public class CodedEnumTests extends TestCase {
 	}
 
 
-	public static class Dog extends ShortCodedEnum {
+	public static class Dog extends ShortEnum {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
 			// this shouldn't be neccessary

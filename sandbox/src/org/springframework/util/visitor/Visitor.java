@@ -17,11 +17,10 @@ package org.springframework.util.visitor;
 
 /**
  * Super 'tag' interface to be implemented by objects that act as visitors.
- * <p><p>
+ * <p>
  * This is a tag interface and as a result does not define any public
  * methods.  It is here to provide some degree of type safety and description
  * to Vistable dispatchers and for dispatch by reflection.
- * 
  * @author  Keith Donald
  * @see Visitable
  * @see ReflectiveVisitorSupport

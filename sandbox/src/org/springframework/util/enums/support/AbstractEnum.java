@@ -13,27 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
-package org.springframework.enums;
+package org.springframework.util.enums.support;
 
 import java.io.Serializable;
 
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.enums.support.StaticCodedEnumResolver;
 import org.springframework.util.Assert;
+import org.springframework.util.enums.Enum;
 
 /**
  * Abstract base superclass for CodedEnum implementations.
  * @author Keith Donald
  */
-public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResolvable, Serializable, Comparable {
+public abstract class AbstractEnum implements Enum, MessageSourceResolvable, Serializable, Comparable {
 
 	private String label;
 
-	protected AbstractCodedEnum() {
+	protected AbstractEnum() {
 	}
 
-	protected AbstractCodedEnum(String label) {
+	protected AbstractEnum(String label) {
 		setLabel(label);
 	}
 
@@ -52,15 +51,15 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
 	}
 
 	public boolean equals(Object o) {
-		if (!(o instanceof AbstractCodedEnum)) {
+		if (!(o instanceof AbstractEnum)) {
 			return false;
 		}
-		AbstractCodedEnum e = (AbstractCodedEnum)o;
+		AbstractEnum e = (AbstractEnum)o;
 		return this.getCode().equals(e.getCode()) && this.getType().equals(e.getType());
 	}
 
 	public int compareTo(Object o) {
-		AbstractCodedEnum e = (AbstractCodedEnum)o;
+		AbstractEnum e = (AbstractEnum)o;
 		Assert.isTrue(getType().equals(e.getType()), "You may only compare enumerations of the same type.");
 		return getCode().compareTo(e.getCode());
 	}
@@ -95,8 +94,8 @@ public abstract class AbstractCodedEnum implements CodedEnum, MessageSourceResol
 		}
 	}
 
-	protected static StaticCodedEnumResolver getStaticEnumResolver() {
-		return StaticCodedEnumResolver.instance();
+	protected StaticEnumResolver getStaticEnumResolver() {
+		return StaticEnumResolver.instance();
 	}
 
 	public String toString() {

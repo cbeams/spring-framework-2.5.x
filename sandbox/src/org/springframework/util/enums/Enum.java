@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enums;
+package org.springframework.util.enums;
 
 import java.util.Comparator;
 
@@ -40,15 +40,15 @@ import org.springframework.util.comparator.NullSafeComparator;
  * <code>com.mycompany.util.FileFormat.CSV</code>.
  * @author Keith Donald
  */
-public interface CodedEnum extends MessageSourceResolvable, Comparable {
+public interface Enum extends MessageSourceResolvable, Comparable {
 
 	/**
 	 * Comparator that sorts enumerations by <code>CODE_ORDER</code>
 	 */
 	public static final Comparator CODE_ORDER = new Comparator() {
 		public int compare(Object o1, Object o2) {
-			Object c1 = ((CodedEnum)o1).getCode();
-			Object c2 = ((CodedEnum)o2).getCode();
+			Object c1 = ((Enum)o1).getCode();
+			Object c2 = ((Enum)o2).getCode();
 			return ComparableComparator.instance().compare(c1, c2);
 		}
 	};
@@ -58,8 +58,8 @@ public interface CodedEnum extends MessageSourceResolvable, Comparable {
 	 */
 	public static final Comparator LABEL_ORDER = new Comparator() {
 		public int compare(Object o1, Object o2) {
-			CodedEnum e1 = (CodedEnum)o1;
-			CodedEnum e2 = (CodedEnum)o2;
+			Enum e1 = (Enum)o1;
+			Enum e2 = (Enum)o2;
 			Comparator c = new NullSafeComparator(String.CASE_INSENSITIVE_ORDER);
 			return c.compare(e1.getLabel(), e2.getLabel());
 		}

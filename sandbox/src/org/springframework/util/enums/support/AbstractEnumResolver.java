@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enums.support;
+package org.springframework.util.enums.support;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -25,27 +25,27 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.enums.CodedEnum;
-import org.springframework.enums.CodedEnumResolver;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
+import org.springframework.util.enums.Enum;
+import org.springframework.util.enums.EnumResolver;
 
 /**
  * Abstract base class for localized coded enum resolvers.
  * @author Keith Donald
  */
-public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
+public abstract class AbstractEnumResolver implements EnumResolver {
 	protected transient final Log logger = LogFactory.getLog(getClass());
 
 	private Map localeCache;
 
 	private boolean caching = true;
 
-	protected AbstractCodedEnumResolver() {
+	protected AbstractEnumResolver() {
 	}
 
-	protected AbstractCodedEnumResolver(boolean caching) {
+	protected AbstractEnumResolver(boolean caching) {
 		setCaching(caching);
 	}
 
@@ -84,10 +84,10 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
 		return Collections.unmodifiableMap(typeEnums);
 	}
 
-	public CodedEnum getEnum(String type, Comparable code, Locale locale) {
+	public Enum getEnum(String type, Comparable code, Locale locale) {
 		Assert.notNull(code, "No enum code specified");
 		Map typeEnums = getEnumsAsMap(type, locale);
-		CodedEnum codedEnum = (CodedEnum) typeEnums.get(code);
+		Enum codedEnum = (Enum) typeEnums.get(code);
 		if (codedEnum == null) {
 			logger.info("No enum found of type '" + type + "' with '" + code.getClass() + " code " + code
 					+ "', returning null.");
@@ -95,8 +95,8 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
 		return codedEnum;
 	}
 
-	public CodedEnum getRequiredEnum(String name, Comparable code, Object object) throws ObjectRetrievalFailureException {
-		CodedEnum codedEnum = getEnum(name, code, null);
+	public Enum getRequiredEnum(String name, Comparable code, Object object) throws ObjectRetrievalFailureException {
+		Enum codedEnum = getEnum(name, code, null);
 		if (codedEnum == null) {
 			throw new ObjectRetrievalFailureException(name, code);
 		}
@@ -120,7 +120,7 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
 		return m;
 	}
 
-	protected void put(Locale locale, CodedEnum codedEnum) {
+	protected void put(Locale locale, Enum codedEnum) {
 		Map localizedTypes = getLocaleEnums(locale);
 		Map typeEnums = (Map) localizedTypes.get(codedEnum.getType());
 		if (typeEnums == null) {
@@ -133,7 +133,7 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
 		typeEnums.put(codedEnum.getCode(), codedEnum);
 	}
 
-	protected void add(CodedEnum codedEnum) {
+	protected void add(Enum codedEnum) {
 		put(null, codedEnum);
 	}
 

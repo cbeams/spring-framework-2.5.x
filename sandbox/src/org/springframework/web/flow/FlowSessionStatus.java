@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import org.springframework.enums.ShortCodedEnum;
+import org.springframework.util.enums.support.ShortEnum;
 
 /**
  * Enumeration of possible flow session statuses.
@@ -25,7 +25,7 @@ import org.springframework.enums.ShortCodedEnum;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class FlowSessionStatus extends ShortCodedEnum {
+public class FlowSessionStatus extends ShortEnum {
 
 	/**
 	 * Initial status of a flow session; the session has been created but not

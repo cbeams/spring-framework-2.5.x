@@ -30,7 +30,6 @@ import org.springframework.util.CachingMapTemplate;
  * <p>
  * To use, call <code>invokeVisit</code>, passing a Visitor object and the
  * data argument to accept (double-dispatch.) For example:
- * 
  * <pre>
  *       public String ToStringStyler.styleValue(Object value) {
  *           reflectiveVistorSupport.invokeVisit(this, value)
@@ -85,7 +84,7 @@ public final class ReflectiveVisitorSupport {
             for (Class clazz = visitorClass; clazz != null; clazz = clazz
                     .getSuperclass()) {
                 try {
-                    return clazz.getDeclaredMethod(VISIT_NULL, null);
+                    return clazz.getDeclaredMethod(VISIT_NULL, (Class[])null);
                 }
                 catch (NoSuchMethodException e) {
                 }
@@ -255,5 +254,4 @@ public final class ReflectiveVisitorSupport {
     protected void callAccept(Visitable visitable, Visitor visitor) {
         visitable.accept(visitor);
     }
-
 }

@@ -87,7 +87,7 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 	protected void addDefaultConverters() {
 		addConverter(new TextToClassConverter());
 		addConverter(new TextToNumberConverter(formatterLocator));
-		addConverter(new TextToCodedEnumConverter());
+		addConverter(new TextToEnumConverter());
 		addConverter(new TextToMappingConverter(this));
 	}
 

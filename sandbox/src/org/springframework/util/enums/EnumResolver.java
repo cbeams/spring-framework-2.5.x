@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enums;
+package org.springframework.util.enums;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -25,7 +25,7 @@ import java.util.Map;
  * use.
  * @author Keith Donald
  */
-public interface CodedEnumResolver {
+public interface EnumResolver {
 
 	/**
 	 * Returns a set of enumerations of a particular type. Each element in the
@@ -53,5 +53,5 @@ public interface CodedEnumResolver {
 	 * @param locale the locale
 	 * @return The enum, or <code>null</code> if not found.
 	 */
-	public CodedEnum getEnum(String type, Comparable code, Locale locale);
+	public Enum getEnum(String type, Comparable code, Locale locale);
 }

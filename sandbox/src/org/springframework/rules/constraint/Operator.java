@@ -15,12 +15,12 @@
  */
 package org.springframework.rules.constraint;
 
-import org.springframework.enums.StringCodedEnum;
+import org.springframework.util.enums.support.StringEnum;
 
 /**
  * @author Keith Donald
  */
-public abstract class Operator extends StringCodedEnum {
+public abstract class Operator extends StringEnum {
 
 	protected Operator(String code, String symbol) {
 		super(code, symbol);

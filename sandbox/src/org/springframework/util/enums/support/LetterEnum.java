@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.enums;
+package org.springframework.util.enums.support;
 
 import org.springframework.util.Assert;
 
@@ -27,18 +27,18 @@ import org.springframework.util.Assert;
  * functionality like CodedEnumResolver.getEnumsAsCollection() in this case.
  * @author Keith Donald
  */
-public class LetterCodedEnum extends AbstractCodedEnum {
+public class LetterEnum extends AbstractEnum {
 	private Character code;
 
-	protected LetterCodedEnum() {
+	protected LetterEnum() {
 		super();
 	}
 
-	protected LetterCodedEnum(char code) {
+	protected LetterEnum(char code) {
 		this(code, null);
 	}
 
-	protected LetterCodedEnum(char code, String label) {
+	protected LetterEnum(char code, String label) {
 		super(label);
 		Assert.isTrue(Character.isLetter(code), "The code " + code + " is invalid; it must be a letter.");
 	}

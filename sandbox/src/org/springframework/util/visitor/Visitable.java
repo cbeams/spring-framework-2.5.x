@@ -17,7 +17,6 @@ package org.springframework.util.visitor;
 
 /**
  * The super vistable interface of the visitor design pattern.
- * 
  * @author Keith Donald
  */
 public interface Visitable {

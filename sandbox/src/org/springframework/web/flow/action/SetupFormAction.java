@@ -21,8 +21,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.enums.ShortCodedEnum;
 import org.springframework.util.StringUtils;
+import org.springframework.util.enums.support.ShortEnum;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.flow.MutableFlowModel;
@@ -123,7 +123,7 @@ public class SetupFormAction extends BindAndValidateAction {
 	 * Helper class used as placeholder data in the <code>exposeViewPlaceholders()</code>
 	 * method.
 	 */
-	private static final class NotMappedEnum extends ShortCodedEnum {
+	private static final class NotMappedEnum extends ShortEnum {
 		public NotMappedEnum(int code) {
 			super(code, NOT_MAPPED_PLACEHOLDER_VALUE);
 		}
