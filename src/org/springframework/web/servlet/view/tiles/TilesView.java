@@ -26,7 +26,6 @@ import org.apache.struts.tiles.Controller;
 import org.apache.struts.tiles.DefinitionsFactory;
 import org.apache.struts.tiles.TilesUtilImpl;
 
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.view.InternalResourceView;
 
@@ -81,8 +80,7 @@ public class TilesView extends InternalResourceView {
 		super.initApplicationContext();
 
 		// get definitions factory
-		this.definitionsFactory = (DefinitionsFactory)
-		    getWebApplicationContext().getServletContext().getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
+		this.definitionsFactory = (DefinitionsFactory) getServletContext().getAttribute(TilesUtilImpl.DEFINITIONS_FACTORY);
 		if (this.definitionsFactory == null) {
 			throw new ApplicationContextException("Tiles definitions factory not found: TilesConfigurer not defined?");
 		}
@@ -165,11 +163,7 @@ public class TilesView extends InternalResourceView {
 	 */
 	protected Controller getController(ComponentDefinition definition, HttpServletRequest request)
 			throws Exception {
-		Controller controller = definition.getOrCreateController();
-		if (controller instanceof ApplicationContextAware) {
-			((ApplicationContextAware) controller).setApplicationContext(getApplicationContext());
-		}
-		return controller;
+		return definition.getOrCreateController();
 	}
 
 	/**
