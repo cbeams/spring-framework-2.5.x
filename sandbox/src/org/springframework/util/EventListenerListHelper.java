@@ -55,7 +55,8 @@ import org.springframework.util.closure.ProcessTemplate;
  * }
  * </pre>
  * 
- * @author oliverh
+ * @author Oliver Hutchison
+ * @author Keith Donald
  */
 public class EventListenerListHelper implements Serializable, ProcessTemplate {
 
@@ -254,7 +255,10 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 	 * Adds <code>listener</code> to the list of registerd listeners. If
 	 * listener is already registered this method will do nothing.
 	 */
-	public void add(Object listener) {
+	public boolean add(Object listener) {
+		if (listener == null) {
+			return false;
+		}
 		checkListenerType(listener);
 		synchronized (this) {
 			if (listeners == EMPTY_OBJECT_ARRAY) {
@@ -264,7 +268,7 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 				int listenersLength = listeners.length;
 				for (int i = 0; i < listenersLength; i++) {
 					if (listeners[i] == listener) {
-						return;
+						return false;
 					}
 				}
 				Object[] tmp = new Object[listenersLength + 1];
@@ -273,15 +277,23 @@ public class EventListenerListHelper implements Serializable, ProcessTemplate {
 				listeners = tmp;
 			}
 		}
+		return true;
 	}
 
 	/**
 	 * @param listeners
 	 */
-	public void addAll(Object[] listeners) {
-		for (int i = 0; i < listeners.length; i++) {
-			add(listeners[i]);
+	public boolean addAll(Object[] listeners) {
+		if (listeners == null) {
+			return false;
 		}
+		boolean changed = false;
+		for (int i = 0; i < listeners.length; i++) {
+			if (add(listeners[i])) {
+				changed = true;
+			}
+		}
+		return changed;
 	}
 
 	/**
