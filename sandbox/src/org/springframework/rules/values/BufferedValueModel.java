@@ -107,7 +107,7 @@ public class BufferedValueModel extends AbstractValueModel implements
                 logger.debug("[Committing buffered value '" + get()
                         + "' to wrapped value model " + wrappedModel + "]");
             }
-            wrappedModel.set(bufferedValue);
+            doBufferedValueCommit(bufferedValue);
             this.bufferedValue = NO_VALUE;
         }
         else {
@@ -115,6 +115,10 @@ public class BufferedValueModel extends AbstractValueModel implements
                 logger.debug("[No buffered edit to commit; nothing to do...]");
             }
         }
+    }
+    
+    protected void doBufferedValueCommit(Object bufferedValue) {
+        wrappedModel.set(bufferedValue);
     }
 
     public ValueModel getWrappedModel() {
