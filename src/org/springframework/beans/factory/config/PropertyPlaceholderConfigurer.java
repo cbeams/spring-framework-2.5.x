@@ -356,7 +356,11 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 		StringBuffer buf = new StringBuffer(strVal);
 
-		int startIndex = buf.toString().indexOf(this.placeholderPrefix);
+		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
+		// method to retain JDK 1.3 compatibility. The slight loss in performance
+		// is not really relevant, as this code will typically just run on startup.
+
+		int startIndex = strVal.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
 			int endIndex = buf.toString().indexOf(
 			    this.placeholderSuffix, startIndex + this.placeholderPrefix.length());

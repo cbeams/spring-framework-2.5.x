@@ -52,6 +52,11 @@ public class AbstractPathResolvingPropertyEditor extends PropertyEditorSupport {
 	 */
 	protected String resolvePath(String path) {
 		StringBuffer buf = new StringBuffer(path);
+
+		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
+		// method to retain JDK 1.3 compatibility. The slight loss in performance
+		// is not really relevant, as this code will typically just run on startup.
+
 		int startIndex = path.indexOf(PLACEHOLDER_PREFIX);
 		while (startIndex != -1) {
 			int endIndex = buf.toString().indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
@@ -72,6 +77,7 @@ public class AbstractPathResolvingPropertyEditor extends PropertyEditorSupport {
 				startIndex = -1;
 			}
 		}
+
 		return buf.toString();
 	}
 
