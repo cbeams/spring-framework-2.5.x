@@ -22,11 +22,11 @@ import java.sql.Types;
 
 import org.easymock.MockControl;
 
-import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.SqlParameter;
 
-public class SqlUpdateTestSuite extends JdbcTestCase {
+public class SqlUpdateTestSuite extends AbstractJdbcTests {
 
 	private static final String UPDATE =
 		"update seat_status set booking_id = null";
@@ -42,13 +42,6 @@ public class SqlUpdateTestSuite extends JdbcTestCase {
 	private MockControl ctrlPreparedStatement;
 	private PreparedStatement mockPreparedStatement;
 
-	public SqlUpdateTestSuite(String name) {
-		super(name);
-	}
-
-	/**
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -58,9 +51,6 @@ public class SqlUpdateTestSuite extends JdbcTestCase {
 			(PreparedStatement) ctrlPreparedStatement.getMock();
 	}
 
-	/**
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	protected void tearDown() throws Exception {
 		super.tearDown();
 

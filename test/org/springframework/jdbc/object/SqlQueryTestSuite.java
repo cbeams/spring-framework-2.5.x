@@ -31,11 +31,11 @@ import javax.sql.DataSource;
 import org.easymock.MockControl;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 
-public class SqlQueryTestSuite extends JdbcTestCase {
+public class SqlQueryTestSuite extends AbstractJdbcTests {
 
 	private static final String SELECT_ID = "select id from custmr";
 	private static final String SELECT_ID_WHERE =

@@ -22,12 +22,12 @@ import java.sql.Statement;
 import org.easymock.MockControl;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.AbstractJdbcTests;
 
 /**
  * @author Rod Johnson
  */
-public class JdbcBeanDefinitionReaderTests extends JdbcTestCase {
+public class JdbcBeanDefinitionReaderTests extends AbstractJdbcTests {
 
 	public void testValid() throws Exception {
 		String sql =

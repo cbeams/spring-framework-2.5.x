@@ -40,7 +40,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.UncategorizedDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -51,9 +51,9 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 /** 
  * Mock object based tests for JdbcTemplate.
  * @author Rod Johnson
- * @version $Id: JdbcTemplateTestSuite.java,v 1.24 2004-04-22 07:41:28 jhoeller Exp $
+ * @version $Id: JdbcTemplateTestSuite.java,v 1.25 2004-05-21 19:25:40 jhoeller Exp $
  */
-public class JdbcTemplateTestSuite extends JdbcTestCase {
+public class JdbcTemplateTestSuite extends AbstractJdbcTests {
 
 	public void testBeanProperties() throws Exception {
 		replay();

@@ -30,12 +30,12 @@ import java.sql.Types;
 import org.easymock.MockControl;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.JdbcTestCase;
+import org.springframework.jdbc.AbstractJdbcTests;
 
 /**
  * @author tcook
  */
-public class SqlFunctionTestSuite extends JdbcTestCase {
+public class SqlFunctionTestSuite extends AbstractJdbcTests {
 
 	private static final String FUNCTION = "select count(id) from mytable";
 	private static final String FUNCTION_INT =
@@ -75,7 +75,7 @@ public class SqlFunctionTestSuite extends JdbcTestCase {
 	}
 
 	/**
-	 * @see org.springframework.jdbc.JdbcTestCase#replay()
+	 * @see org.springframework.jdbc.AbstractJdbcTests#replay()
 	 */
 	protected void replay() {
 		super.replay();

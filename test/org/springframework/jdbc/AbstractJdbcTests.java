@@ -1,5 +1,5 @@
 /*
- * JdbcTestCase.java
+ * AbstractJdbcTests.java
  *
  * Copyright (C) 2002 by Interprise Software.  All rights reserved.
  */
@@ -26,16 +26,13 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 
 /**
- * @task enter type comments
- * 
  * @author <a href="mailto:tcook@interprisesoftware.com">Trevor D. Cook</a>
- * @version $Id: JdbcTestCase.java,v 1.4 2004-03-18 03:01:15 trisberg Exp $
+ * @version $Id: AbstractJdbcTests.java,v 1.1 2004-05-21 19:25:40 jhoeller Exp $
  */
-public abstract class JdbcTestCase extends TestCase {
+public abstract class AbstractJdbcTests extends TestCase {
 
 	protected MockControl ctrlDataSource;
 	protected DataSource mockDataSource;
@@ -49,23 +46,6 @@ public abstract class JdbcTestCase extends TestCase {
 	 */
 	private boolean shouldVerify;
 
-	/**
-	 * 
-	 */
-	public JdbcTestCase() {
-		super();
-	}
-
-	/**
-	 * @param name
-	 */
-	public JdbcTestCase(String name) {
-		super(name);
-	}
-
-	/**
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	protected void setUp() throws Exception {
 		this.shouldVerify = false;
 		super.setUp();
@@ -83,13 +63,10 @@ public abstract class JdbcTestCase extends TestCase {
 		ctrlDataSource.setDefaultReturnValue(mockConnection);
 	}
 
-	/**
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	protected void tearDown() throws Exception {
 		super.tearDown();
 
-		// We shouldn't verify unless the user called replay()
+		// we shouldn't verify unless the user called replay()
 		if (shouldVerify()) {
 			ctrlDataSource.verify();
 			ctrlConnection.verify();
