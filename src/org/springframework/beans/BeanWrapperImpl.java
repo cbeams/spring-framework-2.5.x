@@ -71,7 +71,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.38 2004-05-18 08:02:02 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.39 2004-05-21 19:37:28 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -269,7 +269,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 			catch (BeansException ex) {
 				// probably an indexed or mapped property
 				// we need to retrieve the value to determine the type
-				requiredType = getPropertyValue(propertyName).getClass();
+				Object value = getPropertyValue(propertyName);
+				if (value == null) {
+					return null;
+				}
+				requiredType = value.getClass();
 			}
 		}
 		// no property-specific editor -> check type-specific editor
