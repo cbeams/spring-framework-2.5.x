@@ -25,7 +25,7 @@ import org.springframework.metadata.Attributes;
  * overrides a class transaction attribute.
  * @author Rod Johnson
  * @see org.springframework.metadata.Attributes
- * @version $Id: AttributesTransactionAttributeSource.java,v 1.2 2003-12-17 09:25:59 johnsonr Exp $
+ * @version $Id: AttributesTransactionAttributeSource.java,v 1.3 2003-12-17 09:54:51 johnsonr Exp $
  */
 public class AttributesTransactionAttributeSource implements TransactionAttributeSource {
 	
@@ -43,22 +43,39 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 	 * Return the transaction attribute for this method invocation.
 	 * Defaults to the class's transaction attribute if no method
 	 * attribute is found
-	 * @param mi MethodInvocation 
-	 * @return null if the method is non-transactional
+	 * @param method method for the current invocation. Can't be null
+	 * @param targetClass target class for this invocation. May be null.
+	 * @return TransactionAttribute for this method, or null if the method is non-transactional
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeSource#getTransactionAttribute(org.aopalliance.intercept.MethodInvocation)
 	 */
 	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
 		
+		// TODO cache return value
+		
 		// The method may be on an interface, but we need attributes from the target class.
 		// The AopUtils class provides a convenience method for this. If the target class
 		// is null, the method will be unchanged.
-		method = AopUtils.getMostSpecificMethod(method, targetClass);
+		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 		
-		Collection atts = this.attributes.getAttributes(method);
-		TransactionAttribute txAtt = findTransactionAttribute(atts);
+		// First try is the method in the target class
+		TransactionAttribute txAtt = findTransactionAttribute(attributes.getAttributes(specificMethod));
 		if (txAtt != null)
 			return txAtt;
-		return findTransactionAttribute(this.attributes.getAttributes(method.getDeclaringClass()));
+		
+		// Second try is the transaction attribute on the target class
+		txAtt = findTransactionAttribute(attributes.getAttributes(specificMethod.getDeclaringClass()));
+		if (txAtt != null)
+			return txAtt;
+		
+		if (specificMethod != method ) {
+			// Fallback is to look at the original method
+			txAtt = findTransactionAttribute(attributes.getAttributes(method));
+			if (txAtt != null)
+				return txAtt;
+			// Last fallback is the class of the original method
+			return findTransactionAttribute(attributes.getAttributes(method.getDeclaringClass()));
+		}
+		return null;
 	}
 
 	/**
@@ -87,9 +104,6 @@ public class AttributesTransactionAttributeSource implements TransactionAttribut
 			}
 		}
 
-		// Look for rollback rule attributes if the transaction attribute can understand them
-		// TODO should we cache this, rather than do it each time we find
-		// a rule based attribute?
 		if (txAttribute instanceof RuleBasedTransactionAttribute) {
 			RuleBasedTransactionAttribute rbta = (RuleBasedTransactionAttribute) txAttribute;
 			// We really want value: bit of a hack
