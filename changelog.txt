@@ -1,13 +1,17 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.159 2004-06-05 16:02:15 jhoeller Exp $
+$Id: changelog.txt,v 1.160 2004-06-07 09:37:18 jhoeller Exp $
 
 
 Changes in version 1.0.3 (27.6.2004)
 ------------------------------------
 
+Package org.springframework.aop
+* fixed debug log statements to avoid invocation of "toString" method on target (not supported e.g. by Axis proxy)
+
 Package org.springframework.beans
 * fixed PropertiesEditor's support for converting a Map to Properties
+* fixed MethodInvokingFactoryBean's singleton initialization to properly allow for circular reference detection
 
 Package org.springframework.jdbc
 * refactored Prepared/CallableStatement.setXxxx method invocations into JdbcUtils.setParameters utility method
@@ -23,6 +27,7 @@ Package org.springframework.orm
 
 Package org.springframework.web
 * added IntrospectorCleanupListener to web.util package, for cleaning up JavaBeans Introspector leaks on shutdown
+* added optional "sessionId" and "username" fields to RequestHandledEvent, for easier session and user tracking
 
 
 Changes in version 1.0.2 (3.6.2004)
