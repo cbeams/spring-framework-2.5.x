@@ -52,7 +52,26 @@
 				<prop key="setAge">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
+		<property name="methodPointcut">
+			<ref bean="txnInvocationCounterPointcut"/>
+		</property>
+		<property name="preInterceptors">
+			<list>
+				<ref bean="preInvocationCounterInterceptor"/>
+			</list>
+		</property>
+		<property name="postInterceptors">
+			<list>
+				<ref bean="postInvocationCounterInterceptor"/>
+			</list>
+		</property>
 	</bean>
+
+	<bean id="txnInvocationCounterPointcut" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterPointcut"/>
+
+	<bean id="preInvocationCounterInterceptor" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterInterceptor"/>
+
+	<bean id="postInvocationCounterInterceptor" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterInterceptor"/>
 
 </beans>
 	
