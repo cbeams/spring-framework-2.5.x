@@ -23,6 +23,7 @@ import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.action.EventParameterMapperAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
+import org.springframework.web.flow.config.AutowireMode;
 import org.springframework.web.flow.config.FlowBuilderException;
 
 /**
@@ -62,30 +63,34 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
 	public void buildStates() throws FlowBuilderException {
 		// view search criteria
-		addViewState(CRITERIA, onSubmitBindAndValidate(CRITERIA));
+		addViewState("viewCriteria", "person.Search.criteria.view", on(submit(), "bindAndValidate"));
 
-		// bind and validate search criteria
-		addBindAndValidateState(CRITERIA, new Transition[] { onErrorView(CRITERIA), onSuccess("executeQuery") });
+		// bind and validate search criteria 
+		// TODO - investigate multi action builder helpers
+		// e.g what i'd like to do here is map this state to a method on a multi action bean...
+		addActionState("bindAndValidate", action("person.Search.formAction"), new Transition[] {
+				on(error(), "viewCriteria"), on(success(), "executeQuery") });
 
 		// execute query
-		addActionState("executeQuery", executeAction(ExecuteQueryAction.class), new Transition[] {
-				onErrorView(CRITERIA), onSuccessView(RESULTS) });
+		addActionState("executeQuery", action(ExecuteQueryAction.class, AutowireMode.BY_TYPE), new Transition[] {
+				on(error(), "viewCriteria"), on(success(), "viewResults") });
 
 		// view results
-		String setId = set(ID);
-		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setId) });
+		addViewState("viewResults", "person.Search.results.view", new Transition[] { on("newSearch", "viewCriteria"),
+				on(select(), "setId") });
 
 		// set a user id in the model (selected from result list)
-		EventParameterMapperAction setAction =
-			new EventParameterMapperAction(new Mapping(ID, getConversionExecutor(Long.class)));
+		EventParameterMapperAction setAction = new EventParameterMapperAction(new Mapping(ID,
+				getConversionExecutor(Long.class)));
 		setAction.setTargetScope(ScopeType.FLOW);
-		addActionState(setId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
+		addActionState("setId", setAction, new Transition[] { on(error(), "error"), on(success(), "person.Detail") });
 
 		// view details for selected user id
-		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useAttributeMapper(ID), new Transition[] {
-				onFinish(view(RESULTS)), onError("error") });
+		addSubFlowState("person.Detail", flow("person.Detail", PersonDetailFlowBuilder.class),
+				attributeMapper("id.attributeMapper"), new Transition[] { on(finish(), "executeQuery"),
+						on(error(), "error") });
 
 		// end - an error occured
-		addErrorEndState("error.view");
+		addEndState(error(), "error.view");
 	}
 }

@@ -55,27 +55,27 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 	public void buildStates() throws FlowBuilderException {
 		// get the person given a userid as input
-		addGetState(createAction(GetPersonAction.class, AutowireMode.BY_TYPE));
+		addActionState("getPerson", action(GetPersonAction.class, AutowireMode.BY_TYPE), on(success(), "viewDetails"));
 
-		String colleagueId = "colleagueId";
-		String setColleagueId = set(colleagueId);
-		// view the person
-		addViewState(new Transition[] { onBackFinish(), onSelect(setColleagueId) });
+		// view the person details
+		addViewState("viewDetails", "person.Details.view", new Transition[] { on(back(), "finish"),
+				on(select(), "setCollegueId") });
 
 		// set the selected colleague (chosen from the person's colleague list)
-		EventParameterMapperAction setAction =
-			new EventParameterMapperAction(new Mapping("id", colleagueId, getConversionExecutor(Long.class)));
+		EventParameterMapperAction setAction = new EventParameterMapperAction(new Mapping("id", "collegueId",
+				getConversionExecutor(Long.class)));
 		setAction.setTargetScope(ScopeType.FLOW);
-		addActionState(setColleagueId, setAction, onSuccess(PERSON_DETAIL));
+		addActionState("setCollegueId", setAction, on(success(), "person.Detail"));
 
-		// spawn subflow to view selected colleague details
-		addSubFlowState(PERSON_DETAIL, PersonDetailFlowBuilder.class, useAttributeMapper(colleagueId),
-				new Transition[] { onFinishGet(), onErrorEnd() });
+		// view details for selected collegue
+		addSubFlowState("person.Detail", flow("person.Detail", PersonDetailFlowBuilder.class),
+				attributeMapper("collegueId.attributeMapper"), new Transition[] { on(finish(), "getPerson"),
+						on(error(), "error") });
 
 		// end
-		addFinishEndState();
+		addEndState("finish");
 
 		// end error
-		addErrorEndState();
+		addEndState("error");
 	}
 }
