@@ -23,7 +23,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
 /**
  * JDO-specific subclass of UncategorizedDataAccessException,
  * for JDO system errors that do not match any concrete
- * org.springframework.dao exceptions.
+ * <code>org.springframework.dao</code> exceptions.
  * @author Juergen Hoeller
  * @since 03.06.2003
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException
