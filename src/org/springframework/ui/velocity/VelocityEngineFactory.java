@@ -171,13 +171,13 @@ public class VelocityEngineFactory {
 											"] to File: using SpringResourceLoader");
 				}
 				velocityEngine.setProperty(VelocityEngine.RESOURCE_LOADER,
-																				SpringResourceLoader.NAME);
+																	 SpringResourceLoader.NAME);
 				velocityEngine.setProperty(SpringResourceLoader.SPRING_RESOURCE_LOADER_CLASS,
-																				SpringResourceLoader.class.getName());
+																	 SpringResourceLoader.class.getName());
 				velocityEngine.setApplicationAttribute(SpringResourceLoader.SPRING_RESOURCE_LOADER,
-																										this.resourceLoader);
+																							 this.resourceLoader);
 				velocityEngine.setApplicationAttribute(SpringResourceLoader.SPRING_RESOURCE_LOADER_PATH,
-																										this.resourceLoaderPath);
+																							 this.resourceLoaderPath);
 			}
 		}
 
@@ -186,9 +186,20 @@ public class VelocityEngineFactory {
 			velocityEngine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
 		}
 
+		postProcessVelocityEngine(velocityEngine);
+
 		try {
 			// perform initialization
 			velocityEngine.init();
+		}
+		catch (IOException ex) {
+			throw ex;
+		}
+		catch (VelocityException ex) {
+			throw ex;
+		}
+		catch (RuntimeException ex) {
+			throw ex;
 		}
 		catch (Exception ex) {
 			logger.error("Why does VelocityEngine throw a generic checked exception, after all?", ex);
@@ -201,9 +212,29 @@ public class VelocityEngineFactory {
 	/**
 	 * Return a new VelocityEngine. Subclasses can override this for
 	 * custom initialization, or for using a mock object for testing.
+	 * Called by createVelocityEngine.
+	 * @return the VelocityEngine instance
+	 * @throws IOException if a config file wasn't found
+	 * @throws VelocityException on Velocity initialization failure
+	 * @see #createVelocityEngine
 	 */
-	protected VelocityEngine newVelocityEngine() {
+	protected VelocityEngine newVelocityEngine() throws IOException, VelocityException {
 		return new VelocityEngine();
+	}
+
+	/**
+	 * To be implemented by subclasses that want to to perform custom
+	 * post-processing of the VelocityEngine after this FactoryBean
+	 * performed its default configuration (but before VelocityEngine.init).
+	 * Called by createVelocityEngine.
+	 * @param velocityEngine the current VelocityEngine
+	 * @throws IOException if a config file wasn't found
+	 * @throws VelocityException on Velocity initialization failure
+	 * @see #createVelocityEngine
+	 * @see org.apache.velocity.app.VelocityEngine#init
+	 */
+	protected void postProcessVelocityEngine(VelocityEngine velocityEngine)
+			throws IOException, VelocityException {
 	}
 
 }
