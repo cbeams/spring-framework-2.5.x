@@ -29,7 +29,7 @@ import org.springframework.context.config.ConfigurableApplicationContext;
 /**
  * Tests for static application context.
  * @author Rod Johnson
- * @version $Id: StaticApplicationContextTestSuite.java,v 1.20 2003-12-09 16:46:11 johnsonr Exp $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.21 2003-12-10 08:25:40 johnsonr Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 
@@ -144,6 +144,11 @@ public class StaticApplicationContextTestSuite extends AbstractApplicationContex
 			}
 			return methodInvocation.proceed();
 		}
+	}
+	
+	
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(StaticApplicationContextTestSuite.class);
 	}
 
 }
