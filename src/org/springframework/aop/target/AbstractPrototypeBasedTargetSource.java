@@ -29,6 +29,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * Base class for dynamic TargetSources that can create new prototype bean
@@ -61,6 +62,7 @@ public abstract class AbstractPrototypeBasedTargetSource
 	/** Class of the target */
 	private Class targetClass;
 
+
 	/**
 	 * Set the name of the target bean in the factory. This bean should be a
 	 * prototype, or the same instance will always be obtained from the
@@ -85,12 +87,39 @@ public abstract class AbstractPrototypeBasedTargetSource
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.owningBeanFactory = beanFactory;
+
+		// check whether the target bean is defined as prototype
 		if (this.owningBeanFactory.isSingleton(this.targetBeanName)) {
 			throw new BeanDefinitionStoreException(
-				"Cannot use PrototypeTargetSource against a Singleton bean; instances would not be independent");
+				"Cannot use PrototypeTargetSource against a singleton bean: instances would not be independent");
 		}
-		logger.info("Getting bean with name '" + this.targetBeanName + "' to find class");
-		this.targetClass = this.owningBeanFactory.getBean(this.targetBeanName).getClass();
+
+		// determine type of the target bean
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.targetClass =
+			    ((ConfigurableBeanFactory) beanFactory).getBeanDefinition(this.targetBeanName).getBeanClass();
+		}
+		else {
+			if (logger.isInfoEnabled()) {
+				logger.info("Getting bean with name '" + this.targetBeanName + "' to find class");
+			}
+			this.targetClass = this.owningBeanFactory.getBean(this.targetBeanName).getClass();
+		}
+	}
+
+	public void afterPropertiesSet() {
+		if (this.targetBeanName == null) {
+			throw new IllegalStateException("targetBeanName is required");
+		}
+	}
+
+
+	public Class getTargetClass() {
+		return this.targetClass;
+	}
+
+	public boolean isStatic() {
+		return false;
 	}
 
 	/**
@@ -103,32 +132,18 @@ public abstract class AbstractPrototypeBasedTargetSource
 		return this.owningBeanFactory.getBean(this.targetBeanName);
 	}
 
-	public Class getTargetClass() {
-		return this.targetClass;
-	}
 
-	public boolean isStatic() {
-		return false;
-	}
-
-	public void afterPropertiesSet() {
-		if (this.targetBeanName == null) {
-			throw new IllegalStateException("targetBeanName is required");
-		}
-	}
-	
 	/**
-	 * Replaces this object with a SingletonTargetSource
-	 * on serialization.
-	 * Protected as otherwise it won't be invoked for
-	 * subclasses. (The writeReplace() method must be visible to
-	 * the class being serialized.)
-	 * <br>With this implementation of this method,
-	 * there is no need to mark non-serializable fields
-	 * in this class or subclasses as transient. 
+	 * Replaces this object with a SingletonTargetSource on serialization.
+	 * Protected as otherwise it won't be invoked for subclasses.
+	 * (The writeReplace() method must be visible to the class being serialized.)
+	 * <p>With this implementation of this method, there is no need to mark
+	 * non-serializable fields in this class or subclasses as transient.
 	 */
 	protected Object writeReplace() throws ObjectStreamException {
-		logger.info("Disconnecting TargetSource " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Disconnecting TargetSource [" + this + "]");
+		}
 		try {
 			TargetSource disconnectedTargetSource =  new SingletonTargetSource(getTarget());
 			return disconnectedTargetSource;
