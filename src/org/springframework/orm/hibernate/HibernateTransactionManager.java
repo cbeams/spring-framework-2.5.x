@@ -11,6 +11,8 @@ import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.JDBCException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
+import net.sf.hibernate.connection.ConnectionProvider;
+import net.sf.hibernate.engine.SessionFactoryImplementor;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
@@ -50,9 +52,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * code, this instance needs to be aware of the DataSource (see setDataSource).
  * The given DataSource should obviously match the one used by the given
  * SessionFactory. To achieve this, configure both to the same JNDI DataSource,
- * or preferably create the SessionFactory by supplying the same DataSource to
- * LocalSessionFactoryBean. In the latter case, the Hibernate settings do not
- * have to define a connection provider at all, avoiding duplicated configuration.
+ * or preferably create the SessionFactory with LocalSessionFactoryBean and
+ * a local DataSource (which will be auto-detected by this transaction manager).
+ * In the latter case, the Hibernate settings do not have to define a connection
+ * provider at all, avoiding duplicated configuration.
  *
  * <p>JTA respectively JtaTransactionManager is necessary for accessing multiple
  * transactional resources. The DataSource that Hibernate uses needs to be JTA-enabled
@@ -75,6 +78,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
+ * @see #setSessionFactory
+ * @see #setDataSource
  * @see SessionFactoryUtils#getSession
  * @see SessionFactoryUtils#applyTransactionTimeout
  * @see SessionFactoryUtils#closeSessionIfNecessary
@@ -129,10 +134,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
-	 * The DataSource should match the one used by the Hibernate SessionFactory.
+	 * The DataSource should match the one used by the Hibernate SessionFactory:
+	 * for example, you could specify the same JNDI DataSource for both.
+	 * <p>If the SessionFactory was configured with LocalDataSourceConnectionProvider,
+	 * i.e. by Spring's LocalSessionFactoryBean with a specified "dataSource",
+	 * the DataSource will be auto-detected: You can still explictly specify the
+	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
 	 * or JdbcTemplate. The Connection will be taken from the Hibernate Session.
+	 * @see LocalDataSourceConnectionProvider
+	 * @see LocalSessionFactoryBean#setDataSource
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -192,6 +204,25 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	public void afterPropertiesSet() {
 		if (this.sessionFactory == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
+		}
+		// check for LocalDataSourceConnectionProvider
+		if (this.sessionFactory instanceof SessionFactoryImplementor) {
+			ConnectionProvider cp = ((SessionFactoryImplementor) this.sessionFactory).getConnectionProvider();
+			if (cp instanceof LocalDataSourceConnectionProvider) {
+				DataSource cpds = ((LocalDataSourceConnectionProvider) cp).getDataSource();
+				if (this.dataSource == null) {
+					// use the SessionFactory's DataSource for exposing transactions to JDBC code
+					logger.info("Using DataSource [" + cpds +	"] from Hibernate SessionFactory for HibernateTransactionManager");
+					this.dataSource = cpds;
+				}
+				else if (this.dataSource == cpds) {
+					// let the configuration through: it's consistent
+				}
+				else {
+					throw new IllegalArgumentException("Specified dataSource [" + this.dataSource +
+																						 "] does not match [" + cpds + "] used by the SessionFactory");
+				}
+			}
 		}
 	}
 

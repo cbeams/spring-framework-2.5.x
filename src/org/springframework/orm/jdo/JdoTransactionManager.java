@@ -35,6 +35,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
+ * @see #setPersistenceManagerFactory
+ * @see #setDataSource
  * @see PersistenceManagerFactoryUtils#getPersistenceManager
  * @see PersistenceManagerFactoryUtils#closePersistenceManagerIfNecessary
  * @see JdoTemplate#execute
@@ -47,6 +49,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	private DataSource dataSource;
 
 	private JdoDialect jdoDialect;
+
 
 	/**
 	 * Create a new JdoTransactionManager instance.
@@ -81,13 +84,19 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
-   * The DataSource should match the one used by the JDO PersistenceManagerFactory.
-	 * Note that you need to use a JDO dialect for a specific JDO implementation
-	 * to allow for exposing JDO transactions as JDBC transactions.
+   * The DataSource should match the one used by the JDO PersistenceManagerFactory:
+	 * for example, you could specify the same JNDI DataSource for both.
+	 * <p>If the PersistenceManagerFactory uses a DataSource as connection factory,
+	 * the DataSource will be auto-detected: You can still explictly specify the
+	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
 	 * or JdbcTemplate. The Connection will be taken from the JDO PersistenceManager.
+	 * <p>Note that you need to use a JDO dialect for a specific JDO implementation
+	 * to allow for exposing JDO transactions as JDBC transactions.
 	 * @see #setJdoDialect
+	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory
+	 * @see LocalPersistenceManagerFactoryBean#setDataSource
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -120,10 +129,29 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		if (this.persistenceManagerFactory == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory is required");
 		}
-		if (this.dataSource != null && this.jdoDialect == null) {
+		if (this.jdoDialect == null && this.dataSource != null) {
 			throw new IllegalArgumentException("A jdoDialect is required to expose JDO transactions as JDBC transactions");
 		}
+		if (this.jdoDialect != null) {
+			// check for DataSource as connection factory
+			Object pmfcf = this.persistenceManagerFactory.getConnectionFactory();
+			if (pmfcf instanceof DataSource) {
+				if (this.dataSource == null) {
+					// use the PersistenceManagerFactory's DataSource for exposing transactions to JDBC code
+					logger.info("Using DataSource [" + pmfcf + "] from JDO PersistenceManagerFactory for JdoTransactionManager");
+					this.dataSource = (DataSource) pmfcf;
+				}
+				else if (this.dataSource == pmfcf) {
+					// let the configuration through: it's consistent
+				}
+				else {
+					throw new IllegalArgumentException("Specified dataSource [" + this.dataSource +
+																						 "] does not match [" + pmfcf + "] used by the PersistenceManagerFactory");
+				}
+			}
+		}
 	}
+
 
 	protected Object doGetTransaction() {
 		if (TransactionSynchronizationManager.hasResource(this.persistenceManagerFactory)) {

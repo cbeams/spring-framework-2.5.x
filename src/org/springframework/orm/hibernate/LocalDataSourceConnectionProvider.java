@@ -37,6 +37,13 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		}
 	}
 
+	/**
+	 * Return the DataSource that this ConnectionProvider wraps.
+	 */ 
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+
 	public Connection getConnection() throws SQLException {
 		try {
 			return this.dataSource.getConnection();
