@@ -154,7 +154,7 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 			Properties props = new Properties();
 
 			if (this.configLocation != null) {
-				// load JDO properties from given location
+				// load Quarz properties from given location
 				InputStream is = this.configLocation.getInputStream();
 				try {
 					props.load(is);
