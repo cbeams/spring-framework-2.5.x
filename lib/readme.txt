@@ -56,7 +56,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's FreeMarker support
 
 * hibernate/hibernate2.jar, hibernate/odmg.jar
-- Hibernate 2.1.6 (http://www.hibernate.org)
+- Hibernate 2.1.7 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate support
 
