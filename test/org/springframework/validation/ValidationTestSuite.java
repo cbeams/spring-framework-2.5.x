@@ -22,11 +22,13 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.util.StringUtils;
 
@@ -145,6 +147,16 @@ public class ValidationTestSuite extends TestCase {
 		}
 	}
 
+	public void testBindingWithCustomEditorOnObjectField() {
+		BeanWithObjectProperty tb = new BeanWithObjectProperty();
+		DataBinder binder = new DataBinder(tb, "tb");
+		binder.registerCustomEditor(Integer.class, "object", new CustomNumberEditor(Integer.class, true));
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("object", "1"));
+		binder.bind(pvs);
+		assertEquals(new Integer(1), tb.getObject());
+	}
+
 	public void testBindingWithAllowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
@@ -225,7 +237,6 @@ public class ValidationTestSuite extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
-
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
 			}
@@ -262,7 +273,6 @@ public class ValidationTestSuite extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new Integer(99));
 			}
-
 			public String getAsText() {
 				return "argh";
 			}
@@ -284,7 +294,6 @@ public class ValidationTestSuite extends TestCase {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
-
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
 			}

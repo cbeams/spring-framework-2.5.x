@@ -272,7 +272,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			this.customEditors.put(propertyName, new CustomEditorHolder(propertyEditor, requiredType));
 		}
 		else {
-			this.customEditors.put(requiredType, new CustomEditorHolder(propertyEditor, requiredType));
+			this.customEditors.put(requiredType, propertyEditor);
 		}
 	}
 
@@ -328,18 +328,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	private PropertyEditor getCustomEditor(Class requiredType) {
 		if (requiredType != null) {
-			CustomEditorHolder holder = (CustomEditorHolder) this.customEditors.get(requiredType);
-			if (holder == null) {
+			PropertyEditor editor = (PropertyEditor) this.customEditors.get(requiredType);
+			if (editor == null) {
 				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
 					Object key = it.next();
 					if (key instanceof Class && ((Class) key).isAssignableFrom(requiredType)) {
-						holder = (CustomEditorHolder) this.customEditors.get(key);
+						editor = (PropertyEditor) this.customEditors.get(key);
 					}
 				}
 			}
-			if (holder != null) {
-				return holder.getPropertyEditor(requiredType);
-			}
+			return editor;
 		}
 		return null;
 	}
@@ -495,8 +493,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 					Object key = it.next();
 					if (key instanceof Class) {
 						Class requiredType = (Class) key;
-						CustomEditorHolder editorHolder = (CustomEditorHolder) this.customEditors.get(key);
-						nestedBw.registerCustomEditor(requiredType, editorHolder.getPropertyEditor(requiredType));
+						PropertyEditor editor = (PropertyEditor) this.customEditors.get(key);
+						nestedBw.registerCustomEditor(requiredType, editor);
 					}
 				}
 			}
@@ -1080,7 +1078,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 
 	/**
-	 * Holder for a registered custom editor.
+	 * Holder for a registered custom editor with property name.
 	 * Keeps the PropertyEditor itself plus the type it was registered for.
 	 */
 	private static class CustomEditorHolder {
@@ -1096,11 +1094,17 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 		private PropertyEditor getPropertyEditor(Class requiredType) {
 			// Special case: If no required type specified, which usually only happens for
-			// Collection elements, return PropertyEditor if not registered for Collection type.
-			// (If not registered for Collection, it is assumed to be intended for elements.)
+			// Collection elements, or required type is not assignable to registered type,
+			// which usually only happens for generic properties of type Object -
+			// then return PropertyEditor if not registered for Collection or array type.
+			// (If not registered for Collection or array, it is assumed to be intended
+			// for elements.)
 			if (this.registeredType == null ||
-					(requiredType != null && BeanUtils.isAssignable(this.registeredType, requiredType)) ||
-					(requiredType == null && !(Collection.class.isAssignableFrom(this.registeredType)))) {
+					(requiredType != null &&
+			    (BeanUtils.isAssignable(this.registeredType, requiredType) ||
+			    BeanUtils.isAssignable(requiredType, this.registeredType))) ||
+					(requiredType == null &&
+			    (!Collection.class.isAssignableFrom(this.registeredType) && !this.registeredType.isArray()))) {
 				return this.propertyEditor;
 			}
 			else {
