@@ -39,7 +39,7 @@ import org.springframework.remoting.RemoteAccessException;
  * @author Juergen Hoeller
  * @since 18.12.2003
  */
-public class JaxRpcTestSuite extends TestCase {
+public class JaxRpcSupportTests extends TestCase {
 
 	public void testLocalJaxRpcServiceFactoryBeanWithWsdlAndNamespace() throws Exception {
 		LocalJaxRpcServiceFactoryBean factory = new LocalJaxRpcServiceFactoryBean();

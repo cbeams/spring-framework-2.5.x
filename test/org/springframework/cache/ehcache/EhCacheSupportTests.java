@@ -27,7 +27,7 @@ import org.springframework.core.io.ClassPathResource;
  * @author Juergen Hoeller
  * @since 27.09.2004
  */
-public class EhCacheTestSuite extends TestCase {
+public class EhCacheSupportTests extends TestCase {
 
 	public void testLoadingBlankCacheManager() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();

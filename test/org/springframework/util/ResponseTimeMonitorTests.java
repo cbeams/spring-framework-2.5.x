@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 /**
  * @author Alef Arendsen
  */
-public class ResponseTimeMonitorImplTestSuite extends TestCase {
+public class ResponseTimeMonitorTests extends TestCase {
 
 	public void testGetAccessCount() {
 		ResponseTimeMonitorImpl impl = new ResponseTimeMonitorImpl();

@@ -25,17 +25,14 @@ import org.apache.commons.logging.LogFactory;
 /**
  * @author Alef Arendsen
  */
-public class Log4jConfigurerTestSuite extends TestCase {
+public class Log4jConfigurerTests extends TestCase {
 
-	/*
-	 * Class to test for void initLogging(String)
-	 */
-	public void testInitLoggingString() 
-	throws FileNotFoundException {		
+	public void testInitLoggingString()  throws FileNotFoundException {
 		try {
 			Log4jConfigurer.initLogging("test/org/springframework/util/bla.properties");
 			fail("Exception should have been thrown, file does not exist!");
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			// ok
 		}
 		
@@ -55,12 +52,11 @@ public class Log4jConfigurerTestSuite extends TestCase {
 		assertTrue(MockLog4jAppender.loggingStrings.contains("fatal"));
 	}
 
-	public void testInitLoggingStringlong() {
+	public void testInitLoggingStringLong() {
 		//TODO Implement initLogging() with time to wait before reloading!
 	}
 
-	public void testShutdownLogging() 
-	throws FileNotFoundException {
+	public void testShutdownLogging() throws FileNotFoundException {
 		Log4jConfigurer.initLogging("test/org/springframework/util/testlog4j.properties");
 		Log4jConfigurer.shutdownLogging();
 		assertTrue(MockLog4jAppender.closeCalled);

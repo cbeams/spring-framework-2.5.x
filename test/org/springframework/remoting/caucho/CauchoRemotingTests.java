@@ -26,7 +26,7 @@ import org.springframework.remoting.RemoteAccessException;
  * @author Juergen Hoeller
  * @since 16.05.2003
  */
-public class CauchoTestSuite extends TestCase {
+public class CauchoRemotingTests extends TestCase {
 
 	public void testHessianProxyFactoryBeanWithAccessError() throws Exception {
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
@@ -70,6 +70,5 @@ public class CauchoTestSuite extends TestCase {
 			// expected
 		}
 	}
-
 
 }

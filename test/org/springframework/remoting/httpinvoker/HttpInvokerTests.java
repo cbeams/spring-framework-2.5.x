@@ -38,7 +38,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * @author Juergen Hoeller
  * @since 09.08.2004
  */
-public class HttpInvokerTestSuite extends TestCase {
+public class HttpInvokerTests extends TestCase {
 
 	public void testHttpInvokerProxyFactoryBeanAndServiceExporter() throws Throwable {
 		TestBean target = new TestBean("myname", 99);

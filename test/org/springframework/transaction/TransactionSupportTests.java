@@ -28,7 +28,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @author Juergen Hoeller
  * @since 29.04.2003
  */
-public class TransactionTestSuite extends TestCase {
+public class TransactionSupportTests extends TestCase {
 
 	public void testNoExistingTransaction() {
 		PlatformTransactionManager tm = new TestTransactionManager(false, true);

@@ -37,7 +37,7 @@ import org.springframework.remoting.support.RemoteInvocation;
  * @author Juergen Hoeller
  * @since 16.05.2003
  */
-public class RmiTestSuite extends TestCase {
+public class RmiSupportTests extends TestCase {
 
 	public void testRmiProxyFactoryBean() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
