@@ -15,9 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.OptionalDataException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -183,15 +180,6 @@ public abstract class TransitionableState extends AbstractState {
 	 */
 	public boolean supportsEvent(String eventId) {
 		return getTransition(eventId) != null;
-	}
-
-	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
-		in.defaultReadObject();
-		Iterator it = transitionsIterator();
-		while (it.hasNext()) {
-			Transition t = (Transition)it.next();
-			t.setSourceState(this);
-		}
 	}
 
 	protected void createToString(ToStringCreator creator) {
