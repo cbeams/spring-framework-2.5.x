@@ -17,6 +17,8 @@
 package org.springframework.web.struts;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -126,6 +128,60 @@ public class StrutsSupportTests extends TestCase {
 			}
 		};
 		DispatchActionSupport action = new DispatchActionSupport() {
+		};
+		action.setServlet(actionServlet);
+
+		assertEquals(wac, action.getWebApplicationContext());
+		assertEquals(servletContext, action.getServletContext());
+		assertEquals("testmessage", action.getMessageSourceAccessor().getMessage("test"));
+
+		action.setServlet(null);
+	}
+
+	public void testLookupDispatchActionSupportWithContextLoaderPlugIn() throws ServletException {
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.addMessage("test", Locale.getDefault(), "testmessage");
+		final ServletContext servletContext = new MockServletContext();
+		wac.setServletContext(servletContext);
+		wac.refresh();
+		servletContext.setAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX, wac);
+
+		ActionServlet actionServlet = new ActionServlet() {
+			public ServletContext getServletContext() {
+				return servletContext;
+			}
+		};
+		LookupDispatchActionSupport action = new LookupDispatchActionSupport() {
+			protected Map getKeyMethodMap() {
+				return new HashMap();
+			}
+		};
+		action.setServlet(actionServlet);
+
+		assertEquals(wac, action.getWebApplicationContext());
+		assertEquals(servletContext, action.getServletContext());
+		assertEquals("testmessage", action.getMessageSourceAccessor().getMessage("test"));
+
+		action.setServlet(null);
+	}
+
+	public void testLookupDispatchActionSupportWithRootContext() throws ServletException {
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.addMessage("test", Locale.getDefault(), "testmessage");
+		final ServletContext servletContext = new MockServletContext();
+		wac.setServletContext(servletContext);
+		wac.refresh();
+		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+
+		ActionServlet actionServlet = new ActionServlet() {
+			public ServletContext getServletContext() {
+				return servletContext;
+			}
+		};
+		LookupDispatchActionSupport action = new LookupDispatchActionSupport() {
+			protected Map getKeyMethodMap() {
+				return new HashMap();
+			}
 		};
 		action.setServlet(actionServlet);
 

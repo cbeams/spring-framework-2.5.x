@@ -36,8 +36,9 @@ import org.springframework.web.util.WebUtils;
  * context, falling back to the root WebApplicationContext. For typical
  * usage, i.e. accessing middle tier beans, use a root WebApplicationContext.
  *
- * <p>For Struts DispatchActions, use the analogous
- * {@link DispatchActionSupport DispatchActionSupport} class.
+ * <p>For Struts DispatchActions or LookupDispatchActions, use the analogous
+ * {@link DispatchActionSupport DispatchActionSupport} respectively
+ * {@link LookupDispatchActionSupport LookupDispatchActionSupport} class.
  *
  * <p>As an alternative approach, you can wire your Struts Actions themselves
  * as Spring beans, passing references to them via IoC rather than looking
@@ -52,6 +53,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @see org.springframework.web.context.ContextLoaderServlet
  * @see DispatchActionSupport
+ * @see LookupDispatchActionSupport
  * @see DelegatingActionProxy
  * @see DelegatingRequestProcessor
  */
