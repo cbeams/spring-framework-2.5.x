@@ -8,7 +8,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import org.apache.axis.utils.ClassUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.jmx.exceptions.ProxyCreationException;
 
 /**

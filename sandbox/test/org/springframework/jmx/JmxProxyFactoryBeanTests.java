@@ -5,6 +5,7 @@ package org.springframework.jmx;
 
 import javax.management.ObjectName;
 
+import org.springframework.jmx.proxy.JdkJmxObjectProxyFactory;
 import org.springframework.jmx.proxy.JmxProxyFactoryBean;
 
 /**
@@ -24,7 +25,7 @@ public class JmxProxyFactoryBeanTests extends AbstractJmxTests {
     
     public void testWithJdkProxyFactory() throws Exception {
         JmxProxyFactoryBean fb = getProxyFactory();
-        fb.setUseCglib(false);
+        fb.setImplementationClass(JdkJmxObjectProxyFactory.class);
         fb.setProxyInterfaces(new Class[]{IJmxTestBean.class});
         
         IJmxTestBean bean = (IJmxTestBean)fb.getObject();
@@ -33,7 +34,7 @@ public class JmxProxyFactoryBeanTests extends AbstractJmxTests {
     
     public void testInvalidJdkProxy() throws Exception {
         JmxProxyFactoryBean fb = getProxyFactory();
-        fb.setUseCglib(false);
+        fb.setImplementationClass(JdkJmxObjectProxyFactory.class);
         
         try {
             fb.afterPropertiesSet();
