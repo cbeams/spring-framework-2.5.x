@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="jmxAdapter" class="org.springframework.jmx.MBeanExporter">
+		<property name="server">
+			<ref local="server"/>
+		</property>
+	</bean>
+
+	<bean name="spring:mbean=true" class="org.springframework.jmx.DynamicMBeanTest"/>
+
+	<bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+
+</beans>

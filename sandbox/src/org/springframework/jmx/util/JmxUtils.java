@@ -56,7 +56,7 @@ public class JmxUtils {
 			throw new MBeanServerNotFoundException("Unable to locate an MBeanServer instance");
 		}
 		if (servers.size() > 1) {
-			throw new MBeanServerNotFoundException("More than one MBeanServer available: " + servers);
+			logger.warn("Found more than one MBeanServer instance. Returning first from list.");
 		}
 		MBeanServer server = (MBeanServer) servers.get(0);
 		if (logger.isDebugEnabled()) {
@@ -98,19 +98,23 @@ public class JmxUtils {
 	 * Tests so see if the supplied <code>Object</code> is a valid
 	 * MBean resource.
 	 *
-	 * @param object the <code>Object</code> to test.
+	 * @param beanClass the <code>Class</code> of the bean to test.
 	 * @return <code>true</code> if the <code>Object</code> is an MBean, otherwise false.
 	 */
-	public static boolean isMBean(Object object) {
-		// TODO: Extend this implementation to cover all user-created MBeans.
-		if (object instanceof DynamicMBean) {
+	public static boolean isMBean(Class beanClass) {
+
+		if (beanClass == null) {
+			return false;
+		}
+
+		if (DynamicMBean.class.isAssignableFrom(beanClass)) {
 			return true;
 		}
 
-		Class cls = object.getClass();
+		Class cls = beanClass;
 
-		while(cls != Object.class) {
-			if(hasMBeanInterface(cls)) {
+		while (cls != null && cls != Object.class) {
+			if (hasMBeanInterface(cls)) {
 				return true;
 			}
 
@@ -122,11 +126,11 @@ public class JmxUtils {
 
 	private static boolean hasMBeanInterface(Class cls) {
 		Class[] implementedInterfaces = cls.getInterfaces();
-    String mbeanInterfaceName = cls.getName() + "MBean";
+		String mbeanInterfaceName = cls.getName() + "MBean";
 
 		for (int x = 0; x < implementedInterfaces.length; x++) {
 			Class implementedInterface = implementedInterfaces[x];
-			if(implementedInterface.getName().equals(mbeanInterfaceName)) {
+			if (implementedInterface.getName().equals(mbeanInterfaceName)) {
 				return true;
 			}
 		}

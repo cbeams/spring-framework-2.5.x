@@ -17,10 +17,20 @@
 package org.springframework.jmx.assembler;
 
 import javax.management.Descriptor;
+import javax.management.MBeanInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 import org.springframework.jmx.metadata.JmxAttributeSource;
+import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.MBeanExporter;
+import org.springframework.jmx.util.ObjectNameManager;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.interceptor.NopInterceptor;
+
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @author Rob Harrop
@@ -77,6 +87,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	/**
 	 * Tests the situation where the property only has
 	 * a getter
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void testWithOnlyGetter() throws Exception {
@@ -90,6 +101,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	/**
 	 * Tests the situation where the property only
 	 * has a setter
+	 *
 	 * @throws java.lang.Exception
 	 */
 	public void testWithOnlySetter() throws Exception {
@@ -132,6 +144,30 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 		assertEquals("Currency Time Limit should be 30", "30", desc.getFieldValue("currencyTimeLimit"));
 		assertEquals("Role should be \"operation\"", "operation", desc.getFieldValue("role"));
+	}
+
+	public void testWithProxy() throws Exception {
+		IJmxTestBean tb = new JmxTestBean();
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTarget(tb);
+		pf.addAdvice(new NopInterceptor());
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setBeanFactory(this.getContext());
+		exporter.setAssembler(getAssembler());
+
+		String objectName = "spring:bean=test,proxy=true";
+
+		Map beans = new HashMap();
+		beans.put(objectName, pf.getProxy());
+		exporter.setBeans(beans);
+
+		exporter.afterPropertiesSet();
+
+		MBeanInfo inf = server.getMBeanInfo(ObjectNameManager.getInstance(objectName));
+		System.out.println(inf.getClassName());
+		assertEquals("Incorrect number of operations", getExpectedOperationCount(), inf.getOperations().length);
+		assertEquals("Incorrect number of attributes", getExpectedAttributeCount(), inf.getAttributes().length);
 	}
 
 	protected abstract String getObjectName();
