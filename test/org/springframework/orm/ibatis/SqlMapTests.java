@@ -24,21 +24,17 @@ import javax.sql.DataSource;
 
 import com.ibatis.db.sqlmap.MappedStatement;
 import com.ibatis.db.sqlmap.SqlMap;
-import com.ibatis.sqlmap.client.SqlMapClient;
-import com.ibatis.sqlmap.client.SqlMapExecutor;
-import com.ibatis.sqlmap.client.SqlMapSession;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 import org.springframework.orm.ibatis.support.SqlMapDaoSupport;
 
 /**
  * @author Juergen Hoeller
  * @since 28.11.2003
  */
-public class SqlMapTestSuite extends TestCase {
+public class SqlMapTests extends TestCase {
 
 	public void testSqlMapFactoryBean() throws IOException {
 		SqlMapFactoryBean factory = new SqlMapFactoryBean();
@@ -57,20 +53,6 @@ public class SqlMapTestSuite extends TestCase {
 		}
 		catch (IOException ex) {
 			// expected
-		}
-	}
-	
-	public void testSqlMapClientFactoryBeanWithoutConfig() {
-		SqlMapClientFactoryBean factory = new SqlMapClientFactoryBean();
-		// explicitly set to null, don't know why ;-)
-		factory.setConfigLocation(null);
-		try {
-			factory.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
-		} catch (IllegalArgumentException e) {
-			// expected
-		} catch (IOException e) {
-			fail("Should have thrown IllegalArgumentException");
 		}
 	}
 	
@@ -114,50 +96,6 @@ public class SqlMapTestSuite extends TestCase {
 		conControl.verify();
 	}
 	
-	public void testSqlMapClientTemplate() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		final Connection con = (Connection) conControl.getMock();
-		ds.getConnection();
-		dsControl.setReturnValue(con, 2);
-		con.getMetaData();
-		conControl.setReturnValue(null, 1);
-		con.close();
-		conControl.setVoidCallable(2);
-		dsControl.replay();
-		conControl.replay();
-
-		MockControl smsControl = MockControl.createControl(SqlMapSession.class);
-		final SqlMapSession sms = (SqlMapSession) smsControl.getMock();
-		MockControl smcControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient smc = (SqlMapClient) smcControl.getMock();
-		smc.openSession();
-		smcControl.setReturnValue(sms);
-		sms.setUserConnection(con);
-		smsControl.setVoidCallable();
-		sms.close();
-		smsControl.setVoidCallable();
-		smsControl.replay();
-		smcControl.replay();
-
-		SqlMapClientTemplate template = new SqlMapClientTemplate();
-		template.setDataSource(ds);
-		template.setSqlMapClient(smc);
-		template.afterPropertiesSet();
-		Object result = template.execute(new SqlMapClientCallback() {
-			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
-				assertTrue(executor == sms);
-				return "done";
-			}
-		});
-		assertEquals("done", result);
-		dsControl.verify();
-		conControl.verify();
-		smsControl.verify();
-		smcControl.verify();
-	}
-
 	public void testSqlMapDaoSupport() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
@@ -178,29 +116,6 @@ public class SqlMapTestSuite extends TestCase {
 		testDao.afterPropertiesSet();
 	}
 	
-	public void testSqlMapClientDaoSupport() throws Exception {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		TestSqlMapClientDaoSupport testDao = new TestSqlMapClientDaoSupport();
-		testDao.setDataSource(ds);
-		assertEquals(ds, testDao.getDSource());
-
-		MockControl smcControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient smc = (SqlMapClient) smcControl.getMock();
-		smcControl.replay();
-
-		testDao.setSqlMapClient(smc);
-		assertEquals(smc, testDao.getSMap());
-
-		SqlMapClientTemplate template = new SqlMapClientTemplate();
-		template.setDataSource(ds);
-		template.setSqlMapClient(smc);
-		testDao.setSqlMapClientTemplate(template);
-		assertEquals(template, testDao.getSMTemplate());
-
-		testDao.afterPropertiesSet();
-	}
-
 
 	private class TestSqlMapDaoSupport extends SqlMapDaoSupport{
 	
@@ -214,22 +129,6 @@ public class SqlMapTestSuite extends TestCase {
 	
 		public SqlMapTemplate getSMTemplate(){
 			return super.getSqlMapTemplate();
-		}
-	}
-
-
-	private class TestSqlMapClientDaoSupport extends SqlMapClientDaoSupport{
-
-		public DataSource getDSource(){
-			return super.getDataSource();
-		}
-
-		public SqlMapClient getSMap() {
-			return super.getSqlMapClient();
-		}
-
-		public SqlMapClientTemplate getSMTemplate(){
-			return super.getSqlMapClientTemplate();
 		}
 	}
 
