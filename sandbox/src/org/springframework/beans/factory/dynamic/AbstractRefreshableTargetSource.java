@@ -16,23 +16,32 @@
 
 package org.springframework.beans.factory.dynamic;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
 /**
  * Superclass for TargetSources that are threadsafe yet
- * support refresh operations.
+ * support refresh operations. This class can return an IntroductionAdvisor
+ * allowing control over the dynamic target. See the getInroductionAdvisor() method.
+ * Subclasses must implement the abstract refreshedTarget() method to return
+ * an up-to-date target.
+ * <p>Call the refresh() method before use.
  * @author Rod Johnson
  */
-public abstract class AbstractRefreshableTargetSource extends DelegatingIntroductionInterceptor implements TargetSource, DynamicObject {
+public abstract class AbstractRefreshableTargetSource 
+	implements TargetSource, DynamicObject {
+	
+	protected final Log log = LogFactory.getLog(getClass());
 	
 	private int loads;
 	
 	private long lastRefresh;
 	
-	private Object target;
-	
-	private ExpirableObject expirableObject;
+	private Object currentTarget;
 	
 	private long expiry;
 	
@@ -42,28 +51,53 @@ public abstract class AbstractRefreshableTargetSource extends DelegatingIntroduc
 	
 	private long lastCheck;
 	
-	public AbstractRefreshableTargetSource(Object initialTarget) {
+	private boolean modified;
+	
+	private DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
+	
+	public AbstractRefreshableTargetSource() {
 		lastRefresh = lastCheck = System.currentTimeMillis();
-		loads = 1;
+		loads = 0;
+		// Don't want to expose the TargetSource interface in the introduction
 		suppressInterface(TargetSource.class);
-		this.target = initialTarget;
 	}
 	
-	public void setExpirableObject(ExpirableObject expirableObject) {
-		this.expirableObject = expirableObject;
+	/**
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#isAutoRefresh()
+	 */
+	public boolean isAutoRefresh() {
+		return autoRefresh;
 	}
+	
+	/**
+	 * Enable autorefresh. Default is disabled. Autorefresh will impact performance.
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#setAutoRefresh(boolean)
+	 */
+	public void setAutoRefresh(boolean autoRefresh) {
+		this.autoRefresh = autoRefresh;
+	}
+	
 	
 	public void setExpirySeconds(long expirySeconds) {
 		this.expiry = expirySeconds * 1000;
 	}
 	
 	public synchronized void refresh() {
-		target = refreshedTarget();
+		currentTarget = refreshedTarget();
 		lastRefreshTime = System.currentTimeMillis();
 		++loads;
+		modified = false;
 	}
 	
+	/**
+	 * Subclass must implement this to return a refreshed target.
+	 * @return
+	 */
 	protected abstract Object refreshedTarget();
+	
+	public boolean isLoaded() {
+		return currentTarget != null;
+	}
 
 	/**
 	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#getLastRefreshMillis()
@@ -72,67 +106,85 @@ public abstract class AbstractRefreshableTargetSource extends DelegatingIntroduc
 		return lastRefresh;
 	}
 	/**
-	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#getLoads()
+	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#getLoadCount()
 	 */
-	public int getLoads() {
+	public int getLoadCount() {
 		return loads;
 	}
-	/**
-	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#isModified()
-	 */
-	public boolean isModified() {
-		if (expirableObject != null) {
-			return expirableObject.isModified();
-		}
-		throw new UnsupportedOperationException();
-	}
+
+	
 	/**
 	 * @see org.springframework.aop.TargetSource#getTarget()
 	 */
 	public synchronized Object getTarget() throws Exception {
-		if (autoRefresh &&
-				System.currentTimeMillis() - lastCheck > expiry) {
-			if (isModified()) {
-				refresh();
-			}
-			lastCheck = System.currentTimeMillis();
+		if (autoRefresh && isModified()) {
+			refresh();
 		}
-		return this.target;
+		return this.currentTarget;
 	}
+	
+	public boolean isModified() {
+		if (modified) {
+			return true;
+		}
+		
+		boolean flag =  System.currentTimeMillis() - lastCheck > expiry;
+		lastCheck = System.currentTimeMillis();
+		return flag;
+	}
+	
+	/**
+	 * This can be invoked when a cache is updated etc.
+	 *
+	 */
+	public synchronized void markModified() {
+		this.modified = true;
+	}
+	
 	/**
 	 * @see org.springframework.aop.TargetSource#getTargetClass()
 	 */
 	public Class getTargetClass() {
-		return target.getClass();
+		return (currentTarget != null) ? currentTarget.getClass() : null;
 	}
 	/**
 	 * @see org.springframework.aop.TargetSource#isStatic()
 	 */
-	public boolean isStatic() {
+	public final boolean isStatic() {
 		return false;
 	}
+	
 	/**
 	 * @see org.springframework.aop.TargetSource#releaseTarget(java.lang.Object)
 	 */
 	public void releaseTarget(Object target) throws Exception {
 		// Do nothing
 	}
+	
 	/**
-	 * @see org.springframework.beans.factory.dynamic.DynamicObject#getExpiry()
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#getExpiryMillis()
 	 */
-	public long getExpiry() {
+	public long getExpiryMillis() {
 		return expiry;
 	}
+	
 	/**
-	 * @see org.springframework.beans.factory.dynamic.DynamicObject#isAutoRefresh()
+	 * Return an IntroductionAdvisor that will delegate all DynamicObject methods to this object.
+	 * It will also implement any additional interfaces implemented by subclasses unless they are
+	 * suppressed by calling suppressInterface().
+	 * @return
 	 */
-	public boolean isAutoRefresh() {
-		return autoRefresh;
+	public IntroductionAdvisor getIntroductionAdvisor() {	
+		return new DefaultIntroductionAdvisor(dii);
 	}
+	
 	/**
-	 * @see org.springframework.beans.factory.dynamic.DynamicObject#setAutoRefresh(boolean)
+	 * Ensure that the IntroductionAdvisor returned by this object doesn't implement
+	 * the specified interface. We might want to do this if a subclass of this class implements
+	 * an interface (such as BeanFactoryAware) that should not be exposed.
+	 * @param intf interface implemented by a subclass.
 	 */
-	public void setAutoRefresh(boolean autoRefresh) {
-		this.autoRefresh = autoRefresh;
+	public void suppressInterface(Class intf) {
+		dii.suppressInterface(intf);
 	}
 }

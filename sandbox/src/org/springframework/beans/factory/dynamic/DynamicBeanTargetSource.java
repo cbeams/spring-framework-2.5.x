@@ -23,27 +23,28 @@ public class DynamicBeanTargetSource extends AbstractRefreshableTargetSource {
 	 * @param childFactory optional, must be a child of factory.
 	 * Allows shared child factory.
 	 */
-	public DynamicBeanTargetSource(Object initialTarget, BeanFactory factory, String beanName, DefaultListableBeanFactory childFactory) {
-		super(initialTarget);
+	public DynamicBeanTargetSource(BeanFactory factory, String beanName, DefaultListableBeanFactory childFactory) {
+		//super(initialTarget);
 		this.beanName = beanName;
 		this.childFactory = (childFactory == null) ? 
 			new DefaultListableBeanFactory(factory) :
 			childFactory;
 		
+		// The child bean definition is a prototype, so whenever
+		// we call getBean() on it we'll get a fresh object,
+		// configured the same way.
+		// Apart from that, the child bean definition will be
+		// the same as the parent: all properties are inherited
 		ChildBeanDefinition definition = new ChildBeanDefinition(beanName, null);
-		
 		definition.setSingleton(false);
-
 		this.childFactory.registerBeanDefinition(beanName, definition);	
 	}
-	
 	
 
 	/**
 	 * @see org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource#refreshedTarget()
 	 */
 	protected Object refreshedTarget() {
-		// TODO synching?
 		Object o = childFactory.getBean(beanName);
 		return o;
 	}

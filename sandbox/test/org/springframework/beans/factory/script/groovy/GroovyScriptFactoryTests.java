@@ -14,25 +14,23 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script.groovy;
 
 import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
 
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.groovy.GroovyFactory;
 import org.springframework.beans.factory.script.CompilationException;
-import org.springframework.beans.factory.script.DynamicScript;
 import org.springframework.beans.factory.script.ScriptNotFoundException;
+import org.springframework.beans.factory.script.groovy.GroovyScriptFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 
 /**
  * 
  * @author Rod Johnson
  */
-public class GroovyFactoryTests extends TestCase {
+public class GroovyScriptFactoryTests extends TestCase {
 	
-	private static final String SCRIPT_BASE = "org/springframework/beans/factory/groovy/";
+	private static final String SCRIPT_BASE = "org/springframework/beans/factory/script/groovy/";
 	
 	public void testNoScriptFound() {
 		try {
@@ -44,8 +42,8 @@ public class GroovyFactoryTests extends TestCase {
 		}
 	}
 	
-	protected GroovyFactory groovyFactory() {
-		GroovyFactory gf = new GroovyFactory();
+	protected GroovyScriptFactory groovyFactory() {
+		GroovyScriptFactory gf = new GroovyScriptFactory();
 		gf.setResourceLoader(new DefaultResourceLoader());
 		return gf;
 	}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script.groovy;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.script.AbstractScriptFactory;
@@ -31,11 +31,8 @@ import org.springframework.beans.factory.script.Script;
  * Groovy objects must have a no-arg constructor. You can use
  * Setter Injection on them, not Constructor or Method
  * Injection.
- * 
- * @author Rod Johnson
- *          16:20:14 trisberg Exp $
  */
-public class GroovyFactory extends AbstractScriptFactory {
+public class GroovyScriptFactory extends AbstractScriptFactory {
 
 	/**
 	 * @see org.springframework.beans.factory.script.AbstractScriptFactory#createScript(java.lang.String, org.springframework.core.io.ResourceLoader)

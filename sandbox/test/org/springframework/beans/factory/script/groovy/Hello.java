@@ -14,22 +14,14 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script.groovy;
 
 /**
  * 
  * @author Rod Johnson
  */
-public class DelegatingHello implements Hello {
+public interface Hello {
 	
-	private Hello hello;
-	
-	public void setHello(Hello hello) {
-		this.hello = hello;
-	}
-	
-	public String sayHello() {
-		return this.hello.sayHello();
-	}
+	String sayHello(); 
 
 }

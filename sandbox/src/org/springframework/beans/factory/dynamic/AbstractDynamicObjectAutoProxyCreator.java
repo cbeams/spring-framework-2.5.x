@@ -20,12 +20,14 @@ import java.util.List;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
-import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
- * 
+ * Superclass for bean post processors that create TargetSources of type AbstractRefreshableTargetSource
+ * for selected managed beans. The beans are chosen by whether the subclass's
+ * createRefreshableTargetSource() returns an AbstractRefreshableTargetSource,
+ * rather than null, for the object.
  * @author Rod Johnson
  */
 public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAutoProxyCreator {
@@ -56,15 +58,17 @@ public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAuto
 			return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
 		}
 		else {
-			
+			// This is a dynamic object. Get the target source, which is also an introduction
+			// advice, and add it.
 			AbstractRefreshableTargetSource ats = (AbstractRefreshableTargetSource) targetSource;
+			ats.refresh();
 			// TargetSource must have been created by this class
-			return new Object[] { new DefaultIntroductionAdvisor(ats) };
+			return new Object[] { ats.getIntroductionAdvisor() };
 		}
 	}
 	
 	/**
-	 * Return null if not managed
+	 * Return null if the object should not be managed as a dynamic object
 	 * @return
 	 */
 	protected abstract AbstractRefreshableTargetSource createRefreshableTargetSource(Object bean, ConfigurableListableBeanFactory beanFactory, String beanName);
@@ -85,6 +89,6 @@ public abstract class AbstractDynamicObjectAutoProxyCreator extends AbstractAuto
 	 * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#setCustomTargetSourceCreators(java.util.List)
 	 */
 	public void setCustomTargetSourceCreators(List targetSourceCreators) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("Custom target sources are not supported for DynamicObjectAutoProxyCreators");
 	}
 }

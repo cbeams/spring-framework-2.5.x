@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script.groovy;
 
 import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
@@ -29,9 +29,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * 
  * @author Rod Johnson
  */
-public class BeanFactoryTests extends TestCase {
+public class GroovyScriptFactoryContextTests extends TestCase {
 	
-	private static final String SIMPLE_XML = "/org/springframework/beans/factory/groovy/simple.xml";
+	private static final String SIMPLE_XML = "/org/springframework/beans/factory/script/groovy/simple.xml";
 	
 	private ClassPathXmlApplicationContext ac;
 	
@@ -106,11 +106,11 @@ public class BeanFactoryTests extends TestCase {
 		
 		//System.out.println("AOP CONFIG=" + ((Advised) script).toProxyConfigString());
 		
-		assertEquals(1, script.getLoads());
+		assertEquals(1, script.getLoadCount());
 		script.refresh();
-		assertEquals(2, script.getLoads());
+		assertEquals(2, script.getLoadCount());
 		script.refresh();
-		assertEquals(3, script.getLoads());
+		assertEquals(3, script.getLoadCount());
 		
 		// Reference still works, and target returns the same object
 		

@@ -17,15 +17,15 @@
 package org.springframework.beans.factory.dynamic;
 
 /**
- * 
+ * Interface to be implemented by objects that can go stale.
  * @author Rod Johnson
  */
 public interface ExpirableObject {
 	
-	int getLoads();
-	
-	long getLastRefreshMillis();
-	
+	/**
+	 * Force a check as to whether the object was modified since last load
+	 * @return
+	 */
 	boolean isModified();
 
 }

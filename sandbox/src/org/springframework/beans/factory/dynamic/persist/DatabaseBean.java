@@ -14,32 +14,26 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.dynamic;
+package org.springframework.beans.factory.dynamic.persist;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.dynamic.DynamicObject;
+import org.springframework.dao.DataAccessException;
 
 /**
- * Interface to be implemented by dynamic objects,
- * which support reloading and optionally polling for
- * updates.
+ * Interface to be implemented by objects that are backed by an object
+ * mapped to an RDBMS row.
  * @author Rod Johnson
  */
-public interface DynamicObject extends ExpirableObject {
+public interface DatabaseBean extends DynamicObject {
 	
-	int getLoadCount();
+	long getPrimaryKey();
 	
-	void refresh() throws BeansException;
+	void setPrimaryKey(long pk) throws DataAccessException;
 	
 	/**
-	 * @return the number of milliseconds after refreshing
-	 * that this object will go stale.  
-	 * 0 means no expiry 
-	 **/
-	long getExpiryMillis();
-	
-	long getLastRefreshMillis();
-
-	boolean isAutoRefresh();
-	
-	void setAutoRefresh(boolean autoRefresh);
+	 * Return a readable String showing the details where this definition comes from,
+	 * for use in logging etc.
+	 * @return
+	 */
+	String getStoreDetails();
 }

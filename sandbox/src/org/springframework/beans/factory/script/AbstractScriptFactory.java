@@ -19,11 +19,12 @@ package org.springframework.beans.factory.script;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.dynamic.AbstractDynamicObjectAutoProxyCreator;
 import org.springframework.beans.factory.dynamic.AbstractRefreshableTargetSource;
@@ -32,13 +33,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * TODO could make generic: only candidate evaluation differs
- * Separate out post processor
+ * Creates scripts
  * 
  * @author Rod Johnson
  */
-public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoProxyCreator implements ScriptContext, ApplicationContextAware, BeanFactoryAware,
-		BeanPostProcessor {
+public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoProxyCreator implements ScriptContext, ApplicationContextAware {
 
 	private ResourceLoader resourceLoader;
 
@@ -69,6 +68,13 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 	}
 
 
+	/**
+	 * Create an object
+	 * @param className
+	 * @param interfaceNames
+	 * @return
+	 * @throws BeansException
+	 */
 	public Object create(String className, String[] interfaceNames) throws BeansException {
 		Script script = configuredScript(className, interfaceNames);
 		Object o = script.createObject();
@@ -76,6 +82,12 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 		return o;
 	}
 
+	/**
+	 * Ccreate without specifying any interfaces
+	 * @param className
+	 * @return
+	 * @throws BeansException
+	 */
 	public Object create(String className) throws BeansException {
 		return create(className, new String[0]);
 	}
@@ -136,6 +148,10 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 			}
 		}
 	}
+	
+	public IntroductionAdvisor getIntroductionAdvisor() {
+		return new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(this), Script.class);
+	}
 
 	/**
 	 * @see org.springframework.beans.factory.dynamic.AbstractDynamicObjectConverter#createRefreshableTargetSource(java.lang.Object, org.springframework.beans.factory.config.ConfigurableListableBeanFactory, java.lang.String)
@@ -146,8 +162,6 @@ public abstract class AbstractScriptFactory extends AbstractDynamicObjectAutoPro
 		if (script == null) {
 			return null;
 		}
-		AbstractRefreshableTargetSource targetSource = new DynamicScriptTargetSource(bean, beanFactory, beanName, script);
-		targetSource.setExpirySeconds(getExpirySeconds());
-		return targetSource;
+		return new DynamicScriptTargetSource(beanFactory, beanName, script);
 	}
 }

@@ -80,7 +80,7 @@ public abstract class AbstractScript implements Script {
 		return getClass().getName() + ": location='" + location + "'";
 	}
 	
-	public int getLoads() {
+	public int getLoadCount() {
 		return loads;
 	}
 	

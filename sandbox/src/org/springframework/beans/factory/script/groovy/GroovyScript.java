@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script.groovy;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.beans.factory.groovy;
+package org.springframework.beans.factory.script.groovy;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.springframework.beans.factory.script.CompilationException;
