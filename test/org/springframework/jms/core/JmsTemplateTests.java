@@ -16,6 +16,9 @@
 
 package org.springframework.jms.core;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
@@ -32,6 +35,8 @@ import javax.naming.NamingException;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.jms.JmsException;
+import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JndiDestinationResolver;
 import org.springframework.jndi.JndiTemplate;
@@ -105,6 +110,20 @@ public class JmsTemplateTests extends TestCase {
 		mockJndiControl.setReturnValue(mockQueue);
 	}
 
+	public void testExceptionStackTrace() {
+		JMSException jmsEx = new JMSException("could not connect");
+		Exception innerEx = new Exception("host not found");
+		jmsEx.setLinkedException(innerEx);
+		JmsException springJmsEx = JmsUtils.convertJmsAccessException(jmsEx);
+		StringWriter sw = new StringWriter();
+		PrintWriter out = new PrintWriter(sw);
+		springJmsEx.printStackTrace(out);
+		String trace = sw.toString();
+		System.out.println("trace = " + trace);
+		assertTrue("inner jms exception not found", trace.indexOf("host not found") > 0);
+		
+	}
+	
 	public void testProducerCallback() throws Exception {
 		JmsTemplate sender = new JmsTemplate();
 		sender.setConnectionFactory(mockConnectionFactory);
