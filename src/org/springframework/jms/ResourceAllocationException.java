@@ -19,6 +19,7 @@ package org.springframework.jms;
 /**
  * Runtime exception mirroring the JMS ResourceAllocationException.
  * @author Les Hazlewood
+ * @since 1.1
  * @see javax.jms.ResourceAllocationException
  */
 public class ResourceAllocationException extends JmsException {

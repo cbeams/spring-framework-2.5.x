@@ -52,6 +52,7 @@ import javax.jms.TopicSession;
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
+ * @since 1.1
  * @see #setConnectionFactory
  * @see #setPubSubDomain
  * @see JmsTemplate
@@ -97,14 +98,16 @@ public class JmsTemplate102 extends JmsTemplate {
 		// the selected domain is consistent with the type of connection factory.
 		if (isPubSubDomain()) {
 			if (!(getConnectionFactory() instanceof TopicConnectionFactory)) {
-				throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 template for topics " +
-				                                   "but did not supply an instance of TopicConnectionFactory");
+				throw new IllegalArgumentException(
+						"Specified a Spring JMS 1.0.2 template for topics " +
+						"but did not supply an instance of TopicConnectionFactory");
 			}
 		}
 		else {
 			if (!(getConnectionFactory() instanceof QueueConnectionFactory)) {
-				throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 template for queues " +
-				                                   "but did not supply an instance of QueueConnectionFactory");
+				throw new IllegalArgumentException(
+						"Specified a Spring JMS 1.0.2 template for queues " +
+						"but did not supply an instance of QueueConnectionFactory");
 			}
 		}
 	}

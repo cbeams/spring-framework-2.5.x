@@ -25,6 +25,7 @@ import org.springframework.core.NestedRuntimeException;
  * encounters a problem related to JMS.
  * @author Les Hazlewood
  * @author Juergen Hoeller
+ * @since 1.1
  */
 public abstract class JmsException extends NestedRuntimeException {
 

@@ -21,6 +21,7 @@ import org.springframework.jms.JmsException;
 /**
  * Thrown by MessageConverter when it can not convert an object to/from a JMS message.
  * @author Mark Pollack
+ * @since 1.1
  * @see MessageConverter
  */
 public class MessageConversionException extends JmsException {

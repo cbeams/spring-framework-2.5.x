@@ -25,6 +25,7 @@ import javax.jms.Session;
  * between Java objects and JMS messages.
  * @author Mark Pollack
  * @author Juergen Hoeller
+ * @since 1.1
  */
 public interface MessageConverter {
 

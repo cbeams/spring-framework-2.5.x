@@ -31,6 +31,7 @@ import org.springframework.jms.JmsException;
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
+ * @since 1.1
  */
 public interface JmsOperations {
 

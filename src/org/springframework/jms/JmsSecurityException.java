@@ -19,6 +19,7 @@ package org.springframework.jms;
 /**
  * Runtime exception mirroring the JMS JMSSecurityException.
  * @author Les Hazlewood
+ * @since 1.1
  * @see javax.jms.JMSSecurityException
  */
 public class JmsSecurityException extends JmsException {

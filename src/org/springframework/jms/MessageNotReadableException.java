@@ -19,6 +19,7 @@ package org.springframework.jms;
 /**
  * Runtime exception mirroring the JMS MessageNotReadableException.
  * @author Les Hazlewood
+ * @since 1.1
  * @see javax.jms.MessageNotReadableException
  */
 public class MessageNotReadableException extends JmsException {

@@ -36,7 +36,7 @@ import javax.jms.TopicConnectionFactory;
  * TopicConnections/TopicSessions.
  *
  * @author Juergen Hoeller
- * @since 25.07.2004
+ * @since 1.1
  * @see #setConnectionFactory
  * @see #setPubSubDomain
  */
@@ -103,14 +103,16 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 		// the selected domain is consistent with the type of connection factory.
 		if (isPubSubDomain()) {
 			if (!(getConnectionFactory() instanceof TopicConnectionFactory)) {
-				throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 transaction manager for topics " +
-				                                   "but did not supply an instance of TopicConnectionFactory");
+				throw new IllegalArgumentException(
+						"Specified a Spring JMS 1.0.2 transaction manager for topics " +
+						"but did not supply an instance of TopicConnectionFactory");
 			}
 		}
 		else {
 			if (!(getConnectionFactory() instanceof QueueConnectionFactory)) {
-				throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 transaction manager for queues " +
-				                                   "but did not supply an instance of QueueConnectionFactory");
+				throw new IllegalArgumentException(
+						"Specified a Spring JMS 1.0.2 transaction manager for queues " +
+						"but did not supply an instance of QueueConnectionFactory");
 			}
 		}
 	}

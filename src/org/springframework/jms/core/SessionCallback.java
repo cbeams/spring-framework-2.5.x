@@ -27,6 +27,7 @@ import javax.jms.Session;
  * on the JMS Session, possibly returning a result object.
  *
  * @author Mark Pollack
+ * @since 1.1
  * @see JmsTemplate#execute(SessionCallback)
  */
 public interface SessionCallback {

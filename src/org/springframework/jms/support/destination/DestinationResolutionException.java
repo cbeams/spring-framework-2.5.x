@@ -21,7 +21,7 @@ import org.springframework.jms.JmsException;
 /**
  * Thrown by DestinationResolver when it cannot resolve a destination name.
  * @author Juergen Hoeller
- * @since 25.07.2004
+ * @since 1.1
  * @see DestinationResolver
  */
 public class DestinationResolutionException extends JmsException {

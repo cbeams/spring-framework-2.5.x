@@ -16,14 +16,13 @@ import javax.jms.TopicConnectionFactory;
  * will always create either a QueueConnection or a TopicConnection.
  *
  * @author Juergen Hoeller
- * @since 25.07.2004
+ * @since 1.1
  * @see #setTargetConnectionFactory
  * @see #setPubSubDomain
  */
 public class SingleConnectionFactory102 extends SingleConnectionFactory {
 
 	private boolean pubSubDomain = false;
-
 
 	/**
 	 * Create a new SingleConnectionFactory102 for bean-style usage.
@@ -80,18 +79,19 @@ public class SingleConnectionFactory102 extends SingleConnectionFactory {
 		// the selected domain is consistent with the type of connection factory.
 		if (isPubSubDomain()) {
 			if (!(getTargetConnectionFactory() instanceof TopicConnectionFactory)) {
-				throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 SingleConnectionFactory for topics " +
-																					 "but did not supply an instance of TopicConnectionFactory");
+				throw new IllegalArgumentException(
+						"Specified a Spring JMS 1.0.2 SingleConnectionFactory for topics " +
+						"but did not supply an instance of TopicConnectionFactory");
 			}
 		}
 		else {
 			if (!(getTargetConnectionFactory() instanceof QueueConnectionFactory)) {
-				throw new IllegalArgumentException("Specified a Spring JMS 1.0.2 SingleConnectionFactory for queues " +
-																					 "but did not supply an instance of QueueConnectionFactory");
+				throw new IllegalArgumentException(
+						"Specified a Spring JMS 1.0.2 SingleConnectionFactory for queues " +
+						"but did not supply an instance of QueueConnectionFactory");
 			}
 		}
 	}
-
 
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.

@@ -51,6 +51,7 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
+ * @since 1.1
  * @see SingleConnectionFactory102
  * @see org.springframework.jms.core.JmsTemplate
  */
@@ -175,36 +176,36 @@ public class SingleConnectionFactory
 	}
 
 	public Connection createConnection(String username, String password) throws JMSException {
-		throw new javax.jms.IllegalStateException("SingleConnectionFactory does not support custom " +
-																							"username and password");
+		throw new javax.jms.IllegalStateException(
+				"SingleConnectionFactory does not support custom username and password");
 	}
 
 	public QueueConnection createQueueConnection() throws JMSException {
 		Connection con = createConnection();
 		if (!(con instanceof QueueConnection)) {
-			throw new javax.jms.IllegalStateException("This SingleConnectionFactory does not hold a " +
-																								"QueueConnection but rather: " + con);
+			throw new javax.jms.IllegalStateException(
+					"This SingleConnectionFactory does not hold a QueueConnection but rather: " + con);
 		}
 		return ((QueueConnection) con);
 	}
 
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
-		throw new javax.jms.IllegalStateException("SingleConnectionFactory does not support custom " +
-																							"username and password");
+		throw new javax.jms.IllegalStateException(
+				"SingleConnectionFactory does not support custom username and password");
 	}
 
 	public TopicConnection createTopicConnection() throws JMSException {
 		Connection con = createConnection();
 		if (!(con instanceof TopicConnection)) {
-			throw new javax.jms.IllegalStateException("This SingleConnectionFactory does not hold a " +
-																								"TopicConnection but rather: " + con);
+			throw new javax.jms.IllegalStateException(
+					"This SingleConnectionFactory does not hold a TopicConnection but rather: " + con);
 		}
 		return ((TopicConnection) con);
 	}
 
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
-		throw new javax.jms.IllegalStateException("SingleConnectionFactory does not support custom " +
-																							"username and password");
+		throw new javax.jms.IllegalStateException(
+				"SingleConnectionFactory does not support custom username and password");
 	}
 
 
@@ -225,9 +226,10 @@ public class SingleConnectionFactory
 		if (target instanceof TopicConnection) {
 			classes.add(TopicConnection.class);
 		}
-		return (Connection) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-		                                           (Class[]) classes.toArray(new Class[classes.size()]),
-		                                           new CloseSuppressingInvocationHandler(target));
+		return (Connection) Proxy.newProxyInstance(
+				Thread.currentThread().getContextClassLoader(),
+				(Class[]) classes.toArray(new Class[classes.size()]),
+				new CloseSuppressingInvocationHandler(target));
 	}
 
 

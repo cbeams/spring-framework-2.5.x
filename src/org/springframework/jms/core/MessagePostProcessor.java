@@ -27,6 +27,7 @@ import javax.jms.Message;
  * <p>This often as an anonymous class within a method implementation.
  *
  * @author Mark Pollack
+ * @since 1.1
  * @see JmsTemplate#convertAndSend(String, Object, MessagePostProcessor)
  * @see JmsTemplate#convertAndSend(javax.jms.Destination, Object, MessagePostProcessor)
  * @see org.springframework.jms.support.converter.MessageConverter

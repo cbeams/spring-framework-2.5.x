@@ -30,6 +30,7 @@ import javax.jms.Session;
  * QueueSender or TopicPublisher, to send a message.
  *
  * @author Mark Pollack
+ * @since 1.1
  * @see JmsTemplate#execute(ProducerCallback)
  */
 public interface ProducerCallback {

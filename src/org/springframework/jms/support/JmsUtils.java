@@ -35,7 +35,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Generic utility methods for working with JMS.
  * @author Juergen Hoeller
- * @since 20.07.2004
+ * @since 1.1
  */
 public abstract class JmsUtils {
 

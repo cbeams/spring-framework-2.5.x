@@ -53,7 +53,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * DataSourceTransactionManager, which has stronger needs for synchronization.
  *
  * @author Juergen Hoeller
- * @since 25.07.2004
+ * @since 1.1
  * @see org.springframework.jms.core.JmsTemplate
  * @see SingleConnectionFactory
  */

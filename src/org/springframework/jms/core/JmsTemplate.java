@@ -56,6 +56,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
+ * @since 1.1
  * @see #setConnectionFactory
  * @see #setPubSubDomain
  * @see JmsTemplate102
@@ -102,12 +103,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * Delegate management of JNDI lookups and dynamic destination creation
 	 * to a DestinationResolver implementation.
 	 */
-	private DestinationResolver destinationResolver;
+	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
 	/**
 	 * The messageConverter to use for send(object) methods.
 	 */
-	private MessageConverter messageConverter;
+	private MessageConverter messageConverter = new SimpleMessageConverter();
 
 	/**
 	 * The timeout to use for receive operations.
@@ -144,8 +145,6 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * @see #setConnectionFactory
 	 */
 	public JmsTemplate() {
-		this.destinationResolver = new DynamicDestinationResolver();
-		this.messageConverter = new SimpleMessageConverter();
 	}
 
 	/**
@@ -153,7 +152,6 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * @param connectionFactory the ConnectionFactory to obtain connections from
 	 */
 	public JmsTemplate(ConnectionFactory connectionFactory) {
-		this();
 		setConnectionFactory(connectionFactory);
 		afterPropertiesSet();
 	}

@@ -34,6 +34,7 @@ import javax.jms.Session;
  * to live, override any of the getters with your own implementation.
  *
  * @author Mark Pollack
+ * @since 1.1
  */
 public interface MessageCreator {
 

@@ -36,7 +36,7 @@ import javax.jms.TextMessage;
  * and a Map to a JMS MapMessage (and vice versa).
  *
  * @author Juergen Hoeller
- * @since 25.07.2004
+ * @since 1.1
  * @see javax.jms.TextMessage
  * @see javax.jms.BytesMessage
  * @see javax.jms.MapMessage
@@ -65,9 +65,10 @@ public class SimpleMessageConverter implements MessageConverter {
 			for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				if (!(entry.getKey() instanceof String)) {
-					throw new MessageConversionException("Cannot convert non-String key of type [" +
-																							 (entry.getKey() != null ? entry.getKey().getClass().getName() : null) +
-																							 "] to MapMessage entry");
+					throw new MessageConversionException(
+							"Cannot convert non-String key of type [" +
+							(entry.getKey() != null ? entry.getKey().getClass().getName() : null) +
+							"] to MapMessage entry");
 				}
 				message.setObject((String) entry.getKey(), entry.getValue());
 			}

@@ -23,7 +23,7 @@ package org.springframework.jms.connection;
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
  * @author Juergen Hoeller
- * @since 25.07.2004
+ * @since 1.1
  * @see JmsTransactionManager
  */
 public class JmsTransactionObject {

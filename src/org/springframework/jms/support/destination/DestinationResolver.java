@@ -28,7 +28,7 @@ import javax.jms.Session;
  * and JndiDestinationResolver.
  *
  * @author Juergen Hoeller
- * @since 20.07.2004
+ * @since 1.1
  * @see org.springframework.jms.core.JmsTemplate#setDestinationResolver
  * @see org.springframework.jms.support.destination.DynamicDestinationResolver
  * @see org.springframework.jms.support.destination.JndiDestinationResolver
@@ -40,11 +40,11 @@ public interface DestinationResolver {
 	 * or as dynamic destination.
 	 * @param session the current JMS Session
 	 * @param destinationName the name of the destination
-	 * @param isPubSubDomain whether the domain is pub-sub, else P2P
+	 * @param pubSubDomain whether the domain is pub-sub, else P2P
 	 * @return the JMS destination (either a topic or a queue)
 	 * @throws javax.jms.JMSException if resolution failed
 	 */
-	Destination resolveDestinationName(Session session, String destinationName, boolean isPubSubDomain)
+	Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException;
 
 }
