@@ -75,8 +75,8 @@
 
 		<mkdir dir="${build.dir}"/>
 
-		<javac destdir="${build.dir}" target="1.3" debug="true"
-			deprecation="false" optimize="false" failonerror="true">
+		<javac destdir="${build.dir}" source="1.3" target="1.3" debug="true"
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
 		</javac>
@@ -151,9 +151,9 @@
 
 	<target name="dist" depends="warfile">
 		<!-- 
-			delegate to warfile target by depending on it.  dist is just to offer
+			Delegate to warfile target by depending on it. dist is just to offer
 			a generic target name across all Spring sample apps that may be used
-			for autobuilds testing
+			for autobuilds testing.
 		-->
 	</target>
 
