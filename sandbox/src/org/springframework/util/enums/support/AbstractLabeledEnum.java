@@ -47,8 +47,8 @@ public abstract class AbstractLabeledEnum implements LabeledEnum, MessageSourceR
 		return label;
 	}
 
-	public String getType() {
-		return getClass().getName();
+	public Class getType() {
+		return getClass();
 	}
 
 	public String getKey() {

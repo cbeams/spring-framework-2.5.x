@@ -71,10 +71,10 @@ public interface LabeledEnum extends Comparable {
 	public static final Comparator DEFAULT_ORDER = new CompoundComparator(new Comparator[] { LABEL_ORDER, CODE_ORDER });
 
 	/**
-	 * Returns this enumeration's type. Each type should be unique.
+	 * Returns this enumeration's type.
 	 * @return The type.
 	 */
-	public String getType();
+	public Class getType();
 
 	/**
 	 * Returns this enumeration's code. Each code should be unique within
@@ -88,12 +88,4 @@ public interface LabeledEnum extends Comparable {
 	 * @return The label.
 	 */
 	public String getLabel();
-
-	/**
-	 * Returns a uniquely indentifying key string. A key generally consists of
-	 * the <code>type.code</code> composite and should globally uniquely
-	 * identify this enumeration.
-	 * @return The unique key.
-	 */
-	public String getKey();
 }

@@ -61,8 +61,8 @@ public class LabeledEnumTests extends TestCase {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
 			// this shouldn't be neccessary
-			public String getType() {
-				return Dog.class.getName();
+			public Class getType() {
+				return Dog.class;
 			}
 
 			public String getLabel() {
