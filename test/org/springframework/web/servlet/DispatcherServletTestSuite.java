@@ -207,7 +207,7 @@ public class DispatcherServletTestSuite extends TestCase {
 				(ComplexWebApplicationContext.MockMultipartResolver) complexDispatcherServlet.getWebApplicationContext().getBean("multipartResolver");
 		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
 		complexDispatcherServlet.service(multipartRequest, response);
-		System.out.println(response.getForwardedUrl());
+		//System.out.println(response.getForwardedUrl());
 		multipartResolver.cleanupMultipart(multipartRequest);
 		assertTrue(multipartResolver.cleaned);
 	}

@@ -77,7 +77,7 @@ public class CookieLocaleResolverTestSuite extends TestCase {
 		CookieLocaleResolver resolver = getCookieLocaleResolver();
 		resolver.setCookieName("LanguageKoek");
 		Locale loc = resolver.resolveLocale(request);
-		System.out.println(loc.getLanguage());
+		//System.out.println(loc.getLanguage());
 		assertEquals(loc.getLanguage(), "nl");
 	}
 
@@ -100,7 +100,7 @@ public class CookieLocaleResolverTestSuite extends TestCase {
 			}
 		}
 		assertNotNull(found);
-		System.out.println("found '" + found.getValue() + "'");
+		//System.out.println("found '" + found.getValue() + "'");
 		
 		context = new MockServletContext();
 		request = new MockHttpServletRequest(context);
@@ -110,7 +110,7 @@ public class CookieLocaleResolverTestSuite extends TestCase {
 		resolver = getCookieLocaleResolver();
 		resolver.setCookieName("LanguageKoek");
 		Locale loc = resolver.resolveLocale(request);
-		System.out.println(loc.getLanguage());
+		//System.out.println(loc.getLanguage());
 		assertEquals(loc.getLanguage(), "nl");
 	}
 	
