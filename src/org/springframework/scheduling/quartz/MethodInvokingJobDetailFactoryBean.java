@@ -41,18 +41,18 @@ import org.springframework.util.MethodInvoker;
  * <p>Derived from MethodInvoker to share common properties and
  * behavior with MethodInvokingFactoryBean.
  * 
- * <p>Supports both concurrently running jobs and non-currently running
- * ones through the {@link #setConcurrent(boolean}} property.
+ * <p>Supports both concurrently running jobs and non-currently
+ * running ones through the "concurrent" property.
  *
  * <p><b>Note: JobDetails created via this FactoryBean are <i>not</i>
  * serializable and thus not suitable for persistent job stores.</b>
  * You need to implement your own Quartz Job as a thin wrapper for
  * each case where you want to delegate to an external method.
- * 
  *
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @since 18.02.2004
+ * @see #setConcurrent
  * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
  */
 public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
@@ -62,11 +62,12 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	private String group = Scheduler.DEFAULT_GROUP;
 
+	private boolean concurrent = true;
+
 	private String beanName;
 
 	private JobDetail jobDetail;
-	
-	private boolean concurrent = true;
+
 
 	/**
 	 * Set the name of the job.
@@ -88,19 +89,14 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	}
 	
 	/**
-	 * Specified whether or not multiple jobs should
-	 * be run in a concurrent fashion. The behavior when
-	 * one does not want concurrent jobs to be executed is
-	 * realized through adding the {@link StatefulJob} interface.
-	 * More information on Stateful versus Stateless jobs can
-	 * be found 
+	 * Specify whether or not multiple jobs should be run in a concurrent
+	 * fashion. The behavior when one does not want concurrent jobs to be
+	 * executed is realized through adding the {@link StatefulJob} interface.
+	 * More information on stateful versus stateless jobs can be found
 	 * <a href="http://www.opensymphony.com/quartz/tutorial.html#jobsMore">here</a>.
-	 * <p>The default setting specified to run jobs concurrently.
-	 * @since 23-06-2004 (release 1.1)
-	 * @param concurrent <code>true</code> if one wants to execute 
-	 * multiple jobs creating by this bean concurrently (this is also
-	 * the default setting) and <code>false</code> otherwise.
-	 * in a concurrent 
+	 * <p>The default setting is to run jobs concurrently.
+	 * @param concurrent whether one wants to execute multiple jobs created
+	 * by this bean concurrently
 	 */
 	public void setConcurrent(boolean concurrent) {
 		this.concurrent = concurrent;
@@ -110,14 +106,14 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		this.beanName = beanName;
 	}
 
+
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchMethodException {
 		prepare();
-		// consider the concurrent flag and choose between Stateful or Stateless job
+
+		// consider the concurrent flag to choose between stateful and stateless job
 		this.jobDetail = new JobDetail(this.name != null ? this.name : this.beanName,
-		                               this.group, 
-									   this.concurrent ? 
-									   		MethodInvokingJob.class : 
-									   		StatefulMethodInvokingJob.class);
+		                               this.group,
+		                               this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
 		this.jobDetail.getJobDataMap().put("methodInvoker", this);
 		this.jobDetail.setVolatility(true);		
 	}
@@ -178,15 +174,16 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 			}
 		}
 	}
-	
+
+
 	/**
-	 * Extension of the MethodInvokingJob implementing
-	 * @{link StatefulJob}. Quartz checks whether or not jobs are stateful and if so,
-	 * jobs won't interfere with eachother. 
+	 * Extension of the MethodInvokingJob, implementing the StatefulJob interface.
+	 * Quartz checks whether or not jobs are stateful and if so,
+	 * won't let jobs interfere with each other.
 	 */
 	public static class StatefulMethodInvokingJob extends MethodInvokingJob implements StatefulJob {
-		// no implementation, just a addition of the tagging interface StatefulJob in order
-		// to allow stateful method invoking jobs
+		// No implementation, just a addition of the tag interface StatefulJob
+		// in order to allow stateful method invoking jobs.
 	}
 
 }

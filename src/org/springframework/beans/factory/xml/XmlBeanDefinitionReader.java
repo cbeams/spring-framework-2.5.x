@@ -54,7 +54,7 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @since 26.11.2003
  * @see #setParserClass
- * @version $Id: XmlBeanDefinitionReader.java,v 1.8 2004-03-18 02:46:12 trisberg Exp $
+ * @version $Id: XmlBeanDefinitionReader.java,v 1.9 2004-06-23 18:07:50 jhoeller Exp $
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -99,7 +99,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public void setParserClass(Class parserClass) {
 		if (this.parserClass == null || !XmlBeanDefinitionParser.class.isAssignableFrom(parserClass)) {
-			throw new IllegalArgumentException("parserClass must be a XmlBeanDefinitionParser");
+			throw new IllegalArgumentException("parserClass must be an XmlBeanDefinitionParser");
 		}
 		this.parserClass = parserClass;
 	}
@@ -115,9 +115,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		InputStream is = null;
 		try {
-			logger.info("Loading XML bean definitions from " + resource + "");
+			if (logger.isInfoEnabled()) {
+				logger.info("Loading XML bean definitions from " + resource + "");
+			}
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			logger.debug("Using JAXP implementation [" + factory + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using JAXP implementation [" + factory + "]");
+			}
 			factory.setValidating(this.validating);
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			docBuilder.setErrorHandler(new BeansErrorHandler());
@@ -130,7 +134,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throw new BeanDefinitionStoreException("Parser configuration exception parsing XML from " + resource, ex);
 		}
 		catch (SAXParseException ex) {
-			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document from " + resource + " is invalid", ex);
+			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document from " +
+			                                       resource + " is invalid", ex);
 		}
 		catch (SAXException ex) {
 			throw new BeanDefinitionStoreException("XML document from " + resource + " is invalid", ex);
