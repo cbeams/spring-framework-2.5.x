@@ -18,7 +18,7 @@ package org.springframework.functor.functions;
 import org.springframework.functor.BinaryFunction;
 
 /**
- * Returns the minimum of two <code>Comparable</code> objects
+ * Returns the maximum of two <code>Comparable</code> objects
  * 
  * @author Keith Donald
  * @TODO comparator support

@@ -19,8 +19,6 @@ import java.io.Serializable;
 
 import org.springframework.functor.PredicateFactory;
 import org.springframework.functor.UnaryPredicate;
-import org.springframework.functor.functions.Maximum;
-import org.springframework.functor.functions.Minimum;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringBuilder;
 
@@ -35,24 +33,23 @@ public final class Range implements Serializable, UnaryPredicate {
     private UnaryPredicate rangeConstraint;
 
     /**
-     * Creates a range - which value is the min and which one is the max is
-     * calculated.
+     * Creates a range with the specified min and max edges.
      * 
-     * @param value1
-     *            one edge of the range
-     * @param value2
-     *            the other edge of the range
+     * @param min
+     *            the low edge of the range
+     * @param max
+     *            the high edge of the range
      */
-    public Range(Comparable value1, Comparable value2) {
-        Assert.isTrue(value1 != null && value2 != null);
-        Assert.isTrue(value1.getClass() == value2.getClass());
-        Object maximum = Maximum.instance().evaluate(value1, value2);
-        Object minimum = Minimum.instance().evaluate(value1, value2);
-        UnaryPredicate min = PredicateFactory.bind(GreaterThanEqualTo
-                .instance(), minimum);
-        UnaryPredicate max = PredicateFactory.bind(LessThanEqualTo.instance(),
-                maximum);
-        this.rangeConstraint = new UnaryAnd(min, max);
+    public Range(Comparable min, Comparable max) {
+        Assert.isTrue(min != null && max != null);
+        Assert.isTrue(min.getClass() == max.getClass());
+        Assert.isTrue(LessThanEqualTo.instance().test(min, max), "Minimum "
+                + min + " must be less than maximum " + max);
+        UnaryPredicate minimum = PredicateFactory.bind(GreaterThanEqualTo
+                .instance(), min);
+        UnaryPredicate maximum = PredicateFactory.bind(LessThanEqualTo
+                .instance(), max);
+        this.rangeConstraint = new UnaryAnd(minimum, maximum);
     }
 
     public boolean test(Object value) {
