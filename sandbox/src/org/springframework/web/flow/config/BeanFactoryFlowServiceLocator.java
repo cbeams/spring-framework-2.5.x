@@ -106,13 +106,13 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (AutowireCapableBeanFactory)getBeanFactory();
 	}
 
-	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
-		Assert.isTrue(Action.class.isAssignableFrom(implementationClass),
-				"The service to instantiate must implement the Action interface, the implementation class '"
-						+ implementationClass + "' you provided doesn't.");
-		return (Action)createService(implementationClass, autowireMode);
-	}
-
+	/**
+	 * Helper to have the application context instantiate a service class
+	 * and wire up any dependencies.
+	 * @param implementationClass the action implementation class
+	 * @param autowireMode the autowire policy
+	 * @return the instantiated (and possibly autowired) action
+	 */
 	protected Object createService(Class implementationClass, AutowireMode autowireMode) {
 		if (autowireMode == AutowireMode.DEFAULT) {
 			return createService(implementationClass, getDefaultAutowireMode());
@@ -124,6 +124,13 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		else {
 			return getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(), false);
 		}
+	}
+
+	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
+		Assert.isTrue(Action.class.isAssignableFrom(implementationClass),
+				"The service to instantiate must implement the Action interface, the implementation class '"
+						+ implementationClass + "' you provided doesn't.");
+		return (Action)createService(implementationClass, autowireMode);
 	}
 
 	public Action getAction(String actionId) throws ServiceLookupException {
