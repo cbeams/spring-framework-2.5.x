@@ -287,7 +287,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's AbstractExcelView
 
 * quartz/quartz.jar
-- Quartz 1.4.4 (http://www.opensymphony.org/quartz)
+- Quartz 1.4.5 (http://www.opensymphony.org/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
