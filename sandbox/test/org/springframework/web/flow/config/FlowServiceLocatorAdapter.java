@@ -52,6 +52,10 @@ public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 		throw new UnsupportedOperationException();
 	}
 
+	public FlowAttributeMapper createFlowAttributeMapper(Class implementationClass, AutowireMode autowireMode) {
+		throw new UnsupportedOperationException();
+	}
+
 	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}

@@ -107,7 +107,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
-		Assert.isTrue(FlowAttributeMapper.class.isAssignableFrom(implementationClass),
+		Assert.isTrue(Action.class.isAssignableFrom(implementationClass),
 				"The service to instantiate must implement the Action interface, the implementation class '"
 						+ implementationClass + "' you provided doesn't.");
 		return (Action)createService(implementationClass, autowireMode);
