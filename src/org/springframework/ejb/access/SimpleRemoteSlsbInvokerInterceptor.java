@@ -1,3 +1,8 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+
 package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
@@ -10,7 +15,8 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Basic remote invoker for EJBs.
  * "Creates" a new EJB instance for each invocation.
- * @version $Revision: 1.1.1.1 $
+ * @author Rod Johnson
+ * @version $Id: SimpleRemoteSlsbInvokerInterceptor.java,v 1.2 2003-11-21 11:33:40 johnsonr Exp $
  */
 public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvokerInterceptor {
 	
@@ -47,8 +53,9 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 			return invocation.getMethod().invoke(ejb, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
-			logger.warn(ex + " thrown invoking remote EJB method " + invocation.getMethod());
-			throw ex.getTargetException();
+			Throwable targetException = ex.getTargetException();
+			logger.info("Remote EJB method [" + invocation.getMethod() + "] threw exception: " + targetException.getMessage(), targetException);
+			throw targetException;
 		}
 		catch (Throwable t) {
 			throw new AspectException("Failed to invoke remote EJB", t);

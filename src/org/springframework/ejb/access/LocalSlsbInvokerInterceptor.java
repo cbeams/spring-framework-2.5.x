@@ -1,3 +1,8 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+
 package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
@@ -11,7 +16,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * Interceptor that invokes a local SLSB, after caching
  * the home object. A local EJB home can never go stale.
  * @author Rod Johnson
- * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.1.1.1 2003-08-14 16:20:25 trisberg Exp $
+ * @version $Id: LocalSlsbInvokerInterceptor.java,v 1.2 2003-11-21 11:33:40 johnsonr Exp $
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
@@ -36,11 +41,12 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 			return invocation.getMethod().invoke(ejb, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
-			logger.warn(ex + " thrown invoking remote EJB method " + invocation.getMethod());
-			throw ex.getTargetException();
+			Throwable targetException = ex.getTargetException();
+			logger.info("Local EJB method [" + invocation.getMethod() + "] threw exception: " + targetException.getMessage(), targetException);
+			throw targetException;
 		}
 		catch (Throwable t) {
-			throw new AspectException("Failed to invoke remote EJB", t);
+			throw new AspectException("Failed to invoke local EJB", t);
 		}
 	}
 
