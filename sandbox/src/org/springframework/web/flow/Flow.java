@@ -194,6 +194,11 @@ public class Flow implements FlowEventProcessor, Serializable {
 	public static final String GET = "get";
 
 	/**
+	 * The <code>LOAD</code> event identifier.
+	 */
+	public static final String LOAD = "load";
+
+	/**
 	 * The <code>FIND</code> action state/event identifier.
 	 */
 	public static final String FIND = "find";
@@ -691,41 +696,41 @@ public class Flow implements FlowEventProcessor, Serializable {
 	// flow config factory methods
 
 	/**
-	 * @param stateId
+	 * @param actionStateId
 	 * @param transition
 	 * @return
 	 */
-	public ActionState createActionState(String stateId, Transition transition) {
-		return new ActionState(stateId, transition);
+	public ActionState createActionState(String actionStateId, Transition transition) {
+		return new ActionState(actionStateId, transition);
 	}
 
 	/**
-	 * @param stateId
+	 * @param actionStateId
 	 * @param actionBeanName
 	 * @param transition
 	 * @return
 	 */
-	public ActionState createActionState(String stateId, String actionBeanName, Transition transition) {
-		return new ActionState(stateId, actionBeanName, transition);
+	public ActionState createActionState(String actionStateId, String actionBeanName, Transition transition) {
+		return new ActionState(actionStateId, actionBeanName, transition);
 	}
 
 	/**
-	 * @param stateId
+	 * @param actionStateId
 	 * @param transitions
 	 * @return
 	 */
-	public ActionState createActionState(String stateId, Transition[] transitions) {
-		return new ActionState(stateId, transitions);
+	public ActionState createActionState(String actionStateId, Transition[] transitions) {
+		return new ActionState(actionStateId, transitions);
 	}
 
 	/**
-	 * @param stateId
+	 * @param actionStateId
 	 * @param actionBeanName
 	 * @param transitions
 	 * @return
 	 */
-	public ActionState createActionState(String stateId, String actionBeanName, Transition[] transitions) {
-		return new ActionState(stateId, actionBeanName, transitions);
+	public ActionState createActionState(String actionStateId, String actionBeanName, Transition[] transitions) {
+		return new ActionState(actionStateId, actionBeanName, transitions);
 	}
 
 	/**
@@ -778,6 +783,32 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public ActionState createGetState(String stateIdPrefix, Transition[] transitions) {
 		return createActionState(get(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix) {
+		return createGetState(stateIdPrefix, onSuccessView(stateIdPrefix));
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transition
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix, Transition transition) {
+		return createGetState(stateIdPrefix, new Transition[] { transition });
+	}
+
+	/**
+	 * @param stateIdPrefix
+	 * @param transitions
+	 * @return
+	 */
+	public ActionState createLoadState(String stateIdPrefix, Transition[] transitions) {
+		return createActionState(load(stateIdPrefix), transitions);
 	}
 
 	/**
@@ -1508,6 +1539,14 @@ public class Flow implements FlowEventProcessor, Serializable {
 	 */
 	public String get(String getActionStateIdPrefix) {
 		return buildStateId(getActionStateIdPrefix, GET);
+	}
+
+	/**
+	 * @param getActionStateIdPrefix
+	 * @return
+	 */
+	public String load(String loadActionStateIdPrefix) {
+		return buildStateId(loadActionStateIdPrefix, GET);
 	}
 
 	/**
