@@ -42,7 +42,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: AbstractView.java,v 1.10 2004-05-04 08:39:31 jhoeller Exp $
+ * @version $Id: AbstractView.java,v 1.11 2004-06-28 17:08:16 jhoeller Exp $
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View, BeanNameAware {
@@ -108,38 +108,6 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Set static attributes from a java.util.Properties object. This is
-	 * the most convenient way to set static attributes. Note that static
-	 * attributes can be overridden by dynamic attributes, if a value
-	 * with the same name is included in the model.
-	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
-	 * or a "props" element in XML bean definitions.
-	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
-	 */
-	public void setAttributes(Properties props) {
-		setAttributesMap(props);
-	}
-
-	/**
-	 * Set static attributes from a Map. This allows to set any kind
-	 * of attribute values, for example bean references.
-	 * <p>Can be populated with a "map" or "props" element in XML bean
-	 * definitions.
-	 * @param attributes Map with name Strings as keys and attribute
-	 * objects as values
-	 */
-	public void setAttributesMap(Map attributes) {
-		if (attributes != null) {
-			Iterator itr = attributes.keySet().iterator();
-			while (itr.hasNext()) {
-				String name = (String) itr.next();
-				Object value = attributes.get(name);
-				addStaticAttribute(name, value);
-			}
-		}
-	}
-
-	/**
 	 * Set static attributes as a CSV string.
 	 * Format is: attname0={value1},attname1={value1}
 	 */
@@ -174,6 +142,49 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
+	 * Set static attributes from a java.util.Properties object. This is
+	 * the most convenient way to set static attributes. Note that static
+	 * attributes can be overridden by dynamic attributes, if a value
+	 * with the same name is included in the model.
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
+	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
+	 */
+	public void setAttributes(Properties props) {
+		setAttributesMap(props);
+	}
+
+	/**
+	 * Set static attributes from a Map. This allows to set any kind
+	 * of attribute values, for example bean references.
+	 * <p>Can be populated with a "map" or "props" element in XML bean
+	 * definitions.
+	 * @param attributes Map with name Strings as keys and attribute
+	 * objects as values
+	 */
+	public void setAttributesMap(Map attributes) {
+		if (attributes != null) {
+			Iterator it = attributes.keySet().iterator();
+			while (it.hasNext()) {
+				String name = (String) it.next();
+				Object value = attributes.get(name);
+				addStaticAttribute(name, value);
+			}
+		}
+	}
+
+	/**
+	 * Allow Map access to the static attributes of this view,
+	 * with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "attributesMap[myKey]". This is particularly useful for
+	 * adding or overriding entries in child view definitions.
+	 */
+	public Map getAttributesMap() {
+		return this.staticAttributes;
+	}
+
+	/**
 	 * Add static data to this view, exposed in each view.
 	 * <p>Must be invoked before any calls to render().
 	 * @param name name of attribute to expose
@@ -185,7 +196,9 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Handy for testing. Return the static attributes held in this view.
+	 * Return the static attributes held in this view. Handy for testing.
+	 * <p>Returns an unmodifiable Map, as this is not intended for
+	 * manipulating the Map but rather just for checking the contents.
 	 * @return the static attributes in this view
 	 */
 	public Map getStaticAttributes() {
