@@ -89,6 +89,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 		ObjectOutputStream oos = new ObjectOutputStream(os);
 		try {
 			oos.writeObject(invocation);
+			oos.flush();
 		}
 		finally {
 			oos.close();
