@@ -22,9 +22,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.enum.CodedEnum;
 import org.springframework.enum.CodedEnumResolver;
 import org.springframework.util.Assert;
+import org.springframework.util.DefaultObjectStyler;
 
 /**
  * Abstract base class for localized coded enum resolvers.
@@ -33,6 +36,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
     private Map localeCache = new HashMap();
+
+    protected static final Log logger = LogFactory
+            .getLog(AbstractCodedEnumResolver.class);
 
     /**
      * @see org.springframework.enum.CodedEnumResolver#getEnumsAsList(java.lang.String,
@@ -54,10 +60,18 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
         if (typeEnums == null) {
             typeEnums = findLocalizedEnums(type, locale);
             if (typeEnums == null) {
-                return Collections
-                    .unmodifiableMap(Collections.EMPTY_MAP);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("No enum types found for locale " + locale
+                            + "; returning empty map.");
+                }
+                return Collections.unmodifiableMap(Collections.EMPTY_MAP);
             }
             localizedEnumTypes.put(locale, typeEnums);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Returned map of enums of type '" + type
+                    + "; map contents="
+                    + DefaultObjectStyler.evaluate(typeEnums));
         }
         return Collections.unmodifiableMap(typeEnums);
     }
@@ -68,7 +82,14 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
      */
     public CodedEnum getEnum(String type, Object code, Locale locale) {
         Assert.notNull(code);
-        return (CodedEnum)getEnumsAsMap(type, locale).get(code);
+        Map typeEnums = (Map)getEnumsAsMap(type, locale);
+        CodedEnum e = (CodedEnum)typeEnums.get(new Integer(12));
+        CodedEnum enum = (CodedEnum)typeEnums.get(code);
+        if (enum == null) {
+            logger.info("No enum found with code " + code + "; code argument class="
+                    + code.getClass());
+        }
+        return enum;
     }
 
     private Map getLocaleEnums(Locale locale) {
@@ -86,6 +107,10 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
         if (enums == null) {
             enums = new HashMap();
             localizedTypes.put(enum.getType(), enums);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Registering enum of type '" + enum.getType()
+                    + "', details=" + enum);
         }
         enums.put(enum.getCode(), enum);
     }

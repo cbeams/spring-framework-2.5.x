@@ -24,6 +24,8 @@ import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.UserType;
 import net.sf.hibernate.type.NullableType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.enum.CodedEnum;
 import org.springframework.enum.CodedEnumResolver;
 import org.springframework.enum.LetterCodedEnum;
@@ -37,6 +39,8 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  */
 public class CodedEnumUserType implements UserType {
+    private static final Log logger = LogFactory.getLog(CodedEnumUserType.class);
+    
     private String enumType;
     private Class enumClass;
     private CodedEnumResolver enumResolver = StaticCodedEnumResolver
@@ -122,14 +126,25 @@ public class CodedEnumUserType implements UserType {
      */
     public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
             throws HibernateException, SQLException {
-        Object code = rs.getObject(names[0]);
+        Object code;
+        if (persistentType == Hibernate.SHORT) {
+            code = Hibernate.SHORT.nullSafeGet(rs, names[0]);
+        } else if (persistentType == Hibernate.CHARACTER) {
+            code = Hibernate.CHARACTER.nullSafeGet(rs, names[0]);
+        } else {
+            code = Hibernate.STRING.nullSafeGet(rs, names[0]);
+        }
         if (code == null) {
             return null;
         }
         if (enumType == null) {
             enumType = ClassUtils.getShortNameAsProperty(enumClass);
         }
-        return enumResolver.getEnum(enumType, code, null);
+        CodedEnum enum = enumResolver.getEnum(enumType, code, null);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Resolved enum '" + enum + "' of type '" + enumType + "' from persisted code " + code);
+        }
+        return enum;
     }
 
     /**
