@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.63 2004-06-06 22:24:44 aarendsen Exp $
+    $Id: build.xml,v 1.64 2004-06-10 20:51:57 aarendsen Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -903,23 +903,42 @@
 		 
 		 'mb' runs all the automated build tests and is supposed to be expanded further
 		 'mb-server-tests' runs all the servers tests
-		 'mb-spring-build' runs the spring-build
+		 'mb-publish' publishes the results from the server tests		 
 	-->
 	<target name="mb" depends="clean, build, fulljar, tests, mb-server-tests, mb-publish"/>		
 	
-	<target name="mb-server-tests">			
+	<target name="mb-server-tests">
 		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
-			<property name="autobuild.nospringbuild" value="true"/>
-			<property name="target.app" value="jpetstore"/>
-			<property name="target.server" value="tomcat4"/>
+				<property name="autobuild.nospringbuild" value="true"/>
+				<property name="target.app" value="buildtest"/>
+				<property name="target.server" value="tomcat4"/>
+				<property name="autobuild.nomail" value="true"/>
 		</ant>
 		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
-			<property name="autobuild.nospringbuild" value="true"/>
-			<property name="target.app" value="jpetstore"/>
-			<property name="target.server" value="tomcat5"/>
-			<property name="autobuild.nomail" value="true"/>
+				<property name="autobuild.nospringbuild" value="true"/>
+				<property name="target.app" value="buildtest"/>
+				<property name="target.server" value="tomcat5"/>
+				<property name="autobuild.nomail" value="true"/>
 		</ant>
-	</target>
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+				<property name="autobuild.nospringbuild" value="true"/>
+				<property name="target.app" value="buildtest"/>
+				<property name="target.server" value="jetty4"/>
+				<property name="autobuild.nomail" value="true"/>
+		</ant>
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+				<property name="autobuild.nospringbuild" value="true"/>
+				<property name="target.app" value="jpetstore"/>
+				<property name="target.server" value="tomcat4"/>
+		</ant>
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+				<property name="autobuild.nospringbuild" value="true"/>
+				<property name="target.app" value="jpetstore"/>
+				<property name="target.server" value="tomcat5"/>
+				<property name="autobuild.nomail" value="true"/>
+		</ant>
+    </target>
+
 	
 	<target name="mb-publish">
 		<tstamp>
@@ -930,6 +949,13 @@
 				<include name="*unittests_${tstamp.servertests}.xml"/>
 			</fileset>
 		</copy>
+		<mkdir dir="${target.junit.reports.html.dir}"/>
+		<junitreport todir="${target.junit.reports.html.dir}">
+          <fileset dir="${target.junit.reports.dir}">
+            <include name="*.xml"/>
+          </fileset>
+          <report format="frames" todir="${target.junit.reports.html.dir}"/>
+        </junitreport>
 	</target>
 
 </project>
