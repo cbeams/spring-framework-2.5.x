@@ -23,7 +23,7 @@ import org.springframework.rules.UnaryPredicate;
 /**
  * @author Keith Donald
  */
-public class PropertyResults {
+public class PropertyResults implements ValidationResults {
 
     private String propertyName;
     private Object rejectedValue;

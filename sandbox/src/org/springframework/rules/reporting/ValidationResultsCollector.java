@@ -19,19 +19,12 @@ import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.rules.Algorithms;
-import org.springframework.rules.Rules;
+import org.springframework.rules.UnaryFunction;
 import org.springframework.rules.UnaryPredicate;
-import org.springframework.rules.UnaryProcedure;
-import org.springframework.rules.functions.GetProperty;
-import org.springframework.rules.predicates.CompoundBeanPropertyExpression;
 import org.springframework.rules.predicates.UnaryAnd;
+import org.springframework.rules.predicates.UnaryFunctionResultConstraint;
 import org.springframework.rules.predicates.UnaryNot;
 import org.springframework.rules.predicates.UnaryOr;
-import org.springframework.rules.predicates.beans.BeanPropertiesExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyExpression;
-import org.springframework.rules.predicates.beans.BeanPropertyValueConstraint;
-import org.springframework.rules.predicates.beans.ParameterizedBeanPropertyExpression;
 import org.springframework.util.ToStringBuilder;
 import org.springframework.util.visitor.ReflectiveVisitorSupport;
 import org.springframework.util.visitor.Visitor;
@@ -42,90 +35,41 @@ import org.springframework.util.visitor.Visitor;
 public class ValidationResultsCollector implements Visitor {
     private static final Log logger = LogFactory
             .getLog(ValidationResultsCollector.class);
-    private ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
-    private Object bean;
-    private GetProperty getProperty;
+    protected ReflectiveVisitorSupport visitorSupport = new ReflectiveVisitorSupport();
     private boolean collectAllErrors;
-    private BeanValidationResultsBuilder resultsBuilder;
+    private ValidationResultsBuilder resultsBuilder;
+    private ValidationResults results;
+    private Object argument;
 
-    public ValidationResultsCollector(Object bean) {
-        this.bean = bean;
-        this.resultsBuilder = new BeanValidationResultsBuilder(bean);
-        this.getProperty = new GetProperty(bean);
+    public ValidationResultsCollector() {
+    }
+
+    public ValidationResults collect(final Object argument,
+            final UnaryPredicate constraint) {
+        this.resultsBuilder = new ValidationResultsBuilder() {
+            public void constraintSatisfied() {
+                results = new ValueValidationResults(argument);
+            }
+
+            public void constraintViolated(UnaryPredicate constraint) {
+                results = new ValueValidationResults(argument, constraint);
+            }
+        };
+        this.argument = argument;
+        visitorSupport.invokeVisit(this, constraint);
+        return results;
     }
 
     public void setCollectAllErrors(boolean collectAllErrors) {
         this.collectAllErrors = collectAllErrors;
     }
 
-    public ValidationResults collectResults(Rules rules) {
-        Algorithms.forEach(rules.iterator(), new UnaryProcedure() {
-            public void run(Object beanPropertyConstraint) {
-                collectPropertyResults((BeanPropertyExpression)beanPropertyConstraint);
-            }
-        });
-        return resultsBuilder;
+    protected void setResultsBuilder(ValidationResultsBuilder resultsBuilder) {
+        this.resultsBuilder = resultsBuilder;
     }
 
-    public PropertyResults collectPropertyResults(
-            BeanPropertyExpression rootExpression) {
-        resultsBuilder.setPropertyName(rootExpression.getPropertyName());
-        boolean result = ((Boolean)visitorSupport.invokeVisit(this,
-                rootExpression)).booleanValue();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Final validation result: " + result);
-        }
-        if (!result) {
-            return resultsBuilder.getResults(rootExpression.getPropertyName());
-        } else {
-            return null;
-        }
-    }
-
-    Boolean visit(CompoundBeanPropertyExpression rule) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Validating compound bean property expression ["
-                    + rule + "]...");
-        }
-        return (Boolean)visitorSupport.invokeVisit(this, rule.getPredicate());
-    }
-
-    boolean visit(BeanPropertiesExpression constraint) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Validating bean properties expression [" + constraint
-                    + "]...");
-        }
-        return testBeanPropertyExpression(constraint);
-    }
-
-    boolean visit(ParameterizedBeanPropertyExpression constraint) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Validating parameterized bean property expression ["
-                    + constraint + "]...");
-        }
-        return testBeanPropertyExpression(constraint);
-    }
-
-    private boolean testBeanPropertyExpression(BeanPropertyExpression constraint) {
-        boolean result = constraint.test(bean);
-        result = applyAnyNegation(result);
-        if (!result) {
-            resultsBuilder.push(constraint);
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Constraint [" + constraint + "] "
-                    + (result ? "passed" : "failed"));
-        }
-        return result;
-    }
-
-    Boolean visit(BeanPropertyValueConstraint valueConstraint) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Validating property value constraint ["
-                    + valueConstraint + "]...");
-        }
-        return (Boolean)visitorSupport.invokeVisit(this, valueConstraint
-                .getPredicate());
+    protected void setArgument(Object argument) {
+        this.argument = argument;
     }
 
     boolean visit(UnaryAnd and) {
@@ -191,10 +135,14 @@ public class ValidationResultsCollector implements Visitor {
         return result;
     }
 
+    Boolean visit(UnaryFunctionResultConstraint ofConstraint) {
+        UnaryFunction f = ofConstraint.getFunction();
+        this.argument = f.evaluate(argument);
+        return (Boolean)visitorSupport.invokeVisit(this, ofConstraint.getPredicate());
+    }
+
     boolean visit(UnaryPredicate constraint) {
-        Object propertyValue = getProperty.evaluate(resultsBuilder
-                .getPropertyName());
-        boolean result = constraint.test(propertyValue);
+        boolean result = constraint.test(argument);
         result = applyAnyNegation(result);
         if (!result) {
             resultsBuilder.push(constraint);
@@ -206,7 +154,7 @@ public class ValidationResultsCollector implements Visitor {
         return result;
     }
 
-    private boolean applyAnyNegation(boolean result) {
+    protected boolean applyAnyNegation(boolean result) {
         boolean negated = resultsBuilder.peek() instanceof UnaryNot;
         if (logger.isDebugEnabled()) {
             if (negated) {
@@ -219,9 +167,9 @@ public class ValidationResultsCollector implements Visitor {
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("bean", bean).append(
-                "collectAllErrors", collectAllErrors).append(
-                "validationResultsBuilder", resultsBuilder).toString();
+        return new ToStringBuilder(this).append("collectAllErrors",
+                collectAllErrors).append("validationResultsBuilder",
+                resultsBuilder).toString();
     }
 
 }

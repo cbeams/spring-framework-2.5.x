@@ -27,7 +27,7 @@ import org.springframework.rules.functions.GetProperty;
  * @author Keith Donald
  */
 public class BeanValidationResultsBuilder extends ValidationResultsBuilder
-        implements ValidationResults {
+        implements BeanValidationResults {
     private String currentProperty;
     private Map beanResults = new HashMap();
     private GetProperty getProperty;

@@ -10,8 +10,8 @@ import junit.framework.TestCase;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.rules.factory.Constraints;
-import org.springframework.rules.reporting.ValidationResults;
-import org.springframework.rules.reporting.ValidationResultsCollector;
+import org.springframework.rules.reporting.BeanValidationResults;
+import org.springframework.rules.reporting.BeanValidationResultsCollector;
 
 /**
  * @author Keith Donald
@@ -31,17 +31,17 @@ public class ValidationResultsTests extends TestCase {
 
     public void testValidationResultsCollector() {
         Person p = new Person();
-        ValidationResultsCollector c = new ValidationResultsCollector(p);
-        ValidationResults r =
+        BeanValidationResultsCollector c = new BeanValidationResultsCollector(p);
+        BeanValidationResults r =
             c.collectResults(rulesSource.getRules(Person.class));
         assertEquals(2, r.getViolatedCount());
     }
 
     public void testValidationResultsCollectorCollectAllErrors() {
         Person p = new Person();
-        ValidationResultsCollector c = new ValidationResultsCollector(p);
+        BeanValidationResultsCollector c = new BeanValidationResultsCollector(p);
         c.setCollectAllErrors(true);
-        ValidationResults r =
+        BeanValidationResults r =
             c.collectResults(rulesSource.getRules(Person.class));
         assertEquals(2, r.getViolatedCount());
     }
@@ -60,9 +60,9 @@ public class ValidationResultsTests extends TestCase {
                 constraints.not(
                     constraints.eqProperty("firstName", "lastName")));
         rules.add(constraint);
-        ValidationResultsCollector c = new ValidationResultsCollector(p);
+        BeanValidationResultsCollector c = new BeanValidationResultsCollector(p);
         c.setCollectAllErrors(true);
-        ValidationResults r = c.collectResults(rules);
+        BeanValidationResults r = c.collectResults(rules);
         assertEquals(3, r.getViolatedCount());
         String message =
             r.getResults("firstName").buildMessage(ac, Locale.getDefault());
