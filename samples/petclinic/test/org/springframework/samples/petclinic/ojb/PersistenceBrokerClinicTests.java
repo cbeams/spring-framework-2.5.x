@@ -11,8 +11,8 @@ import org.springframework.samples.petclinic.AbstractClinicTests;
  */
 public class PersistenceBrokerClinicTests extends AbstractClinicTests {
 
-	protected String getContextConfigLocation() {
-		return "/org/springframework/samples/petclinic/ojb/applicationContext-ojb.xml";
+	protected String[] getConfigLocations() {
+		return new String[] { "/org/springframework/samples/petclinic/ojb/applicationContext-ojb.xml" };
 	}
 
 }

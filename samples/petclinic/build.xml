@@ -80,6 +80,12 @@
 			<include name="commons-pool.jar"/>
 		</fileset>
 
+		<!--
+			Contains org.springframework.test package.
+		-->
+		<fileset dir="${spring.root}/dist">
+			<include name="spring-mock.jar"/>
+		</fileset>
 	</path>
 
 
@@ -278,6 +284,7 @@
 			<classpath path="${build.dir}"/>
 			<classpath refid="master-classpath"/>
 			<classpath path="${spring.root}/lib/junit/junit.jar"/>
+			<classpath refid="test-classpath"/>
 		</javac>
 
 		<junit printsummary="true" fork="yes">

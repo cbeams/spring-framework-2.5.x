@@ -10,8 +10,8 @@ import org.springframework.samples.petclinic.AbstractClinicTests;
  */
 public class HibernateClinicTests extends AbstractClinicTests {
 
-	protected String getContextConfigLocation() {
-		return "/org/springframework/samples/petclinic/hibernate/applicationContext-hibernate.xml";
+	protected String[] getConfigLocations() {
+		return new String[] { "/org/springframework/samples/petclinic/hibernate/applicationContext-hibernate.xml" };
 	}
 
 }

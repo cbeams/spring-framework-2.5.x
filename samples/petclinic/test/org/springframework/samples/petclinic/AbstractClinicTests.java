@@ -3,31 +3,58 @@ package org.springframework.samples.petclinic;
 import java.util.Collection;
 import java.util.Date;
 
-import junit.framework.TestCase;
-
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.samples.petclinic.util.EntityUtils;
+import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
 
 /**
  * Base class for Clinic tests.
- * Allows subclasses to specify context location.
- *
+ * Allows subclasses to specify context locations.
+ * <p>
+ * This class extends AbstractTransactionalDataSourceSpringContextTests,
+ * one of the valuable test superclasses provided in the org.springframework.test
+ * package. This represents best practice for integration tests with Spring. 
+ * The AbstractTransactionalDataSourceSpringContextTests superclass provides the
+ * following services:
+ * <li>Injects test dependencies, meaning that we don't need to perform application
+ * context lookups. See the setClinic() method. Injection uses autowiring by
+ * type.
+ * <li>Executes each test method in its own transaction, which is automatically
+ * rolled back by default. This means that even if tests
+ * insert or otherwise change database state, there is no need for a teardown
+ * or cleanup script.
+ * <li>Provides useful inherited protected fields, such as a JdbcTemplate that can be
+ * used to verify database state after test operations, or verify the results of queries
+ * performed by application code. An ApplicationContext is also inherited, and can be
+ * used for explicit lookup if necessary.
+ * <p>
+ * The AbstractTransactionalDataSourceSpringContextTests and related classes are shipped
+ * in the spring-mock.jar.
+ * 
+ * @see org.springframework.test.AbstractTransactionalDataSourceSpringContextTests
  * @author Ken Krebs
+ * @author Rod Johnson
  */
-public abstract class AbstractClinicTests extends TestCase {
+public abstract class AbstractClinicTests extends AbstractTransactionalDataSourceSpringContextTests {
 
-	private Clinic clinic;
+	protected Clinic clinic;
 
-	protected void setUp() throws Exception {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getContextConfigLocation());
-		this.clinic = (Clinic) ctx.getBean("clinic");
+	/**
+	 * This method is provided to set the Clinic instance being tested by the Dependency Injection
+	 * injection behaviour of the superclass from the org.springframework.test package.
+	 * @param clinic clinic to test
+	 */
+	public void setClinic(Clinic clinic) {
+		this.clinic = clinic;
 	}
-
-	protected abstract String getContextConfigLocation();
 
 	public void testGetVets() {
 		Collection vets = this.clinic.getVets();
-		assertEquals(6, vets.size());
+		
+		// Use the inherited JdbcTemplate (from AbstractTransactionalDataSourceSpringContextTests) 
+		// to verify the results of the query
+		assertEquals("JDBC query must show the same number of vets",
+				jdbcTemplate.queryForInt("SELECT COUNT(0) FROM VETS"), 
+				vets.size());
 		Vet v1 = (Vet) EntityUtils.getById(vets, Vet.class, 2);
 		assertEquals("Leary", v1.getLastName());
 		assertEquals(1, v1.getNrOfSpecialties());
@@ -41,7 +68,9 @@ public abstract class AbstractClinicTests extends TestCase {
 
 	public void testGetPetTypes() {
 		Collection petTypes = this.clinic.getPetTypes();
-		assertEquals(6, petTypes.size());
+		assertEquals("JDBC query must show the same number of pet typess",
+				jdbcTemplate.queryForInt("SELECT COUNT(0) FROM TYPES"), 
+				petTypes.size());
 		PetType t1 = (PetType) EntityUtils.getById(petTypes, PetType.class, 1);
 		assertEquals("cat", t1.getName());
 		PetType t4 = (PetType) EntityUtils.getById(petTypes, PetType.class, 4);
@@ -60,6 +89,13 @@ public abstract class AbstractClinicTests extends TestCase {
 		assertTrue(o1.getLastName().startsWith("Franklin"));
 		Owner o10 = this.clinic.loadOwner(10);
 		assertEquals("Carlos", o10.getFirstName());
+		
+		// Check lazy loading, by ending the transaction
+		endTransaction();
+		// Now Owners are "disconnected" from the data store.
+		// We might need to touch this collection if we switched to lazy loading
+		// in mapping files, but this test would pick this up.
+		o1.getPets();
 	}
 
 	public void testInsertOwner() {
