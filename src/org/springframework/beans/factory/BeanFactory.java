@@ -20,8 +20,8 @@ import org.springframework.beans.BeansException;
 
 /**
  * The root interface for accessing a Spring IoC container.
- * <p>
- * This interface is implemented by objects that hold a number of bean definitions,
+ *
+ * <p>This interface is implemented by objects that hold a number of bean definitions,
  * each uniquely identified by a String name. Depending on the bean definition,
  * the factory will return either an independent instance of a
  * contained object (the Prototype design pattern), or a single
@@ -36,8 +36,8 @@ import org.springframework.beans.BeansException;
  * components (no more do individual objects need to read properties files,
  * for example). See chapters 4 and 11 of "Expert One-on-One J2EE Design and
  * Development" for a discussion of the benefits of this approach.
- * <p>
- * Note that it is generally better to rely on Dependency Injection
+ *
+ * <p>Note that it is generally better to rely on Dependency Injection
  * ("push" configuration) to configure application objects through setters
  * or constructors, rather than use
  * any form of "pull" configuration like a BeanFactory lookup. Spring's
@@ -90,6 +90,15 @@ import org.springframework.beans.BeansException;
 public interface BeanFactory {
 
 	/**
+	 * Used to dereference a FactoryBean and distinguish it from beans
+	 * <i>created</i> by the factory. For example, if the bean named
+	 * <code>myEjb</code> is a factory, getting <code>&myEjb</code> will
+	 * return the factory, not the instance returned by the factory.
+	 */
+	String FACTORY_BEAN_PREFIX = "&";
+
+
+	/**
 	 * Return an instance, which may be shared or independent, of the given bean name.
 	 * This method allows a Spring bean factory to be used as a replacement for
 	 * the Singleton or Prototype design pattern.
@@ -97,7 +106,7 @@ public interface BeanFactory {
 	 * in the case of Singleton beans. 
 	 * <p>This method delegates to the parent factory if the 
 	 * bean cannot be found in this factory instance.
-	 * @param name name of the bean to return
+	 * @param name the name of the bean to return
 	 * @return the instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean definition
 	 * with the specified name
@@ -107,15 +116,15 @@ public interface BeanFactory {
 
 	/**
 	 * Return an instance (possibly shared or independent) of the given bean name.
-	 * Behaves the same as getBean(String), but provides a measure of type safety by 
+	 * <p>Behaves the same as getBean(String), but provides a measure of type safety by
 	 * throwing a Spring BeansException if the bean is not of the required type.
 	 * This means that ClassCastException can't be thrown on casting the result correctly,
 	 * as can happen with getBean(String). 
-	 * @param name name of the bean to return
+	 * @param name the name of the bean to return
 	 * @param requiredType type the bean must match. Can be an interface or superclass
-	 * of the actual class. For example, if the value is Object.class, this method will
-	 * succeed whatever the class of the returned instance.
-	 * @return an instance of the bean
+	 * of the actual class, or null for any match. For example, if the value is
+	 * Object.class, this method will succeed whatever the class of the returned instance.
+	 * @return an instance of the bean (never null)
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
 	 * @throws BeansException if the bean could not be created
@@ -125,7 +134,7 @@ public interface BeanFactory {
 	/**
 	 * Does this bean factory contain a bean definition with the given name?
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
-	 * @param name name of the bean to query
+	 * @param name the name of the bean to query
 	 * @return whether a bean with the given name is defined
 	 */
 	boolean containsBean(String name);
@@ -133,11 +142,23 @@ public interface BeanFactory {
 	/**
 	 * Is this bean a singleton? That is, will getBean() always return the same object?
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
-	 * @param name name of the bean to query
+	 * @param name the name of the bean to query
 	 * @return is this bean a singleton
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 */
 	boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Determine the type of the bean with the given name.
+	 * More specifically, checks the type of object that getBean would return.
+	 * For a FactoryBean, returns the type of object that the FactoryBean creates.
+	 * @param name the name of the bean to query
+	 * @return the type of the bean, or null if not determinable
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @see #getBean
+	 * @see FactoryBean#getObjectType
+	 */
+	Class getType(String name) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Return the aliases for the given bean name, if defined.

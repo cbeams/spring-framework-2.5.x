@@ -825,8 +825,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		else if (value instanceof BeanDefinition) {
 			// Resolve plain BeanDefinition, without contained name: use dummy name.
 			BeanDefinition bd = (BeanDefinition) value;
-			return resolveInnerBeanDefinition(
-					beanName, "(inner bean of type " + bd.getBeanClass().getName() + ")", bd);
+			return resolveInnerBeanDefinition(beanName, "(inner bean)", bd);
 		}
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
@@ -860,8 +859,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (mergedInnerBd.isSingleton()) {
 			if (innerBean instanceof DisposableBean) {
 				registerDependentBean(innerBeanName, beanName);
-				// keep reference to inner bean, to be able to destroy it on factory shutdown
-				addDisposableBean(innerBeanName, (DisposableBean) innerBean);
+				// Keep reference to inner bean, to be able to destroy it on factory shutdown.
+				registerDisposableBean(innerBeanName, (DisposableBean) innerBean);
 			}
 		}
 		return getObjectForSharedInstance(innerBeanName, innerBean);
