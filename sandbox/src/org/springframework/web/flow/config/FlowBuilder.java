@@ -18,13 +18,15 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.Flow;
 
 /**
- * Builder interface used to build flows.
- * 
+ * Builder interface used to build flows. Implementations should encapsulate
+ * flow construction logic (for a specific kind of flow, for example,
+ * <code>EditUsersMasterFlowBuilder</code>) or a generic flow builder
+ * strategy (like the XmlFlowBuilder, for building flows from a xml-definition).
  * <p>
- * Flow builders are <i>executed</i> by the FlowFactoryBean.
+ * Flow builders are executed by the FlowFactoryBean, which acts as an assembler
+ * (director). This is the classic GoF Builder pattern.
  * 
  * @see org.springframework.web.flow.config.FlowFactoryBean
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -37,13 +39,13 @@ public interface FlowBuilder {
 	public void init() throws FlowBuilderException;
 
 	/**
-	 * Creates and adds all states for the flow built by this builder.
+	 * Creates and adds all states to the flow built by this builder.
 	 */
 	public void buildStates() throws FlowBuilderException;
 
 	/**
-	 * Creates and/or links applicable flow execution listeners up to the
-	 * flow built by this builder. This set of listeners will be treated as the
+	 * Creates and/or links applicable flow execution listeners up to the flow
+	 * built by this builder. This set of listeners will be treated as the
 	 * default set associated with each execution created for the flow built by
 	 * this builder.
 	 */

@@ -29,7 +29,7 @@ import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecutionListener;
 
 /**
- * Abstract base implementation of a flow builder defining base functionality
+ * Abstract base implementation of a flow builder defining common functionality
  * needed by most concrete flow builder implementations.
  * 
  * @author Keith Donald
@@ -39,7 +39,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private FlowServiceLocator flowServiceLocator=new BeanFactoryFlowServiceLocator();
+	private FlowServiceLocator flowServiceLocator = new BeanFactoryFlowServiceLocator();
 
 	private Collection flowExecutionListeners = new ArrayList(3);
 
@@ -48,23 +48,25 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	private FlowCreator flowCreator = new DefaultFlowCreator();
 
 	/**
-	 * The default FlowCreator implementation. This just instantiates
-	 * the Flow class.
+	 * The default FlowCreator implementation. This just instantiates the
+	 * <code>Flow</code> class. If you need a custom <code>Flow</code>
+	 * implementation, configure the BaseFlowBuilder witha custom
+	 * <code>FlowCreator</code>.
 	 * 
-	 * @see org.springframework.web.flow.Flow 
+	 * @see org.springframework.web.flow.Flow
 	 */
 	public static class DefaultFlowCreator implements FlowCreator {
 		public Flow createFlow(String flowId) {
 			return new Flow(flowId);
 		}
 	}
-	
+
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (flowServiceLocator instanceof BeanFactoryFlowServiceLocator) {
 			((BeanFactoryFlowServiceLocator)flowServiceLocator).setBeanFactory(beanFactory);
 		}
 	}
-	
+
 	/**
 	 * @return The flow creation strategy to use.
 	 */
@@ -94,8 +96,8 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	}
 
 	/**
-	 * Set the default listener that will be associated with each execution
-	 * of the flow created by this builder.
+	 * Set the default listener that will be associated with each execution of
+	 * the flow created by this builder.
 	 */
 	public void setFlowExecutionListener(FlowExecutionListener listener) {
 		this.flowExecutionListeners.clear();
@@ -103,8 +105,8 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	}
 
 	/**
-	 * Set the default listeners that will be associated with each execution
-	 * of the flow created by this builder.
+	 * Set the default listeners that will be associated with each execution of
+	 * the flow created by this builder.
 	 */
 	public void setFlowExecutionListeners(FlowExecutionListener[] listeners) {
 		this.flowExecutionListeners.clear();
@@ -119,7 +121,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	}
 
 	/**
-	 * Get the flow being built by this builder.
+	 * Get the flow (result) built by this builder.
 	 */
 	protected Flow getFlow() {
 		return flow;

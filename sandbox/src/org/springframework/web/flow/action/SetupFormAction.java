@@ -29,6 +29,18 @@ import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.MutableAttributesAccessor;
 
 /**
+ * A base superclass for actions that contain form view setup logic. Extends
+ * from <code>BindAndValidate</code> action to share common behaivior.
+ * <p>
+ * Form setup actions typically execute before a view is displayed to load the
+ * backing form object and errors instance, and retrieve any supporting
+ * reference data (typically to populate drop downs). Basically, this action
+ * exists to setup any dynamic data needed for rendering by a view template.
+ * 
+ * Fully instantiable as is, or by a custom subclass. This action differs from a
+ * standard BindAndValidate action in that it doesn't do validation (not needed
+ * during form setup), and has a specific setupFormReferenceData hook.
+ * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
@@ -42,6 +54,12 @@ public class SetupFormAction extends BindAndValidateAction {
 
 	private boolean prepopulateFromRequest;
 
+	/**
+	 * Sets a flag that determines whether this setup form action should
+	 * prepopulate its form object from request parameter values when executed.
+	 * @param prepopulateFromRequest true if the form object should be populated
+	 *        with request parameters, false otherwise
+	 */
 	public void setPrepopulateFromRequest(boolean prepopulateFromRequest) {
 		this.prepopulateFromRequest = prepopulateFromRequest;
 	}
@@ -51,6 +69,10 @@ public class SetupFormAction extends BindAndValidateAction {
 		return true;
 	}
 
+	/**
+	 * Exception thrown when reference data setup fails.
+	 * @author Keith Donald
+	 */
 	protected static class ReferenceDataSetupException extends RuntimeException {
 		public ReferenceDataSetupException(String message, Throwable cause) {
 			super(message, cause);
@@ -97,6 +119,12 @@ public class SetupFormAction extends BindAndValidateAction {
 		return binder.getErrors().hasErrors() ? error() : success();
 	}
 
+	/**
+	 * Exports convenience 'debug' placeholders for views that have incomplete
+	 * field mappings.
+	 * @param request The request
+	 * @param model The model
+	 */
 	protected void exportViewPlaceholders(HttpServletRequest request, MutableAttributesAccessor model) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Exporting view markers/placeholders to notify business-tier developers of "
@@ -125,7 +153,9 @@ public class SetupFormAction extends BindAndValidateAction {
 
 	/**
 	 * Template method to be implemented by subclasses to setup any reference
-	 * data needed to support this form.
+	 * data needed to support this form. For example, a subclass may load
+	 * reference data from the DB or a 2nd level cache and place it in the
+	 * request.
 	 * @param request current HTTP request
 	 * @param model the flow model
 	 */

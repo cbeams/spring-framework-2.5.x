@@ -31,7 +31,8 @@ import org.springframework.web.flow.Flow;
 public interface FlowCreator {
 
 	/**
-	 * Create the <code>Flow</code> instance with the specified id.
+	 * Factory method that create the <code>Flow</code> instance with the
+	 * specified id.
 	 * @param id The flow identifier
 	 * @return The <code>Flow</code> (or a custom specialization of Flow)
 	 */
