@@ -17,12 +17,16 @@
 package org.springframework.core;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.map.IdentityMap;
 import org.apache.commons.collections.map.LinkedMap;
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -64,6 +68,30 @@ public class CollectionFactory {
 				commonsCollections3xAvailable = false;
 				logger.info("Using JDK 1.3 collections");
 			}
+		}
+	}
+
+	/**
+	 * Create a linked set if possible: that is, if running on JDK >= 1.4
+	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4
+	 * LinkedHashSet to a Commons Collections 3.x ListOrderedSet.
+	 * @param initialCapacity the initial capacity of the set
+	 * @return the new set instance
+	 * @see java.util.LinkedHashSet
+	 * @see org.apache.commons.collections.set.ListOrderedSet
+	 */
+	public static Set createLinkedSetIfPossible(int initialCapacity) {
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			logger.debug("Creating java.util.LinkedHashSet");
+			return Jdk14CollectionFactory.createLinkedHashSet(initialCapacity);
+		}
+		else if (commonsCollections3xAvailable) {
+			logger.debug("Creating org.apache.commons.collections.set.ListOrderedSet");
+			return CommonsCollectionFactory.createCommonsListOrderedSet(initialCapacity);
+		}
+		else {
+			logger.debug("Falling back to java.util.HashSet for linked set");
+			return new HashSet(initialCapacity);
 		}
 	}
 
@@ -117,10 +145,14 @@ public class CollectionFactory {
 
 
 	/**
-	 * Actual creation of a java.util.LinkedHashMap.
+	 * Actual creation of JDK 1.4 Collections.
 	 * In separate inner class to avoid runtime dependency on JDK 1.4.
 	 */
 	private static abstract class Jdk14CollectionFactory {
+
+		private static Set createLinkedHashSet(int initialCapacity) {
+			return new LinkedHashSet(initialCapacity);
+		}
 
 		private static Map createLinkedHashMap(int initialCapacity) {
 			return new LinkedHashMap(initialCapacity);
@@ -133,10 +165,14 @@ public class CollectionFactory {
 
 
 	/**
-	 * Actual creation of a org.apache.commons.collections.map.LinkedMap.
+	 * Actual creation of Commons Collections.
 	 * In separate inner class to avoid runtime dependency on Commons Collections 3.x.
 	 */
 	private static abstract class CommonsCollectionFactory {
+
+		private static Set createCommonsListOrderedSet(int initialCapacity) {
+			return ListOrderedSet.decorate(new HashSet(initialCapacity));
+		}
 
 		private static Map createCommonsLinkedMap(int initialCapacity) {
 			// Commons Collections does not support initial capacity of 0.
