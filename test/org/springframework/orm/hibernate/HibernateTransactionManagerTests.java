@@ -1259,8 +1259,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 	}
 
 	protected void tearDown() {
-		//assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		//assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 
