@@ -56,11 +56,12 @@ public class ReflectiveVisitorSupport {
      *            if the visitor parameter is null.
      * @see org.springframework.utils.visitor.Visitor#visit(java.lang.Object)
      */
-    public final void invokeVisit(Visitor visitor, Object argument) {
+    public final Object invokeVisit(Visitor visitor, Object argument) {
         Assert.notNull(visitor);
         try {
             if (argument instanceof Visitable) {
                 callAccept((Visitable)argument, visitor);
+                return null;
             } else {
                 Method method = getMethod(visitor.getClass(), argument);
                 if (method == null) {
@@ -70,14 +71,14 @@ public class ReflectiveVisitorSupport {
                             + " and argument '"
                             + (argument != null ? argument.getClass() : null)
                             + "'");
-                    return;
+                    return null;
                 }
                 try {
                     Object[] args = null;
                     if (argument != null) {
                         args = new Object[] { argument };
                     }
-                    method.invoke(visitor, args);
+                    return method.invoke(visitor, args);
                 } catch (Exception e) {
                     throw e;
                 }

@@ -8,7 +8,9 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.BeanInfoSupport;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.SpringValueStyler;
 import org.springframework.validation.rules.MaxLength;
 import org.springframework.validation.rules.Required;
 import org.springframework.validation.support.BeanValidatorBuilder;
@@ -43,19 +45,23 @@ public class BeanValidatorTestSuite extends TestCase {
                 .getValue(BeanValidatorConstants.VALIDATOR_PROPERTY))
                 .getPropertyName());
         beanInfo = support.getNestedBeanInfo("name");
-        assertEquals(
-            "lastName",
-            ((PropertyValidator)support
-                .getPropertyDescriptor(beanInfo, "lastName")
-                .getValue(BeanValidatorConstants.VALIDATOR_PROPERTY))
-                .getPropertyName());
+        PropertyValidator validator =
+            (PropertyValidator)support.getPropertyDescriptor(
+                beanInfo,
+                "lastName").getValue(
+                BeanValidatorConstants.VALIDATOR_PROPERTY);
+        assertEquals("lastName", validator.getPropertyName());
+        MessageSourceResolvable[] hints = validator.getTypingHints(null);
+        System.out.println(hints.length);
+        System.out.println(
+            new SpringValueStyler().styleValue(hints));
+
         assertNull(
             support.getPropertyDescriptor(beanInfo, "firstName").getValue(
                 BeanValidatorConstants.VALIDATOR_PROPERTY));
         assertNull(
-            support
-                .getPropertyDescriptor(beanInfo, "firstName")
-                .getValue(BeanValidatorConstants.VALIDATED_PROPERTY));
+            support.getPropertyDescriptor(beanInfo, "firstName").getValue(
+                BeanValidatorConstants.VALIDATED_PROPERTY));
     }
 
     public void testBasicValidationWorkflow() {
