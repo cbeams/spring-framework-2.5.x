@@ -197,7 +197,7 @@ public class ContextLoaderTests extends TestCase {
 					}
 					catch (BeanCreationException ex) {
 						DefaultListableBeanFactory factory = (DefaultListableBeanFactory) getBeanFactory();
-						assertEquals(0, factory.getSingletonNames().length);
+						assertEquals(0, factory.getSingletonCount());
 						throw ex;
 					}
 				}

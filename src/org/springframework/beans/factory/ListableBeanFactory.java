@@ -104,11 +104,11 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Use <code>containsBean</code> to check ancestor factories too.
 	 * <p>Note: Ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
-	 * @param name the name of the bean to look for
+	 * @param beanName the name of the bean to look for
 	 * @return if this bean factory contains a bean definition with the given name
 	 * @see #containsBean
 	 */
-	boolean containsBeanDefinition(String name);
+	boolean containsBeanDefinition(String beanName);
 
 	/**
 	 * Return the bean instances that match the given object type (including
