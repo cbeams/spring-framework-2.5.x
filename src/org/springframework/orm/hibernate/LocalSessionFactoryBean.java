@@ -424,7 +424,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * SchemaExport class, to be invoked on application setup.
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
-	 * <code>LocalSessionFactoryBean lsfb = ctx.getBean("&mySessionFactory");</code>.
+	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
 	 * connection to perform the script.
 	 * @throws DataAccessException in case of script execution errors
@@ -453,7 +453,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * SchemaExport class, to be invoked on application setup.
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
-	 * <code>LocalSessionFactoryBean lsfb = ctx.getBean("&mySessionFactory");</code>.
+	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
 	 * connection to perform the script.
 	 * @throws DataAccessException in case of script execution errors
@@ -483,7 +483,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * on application startup. Can also be invoked manually.
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
-	 * <code>LocalSessionFactoryBean lsfb = ctx.getBean("&mySessionFactory");</code>.
+	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
 	 * connection to perform the script.
 	 * @throws HibernateException in case of Hibernate initialization errors
@@ -494,6 +494,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	public void updateDatabaseSchema() throws HibernateException {
 		logger.info("Updating database schema for Hibernate SessionFactory");
 		HibernateTemplate hibernateTemplate = new HibernateTemplate(this.sessionFactory);
+		hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 		hibernateTemplate.execute(
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
@@ -516,20 +517,30 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	protected void executeSchemaScript(Connection con, String[] sql) throws SQLException {
-		Statement stmt = con.createStatement();
-		try {
-			for (int i = 0; i < sql.length; i++) {
-				logger.debug("Executing schema statement: " + sql[i]);
+		if (sql != null && sql.length > 0) {
+			boolean oldAutoCommit = con.getAutoCommit();
+			con.setAutoCommit(false);
+			try {
+				Statement stmt = con.createStatement();
 				try {
-					stmt.executeUpdate(sql[i]);
+					for (int i = 0; i < sql.length; i++) {
+						logger.debug("Executing schema statement: " + sql[i]);
+						try {
+							stmt.executeUpdate(sql[i]);
+						}
+						catch (SQLException ex) {
+							logger.warn("Unsuccessful schema statement: " + sql[i], ex);
+						}
+					}
 				}
-				catch (SQLException ex) {
-					logger.info("Unsuccessful schema statement: " + sql[i], ex);
+				finally {
+					JdbcUtils.closeStatement(stmt);
 				}
+				con.commit();
 			}
-		}
-		finally {
-			JdbcUtils.closeStatement(stmt);
+			finally {
+				con.setAutoCommit(oldAutoCommit);
+			}
 		}
 	}
 
