@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.transaction;
 
@@ -30,6 +30,7 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -67,7 +68,7 @@ public class JtaTransactionManagerTests extends TestCase {
 
 		JtaTransactionManager ptm = new JtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
-		assertEquals(JtaTransactionManager.SYNCHRONIZATION_ALWAYS, ((JtaTransactionManager) tt.getTransactionManager()).getTransactionSynchronization());
+		assertEquals(JtaTransactionManager.SYNCHRONIZATION_ALWAYS, ptm.getTransactionSynchronization());
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -935,14 +936,105 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.verify();
 	}
 
+	public void testJtaTransactionManagerWithDoubleCommit() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.commit();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		TransactionStatus status = ptm.getTransaction(new DefaultTransactionDefinition());
+		assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+		// first commit
+		ptm.commit(status);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		try {
+			// second commit attempt
+			ptm.commit(status);
+			fail("Should have thrown IllegalTransactionStateException");
+		}
+		catch (IllegalTransactionStateException ex) {
+			// expected
+		}
+
+		utControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithDoubleRollback() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.rollback();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		TransactionStatus status = ptm.getTransaction(new DefaultTransactionDefinition());
+		assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+		// first rollback
+		ptm.rollback(status);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		try {
+			// second rollback attempt
+			ptm.rollback(status);
+			fail("Should have thrown IllegalTransactionStateException");
+		}
+		catch (IllegalTransactionStateException ex) {
+			// expected
+		}
+
+		utControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithRollbackAndCommit() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.rollback();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		TransactionStatus status = ptm.getTransaction(new DefaultTransactionDefinition());
+		assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+		// first: rollback
+		ptm.rollback(status);
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		try {
+			// second: commit attempt
+			ptm.commit(status);
+			fail("Should have thrown IllegalTransactionStateException");
+		}
+		catch (IllegalTransactionStateException ex) {
+			// expected
+		}
+
+		utControl.verify();
+	}
+
 	/**
 	 * Prevent any side-effects due to this test modifying ThreadLocals that might
 	 * affect subsequent tests when all tests are run in the same JVM, as with Eclipse.
 	 */
 	protected void tearDown() {
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.clearSynchronization();
-		}
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
 }
