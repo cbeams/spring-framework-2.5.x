@@ -39,30 +39,27 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Helper to manage flow execution and process requests coming into a flow
- * execution. This class provides numerous methods that can be extended
- * in subclasses to fine-tune the execution algorithm.
+ * execution. This class provides numerous methods that can be extended in
+ * subclasses to fine-tune the execution algorithm.
  * 
  * <p>
- * The <code>handleRequest()</code> method implements the following
- * algorithm:
+ * The <code>handleRequest()</code> method implements the following algorithm:
  * <ol>
  * <li>Look for a flow execution id in the request (in a parameter named
  * "_flowExecutionId").</li>
- * <li>If a flow execution id is not found, a new flow execution will
- * be created. The top-level flow for which the execution is created
- * is determined by first looking for a flow id specified in the request
- * using the "_flowId" request parameter. If this parameter is set,
- * the specified flow will be used, after lookup using a flow locator.
- * If no "_flowId" parameter is present, the default top-level flow
- * configured for this manager is used.</li>
- * <li>If a flow execution id is found, the corresponding flow execution
- * is obtained from the HTTP session.</li>
- * <li>If a new flow execution was created in the previous steps,
- * it will be started.</li>
- * <li>If an existing flow execution is continued, current state
- * id ("_currentStateId") and event id ("_eventId") parameter values
- * will be obtained from the request and will be signaled in the
- * flow execution.</li>
+ * <li>If a flow execution id is not found, a new flow execution will be
+ * created. The top-level flow for which the execution is created is determined
+ * by first looking for a flow id specified in the request using the "_flowId"
+ * request parameter. If this parameter is set, the specified flow will be used,
+ * after lookup using a flow locator. If no "_flowId" parameter is present, the
+ * default top-level flow configured for this manager is used.</li>
+ * <li>If a flow execution id is found, the corresponding flow execution is
+ * obtained from the HTTP session.</li>
+ * <li>If a new flow execution was created in the previous steps, it will be
+ * started.</li>
+ * <li>If an existing flow execution is continued, current state id
+ * ("_currentStateId") and event id ("_eventId") parameter values will be
+ * obtained from the request and will be signaled in the flow execution.</li>
  * </ol>
  * 
  * @author Erwin Vervaet
@@ -136,8 +133,8 @@ public class HttpFlowExecutionManager {
 
 	/**
 	 * Create a new flow execution manager. Since no default flow is specified,
-	 * the id of the flow for which executions will be managed is expected
-	 * in the request parameter "_flowId".
+	 * the id of the flow for which executions will be managed is expected in
+	 * the request parameter "_flowId".
 	 * @param flowLocator the flow locator to use for flow lookup
 	 */
 	public HttpFlowExecutionManager(FlowLocator flowLocator) {
@@ -146,8 +143,8 @@ public class HttpFlowExecutionManager {
 
 	/**
 	 * Create a new flow execution manager. Since no default flow is specified,
-	 * the id of the flow for which executions will be managed is expected
-	 * in the request parameter "_flowId".
+	 * the id of the flow for which executions will be managed is expected in
+	 * the request parameter "_flowId".
 	 * @param flowLocator the flow locator to use for flow lookup
 	 * @param flowExecutionListeners the set of listeners that should be
 	 *        notified of lifecycle events in the managed flow execution
@@ -156,7 +153,7 @@ public class HttpFlowExecutionManager {
 		this.flowLocator = flowLocator;
 		this.flowExecutionListeners = flowExecutionListeners;
 	}
-	
+
 	//subclassing hooks
 
 	/**
@@ -192,14 +189,26 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Returns the name of the event id attribute in the request
 	 * ("_mapped_eventId")
+	 * <p>
+	 * This is useful when working with image buttons and javscript
+	 * restrictions. For example, a intercepting servlet filter can process a
+	 * image button with a name in the format "_pname__eventId_pvalue_submit"
+	 * and set the proper "mapped' eventId attribute in the request.
 	 */
 	protected String getEventIdRequestAttributeName() {
 		return FlowConstants.EVENT_ID_REQUEST_ATTRIBUTE;
 	}
 
 	/**
-	 * Returns the marker value indicating that the event id parameter
-	 * was not properly set in the request ("@NOT_SET@")
+	 * Returns the marker value indicating that the event id parameter was not
+	 * set properly in the request because of view configuration error (
+	 * {@link FlowConstants.NOT_SET_EVENT_ID)
+	 * <p>
+	 * This is useful when a view relies on an dynamic means to set the eventId
+	 * request parameter, for example, using javascript. This approach assumes
+	 * the "not set" marker value will be a static default (a kind of fallback,
+	 * submitted if the eventId does not get set to the proper dynamic value
+	 * onClick, for example, if javascript was disabled).
 	 */
 	protected String getNotSetEventIdParameterMarker() {
 		return FlowConstants.NOT_SET_EVENT_ID;
@@ -251,7 +260,8 @@ public class HttpFlowExecutionManager {
 			if (!StringUtils.hasText(eventId)) {
 				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 				if (!StringUtils.hasText(eventId)) {
-					throw new IllegalArgumentException("The '"
+					throw new IllegalArgumentException(
+							"The '"
 									+ getEventIdParameterName()
 									+ "' request parameter (or '"
 									+ getEventIdRequestAttributeName()
@@ -267,7 +277,7 @@ public class HttpFlowExecutionManager {
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
 						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
 			}
-			
+
 			// execute the signaled event within the current state
 			modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
 		}
@@ -296,8 +306,8 @@ public class HttpFlowExecutionManager {
 	/**
 	 * Obtain a flow to use from given request. If there is a flow id parameter
 	 * specified in the request, the flow with that id will be returend after
-	 * lookup using the flow locator. If no flow id parameter is present in
-	 * the request, the default top-level flow will be returned.
+	 * lookup using the flow locator. If no flow id parameter is present in the
+	 * request, the default top-level flow will be returned.
 	 */
 	protected Flow getFlow(HttpServletRequest request) {
 		String flowId = request.getParameter(getFlowIdParameterName());
@@ -306,7 +316,8 @@ public class HttpFlowExecutionManager {
 			return this.flow;
 		}
 		else {
-			Assert.notNull(this.flowLocator, "The flow locator is required to lookup flows to execute by a flow id request parameter");
+			Assert.notNull(this.flowLocator,
+					"The flow locator is required to lookup flows to execute by a flow id request parameter");
 			return this.flowLocator.getFlow(flowId);
 		}
 	}
