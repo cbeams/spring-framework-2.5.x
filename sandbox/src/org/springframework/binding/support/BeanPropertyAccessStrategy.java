@@ -26,7 +26,6 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -37,6 +36,7 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.binding.MutablePropertyAccessStrategy;
 import org.springframework.binding.PropertyAccessStrategy;
 import org.springframework.binding.PropertyMetadataAccessStrategy;
+import org.springframework.binding.value.BoundValueModel;
 import org.springframework.binding.value.PropertyChangePublisher;
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.binding.value.ValueModel;
@@ -56,7 +56,7 @@ public class BeanPropertyAccessStrategy implements
 
     private BeanWrapperImpl beanWrapper;
 
-    private ValueModel beanHolder;
+    private BoundValueModel beanHolder;
 
     private PropertyMetadataAccessStrategy metaAspectAccessor;
 
@@ -69,11 +69,11 @@ public class BeanPropertyAccessStrategy implements
     private DomainObjectChangeHandler domainObjectChangeHandler;
 
     public BeanPropertyAccessStrategy(Object bean) {
-        this((bean instanceof ValueModel ? (ValueModel)bean
+        this((bean instanceof BoundValueModel ? (BoundValueModel)bean
                 : createValueHolder(bean)));
     }
 
-    private static ValueModel createValueHolder(Object bean) {
+    private static BoundValueModel createValueHolder(Object bean) {
         Assert
                 .notNull(
                         bean,
@@ -86,7 +86,7 @@ public class BeanPropertyAccessStrategy implements
         }
     }
 
-    public BeanPropertyAccessStrategy(final ValueModel beanHolder) {
+    public BeanPropertyAccessStrategy(final BoundValueModel beanHolder) {
         Assert.notNull(beanHolder, "No bean holder specified");
         this.beanWrapper = new BeanWrapperImpl();
         this.beanHolder = beanHolder;
@@ -136,7 +136,7 @@ public class BeanPropertyAccessStrategy implements
         }
     }
 
-    private BeanPropertyAccessStrategy(ValueModel nestedDomainObjectHolder,
+    private BeanPropertyAccessStrategy(BoundValueModel nestedDomainObjectHolder,
             String nestedPropertyName, final BeanPropertyAccessStrategy parent) {
         this(nestedDomainObjectHolder);
         this.nestedPath = nestedPropertyName;
@@ -172,7 +172,7 @@ public class BeanPropertyAccessStrategy implements
         return beanWrapper.getWrappedClass();
     }
 
-    public ValueModel getPropertyValueModel(String propertyPath)
+    public BoundValueModel getPropertyValueModel(String propertyPath)
             throws BeansException {
         if (logger.isDebugEnabled()) {
             logger.debug("Retrieving property value model for path '"
@@ -270,7 +270,7 @@ public class BeanPropertyAccessStrategy implements
                         .debug("Creating new nested BeanPropertyAccessor for property '"
                                 + canonicalName + "'");
             }
-            ValueModel propertyValueHolder = getOrCreateValueModel(nestedPropertyName);
+            BoundValueModel propertyValueHolder = getOrCreateValueModel(nestedPropertyName);
             nestedAccessor = new BeanPropertyAccessStrategy(
                     propertyValueHolder, this.nestedPath + canonicalName
                             + PropertyAccessor.NESTED_PROPERTY_SEPARATOR, this);
@@ -286,11 +286,11 @@ public class BeanPropertyAccessStrategy implements
         return nestedAccessor;
     }
 
-    protected ValueModel getOrCreateValueModel(String propertyName) {
+    protected BoundValueModel getOrCreateValueModel(String propertyName) {
         if (propertyValueModels == null) {
             this.propertyValueModels = new HashMap();
         }
-        ValueModel propertyValueHolder = (ValueModel)propertyValueModels
+        BoundValueModel propertyValueHolder = (BoundValueModel)propertyValueModels
                 .get(propertyName);
         if (propertyValueHolder == null) {
             propertyValueHolder = new PropertyAdapter(this, propertyName);
@@ -441,7 +441,7 @@ public class BeanPropertyAccessStrategy implements
         return beanHolder.getValue();
     }
 
-    public ValueModel getDomainObjectHolder() {
+    public BoundValueModel getDomainObjectHolder() {
         return beanHolder;
     }
 

@@ -19,6 +19,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.springframework.binding.MutablePropertyAccessStrategy;
+import org.springframework.binding.value.PropertyChangePublisher;
 import org.springframework.binding.value.ValueChangeListener;
 import org.springframework.util.ToStringCreator;
 
@@ -34,7 +35,7 @@ public class PropertyAdapter extends AbstractValueModel implements
 
     private MutablePropertyAccessStrategy propertyAccessStrategy;
 
-    private ValueChangeListener domainObjectChangeHandler;
+    private PropertyChangeListener domainObjectChangeHandler;
 
     public PropertyAdapter(
             MutablePropertyAccessStrategy propertyAccessStrategy,
@@ -47,15 +48,24 @@ public class PropertyAdapter extends AbstractValueModel implements
             }
             this.domainObjectChangeHandler = new DomainObjectChangeHandler();
             propertyAccessStrategy.getDomainObjectHolder()
-                    .addValueChangeListener(domainObjectChangeHandler);
+                    .addPropertyChangeListener(domainObjectChangeHandler);
         }
         this.propertyAccessStrategy = propertyAccessStrategy;
         this.propertyName = propertyName;
+        this.propertyAccessStrategy.addPropertyChangeListener(propertyName, this);
     }
 
     private final class DomainObjectChangeHandler implements
-            ValueChangeListener {
-        public void valueChanged() {
+            PropertyChangeListener {
+        public void propertyChange(PropertyChangeEvent evt) {
+            Object oldBean = evt.getOldValue();
+            if (oldBean instanceof PropertyChangePublisher) {
+                propertyAccessStrategy.removePropertyChangeListener(propertyName, this);
+            }
+            Object newBean = evt.getNewValue();
+            if (newBean instanceof PropertyChangePublisher) {
+                propertyAccessStrategy.addPropertyChangeListener(propertyName, this);
+            }
             if (logger.isDebugEnabled()) {
                 logger
                         .debug("[Notifying any dependents for '"
@@ -78,23 +88,27 @@ public class PropertyAdapter extends AbstractValueModel implements
     public void setValue(Object value) {
         Object oldValue = getValue();
         if (hasChanged(oldValue, value)) {
-            propertyAccessStrategy.setPropertyValue(propertyName, value);
-            fireValueChanged();
-            firePropertyChange(VALUE_PROPERTY, oldValue, value);
+            updateValueSilently(value);
+            fireValueChanged(oldValue, value);
         }
     }
 
+    private void updateValueSilently(Object value) {
+        propertyAccessStrategy.removePropertyChangeListener(propertyName, this);
+        propertyAccessStrategy.setPropertyValue(propertyName, value);
+        propertyAccessStrategy.addPropertyChangeListener(propertyName, this);
+    }
+    
     public void addValueChangeListener(ValueChangeListener l) {
         super.addValueChangeListener(l);
-        propertyAccessStrategy.addPropertyChangeListener(propertyName, this);
     }
 
     public void removeValueChangeListener(ValueChangeListener l) {
         super.removeValueChangeListener(l);
-        propertyAccessStrategy.removePropertyChangeListener(propertyName, this);
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
+        fireValueChanged(evt.getOldValue(), evt.getNewValue());
     }
 
     public String toString() {

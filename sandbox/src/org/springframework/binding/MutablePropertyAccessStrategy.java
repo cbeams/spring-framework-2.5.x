@@ -19,6 +19,7 @@ import java.beans.PropertyEditor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyAccessor;
+import org.springframework.binding.value.BoundValueModel;
 import org.springframework.binding.value.PropertyChangePublisher;
 import org.springframework.binding.value.ValueModel;
 
@@ -46,9 +47,9 @@ public interface MutablePropertyAccessStrategy extends PropertyAccessStrategy,
 
     public PropertyEditor findCustomEditor(String propertyName);
 
-    public ValueModel getDomainObjectHolder();
+    public BoundValueModel getDomainObjectHolder();
 
-    public ValueModel getPropertyValueModel(String propertyPath)
+    public BoundValueModel getPropertyValueModel(String propertyPath)
             throws BeansException;
 
     public MutablePropertyAccessStrategy getPropertyAccessStrategyForPath(
