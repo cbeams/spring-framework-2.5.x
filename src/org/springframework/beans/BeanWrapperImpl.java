@@ -15,10 +15,12 @@ import java.beans.PropertyEditorManager;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -60,7 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.10 2003-11-05 20:28:34 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.11 2003-11-09 21:37:10 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
@@ -136,7 +138,14 @@ public class BeanWrapperImpl implements BeanWrapper {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Creates new BeanWrapperImpl for the given object.
+	 * Create new empty BeanWrapperImpl. Object needs to be set afterwards.
+	 * @see #setObject
+	 */
+	public BeanWrapperImpl() {
+	}
+
+	/**
+	 * Create new BeanWrapperImpl for the given object.
 	 * @param object object wrapped by this BeanWrapper.
 	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
@@ -145,7 +154,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	/**
-	 * Creates new BeanWrapperImpl for the given object,
+	 * Create new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper.
 	 * @param nestedPath the nested path of the object
@@ -157,7 +166,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	/**
-	 * Creates new BeanWrapperImpl, wrapping a new instance of the specified class.
+	 * Create new BeanWrapperImpl, wrapping a new instance of the specified class.
 	 * @param clazz class to instantiate and wrap
 	 * @throws BeansException if the class cannot be wrapped by a BeanWrapper
 	 */
@@ -279,23 +288,27 @@ public class BeanWrapperImpl implements BeanWrapper {
 	/**
 	 * Convert the value to the required type (if necessary from a string),
 	 * to create a PropertyChangeEvent.
-	 * Conversions from String to any type use the setAsTest() method of
+	 * <p>Conversions from String to any type use the setAsTest() method of
 	 * the PropertyEditor class. Note that a PropertyEditor must be registered
 	 * for this class for this to work. This is a standard Java Beans API.
 	 * A number of property editors are automatically registered by this class.
-	 * @param target target bean
 	 * @param propertyName name of the property
 	 * @param oldValue previous value, if available. May be null.
 	 * @param newValue proposed change value.
 	 * @param requiredType type we must convert to
 	 * @throws BeansException if there is an internal error
-	 * @return a PropertyChangeEvent, containing the converted type of the new
-	 * value.
+	 * @return a PropertyChangeEvent, containing the converted type of the new value
 	 */
 	private PropertyChangeEvent createPropertyChangeEventWithTypeConversionIfNecessary(
-			Object target, String propertyName, Object oldValue, Object newValue,
-			Class requiredType) throws BeansException {
-		return new PropertyChangeEvent(target, this.nestedPath + propertyName, oldValue, doTypeConversionIfNecessary(target, propertyName, oldValue, newValue, requiredType));
+			String propertyName, Object oldValue, Object newValue, Class requiredType) throws BeansException {
+		Object finalValue = doTypeConversionIfNecessary(propertyName, oldValue, newValue, requiredType);
+		return new PropertyChangeEvent(this.object, this.nestedPath + propertyName, oldValue, finalValue);
+	}
+
+	private PropertyChangeEvent createPropertyChangeEvent(String propertyName, Object oldValue, Object newValue)
+			throws BeansException {
+		return new PropertyChangeEvent(this.object, (propertyName != null ? this.nestedPath + propertyName : null),
+																	 oldValue, newValue);
 	}
 
 	/**
@@ -304,7 +317,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * the PropertyEditor class. Note that a PropertyEditor must be registered
 	 * for this class for this to work. This is a standard Java Beans API.
 	 * A number of property editors are automatically registered by this class.
-	 * @param target target bean
 	 * @param propertyName name of the property
 	 * @param oldValue previous value, if available. May be null.
 	 * @param newValue proposed change value.
@@ -312,9 +324,24 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws BeansException if there is an internal error
 	 * @return new value, possibly the result of type convertion.
 	 */
-	public Object doTypeConversionIfNecessary(Object target, String propertyName, Object oldValue,
-																						Object newValue, Class requiredType) throws BeansException {
-		if (newValue != null) {
+	public Object doTypeConversionIfNecessary(String propertyName, Object oldValue, Object newValue,
+																						Class requiredType) throws BeansException {
+		if (newValue instanceof List && requiredType.isArray()) {
+			List list = (List) newValue;
+			Class componentType = requiredType.getComponentType();
+			try {
+				Object[] arr = (Object[]) Array.newInstance(componentType, list.size());
+				for (int i = 0; i < list.size(); i++) {
+					arr[i] = doTypeConversionIfNecessary(propertyName, null, list.get(i), componentType);
+				}
+				return arr;
+			}
+			catch (ArrayStoreException ex) {
+				throw new TypeMismatchException(createPropertyChangeEvent(propertyName, oldValue, newValue), requiredType, ex);
+			}
+		}
+
+		else if (newValue != null) {
 			// Custom editor for this type?
 			PropertyEditor pe = findCustomEditor(requiredType, propertyName);
 			// Value not of required type?
@@ -324,13 +351,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 					// Convert String array to String
 					newValue = StringUtils.arrayToCommaDelimitedString((String[])newValue);
 					if (logger.isDebugEnabled())
-						logger.debug("Convert: StringArray to CommaDelimitedString");
+						logger.debug("Convert: StringArray to CommaDelimitedString [" + newValue + "]");
 				}
 
 				if (newValue instanceof String) {
 					// Use PropertyEditor's setAsText in case of a String value
 					if (logger.isDebugEnabled())
-						logger.debug("Convert: String to " + requiredType);
+						logger.debug("Convert: String to [" + requiredType + "]");
 					if (pe == null) {
 						// No custom editor -> check BeanWrapper's default editors
 						pe = (PropertyEditor) defaultEditors.get(requiredType);
@@ -347,8 +374,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 							newValue = pe.getValue();
 						}
 						catch (IllegalArgumentException ex) {
-							throw new TypeMismatchException(
-									new PropertyChangeEvent(target, this.nestedPath + propertyName, oldValue, newValue), requiredType, ex);
+							throw new TypeMismatchException(createPropertyChangeEvent(propertyName, oldValue, newValue), requiredType, ex);
 						}
 					}
 				}
@@ -363,14 +389,15 @@ public class BeanWrapperImpl implements BeanWrapper {
 						newValue = pe.getValue();
 					}
 					catch (IllegalArgumentException ex) {
-						throw new TypeMismatchException(
-								new PropertyChangeEvent(target, this.nestedPath + propertyName, oldValue, newValue), requiredType, ex);
+						throw new TypeMismatchException(createPropertyChangeEvent(propertyName, oldValue, newValue), requiredType, ex);
 					}
 				}
 			}
 		}
 		return newValue;
 	}
+
+
 
 	public void setPropertyValue(String propertyName, Object value) throws PropertyVetoException, BeansException {
 		setPropertyValue(new PropertyValue(propertyName, value));
@@ -511,7 +538,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 			// Old value may still be null
 			propertyChangeEvent = createPropertyChangeEventWithTypeConversionIfNecessary(
-					this.object, pv.getName(), oldValue, pv.getValue(), pd.getPropertyType());
+					pv.getName(), oldValue, pv.getValue(), pd.getPropertyType());
 
 			// May throw PropertyVetoException: if this happens the PropertyChangeSupport
 			// class fires a reversion event, and we jump out of this method, meaning
@@ -530,7 +557,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 			if (logger.isDebugEnabled())
 				logger.debug("About to invoke write method [" + writeMethod +
 				             "] on object of class [" + object.getClass().getName() + "]");
-			writeMethod.invoke(object, new Object[]{propertyChangeEvent.getNewValue()});
+			writeMethod.invoke(object, new Object[] {propertyChangeEvent.getNewValue()});
 			if (logger.isDebugEnabled())
 				logger.debug("Invoked write method [" + writeMethod + "] ok");
 
