@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  * of prohibiting the execution of the handler itself, and custom post-processing.
  * Filters are more powerful, for example they allow for exchanging the request
  * and response objects that are handed down the chain. Note that a filter
- * gets configured in web.xml, a HandlerInterceptor in the application context. 
+ * gets configured in web.xml, a HandlerInterceptor in the application context.
  *
  * <p>As a basic guideline, fine-grained handler-related preprocessing tasks are
  * candidates for HandlerInterceptor implementations, especially factored-out
@@ -39,8 +39,9 @@ import javax.servlet.http.HttpServletResponse;
  * @author Juergen Hoeller
  * @since 20.06.2003
  * @see HandlerExecutionChain#getInterceptors
+ * @see org.springframework.web.servlet.handler.HandlerInterceptorAdapter
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setInterceptors
- * @see org.springframework.web.servlet.support.UserRoleAuthorizationInterceptor
+ * @see org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor
  * @see org.springframework.web.servlet.i18n.LocaleChangeInterceptor
  * @see org.springframework.web.servlet.theme.ThemeChangeInterceptor
  * @see javax.servlet.Filter
@@ -50,12 +51,10 @@ public interface HandlerInterceptor {
 	/**
 	 * Intercept the execution of a handler. Called after HandlerMapping determined
 	 * an appropriate handler object, but before HandlerAdapter invokes the handler.
-	 *
 	 * <p>DispatcherServlet processes a handler in an execution chain, consisting
 	 * of any number of interceptors, with the handler itself at the end.
 	 * With this method, each interceptor can decide to abort the execution chain,
 	 * typically sending a HTTP error or writing a custom response.
-	 *
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
@@ -64,24 +63,39 @@ public interface HandlerInterceptor {
 	 * interceptor has already dealed with the response itself
 	 * @throws Exception in case of errors
 	 */
-	boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws Exception;
+	boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+										Object handler) throws Exception;
 
 	/**
 	 * Intercept the execution of a handler. Called after HandlerAdapter actually
-	 * invoked the handler.
-	 *
+	 * invoked the handler, but before the DispatcherServlet renders the view.
+	 * Can expose additional model objects to the view via the given ModelAndView.
 	 * <p>DispatcherServlet processes a handler in an execution chain, consisting
 	 * of any number of interceptors, with the handler itself at the end.
 	 * With this method, each interceptor can post-process an execution,
 	 * getting applied in inverse order of the execution chain.
-	 *
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler chosen handler to execute, for type and/or instance evaluation
+	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param modelAndView the ModelAndView that the handler returned, can also be null
 	 * @throws Exception in case of errors
 	 */
-	void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws Exception;
+	void postHandle(HttpServletRequest request, HttpServletResponse response,
+									Object handler, ModelAndView modelAndView) throws Exception;
+
+	/**
+	 * Callback after completion of request processing, i.e. after rendering the view.
+	 * Will be called on any outcome of handler execution, thus allows for proper
+	 * resource cleanup.
+	 * <p>Note: Will only be called if this interceptor's preHandle method has
+	 * successfully completed and returned true!
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param ex exception thrown on handler execution
+	 * @throws Exception in case of errors
+	 */
+	void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+											 Object handler, Exception ex) throws Exception;
 
 }

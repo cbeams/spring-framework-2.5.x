@@ -80,7 +80,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.17 2003-11-27 18:37:20 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.18 2003-12-06 15:49:30 jhoeller Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -330,8 +330,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Both doGet() and doPost() are handled by this method.
 	 * It's up to HandlerAdapters to decide which methods are acceptable.
 	 */
-	protected void doService(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		logger.debug("DispatcherServlet with name '" + getServletName() + "' received request for [" +
 		             WebUtils.getRequestUri(request) + "]");
 
@@ -348,8 +347,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			processedRequest = this.multipartResolver.resolveMultipart(request);
 		}
 
+		HandlerExecutionChain mappedHandler = null;
+		int interceptorIndex = -1;
 		try {
-			HandlerExecutionChain mappedHandler = getHandler(processedRequest);
+			mappedHandler = getHandler(processedRequest);
 			if (mappedHandler == null || mappedHandler.getHandler() == null) {
 				// if we didn't find a handler
 				pageNotFoundLogger.warn("No mapping for [" + WebUtils.getRequestUri(processedRequest) +
@@ -367,6 +368,7 @@ public class DispatcherServlet extends FrameworkServlet {
 						if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
 							return;
 						}
+						interceptorIndex = i;
 					}
 				}
 
@@ -376,9 +378,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 				// apply postHandle methods of registered interceptors
 				if (mappedHandler.getInterceptors() != null) {
-					for (int i = mappedHandler.getInterceptors().length - 1; i >=0 ; i--) {
+					for (int i = mappedHandler.getInterceptors().length - 1; i >= 0; i--) {
 						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-						interceptor.postHandle(processedRequest, response, mappedHandler.getHandler());
+						interceptor.postHandle(processedRequest, response, mappedHandler.getHandler(), mv);
 					}
 				}
 			}
@@ -396,18 +398,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					mv = exMv;
 				}
 				else {
-					if (ex instanceof ServletException) {
-						throw (ServletException) ex;
-					}
-					else if (ex instanceof IOException) {
-						throw (IOException) ex;
-					}
-					else if (ex instanceof RuntimeException) {
-						throw (RuntimeException) ex;
-					}
-					else {
-						throw new ServletException(ex.getMessage(), ex);
-					}
+					throw ex;
 				}
 			}
 
@@ -423,10 +414,28 @@ public class DispatcherServlet extends FrameworkServlet {
 										 getServletName() + "': assuming HandlerAdapter completed request handling");
 			}
 		}
+		catch (Exception ex) {
+			throw triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+		}
 		finally {
-			// clean up any resources used by a multipart request.
-			if (this.multipartResolver != null && request instanceof MultipartHttpServletRequest) {
-				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
+			Exception ex = null;
+			if (mappedHandler != null) {
+				ex = triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+			}
+			try {
+				// clean up any resources used by a multipart request
+				if (this.multipartResolver != null && request instanceof MultipartHttpServletRequest) {
+					this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
+				}
+			}
+			catch (RuntimeException ex2) {
+				if (ex != null) {
+					logger.error("Exception overridden by MultipartResolver.cleanMultipart exception", ex);
+				}
+				throw ex2;
+			}
+			if (ex != null) {
+				throw ex;
 			}
 		}
 	}
@@ -512,6 +521,39 @@ public class DispatcherServlet extends FrameworkServlet {
 																 getServletName() + "': View to render cannot be null with ModelAndView [" + mv + "]");
 		}
 		view.render(mv.getModel(), request, response);
+	}
+
+	/**
+	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
+	 * Will just invoke afterCompletion for all interceptors whose preHandle
+	 * invocation has successfully completed and returned true.
+	 * @param mappedHandler the mapped HandlerExecutionChain
+	 * @param interceptorIndex index of last interceptor that successfully completed
+	 * @param ex Exception thrown on handler execution, or null if none
+	 * @return the most current Exception thrown, either the passed-in one or one
+	 * thrown by a HandlerInterceptor.afterCompletion invocation
+	 * @see HandlerInterceptor#afterCompletion
+	 */
+	private Exception triggerAfterCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
+																					 HttpServletRequest request, HttpServletResponse response,
+																					 Exception ex) {
+		// apply afterCompletion methods of registered interceptors
+		Exception currEx = ex;
+		if (mappedHandler.getInterceptors() != null) {
+			for (int i = interceptorIndex; i >=0; i--) {
+				HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+				try {
+					interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
+				}
+				catch (Exception ex2) {
+					if (currEx != null) {
+						logger.error("Exception overridden by HandlerInterceptor.afterCompletion exception", currEx);
+					}
+					currEx = ex2;
+				}
+			}
+		}
+		return currEx;
 	}
 
 }

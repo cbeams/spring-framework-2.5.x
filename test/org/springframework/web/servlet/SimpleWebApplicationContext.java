@@ -11,13 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.SimpleTheme;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
+import org.springframework.web.context.NestedWebApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.RootWebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
@@ -32,11 +33,10 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
  */
 public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
-	public SimpleWebApplicationContext(ApplicationContext parent, String namespace) throws BeansException, ApplicationContextException {
-		super(parent, namespace);
-	}
+	public void initNestedContext(ServletContext servletContext, String namespace,
+																WebApplicationContext parent, Object owner) {
+		super.initNestedContext(servletContext, namespace, parent, owner);
 
-	public void setServletContext(ServletContext servletContext) {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("commandClass", "org.springframework.beans.TestBean"));
 		pvs.addPropertyValue(new PropertyValue("formView", "form"));
@@ -48,7 +48,8 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 
 		registerSingleton(UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME, DummyThemeSource.class, null);
-		super.setServletContext(servletContext);
+
+		rebuild();
 	}
 
 

@@ -3,16 +3,16 @@ package org.springframework.samples.jpetstore.web.spring;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ModelAndViewDefiningException;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.util.WebUtils;
 
 /**
  * @author Juergen Hoeller
  * @since 01.12.2003
  */
-public class SignonInterceptor implements HandlerInterceptor {
+public class SignonInterceptor extends HandlerInterceptorAdapter {
 
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {

@@ -1,10 +1,11 @@
 package org.springframework.web.servlet.mvc;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
@@ -28,7 +29,12 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 		return true;
 	}
 
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+												 ModelAndView modelAndView) {
+	}
+
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+															Object handler, Exception ex) {
 	}
 
 }

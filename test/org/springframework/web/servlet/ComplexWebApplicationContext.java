@@ -10,28 +10,26 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.support.RequestContextUtils;
-import org.springframework.web.servlet.support.UserRoleAuthorizationInterceptor;
-import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.ResourceBundleViewResolver;
-import org.springframework.web.bind.ServletRequestBindingException;
 
 /**
  * @author Juergen Hoeller
@@ -39,11 +37,10 @@ import org.springframework.web.bind.ServletRequestBindingException;
  */
 class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
-	public ComplexWebApplicationContext(ApplicationContext parent, String namespace) throws BeansException, ApplicationContextException {
-		super(parent, namespace);
-	}
+	public void initNestedContext(ServletContext servletContext, String namespace,
+																WebApplicationContext parent, Object owner) {
+		super.initNestedContext(servletContext, namespace, parent, owner);
 
-	public void setServletContext(ServletContext servletContext) {
 		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class, null);
 		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class, null);
 
@@ -94,7 +91,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 
-		super.setServletContext(servletContext);
+		rebuild();
 
 		SimpleUrlHandlerMapping myUrlMapping1 = (SimpleUrlHandlerMapping) getBean("myUrlMapping1");
 		LocaleChangeInterceptor interceptor1 = new LocaleChangeInterceptor();
@@ -173,20 +170,29 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 				throw new ServletException("Wrong interceptor order");
 			}
 			request.setAttribute("test1", "test1");
+			request.setAttribute("test1x", "test1x");
+			request.setAttribute("test1y", "test1y");
 			return true;
 		}
 
-		public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-		    throws ServletException {
-			if (request.getAttribute("test2") != null) {
+		public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+													 ModelAndView modelAndView) throws ServletException {
+			if (request.getAttribute("test2x") != null) {
 				throw new ServletException("Wrong interceptor order");
 			}
-			if (!"test1".equals(request.getAttribute("test1"))) {
+			if (!"test1x".equals(request.getAttribute("test1x"))) {
 				throw new ServletException("Incorrect request attribute");
 			}
-			request.removeAttribute("test1");
+			request.removeAttribute("test1x");
 		}
 
+		public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+																Object handler, Exception ex) throws ServletException {
+			if (request.getAttribute("test2y") != null) {
+				throw new ServletException("Wrong interceptor order");
+			}
+			request.removeAttribute("test1y");
+		}
 	}
 
 
@@ -194,24 +200,33 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 		    throws ServletException {
-			if (request.getAttribute("test1") == null) {
+			if (request.getAttribute("test1x") == null) {
 				throw new ServletException("Wrong interceptor order");
 			}
 			request.setAttribute("test2", "test2");
+			request.setAttribute("test2x", "test2x");
+			request.setAttribute("test2y", "test2y");
 			return true;
 		}
 
-		public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-		    throws ServletException {
-			if (request.getAttribute("test1") == null) {
+		public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+													 ModelAndView modelAndView) throws ServletException {
+			if (request.getAttribute("test1x") == null) {
 				throw new ServletException("Wrong interceptor order");
 			}
-			if (!"test2".equals(request.getAttribute("test2"))) {
+			if (!"test2x".equals(request.getAttribute("test2x"))) {
 				throw new ServletException("Incorrect request attribute");
 			}
-			request.removeAttribute("test2");
+			request.removeAttribute("test2x");
 		}
 
+		public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+																Object handler, Exception ex) throws Exception {
+			if (request.getAttribute("test1y") == null) {
+				throw new ServletException("Wrong interceptor order");
+			}
+			request.removeAttribute("test2y");
+		}
 	}
 
 

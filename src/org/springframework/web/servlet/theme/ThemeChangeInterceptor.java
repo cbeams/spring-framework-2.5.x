@@ -4,8 +4,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ThemeResolver;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
@@ -15,7 +15,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @since 20.06.2003
  * @see org.springframework.web.servlet.ThemeResolver
  */
-public class ThemeChangeInterceptor implements HandlerInterceptor {
+public class ThemeChangeInterceptor extends HandlerInterceptorAdapter {
 
 	public static final String DEFAULT_PARAM_NAME = "theme";
 
@@ -38,9 +38,6 @@ public class ThemeChangeInterceptor implements HandlerInterceptor {
 		}
 		// proceed in any case
 		return true;
-	}
-
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 	}
 
 }

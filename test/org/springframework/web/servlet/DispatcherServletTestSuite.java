@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 
 import org.springframework.context.support.MessageSourceResolvableImpl;
 import org.springframework.web.bind.EscapedErrors;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.RootWebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
@@ -38,11 +38,11 @@ public class DispatcherServletTestSuite extends TestCase {
 		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
 
 		simpleControllerServlet = new DispatcherServlet();
-		simpleControllerServlet.setContextClass("org.springframework.web.servlet.SimpleWebApplicationContext");
+		simpleControllerServlet.setContextClass(SimpleWebApplicationContext.class);
 		simpleControllerServlet.init(servletConfig);
 
 		complexControllerServlet = new DispatcherServlet();
-		complexControllerServlet.setContextClass("org.springframework.web.servlet.ComplexWebApplicationContext");
+		complexControllerServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexControllerServlet.setNamespace("test");
 		complexControllerServlet.setPublishContext(false);
 		complexControllerServlet.init(new MockServletConfig(servletConfig.getServletContext(), "complex"));
@@ -184,6 +184,13 @@ public class DispatcherServletTestSuite extends TestCase {
 			assertEquals(99, complexControllerServlet.getLastModified(request));
 			complexControllerServlet.doGet(request, response);
 			assertTrue("Not forwarded", response.forwarded == null);
+
+			assertTrue(request.getAttribute("test1") != null);
+			assertTrue(request.getAttribute("test1x") == null);
+			assertTrue(request.getAttribute("test1y") == null);
+			assertTrue(request.getAttribute("test2") != null);
+			assertTrue(request.getAttribute("test2x") == null);
+			assertTrue(request.getAttribute("test2y") == null);
 		}
 		catch (ServletException ex) {
 			fail("Should not have thrown ServletException: " + ex.getMessage());
@@ -366,7 +373,7 @@ public class DispatcherServletTestSuite extends TestCase {
 			// expected
 		}
 
-		servletContext.setAttribute(WebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME, new StaticWebApplicationContext());
+		servletContext.setAttribute(RootWebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME, new StaticWebApplicationContext());
 		try {
 			RequestContextUtils.getWebApplicationContext(request, servletContext);
 		}

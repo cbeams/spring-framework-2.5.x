@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.propertyeditors.LocaleEditor;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
@@ -18,7 +18,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @since 20.06.2003
  * @see org.springframework.web.servlet.LocaleResolver
  */
-public class LocaleChangeInterceptor implements HandlerInterceptor {
+public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 
 	public static final String DEFAULT_PARAM_NAME = "locale";
 
@@ -43,9 +43,6 @@ public class LocaleChangeInterceptor implements HandlerInterceptor {
 		}
 		// proceed in any case
 		return true;
-	}
-
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 	}
 
 }
