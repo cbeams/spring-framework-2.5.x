@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.24 2004-01-01 23:54:09 jhoeller Exp $
+    $Id: build.xml,v 1.25 2004-01-02 14:51:37 colins Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -24,14 +24,17 @@
 	<property file="build.properties"/>
 	<property file="project.properties"/>
 
-	<path id="master-classpath">
-
+	<path id="qa-portalpath">
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
 		</fileset>
-
 	</path>
 
+	<path id="attribute-compiler-classpath">
+		<pathelement location="./lib/jakarta-commons/commons-attributes-compiler-SNAPSHOT.jar"/>
+		<pathelement location="./lib/jakarta-commons/commons-collections.jar"/>
+		<pathelement location="./lib/xdoclet/xjavadoc-1.0.jar"/>
+	</path>
 
 	<target name="usage">
 
@@ -79,7 +82,9 @@
 	<target name="compileSrcAttributes">
 
 	 	<!-- Bring in Jakarta Commons attribute compilation -->
-		<taskdef resource="org/apache/commons/attributes/anttasks.properties"/>
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
+		  <classpath refid="attribute-compiler-classpath"/>
+		</taskdef>
 
 		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.src}">
@@ -110,7 +115,7 @@
 			<src path="${src.dir}"/>
 			<!-- Include Commons Attributes generated Java sources -->
 			<src path="${commons.attributes.tempdir.src}"/>
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 		</javac>
 
 		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RemoteInvocationWrapper"/>
@@ -258,7 +263,7 @@
 			defaultexcludes="yes"	author="true" version="true" use="true">
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Rod Johnson and Spring contributors 2001-2003.</i>]]></bottom>
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
@@ -355,7 +360,7 @@
 			<src path="${test.dir}"/>
 			<!-- Include Commons Attributes generated Java sources -->
 			<src path="${commons.attributes.tempdir.test}"/>
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 			<classpath location="${target.classes.dir}"/>
 		</javac>
 
@@ -390,7 +395,7 @@
 			<!-- Need files loaded as resources -->
 			<classpath location="${test.dir}"/>
 
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 
 			<formatter type="plain"/>
 
@@ -413,7 +418,7 @@
 		<javac destdir="${target.clover.dir}" target="1.3" debug="${debug}"
 			deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 		</javac>
 
 		<copy todir="${target.clover.dir}" preservelastmodified="true">
@@ -437,7 +442,7 @@
 			<!-- Need files loaded as resources -->
 			<classpath location="${test.dir}"/>
 
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 
 			<batchtest fork="yes">
 				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
@@ -458,7 +463,7 @@
 
 		<java classname="com.cortexeb.tools.clover.reporters.jfc.Viewer" fork="yes">
 			<arg value="${clover.initstring}"/>
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 		</java>
 
 	</target>
@@ -472,7 +477,7 @@
 
 		<java classname="com.cortexeb.tools.clover.reporters.html.HtmlReporter" fork="yes">
 			<arg line="-o '${target.clover.html.dir}' -i '${clover.initstring}' -t 'Spring Framework'"/>
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 		</java>
 
 	</target>
@@ -486,7 +491,7 @@
 			deprecation="false" optimize="false" failonerror="false">
 			<src path="load"/>
 
-			<classpath refid="master-classpath"/>
+			<classpath refid="qa-portalpath"/>
 
 			<!-- For load -->
 			<classpath location="${target.classes.dir}"/>
