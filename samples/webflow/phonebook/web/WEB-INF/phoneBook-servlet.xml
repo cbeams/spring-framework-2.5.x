@@ -52,7 +52,7 @@
 		</property>
 	</bean>
 
-	<bean id="person.Search.query" class="org.springframework.samples.phonebook.web.flow.action.QueryAction" autowire="byType"/>
+	<bean id="person.Search.executeQuery" class="org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction" autowire="byType"/>
 
 	<!-- The set action sets request parameter attribute(s) as attributes in the flow model.
 	     The exact mapping(s) policies are fully configurable; in this case, the

@@ -18,7 +18,7 @@ package org.springframework.samples.phonebook.web.flow;
 import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.support.Mapping;
-import org.springframework.samples.phonebook.web.flow.action.QueryAction;
+import org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.action.SetAction;
@@ -26,8 +26,8 @@ import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
 /**
- * Java-based flow builder that searches for people in the phonebook. The
- * flow defined by this class is exactly the same as that defined in the
+ * Java-based flow builder that searches for people in the phonebook. The flow
+ * defined by this class is exactly the same as that defined in the
  * "search-flow.xml" XML flow definition.
  * <p>
  * This encapsulates the page flow of searching for some people, selecting a
@@ -47,7 +47,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 	private static final String ID = "id";
 
 	private ConversionService conversionService;
-	
+
 	protected ConversionExecutor getConversionExecutor(Class targetClass) {
 		return conversionService.getConversionExecutor(String.class, targetClass);
 	}
@@ -55,7 +55,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
+
 	protected String flowId() {
 		return SEARCH;
 	}
@@ -65,11 +65,11 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		addViewState(CRITERIA, onSubmitBindAndValidate(CRITERIA));
 
 		// bind and validate search criteria
-		addBindAndValidateState(CRITERIA, new Transition[] { onErrorView(CRITERIA), onSuccess("query") });
+		addBindAndValidateState(CRITERIA, new Transition[] { onErrorView(CRITERIA), onSuccess("executeQuery") });
 
 		// execute query
-		addActionState("query", executeAction(QueryAction.class), new Transition[] { onErrorView(CRITERIA),
-				onSuccessView(RESULTS) });
+		addActionState("executeQuery", executeAction(ExecuteQueryAction.class), new Transition[] {
+				onErrorView(CRITERIA), onSuccessView(RESULTS) });
 
 		// view results
 		String setId = set(ID);

@@ -23,7 +23,7 @@ import org.springframework.samples.phonebook.domain.PhoneBookQuery;
 import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.flow.action.AbstractAction;
 
-public class QueryAction extends AbstractAction {
+public class ExecuteQueryAction extends AbstractAction {
 
 	private PhoneBook phoneBook;
 
