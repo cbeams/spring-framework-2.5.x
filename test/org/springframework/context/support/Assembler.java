@@ -16,16 +16,15 @@
 
 package org.springframework.context.support;
 
-
 /**
  * @author Alef Arendsen
  */
 public class Assembler implements TestIF {
-	
+
 	private Service service;
 	private Logic l;	
 	private String name;
-	
+
 	public void setService(Service service) {
 		this.service = service;
 	}
@@ -37,16 +36,13 @@ public class Assembler implements TestIF {
 	public void setBeanName(String name) {
 		this.name = name;
 	}
-	
-	public void afterPropertiesSet() throws Exception {
 
-	}
-	
-	public void test() {		
+	public void test() {
 	}
 	
 	public void output() {
 		System.out.println("Bean " + name);
 		l.output();
 	}
+
 }
