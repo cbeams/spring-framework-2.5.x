@@ -33,7 +33,7 @@ import org.springframework.core.io.UrlResource;
  * that is more tightly coupled, and harder to modify or test.</p> 
  * <p>In this implementation, an ApplicationContext is built up from one or more XML
  * definition files, accessed as resources. The default name of the resource file(s)
- * is 'bean-refs.xml', which is used when the instance is obtained with the no-arg 
+ * is 'beanRefFactory.xml', which is used when the instance is obtained with the no-arg 
  * {@link #getInstance()} method. Using {@link #getInstance(String selector)} will
  * return a singleton instance which will use a name for the resource file(s) which
  * is the specificed selector argument, instead of the default. The purpose of this
@@ -81,7 +81,7 @@ import org.springframework.core.io.UrlResource;
  * for use.<br/>
  * Given the above=mentioned three ApplicationContexts, consider the simplest
  * KeyedSingletonBeanFactoryLocator usage scenario, where there is only one single
- * <code>bean-refs.xml</code> definition file:<br/>
+ * <code>beanRefFactory.xml</code> definition file:<br/>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -108,7 +108,7 @@ import org.springframework.core.io.UrlResource;
  * // now use some bean from factory 
  * MyClass zed = bf.getFactory().getBean("mybean");
  * </pre>
- * Another relatively simple variation of the <code>bean-refs.xml</code> definition file could be:
+ * Another relatively simple variation of the <code>beanRefFactory.xml</code> definition file could be:
  * <br/>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
@@ -163,9 +163,9 @@ import org.springframework.core.io.UrlResource;
  * context with an id which represents the package or module the code is in, and the
  * actual definition file(s) for the KeyedSingletonBeanFactoryLocator maps that id to
  * a real context id.<br/><br/>
- * A final example is more complex, with a <code>bean-refs.xml</code> for every module.
+ * A final example is more complex, with a <code>beanRefFactory.xml</code> for every module.
  * All the files are automatically combined to create the final definition.<br/>
- * <code>bean-refs.xml</code> file inside jar for util module:<br/><br>
+ * <code>beanRefFactory.xml</code> file inside jar for util module:<br/><br>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -180,7 +180,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  * 
- * <code>bean-refs.xml</code> file inside jar for data-access module:<br/>
+ * <code>beanRefFactory.xml</code> file inside jar for data-access module:<br/>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -199,7 +199,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  * 
- * <code>bean-refs.xml</code> file inside jar for services module:<br/>
+ * <code>beanRefFactory.xml</code> file inside jar for services module:<br/>
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
@@ -218,7 +218,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  * 
- * <code>bean-refs.xml</code> file inside jar for mypackage module. This doesn't
+ * <code>beanRefFactory.xml</code> file inside jar for mypackage module. This doesn't
  * create any of its own contexts, but allows the other ones to be referred to be
  * a name known to this module:<br/>
  * <pre>
@@ -237,7 +237,7 @@ import org.springframework.core.io.UrlResource;
  * &lt;/beans>
  * </pre>
  *   
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @author colin sampaleanu
  * 
  * @see org.springframework.context.access.LocatorFactory
@@ -246,7 +246,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 	// --- statics
 
-	public static final String BEANS_REFS_XML_NAME = "bean-refs.xml";
+	public static final String BEANS_REFS_XML_NAME = "beanRefFactory.xml";
 
 	protected static final Logger _log = Logger
 			.getLogger(SingletonBeanFactoryLocator.class);
@@ -266,7 +266,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	private String _resourceName;
 
 	/**
-	 * Returns an instance which uses the default "bean-refs.xml", as the name of the
+	 * Returns an instance which uses the default "beanRefFactory.xml", as the name of the
 	 * definition file(s). All resources returned by the current thread's context
 	 * classloader's getResources() method with this name will be combined to create a
 	 * definition, which is just a BeanFactory.
@@ -308,7 +308,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	}
 
 	//
-	// Constructor which uses the default "bean-refs.xml", as the name of the
+	// Constructor which uses the default "beanRefFactory.xml", as the name of the
 	// definition file(s). All resources returned by the definition classloader's
 	// getResources() method with this name will be combined to create a definition
 	// definition. 

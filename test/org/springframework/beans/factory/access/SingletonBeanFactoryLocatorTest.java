@@ -2,7 +2,7 @@
  * The Spring Framework is published under the terms
  * of the Apache Software License.
  */
- 
+
 package org.springframework.beans.factory.access;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ import org.springframework.util.ClassLoaderUtils;
 /**
  * Test for SingletonBeanFactoryLocator
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @author colin sampaleanu
  */
 public class SingletonBeanFactoryLocatorTest extends TestCase {
@@ -46,9 +46,11 @@ public class SingletonBeanFactoryLocatorTest extends TestCase {
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
 				ArrayList list = new ArrayList();
 				list.add(cl.getResource(ClassLoaderUtils
-						.addResourcePathToPackagePath(this.getClass(), "ref1.xml")));
+						.addResourcePathToPackagePath(this.getClass(),
+								"ref1.xml")));
 				list.add(cl.getResource(ClassLoaderUtils
-						.addResourcePathToPackagePath(this.getClass(), "ref2.xml")));
+						.addResourcePathToPackagePath(this.getClass(),
+								"ref2.xml")));
 				return list;
 			}
 		};
@@ -64,7 +66,8 @@ public class SingletonBeanFactoryLocatorTest extends TestCase {
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 
-		fac = facLoc.useFactory("a.qualified.name.which.is.an.alias").getFactory();
+		fac = facLoc.useFactory("a.qualified.name.which.is.an.alias")
+				.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
 	}
@@ -79,15 +82,18 @@ public class SingletonBeanFactoryLocatorTest extends TestCase {
 			protected Collection getAllDefinitionResources(String resourceName)
 					throws IOException {
 
-				// make sure it asks for "bean-refs.xml", but then ignore that
-				assertTrue(resourceName.equals("bean-refs.xml"));
+				// make sure it asks for "beanRefFactory.xml", but then ignore that
+				assertTrue(resourceName
+						.equals(SingletonBeanFactoryLocator.BEANS_REFS_XML_NAME));
 
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
 				ArrayList list = new ArrayList();
 				list.add(cl.getResource(ClassLoaderUtils
-						.addResourcePathToPackagePath(this.getClass(), "ref1.xml")));
+						.addResourcePathToPackagePath(this.getClass(),
+								"ref1.xml")));
 				list.add(cl.getResource(ClassLoaderUtils
-						.addResourcePathToPackagePath(this.getClass(), "ref2.xml")));
+						.addResourcePathToPackagePath(this.getClass(),
+								"ref2.xml")));
 				return list;
 			}
 		};
@@ -105,9 +111,11 @@ public class SingletonBeanFactoryLocatorTest extends TestCase {
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
 				ArrayList list = new ArrayList();
 				list.add(cl.getResource(ClassLoaderUtils
-						.addResourcePathToPackagePath(this.getClass(), "ref1.xml")));
+						.addResourcePathToPackagePath(this.getClass(),
+								"ref1.xml")));
 				list.add(cl.getResource(ClassLoaderUtils
-						.addResourcePathToPackagePath(this.getClass(), "ref2.xml")));
+						.addResourcePathToPackagePath(this.getClass(),
+								"ref2.xml")));
 				return list;
 			}
 		};
