@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+
+	<import resource="import1.xml"/>
+	<import resource="classpath:org/springframework/context/support/import2.xml"/>
 
 	<bean class="org.springframework.context.support.FactoryBeanAndApplicationListener"/>
 
 	<bean name="service" class="org.springframework.context.support.Service">
 		<property name="resources"><value>/org/springframework/context/support/context*.xml</value></property>
   </bean>
-
-	<bean name="assemblerOne" class="org.springframework.context.support.Assembler">
-		<property name="service"><ref bean="service"/></property>
-		<property name="logic"><ref bean="logicOne"/></property>
-	</bean>
-
-	<bean name="assemblerTwo" class="org.springframework.context.support.Assembler">
-		<property name="service"><ref bean="service"/></property>
-		<property name="logic"><ref bean="logicTwo"/></property>
-	</bean>
 
 	<bean name="transactionManager" class="org.springframework.transaction.CountingTxManager"/>
 

@@ -64,6 +64,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 	 */
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws IOException {
 		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+		beanDefinitionReader.setResourceLoader(this);
 		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
 		initBeanDefinitionReader(beanDefinitionReader);
 		loadBeanDefinitions(beanDefinitionReader);
