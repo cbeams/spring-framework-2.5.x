@@ -130,6 +130,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			result = beanProcessor.postProcessBeforeInitialization(result, name);
+			if (result == null) {
+				throw new BeanCreationException("postProcessBeforeInitialization method of BeanPostProcessor [" +
+				                                beanProcessor + "] returned null for bean [" + result +
+				                                "] with name [" + name + "]");
+			}
 		}
 		return result;
 	}
@@ -142,6 +147,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			result = beanProcessor.postProcessAfterInitialization(result, name);
+			if (result == null) {
+				throw new BeanCreationException("postProcessAfter" +
+				                                "Initialization method of BeanPostProcessor [" +
+				                                beanProcessor + "] returned null for bean [" + result +
+				                                "] with name [" + name + "]");
+			}
 		}
 		return result;
 	}
@@ -197,14 +208,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				((BeanFactoryAware) bean).setBeanFactory(this);
 			}
 
-
 			bean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 			invokeInitMethods(bean, beanName, mergedBeanDefinition);
 			bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 		}
-		catch (InvocationTargetException ex) {
-			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
-																			"Initialization of bean failed", ex.getTargetException());
+		catch (BeanCreationException ex) {
+			throw ex;
 		}
 		catch (Exception ex) {
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
@@ -702,6 +711,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected void invokeInitMethods(Object bean, String beanName, RootBeanDefinition mergedBeanDefinition)
 			throws Exception {
+
 		if (bean instanceof InitializingBean) {
 			logger.debug("Calling afterPropertiesSet() on bean with beanName '" + beanName + "'");
 			((InitializingBean) bean).afterPropertiesSet();
@@ -710,12 +720,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (mergedBeanDefinition.getInitMethodName() != null) {
 			logger.debug("Calling custom init method '" + mergedBeanDefinition.getInitMethodName() +
 									 "' on bean with beanName '" + beanName + "'");
-			bean.getClass().getMethod(mergedBeanDefinition.getInitMethodName(), null).invoke(bean, null);
+			try {
+				bean.getClass().getMethod(mergedBeanDefinition.getInitMethodName(), null).invoke(bean, null);
+			}
+			catch (InvocationTargetException ex) {
+				throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
+																				"Initialization method '" + mergedBeanDefinition.getInitMethodName() +
+																				"' threw exception", ex.getTargetException());
+			}
+			catch (Exception ex) {
+				throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName,
+																				"Invocation of initialization method '" +
+																				mergedBeanDefinition.getInitMethodName() + "' failed", ex);
+			}
 		}
 	}
 
 	public void destroySingletons() {
 		super.destroySingletons();
+
 		synchronized (this.disposableInnerBeans) {
 			for (Iterator it = this.disposableInnerBeans.iterator(); it.hasNext();) {
 				Object bean = it.next();
