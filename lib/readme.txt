@@ -45,7 +45,7 @@ distribution/website before using any of them in your own applications.
 - required for building the test suite
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3 RC3 (http://www.freemarker.org)
+- FreeMarker 2.3 RC4 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -63,7 +63,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore and Petclinic
 
 * ibatis/ibatis-common.jar, ibatis/ibatis-sqlmap.jar, ibatis/ibatis-sqlmap-2.jar
-- iBATIS SQL Maps 1.3.1 and 2.0 RC3 (http://www.ibatis.com)
+- iBATIS SQL Maps 1.3.1 and 2.0 RC4 (http://www.ibatis.com)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps support
 
@@ -123,7 +123,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's XmlBeanFactory on J2SE 1.3
 
 * jakarta-commons/commons-attributes-*-SNAPSHOT.jar
-- Commons Attributes March 19th snapshot (http://jakarta.apache.org/commons/sandbox/attributes)
+- Commons Attributes May 9th snapshot (http://jakarta.apache.org/commons/sandbox/attributes)
 - required for building the framework
 - required at runtime when using Spring's Commons Attributes support
 
@@ -209,10 +209,6 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
-* mockobjects/mockobjects-*-0.09.jar
-- MockObjects 0.09 (http://www.mockobjects.com)
-- required for building the test suite
-
 * poi/poi-2.5.jar
 - Apache POI 2.5 (http://jakarta.apache.org/poi)
 - required for building the framework
@@ -239,8 +235,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's VelocityView
 
-* velocity/velocity-tools-generic-1.1-rc1.jar
-- Velocity Tools 1.1 RC1 (http://jakarta.apache.org/velocity/tools)
+* velocity/velocity-tools-generic-1.1.jar
+- Velocity Tools 1.1 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
 
