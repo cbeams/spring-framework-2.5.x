@@ -27,7 +27,6 @@ public class ValidationResultsTests extends TestCase {
         rules = rulesSource.getRules(Person.class);
     }
 
-/*
     public void testValidationResultsCollector() {
         Person p = new Person();
         ValidationResultsCollector c = new ValidationResultsCollector(p);
@@ -42,7 +41,6 @@ public class ValidationResultsTests extends TestCase {
         ValidationResults r = c.collectResults(rulesSource.getRules(Person.class));
         System.out.println(r.getResults().size());
     }
-  */
   
     public void testNestedValidationResultsPropertyConstraint() {
         Person p = new Person();
