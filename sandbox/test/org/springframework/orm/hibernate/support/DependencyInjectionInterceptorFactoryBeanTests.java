@@ -35,6 +35,16 @@ import bsh.Interpreter;
  */
 public class DependencyInjectionInterceptorFactoryBeanTests extends TestCase {
 	
+	public void testSetsNextInterceptorNonNull() throws Exception {		
+		DependencyInjectionInterceptorFactoryBean dias = new DependencyInjectionInterceptorFactoryBean();
+		Interceptor next = new ChainedInterceptorSupport() {};
+		dias.setNextInterceptor(next);
+		assertSame(next, dias.getNextInterceptor());
+		ChainedInterceptorSupport interceptor = (ChainedInterceptorSupport) dias.getObject();
+		assertSame("Enclosing FactoryBean populated nextInterceptor property on created ChainedInterceptorSupport",
+				next, interceptor.getNextInterceptor());
+	}
+	
 	public void testNoChainNoRegistration() throws Exception {
 		DependencyInjectionInterceptorFactoryBean dias = new DependencyInjectionInterceptorFactoryBean();
 		// We'll ask for a different class
@@ -56,7 +66,9 @@ public class DependencyInjectionInterceptorFactoryBeanTests extends TestCase {
 		dias.setBeanFactory(bf);
 		dias.afterPropertiesSet();
 		
-		Interceptor interceptor = (Interceptor) dias.getObject();
+		ChainedInterceptorSupport interceptor = (ChainedInterceptorSupport) dias.getObject();
+		assertNull("Next interceptor in chain is null by default", interceptor.getNextInterceptor());
+		
 		TestBean tb = (TestBean) interceptor.instantiate(TestBean.class, new Integer(12));
 		assertNull("Doesn't know about this class", interceptor.instantiate(NestedTestBean.class, new Integer(25)));
 		assertNotNull("Knows about this class", tb);
@@ -64,7 +76,15 @@ public class DependencyInjectionInterceptorFactoryBeanTests extends TestCase {
 		assertEquals("Id was set", 12, tb.getAge());
 	}
 	
-	public void testAutowirePrototype() throws Exception {
+	public void testAutowirePrototypeUsingNamedSessionFactory() throws Exception {
+		testAutowirePrototype(true);
+	}
+	
+	public void testAutowirePrototypeUsingSessionFactorySetter() throws Exception {
+		testAutowirePrototype(false);
+	}
+	
+	private void testAutowirePrototype(boolean useSessionFactoryName) throws Exception {
 		DependencyInjectionInterceptorFactoryBean dias = new DependencyInjectionInterceptorFactoryBean();
 		DefaultListableBeanFactory bf = DependencyInjectionAspectSupportTests.beanFactoryWithTestBeanSingleton();
 		String expectedName = "cherie";
@@ -72,7 +92,15 @@ public class DependencyInjectionInterceptorFactoryBeanTests extends TestCase {
 		bf.registerBeanDefinition(prototypeName, DependencyInjectionAspectSupportTests.prototypeSpouseBeanDefinition(expectedName));
 		
 		dias.addManagedClassToPrototypeMapping(TestBean.class, prototypeName);
-		dias.setSessionFactory(mockSessionFactory(TestBean.class));
+		if (useSessionFactoryName) {
+			// Use SessionFactory bean name property to avoid circular dependency
+			String sessionFactoryBeanName = "sf";
+			bf.registerSingleton(sessionFactoryBeanName, mockSessionFactory(TestBean.class));
+			dias.setSessionFactoryName(sessionFactoryBeanName);
+		}
+		else {
+			dias.setSessionFactory(mockSessionFactory(TestBean.class));
+		}
 		dias.setBeanFactory(bf);
 		dias.afterPropertiesSet();
 		

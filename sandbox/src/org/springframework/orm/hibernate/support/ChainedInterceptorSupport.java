@@ -63,7 +63,7 @@ public abstract class ChainedInterceptorSupport implements Interceptor {
 		this.nextInterceptor = nextInterceptor;
 	}
 
-	protected Interceptor next() {
+	public Interceptor getNextInterceptor() {
 		return nextInterceptor;
 	}
 

@@ -33,9 +33,12 @@ import org.springframework.beans.factory.support.DependencyInjectionAspectSuppor
  * Based on a constribution by
  * Oliver Hutchison. Thanks also to Seth Ladd.
  * <p>
- * This is a factory bean as we want to extend DependencyInjectionAspectSupport yet be usable
+ * This is a factory bean, as we want to extend DependencyInjectionAspectSupport yet be usable
  * as a Hibernate Interceptor. 
  * <p>
+ * Typically, the Hibernate SessionFactory will be set via the sessionFactoryName
+ * property: this avoids a circular dependency between SessionFactory (requiring an
+ * Interceptor) and this Interceptor (requiring a SessionFactory).
  * 
  * @author Oliver Hutchison
  * @author Rod Johnson
@@ -45,20 +48,59 @@ import org.springframework.beans.factory.support.DependencyInjectionAspectSuppor
 public class DependencyInjectionInterceptorFactoryBean extends DependencyInjectionAspectSupport implements FactoryBean {
 
 	private SessionFactory sessionFactory;
+	
+	private String sessionFactoryName;
+	
+	private Interceptor nextInterceptor;
+	
+	/**
+	 * As Hibernate doesn't support chaining of interceptors natively, we add the ability for
+	 * chaining via a delegate.
+	 * 
+	 * @param delegateInterceptor
+	 */
+	public void setNextInterceptor(Interceptor nextInterceptor) {
+		this.nextInterceptor = nextInterceptor;
+	}
 
 	/**
-	 * We need this to work out identifier property name to set PK on object
-	 * 
-	 * @param sessionFactory
+	 * @return the next Interceptor in the chain, or null if this is
+	 * the only interceptor
+	 */
+	public Interceptor getNextInterceptor() {
+		return nextInterceptor;
+	}
+
+	/**
+	 * We need the Hibernate SessionFactory to work out identifier property name to set PK on object
+	 * @param sessionFactory bean name of the Hibernate SessionFactory
+	 * this interceptor should configure persistent object instances for
 	 */
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
+	}
+	
+	/**
+	 * Alternative to the sessionFactory property.
+	 * Use this property to avoid circular dependencies between interceptor
+	 * and SessionFactory. The session factory will be looked up on validation.
+	 * @param sessionFactoryName bean name of the Hibernate SessionFactory
+	 * this interceptor should configure persistent object instances for
+	 */
+	public void setSessionFactoryName(String sessionFactoryName) {
+		this.sessionFactoryName = sessionFactoryName;
 	}
 
 
 	protected void validateProperties() {
 		if (sessionFactory == null) {
-			throw new IllegalArgumentException("Hibernate SessionFactory is required");
+			if (sessionFactoryName == null) {
+				throw new IllegalArgumentException("Either sessionFactory or sessionFactoryName property must be set");
+			}
+			else {
+				// look up the session factory bean
+				this.sessionFactory = (SessionFactory) getBeanFactory().getBean(sessionFactoryName, SessionFactory.class);
+			}
 		}
 	}
 
@@ -80,15 +122,14 @@ public class DependencyInjectionInterceptorFactoryBean extends DependencyInjecti
 		}
 	}
 
-	protected SessionFactory getSessionFactory() {
-		return sessionFactory;
-	}
 
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	public Object getObject() throws Exception {
-		return new DependencyInjectionInterceptor();
+		DependencyInjectionInterceptor dii = new DependencyInjectionInterceptor();
+		dii.setNextInterceptor(nextInterceptor);
+		return dii;
 	}
 
 	/**
