@@ -76,7 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.45 2004-06-15 16:56:52 jhoeller Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.46 2004-06-17 16:59:14 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  * @see org.springframework.beans.propertyeditors.ClassEditor
@@ -481,7 +481,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 		// lookup cached sub-BeanWrapper, create new one if not found
 		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(canonicalName);
-		if (nestedBw == null) {
+		if (nestedBw == null || nestedBw.getWrappedInstance() != propertyValue) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
 			}
