@@ -145,8 +145,8 @@ public class CommandControllerTestSuite extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=10"));
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
+		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=10"));
 	}
 
 	public void testCachingWithoutExpires() throws Exception {
@@ -157,15 +157,46 @@ public class CommandControllerTestSuite extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires") == null);
+		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=10"));
+	}
+
+	public void testCachingWithoutCacheControl() throws Exception {
+		TestController mc = new TestController();
+		mc.setCacheSeconds(10);
+		mc.setUseCacheControlHeader(false);
+		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		mc.handleRequest(request, response);
+		assertTrue("Correct expires header", response.getHeader("Expires") != null);
+		assertTrue("Correct caching", response.getHeader("Cache-Control") == null);
 	}
 
 	public void testCachingWithLastModified() throws Exception {
-		TestController mc = new LastModifiedTestController();
+		class LastModifiedTestController extends TestController implements LastModified {
+			public long getLastModified(HttpServletRequest request) {
+				return 0;
+			}
+		};
+		LastModifiedTestController mc = new LastModifiedTestController();
 		mc.setCacheSeconds(10);
 		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=10, must-revalidate"));
+		assertTrue("Correct expires header", response.getHeader("Expires") != null);
+	}
+
+	public void testCachingWithCustomCacheForSecondsCall() throws Exception {
+		TestController mc = new TestController() {
+			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
+				cacheForSeconds(response, 5);
+				return super.handle(request, response, command, errors);
+			}
+		};
+		HttpServletRequest request = new MockHttpServletRequest(null, "GET", "/ok.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		mc.handleRequest(request, response);
+		assertTrue("Correct caching", response.getHeader("Cache-Control").equals("max-age=5"));
 		assertTrue("Correct expires header", response.getHeader("Expires") != null);
 	}
 
@@ -288,26 +319,19 @@ public class CommandControllerTestSuite extends TestCase {
 	}
 
 
-	public static class TestController extends AbstractCommandController {
+	private static class TestController extends AbstractCommandController {
 		
-		public TestController() {
+		private TestController() {
 			super(TestBean.class, "person");
 		}
 		
 		protected ModelAndView handle(HttpServletRequest request,	HttpServletResponse response,	Object command,	BindException errors) {
-				Map m = new HashMap();
-				assertTrue("Command not null", command != null);
-				assertTrue("errors not null", errors != null);
-				m.put("errors", errors);
-				m.put("command", command);
+			Map m = new HashMap();
+			assertTrue("Command not null", command != null);
+			assertTrue("errors not null", errors != null);
+			m.put("errors", errors);
+			m.put("command", command);
 			return new ModelAndView(request.getServletPath(), m);
-		}
-	}
-
-	public static class LastModifiedTestController extends TestController implements LastModified {
-
-		public long getLastModified(HttpServletRequest request) {
-			return 0;
 		}
 	}
 

@@ -167,10 +167,10 @@ public abstract class AbstractController extends WebContentGenerator implements 
 		}
 		// Leave caching to the client otherwise
 		
-		// If everything's OK, leave subclass to do the business
+		// If everything's OK, let subclass do its business
 		return handleRequestInternal(request, response);
 	}
-	
+
 	/**
 	 * Template method. Subclasses must implement this.
 	 * The contract is the same as for handleRequest.
