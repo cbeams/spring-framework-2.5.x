@@ -26,11 +26,11 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		addBindAndValidateState(CRITERIA, new Transition[] { onErrorView(CRITERIA), onSuccess("query") });
 		addActionState("query", executeAction(QueryAction.class), new Transition[] { onErrorView(CRITERIA),
 				onSuccessView(RESULTS) });
-		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(set("userId")) });
-		addActionState(set("userId"), qualify(set("userId")), new Transition[] { onError("error"),
-				onSuccess("person.Detail") });
-		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useModelMapper("userId"),
-				new Transition[] { onFinish(view(RESULTS)), onError("error") });
+		String setUserId = set("userId");
+		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setUserId) });
+		addActionState(setUserId, qualify(setUserId), new Transition[] { onError("error"), onSuccess("person.Detail") });
+		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useModelMapper("userId"), new Transition[] {
+				onFinish(view(RESULTS)), onError("error") });
 		addEndState("error", "error.view");
 	}
 }
