@@ -1422,7 +1422,7 @@ public class AnotherExampleBean implements DisposableBean {
   </sect1>
 
   <sect1 id="beans-child-bean-definitions">
-    <title>Child bean definitions</title>
+    <title>Abstract and child bean definitions</title>
 
     <para>A bean definition potentially contains a large amount of
     configuration information, including container specific information (i.e.
@@ -1440,7 +1440,8 @@ public class AnotherExampleBean implements DisposableBean {
     XmlBeanFactory. In an XmlBeanFactory bean definition, a child bean
     definition is indicated simply by using the <literal>parent</literal>
     attribute, specifying the parent bean as the value of this
-    attribute.<programlisting>&lt;bean id="inheritedTestBean" class="org.springframework.beans.TestBean"&gt;
+    attribute.<programlisting>&lt;bean id="inheritedTestBean" abstract="true"
+    class="org.springframework.beans.TestBean"&gt;
     &lt;property name="name"&gt;&lt;value&gt;parent&lt;/value&gt;&lt;/property&gt;
     &lt;property name="age"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
@@ -1467,8 +1468,10 @@ public class AnotherExampleBean implements DisposableBean {
     <emphasis>autowire mode</emphasis>, <emphasis>dependency check</emphasis>,
     <emphasis>singleton</emphasis>, <emphasis>lazy init</emphasis>.</para>
 
-    <para>In the case that the parent definition does not specify a
-    class:<programlisting>&lt;bean id="inheritedTestBeanWithoutClass"&gt;
+    <para>Note that in the example above, we have explicitly marked the parent
+    bean definition as <emphasis>abstract</emphasis> by using the
+    <emphasis>abstract</emphasis> attribute. In the case that the parent
+    definition does not specify a class:<programlisting>&lt;bean id="inheritedTestBeanWithoutClass"&gt;
     &lt;property name="name"&gt;&lt;value&gt;parent&lt;/value&gt;&lt;/property&gt;
     &lt;property name="age"&gt;&lt;value&gt;1&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;
@@ -1479,24 +1482,23 @@ public class AnotherExampleBean implements DisposableBean {
     &lt;!-- age should inherit value of 1 from parent --&gt;
 &lt;/bean&gt;</programlisting></para>
 
-    <para>the parent bean can not get instantiated on its own; it's
-    effectively just a pure template or abstract bean definition that serves
-    as parent definition for child definitions. Trying to use such parent
-    beans on it's own (by referring to it as a ref property of another bean,
-    or doing an explicit getBean() call with the parent bean id, will result
-    in an error. Similarly, the container's internal
+    <para>the parent bean can not get instantiated on its own since it is
+    incomplete, and it's also considered abstract. When a definition is
+    considered abstract like this (explicitely or implicitly), it's usable
+    just as a pure template or abstract bean definition that will serve as
+    parent definition for child definitions. Trying to use such an abstract
+    parent bean on its own (by referring to it as a ref property of another
+    bean, or doing an explicit getBean() call with the parent bean id, will
+    result in an error. Similarly, the container's internal
     <emphasis>preInstantiateSingletons</emphasis> method will completely
-    ignore bean definitions which don't have either a parent or class
-    attribute set, since they are not complete.</para>
+    ignore bean definitions which are considered abstract.</para>
 
-    <para><emphasis>Important Note</emphasis>: there is no way to explicitly
-    declare a bean definition as abstract. If the bean does have a class
-    definition, then it can be instantiated. Note also that XmlBeanFactory
-    will by default pre-instantiate all singletons. Therefore it is important
-    that if you have a (parent) bean definition which you intend to use only
-    as a template, and the class is specified, you must make sure to set the
-    <emphasis>lazy-init</emphasis> attribute to <emphasis>true</emphasis> (or
-    mark the bean non-singleton), otherwise the XmlBeanFactory (and possibly
+    <para><emphasis>Important Note</emphasis>: XmlBeanFactory will by default
+    pre-instantiate all singletons. Therefore it is important (at least for
+    singleton beans) that if you have a (parent) bean definition which you
+    intend to use only as a template, and this definition specifies a class,
+    you must make sure to set the <emphasis>abstract</emphasis> attribute to
+    <emphasis>true</emphasis>, otherwise the XmlBeanFactory (and possibly
     other containers) will actually pre-instantiate it.</para>
   </sect1>
 
