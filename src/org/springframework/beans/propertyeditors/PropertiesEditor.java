@@ -3,23 +3,23 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
 /**
  * Editor for java.util.Properties objects. Handles conversion from String
- * to Properties object. Not a GUI editor.
+ * to Properties object.
  *
- * <p>This editor must be registered with the JavaBeans API before it will be
- * available. Editors in this package are registered by BeanWrapperImpl.
+ * <p>This editor must be registered before it will be available. Standard
+ * editors in this package are automatically registered by BeanWrapperImpl.
  *
  * <p>The required format is defined in java.util.Properties documentation.
  * Each property must be on a new line.
  *
  * @author Rod Johnson
- * @version $Id: PropertiesEditor.java,v 1.3 2003-12-19 11:37:03 jhoeller Exp $
+ * @version $Id: PropertiesEditor.java,v 1.4 2004-02-04 17:52:31 jhoeller Exp $
  * @see org.springframework.beans.BeanWrapperImpl
  * @see java.util.Properties#load
  */
@@ -29,23 +29,20 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	 * Any of these characters, if they're first after whitespace or first
 	 * on a line, mean that the line is a comment and should be ignored.
 	 */
-	private final static String COMMENT_MARKERS = "#!";
+	public final static String COMMENT_MARKERS = "#!";
 	
-	/**
-	 * @see java.beans.PropertyEditor#setAsText(String)
-	 */
-	public void setAsText(String s) throws IllegalArgumentException {
-		if (s == null) {
+	public void setAsText(String text) throws IllegalArgumentException {
+		if (text == null) {
 			throw new IllegalArgumentException("Cannot set Properties to null");
 		}
 		Properties props = new Properties();
 		try {
-			props.load(new ByteArrayInputStream(s.getBytes()));
+			props.load(new ByteArrayInputStream(text.getBytes()));
 			dropComments(props);
 		}
 		catch (IOException ex) {
-			// Shouldn't happen
-			throw new IllegalArgumentException("Failed to read String");
+			// shouldn't happen
+			throw new IllegalArgumentException("Failed to parse [" + text + "] into Properties");
 		}
 		setValue(props);
 	}
@@ -58,7 +55,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	 */
 	private void dropComments(Properties props) {
 		Iterator keys = props.keySet().iterator();
-		List commentKeys = new LinkedList();
+		List commentKeys = new ArrayList();
 		while (keys.hasNext()) {
 			String key = (String) keys.next();
 			// A comment line starts with one of our comment markers
@@ -68,8 +65,8 @@ public class PropertiesEditor extends PropertyEditorSupport {
 				commentKeys.add(key);
 			}
 		}
-		for (int i = 0; i < commentKeys.size(); i++) {
-			String key = (String) commentKeys.get(i);
+		for (Iterator it = commentKeys.iterator(); it.hasNext();) {
+			String key = (String) it.next();
 			props.remove(key);
 		}
 	}
