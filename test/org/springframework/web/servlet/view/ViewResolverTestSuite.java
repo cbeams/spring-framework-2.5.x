@@ -36,10 +36,6 @@ import org.springframework.web.servlet.theme.FixedThemeResolver;
  */
 public class ViewResolverTestSuite extends TestCase {
 
-	public ViewResolverTestSuite(String msg) {
-		super(msg);
-	}
-
 	public void testBeanNameViewResolver() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
@@ -147,28 +143,40 @@ public class ViewResolverTestSuite extends TestCase {
 				return ViewResolverTestSuite.class.getResourceAsStream(path);
 			}
 		};
+		wac.registerSingleton("testBean", TestBean.class, null);
 		wac.setServletContext(new MockServletContext());
+		TestBean testBean = (TestBean) wac.getBean("testBean");
 		XmlViewResolver vr = new XmlViewResolver();
 		vr.setLocation("/org/springframework/web/servlet/view/views.xml");
 		vr.setApplicationContext(wac);
 
-		View view = vr.resolveViewName("example1", Locale.getDefault());
-		assertTrue("Correct view class", InternalResourceView.class.equals(view.getClass()));
-		assertTrue("Correct URL", "/example1.jsp".equals(((InternalResourceView) view).getUrl()));
+		View view1 = vr.resolveViewName("example1", Locale.getDefault());
+		assertTrue("Correct view class", InternalResourceView.class.equals(view1.getClass()));
+		assertTrue("Correct URL", "/example1.jsp".equals(((InternalResourceView) view1).getUrl()));
 
-		view = vr.resolveViewName("example2", Locale.getDefault());
-		assertTrue("Correct view class", JstlView.class.equals(view.getClass()));
-		assertTrue("Correct URL", "/example2new.jsp".equals(((InternalResourceView) view).getUrl()));
+		View view2 = vr.resolveViewName("example2", Locale.getDefault());
+		assertTrue("Correct view class", JstlView.class.equals(view2.getClass()));
+		assertTrue("Correct URL", "/example2new.jsp".equals(((InternalResourceView) view2).getUrl()));
 
 		ServletContext sc = new MockServletContext();
+		Map model = new HashMap();
+		TestBean tb = new TestBean();
+		model.put("tb", tb);
+
 		HttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/example");
 		HttpServletResponse response = new MockHttpServletResponse();
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
-		Map model = new HashMap();
-		TestBean tb = new TestBean();
-		model.put("tb", tb);
-		view.render(model, request, response);
+		view1.render(model, request, response);
+		assertTrue("Correct tb attribute", tb.equals(request.getAttribute("tb")));
+		assertTrue("Correct test1 attribute", "testvalue1".equals(request.getAttribute("test1")));
+		assertTrue("Correct test2 attribute", testBean.equals(request.getAttribute("test2")));
+
+		request = new MockHttpServletRequest(sc, "GET", "/example");
+		response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
+		view2.render(model, request, response);
 		assertTrue("Correct tb attribute", tb.equals(request.getAttribute("tb")));
 		assertTrue("Correct test1 attribute", "testvalue1".equals(request.getAttribute("test1")));
 		assertTrue("Correct test2 attribute", "testvalue2".equals(request.getAttribute("test2")));
