@@ -17,8 +17,11 @@
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
 
 /**
  * Editor for java.net.URL, to directly feed a URL property
@@ -29,17 +32,44 @@ import java.net.URL;
  */
 public class URLEditor extends PropertyEditorSupport {
 
+	private final ResourceEditor resourceEditor;
+
+	/**
+	 * Create a new URLEditor,
+	 * using the default ResourceEditor underneath.
+	 */
+	public URLEditor() {
+		this.resourceEditor = new ResourceEditor();
+	}
+
+	/**
+	 * Create a new URLEditor,
+	 * using the given ResourceEditor underneath.
+	 * @param resourceEditor the ResourceEditor to use
+	 */
+	public URLEditor(ResourceEditor resourceEditor) {
+		this.resourceEditor = resourceEditor;
+	}
+
 	public void setAsText(String text) throws IllegalArgumentException {
+		this.resourceEditor.setAsText(text);
+		Resource resource = (Resource) this.resourceEditor.getValue();
 		try {
-			setValue(new URL(text));
+			setValue(resource != null ? resource.getURL() : null);
 		}
-		catch (MalformedURLException ex) {
-			throw new IllegalArgumentException("Malformed URL: " + ex.getMessage());
+		catch (IOException ex) {
+			throw new IllegalArgumentException(
+					"Could not retrieve URL for " + resource + ": " + ex.getMessage());
 		}
 	}
 
 	public String getAsText() {
-		return ((URL) getValue()).toExternalForm();
+		if (getValue() != null) {
+			return ((URL) getValue()).toExternalForm();
+		}
+		else {
+			return "";
+		}
 	}
 
 }
