@@ -185,8 +185,9 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
-	public Object queryForObject(final String statementName, final Object parameterObject,
-															 final Object resultObject) throws DataAccessException {
+	public Object queryForObject(
+			final String statementName, final Object parameterObject, final Object resultObject)
+			throws DataAccessException {
 		return execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForObject(statementName, parameterObject, resultObject);
@@ -203,8 +204,8 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
-	public List queryForList(final String statementName, final Object parameterObject,
-													 final int skipResults, final int maxResults)
+	public List queryForList(
+			final String statementName, final Object parameterObject, final int skipResults, final int maxResults)
 			throws DataAccessException {
 		return executeWithListResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
@@ -213,8 +214,9 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
-	public void queryWithRowHandler(final String statementName, final Object parameterObject,
-																	final RowHandler rowHandler) {
+	public void queryWithRowHandler(
+			final String statementName, final Object parameterObject, final RowHandler rowHandler)
+			throws DataAccessException {
 		execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				executor.queryWithRowHandler(statementName, parameterObject, rowHandler);
@@ -223,8 +225,9 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
-	public List queryForList(final String statementName, final Object parameterObject,
-													 final RowHandler rowHandler) throws DataAccessException {
+	public List queryForList(
+			final String statementName, final Object parameterObject, final RowHandler rowHandler)
+			throws DataAccessException {
 		return executeWithListResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForList(statementName, parameterObject, rowHandler);
@@ -232,14 +235,16 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
-	public PaginatedList queryForPaginatedList(final String statementName, final Object parameterObject,
-																		final int pageSize) throws DataAccessException {
+	public PaginatedList queryForPaginatedList(
+			final String statementName, final Object parameterObject, final int pageSize)
+			throws DataAccessException {
 
 		// throw exception if lazy loading will not work
 		if (this.sqlMapClient instanceof ExtendedSqlMapClient &&
 				((ExtendedSqlMapClient) this.sqlMapClient).getDelegate().getTxManager() == null) {
-			throw new InvalidDataAccessApiUsageException("SqlMapClient needs to have DataSource to allow for lazy loading" +
-																									 " - specify SqlMapClientFactoryBean's 'dataSource' property");
+			throw new InvalidDataAccessApiUsageException(
+					"SqlMapClient needs to have DataSource to allow for lazy loading" +
+					" - specify SqlMapClientFactoryBean's 'dataSource' property");
 		}
 
 		return (PaginatedList) execute(new SqlMapClientCallback() {
@@ -249,8 +254,9 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
-	public Map queryForMap(final String statementName, final Object parameterObject,
-												 final String keyProperty) throws DataAccessException {
+	public Map queryForMap(
+			final String statementName, final Object parameterObject, final String keyProperty)
+			throws DataAccessException {
 		return executeWithMapResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForMap(statementName, parameterObject, keyProperty);
@@ -258,8 +264,8 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
-	public Map queryForMap(final String statementName, final Object parameterObject,
-												 final String keyProperty, final String valueProperty)
+	public Map queryForMap(
+			final String statementName, final Object parameterObject, final String keyProperty, final String valueProperty)
 			throws DataAccessException {
 		return executeWithMapResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {

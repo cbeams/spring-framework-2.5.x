@@ -63,7 +63,7 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 
 
 	/**
-	 * Set the location of the iBATIS SqlMapClient config file as class path resource.
+	 * Set the location of the iBATIS SqlMapClient config file.
 	 * A typical value is "WEB-INF/sql-map-config.xml".
 	 */
 	public void setConfigLocation(Resource configLocation) {
@@ -113,8 +113,8 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 		// tell the SqlMapClient to use the given DataSource, if any
 		if (this.dataSource != null) {
 			if (!(this.sqlMapClient instanceof ExtendedSqlMapClient)) {
-				throw new IllegalArgumentException("Cannot set DataSource for SqlMapClient " +
-																					 "if not of type ExtendedSqlMapClient");
+				throw new IllegalArgumentException(
+						"Cannot set DataSource for SqlMapClient if not of type ExtendedSqlMapClient");
 			}
 			ExtendedSqlMapClient extendedClient = (ExtendedSqlMapClient) this.sqlMapClient;
 			ExternalTransactionConfig transactionConfig = new ExternalTransactionConfig();
