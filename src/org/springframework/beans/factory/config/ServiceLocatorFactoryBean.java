@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Properties;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
@@ -29,25 +30,46 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.util.StringUtils;
 
 /**
- * FactoryBean which, given an interface which must have one or more methods
- * with the signatures <code>getXXX()<code> or <code>getXXX(String id)<code>
- * creates a proxy which implements that interface.
+ * FactoryBean that takes an interface which must have one or more methods with
+ * the signatures <code>MyType xxx()<code> or <code>MyType xxx(MyIdType id)<code>
+ * (typically, <code>MyService getService()<code> or <code>MyService getService(String id)<code>)
+ * and creates a dynamic proxy which implements that interface, delegating to the
+ * Spring BeanFactory underneath.
  *
- * <p>On invocation of the no-arg factory method, or the String-arg factory method with an
- * id of null, if exactly one bean in the factory matches the return type of the 'get' method,
- * that is returned, otherwise a NoSuchBeanDefinitionException is thrown. On invocation of
- * the String-arg factory method with a non-null argument, the proxy returns the result of a
- * <code>BeanFactory.getBean(id)</code> call.
- * 
+ * <p>Such service locator allow to decouple the caller from Spring BeanFactory API, using an
+ * appropriate custom locator interface. They will typically be used for <b>prototype beans</b>,
+ * i.e. for factory methods that are supposed to return a new instance for each call.
+ * The client receives a reference to the service locator via setter or constructor injection,
+ * being able to invoke the locator's factory methods on demand. <b>For singleton beans,
+ * direct setter or constructor injection of the target bean is preferable.</b>
+ *
+ * <p>On invocation of the no-arg factory method, or the single-arg factory method with an id
+ * of null or empty String, if exactly one bean in the factory matches the return type of the
+ * factory method, that is returned, otherwise a NoSuchBeanDefinitionException is thrown.
+ *
+ * <p>On invocation of the single-arg factory method with a non-null (and non-empty) argument,
+ * the proxy returns the result of a <code>BeanFactory.getBean(name)</code> call, using a
+ * stringified version of the passed-in id as bean name.
+ *
+ * <p>A factory method argument will usually be a String, but can also be an int or a custom
+ * enumeration type, for example, stringified via <code>toString</code>. The resulting String
+ * can be used as bean name as-is, provided that corresponding beans are defined in the bean
+ * factory. Alternatively, mappings between service ids and bean names can be defined.
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 1.1.4
+ * @see #setServiceLocatorInterface
+ * @see #setServiceMappings
  */
 public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware, InitializingBean {
 
 	private Class serviceLocatorInterface;
+
+	private Properties serviceMappings;
 
 	private ListableBeanFactory beanFactory;
 
@@ -55,11 +77,27 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 
 
 	/**
-	 * Set the service locator interface to use.
-	 * See class-level javadoc for details on service locator method signatures.
+	 * Set the service locator interface to use, which must have one or more methods with
+	 * the signatures <code>MyType xxx()<code> or <code>MyType xxx(MyIdType id)<code>
+	 * (typically, <code>MyService getService()<code> or <code>MyService getService(String id)<code>).
+	 * See class-level javadoc for information on the semantics of such methods.
 	 */
 	public void setServiceLocatorInterface(Class interfaceName) {
 		this.serviceLocatorInterface = interfaceName;
+	}
+
+	/**
+	 * Set mappings between service ids (passed into the service locator)
+	 * and bean names (in the bean factory). Service ids that are not defined
+	 * here will be treated as bean names as-is.
+	 * <p>The empty string as service id key defines the mapping for null and
+	 * empty string, and for factory methods without parameter. If not defined,
+	 * a single matching bean will be retrieved from the bean factory.
+	 * @param serviceMappings mappings between service ids and bean names,
+	 * with service ids as keys as bean names as values
+	 */
+	public void setServiceMappings(Properties serviceMappings) {
+		this.serviceMappings = serviceMappings;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -95,8 +133,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 
 
 	/**
-	 * Invocation handler that delegates service locator calls
-	 * to the bean factory.
+	 * Invocation handler that delegates service locator calls to the bean factory.
 	 */
 	private class ServiceLocatorInvocationHandler implements InvocationHandler {
 
@@ -104,29 +141,42 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 			try {
 				Class[] paramTypes = method.getParameterTypes();
 				Method interfaceMethod = serviceLocatorInterface.getMethod(method.getName(), paramTypes);
-				if (!interfaceMethod.getName().startsWith("get") ||
-						!((paramTypes.length == 0) || (paramTypes.length == 1 && String.class.equals(paramTypes[0])))) {
+				Class serviceLocatorReturnType = interfaceMethod.getReturnType();
+
+				// Check whether the method is a valid service locator.
+				if (paramTypes.length > 1 || void.class.equals(serviceLocatorReturnType)) {
 					throw new UnsupportedOperationException(
-							"May only call methods with signature '<type> getXXX()' or '<type> getXXX(String id)' " +
+							"May only call methods with signature '<type> xxx()' or '<type> xxx(<idtype> id)' " +
 							"on factory interface, but tried to call: " + interfaceMethod);
 				}
-				Class serviceLocatorReturnType = interfaceMethod.getReturnType();
-				String beanName = null;
-				if (args != null) {
-					// Service locator method for a specific bean name.
-					beanName = (String) args[0];
+
+				// Check whether a service id was passed in.
+				String beanName = "";
+				if (args != null && args.length == 1 && args[0] != null) {
+					beanName = args[0].toString();
 				}
-				if (beanName != null) {
-					return beanFactory.getBean(beanName);
+
+				// Look for explicit serviceId-to-beanName mappings.
+				if (serviceMappings != null) {
+					String mappedName = serviceMappings.getProperty(beanName);
+					if (mappedName != null) {
+						beanName = mappedName;
+					}
+				}
+
+				if (StringUtils.hasLength(beanName)) {
+					// Service locator for a specific bean name.
+					return beanFactory.getBean(beanName, serviceLocatorReturnType);
 				}
 				else {
-					// Service locator method for a specific bean type.
+					// Service locator for a bean type.
 					return BeanFactoryUtils.beanOfTypeIncludingAncestors(beanFactory, serviceLocatorReturnType);
 				}
 			}
+
 			catch (NoSuchMethodException ex) {
 				// It's normal to get here for non service locator interface method calls
-				// (toString, equals, etc).
+				// (toString, equals, etc). Simply apply call to invocation handler object.
 				try {
 					return method.invoke(this, args);
 				}
