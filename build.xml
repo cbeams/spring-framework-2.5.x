@@ -182,6 +182,7 @@
 
 		<jar jarfile="${dist.dir}/spring-context.jar">
 			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/cache/**"/>
 				<include name="org/springframework/context/**"/>
 				<include name="org/springframework/ejb/**"/>
 				<include name="org/springframework/jms/**"/>
@@ -225,13 +226,8 @@
 
 		<jar jarfile="${dist.dir}/spring-web.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/web/bind/**"/>
-				<include name="org/springframework/web/context/**"/>
-				<include name="org/springframework/web/filter/**"/>
-				<include name="org/springframework/web/mock/**"/>
-				<include name="org/springframework/web/multipart/**"/>
-				<include name="org/springframework/web/struts/**"/>
-				<include name="org/springframework/web/util/**"/>
+				<include name="org/springframework/web/**"/>
+				<exclude name="org/springframework/web/servlet/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
