@@ -38,11 +38,18 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * For information on Burlap, see the
  * <a href="http://www.caucho.com/burlap">Burlap website</a>
  *
- * <p>Note: Burlap services accessed with this proxy factory do not have to be
- * exported via BurlapServiceExporter, as there isn't any special handling involved.
+ * <p>Note: Burlap services accessed with this proxy factory do not
+ * have to be exported via BurlapServiceExporter, as there isn't
+ * any special handling involved. Therefore, you can also access
+ * services that are exported via Caucho's BurlapServlet.
  *
  * @author Juergen Hoeller
  * @since 29.09.2003
+ * @see #setServiceInterface
+ * @see #setServiceUrl
+ * @see #setUsername
+ * @see #setPassword
+ * @see com.caucho.burlap.client.BurlapProxyFactory
  */
 public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
 
@@ -52,6 +59,8 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 
 	/**
 	 * Set the username that this factory should use to access the remote service.
+	 * Default is none.
+	 * @see com.caucho.burlap.client.BurlapProxyFactory#setUser
 	 */
 	public void setUsername(String username) {
 		this.proxyFactory.setUser(username);
@@ -59,9 +68,19 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 
 	/**
 	 * Set the password that this factory should use to access the remote service.
+	 * Default is none.
+	 * @see com.caucho.burlap.client.BurlapProxyFactory#setPassword
 	 */
 	public void setPassword(String password) {
 		this.proxyFactory.setPassword(password);
+	}
+
+	/**
+	 * Set whether overloaded methods should be enabled for remote invocations.
+	 * @see com.caucho.burlap.client.BurlapProxyFactory#setOverloadEnabled
+	 */
+	public void setOverloadEnabled(boolean overloadEnabled) {
+		this.proxyFactory.setOverloadEnabled(overloadEnabled);
 	}
 
 	public void afterPropertiesSet() throws MalformedURLException {
@@ -71,7 +90,18 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 		if (getServiceUrl() == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
-		this.burlapProxy = this.proxyFactory.create(getServiceInterface(), getServiceUrl());
+		this.burlapProxy = createBurlapProxy(this.proxyFactory);
+	}
+
+	/**
+	 * Create the Burlap proxy that is wrapped by this interceptor.
+	 * @param proxyFactory the proxy factory to use
+	 * @return the Burlap proxy
+	 * @throws MalformedURLException if thrown by the proxy factory
+	 * @see com.caucho.burlap.client.BurlapProxyFactory#create
+	 */
+	protected Object createBurlapProxy(BurlapProxyFactory proxyFactory) throws MalformedURLException {
+		return proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
