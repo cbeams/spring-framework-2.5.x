@@ -22,15 +22,47 @@ public class SqlReturnResultSet extends SqlParameter {
 	 * output maps
 	 * @param RowCallbackHandler.
 	 */
-	private RowCallbackHandler rch;
+	private RowCallbackHandler rowCallbackHandler;
+	private RowMapper rowMapper = null;
+	private int rowsExpected = 0;
+	private boolean rowMapperSupported = false;
 
 	public SqlReturnResultSet(String name, RowCallbackHandler rch) {
 		super(name, 0);
-		this.rch = rch;
+		this.rowCallbackHandler = rch;
+	}
+
+	public SqlReturnResultSet(String name, RowMapper rm, int rowsExpected) {
+		super(name, 0);
+		this.rowMapper = rm;
+		this.rowsExpected = rowsExpected;
+		this.rowMapperSupported = true;
 	}
 	
+	public SqlReturnResultSet(String name, RowMapper rm) {
+		this(name, rm, 0);
+	}
+		
+	/**
+	 * @return Returns the rowCallbackHandler.
+	 */
 	public RowCallbackHandler getRowCallbackHandler() {
-		return rch;
+		return rowCallbackHandler;
 	}
 	
+	/**
+	 * Return new instance of the implementation of a ResultReader usable for returned resultsets. This implementation 
+	 * invokes the RowMapper's implementation of the mapRow() method.
+	 */
+	protected final ResultReader newResultReader() {
+		return new ResultReaderStoredProcImpl(rowsExpected, rowMapper);
+	}
+
+	/**
+	 * @return Returns the isRowMapperSupported.
+	 */
+	public boolean isRowMapperSupported() {
+		return rowMapperSupported;
+	}
+
 }

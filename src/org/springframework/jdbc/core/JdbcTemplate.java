@@ -61,7 +61,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Yann Caroff
  * @author Thomas Risberg
  * @author Isabelle Muszynski
- * @version $Id: JdbcTemplate.java,v 1.13 2003-11-20 09:01:42 johnsonr Exp $
+ * @version $Id: JdbcTemplate.java,v 1.14 2003-11-26 23:09:58 trisberg Exp $
  * @since May 3, 2001
  * @see org.springframework.dao
  * @see org.springframework.jdbc.object
@@ -551,9 +551,10 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 			boolean retval = cs.execute();
 			if (logger.isDebugEnabled())
 				logger.debug("CallableStatement.execute returned [" + retval + "]");
+			Map retMap = new HashMap();
 			if (retval)
-				extractReturnedResultSets(cs, declaredParameters);
-			Map retMap = extractOutputParameters(cs, declaredParameters);
+				retMap.putAll(extractReturnedResultSets(cs, declaredParameters));
+			retMap.putAll(extractOutputParameters(cs, declaredParameters));
 			return retMap;
 		}
 		catch (SQLException ex) {
@@ -592,10 +593,17 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 					// We can't pass back a resultset since the connection will be closed - we must process it
 					try {
 						if (((SqlOutParameter) p).isResultSetSupported()) {
-							ResultSetExtractor rse = new RowCallbackHandlerResultSetExtractor(((SqlOutParameter) p).getRowCallbackHandler());
+							ResultSetExtractor rse = null;
+							if (((SqlOutParameter) p).isRowMapperSupported())
+								rse = new RowCallbackHandlerResultSetExtractor(((SqlOutParameter) p).newResultReader());
+							else
+								rse = new RowCallbackHandlerResultSetExtractor(((SqlOutParameter) p).getRowCallbackHandler());
 							rse.extractData((ResultSet) out);
 							logger.debug("ResultSet returned from stored procedure was processed");
-							outParams.put(p.getName(), "ResultSet processed.");
+							if (((SqlOutParameter) p).isRowMapperSupported())
+								outParams.put(p.getName(), ((ResultReader) ((RowCallbackHandlerResultSetExtractor) rse).getCallbackHandler()).getResults() );
+							else
+								outParams.put(p.getName(), "ResultSet processed.");
 						}
 						else {
 							logger.warn("ResultSet returned from stored procedure but a corresponding SqlOutParameter with a RowCallbackHandler was not declared");
@@ -629,7 +637,8 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 	 * @param cs JDBC wrapper for the stored procedure
 	 * @param parameters Parameter list for the stored procedure
 	 */
-	private void extractReturnedResultSets(CallableStatement cs, List parameters) throws SQLException {
+	private Map extractReturnedResultSets(CallableStatement cs, List parameters) throws SQLException {
+		Map returnedResults = new HashMap();
 		int rsIndx = 0;
 		do {
 			SqlParameter p = null;
@@ -639,11 +648,16 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 				ResultSet rs = null;
 				rs = cs.getResultSet();
 				try {
-					new RowCallbackHandlerResultSetExtractor(
-					    ((SqlReturnResultSet) p)
-					    .getRowCallbackHandler())
-					    .extractData(
-					        rs);
+					ResultSetExtractor rse = null;
+					if (((SqlReturnResultSet) p).isRowMapperSupported())
+						rse = new RowCallbackHandlerResultSetExtractor(((SqlReturnResultSet) p).newResultReader());
+					else
+						rse = new RowCallbackHandlerResultSetExtractor(((SqlReturnResultSet) p).getRowCallbackHandler());
+					rse.extractData(rs);
+					if (((SqlReturnResultSet) p).isRowMapperSupported())
+						returnedResults.put(p.getName(), ((ResultReader)((RowCallbackHandlerResultSetExtractor) rse).getCallbackHandler()).getResults());
+					else
+						returnedResults.put(p.getName(), "ResultSet returned from stored procedure was processed");
 				}
 				catch (SQLException se) {
 					throw se;
@@ -660,8 +674,9 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 				logger.warn("ResultSet returned from stored procedure but a corresponding SqlReturnResultSet parameter was not declared");
 			}
 			rsIndx++;
-		}
-		while (cs.getMoreResults());
+		} while (cs.getMoreResults());
+		
+		return returnedResults;
 	}
 
 	/**
@@ -725,6 +740,13 @@ public class JdbcTemplate implements InitializingBean, IJdbcTemplate {
 				this.callbackHandler.processRow(rs);
 			}
 		}
+		/**
+		 * @return Returns the callbackHandler.
+		 */
+		public RowCallbackHandler getCallbackHandler() {
+			return callbackHandler;
+		}
+
 	}
 
 }

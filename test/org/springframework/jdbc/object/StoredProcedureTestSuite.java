@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,9 @@ import org.springframework.jdbc.JdbcTestCase;
 import org.springframework.jdbc.core.BadSqlGrammarException;
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SQLExceptionTranslator;
 import org.springframework.jdbc.core.SQLStateSQLExceptionTranslator;
 import org.springframework.jdbc.core.SqlOutParameter;
@@ -34,7 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Thomas Risberg
  * @author Trevor Cook
  * @author Rod Johnson
- * @version $Id: StoredProcedureTestSuite.java,v 1.8 2003-11-05 20:33:06 jhoeller Exp $
+ * @version $Id: StoredProcedureTestSuite.java,v 1.9 2003-11-26 23:10:34 trisberg Exp $
  */
 public class StoredProcedureTestSuite extends JdbcTestCase {
 
@@ -235,9 +236,6 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 	
 		assertEquals(sp.execute(1106), 4);
 	}
-	
-	
-	
 
 	public void testNullArg() throws Exception {
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
@@ -317,12 +315,8 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getString(2);
-		ctrlResultSet.setReturnValue("Foo");
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getString(2);
-		ctrlResultSet.setReturnValue("Bar");
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
@@ -346,16 +340,81 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 
 		StoredProcedureWithResultSet sproc =
 			new StoredProcedureWithResultSet(mockDataSource);
-		List res = sproc.execute();
+		sproc.execute();
 
 		ctrlResultSet.verify();
-		
-		assertEquals(2, res.size());
-		assertEquals("Foo", res.get(0));
-		assertEquals("Bar", res.get(1));
+		assertEquals(2, sproc.getCount());
 		
 	}
 	
+	public void testStoredProcedureWithResultSetMapped() throws Exception {
+		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString(2);
+		ctrlResultSet.setReturnValue("Foo");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString(2);
+		ctrlResultSet.setReturnValue("Bar");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(true);
+		mockCallable.getResultSet();
+		ctrlCallable.setReturnValue(mockResultSet);
+		mockCallable.getMoreResults();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		ctrlResultSet.replay();
+
+		StoredProcedureWithResultSetMapped sproc =
+			new StoredProcedureWithResultSetMapped(mockDataSource);
+		Map res = sproc.execute();
+
+		ctrlResultSet.verify();
+		
+		List rs = (List) res.get("rs");
+		assertEquals(2, rs.size());
+		assertEquals("Foo", rs.get(0));
+		assertEquals("Bar", rs.get(1));		
+
+	}
+
+	public void testParameterMapper() throws Exception {
+		mockCallable.setObject(1, "$Proxy0", Types.VARCHAR);
+		ctrlCallable.setVoidCallable();
+		mockCallable.registerOutParameter(2, Types.VARCHAR);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getObject(2);
+		ctrlCallable.setReturnValue("OK");
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{call " + ParameterMapperStoredProcedure.SQL + "(?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		ParameterMapperStoredProcedure pmsp =
+			new ParameterMapperStoredProcedure(mockDataSource);
+		Map out = pmsp.executeTest();
+		assertEquals("OK", out.get("out"));
+	}
+
 	private class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
 		public static final String SQL = "configured_via_jt";
 		public StoredProcedureConfiguredViaJdbcTemplate(JdbcTemplate t) {
@@ -473,7 +532,7 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 	private class StoredProcedureWithResultSet extends StoredProcedure {
 		public static final String SQL = "sproc_with_result_set";
 
-		private List results = new LinkedList();
+		private int count = 0;
 
 		public StoredProcedureWithResultSet(DataSource ds) {
 			setDataSource(ds);
@@ -483,17 +542,78 @@ public class StoredProcedureTestSuite extends JdbcTestCase {
 			compile();
 		}
 
-		public List execute() {
-			Map out = execute(new HashMap());
-			return results;
+		public void execute() {
+			execute(new HashMap());
+		}
+
+		public int getCount() {
+			return count;
 		}
 
 		private class RowCallbackHandlerImpl implements RowCallbackHandler {
 			public void processRow(ResultSet rs) throws SQLException {
-				results.add(rs.getString(2));
+				count++;
 			}
 		}
 
+	}
+
+	private class StoredProcedureWithResultSetMapped extends StoredProcedure {
+		public static final String SQL = "sproc_with_result_set";
+
+		public StoredProcedureWithResultSetMapped(DataSource ds) {
+			setDataSource(ds);
+			setSql(SQL);
+			declareParameter(
+				new SqlReturnResultSet("rs", new RowMapperImpl()));
+			compile();
+		}
+
+		public Map execute() {
+			Map out = execute(new HashMap());
+			return out;
+		}
+
+		private class RowMapperImpl implements RowMapper {
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString(2);
+			}
+		}
+
+	}
+
+	private class ParameterMapperStoredProcedure extends StoredProcedure {
+
+		public static final String SQL = "parameter_mapper_sp";
+
+		public ParameterMapperStoredProcedure(DataSource ds) {
+			setDataSource(ds);
+			setSql(SQL);
+			declareParameter(new SqlParameter("in", Types.VARCHAR));
+			declareParameter(new SqlOutParameter("out", Types.VARCHAR));
+			compile();
+		}
+
+		public Map executeTest() {
+			Map out = null;
+			out = execute(new TestParameterMapper());
+			return out;
+		}
+		
+		private class TestParameterMapper implements ParameterMapper {
+			
+			private TestParameterMapper() {
+			}
+			
+			public Map createMap(Connection conn) throws SQLException {
+				Map inParms = new HashMap();
+				inParms.put("in", conn.getClass().getName());
+				return inParms;
+			}
+		
+		}
+
+		
 	}
 
 	private class StoredProcedureExceptionTranslator extends StoredProcedure {
