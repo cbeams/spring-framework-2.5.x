@@ -140,7 +140,7 @@
        with a manually specified TransactionInterceptor, or use BeanNameAutoProxyCreator -->
 
 
-	<!-- a proxy to remote EJB, with the cached home flag oon, to test home caching -->
+	<!-- a proxy to remote EJB, with the cached home flag on, to test home caching -->
 	<bean id="cachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
 		<property name="jndiName">
 			<value>SimpleWithCmtAndSpringTx</value>

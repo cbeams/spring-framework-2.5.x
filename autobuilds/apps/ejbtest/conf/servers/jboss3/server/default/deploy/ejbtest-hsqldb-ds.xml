@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- Sample JBOSS connection factory config for this HSSQL instance running
-     externally on port 19001. Drop into deploy dir -->
+     externally on port 19002. Drop into deploy dir
+
+	 $Id: ejbtest-hsqldb-ds.xml,v 1.1 2004-11-14 17:19:16 colins Exp $
+  -->
 
 <datasources>
    <local-tx-datasource>
@@ -21,7 +24,7 @@
       <!-- for in-process db with file store, saved when jboss stops. The
       org.jboss.jdbc.HypersonicDatabase is unnecessary
       -->
-      <connection-url>jdbc:hsqldb:hsql://localhost:19001</connection-url>
+      <connection-url>jdbc:hsqldb:hsql://localhost:19002</connection-url>
 
       <!-- The driver class -->
       <driver-class>org.hsqldb.jdbcDriver</driver-class>

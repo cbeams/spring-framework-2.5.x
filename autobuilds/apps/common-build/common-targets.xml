@@ -1,16 +1,13 @@
 <?xml version="1.0"?>
 
 <!--
-  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/ejbtest/common-build/common-targets.xml,v 1.2 2004-11-13 04:07:25 colins Exp $"
+  "$Header: /var/local/springframework.cvs.sourceforge.net/spring/autobuilds/apps/common-build/common-targets.xml,v 1.1 2004-11-14 17:19:16 colins Exp $"
 -->
 
 <project name="common-targets">
 
   <!-- load constants pointing to various libs in the static repo -->
   <property file="${basedef.dir}/library-refs.properties"/>
-
-  <property name="EJBTEST_JAR"
-            value="${basedef.dir}/../ejbtest/target/modules/lib/ejbtest.jar"/>
 
   <!--
         targets:  displays all targets suitable for developer use
@@ -61,6 +58,8 @@
     <echo message='ant.file = "${ant.file}"' />
     <echo message='user.dir = "${user.dir}"' />
     <echo message='ant.java.version = "${ant.java.version}"' />
+    <echo message='debug = "${debug}"' />
+    <echo message='optimize = "${optimize}"' />
     <echo message='static.repo="${static.repo}"' />
     <echo message='target.appserver = "${target.appserver}"' />
 

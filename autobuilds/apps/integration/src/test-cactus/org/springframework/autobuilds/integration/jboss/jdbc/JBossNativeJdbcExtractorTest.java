@@ -63,7 +63,7 @@ public class JBossNativeJdbcExtractorTest extends TestCase {
 		extractor = new JBossNativeJdbcExtractor();
 		ClassPathResource res = new ClassPathResource("applicationContext.xml",
 				this.getClass());
-		assertTrue(res.exists());
+		assertTrue("need applicationContext.xml", res.exists());
 		bf = new XmlBeanFactory(res);
 	}
 
