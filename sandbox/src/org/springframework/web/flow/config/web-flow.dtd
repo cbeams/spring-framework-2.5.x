@@ -55,8 +55,8 @@
 <!ATTLIST action bean CDATA #IMPLIED>
 
 <!--
-	Fully qualified class of the Action implementation.  An instance of the
-	class will be instantiated and possibly auto-wireddepending on the value of the
+	Fully qualified class of the Action implementation. An instance of the
+	class will be instantiated and possibly auto-wired depending on the value of the
 	autowire attribute.
 -->
 <!ATTLIST action class CDATA #IMPLIED>
@@ -76,7 +76,8 @@
 <!--
 	Name of the action. This is optional. When not specified, the action will
 	not have any name and the events signaled by the action will not get the
-	action name prepended to them.
+	action name prepended to them. An action with a name is also referred to
+	as a named action.
 -->
 <!ATTLIST action name CDATA #IMPLIED>
 
@@ -95,8 +96,8 @@
 	Name of the view that will be rendered. This is optional. When
 	not present, this view state will be a marker view state.
 	A marker view state does not actually render a view, but just returns
-	control to the client. Use this when an action has already generated
-	the response.
+	control to the client. Use a marker view state when an action has
+	already generated the response.
 -->
 <!ATTLIST view-state view CDATA #IMPLIED>
 
@@ -106,17 +107,19 @@
 <!ELEMENT transition EMPTY>
 
 <!--
-	ID of the event that will trigger this transition.
+	The id of the event that will trigger this transition.
 	
 	The event identifier is of the form "[actionName'.']event". So
 	the name of the event that will trigger the transition is prepended with
 	the name of the action that signals the event. Both are concatenated using
 	a dot. So when you have an action with name "myAction" that signals an
-	event "success", the event of the corresponding transition should be "myAction.success".
+	event "success", the event on which the corresponding transition will
+	fire should be "myAction.success".
 	
 	For the events signaled by an action that does not have a name, or events
 	signaled in a view state or a subflow state, the transition event is simply
-	the name of the event that triggers the transition ("ok" in the previous example).
+	the name of the event that triggers the transition ("success" in the
+	previous example).
 -->
 <!ATTLIST transition on CDATA #REQUIRED>
 
@@ -138,8 +141,7 @@
 <!ATTLIST subflow-state id ID #REQUIRED>
 
 <!--
-	Name (unique bean id) of the sub flow that will be spawned.  When not present,
-	the ID of the subflow-state will be treated as the ID of the subflow.
+	Name (unique bean id) of the sub flow that will be spawned.
 -->
 <!ATTLIST subflow-state flow CDATA #REQUIRED>
 
@@ -164,7 +166,7 @@
 	and when there is no parent flow to continue. This is optional. When
 	not present, this state will be a market end state.
 	A marker end state does not actually render a view, but just returns
-	control to the client. Use this when an action has already generated
-	the response.
+	control to the client. Use a marker end state when an action has
+	already generated the response.
 -->
 <!ATTLIST end-state view CDATA #IMPLIED>

@@ -32,6 +32,7 @@ import org.springframework.web.flow.ServiceLookupException;
 /**
  * A flow service locator that uses a Spring bean factory to lookup flow-related
  * services.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -68,22 +69,25 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	protected BeanFactory getBeanFactory() {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException(
-					"The bean factory reference has not yet been set for this BeanFactoryServiceLocator - call setBeanFactory()");
+					"The bean factory reference has not yet been set for this BeanFactoryServiceLocator"
+					+ " -- call setBeanFactory()");
 		}
 		return beanFactory;
 	}
 
 	/**
-	 * @return Returns the defaultAutowireMode.
+	 * Returns the default autowire mode. This defaults
+	 * to {@link AutowireMode#NONE}.
 	 */
 	public AutowireMode getDefaultAutowireMode() {
 		return defaultAutowireMode;
 	}
 
 	/**
-	 * @param defaultAutowireMode The defaultAutowireMode to set.
+	 * Set the default autowire mode.
 	 */
 	public void setDefaultAutowireMode(AutowireMode defaultAutowireMode) {
+		// avoid infinite loops!
 		Assert.isTrue(defaultAutowireMode != AutowireMode.DEFAULT, "The default auto wire must not equal 'default'");
 		this.defaultAutowireMode = defaultAutowireMode;
 	}
@@ -102,16 +106,21 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (AutowireCapableBeanFactory)getBeanFactory();
 	}
 
-	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
-		if (autowireMode == AutowireMode.DEFAULT) {
-			return createAction(implementationClass, getDefaultAutowireMode());
+	public Action createAction(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException {
+		try {
+			if (autowireMode == AutowireMode.DEFAULT) {
+				return createAction(implementationClass, getDefaultAutowireMode());
+			}
+			if (autowireMode == AutowireMode.NONE) {
+				return (Action)BeanUtils.instantiateClass(implementationClass);
+			}
+			else {
+				return (Action)
+					getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(), false);
+			}
 		}
-		if (autowireMode == AutowireMode.NONE) {
-			return (Action)BeanUtils.instantiateClass(implementationClass);
-		}
-		else {
-			return (Action)getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(),
-					false);
+		catch (BeansException e) {
+			throw new NoSuchActionException(implementationClass, e);
 		}
 	}
 
@@ -161,7 +170,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			else {
 				throw new NoSuchFlowDefinitionException(flowDefinitionId, new IllegalStateException(
 						"The flow factory must produce flows using a FlowBuilder of type '"
-								+ requiredBuilderImplementationClass + "' but it doesn't"));
+								+ requiredBuilderImplementationClass + "', but it doesn't"));
 			}
 		}
 		catch (BeansException e) {

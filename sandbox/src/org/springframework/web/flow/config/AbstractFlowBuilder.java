@@ -33,10 +33,10 @@ import org.springframework.web.flow.ViewState;
  * Base class for flow builders that programmatically build flows in Java
  * configuration code.
  * <p>
- * To give you an example of what a simple java-based web flow builder
+ * To give you an example of what a simple Java-based web flow builder
  * definition might look like, the following example defines the 'dynamic' web
- * flow equivalent to the work flow statically implemented in Spring MVC's
- * simple form controller:
+ * flow roughly equivalent to the work flow statically implemented in Spring
+ * MVC's simple form controller:
  * 
  * <pre>
  * public class EditCustomerDetailsFlowBuilder extends AbstractFlowBuilder {
@@ -55,7 +55,7 @@ import org.springframework.web.flow.ViewState;
  * }
  * </pre>
  * 
- * What this java-based FlowBuilder implementation does is add four states to a
+ * What this Java-based FlowBuilder implementation does is add four states to a
  * flow identified as "customerDetails". These include a "get"
  * <code>ActionState</code> (the start state), a <code>ViewState</code>
  * state, a "bind and validate" <code>ActionState</code>, and an end marker

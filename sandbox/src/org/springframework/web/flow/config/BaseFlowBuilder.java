@@ -31,6 +31,7 @@ import org.springframework.web.flow.FlowExecutionListener;
 /**
  * Abstract base implementation of a flow builder defining common functionality
  * needed by most concrete flow builder implementations.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -61,7 +62,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	private FlowCreator flowCreator = new DefaultFlowCreator();
 
 	/**
-	 * Default constructor
+	 * Default constructor for subclassing.
 	 */
 	protected BaseFlowBuilder() {
 	}
@@ -185,8 +186,8 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	 * override to return a custom Flow implementation, or simply pass in a
 	 * custom FlowCreator implementation.
 	 * 
-	 * @param id The flow identifier.
-	 * @return The flow built by this builder.
+	 * @param id the flow identifier.
+	 * @return the flow built by this builder.
 	 */
 	protected Flow createFlow(String id) {
 		return this.flowCreator.createFlow(id);

@@ -27,6 +27,7 @@ import org.xml.sax.SAXException;
  * EntityResolver implementation for the Spring web flow DTD, to load the DTD
  * from the classpath. The implementation is similar to that of the
  * <code>org.springframework.beans.factory.xml.BeansDtdResolver</code>.
+ * 
  * @author Erwin Vervaet
  */
 public class FlowDtdResolver implements EntityResolver {

@@ -19,6 +19,7 @@ import org.springframework.web.flow.ServiceLookupException;
 
 /**
  * Thrown when an action cannot be found.
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -26,7 +27,7 @@ public class NoSuchActionException extends ServiceLookupException {
 
 	/**
 	 * Create a new action lookup exception.
-	 * @param serviceId The id of the service that cannot be found
+	 * @param serviceId the id of the service that cannot be found
 	 */
 	public NoSuchActionException(String serviceId) {
 		super(serviceId);
@@ -34,8 +35,8 @@ public class NoSuchActionException extends ServiceLookupException {
 
 	/**
 	 * Create a new action lookup exception.
-	 * @param serviceId The id of the service that cannot be found
-	 * @param cause The underlying cause of this exception
+	 * @param serviceId the id of the service that cannot be found
+	 * @param cause the underlying cause of this exception
 	 */
 	public NoSuchActionException(String serviceId, Throwable cause) {
 		super(serviceId, cause);
@@ -43,7 +44,7 @@ public class NoSuchActionException extends ServiceLookupException {
 
 	/**
 	 * Create a new action lookup exception.
-	 * @param serviceImplementationClass The required implementation class of
+	 * @param serviceImplementationClass the required implementation class of
 	 *        the service that cannot be found
 	 */
 	public NoSuchActionException(Class serviceImplementationClass) {
@@ -52,9 +53,9 @@ public class NoSuchActionException extends ServiceLookupException {
 
 	/**
 	 * Create a new action lookup exception.
-	 * @param serviceImplementationClass The required implementation class of
+	 * @param serviceImplementationClass the required implementation class of
 	 *        the service that cannot be found
-	 * @param cause The underlying cause of this exception
+	 * @param cause the underlying cause of this exception
 	 */
 	public NoSuchActionException(Class serviceImplementationClass, Throwable cause) {
 		super(serviceImplementationClass, cause);
@@ -67,7 +68,7 @@ public class NoSuchActionException extends ServiceLookupException {
 		}
 		else {
 			return "No action was found of implementation '" + getServiceImplementationClass()
-					+ "'; make sure there is a single Action implementation of this type exported in the context";
+					+ "' -- make sure there is a single Action implementation of this type exported in the context";
 		}
 	}
 }

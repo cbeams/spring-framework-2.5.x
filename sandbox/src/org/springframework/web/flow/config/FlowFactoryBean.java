@@ -38,19 +38,19 @@ import org.springframework.web.flow.Flow;
  *    &lt;/bean&gt;
  * </pre>
  * 
- * The above definition is configured with a specific, java-based FlowBuilder
+ * The above definition is configured with a specific, Java-based FlowBuilder
  * implementation. An XmlFlowBuilder could instead be used, for example:
  * 
  * <pre>
- *    &amp;ltbean id=&quot;user.RegistrationFlow&quot; class=&quot;org.springframework.web.flow.config.FlowFactoryBean&quot;&gt;
- *        &amp;ltproperty name=&quot;flowBuilder&quot;&gt;
- *            &amp;ltbean class=&quot;org.springframework.web.flow.config.XmlFlowBuilder&quot;&gt;
- *                &amp;ltproperty name=&quot;resource&quot;&gt;
- *                    &amp;ltvalue&amp;gt;UserRegistrationFlow.xml&amp;lt/value&gt;
- *                &amp;lt/property&gt;
- *            &amp;lt/bean&gt;
- *         &amp;lt/property&gt;
- *    &amp;lt/bean&gt;
+ *    &lt;bean id=&quot;user.RegistrationFlow&quot; class=&quot;org.springframework.web.flow.config.FlowFactoryBean&quot;&gt;
+ *        &lt;property name=&quot;flowBuilder&quot;&gt;
+ *            &lt;bean class=&quot;org.springframework.web.flow.config.XmlFlowBuilder&quot;&gt;
+ *                &lt;property name=&quot;resource&quot;&gt;
+ *                    &lt;value&gt;UserRegistrationFlow.xml&lt;/value&gt;
+ *                &lt;/property&gt;
+ *            &lt;/bean&gt;
+ *         &lt;/property&gt;
+ *    &lt;/bean&gt;
  * </pre>
  * 
  * </p>
@@ -77,6 +77,7 @@ import org.springframework.web.flow.Flow;
  * property.</td>
  * </tr>
  * </table>
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -101,7 +102,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 
 	/**
 	 * Create a new flow factory bean using the specified builder strategy.
-	 * @param flowBuilder The builder the factory will use to build flows.
+	 * @param flowBuilder the builder the factory will use to build flows.
 	 */
 	public FlowFactoryBean(FlowBuilder flowBuilder) {
 		setFlowBuilder(flowBuilder);
@@ -122,15 +123,15 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	public void afterPropertiesSet() {
-		Assert.state(flowBuilder != null, "The flow builder is required to assemble the flow produced by this factory");
+		Assert.notNull(flowBuilder, "The flow builder is required to assemble the flow produced by this factory");
 	}
 
 	/**
 	 * Does this factory bean build flows with the specified FlowBuilder
 	 * implementation?
-	 * @param builderImplementationClass The builder implementation
+	 * @param builderImplementationClass the builder implementation
 	 * @return true if yes, false otherwise
-	 * @throws IllegalArgumentException If specified class is not a
+	 * @throws IllegalArgumentException if specified class is not a
 	 *         <code>FlowBuilder</code> implementation
 	 */
 	public boolean buildsWith(Class builderImplementationClass) throws IllegalArgumentException {

@@ -17,19 +17,58 @@ package org.springframework.web.flow.config;
 
 import org.springframework.util.enums.support.ShortCodedLabeledEnum;
 
+/**
+ * Enumeration listing all possible autowire modes. The autowire mode is
+ * used by the <code>FlowServiceLocator</code> when asking the backing
+ * registry to create new artifacts, e.g. actions.
+ * <p>
+ * The autowire modes defined here are inspired by those supported by
+ * the Spring <code>AutowireCapableBeanFactory</code>.
+ * 
+ * @see org.springframework.web.flow.config.FlowServiceLocator
+ * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
+ *  
+ * @author Keith Donald
+ * @author Erwin Vervaet
+ */
 public class AutowireMode extends ShortCodedLabeledEnum {
+	
+	/**
+	 * Constant that indicates autowiring bean properties by name.
+	 */
 	public static final AutowireMode BY_NAME = new AutowireMode(1, "byName");
 
+	/**
+	 * Constant that indicates autowiring bean properties by type.
+	 */
 	public static final AutowireMode BY_TYPE = new AutowireMode(2, "byType");
 
+	/**
+	 * Constant that indicates autowiring a constructor.
+	 */
 	public static final AutowireMode CONSTRUCTOR = new AutowireMode(3, "constructor");
 
+	/**
+	 * Constant that indicates determining an appropriate autowire strategy
+	 * through introspection of the bean class.
+	 */
 	public static final AutowireMode AUTODETECT = new AutowireMode(4, "autodetect");
 
+	/**
+	 * Constant that indicates that no autowiring should be done.
+	 */
 	public static final AutowireMode NONE = new AutowireMode(5, "none");
 
+	/**
+	 * Constant that indicates that no explicit autowire mode is specified
+	 * and that the default autowire mode of the FlowServiceLocator should
+	 * be used.
+	 */
 	public static final AutowireMode DEFAULT = new AutowireMode(6, "default");
 
+	/**
+	 * Private constructor because this is a typesafe enum!
+	 */
 	private AutowireMode(int code, String label) {
 		super(code, label);
 	}

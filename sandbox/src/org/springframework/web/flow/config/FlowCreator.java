@@ -25,10 +25,12 @@ import org.springframework.web.flow.Flow;
  * This interface is useful when you require specific <code>Flow</code>
  * specializations that are shared between different <code>FlowBuilder</code>
  * implementations.
- * @author Keith Donald
- * @author Erwin Vervaet
+ * 
  * @see org.springframework.web.flow.Flow
  * @see org.springframework.web.flow.config.FlowBuilder
+ * 
+ * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface FlowCreator {
 

@@ -17,13 +17,14 @@ package org.springframework.web.flow.config;
 
 /**
  * Exception thrown to indicate a problem while building a flow.
+ * 
  * @author Erwin Vervaet
  */
 public class FlowBuilderException extends RuntimeException {
 
 	/**
 	 * Create a new flow builder exception.
-	 * @param message Descriptive message
+	 * @param message descriptive message
 	 */
 	public FlowBuilderException(String message) {
 		super(message);
@@ -31,7 +32,7 @@ public class FlowBuilderException extends RuntimeException {
 
 	/**
 	 * Create a new flow builder exception.
-	 * @param cause The underlying cause of this exception
+	 * @param cause the underlying cause of this exception
 	 */
 	public FlowBuilderException(Throwable cause) {
 		super(cause);
@@ -39,8 +40,8 @@ public class FlowBuilderException extends RuntimeException {
 
 	/**
 	 * Create a new flow builder exception.
-	 * @param message Descriptive message
-	 * @param cause The underlying cause of this exception
+	 * @param message descriptive message
+	 * @param cause the underlying cause of this exception
 	 */
 	public FlowBuilderException(String message, Throwable cause) {
 		super(message, cause);
