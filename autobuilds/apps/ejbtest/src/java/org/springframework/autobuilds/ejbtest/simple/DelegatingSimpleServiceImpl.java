@@ -15,25 +15,47 @@
  */
 package org.springframework.autobuilds.ejbtest.simple;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * A POJO implementation of SimpleService
  */
-public class SimpleServiceImpl implements SimpleService {
+public class DelegatingSimpleServiceImpl implements SimpleService {
+	
+	Log log = LogFactory.getLog(DelegatingSimpleServiceImpl.class);
+
+	private SimpleService delegate;
+	
+	/**
+	 * @param delegate The delegate to set.
+	 * @todo Generated comment
+	 */
+	public void setDelegate(SimpleService delegate) {
+		this.delegate = delegate;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.springframework.autobuilds.ejbtest.simple.SimpleService#echo(java.lang.String)
 	 */
 	public String echo(String input) {
-		// TODO Auto-generated method stub
-		return null;
+		log.debug("DelegatingSimpleServiceImpl:echo");
+		return "(DelegatingSimpleServiceImpl:echo: hello " + input + ")";
 	}
 
 	/* (non-Javadoc)
 	 * @see org.springframework.autobuilds.ejbtest.simple.SimpleService#echo2(java.lang.String)
 	 */
 	public String echo2(String input) {
-		// TODO Auto-generated method stub
-		return null;
+		log.debug("DelegatingSimpleServiceImpl:echo2");
+		return "(DelegatingSimpleServiceImpl:echo2: hello " + input + ")";
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.autobuilds.ejbtest.simple.SimpleService#echo3(java.lang.String)
+	 */
+	public String echo3(String input) {
+		log.debug("DelegatingSimpleServiceImpl:echo3");
+		return delegate.echo3(input);
+	}
 }

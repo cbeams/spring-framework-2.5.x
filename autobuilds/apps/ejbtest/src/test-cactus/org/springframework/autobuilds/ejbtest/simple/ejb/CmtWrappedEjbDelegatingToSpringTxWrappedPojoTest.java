@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.autobuilds.ejbtest;
+package org.springframework.autobuilds.ejbtest.simple.ejb;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -26,11 +26,12 @@ import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 
 /**
- * Test usage of EJB Remote proxy with and without a cached home. Also test EJB Local proxy (home
- * cache is not changed for this, since there is no difference in behaviour from remote).
+ * Test calling into a CMT EJB which then calls into Spring TX wrapped POJO,
+ * including one test in which that POJO calls into another Spring TX wrapped
+ * POJO, which does persistence via Hibernate.
  * 
  * @author colin sampaleanu
- * @version $Id: CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest.java,v 1.1 2004-07-15 00:09:42 colins Exp $
+ * @version $Id: CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest.java,v 1.1 2004-07-16 04:24:08 colins Exp $
  */
 public class CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest extends TestCase {
 
@@ -58,11 +59,27 @@ public class CmtWrappedEjbDelegatingToSpringTxWrappedPojoTest extends TestCase {
 		bfr.release();
 	}
 
-	public void testLocalInvocations() {
+	public void testCmtDelegatingToOneLayerOfSpringTx() {
 		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
 		ejb.echo("hello");
 		ejb.echo("hello2");
 		ejb.echo2("whatever");
 		ejb.echo2("whatever2");
 	}
+	
+	public void testCmtDelegatingToTwoLayersOfSpringTxIncludingHibernatePersistence() {
+		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
+		ejb.echo("hello");
+		ejb.echo("hello2");
+		ejb.echo2("whatever");
+		ejb.echo2("whatever2");
+		ejb.echo3("goodbye");
+		ejb.echo3("goodbye2");
+	}
+	
+	public void testSingleMultiLayerTxCallStack() {
+		SimpleService ejb = (SimpleService) bfr.getFactory().getBean(SERVICE_ID_LOCAL_PROXY);
+		ejb.echo3("goodbye");
+	}
+	
 }

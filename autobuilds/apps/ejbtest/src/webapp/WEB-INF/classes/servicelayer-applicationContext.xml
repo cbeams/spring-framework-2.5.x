@@ -19,16 +19,6 @@
 
 	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
   
-	<!-- Local DataSource that works in any environment -->
-	<!--
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
-		<property name="url"><value>${jdbc.url}</value></property>
-		<property name="username"><value>${jdbc.username}</value></property>
-		<property name="password"><value>${jdbc.password}</value></property>
-	</bean>
-	-->
-
 	<!-- JNDI DataSource for J2EE environments -->
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		<property name="jndiName"><value>java:ejbtestDS</value></property>
@@ -51,6 +41,12 @@
 			</props>
 		</property>
 	</bean>
+
+  <!-- define a HibernateInterceptor instance -->
+  <bean id="hibInterceptor"
+        class="org.springframework.orm.hibernate.HibernateInterceptor">
+    <property name="sessionFactory"><ref local="hibSessionFactory"/></property>
+  </bean>
 
 	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
 	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
@@ -77,18 +73,45 @@
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
   
   <!-- pojo SimpleService bean, and tx wrapped proxy which is actually used by clients -->
-	<bean id="simpleServiceTarget" class="org.springframework.autobuilds.ejbtest.simple.SimpleServiceImpl">
+	<bean id="delegatingSimpleServiceTarget" class="org.springframework.autobuilds.ejbtest.simple.DelegatingSimpleServiceImpl">
+    <property name="delegate"><ref bean="mapperUsingSimpleService"/></property>
 	</bean>
-  <bean id="simpleService" 
+  <bean id="delegatingSimpleService" 
         class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
     <property name="transactionManager"><ref bean="transactionManager"/></property>
-    <property name="target"><ref bean="simpleServiceTarget"/></property>
+    <property name="target"><ref bean="delegatingSimpleServiceTarget"/></property>
     <property name="transactionAttributes">
       <props>
         <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
       </props>
     </property>
-  </bean>  
+    <property name="postInterceptors">
+      <list>
+        <ref local="hibInterceptor"/>
+      </list>
+    </property>
+  </bean>
+  
+  <!-- pojo SimpleService bean, and tx wrapped proxy which is actually used by clients -->
+	<bean id="mapperUsingSimpleServiceTarget" class="org.springframework.autobuilds.ejbtest.simple.MapperUsingSimpleService">
+    <property name="mapper"><ref bean="root-mapper"/></property>
+	</bean>
+  <bean id="mapperUsingSimpleService" 
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <property name="transactionManager"><ref bean="transactionManager"/></property>
+    <property name="target"><ref bean="mapperUsingSimpleServiceTarget"/></property>
+    <property name="transactionAttributes">
+      <props>
+        <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
+      </props>
+    </property>
+    <property name="postInterceptors">
+      <list>
+        <ref local="hibInterceptor"/>
+      </list>
+    </property>
+    
+  </bean>
 
 	<!-- a proxy to remote EJB, with the cached home flag oon, to test home caching -->
 	<bean id="cachedHomeProxy" lazy-init="true" class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">

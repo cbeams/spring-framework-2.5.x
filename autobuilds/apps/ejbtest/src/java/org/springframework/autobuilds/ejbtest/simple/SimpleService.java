@@ -21,12 +21,14 @@ package org.springframework.autobuilds.ejbtest.simple;
  * <p>Business interface for a simple EJB test.</p>
  * 
  * @author colin sampaleanu
- * @version $Id: SimpleService.java,v 1.2 2004-07-15 00:07:56 colins Exp $
+ * @version $Id: SimpleService.java,v 1.3 2004-07-16 04:24:08 colins Exp $
  */
 public interface SimpleService {
 
 	public String echo(String input);
 	
 	public String echo2(String input);
+	
+	public String echo3(String input);
 
 }
