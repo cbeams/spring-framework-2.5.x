@@ -1,7 +1,5 @@
 package org.springframework.scheduling.timer;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Timer;
 
 import org.apache.commons.logging.Log;
@@ -41,10 +39,10 @@ public class TimerFactoryBean implements FactoryBean, DisposableBean {
 	 * @see java.util.Timer#schedule(java.util.TimerTask, long, long)
 	 * @see java.util.Timer#scheduleAtFixedRate(java.util.TimerTask, long, long)
 	 */
-	public void setScheduledTimerTasks(List scheduledTimerTasks) {
+	public void setScheduledTimerTasks(ScheduledTimerTask[] scheduledTimerTasks) {
 		logger.info("Initializing Timer");
-		for (Iterator it = scheduledTimerTasks.iterator(); it.hasNext();) {
-			ScheduledTimerTask scheduledTask = (ScheduledTimerTask) it.next();
+		for (int i = 0; i < scheduledTimerTasks.length; i++) {
+			ScheduledTimerTask scheduledTask = scheduledTimerTasks[i];
 			if (scheduledTask.isFixedRate()) {
 				this.timer.scheduleAtFixedRate(scheduledTask.getTimerTask(), scheduledTask.getDelay(),
 																			 scheduledTask.getPeriod());

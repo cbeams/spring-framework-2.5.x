@@ -2,6 +2,7 @@ package org.springframework.scheduling.quartz;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -105,8 +106,8 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 	 * @see JobDetailAwareTrigger
 	 * @see org.quartz.Trigger#setJobName
 	 */
-	public void setJobDetails(List jobDetails) {
-		this.jobDetails = jobDetails;
+	public void setJobDetails(JobDetail[] jobDetails) {
+		this.jobDetails = Arrays.asList(jobDetails);
 	}
 
 	/**
@@ -134,8 +135,8 @@ public class SchedulerFactoryBean implements FactoryBean, InitializingBean, Disp
 	 * @see CronTriggerBean
 	 * @see SimpleTriggerBean
 	 */
-	public void setTriggers(List triggers) {
-		this.triggers = triggers;
+	public void setTriggers(Trigger[] triggers) {
+		this.triggers = Arrays.asList(triggers);
 	}
 
 
