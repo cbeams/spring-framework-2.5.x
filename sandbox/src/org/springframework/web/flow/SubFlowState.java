@@ -114,8 +114,6 @@ public class SubFlowState extends TransitionableState {
 			}
 			subFlowAttributes = new HashMap(1);
 		}
-		subFlowAttributes.put(FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME, sessionExecutionStack
-				.getRequiredAttribute(FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME));
 		return subFlow.start(sessionExecutionStack, request, response, subFlowAttributes);
 	}
 

@@ -3,17 +3,13 @@
  */
 package org.springframework.web.flow;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.web.util.WebUtils;
-
 /**
  * @author Keith Donald
  */
 public class FlowUtils {
-	public static FlowSessionExecutionInfo getFlowSessionExecutionInfo(HttpServletRequest request,
-			AttributesAccessor model) throws IllegalStateException {
-		return (FlowSessionExecutionInfo)WebUtils.getRequiredSessionAttribute(request, (String)model
-				.getRequiredAttribute(FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME));
+	public static FlowSessionExecutionInfo getFlowSessionExecutionInfo(AttributesAccessor model)
+			throws IllegalStateException {
+		return (FlowSessionExecutionInfo)model
+				.getRequiredAttribute(FlowSessionExecutionInfo.FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME);
 	}
 }

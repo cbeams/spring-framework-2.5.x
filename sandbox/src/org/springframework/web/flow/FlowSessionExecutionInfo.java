@@ -8,6 +8,8 @@ package org.springframework.web.flow;
  */
 public interface FlowSessionExecutionInfo extends AttributesAccessor {
 
+	public static String FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME = "flowSessionExecutionInfo";
+
 	/**
 	 * Is the flow session execution active?
 	 * @return

@@ -39,7 +39,7 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	private static final Log logger = LogFactory.getLog(FlowSessionExecutionStack.class);
 
 	private String id;
-	
+
 	private FlowSession NO_SESSION = new FlowSession(null, null);
 
 	private Stack executingFlowSessions = new Stack();
@@ -51,11 +51,11 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	public FlowSessionExecutionStack() {
 		this.id = SessionKeyUtils.generateMD5SessionKey(String.valueOf(this), true);
 	}
-	
+
 	public String getId() {
 		return id;
 	}
-	
+
 	public boolean isActive() {
 		return !isEmpty();
 	}
@@ -115,19 +115,41 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	}
 
 	public Object getAttribute(String attributeName) {
-		return getActiveFlowSession().getAttribute(attributeName);
+		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+			return this;
+		}
+		else {
+			return getActiveFlowSession().getAttribute(attributeName);
+		}
 	}
 
 	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		return getActiveFlowSession().getAttribute(attributeName, requiredType);
+		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+			Assert.isInstanceOf(requiredType, this);
+			return this;
+		}
+		else {
+			return getActiveFlowSession().getAttribute(attributeName, requiredType);
+		}
 	}
 
 	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
-		return getActiveFlowSession().getRequiredAttribute(attributeName);
+		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+			return this;
+		}
+		else {
+			return getActiveFlowSession().getRequiredAttribute(attributeName);
+		}
 	}
 
 	public Object getRequiredAttribute(String attributeName, Class requiredType) throws IllegalStateException {
-		return getActiveFlowSession().getRequiredAttribute(attributeName, requiredType);
+		if (attributeName.equals(FLOW_SESSION_EXECUTION_INFO_ATTRIBUTE_NAME)) {
+			Assert.isInstanceOf(requiredType, this);
+			return this;
+		}
+		else {
+			return getActiveFlowSession().getRequiredAttribute(attributeName, requiredType);
+		}
 	}
 
 	public boolean containsAttribute(String attributeName) {
@@ -203,7 +225,6 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 
 	protected void push(FlowSession subFlowSession) {
 		executingFlowSessions.push(subFlowSession);
-		subFlowSession.setAttribute(FlowSession.FLOW_SESSION_ID_ATTRIBUTE_NAME, getId());
 		if (logger.isDebugEnabled()) {
 			logger.debug("After push of new Flow Session '" + subFlowSession.getFlowId()
 					+ "' - excutingFlowSessionsCount=" + executingFlowSessions.size() + ", sessionStack="
