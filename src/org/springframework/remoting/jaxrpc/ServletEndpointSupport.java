@@ -10,6 +10,7 @@ import javax.xml.rpc.server.ServletEndpointContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.WebUtils;
@@ -41,6 +42,8 @@ public class ServletEndpointSupport implements ServiceLifecycle {
 
 	private WebApplicationContext webApplicationContext;
 
+	private MessageSourceAccessor messageSourceAccessor;
+
 	/**
 	 * Initialize this JAX-RPC servlet endpoint.
 	 * Calls onInit after successful context initialization.
@@ -55,6 +58,7 @@ public class ServletEndpointSupport implements ServiceLifecycle {
 		this.servletEndpointContext = (ServletEndpointContext) context;
 		ServletContext servletContext = this.servletEndpointContext.getServletContext();
 		this.webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+		this.messageSourceAccessor = new MessageSourceAccessor(this.webApplicationContext);
 		onInit();
 	}
 
@@ -70,6 +74,14 @@ public class ServletEndpointSupport implements ServiceLifecycle {
 	 */
 	protected final WebApplicationContext getWebApplicationContext() {
 		return this.webApplicationContext;
+	}
+
+	/**
+	 * Return a MessageSourceAccessor for the application context
+	 * used by this object, for easy message access.
+	 */
+	protected final MessageSourceAccessor getMessageSourceAccessor() {
+		return this.messageSourceAccessor;
 	}
 
 	/**
