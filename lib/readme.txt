@@ -68,7 +68,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0.4 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.0.5 (http://www.ibatis.com)
 - ibatis-sqlmap-2.jar is required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
@@ -131,8 +131,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework on J2SE 1.3
 - required at runtime when using Spring's XmlBeanFactory on J2SE 1.3
 
-* jakarta-commons/commons-attributes-*-2.1rc1.jar
-- Commons Attributes 2.1 RC1 (http://jakarta.apache.org/commons/attributes)
+* jakarta-commons/commons-attributes-api.jar, jakarta-commons/commons-attributes-compiler.jar
+- Commons Attributes 2.1 (http://jakarta.apache.org/commons/attributes)
 - required for building the framework
 - required at runtime when using Spring's Commons Attributes support
 
@@ -228,20 +228,20 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's OJB support
 
-* poi/poi-2.5.jar
-- Apache POI 2.5 (http://jakarta.apache.org/poi)
+* oro/jakarta-oro-2.0.8.jar
+- Jakarta ORO 2.0.8 (http://jakarta.apache.org/oro)
+- required for building the framework
+- required at runtime when using Spring's RegexpMethodPointcut
+
+* poi/poi-2.5.1.jar
+- Apache POI 2.5.1 (http://jakarta.apache.org/poi)
 - required for building the framework
 - required at runtime when using Spring's AbstractExcelView
 
 * quartz/quartz.jar
-- Quartz 1.3.4 (http://www.opensymphony.org/quartz)
+- Quartz 1.4.2 (http://www.opensymphony.org/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
-
-* rexexp/jakarta-oro-2.0.7.jar
-- Jakarta ORO 2.0.7 regular expression parser (http://jakarta.apache.org/oro)
-- required for building the framework
-- required at runtime when using Spring's RegexpMethodPointcut
 
 * struts/struts-1.1.jar
 - Apache Struts 1.1 (http://jakarta.apache.org/struts)
