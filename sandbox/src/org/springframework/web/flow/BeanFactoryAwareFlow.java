@@ -8,6 +8,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
  * Specialization of Flow that is aware of the Spring <code>BeanFactory</code>
@@ -41,9 +42,13 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 		super(id, startStateId, new BeanFactoryFlowDao(), states);
 	}
 
-	/**
-	 *  
-	 */
+	public void setFlowDao(FlowDao dao) {
+		Assert.isInstanceOf(BeanFactoryFlowDao.class, dao,
+				"The FlowDao must be a BeanFactoryFlowDao implementation for BeanFactoryAwareFlows, but you provided a "
+						+ dao.getClass() + " implementation");
+		super.setFlowDao(dao);
+	}
+
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		((BeanFactoryFlowDao)getFlowDao()).setBeanFactory(beanFactory);
 	}
@@ -52,9 +57,6 @@ public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, Bean
 		return ((BeanFactoryFlowDao)getFlowDao()).getBeanFactory();
 	}
 
-	/**
-	 *  
-	 */
 	public void setBeanName(String name) {
 		if (getId() == null) {
 			setId(name);
