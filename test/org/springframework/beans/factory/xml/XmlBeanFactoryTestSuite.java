@@ -62,7 +62,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.46 2004-06-02 17:11:10 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.47 2004-06-05 14:42:03 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -950,6 +950,20 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		catch (BeanDefinitionStoreException ex) {
 			fail("Should not have thrown BeanDefinitionStoreException");
 		}
+	}
+
+	public void testProps() throws Exception {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
+
+		HasMap hasMap = (HasMap) xbf.getBean("props");
+		assertEquals(2, hasMap.getProps().size());
+		assertEquals("bar", hasMap.getProps().getProperty("foo"));
+		assertEquals("TWO", hasMap.getProps().getProperty("2"));
+
+		HasMap hasMap2 = (HasMap) xbf.getBean("propsViaMap");
+		assertEquals(2, hasMap2.getProps().size());
+		assertEquals("bar", hasMap2.getProps().getProperty("foo"));
+		assertEquals("TWO", hasMap2.getProps().getProperty("2"));
 	}
 
 	public void testListFactory() throws Exception {

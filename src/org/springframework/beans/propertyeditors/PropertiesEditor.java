@@ -38,7 +38,7 @@ import java.util.Properties;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: PropertiesEditor.java,v 1.6 2004-05-18 08:03:16 jhoeller Exp $
+ * @version $Id: PropertiesEditor.java,v 1.7 2004-06-05 14:42:03 jhoeller Exp $
  * @see org.springframework.beans.BeanWrapperImpl
  * @see java.util.Properties#load
  */
@@ -76,7 +76,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 		if (!(value instanceof Properties) && value instanceof Map) {
 			Properties props = new Properties();
 			props.putAll((Map) value);
-			super.setValue(new Properties());
+			super.setValue(props);
 		}
 		else {
 			super.setValue(value);
