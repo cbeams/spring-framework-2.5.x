@@ -915,9 +915,7 @@ public class Account {
 public class SqlMapAccountDao extends SqlMapDaoSupport implements AccountDao {
 
 	public Account getAccount(String email) throws DataAccessException {
-		Account acc = new Account();
-		acc.setEmail();
-		return (Account)getSqlMapTemplate().executeQueryForObject("getAccountByEmail", email);
+		return (Account) getSqlMapTemplate().executeQueryForObject("getAccountByEmail", email);
 	}
 
 	public void insertAccount(Account account) throws DataAccessException {

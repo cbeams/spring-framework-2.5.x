@@ -169,7 +169,7 @@ dataSource.setPassword( ""); </programlisting>
 
       <para><literal>SQLErrorCodeSQLExceptionTranslator</literal> can be
       extended the following way: <programlisting format="linespecific"
-      xml:space="preserve">public class MySQLErrorCodesTransalator extends SQLErrorCodeSQLExceptionTranslator {
+      xml:space="preserve">public class MySQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
     protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
         if (sqlex.getErrorCode() == -12345)
             return new DeadlockLoserDataAccessException(task, sqlex);
