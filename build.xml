@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.59 2004-05-23 22:02:34 jhoeller Exp $
+    $Id: build.xml,v 1.60 2004-05-26 10:49:39 jhoeller Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -315,6 +315,13 @@
 	<target name="alljars" depends="modulejars,fulljar,mockjar,srczip" description="Create all JAR files"/>
 
 
+	<!--
+		Convenience targets, needed for the automated build process. Convenience targets are
+		made up of the individual targets called, separated by an underscore.
+	-->
+	<target name="clean_alljars" depends="clean, alljars"/>
+
+
 	<target name="javadoc" description="Generate framework Javadocs.">
 
 		<mkdir dir="${javadocs.dir}"/>
@@ -615,40 +622,6 @@
 	</target>
 
 
-	<target name="loadjar" depends="initdist, buildtests" description="Build load test jar">
-
-		<mkdir dir="${target.loadclasses.dir}"/>
-
-		<javac destdir="${target.loadclasses.dir}" target="1.3" debug="${debug}"
-			deprecation="false" optimize="false" failonerror="false">
-
-			<src path="${load.dir}"/>
-
-			<classpath refid="all-libs"/>
-
-			<!-- For load -->
-			<classpath location="${target.classes.dir}"/>
-
-			<classpath location="${target.testclasses.dir}"/>
-
-		</javac>
-
-		<copy todir="${target.loadclasses.dir}" preservelastmodified="true">
-			<fileset dir="load">
-				<include name="**/*.xml"/>
-				<include name="**/*.properties"/>
-			</fileset>
-		</copy>
-
-		<jar jarfile="${dist.dir}/${spring-load.jar}">
-			<fileset dir="${target.loadclasses.dir}">
-				<include name="org/springframework/load/**" />
-			</fileset>
-		</jar>
-
-	</target>
-
-
 	<target name="docclean" description="Delete temporary and distribution directories for docs">
 
 		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/pdf"/>
@@ -882,12 +855,39 @@
 		</jar>
 
 	</target>
-	
-	
-	<!--
-		Convenience targets, needed for the automated build process. Convenience targets are
-		made up of the individual targets called, separated by an underscore
-	-->
-	<target name="clean_alljars" depends="clean, alljars"/>
+
+
+	<target name="loadjar" depends="initdist, buildtests" description="Build load test jar">
+
+		<mkdir dir="${target.loadclasses.dir}"/>
+
+		<javac destdir="${target.loadclasses.dir}" target="1.3" debug="${debug}"
+			deprecation="false" optimize="false" failonerror="false">
+
+			<src path="${load.dir}"/>
+
+			<classpath refid="all-libs"/>
+
+			<!-- For load -->
+			<classpath location="${target.classes.dir}"/>
+
+			<classpath location="${target.testclasses.dir}"/>
+
+		</javac>
+
+		<copy todir="${target.loadclasses.dir}" preservelastmodified="true">
+			<fileset dir="load">
+				<include name="**/*.xml"/>
+				<include name="**/*.properties"/>
+			</fileset>
+		</copy>
+
+		<jar jarfile="${dist.dir}/${spring-load.jar}">
+			<fileset dir="${target.loadclasses.dir}">
+				<include name="org/springframework/load/**" />
+			</fileset>
+		</jar>
+
+	</target>
 
 </project>
