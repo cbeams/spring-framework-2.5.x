@@ -146,20 +146,13 @@ public class ViewResolverTestSuite extends TestCase {
 	}
 
 	public void testXmlViewResolver() throws Exception {
-		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
-			protected Resource getResourceByPath(String path) {
-				if ("test".equals(path)) {
-					return new FileSystemResource(path);
-				}
-				return new ClassPathResource(path, ViewResolverTestSuite.class);
-			}
-		};
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("testBean", TestBean.class, null);
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
 		TestBean testBean = (TestBean) wac.getBean("testBean");
 		XmlViewResolver vr = new XmlViewResolver();
-		vr.setLocation("/org/springframework/web/servlet/view/views.xml");
+		vr.setLocation(new ClassPathResource("org/springframework/web/servlet/view/views.xml"));
 		vr.setApplicationContext(wac);
 
 		View view1 = vr.resolveViewName("example1", Locale.getDefault());
