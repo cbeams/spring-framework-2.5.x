@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework.adapter;
 
+import java.io.Serializable;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -28,11 +30,15 @@ import org.springframework.aop.AfterReturningAdvice;
  *
  * <p>Used internally by the AOP framework: application developers should not need
  * to use this class directly.
+ * 
+ * <p>You can also use this class to wrap Spring AfterReurningAdvice implementations
+ * for use in other AOP frameworks supporting the AOP Alliance
+ * interfaces.
  *
  * @author Rod Johnson
- * @version $Id: AfterReturningAdviceInterceptor.java,v 1.4 2004-04-01 15:35:47 jhoeller Exp $
+ * @version $Id: AfterReturningAdviceInterceptor.java,v 1.5 2004-07-29 11:53:40 johnsonr Exp $
  */
-final class AfterReturningAdviceInterceptor implements MethodInterceptor {
+public final class AfterReturningAdviceInterceptor implements MethodInterceptor, Serializable {
 	
 	private final AfterReturningAdvice advice;
 	

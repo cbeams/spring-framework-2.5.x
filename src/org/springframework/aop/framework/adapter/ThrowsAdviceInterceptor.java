@@ -36,14 +36,20 @@ import org.apache.commons.logging.LogFactory;
  *
  * <p>This is a framework class that need not be used directly by Spring users.
  * 
+ * <p>You can, however, use this class to wrap Spring ThrowsAdvice implementations
+ * for use in other AOP frameworks supporting the AOP Alliance
+ * interfaces.
+ *
  * @author Rod Johnson
- * @version $Id: ThrowsAdviceInterceptor.java,v 1.3 2004-04-01 15:35:47 jhoeller Exp $
+ * @version $Id: ThrowsAdviceInterceptor.java,v 1.4 2004-07-29 11:53:40 johnsonr Exp $
  */
-final class ThrowsAdviceInterceptor implements MethodInterceptor {
+public final class ThrowsAdviceInterceptor implements MethodInterceptor {
+	
+	// TODO make serializable (methods are not serializable)
 	
 	private static final String AFTER_THROWING = "afterThrowing";
 	
-	private final Log logger = LogFactory.getLog(getClass());
+	protected static Log logger = LogFactory.getLog(ThrowsAdviceInterceptor.class);
 
 	private Object throwsAdvice;
 
