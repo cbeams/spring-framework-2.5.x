@@ -5,7 +5,7 @@
 
 <web-flow id="person.Search" start-state="criteria.view">
 
-	<view-state id="criteria.view">
+	<view-state id="criteria.view" view="person.Search.criteria.view">
 		<transition event="submit" to="criteria.bindAndValidate"/>
 	</view-state>
 
@@ -20,7 +20,7 @@
 		<transition event="success" to="results.view"/>
 	</action-state>
 	
-	<view-state id="results.view">
+	<view-state id="results.view" view="person.Search.results.view">
 		<transition event="newSearch" to="criteria.view"/>
 		<transition event="select" to="userId.set"/>
 	</view-state>

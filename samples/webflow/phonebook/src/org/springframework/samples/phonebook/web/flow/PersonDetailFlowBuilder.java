@@ -30,26 +30,26 @@ import org.springframework.web.flow.config.FlowBuilderException;
  */
 public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
-	private static final String PERSON = "person";
+	private static final String PERSON_DETAIL = "person.Detail";
 
 	protected String flowId() {
-		return "person.Detail";
+		return PERSON_DETAIL;
 	}
 
 	public void buildStates() throws FlowBuilderException {
 		// get the person given a userid as input
-		addGetState(PERSON, executeAction(GetPersonAction.class));
+		addGetState(PERSON_DETAIL, executeAction(GetPersonAction.class));
 
 		// view the person
 		String setCollegueId = qualify(set("collegueId"));
-		addViewState(PERSON, new Transition[] { onBackFinish(), onSelect(setCollegueId) });
+		addViewState(PERSON_DETAIL, new Transition[] { onBackFinish(), onSelect(setCollegueId) });
 
 		// set the selected collegue (chosen from the person's collegue list)
 		addActionState(setCollegueId, onSuccess("collegue.Detail"));
 
 		// spawn subflow to view selected collegue details
 		addSubFlowState("collegue.Detail", PersonDetailFlowBuilder.class, useModelMapper("collegueId"),
-				new Transition[] { onFinishGet(PERSON), onErrorEnd() });
+				new Transition[] { onFinishGet(PERSON_DETAIL), onErrorEnd() });
 
 		// end
 		addFinishEndState();

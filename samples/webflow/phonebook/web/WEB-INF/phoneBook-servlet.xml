@@ -8,13 +8,14 @@
 		<property name="suffix"><value>.jsp</value></property>
 	</bean>
 	
-	<!-- search flow -->
+	<!-- search flow beans -->
 
 	<bean id="searchFrontController" name="/search.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="cacheSeconds"><value>0</value></property>
 		<property name="flow"><ref bean="person.Search"/></property>
 	</bean>
 	
+	<!-- xml flow builder definition for the search flow -->
 	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
@@ -23,6 +24,15 @@
 		</property>
 	</bean>
 
+	<!-- java flow builder definition for the search flow -->
+	<!--
+	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.samples.phonebook.web.flow.SearchPersonFlowBuilder"/>
+		</property>
+	</bean>
+	-->
+	
 	<bean id="person.Search.criteria.bindAndValidate" class="org.springframework.web.flow.action.BindAndValidateAction">
 		<property name="formObjectName"><value>query</value></property>
 		<property name="formObjectClass"><value>org.springframework.samples.phonebook.domain.PhoneBookQuery</value></property>
@@ -48,13 +58,14 @@
 		</property>
 	</bean>
 	
-	<!-- detail flow -->
+	<!-- detail flow beans -->
 
 	<bean id="detailFrontController" name="/detail.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<property name="cacheSeconds"><value>0</value></property>
 		<property name="flow"><ref bean="person.Detail"/></property>
 	</bean>
-	
+
+	<!-- xml flow builder definition for the detail flow -->
 	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
@@ -64,6 +75,15 @@
 			</bean>
 		</property>
 	</bean>
+
+	<!-- java flow builder definition for the detail flow -->
+	<!--
+	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.samples.phonebook.web.flow.PersonDetailFlowBuilder"/>
+		</property>
+	</bean>
+	-->
 
 	<bean id="person.Detail.get" class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction">
 		<property name="phoneBook"><ref bean="phoneBook"/></property>

@@ -11,7 +11,7 @@
 		<transition event="error" to="error"/>
 	</action-state>
 
-	<view-state id="detail.view">
+	<view-state id="detail.view" view="person.Detail.view">
 		<transition event="back" to="finish"/>
 		<transition event="select" to="collegueId.set"/>
 	</view-state>

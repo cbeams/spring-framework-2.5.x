@@ -31,12 +31,14 @@ import org.springframework.web.flow.config.FlowBuilderException;
  */
 public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
-	private static final String RESULTS = "results";
+	private static final String SEARCH = "person.Search";
 
-	private static final String CRITERIA = "criteria";
+	private static final String CRITERIA = SEARCH + ".criteria";
+
+	private static final String RESULTS = SEARCH + ".results";
 
 	protected String flowId() {
-		return "person.Search";
+		return SEARCH;
 	}
 
 	public void buildStates() throws FlowBuilderException {
