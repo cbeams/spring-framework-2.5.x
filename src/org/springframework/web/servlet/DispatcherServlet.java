@@ -12,16 +12,14 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
@@ -73,7 +71,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.ContextLoaderListener
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -112,6 +110,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see org.springframework.web.servlet.support.RequestContext
 	 */
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME";
+
+	/**
+	 * Additional logger for use when no mapping handlers are found for a request. 
+	 */
+	protected final Log pageNotFoundLogger =
+		LogFactory.getLog("org.springframework.web.servlet.PageNotFound");
 
 	/** LocaleResolver used by this servlet */
 	private LocaleResolver localeResolver;
@@ -352,7 +356,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		if (mappedHandler == null || mappedHandler.getHandler() == null) {
 			// if we didn't find a handler
-			logger.error("No mapping for [" + WebUtils.getRequestUri(request) + "] in DispatcherServlet with name '" + getServletName() + "'");
+			pageNotFoundLogger.warn("No mapping for [" + WebUtils.getRequestUri(request) + "] in DispatcherServlet with name '" + getServletName() + "'");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
