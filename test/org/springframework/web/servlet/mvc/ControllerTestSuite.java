@@ -35,7 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class ControllerTestSuite extends TestCase {
 
-	public void testParameterizableViewControllerWith() throws Exception {
+	public void testParameterizableViewController() throws Exception {
 		String viewName = "viewName";
 		ParameterizableViewController pvc = new ParameterizableViewController();
 		pvc.setViewName(viewName);
@@ -59,7 +59,7 @@ public class ControllerTestSuite extends TestCase {
 		}
 	}
 
-	public void testServletWrappingController() throws Exception {
+	public void testServletForwardingController() throws Exception {
 		MockControl requestControl = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) requestControl.getMock();
 		MockControl responseControl = MockControl.createControl(HttpServletResponse.class);
@@ -81,7 +81,7 @@ public class ControllerTestSuite extends TestCase {
 
 		StaticWebApplicationContext sac = new StaticWebApplicationContext();
 		sac.setServletContext(context);
-		ServletWrappingController swc = new ServletWrappingController();
+		ServletForwardingController swc = new ServletForwardingController();
 		swc.setServletName("action");
 		swc.setApplicationContext(sac);
 		swc.initApplicationContext();
@@ -92,16 +92,37 @@ public class ControllerTestSuite extends TestCase {
 		dispatcherControl.verify();
 	}
 
-	public void testServletWrappingControllerWithPropertyNotSet() {
-		ServletWrappingController swc = new ServletWrappingController();
-		try {
-			swc.initApplicationContext();
-			fail("should require servletName property to be set");
-		}
-		catch (IllegalArgumentException ex){
-			// expected
-			assertTrue("meaningful exception message", ex.getMessage().indexOf("servletName") != -1);
-		}
+	public void testServletForwardingControllerWithBeanName() throws Exception {
+		MockControl requestControl = MockControl.createControl(HttpServletRequest.class);
+		HttpServletRequest request = (HttpServletRequest) requestControl.getMock();
+		MockControl responseControl = MockControl.createControl(HttpServletResponse.class);
+		HttpServletResponse response = (HttpServletResponse) responseControl.getMock();
+		MockControl contextControl = MockControl.createControl(ServletContext.class);
+		ServletContext context = (ServletContext) contextControl.getMock();
+		MockControl dispatcherControl = MockControl.createControl(RequestDispatcher.class);
+		RequestDispatcher dispatcher = (RequestDispatcher) dispatcherControl.getMock();
+
+		request.getMethod();
+		requestControl.setReturnValue("GET", 1);
+		context.getNamedDispatcher("action");
+		contextControl.setReturnValue(dispatcher, 1);
+		dispatcher.forward(request, response);
+		dispatcherControl.setVoidCallable(1);
+		requestControl.replay();
+		contextControl.replay();
+		dispatcherControl.replay();
+
+		StaticWebApplicationContext sac = new StaticWebApplicationContext();
+		sac.setServletContext(context);
+		ServletForwardingController swc = new ServletForwardingController();
+		swc.setBeanName("action");
+		swc.setApplicationContext(sac);
+		swc.initApplicationContext();
+		assertNull(swc.handleRequest(request, response));
+
+		requestControl.verify();
+		contextControl.verify();
+		dispatcherControl.verify();
 	}
 
 }

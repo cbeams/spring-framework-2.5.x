@@ -16,18 +16,23 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
+import java.util.Enumeration;
+import java.util.Properties;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Spring Controller implementation that forwards to a named servlet,
- * i.e. the "servlet-name" in web.xml rather than a URL path mapping.
- * A target servlet doesn't even need a "servlet-mapping" in web.xml
- * in the first place: A "servlet" declaration is sufficient.
+ * Spring Controller implementation that wraps a servlet instance that it manages
+ * internally. Such a wrapped servlet is not known outside of this controller.
  *
  * <p>Useful to invoke an existing servlet via Spring's dispatching infrastructure,
  * for example to apply Spring HandlerInterceptors to its requests. This will work
@@ -35,39 +40,23 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>In particular, the main intent of this controller is to allow to apply
  * Spring's OpenSessionInViewInterceptor or OpenPersistenceManagerInViewInterceptor
- * to Struts actions in a Servlet 2.2 container. The specified "servlet-name" will
- * simply refer to a Struts ActionServlet definition in web.xml in such a scenario.
+ * to Struts actions in a Servlet 2.2 container. The Struts ActionServlet will be
+ * wrapped by this controller in such a scenario, rather than defined in web.xml.
  * You then need to map "/*.do" (or whatever pattern you choose for your Struts actions)
  * onto this controller, which will in turn forward to the Struts ActionServlet.
+ *
+ * <p>Note that Struts has a special requirement in that it parses web.xml to
+ * find its servlet mapping. Therefore, you need to specify the DispatcherServlet's
+ * servlet name as "servletName" on this controller, so that Struts finds the
+ * DispatcherServlet's mapping (assuming that it refers to the ActionServlet).
  *
  * <p>In a Servlet 2.3 container, when not using Spring's own web MVC framework,
  * it is recommended to use classic servlet mapping in combination with a filter,
  * for example Spring's OpenSessionInViewFilter or OpenPersistenceManagerInViewFilter.
  *
- * <p><b>Example:</b> web.xml, mapping all *.do requests to a Spring dispatcher.
- * Also defines a Struts ActionServlet, but <i>without</i> servlet mapping.
- * All remaining Struts configuration is as usual, just like if the *.do mapping
- * pointed directly at the ActionServlet.
- *
- * <pre>
- * &lt;servlet&gt;
- *   &lt;servlet-name&gt;action&lt;/servlet-name&gt;
- *   &lt;servlet-class&gt;org.apache.struts.action.ActionServlet&lt;/servlet-class&gt;
- * &lt;/servlet&gt;
- *
- * &lt;servlet&gt;
- *   &lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;
- *   &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
- * &lt;/servlet&gt;
- *
- * &lt;servlet-mapping&gt;
- *   &lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;
- *   &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;
- * &lt;/servlet-mapping&gt;</pre>
- *
- * <b>Example:</b> dispatcher-servlet.xml, in turn forwarding *.do to the Struts
- * ActionServlet (identified by servlet name). All such requests will go to the
- * configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
+ * <b>Example:</b> a DispatcherServlet XML context, forwarding *.do to the Struts
+ * ActionServlet wrapped by a ServletWrappingController. All such requests will go
+ * through the configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
  * From the Struts point of view, everything will work as usual.
  *
  * <pre>
@@ -85,12 +74,20 @@ import org.springframework.web.servlet.ModelAndView;
  * &lt;/bean&gt;
  *
  * &lt;bean id="strutsWrappingController" class="org.springframework.web.servlet.mvc.ServletWrappingController"&gt;
+ *   &lt;property name="servletClass"&gt;
+ *     &lt;value&gt;org.apache.struts.action.ActionServlet&lt;/value&gt;
+ *   &lt;/property&gt;
  *   &lt;property name="servletName"&gt;&lt;value&gt;action&lt;/value&gt;&lt;/property&gt;
+ *   &lt;property name="initParameters"&gt;
+ *     &lt;props&gt;
+ *       &lt;prop key="config"&gt;/WEB-INF/struts-config.xml&lt;/prop&gt;
+ *     &lt;/props&gt;
+ *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
  * Thanks to Keith Garry Boyce for pointing out the issue with Struts in a
- * Servlet 2.2 container, and for suggesting to access Struts through Spring's
- * web dispatching infrastructure!
+ * Servlet 2.2 container, and for providing a prototype that accesses Struts
+ * through Spring's web dispatching infrastructure!
  *
  * @author Juergen Hoeller
  * @since 1.1.1
@@ -99,32 +96,93 @@ import org.springframework.web.servlet.ModelAndView;
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter
  */
-public class ServletWrappingController extends AbstractController {
+public class ServletWrappingController extends AbstractController
+    implements BeanNameAware, InitializingBean, DisposableBean {
+
+	private Class servletClass;
 
 	private String servletName;
 
+	private Properties initParameters = new Properties();
+
+	private String beanName;
+
+	private Servlet servletInstance;
+
+
 	/**
-	 * Specify the name of the servlet to forward to,
-	 * i.e. the "servlet-name" of the target servlet in web.xml.
+	 * Set the class of the servlet to wrap.
+	 * Needs to implement <code>javax.servlet.Servlet</code>.
+	 *
+	 * @see javax.servlet.Servlet
+	 */
+	public void setServletClass(Class servletClass) {
+		this.servletClass = servletClass;
+	}
+
+	/**
+	 * Set the name of the servlet to wrap.
+	 * Default is the bean name of this controller.
 	 */
 	public void setServletName(String servletName) {
 		this.servletName = servletName;
 	}
 
-	protected void initApplicationContext() {
-		if (this.servletName == null) {
-			throw new IllegalArgumentException("servletName is required");
+	/**
+	 * Specify init parameters for the servlet to wrap,
+	 * as name-value pairs.
+	 */
+	public void setInitParameters(Properties initParameters) {
+		this.initParameters = initParameters;
+	}
+
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
+	public void afterPropertiesSet() throws Exception {
+		if (this.servletClass == null) {
+			throw new IllegalArgumentException("servletClass is required");
 		}
+		if (!Servlet.class.isAssignableFrom(this.servletClass)) {
+			throw new IllegalArgumentException("servletClass [" + this.servletClass.getName() +
+			    "] needs to implement interface [javax.servlet.Servlet]");
+		}
+		if (this.servletName == null) {
+			this.servletName = this.beanName;
+		}
+		this.servletInstance = (Servlet) this.servletClass.newInstance();
+		this.servletInstance.init(new DelegatingServletConfig());
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		RequestDispatcher rd = getServletContext().getNamedDispatcher(this.servletName);
-		if (rd == null) {
-			throw new ServletException("No servlet with name '" + this.servletName + "' defined in web.xml");
-		}
-		rd.forward(request, response);
+	    throws Exception {
+		this.servletInstance.service(request, response);
 		return null;
+	}
+
+	public void destroy() {
+		this.servletInstance.destroy();
+	}
+
+
+	private class DelegatingServletConfig implements ServletConfig {
+
+		public String getServletName() {
+			return servletName;
+		}
+
+		public ServletContext getServletContext() {
+			return getWebApplicationContext().getServletContext();
+		}
+
+		public String getInitParameter(String paramName) {
+			return initParameters.getProperty(paramName);
+		}
+
+		public Enumeration getInitParameterNames() {
+			return initParameters.keys();
+		}
 	}
 
 }
