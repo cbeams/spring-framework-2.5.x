@@ -319,7 +319,7 @@ abstract public class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	}
 
 	protected void retrieveIdentity(final Entity entity) {
-		entity.setId(getJdbcTemplate().queryForInt(getIdentityQuery()));
+		entity.setId(getJdbcTemplate().queryForLong(getIdentityQuery()));
 	}
 
 	/**
