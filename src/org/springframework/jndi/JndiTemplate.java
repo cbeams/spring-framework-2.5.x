@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.jndi;
 
@@ -128,6 +128,28 @@ public class JndiTemplate {
 				return located;
 			}
 		});
+	}
+
+	/**
+	 * Look up the object with the given name in the current JNDI context.
+	 * @param name the JNDI name of the object
+	 * @param requiredType type the JNDI object must match. Can be an interface or
+	 * superclass of the actual class, or null for any match. For example, if the
+	 * value is Object.class, this method will succeed whatever the class of the
+	 * returned instance.
+	 * @return object found (cannot be null; if a not so well-behaved
+	 * JNDI implementations returns null, a NamingException gets thrown)
+	 * @throws NamingException if there is no object with the given
+	 * name bound to JNDI
+	 */
+	public Object lookup(String name, Class requiredType) throws NamingException {
+		Object jndiObject = lookup(name);
+		if (requiredType != null && !requiredType.isInstance(jndiObject)) {
+			throw new NamingException(
+					"Object [" + jndiObject + "] available at JNDI location [" +
+					name + "] does not implement [" + requiredType.getName() + "]");
+		}
+		return jndiObject;
 	}
 
 	/**
