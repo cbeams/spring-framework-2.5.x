@@ -46,7 +46,7 @@ import org.springframework.core.io.Resource;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: SQLErrorCodesFactory.java,v 1.20 2004-07-22 18:12:07 trisberg Exp $
+ * @version $Id: SQLErrorCodesFactory.java,v 1.21 2004-07-30 10:06:31 jhoeller Exp $
  * @see java.sql.DatabaseMetaData#getDatabaseProductName
  */
 public class SQLErrorCodesFactory {
@@ -55,7 +55,7 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Name of custom SQL error codes file, loading from the root
-	 * of the class path (e.g. in the WEB-INF/classes directory).
+	 * of the class path (e.g. in the "WEB-INF/classes" directory).
 	 */
 	public static final String SQL_ERROR_CODE_OVERRIDE_PATH = "sql-error-codes.xml";
 
@@ -91,8 +91,7 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Not public to enforce Singleton design pattern.
-	 * Would be private except to allow testing via overriding
-	 * the loadResource method.
+	 * Would be private except to allow testing via overriding the loadResource method.
 	 * <b>Do not subclass in application code.</b>
 	 * @see #loadResource
 	 */
@@ -218,18 +217,21 @@ public class SQLErrorCodesFactory {
 					return info;
 				}
 			});
+
 			if (dbmdInfo != null) {
 				// should always be the case outside of test environments
 				String dbName = (String) dbmdInfo.get("DatabaseProductName");
 				String driverVersion = (String) dbmdInfo.get("DriverVersion");
-				// special check for DB2 -- !!! DEPRECATED AS OF Spring 1.1RC1 !!!
+
+				// special check for DB2 -- !!! DEPRECATED AS OF Spring 1.1 !!!
 				// !!! This will be removed in a future version !!!
 				// We have added wildcard support so you should add a
 				// <property name="databaseProductName"><value>DB2*</value></property>
-				// entry to your custom sql-error-cdes.xml instead
+				// entry to your custom sql-error-cdes.xml instead.
 				if (dbName != null && dbName.startsWith("DB2")) {
 					dbName = "DB2";
 				}
+
 				// special check for wild card match - we can match on a database name like 'DB2*' meaning
 				// the database name starts with 'DB2' or '*DB2' for ends with 'DB2' or even '*DB2*' for
 				// contains 'DB2'
@@ -256,6 +258,7 @@ public class SQLErrorCodesFactory {
 						}
 					}
 				}
+
 				if (dbName != null) {
 					this.dataSourceProductName.put(ds, dbName);
 					logger.info("Database Product Name is " + dbName);
