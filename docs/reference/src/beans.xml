@@ -1,317 +1,113 @@
 <chapter id="beans">
-
-    <title>The Bean Package</title>
-    
-    <sect1 id="beans-introduction">
-    	<title>Introduction</title>
-
+	
+	<title>Beans and the ApplicationContext</title>
+	
+	<sect1 id="beans-introduction">
+		<title>Introduction</title>
 		<para>
-			<emphasis>TODO: My idea is to generally describe the beans package for people to get
-			a basic understanding of what it does. However, this is quite difficult as you might
-			see... I have to take a further look at it... More info on IoC needs to be added and
-			also some docs on the type 2 type 3 stuff...
-			</emphasis>
+			Two of Spring's most elementary and important packages are the
+			<literal>org.springframework.beans</literal> and <literal>org.springframework.context</literal>
+			package. These packages provide the basis for the Spring Inversion of Control features, or
+			Dependency Injection as people more recently call it (see <xref linkend="background-ioc"/> for
+			some resources on that). The <literal>BeanFactory</literal> provides an advanced configuration 
+			mechanism capable of managing beans of any kind of nature, using - potentially - any kind of 
+			storage facility. The <literal>ApplicationContext</literal> builds on top of the 
+			BeanFactory and adds other functionality such as integration with Springs AOP features, messaging
+			(using <emphasis>i18n</emphasis>), the capability of having contexts inherit from other contexts
+			and defining application-layer specific contexts, such as the <literal>WebApplicationContext</literal>.						
 		</para>
-    	<para>
-    		Spring's core is the <literal>org.springframework.beans</literal> package,
-    		designed for working with JavaBeans, retrieving objects by name and managing
-    		relationships between objects. The beans package and its subpackages provide 
-    		functionality for specifying the infrastructure of a project using JavaBeans.
-    	</para>
-    	<para>
-	    	There are three important concepts in the beans package. First of all there's the
-	    	<literal>BeanWrapper</literal> which offers functionality for setting and getting
-	    	properties of JavaBeans. Secondly, the concept of <literal>BeanFactories</literal> is
-	    	important. A BeanFactory is a generic factory, capable of instantiating objects and
-	    	manage relationships between different objects. Several different types of beans can
-	    	be managed and there's support for initialization and other lifecycle methods.
-	    	The BeanFactory basically instantiates <literal>BeanDefinitions</literal>. Bean definitions
-	    	are - as the name might incur - the definitions of your beans. A BeanDefinition defines
-	    	the class of the bean, the mode it will be instantiated in, but also defines what
-	    	collaborators it needs at runtime. Each of the three concepts 
-	    	(<emphasis>BeanFactory</emphasis>, <emphasis>BeanWrapper</emphasis> and 
-	    	<emphasis>BeanDefinition</emphasis>) will be discussed in much more detail below.
-    	</para>
-    </sect1>
-    
-    <sect1 id="beans-beans">
-    	<title>Bean manipulation and the <literal>BeanWrapper</literal></title>
-    	<para>
-    		The <literal>org.springframework.beans</literal> package adheres to the JavaBeans standard
-    		provided by Sun. A JavaBean is simply a class with a default no-argument constructor, which
-    		follows a naming conventions where a property named <literal>prop</literal> has a setter
-    		<literal>setProp(...)</literal> and a getter <literal>getProp()</literal>. For more
-    		information about JavaBeans and the specification, please refer to Sun website
-    		(<ulink url="http://java.sun.com/products/javabeans/">java.sun.com/products/javabeans</ulink>).
-    	</para>
-    	<para>
-    		One quite important concept of the beans package is the <literal>BeanWrapper</literal>
-    		interface and its corresponding implementation (<literal>BeanWrapperImpl</literal>).
-    		As quoted from the JavaDoc,  the BeanWrapper offers functionality to set and get property 
-    		values (individually or in bulk), get property descriptors and query the readability and
-    		writability of properties. Also, the BeanWrapper offers support for
-    		nested properties, enabling the setting of properties on subproperties to an unlimited
-    		depth. Then, the BeanWrapper support the ability to add standard
-    		JavaBeans <literal>PropertyChangeListeners</literal> and <literal>VetoableChangeListeners</literal>,
-    		without the need for supporting code in the target class. Last but not least, the
-    		BeanWrapper provides support for the setting of indexed properties.	The BeanWrapper 
-    		usually isn't used by application code directly, but by the <literal>DataBinder</literal> 
-    		and the <literal>BeanFactory</literal>.
-    	</para>
-    	<para>
-    		The way the BeanWrapper works is partly indicated by its name: 
-    		<emphasis>it wraps a bean</emphasis> to perform action on that bean, like setting
-    		and retrieving properties.
-    	</para>
-    	
-    	<sect2 id="beans-beans-conventions">
-    		<title>Setting and getting basic and nested properties</title>
-    		<para>
-    			Setting and getting properties is done using the <literal>setPropertyValue(s)</literal>
-    			<literal>getPropertyValue(s)</literal> methods that both come with a couple of
-    			overloaded variants. They're all described in more detail in the JavaDoc Spring
-    			comes with. What's important to know that there's a couple of conventions for 
-    			indicating properties of an object. A couple of examples:
-				<table frame="all">
-		            <title>Examples of properties</title>
-		            <tgroup cols="2">
-		                <colspec colname="c1" colwidth="1*"/>
-		                <colspec colname="c2" colwidth="5*"/>
-		                <thead>
-		                    <row>
-		                        <entry>Expression</entry>
-		                        <entry>Explanation</entry>
-		                    </row>
-		                </thead>
-			            <tbody>
-				            <row>
-				            	<entry><literal>name</literal></entry>
-				            	<entry>Indicates the property <literal>name</literal> corresponding to the
-				            		methods <literal>getName()</literal> or <literal>isName()</literal> and
-				            		<literal>setName()</literal>
-				            	</entry>
-				            </row>
-				            <row>
-				            	<entry><literal>account.name</literal></entry>
-				            	<entry>Indicates the nested property <literal>name</literal> of the property
-					            	<literal>account</literal> corresponding e.g. to the methods
-					            	<literal>getAccount().setName()</literal> or <literal>getAccount().getName()</literal>
-					            </entry>
-				            </row>
-				            <row>
-				            	<entry><literal>account[2]</literal></entry>
-				            	<entry>Indicates the <emphasis>third</emphasis> element of the indexed property
-					            	<literal>account</literal>. Indexed properties can be of type <literal>array</literal>,
-					            	<literal>list</literal> or other <emphasis>natural ordered</emphasis> collection
-					            </entry>
-				            </row>
-				        </tbody>
-			        </tgroup>
-		        </table>
-    		</para>
-    		
-			<para>
-				Below you'll find some examples of working with the BeanWrapper to get
-				and set properties.
-			</para>
-    		<para><emphasis>Note: this part is not important to you if you're not planning to
-    			work with the BeanWrapper directly. If you're just using the 
-    			<literal>DataBinder</literal> and the <literal>BeanFactory</literal> and their
-    			out-of-the-box implementation, don't mind reading this and go on with
-    			reading about <literal>PropertyEditors</literal>.</emphasis>
-    		</para>
-       		<para>    
-       			Consider the following two classes:			
-				<programlisting><![CDATA[
-public class Company {
-	private String name;
-	private Employee managingDirector;
+		<para>
+			In short, the <literal>BeanFactory</literal> provides the configuration framework and allows you to
+			for example avoid the use of singletons, while the <literal>ApplicationContext</literal> adds
+			more enterprise-centric, J2EE functionality to it.
+		</para>
+		<para>
+			In order to get you started using the BeanFactory and the ApplicationContext we'll first introduce
+			you to a couple of basic principles that might be handy to know of when using the BeanFactory
+			and the ApplicationContext.
+		</para>
+		<para>
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						<emphasis>Bean definition</emphasis>: the description of a bean managed by the BeanFactory.
+						Each BeanFactory contains bean definitions each describing the nature of a bean, its properties,
+						the methods that need to be called upon initialization and destruction, whether or not
+						the bean needs to be autowired and more things a like. The <literal>XmlBeanFactory</literal> for
+						example is capalbe of reading bean definitions from an XML file, where properties, as well as
+						collaborators and lifecycle methods are defined in XML
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>Property editors</emphasis>: part of the JavaBeans specification by Sun is the
+						concept of <literal>PropertyEditors</literal>. Property editors in Spring are used to
+						convert properties of beans to human-readable String and vice versa. As the PropertyEditor
+						JavaDOC (<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/"/>) states, the <literal>getAsText()</literal>-method
+						should return a human-readable String representing the property the editor is (so-called) editing.
+						The <literal>setAsText()</literal>-method should be able to parse the same String and (using
+						the <literal>setValue(Object)</literal>-method) set the resulting value of the property.
+						PropertyEditors are heavily used in Spring, not only by for example the BeanFactory to transform
+						the Strings defined in the XML containing beans to properties of those beans, but also by
+						the MVC framework to convert request parameters submitted by a user after filling a form to
+						properties of command objects that might be of some completely different type
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<emphasis>BeanWrapper</emphasis>: an special class of which instances wrap a bean, managed
+						BeanWrappers for example have features for setting and getting properties 
+						from the beans they're wrapping. It's not likely you'll ever have to touch a BeanWrapper
+						yourself, but it might be handy to know about them
+					</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+	</sect1>
 	
-	public String getName()	{ 
-		return this.name; 
-	}
-	public void setName(String name) { 
-		this.name = name; 
-	} 
-	public Employee getManagingDirector() { 
-		return this.managingDirector; 
-	}
-	public void setManagingDirector(Employee managingDirector) {
-		this.managingDirector = managingDirector;							
-	}
-}
-				]]></programlisting>
-				<programlisting><![CDATA[
-public class Employee {
-	private float salary;
-	
-	public float getSalary() {
-		return salary;
-	}						
-	public void setSalary(float salary) {
-		this.salary = salary;
-	}
-}					
-				]]></programlisting>
-			</para>
-			<para>
-				The following code snippets show some examples of how to retrieve and
-				manipulate some of the properties of instantiated:
-				<literal>Companies</literal> and <literal>Employees</literal>
-				<programlisting><![CDATA[
-Company c = new Company();
-BeanWrapper bwComp = BeanWrapperImpl(c);
-// setting the company name...
-bwComp.setPropertyValue("name", "Some Company Inc.");
-// ... can also be done like this:
-PropertyValue v = new PropertyValue("name", "Some Company Inc.");
-bwComp.setPropertyValue(v);
-
-// ok, let's create the director and tie it to the company:
-Employee jim = new Employee();
-BeanWrapper bwJim = BeanWrapperImpl(jim);
-bwJim.setPropertyValue("name", "Jim Stravinsky");					
-bwComp.setPropertyValue("managingDirector", jim);
-
-// retrieving the salary of the managingDirector through the company
-Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
-				]]></programlisting>				
-			</para>
-    	</sect2>
-    	
-    	<sect2 id="beans-beans-conversion">
-    		<title>Converting properties using <literal>PropertyEditors</literal></title>
-    		<para>
-    			Sometimes it might be handy to be able to represent properties in a different
-    			way than the object itself. For example, a date can be represented in a human
-    			readable way, while we're still able to convert the human readable form back to
-    			the original date (or even better: convert any date entered in a human readable form,
-    			back to Date objects). This behavior can be achieved by <emphasis>registering
-    			custom editors</emphasis>, of type <literal>java.beans.PropertyEditor</literal>.
-    			Registering custom editors to a BeanWrapper gives it the knowledge of how to convert
-    			properties to the desired type. Read more about PropertyEditors in the JavaDoc of the
-    			<literal>java.beans</literal> package provided by Sun.
-    		</para>
-    		<para>
-    			An example of working with a PropertyEditor convertin <literal>java.util.Date</literal>
-    			objects to a form humans understand:
-				<programlisting><![CDATA[
-/** Details in this class are excluded for brevity */
-public class Person {	
-	public void setBirthDay(Date d);
-	public Date getBirthDay();
-}
-
-/** and some other method */
-public void doIt() {
-	SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-	// CustomDateEditor located in org.springframework.beans.propertyeditors
-	// true indicated that null values are NOT allowed
-	CustomDateEditor editor = new CustomDateEditor(df, false);
-	
-	Person p = new Person();
-	BeanWrapper bw = new BeanWrapper(p);
-	bw.registerCustomEditor(editor);
-	// this will convert the String to the desired object type: java.util.Date!
-	bw.setPropertyValue("birthDay", "22-12-1966");
-}
-				]]></programlisting>				
-			</para>
-			<para>
-				The notion of <literal>PropertyEditors</literal> is quite important to for instance
-				the MVC framework, but also other parts of the framework, so in the rest of this
-				document, sometimes references to this part occur. For more information on how to
-				write custom editors yourself, refer to
-				the JavaBeans specification (<ulink url="http://java.sun.com/products/javabeans"/>).
-			</para>
-		</sect2>  
-		
-		<sect2 id="beans-beans-other">
-			<title>Other features worth mentioning</title>
-			<para>
-				Besides the features you've seen in the previous sections there a couple of
-				features that might be intereseted to you, though not worth an entire section.
-				<itemizedlist spacing="compact">
-					<listitem>
-						<para>
-							<emphasis>determining readability and writability</emphasis>: using
-							the <literal>isReadable()</literal> and <literal>isWritable()</literal>
-							methods, you can determine whether or not a property is readable or
-							writable
-						</para>
-					</listitem>
-					<listitem>
-						<para>
-							<emphasis>retrieving propertydescriptors</emphasis>: using
-							<literal>getPropertyDescriptor(String)</literal> and
-							<literal>getPropertyDescriptors()</literal> you can retrieve
-							objects of type <literal>java.beans.PropertyDescriptor</literal>,
-							that might come in handy sometimes
-						</para>
-					</listitem>
-				</itemizedlist>
-			</para>
-		</sect2>			  		
-
-    </sect1>
-    
-    <sect1 id="beans-factory">
-    	<title>The BeanFactory</title>
-    	<para>
-    		The <literal>org.springframework.beans.factory</literal> package and its subpackages
-    		provide the basis for Spring's IoC<footnote>
-    			<para>
-    				Inversion of Control, see <xref linkend="background-ioc"/> for more information
-    			</para>
-    		</footnote> container. Spring's BeanFactory supports IoC type 2 and 3. More information
-    		about this can be found further along.
-			The BeanFactory provides a way of obtaining beans by name from a central configuration
-			repository, removing the need individual Java objects to read configuration data from
-			for instance properties files. Configuration of the object is the responsibility of the
-			BeanFactory which makes instances available when needed. Two things are important while
-			considering the BeanFactory. First of all the BeanFactory implementations themselves and
-			how to retrieve beans using the BeanFactory interface. Secondly, the way BeanFactories know
-			about how to instantiate objects and what to do with them before returning them for use.
-			The latter is realized using a concept of bean definitions.
-    	</para>
-    	<sect2 id="beans-factory-definitions">
-    		<title>Bean definitions</title>
-    		<para>
-    			Bean definitions are the specifications of your beans. Beans are classes, providing
-    			functionality, but how the BeanFactory is going to manage your beans and how
-    			they are configured, is stated in a bean definition. The following is what actually
-    			models the bean definition in order to be able to instantiates beans:
-    			<itemizedlist spacing="compact">
-    				<listitem>
-    					<para>
-    						The beanclass, which is the actual implementation of the bean related to the
-    						bean definition
-    					</para>
-    				</listitem>
-    				<listitem>
-    					<para>
-    						Bean behavioral configuration elements, which state how the bean should
-    						behave in the container (i.e. prototype or singleton, autowiring mode, 
-    						dependency checking mode, initialization and destruction methods)
-    					</para>
-    				</listitem>
-    				<listitem>
-    					<para>
-    						Properties being configuration data for the bean. You could think of the number
-    						of connections to use in a bean that manages a connection pool
-    						(either specified as properties or as constructor arguments)
-    					</para>
-    				</listitem>
-    				<listitem>
-    					<para>
-    						Other beans your bean needs to do its work, i.e. <emphasis>collaborators</emphasis>
-    						(also specified as properties or as constructor arguments)
-    					</para>    					
-    				</listitem>
-				</itemizedlist>
-			</para>
-		
-			<para>				
+	<sect1 id="beans-definition">
+		<title>The BeanDefinition</title>
+		<para>
+			As already stated in the introduction, bean definitions describe beans managed by a
+			<literal>BeanFactory</literal> or <literal>ApplicationContext</literal>. Bean definitions
+			contain the following information:
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						The beanclass, which is the actual implementation of the bean related to the
+						bean definition
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Bean behavioral configuration elements, which state how the bean should
+						behave in the container (i.e. prototype or singleton, autowiring mode, 
+						dependency checking mode, initialization and destruction methods)
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Properties being configuration data for the bean. You could think of the number
+						of connections to use in a bean that manages a connection pool
+						(either specified as properties or as constructor arguments), or
+						the class that should be used to create the connection pool
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Other beans your bean needs to do its work, i.e. <emphasis>collaborators</emphasis>
+						(also specified as properties or as constructor arguments)
+					</para>    					
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			In the list above, we mentioned the use of constructor arguments, as well as setters.
+			Spring support two types of IoC, i.e. type 2 and type 3. What that means is that you
+			use both constructor arguments to specify your dependencies and properties as well
+			as setters and getters.			
+		</para>
+		<para>				
 				The concepts listed above, directly translate to a set of elements the bean definition consists
 				of. These elements are listed below, along with a reference to further documentation about each
 				of them.
@@ -364,16 +160,28 @@ public void doIt() {
 			        </tgroup>
 		        </table>
 		    </para>
-		    
-		    <para>
-		    	All the features described above will be configurable for each of your beans using
-		    	one of the out-of-the-box BeanFactory implementation (like
-		    	<literal>XmlBeanFactory</literal>). More information about each of the features
-		    	will be found below.
-		    </para>
-		</sect2>
+	</sect1>        
+    
+    <sect1 id="beans-factory">
+    	<title>The BeanFactory</title>
+    	<para>
+			The BeanFactory is the actual <emphasis>container</emphasis> (although we don't
+			like to use the word container too much, since it kind of sounds quite heavy),
+			containing and managing your beans. A BeanFactory loads BeanDefinitions and
+			- upon request - instantiate one (or possible more) instances of the bean in 
+			question and manages it by calling lifecycle methods.
+    	</para>
+				    
+		<para>
+			All of the features described in <xref linkend="beans-definition"/> will be 
+			configurable for each of your beans using one of the out-of-the-box BeanFactory 
+			implementations. In the example below we will use the most popular BeanFactory
+			to illustrate the behavior, i.e. the <literal>XmlBeanFactory</literal>. More information 
+			on the XmlBeanFactory and other implementations can be found further ahead.
+		</para>
+	</sect1>
 		
-		<sect2 id="beans-factory-class">
+		<sect1 id="beans-factory-class">
 			<title>The bean class</title>
 			<para>
 				Of course you need to specify the actual class of your bean, that should be obvious.
@@ -388,12 +196,28 @@ public void doIt() {
 				prefer to have actual beans (having just a default constructor and appropriate setters
 				and getters modelled after the properties) in the BeanFactory, but it it's also possible
 				to have more exotic non-bean-style classes in your BeanFactory. If for example you're having
-				a legacy connectionpool that absolutely does not adhere to the bean specification, no worries,
+				a legacy connection pool that absolutely does not adhere to the bean specification, no worries,
 				Spring can manage it as well.
 			</para>
-		</sect2>
+			<para>
+				Using the XmlBeanFactory you can specify your bean class as follows:
+				<programlisting><![CDATA[
+<bean id="exampleBean" class="examples.ExampleBean"/>
+<bean name="anotherExample" class="examples.ExampleBeanTwo"/>
+				]]></programlisting>
+			</para>
+		</sect1>
+		
+		<sect1 id="beans-beanname">
+			<title>The bean identifiers (<literal>id</literal> and <literal>name</literal>)</title>
+			<para>
+				Somehow of course you need to identifiy your beans. This can be done by a name
+				or an id. The <literal>id</literal> is to be uniquely defined across all beans
+				in a BeanFactory.
+			</para>
+		</sect1>
     	
-    	<sect2 id="beans-factory-modes">
+    	<sect1 id="beans-factory-modes">
     		<title>To singleton or not to singleton</title>
     		<para>
     			Beans exist in two types, singletons and prototypes. When a bean is a singleton,
@@ -412,27 +236,39 @@ public void doIt() {
     			might not be what you actually want. So only change the mode to prototype when absolutely
     			necessary.
     		</para>
-		</sect2>
+    		<para>
+    			In the example below, two beans are declared of which one is defined as a singleton,
+    			and the other one as a prototype. <literal>exampleBean</literal> is created each
+    			and every time a client asks the BeanFactory for this bean, while <literal>yetAnotherExample</literal>
+    			is only created one, a reference is returned each time a request for this bean is done.
+				<programlisting><![CDATA[
+<bean id="exampleBean" class="examples.ExampleBean" singleton="false"/>
+<bean name="yetAnotherExample" class="examples.ExampleBeanTwo" singleton="true"/>
+				]]></programlisting>
+    		</para>
+		</sect1>
 		
-		<sect2 id="beans-factory-collaborators">
+		<sect1 id="beans-factory-collaborators">
 			<title>Setting beans properties and collaborators</title>
 			<para>
-				The basic principle of IoC (Inversion of Control) is often referred to as the
-				<emphasis>Hollywood Principle</emphasis> (<quote>don't call us, we'll call you!</quote>).
-				The idea is that beans don't specify themselves who they're collaborating with
-				and what additional properties they need. Also
-				the client(s) that use the beans don't specify it. Instead (in case of Spring IoC), the
-				BeanFactory takes care of resolving collaborators and giving them to the beans. This is
-				done using the bean definitions discussed earlier. In the BeanDefinition structure,
-				collaborators and properties are specified using 
-				<literal>PropertyValue</literal> objects, which are used when insantiating a bean to resolve 
-				references.
-			</para>				
+				Inversion of Control is already referred to as <emphasis>Dependency Injection</emphasis>.
+				The basic principle is that beans themselves do not define who or what they're depending
+				on, but instead, let the container do that for them. Also, the container <emphasis>injects</emphasis>
+				the actual dependencies, as opposed to the Service Locator pattern, where the beans themselves
+				do a lookup to resolve those dependencies. While not elaborating too much on the advantages
+				of Dependency Injection, it might be obvious that code gets much cleaner and reacher a higher 
+				grade of decoupling is much easier when beans themselves first of all do not lookup their
+				dependencies themselves, but also do not even know where the actual dependencies are located
+				and of what actual instance they are.
+			</para>
 			<para>
-				<emphasis>It's very important</emphasis> to understand the concept of IoC beacuse this is
-				one of the basics of Spring and will make your applications much more elegant, configurable
-				and maintainable. Configure each and every collaborator and property using the BeanDefinitions
-				(for more information about the implementation have a look at one of the next sections)!
+				The BeanFactory is capable of <emphasis>injecting</emphasis> dependencies into
+				beans its manages. It does so using the <literal>BeanDefinition</literal> and the 
+				<literal>PropertyEditors</literal> that
+				are defined in the Spring Framework. We'll explain that further along using some
+				examples of beans defined in the XML format. For now it might be handy to know that
+				a BeanDefinition, collaborators and properties are specified using 
+				<literal>PropertyValue</literal>-objects.
 			</para>
 			<para>
 				The resolving of the dependencies is a little too complex to go get into it in depth here,
@@ -440,38 +276,62 @@ public void doIt() {
 				<orderedlist spacing="compact">
 					<listitem>
 						<para>Checking what the type of the property is (this can be a primitive-like type - 
-							like int or String - or a collection - i.e. Map or List - or a collaborator). Collaborators
-							are other beans the BeanFactory must capable of resolving
+							like int or String, a Collection - i.e. Map or List,
+							a Class or any other type Spring supports by default. It can also be a collaborator). 
+							Collaborators are other beans the BeanFactory must capable of resolving, in order
+							words, other beans, also defined in the same BeanFactory (or, in case you're using the
+							ApplicationContext, possibly in another application context)
 						</para>
 					</listitem>
 					<listitem>
-						<para>In case of the first two options (primitive or collection), Spring constructs the
-							collection and adds it to the bean definition as a PropertyValue
+						<para>In case the bean isn't a collaborator that can be resolved from the BeanFactory,
+							Spring uses its built-in (or manually added) PropertyEditors to transform the
+							property to the type that was required (when using the XML format to define a bean
+							that contains a setter with a <literal>Class</literal>-parameter, Spring uses the
+							<literal>ClassEditor</literal> (more about PropertyEditors and how to manually
+							add custom ones, can be found further ahead, TODODODODODODO reference!)
 						</para>
 					</listitem>
 					<listitem>
-						<para>In case of a collaborator, Sprign constructs a <literal>RuntimeBeanReference</literal>
-							that is used later on when the bean is actually instantiated. Spring then actually resolves
-							the instance of the collaborator and sets it on the bean
+						<para>In case of a collaborator, Sprign constructs a reference to the bean
+							that is used later on when the bean is actually instantiated. You can trust
+							Spring here that is sets the actual collaborator at the right moment
 						</para>
 					</listitem>
 				</orderedlist>
 			</para>
 			<para>
-				The setting of properties and collaborators can be done in two ways, which correspond to two of the
-				different IoC types<footnote>
-					<para>For more information about IoC types, see <xref linkend="background-ioc"/></para>
-				</footnote>, namely type 2 and type 3. The type 2 support, will set the dependencies on a bean using 
-				setter methods, IoC type 3 support will set the dependencies using constructor arguments.
-				It's best to explain things using a concrete implementation of a BeanFactory. We will use the
-				<literal>XmlBeanFactory</literal><footnote>
-					<para>See <xref linkend="beans-factoryimpl"/> for more information about BeanFactory implementations</para>
-				</footnote> here, which - as the name implies - stores bean definition in XML.
+				Dependency Injection (or Inversion of Control) exists in two major variants, both of 
+				which Spring supports.
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							<emphasis>setter-based</emphasis> dependency injection is realized by calling
+							setters on your beans after invoking an argumentless constructor to instantiate
+							your bean. Beans defined in the BeanFactory that use setter-based dependency 
+							injection are <emphasis>true JavaBeans</emphasis>, and not only for the sake
+							of adhering a standard, Spring advocated to use setter-based dependency injection
+							as much as possible
+						</para>						
+					</listitem>
+					<listitem>
+						<para>
+							<emphasis>constructor-based</emphasis> dependency injection is realized by
+							invoking a constructor with a number of arguments, each representing a collaborator
+							or property. Though Spring advices to use setter-based dependency injection
+							as much as possible, there might be beans around that just have constructors and that
+							you want to use as well. Therefore we provided the constructor-based approach as well
+						</para>
+					</listitem>
+				</itemizedlist>
 			</para>
 			<para>
-				First, an example of using the BeanFactory for IoC type 2 (using setters). Below, there's a small part of an
-				XML file specifying bean definition. Also, you can find the actual bean itself, having the appropriate
-				setters declared.
+				Some examples:
+			</para>
+			<para>
+				First, an example of using the BeanFactory for setter-based dependency injection. Below, there's a small part 
+				of an XML file specifying bean definition. Also, you can find the actual bean itself, 
+				having the appropriate setters declared.
 				<programlisting><![CDATA[
 <bean id="exampleBean" class="examples.ExampleBean">
 	<property name="beanOne"><ref bean="anotherExampleBean"/></property>
@@ -504,7 +364,7 @@ public class ExampleBean {
 }
 				]]></programlisting>
 				
-				As you can, setters have been declared to match against the properties specified in the XML file. (The properties
+				As you can see, setters have been declared to match against the properties specified in the XML file. (The properties
 				from the XML file, directly relate to the <literal>PropertyValues</literal> object from the <literal>RootBeanDefinition</literal>)				
 			</para>
 			<para>
@@ -540,9 +400,9 @@ public class ExampleBean {
 				arguments to the constructor of the <literal>ExampleBean</literal>.	
 			</para>
 			
-		</sect2>
+		</sect1>
 		
-		<sect2 id="beans-factory-autowire">	
+		<sect1 id="beans-factory-autowire">	
 			<title>Autowiring collaborators</title>
 			<para>
 				Spring has autowire capabilities, which means it's possible to automatically let Spring
@@ -601,9 +461,9 @@ public class ExampleBean {
 		        autowiring beacuse it removes the transparency and the structure from your collaborating
 		        classes.</emphasis>
 			</para>
-		</sect2>
+		</sect1>
 		
-		<sect2 id="beans-factory-dependencies">
+		<sect1 id="beans-factory-dependencies">
 			<title>Checking for dependencies</title>
 			<para>
 				Spring also offers the capability for checking required dependencies of your beans.
@@ -644,9 +504,9 @@ public class ExampleBean {
 			        </tgroup>
 		        </table>
 			</para>
-		</sect2>
+		</sect1>
 		
-<sect2 id="beans-factory-lifecycle">
+		<sect1 id="beans-factory-lifecycle">
 	    	<title>Bean Nature and Lifecycle Features</title>
 	    	<para>
 	    		Spring provides a couple of marker interfaces and some other features that allow
@@ -655,7 +515,7 @@ public class ExampleBean {
 	    		they offer are described below.
 	    	</para>
 	    	
-			<sect3 id="beans-factory-lifecycle-factorybean">
+			<sect2 id="beans-factory-lifecycle-factorybean">
 	    		<title>FactoryBean</title>
 		    	<para>
 		    		The <literal>org.springframework.beans.factory.FactoryBean</literal> is to be implemented
@@ -684,9 +544,9 @@ public class ExampleBean {
 						</listitem>
 					</itemizedlist>
 				</para>
-			</sect3>
+			</sect2>
 			
-			<sect3 id="beans-factory-lifecycle-initializingbean">
+			<sect2 id="beans-factory-lifecycle-initializingbean">
 				<title>InitializingBean</title>
 				<para>
 					The <literal>org.springframework.beans.factory.InitializingBean</literal> gives
@@ -713,9 +573,9 @@ public class ExampleBean {
 					(may it be XML, properties-files or a database). For more information about this
 					feature, see the next section)</emphasis>
 				</para>
-			</sect3>
+			</sect2>
 			
-			<sect3 id="beans-factory-lifecycle-initmethod">
+			<sect2 id="beans-factory-lifecycle-initmethod">
 				<title>init-method</title>
 				<para>
 					Besides the InitializingBean, Spring also offers a less intrusive way of defining
@@ -725,9 +585,9 @@ public class ExampleBean {
 					also after the <literal>afterPropertiesSet()</literal> method from InitializingBean 
 					has been called</emphasis>. TODO INCLUDE REFERENCE TO DIFFERENT WAYS TO SPECIFY INIT_METHODS????
 				</para>
-			</sect3>
+			</sect2>
 			
-			<sect3 id="beans-factory-lifecycle-disposablebean">
+			<sect2 id="beans-factory-lifecycle-disposablebean">
 				<title>DisposableBean</title>
 				<para>
 					The <literal>org.springframework.beans.factory.DisposableBean</literal> interface
@@ -752,9 +612,9 @@ public class ExampleBean {
 					(may it be XML, properties-files or a database). For more information about this
 					feature, see the next section)</emphasis>
 				</para>
-			</sect3>
+			</sect2>
 			
-			<sect3 id="beans-factory-lifecycle-destroymethod">
+			<sect2 id="beans-factory-lifecycle-destroymethod">
 				<title>destroy-method</title>
 				<para>
 					Besides the Disposable, Spring also offers a less intrusive way of defining
@@ -765,9 +625,9 @@ public class ExampleBean {
 					DisposableBean has been called</emphasis>.
 					TODO INCLUDE REFERENCE TO DIFFERENT WAYS TO SPECIFY DESTROY_METHODS????
 				</para>
-			</sect3>
+			</sect2>
 			
-			<sect3 id="beans-factory-lifecycle-beanfactoryaware">
+			<sect2 id="beans-factory-lifecycle-beanfactoryaware">
 				<title>BeanFactoryAware</title>
 				<para>
 					The <literal>org.springframework.beans.factory.BeanFactoryAware</literal> interface
@@ -785,8 +645,71 @@ public class ExampleBean {
 						</listitem>
 					</itemizedlist>
 				</para>
-			</sect3>
-		</sect2>	
+			</sect2>
+		</sect1>
+		
+		<sect1 id="beans-factory-customizing">
+			<title>Customizing the BeanFactory (advanced stuff)</title>	
+			<para>
+				When in need for special behavior for the BeanFactory you need to consult the
+				<literal>org.springframework.beans.factory.config</literal>-package, which
+				should provide you all the things you need in such a case. Using the config
+				package you can for instance define a properties file of which the property-entries
+				are used as replacements values in the BeanFactory. Also, you can implement custom
+				behavior (like adding custom editors) using the BeanFactoryPostProcessor. Each of the
+				features the config-package offers is described below:
+			</para>
+			<sect2 id="beans-factory-postprocessor">
+				<title>The <literal>BeanFactoryPostProcessor</literal></title>
+				<para>
+					The BeanFactoryPostProcessor is a special bean you can define in your
+					BeanFactory. The BeanFactory - while initializing - checks if any
+					BeanFactoryPostProcessors are present and if so, it give them a change to
+					override any values, beans, bean definitions or other bean factory specific
+					stuff. The BeanFactoryPostProcessor can for instance be used to add custom editors
+					(as also mentioned in <xref linkend="beans-beans-conversion"/>). Some
+					out-of-the-box post processors are available, like the <literal>PropertyResourceConfigurer</literal>
+					and the <literal>PropertyPlaceHolderConfigurer</literal>, both described below.
+				</para>
+			</sect2>
+			<sect2 id="beans-factory-placeholderconfigurer">
+				<title>The <literal>PropertyPlaceHolderConfigurer</literal></title>
+				<para>
+					The <literal>PropertyPlaceHolderConfigurer</literal> is an excellent solution
+					when you want to externalize a few properties from a file containing bean definitions.
+					Say you want to let a guy responsible for deploying applications just fill in
+					database URLs and usernames and passwords. You could of course let him change the
+					XML file containing bean definitions, but that would be risky. Instead, use the
+					<literal>PropertyPlaceHolderConfigurer</literal> to - at runtime - replace those
+					properties by values from a properties file.
+				</para>
+				<para>
+					In the example below, a datasource is defined, next to a <literal>PropertyPlaceHolderConfigurer</literal>.
+					At runtime, the BeanFactory will encounter this post processor and let it
+					override any values from the beans defined in the XML file. This specific
+					post processor will inspect the jdbc.properties file and replace all values
+					it can find in the BeanFactory with the values from the properties file:
+				</para>
+				<programlisting><![CDATA[
+<bean id="propertyConfigurer" class="org.sf.beans.config.PropertyPlaceholderConfigurer">
+	<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+</bean>
+
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
+	<property name="url"><value>${jdbc.url}</value></property>
+	<property name="username"><value>${jdbc.username}</value></property>
+	<property name="password"><value>${jdbc.password}</value></property>
+</bean>
+				]]></programlisting>
+				<programlisting><![CDATA[
+jdbc.driverClassName=org.hsqldb.jdbcDriver
+jdbc.url=jdbc:hsqldb:hsql://production:9002
+jdbc.username=sa
+jdbc.password=root
+				]]></programlisting>
+								
+			</sect2>
 		
 		<sect2 id="beans-factory-client">
 			<title>Clients interacting with the factory</title>
@@ -1104,6 +1027,303 @@ public class ExampleBean {
 			
 		</sect2>
     </sect1>
+    
+    
+    <sect1 id="beans-beans">
+    	<title>Bean manipulation and the <literal>BeanWrapper</literal></title>
+    	<para>
+    		The <literal>org.springframework.beans</literal> package adheres to the JavaBeans standard
+    		provided by Sun. A JavaBean is simply a class with a default no-argument constructor, which
+    		follows a naming conventions where a property named <literal>prop</literal> has a setter
+    		<literal>setProp(...)</literal> and a getter <literal>getProp()</literal>. For more
+    		information about JavaBeans and the specification, please refer to Sun website
+    		(<ulink url="http://java.sun.com/products/javabeans/">java.sun.com/products/javabeans</ulink>).
+    	</para>
+    	<para>
+    		One quite important concept of the beans package is the <literal>BeanWrapper</literal>
+    		interface and its corresponding implementation (<literal>BeanWrapperImpl</literal>).
+    		As quoted from the JavaDoc,  the BeanWrapper offers functionality to set and get property 
+    		values (individually or in bulk), get property descriptors and query the readability and
+    		writability of properties. Also, the BeanWrapper offers support for
+    		nested properties, enabling the setting of properties on subproperties to an unlimited
+    		depth. Then, the BeanWrapper support the ability to add standard
+    		JavaBeans <literal>PropertyChangeListeners</literal> and <literal>VetoableChangeListeners</literal>,
+    		without the need for supporting code in the target class. Last but not least, the
+    		BeanWrapper provides support for the setting of indexed properties.	The BeanWrapper 
+    		usually isn't used by application code directly, but by the <literal>DataBinder</literal> 
+    		and the <literal>BeanFactory</literal>.
+    	</para>
+    	<para>
+    		The way the BeanWrapper works is partly indicated by its name: 
+    		<emphasis>it wraps a bean</emphasis> to perform action on that bean, like setting
+    		and retrieving properties.
+    	</para>
+    	
+    	<sect2 id="beans-beans-conventions">
+    		<title>Setting and getting basic and nested properties</title>
+    		<para>
+    			Setting and getting properties is done using the <literal>setPropertyValue(s)</literal>
+    			<literal>getPropertyValue(s)</literal> methods that both come with a couple of
+    			overloaded variants. They're all described in more detail in the JavaDoc Spring
+    			comes with. What's important to know that there's a couple of conventions for 
+    			indicating properties of an object. A couple of examples:
+				<table frame="all">
+		            <title>Examples of properties</title>
+		            <tgroup cols="2">
+		                <colspec colname="c1" colwidth="1*"/>
+		                <colspec colname="c2" colwidth="5*"/>
+		                <thead>
+		                    <row>
+		                        <entry>Expression</entry>
+		                        <entry>Explanation</entry>
+		                    </row>
+		                </thead>
+			            <tbody>
+				            <row>
+				            	<entry><literal>name</literal></entry>
+				            	<entry>Indicates the property <literal>name</literal> corresponding to the
+				            		methods <literal>getName()</literal> or <literal>isName()</literal> and
+				            		<literal>setName()</literal>
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>account.name</literal></entry>
+				            	<entry>Indicates the nested property <literal>name</literal> of the property
+					            	<literal>account</literal> corresponding e.g. to the methods
+					            	<literal>getAccount().setName()</literal> or <literal>getAccount().getName()</literal>
+					            </entry>
+				            </row>
+				            <row>
+				            	<entry><literal>account[2]</literal></entry>
+				            	<entry>Indicates the <emphasis>third</emphasis> element of the indexed property
+					            	<literal>account</literal>. Indexed properties can be of type <literal>array</literal>,
+					            	<literal>list</literal> or other <emphasis>natural ordered</emphasis> collection
+					            </entry>
+				            </row>
+				        </tbody>
+			        </tgroup>
+		        </table>
+    		</para>
+    		
+			<para>
+				Below you'll find some examples of working with the BeanWrapper to get
+				and set properties.
+			</para>
+    		<para><emphasis>Note: this part is not important to you if you're not planning to
+    			work with the BeanWrapper directly. If you're just using the 
+    			<literal>DataBinder</literal> and the <literal>BeanFactory</literal> and their
+    			out-of-the-box implementation, don't mind reading this and go on with
+    			reading about <literal>PropertyEditors</literal>.</emphasis>
+    		</para>
+       		<para>    
+       			Consider the following two classes:			
+				<programlisting><![CDATA[
+public class Company {
+	private String name;
+	private Employee managingDirector;
+	
+	public String getName()	{ 
+		return this.name; 
+	}
+	public void setName(String name) { 
+		this.name = name; 
+	} 
+	public Employee getManagingDirector() { 
+		return this.managingDirector; 
+	}
+	public void setManagingDirector(Employee managingDirector) {
+		this.managingDirector = managingDirector;							
+	}
+}
+				]]></programlisting>
+				<programlisting><![CDATA[
+public class Employee {
+	private float salary;
+	
+	public float getSalary() {
+		return salary;
+	}						
+	public void setSalary(float salary) {
+		this.salary = salary;
+	}
+}					
+				]]></programlisting>
+			</para>
+			<para>
+				The following code snippets show some examples of how to retrieve and
+				manipulate some of the properties of instantiated:
+				<literal>Companies</literal> and <literal>Employees</literal>
+				<programlisting><![CDATA[
+Company c = new Company();
+BeanWrapper bwComp = BeanWrapperImpl(c);
+// setting the company name...
+bwComp.setPropertyValue("name", "Some Company Inc.");
+// ... can also be done like this:
+PropertyValue v = new PropertyValue("name", "Some Company Inc.");
+bwComp.setPropertyValue(v);
+
+// ok, let's create the director and tie it to the company:
+Employee jim = new Employee();
+BeanWrapper bwJim = BeanWrapperImpl(jim);
+bwJim.setPropertyValue("name", "Jim Stravinsky");					
+bwComp.setPropertyValue("managingDirector", jim);
+
+// retrieving the salary of the managingDirector through the company
+Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");
+				]]></programlisting>				
+			</para>
+    	</sect2>
+    	
+    	<sect2 id="beans-beans-conversion">
+    		<title>Built-in <literal>PropertyEditors</literal>, converting types</title>
+    		<para>
+    			Spring heavily uses the concept of <literal>PropertyEditors</literal>.
+    			Sometimes it might be handy to be able to represent properties in a different
+    			way than the object itself. For example, a date can be represented in a human
+    			readable way, while we're still able to convert the human readable form back to
+    			the original date (or even better: convert any date entered in a human readable form,
+    			back to Date objects). This behavior can be achieved by <emphasis>registering
+    			custom editors</emphasis>, of type <literal>java.beans.PropertyEditor</literal>.
+    			Registering custom editors to a BeanWrapper gives it the knowledge of how to convert
+    			properties to the desired type. Read more about PropertyEditors in the JavaDoc of the
+    			<literal>java.beans</literal> package provided by Sun.
+    		</para>
+    		<para>
+    			A couple of examples where property editing are used in Spring
+    			<itemizedlist spacing="compact">
+    				<listitem>
+    					<para><emphasis>setting properties on beans</emphasis> is done using
+    						PropertyEditors. When mentioning <literal>java.lang.String</literal>
+    						as the value of a property of some bean you're declaring in XML file,
+    						Spring will (if the setter of the corresponding property has a 
+    						Class-parameter) use the <literal>ClassEditor</literal> to try
+    						to resolve the parameter to a Class object</para>
+    				</listitem>
+    				<listitem>
+    					<para><emphasis>parsing HTTP request parameters</emphasis> is Spring's
+    						MVC framework is done using all kinds of PropertyEditors that you
+    						can manually bind in all subclasses of the <literal>CommandController</literal></para>
+    				</listitem>
+    			</itemizedlist>
+    		</para>
+			<para>
+				Spring has a number of built-in PropertyEditors to make life easy. Each of those is listed below and
+				they are all located in the <literal>org.springframework.beans.propertyeditors</literal> package:
+				<table frame="all">
+		            <title>Built-in PropertyEditors</title>
+		            <tgroup cols="2">
+		                <colspec colname="c1" colwidth="1*"/>
+		                <colspec colname="c2" colwidth="5*"/>
+		                <thead>
+		                    <row>
+		                        <entry>Class</entry>
+		                        <entry>Explanation</entry>
+		                    </row>
+		                </thead>
+			            <tbody>
+				            <row>
+				            	<entry><literal>ClassEditor</literal></entry>
+				            	<entry>
+				            		Parses Strings representing classes to actual classes and
+				            		the other way around. When a class is not found,
+				            		an IllegalArgumentException is thrown
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>FileEditor</literal></entry>
+				            	<entry>
+				            		Capable of resolving String to <literal>File</literal>-objects
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>LocaleEditor</literal></entry>
+				            	<entry>
+				            		Capable of resolving Strings to <literal>Locale</literal>-objects
+				            		and vice versa (the String format is [language]_[country]_[variant],
+				            		which is the same thing the toString() method of Locale provides
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>PropertiesEditor</literal></entry>
+				            	<entry>
+				            		Capable of converting Strings (formatted using the 
+				            		format as defined in the JavaDOC for the java.lang.Properties class)
+				            		to <literal>Properties</literal>-objects
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>StringArrayPropertyEditor</literal></entry>
+				            	<entry>
+				            		Capable of resolving a comma-delimited list of String to
+				            		a String-array and vice versa
+				            	</entry>
+				            </row>
+				            <row>
+				            	<entry><literal>URLEditor</literal></entry>
+				            	<entry>
+				            		Capable of resolving a String representation of a URL
+				            		to an actual <literal>URL</literal>-object
+				            	</entry>
+				            </row>				            				            
+				        </tbody>
+			        </tgroup>
+		        </table>
+			</para>
+			<para>
+				Spring uses the <literal>java.beans.PropertyEditorManager</literal> to
+				set the search-path for property editors that might be needed. The search-path
+				also includes <literal>sun.bean.editors</literal>, which includes
+				PropertyEditors for for example Font, Color and all the primitive types.
+			</para>
+			<para>
+				When in need for a custom editor in your BeanFactory (i.e. you have some
+				exotic type that you need express as a property in for instance an XML
+				file containing beans), you can use the <literal>BeanFactoryPostProcessor</literal>
+				infrastructure to do this. TODOOOODOOD reference provides more info on how to use
+				the <literal>BeanFactoryPostProcessor</literal>. The following piece of code
+				show the actual processor that registered a custom editor for use with the
+				BeanFactory:
+				<programlisting><![CDATA[
+public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+	void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+	    beanFactory.registerCustomEditor(Date.class, CustomDateEditor.class);
+	}
+}
+				]]></programlisting>
+
+			</para>
+		</sect2>  
+		
+		<sect2 id="beans-beans-other">
+			<title>Other features worth mentioning</title>
+			<para>
+				Besides the features you've seen in the previous sections there a couple of
+				features that might be intereseted to you, though not worth an entire section.
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							<emphasis>determining readability and writability</emphasis>: using
+							the <literal>isReadable()</literal> and <literal>isWritable()</literal>
+							methods, you can determine whether or not a property is readable or
+							writable
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							<emphasis>retrieving propertydescriptors</emphasis>: using
+							<literal>getPropertyDescriptor(String)</literal> and
+							<literal>getPropertyDescriptors()</literal> you can retrieve
+							objects of type <literal>java.beans.PropertyDescriptor</literal>,
+							that might come in handy sometimes
+						</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+		</sect2>			  		
+
+    </sect1>
+
+    
         	
 </chapter>
 
