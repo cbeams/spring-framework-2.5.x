@@ -24,13 +24,14 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.HasMap;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.support.ListableBeanFactoryImpl;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  *
  * @author Rod Johnson
-* @version $Id: XmlBeanFactoryTestSuite.java,v 1.2 2003-08-28 17:24:39 jhoeller Exp $
+* @version $Id: XmlBeanFactoryTestSuite.java,v 1.3 2003-09-03 23:41:39 johnsonr Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -475,6 +476,73 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 			// Ok
 			// TODO Check that the error message includes filename
 		}
+	}
+	
+	public void testUnsatisfiedObjectDependencyCheck() throws Exception {
+		InputStream is = getClass().getResourceAsStream("unsatisfiedObjectDependencyCheck.xml");
+	
+		try {
+			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
+			fail();
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Ok
+			// What if many dependencies are unsatisfied?
+			//assertTrue(ex.getMessage().indexOf("spouse"))
+		}
+	}
+	
+	public void testUnsatisfiedSimpleDependencyCheck() throws Exception {
+		InputStream is = getClass().getResourceAsStream("unsatisfiedSimpleDependencyCheck.xml");
+		try {
+			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
+			fail();
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Ok
+			// What if many dependencies are unsatisfied?
+			//assertTrue(ex.getMessage().indexOf("spouse"))
+		}
+	}
+
+	public void testSatisfiedObjectDependencyCheck() throws Exception {
+		InputStream is = getClass().getResourceAsStream("satisfiedObjectDependencyCheck.xml");
+
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
+		assertNotNull(a.getSpouse());
+	}
+	
+	public void testSatisfiedSimpleDependencyCheck() throws Exception {
+		InputStream is = getClass().getResourceAsStream("satisfiedSimpleDependencyCheck.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
+		assertEquals(a.getAge(), 33);
+	}
+	
+	public void testUnsatisfiedAllDependencyCheck() throws Exception {
+		InputStream is = getClass().getResourceAsStream("unsatisfiedAllDependencyCheckMissingObjects.xml");
+		try {
+			XmlBeanFactory xbf = new XmlBeanFactory(is);
+			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
+			fail();
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Ok
+			// What if many dependencies are unsatisfied?
+			//assertTrue(ex.getMessage().indexOf("spouse"))
+		}
+	}
+	
+	public void testSatisfiedAllDependencyCheck() throws Exception {
+		InputStream is = getClass().getResourceAsStream("satisfiedAllDependencyCheck.xml");
+		XmlBeanFactory xbf = new XmlBeanFactory(is);
+		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
+		assertEquals(a.getAge(), 33);
+		assertNotNull(a.getName());
+		assertNotNull(a.getSpouse());
 	}
 
 

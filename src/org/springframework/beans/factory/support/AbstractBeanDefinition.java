@@ -21,15 +21,26 @@ import org.springframework.beans.PropertyValues;
  * BeanDefinitions.
  *
  * @author Rod Johnson
- * @version $Id: AbstractBeanDefinition.java,v 1.1.1.1 2003-08-14 16:20:18 trisberg Exp $
+ * @version $Id: AbstractBeanDefinition.java,v 1.2 2003-09-03 23:41:39 johnsonr Exp $
  */
 public abstract class AbstractBeanDefinition {
+	
+	public static final int DEPENDENCY_CHECK_NONE = 0;
+	
+	public static final int DEPENDENCY_CHECK_OBJECTS = 1;
+	
+	public static final int DEPENDENCY_CHECK_SIMPLE = 2;
+	
+	public static final int DEPENDENCY_CHECK_ALL = 3;
 
 	/** Is this a singleton bean? */
 	private boolean singleton;
 	
 	/** Property map */
 	private PropertyValues pvs;
+	
+	/** A constant */
+	private int dependencyCheck;
 	
 	/** 
 	 * Creates new BeanDefinition
@@ -77,6 +88,21 @@ public abstract class AbstractBeanDefinition {
 		AbstractBeanDefinition obd = (AbstractBeanDefinition) other;
 		return this.singleton = obd.singleton &&
 			this.pvs.changesSince(obd.pvs).getPropertyValues().length == 0;
+	}
+
+	/**
+	 * @return int
+	 */
+	protected int getDependencyCheck() {
+		return dependencyCheck;
+	}
+
+	/**
+	 * Sets the dependencyCheck.
+	 * @param dependencyCheck The dependencyCheck to set
+	 */
+	public void setDependencyCheck(int dependencyCheck) {
+		this.dependencyCheck = dependencyCheck;
 	}
 
 }

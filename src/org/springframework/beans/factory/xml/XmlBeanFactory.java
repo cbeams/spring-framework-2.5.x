@@ -33,7 +33,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.util.StringUtils;
-
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,7 +60,7 @@ import org.xml.sax.SAXParseException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.2 2003-08-28 17:24:39 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.3 2003-09-03 23:41:26 johnsonr Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -112,7 +111,11 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String PROPS_ELEMENT = "props";
 
 	private static final String PROP_ELEMENT = "prop";
-
+	
+	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependencyCheck";
+	
+	private static final String DEFAULT_DEPENDENCY_CHECK_VALUE = "none";
+	
 
 	private EntityResolver entityResolver;
 
@@ -302,11 +305,21 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private AbstractBeanDefinition parseBeanDefinition(Element el, String beanName, PropertyValues pvs) {
 		String className = null;
 		boolean singleton = true;
+		String dependencyCheck = DEFAULT_DEPENDENCY_CHECK_VALUE;
+		AbstractBeanDefinition bd = null;
+		
 		if (el.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			// Default is singleton
 			// Can override by making non-singleton if desired
 			singleton = TRUE_ATTRIBUTE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
 		}
+		
+		if (el.hasAttribute(DEPENDENCY_CHECK_ATTRIBUTE)) {
+			// Default is singleton
+			// Can override by making non-singleton if desired
+			dependencyCheck = el.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+		}
+		
 		try {
 			if (el.hasAttribute(CLASS_ATTRIBUTE))
 				className = el.getAttribute(CLASS_ATTRIBUTE);
@@ -323,12 +336,27 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 				String destroyMethodName = el.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 				if (destroyMethodName.equals(""))
 					destroyMethodName = null;
-				return new RootBeanDefinition(Class.forName(className, true, cl),
+				bd = new RootBeanDefinition(Class.forName(className, true, cl),
 				                              pvs, singleton, initMethodName, destroyMethodName);
 			}
 			else {
-				return new ChildBeanDefinition(parent, pvs, singleton);
+				bd = new ChildBeanDefinition(parent, pvs, singleton);
 			}
+					
+			int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;	
+			if ("all".equals(dependencyCheck)) {
+				dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
+			}
+			else if ("simple".equals(dependencyCheck)) {
+				dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
+			}
+			else if ("objects".equals(dependencyCheck)) {
+				dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
+			}
+			// else leave default value
+			
+			bd.setDependencyCheck(dependencyCheckCode);
+			return bd;
 		}
 		catch (ClassNotFoundException ex) {
 			throw new FatalBeanException("Error creating bean with name [" + beanName + "]", ex);

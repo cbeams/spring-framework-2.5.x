@@ -5,13 +5,18 @@
  
 package org.springframework.beans.factory.support;
 
+import java.beans.PropertyDescriptor;
+
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 
 /** 
 * Root bean definitions have a class and properties.
 * @author Rod Johnson
-* @version $Id: RootBeanDefinition.java,v 1.1.1.1 2003-08-14 16:20:19 trisberg Exp $
+* @version $Id: RootBeanDefinition.java,v 1.2 2003-09-03 23:41:39 johnsonr Exp $
 */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
@@ -42,6 +47,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.clazz = other.clazz;
 		this.initMethodName = other.initMethodName;
 		this.destroyMethodName = other.destroyMethodName;
+		this.setDependencyCheck(other.getDependencyCheck());
 	}
 	
 	/**
@@ -67,6 +73,36 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		return this.clazz;
 	}
 
+	/**
+	 * Perform a dependency check that all properties exposed have
+	 * been set, if desired.
+	 * Dependency checks can be simple (primitives and String),
+	 * object (collaborating beans)
+	 * or all (both)
+	 * @throws UnsatisfiedDependencyException
+	 */
+	public void dependencyCheck(String beanName) throws UnsatisfiedDependencyException {
+		if (getDependencyCheck() == DEPENDENCY_CHECK_NONE) {
+			return;
+		}
+		
+		BeanWrapper bw = new BeanWrapperImpl(this.clazz);
+		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
+		for (int i = 0; i < pds.length; i++) {
+			String name = pds[i].getName();
+			if (getPropertyValues().getPropertyValue(name) == null &&
+					!pds[i].getName().equals("class")) {
+				boolean isSimple = pds[i].getPropertyType().isPrimitive() || pds[i].getPropertyType().equals(String.class);
+				boolean unsatisfied = getDependencyCheck() == DEPENDENCY_CHECK_ALL ||
+					(isSimple && getDependencyCheck() == DEPENDENCY_CHECK_SIMPLE) ||
+					(!isSimple && getDependencyCheck() == DEPENDENCY_CHECK_OBJECTS); 
+				// The property isn't set
+				if (unsatisfied) 
+					throw new UnsatisfiedDependencyException(beanName, name);
+			}
+		}
+	}
+		
 	public boolean equals(Object obj) {
 		if (!(obj instanceof RootBeanDefinition))
 			return false;

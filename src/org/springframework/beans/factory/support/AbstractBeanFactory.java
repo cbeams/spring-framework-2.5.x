@@ -50,7 +50,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.1.1.1 2003-08-14 16:20:19 trisberg Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.2 2003-09-03 23:41:39 johnsonr Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
@@ -286,6 +286,9 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 */
 	private Object createBean(String name, Map newlyCreatedBeans) throws BeansException {
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(name);
+		
+		mergedBeanDefinition.dependencyCheck(name);
+				
 		logger.debug("Creating instance of bean '" + name + "' with merged definition [" + mergedBeanDefinition + "]");
 		BeanWrapper instanceWrapper = new BeanWrapperImpl(mergedBeanDefinition.getBeanClass());
 		Object bean = instanceWrapper.getWrappedInstance();
