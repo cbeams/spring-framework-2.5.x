@@ -5,8 +5,6 @@
  
 package org.springframework.ejb.support;
 
-import java.io.InputStream;
-
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -15,30 +13,37 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.BeanFactoryLoader;
 import org.springframework.beans.factory.support.BootstrapException;
-import org.springframework.beans.factory.support.ClasspathBeanDefinitionRegistryLocation;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jndi.JndiTemplate;
-import org.springframework.util.ClassLoaderUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the BeanFactoryLoader interface useful in EJBs
  * (although not tied to the EJB API).
  *
  * <p>This class will look for the JNDI environment key
- * "java:comp/env/ejb/BeanFactoryPath" for the classpath location
- * of an XML bean factory definition.
+ * "java:comp/env/ejb/BeanFactoryPath" for classpath locations
+ * of XML bean factory definitions. Multiple locations can be
+ * separated by any name of commas or spaces.
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @since 20-Jul-2003
- * @version $Id: XmlBeanFactoryLoader.java,v 1.6 2003-12-19 15:49:59 johnsonr Exp $
+ * @version $Id: XmlBeanFactoryLoader.java,v 1.7 2003-12-30 02:04:03 jhoeller Exp $
  */
 public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 	
 	public static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
+
+	/**
+	 * Any number of these characters are considered delimiters
+	 * between multiple bean factory paths in a single-String value.
+	 */
+	public static final String BEAN_FACTORY_PATH_DELIMITERS = ",; ";
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -52,12 +57,13 @@ public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 		try {
 			beanFactoryPath = (String) (new JndiTemplate()).lookup(BEAN_FACTORY_PATH_ENVIRONMENT_KEY);
 			logger.info("BeanFactoryPath from JNDI is [" + beanFactoryPath + "]");
-			InputStream is = ClassLoaderUtils.getResourceAsStream(beanFactoryPath);
-			if (is == null) {
-				throw new BootstrapException("Cannot load bean factory path '" + beanFactoryPath + "'", null);
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+			String[] paths = StringUtils.tokenizeToStringArray(beanFactoryPath, BEAN_FACTORY_PATH_DELIMITERS, true, true);
+			for (int i = 0; i < paths.length; i++) {
+				reader.loadBeanDefinitions(new ClassPathResource(paths[i]));
 			}
-			ListableBeanFactory beanFactory = new XmlBeanFactory(is, 
-					new ClasspathBeanDefinitionRegistryLocation(beanFactoryPath));
+			beanFactory.preInstantiateSingletons();
 			logger.info("Loaded BeanFactory [" + beanFactory + "]");
 			return beanFactory;
 		}
@@ -70,10 +76,8 @@ public class XmlBeanFactoryLoader implements BeanFactoryLoader {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.beans.factory.support.BeanFactoryLoader#unloadBeanFactory(org.springframework.beans.factory.BeanFactory)
-	 */
-	public void unloadBeanFactory(BeanFactory bf) throws FatalBeanException {
+	public void unloadBeanFactory(BeanFactory beanFactory) throws FatalBeanException {
 		// nothing to do in default implementation
 	}
+
 }
