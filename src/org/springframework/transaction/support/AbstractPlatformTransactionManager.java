@@ -1,3 +1,8 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+
 package org.springframework.transaction.support;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +32,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
+ * @version $Id: AbstractPlatformTransactionManager.java,v 1.9 2003-11-20 16:33:41 johnsonr Exp $
  */
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
 
@@ -83,7 +89,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 		Object transaction = doGetTransaction();
-		logger.debug("Using transaction object [" + transaction + "]");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Using transaction object [" + transaction + "]");
+		}
 
 		if (isExistingTransaction(transaction)) {
 			logger.debug("Participating in existing transaction");
