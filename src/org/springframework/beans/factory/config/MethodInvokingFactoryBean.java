@@ -20,17 +20,37 @@ import org.springframework.beans.factory.InitializingBean;
  * object.
  * <br/>A static target method may be specified by setting the
  * {@link #setStaticMethod staticMethod} property to a String representing the fully
- * qualified static method name. Alternately, a target instance method may be specified,
- * by setting the {@link #setTarget target} property as the
- * target object, and the {@link #setTargetMethod targetMethod} property as the name of the method to call on
- * that target object.
+ * qualified static method name. Alternately, a target instance method may be
+ * specified, by setting the {@link #setTarget target} property as the target
+ * object, and the {@link #setTargetMethod targetMethod} property as the name of the
+ * method to call on that target object.
  * Arguments for the method invocation may be specified by setting the args property.
- * <br/><br/>This class depends on afterPropertiesSet being called once all properties
- * have been set, as per the InitializingBean contract.
+ * <br/><br/>This class depends on {@link #afterPropertiesSet()} being called once
+ * all properties have been set, as per the InitializingBean contract.
+ * <br/><br/>An example (in an XML based bean factory definition) of a bean definition
+ * which uses this class to call a static factory method:
+ * <pre>
+ * &lt;bean id="myClass" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+ *   &lt;property name="staticMethod">&lt;value>com.whatever.MyClassFactory.getInstance&lt;/value>&lt;/property>
+ * &lt;/bean></pre>
+ * An example of calling a static method then an instance method to get at a Java
+ * System property. Somewhat verbose, but it works.<pre>
+ * &lt;bean id="sysProps" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+ *   &lt;property name="staticMethod">&lt;value>java.lang.System.getProperties&lt;/value>&lt;/property>
+ * &lt;/bean>
+ * &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+ *   &lt;property name="target">&lt;ref local='sysProps'/>&lt;/property>
+ *   &lt;property name="targetMethod">&lt;value>getProperty&lt;/value>&lt;/property>
+ *   &lt;property name="args">
+ *     &lt;list>
+ *       &lt;value>|java.version|&lt;/value>
+ *     &lt;/list>
+ *   &lt;/property>
+ * &lt;/bean></pre>
  * 
  * @author colin sampaleanu
  * @since 2003-11-21
- * @version $Id: MethodInvokingFactoryBean.java,v 1.1 2003-11-22 00:45:12 colins Exp $
+ * @version $Id: MethodInvokingFactoryBean.java,v 1.2 2003-11-22 20:02:58 colins Exp $
  */
 public class MethodInvokingFactoryBean implements FactoryBean, InitializingBean {
 
@@ -172,7 +192,8 @@ public class MethodInvokingFactoryBean implements FactoryBean, InitializingBean 
 	}
 	/**
 	 * Allows arguments for the method invocation to be specified. If this property
-	 * is not set, a method with no arguments is assumed.
+	 * is not set (null), or the Object array is of length 0, a method with no
+	 * arguments is assumed.
 	 */
 	public void setArgs(Object[] args) {
 		_args = args;
