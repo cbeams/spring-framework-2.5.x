@@ -24,7 +24,14 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Bootstrap servlet for custom Log4J initialization in a web environment.
- * Simply delegates to Log4jWebConfigurer.
+ * Delegates to Log4jWebConfigurer (see its javadoc for configuration details).
+ *
+ * <b>WARNING: Assumes an expanded WAR file</b>, both for loading the configuration
+ * file and for writing the log files. If you want to keep your WAR unexpanded or
+ * don't need application-specific log files within the WAR directory, don't use
+ * Log4J setup within the application (thus, don't use Log4jConfigListener or
+ * Log4jConfigServlet). Instead, use a global, VM-wide Log4J setup (for example,
+ * in JBoss) or JDK 1.4's java.util.logging (which is global too).
  *
  * <p>Note: This servlet should have a lower load-on-startup value in web.xml
  * than ContextLoaderServlet, when using custom Log4J initialization.
@@ -60,8 +67,9 @@ public class Log4jConfigServlet extends HttpServlet {
 	 * listener is much more appropriate for initialization work ;-)
 	 */
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		getServletContext().log("Attempt to call service method on Log4jConfigServlet as [" +
-														request.getRequestURI() + "] was ignored");
+		getServletContext().log(
+				"Attempt to call service method on Log4jConfigServlet as [" +
+				request.getRequestURI() + "] was ignored");
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
