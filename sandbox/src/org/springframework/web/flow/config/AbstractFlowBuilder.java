@@ -176,8 +176,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * FlowServiceLocator.
 	 * @param id the state id, must be unique among all states of the flow built
 	 *        by this builder. This id also acts as the id of the subFlow.
-	 * @param subFlowId the id of the Flow definition to retieve (could also be
-	 *        the ID of a FlowFactoryBean that produces the Flow)
 	 * @param transitions The eligible set of state transitions
 	 * @throws IllegalArgumentException the state id is not unique
 	 */
@@ -479,8 +477,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g personDetails.view)
 	 * @return The view marker state
 	 * @throws IllegalStateException the stateId was not unique after
 	 *         qualificaion
@@ -505,8 +503,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g. personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g.
+	 *        personDetails.view)
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The view marker state
@@ -533,8 +532,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g. personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g.
+	 *        personDetails.view)
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
@@ -570,8 +570,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g personDetails.view)
 	 * @return The view state
 	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
@@ -595,8 +595,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * view resource to render a response when the view state is entered during
 	 * a flow execution.
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g personDetails.view)
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The view state
@@ -632,8 +632,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * view resource to render a response when the view state is entered during
 	 * a flow execution.
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g personDetails.view)
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
@@ -658,8 +658,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g personDetails.view)
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -678,8 +678,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state triggers the rendering of a view template when entered.
 	 * 
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g personDetails.view)
 	 * @param viewName The name of the logical view name to render. This name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -700,8 +700,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state triggers the rendering of a view template when entered.
 	 * 
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        {@link VIEW}action constant will be appended to this prefix to
-	 *        build a qualified state id (e.g personDetails.view)
+	 *        {@link FlowConstants#VIEW}action constant will be appended to
+	 *        this prefix to build a qualified state id (e.g personDetails.view)
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -2698,8 +2698,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param stateIdPrefix The state id qualifier (e.g person)
 	 * @return The transition (e.g select->person.get)
 	 */
-	protected Transition onSelectGet(String selectStateIdPrefix) {
-		return onSelect(get(selectStateIdPrefix));
+	protected Transition onSelectGet(String stateIdPrefix) {
+		return onSelect(get(stateIdPrefix));
 	}
 
 	/**
@@ -2952,7 +2952,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Qualify the specified id suffix with the id of the flow built by this
 	 * builder.
-	 * @param the suffix to qualify with the flow id (e.g myAction)
+	 * @param idSuffix the suffix to qualify with the flow id (e.g myAction)
 	 * @return the qualified id (e.g MyFlow.myAction)
 	 */
 	protected String qualify(String idSuffix) {
@@ -2960,7 +2960,11 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Join given prefix and suffix, separating them with a delimiter.
+	 * Join given prefix and suffix into a single string separated by a
+	 * delimiter.
+	 * @param prefix the prefix
+	 * @param suffix the suffix
+	 * @return the qualified string
 	 */
 	protected String join(String prefix, String suffix) {
 		return prefix + getQualifierDelimiter() + suffix;
