@@ -8,33 +8,22 @@
 
 <beans>
 
-<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
-		
-	</bean>
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"/>
 
-
-	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 		
-    <bean id="dao" class="org.springframework.beans.factory.xml.DummyDao"
-    				autowire="constructor">
-    </bean>
+	<bean id="dao" class="org.springframework.beans.factory.xml.DummyDao" autowire="constructor"/>
 
-	
-	
-	<bean id="boPrototype" 
-		autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl"
+	<bean id="boPrototype" autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl"
 		singleton="false"
 	/>
 	
-	<bean id="prototypeTargetSource" 
-		class="org.springframework.aop.target.PrototypeTargetSource">	
+	<bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource">
 		<property name="targetBeanName"><value>boPrototype</value></property>
 	</bean>
-	
-	
+
 	<bean id="prototypeBenchmark" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
 		<property name="target"><ref local="prototypeTargetSource"/></property>
@@ -45,11 +34,7 @@
 			</props>
 		</property>
 	</bean>
-	
 
-	<bean id="boSingleton" autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl">
-	</bean>
-	
-	
+	<bean id="boSingleton" autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl"/>
 
 </beans>

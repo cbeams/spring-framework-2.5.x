@@ -25,11 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.FactoryBeanCircularReferenceException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -42,7 +43,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @version $Id: DefaultListableBeanFactory.java,v 1.24 2004-07-23 13:15:42 jhoeller Exp $
+ * @version $Id: DefaultListableBeanFactory.java,v 1.25 2004-07-27 09:25:00 jhoeller Exp $
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -120,7 +121,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Map result = new HashMap();
 		for (int i = 0; i < beanNames.length; i++) {
 			if (includePrototypes || isSingleton(beanNames[i])) {
-				result.put(beanNames[i], getBean(beanNames[i]));
+				try {
+					result.put(beanNames[i], getBean(beanNames[i]));
+				}
+				catch (BeanCurrentlyInCreationException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring match to currently created bean '" + beanNames[i] + "'");
+					}
+					// ignore
+				}
 			}
 		}
 
@@ -128,7 +137,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (int i = 0; i < singletonNames.length; i++) {
 			if (!containsBeanDefinition(singletonNames[i])) {
 				// directly registered singleton
-				result.put(singletonNames[i], getBean(singletonNames[i]));
+				try {
+					result.put(singletonNames[i], getBean(singletonNames[i]));
+				}
+				catch (BeanCurrentlyInCreationException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring match to currently created bean '" + singletonNames[i] + "'");
+					}
+					// ignore
+				}
 			}
 		}
 
@@ -147,10 +164,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						}
 					}
 				}
-				catch (FactoryBeanCircularReferenceException ex) {
-					// we're currently creating that FactoryBean
-					// sensible to ignore it, as we are just looking for a certain type
-					logger.debug("Ignoring exception on FactoryBean type check", ex);
+				catch (BeanCurrentlyInCreationException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring match to currently created bean '" + factoryNames[i] + "'");
+					}
+					// ignore
+				}
+				catch (BeanCreationException ex) {
+					// We're currently creating that FactoryBean.
+					// Sensible to ignore it, as we are just looking for a certain type.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring FactoryBean creation failure when looking for matching beans", ex);
+					}
+					// ignore
 				}
 			}
 		}

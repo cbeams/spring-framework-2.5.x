@@ -65,7 +65,7 @@ import org.springframework.util.StopWatch;
 /**
  * @author Juergen Hoeller
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.55 2004-07-02 07:28:21 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.56 2004-07-27 09:25:01 jhoeller Exp $
  */
 public class XmlBeanFactoryTestSuite extends TestCase {
 
@@ -213,7 +213,7 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 		DummyBoImpl bos = (DummyBoImpl) bf.getBean("boSingleton");
 		DummyBoImpl bop = (DummyBoImpl) bf.getBean("boPrototype");
 		assertNotSame(bos, bop);
-		assertEquals(bos.dao, bop.dao);
+		assertTrue(bos.dao == bop.dao);
 	}
 
 	public void testChildOverridesParentBean() throws Exception {
@@ -1129,7 +1129,6 @@ public class XmlBeanFactoryTestSuite extends TestCase {
 	}
 	
 	private void testLookupOverrideMethodsWithSetterInjection(BeanFactory xbf, String beanName, boolean singleton) {
-		
 		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean(beanName);
 		
 		if (singleton) {

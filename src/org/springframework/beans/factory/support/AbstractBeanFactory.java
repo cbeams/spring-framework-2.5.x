@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
@@ -60,7 +61,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.60 2004-07-01 20:59:28 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.61 2004-07-27 09:25:00 jhoeller Exp $
  * @see #getBeanDefinition
  * @see #createBean
  * @see #destroyBean
@@ -74,6 +75,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * return the factory, not the instance returned by the factory.
 	 */
 	public static final String FACTORY_BEAN_PREFIX = "&";
+
+	/**
+	 * Marker object to be temporarily registered in the singleton cache
+	 * while instantiating a bean, to be able to detect circular references.
+	 */
+	private static final Object CURRENTLY_IN_CREATION = new Object();
 
 
 	/** Logger available to subclasses */
@@ -135,7 +142,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param name name of the bean to retrieve
 	 * @param args arguments to use if creating a prototype using explicit arguments to a static
 	 * factory method. It is invalid to use a non-null args value in any other case.
-	 * TODO we could consider supporting this for constructor args also, but it's really a 
+	 * TODO: We could consider supporting this for constructor args also, but it's really a
 	 * corner case required for AspectJ integration.
 	 */
 	public Object getBean(String name, Object[] args) throws BeansException {
@@ -143,6 +150,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		// eagerly check singleton cache for manually registered singletons
 		Object sharedInstance = this.singletonCache.get(beanName);
 		if (sharedInstance != null) {
+			if (sharedInstance == CURRENTLY_IN_CREATION) {
+				throw new BeanCurrentlyInCreationException(beanName, "Requested bean is already currently in creation");
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 			}
@@ -162,14 +172,16 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				throw ex;
 			}
 			
-			// Check validity of the usage of the args parameter. This 
-			// can only be used for prototypes constructed via a factory method.
+			// Check validity of the usage of the args parameter. This can
+			// only be used for prototypes constructed via a factory method.
 			if (args != null) {
 				if (mergedBeanDefinition.isSingleton()) {			
-					throw new BeanDefinitionStoreException("Cannot specify arguments in the getBean() method when referring to a singleton bean definition");
+					throw new BeanDefinitionStoreException("Cannot specify arguments in the getBean() method when " +
+																								 "referring to a singleton bean definition");
 				}
 				else if (mergedBeanDefinition.getStaticFactoryMethodName() == null) {			
-					throw new BeanDefinitionStoreException("Can only specify arguments in the getBean() method in conjunction with a static factory method");
+					throw new BeanDefinitionStoreException("Can only specify arguments in the getBean() method in " +
+																								 "conjunction with a static factory method");
 				}
 			}
 			
@@ -179,9 +191,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 					// re-check singleton cache within synchronized block
 					sharedInstance = this.singletonCache.get(beanName);
 					if (sharedInstance == null) {
-						logger.info("Creating shared instance of singleton bean '" + beanName + "'");
-						sharedInstance = createBean(beanName, mergedBeanDefinition, args);
-						addSingleton(beanName, sharedInstance);
+						if (logger.isInfoEnabled()) {
+							logger.info("Creating shared instance of singleton bean '" + beanName + "'");
+						}
+						this.singletonCache.put(beanName, CURRENTLY_IN_CREATION);
+						try {
+							sharedInstance = createBean(beanName, mergedBeanDefinition, args);
+							this.singletonCache.put(beanName, sharedInstance);
+						}
+						catch (BeansException ex) {
+							this.singletonCache.remove(beanName);
+							throw ex;
+						}
 					}
 				}
 				return getObjectForSharedInstance(name, sharedInstance);

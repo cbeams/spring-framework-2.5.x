@@ -625,6 +625,30 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 		}
 	}
 
+	public void testCircularReferenceThroughAutowiring() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyBean.class,
+																															RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
+		try {
+			lbf.preInstantiateSingletons();
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// expected
+		}
+	}
+
+	public void testCircularReferenceThroughFactoryBeanAutowiring() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyFactoryBean.class,
+																															RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
+		try {
+			lbf.preInstantiateSingletons();
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// expected
+		}
+	}
+
 
 	public static class NoDependencies {
 
@@ -650,6 +674,32 @@ public class DefaultListableBeanFactoryTestSuite extends TestCase {
 	public static class UnsatisfiedConstructorDependency {
 
 		public UnsatisfiedConstructorDependency(TestBean t, SideEffectBean b) {
+		}
+	}
+
+
+	public static class ConstructorDependencyBean {
+
+		public ConstructorDependencyBean(ConstructorDependencyBean dependency) {
+		}
+	}
+
+
+	public static class ConstructorDependencyFactoryBean implements FactoryBean {
+
+		public ConstructorDependencyFactoryBean(String dependency) {
+		}
+
+		public Object getObject() throws Exception {
+			return "test";
+		}
+
+		public Class getObjectType() {
+			return String.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
 		}
 	}
 
