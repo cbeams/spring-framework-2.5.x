@@ -70,10 +70,10 @@
     given a Session provided by the JmsTemplate.  In order to allow
     for more complex usage of the JMS API, the callback  
     <literal>SessionCallback</literal> provides the user with the JMS
-    session.  The callback <literal>JmsSenderCallback</literal> exposes
-    the a Session and MessageProduer pair.
+    session.  The callback <literal>ProducerCallback</literal> exposes
+    the a Session and MessageProducer pair.
     
-    <!-- TODO change name of JmsSenderCallback to something more meaningful. -->
+    <!-- TODO change name of JmsSenderCallback to ProducerCallback -->
     </para>
     <para>
     The JMS API exposes two types of send methods, one that takes 
@@ -134,8 +134,62 @@
       </para>
     </sect2>
     <sect2>
-      <title>Dynamic Destinations</title>
-      <!-- Talk about dynamic destination and the JmsAdmin interface -->
+      <title>Destination Management</title>
+      <para>Quite often the destinations used in a JMS application are only 
+      known at runtime and therefore can not be administratively created 
+      when the application is deployed.  This is often because there is 
+      shared application logic between interacting system components that 
+      create destinations at runtime according to a well known naming 
+      convention determined by the user.  While not explicity mentioned 
+      in the JMS specification, vendors have provided functionality to 
+      create destination at runtime.   Dynamic destinations are created with
+      a name defined by the user, which differentiates them from temporary
+      destinations, and are often not registered in JNDI.  When used for 
+      sending messages, JmsTemplate can be configured to create a dynamic 
+      destination if a destination of the given name is not already registered
+      with JNDI.  Dynamic destination support is enabled by setting the
+      boolen property <literal>DynamicDestinationEnabled</literal> to true.  
+      Since this behavior is vendor dependent, the JmsTemplate delegates 
+      the responsibility of creating dynamic destinations to implementations 
+      of the <literal>JmsAdmin</literal> interface.  The default 
+      implementation of JmsAdmin is <literal>DefaultJmsAdmin</literal> and 
+      uses the <literal>TopicSession</literal> method 
+      <literal>createTopic(String topicName)</literal> or the 
+      <literal>QueueSession</literal> method 
+      <literal>createQueue(String queueName)</literal> to create dynamic 
+      destinations since this a common implementation choice made by JMS
+      providers.  Other implementations of JmsAdmin can be created to 
+      support the needs of your specific JMS provider.
+      </para>
+
+      <para>The boolean property <literal>PubSubDomain</literal> is used 
+      to configure the implementation
+      with knowledge of what JMS domain is being used.  By default the
+      value of this property is false, indicating that the point-to-point
+      domain, Queues, will be used.  In the 1.0.2 implementation the value
+      of this property determines if the JmsTemplate's send operations will
+      send a message to a Queue or to a Topic.  This flag has no effect on send
+      operations for the 1.1 implementation.  However, in both implementations,
+      if the property <literal>DynamicDestinationEnabled</literal> is true,
+      when sending to a destination that does not yet exist in JNDI
+      the value of <literal>PubSubDomain</literal> flag determines the 
+      type of destination to create dynamically.
+      </para>
+      
+      <para>The DefaultJmsAdmin class also acts as a service locator object 
+      to abstract the JNDI lookup for destinations and to cache previously 
+      resolved destinations.  Of course it is also possible to directly 
+      configure a bean with a JMS destination though dependency injection 
+      using the Spring application context.  The service locator acts as a 
+      convience for the case when an applications uses many destinations,
+      or when the vendor support as hierarchical destinations with
+      support for wildcards in the destination name.
+      </para>
+      <para>You can also configure the JmsTemplate with a default destination
+      via the proprety <literal>DefaultDestination</literal>.  The default
+      destination will be used with send operations that do not refer to a 
+      specific destination.
+      </para>
     </sect2> 
   </sect1>  
 
@@ -143,21 +197,86 @@
 
   <sect1>
     <title>Using the JmsTemplate</title>
-    <!-- Go over the various send methods and callback -->
-    <!-- Go over setting the domain flag isPubSubEnabled -->
-  </sect1>
+    <para>To get started using the JmsTemplate you need to select either the
+    JMS 1.0.2 implementation <literal>JmsTemplate102</literal> or the
+    JMS 1.1 implementation <literal>JmsTemplate11</literal>.  Check your
+    JMS provider to determine what version is supported.  When using the
+    1.0.2 implementation it is important to configure the boolean
+    <literal>PubSubDomain</literal> property to indicate if you want to
+    send to Queues or Topics.
+    </para>
+
+    <para>The JmsTemplate contains many convience methods to send a message.
+    There are send methods that specify the destination using a 
+    <literal>javax.jms.Destination</literal> object and those that
+    specify the destination using a string for use in a JNDI lookup.
+    The send method that takes no destination argument uses the
+    default destination.  Here is an example that sends a message to 
+    a queue using the 1.0.2 implementation of the template.
+    </para>
+    <programlisting>import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.Session;
+
+import org.springframework.jms.JmsTemplate;
+import org.springframework.jms.JmsTemplate102;
+import org.springframework.jms.MessageCreator;
+
+public class JmsQueueSender {
+
+    private JmsTemplate jt;
+
+    private ConnectionFactory connFactory;
+
+    private Queue queue;
+
+    public void simpleSend() {
+        jt = new JmsTemplate102(connFactory);
+        jt.send(queue, new MessageCreator() {
+            public Message createMessage(Session session) throws JMSException {
+                return session.createTextMessage("hello queue world");
+            }
+        });
+    }
+
+    public void setConnectionFactory(ConnectionFactory cf) {
+        connFactory = cf;
+    }
+
+    public void setQueue(Queue q) {
+                queue = q;
+    }
+
+}
+    </programlisting>
+    <para>This example uses the <literal>MessgaeCreator</literal> callback 
+    to create a text message from the supplied Session object.  Also, the
+    JmsTemplate is constructed passing a reference to the ConnectionFactory.
+    A zero argument constuctor and a setConnectionFactory method are 
+    also provided and can be used for constructing the instance using
+    a BeanFactory.  The method simpleSend modified to send to a topic 
+    instead of a queue is shown below
+    </para>
+    
+    <programlisting>
+        public void simpleSend() {
+                jt = new JmsTemplate102(connFactory);
+                jt.setPubSubDomain(true);
+                jt.send(topic, new MessageCreator() {
+                        public Message createMessage(Session session) throws JMSException {
+                                return session.createTextMessage("hello topic world");
+                        }
+                });
+        }     
+    </programlisting>  
+    </sect1>
 
   <sect1>
     <title>MessageConverters</title>
   </sect1>
 
-  <sect1>
-    <title>Use in a J2EE container</title>
-  </sect1>
-
-  <sect1>
-    <title>Use outside a J2EE container</title>
-  </sect1>
 
 
         
