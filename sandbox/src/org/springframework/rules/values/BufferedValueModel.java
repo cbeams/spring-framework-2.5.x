@@ -26,7 +26,7 @@ import org.springframework.util.ObjectUtils;
 public class BufferedValueModel extends AbstractValueModel implements
         ValueModel {
 
-    private static final Object NO_VALUE = new Object();
+    protected static final Object NO_VALUE = new Object();
 
     private Object bufferedValue = NO_VALUE;
 
@@ -34,6 +34,12 @@ public class BufferedValueModel extends AbstractValueModel implements
 
     private ValueModel commitTrigger;
 
+    private ValueListener committer;
+    
+    public BufferedValueModel(ValueModel wrappedModel) {
+        this(wrappedModel, null);
+    }
+    
     public BufferedValueModel(ValueModel wrappedModel, ValueModel commitTrigger) {
         this.wrappedModel = wrappedModel;
         this.wrappedModel.addValueListener(new ValueListener() {
@@ -44,15 +50,37 @@ public class BufferedValueModel extends AbstractValueModel implements
                                     + BufferedValueModel.this.wrappedModel
                                             .get() + "']");
                 }
-                if (isChangeBuffered()) {
-                    logger.warn("[Losing buffered edit " + get() + "]");
-                    set(NO_VALUE);
-                }
-                fireValueChanged();
+                onWrappedValueChanged();
             }
         });
-        this.commitTrigger = commitTrigger;
-        this.commitTrigger.addValueListener(new ValueListener() {
+        setCommitTrigger(commitTrigger);
+    }
+
+    protected void onWrappedValueChanged() {
+        if (isChangeBuffered()) {
+            logger.warn("[Losing buffered edit " + get() + "]");
+            set(NO_VALUE);
+        } else {
+            fireValueChanged();
+        }
+    }
+    
+	public void setCommitTrigger(ValueModel commitTrigger) {
+	    if (this.commitTrigger == commitTrigger) {
+	        return;
+	    }
+	    if (committer == null) {
+	        createCommitter();
+	    }
+	    if (this.commitTrigger != null) {
+	        this.commitTrigger.removeValueListener(committer);
+	    }
+	    this.commitTrigger = commitTrigger;
+	    this.commitTrigger.addValueListener(committer);
+	}
+	
+	private void createCommitter() {
+        this.committer = new ValueListener() {
             public void valueChanged() {
                 Boolean commit = (Boolean)((ValueModel)BufferedValueModel.this.commitTrigger)
                         .get();
@@ -69,9 +97,9 @@ public class BufferedValueModel extends AbstractValueModel implements
                     revert();
                 }
             }
-        });
-    }
-
+        };
+	}
+	
     private void commit() {
         if (isChangeBuffered()) {
             if (logger.isDebugEnabled()) {

@@ -108,8 +108,11 @@ public class DefaultFormModel implements MutableFormModel {
         return formValueModel;
     }
 
-    protected ValueModel add(String domainObjectProperty,
+    public ValueModel add(String domainObjectProperty,
             ValueModel formValueModel) {
+        if (formValueModel instanceof BufferedValueModel) {
+            ((BufferedValueModel)formValueModel).setCommitTrigger(commitTrigger);
+        }
         formValueModel = onPreProcessNewFormValueModel(domainObjectProperty,
                 formValueModel);
         formValueModels.put(domainObjectProperty, formValueModel);
@@ -159,7 +162,7 @@ public class DefaultFormModel implements MutableFormModel {
         return false;
     }
 
-    public AspectAccessStrategy getAspectAccessStrategy() {
+    public MutableAspectAccessStrategy getAspectAccessStrategy() {
         return domainObjectAccessStrategy;
     }
 

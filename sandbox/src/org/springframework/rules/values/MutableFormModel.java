@@ -20,7 +20,7 @@ package org.springframework.rules.values;
  * @author Keith Donald
  */
 public interface MutableFormModel extends NestableFormModel {
-    public AspectAccessStrategy getAspectAccessStrategy();
+    public MutableAspectAccessStrategy getAspectAccessStrategy();
 
     public MetaAspectAccessStrategy getMetaAspectAccessor();
 
@@ -30,4 +30,5 @@ public interface MutableFormModel extends NestableFormModel {
 
     public ValueModel add(String domainObjectProperty, boolean bufferChanges);
 
+    public ValueModel add(String domainObjectProperty, ValueModel valueModel);
 }
