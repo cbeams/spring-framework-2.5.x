@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.beans.ITestBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
@@ -23,7 +24,8 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * 
  * @author Rod Johnson
  */
-public class SPR391LookupMethodWrappedByCglibProxyTests extends AbstractDependencyInjectionSpringContextTests {
+public class SPR391LookupMethodWrappedByCglibProxyTests extends
+        AbstractDependencyInjectionSpringContextTests {
 
     /**
      * @see org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations()
@@ -31,26 +33,47 @@ public class SPR391LookupMethodWrappedByCglibProxyTests extends AbstractDependen
     protected String[] getConfigLocations() {
         return new String[] { "/org/springframework/beans/factory/xml/overloadOverrides.xml" };
     }
-    
-    
+
+    protected void onSetUp() {
+        resetInterceptor();
+    }
+
     public void testAutoProxiedLookup() {
         OverloadLookup olup = (OverloadLookup) applicationContext.getBean("autoProxiedOverload");
         ITestBean jenny = olup.newTestBean();
         assertEquals("Jenny", jenny.getName());
         assertEquals("foo", olup.testMethod());
+        assertInterceptorCount(2);
     }
-    
+
     public void testRegularlyProxiedLookup() {
         OverloadLookup olup = (OverloadLookup) applicationContext.getBean("regularlyProxiedOverload");
         ITestBean jenny = olup.newTestBean();
         assertEquals("Jenny", jenny.getName());
         assertEquals("foo", olup.testMethod());
+        assertInterceptorCount(2);
     }
-    
+
+    private void assertInterceptorCount(int count) {
+        DebugInterceptor interceptor = getInterceptor();
+        assertEquals("Interceptor count is incorrect", count,
+                interceptor.getCount());
+    }
+
+    private void resetInterceptor() {
+        DebugInterceptor interceptor = getInterceptor();
+        interceptor.resetCount();
+    }
+
+    private DebugInterceptor getInterceptor() {
+        DebugInterceptor interceptor = (DebugInterceptor) applicationContext.getBean("interceptor");
+        return interceptor;
+    }
+
     public static abstract class OverloadLookup {
-        
+
         public abstract ITestBean newTestBean();
-        
+
         public String testMethod() {
             return "foo";
         }

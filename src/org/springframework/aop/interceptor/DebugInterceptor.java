@@ -61,5 +61,13 @@ public class DebugInterceptor implements MethodInterceptor, Serializable {
 	public int getCount() {
 		return this.count;
 	}
+    
+    /**
+     * Reset the invocation count to zero.
+     *
+     */
+    public void resetCount() {
+        this.count = 0;
+    }
 
 }
