@@ -32,7 +32,7 @@ class ServletConfigPropertyValues implements PropertyValues {
 	private MutablePropertyValues mutablePropertyValues;
 
 	/**
-	 * Create a new PropertyValues object.
+	 * Create a new ServletConfigPropertyValues object.
 	 * @param config ServletConfig we'll use to take PropertyValues from
 	 * @throws ServletException should never be thrown from this method
 	 */
@@ -40,66 +40,52 @@ class ServletConfigPropertyValues implements PropertyValues {
 		this(config, null);
 	}
 
-	/** Creates new PropertyValues object
+	/**
+	 * Creates new ServletConfigPropertyValues object.
 	 * @param config ServletConfig we'll use to take PropertyValues from
 	 * @param requiredProperties array of property names we need, where
 	 * we can't accept default values
 	 * @throws ServletException if any required properties are missing
 	 */
 	public ServletConfigPropertyValues(ServletConfig config, List requiredProperties) throws ServletException {
-		// Ensure we have a deep copy
+		// ensure we have a deep copy
 		List missingProps = (requiredProperties == null) ? new ArrayList(0) : new ArrayList(requiredProperties);
 
-		mutablePropertyValues = new MutablePropertyValues();
+		this.mutablePropertyValues = new MutablePropertyValues();
 		Enumeration enum = config.getInitParameterNames();
 		while (enum.hasMoreElements()) {
 			String property = (String) enum.nextElement();
 			Object value = config.getInitParameter(property);
-			mutablePropertyValues.addPropertyValue(new PropertyValue(property, value));
-			// Check it off
+			this.mutablePropertyValues.addPropertyValue(new PropertyValue(property, value));
 			missingProps.remove(property);
 		}
 
-		// Fail if we are still missing properties
+		// fail if we are still missing properties
 		if (missingProps.size() > 0) {
-			throw new ServletException("Initialization from ServletConfig for servlet '" + config.getServletName() + "' failed: the following required properties were missing -- (" +
+			throw new ServletException("Initialization from ServletConfig for servlet '" + config.getServletName() +
+																 "' failed: the following required properties were missing -- (" +
 			                           StringUtils.collectionToDelimitedString(missingProps, ", ") + ")");
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Found PropertyValues in ServletConfig: " + mutablePropertyValues);
+			logger.debug("Found PropertyValues in ServletConfig: " + this.mutablePropertyValues);
 		}
 	}
 
-
-	/**
-	 * Return an array of the PropertyValue objects
-	 * held in this object.
-	 * @return an array of the PropertyValue objects
-	 * held in this object.
-	 */
 	public PropertyValue[] getPropertyValues() {
-		// We simply let the delegate handle this
-		return mutablePropertyValues.getPropertyValues();
+		return this.mutablePropertyValues.getPropertyValues();
 	}
 
-	/**
-	 * Is there a propertyValue object for this property?
-	 * @param propertyName name of the property we're interested in
-	 * @return whether there is a propertyValue object for this property?
-	 */
 	public boolean contains(String propertyName) {
-		return mutablePropertyValues.contains(propertyName);
+		return this.mutablePropertyValues.contains(propertyName);
 	}
 
 	public PropertyValue getPropertyValue(String propertyName) {
-		// Just pass it to the delegate...
-		return mutablePropertyValues.getPropertyValue(propertyName);
+		return this.mutablePropertyValues.getPropertyValue(propertyName);
 	}
 
 	public PropertyValues changesSince(PropertyValues old) {
-		// Just pass it to the delegate...
-		return mutablePropertyValues.changesSince(old);
+		return this.mutablePropertyValues.changesSince(old);
 	}
 
 }
