@@ -6,7 +6,6 @@ import java.util.Locale;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.servlet.DispatcherServlet;

@@ -5,11 +5,6 @@
 
 package org.springframework.remoting.support;
 
-import java.net.MalformedURLException;
-
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.remoting.RemoteAccessException;
-
 /**
  * Abstract base class for factory beans proxying a remote service.
  * Exposes the proxy when used as bean reference. Used e.g. by the
