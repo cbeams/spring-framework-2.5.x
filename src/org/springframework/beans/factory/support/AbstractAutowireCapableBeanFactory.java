@@ -628,7 +628,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-							"Did you specify the correct bean references as generic constructor arguments?");
+							"Ambiguous constructor argument types - " +
+							"did you specify the correct bean references as generic constructor arguments?");
 				}
 				Map matchingBeans = findMatchingBeans(argTypes[j]);
 				if (matchingBeans == null || matchingBeans.size() != 1) {
@@ -829,7 +830,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (unsatisfied) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, pds[i].getName(),
-							"Set this property value or disable dependency checking for this bean.");
+							"set this property value or disable dependency checking for this bean");
 				}
 			}
 		}

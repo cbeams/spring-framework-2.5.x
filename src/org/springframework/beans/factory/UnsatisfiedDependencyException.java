@@ -12,16 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory;
 
 /**
- * Exception thrown when a bean depends on other beans or simple properties that were not
- * specified in the bean factory definition, although dependency checking was enabled.
+ * Exception thrown when a bean depends on other beans or simple properties
+ * that were not specified in the bean factory definition, although
+ * dependency checking was enabled.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since September 3, 2003
+ * @since 03.09.2003
  */
 public class UnsatisfiedDependencyException extends BeanCreationException {
 
