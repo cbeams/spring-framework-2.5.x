@@ -94,9 +94,10 @@ public abstract class TransitionableState extends AbstractState {
 	 */
 	public ViewDescriptor execute(String eventId, FlowSessionExecutionStack sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws IllegalArgumentException {
-		String activeFlowId = sessionExecution.getQualifiedActiveFlowId();
 		updateCurrentStateIfNeccessary(eventId, sessionExecution);
+		String activeFlowId = null;
 		if (logger.isDebugEnabled()) {
+			activeFlowId = sessionExecution.getQualifiedActiveFlowId();
 			logger.debug("Event '" + eventId + "' within state '" + getId() + "' for flow '" + activeFlowId
 					+ "' signaled");
 		}

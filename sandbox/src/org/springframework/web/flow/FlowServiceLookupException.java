@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 /**
  * @author Keith Donald
  */
-public class FlowServiceLookupException extends RuntimeException {
+public class FlowServiceLookupException extends FlowException {
 
 	private String serviceId;
 
