@@ -33,7 +33,7 @@ public class LocalFlowExecutionContext implements StateContext {
 
 	private FlowExecutionStack flowExecutionStack;
 
-	private Scope requestAttributes = new Scope();
+	private Scope requestAttributes = new Scope(ScopeType.REQUEST);
 
 	private TransactionSynchronizer transactionSynchronizer = new LocalTransactionSynchronizer();
 

@@ -70,7 +70,7 @@ public class FlowSession implements Serializable {
 	/**
 	 * The session data model ("flow scope").
 	 */
-	private Scope attributes = new Scope();
+	private Scope attributes = new Scope(ScopeType.FLOW);
 
 	/**
 	 * Set only on deserialization so this object can be fully reconstructed.

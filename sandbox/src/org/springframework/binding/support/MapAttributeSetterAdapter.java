@@ -15,10 +15,8 @@
  */
 package org.springframework.binding.support;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * Adapter class to set data in a map using the <code>AttributeSetter</code>
@@ -29,8 +27,11 @@ public class MapAttributeSetterAdapter extends AttributeSetterSupport {
 
 	private Map map;
 
+	/**
+	 * Create a new map attribute setter adapter.
+	 */
 	public MapAttributeSetterAdapter() {
-
+		this.map = new HashMap();
 	}
 
 	/**
@@ -42,39 +43,42 @@ public class MapAttributeSetterAdapter extends AttributeSetterSupport {
 	}
 
 	public Map getAttributeMap() {
-		if (map != null) {
-			return map;
-		}
-		else {
-			return Collections.EMPTY_MAP;
-		}
+		return map;
 	}
 
 	public Object setAttribute(String attributeName, Object attributeValue) {
-		if (map == null) {
-			map = new HashMap();
-		}
 		return map.put(attributeName, attributeValue);
 	}
 
 	public boolean containsAttribute(String attributeName) {
-		if (map == null) {
-			return false;
-		}
 		return map.containsKey(attributeName);
 	}
 
 	public Object getAttribute(String attributeName) {
-		if (map == null) {
-			return null;
-		}
 		return map.get(attributeName);
 	}
 
 	public Object removeAttribute(String attributeName) {
-		if (map == null) {
-			return null;
-		}
 		return map.remove(attributeName);
+	}
+
+	public void clear() {
+		map.clear();
+	}
+
+	public boolean containsValue(Object value) {
+		return map.containsValue(value);
+	}
+
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
+	public Object remove(Object key) {
+		return map.remove(key);
+	}
+
+	public int size() {
+		return map.size();
 	}
 }

@@ -30,10 +30,27 @@ import org.springframework.binding.support.AttributeSetterSupport;
 public class Scope extends AttributeSetterSupport implements Serializable {
 
 	/**
+	 * The scope type; e.g FLOW or REQUEST. 
+	 */
+	private ScopeType scopeType;
+
+	/**
+	 * Create a scope attribute container for the specified scope type
+	 * @param scopeType the scope type.
+	 */
+	public Scope(ScopeType scopeType) {
+		this.scopeType = scopeType;
+	}
+
+	/**
 	 * The data holder map.
 	 */
 	private Map attributes = new HashMap();
 
+	protected String getMapName() {
+		return scopeType.getLabel() + " scope";
+	}
+	
 	public boolean containsAttribute(String attributeName) {
 		return this.attributes.containsKey(attributeName);
 	}
@@ -54,7 +71,24 @@ public class Scope extends AttributeSetterSupport implements Serializable {
 		return this.attributes.remove(attributeName);
 	}
 
+	// map operations
 	public int size() {
 		return this.attributes.size();
+	}
+
+	public void clear() {
+		this.attributes.clear();
+	}
+
+	public boolean containsValue(Object value) {
+		return this.attributes.containsValue(value);
+	}
+
+	public boolean isEmpty() {
+		return this.attributes.isEmpty();
+	}
+
+	public Object remove(Object key) {
+		return removeAttribute(String.valueOf(key));
 	}
 }
