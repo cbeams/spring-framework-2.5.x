@@ -57,7 +57,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptors
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.3 2004-01-12 16:56:48 johnsonr Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.4 2004-01-13 14:00:26 johnsonr Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig implements BeanPostProcessor, BeanFactoryAware, Ordered {
 
@@ -76,11 +76,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
+	/**
+	 * Default value is same as non-ordered
+	 */
+	private int order = Integer.MAX_VALUE; 
 
 	/**
-	 * Names of interceptors. We must use bean name rather than object references
+	 * Names of common interceptors. We must use bean name rather than object references
 	 * to handle prototype advisors/interceptors.
+	 * Default is the empty array: no common interceptors.
 	 */
 	private String[] interceptorNames = new String[0];
 
@@ -91,6 +95,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	private BeanFactory owningBeanFactory;
 	
 
+	/**
+	 * Set the ordering which will apply to this class's
+	 * implementation of Ordered, used by bean post processors.
+	 * Default value is Integer.MAX_VALUE, meaning that it's
+	 * non-ordered.
+	 * @param order ordering value
+	 */
 	public final void setOrder(int order) {
 	  this.order = order;
 	}
@@ -100,7 +111,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig implements Be
 	}
 	
 	/**
-	 * Set custom TargetSourceCreators, that will be applied in this order.
+	 * Set custom TargetSourceCreators to be applied in this order.
 	 * If the list is empty, or they all return null, a SingletonTargetSource
 	 * will be created.<br>
 	 * TargetSourceCreators can only be invoked if this post processor is used in

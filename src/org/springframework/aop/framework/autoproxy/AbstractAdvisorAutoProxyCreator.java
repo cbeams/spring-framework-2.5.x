@@ -5,12 +5,14 @@
 
 package org.springframework.aop.framework.autoproxy;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.core.OrderComparator;
 import org.springframework.util.ControlFlow;
 import org.springframework.util.ControlFlowFactory;
 
@@ -18,19 +20,22 @@ import org.springframework.util.ControlFlowFactory;
  * Abstract BeanPostProcessor implementation that creates AOP proxies. 
  * This class is completely generic; it contains
  * no special code to handle any particular aspects, such as pooling aspects.
- * <br>
+ * <p>
  * Subclasses must implement the abstract findCandidateAdvisors() method to
  * return a list of Advisors applying to any object. Subclasses can also
  * override the inherited shouldSkip() method to exclude certain objects
  * from autoproxying, but they must be careful to invoke the shouldSkip()
  * method of this class, which tries to avoid circular reference problems
  * and infinite loops.
+ * <p>
+ * Advisors or advices requiring ordering should implement the Ordered interface.
+ * This class sorts advisors by Ordered order value. Advisors that don't implement
+ * the Ordered interface will be considered to be unordered, and will appear
+ * at the end of the advisor chain in undefined order.
  * @author Rod Johnson
- * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.3 2003-12-30 01:07:11 jhoeller Exp $
+ * @version $Id: AbstractAdvisorAutoProxyCreator.java,v 1.4 2004-01-13 14:00:26 johnsonr Exp $
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
-
-	public final static int UNORDERED = 100;
 	
 	/**
 	 * Find all candidate advices to use in auto proxying.
@@ -76,13 +81,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * Sort based on ordering.
 	 */
 	protected List sortAdvisors(List l) {
-		// TODO implement this
-		//		Ordering:
-		// PERFMON?
-		// 1. tx interceptor - or weightings for pointcuts?
-		// 2. tx 
-		// 3. custom
-
+		Collections.sort(l, new OrderComparator());
 		return l;
 	}
 

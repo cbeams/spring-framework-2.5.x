@@ -26,7 +26,7 @@ import org.springframework.transaction.CountingTxManager;
 /**
  * Tests for auto proxy creation by advisor recognition.
  * @author Rod Johnson
- * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.8 2004-01-12 16:56:40 johnsonr Exp $
+ * @version $Id: AdvisorAutoProxyCreatorTests.java,v 1.9 2004-01-13 14:00:26 johnsonr Exp $
  */
 public class AdvisorAutoProxyCreatorTests extends TestCase {
 	
@@ -200,11 +200,15 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		ITestBean test = (ITestBean) bf.getBean("test");
 		
 		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
-		
+		OrderedTxCheckAdvisor txc = (OrderedTxCheckAdvisor) bf.getBean("orderedBeforeTransaction");
+		assertEquals(0, txc.getCountingBeforeAdvice().getCalls());
+				
 		assertEquals(0, txMan.commits);
 		assertEquals("Initial value was correct", 4, test.getAge());
 		int newAge = 5;
 		test.setAge(newAge);
+		assertEquals(1, txc.getCountingBeforeAdvice().getCalls());
+			
 		assertEquals("New value set correctly", newAge, test.getAge());
 		assertEquals("Transaction counts match", 1, txMan.commits);
 	}
@@ -219,9 +223,13 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		Rollback rb = (Rollback) bf.getBean("rollback");
 	
 		CountingTxManager txMan = (CountingTxManager) bf.getBean(TXMANAGER_BEAN_NAME);
-	
+		OrderedTxCheckAdvisor txc = (OrderedTxCheckAdvisor) bf.getBean("orderedBeforeTransaction");
+		assertEquals(0, txc.getCountingBeforeAdvice().getCalls());
+		
 		assertEquals(0, txMan.commits);
 		rb.echoException(null);
+		// Fires only on setters
+		assertEquals(0, txc.getCountingBeforeAdvice().getCalls());
 		assertEquals("Transaction counts match", 1, txMan.commits);
 		
 		assertEquals(0, txMan.rollbacks);

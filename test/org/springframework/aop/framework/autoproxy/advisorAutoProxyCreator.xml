@@ -14,6 +14,31 @@
 	<bean id="aapc"
 		class="org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreator">
 	</bean>
+	
+	<!--
+		Depending on the order value, these beans should appear
+		before or after the transaction advisor. Thus we configure
+		them to check for or to refuse to accept a transaction.
+		The transaction advisor's order value is 10.
+	-->
+	<bean id="orderedBeforeTransaction"
+		class="org.springframework.aop.framework.autoproxy.OrderedTxCheckAdvisor">
+		<property name="order"><value>9</value></property>
+		<property name="requireTransactionContext"><value>false</value></property>
+	</bean>
+	
+	<bean id="orderedAfterTransaction"
+		class="org.springframework.aop.framework.autoproxy.OrderedTxCheckAdvisor">
+		<property name="order"><value>11</value></property>
+		<property name="requireTransactionContext"><value>true</value></property>
+	</bean>
+	
+	<bean id="orderedAfterTransaction2"
+		class="org.springframework.aop.framework.autoproxy.OrderedTxCheckAdvisor">
+		<!-- Don't set order value: should remain Integer.MAX_VALUE,
+		so it's non-ordered -->
+		<property name="requireTransactionContext"><value>true</value></property>
+	</bean>
 
 
 	<!--
