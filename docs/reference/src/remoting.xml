@@ -49,6 +49,11 @@
 						<emphasis>JAX RPC (TODO)</emphasis>.
 					</para>
 				</listitem>
+				<listitem>
+					<para>
+						<emphasis>JMS (TODO)</emphasis>.
+					</para>
+				</listitem>
 			</itemizedlist>
 		</para>
 		<para>
@@ -402,6 +407,13 @@ public class SimpleObject {
 			However, non-Java support is still limited. Known problems include the serialization
 			of Hibernate objects in combination with lazily initializing collections. If you
 			have such a data model, consider using RMI or HTTP invokers instead of Hessian.
+		</para>
+		<para>
+			JMS can be useful for providing clusters of services and allowing the JMS broker
+      to take care of load balancing, discovery and auto-failover.
+      By default Java serialization is used when using JMS remoting but
+      the JMS provider could use a different mechanism for the wire formatting,
+      such as XStream to allow servers to be implemented in other technologies.
 		</para>
 		<para>
 			Last but not least, EJB has an advantage over RMI in that it supports standard
