@@ -6,8 +6,14 @@
 	-->
 <beans>
 	
-	<bean id="simple"
+	<bean id="groovyScriptFactory"
 		class="org.springframework.beans.factory.groovy.GroovyFactory"
+	>
+		<property name="pollIntervalSeconds"><value>10</value></property>
+	</bean>
+	
+	<bean id="simple"
+		factory-bean="groovyScriptFactory"
 		factory-method="staticObject"
 	>
 		<constructor-arg index="0"><value>org/springframework/beans/factory/groovy/SimpleHello.groovy</value></constructor-arg>
@@ -19,13 +25,10 @@
 	-->
 	<bean id="property"
 		singleton="false"
-		class="org.springframework.beans.factory.groovy.GroovyFactory"
+		factory-bean="groovyScriptFactory"
 		factory-method="dynamicObject"
 	>
 		<constructor-arg index="0"><value>org/springframework/beans/factory/groovy/PropertyHello.groovy</value></constructor-arg>
-		
-		<!-- Reload seconds -->
-		<constructor-arg index="1"><value>20</value></constructor-arg>
 		
 		<!-- Property on created Groovy object -->
 		<property name="message"><value>hello world property</value></property>
@@ -38,7 +41,7 @@
 	</bean>
 	
 	<bean id="bad"
-		class="org.springframework.beans.factory.groovy.GroovyFactory"
+		factory-bean="groovyScriptFactory"
 		factory-method="staticObject"
 		singleton="false"
 	>

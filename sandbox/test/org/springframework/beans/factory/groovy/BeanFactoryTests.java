@@ -16,17 +16,16 @@
 
 package org.springframework.beans.factory.groovy;
 
+import junit.framework.TestCase;
+
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.script.CompilationException;
 import org.springframework.beans.factory.script.DynamicScript;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import junit.framework.TestCase;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BeanFactoryTests.java,v 1.3 2004-08-02 08:57:58 johnsonr Exp $
+ * @version $Id: BeanFactoryTests.java,v 1.4 2004-08-02 17:03:24 johnsonr Exp $
  */
 public class BeanFactoryTests extends TestCase {
 	
@@ -73,11 +72,11 @@ public class BeanFactoryTests extends TestCase {
 		
 		// Give reloading a chance
 		// We need to change this file while the test is running :-)
-		//Thread.sleep(60 * 1000);
+		Thread.sleep(60 * 1000);
 		
 		// This assertion only works if the file is changed
 		// and reloaded
-		//assertTrue("Reloaded in background thread", 2 < script.getLoads());
+		assertTrue("Reloaded in background thread", 2 < script.getLoads());
 		
 	}
 

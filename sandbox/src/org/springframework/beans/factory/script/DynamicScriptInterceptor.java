@@ -81,4 +81,12 @@ public class DynamicScriptInterceptor extends DynamicObjectInterceptor implement
 	public long getLastReloadTime() {
 		return script.getLastReloadTime();
 	}
+	
+	public Class[] getInterfaces() {
+		return script.getInterfaces(); 
+	}
+	
+	public void addInterface(Class intf) {
+		throw new UnsupportedOperationException("Not supported on constructed scripts");
+	}
 }

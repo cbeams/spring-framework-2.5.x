@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Helper that regularly polls a resource
  * @author Rod Johnson
- * @version $Id: AbstractPoller.java,v 1.1 2004-08-01 15:42:01 johnsonr Exp $
+ * @version $Id: AbstractPoller.java,v 1.2 2004-08-02 17:03:22 johnsonr Exp $
  */
 public abstract class AbstractPoller extends TimerTask {
 	
@@ -39,8 +39,9 @@ public abstract class AbstractPoller extends TimerTask {
 
 	private DynamicObject dynamicObject;
 
-	public AbstractPoller(DynamicObject script) {
-		this.secs = script.getPollIntervalSeconds();
+	public AbstractPoller(DynamicObject dynamicObject) {
+		this.dynamicObject = dynamicObject;
+		this.secs = dynamicObject.getPollIntervalSeconds();
 		timer = new Timer(true);
 		timer.schedule(this, secs * 1000, secs * 1000);
 	}

@@ -16,14 +16,9 @@
 
 package org.springframework.beans.factory.groovy;
 
-import groovy.lang.GroovyObject;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.dynamic.DynamicObjectInterceptor;
-import org.springframework.beans.factory.script.DynamicScriptInterceptor;
-import org.springframework.core.ControlFlowFactory;
+import org.springframework.beans.factory.script.AbstractScriptFactory;
+import org.springframework.beans.factory.script.Script;
 
 /**
  * Class containing static factory methods for wrapping
@@ -41,53 +36,13 @@ import org.springframework.core.ControlFlowFactory;
  * @version $Id: AbstractVetoableChangeListener.java,v 1.1.1.1 2003/08/14
  *          16:20:14 trisberg Exp $
  */
-public class GroovyFactory {
-	
-	protected final static Log log = LogFactory.getLog(GroovyFactory.class);
-	
-	/**
-	 * Return a reloadable object but don't poll
-	 * @param className
-	 * @return
-	 * @throws GroovyScriptException
-	 */
-	public static GroovyObject dynamicObject(String className) throws BeansException {
-		return dynamicObject(className, 0);
-	}
+public class GroovyFactory extends AbstractScriptFactory {
 
 	/**
-	 * Create a dynamic Groovy Bean.
-	 * This method can only be called in a BeanFactory.
-	 * @param className
-	 * @param checkInterval
-	 * @return
-	 * @throws GroovyScriptException
+	 * @see org.springframework.beans.factory.script.AbstractScriptFactory#createScript(java.lang.String, org.springframework.core.io.ResourceLoader)
 	 */
-	public static GroovyObject dynamicObject(String className, int pollIntervalSeconds) throws BeansException {
-		GroovyScript script = new GroovyScript(className);
-		GroovyObject groovyObject = (GroovyObject) script.createObject();
-		
-		// TODO args?
-		if (ControlFlowFactory.createControlFlow().under(DynamicObjectInterceptor.class)) {
-			// Tricky...
-			// If the DynamicScriptInterceptor requests this bean,
-			// do NOT wrap it again.
-			log.info("Groovy bean being reloaded by proxy: don't wrap in proxy");
-			return groovyObject;
-		}
-		
-		// Wrap the bean in an AOP proxy to allow use of the
-		// HotSwappableTargetSource
-		// Requires CGLIB
-		return (GroovyObject) new DynamicScriptInterceptor(script, groovyObject, pollIntervalSeconds).createProxy();
-	}
-		
-	
-	/**
-	 * Create a non-dynamic Groovy bean.
-	 */
-	public static GroovyObject staticObject(String className) throws BeansException {
-		return (GroovyObject) new GroovyScript(className).createObject();
+	protected Script createScript(String location) throws BeansException {
+		return new GroovyScript(location, this);
 	}
 
 }
