@@ -1159,6 +1159,32 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        to build the qualified state id (e.g person.get). Note: the
 	 *        qualified state ID will also be used as the actionId, to lookup in
 	 *        the locator's registry.
+	 * @param transition The sole supported transition for this state that maps
+	 *        a path from this state to another state (triggered by an event).
+	 * @return The action state
+	 */
+	protected ActionState addGetState(String stateIdPrefix, Transition transition) {
+		return addActionState(get(stateIdPrefix), new Transition[] { transition });
+	}
+
+	/**
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>get </i> stereotype is a simple qualifier that indicates
+	 * this action state, when entered, executes an action that invokes object
+	 * retrieval logic.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>get</code> action constant will be appended to this prefix
+	 *        to build the qualified state id (e.g person.get). Note: the
+	 *        qualified state ID will also be used as the actionId, to lookup in
+	 *        the locator's registry.
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
 	 *        event).
@@ -1166,6 +1192,23 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected ActionState addGetState(String stateIdPrefix, Transition[] transitions) {
 		return addActionState(get(stateIdPrefix), transitions);
+	}
+
+	/**
+	 * Adds a <i>get </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>get </i> stereotype is a simple qualifier that indicates
+	 * this action state, when entered, executes an action that invokes object
+	 * retrieval logic.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>get</code> action constant will be appended to this prefix
+	 *        to build the qualified state id (e.g person.get).
+	 * @param action The action that will execute when this state is entered
+	 * @param transition The sole supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 */
+	protected ActionState addGetState(String stateIdPrefix, Action action, Transition transition) {
+		return addActionState(get(stateIdPrefix), action, transition);
 	}
 
 	/**
@@ -1187,10 +1230,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Adds a <i>set </i> <code>ActionState</code> to the flow built by this
-	 * builder. The <i>set </i> stereotype is a simple qualifier that indicates
-	 * this action state, when entered, executes an action that puts input data
-	 * (typically in the request) into the flow model.
+	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>setup </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * prepares a view (often a form) for display.
 	 * <p>
 	 * The <code>Action</code> implementation to use will be looked up by ID
 	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
@@ -1201,10 +1244,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * that id, or a <code>NoSuchActionException</code> will be thrown.
 	 * <p>
 	 * As the various flavors of this method add an action state intended to
-	 * execute attribute setting logic, they also establishes several naming
-	 * conventions and relavent defaults. For example, the usage:
+	 * execute retrieval logic, they also establishes several naming conventions
+	 * and relavent defaults. For example, the usage:
 	 * <p>
-	 * <code>ActionState setState = addSetState("personId", transition);</code>
+	 * <code>ActionState setupState = addSetupState("person");</code>
 	 * <p>
 	 * ... builds an action state with the following properties: <table
 	 * border="1">
@@ -1214,44 +1257,158 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * <th>Notes</th>
 	 * <tr>
 	 * <td>id</td>
-	 * <td>personId.set</td>
-	 * <td>The set action qualifier is appended in a hierarchical fashion to
-	 * the 'personId' prefix</td>
+	 * <td>person.setup</td>
+	 * <td>The setup action qualifier is appended in a hierarchical fashion to
+	 * the 'person' prefix</td>
 	 * <tr>
 	 * <td>action</td>
 	 * <td colspan="2">The <code>Action</code> implementation in the registry
-	 * exported with the id '<code>personId.set</code>'</td>
+	 * exported with the id '<code>person.setup</code>'</td>
 	 * </table>
+	 * <p>
+	 * In addition, the setup action state will be configured with the following
+	 * default state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>person.view</code>)
+	 * </ul>
+	 * <p>
+	 * This assumes, after successfully executing view setup logic, you wish to
+	 * display the view.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetitive configuration code for common situations.
+	 * 
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
-	 *        <code>set</code> action constant will be appended to this prefix
-	 *        to build the qualified state id (e.g personId.set). Note: the
-	 *        qualified state ID will also be used as the actionId, to lookup in
-	 *        the locator's registry.
+	 *        <code>setup</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.setup). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @return The action state
+	 */
+	protected ActionState addSetupState(String stateIdPrefix) {
+		return addSetupState(stateIdPrefix, new Transition[] { onSuccessView(stateIdPrefix) });
+	}
+
+	/**
+	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>setup </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * prepares a view (often a form) for display.
+	 * <p>
+	 * By default, the setup action state will be configured with the following
+	 * state transitions:
+	 * <ul>
+	 * <li>on event <code>success</code>, transition to the
+	 * <code>${stateIdPrefix}.view</code> state (e.g <code>person.view</code>)
+	 * </ul>
+	 * <p>
+	 * This assumes, after successfully executing view setup logic, you wish to
+	 * display the view.
+	 * <p>
+	 * If these defaults do not fit your needs, use one of the more generic
+	 * action state builder methods. This method is provided as a convenience to
+	 * help reduce repetitive configuration code for common situations.
+	 * 
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
+	 *        <code>setup</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.setup). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @param action The action that will execute the retrieval logic.
+	 * @return The action state
+	 */
+	protected ActionState addSetupState(String stateIdPrefix, Action action) {
+		return addSetupState(stateIdPrefix, action, new Transition[] { onSuccessView(stateIdPrefix) });
+	}
+
+	/**
+	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>setup </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * prepares a view (often a form) for display.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>setup</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.setup). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
+	 * @param transition The supported transition for this state that maps a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 */
+	protected ActionState addSetupState(String stateIdPrefix, Transition transition) {
+		return addActionState(setup(stateIdPrefix), new Transition[] { transition });
+	}
+
+	/**
+	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>setup </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * prepares a view (often a form) for display.
+	 * <p>
+	 * The <code>Action</code> implementation to use will be looked up by ID
+	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
+	 * builder will fail-fast if the lookup fails. By default, the Action
+	 * <code>id</code> to use for lookup will be the same as the specified
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that id, or a <code>NoSuchActionException</code> will be thrown.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>setup</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.setup). Note:
+	 *        the qualified state ID will also be used as the actionId, to
+	 *        lookup in the locator's registry.
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSetState(String stateIdPrefix, Transition[] transitions) {
-		return addActionState(set(stateIdPrefix), transitions);
+	protected ActionState addSetupState(String stateIdPrefix, Transition[] transitions) {
+		return addActionState(setup(stateIdPrefix), transitions);
 	}
 
 	/**
-	 * Adds a <i>set </i> <code>ActionState</code> to the flow built by this
-	 * builder. The <i>set </i> stereotype is a simple qualifier that indicates
-	 * this action state, when entered, executes an action that sets attributes
-	 * in the flow model.
+	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>setup </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object retrieval logic.
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
-	 *        <code>set</code> action constant will be appended to this prefix
-	 *        to build the qualified state id (e.g personId.set).
+	 *        <code>setup</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.setup).
+	 * @param action The action that will execute when this state is entered
+	 * @param transition The supported transition for this state that maps a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 */
+	protected ActionState addSetupState(String stateIdPrefix, Action action, Transition transition) {
+		return addActionState(setup(stateIdPrefix), action, new Transition[] { transition });
+	}
+
+	/**
+	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>setup </i> stereotype is a simple qualifier that
+	 * indicates this action state, when entered, executes an action that
+	 * invokes object retrieval logic.
+	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
+	 *        <code>setup</code> action constant will be appended to this
+	 *        prefix to build the qualified state id (e.g person.setup).
 	 * @param action The action that will execute when this state is entered
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSetState(String stateIdPrefix, Action action, Transition[] transitions) {
-		return addActionState(set(stateIdPrefix), action, transitions);
+	protected ActionState addSetupState(String stateIdPrefix, Action action, Transition[] transitions) {
+		return addActionState(setup(stateIdPrefix), action, transitions);
 	}
 
 	/**
@@ -1533,10 +1690,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
-	 * builder. The <i>setup </i> stereotype is a simple qualifier that
-	 * indicates this action state, when entered, executes an action that
-	 * prepares a view (often a form) for display.
+	 * Adds a <i>set </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>set </i> stereotype is a simple qualifier that indicates
+	 * this action state, when entered, executes an action that puts input data
+	 * (typically in the request) into the flow model.
 	 * <p>
 	 * The <code>Action</code> implementation to use will be looked up by ID
 	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
@@ -1547,10 +1704,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * that id, or a <code>NoSuchActionException</code> will be thrown.
 	 * <p>
 	 * As the various flavors of this method add an action state intended to
-	 * execute retrieval logic, they also establishes several naming conventions
-	 * and relavent defaults. For example, the usage:
+	 * execute attribute setting logic, they also establishes several naming
+	 * conventions and relavent defaults. For example, the usage:
 	 * <p>
-	 * <code>ActionState setupState = addSetupState("person");</code>
+	 * <code>ActionState setState = addSetState("personId", transition);</code>
 	 * <p>
 	 * ... builds an action state with the following properties: <table
 	 * border="1">
@@ -1560,115 +1717,44 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * <th>Notes</th>
 	 * <tr>
 	 * <td>id</td>
-	 * <td>person.setup</td>
-	 * <td>The setup action qualifier is appended in a hierarchical fashion to
-	 * the 'person' prefix</td>
+	 * <td>personId.set</td>
+	 * <td>The set action qualifier is appended in a hierarchical fashion to
+	 * the 'personId' prefix</td>
 	 * <tr>
 	 * <td>action</td>
 	 * <td colspan="2">The <code>Action</code> implementation in the registry
-	 * exported with the id '<code>person.setup</code>'</td>
+	 * exported with the id '<code>personId.set</code>'</td>
 	 * </table>
-	 * <p>
-	 * In addition, the setup action state will be configured with the following
-	 * default state transitions:
-	 * <ul>
-	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g. <code>person.view</code>)
-	 * </ul>
-	 * <p>
-	 * This assumes, after successfully executing view setup logic, you wish to
-	 * display the view.
-	 * <p>
-	 * If these defaults do not fit your needs, use one of the more generic
-	 * action state builder methods. This method is provided as a convenience to
-	 * help reduce repetitive configuration code for common situations.
-	 * 
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
-	 *        <code>setup</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g person.setup). Note:
-	 *        the qualified state ID will also be used as the actionId, to
-	 *        lookup in the locator's registry.
-	 * @return The action state
-	 */
-	protected ActionState addSetupState(String stateIdPrefix) {
-		return addSetupState(stateIdPrefix, new Transition[] { onSuccessView(stateIdPrefix) });
-	}
-
-	/**
-	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
-	 * builder. The <i>setup </i> stereotype is a simple qualifier that
-	 * indicates this action state, when entered, executes an action that
-	 * prepares a view (often a form) for display.
-	 * <p>
-	 * By default, the setup action state will be configured with the following
-	 * state transitions:
-	 * <ul>
-	 * <li>on event <code>success</code>, transition to the
-	 * <code>${stateIdPrefix}.view</code> state (e.g <code>person.view</code>)
-	 * </ul>
-	 * <p>
-	 * This assumes, after successfully executing view setup logic, you wish to
-	 * display the view.
-	 * <p>
-	 * If these defaults do not fit your needs, use one of the more generic
-	 * action state builder methods. This method is provided as a convenience to
-	 * help reduce repetitive configuration code for common situations.
-	 * 
-	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
-	 *        <code>setup</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g person.setup). Note:
-	 *        the qualified state ID will also be used as the actionId, to
-	 *        lookup in the locator's registry.
-	 * @param action The action that will execute the retrieval logic.
-	 * @return The action state
-	 */
-	protected ActionState addSetupState(String stateIdPrefix, Action action) {
-		return addSetupState(stateIdPrefix, action, new Transition[] { onSuccessView(stateIdPrefix) });
-	}
-
-	/**
-	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
-	 * builder. The <i>setup </i> stereotype is a simple qualifier that
-	 * indicates this action state, when entered, executes an action that
-	 * prepares a view (often a form) for display.
-	 * <p>
-	 * The <code>Action</code> implementation to use will be looked up by ID
-	 * by messaging the configured <code>FlowServiceLocator</code>. This flow
-	 * builder will fail-fast if the lookup fails. By default, the Action
-	 * <code>id</code> to use for lookup will be the same as the specified
-	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
-	 * implementation be exported in the backing service locator registry under
-	 * that id, or a <code>NoSuchActionException</code> will be thrown.
-	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
-	 *        <code>setup</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g person.setup). Note:
-	 *        the qualified state ID will also be used as the actionId, to
-	 *        lookup in the locator's registry.
+	 *        <code>set</code> action constant will be appended to this prefix
+	 *        to build the qualified state id (e.g personId.set). Note: the
+	 *        qualified state ID will also be used as the actionId, to lookup in
+	 *        the locator's registry.
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSetupState(String stateIdPrefix, Transition[] transitions) {
-		return addActionState(setup(stateIdPrefix), transitions);
+	protected ActionState addSetState(String stateIdPrefix, Transition[] transitions) {
+		return addActionState(set(stateIdPrefix), transitions);
 	}
 
 	/**
-	 * Adds a <i>setup </i> <code>ActionState</code> to the flow built by this
-	 * builder. The <i>setup </i> stereotype is a simple qualifier that
-	 * indicates this action state, when entered, executes an action that
-	 * invokes object retrieval logic.
+	 * Adds a <i>set </i> <code>ActionState</code> to the flow built by this
+	 * builder. The <i>set </i> stereotype is a simple qualifier that indicates
+	 * this action state, when entered, executes an action that sets attributes
+	 * in the flow model.
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix. Note: the
-	 *        <code>setup</code> action constant will be appended to this
-	 *        prefix to build the qualified state id (e.g person.setup).
+	 *        <code>set</code> action constant will be appended to this prefix
+	 *        to build the qualified state id (e.g personId.set).
 	 * @param action The action that will execute when this state is entered
 	 * @param transitions The supported transitions for this state, where each
 	 *        maps a path from this state to another state (triggered by an
 	 *        event).
 	 * @return The action state
 	 */
-	protected ActionState addSetupState(String stateIdPrefix, Action action, Transition[] transitions) {
-		return addActionState(setup(stateIdPrefix), action, transitions);
+	protected ActionState addSetState(String stateIdPrefix, Action action, Transition[] transitions) {
+		return addActionState(set(stateIdPrefix), action, transitions);
 	}
 
 	/**
@@ -2399,6 +2485,67 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
+	 * <li>on an occurence of the '<code>error</code>' event, transition to
+	 * the state with the id <code>${stateId}</code>
+	 * </ul>
+	 * @param stateId The state id
+	 * @return The transition The transition
+	 */
+	protected Transition onError(String stateId) {
+		return onEvent(getErrorEventId(), stateId);
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>on an occurence of the <code>${actionName}.error</code> event,
+	 * transition to the state with the id <code>${stateId}</code>
+	 * </ul>
+	 * @param actionName the action name qualifier
+	 * @param stateId The state id
+	 * @return The transition The transition
+	 */
+	protected Transition onError(String actionName, String stateId) {
+		return onEvent(actionName, getErrorEventId(), stateId);
+	}
+
+	/**
+	 * Returns the well-known 'error' event id. Subclasses may override.
+	 * @return The error event id
+	 */
+	protected String getErrorEventId() {
+		return FlowConstants.ERROR;
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>on an occurence of the '<code>error</code>' event, transition to
+	 * the view state with the id <code>${stateIdPrefix}.setup</code>.
+	 * </ul>
+	 * @param stateIdPrefix The state id qualifier (e.g person)
+	 * @return The transition
+	 */
+	protected Transition onErrorSetup(String stateIdPrefix) {
+		return onError(view(stateIdPrefix));
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>on an occurence of the '<code>error</code>' event, transition to
+	 * the view state with the id <code>${stateIdPrefix}.view</code>.
+	 * </ul>
+	 * @param stateIdPrefix The state id qualifier (e.g person)
+	 * @return The transition
+	 */
+	protected Transition onErrorView(String stateIdPrefix) {
+		return onError(view(stateIdPrefix));
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
 	 * <li>on an occurence of the '<code>submit</code>' event, transition
 	 * to the state with the id <code>${stateId}</code>
 	 * </ul>
@@ -2429,6 +2576,19 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Transition onSubmitBindAndValidate(String stateIdPrefix) {
 		return onSubmit(bindAndValidate(stateIdPrefix));
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>on an occurence of the '<code>submit</code>' event, transition
+	 * to the end state with the id <code>finish</code>
+	 * </ul>
+	 * @param stateId The state id
+	 * @return The transition (submit->finish)
+	 */
+	protected Transition onSubmitFinish() {
+		return onEvent(getSubmitEventId(), getDefaultFinishEndStateId());
 	}
 
 	/**
@@ -2671,6 +2831,48 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
+	 * <li>on an occurence of the <code>edit</code> event, transition to the
+	 * state with the id <code>${stateId}</code>
+	 * </ul>
+	 * @param stateId The state id
+	 * @return The transition (edit->${stateId})
+	 */
+	protected Transition onEdit(String stateId) {
+		return onEvent(getEditEventId(), stateId);
+	}
+
+	/**
+	 * Returns the 'edit' event id.
+	 * @return The eventId.
+	 */
+	protected String getEditEventId() {
+		return FlowConstants.EDIT;
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>on an occurence of the <code>add</code> event, transition to the
+	 * state with the id <code>${stateId}</code>
+	 * </ul>
+	 * @param stateId The state id
+	 * @return The transition (add->${stateId})
+	 */
+	protected Transition onAdd(String stateId) {
+		return onEvent(getAddEventId(), stateId);
+	}
+
+	/**
+	 * Returns the add' event id.
+	 * @return The eventId.
+	 */
+	protected String getAddEventId() {
+		return FlowConstants.ADD;
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
 	 * <li>on an occurence of the <code>select</code> event, transition to
 	 * the state with the id <code>${stateId}</code>
 	 * </ul>
@@ -2705,62 +2907,14 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
-	 * <li>on an occurence of the '<code>error</code>' event, transition to
-	 * the state with the id <code>${stateId}</code>
-	 * </ul>
-	 * @param stateId The state id
-	 * @return The transition The transition
-	 */
-	protected Transition onError(String stateId) {
-		return onEvent(getErrorEventId(), stateId);
-	}
-
-	/**
-	 * Creates a transition stating:
-	 * <ul>
-	 * <li>on an occurence of the <code>${actionName}.error</code> event,
-	 * transition to the state with the id <code>${stateId}</code>
-	 * </ul>
-	 * @param actionName the action name qualifier
-	 * @param stateId The state id
-	 * @return The transition The transition
-	 */
-	protected Transition onError(String actionName, String stateId) {
-		return onEvent(actionName, getErrorEventId(), stateId);
-	}
-
-	/**
-	 * Returns the well-known 'error' event id. Subclasses may override.
-	 * @return The error event id
-	 */
-	protected String getErrorEventId() {
-		return FlowConstants.ERROR;
-	}
-
-	/**
-	 * Creates a transition stating:
-	 * <ul>
-	 * <li>on an occurence of the '<code>error</code>' event, transition to
-	 * the view state with the id <code>${stateIdPrefix}.setup</code>.
+	 * <li>on an occurence of the '<code>select</code>' event, transition
+	 * to the action state with the id <code>${stateIdPrefix}.delete</code>.
 	 * </ul>
 	 * @param stateIdPrefix The state id qualifier (e.g person)
-	 * @return The transition
+	 * @return The transition (e.g select->person.delete)
 	 */
-	protected Transition onErrorSetup(String stateIdPrefix) {
-		return onError(view(stateIdPrefix));
-	}
-
-	/**
-	 * Creates a transition stating:
-	 * <ul>
-	 * <li>on an occurence of the '<code>error</code>' event, transition to
-	 * the view state with the id <code>${stateIdPrefix}.view</code>.
-	 * </ul>
-	 * @param stateIdPrefix The state id qualifier (e.g person)
-	 * @return The transition
-	 */
-	protected Transition onErrorView(String stateIdPrefix) {
-		return onError(view(stateIdPrefix));
+	protected Transition onSelectDelete(String stateIdPrefix) {
+		return onSelect(delete(stateIdPrefix));
 	}
 
 	/**
@@ -2776,8 +2930,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the get action state stereotype to the provided stateId, building
 	 * a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. person)
+	 * @return the qualified state id (e.g. person.get)
 	 */
 	protected String get(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.GET);
@@ -2786,8 +2940,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the load action state stereotype to the provided stateId, building
 	 * a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. person)
+	 * @return the qualified state id (e.g. person.load)
 	 */
 	protected String load(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.LOAD);
@@ -2796,8 +2950,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the setup action state stereotype to the provided stateId,
 	 * building a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. personForm)
+	 * @return the qualified state id (e.g. personForm.setup)
 	 */
 	protected String setup(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.SETUP);
@@ -2806,8 +2960,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the view state stereotype to the provided stateId, building a
 	 * qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. personForm)
+	 * @return the qualified state id (e.g personForm.view)
 	 */
 	protected String view(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.VIEW);
@@ -2816,8 +2970,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the set action state stereotype to the provided stateId, building
 	 * a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. personId);
+	 * @return the qualified state id (e.g. personId.set)
 	 */
 	protected String set(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.SET);
@@ -2826,8 +2980,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the add action state stereotype to the provided stateId, building
 	 * a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. person)
+	 * @return the qualified state id (e.g. person.add)
 	 */
 	protected String add(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.ADD);
@@ -2836,8 +2990,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the save action state stereotype to the provided stateId, building
 	 * a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. person)
+	 * @return the qualified state id (e.g. person.save)
 	 */
 	protected String save(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.SAVE);
@@ -2846,8 +3000,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the bindAndValidate action state stereotype to the provided
 	 * stateId, building a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. person)
+	 * @return the qualified state id (e.g. person.bindAndValidate)
 	 */
 	protected String bindAndValidate(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.BIND_AND_VALIDATE);
@@ -2856,8 +3010,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the bind action state stereotype to the provided stateId, building
 	 * a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g person)
+	 * @return the qualified state id (e.g. person.bind)
 	 */
 	protected String bind(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.BIND);
@@ -2866,8 +3020,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the validate action state stereotype to the provided stateId,
 	 * building a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. person)
+	 * @return the qualified state id (e.g. person.validate)
 	 */
 	protected String validate(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.VALIDATE);
@@ -2876,8 +3030,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the delete action state stereotype to the provided stateId,
 	 * building a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. person)
+	 * @return the qualified state id (e.g. person.delete)
 	 */
 	protected String delete(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.DELETE);
@@ -2886,8 +3040,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the edit action state stereotype to the provided stateId, building
 	 * a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g person)
+	 * @return the qualified state id (e.g. person.edit)
 	 */
 	protected String edit(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.EDIT);
@@ -2896,8 +3050,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Append the search action state stereotype to the provided stateId,
 	 * building a qualified stateId.
-	 * @param stateIdPrefix the state id prefix
-	 * @return the qualified state id
+	 * @param stateIdPrefix the state id prefix (e.g. person)
+	 * @return the qualified state id (e.g. person.search)
 	 */
 	protected String search(String stateIdPrefix) {
 		return buildStateId(stateIdPrefix, FlowConstants.SEARCH);
