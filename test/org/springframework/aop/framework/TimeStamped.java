@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2002-2004 the original author or authors.
  * 
@@ -18,15 +17,14 @@
 package org.springframework.aop.framework;
 
 /**
- * This interface can be implemented by cacheable objects
- * or cache entries, to enable the freshness of objects
- * to be checked.
+ * This interface can be implemented by cacheable objects or cache entries,
+ * to enable the freshness of objects to be checked.
  * @author Rod Johnson
  */
 public interface TimeStamped {
 	
 	/**
-	 * Return the timestamp for this object
+	 * Return the timestamp for this object.
 	 * @return long the timestamp for this object,
 	 * as returned by System.currentTimeMillis()
 	 */
