@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.aop.framework;
+package org.springframework.aop.interceptor;
 
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -23,7 +23,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Interceptor that exposes the current MethodInvocation.
  * @author Rod Johnson
- * @version $Id: ExposeInvocationInterceptor.java,v 1.3 2004-03-19 21:35:47 johnsonr Exp $
+ * @version $Id: ExposeInvocationInterceptor.java,v 1.1 2004-07-20 16:32:09 johnsonr Exp $
  */
 public class ExposeInvocationInterceptor implements MethodInterceptor {
 	
