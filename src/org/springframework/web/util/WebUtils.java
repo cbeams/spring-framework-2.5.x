@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.util;
 
@@ -74,7 +74,7 @@ public abstract class WebUtils {
 	 * Set a system property to the web application root directory.
 	 * The key of the system property can be defined with the "webAppRootKey"
 	 * context-param in web.xml. Default is "webapp.root".
-	 * <p>Can be used for toolkits that support substition with System.getProperty
+	 * <p>Can be used for tools that support substition with <code>System.getProperty</code>
 	 * values, like Log4J's "${key}" syntax within log file locations.
 	 * @param servletContext the servlet context of the web application
 	 * @throws IllegalStateException if the system property is already set,
@@ -101,6 +101,18 @@ public abstract class WebUtils {
 		}
 		System.setProperty(key, root);
 		servletContext.log("Set web app root system property: '" + key + "' = [" + root + "]");
+	}
+
+	/**
+	 * Remove the system property that points to the web app root directory.
+	 * To be called on shutdown of the web application.
+	 * @param servletContext the servlet context of the web application
+	 * @see #setWebAppRootSystemProperty
+	 */
+	public static void removeWebAppRootSystemProperty(ServletContext servletContext) {
+		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
+		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
+		System.getProperties().remove(key);
 	}
 
 	/**
@@ -248,8 +260,9 @@ public abstract class WebUtils {
 		Cookie cookies[] = request.getCookies();
 		if (cookies != null) {
 			for (int i = 0; i < cookies.length; i++) {
-				if (name.equals(cookies[i].getName()))
+				if (name.equals(cookies[i].getName())) {
 					return cookies[i];
+				}
 			}
 		}
 		return null;

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.web.util;
 
@@ -32,7 +32,7 @@ import org.springframework.util.Log4jConfigurer;
  * don't need application-specific log files within the WAR directory, don't use
  * Log4J setup within the application (thus, don't use Log4jConfigListener or
  * Log4jConfigServlet). Instead, use a global, VM-wide Log4J setup (for example,
- * in JBoss) or JDK 1.4's java.util.logging (which is global too).
+ * in JBoss) or JDK 1.4's <code>java.util.logging</code> (which is global too).
  *
  * <p>Supports two init parameters at the servlet context level (i.e. context-param
  * in web.xml):
@@ -40,7 +40,7 @@ import org.springframework.util.Log4jConfigurer;
  * <ul>
  * <li><i>"log4jConfigLocation":</i><br>
  * Name of the Log4J config file (relative to the web application root directory,
- * e.g. "WEB-INF/log4j.properties"). If not specified, default Log4J initialization
+ * e.g. "/WEB-INF/log4j.properties"). If not specified, default Log4J initialization
  * will apply (from "log4j.properties" in the classpath).
  * <li><i>"log4jRefreshInterval":</i><br>
  * Interval between config file refresh checks, in milliseconds. If not specified,
@@ -93,6 +93,11 @@ public abstract class Log4jWebConfigurer {
 	public static final String REFRESH_INTERVAL_PARAM = "log4jRefreshInterval";
 
 
+	/**
+	 * Initialize Log4J, including setting the web app root system property.
+	 * @param servletContext the current ServletContext
+	 * @see WebUtils#setWebAppRootSystemProperty
+	 */
 	public static void initLogging(ServletContext servletContext) {
 
 		// Set the web app root system property.
@@ -144,11 +149,19 @@ public abstract class Log4jWebConfigurer {
 	}
 
 	/**
-	 * Shutdown Log4J to release all file locks.
+	 * Shut down Log4J, properly releasing all file locks
+	 * and resetting the web app root system property.
+	 * @param servletContext the current ServletContext
+	 * @see WebUtils#removeWebAppRootSystemProperty
 	 */
 	public static void shutdownLogging(ServletContext servletContext) {
 		servletContext.log("Shutting down Log4J");
-		Log4jConfigurer.shutdownLogging();
+		try {
+			Log4jConfigurer.shutdownLogging();
+		}
+		finally {
+			WebUtils.removeWebAppRootSystemProperty(servletContext);
+		}
 	}
 
 }
