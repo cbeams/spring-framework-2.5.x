@@ -25,21 +25,31 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
 
 /**
  * Simple servlet that can expose an internal resource, including a 
  * default URL if the specified resource is not found. An alternative,
  * for example, to trying and catching exceptions when using JSP include.
- * A further benefit is the ability to apply last-modified timestamps.
+ *
+ * <p>A further usage of this servlet is the ability to apply last-modified
+ * timestamps to quasi-static resources (typically JSPs). This can happen
+ * as bridge to parameter-specified resources, or as proxy for a specific
+ * target resource (or a list of specific target resources to combine).
  *
  * <p>A typical usage would map a URL like "/ResourceServlet" onto an instance
  * of this servlet, and use the "JSP include" action to include this URL,
  * with the "resource" parameter indicating the actual target path in the WAR.
  *
  * <p>The <code>defaultUrl</code> property can be set to the internal
- * resource path of a default (placeholder) URL, to be rendered when the
- * target resource is not found.
+ * resource path of a default URL, to be rendered when the target resource
+ * is not found or not specified in the first place.
+ *
+ * <p>The <code>defaultUrls</code> property can be used to specify a list of
+ * target resources to combine. Those resources will be included one by one
+ * to build the response. If last-modified determination is active, the
+ * newest timestamp among those files will be used.
  *
  * <p>The <code>allowedResources</code> property can be set to a URL
  * pattern of resources that should be available via this servlet.
@@ -78,7 +88,13 @@ import org.springframework.web.context.support.ServletContextResource;
  * @see #setAllowedResources
  */
 public class ResourceServlet extends HttpServletBean {
-	
+
+	/**
+	 * Any number of these characters are considered delimiters
+	 * between multiple resource paths in a single URL.
+	 */
+	public static final String RESOURCE_URL_DELIMITERS = ",; \t\n";
+
 	/**
 	 * Name of the parameter that must contain the actual resource path.
 	 */
@@ -98,7 +114,12 @@ public class ResourceServlet extends HttpServletBean {
 
 	/**
 	 * Set the URL within the current web application from which to
-	 * include content if the requested path isn't found.
+	 * include content if the requested path isn't found, or if none
+	 * is specified in the first place.
+	 * <p>If specifying multiple URLs, they will be included one by one
+	 * to build the response. If last-modified determination is active,
+	 * the newest timestamp among those files will be used.
+	 * @see #applyLastModified
 	 */
 	public void setDefaultUrl(String defaultUrl) {
 		this.defaultUrl = defaultUrl;
@@ -157,68 +178,31 @@ public class ResourceServlet extends HttpServletBean {
 
 		// determine URL of resource to include
 		String resourceUrl = determineResourceUrl(request);
-		if (resourceUrl == null) {
+
+		if (resourceUrl != null) {
+			try {
+				doInclude(request, response, resourceUrl);
+			}
+			catch (ServletException ex) {
+				logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
+				// try including default URL if appropriate
+				if (!includeDefaultUrl(request, response)) {
+					throw ex;
+				}
+			}
+			catch (IOException ex) {
+				logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
+				// try including default URL if appropriate
+				if (!includeDefaultUrl(request, response)) {
+					throw ex;
+				}
+			}
+		}
+
+		// no resource URL specified -> try to include default URL
+		else if (!includeDefaultUrl(request, response)) {
 			throw new ServletException("No target resource URL found for request");
 		}
-
-		// check whether URL matches allowed resources
-		if (this.allowedResources != null && !PathMatcher.match(this.allowedResources, resourceUrl)) {
-			throw new ServletException("Resource [" + resourceUrl + "] does not match allowed pattern [" +
-			                           this.allowedResources + "]");
-		}
-
-		try {
-			doInclude(request, response, resourceUrl);
-		}
-		catch (ServletException ex) {
-			logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
-			// try including default URL if appropriate
-			if (!includeDefaultUrl(request, response)) {
-				throw ex;
-			}
-		}
-		catch (IOException ex) {
-			logger.warn("Failed to include content of resource [" + resourceUrl + "]", ex);
-			// try including default URL if appropriate
-			if (!includeDefaultUrl(request, response)) {
-				throw ex;
-			}
-		}
-	}
-
-	/**
-	 * Return the last-modified timestamp of the file that corresponds
-	 * to the target resource URL (i.e. typically the request ".jsp" file).
-	 * Will simply return -1 if "applyLastModified" is false (the default).
-	 * <p>Returns no last-modified date before the startup time of this servlet,
-	 * to allow for message resolution etc that influences JSP contents,
-	 * assuming that those background resources might have changed on restart.
-	 * <p>Returns the startup time of this servlet if the file that corresponds
-	 * to the target resource URL coudln't be resolved (for example, because
-	 * the WAR is not expanded).
-	 * @see #determineResourceUrl
-	 */
-	protected final long getLastModified(HttpServletRequest request) {
-		if (this.applyLastModified) {
-			String resourceUrl = determineResourceUrl(request);
-			if (resourceUrl != null) {
-				try {
-					File resource = new ServletContextResource(getServletContext(), resourceUrl).getFile();
-					long lastModifiedTime = resource.lastModified();
-					if (logger.isDebugEnabled()) {
-						logger.debug("Last-modified timestamp of resource file [" + resource.getAbsolutePath() +
-												 "] is " + lastModifiedTime);
-					}
-					return (lastModifiedTime > this.startupTime ? lastModifiedTime : this.startupTime);
-				}
-				catch (IOException ex) {
-					logger.warn("Couldn't retrieve lastModified timestamp of resource [" + resourceUrl +
-					            "] - returning ResourceServlet startup time");
-					return this.startupTime;
-				}
-			}
-		}
-		return -1;
 	}
 
 	/**
@@ -263,9 +247,78 @@ public class ResourceServlet extends HttpServletBean {
 		if (this.contentType != null) {
 			response.setContentType(this.contentType);
 		}
-		RequestDispatcher rd = request.getRequestDispatcher(resourceUrl);
-		rd.include(request, response);
-		logger.debug("Included resource [" + resourceUrl + "]");
+		String[] resourceUrls =
+		    StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS, true, true);
+		for (int i = 0; i < resourceUrls.length; i++) {
+			// check whether URL matches allowed resources
+			if (this.allowedResources != null && !PathMatcher.match(this.allowedResources, resourceUrls[i])) {
+				throw new ServletException("Resource [" + resourceUrls[i] + "] does not match allowed pattern [" +
+				                           this.allowedResources + "]");
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Including resource [" + resourceUrls[i] + "]");
+			}
+			RequestDispatcher rd = request.getRequestDispatcher(resourceUrls[i]);
+			rd.include(request, response);
+		}
+	}
+
+	/**
+	 * Return the last-modified timestamp of the file that corresponds
+	 * to the target resource URL (i.e. typically the request ".jsp" file).
+	 * Will simply return -1 if "applyLastModified" is false (the default).
+	 * <p>Returns no last-modified date before the startup time of this servlet,
+	 * to allow for message resolution etc that influences JSP contents,
+	 * assuming that those background resources might have changed on restart.
+	 * <p>Returns the startup time of this servlet if the file that corresponds
+	 * to the target resource URL coudln't be resolved (for example, because
+	 * the WAR is not expanded).
+	 * @see #determineResourceUrl
+	 * @see #getFileTimestamp
+	 */
+	protected final long getLastModified(HttpServletRequest request) {
+		if (this.applyLastModified) {
+			String resourceUrl = determineResourceUrl(request);
+			if (resourceUrl == null) {
+				resourceUrl = this.defaultUrl;
+			}
+			if (resourceUrl != null) {
+				String[] resourceUrls =
+				    StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS, true, true);
+				long latestTimestamp = -1;
+				for (int i = 0; i < resourceUrls.length; i++) {
+					long timestamp = getFileTimestamp(resourceUrls[i]);
+					if (timestamp > latestTimestamp) {
+						latestTimestamp = timestamp;
+					}
+				}
+				return (latestTimestamp > this.startupTime ? latestTimestamp : this.startupTime);
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Return the file timestamp for the given resource.
+	 * @param resourceUrl the URL of the resource
+	 * @return the file timestamp in milliseconds,
+	 * or -1 if not determinable
+	 */
+	protected long getFileTimestamp(String resourceUrl) {
+		try {
+			File resource = new ServletContextResource(getServletContext(), resourceUrl).getFile();
+			long lastModifiedTime = resource.lastModified();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Last-modified timestamp of resource file [" + resource.getAbsolutePath() +
+										 "] is [" + lastModifiedTime + "]");
+			}
+			return lastModifiedTime;
+		}
+		catch (IOException ex) {
+			logger.warn("Couldn't retrieve lastModified timestamp of resource [" + resourceUrl +
+			            "] - returning ResourceServlet startup time");
+			return -1;
+		}
 	}
 
 }
