@@ -65,10 +65,6 @@ public class ValidatingFormModel extends DefaultFormModel implements
         this.rulesSource = rulesSource;
     }
 
-    public Object getValue(String aspect) {
-        return getValueModel(aspect).get();
-    }
-
     public MetaAspectAccessStrategy getMetaAspectAccessor() {
         return getAccessStrategy().getMetaAspectAccessor();
     }
@@ -132,7 +128,8 @@ public class ValidatingFormModel extends DefaultFormModel implements
                 .notNull(rulesSource,
                         "No rules source has been configured; please set a valid reference.");
         BeanPropertyExpression constraint;
-        //@TODO if form object changes, rules aren't updated...introduces subtle bugs...
+        //@TODO if form object changes, rules aren't updated...introduces
+        // subtle bugs...
         // ... for rules dependent on instance...
         if (getFormObject() instanceof RulesProvider) {
             constraint = ((RulesProvider)getFormObject())

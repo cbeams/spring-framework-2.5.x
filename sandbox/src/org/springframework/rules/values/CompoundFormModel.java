@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 /**
  * @author Keith Donald
  */
-public class CompoundFormModel implements FormModel {
+public class CompoundFormModel implements FormModel, NestingFormModel {
 
     private MutableAspectAccessStrategy domainObjectAccessStrategy;
 
@@ -64,10 +64,11 @@ public class CompoundFormModel implements FormModel {
 
     public MutableFormModel createChild(String childFormModelName) {
         Assert.isTrue(getChildFormModel(childFormModelName) == null,
-                "Child model by name " + childFormModelName + "already exists");
+                "Child model by name '" + childFormModelName + "' already exists");
         ValidatingFormModel childModel = new ValidatingFormModel(
                 domainObjectAccessStrategy, bufferChanges);
         childModel.setRulesSource(rulesSource);
+        childModel.setParent(this);
         formModels.put(childFormModelName, childModel);
         return childModel;
     }
@@ -85,17 +86,27 @@ public class CompoundFormModel implements FormModel {
     }
 
     public Object getValue(String domainObjectProperty) {
-        return getValueModel(domainObjectProperty).get();
+        ValueModel valueModel = getValueModel(domainObjectProperty);
+        Assert.isTrue(valueModel != null,
+                "Value model does not exist on any child form models for property "
+                        + domainObjectProperty);
+        return valueModel.get();
     }
 
     public ValueModel getValueModel(String domainObjectProperty) {
+        return findValueModelFor(null, domainObjectProperty);
+    }
+
+    public ValueModel findValueModelFor(FormModel delegatingChild, String domainObjectProperty) {
         Iterator it = formModels.values().iterator();
         while (it.hasNext()) {
-            FormModel formModel = (FormModel)it.next();
-            ValueModel valueModel = formModel.getValueModel(domainObjectProperty);
-            if (valueModel != null) {
-                return valueModel;
+            NestableFormModel formModel = (NestableFormModel)it.next();
+            if (delegatingChild != null && formModel == delegatingChild) {
+                continue;
             }
+            ValueModel valueModel = formModel
+                    .getValueModel(domainObjectProperty, false);
+            if (valueModel != null) { return valueModel; }
         }
         return null;
     }
@@ -136,7 +147,7 @@ public class CompoundFormModel implements FormModel {
     public Object getFormObject() {
         return domainObjectAccessStrategy.getDomainObject();
     }
-    
+
     public ValueModel getFormObjectHolder() {
         return domainObjectAccessStrategy.getDomainObjectHolder();
     }

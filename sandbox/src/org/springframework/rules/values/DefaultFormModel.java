@@ -20,17 +20,20 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 
 /**
  * @author Keith Donald
  */
-public class DefaultFormModel implements FormModel, MutableFormModel {
+public class DefaultFormModel implements MutableFormModel {
     protected static final Log logger = LogFactory
             .getLog(DefaultFormModel.class);
 
     private MutableAspectAccessStrategy domainObjectAccessStrategy;
 
     private ValueModel commitTrigger;
+
+    private NestingFormModel parent;
 
     private Map formValueModels = new HashMap();
 
@@ -57,14 +60,6 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
         this.bufferChanges = bufferChanges;
     }
 
-    public void addValidationListener(ValidationListener listener) {
-
-    }
-
-    public void removeValidationListener(ValidationListener listener) {
-
-    }
-
     public void setFormProperties(String[] domainObjectProperties) {
         formValueModels.clear();
         for (int i = 0; i < domainObjectProperties.length; i++) {
@@ -72,41 +67,91 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
         }
     }
 
+    public void setParent(NestingFormModel parent) {
+        this.parent = parent;
+    }
+
+    public void addValidationListener(ValidationListener listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void removeValidationListener(ValidationListener listener) {
+        throw new UnsupportedOperationException();
+    }
+
     public ValueModel add(String domainObjectProperty) {
+        return add(domainObjectProperty, this.bufferChanges);
+    }
+
+    public ValueModel add(String domainObjectProperty, boolean bufferChanges) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Adding new form value model for property '" + domainObjectProperty + "'");
+            logger.debug("Adding new form value model for property '"
+                    + domainObjectProperty + "'");
         }
         ValueModel formValueModel = new AspectAdapter(
                 domainObjectAccessStrategy, domainObjectProperty);
         if (bufferChanges) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Creating form value buffer for property '" + domainObjectProperty + "'");
+                logger.debug("Creating form value buffer for property '"
+                        + domainObjectProperty + "'");
             }
             formValueModel = new BufferedValueModel(formValueModel,
                     commitTrigger);
         }
-        formValueModel = onPreProcessNewFormValueModel(domainObjectProperty, formValueModel);
+        else {
+            if (logger.isDebugEnabled()) {
+                logger
+                        .debug("No buffer created; value model updates will commit directly to the domain layer");
+            }
+        }
+        add(domainObjectProperty, formValueModel);
+        return formValueModel;
+    }
+
+    protected ValueModel add(String domainObjectProperty,
+            ValueModel formValueModel) {
+        formValueModel = onPreProcessNewFormValueModel(domainObjectProperty,
+                formValueModel);
         formValueModels.put(domainObjectProperty, formValueModel);
         onFormValueModelAdded(domainObjectProperty, formValueModel);
         return formValueModel;
     }
 
-    protected ValueModel onPreProcessNewFormValueModel(String domainObjectProperty,
-            ValueModel formValueModel) {
+    protected ValueModel onPreProcessNewFormValueModel(
+            String domainObjectProperty, ValueModel formValueModel) {
         return formValueModel;
     }
-    
-    protected void onFormValueModelAdded(String domainObjectProperty, ValueModel formValueModel) {
-        
+
+    protected void onFormValueModelAdded(String domainObjectProperty,
+            ValueModel formValueModel) {
+
     }
 
     public Object getValue(String domainObjectProperty) {
-        return getValueModel(domainObjectProperty).get();
+        ValueModel valueModel = getValueModel(domainObjectProperty);
+        Assert
+                .isTrue(
+                        valueModel != null,
+                        "The property '"
+                                + domainObjectProperty
+                                + "' value model has not been added to this form model (or to any parents.)");
+        return valueModel.get();
     }
 
     public ValueModel getValueModel(String domainObjectProperty) {
+        return getValueModel(domainObjectProperty, true);
+    }
+
+    public ValueModel getValueModel(String domainObjectProperty,
+            boolean queryParent) {
         ValueModel valueModel = (ValueModel)formValueModels
                 .get(domainObjectProperty);
+        if (valueModel == null) {
+            if (parent != null && queryParent) {
+                valueModel = parent.findValueModelFor(this,
+                        domainObjectProperty);
+            }
+        }
         return valueModel;
     }
 
@@ -117,11 +162,11 @@ public class DefaultFormModel implements FormModel, MutableFormModel {
     public AspectAccessStrategy getAspectAccessStrategy() {
         return domainObjectAccessStrategy;
     }
-    
+
     public MetaAspectAccessStrategy getMetaAspectAccessor() {
         return domainObjectAccessStrategy.getMetaAspectAccessor();
     }
-    
+
     public Object getFormObject() {
         return domainObjectAccessStrategy.getDomainObject();
     }
