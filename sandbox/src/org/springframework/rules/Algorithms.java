@@ -25,7 +25,7 @@ import org.springframework.rules.factory.Functions;
  * functor objects such as predicates.
  * 
  * @author Keith Donald
- * @version $Id: Algorithms.java,v 1.5 2004-06-14 16:07:04 kdonald Exp $
+ * @version $Id: Algorithms.java,v 1.6 2004-06-30 19:10:44 kdonald Exp $
  */
 public class Algorithms {
     private Functions functions = Functions.instance();
@@ -69,7 +69,7 @@ public class Algorithms {
         return null;
     }
 
-    public void forEach(Collection collection, UnaryProcedure callback) {
+    public void forEachIn(Collection collection, UnaryProcedure callback) {
         forEach(collection.iterator(), callback);
     }
 
