@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.96 2004-02-22 21:55:03 jhoeller Exp $
+$Id: changelog.txt,v 1.97 2004-02-27 01:27:36 davison Exp $
 
 
-Changes in version 1.0 RC2 (25.2.2003)
+Changes in version 1.0 RC2 (29.2.2003)
 --------------------------------------
 
 Package org.springframework.aop
@@ -76,6 +76,10 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * added "defaultMethod" property to ParameterMethodNameResolver
+
+Package org.springframework.web.servlet.view.xslt
+* relaxed exceptions for null models / null root tag name in AbstractXsltView
+* added stylesheet parameters to AbstractXsltView which subclasses can create
 
 
 Changes in version 1.0 RC1 (11.2.2003)
