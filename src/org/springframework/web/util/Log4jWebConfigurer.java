@@ -51,8 +51,8 @@ import org.springframework.util.Log4jConfigurer;
  * <p><b>WARNING</b>: The WAR file containing the web application needs to be expanded
  * to allow for setting the web app root system property and for loading Log4J
  * configuration from a custom location. This is by default not the case when a
- * WAR file gets deployed to WebLogic, for example. Do not use this configurer
- * respectively Log4jConfigListener or Log4jConfigServlet in such an environment!
+ * WAR file gets deployed to WebLogic, for example. Do not use this configurer, 
+ * Log4jConfigListener or Log4jConfigServlet in such an environment!
  *
  * @author Juergen Hoeller
  * @since 12.08.2003
