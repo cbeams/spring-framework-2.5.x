@@ -33,4 +33,8 @@ public class ReflectiveAssemblerTests extends AbstractJmxAssemblerTests {
 	protected ModelMBeanInfoAssembler getAssembler() {
 	    return new ReflectiveModelMBeanInfoAssembler();
 	}
+
+    protected String getApplicationContextPath() {
+        return "org/springframework/jmx/reflectiveAssembler.xml";
+    }
 }

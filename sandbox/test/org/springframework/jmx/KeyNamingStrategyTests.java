@@ -1,29 +1,25 @@
-/*
- * Created on Jul 21, 2004
- */
 package org.springframework.jmx;
 
-import org.springframework.jmx.naming.MetadataNamingStrategy;
 import org.springframework.jmx.naming.ObjectNamingStrategy;
+import org.springframework.jmx.naming.KeyNamingStrategy;
 
 /**
  * @author robh
  */
-public class MetadataNamingStrategyTests extends AbstractNamingStrategyTests {
+public class KeyNamingStrategyTests extends AbstractNamingStrategyTests{
 
-    private static final String OBJECT_NAME = "spring:bean=test";
-
+    private static final String OBJECT_NAME = "spring:name=test";
 
     protected ObjectNamingStrategy getStrategy() throws Exception {
-        return new MetadataNamingStrategy();
+        return new KeyNamingStrategy();
     }
 
     protected Object getManagedResource() throws Exception {
-        return new JmxTestBean();
+        return new Object();
     }
 
     protected String getKey() {
-        return "foo";
+        return OBJECT_NAME;
     }
 
     protected String getCorrectObjectName() {

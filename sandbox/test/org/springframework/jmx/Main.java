@@ -8,6 +8,7 @@ import javax.management.MBeanServerFactory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.jmx.remote.ConnectorServiceBean;
 
 import com.sun.jdmk.comm.HtmlAdaptorServer;
 
@@ -18,7 +19,10 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         MBeanServer server = MBeanServerFactory.createMBeanServer();
-        HtmlAdaptorServer adapter = new HtmlAdaptorServer(9000);
+        ConnectorServiceBean connector = new ConnectorServiceBean();
+        connector.setServer(server);
+        connector.start();
+        /*HtmlAdaptorServer adapter = new HtmlAdaptorServer(9000);
        
         server.registerMBean(adapter, ObjectNameManager.getInstance("adapter:type=http"));
         adapter.start();
@@ -27,7 +31,8 @@ public class Main {
                 "./sandbox/test/org/springframework/jmx/applicationContext.xml");
         System.out.println("Running");
         System.in.read();
-        adapter.stop();
+        adapter.stop();*/
+
 
     }
 }

@@ -9,12 +9,13 @@ import javax.management.ObjectName;
 import org.springframework.jmx.assemblers.AutodetectCapableModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.ModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.metadata.MetadataModelMBeanInfoAssembler;
+import junit.framework.TestCase;
 
 
 /**
  * @author robh
  */
-public abstract class AbstractAutodetectTest extends AbstractJmxTests {
+public abstract class AbstractAutodetectTest extends TestCase {
 
 
     public AbstractAutodetectTest(String name) {
@@ -25,7 +26,7 @@ public abstract class AbstractAutodetectTest extends AbstractJmxTests {
         JmxTestBean bean = new JmxTestBean();
        
         AutodetectCapableModelMBeanInfoAssembler assembler = getAssembler();
-        assertTrue("The bean should be included", assembler.includeBean("testBean", bean));
+        assertTrue("The bean should be included", assembler.includeBean("testBean", bean.getClass()));
         
     }  
     

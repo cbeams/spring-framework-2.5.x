@@ -3,21 +3,34 @@
  */
 package org.springframework.jmx;
 
-import javax.management.ObjectInstance;
+import org.springframework.jmx.naming.ObjectNamingStrategy;
+import org.springframework.jmx.naming.PropertiesNamingStrategy;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author robh
  */
-public class PropertiesNamingStrategyTests extends AbstractJmxTests {
+public class PropertiesNamingStrategyTests extends AbstractNamingStrategyTests {
 
     private static final String OBJECT_NAME = "bean:name=namingTest";
 
-    public PropertiesNamingStrategyTests(String name) {
-        super(name);
+
+    protected ObjectNamingStrategy getStrategy() throws Exception {
+        PropertiesNamingStrategy strat = new PropertiesNamingStrategy();
+        strat.setPropertiesFile(new ClassPathResource("jmx.names.properties", this.getClass()));
+        strat.afterPropertiesSet();
+        return strat;
     }
 
-    public void testNaming() throws Exception {
-        ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance(OBJECT_NAME));
-        assertNotNull("ObjectInstance should not be null", instance);
+    protected Object getManagedResource() {
+        return new Object();
+    }
+
+    protected String getKey() {
+        return "namingTest";
+    }
+
+    protected String getCorrectObjectName() {
+        return OBJECT_NAME;
     }
 }
