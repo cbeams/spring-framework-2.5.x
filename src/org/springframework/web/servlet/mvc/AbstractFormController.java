@@ -352,9 +352,9 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (sessionFormObject == null) {
 			throw new ServletException("Form object not found in session (in session-form mode)");
 		}
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing form session attribute [" + formAttrName + "]");
-        }
+		if (logger.isDebugEnabled()) {
+			logger.debug("Removing form session attribute [" + formAttrName + "]");
+		}
 		session.removeAttribute(formAttrName);
 		return sessionFormObject;
 	}
@@ -446,10 +446,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 			HttpServletRequest request, BindException errors, String viewName, Map controlModel) throws Exception {
 
 		if (isSessionForm()) {
-            String formAttrName = getFormSessionAttributeName(request);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Setting form session attribute [" + formAttrName + "] to " + errors.getTarget());
-            }
+			String formAttrName = getFormSessionAttributeName(request);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Setting form session attribute [" + formAttrName + "] to: " + errors.getTarget());
+			}
 			request.getSession().setAttribute(formAttrName, errors.getTarget());
 		}
 		Map model = errors.getModel();

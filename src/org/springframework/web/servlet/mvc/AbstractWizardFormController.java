@@ -317,9 +317,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			Integer pageInteger = new Integer(page);
 			String pageAttrName = getPageSessionAttributeName(request);
 			if (isSessionForm()) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Setting page session attribute [" + pageAttrName + "] to [" + pageInteger + "]");
-                }
+				if (logger.isDebugEnabled()) {
+					logger.debug("Setting page session attribute [" + pageAttrName + "] to: " + pageInteger);
+				}
 				request.getSession().setAttribute(pageAttrName, pageInteger);
 			}
 			request.setAttribute(pageAttrName, pageInteger);
@@ -418,9 +418,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		// Remove page session attribute, provide copy as request attribute.
 		String pageAttrName = getPageSessionAttributeName(request);
 		if (isSessionForm()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Removing page attribute [" + pageAttrName + "]");
-            }
+			if (logger.isDebugEnabled()) {
+				logger.debug("Removing page session attribute [" + pageAttrName + "]");
+			}
 			request.getSession().removeAttribute(pageAttrName);
 		}
 		request.setAttribute(pageAttrName, new Integer(currentPage));
@@ -658,6 +658,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	protected ModelAndView processCancel(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {
+
 		throw new ServletException(
 				"Wizard form controller class [" + getClass().getName() + "] does not support a cancel operation");
 	}
