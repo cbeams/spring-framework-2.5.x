@@ -59,7 +59,7 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 	 * @param	in input stream to read from
 	 * @param codebaseUrl the codebase URL to load classes from if not found locally
 	 * (can consist of multiple URLs, separated by spaces)
-	 * @see java.io.ObjectInputStream(java.io.InputStream)
+	 * @see java.io.ObjectInputStream#ObjectInputStream(java.io.InputStream)
 	 */
 	public CodebaseAwareObjectInputStream(InputStream in, String codebaseUrl) throws IOException {
 		super(in);
