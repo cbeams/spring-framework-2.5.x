@@ -60,7 +60,7 @@
     <para>One quite important concept of the beans package is the
     <literal>BeanWrapper</literal> interface and its corresponding
     implementation (<literal>BeanWrapperImpl</literal>). As quoted from the
-    JavaDoc, the BeanWrapper offers functionnality to set and get property
+    JavaDoc, the BeanWrapper offers functionality to set and get property
     values (individually or in bulk), get property descriptors and query the
     readability and writability of properties. Also, the BeanWrapper offers
     support for nested properties, enabling the setting of properties on
@@ -93,7 +93,7 @@
           <tgroup cols="2">
             <colspec colname="c1" colwidth="1*" />
 
-            <colspec colname="c2" colwidth="5*" />
+            <colspec colname="c2" colwidth="3*" />
 
             <thead>
               <row>
@@ -292,7 +292,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 <entry><literal>CustomDateEditor</literal></entry>
 
                 <entry>Customizable property editor for java.util.Date,
-                supporting a custom DateFormat. NOT registerd by default. Must
+                supporting a custom DateFormat. NOT registered by default. Must
                 be user registered as needed with appropriate format.</entry>
               </row>
 
@@ -353,10 +353,10 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
               </row>
 
               <row>
-                <entry><literal>StringTrimmedEditor</literal></entry>
+                <entry><literal>StringTrimmerEditor</literal></entry>
 
                 <entry>Property editor that trims Strings. Optionally allows
-                transforming an empty string into a null value. NOT registerd
+                transforming an empty string into a null value. NOT registered
                 by default. Must be user registered as needed.</entry>
               </row>
 
@@ -373,10 +373,10 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
 
       <para>Spring uses the
       <literal>java.beans.PropertyEditorManager</literal> to set the
-      search-path for property editors that might be needed. The search-path
+      search path for property editors that might be needed. The search path
       also includes <literal>sun.bean.editors</literal>, which includes
       PropertyEditors for Font, Color and all the primitive types. Note also
-      that the Java PropertyEditors code will automatically discover
+      that the standard JavaBeans infrastructure will automatically discover
       PropertyEditors (without you having to register them) if they are in the
       same package as the class they handle, and have the same name as that
       class, with 'Editor' appended.</para>
