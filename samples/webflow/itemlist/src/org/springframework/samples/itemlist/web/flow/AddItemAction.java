@@ -30,9 +30,9 @@ public class AddItemAction extends AbstractAction {
 			HttpServletResponse response, MutableFlowModel model)
 			throws Exception {
 		//check to ensure the incoming request is within the active transaction
+		//note that we're also ending the transaction using reset==true
 		if (!model.inTransaction(request, true)) {
-			//the transaction was not valid so cannot continue normal
-			// processing
+			//the transaction was not valid so cannot continue normal processing
 			return "txError";
 		}
 		List list = (List)model.getAttribute("list");
