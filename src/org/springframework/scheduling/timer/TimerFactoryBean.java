@@ -29,9 +29,9 @@ import org.springframework.beans.factory.InitializingBean;
  * FactoryBean that sets up a J2SE Timer and exposes it for bean references.
  *
  * <p>Allows registration of ScheduledTimerTasks, automatically starting
- * the timer on initialization and cancelling it on destruction.
- * In typical scenarios, there is no need to access the Timer instance
- * itself in application code.
+ * the Timer on initialization and cancelling it on destruction of the context.
+ * In scenarios that just require static registration of tasks at startup,
+ * ther is no need to access the Timer instance itself in application code.
  *
  * <p>Note that Timer uses a TimerTask instance that is shared between
  * repeated executions, in contrast to Quartz which instantiates a new
@@ -56,7 +56,9 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 
 	/**
 	 * Register a list of ScheduledTimerTask objects with the Timer that
-	 * this FactoryBean creates.
+	 * this FactoryBean creates. Depending on each SchedulerTimerTask's
+	 * settings, it will be registered via one of Timer's schedule methods.
+	 * @see java.util.Timer#schedule(java.util.TimerTask, long)
 	 * @see java.util.Timer#schedule(java.util.TimerTask, long, long)
 	 * @see java.util.Timer#scheduleAtFixedRate(java.util.TimerTask, long, long)
 	 */
@@ -78,15 +80,24 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	public void afterPropertiesSet() {
 		logger.info("Initializing Timer");
 		this.timer = createTimer(this.daemon);
+
+		// register all ScheduledTimerTasks
 		for (int i = 0; i < this.scheduledTimerTasks.length; i++) {
 			ScheduledTimerTask scheduledTask = this.scheduledTimerTasks[i];
-			if (scheduledTask.isFixedRate()) {
-				this.timer.scheduleAtFixedRate(scheduledTask.getTimerTask(), scheduledTask.getDelay(),
-																			 scheduledTask.getPeriod());
+			if (scheduledTask.getPeriod() > 0) {
+				// repeated task execution
+				if (scheduledTask.isFixedRate()) {
+					this.timer.scheduleAtFixedRate(
+							scheduledTask.getTimerTask(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+				}
+				else {
+					this.timer.schedule(
+							scheduledTask.getTimerTask(), scheduledTask.getDelay(), scheduledTask.getPeriod());
+				}
 			}
 			else {
-				this.timer.schedule(scheduledTask.getTimerTask(), scheduledTask.getDelay(),
-														scheduledTask.getPeriod());
+				// one-time task execution
+				this.timer.schedule(scheduledTask.getTimerTask(), scheduledTask.getDelay());
 			}
 		}
 	}

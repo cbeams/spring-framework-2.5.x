@@ -60,6 +60,26 @@ public class ScheduledTimerTask {
 	}
 
 	/**
+	 * Create a new ScheduledTimerTask, with default
+	 * one-time execution without delay.
+	 * @param timerTask the TimerTask to schedule
+	 */
+	public ScheduledTimerTask(TimerTask timerTask) {
+		this.timerTask = timerTask;
+	}
+
+	/**
+	 * Create a new ScheduledTimerTask, with default
+	 * one-time execution with the given delay.
+	 * @param timerTask the TimerTask to schedule
+	 * @param delay the delay before starting the task for the first time (ms)
+	 */
+	public ScheduledTimerTask(TimerTask timerTask, long delay) {
+		this.timerTask = timerTask;
+		this.delay = delay;
+	}
+
+	/**
 	 * Create a new ScheduledTimerTask.
 	 * @param timerTask the TimerTask to schedule
 	 * @param delay the delay before starting the task for the first time (ms)
@@ -105,9 +125,13 @@ public class ScheduledTimerTask {
 	}
 
 	/**
-	 * Set the period between repeated task executions,
-	 * in milliseconds. Default is 0; this property needs to
-	 * be set to a positive value for proper execution.
+	 * Set the period between repeated task executions, in milliseconds.
+	 * Default is 0, leading to one-time execution. In case of a positive
+	 * value, the task will be executed repeatedly, with the given interval
+	 * inbetween executions.
+	 * <p>Note that the semantics of the period vary between fixed-rate
+	 * and fixed-delay execution.
+	 * @see #setFixedRate
 	 */
 	public void setPeriod(long period) {
 		this.period = period;

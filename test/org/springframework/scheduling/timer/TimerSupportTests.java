@@ -33,6 +33,7 @@ public class TimerSupportTests extends TestCase {
 
 	public void testTimerFactoryBean() throws Exception {
 		final TestTimerTask timerTask0 = new TestTimerTask();
+
 		TestMethodInvokingTask task1 = new TestMethodInvokingTask();
 		MethodInvokingTimerTaskFactoryBean mittfb = new MethodInvokingTimerTaskFactoryBean();
 		mittfb.setTargetObject(task1);
@@ -40,9 +41,12 @@ public class TimerSupportTests extends TestCase {
 		mittfb.afterPropertiesSet();
 		final TimerTask timerTask1 = (TimerTask) mittfb.getObject();
 
-		ScheduledTimerTask[] tasks = new ScheduledTimerTask[2];
+		final TestTimerTask timerTask2 = new TestTimerTask();
+
+		ScheduledTimerTask[] tasks = new ScheduledTimerTask[3];
 		tasks[0] = new ScheduledTimerTask(timerTask0, 0, 10, false);
 		tasks[1] = new ScheduledTimerTask(timerTask1, 10, 20, true);
+		tasks[2] = new ScheduledTimerTask(timerTask2, 20);
 
 		final List success = new ArrayList(3);
 		final Timer timer = new Timer(true) {
@@ -53,6 +57,11 @@ public class TimerSupportTests extends TestCase {
 			}
 			public void scheduleAtFixedRate(TimerTask task, long delay, long period) {
 				if (task == timerTask1 && delay == 10 && period == 20) {
+					success.add(Boolean.TRUE);
+				}
+			}
+			public void schedule(TimerTask task, long delay) {
+				if (task == timerTask2 && delay == 20) {
 					success.add(Boolean.TRUE);
 				}
 			}
@@ -72,14 +81,16 @@ public class TimerSupportTests extends TestCase {
 			assertTrue(timerFactoryBean.getObject() instanceof Timer);
 			timerTask0.run();
 			timerTask1.run();
+			timerTask2.run();
 		}
 		finally {
 			timerFactoryBean.destroy();
 		}
 
-		assertTrue("Correct Timer invocations", success.size() == 3);
+		assertTrue("Correct Timer invocations", success.size() == 4);
 		assertTrue("TimerTask0 works", timerTask0.counter == 1);
 		assertTrue("TimerTask1 works", task1.counter == 1);
+		assertTrue("TimerTask2 works", timerTask2.counter == 1);
 	}
 
 
