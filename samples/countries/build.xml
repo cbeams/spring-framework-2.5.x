@@ -58,7 +58,7 @@
 		<echo message="build    --> Compile main Java sources and copy libraries"/>
 		<echo message="docs     --> Create complete Javadoc documentation"/>
 		<echo message="warfile  --> Build the web application archive"/>
-		<echo message="all      --> Clean,build,warfile,docs,test"/>
+		<echo message="all      --> Clean, build, docs, warfile"/>
 		<echo message=""/>
 
 	</target>

@@ -84,7 +84,7 @@
 		<echo message="warfile  --> Build the web application archive"/>
 		<echo message="setupDB  --> Initialize the database"/>
 		<echo message="test     --> Run tests using initialized database"/>
-		<echo message="all      --> Clean,build,warfile,docs,test"/>
+		<echo message="all      --> Clean, build, docs, warfile, test"/>
 		<echo message=""/>
 
 	</target>
@@ -273,6 +273,6 @@
 
 	</target>
 
-	<target name="all" depends="clean,build,warfile,docs,test" description="Clean,build,warfile,docs,test"/>
+	<target name="all" depends="clean,build,docs,warfile,test" description="Clean,build,warfile,docs,test"/>
 
 </project>
