@@ -1,22 +1,22 @@
 /*
- *	$Id: TestBean.java,v 1.12 2004-07-01 19:53:59 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.13 2004-07-01 20:56:16 jhoeller Exp $
  */
 
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans;
 
@@ -43,13 +43,9 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	private boolean postProcessed;
 
-	/** Holds value of property age. */
-	private int age;
-
-	/** Holds value of property name. */
 	private String name;
 
-	private String[] aliases;
+	private int age;
 
 	private ITestBean spouse;
 
@@ -99,6 +95,30 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 		return postProcessed;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
+
+	public ITestBean getSpouse() {
+		return spouse;
+	}
+
+	public void setSpouse(ITestBean spouse) {
+		this.spouse = spouse;
+	}
+
 	public String getTouchy() {
 		return touchy;
 	}
@@ -111,38 +131,6 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 			throw new NumberFormatException("Number format exception: contains a ,");
 		}
 		this.touchy = touchy;
-	}
-
-	public int getAge() {
-		return age;
-	}
-
-	public void setAge(int age) {
-		this.age = age;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String[] getAliases() {
-		return aliases;
-	}
-
-	public void setAliases(String[] aliases) {
-		this.aliases = aliases;
-	}
-
-	public ITestBean getSpouse() {
-		return spouse;
-	}
-
-	public void setSpouse(ITestBean spouse) {
-		this.spouse = spouse;
 	}
 
 	public String[] getStringArray() {
@@ -169,75 +157,10 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 		this.myFloat = myFloat;
 	}
 
-
-	public boolean equals(Object other) {
-		if (this == other)
-			return true;
-		if (other == null || !(other instanceof TestBean))
-			return false;
-		TestBean tb2 = (TestBean) other;
-		if (tb2.age != age)
-			return false;
-
-		if (name == null)
-			return tb2.name == null;
-
-		if (!tb2.name.equals(name))
-			return false;
-
-		return true;
-	}
-
-	public int compareTo(Object other) {
-		if (this.name != null && other instanceof TestBean) {
-			return this.name.compareTo(((TestBean) other).getName());
-		}
-		else {
-			return 1;
-		}
-	}
-
-	public String toString() {
-		String s = "name=" + name + "; age=" + age + "; touchy=" + touchy;
-		s += "; spouse={" + (spouse != null ? spouse.getName() : null) + "}";
-		return s;
-	}
-
-
-	/**
-	 * @see ITestBean#exceptional(Throwable)
-	 */
-	public void exceptional(Throwable t) throws Throwable {
-		if (t != null)
-			throw t;
-	}
-
-	/**
-	 * @see ITestBean#returnsThis()
-	 */
-	public Object returnsThis() {
-		return this;
-	}
-
-	/**
-	 * @see IOther#absquatulate()
-	 */
-	public void absquatulate() {
-		//System.out.println("IOther.absquatulate");
-	}
-	
-
-	/**
-	 * @return Collection
-	 */
 	public Collection getFriends() {
 		return friends;
 	}
 
-	/**
-	 * Sets the friends.
-	 * @param friends The friends to set
-	 */
 	public void setFriends(Collection friends) {
 		this.friends = friends;
 	}
@@ -280,6 +203,64 @@ public class TestBean implements BeanFactoryAware, ITestBean, IOther, Comparable
 
 	public void setNestedIndexedBean(IndexedTestBean nestedIndexedBean) {
 		this.nestedIndexedBean = nestedIndexedBean;
+	}
+
+
+	/**
+	 * @see ITestBean#exceptional(Throwable)
+	 */
+	public void exceptional(Throwable t) throws Throwable {
+		if (t != null)
+			throw t;
+	}
+
+	/**
+	 * @see ITestBean#returnsThis()
+	 */
+	public Object returnsThis() {
+		return this;
+	}
+
+	/**
+	 * @see IOther#absquatulate()
+	 */
+	public void absquatulate() {
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other)
+			return true;
+
+		if (other == null || !(other instanceof TestBean))
+			return false;
+
+		TestBean tb2 = (TestBean) other;
+		if (tb2.age != age)
+			return false;
+
+		if (name == null)
+			return tb2.name == null;
+
+		if (!tb2.name.equals(name))
+			return false;
+
+		return true;
+	}
+
+	public int compareTo(Object other) {
+		if (this.name != null && other instanceof TestBean) {
+			return this.name.compareTo(((TestBean) other).getName());
+		}
+		else {
+			return 1;
+		}
+	}
+
+	public String toString() {
+		String s = "name=" + name + "; age=" + age + "; touchy=" + touchy;
+		s += "; spouse={" + (spouse != null ? spouse.getName() : null) + "}";
+		return s;
 	}
 
 }

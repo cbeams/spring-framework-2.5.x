@@ -151,16 +151,16 @@ public class BindUtilsTestSuite extends TestCase {
 	public void testBindWithRequiredArrayField() throws ServletException {
 		ServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
-		request.addParameter("aliases", "alias_1,alias_2");
+		request.addParameter("stringArray", "alias_1,alias_2");
 
 		TestBean tb = new TestBean();
 		BindUtils.bind(request, tb, "tb", new BindInitializer() {
 			public void initBinder(ServletRequest request, ServletRequestDataBinder binder) {
-				binder.setRequiredFields(new String[] {"aliases[0]"});
+				binder.setRequiredFields(new String[] {"stringArray[0]"});
 			}
 		});
 
-		assertTrue("aliases length", tb.getAliases().length == 2);
+		assertTrue("stringArray length", tb.getStringArray().length == 2);
 	}
 
 }
