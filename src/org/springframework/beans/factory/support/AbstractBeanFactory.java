@@ -52,7 +52,7 @@ import org.springframework.beans.factory.PropertyValuesProviderFactoryBean;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: AbstractBeanFactory.java,v 1.9 2003-10-23 10:21:03 jhoeller Exp $
+ * @version $Id: AbstractBeanFactory.java,v 1.10 2003-10-23 18:44:30 uid112313 Exp $
  */
 public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 
@@ -306,7 +306,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		mergedBeanDefinition.dependencyCheck(name);
 
 		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
-		applyPropertyValues(instanceWrapper, pvs, name);
+		applyPropertyValues(name, instanceWrapper, pvs, name);
 		callLifecycleMethodsIfNecessary(bean, name, mergedBeanDefinition, instanceWrapper);
 
 		return applyBeanPostProcessors(bean, name, mergedBeanDefinition);
@@ -357,7 +357,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * @param pvs new property values
 	 * @param name bean name passed for better exception information
 	 */
-	private void applyPropertyValues(BeanWrapper bw, PropertyValues pvs, String name) throws BeansException {
+	private void applyPropertyValues(String beanName, BeanWrapper bw, PropertyValues pvs, String name) throws BeansException {
 		if (pvs == null)
 			return;
 
@@ -365,7 +365,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		PropertyValue[] pvals = deepCopy.getPropertyValues();
 		
 		for (int i = 0; i < pvals.length; i++) {
-			PropertyValue pv = new PropertyValue(pvals[i].getName(), resolveValueIfNecessary(bw, pvals[i]));
+			PropertyValue pv = new PropertyValue(pvals[i].getName(), resolveValueIfNecessary(beanName, bw, pvals[i]));
 			// Update mutable copy
 			deepCopy.setPropertyValueAt(pv, i);
 		}
@@ -392,7 +392,7 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * If the value is a simple object, but the property takes a Collection type,
 	 * the value must be placed in a list.
 	 */
-	private Object resolveValueIfNecessary(BeanWrapper bw, PropertyValue pv)
+	private Object resolveValueIfNecessary(String beanName, BeanWrapper bw, PropertyValue pv)
 	    throws BeansException {
 		Object val;
 		
@@ -401,20 +401,20 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 		// If it does, we'll attempt to instantiate the bean and set the reference.
 		if (pv.getValue() != null && (pv.getValue() instanceof RuntimeBeanReference)) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) pv.getValue();
-			val = resolveReference(pv.getName(), ref);
+			val = resolveReference(beanName, pv.getName(), ref);
 		}	
 		else if (pv.getValue() != null && (pv.getValue() instanceof ManagedList)) {
 			// Convert from managed list. This is a special container that
 			// may contain runtime bean references.
 			// May need to resolve references
-			val = resolveManagedList(pv.getName(), (ManagedList) pv.getValue());
+			val = resolveManagedList(beanName, pv.getName(), (ManagedList) pv.getValue());
 		}
 		else if (pv.getValue() != null && (pv.getValue() instanceof ManagedMap)) {
 			// Convert from managed map. This is a special container that
 			// may contain runtime bean references as values.
 			// May need to resolve references
 			ManagedMap mm = (ManagedMap) pv.getValue();
-			val = resolveManagedMap(pv.getName(), mm);
+			val = resolveManagedMap(beanName, pv.getName(), mm);
 		}
 		else {
 			// It's an ordinary property. Just copy it.
@@ -439,19 +439,19 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	
 	/**
 	 * Resolve a reference to another bean in the factory.
-	 * @param name included for diagnostics
 	 */
-	private Object resolveReference(String name, RuntimeBeanReference ref) throws BeansException {
+	private Object resolveReference(String beanName, String propertyName, RuntimeBeanReference ref) throws BeansException {
 		try {
 			// Try to resolve bean reference
-			logger.debug("Resolving reference from bean '" + name + "' to bean '" + ref.getBeanName() + "'");
+			logger.debug("Resolving reference from property '" + propertyName + "' in bean '" +
+			             beanName + "' to bean '" + ref.getBeanName() + "'");
 			Object bean = getBean(ref.getBeanName());
 			// Create a new PropertyValue object holding the bean reference
 			return bean;
 		}
 		catch (BeansException ex) {
 			throw new FatalBeanException("Can't resolve reference to bean '" + ref.getBeanName() +
-																	 "' while setting properties on bean '" + name + "'", ex);
+																	 "' while setting property '" + propertyName + "' on bean '" + beanName + "'", ex);
 		}
 	}
 
@@ -459,18 +459,18 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	 * For each element in the ManagedMap, resolve references if necessary.
 	 * Allow ManagedLists as map entries.
 	 */
-	private ManagedMap resolveManagedMap(String name, ManagedMap mm) throws BeansException {
+	private ManagedMap resolveManagedMap(String beanName, String propertyName, ManagedMap mm) throws BeansException {
 		Iterator keys = mm.keySet().iterator();
 		while (keys.hasNext()) {
 			Object key = keys.next();
 			Object value = mm.get(key);
 			if (value instanceof RuntimeBeanReference) {
-				mm.put(key, resolveReference(name, (RuntimeBeanReference) value));
+				mm.put(key, resolveReference(beanName, propertyName, (RuntimeBeanReference) value));
 			}
 			else if (value instanceof ManagedList) {
 				// An entry may be a ManagedList, in which case we may need to
 				// resolve references
-				mm.put(key, resolveManagedList(name, (ManagedList) value));
+				mm.put(key, resolveManagedList(beanName, propertyName, (ManagedList) value));
 			}
 		}	// for each key in the managed map
 		return mm;
@@ -479,10 +479,10 @@ public abstract class AbstractBeanFactory implements HierarchicalBeanFactory {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private ManagedList resolveManagedList(String name, ManagedList l) throws BeansException {
+	private ManagedList resolveManagedList(String beanName, String propertyName, ManagedList l) throws BeansException {
 		for (int j = 0; j < l.size(); j++) {
 			if (l.get(j) instanceof RuntimeBeanReference) {
-				l.set(j, resolveReference(name, (RuntimeBeanReference) l.get(j)));
+				l.set(j, resolveReference(beanName, propertyName, (RuntimeBeanReference) l.get(j)));
 			}
 		}
 		return l;
