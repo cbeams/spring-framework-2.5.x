@@ -24,8 +24,11 @@ import javax.servlet.http.HttpServletRequest;
  * @author Juergen Hoeller
  * @author Trevor D. Cook
  * @since 29.9.2003
+ * @see MultipartHttpServletRequest
+ * @see MultipartFile
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
  * @see org.springframework.web.multipart.cos.CosMultipartResolver
+ * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.support.RequestContextUtils#getMultipartResolver
  */
 public interface MultipartResolver {
@@ -42,18 +45,10 @@ public interface MultipartResolver {
 
 	/**
 	 * Wrap the servlet request inside a MultipartHttpServletRequest.
-	 * <p>In addition to being accessible from the methods defined in MultipartHttpServletRequest,
-	 * multipart files should be retrievable as normal parameters (such as with
-	 * getParameter(String)) in order to allow other Spring features such as binding
-	 * to occur correctly. Multipart files retrieved as regular parameters must
-	 * fulfil the contract <code>key == value</code>.  This will allow property editors
-	 * to be able to access them as a standard String value in order to retrieve
-	 * the appropriate MultipartFile.
 	 * @param request the servlet request to wrap (must be of a multipart content type)
 	 * @return the wrapped servlet request
-	 * @throws org.springframework.web.multipart.MultipartException if the servlet request is not multipart, or if
-	 * implementation-specific problems are encountered (such as exceeding file
-	 * size limits)
+	 * @throws MultipartException if the servlet request is not multipart, or if
+	 * implementation-specific problems are encountered (such as exceeding file size limits)
 	 */
 	MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException;
 
