@@ -5,7 +5,6 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -53,8 +52,8 @@ public interface HandlerMapping {
 	 * @param request current HTTP request
 	 * @return a HandlerExecutionChain instance containing handler object and
 	 * any interceptors, or null if no mapping found
-	 * @throws ServletException if there is an internal error
+	 * @throws Exception if there is an internal error
 	 */
-	HandlerExecutionChain getHandler(HttpServletRequest request) throws ServletException;
+	HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;
 
 }

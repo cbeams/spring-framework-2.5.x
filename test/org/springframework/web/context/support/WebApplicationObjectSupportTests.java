@@ -17,9 +17,10 @@ public class WebApplicationObjectSupportTests extends TestCase {
 
 	public void testWebApplicationObjectSupport() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.initRootContext(new MockServletContext());
+		wac.setServletContext(new MockServletContext());
 		File tempDir = new File("");
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, tempDir);
+		wac.refresh();
 		WebApplicationObjectSupport wao = new WebApplicationObjectSupport() {
 		};
 		wao.setApplicationContext(wac);

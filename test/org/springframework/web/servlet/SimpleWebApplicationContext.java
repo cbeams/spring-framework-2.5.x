@@ -3,11 +3,11 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.util.Locale;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.context.support.StaticMessageSource;
@@ -15,12 +15,15 @@ import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.SimpleTheme;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.validation.BindException;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.SimpleFormController;
+import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
+import org.springframework.web.servlet.mvc.throwaway.ValidatableThrowawayController;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 
@@ -30,10 +33,7 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
  */
 public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
-	public void initNestedContext(ServletContext servletContext, String namespace,
-																WebApplicationContext parent, Object owner) {
-		super.initNestedContext(servletContext, namespace, parent, owner);
-
+	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("commandClass", "org.springframework.beans.TestBean"));
 		pvs.addPropertyValue(new PropertyValue("formView", "form"));
@@ -41,12 +41,15 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 		registerSingleton("/locale.do", LocaleChecker.class, null);
 
+		registerPrototype("/throwaway.do", TestThrowawayController.class, null);
+		registerPrototype("/vthrowaway.do", TestValidatableThrowawayController.class, null);
+
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 
 		registerSingleton(UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME, DummyThemeSource.class, null);
 
-		rebuild();
+		super.refresh();
 	}
 
 
@@ -87,6 +90,47 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 			else {
 				return null;
 			}
+		}
+	}
+
+
+	public static class TestThrowawayController implements ThrowawayController {
+
+		public static int counter = 0;
+
+		private int myInt;
+
+		public TestThrowawayController() {
+			counter++;
+		}
+
+		public void setMyInt(int myInt) {
+			this.myInt = myInt;
+		}
+
+		public ModelAndView execute() throws Exception {
+			return new ModelAndView("view" + this.myInt);
+		}
+	}
+
+
+	public static class TestValidatableThrowawayController implements ValidatableThrowawayController {
+
+		private int myInt;
+
+		public void setMyInt(int myInt) {
+			this.myInt = myInt;
+		}
+
+		public String getName() {
+			return "test";
+		}
+
+		public void initBinder(DataBinder binder) throws Exception {
+		}
+
+		public ModelAndView execute(BindException errors) throws Exception {
+			return new ModelAndView("view" + this.myInt, errors.getModel());
 		}
 	}
 

@@ -32,7 +32,8 @@ public class ResourceBundleViewResolverTestSuite extends TestCase {
 		rb.setBasename(PROPS_FILE);
 		rb.setCache(getCache());
 		wac = new StaticWebApplicationContext();
-		wac.initRootContext(new MockServletContext());
+		wac.setServletContext(new MockServletContext());
+		wac.refresh();
 
 		// This will be propagated to views, so we need it
 		rb.setApplicationContext(wac);

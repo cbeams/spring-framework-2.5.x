@@ -27,8 +27,18 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  */
 public class TilesTestSuite extends TestCase {
 
-	protected void setUp() throws Exception {
-		super.setUp();
+	protected WebApplicationContext prepareWebApplicationContext() throws Exception {
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		MockServletContext sc = new MockServletContext("/org/springframework/web/servlet/view/tiles/", "web.xml");
+		wac.setServletContext(sc);
+		wac.refresh();
+
+		TilesConfigurer tc = new TilesConfigurer();
+		tc.setDefinitions(new String[] {"tiles-test.xml"});
+		tc.setValidateDefinitions(true);
+		tc.setApplicationContext(wac);
+
+		return wac;
 	}
 
 	public void testTilesView() throws Exception {
@@ -107,19 +117,6 @@ public class TilesTestSuite extends TestCase {
 		attr = (PathAttribute) cc.getAttribute("content");
 		assertEquals("/WEB-INF/jsp/otherContent.jsp", attr.getValue());
 		assertEquals("testVal", request.getAttribute("testAttr"));
-	}
-
-	private WebApplicationContext prepareWebApplicationContext() throws Exception {
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		MockServletContext sc = new MockServletContext("/org/springframework/web/servlet/view/tiles/", "web.xml");
-		wac.initRootContext(sc);
-
-		TilesConfigurer tc = new TilesConfigurer();
-		tc.setDefinitions(new String[] {"tiles-test.xml"});
-		tc.setValidateDefinitions(true);
-		tc.setApplicationContext(wac);
-
-		return wac;
 	}
 
 }

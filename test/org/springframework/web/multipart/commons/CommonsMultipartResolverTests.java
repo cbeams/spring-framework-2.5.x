@@ -51,9 +51,9 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 	public void testWithApplicationContext() throws MultipartException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.initRootContext(new MockServletContext());
+		wac.setServletContext(new MockServletContext());
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
-		wac.rebuild();
+		wac.refresh();
 		CommonsMultipartResolver resolver = new MockCommonsMultipartResolver();
 		DiskFileUpload fileUpload = resolver.getFileUpload();
 		resolver.setMaximumFileSize(1000);
@@ -180,10 +180,10 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 	public void testWithServletContextAndFilter() throws ServletException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.initRootContext(new MockServletContext());
+		wac.setServletContext(new MockServletContext());
 		wac.registerSingleton("filterMultipartResolver", MockCommonsMultipartResolver.class, new MutablePropertyValues());
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
-		wac.rebuild();
+		wac.refresh();
 		WebApplicationContextUtils.publishWebApplicationContext(wac);
 		CommonsMultipartResolver resolver = new CommonsMultipartResolver(wac.getServletContext());
 		assertTrue(resolver.getFileUpload().getRepositoryPath().endsWith("mytemp"));
@@ -215,8 +215,8 @@ public class CommonsMultipartResolverTests extends TestCase {
 
 	public void testWithServletContextAndFilterWithCustomBeanName() throws ServletException, IOException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.initRootContext(new MockServletContext());
-		wac.rebuild();
+		wac.setServletContext(new MockServletContext());
+		wac.refresh();
 		wac.registerSingleton("myMultipartResolver", MockCommonsMultipartResolver.class, new MutablePropertyValues());
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		WebApplicationContextUtils.publishWebApplicationContext(wac);

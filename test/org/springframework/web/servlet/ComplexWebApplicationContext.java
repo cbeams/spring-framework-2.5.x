@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.support.ManagedList;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.support.RuntimeBeanReference;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -35,12 +34,9 @@ import org.springframework.web.servlet.view.ResourceBundleViewResolver;
  * @author Juergen Hoeller
  * @since 21.05.2003
  */
-class ComplexWebApplicationContext extends StaticWebApplicationContext {
+public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
-	public void initNestedContext(ServletContext servletContext, String namespace,
-																WebApplicationContext parent, Object owner) {
-		super.initNestedContext(servletContext, namespace, parent, owner);
-
+	public void refresh() throws BeansException {
 		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class, null);
 		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class, null);
 
@@ -73,7 +69,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		registerSingleton("localeHandler", ComplexLocaleChecker.class, null);
 		registerSingleton("anotherLocaleHandler", ComplexLocaleChecker.class, null);
-		registerSingleton("unknownHandler", String.class, null);
+		registerSingleton("unknownHandler", Object.class, null);
 
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("order", "1");
@@ -91,7 +87,7 @@ class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 
-		rebuild();
+		super.refresh();
 
 		SimpleUrlHandlerMapping myUrlMapping1 = (SimpleUrlHandlerMapping) getBean("myUrlMapping1");
 		LocaleChangeInterceptor interceptor1 = new LocaleChangeInterceptor();

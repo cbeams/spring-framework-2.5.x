@@ -5,7 +5,7 @@ import javax.servlet.ServletException;
 import junit.framework.TestCase;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.web.context.RootWebApplicationContext;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockServletContext;
@@ -20,13 +20,14 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/servlet/handler/map1.xml";
 	
-	private RootWebApplicationContext wac;
+	private ConfigurableWebApplicationContext wac;
 
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
-		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, CONF);
 		wac = new XmlWebApplicationContext();
-		wac.initRootContext(sc);
+		wac.setServletContext(sc);
+		wac.setConfigLocations(new String[] {CONF});
+		wac.refresh();
 	}
 
 	public void testRequestsWithoutHandlers() throws Exception {
@@ -110,7 +111,7 @@ public class BeanNameUrlHandlerMappingTestSuite extends TestCase {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
 
-	public void testAsteriskMatches() throws ServletException {
+	public void testAsteriskMatches() throws Exception {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 		Object bean = wac.getBean("godCtrl");
 

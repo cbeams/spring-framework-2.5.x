@@ -9,8 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 
 import org.springframework.context.support.MessageSourceResolvableImpl;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
-import org.springframework.web.context.RootWebApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.mock.MockHttpServletRequest;
 import org.springframework.web.mock.MockHttpServletResponse;
@@ -34,7 +36,7 @@ public class DispatcherServletTestSuite extends TestCase {
 
 	private DispatcherServlet complexControllerServlet;
 
-	public DispatcherServletTestSuite() throws ServletException {
+	protected void setUp() throws ServletException {
 		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
 
 		simpleControllerServlet = new DispatcherServlet();
@@ -353,6 +355,72 @@ public class DispatcherServletTestSuite extends TestCase {
 		}
 	}
 
+	public void testThrowawayController() throws Exception {
+		SimpleWebApplicationContext.TestThrowawayController.counter = 0;
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/throwaway.do");
+		request.addParameter("myInt", "5");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			simpleControllerServlet.doGet(request, response);
+			assertTrue("Correct response", "view5".equals(response.forwarded));
+			assertEquals(1, SimpleWebApplicationContext.TestThrowawayController.counter);
+		}
+		catch (ServletException ex) {
+			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
+	public void testThrowawayControllerWithBindingFailure() throws Exception {
+		SimpleWebApplicationContext.TestThrowawayController.counter = 0;
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/throwaway.do");
+		request.addParameter("myInt", "5x");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			simpleControllerServlet.doGet(request, response);
+			fail("Should have thrown ServletException");
+		}
+		catch (ServletException ex) {
+			// expected
+			assertTrue(ex.getRootCause() instanceof BindException);
+			assertEquals(1, SimpleWebApplicationContext.TestThrowawayController.counter);
+		}
+	}
+
+	public void testValidatableThrowawayController() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/vthrowaway.do");
+		request.addParameter("myInt", "5");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			simpleControllerServlet.doGet(request, response);
+			assertTrue("Correct response", "view5".equals(response.forwarded));
+			assertTrue("Correct model", request.getAttribute("test") instanceof SimpleWebApplicationContext.TestValidatableThrowawayController);
+			Errors errors = (new RequestContext(request)).getErrors("test");
+			assertNotNull("Errors set", errors);
+			assertFalse("No binding errors", errors.hasErrors());
+		}
+		catch (ServletException ex) {
+			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
+	public void testValidatableThrowawayControllerWithBindingFailure() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/vthrowaway.do");
+		request.addParameter("myInt", "5x");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try {
+			simpleControllerServlet.doGet(request, response);
+			assertTrue("Correct response", "view0".equals(response.forwarded));
+			assertTrue("Correct model", request.getAttribute("test") instanceof SimpleWebApplicationContext.TestValidatableThrowawayController);
+			Errors errors = (new RequestContext(request)).getErrors("test");
+			assertNotNull("Errors set", errors);
+			assertTrue("Correct binding error", errors.hasFieldErrors("myInt"));
+			assertEquals("Correct binding error", "typeMismatch", errors.getFieldError("myInt").getCode());
+		}
+		catch (ServletException ex) {
+			fail("Should not have thrown ServletException: " + ex.getMessage());
+		}
+	}
+
 	public void testWebApplicationContextLookup() {
 		MockServletContext servletContext = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/invalid.do");
@@ -373,7 +441,7 @@ public class DispatcherServletTestSuite extends TestCase {
 			// expected
 		}
 
-		servletContext.setAttribute(RootWebApplicationContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE_NAME, new StaticWebApplicationContext());
+		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, new StaticWebApplicationContext());
 		try {
 			RequestContextUtils.getWebApplicationContext(request, servletContext);
 		}

@@ -25,7 +25,7 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
  * to and will be called "messages_XX_YY.properties" where "XX" and "YY" are the
  * language and country codes known by the ResourceBundle class.
  *
- * <p>NOTE: The main method of this class is the "createContext(...)" method, and
+ * <p>NOTE: The main method of this class is the "createWebApplicationContext(...)" method, and
  * it was copied from the org.springframework.web.context.WebApplicationContextTestSuite
  * class.
  *
@@ -42,11 +42,29 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 	 */
 	public static final String WAR_ROOT = "/org/springframework/web/context";
 
-	private RootWebApplicationContext root;
+	private ConfigurableWebApplicationContext root;
 
 	private MessageSource themeMsgSource;
 
-	public ResourceBundleMessageSourceTestSuite() throws Exception {
+	protected ConfigurableApplicationContext createContext() throws Exception {
+		root = new XmlWebApplicationContext();
+		MockServletContext sc = new MockServletContext("");
+		root.setServletContext(sc);
+		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
+		root.refresh();
+		ConfigurableWebApplicationContext wac = new XmlWebApplicationContext();
+		wac.setParent(root);
+		wac.setServletContext(sc);
+		wac.setNamespace("test-servlet");
+		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
+		wac.refresh();
+
+		Theme theme = wac.getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
+		assertNotNull(theme);
+		assertTrue("Theme name has to be the default theme name", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(theme.getName()));
+		themeMsgSource = theme.getMessageSource();
+		assertNotNull(themeMsgSource);
+		return wac;
 	}
 
 	public void testCount() {
@@ -216,26 +234,6 @@ public class ResourceBundleMessageSourceTestSuite extends AbstractApplicationCon
 
 	private String getThemeMessage(String code, Object args[], String defaultMessage, Locale locale) {
 		return themeMsgSource.getMessage(code, args, defaultMessage, locale);
-	}
-
-	protected ConfigurableApplicationContext createContext() throws Exception {
-		root = new XmlWebApplicationContext();
-		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
-		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, "/org/springframework/web/context/WEB-INF/applicationContext.xml");
-		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM, "/org/springframework/web/context/WEB-INF/");
-		root.initRootContext(sc);
-		NestedWebApplicationContext wac = new XmlWebApplicationContext();
-		wac.initNestedContext(sc, "test-servlet", root, null);
-
-		Theme theme = wac.getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
-		assertNotNull(theme);
-		assertTrue("Theme name has to be the default theme name", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(theme.getName()));
-		themeMsgSource = theme.getMessageSource();
-		assertNotNull(themeMsgSource);
-
-		// Add listeners expected by parent test case
-		//wac.(this.listener);
-		return wac;
 	}
 
 }

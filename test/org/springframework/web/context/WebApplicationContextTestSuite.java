@@ -2,7 +2,6 @@ package org.springframework.web.context;
 
 import java.util.Locale;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.springframework.beans.ITestBean;
@@ -20,20 +19,21 @@ import org.springframework.web.mock.MockServletContext;
  */
 public class WebApplicationContextTestSuite extends AbstractApplicationContextTests {
 
-	private ServletContext servletContext;
-
-	private RootWebApplicationContext root;
+	private ConfigurableWebApplicationContext root;
 
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		InitAndIB.constructed = false;
 		root = new XmlWebApplicationContext();
-		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
-		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PARAM, "/org/springframework/web/context/WEB-INF/applicationContext.xml");
-		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM, "/org/springframework/web/context/WEB-INF/");
-		this.servletContext = sc;
-		root.initRootContext(sc);
+		MockServletContext sc = new MockServletContext("");
+		root.setServletContext(sc);
+		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
+		root.refresh();
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
-		wac.initNestedContext(sc, "test-servlet", root, null);
+		wac.setParent(root);
+		wac.setServletContext(sc);
+		wac.setNamespace("test-servlet");
+		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
+		wac.refresh();
 		return wac;
 	}
 
@@ -61,10 +61,13 @@ public class WebApplicationContextTestSuite extends AbstractApplicationContextTe
 	}
 
 	public void testWithoutMessageSource() throws Exception {
-		MockServletContext sc = new MockServletContext("", "/org/springframework/web/context/WEB-INF/web.xml");
-		sc.addInitParameter(XmlWebApplicationContext.CONFIG_LOCATION_PREFIX_PARAM, "/org/springframework/web/context/WEB-INF/");
-		NestedWebApplicationContext wac = new XmlWebApplicationContext();
-		wac.initNestedContext(sc, "testNamespace", null, null);
+		MockServletContext sc = new MockServletContext("");
+		XmlWebApplicationContext wac = new XmlWebApplicationContext();
+		wac.setParent(root);
+		wac.setServletContext(sc);
+		wac.setNamespace("testNamespace");
+		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
+		wac.refresh();
 		try {
 			wac.getMessage("someMessage", null, Locale.getDefault());
 			fail("Should have thrown NoSuchMessageException");

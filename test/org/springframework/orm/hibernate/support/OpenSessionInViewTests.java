@@ -124,8 +124,9 @@ public class OpenSessionInViewTests extends TestCase {
 
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.initRootContext(sc);
+		wac.setServletContext(sc);
 		wac.getListableBeanFactory().registerSingleton(OpenSessionInViewFilter.DEFAULT_SESSION_FACTORY_BEAN_NAME, sf);
+		wac.refresh();
 		WebApplicationContextUtils.publishWebApplicationContext(wac);
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -154,6 +155,8 @@ public class OpenSessionInViewTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
+
+		wac.close();
 	}
 
 	public void testOpenSessionInViewFilterWithCustomBeanName() throws Exception {
@@ -164,8 +167,9 @@ public class OpenSessionInViewTests extends TestCase {
 
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.initRootContext(sc);
+		wac.setServletContext(sc);
 		wac.getListableBeanFactory().registerSingleton("mySessionFactory", sf);
+		wac.refresh();
 		WebApplicationContextUtils.publishWebApplicationContext(wac);
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test");
 		MockHttpServletResponse response = new MockHttpServletResponse();
