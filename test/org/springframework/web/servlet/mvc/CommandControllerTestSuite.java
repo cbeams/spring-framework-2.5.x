@@ -299,7 +299,7 @@ public class CommandControllerTestSuite extends TestCase {
 		errors = (Errors) mv.getModel().get("errors");
 		assertTrue("No field error", !errors.hasFieldErrors("date"));
 		assertTrue("Correct date property", tb.getDate() == null);
-		assertTrue("Correct date value", errors.getFieldValue("date") == null);
+		assertTrue("Correct date value", "".equals(errors.getFieldValue("date")));
 	}
 
 	public void testCustomDateEditorWithoutAllowEmpty() throws Exception {
@@ -358,7 +358,7 @@ public class CommandControllerTestSuite extends TestCase {
 		errors = (Errors) mv.getModel().get("errors");
 		assertTrue("No field error", !errors.hasFieldErrors("myFloat"));
 		assertTrue("Correct float property", tb.getMyFloat() == null);
-		assertTrue("Correct float value", errors.getFieldValue("myFloat") == null);
+		assertTrue("Correct float value", "".equals(errors.getFieldValue("myFloat")));
 	}
 
 	public void testCustomNumberEditorWithoutAllowEmpty() throws Exception {

@@ -294,8 +294,8 @@ public class BindException extends Exception implements Errors {
 		// use rejected value in case of error, current bean property value else
 		Object value = (fe != null) ? fe.getRejectedValue() : getBeanWrapper().getPropertyValue(fixedField);
 		// apply custom editor, but not on binding failures like type mismatches
-		if (value != null && (fe == null || !fe.isBindingFailure())) {
-			PropertyEditor customEditor = getBeanWrapper().findCustomEditor(value.getClass(), fixedField);
+		if (fe == null || !fe.isBindingFailure()) {
+			PropertyEditor customEditor = getCustomEditor(fixedField);
 			if (customEditor != null) {
 				customEditor.setValue(value);
 				return customEditor.getAsText();
