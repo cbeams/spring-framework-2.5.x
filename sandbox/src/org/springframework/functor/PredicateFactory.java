@@ -22,6 +22,7 @@ import org
     .BeanPropertyConstantExpressionTester;
 import org.springframework.functor.predicates.BeanPropertyExpressionTester;
 import org.springframework.functor.predicates.BinaryFunctionResultTester;
+import org.springframework.functor.predicates.EqualTo;
 import org.springframework.functor.predicates.GreaterThan;
 import org.springframework.functor.predicates.GreaterThanEqualTo;
 import org.springframework.functor.predicates.LessThan;
@@ -155,6 +156,24 @@ public class PredicateFactory {
     }
 
     /**
+     * Apply a "equal to" constraint to a bean property.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param propertyValue
+     *            The constraint value
+     * @return The predicate
+     */
+    public static UnaryPredicate equals(
+        String propertyName,
+        Object propertyValue) {
+        return new BeanPropertyConstantExpressionTester(
+            propertyName,
+            propertyValue,
+            EqualTo.instance());
+    }
+
+    /**
      * Apply a "greater than" constraint to a bean property.
      * 
      * @param propertyName
@@ -242,6 +261,24 @@ public class PredicateFactory {
             propertyName,
             otherPropertyName,
             GreaterThan.instance());
+    }
+
+    /**
+     * Apply a "equal to" constraint to two bean properties.
+     * 
+     * @param propertyName
+     *            The first property
+     * @param otherPropertyName
+     *            The other property
+     * @return The predicate
+     */
+    public static UnaryPredicate equalsProperty(
+            String propertyName,
+            String otherPropertyName) {
+        return new BeanPropertyConstantExpressionTester(
+                propertyName,
+                propertyName,
+                EqualTo.instance());
     }
 
     /**
