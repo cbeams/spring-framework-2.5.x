@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.config.ConfigurableApplicationContext;
@@ -85,6 +86,11 @@ public class ContextLoader {
 		catch (BeansException ex) {
 			logger.error("Context initialization failed", ex);
 			throw ex;
+		}
+		catch (Throwable t) {
+			String mesg = "Context initialization failed unexpectedly";
+			logger.error(mesg, t);
+			throw new FatalBeanException(mesg, t);
 		}
 	}
 
