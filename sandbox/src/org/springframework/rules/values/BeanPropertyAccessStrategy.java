@@ -143,7 +143,7 @@ public class BeanPropertyAccessStrategy implements
             boolean last) {
         boolean inKey = false;
         int i = (last ? propertyPath.length() - 1 : 0);
-        while ((last && i >= 0) || i < propertyPath.length()) {
+        while ((last && i >= 0) || (!last && i < propertyPath.length())) {
             switch (propertyPath.charAt(i)) {
             case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR:
             case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR:
