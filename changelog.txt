@@ -1,18 +1,20 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.152 2004-05-29 21:40:55 jhoeller Exp $
+$Id: changelog.txt,v 1.153 2004-05-30 15:43:21 jhoeller Exp $
 
 
-Changes in version 1.0.2 (30.5.2004)
+Changes in version 1.0.2 (31.5.2004)
 ------------------------------------
 
 Package org.springframework.aop
 * fixed AbstractAutoProxyCreator to not check singleton status for inner beans, avoiding NoSuchBeanDefinitionException
-* reworked GlobalAdvisorAdapterRegistry to hold and return a DefaultAdvisorAdapterRegistry in a WeakReference
+* reworked GlobalAdvisorAdapterRegistry to hold and return a DefaultAdvisorAdapterRegistry
 * added "advisorAdapterRegistry" property to ProxyFactoryBean and co, with global AdvisorAdapterRegistry as default
 * removed unused MethodInvocationFactory interface and the corresponding bean property in the AdvisedSupport class
 
 Package org.springframework.beans
+* CachedIntrospectionResults uses a WeakHashMap with WeakReferences as cache, avoiding hard references to Class objects
+* CachedIntrospectionResults flushes the JavaBeans Introspector cache for each given class, for proper GC on shutdown
 * PropertyValue and MutablePropertyValues implement java.io.Serializable
 * added "addPropertyValues(PropertyValues)" and "addPropertyValues(Map)" methods to MutablePropertyValues
 * BeanWrapperImpl registers default PropertyEditors per instance and applies them to non-String values too
@@ -60,7 +62,6 @@ Package org.springframework.ejb
 
 Package org.springframework.jdbc
 * added UserCredentialsDataSourceAdapter, for transparently appying username and password to target DataSource calls
-* reworked SQLErrorCodesFactory to hold the singleton in a WeakReference, for proper garbage collection
 * fixed a NPE in SQLErrorCodeSQLExceptionTranslator for custom error translator that did not have DataSource set
 * added "query(sql, args, resultSetExtractor)"-style methods to JdbcOperations interface and JdbcTemplate class
 * changed JdbcTemplate's "queryForList" to return List of LinkedHashMap if JDK version >1.3 (to preserve column order)
