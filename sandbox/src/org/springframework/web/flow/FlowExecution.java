@@ -105,6 +105,8 @@ public interface FlowExecution extends FlowExecutionInfo, MutableFlowModel {
 	 * Called by a controller to restore this execution's state after
 	 * deserialization if neccessary.
 	 * @param flowLocator the locator
+	 * @param listeners the set of listeners that should be
+	 *        notified of lifecycle events in this flow execution
 	 */
 	public void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners);
 
