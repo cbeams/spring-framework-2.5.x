@@ -5,18 +5,15 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Simple implementation of TransactionAttributeSource that
  * allows attributes to be matched by registered name.
  * @author Juergen Hoeller
  * @since 21.08.2003
+ * @see #isMatch
  */
-public class NameMatchTransactionAttributeSource implements TransactionAttributeSource {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public class NameMatchTransactionAttributeSource extends AbstractTransactionAttributeSource {
 
 	private Map nameMap = new HashMap();
 
@@ -32,26 +29,20 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 	public TransactionAttribute getTransactionAttribute(MethodInvocation invocation) {
-		for (Iterator it = this.nameMap.keySet().iterator(); it.hasNext();) {
-			String mappedName = (String) it.next();
-			if (isMatch(invocation.getMethod().getName(), mappedName)) {
-				return (TransactionAttribute) this.nameMap.get(mappedName);
-			}
+		String methodName = invocation.getMethod().getName();
+		TransactionAttribute attr = (TransactionAttribute) this.nameMap.get(methodName);
+		if (attr != null) {
+			return attr;
 		}
-		return null;
-	}
-
-	/**
-	 * Return if the given method name matches the mapped name.
-	 * The default implementation checks for direct and "xxx*" matches.
-	 * Can be overridden in subclasses.
-	 * @param methodName the method name of the class
-	 * @param mappedName the name in the descriptor
-	 * @return if the names match
-	 */
-	protected boolean isMatch(String methodName, String mappedName) {
-		return methodName.equals(mappedName) ||
-		    (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1)));
+		else {
+			for (Iterator it = this.nameMap.keySet().iterator(); it.hasNext();) {
+				String mappedName = (String) it.next();
+				if (isMatch(methodName, mappedName)) {
+					return (TransactionAttribute) this.nameMap.get(mappedName);
+				}
+			}
+			return null;
+		}
 	}
 
 }

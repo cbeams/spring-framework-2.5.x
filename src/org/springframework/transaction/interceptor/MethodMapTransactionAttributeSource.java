@@ -13,21 +13,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.springframework.transaction.TransactionUsageException;
 
 /**
  * Simple implementation of TransactionAttributeSource that
  * allows attributes to be stored per method in a map.
  * @since 24-Apr-2003
- * @version $Id: MethodMapTransactionAttributeSource.java,v 1.1 2003-08-21 15:45:50 jhoeller Exp $
+ * @version $Id: MethodMapTransactionAttributeSource.java,v 1.2 2003-11-07 09:07:13 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #isMatch
  */
-public class MethodMapTransactionAttributeSource implements TransactionAttributeSource {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public class MethodMapTransactionAttributeSource extends AbstractTransactionAttributeSource {
 
 	/** Map from Method to TransactionAttribute */
 	protected Map methodMap = new HashMap();
@@ -65,14 +63,15 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 
 	/**
 	 * Add an attribute for a transactional method.
-	 * Method names can end with "*" for matching multiple methods.
+	 * Method names can end or start with "*" for matching multiple methods.
 	 * @param name class and method name, separated by a dot
 	 * @param attr attribute associated with the method
 	 */
 	public void addTransactionalMethod(String name, TransactionAttribute attr) {
 		int lastDotIndex = name.lastIndexOf(".");
-		if (lastDotIndex == -1)
+		if (lastDotIndex == -1) {
 			throw new TransactionUsageException("'" + name + "' is not a valid method name: format is FQN.methodName");
+		}
 		String className = name.substring(0, lastDotIndex);
 		String methodName = name.substring(lastDotIndex + 1);
 		try {
@@ -86,13 +85,13 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 
 	/**
 	 * Add an attribute for a transactional method.
-	 * Method names can end with "*" for matching multiple methods.
+	 * Method names can end or start with "*" for matching multiple methods.
 	 * @param clazz target interface or class
-	 * @param methodName method name
+	 * @param mappedName mapped method name
 	 * @param attr attribute associated with the method
 	 */
-	public void addTransactionalMethod(Class clazz, String methodName, TransactionAttribute attr) {
-		String name = clazz.getName() + '.'  + methodName;
+	public void addTransactionalMethod(Class clazz, String mappedName, TransactionAttribute attr) {
+		String name = clazz.getName() + '.'  + mappedName;
 		logger.debug("Adding transactional method [" + name + "] with attribute [" + attr + "]");
 
 		// TODO address method overloading? At present this will
@@ -101,12 +100,12 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 		Method[] methods = clazz.getDeclaredMethods();
 		List matchingMethods = new ArrayList();
 		for (int i = 0; i < methods.length; i++) {
-			if (isMatch(methods[i].getName(), methodName)) {
+			if (isMatch(methods[i].getName(), mappedName)) {
 				matchingMethods.add(methods[i]);
 			}
 		}
 		if (matchingMethods.isEmpty())
-			throw new TransactionUsageException("Couldn't find method '" + methodName + "' on " + clazz);
+			throw new TransactionUsageException("Couldn't find method '" + mappedName + "' on " + clazz);
 
 		// register all matching methods
 		for (Iterator it = matchingMethods.iterator(); it.hasNext();) {
@@ -129,19 +128,6 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 				}
 			}
 		}
-	}
-
-	/**
-	 * Return if the given method name matches the mapped name.
-	 * The default implementation checks for direct and "xxx*" matches.
-	 * Can be overridden in subclasses.
-	 * @param methodName the method name of the class
-	 * @param mappedName the name in the descriptor
-	 * @return if the names match
-	 */
-	protected boolean isMatch(String methodName, String mappedName) {
-		return methodName.equals(mappedName) ||
-		    (mappedName.endsWith("*") && methodName.startsWith(mappedName.substring(0, mappedName.length() - 1)));
 	}
 
 }

@@ -49,7 +49,7 @@
 		<property name="proxyInterfacesOnly"><value>false</value></property>
 		<property name="transactionAttributes">
 			<props>
-				<prop key="setAge">PROPAGATION_REQUIRED</prop>
+				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
 		<property name="methodPointcut">

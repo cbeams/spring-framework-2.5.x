@@ -18,7 +18,7 @@ import org.springframework.transaction.TransactionDefinition;
  * FQN.Method=tx attribute representation
  * @author Rod Johnson
  * @since 26-Apr-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class TransactionAttributeSourceEditorTests extends TestCase {
 
@@ -57,7 +57,7 @@ public class TransactionAttributeSourceEditorTests extends TestCase {
 		// TODO need FQN?
 		pe.setAsText("java.lang.Object.hashCode=PROPAGATION_REQUIRED\n" +
 		             "java.lang.Object.equals=PROPAGATION_MANDATORY\n" +
-		             "java.lang.Object.wait=PROPAGATION_SUPPORTS\n" +
+		             "java.lang.Object.*it=PROPAGATION_SUPPORTS\n" +
 		             "java.lang.Object.notify=PROPAGATION_SUPPORTS\n" +
 		             "java.lang.Object.not*=PROPAGATION_REQUIRED");
 		TransactionAttributeSource tas = (TransactionAttributeSource) pe.getValue();
