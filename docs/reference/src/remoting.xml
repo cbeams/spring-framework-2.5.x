@@ -399,6 +399,11 @@ public class SimpleObject {
 				<listitem>Accessing Web Services</listitem>
 			</itemizedlist>
 		</para>
+        <para>
+            Next to the support listed above, you can also expose your web services using
+            XFire <ulink url="http://xfire.codehaus.org">xfire.codehaus.org</ulink>.
+            XFire is a ligthweight SOAP library, currently in development at Codehaus.
+        </para>
 		<sect2>
 			<title>Exposing services using JAX-RPC</title>
 			<para>
@@ -637,7 +642,81 @@ public class AccountHandlerJaxRpcPortProxyFactoryBean extends JaxRpcPortProxyFac
 			</para>
 		</sect2>
 
+        <sect2>
+            <title>Exposing web services using XFire</title>
+            <para>
+                XFire is a lightweight SOAP library, hosted by Codehaus. At the time of writing (March 2005), XFire
+                is still in development. Although Spring support is stable, lots of features should be added in the future.
+                Exposing XFire is done using an XFire context that shipping with XFire itself in combination with a
+                RemoteExporter-style bean you have to add to your WebApplicationContext.
+            </para>
+            <para>
+                As with all methods that allow you to expose service, you have to create a DispatcherServlet with
+                a corresponding WebApplicationContext containing the services you will be exposing:
+                <programlisting><![CDATA[
+<servlet>
+  <servlet-name>xfire</servlet-name>
+  <servlet-class>
+    org.springframework.web.servlet.DispatcherServlet
+  </servlet-class>
+</servlet>
+                ]]></programlisting>
+            </para>
+            <para>
+                You also have to link in the XFire configuration. This is done by adding a context file to the
+                <literal>contextConfigLocations</literal> context parameter picked up by the ContextLoaderListener
+                (or Servlet for that matter). The configuration file is located in the XFire jar and should of course
+                be placed on the classpath of your application archive.
+                <programlisting><![CDATA[
+<context-param>
+  <param-name>contextConfigLocation</param-name>
+  <param-value>
+    classpath:org/codehaus/xfire/spring/xfire.xml
+  </param-value>
+</context-param>
+
+<listener>
+  <listener-class>
+    org.springframework.web.context.ContextLoaderListener
+  </listener-class>
+</listener>
+                ]]></programlisting>
+            </para>
+
+            <para>
+              After you added a servlet mapping (mapping /* to the XFire servlet declared above) you only have to add
+              one extra bean to expose the service using XFire. Add for example the following you <literal>xfire-servlet.xml</literal>:
+              <programlisting><![CDATA[
+<beans>
+  <bean name="/Echo" class="org.codehaus.xfire.spring.XFireExporter">
+    <property name="service">
+      <ref bean="echo"/>
+    </property>
+    <property name="serviceInterface">
+      <value>org.codehaus.xfire.spring.Echo</value>
+    </property>
+    <property name="serviceBuilder">
+      <ref bean="xfire.serviceBuilder"/>
+    </property>
+    <!-- the XFire bean is wired up in the xfire.xml file you've linked in earlier
+    <property name="xfire">
+      <ref bean="xfire"/>
+    </property>
+  </bean>
+
+  <bean id="echo" class="org.codehaus.xfire.spring.EchoImpl"/>
+</beans>
+]]></programlisting>
+            </para>
+            <para>
+              XFire handles the rest. It introspects your service interface and generates a WSDL from it.
+              Parts of this documentation have been taken from the XFire site. For more detailed information on XFire
+              Spring integration, have a look at the <ulink url="http://docs.codehaus.org/display/XFIRE/Spring">docs.codehaus.org/display/XFIRE/Spring</ulink>.
+            </para>
+        </sect2>
+
 	</sect1>
+
 
 	<sect1>
         <title>Auto-detection is not implemented for remote interfaces</title>
@@ -658,11 +737,11 @@ public class AccountHandlerJaxRpcPortProxyFactoryBean extends JaxRpcPortProxyFac
         <para>
             This is a trade-off between configuration convenience and the risk of accidental
             exposure of internal methods. Always specifying a service interface is not too much
-            effort, and puts you on the safe side regarding controlled exposure of specific 
+            effort, and puts you on the safe side regarding controlled exposure of specific
             methods.
         </para>
     </sect1>
-	
+
 	<sect1>
 		<title>Considerations when choosing a technology</title>
 		<para>
@@ -705,5 +784,5 @@ public class AccountHandlerJaxRpcPortProxyFactoryBean extends JaxRpcPortProxyFac
 			propagation as well, although this is not provided by core Spring: There are
 			just appropriate hooks for plugging in third-party or custom solutions here.
 		</para>
-	</sect1>  		
+	</sect1>
 </chapter>
