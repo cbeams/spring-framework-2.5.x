@@ -1,50 +1,51 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
 	<TITLE></TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0.2  (Linux)">
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.0  (Win32)">
 	<META NAME="CREATED" CONTENT="20030630;21474000">
-	<META NAME="CHANGED" CONTENT="20030828;20492200">
+	<META NAME="CHANGEDBY" CONTENT="Thomas Risberg">
+	<META NAME="CHANGED" CONTENT="20030829;22155203">
 	<STYLE>
 	<!--
-		@page { size: 21.59cm 27.94cm; margin-left: 3.18cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
-		TD P { margin-bottom: 0.21cm }
-		P { margin-bottom: 0.21cm }
+		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
+		TD P { margin-bottom: 0.08in }
+		P { margin-bottom: 0.08in }
 	-->
 	</STYLE>
 </HEAD>
-<BODY LANG="en-US">
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B><FONT SIZE=4>Developing
-a Spring Framework MVC applicaton step-by-step</FONT></B></P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm">Part 1 – Basic
+<BODY LANG="en-US" DIR="LTR">
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><FONT SIZE=4><B>Developing
+a Spring Framework MVC applicaton step-by-step</B></FONT></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">Part 1 &ndash; Basic
 Application and Environment Setup</P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><B>Thomas Risberg</B>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><B>Thomas Risberg</B>
 <BR>July, 2003</P>
-<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">This is a step-by-step account of how
+<P STYLE="margin-bottom: 0in">This is a step-by-step account of how
 to develop a web application from scratch using the Spring Framework.</P>
-<P STYLE="margin-bottom: 0cm">Prerequisites:</P>
+<P STYLE="margin-bottom: 0in">Prerequisites:</P>
 <UL>
 	<UL>
-		<LI><P STYLE="margin-bottom: 0cm">Java SDK (<I>I am currently using
+		<LI><P STYLE="margin-bottom: 0in">Java SDK (<I>I am currently using
 		version 1.4.1</I>)</P>
-		<LI><P STYLE="margin-bottom: 0cm">Ant (<I>using version 1.5.3</I>)</P>
-		<LI><P STYLE="margin-bottom: 0cm">Apache Tomcat (<I>using version
+		<LI><P STYLE="margin-bottom: 0in">Ant (<I>using version 1.5.3</I>)</P>
+		<LI><P STYLE="margin-bottom: 0in">Apache Tomcat (<I>using version
 		4.1.24</I>)</P>
 	</UL>
 </UL>
-<P STYLE="margin-bottom: 0cm">You should also be reasonably
+<P STYLE="margin-bottom: 0in">You should also be reasonably
 comfortable using the above software.</P>
-<P STYLE="margin-bottom: 0cm">I am not going to cover a lot of
+<P STYLE="margin-bottom: 0in">I am not going to cover a lot of
 background information or theory in this document -- there are plenty
 of books available that covers this in depth. Instead we will dive
 right into developing the application.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 1 – development directory</B></P>
-<P STYLE="margin-bottom: 0cm">We are going to need a place to keep
+<P STYLE="margin-bottom: 0in"><B>Step 1 &ndash; development directory</B></P>
+<P STYLE="margin-bottom: 0in">We are going to need a place to keep
 all the source and other files we will be creating, so I create a
 directory that I name 'springapp'. You can place this directory in
 your home folder or in some other location. I create mine in a
@@ -56,10 +57,10 @@ directory will hold everything that should go into the WAR file, that
 we would use to deploy our application. All source files other than
 Java source, like JSPs and configuration files, belongs in this
 directory.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 2 – index.jsp</B></P>
-<P STYLE="margin-bottom: 0cm">I will start by creating a JSP page
+<P STYLE="margin-bottom: 0in"><B>Step 2 &ndash; index.jsp</B></P>
+<P STYLE="margin-bottom: 0in">I will start by creating a JSP page
 named 'index.jsp' in the war directory. This is the entry point for
 our application.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -82,7 +83,7 @@ our application.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Just to have a complete web
+<P STYLE="margin-bottom: 0in">Just to have a complete web
 application, I create a web.xml in a WEB-INF directory that I create
 under the war directory.</P>
 <TABLE WIDTH=1004 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -104,11 +105,11 @@ under the war directory.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 3 – deploying the application
-to Tomcat</B></P>
-<P STYLE="margin-bottom: 0cm">Next, I write an Ant build script that
+<P STYLE="margin-bottom: 0in"><B>Step 3 &ndash; deploying the
+application to Tomcat</B></P>
+<P STYLE="margin-bottom: 0in">Next, I write an Ant build script that
 we are going to use throughout this document. There are tasks for
 building and deploying the application. There are also tasks for
 controlling the application under Tomcat.</P>
@@ -261,7 +262,7 @@ controlling the application under Tomcat.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">This script now
+<P STYLE="margin-bottom: 0in; font-weight: medium">This script now
 contains all the targets that we are going to need to make our
 development efforts easier. I am not going to cover this script in
 detail since most if not all of it is pretty much standard Ant and
@@ -294,7 +295,7 @@ tomcat.manager.password=tomcat</PRE>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><I>If you are on a system where you are
+<P STYLE="margin-bottom: 0in"><I>If you are on a system where you are
 not the owner of the Tomcat install, then the Tomcat owner must
 either grant you full access to the webapps directory or the owner
 must create a new directory named 'springapp' in the 'webapps'
@@ -302,12 +303,12 @@ directory of the Tomcat installation, and also give you full rights
 to deploy to this newly created directory. On Linux I run the command
 <B><FONT SIZE=2><FONT FACE="Fixed, monospace">chmod a+rwx springapp</FONT></FONT></B>
 to give everybody full rights to this directory.</I></P>
-<P STYLE="margin-bottom: 0cm"><I>If you are using a different web
+<P STYLE="margin-bottom: 0in"><I>If you are using a different web
 application server, then you can remove the Tomcat specific tasks at
 the end of the build script. You will have to rely on your server's
 hot deploy feature, or you will have to stop and start your
 application manually.</I></P>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">Now I run Ant to
+<P STYLE="margin-bottom: 0in; font-weight: medium">Now I run Ant to
 make sure that everything is working OK. You should have your current
 directory set to the 'springapp' directory.</P>
 <TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -339,10 +340,10 @@ directory set to the 'springapp' directory.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">Last action here
+<P STYLE="margin-bottom: 0in; font-weight: medium">Last action here
 is to do the actual deployment. Just run Ant and specify 'deploy' or
 'deploywar' as the target.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
 <TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -361,12 +362,12 @@ is to do the actual deployment. Just run Ant and specify 'deploy' or
 </TABLE>
 <P><BR><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 4 – Test the application</B></P>
-<P STYLE="margin-bottom: 0cm">Let's just quickly start Tomcat and
+<P STYLE="margin-bottom: 0in"><B>Step 4 &ndash; Test the application</B></P>
+<P STYLE="margin-bottom: 0in">Let's just quickly start Tomcat and
 make sure that we can access the application. Use the 'list' task
 from our build file to see if Tomcat has picked up the new
 application.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
 <TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -398,9 +399,9 @@ application.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">If it is not listed, use the 'install'
+<P STYLE="margin-bottom: 0in">If it is not listed, use the 'install'
 task to get the application installed in Tomcat.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
 <TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -418,37 +419,37 @@ task to get the application installed in Tomcat.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">Now open a browser and browse to
+<P STYLE="margin-bottom: 0in">Now open a browser and browse to
 <A HREF="http://localhost:8080/springapp/index.jsp">http://localhost:8080/springapp/index.jsp</A>.
 </P>
-<P STYLE="margin-bottom: 0cm"><IMG SRC="Spring-MVC-step-by-step_html_m5b7553b2.png" NAME="Graphic1" ALIGN=LEFT WIDTH=840 HEIGHT=528 BORDER=0><BR CLEAR=LEFT><BR>
+<P STYLE="margin-bottom: 0in"><IMG SRC="Spring-MVC-step-by-step_html_m5b7553b2.png" NAME="Graphic1" ALIGN=LEFT WIDTH=840 HEIGHT=528 BORDER=0><BR CLEAR=LEFT><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 5 – Download Spring
+<P STYLE="margin-bottom: 0in"><B>Step 5 &ndash; Download Spring
 distribution</B></P>
-<P STYLE="margin-bottom: 0cm">If you have not already downloaded the
+<P STYLE="margin-bottom: 0in">If you have not already downloaded the
 Spring Framework Release file, now is the time to do so. I am
 currently using 'spring-framework-1.0m1.zip' that can be downloaded
 from <A HREF="http://www.springframework.org/download.html">www.springframework.org/download.html</A>.
 I unzipped this file in my home directory. We are going to use
 several files from this download later on.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><FONT SIZE=4><U><B>This completes the
+<P STYLE="margin-bottom: 0in"><FONT SIZE=4><U><B>This completes the
 setup of the environment that is necessary, and now we can start
 actually developing our Spring Framework MVC application.</B></U></FONT></P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 6 – Create WEB-INF and
+<P STYLE="margin-bottom: 0in"><B>Step 6 &ndash; Create WEB-INF and
 web.xml</B></P>
-<P STYLE="margin-bottom: 0cm">Go to the 'springapp/war/ WEB-INF'
+<P STYLE="margin-bottom: 0in">Go to the 'springapp/war/ WEB-INF'
 directory. Modify the minimal 'web.xml' file that we created earlier.
 Now we will modify it to suite our needs. We define a
 DispatcherServlet that is going to control where all our request are
@@ -492,7 +493,7 @@ extension be routed to the 'springapp' dispatcher.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Next, create a file called
+<P STYLE="margin-bottom: 0in">Next, create a file called
 'springapp-servlet.xml' in the springapp/war/WEB-INF directory (you
 can copy an example of this file from the Spring distributions
 sample/skeletons/webapp-minimal directory). This is the file where
@@ -535,20 +536,25 @@ different url:s.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 7 – Copy jars to WEB-INF/lib</B></P>
-<P STYLE="margin-bottom: 0cm">From the Spring distribution, copy
+<P STYLE="margin-bottom: 0in"><B>Step 7 &ndash; Copy jars to
+WEB-INF/lib</B></P>
+<P STYLE="margin-bottom: 0in">From the Spring distribution, copy
 spring.jar (spring-framework-1.0m1/dist/spring.jar) to a
-war/WEB-INF/lib directory. Also copy log4j jars to the
-war/WEB-INF/lib directory (spring-framework-1.0m1/lib/log4j/*.jar).
+war/WEB-INF/lib directory. Also copy log4j and commons-logging jars
+to the war/WEB-INF/lib directory
+(spring-framework-1.0m1/lib/log4j/log4j-1.2.8.jar and
+spring-framework-1.0m1/lib/jakarta-commons/commons-logging.jar).
 These jars will be deployed to the server and they are also used
 during the build process.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 8 – Create your Controller</B></P>
-<P STYLE="margin-bottom: 0cm">Create your Controller – I named mine
-SpringappController.java and placed it a new springapp/src directory.</P>
+<P STYLE="margin-bottom: 0in"><B>Step 8 &ndash; Create your
+Controller</B></P>
+<P STYLE="margin-bottom: 0in">Create your Controller &ndash; I named
+mine SpringappController.java and placed it a new springapp/src
+directory.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
 	<TR>
@@ -578,16 +584,16 @@ public class SpringappController implements Controller {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">This is as basic a
+<P STYLE="margin-bottom: 0in; font-weight: medium">This is as basic a
 Controller as you can use. We will be expanding this later on, and we
 will also later on extend some provided abstract base
-implementations. The Controller “handles” the request and returns
-a ModelAndView. We have not yet defined any Views, so right now there
-is nothing to do.</P>
-<P STYLE="margin-bottom: 0cm"><BR>
+implementations. The Controller &ldquo;handles&rdquo; the request and
+returns a ModelAndView. We have not yet defined any Views, so right
+now there is nothing to do.</P>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 9 – Build the Application</B></P>
-<P STYLE="margin-bottom: 0cm">Run the 'build' task of the build.xml.
+<P STYLE="margin-bottom: 0in"><B>Step 9 &ndash; Build the Application</B></P>
+<P STYLE="margin-bottom: 0in">Run the 'build' task of the build.xml.
 Hopefully the code compiles OK.</P>
 <TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -604,11 +610,11 @@ Hopefully the code compiles OK.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 10 – Copy and modify
+<P STYLE="margin-bottom: 0in"><B>Step 10 &ndash; Copy and modify
 log4j.properties</B></P>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">The Spring
+<P STYLE="margin-bottom: 0in; font-weight: medium">The Spring
 Framework uses log4j for logging so we have to create a configuration
 file for log4j. Copy the log4j.properties from the sample Petclinic
 application
@@ -643,14 +649,14 @@ log4j.appender.logfile.layout.ConversionPattern=%d %p [%c] - &lt;%m&gt;%n</PRE>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 11 – Deploy Application</B></P>
-<P STYLE="margin-bottom: 0cm">Run the 'deploy' task and then the
+<P STYLE="margin-bottom: 0in"><B>Step 11 &ndash; Deploy Application</B></P>
+<P STYLE="margin-bottom: 0in">Run the 'deploy' task and then the
 'stop' and 'start' tasks of the build.xml. This will force a reload
 of the application. We have to check the Tomcat logs for any
-deployment errors – there could be typos in the above xml files or
-there could be missing classes or jar files. This is an example of
+deployment errors &ndash; there could be typos in the above xml files
+or there could be missing classes or jar files. This is an example of
 what it should look like.
 (/home/trisberg/jakarta-tomcat-4.1.24/logs/springapp.log)</P>
 <TABLE WIDTH=85% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -687,10 +693,10 @@ what it should look like.
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Step 12 – Create a View</B></P>
-<P STYLE="margin-bottom: 0cm">Now it is time to create our first
+<P STYLE="margin-bottom: 0in"><B>Step 12 &ndash; Create a View</B></P>
+<P STYLE="margin-bottom: 0in">Now it is time to create our first
 view. I will use a JSP page that I decided to name hello.jsp. I'll
 put it in the war directory to begin with.</P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -712,7 +718,7 @@ put it in the war directory to begin with.</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm">Nothing fancy here, but it will do for
+<P STYLE="margin-bottom: 0in">Nothing fancy here, but it will do for
 now. Next we have to modify the SpringappController to forward to
 this view.</P>
 <TABLE WIDTH=876 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -753,25 +759,25 @@ public class SpringappController implements Controller {
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">While I was
+<P STYLE="margin-bottom: 0in; font-weight: medium">While I was
 modifying this class, I also added a logger so we can verify that we
 actually got here. Changes are highlighted in <FONT COLOR="#800000">red</FONT>.
 The model that this class returns is actually resolved via a
 ViewResolver. Since we have not specified a specific one, we are
 going to get a default one that just forwards to a url matching the
 name of the view specified. We will modify this later on.</P>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">Now compile and
+<P STYLE="margin-bottom: 0in; font-weight: medium">Now compile and
 deploy the application. After instructing Tomcat to stop and then
 start the application, everything should get reloaded.</P>
-<P STYLE="margin-bottom: 0cm">Let's try it in a browser – enter the
-url <A HREF="http://localhost:8080/springapp/hello.htm">http://localhost:8080/springapp/hello.htm</A>
+<P STYLE="margin-bottom: 0in">Let's try it in a browser &ndash; enter
+the url <A HREF="http://localhost:8080/springapp/hello.htm">http://localhost:8080/springapp/hello.htm</A>
 and we should see the following:</P>
-<P STYLE="margin-bottom: 0cm"><IMG SRC="Spring-MVC-step-by-step_html_m3871950e.png" NAME="Graphic2" ALIGN=LEFT WIDTH=742 HEIGHT=572 BORDER=0><BR CLEAR=LEFT><BR>
+<P STYLE="margin-bottom: 0in"><IMG SRC="Spring-MVC-step-by-step_html_m3871950e.png" NAME="Graphic2" ALIGN=LEFT WIDTH=742 HEIGHT=572 BORDER=0><BR CLEAR=LEFT><BR>
 </P>
-<P STYLE="margin-bottom: 0cm; font-weight: medium">We can also check
-the log – I'm only showing the last entries, but we can see that
-the controller did get invoked and that it forwarded to the hello
-view. (/home/trisberg/jakarta-tomcat-4.1.24/logs/springapp.log)</P>
+<P STYLE="margin-bottom: 0in; font-weight: medium">We can also check
+the log &ndash; I'm only showing the last entries, but we can see
+that the controller did get invoked and that it forwarded to the
+hello view. (/home/trisberg/jakarta-tomcat-4.1.24/logs/springapp.log)</P>
 <TABLE WIDTH=1226 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=1216>
 	<TR>
@@ -782,34 +788,34 @@ view. (/home/trisberg/jakarta-tomcat-4.1.24/logs/springapp.log)</P>
 		</TD>
 	</TR>
 </TABLE>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><B>Summary</B></P>
-<P STYLE="margin-bottom: 0cm">Let's take quick look at the parts of
+<P STYLE="margin-bottom: 0in"><B>Summary</B></P>
+<P STYLE="margin-bottom: 0in">Let's take quick look at the parts of
 our application that we have created so far.</P>
 <OL>
-	<LI><P STYLE="margin-bottom: 0cm">An introduction page <B>index.jsp</B>
+	<LI><P STYLE="margin-bottom: 0in">An introduction page <B>index.jsp</B>
 	that does not do anything useful. It was just used to test our
 	setup. We will later change this to actually provide a link into our
 	application.</P>
-	<LI><P STYLE="margin-bottom: 0cm; font-weight: medium">A
+	<LI><P STYLE="margin-bottom: 0in; font-weight: medium">A
 	DispatcherServlet with a corresponding <B>springapp-servlet.xml</B>
 	configuration file.</P>
-	<LI><P STYLE="margin-bottom: 0cm">A controller
-	<B>springappController.java</B> with limited functionality – it
-	just forwards a ModelAndView to the ViewResolver. Actually, we only
-	have an empty model so far, but we will fix this later.</P>
-	<LI><P STYLE="margin-bottom: 0cm">A view <B>hello.jsp</B> that again
+	<LI><P STYLE="margin-bottom: 0in">A controller
+	<B>springappController.java</B> with limited functionality &ndash;
+	it just forwards a ModelAndView to the ViewResolver. Actually, we
+	only have an empty model so far, but we will fix this later.</P>
+	<LI><P STYLE="margin-bottom: 0in">A view <B>hello.jsp</B> that again
 	is extremely basic. But the whole setup works and we are now ready
 	to add more functionality.</P>
 </OL>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
-<A HREF="Spring-MVC-step-by-step-Part-2.html" TARGET="_self">Part 2 –
+<P STYLE="margin-bottom: 0in"><A HREF="Spring-MVC-step-by-step.html" TARGET="_self">Back</A>
+<A HREF="Spring-MVC-step-by-step-Part-2.html" TARGET="_self">Part 2 &ndash;
 Developing and Configuring the Application</A></P>
-<P STYLE="margin-bottom: 0cm"><BR>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
-<P STYLE="margin-bottom: 0cm">Copyright &copy; 2003, Thomas Risberg</P>
+<P STYLE="margin-bottom: 0in">Copyright &copy; 2003, Thomas Risberg</P>
 </BODY>
 </HTML>
