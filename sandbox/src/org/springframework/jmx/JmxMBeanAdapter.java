@@ -15,16 +15,6 @@
  */
 package org.springframework.jmx;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.management.DynamicMBean;
-import javax.management.JMException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
-import javax.management.modelmbean.ModelMBean;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -32,7 +22,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.jmx.assemblers.AutodetectCapableModelMBeanInfoAssembler;
 import org.springframework.jmx.assemblers.ModelMBeanInfoAssembler;
@@ -43,22 +32,31 @@ import org.springframework.jmx.naming.ObjectNamingStrategy;
 import org.springframework.jmx.proxy.JmxProxyFactoryBean;
 import org.springframework.jmx.util.JmxUtils;
 
+import javax.management.DynamicMBean;
+import javax.management.JMException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
+import javax.management.modelmbean.ModelMBean;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A bean that allows for any Spring managed to be exposed to an <code>MBeanServer</code>
  * without the need to define any JMX specific information in the bean classes.
- * 
+ * <p/>
  * If the bean implements one of the JMX management interface then
  * JmxMBeanAdapter will simply register the MBean with the server automatically.
- * 
+ * <p/>
  * If the bean does not implement on the JMX management interface then
  * <code>JmxMBeanAdapter</code> will create the management information using the supplied
- * <code>ModelMBeanMetadataAssembler</code> implementation. 
- * 
+ * <code>ModelMBeanMetadataAssembler</code> implementation.
+ *
  * @author Rob Harrop
  * @since 1.2
  */
 public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
-        BeanFactoryAware, BeanFactoryPostProcessor {
+        BeanFactoryAware {
 
     /**
      * <code>Log</code> instance for this class.
@@ -75,7 +73,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
      * <code>ModelMBean</code> instances.
      */
     private ModelMBeanProvider mbeanProvider = new RequiredModelMBeanProvider();
-    
+
     /**
      * Stores the <code>ModelMBeanInfoAssembler</code> to use for this
      * adaptor.
@@ -107,6 +105,73 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
      * 
      */
     public void afterPropertiesSet() throws Exception {
+        // register the beans now
+        registerBeans();
+    }
+
+    /**
+     * Supply a <code>Map</code> of beans to be registered with the JMX
+     * <code>MBeanServer</code>.
+     *
+     * @param beans a <code>Map</code> whose entries are the beans to register via JMX.
+     */
+    public void setBeans(Map beans) {
+        this.beans = beans;
+    }
+
+    /**
+     * Set the implementation of the <code>ModelMBeanInfoAssembler</code> interface
+     * to use for this instance.
+     *
+     * @param assembler an implementation of the <code>ModelMBeanInfoAssembler</code> interface.
+     */
+    public void setAssembler(ModelMBeanInfoAssembler assembler) {
+        this.assembler = assembler;
+    }
+
+
+    /**
+     * Set the implementation of the <code>ObjectNamingStrategy</code> interface to
+     * use for this instance.
+     *
+     * @param namingStrategy an implementation of the <code>ObjectNamingStrategy</code> interface.
+     */
+    public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
+    }
+
+    /**
+     * Specify an instance <code>MBeanServer</code> with which all beans should
+     * be registered. The <code>JmxMBeanAdapter</code> will attempt to locate an
+     * existing <code>MBeanServer</code> if none is supplied.
+     *
+     * @param server an instance of <code>MBeanServer</code>.
+     */
+    public void setServer(MBeanServer server) {
+        this.server = server;
+    }
+
+    /**
+     * Set the implementation of the <code>ModelMBeanProvider</code> interface to
+     * use for this instance.
+     *
+     * @param mbeanProvider an implementation of the <code>ModelMBeanProvider</code> interface.
+     */
+    public void setBeanProvider(ModelMBeanProvider mbeanProvider) {
+        this.mbeanProvider = mbeanProvider;
+    }
+
+    /**
+     * Registers the defined beans with the <code>MBeanServer</code>. Each bean is exposed
+     * to the <code>MBeanServer</code> via a <code>ModelMBean</code>. The actual implemetation
+     * of the <code>ModelMBean</code> interface used depends on the implementation of the
+     * <code>ModelMBeanProvider</code> interface that is configuerd. By default the <code>
+     * RequiredModelMBean</code> class that is supplied with all JMX implementations is used. The management
+     * interface produced for each bean is dependent on te <code>ModelMBeanInfoAssembler</code>
+     * implementation being used. The <code>ObjectName</code> given to each bean is dependent on
+     * the implementation of the <code>ObjectNamingStrategy</code> interface being used.
+     */
+    public void registerBeans() {
 
         // the beans property may be null
         // initially if we are relying solely
@@ -123,67 +188,6 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
             log.debug("No MBeanServer provided. Attempting to locate one...");
             this.server = JmxUtils.locateMBeanServer();
         }
-    }
-
-    /**
-     * Supply a <code>Map</code> of beans to be registered with the JMX
-     * <code>MBeanServer</code>.
-     * @param beans a <code>Map</code> whose entries are the beans to register via JMX.
-     */
-    public void setBeans(Map beans) {
-        this.beans = beans;
-    }
-
-    /**
-     * Set the implementation of the <code>ModelMBeanInfoAssembler</code> interface
-     * to use for this instance.
-     * @param assembler an implementation of the <code>ModelMBeanInfoAssembler</code> interface.
-     */
-    public void setAssembler(ModelMBeanInfoAssembler assembler) {
-        this.assembler = assembler;
-    }
-
-
-    /**
-     * Set the implementation of the <code>ObjectNamingStrategy</code> interface to
-     * use for this instance.
-     * @param namingStrategy an implementation of the <code>ObjectNamingStrategy</code> interface.
-     */
-    public void setNamingStrategy(ObjectNamingStrategy namingStrategy) {
-        this.namingStrategy = namingStrategy;
-    }
-
-    /**
-     * Specify an instance <code>MBeanServer</code> with which all beans should
-     * be registered. The <code>JmxMBeanAdapter</code> will attempt to locate an
-     * existing <code>MBeanServer</code> if none is supplied.
-     * @param server an instance of <code>MBeanServer</code>.
-     */
-    public void setServer(MBeanServer server) {
-        this.server = server;
-    }
-
-    /**
-     * Set the implementation of the <code>ModelMBeanProvider</code> interface to
-     * use for this instance.
-     * @param mbeanProvider an implementation of the <code>ModelMBeanProvider</code> interface.
-     */
-    public void setBeanProvider(ModelMBeanProvider mbeanProvider) {
-        this.mbeanProvider = mbeanProvider;
-    }
-    
-    /**
-     * Registers the defined beans with the <code>MBeanServer</code>. Each bean is exposed
-     * to the <code>MBeanServer</code> via a <code>ModelMBean</code>. The actual implemetation
-     * of the <code>ModelMBean</code> interface used depends on the implementation of the
-     * <code>ModelMBeanProvider</code> interface that is configuerd. By default the <code>
-     * RequiredModelMBean</code> class that is supplied with all JMX implementations is used. The management
-     * interface produced for each bean is dependent on te <code>ModelMBeanInfoAssembler</code> 
-     * implementation being used. The <code>ObjectName</code> given to each bean is dependent on
-     * the implementation of the <code>ObjectNamingStrategy</code> interface being used.
-     *  
-     */
-    public void registerBeans() {
 
         // allow the metadata assembler a chance to
         // vote for bean inclusion
@@ -193,8 +197,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 
         // check we now have at least one bean
         if (beans.size() < 1) {
-            throw new IllegalArgumentException(
-                    "Must specify at least one bean for registration");
+            throw new IllegalArgumentException("Must specify at least one bean for registration");
         }
 
         Object[] keys = beans.keySet().toArray();
@@ -216,7 +219,7 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
                     ModelMBean mbean = mbeanProvider.getModelMBean();
                     mbean.setModelMBeanInfo(assembler.getMBeanInfo(bean));
                     mbean.setManagedResource(bean, "ObjectReference");
-                    
+
                     log.info("Registering and Assembling MBean: "
                             + objectName.toString());
 
@@ -228,15 +231,13 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
 
             }
         } catch (JMException ex) {
-            throw new MBeanAssemblyException(
-                    "A JMX error occured when trying to assemble "
-                            + "the management interface metadata.", ex);
+            throw new MBeanAssemblyException("A JMX error occured when trying to assemble "
+                    + "the management interface metadata.", ex);
         } catch (InvalidTargetObjectTypeException ex) {
             // we should never get this
             log.warn("Received InvalidTargetObjectTypeException - this should not occur!");
-            throw new MBeanAssemblyException(
-                    "An invalid object type was used when specifying a managed resource. "
-                            + "This is a serious error and points to an error in the Spring JMX Code",
+            throw new MBeanAssemblyException("An invalid object type was used when specifying a managed resource. "
+                    + "This is a serious error and points to an error in the Spring JMX Code",
                     ex);
         }
     }
@@ -308,16 +309,5 @@ public class JmxMBeanAdapter implements InitializingBean, DisposableBean,
         } else {
             log.info("Not using a ConfigurableListableBeanFactory - auto detection of managed beans is disabled");
         }
-    }
-
-    /**
-     * Invokes the <code>registerBeans()</code> method automatically when running in
-     * an <code>ApplicationContext</code> even if the bean is not a singleton
-     */
-    public void postProcessBeanFactory(
-            ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
-        // register the beans
-        registerBeans();
     }
 }
