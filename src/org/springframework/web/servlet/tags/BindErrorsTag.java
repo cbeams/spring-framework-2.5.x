@@ -27,22 +27,17 @@ public class BindErrorsTag extends RequestContextAwareTag {
 	}
 
 	protected int doStartTagInternal() throws ServletException {
-		Errors errors = null;
 		try {
-			errors = getRequestContext().getErrors(this.name, isHtmlEscape());
+			Errors errors = getRequestContext().getErrors(this.name, isHtmlEscape());
+			if (errors.hasErrors()) {
+				this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, errors);
+				return EVAL_BODY_INCLUDE;
+			}
 		}
-		catch(ServletException ex){
-			//No Errors instance
-			return SKIP_BODY;
+		catch (ServletException ex){
+			// no Errors instance
 		}
-		
-		if (errors.hasErrors()) {
-			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, errors);
-			return EVAL_BODY_INCLUDE;
-		}
-		else {
-			return SKIP_BODY;
-		}
+		return SKIP_BODY;
 	}
 
 }

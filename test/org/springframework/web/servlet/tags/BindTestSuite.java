@@ -43,13 +43,7 @@ public class BindTestSuite extends AbstractTagTest {
 		BindErrorsTag tag = new BindErrorsTag();
 		tag.setPageContext(pc);
 		tag.setName("tb");
-		try {
-			tag.doStartTag();
-			fail("Should have thrown JspException");
-		}
-		catch (JspException ex) {
-			// expected
-		}
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.SKIP_BODY);
 	}
 
 	public void testBindTagWithoutErrors() throws JspException {
