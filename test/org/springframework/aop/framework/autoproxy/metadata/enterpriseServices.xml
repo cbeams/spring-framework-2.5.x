@@ -16,6 +16,8 @@
 		<property name="customTargetSourceCreators">
 			<list>
 				<ref local="es.poolingTargetSourceCreator" />
+				<ref local="es.prototypeTargetSourceCreator" />
+				<ref local="es.threadLocalTargetSourceCreator" />
 			</list>
 		</property>
 	</bean>
@@ -42,6 +44,16 @@
 	
 	<bean id="es.txAdvice"
 		class="org.springframework.transaction.interceptor.TransactionAttributeSourceTransactionAroundAdvisor"
+		autowire="constructor" >
+	</bean>
+	
+	<bean id="es.prototypeTargetSourceCreator"
+		class="org.springframework.aop.framework.autoproxy.metadata.AttributesPrototypeTargetSourceCreator"
+		autowire="constructor" >
+	</bean>
+	
+	<bean id="es.threadLocalTargetSourceCreator"
+		class="org.springframework.aop.framework.autoproxy.metadata.AttributesThreadLocalTargetSourceCreator"
 		autowire="constructor" >
 	</bean>
 	
@@ -76,6 +88,23 @@
 	
 	<bean id="modifiable2"
 		class="org.springframework.aop.framework.autoproxy.metadata.ModifiableTestBean" />
+	
+	
+	<bean id="protoTest"
+		class="org.springframework.aop.framework.autoproxy.metadata.PrototypeTestBean" 
+		singleton="false">
+	</bean>
+	
+	<bean id="threadLocalTest"
+		class="org.springframework.aop.framework.autoproxy.metadata.ThreadLocalTestBean" 
+		singleton="false">
+	</bean>
+	
+	<!-- Should not be proxied -->
+	<bean id="rawTest"
+		singleton="false"
+		class="org.springframework.beans.TestBean" >
+	</bean>
 	
 
 </beans>		

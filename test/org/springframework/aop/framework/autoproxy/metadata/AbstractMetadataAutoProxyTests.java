@@ -14,6 +14,8 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.aop.target.AbstractPoolingTargetSource;
+import org.springframework.aop.target.PrototypeTargetSource;
+import org.springframework.aop.target.ThreadLocalTargetSource;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
@@ -27,7 +29,7 @@ import org.springframework.transaction.CountingTxManager;
  * define the EnterpriseServices bean in a separate file to
  * change how attributes are source. 
  * @author Rod Johnson
- * @version $Id: AbstractMetadataAutoProxyTests.java,v 1.1 2003-12-12 21:31:25 johnsonr Exp $
+ * @version $Id: AbstractMetadataAutoProxyTests.java,v 1.2 2003-12-15 17:14:43 johnsonr Exp $
  */
 public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 	
@@ -165,6 +167,54 @@ public abstract class AbstractMetadataAutoProxyTests extends TestCase {
 		
 		 }
 		 assertEquals("Transaction rollbacks correct", 1, txMan.rollbacks);
+	}
+	
+	/**
+	 * Plain old class with no special attributes
+	 * @throws Exception
+	 */
+	public void testNoAutoProxying() throws Exception {
+		BeanFactory bf = getBeanFactory();
+		ITestBean test = (ITestBean) bf.getBean("rawTest");
+		assertFalse(AopUtils.isAopProxy(test));
+	}
+	
+	public void testAutoPrototype() throws Exception {
+		BeanFactory bf = getBeanFactory();
+		ITestBean test = (ITestBean) bf.getBean("protoTest");
+		assertTrue(AopUtils.isAopProxy(test));
+		Advised advised = (Advised) test;
+		assertTrue(advised.getTargetSource() instanceof PrototypeTargetSource );
+		ITestBean test2 = (ITestBean) bf.getBean("protoTest");
+		assertFalse(test == test2);
+	}
+	
+	public void testAutoThreadLocal() throws Exception {
+		final BeanFactory bf = getBeanFactory();
+		final ITestBean test = (ITestBean) bf.getBean("threadLocalTest");
+		assertTrue(AopUtils.isAopProxy(test));
+		Advised advised = (Advised) test;
+		assertTrue(advised.getTargetSource() instanceof ThreadLocalTargetSource );
+		String nameForMainThread = "tom";
+		test.setName(nameForMainThread);
+		assertEquals(nameForMainThread, test.getName());
+		// Check that in another thread we don't see that value back
+		Runnable r = new Runnable() {
+			public void run() {
+				//System.err.println("RUN INNER CLASS");
+				ITestBean myTest = (ITestBean) bf.getBean("threadLocalTest");
+				assertNull(myTest.getName());
+				String myName = "Fred";
+				myTest.setName(myName);
+				assertEquals(myName, myTest.getName());
+				//assertEquals(myName, test.getName());
+			}
+		};
+		Thread t = new Thread(r);
+		t.start();
+		t.join();
+		// Inner class didn't change outer thread's value
+		assertEquals(nameForMainThread, test.getName());
 	}
 	
 	/**

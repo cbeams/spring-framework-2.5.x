@@ -8,35 +8,35 @@ import java.util.Collection;
 
 import org.springframework.aop.framework.autoproxy.target.AbstractPrototypeTargetSourceCreator;
 import org.springframework.aop.target.AbstractPrototypeTargetSource;
-import org.springframework.aop.target.PrototypeTargetSource;
+import org.springframework.aop.target.ThreadLocalTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.metadata.Attributes;
 
 /**
  * PrototypeTargetSourceCreator driven by metadata.
- * Creates a prototype
- * only if there's a PrototypeAttribute associated with the class.
+ * Creates a ThreadLocalTargetSource
+ * only if there's a ThreadLocalAttribute associated with the class.
  * @author Rod Johnson
- * @version $Id: AttributesPrototypeTargetSourceCreator.java,v 1.2 2003-12-15 17:14:34 johnsonr Exp $
+ * @version $Id: AttributesThreadLocalTargetSourceCreator.java,v 1.1 2003-12-15 17:14:35 johnsonr Exp $
  */
-public class AttributesPrototypeTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
+public class AttributesThreadLocalTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
 
 	private final Attributes attributes;
 
-	public AttributesPrototypeTargetSourceCreator(Attributes attributes) {
+	public AttributesThreadLocalTargetSourceCreator(Attributes attributes) {
 		this.attributes = attributes;
 	}
 
 	protected AbstractPrototypeTargetSource createPrototypeTargetSource(Object bean, String beanName, BeanFactory bf) {
 		Class beanClass = bean.getClass();
 		// See if there's a pooling attribute
-		Collection atts = attributes.getAttributes(beanClass, PrototypeAttribute.class);
+		Collection atts = attributes.getAttributes(beanClass, ThreadLocalAttribute.class);
 		if (atts.isEmpty()) {
 			// No pooling attribute: don't create a custom TargetSource
 			return null;
 		}
 		else {
-			return new PrototypeTargetSource();
+			return new ThreadLocalTargetSource();
 		}
 	}
 

@@ -9,12 +9,12 @@ import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * TargetSource creators that creates a PrototypeTargetSource,
+ * TargetSource creator that creates a PrototypeTargetSource,
  * ensuring that each invocation is routed to a new instance of the target.
  * @author Rod Johnson
- * @version $Id: PrototypeTargetSourceCreator.java,v 1.1 2003-12-15 10:00:02 johnsonr Exp $
+ * @version $Id: PrototypeTargetSourceCreator.java,v 1.2 2003-12-15 17:14:44 johnsonr Exp $
  */
-public abstract class PrototypeTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
+public final class PrototypeTargetSourceCreator extends AbstractPrototypeTargetSourceCreator {
 
 	/**
 	 * @see org.springframework.aop.framework.support.TargetSourceCreator#getTargetSource(java.lang.Object,
