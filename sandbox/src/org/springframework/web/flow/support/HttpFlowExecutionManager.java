@@ -251,14 +251,20 @@ public class HttpFlowExecutionManager {
 			String eventId = request.getParameter(getEventIdParameterName());
 
 			if (!StringUtils.hasText(eventId)) {
-				eventId = searchForRequestParameter(request, getEventIdParameterName());
-				if (logger.isDebugEnabled()) {
-					logger.debug("No '" + getEventIdParameterName() + "' parameter was found; falling back to '"
-							+ getEventIdRequestAttributeName() + "' request attribute");
-				}
+				// see if the evenId is set as a request attribute (put
+				// there by a servlet filter)
+				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
 			}
 			if (!StringUtils.hasText(eventId)) {
-				eventId = (String)request.getAttribute(getEventIdRequestAttributeName());
+				// perform an exhaustive search for the eventId in the request
+				// parameter list
+				if (logger.isDebugEnabled()) {
+					logger
+							.debug("No '"
+									+ getEventIdRequestAttributeName()
+									+ "' request attribute was found; performing exhaustive search for the eventId in the request parameter list");
+				}
+				eventId = searchForRequestParameter(request, getEventIdParameterName());
 				if (!StringUtils.hasText(eventId)) {
 					throw new IllegalArgumentException(
 							"The '"
@@ -269,6 +275,8 @@ public class HttpFlowExecutionManager {
 									+ flowExecution.getCaption() + "' -- programmer error?");
 				}
 			}
+			// see if the eventId was set to a static marker placeholder because
+			// of a view configuration error
 			if (eventId.equals(getNotSetEventIdParameterMarker())) {
 				throw new IllegalArgumentException("The eventId submitted by the browser was the 'not set' marker '"
 						+ getNotSetEventIdParameterMarker()
@@ -277,7 +285,6 @@ public class HttpFlowExecutionManager {
 						+ "' parameter must be set to a valid event to execute within the current state '" + stateId
 						+ "' of this flow '" + flowExecution.getCaption() + "' - else I don't know what to do!");
 			}
-
 			// execute the signaled event within the current state
 			modelAndView = flowExecution.signalEvent(eventId, stateId, request, response);
 		}

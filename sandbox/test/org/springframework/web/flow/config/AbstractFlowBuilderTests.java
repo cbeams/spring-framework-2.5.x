@@ -105,7 +105,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 		public void buildStates() {
 			addGetState(PERSONS_LIST);
 			addViewState(PERSONS_LIST, onSubmit(PERSON_DETAILS));
-			addSubFlowState(PERSON_DETAILS, PERSON_DETAILS, "personId", get(PERSONS_LIST));
+			addSubFlowState(PERSON_DETAILS, useModelMapper("personId"), get(PERSONS_LIST));
 			addFinishEndState();
 		}
 	}
