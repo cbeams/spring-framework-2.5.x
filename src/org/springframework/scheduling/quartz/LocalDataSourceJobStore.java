@@ -35,6 +35,12 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * DataSource instead of using a Quartz-managed connection pool. This JobStore
  * will be used if SchedulerFactoryBean's "dataSource" property is set.
  *
+ * <p>Supports both transactional and non-transactional DataSource access.
+ * With a non-XA DataSource and local Spring transactions, a single DataSource
+ * argument is sufficient. In case of an XA DataSource and global JTA transactions,
+ * SchedulerFactoryBean's "nonTransactionalDataSource" property should be set,
+ * passing in a non-XA DataSource that will not participate in global transactions.
+ *
  * <p>Operations performed by this JobStore will properly participate in any
  * kind of Spring-managed transaction, as it uses Spring's DataSourceUtils
  * connection handling methods that are aware of a current transaction.
@@ -46,7 +52,8 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Juergen Hoeller
  * @since 1.1
  * @see SchedulerFactoryBean#setDataSource
- * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+ * @see SchedulerFactoryBean#setNonTransactionalDataSource
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#doGetConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
  */
 public class LocalDataSourceJobStore extends JobStoreCMT {
@@ -57,7 +64,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	 * @see org.quartz.utils.DBConnectionManager#addConnectionProvider
 	 * @see SchedulerFactoryBean#setDataSource
 	 */
-	public static final String TX_DATA_SOURCE_NAME = "springTxDataSource";
+	public static final String TX_DATA_SOURCE_PREFIX = "springTxDataSource.";
 
 	/**
 	 * Name used for the non-transactional ConnectionProvider for Quartz.
@@ -65,15 +72,15 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 	 * @see org.quartz.utils.DBConnectionManager#addConnectionProvider
 	 * @see SchedulerFactoryBean#setDataSource
 	 */
-	public static final String NON_TX_DATA_SOURCE_NAME = "springNonTxDataSource";
+	public static final String NON_TX_DATA_SOURCE_PREFIX = "springNonTxDataSource.";
 
 	private DataSource dataSource;
 
 	public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler signaler)
 	    throws SchedulerConfigException {
 
-		this.dataSource = SchedulerFactoryBean.getConfigTimeDataSource();
 		// Absolutely needs thread-bound DataSource to initialize.
+		this.dataSource = SchedulerFactoryBean.getConfigTimeDataSource();
 		if (this.dataSource == null) {
 			throw new SchedulerConfigException(
 			    "No local DataSource found for configuration - " +
@@ -81,35 +88,41 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 		}
 
 		// Configure transactional connection settings for Quartz.
-		setDataSource(TX_DATA_SOURCE_NAME);
+		setDataSource(TX_DATA_SOURCE_PREFIX + getInstanceName());
 		setDontSetAutoCommitFalse(true);
 
 		// Register transactional ConnectionProvider for Quartz.
 		DBConnectionManager.getInstance().addConnectionProvider(
-				TX_DATA_SOURCE_NAME,
+				TX_DATA_SOURCE_PREFIX + getInstanceName(),
 				new ConnectionProvider() {
 					public Connection getConnection() throws SQLException {
 						// Return a transactional Connection, if any.
-						return DataSourceUtils.getConnection(dataSource);
+						return DataSourceUtils.doGetConnection(dataSource);
 					}
-					public void shutdown() throws SQLException {
+					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
 				}
 		);
 
+		// Non-transactional DataSource is optional: fall back to default
+		// DataSource if not explicitly specified.
+		DataSource nonTxDataSource = SchedulerFactoryBean.getConfigTimeNonTransactionalDataSource();
+		final DataSource nonTxDataSourceToUse =
+				(nonTxDataSource != null ? nonTxDataSource : this.dataSource);
+
 		// Configure non-transactional connection settings for Quartz.
-		setNonManagedTXDataSource(NON_TX_DATA_SOURCE_NAME);
+		setNonManagedTXDataSource(NON_TX_DATA_SOURCE_PREFIX + getInstanceName());
 
 		// Register non-transactional ConnectionProvider for Quartz.
 		DBConnectionManager.getInstance().addConnectionProvider(
-				NON_TX_DATA_SOURCE_NAME,
+				NON_TX_DATA_SOURCE_PREFIX + getInstanceName(),
 				new ConnectionProvider() {
 					public Connection getConnection() throws SQLException {
 						// Always return a non-transactional Connection.
-						return dataSource.getConnection();
+						return nonTxDataSourceToUse.getConnection();
 					}
-					public void shutdown() throws SQLException {
+					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
 				}

@@ -105,6 +105,8 @@ public class SchedulerFactoryBean
 
 	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
+	private static ThreadLocal configTimeNonTransactionalDataSourceHolder = new ThreadLocal();
+
 	/**
 	 * Return the DataSource for the currently configured Quartz Scheduler,
 	 * to be used by LocalDataSourceJobStore.
@@ -116,6 +118,19 @@ public class SchedulerFactoryBean
 	 */
 	public static DataSource getConfigTimeDataSource() {
 		return (DataSource) configTimeDataSourceHolder.get();
+	}
+
+	/**
+	 * Return the non-transactional DataSource for the currently configured
+	 * Quartz Scheduler, to be used by LocalDataSourceJobStore.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * Scheduler, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setNonTransactionalDataSource
+	 * @see LocalDataSourceJobStore
+	 */
+	public static DataSource getConfigTimeNonTransactionalDataSource() {
+		return (DataSource) configTimeNonTransactionalDataSourceHolder.get();
 	}
 
 
@@ -131,6 +146,8 @@ public class SchedulerFactoryBean
 	private Properties quartzProperties;
 
 	private DataSource dataSource;
+
+	private DataSource nonTransactionalDataSource;
 
 	private PlatformTransactionManager transactionManager;
 
@@ -222,7 +239,7 @@ public class SchedulerFactoryBean
 	}
 
 	/**
-	 * Set the DataSource to be used by the Scheduler. If set,
+	 * Set the default DataSource to be used by the Scheduler. If set,
 	 * this will override corresponding settings in Quartz properties.
 	 * <p>Note: If this is set, the Quartz settings should not define
 	 * a job store "dataSource" to avoid meaningless double configuration.
@@ -231,12 +248,32 @@ public class SchedulerFactoryBean
 	 * the Scheduler within Spring-managed (or plain JTA) transactions.
 	 * Else, database locking will not properly work and might even break
 	 * (e.g. if trying to obtain a lock on Oracle without a transaction).
+	 * <p>Supports both transactional and non-transactional DataSource access.
+	 * With a non-XA DataSource and local Spring transactions, a single DataSource
+	 * argument is sufficient. In case of an XA DataSource and global JTA transactions,
+	 * SchedulerFactoryBean's "nonTransactionalDataSource" property should be set,
+	 * passing in a non-XA DataSource that will not participate in global transactions.
+	 * @see #setNonTransactionalDataSource
 	 * @see #setQuartzProperties
 	 * @see #setTransactionManager
 	 * @see org.springframework.scheduling.quartz.LocalDataSourceJobStore
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Set the DataSource to be used by the Scheduler <i>for non-transactional access</i>.
+	 * <p>This is only necessary if the default DataSource is an XA DataSource that will
+	 * always participate in transactions: A non-XA version of that DataSource should
+	 * be specified as "nonTransactionalDataSource" in such a scenario.
+	 * <p>This is not relevant with a local DataSource instance and Spring transactions.
+	 * Specifying a single default DataSource as "dataSource" is sufficient there.
+	 * @see #setDataSource
+	 * @see org.springframework.scheduling.quartz.LocalDataSourceJobStore
+	 */
+	public void setNonTransactionalDataSource(DataSource nonTransactionalDataSource) {
+		this.nonTransactionalDataSource = nonTransactionalDataSource;
 	}
 
 	/**
@@ -457,12 +494,20 @@ public class SchedulerFactoryBean
 			// Make given DataSource available for SchedulerFactory configuration.
 			configTimeDataSourceHolder.set(this.dataSource);
 		}
+		if (this.nonTransactionalDataSource != null) {
+			// Make given non-transactional DataSource available for SchedulerFactory configuration.
+			configTimeNonTransactionalDataSourceHolder.set(this.nonTransactionalDataSource);
+		}
+
 
 		// Get Scheduler instance from SchedulerFactory.
 		this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
 
 		if (this.dataSource != null) {
 			configTimeDataSourceHolder.set(null);
+		}
+		if (this.nonTransactionalDataSource != null) {
+			configTimeNonTransactionalDataSourceHolder.set(null);
 		}
 
 		populateSchedulerContext();
