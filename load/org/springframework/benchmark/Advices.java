@@ -5,11 +5,12 @@ import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.support.StaticMethodMatcherPointcutAroundAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 
 /**
  * 
  * @author Rod Johnson
+ * @version $Id: Advices.java,v 1.2 2004-02-23 15:57:54 dkopylenko Exp $
  */
 public abstract class Advices {
 
@@ -44,7 +45,7 @@ public abstract class Advices {
 	 * 
 	 * @author Rod Johnson
 	 */
-	public static class SetterPointCut extends StaticMethodMatcherPointcutAroundAdvisor {
+	public static class SetterPointCut extends StaticMethodMatcherPointcutAdvisor {
 		public static final String SET= "set";
 		public SetterPointCut(MethodInterceptor mi) {
 			super(mi);
@@ -59,7 +60,7 @@ public abstract class Advices {
 	}
 	
 	
-	public static class ObjectReturnPointCut extends StaticMethodMatcherPointcutAroundAdvisor {
+	public static class ObjectReturnPointCut extends StaticMethodMatcherPointcutAdvisor {
 		public ObjectReturnPointCut(MethodInterceptor mi) {
 			super(mi);
 		}
