@@ -423,7 +423,8 @@ public class BeanWrapperTestSuite extends TestCase {
 		ConsoleListener l = new ConsoleListener();
 		AgistListener v = new AgistListener();
 		try {
-			BeanWrapper bw = new BeanWrapperImpl(t, true);
+			BeanWrapper bw = new BeanWrapperImpl(t);
+			bw.setEventPropagationEnabled(true);
 			bw.addPropertyChangeListener(l);
 			bw.addVetoableChangeListener(v);
 			//System.out.println(bw);
@@ -453,7 +454,8 @@ public class BeanWrapperTestSuite extends TestCase {
 		ConsoleListener l = new ConsoleListener();
 		AgistListener v = new AgistListener();
 		try {
-			BeanWrapper bw = new BeanWrapperImpl(t, true);
+			BeanWrapper bw = new BeanWrapperImpl(t);
+			bw.setEventPropagationEnabled(true);
 			bw.addPropertyChangeListener(l);
 			bw.addVetoableChangeListener(v);
 			//System.out.println(bw);
@@ -482,7 +484,8 @@ public class BeanWrapperTestSuite extends TestCase {
 		String newName = "tony";
 		ConsoleListener l = new ConsoleListener();
 		
-		BeanWrapper bw = new BeanWrapperImpl(t, true);
+		BeanWrapper bw = new BeanWrapperImpl(t);
+		bw.setEventPropagationEnabled(true);
 		bw.addPropertyChangeListener(l);
 
 			//System.out.println(bw);

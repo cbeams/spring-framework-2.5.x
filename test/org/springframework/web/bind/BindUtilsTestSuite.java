@@ -24,15 +24,25 @@ public class BindUtilsTestSuite extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(sc, "GET", "/test.do");
 		request.addParameter("name", " myname ");
 		request.addParameter("age", "myage");
+		request.addParameter("spouse.name", " spousename ");
+		request.addParameter("spouse.age", "spouseage");
 		TestBean tb = new TestBean();
+		tb.setSpouse(new TestBean());
 		assertTrue("Name not set", tb.getName() == null);
 		assertTrue("Age not set", tb.getAge() == 0);
+		assertTrue("Spouse name not set", tb.getSpouse().getName() == null);
+		assertTrue("Spouse age not set", tb.getSpouse().getAge() == 0);
 		Errors errors = BindUtils.bind(request, tb, "tb");
 		assertTrue("Name set", " myname ".equals(tb.getName()));
 		assertTrue("No name error", !errors.hasFieldErrors("name"));
 		assertTrue("Age not set", tb.getAge() == 0);
 		assertTrue("Has age error", errors.hasFieldErrors("age"));
 		assertTrue("Correct age error", "typeMismatch".equals(errors.getFieldError("age").getCode()));
+		assertTrue("Spouse name set", " spousename ".equals(tb.getSpouse().getName()));
+		assertTrue("No spouse name error", !errors.hasFieldErrors("spouse.name"));
+		assertTrue("Spouse age not set", tb.getSpouse().getAge() == 0);
+		assertTrue("Has spouse age error", errors.hasFieldErrors("spouse.age"));
+		assertTrue("Correct spouse age error", "typeMismatch".equals(errors.getFieldError("spouse.age").getCode()));
 	}
 
 	public void testBindAndValidate() {

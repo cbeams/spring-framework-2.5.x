@@ -60,20 +60,16 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 15 April 2001
- * @version $Id: BeanWrapperImpl.java,v 1.3 2003-08-18 21:50:17 pawlakjp Exp $
+ * @version $Id: BeanWrapperImpl.java,v 1.4 2003-08-21 09:02:08 jhoeller Exp $
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
  */
 public class BeanWrapperImpl implements BeanWrapper {
 
-	/** Should JavaBeans event propagation be enabled by default? */
-	public static final boolean DEFAULT_EVENT_PROPAGATION_ENABLED = false;
-
-	/**
-	 * We'll create a lot of these objects, so we don't want a new logger every time.
-	 */
+	/** We'll create a lot of these objects, so we don't want a new logger every time */
 	private static final Log logger = LogFactory.getLog(BeanWrapperImpl.class);
 
+	/** Registry for default PropertyEditors */
 	private static final Map defaultEditors = new HashMap();
 
 	static {
@@ -110,10 +106,13 @@ public class BeanWrapperImpl implements BeanWrapper {
 	/** The wrapped object */
 	private Object object;
 
+	/** The nested path of the object */
+	private String nestedPath = "";
+
 	/**
 	 * Cached introspections results for this object, to prevent encountering the cost
 	 * of JavaBeans introspection every time.
-	 * */
+	 */
 	private CachedIntrospectionResults cachedIntrospectionResults;
 
 	/** Standard java.beans helper object used to propagate events */
@@ -123,7 +122,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	private PropertyChangeSupport propertyChangeSupport;
 
 	/** Should we propagate events to listeners? */
-	private boolean eventPropagationEnabled = DEFAULT_EVENT_PROPAGATION_ENABLED;
+	private boolean eventPropagationEnabled = false;
 
 	/* Map with cached nested BeanWrappers */
 	private Map nestedBeanWrappers;
@@ -137,33 +136,32 @@ public class BeanWrapperImpl implements BeanWrapper {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Creates new BeanWrapperImpl with default event propagation (disabled)
+	 * Creates new BeanWrapperImpl for the given object.
 	 * @param object object wrapped by this BeanWrapper.
 	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object) throws BeansException {
-		this(object, DEFAULT_EVENT_PROPAGATION_ENABLED);
-	}
-
-	/**
-	 * Creates new BeanWrapperImpl, allowing specification of whether event
-	 * propagation is enabled.
-	 * @param object object wrapped by this BeanWrapper.
-	 * @param eventPropagationEnabled whether event propagation should be enabled
-	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
-	 */
-	public BeanWrapperImpl(Object object, boolean eventPropagationEnabled) throws BeansException {
-		this.eventPropagationEnabled = eventPropagationEnabled;
 		setObject(object);
 	}
 
 	/**
-	 * Creates new BeanWrapperImpl, wrapping a new instance of the specified class
+	 * Creates new BeanWrapperImpl for the given object,
+	 * registering a nested path that the object is in.
+	 * @param object object wrapped by this BeanWrapper.
+	 * @param nestedPath the nested path of the object
+	 * @throws BeansException if the object cannot be wrapped by a BeanWrapper
+	 */
+	public BeanWrapperImpl(Object object, String nestedPath) throws BeansException {
+		setObject(object);
+		this.nestedPath = nestedPath;
+	}
+
+	/**
+	 * Creates new BeanWrapperImpl, wrapping a new instance of the specified class.
 	 * @param clazz class to instantiate and wrap
 	 * @throws BeansException if the class cannot be wrapped by a BeanWrapper
 	 */
 	public BeanWrapperImpl(Class clazz) throws BeansException {
-		this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(clazz);
 		setObject(BeanUtils.instantiateClass(clazz));
 	}
 
@@ -177,9 +175,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 		if (object == null)
 			throw new FatalBeanException("Cannot set BeanWrapperImpl target to a null object", null);
 		this.object = object;
-		if (cachedIntrospectionResults == null
-				|| !cachedIntrospectionResults.getBeanClass().equals(object.getClass())) {
-			cachedIntrospectionResults = CachedIntrospectionResults.forClass(object.getClass());
+		if (this.cachedIntrospectionResults == null ||
+		    !this.cachedIntrospectionResults.getBeanClass().equals(object.getClass())) {
+			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(object.getClass());
 		}
 		setEventPropagationEnabled(this.eventPropagationEnabled);
 		// assert: cachedIntrospectionResults != null
@@ -297,7 +295,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	private PropertyChangeEvent createPropertyChangeEventWithTypeConversionIfNecessary(
 			Object target, String propertyName, Object oldValue, Object newValue,
 			Class requiredType) throws BeansException {
-		return new PropertyChangeEvent(target, propertyName, oldValue, doTypeConversionIfNecessary(target, propertyName, oldValue, newValue, requiredType));
+		return new PropertyChangeEvent(target, this.nestedPath + propertyName, oldValue, doTypeConversionIfNecessary(target, propertyName, oldValue, newValue, requiredType));
 	}
 
 	/**
@@ -347,7 +345,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 						}
 						catch (IllegalArgumentException ex) {
 							throw new TypeMismatchException(
-									new PropertyChangeEvent(target, propertyName, oldValue, newValue), requiredType, ex);
+									new PropertyChangeEvent(target, this.nestedPath + propertyName, oldValue, newValue), requiredType, ex);
 						}
 					}
 				}
@@ -379,8 +377,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		String finalPath = nestedPath.substring(nestedPath.lastIndexOf(NESTED_PROPERTY_SEPARATOR) + 1);
 		;
 		if (logger.isDebugEnabled()) {
-			logger.debug("Final path in nested property value '" + nestedPath + "' is '"
-									 + finalPath + "'");
+			logger.debug("Final path in nested property value '" + nestedPath + "' is '" + finalPath + "'");
 		}
 		return finalPath;
 	}
@@ -426,7 +423,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(propertyValue);
 		if (nestedBw == null) {
 			logger.debug("Creating new nested BeanWrapper for property '" + nestedProperty + "'");
-			nestedBw = new BeanWrapperImpl(propertyValue, false);
+			nestedBw = new BeanWrapperImpl(propertyValue, this.nestedPath + nestedProperty + NESTED_PROPERTY_SEPARATOR);
 			// inherit all type-specific PropertyEditors
 			if (this.customEditors != null) {
 				for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
@@ -447,14 +444,12 @@ public class BeanWrapperImpl implements BeanWrapper {
 	}
 
 	/**
-	 * Set an individual field.
-	 * All other setters go through this.
+	 * Set an individual field. All other setters go through this.
 	 * @param pv property value to use for update
 	 * @throws PropertyVetoException if a listeners throws a JavaBeans API veto
 	 * @throws BeansException if there's a low-level, fatal error
 	 */
 	public void setPropertyValue(PropertyValue pv) throws PropertyVetoException, BeansException {
-
 		if (isNestedProperty(pv.getName())) {
 			try {
 				BeanWrapper nestedBw = getBeanWrapperForNestedProperty(pv.getName());
