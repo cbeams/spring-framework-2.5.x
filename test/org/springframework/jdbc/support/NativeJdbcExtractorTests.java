@@ -18,6 +18,7 @@ package org.springframework.jdbc.support;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,54 +34,71 @@ import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
 
 /**
  * @author Andre Biryukov
- * @version $Id: NativeJdbcSupportTests.java,v 1.4 2004-04-30 09:19:34 jhoeller Exp $
+ * @version $Id: NativeJdbcExtractorTests.java,v 1.1 2004-05-31 17:17:50 jhoeller Exp $
  */
-public class NativeJdbcSupportTests extends TestCase {
+public class NativeJdbcExtractorTests extends TestCase {
 
 	public void testSimpleNativeJdbcExtractor() throws SQLException {
 		SimpleNativeJdbcExtractor extractor = new SimpleNativeJdbcExtractor();
 
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
-		MockControl stmtControl = MockControl.createControl(Statement.class);
-		Statement stmt = (Statement) stmtControl.getMock();
-		con.createStatement();
-		conControl.setReturnValue(stmt);
-		stmt.getConnection();
-		stmtControl.setReturnValue(con, 2);
-		stmt.close();
-		stmtControl.setVoidCallable();
+		MockControl dbmdControl = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData dbmd = (DatabaseMetaData) dbmdControl.getMock();
+		MockControl con2Control = MockControl.createControl(Connection.class);
+		Connection con2 = (Connection) con2Control.getMock();
+		con.getMetaData();
+		conControl.setReturnValue(dbmd, 2);
+		dbmd.getConnection();
+		dbmdControl.setReturnValue(con2, 2);
 		conControl.replay();
-		stmtControl.replay();
+		dbmdControl.replay();
+		con2Control.replay();
 
 		Connection nativeCon = extractor.getNativeConnection(con);
-		assertEquals(nativeCon, con);
+		assertEquals(con2, nativeCon);
+
+		MockControl stmtControl = MockControl.createControl(Statement.class);
+		Statement stmt = (Statement) stmtControl.getMock();
+		stmt.getConnection();
+		stmtControl.setReturnValue(con);
+		stmtControl.replay();
+
+		nativeCon = extractor.getNativeConnectionFromStatement(stmt);
+		assertEquals(con2, nativeCon);
 
 		Statement nativeStmt = extractor.getNativeStatement(stmt);
 		assertEquals(nativeStmt, stmt);
-
-		nativeCon = extractor.getNativeConnectionFromStatement(stmt);
-		assertEquals(con, nativeCon);
 
 		MockControl psControl = MockControl.createControl(PreparedStatement.class);
 		PreparedStatement ps = (PreparedStatement) psControl.getMock();
 		psControl.replay();
 
-		PreparedStatement nativePrepStmt = extractor.getNativePreparedStatement(ps);
-		assertEquals(ps, nativePrepStmt);
+		PreparedStatement nativePs = extractor.getNativePreparedStatement(ps);
+		assertEquals(ps, nativePs);
 
-		CallableStatement mockCallableStmt =
-			(CallableStatement) MockControl.createControl(CallableStatement.class).getMock();
-		CallableStatement nativeCallableStmt = extractor.getNativeCallableStatement(mockCallableStmt);
-		assertEquals(mockCallableStmt, nativeCallableStmt);
+		MockControl csControl = MockControl.createControl(CallableStatement.class);
+		CallableStatement cs = (CallableStatement) csControl.getMock();
+		MockControl rsControl = MockControl.createControl(ResultSet.class);
+		ResultSet rs = (ResultSet) rsControl.getMock();
+		cs.getResultSet();
+		csControl.setReturnValue(rs);
+		csControl.replay();
+		rsControl.replay();
 
-		ResultSet mockResultSet = mockCallableStmt.getResultSet();
-		ResultSet nativeResultSet = extractor.getNativeResultSet(mockResultSet);
-		assertEquals(mockResultSet, nativeResultSet);
+		CallableStatement nativeCs = extractor.getNativeCallableStatement(cs);
+		assertEquals(cs, nativeCs);
+
+		ResultSet nativeRs = extractor.getNativeResultSet(cs.getResultSet());
+		assertEquals(nativeRs, rs);
 
 		conControl.verify();
+		dbmdControl.verify();
+		con2Control.verify();
 		stmtControl.verify();
 		psControl.verify();
+		csControl.verify();
+		rsControl.verify();
 	}
 
 	public void testJBossNativeJdbcExtractor() throws SQLException {

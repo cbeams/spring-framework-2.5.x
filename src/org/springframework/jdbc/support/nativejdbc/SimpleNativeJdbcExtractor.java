@@ -23,46 +23,95 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.springframework.jdbc.support.JdbcUtils;
-
 /**
  * Simple implementation of the NativeJdbcExtractor interface.
- * Assumes a pool that just wraps Connections but not Statements:
+ * Assumes a pool that wraps Connection handles but not DatabaseMetaData:
  * In this case, the underlying native Connection can be retrieved by simply
- * opening a Statement and invoking Statement.getConnection(). All other JDBC
- * objects will be returned as passed in.
+ * calling <code>conHandle.getMetaData().getConnection()</code>.
+ * All other JDBC objects will be returned as passed in.
  *
- * <p>Known to work with Resin 2.1 and 3.0, but should work with any pool that
- * does not wrap Statements. Note that the pool can still wrap PreparedStatements
- * etc: The only requirement of this extractor is that java.sql.Statement does
- * not get wrapped, returning the native Connection on getConnection().
+ * <p>This extractor should work with any pool that does not wrap DatabaseMetaData,
+ * and will also work with any plain JDBC driver. Note that a pool can still wrap
+ * Statements, PreparedStatements, etc: The only requirement of this extractor is
+ * that java.sql.DatabaseMetaData does not get wrapped, returning the native
+ * Connection of the JDBC driver on <code>metaData.getConnection()</code>.
  *
  * <p>Customize this extractor by setting the "nativeConnectionNecessaryForXxx"
- * flags accordingly: If PreparedStatements and/or CallableStatements are wrapped
- * by your pool, set the respective "nativeConnectionNecessaryForXxx" flags to
- * true. If none of the statement types is wrapped, the defaults are fine.
+ * flags accordingly: If Statements, PreparedStatements, and/or CallableStatements
+ * are wrapped by your pool, set the corresponding "nativeConnectionNecessaryForXxx"
+ * flags to true. If none of the statement types is wrapped - or you solely need
+ * Connection unwrapping in the first place -, the defaults are fine.
+ *
+ * <p>This is the default extractor used by OracleLobHandler, which just needs
+ * Connection unwrapping via the <code>getNativeConnectionFromStatement</code>
+ * method. This usage of SimpleNativeJdbcExtractor will work with almost any
+ * connection pool; this is why OracleLobHandler uses it as default. Known to
+ * work are, for example:
+ * <ul>
+ * <li>Resin 2.1 and 3.0
+ * <li>C3P0
+ * <li>Jakarta Commons DBCP
+ * </ul>
+ *
+ * <p>For full usage with JdbcTemplate:
+ * <ul>
+ * <li>Use a default SimpleNativeJdbcExtractor for Resin (no JDBC Statement
+ * objects are wrapped, therefore no special unwrapping is necessary)
+ * <li>Use a SimpleNativeJdbcExtractor with all "nativeConnectionNecessaryForXxx"
+ * flags set to true for C3P0 (all JDBC Statement objects are wrapped, but none
+ * of the wrappers allow for unwrapping)
+ * <li>Use a CommonsDbcpNativeJdbcExtractor for Jakarta Commons DBCP (all JDBC
+ * Statement objects are wrapped, but all of them can be extracted by casting
+ * to DBCP implementation classes)
+ * </ul>
  *
  * @author Juergen Hoeller
  * @since 05.12.2003
  * @see java.sql.Statement#getConnection
+ * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
+ * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
+ * @see #getNativeConnectionFromStatement
  */
 public class SimpleNativeJdbcExtractor implements NativeJdbcExtractor {
+
+	private boolean nativeConnectionNecessaryForNativeStatements = false;
 
 	private boolean nativeConnectionNecessaryForNativePreparedStatements = false;
 
 	private boolean nativeConnectionNecessaryForNativeCallableStatements = false;
 
 
+	/**
+	 * Set whether it is necessary to work on the native Connection to
+	 * receive native Statements. Default is false. If true, the Connection
+	 * will be unwrapped first to create a Statement.
+	 * <p>This makes sense if you need to work with native Statements from
+	 * a pool that does not allow to extract the native JDBC objects from its
+	 * wrappers but returns the native Connection on DatabaseMetaData.getConnection.
+	 * <p>The standard SimpleNativeJdbcExtractor is unable to unwrap statements,
+	 * so set this to true if your connection pool wraps Statements.
+	 * @see java.sql.Connection#createStatement
+	 * @see java.sql.DatabaseMetaData#getConnection
+	 */
+	public void setNativeConnectionNecessaryForNativeStatements(boolean nativeConnectionNecessaryForNativeStatements) {
+		this.nativeConnectionNecessaryForNativeStatements = nativeConnectionNecessaryForNativeStatements;
+	}
+
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
-		return false;
+		return nativeConnectionNecessaryForNativeStatements;
 	}
 
 	/**
 	 * Set whether it is necessary to work on the native Connection to
-	 * receive native PreparedStatements. Default is false.
+	 * receive native PreparedStatements. Default is false. If true,
+	 * the Connection will be unwrapped first to create a PreparedStatement.
 	 * <p>This makes sense if you need to work with native PreparedStatements from
 	 * a pool that does not allow to extract the native JDBC objects from its
 	 * wrappers but returns the native Connection on Statement.getConnection.
+	 * <p>The standard SimpleNativeJdbcExtractor is unable to unwrap statements,
+	 * so set this to true if your connection pool wraps PreparedStatements.
+	 * @see java.sql.Connection#prepareStatement
+	 * @see java.sql.DatabaseMetaData#getConnection
 	 */
 	public void setNativeConnectionNecessaryForNativePreparedStatements(boolean nativeConnectionNecessary) {
 		this.nativeConnectionNecessaryForNativePreparedStatements = nativeConnectionNecessary;
@@ -74,10 +123,15 @@ public class SimpleNativeJdbcExtractor implements NativeJdbcExtractor {
 
 	/**
 	 * Set whether it is necessary to work on the native Connection to
-	 * receive native CallableStatements. Default is false.
+	 * receive native CallableStatements. Default is false. If true,
+	 * the Connection will be unwrapped first to create a CallableStatement.
 	 * <p>This makes sense if you need to work with native CallableStatements from
 	 * a pool that does not allow to extract the native JDBC objects from its
 	 * wrappers but returns the native Connection on Statement.getConnection.
+	 * <p>The standard SimpleNativeJdbcExtractor is unable to unwrap statements,
+	 * so set this to true if your connection pool wraps CallableStatements.
+	 * @see java.sql.Connection#prepareCall
+	 * @see java.sql.DatabaseMetaData#getConnection
 	 */
 	public void setNativeConnectionNecessaryForNativeCallableStatements(boolean nativeConnectionNecessary) {
 		this.nativeConnectionNecessaryForNativeCallableStatements = nativeConnectionNecessary;
@@ -88,44 +142,49 @@ public class SimpleNativeJdbcExtractor implements NativeJdbcExtractor {
 	}
 
 
+	/**
+	 * Retrieve the Connection via the DatabaseMetaData object, which will
+	 * result in the native JDBC Connection with many connection pools.
+	 * @see java.sql.DatabaseMetaData#getConnection
+	 */
 	public Connection getNativeConnection(Connection con) throws SQLException {
-		Statement stmt = con.createStatement();
-		try {
-			// assuming a non-wrapped Statement:
-			// getConnection() will return the native Connection
-			return stmt.getConnection();
-		}
-		finally {
-			JdbcUtils.closeStatement(stmt);
-		}
+		return con.getMetaData().getConnection();
 	}
 
+	/**
+	 * Retrieve the Connection via the DatabaseMetaData object of the
+	 * Statement's Connection.
+	 * @see #getNativeConnection
+	 * @see java.sql.Statement#getConnection
+	 */
 	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
-		if (this.nativeConnectionNecessaryForNativePreparedStatements && stmt instanceof PreparedStatement) {
-			// PreparedStatements are wrapped:
-			// retrieve the native Connection via a Statement
-			return getNativeConnection(stmt.getConnection());
-		}
-		if (this.nativeConnectionNecessaryForNativeCallableStatements && stmt instanceof CallableStatement) {
-			// CallableStatements are wrapped:
-			// retrieve the native Connection via a Statement
-			return getNativeConnection(stmt.getConnection());
-		}
-		return stmt.getConnection();
+		return getNativeConnection(stmt.getConnection());
 	}
 
+	/**
+	 * Not able to unwrap: return passed-in Statement.
+	 */
 	public Statement getNativeStatement(Statement stmt) {
 		return stmt;
 	}
 
+	/**
+	 * Not able to unwrap: return passed-in PreparedStatement.
+	 */
 	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
 		return ps;
 	}
 
+	/**
+	 * Not able to unwrap: return passed-in CallableStatement.
+	 */
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) {
 		return cs;
 	}
 
+	/**
+	 * Not able to unwrap: return passed-in ResultSet.
+	 */
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 		return rs;
 	}
