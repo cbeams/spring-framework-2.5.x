@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework.
 
-    $Id: build.xml,v 1.61 2004-05-27 09:18:33 jhoeller Exp $
+    $Id: build.xml,v 1.62 2004-06-04 13:04:12 aarendsen Exp $
 
     This script requires a "lib" directory containing the necessary third party JAR files.
     See project.properties for the definitions of the properties used in this file.
@@ -895,5 +895,30 @@
 		</jar>
 
 	</target>
+
+
+	<!--
+		 targets for the automated build
+		 @author Alef Arendsen
+		 
+		 'mb' runs all the automated build tests and is supposed to be expanded further
+		 'mb-server-tests' runs all the servers tests
+		 'mb-spring-build' runs the spring-build
+	-->
+	<target name="mb" depends="clean, build, fulljar, tests, mb-server-tests"/>		
+	
+	<target name="mb-server-tests">			
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="spring.nobuild" value="true"/>
+			<property name="target.app" value="jpetstore"/>
+			<property name="target.server" value="tomcat4"/>
+		</ant>
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="jpetstore"/>
+			<property name="target.server" value="tomcat5"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+	</target>	
 
 </project>

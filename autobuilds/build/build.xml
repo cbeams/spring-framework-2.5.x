@@ -9,7 +9,7 @@
 	This script should normally be managed from a shell script or 
 	batch file (supplied).
 	
-	$Id: build.xml,v 1.9 2004-05-26 00:08:23 davison Exp $
+	$Id: build.xml,v 1.10 2004-06-04 13:04:24 aarendsen Exp $
 -->
 <project name="autobuilds" basedir="." default="usage">
 
@@ -68,14 +68,14 @@
 	<!-- 
 		Version numbers and file names for each server that we can deploy to
 	-->	
-	<property name="tomcat4.version" value="4.1.29" />	
-	<property name="tomcat4.tarball" value="jakarta-tomcat-4.1.29.tar.gz" />
-	<property name="jboss3.version" value="3.2.2" />
-	<property name="jboss3.tarball" value="jboss-3.2.2.tgz" />
-	<property name="tomcat5.version" value="5.0.14" />
-	<property name="tomcat5.tarball" value="jakarta-tomcat-5.0.14.tar.gz" />
-	<property name="jetty4.version" value="4.2.14" />
-	<property name="jetty4.tarball" value="Jetty-4.2.14-all.tar.gz" />
+	<property name="tomcat4.version" value="4.1.30" />	
+	<property name="tomcat4.tarball" value="jakarta-tomcat-4.1.30.tar.gz" />
+	<property name="jboss3.version" value="3.2.3" />
+	<property name="jboss3.tarball" value="jboss-3.2.3.tgz" />
+	<property name="tomcat5.version" value="5.0.25" />
+	<property name="tomcat5.tarball" value="jakarta-tomcat-5.0.25.tar.gz" />
+	<property name="jetty4.version" value="4.2.17" />
+	<property name="jetty4.tarball" value="Jetty-4.2.17-all.tar.gz" />
 	<property name="resin2.version" value="2.1.11" />
 	<property name="resin2.tarball" value="resin-2.1.11.tar.gz" />
 	<property name="resin3.version" value="3.0.4" />
@@ -183,14 +183,16 @@ realclean       --> delete ALL build products and sandbox.
 	
 	
 	
+
+	
 	<!--
 		main
 		
 		workflow task for autobuilds
 	-->
 	<target name="main" depends="setup,spring-build,taskdefs,init">
-		
-		<record name="${reports.dir}/${autobuilds.buildlog}"/>
+
+		<!--<record name="${reports.dir}/${autobuilds.buildlog}"/>-->
 		
 		<echo message="     #  ----------------------------------------------------------------" />
 		<echo message="     #" />
@@ -266,8 +268,12 @@ realclean       --> delete ALL build products and sandbox.
 		spring-build
 		
 		build the spring.jar file from source
+		
+		spring.nobuild indicated no build will occur (this is especially useful
+		for automated building where the cvs updating and the building is done by somebody or
+		something else.
 	-->
-	<target name="spring-build">
+	<target name="spring-build" unless="autobuild.nospringbuild">
 		<echo message="#  ----------------------------------------------------------------" />
 		<echo message="#  Performing build of spring.jar" />
 		<echo message="#  ----------------------------------------------------------------" />
@@ -407,7 +413,7 @@ realclean       --> delete ALL build products and sandbox.
 		
 		see if the unit tests failed or errored and take appropriate action
 	-->
-	<target name="testchecks" if="junit.failure">
+	<target name="testchecks" if="junit.failure" unless="autobuild.nomail">
 		<mail 
 			from="${autobuilds.mail.from}"
 			tolist="${autobuilds.mail.sendto}"
@@ -444,5 +450,6 @@ realclean       --> delete ALL build products and sandbox.
 	<target name="realclean">
 		<delete dir="${target.root.dir}" />
 	</target>
+
 	
 </project>
