@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.8 2003-10-22 17:10:06 jhoeller Exp $
+    $Id: build.xml,v 1.9 2003-11-04 15:47:30 dkopylenko Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -396,7 +396,7 @@
 	</target>
 
 
-	<target name="loadjar" depends="build,buildtests" description="Build load test jar">
+	<target name="loadjar" depends="buildtests" description="Build load test jar">
 
 		<mkdir dir="${loadbuild.dir}"/>
 
@@ -424,6 +424,21 @@
 			<fileset dir="${loadbuild.dir}">
 				<include name="org/springframework/load/**" />
 			</fileset>
+		</jar>
+
+	</target>
+	
+	<target name="metadata" depends="build,initdist" description="Create JAR file for source level matadata support">
+
+		<delete file="${dist.dir}/${spring-metadata.jar}"/>
+
+		<jar jarfile="${dist.dir}/${spring-metadata.jar}">
+			<fileset dir="${build.dir}">
+				<include name="org/springframework/metadata/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
 		</jar>
 
 	</target>
