@@ -20,24 +20,15 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 
 /**
- * 
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 08-Jul-2003
  */
 public class JndiTemplateTests extends TestCase {
 
-	/**
-	 * Constructor for JndiTemplateTests.
-	 * @param arg0
-	 */
-	public JndiTemplateTests(String arg0) {
-		super(arg0);
-	}
-	
 	public void testLookupSucceeds() throws Exception {
 		Object o = new Object();
 		String name = "foo";
@@ -108,6 +99,27 @@ public class JndiTemplateTests extends TestCase {
 		mc.verify();
 	}
 	
+	public void testRebind() throws Exception {
+		Object o = new Object();
+		String name = "foo";
+		MockControl mc = MockControl.createControl(Context.class);
+		final Context mock = (Context) mc.getMock();
+		mock.rebind(name, o);
+		mc.setVoidCallable(1);
+		mock.close();
+		mc.setVoidCallable(1);
+		mc.replay();
+
+		JndiTemplate jt = new JndiTemplate() {
+			protected Context createInitialContext() throws NamingException {
+				return mock;
+			}
+		};
+
+		jt.rebind(name, o);
+		mc.verify();
+	}
+
 	public void testUnbind() throws Exception {
 		String name = "something";
 		MockControl mc = MockControl.createControl(Context.class);
