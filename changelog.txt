@@ -1,7 +1,7 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
 
-$Id: changelog.txt,v 1.31 2003-10-23 10:24:24 jhoeller Exp $
+$Id: changelog.txt,v 1.32 2003-10-23 18:48:18 uid112313 Exp $
 
 Changes in version 1.0 M2 (23.10.2003)
 --------------------------------------
@@ -13,6 +13,7 @@ Changes in version 1.0 M2 (23.10.2003)
 * reworked AbstractBeanFactory's circular reference detection into eager singleton caching
 * redefined XmlBeanFactory "ref" tag: "local" for local bean ids, "bean" for any bean name ("external" deprecated now)
 * reworked XmlBeanFactory's alias handling to allow for multiple aliases in the "name" attribute of the bean tag
+* allowed nested maps in XML bean definitions, i.e. a "map" tag as child of an "entry" tag of a surrounding "map" tag
 * reworked AopUtils and AOP ProxyFactory configuration options
 * introduced auto proxy creator classes in org.springframework.aop.framework.support, implementing BeanPostProcessor
 * restructured org.springframework.context.support package into support, event, and config packages
@@ -20,7 +21,7 @@ Changes in version 1.0 M2 (23.10.2003)
 * reworked AbstractXmlApplicationContext's "getInputStreamForBeanFactory" into "loadBeanDefinitions(BeanFactory)"
 * added support for multiple file paths in FileSystemXmlApplicationContext and ClassPathXmlApplicationContext
 * added support for multiple basenames in a ResourceBundleMessageSource, getting checked sequentially
-* added getMessage convenience methods to ApplicationObjectSupport, with all combinations of arguments
+* introduced MessageSourceAccessor helper class for easy message access, available via ApplicationObjectSupport
 * reworked PropertyResourceConfigurer into PropertyOverrideConfigurer and PropertyPlaceholderConfigurer
 * introduced generic mail infrastructure in org.springframework.mail package, around the MailSender interface
 * introduced JavaMailSender and JavaMailSenderImpl in org.springframework.mail.javamail package
