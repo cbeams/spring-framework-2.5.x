@@ -9,6 +9,11 @@
 		The flow id of the flow to start should be passed in using the "_flowId" request parameter.
 	-->
 	<bean id="frontController" name="/pos.htm" class="org.springframework.web.flow.mvc.FlowController">
+		<!--
+			Set cacheSeconds to a small, non 0, value so you can do ctrl-N to open an new
+			window and experiment with the continuations stuff.
+		-->
+		<property name="cacheSeconds"><value>5</value></property>
 		<property name="flowExecutionManager" ref="flowExecutionManager"/>
 	</bean>
 
@@ -28,7 +33,9 @@
 		-->
 		<!-- 
 		<property name="flowExecutionStorage">
-			<bean class="org.springframework.web.flow.execution.ClientContinuationFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.ClientContinuationFlowExecutionStorage">
+				<property name="compress"><value>true</value></property>
+			</bean>
 		</property>
 		-->
 	</bean>
