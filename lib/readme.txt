@@ -68,7 +68,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0.3 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.0.4 (http://www.ibatis.com)
 - ibatis-sqlmap-2.jar is required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
@@ -131,8 +131,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework on J2SE 1.3
 - required at runtime when using Spring's XmlBeanFactory on J2SE 1.3
 
-* jakarta-commons/commons-attributes-*-SNAPSHOT.jar
-- Commons Attributes July 6th snapshot (http://jakarta.apache.org/commons/sandbox/attributes)
+* jakarta-commons/commons-attributes-*-2.1rc1.jar
+- Commons Attributes 2.1 RC1 (http://jakarta.apache.org/commons/attributes)
 - required for building the framework
 - required at runtime when using Spring's Commons Attributes support
 
@@ -182,7 +182,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore's Struts web tier
 
 * jakarta-taglibs/standard.jar
-- Jakarta's JSTL implementation 1.0.5 (http://jakarta.apache.org/taglibs)
+- Jakarta's JSTL implementation 1.0.6 (http://jakarta.apache.org/taglibs)
 - required for running JPetStore, Petclinic, Countries, and Tiles Example
 
 * jdo/jdo.jar
