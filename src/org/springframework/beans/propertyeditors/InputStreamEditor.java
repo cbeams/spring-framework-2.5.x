@@ -23,8 +23,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 
 /**
- * Editor for java.io.InputStream, to directly feed an InputStream
- * property instead of using a String location property.
+ * One-way PropertyEditor, which can convert from a text string to an
+ * InputStream, allowing InputStream properties to be set directly as
+ * a text string. The string should be suitable for feeding to a 
+ * ResourceEditor, since this is what is actually used to produce a
+ * Resource from the text, which is then asked for an InputStream.
+ * Note that in the default usage the stream is not 
+ * closed by Spring itself!
  * @author Juergen Hoeller
  * @since 01.04.2004
  */
