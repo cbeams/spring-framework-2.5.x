@@ -38,11 +38,18 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>
  *
- * <p>Note: Hessian services accessed with this proxy factory do not have to be
- * exported via HessianServiceExporter, as there isn't any special handling involved.
+ * <p>Note: Hessian services accessed with this proxy factory do not
+ * have to be exported via HessianServiceExporter, as there isn't
+ * any special handling involved. Therefore, you can also access
+ * services that are exported via Caucho's HessianServlet.
  *
  * @author Juergen Hoeller
  * @since 29.09.2003
+ * @see #setServiceInterface
+ * @see #setServiceUrl
+ * @see #setUsername
+ * @see #setPassword
+ * @see com.caucho.hessian.client.HessianProxyFactory
  */
 public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean {
 
@@ -52,6 +59,9 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 
 	/**
 	 * Set the username that this factory should use to access the remote service.
+	 * Default is none.
+	 * <p>The username will be sent by Hessian via HTTP Basic Authentication.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setUser
 	 */
 	public void setUsername(String username) {
 		this.proxyFactory.setUser(username);
@@ -59,9 +69,21 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 
 	/**
 	 * Set the password that this factory should use to access the remote service.
+	 * Default is none.
+	 * <p>The password will be sent by Hessian via HTTP Basic Authentication.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setPassword
 	 */
 	public void setPassword(String password) {
 		this.proxyFactory.setPassword(password);
+	}
+
+	/**
+	 * Set whether overloaded methods should be enabled for remote invocations.
+	 * Default is false.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setOverloadEnabled
+	 */
+	public void setOverloadEnabled(boolean overloadEnabled) {
+		this.proxyFactory.setOverloadEnabled(overloadEnabled);
 	}
 
 	public void afterPropertiesSet() throws MalformedURLException {
@@ -71,7 +93,18 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 		if (getServiceUrl() == null) {
 			throw new IllegalArgumentException("serviceUrl is required");
 		}
-		this.hessianProxy = this.proxyFactory.create(getServiceInterface(), getServiceUrl());
+		this.hessianProxy = createHessianProxy(this.proxyFactory);
+	}
+
+	/**
+	 * Create the Hessian proxy that is wrapped by this interceptor.
+	 * @param proxyFactory the proxy factory to use
+	 * @return the Hessian proxy
+	 * @throws MalformedURLException if thrown by the proxy factory
+	 * @see com.caucho.hessian.client.HessianProxyFactory#create
+	 */
+	protected Object createHessianProxy(HessianProxyFactory proxyFactory) throws MalformedURLException {
+		return proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
