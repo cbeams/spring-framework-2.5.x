@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.metadata;
 
@@ -31,9 +31,10 @@ import java.util.Collection;
  * attribute sources: for example, an XML file or properties file might override
  * some attributes defined in source-level metadata with JSR-175 or another framework.
  *
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  * @author Rod Johnson
- * @since Sep 30, 2003
+ * @since 30.09.2003
+ * @see org.springframework.metadata.commons.CommonsAttributes
  */
 public interface Attributes {
 
@@ -46,7 +47,7 @@ public interface Attributes {
 
 	/**
 	 * Return the class attributes of the target class of a given type.
-	 * The class attributes are filtered by providing a java.lang.Class
+	 * <p>The class attributes are filtered by providing a <code>Class</code>
 	 * reference to indicate the type to filter on. This is useful if you know
 	 * the type of the attribute you are looking for and don't want to sort
 	 * through the unfiltered Collection yourself.
@@ -65,7 +66,7 @@ public interface Attributes {
 
 	/**
 	 * Return the method attributes of the target method of a given type.
-	 * The method attributes are filtered by providing a java.lang.Class
+	 * <p>The method attributes are filtered by providing a <code>Class</code>
 	 * reference to indicate the type to filter on. This is useful if you know
 	 * the type of the attribute you are looking for and don't want to sort
 	 * through the unfiltered Collection yourself.
@@ -84,7 +85,7 @@ public interface Attributes {
 
 	/**
 	 * Return the field attributes of the target method of a given type.
-	 * The field attributes are filtered by providing a java.lang.Class
+	 * <p>The field attributes are filtered by providing a <code>Class</code>
 	 * reference to indicate the type to filter on. This is useful if you know
 	 * the type of the attribute you are looking for and don't want to sort
 	 * through the unfiltered Collection yourself.

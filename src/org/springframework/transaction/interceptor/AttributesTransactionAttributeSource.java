@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.metadata.Attributes
+ * @see org.springframework.metadata.commons.CommonsAttributes
  * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource
  */
 public class AttributesTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
@@ -51,6 +52,9 @@ public class AttributesTransactionAttributeSource extends AbstractFallbackTransa
 	 * @param attributes the Attributes implementation to use
 	 */
 	public AttributesTransactionAttributeSource(Attributes attributes) {
+		if (attributes == null) {
+			throw new IllegalArgumentException("Attributes is required");
+		}
 		this.attributes = attributes;
 	}
 
