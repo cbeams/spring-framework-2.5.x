@@ -326,7 +326,7 @@ public class Flow implements Serializable {
 	 * @throws NoSuchFlowStateException The state has not been added to this
 	 *         flow
 	 */
-	protected void setStartState(TransitionableState state) throws NoSuchFlowStateException {
+	public void setStartState(TransitionableState state) throws NoSuchFlowStateException {
 		assertValidState(state);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting start state for flow '" + getId() + "' to '" + state.getId() + "'");

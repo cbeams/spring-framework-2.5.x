@@ -20,11 +20,7 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributesMapper;
 
 /**
- * Service locator interface used by flows to retrieve needed artifacts
- * <p>
- * Typically implemented via Spring's ServiceLocatorProxyCreator, to get
- * artifacts as beans out of a Spring context.
- * </p>
+ * Service locator interface used by flows to retrieve needed artifacts.
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -32,18 +28,18 @@ import org.springframework.web.flow.FlowAttributesMapper;
 public interface FlowServiceLocator {
 
 	/**
-	 * @param actionBeanId
+	 * @param actionId
 	 * @return
 	 * @throws NoSuchActionException
 	 */
-	public Action getActionBean(String actionBeanId) throws FlowServiceLookupException;
+	public Action getAction(String actionId) throws FlowServiceLookupException;
 
 	/**
-	 * @param actionBeanImplementationClass
+	 * @param actionImplementationClass
 	 * @return
 	 * @throws FlowServiceLookupException
 	 */
-	public Action getActionBean(Class actionBeanImplementationClass) throws FlowServiceLookupException;
+	public Action getAction(Class actionImplementationClass) throws FlowServiceLookupException;
 
 	/**
 	 * @param flowDefinitionId

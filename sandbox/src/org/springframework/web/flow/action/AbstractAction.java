@@ -29,7 +29,6 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionResult;
 import org.springframework.web.flow.AttributesAccessor;
 import org.springframework.web.flow.MutableAttributesAccessor;
-import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowConstants;
 import org.springframework.web.util.WebUtils;
 
@@ -74,7 +73,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	protected ActionResult success() {
-		return new ActionResult(AbstractFlowBuilder.SUCCESS);
+		return new ActionResult(FlowConstants.SUCCESS);
 	}
 
 	protected ActionResult error() {

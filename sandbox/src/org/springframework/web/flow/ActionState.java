@@ -34,36 +34,35 @@ public class ActionState extends TransitionableState {
 
 	public ActionState(Flow flow, String id, Action action, Transition transition) {
 		super(flow, id, transition);
-		addActionBean(action);
+		addAction(action);
 	}
 
 	public ActionState(Flow flow, String id, Action action, Transition[] transitions) {
 		super(flow, id, transitions);
-		addActionBean(action);
+		addAction(action);
 	}
 
 	public ActionState(Flow flow, String id, Action[] actions, Transition[] transitions) {
 		super(flow, id, transitions);
-		addActionBeans(actions);
+		addActions(actions);
 	}
 
 	public boolean isActionState() {
 		return true;
 	}
 
-	protected void addActionBean(Action action) {
+	protected void addAction(Action action) {
 		this.actions.add(action);
 	}
 
-	protected void addActionBeans(Action[] actions) {
+	protected void addActions(Action[] actions) {
 		for (int i = 0; i < actions.length; i++) {
 			this.actions.add(actions[i]);
 		}
 	}
 
-	protected Action getActionBean() {
-		Iterator it = actionIterator();
-		return (Action)it.next();
+	protected Action[] getActions() {
+		return (Action[])actions.toArray(new Action[actions.size()]);
 	}
 
 	/**

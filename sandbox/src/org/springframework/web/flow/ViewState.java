@@ -73,6 +73,10 @@ public class ViewState extends TransitionableState {
 	public boolean isViewState() {
 		return true;
 	}
+	
+	public boolean isMarker() {
+		return !StringUtils.hasText(getViewName());
+	}
 
 	/**
 	 * Return a view descriptor pointing requesting front controllers to a
@@ -89,17 +93,17 @@ public class ViewState extends TransitionableState {
 	 */
 	protected ModelAndView doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		if (StringUtils.hasText(getViewName())) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Returning view name '" + viewName + "' to render");
-			}
-			return new ModelAndView(viewName, sessionExecution.getAttributes());
-		}
-		else {
+		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning a view descriptor null object; no view to render");
 			}
 			return null;
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Returning view name '" + viewName + "' to render");
+			}
+			return new ModelAndView(viewName, sessionExecution.getAttributes());
 		}
 	}
 

@@ -22,7 +22,7 @@ import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowSession;
 
-public class FlowExecutionListenerAdapter implements FlowExecutionListener {
+public abstract class FlowExecutionListenerAdapter implements FlowExecutionListener {
 
 	public void started(FlowExecution flowExecution) {
 

@@ -22,6 +22,13 @@ public class NoSuchFlowDefinitionException extends FlowServiceLookupException {
 	public NoSuchFlowDefinitionException(Class serviceImplementationClass, Throwable cause) {
 		super(serviceImplementationClass, cause);
 	}
+	
+	/**
+	 * @param serviceId
+	 */
+	public NoSuchFlowDefinitionException(String serviceId) {
+		super(serviceId);
+	}
 
 	/**
 	 * @param serviceId

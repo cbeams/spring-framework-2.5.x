@@ -60,9 +60,9 @@ public class FlowTests extends TestCase {
 
 		MockControl flowDaoMc = MockControl.createControl(FlowServiceLocator.class);
 		FlowServiceLocator dao = (FlowServiceLocator)flowDaoMc.getMock();
-		dao.getActionBean(getStateId);
+		dao.getAction(getStateId);
 		flowDaoMc.setReturnValue(new NoOpActionBean());
-		dao.getActionBean(bindAndValidateStateId);
+		dao.getAction(bindAndValidateStateId);
 		flowDaoMc.setReturnValue(new NoOpActionBean());
 		flowDaoMc.replay();
 	}

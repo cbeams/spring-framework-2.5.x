@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	Web flow DTD
+	Authors: Erwin Vervaet
+	
+	This DTD defines the web flow XML syntax. Web flows capture the page flow
+	in (part of) a web application.
+
+	XML documents that conform to this DTD should declare the following doctype:
+
+	<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD SPRING WEB FLOW//EN"
+		"http://www.springframework.org/dtd/web-flow.dtd">
+-->
+
+
+<!--
+	Defines the root element for a web flow definition. Web flows
+	are composed of a number of states.
+-->
+<!ELEMENT web-flow (
+	(action-state | view-state | sub-flow-state | end-state)+
+)>
+
+<!--
+	Name of the web flow.
+-->
+<!ATTLIST web-flow name CDATA #REQUIRED>
+
+<!--
+	Defines the start state of the flow. This identifies the state
+	where flow execution will begin.
+-->
+<!ATTLIST web-flow start-state IDREF #REQUIRED>
+
+
+<!--
+	Defines an action state: a state where an action is executed.
+	Transitions triggered by the action(s) lead on to other states.
+-->
+<!ELEMENT action-state (
+	action+, transition+
+)>
+
+<!--
+	Unique id of an action state.
+-->
+<!ATTLIST action-state id ID #REQUIRED>
+
+
+<!--
+	Defines a view state: a state where a view will be rendered.
+	Transitions triggered by the view lead on to other states.
+-->
+<!ELEMENT view-state (
+	transition*
+)>
+
+<!--
+	Unique id of a view state.
+-->
+<!ATTLIST view-state id ID #REQUIRED>
+
+<!--
+	Name of the view that will be rendered. This is optional. When
+	not present, the view name will default to the id of the view state.
+-->
+<!ATTLIST view-state view CDATA #IMPLIED>
+
+<!--
+	Indicates whether or not this view state is a marker view state.
+	A marker view state does not actually render a view, but just returns
+	controll to the client. Use this when an action has already generated
+	the response.
+-->
+<!ATTLIST view-state marker (true | false) "false">
+
+
+<!--
+	Defines a flow state: a state where another flow is executed. When the
+	sub flow reaches an end state, the corresponding transition in this state
+	is triggered to continue the flow.
+-->
+<!ELEMENT sub-flow-state (
+	transition*
+)>
+
+<!--
+	Unique id of a flow state.
+-->
+<!ATTLIST sub-flow-state id ID #REQUIRED>
+
+<!--
+	Name of the flow that will be rendered. This is the name of a bean
+	in the application context associated with the flow controller.
+-->
+<!ATTLIST sub-flow-state flow CDATA #REQUIRED>
+
+<!--
+	Optional name of a mapper that will map model data to and from the sub flow.
+	This is the name of a bean in the application context associated with the
+	flow controller.
+-->
+<!ATTLIST sub-flow-state attributes-mapper CDATA #IMPLIED>
+
+
+<!--
+	Defines an end state: a state that terminates the flow.
+-->
+<!ELEMENT end-state EMPTY>
+
+<!--
+	Unique id of an end state.
+-->
+<!ATTLIST end-state id ID #REQUIRED>
+
+<!--
+	Name of the view that will be rendered. This is optional. When
+	not present, the view name will default to the id of the view state.
+-->
+<!ATTLIST end-state view CDATA #IMPLIED>
+
+<!--
+	Indicates whether or not this end state is a marker view state.
+	A marker view state does not actually render a view, but just returns
+	controll to the client. Use this when an action has already generated
+	the response.
+-->
+<!ATTLIST end-state marker (true | false) "false">
+
+
+<!--
+	Defines a transition to another state.
+-->
+<!ELEMENT transition EMPTY>
+
+<!--
+	Name of the transition. This name is of the form "[actionId'.']event". So
+	the name of the event that will trigger the transition is prepended with
+	the id of the action that signals the event. Both are concatenated using
+	a dot. So when you have an action with id "myAction" that signals an
+	event "ok", the name of the corresponding transition should be "myAction.ok".
+	
+	For the events signaled by a view state or a subflow state, no action is involved so
+	the transition name is simply the name of the event that triggers the transition
+	("ok" in the previous example).
+-->
+<!ATTLIST transition name CDATA #REQUIRED>
+
+<!--
+	Target state of the transition.
+-->
+<!ATTLIST transition to IDREF #REQUIRED>
+
+
+<!--
+	Defines an action that is executed by the flow in an action state.
+-->
+<!ELEMENT action EMPTY>
+
+<!--
+	Name of the action.
+-->
+<!ATTLIST action name CDATA #REQUIRED>

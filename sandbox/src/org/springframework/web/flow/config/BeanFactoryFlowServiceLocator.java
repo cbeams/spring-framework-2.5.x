@@ -32,26 +32,26 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (ListableBeanFactory)getBeanFactory();
 	}
 
-	public Action getActionBean(String actionBeanId) throws FlowServiceLookupException {
+	public Action getAction(String actionId) throws FlowServiceLookupException {
 		try {
-			return (Action)getBeanFactory().getBean(actionBeanId, Action.class);
+			return (Action)getBeanFactory().getBean(actionId, Action.class);
 		}
 		catch (BeansException e) {
-			throw new NoSuchActionException(actionBeanId, e);
+			throw new NoSuchActionException(actionId, e);
 		}
 	}
 
-	public Action getActionBean(Class actionBeanImplementationClass) throws FlowServiceLookupException {
-		if (!Action.class.isAssignableFrom(actionBeanImplementationClass)) {
-			throw new IllegalArgumentException("Your action bean implementation '" + actionBeanImplementationClass
+	public Action getAction(Class actionImplementationClass) throws FlowServiceLookupException {
+		if (!Action.class.isAssignableFrom(actionImplementationClass)) {
+			throw new IllegalArgumentException("Your action implementation '" + actionImplementationClass
 					+ "' must implement the '" + Action.class.getName() + "' interface");
 
 		}
 		try {
-			return (Action)BeanFactoryUtils.beanOfType(getListableBeanFactory(), actionBeanImplementationClass);
+			return (Action)BeanFactoryUtils.beanOfType(getListableBeanFactory(), actionImplementationClass);
 		}
 		catch (BeansException e) {
-			throw new NoSuchActionException(actionBeanImplementationClass, e);
+			throw new NoSuchActionException(actionImplementationClass, e);
 		}
 	}
 
@@ -127,4 +127,5 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			throw new NoSuchFlowAttributesMapperException(flowAttributesMapperImplementationClass, e);
 		}
 	}
+
 }

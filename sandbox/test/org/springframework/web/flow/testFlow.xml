@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE web-flow PUBLIC "-//SPRING//DTD SPRING WEB FLOW//EN"
+	"http://www.springframework.org/dtd/web-flow.dtd">
+
+<web-flow name="testFlow" start-state="actionState1">
+
+	<action-state id="actionState1">
+		<action name="action1"/>
+		<action name="action2"/>
+		<transition name="event1" to="viewState1"/>
+		<transition name="event2" to="viewState2"/>
+	</action-state>
+	
+	<view-state id="viewState1" view="view1">
+		<transition name="event1" to="subFlowState1"/>
+	</view-state>
+	
+	<view-state id="viewState2" marker="true">
+		<transition name="event2" to="subFlowState2"/>
+	</view-state>
+	
+	<sub-flow-state id="subFlowState1" flow="subFlow1" attributes-mapper="attribMapper1">
+		<transition name="event1" to="endState1"/>
+	</sub-flow-state>
+	
+	<sub-flow-state id="subFlowState2" flow="subFlow2">
+		<transition name="event2" to="endState2"/>
+	</sub-flow-state>
+	
+	<end-state id="endState1" view="endView1"/>
+	
+	<end-state id="endState2" marker="true"/>
+
+</web-flow>

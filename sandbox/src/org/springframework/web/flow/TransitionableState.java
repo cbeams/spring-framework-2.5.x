@@ -105,6 +105,10 @@ public abstract class TransitionableState extends AbstractState {
 	protected Iterator transitionsIterator() {
 		return transitions.iterator();
 	}
+	
+	protected Transition[] getTransitions() {
+		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
+	}
 
 	public Collection getEventIdCriterion() {
 		if (transitions.isEmpty()) {

@@ -48,6 +48,10 @@ public class EndState extends AbstractState {
 	protected String getViewName() {
 		return viewName;
 	}
+	
+	public boolean isMarker() {
+		return !StringUtils.hasText(viewName);
+	}
 
 	public boolean isEndState() {
 		return true;
@@ -94,17 +98,17 @@ public class EndState extends AbstractState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Session execution for root flow '" + getFlow().getId() + "' has ended");
 			}
-			if (StringUtils.hasText(getViewName())) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Returning view name '" + viewName + "' to render");
-				}
-				return new ModelAndView(viewName, endingFlowSession.getAttributes());
-			}
-			else {
+			if (isMarker()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Returning a view descriptor null object; no view to render");
 				}
 				return null;
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Returning view name '" + viewName + "' to render");
+				}
+				return new ModelAndView(viewName, endingFlowSession.getAttributes());
 			}
 		}
 	}
