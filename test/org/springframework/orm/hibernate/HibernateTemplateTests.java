@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate;
 
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -186,10 +187,87 @@ public class HibernateTemplateTests extends TestCase {
 		}
 	}
 
+	public void testExecuteWithThreadBoundAndNewSession() throws HibernateException {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl session2Control = MockControl.createControl(Session.class);
+		Session session2 = (Session) session2Control.getMock();
+
+		session2.connection();
+		session2Control.setReturnValue(con, 1);
+		sf.openSession(con);
+		sfControl.setReturnValue(session, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		session2Control.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setAlwaysUseNewSession(true);
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session2));
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			List result = ht.executeFind(new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException {
+					return l;
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+	}
+
+	public void testExecuteWithThreadBoundAndNewSessionAndEntityInterceptor() throws HibernateException {
+		MockControl interceptorControl = MockControl.createControl(net.sf.hibernate.Interceptor.class);
+		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
+
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl session2Control = MockControl.createControl(Session.class);
+		Session session2 = (Session) session2Control.getMock();
+
+		session2.connection();
+		session2Control.setReturnValue(con, 1);
+		sf.openSession(con, entityInterceptor);
+		sfControl.setReturnValue(session, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+		session2Control.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setAlwaysUseNewSession(true);
+		ht.setEntityInterceptor(entityInterceptor);
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session2));
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			List result = ht.executeFind(new HibernateCallback() {
+				public Object doInHibernate(Session session) throws HibernateException {
+					return l;
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+	}
+
 	public void testExecuteWithEntityInterceptor() throws HibernateException {
 		MockControl interceptorControl = MockControl.createControl(net.sf.hibernate.Interceptor.class);
 		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
-		interceptorControl.replay();
 
 		sf.openSession(entityInterceptor);
 		sfControl.setReturnValue(session, 1);
@@ -212,7 +290,6 @@ public class HibernateTemplateTests extends TestCase {
 			}
 		});
 		assertTrue("Correct result list", result == l);
-		interceptorControl.verify();
 	}
 
 	public void testExecuteWithCacheQueries() throws HibernateException {

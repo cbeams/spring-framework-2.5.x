@@ -38,7 +38,6 @@ import net.sf.hibernate.type.Type;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Helper class that simplifies Hibernate data access code, and converts
@@ -115,6 +114,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	private boolean allowCreate = true;
 
+	private boolean alwaysUseNewSession = false;
+
 	private boolean exposeNativeSession = false;
 
 	private boolean checkWriteOperations = true;
@@ -168,6 +169,30 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	public boolean isAllowCreate() {
 		return allowCreate;
+	}
+
+	/**
+	 * Set whether to always use a new Hibernate Session for this template.
+	 * Default is false; if activated, all operations on this template will
+	 * work on a new Hibernate Session even in case of a pre-bound Session
+	 * (for example, within a transaction or OpenSessionInViewFilter).
+	 * <p>Within a transaction, a new Hibernate Session used by this template
+	 * will participate in the transaction through using the same JDBC
+	 * Connection. In such a scenario, multiple Sessions will participate
+	 * in the same database transaction.
+	 * <p>Turn this on for operations that are supposed to always execute
+	 * independently, without side effects caused by a shared Hibernate
+	 * Session.
+	 */
+	public void setAlwaysUseNewSession(boolean alwaysUseNewSession) {
+		this.alwaysUseNewSession = alwaysUseNewSession;
+	}
+
+	/**
+	 * Return whether to always use a new Hibernate Session for this template.
+	 */
+	public boolean isAlwaysUseNewSession() {
+		return alwaysUseNewSession;
 	}
 
 	/**
@@ -277,11 +302,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
-		Session session = (!isAllowCreate() ?
-				SessionFactoryUtils.getSession(getSessionFactory(), false) :
-				SessionFactoryUtils.getSession(
-						getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator()));
-		boolean existingTransaction = TransactionSynchronizationManager.hasResource(getSessionFactory());
+		Session session = getSession();
+		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
 		if (!existingTransaction && getFlushMode() == FLUSH_NEVER) {
 			session.setFlushMode(FlushMode.NEVER);
 		}
@@ -303,6 +325,30 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		}
 		finally {
 			SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
+		}
+	}
+
+	/**
+	 * Return a Session for use by this template.
+	 * <p>Returns a new Session in case of "alwaysUseNewSession" (using the same
+	 * JDBC Connection as a transactional Session, if applicable), a pre-bound
+	 * Session in case of "allowCreate" turned off, and a pre-bound or new Session
+	 * else (new only if no transactional or otherwise pre-bound Session exists).
+	 * @see SessionFactoryUtils#getSession
+	 * @see SessionFactoryUtils#getNewSession
+	 * @see #setAlwaysUseNewSession
+	 * @see #setAllowCreate
+	 */
+	protected Session getSession() {
+		if (isAlwaysUseNewSession()) {
+			return SessionFactoryUtils.getNewSession(getSessionFactory(), getEntityInterceptor());
+		}
+		else if (!isAllowCreate()) {
+			return SessionFactoryUtils.getSession(getSessionFactory(), false);
+		}
+		else {
+			return SessionFactoryUtils.getSession(
+					getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
 		}
 	}
 
