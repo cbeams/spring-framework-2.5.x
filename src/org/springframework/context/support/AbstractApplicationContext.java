@@ -393,10 +393,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		else {
-			// Use empty message source to be able to accept getMessage calls.
-			StaticMessageSource sms = new StaticMessageSource();
-			sms.setParentMessageSource(getInternalParentMessageSource());
-			this.messageSource = sms;
+			// Use empty MessageSource to be able to accept getMessage calls.
+			DelegatingMessageSource dms = new DelegatingMessageSource();
+			dms.setParentMessageSource(getInternalParentMessageSource());
+			this.messageSource = dms;
 			if (logger.isInfoEnabled()) {
 				logger.info("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
 						"': using default [" + this.messageSource + "]");
