@@ -24,7 +24,7 @@
 	As the format is simple, a DTD is sufficient, and there's
 	no need for a schema at this point.
 	
-	$Id: spring-beans.dtd,v 1.5 2003-10-21 16:03:10 jhoeller Exp $
+	$Id: spring-beans.dtd,v 1.6 2003-10-23 18:45:50 uid112313 Exp $
 -->
 
 <!-- 
@@ -207,7 +207,7 @@
 	The name of the property is given by the "key" attribute.
 -->
 <!ELEMENT entry (
-        (value | ref | list)*
+        (value | ref | list | map)*
 )>
 
 <!ATTLIST entry key CDATA #REQUIRED>

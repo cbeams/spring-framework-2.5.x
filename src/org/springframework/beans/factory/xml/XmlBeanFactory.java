@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -61,7 +62,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 15 April 2001
- * @version $Id: XmlBeanFactory.java,v 1.11 2003-10-23 10:21:03 jhoeller Exp $
+ * @version $Id: XmlBeanFactory.java,v 1.12 2003-10-23 18:45:50 uid112313 Exp $
  */
 public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
@@ -96,7 +97,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String KEY_ATTRIBUTE = "key";
 
 	private static final String ENTRY_ELEMENT = "entry";
-	
+
 	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
 
 	private static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
@@ -112,9 +113,9 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	private static final String PROPS_ELEMENT = "props";
 
 	private static final String PROP_ELEMENT = "prop";
-	
+
 	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
-	
+
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
 
 
@@ -316,13 +317,13 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 		String className = null;
 		boolean singleton = true;
 		AbstractBeanDefinition bd = null;
-		
+
 		if (el.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			// Default is singleton
 			// Can override by making non-singleton if desired
 			singleton = TRUE_ATTRIBUTE_VALUE.equals(el.getAttribute(SINGLETON_ATTRIBUTE));
 		}
-		
+
 		try {
 			if (el.hasAttribute(CLASS_ATTRIBUTE))
 				className = el.getAttribute(CLASS_ATTRIBUTE);
@@ -340,12 +341,12 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 				if (destroyMethodName.equals(""))
 					destroyMethodName = null;
 				bd = new RootBeanDefinition(Class.forName(className, true, cl),
-				                              pvs, singleton, initMethodName, destroyMethodName);
+				                            pvs, singleton, initMethodName, destroyMethodName);
 			}
 			else {
 				bd = new ChildBeanDefinition(parent, pvs, singleton);
 			}
-			
+
 			bd.setDependencyCheck(getDependencyCheck(el));
 			bd.setAutowire(getAutowire(el));
 			return bd;
@@ -357,7 +358,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 	private int getDependencyCheck(Element beanEle) {
 		String att = beanEle.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
-		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;	
+		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
 		if ("all".equals(att)) {
 			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
 		}
@@ -478,15 +479,31 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 
 	private Map getMap(Element mapEle) {
 		ManagedMap m = new ManagedMap();
-		NodeList nl = mapEle.getElementsByTagName(ENTRY_ELEMENT);
-		for (int i = 0; i < nl.getLength(); i++) {
-			Element entryEle = (Element) nl.item(i);
+		List l = getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
+		for (int i = 0; i < l.size(); i++) {
+			Element entryEle = (Element) l.get(i);
 			String key = entryEle.getAttribute(KEY_ATTRIBUTE);
 			// TODO hack: make more robust
 			NodeList subEles = entryEle.getElementsByTagName("*");
 			m.put(key, parsePropertySubelement((Element) subEles.item(0)));
 		}
 		return m;
+	}
+
+	/**
+	 * Don't use the horrible DOM API to get child elements:
+	 * Get an element's children with a given element name
+	 */
+	private List getChildElementsByTagName(Element mapEle, String elementName) {
+		NodeList nl = mapEle.getChildNodes();
+		List nodes = new ArrayList();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node n = nl.item(i);
+			if (n instanceof Element && elementName.equals(n.getNodeName())) {
+				nodes.add(n);
+			}
+		}
+		return nodes;
 	}
 
 	private Properties getProps(Element propsEle) {
@@ -526,7 +543,7 @@ public class XmlBeanFactory extends ListableBeanFactoryImpl {
 	 * Private implementation of SAX ErrorHandler used when validating XML.
 	 */
 	private static class BeansErrorHandler implements ErrorHandler {
-		
+
 		/**
 		 * We can't use the enclosing class' logger as it's protected and inherited.
 		 */

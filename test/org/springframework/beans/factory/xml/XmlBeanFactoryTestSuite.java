@@ -31,7 +31,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author Rod Johnson
- * @version $Id: XmlBeanFactoryTestSuite.java,v 1.7 2003-10-10 13:59:54 jhoeller Exp $
+ * @version $Id: XmlBeanFactoryTestSuite.java,v 1.8 2003-10-23 18:45:50 uid112313 Exp $
  */
 public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 
@@ -335,7 +335,7 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		InputStream is = getClass().getResourceAsStream("collections.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(is);
 		HasMap hasMap = (HasMap) xbf.getBean("mixedMapWithList");
-		assertTrue(hasMap.getMap().size() == 3);
+		assertTrue(hasMap.getMap().size() == 4);
 		assertTrue(hasMap.getMap().get("foo").equals("bar"));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertTrue(hasMap.getMap().get("jenny").equals(jenny));
@@ -345,7 +345,15 @@ public class XmlBeanFactoryTestSuite extends AbstractListableBeanFactoryTests {
 		assertNotNull(l);
 		assertTrue(l.size() == 2);
 		assertTrue(l.get(0).equals("zero"));
-		assertTrue("List elt 1 should be equal to jenny bean, not " + l.get(1),
+		assertTrue("List element 1 should be equal to jenny bean, not " + l.get(1),
+			l.get(1).equals(jenny));
+
+		// Check nested map
+		Map m = (Map) hasMap.getMap().get("map");
+		assertNotNull(m);
+		assertTrue(m.size() == 2);
+		assertTrue(m.get("foo").equals("bar"));
+		assertTrue("Map element 'jenny' should be equal to jenny bean, not " + m.get("jenny"),
 			l.get(1).equals(jenny));
 	}
 

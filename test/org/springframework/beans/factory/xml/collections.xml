@@ -104,6 +104,12 @@
 						<ref local="jenny" />
 					</list>
 				</entry>
+				<entry key="map">
+					<map>
+						<entry key="foo"><value>bar</value></entry>
+						<entry key="jenny"><ref local="jenny"/></entry>
+					</map>
+				</entry>
 			</map>
 		</property>
 	</bean>
