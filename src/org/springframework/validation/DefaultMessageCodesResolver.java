@@ -100,7 +100,9 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver {
 			String fieldInList = (String) it.next();
 			codeList.add(errorCode + CODE_SEPARATOR + fieldInList);
 		}
-		codeList.add(errorCode + CODE_SEPARATOR + fieldType.getName());
+		if (fieldType != null) {
+			codeList.add(errorCode + CODE_SEPARATOR + fieldType.getName());
+		}
 		codeList.add(errorCode);
 		return (String[]) codeList.toArray(new String[codeList.size()]);
 	}

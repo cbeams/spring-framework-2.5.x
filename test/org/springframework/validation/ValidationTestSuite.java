@@ -398,6 +398,7 @@ public class ValidationTestSuite extends TestCase {
 		Errors errors = binder.getErrors();
 		errors.rejectValue("array[0]", "NOT_ROD", "are you sure you're not Rod?");
 		errors.rejectValue("map[key1]", "NOT_ROD", "are you sure you're not Rod?");
+		errors.rejectValue("map[key0]", "NOT_NULL", "should not be null");
 
 		assertEquals("arraya", errors.getFieldValue("array[0]"));
 		assertEquals(1, errors.getFieldErrorCount("array[0]"));
@@ -408,6 +409,7 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
 		assertEquals("NOT_ROD.org.springframework.beans.TestBean", errors.getFieldError("array[0]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[5]);
+
 		assertEquals(1, errors.getFieldErrorCount("map[key1]"));
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCode());
 		assertEquals("NOT_ROD.tb.map[key1]", errors.getFieldError("map[key1]").getCodes()[0]);
@@ -416,6 +418,14 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("NOT_ROD.map", errors.getFieldError("map[key1]").getCodes()[3]);
 		assertEquals("NOT_ROD.org.springframework.beans.TestBean", errors.getFieldError("map[key1]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCodes()[5]);
+
+		assertEquals(1, errors.getFieldErrorCount("map[key0]"));
+		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCode());
+		assertEquals("NOT_NULL.tb.map[key0]", errors.getFieldError("map[key0]").getCodes()[0]);
+		assertEquals("NOT_NULL.tb.map", errors.getFieldError("map[key0]").getCodes()[1]);
+		assertEquals("NOT_NULL.map[key0]", errors.getFieldError("map[key0]").getCodes()[2]);
+		assertEquals("NOT_NULL.map", errors.getFieldError("map[key0]").getCodes()[3]);
+		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[4]);
 	}
 
 	public void testBindingErrors() {
