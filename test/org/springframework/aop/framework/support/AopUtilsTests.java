@@ -67,7 +67,7 @@ public class AopUtilsTests extends TestCase {
 	
 	public void testPointcutCanNeverApply() {
 		class TestPointcut extends AbstractMethodPointcut implements StaticMethodPointcut {
-			public boolean applies(Method method, AttributeRegistry attributeRegistry) {
+			public boolean applies(Method method, Class clazz, AttributeRegistry attributeRegistry) {
 				return false;
 			}
 		}
@@ -83,7 +83,7 @@ public class AopUtilsTests extends TestCase {
 
 	public void testPointcutAppliesToOneMethodOnObject() {
 		class TestPointcut extends AbstractMethodPointcut implements StaticMethodPointcut {
-			public boolean applies(Method method, AttributeRegistry attributeRegistry) {
+			public boolean applies(Method method, Class clazz, AttributeRegistry attributeRegistry) {
 				return method.getName().equals("hashCode");
 			}
 		}
@@ -99,7 +99,7 @@ public class AopUtilsTests extends TestCase {
 
 	public void testPointcutAppliesToOneInterfaceOfSeveral() {
 		class TestPointcut extends AbstractMethodPointcut implements StaticMethodPointcut {
-			public boolean applies(Method method, AttributeRegistry attributeRegistry) {
+			public boolean applies(Method method, Class clazz, AttributeRegistry attributeRegistry) {
 				return method.getName().equals("getName");
 			}
 		}

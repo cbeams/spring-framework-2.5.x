@@ -1,3 +1,8 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+ 
 package org.springframework.context.support;
 
 import java.lang.reflect.Proxy;
@@ -23,10 +28,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.BeanThatListens;
 
 /**
- * Classname doesn't match XXXXTestSuite pattern, so as to avoid
- * being invoked by Ant JUnit run, as it's abstract
+ * Tests for static application context.
  * @author Rod Johnson
- * @version $Revision: 1.6 $
+ * @version $Id: StaticApplicationContextTestSuite.java,v 1.7 2003-10-25 18:46:21 johnsonr Exp $
  */
 public class StaticApplicationContextTestSuite extends AbstractApplicationContextTests {
 

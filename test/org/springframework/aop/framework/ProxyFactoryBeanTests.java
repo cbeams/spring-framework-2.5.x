@@ -32,7 +32,7 @@ import org.springframework.core.TimeStamped;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.1.1.1 2003-08-14 16:21:02 trisberg Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.2 2003-10-25 18:46:21 johnsonr Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
@@ -281,7 +281,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		/**
 		 * @see org.springframework.aop.framework.DynamicMethodPointcut#couldApply(java.lang.reflect.Method, org.aopalliance.intercept.AttributeRegistry)
 		 */
-		public boolean applies(Method m, AttributeRegistry attributeRegistry) {
+		public boolean applies(Method m, Class clazz, AttributeRegistry attributeRegistry) {
 			return true;
 		}
 

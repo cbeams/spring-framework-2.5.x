@@ -25,7 +25,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13-Mar-2003
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AopProxyTests extends TestCase {
 
@@ -365,7 +365,7 @@ public class AopProxyTests extends TestCase {
 			return args[0] == null;
 		}
 
-		public boolean applies(Method m, AttributeRegistry attributeRegistry) {
+		public boolean applies(Method m, Class targetClass, AttributeRegistry attributeRegistry) {
 			return m.getName().startsWith("set") &&
 				m.getParameterTypes().length == 1 &&
 				m.getParameterTypes()[0].equals(String.class);
@@ -453,7 +453,7 @@ public class AopProxyTests extends TestCase {
 		/**
 		 * @see org.springframework.aop.framework.DynamicMethodPointcut#couldApply(java.lang.reflect.Method, org.aopalliance.intercept.AttributeRegistry)
 		 */
-		public boolean applies(Method m, AttributeRegistry attributeRegistry) {
+		public boolean applies(Method m, Class targetClass, AttributeRegistry attributeRegistry) {
 			return true;
 		}
 	}
@@ -463,7 +463,7 @@ public class AopProxyTests extends TestCase {
 			super(mi, pattern);
 		}
 		
-		public boolean applies(Method m, AttributeRegistry attributeRegistry) {
+		public boolean applies(Method m, Class clazz, AttributeRegistry attributeRegistry) {
 			return m.getName().startsWith("set");
 		}
 	}
@@ -477,7 +477,7 @@ public class AopProxyTests extends TestCase {
 			super(mi);
 			this.pattern = pattern;
 		}
-		public boolean applies(Method m, AttributeRegistry attributeRegistry) {
+		public boolean applies(Method m, Class targetClass, AttributeRegistry attributeRegistry) {
 			boolean run = m.getName().indexOf(pattern) != -1;
 			if (run) ++count;
 			return run;

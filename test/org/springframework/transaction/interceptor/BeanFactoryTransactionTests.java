@@ -29,7 +29,7 @@ import org.springframework.transaction.TransactionStatus;
  * Test cases for AOP transaction management.
  * @author Rod Johnson
  * @since 23-Apr-2003
- * @version $Id: BeanFactoryTransactionTests.java,v 1.6 2003-10-06 13:52:06 jhoeller Exp $
+ * @version $Id: BeanFactoryTransactionTests.java,v 1.7 2003-10-25 18:46:21 johnsonr Exp $
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
@@ -107,7 +107,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 		int counter = 0;
 
-		public boolean applies(Method method, AttributeRegistry attributeRegistry) {
+		public boolean applies(Method method, Class clazz, AttributeRegistry attributeRegistry) {
 			counter++;
 			return true;
 		}
