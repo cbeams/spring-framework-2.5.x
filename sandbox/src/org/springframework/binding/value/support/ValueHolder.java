@@ -27,7 +27,6 @@ public class ValueHolder extends AbstractValueModel {
     private Object value;
 
     public ValueHolder() {
-
     }
 
     public ValueHolder(Object value) {
@@ -45,6 +44,10 @@ public class ValueHolder extends AbstractValueModel {
     public void setValue(Object value) {
         if (hasChanged(this.value, value)) {
             Object oldValue = this.value;
+            if (logger.isDebugEnabled()) {
+                logger.debug("Setting held value from " + oldValue + " to "
+                        + value);
+            }
             this.value = value;
             fireValueChanged();
             firePropertyChange(VALUE_PROPERTY, oldValue, this.value);
