@@ -1,4 +1,9 @@
 /*
+ * All source code, binaries, documentation and other files distributed
+ * with the Spring Framework - except the third-party libraries in the "lib"
+ * directory - are subject to the following license terms, and are held under
+ * the following copyright notice.
+ *
  * ============================================================================
  *                   The Apache Software License, Version 1.1
  * ============================================================================
