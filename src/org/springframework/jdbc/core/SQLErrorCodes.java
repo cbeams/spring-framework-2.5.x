@@ -6,9 +6,11 @@
 package org.springframework.jdbc.core;
 
 /**
- * JavaBean for holding JDBC Error Codes - loaded through BeanFactory
- * implementation. Used by the SQLExceptionTranslator.
+ * JavaBean for holding JDBC Error Codes for a particular database.
+ * Normally loaded through a BeanFactory
+ * implementation. Used by the SQLErrorCodeSQLExceptionTranslator.
  * @author Thomas Risberg
+ * @version $Id: SQLErrorCodes.java,v 1.3 2003-11-03 15:08:58 johnsonr Exp $
  */
 public class SQLErrorCodes {
 
