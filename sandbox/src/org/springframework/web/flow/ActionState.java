@@ -31,8 +31,6 @@ import org.springframework.util.Assert;
  */
 public class ActionState extends TransitionableState {
 
-	public static final String STATE_ID_ATTRIBUTE = "_stateId";
-
 	private Set actionBeanNames;
 
 	public ActionState(String id, Transition transition) {
@@ -99,9 +97,7 @@ public class ActionState extends TransitionableState {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing action bean with name '" + actionBeanName + "'");
 			}
-			sessionExecutionStack.setAttribute(STATE_ID_ATTRIBUTE, getId());
 			ActionBeanEvent event = actionBean.execute(request, response, sessionExecutionStack);
-			sessionExecutionStack.removeAttribute(STATE_ID_ATTRIBUTE);
 			if (triggersTransition(event, flow)) {
 				return getTransition(event, flow).execute(flow, sessionExecutionStack, request, response);
 			}

@@ -31,6 +31,8 @@ import org.springframework.util.ToStringCreator;
 public class Transition implements Serializable {
 	private static final Log logger = LogFactory.getLog(Transition.class);
 
+	public static final String EVENT_ID_ATTRIBUTE = "_eventId";
+
 	private String id;
 
 	private String toState;
@@ -57,8 +59,10 @@ public class Transition implements Serializable {
 					+ "' to state '" + getToState() + "' in flow '" + flow.getId() + "'");
 		}
 		try {
+			sessionExecutionStack.setAttribute(EVENT_ID_ATTRIBUTE, getId());
 			ViewDescriptor descriptor = flow.getRequiredState(getToState()).enter(flow, sessionExecutionStack, request,
 					response);
+			sessionExecutionStack.removeAttribute(EVENT_ID_ATTRIBUTE);
 			return descriptor;
 		}
 		catch (NoSuchFlowStateException e) {

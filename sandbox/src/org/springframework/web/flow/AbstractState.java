@@ -34,6 +34,8 @@ import org.springframework.util.ToStringCreator;
  */
 public abstract class AbstractState implements Serializable {
 
+	public static final String STATE_ID_ATTRIBUTE = "_stateId";
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String id;
@@ -101,11 +103,15 @@ public abstract class AbstractState implements Serializable {
 			logger.debug("Entering state '" + this + "' in flow '" + flow.getId() + "'");
 		}
 		sessionExecutionStack.setCurrentState(getId());
+
 		// Publish state transition event if necessary
 		if (flow.getFlowLifecycleListener() != null) {
 			flow.getFlowLifecycleListener().flowStateTransitioned(flow, oldState, this, sessionExecutionStack, request);
 		}
-		return doEnterState(flow, sessionExecutionStack, request, response);
+		sessionExecutionStack.setAttribute(STATE_ID_ATTRIBUTE, getId());
+		ViewDescriptor viewDescriptor = doEnterState(flow, sessionExecutionStack, request, response);
+		sessionExecutionStack.removeAttribute(STATE_ID_ATTRIBUTE);
+		return viewDescriptor;
 	}
 
 	/**
