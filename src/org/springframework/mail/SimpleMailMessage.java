@@ -16,6 +16,7 @@
 
 package org.springframework.mail;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import org.springframework.util.StringUtils;
@@ -36,7 +37,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.mail.javamail.MimeMessagePreparator
  * @see org.springframework.mail.javamail.MimeMessageHelper
  */
-public class SimpleMailMessage {
+public class SimpleMailMessage implements Serializable {
 
 	private String from;
 
