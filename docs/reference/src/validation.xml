@@ -141,8 +141,8 @@
       <para><emphasis>Note: this part is not important to you if you're not
       planning to work with the BeanWrapper directly. If you're just using the
       <literal>DataBinder</literal> and the <literal>BeanFactory</literal> and
-      their out-of-the-box implementation, don't mind reading this and go on
-      with reading about <literal>PropertyEditors</literal>.</emphasis></para>
+      their out-of-the-box implementation, you should skip ahead to the section
+      about <literal>PropertyEditors</literal>.</emphasis></para>
 
       <para>Consider the following two classes: <programlisting>public class Company {
     private String name;
@@ -260,7 +260,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
               <row>
                 <entry><literal>FileEditor</literal></entry>
 
-                <entry>Capable of resolving String to
+                <entry>Capable of resolving Strings to
                 <literal>File</literal>-objects</entry>
               </row>
 
@@ -277,7 +277,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
                 <entry><literal>PropertiesEditor</literal></entry>
 
                 <entry>Capable of converting Strings (formatted using the
-                format as defined in the JavaDOC for the java.lang.Properties
+                format as defined in the Javadoc for the java.lang.Properties
                 class) to <literal>Properties</literal>-objects</entry>
               </row>
 
