@@ -21,13 +21,14 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.dynamic.DynamicObject;
 import org.springframework.beans.factory.script.DynamicScript;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * 
  * @author Rod Johnson
- * @version $Id: BeanFactoryTests.java,v 1.5 2004-08-04 16:49:48 johnsonr Exp $
+ * @version $Id: BeanFactoryTests.java,v 1.6 2004-08-05 10:53:00 johnsonr Exp $
  */
 public class BeanFactoryTests extends TestCase {
 	
@@ -56,25 +57,45 @@ public class BeanFactoryTests extends TestCase {
 		}
 	}
 	
-	public void testSimple() {
+	public void testSimpleSingleton() {
 		
-		Hello hello = (Hello) ac.getBean("simple");
+		Hello hello = (Hello) ac.getBean("simpleSingleton");
 		assertEquals("hello world", hello.sayHello());
+		
+		Hello hello2 = (Hello) ac.getBean("simpleSingleton");
+		assertSame(hello, hello2);
 	}
 	
-	public void testStringProperty() {
+	public void testPrototypesAreDistinct() {
 		
-		Hello hello = (Hello) ac.getBean("property");
+		Hello hello1 = (Hello) ac.getBean("propertyPrototype");
+		assertEquals("propertyPrototype", hello1.sayHello());
+		
+		Hello hello2 = (Hello) ac.getBean("propertyPrototype");
+		assertEquals("propertyPrototype", hello1.sayHello());
+		assertNotSame(hello1, hello2);
+		
+		// Change property on 1 shouldn't affect 2
+		String newName = "Gordon";
+		((GroovyObject) hello1).setProperty("message", newName);
+		
+		// Refresh would zap that property however...
+		
+		assertEquals(newName, hello1.sayHello());
+		assertEquals("propertyPrototype", hello2.sayHello());
+	}
+	
+	public void testStringPropertySingleton() {
+		Hello hello = (Hello) ac.getBean("propertySingleton");
 		Advised a = (Advised) hello;
 		System.err.println(a.toProxyConfigString());
 		assertEquals("hello world property", hello.sayHello());
 		System.out.println(((DynamicScript) hello).getResourceString() );
 	}
 	
-	public void testCanCastToGroovyObject() {
-		
-		GroovyObject groovyObj = (GroovyObject) ac.getBean("property");
-		
+	public void testCanCastToGroovyObject() {		
+		GroovyObject groovyObj = (GroovyObject) ac.getBean("propertySingleton");
+		GroovyObject groovyObj2 = (GroovyObject) ac.getBean("propertyPrototype");
 	}
 	
 	public void testDependencyOnReloadedGroovyBean() throws Throwable {
@@ -82,7 +103,7 @@ public class BeanFactoryTests extends TestCase {
 		Hello delegatingHello = (Hello) ac.getBean("dependsOnProperty");
 		assertEquals("hello world property", delegatingHello.sayHello());
 		
-		DynamicScript script = (DynamicScript) ac.getBean("property");
+		DynamicObject script = (DynamicObject) ac.getBean("propertySingleton");
 		
 		//System.out.println("AOP CONFIG=" + ((Advised) script).toProxyConfigString());
 		
