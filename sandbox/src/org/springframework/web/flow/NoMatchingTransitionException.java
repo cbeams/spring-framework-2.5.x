@@ -103,7 +103,7 @@ public class NoMatchingTransitionException extends FlowNavigationException {
 	/**
 	 * Returns the context for the current request that did not trigger any
 	 * supported transition out of the set state.
-	 * @returns the request context
+	 * @return the request context
 	 */
 	public RequestContext getRequestContext() {
 		return context;

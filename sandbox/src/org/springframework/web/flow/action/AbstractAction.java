@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.SimpleEvent;
 

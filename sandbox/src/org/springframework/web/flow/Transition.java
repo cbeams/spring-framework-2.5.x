@@ -207,7 +207,6 @@ public class Transition {
 			}
 		}
 		return viewDescriptor;
-
 	}
 
 	/**
