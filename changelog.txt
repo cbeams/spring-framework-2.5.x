@@ -11,6 +11,7 @@ Package org.springframework.aop
 * DelegatingIntroductionInterceptor lets unchecked exceptions thrown by introduction delegates through without wrapping
 * HashMapCachingAdvisorChainFactory uses Commons Collections IdentityMap (if available, on JDK <= 1.4) for method cache
 * deprecated PoolingConfig's "getActive"/"getFree" in favor of "getActiveCount"/"getIdleCount", for consistent naming
+* Modified Cglib2AopProxy to prevent protected methods from being proxied. This fixes bug SPR-357.
 
 Package org.springframework.beans
 * MutablePropertyValues's "addPropertyValues" methods return MutablePropertyValues, for invocation chains in 1 statement
