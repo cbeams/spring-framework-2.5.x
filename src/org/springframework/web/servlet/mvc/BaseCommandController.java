@@ -123,6 +123,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	private boolean validateOnBinding = true;
 
+
 	/**
 	 * Set the name of the command in the model.
 	 * The command object will be included in the model under this name.
@@ -155,8 +156,8 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Set the validator for this controller (can also be null).
-	 * The validator must support the specified command class.
+	 * Set the Validator for this controller (can also be null).
+	 * The Validator must support the specified command class.
 	 */
 	public final void setValidator(Validator validator) {
 		checkValidator(validator, this.commandClass);
@@ -164,35 +165,36 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Return the validator for this controller.
+	 * Return the Validator for this controller.
 	 */
 	protected final Validator getValidator() {
 		return validator;
 	}
 
 	/**
-	 * Set if the validator should get applied when binding.
+	 * Set if the Validator should get applied when binding.
 	 */
 	public final void setValidateOnBinding(boolean validateOnBinding) {
 		this.validateOnBinding = validateOnBinding;
 	}
 
 	/**
-	 * Return if the validator should get applied when binding.
+	 * Return if the Validator should get applied when binding.
 	 */
 	protected final boolean isValidateOnBinding() {
 		return validateOnBinding;
 	}
 
+
 	/**
-	 * Check if the given validator and command class match.
-	 * @param validator validator instance
+	 * Check if the given Validator and command class match.
+	 * @param validator Validator instance
 	 * @param commandClass command class
 	 */
 	private void checkValidator(Validator validator, Class commandClass) throws IllegalArgumentException {
 		if (validator != null && commandClass != null && !validator.supports(commandClass))
-			throw new IllegalArgumentException(
-					"Validator [" + validator + "] can't validate command class of type [" + commandClass.getName() + "]");
+			throw new IllegalArgumentException("Validator [" + validator + "] does not support command class [" +
+			                                   commandClass.getName() + "]");
 	}
 
 	/**
@@ -242,6 +244,7 @@ public abstract class BaseCommandController extends AbstractController {
 			throws Exception {
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
+		onBind(request, command);
 		if (isValidateOnBinding()) {
 			ValidationUtils.invokeValidator(getValidator(), command, binder.getErrors());
 		}
@@ -263,35 +266,51 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #bindAndValidate
 	 * @see #initBinder
 	 */
-	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command) throws Exception {
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
+	    throws Exception {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
 		initBinder(request, binder);
 		return binder;
 	}
 
 	/**
-	 * Initialize the given binder instance, e.g. with custom editors.
+	 * Initialize the given binder instance, for example with custom editors.
 	 * Called by createBinder.
 	 * <p>This method allows you to register custom editors for certain fields of your
 	 * command class. For instance, you will be able to transform Date objects into a
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
-	 * and still be able to set and display them in for instance an HTML interface.
+	 * and still be able to set and display them in an HTML interface.
 	 * @param request current request
 	 * @param binder new binder instance
 	 * @throws Exception in case of invalid state or arguments
-	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 * @see #createBinder
+	 * @see org.springframework.validation.DataBinder#registerCustomEditor
+	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
 	 */
-	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
+	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
+	    throws Exception {
+	}
+
+	/**
+	 * Callback for custom post-processing in terms of binding.
+	 * Called on each submit, after standard binding but before validation.
+	 * @param request current HTTP request
+	 * @param command command object to perform further binding on
+	 * @throws Exception in case of invalid state or arguments
+	 * @see #bindAndValidate
+	 */
+	protected void onBind(HttpServletRequest request, Object command)
+			throws Exception {
 	}
 
 	/**
 	 * Callback for custom post-processing in terms of binding and validation.
 	 * Called on each submit, after standard binding and validation,
-	 * and before error evaluation.
+	 * but before error evaluation.
 	 * @param request current HTTP request
-	 * @param command bound command
-	 * @param errors validation errors holder for additional custom validation
+	 * @param command command object, still allowing for further binding
+	 * @param errors validation errors holder, allowing for additional
+	 * custom validation
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #bindAndValidate
 	 * @see org.springframework.validation.Errors
