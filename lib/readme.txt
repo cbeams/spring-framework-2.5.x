@@ -7,9 +7,9 @@ distribution/website before using any of them in your own applications.
 - Ant 1.6.2 (http://ant.apache.org)
 - used to build the framework and the sample apps
 
-* antlr/antlr-2.7.4.jar
-- ANTLR 2.7.4 (http://www.antlr.org)
-- required for running Petclinic (by Hibernate)
+* antlr/antlr-2.7.5H3.jar
+- ANTLR 2.7.5 with Hibernate3 patch (http://www.antlr.org)
+- required for running Petclinic (by Hibernate3)
 
 * aopalliance/aopalliance.jar
 - AOP Alliance 1.0 (http://aopalliance.sourceforge.net)
@@ -69,13 +69,13 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
-* hibernate/hibernate2.jar, hibernate/odmg.jar
+* hibernate/hibernate2.jar
 - Hibernate 2.1.8 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.0 RC1 (http://www.hibernate.org)
+- Hibernate 3.0 final (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
