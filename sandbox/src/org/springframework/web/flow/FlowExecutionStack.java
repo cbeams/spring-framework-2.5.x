@@ -104,18 +104,18 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		return view;
 	}
 
-	protected ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response) {
+	public ModelAndView spawn(Flow flow, Map input, HttpServletRequest request, HttpServletResponse response) {
 		activate(new FlowSession(flow, input));
 		return flow.getStartState().enter(this, request, response);
 	}
 
-	protected ModelAndView spawn(Flow flow, String stateId, Map input, HttpServletRequest request,
+	public ModelAndView spawn(Flow flow, String stateId, Map input, HttpServletRequest request,
 			HttpServletResponse response) {
 		activate(new FlowSession(flow, input));
 		return flow.getRequiredTransitionableState(stateId).enter(this, request, response);
 	}
 
-	protected void activate(FlowSession flowSession) {
+	public void activate(FlowSession flowSession) {
 		if (!executingFlowSessions.isEmpty()) {
 			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
 		}
@@ -357,7 +357,7 @@ public class FlowExecutionStack implements FlowExecution, Serializable {
 		getActiveFlowSession().removeAttribute(attributeName);
 	}
 
-	protected FlowSession endActiveSession() {
+	public FlowSession endActiveSession() {
 		FlowSession endingSession = (FlowSession)executingFlowSessions.pop();
 		endingSession.setStatus(FlowSessionStatus.ENDED);
 		if (!executingFlowSessions.isEmpty()) {
