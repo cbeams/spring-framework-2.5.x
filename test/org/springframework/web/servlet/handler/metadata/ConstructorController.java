@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
  
-package org.springframework.web.servlet.handler.commonsattributes;
+package org.springframework.web.servlet.handler.metadata;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,9 +16,9 @@ import org.springframework.web.servlet.mvc.AbstractController;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: ConstructorController.java,v 1.1 2003-12-24 17:16:55 johnsonr Exp $
+ * @version $Id: ConstructorController.java,v 1.1 2003-12-25 08:56:13 johnsonr Exp $
  * 
- * @@org.springframework.web.servlet.handler.commonsattributes.PathMap("/constructor.cgi")
+ * @@PathMap("/constructor.cgi")
  */
 public class ConstructorController extends AbstractController {
 	

@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
  
-package org.springframework.web.servlet.handler.commonsattributes;
+package org.springframework.web.servlet.handler.metadata;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +22,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 /**
  * 
  * @author Rod Johnson
- * @version $Id: PathMapHandlerMappingTests.java,v 1.1 2003-12-24 17:16:55 johnsonr Exp $
+ * @version $Id: PathMapHandlerMappingTests.java,v 1.1 2003-12-25 08:56:13 johnsonr Exp $
  */
 public class PathMapHandlerMappingTests extends TestCase {
 	
@@ -92,7 +92,7 @@ public class PathMapHandlerMappingTests extends TestCase {
 	}
 
 	
-	private static class HashUrlMapHandlerMapping extends PathMapHandlerMapping {
+	private static class HashUrlMapHandlerMapping extends AbstractPathMapHandlerMapping {
 		private HashMap classToPathMaps = new HashMap();
 		public void register(Class clazz, PathMap pm) {
 			classToPathMaps.put(clazz, new PathMap[] { pm });
@@ -101,7 +101,7 @@ public class PathMapHandlerMappingTests extends TestCase {
 			classToPathMaps.put(clazz, pms);
 		}
 		/**
-		 * @see org.springframework.web.servlet.handler.commonsattributes.PathMapHandlerMapping#getClassNamesWithPathMapAttributes()
+		 * @see org.springframework.web.servlet.handler.metadata.CommonsPathMapHandlerMapping#getClassNamesWithPathMapAttributes()
 		 */
 		protected Collection getClassNamesWithPathMapAttributes() {
 			Collection names = new ArrayList(classToPathMaps.size());
@@ -112,7 +112,7 @@ public class PathMapHandlerMappingTests extends TestCase {
 			return names;
 		}
 		/**
-		 * @see org.springframework.web.servlet.handler.commonsattributes.PathMapHandlerMapping#getPathMapAttributes(java.lang.Class)
+		 * @see org.springframework.web.servlet.handler.metadata.CommonsPathMapHandlerMapping#getPathMapAttributes(java.lang.Class)
 		 */
 		protected PathMap[] getPathMapAttributes(Class handlerClass) {
 			return (PathMap[]) classToPathMaps.get(handlerClass);

@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
  
-package org.springframework.web.servlet.handler.commonsattributes;
+package org.springframework.web.servlet.handler.metadata;
 
 /**
  * Attribute to be used on Controller classes to allow for automatic
@@ -14,7 +14,7 @@ package org.springframework.web.servlet.handler.commonsattributes;
  * Application code must use the Commons Attributes indexer
  * tool to use this option.
  * @author Rod Johnson
- * @version $Id: PathMap.java,v 1.1 2003-12-24 17:16:55 johnsonr Exp $
+ * @version $Id: PathMap.java,v 1.1 2003-12-25 08:56:12 johnsonr Exp $
  * 
  * @org.apache.commons.attributes.Indexed()
  */

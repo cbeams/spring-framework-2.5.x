@@ -3,7 +3,7 @@
 <!--
     Build file for the Spring Framework core.
 
-    $Id: build.xml,v 1.22 2003-12-24 17:16:55 johnsonr Exp $
+    $Id: build.xml,v 1.23 2003-12-25 08:56:12 johnsonr Exp $
 
     This script requires a /lib directory containing the
     necessary third party JAR files.
@@ -81,10 +81,10 @@
 	 	 	destdir="${commons.attributes.tempdir.src}" 
 	 	 >
 	 	 	<!-- 
-	 	 		Only the PathMap attribute in the org.springframework.web.servlet.handler.commonsattributes
+	 	 		Only the PathMap attribute in the org.springframework.web.servlet.handler.metadata
 	 	 	 package currently needs to be shipped with an attribute, to support indexing.
 	 	 	 -->
-	         <fileset dir="${src.dir}" includes="**/commonsattributes/*.java"/>
+	         <fileset dir="${src.dir}" includes="**/metadata/*.java"/>
 	     </attribute-compiler>
  	</target>
 

@@ -3,18 +3,16 @@
  * of the Apache Software License.
  */
 
-package org.springframework.web.servlet.handler.commonsattributes;
+package org.springframework.web.servlet.handler.metadata;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.apache.commons.attributes.AttributeIndex;
 import org.apache.commons.attributes.Attributes;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 
 /**
- * Implementation of the HandlerMapping interface that recognizes Commons Attributes
+ * Subclass of AbstractPathMapHandlerMapping that recognizes Commons Attributes
  * metadata attributes of type PathMap on application Controllers and automatically
  * wires them into the current servlet's WebApplicationContext.
  * <p>
@@ -37,51 +35,10 @@ import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
  * using different middle tier objects, but should understand the implications. All
  * Controllers with attributes will be picked up by each DispatcherServlet's context.
  * @author Rod Johnson
- * @version $Id: PathMapHandlerMapping.java,v 1.1 2003-12-24 17:16:55 johnsonr Exp $
+ * @version $Id: CommonsPathMapHandlerMapping.java,v 1.1 2003-12-25 08:56:12 johnsonr Exp $
  */
-public class PathMapHandlerMapping extends AbstractUrlHandlerMapping {
+public class CommonsPathMapHandlerMapping extends AbstractPathMapHandlerMapping {
 	
-	/**
-	 * Look for all classes with a PathMap class attribute, instantiate them in
-	 * the owning ApplicationContext and register them as MVC handlers usable
-	 * by the current DispatcherServlet.
-	 * @see org.springframework.context.support.ApplicationObjectSupport#initApplicationContext()
-	 */
-	public void initApplicationContext() throws ApplicationContextException {
-		try {
-			logger.info("Looking for attribute-defined URL mappings in application context: " + getApplicationContext());
-			
-			Collection names = getClassNamesWithPathMapAttributes();
-			logger.info("Found " + names.size() + " attribute-targeted handlers");				
-			
-			// For each classname returned by the Commons Attribute indexer
-			for (Iterator itr = names.iterator(); itr.hasNext();) {
-				String handlerClassName = (String) itr.next();
-				Class handlerClass = Class.forName(handlerClassName);
-				
-				String beanName = handlerClass.getName();
-				Object handler = getApplicationContext().registerBeanOfClass(beanName, handlerClass, true);
-				
-				// There may be multiple paths mapped to this class
-				PathMap[] pathMaps = getPathMapAttributes(handlerClass);
-				for (int i = 0; i < pathMaps.length; i++) {				
-					PathMap pathMap = pathMaps[i];
-					String path = pathMap.getUrl();
-					if (!path.startsWith("/")) {
-						path = "/" + path;
-					}
-					
-					logger.info("Mapping path [" + path + "] to class with name '" + handlerClassName + "'");
-					registerHandler(path, handler);
-				}
-			}
-		}
-		catch (ClassNotFoundException ex) {
-			// Shouldn't happen: Commons Attributes gave us the classname
-			throw new ApplicationContextException("Failed to load a class returned in an attribute index: internal error in Commons Attributes indexing?", ex);
-		}
-	}
-
 	/**
 	 * Use Commons Attributes AttributeIndex to get a Collection of FQNs of
 	 * classes with the required PathMap attribute. Protected so that it can

@@ -1,8 +1,10 @@
 <html>
 <body>
 
-This package enables automatic web controller targeting based on Commons
-Attributes source-level attributes.
+This package enables automatic web controller targeting.
+
+The only implementation at present is CommonsPathMapHandlerMapping, based on Commons
+Attributes source-level attributes, but metadata implementation is pluggable.
 <br>
 In this model, you don't need to map URLs onto controllers in your Spring
 XML web application context bean definition files. You merely need to
@@ -15,7 +17,7 @@ properties, will be resolved if possible using the middle tier definitions in
 the WebApplicationContext.
 
 <p>
-To use this feature, perform the following steps:
+To use this feature, using the Commons Attributes implementation, perform the following steps:
 <ol>
 	<li>Invoke the Commons Attributes compiler on your application classes. The
 	classes must be compiled into a Jar rather than the WEB-INF/classes directory.
