@@ -30,12 +30,13 @@ import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
 
 /**
- * Base class for flow builders that programmatically build flows.
- * 
+ * Base class for flow builders that programmatically build flows in Java
+ * configuration code.
  * <p>
- * To give you an example of what a simple web flow definition might look like,
- * the following piece of java code defines the 'dynamic' web flow equivalent to
- * the work flow statically implemented in Spring MVC's simple form controller:
+ * To give you an example of what a simple java-based web flow builder
+ * definition might look like, the following example defines the 'dynamic' web
+ * flow equivalent to the work flow statically implemented in Spring MVC's
+ * simple form controller:
  * 
  * <pre>
  * public class EditPersonDetailsFlowBuilder extends AbstractFlowBuilder {
@@ -54,7 +55,7 @@ import org.springframework.web.flow.ViewState;
  *   }
  * </pre>
  * 
- * What this java-based FlowBuilder implementation does is add 4 states to a
+ * What this java-based FlowBuilder implementation does is add four states to a
  * flow identified as "personDetails". These include a "get"
  * <code>ActionState</code> (the start state), a <code>ViewState</code>
  * state, a "bind and validate" <code>ActionState</code>, and an end marker
@@ -129,24 +130,26 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	public static final String MODEL_MAPPER_ID_SUFFIX = "modelMapper";
 
 	/**
-	 * Constructor for use in subclasses.
+	 * Create an instance of a abstract flow builder; default constructor.
 	 */
 	protected AbstractFlowBuilder() {
 		super();
 	}
 
 	/**
-	 * Constructor for use in subclasses.
-	 * @param flowServiceLocator strategy to use for service lookup
+	 * Create an instance of an abstract flow builder, using the specified
+	 * service locator to obtain needed flow services during configuation.
+	 * @param flowServiceLocator The service locator.
 	 */
 	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator) {
 		super(flowServiceLocator);
 	}
 
 	/**
-	 * Constructor for use in subclasses.
-	 * @param flowServiceLocator strategy to use for service lookup
-	 * @param flowCreator strategy to use for flow instantiation
+	 * Create an instance of an abstract flow builder, using the specified
+	 * service locator and flow creator strategy.
+	 * @param flowServiceLocator The service locator
+	 * @param flowCreator The flow creation strategy
 	 */
 	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator, FlowCreator flowCreator) {
 		super(flowServiceLocator, flowCreator);
@@ -166,23 +169,41 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Add a subflow state to the flow built by this builder with the specified
-	 * ID. The builder will attempt to resolve the Flow definition associated
-	 * with the provided subFlowId by querying the FlowServiceLocator.
-	 * @param id the state id
+	 * ID. By default, the subflow state ID will also be treated as the id of
+	 * the subflow definition to spawn, to be used for retrieval by the
+	 * FlowServiceLocator.
+	 * @param id the state id, must be unique among all states of the flow built
+	 *        by this builder. This id also acts as the id of the subFlow.
 	 * @param subFlowId the id of the Flow definition to retieve (could also be
 	 *        the ID of a FlowFactoryBean that produces the Flow)
 	 * @param transitions The eligible set of state transitions
+	 * @throws IllegalArgumentException the state id is not unique
 	 */
-	protected void addSubFlowState(String id, String subFlowId, Transition[] transitions) {
-		addSubFlowState(id, spawnFlow(subFlowId), transitions);
+	protected void addSubFlowState(String id, Transition[] transitions) {
+		addSubFlowState(id, spawnFlow(subFlowId(id)), transitions);
+	}
+
+	/**
+	 * Factory method that returns an sub flow identifier given a stateId as
+	 * input. This default implementation simply returns the stateId; because as
+	 * a default, the value of the subflow state id is also treated as the
+	 * <code>id</code> of the <code>Flow</code> definition to lookup using
+	 * the <code>FlowServiceLocator</code>.
+	 * @param stateId The stateId
+	 * @return the subflowId
+	 */
+	protected String subFlowId(String stateId) {
+		return stateId;
 	}
 
 	/**
 	 * Add a subflow state to the flow built by this builder with the specified
 	 * ID.
-	 * @param id the state id
+	 * @param id the state id, must be unique among all states of the flow built
+	 *        by this builder
 	 * @param subFlow the flow to be used as a subflow
 	 * @param transitions The eligible set of state transitions
+	 * @throws IllegalArgumentException the state id is not unique
 	 */
 	protected void addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
 		new SubFlowState(getFlow(), id, subFlow, transitions);
@@ -190,75 +211,85 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Add a subflow state to the flow built by this builder with the specified
-	 * ID. The sub flow state ID will also be treated as the id of the sub flow
+	 * ID. The subflow state ID will also be treated as the id of the subflow
 	 * definition, to be used for retrieval by the FlowServiceLocator.
-	 * 
+	 * <p>
 	 * The retrieved subflow definition must also be built by the specified
 	 * FlowBuilder implementation, or an exception is thrown. This allows for
-	 * easy navigation to sub flow creation logic from within the parent flow
+	 * easy navigation to subflow creation logic from within the parent flow
 	 * definition, and validates that a particular build implementation does
 	 * indeed produce the subflow.
-	 * @param id the state id, as well as the subflow id
+	 * @param id the state id, must be unique among all states of the flow built
+	 *        by this builder. This id also acts as the id of the subFlow.
 	 * @param flowBuilderImplementation The flow builder implementation
 	 * @param transitions The eligible set of state transitions
+	 * @throws IllegalArgumentException the state id is not unique
+	 * @throws NoSuchFlowDefinitionException the subflow could not be resolved,
+	 *         or it was not built by the specified builder implementation.
 	 */
-	protected void addSubFlowState(String id, Class flowBuilderImplementation, Transition[] transitions) {
+	protected void addSubFlowState(String id, Class flowBuilderImplementation, Transition[] transitions)
+			throws IllegalArgumentException, NoSuchFlowDefinitionException {
 		new SubFlowState(getFlow(), id, spawnFlow(id, flowBuilderImplementation), transitions);
 	}
 
 	/**
 	 * Add a subflow state to the flow built by this builder with the specified
-	 * ID. This builder will attempt to resolve the Flow definition associated
-	 * with the provided subFlowId by querying the configured
+	 * ID. By default, the subflow state ID will also be treated as the id of
+	 * the subflow definition to spawn, to be used for retrieval by the
 	 * FlowServiceLocator.
-	 * @param id the state id
-	 * @param subFlowId the id of the Flow definition to retieve and to be
-	 *        spawned as a subflow (could also be the ID of a FlowFactoryBean
-	 *        that produces the Flow)
-	 * @param modelMapperIdPrefix The id of the model mapper, to map
-	 *        attributes between the the flow built by this builder and the sub
-	 *        flow
+	 * @param id the state id, must be unique among all states of the flow built
+	 *        by this builder. This id also acts as the id of the subFlow.
+	 * @param modelMapper The model mapper to map attributes between the flow
+	 *        built by this builder and the subflow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
-	 *        sub flow ends (this assumes you always transition to the same
-	 *        state regardless of which EndState is reached in the subflow)
+	 *        subflow ends (this assumes you always transition to the same state
+	 *        regardless of which EndState is reached in the subflow)
+	 * @throws IllegalArgumentException the state id is not unique
 	 */
-	protected void addSubFlowState(String id, String subFlowId, String modelMapperIdPrefix,
-			String subFlowDefaultFinishStateId) {
-		addSubFlowState(id, spawnFlow(subFlowId), useModelMapper(modelMapperIdPrefix), subFlowDefaultFinishStateId);
+	protected void addSubFlowState(String id, FlowModelMapper modelMapper, String subFlowDefaultFinishStateId)
+			throws IllegalArgumentException {
+		addSubFlowState(id, spawnFlow(subFlowId(id)), modelMapper,
+				new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
 
 	/**
 	 * Add a subflow state to the flow built by this builder with the specified
 	 * ID.
-	 * @param id the state id
+	 * @param id the state id, must be unique among all states
 	 * @param subFlow the Flow definition to be spawned as a subflow
-	 * @param modelMapper The model mapper to map attributes between the
-	 *        the flow built by this builder and the sub flow
+	 * @param modelMapper The model mapper to map attributes between the flow
+	 *        built by this builder and the subflow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
-	 *        sub flow ends (this assumes you always transition to the same
-	 *        state regardless of which EndState is reached in the subflow)
+	 *        subflow ends (this assumes you always transition to the same state
+	 *        regardless of which EndState is reached in the subflow)
+	 * @throws IllegalArgumentException the state id is not unique
 	 */
 	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper modelMapper,
-			String subFlowDefaultFinishStateId) {
+			String subFlowDefaultFinishStateId) throws IllegalArgumentException {
 		addSubFlowState(id, subFlow, modelMapper, new Transition[] { onAnyEvent(subFlowDefaultFinishStateId) });
 	}
 
 	/**
 	 * Add a subflow state to the flow built by this builder with the specified
-	 * ID. The sub flow state ID will also be treated as the id of the sub flow
+	 * ID. The subflow state ID will also be treated as the id of the subflow
 	 * definition to spawn, to be used for retrieval by the FlowServiceLocator.
-	 * 
+	 * <p>
 	 * The retrieved subflow definition must be built by the specified
 	 * FlowBuilder implementation or an exception is thrown. This allows for
-	 * easy navigation to sub flow creation logic from within the parent flow
+	 * easy navigation to subflow creation logic from within the parent flow
 	 * builder definition, and validates that a particular build implementation
 	 * does indeed create the subflow.
-	 * @param id the state id, as well as the subflow id
-	 * @param flowBuilderImplementation The flow builder implementation
-	 * @param transitions The eligible set of state transitions
+	 * @param id the state id, must be unique among all states of the flow built
+	 *        by this builder. The state id will also act as the subflow id.
+	 * @param subFlowBuilderImplementation The flow builder implementation
+	 * @param modelMapper The model mapper to map attributes between the the
+	 *        flow built by this builder and the subflow
 	 * @param subFlowDefaultFinishStateId The state Id to transition to when the
-	 *        sub flow ends (this assumes you always transition to the same
-	 *        state regardless of which EndState is reached in the subflow)
+	 *        subflow ends (this assumes you always transition to the same state
+	 *        regardless of which EndState is reached in the subflow)
+	 * @throws IllegalArgumentException the state id is not unique
+	 * @throws NoSuchFlowDefinitionException the subflow could not be resolved,
+	 *         or it was not built by the specified builder implementation.
 	 */
 	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowModelMapper modelMapper,
 			String subFlowDefaultFinishStateId) {
@@ -268,28 +299,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Add a subflow state to the flow built by this builder with the specified
-	 * ID. The builder will attempt to resolve the Flow definition associated
-	 * with the provided subFlowId by querying the FlowServiceLocator.
-	 * @param id the state id
-	 * @param subFlowId the id of the Flow definition to retieve (could also be
-	 *        the ID of a FlowFactoryBean that produces the Flow)
-	 * @param modelMapperIdPrefix The id of the model mapper to map
-	 *        attributes between the the flow built by this builder and the sub
-	 *        flow
-	 * @param transitions The eligible set of state transitions
-	 */
-	protected void addSubFlowState(String id, String subFlowId, String modelMapperIdPrefix, Transition[] transitions) {
-		addSubFlowState(id, spawnFlow(subFlowId), useModelMapper(modelMapperIdPrefix), transitions);
-	}
-
-	/**
-	 * Add a subflow state to the flow built by this builder with the specified
 	 * ID.
 	 * @param id the state id
 	 * @param subFlow The flow definition to be used as the subflow
-	 * @param modelMapper The model mapper to map attributes between the
-	 *        the flow built by this builder and the sub flow
+	 * @param modelMapper The model mapper to map attributes between the flow
+	 *        built by this builder and the subflow
 	 * @param transitions The eligible set of state transitions
+	 * @throws IllegalArgumentException the state id is not unique
 	 */
 	protected void addSubFlowState(String id, Flow subFlow, FlowModelMapper modelMapper, Transition[] transitions) {
 		new SubFlowState(getFlow(), id, subFlow, modelMapper, transitions);
@@ -297,19 +313,23 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Add a subflow state to the flow built by this builder with the specified
-	 * ID. The sub flow state ID will also be treated as the id of the sub flow
+	 * ID. The subflow state ID will also be treated as the id of the subflow
 	 * definition to spawn, to be used for retrieval by the FlowServiceLocator.
-	 * 
+	 * <p>
 	 * The retrieved subflow definition must be built by the specified
 	 * FlowBuilder implementation or an exception is thrown. This allows for
-	 * easy navigation to sub flow creation logic from within the parent flow
+	 * easy navigation to subflow creation logic from within the parent flow
 	 * builder definition, and validates that a particular build implementation
 	 * does indeed create the subflow.
-	 * @param id the state id, as well as the subflow id
-	 * @param flowBuilderImplementation The flow builder implementation
-	 * @param modelMapper The model mapper to map attributes between the
-	 *        the flow built by this builder and the sub flow
+	 * @param id the state id, must be unique among all states of the flow built
+	 *        by this builder. The state id will also act as the subflow id.
+	 * @param subFlowBuilderImplementation The flow builder implementation
+	 * @param modelMapper The model mapper to map attributes between the the
+	 *        flow built by this builder and the subflow
 	 * @param transitions The eligible set of state transitions
+	 * @throws IllegalArgumentException the state id is not unique
+	 * @throws NoSuchFlowDefinitionException the subflow could not be resolved,
+	 *         or was not produced by the appropriate builder implementation.
 	 */
 	protected void addSubFlowState(String id, Class subFlowBuilderImplementation, FlowModelMapper modelMapper,
 			Transition[] transitions) {
@@ -317,10 +337,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the flow with the specified flowId be spawned as a subflow
-	 * when the sub flow state is entered. Simply resolves the subflow
-	 * definition by id and returns it; throwing a fail-fast exception if it
-	 * does not exist.
+	 * Request that the <code>Flow</code> with the specified flowId be spawned
+	 * as a subflow when the subflow state being built is entered. Simply
+	 * resolves the subflow definition by id and returns it; throwing a
+	 * fail-fast exception if it does not exist.
 	 * @param flowId The flow definition id
 	 * @return The flow to be used as a subflow, this should be passed to a
 	 *         addSubFlowState call
@@ -332,13 +352,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Request that the flow with the specified flowId and built by the
 	 * specified flow builder implementation be spawned as a subflow when the
-	 * sub flow state is entered. Simply resolves the subflow definition by id,
-	 * verifies it is built by the specified builder, and returns it; throwing a
-	 * fail-fast exception if it does not exist or is build by the wrong
-	 * builder.
+	 * subflow state being built is entered. Simply resolves the subflow
+	 * definition by id, verifies it is built by the specified builder, and
+	 * returns it; throwing a fail-fast exception if it does not exist or is
+	 * build by the wrong builder.
 	 * @param flowId The flow definition id
 	 * @param flowBuilderImplementationClass Ther required FlowBuilder
-	 *        implementation that must build the sub flow.
+	 *        implementation that must build the subflow.
 	 * @return The flow to be used as a subflow, this should be passed to a
 	 *         addSubFlowState call
 	 */
@@ -347,29 +367,29 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the action with the specified name be executed when the
-	 * action state being built is entered. Simply looks the action up by name
-	 * and returns it.
-	 * @param actionName The action name
+	 * Request that the action with the specified id be executed when the action
+	 * state being built is entered. Simply looks the action up by name and
+	 * returns it.
+	 * @param actionId The action id
 	 * @return The action
-	 * @throws NoSuchActionException
+	 * @throws NoSuchActionException the action could not be resolved.
 	 */
-	protected Action executeAction(String actionName) throws NoSuchActionException {
-		return getFlowServiceLocator().getAction(actionName);
+	protected Action executeAction(String actionId) throws NoSuchActionException {
+		return getFlowServiceLocator().getAction(actionId);
 	}
 
 	/**
-	 * Request that the actions with the specified name be executed in the order
+	 * Request that the actions with the specified ids be executed in the order
 	 * specified when the action state being built is entered. Simply looks the
-	 * actions up by name and returns them.
-	 * @param actionNames The action names
+	 * actions up by id and returns them.
+	 * @param actionIds The action ids
 	 * @return The actions
-	 * @throws NoSuchActionException
+	 * @throws NoSuchActionException at least one action could not be resolved.
 	 */
-	protected Action[] executeActions(String[] actionNames) throws NoSuchActionException {
-		Action[] actions = new Action[actionNames.length];
-		for (int i = 0; i < actionNames.length; i++) {
-			actions[i] = getFlowServiceLocator().getAction(actionNames[i]);
+	protected Action[] executeActions(String[] actionIds) throws NoSuchActionException {
+		Action[] actions = new Action[actionIds.length];
+		for (int i = 0; i < actionIds.length; i++) {
+			actions[i] = getFlowServiceLocator().getAction(actionIds[i]);
 		}
 		return actions;
 	}
@@ -378,10 +398,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Request that the actions with the specified implementation be executed
 	 * when the action state being built is entered. Looks the action up by
 	 * implementation class and returns it.
-	 * @param actionImplementationClass The action implementation, must be
-	 *        unique
+	 * @param actionImplementationClass The action implementation--there must be
+	 *        only one action impl of this type defined in the registry
 	 * @return The actions The action
-	 * @throws NoSuchActionException
+	 * @throws NoSuchActionException The action could not be resolved.
 	 */
 	protected Action executeAction(Class actionImplementationClass) {
 		return getFlowServiceLocator().getAction(actionImplementationClass);
@@ -390,11 +410,12 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Request that the actions with the specified implementations be executed
 	 * in the order specified when the action state being built is entered.
-	 * Looks the action up by implementation class and returns it.
-	 * @param actionImplementationClasses The action implementations, must be
-	 *        unique
+	 * Looks the actions up by implementation class and returns it.
+	 * @param actionImplementationClasses The action implementations--there must
+	 *        be only one action impl per type defined in the registry
 	 * @return The actions The actions
-	 * @throws NoSuchActionException
+	 * @throws NoSuchActionException One or more of the actions could not be
+	 *         resolved
 	 */
 	protected Action[] executeActions(Class[] actionImplementationClasses) throws NoSuchActionException {
 		Action[] actions = new Action[actionImplementationClasses.length];
@@ -405,11 +426,17 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the model mapper with the specified name prefix be
-	 * used to map attributes between a parent flow and a spawning subflow when
-	 * the subflow state being constructed is entered.
-	 * @param modelMapperIdPrefix The model mapper prefix
+	 * Request that the model mapper with the specified name prefix be used to
+	 * map attributes between a parent flow and a spawning subflow when the
+	 * subflow state being constructed is entered.
+	 * @param modelMapperIdPrefix The id prefix of the model mapper that will
+	 *        map attributes between the the flow built by this builder and the
+	 *        subflow; note, the id prefix will have the model mapper suffix
+	 *        appended to produce the qualified service identifier (e.g
+	 *        userId.modelMapper) See: {@link String#modelMapper(String)}
 	 * @return The model mapper
+	 * @throws NoSuchFlowModelMapperException no FlowModelMapper implementation
+	 *         was exported with the specified id.
 	 */
 	protected FlowModelMapper useModelMapper(String modelMapperIdPrefix) throws NoSuchFlowModelMapperException {
 		if (!StringUtils.hasText(modelMapperIdPrefix)) {
@@ -419,11 +446,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Request that the mapper of the specified implementation be used
-	 * to map attributes between a parent flow and a spawning subflow when the
-	 * subflow state being constructed is entered.
-	 * @param flowModelMapperImplementationClass
+	 * Request that the mapper of the specified implementation be used to map
+	 * attributes between a parent flow and a spawning subflow when the subflow
+	 * state being built is entered.
+	 * @param flowModelMapperImplementationClass The model mapper
+	 *        implementation, there must be only one instance in the registry.
 	 * @return The model mapper
+	 * @throws NoSuchFlowModelMapperException no FlowModelMapper implementation
+	 *         was exported with the specified implementation, or more than one
+	 *         existed.
 	 */
 	protected FlowModelMapper useModelMapper(Class flowModelMapperImplementationClass)
 			throws NoSuchFlowModelMapperException {
@@ -446,13 +477,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g personDetails.view)
 	 * @return The view marker state
 	 * @throws IllegalStateException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewStateMarker(String stateIdPrefix) throws IllegalStateException {
+	protected ViewState addViewStateMarker(String stateIdPrefix) throws IllegalArgumentException {
 		return addViewState(stateIdPrefix, (String)null);
 	}
 
@@ -472,15 +503,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g. personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g. personDetails.view)
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The view marker state
 	 * @throws IllegalStateException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewStateMarker(String stateIdPrefix, Transition transition) throws IllegalStateException {
+	protected ViewState addViewStateMarker(String stateIdPrefix, Transition transition) throws IllegalArgumentException {
 		return addViewState(stateIdPrefix, (String)null, transition);
 	}
 
@@ -500,8 +531,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g. personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g. personDetails.view)
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
@@ -509,7 +540,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws IllegalStateException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewStateMarker(String stateIdPrefix, Transition[] transitions) throws IllegalStateException {
+	protected ViewState addViewStateMarker(String stateIdPrefix, Transition[] transitions)
+			throws IllegalArgumentException {
 		return addViewState(stateIdPrefix, (String)null, transitions);
 	}
 
@@ -536,13 +568,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g personDetails.view)
 	 * @return The view state
-	 * @throws IllegalStateException the stateId was not unique after
+	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix) throws IllegalStateException {
+	protected ViewState addViewState(String stateIdPrefix) throws IllegalArgumentException {
 		return addViewState(stateIdPrefix, new Transition[] { onBackEnd(), onCancelEnd(),
 				onSubmitBindAndValidate(stateIdPrefix) });
 	}
@@ -561,16 +593,27 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * view resource to render a response when the view state is entered during
 	 * a flow execution.
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g personDetails.view)
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The view state
-	 * @throws IllegalStateException the stateId was not unique after
+	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix, Transition transition) throws IllegalStateException {
+	protected ViewState addViewState(String stateIdPrefix, Transition transition) throws IllegalArgumentException {
 		return new ViewState(getFlow(), view(stateIdPrefix), viewName(stateIdPrefix), transition);
+	}
+
+	/**
+	 * Factory method that generates a viewName from a stateIdPrefix. This
+	 * implementation appends the "view" action constant to the prefix in the
+	 * form ${stateIdPrefix}.view. Subclasses may override.
+	 * @param stateIdPrefix The stateIdPrefix
+	 * @return The view name.
+	 */
+	protected String viewName(String stateIdPrefix) {
+		return view(stateIdPrefix);
 	}
 
 	/**
@@ -587,16 +630,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * view resource to render a response when the view state is entered during
 	 * a flow execution.
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g personDetails.view)
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The view state
-	 * @throws IllegalStateException the stateId was not unique after
+	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix, Transition[] transitions) throws IllegalStateException {
+	protected ViewState addViewState(String stateIdPrefix, Transition[] transitions) throws IllegalArgumentException {
 		return new ViewState(getFlow(), view(stateIdPrefix), viewName(stateIdPrefix), transitions);
 	}
 
@@ -613,17 +656,17 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * '${stateIdPrefix}.bindAndValidate' state
 	 * </ul>
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g personDetails.view)
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
 	 *        controller.
 	 * @return The view state
-	 * @throws IllegalStateException the stateId was not unique after
+	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateIdPrefix, String viewName) throws IllegalStateException {
+	protected ViewState addViewState(String stateIdPrefix, String viewName) throws IllegalArgumentException {
 		return addViewState(stateIdPrefix, viewName, new Transition[] { onBackEnd(), onCancelEnd(),
 				onSubmitBindAndValidate(stateIdPrefix) });
 	}
@@ -633,8 +676,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state triggers the rendering of a view template when entered.
 	 * 
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g personDetails.view)
 	 * @param viewName The name of the logical view name to render. This name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -642,11 +685,11 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The view state
-	 * @throws IllegalStateException the stateId was not unique after
+	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
 	 */
 	protected ViewState addViewState(String stateIdPrefix, String viewName, Transition transition)
-			throws IllegalStateException {
+			throws IllegalArgumentException {
 		return new ViewState(getFlow(), view(stateIdPrefix), viewName, transition);
 	}
 
@@ -655,8 +698,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state triggers the rendering of a view template when entered.
 	 * 
 	 * @param stateIdPrefix The <code>ViewState</code> id prefix; note: the
-	 *        VIEW action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g personDetails.view)
+	 *        {@link VIEW}action constant will be appended to this prefix to
+	 *        build a qualified state id (e.g personDetails.view)
 	 * @param viewName The name of the logical view name to render; this name
 	 *        will be mapped to a physical resource template such as a JSP when
 	 *        the ViewState is entered and control returns to the front
@@ -665,23 +708,40 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The view state
-	 * @throws IllegalStateException the stateId was not unique after
+	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
 	 */
 	protected ViewState addViewState(String stateIdPrefix, String viewName, Transition[] transitions)
-			throws IllegalStateException {
+			throws IllegalArgumentException {
 		return new ViewState(getFlow(), view(stateIdPrefix), viewName, transitions);
 	}
 
 	/**
-	 * Factory method that generates a viewName from a stateIdPrefix. This
-	 * implementation appends the "view" action constant to the prefix in the
-	 * form ${stateIdPrefix}.view. Subclasses may override.
-	 * @param stateIdPrefix The stateIdPrefix
-	 * @return The view name.
+	 * Adds an <code>ActionState</code> to the flow built by this builder. An
+	 * action state executes an <code>Action</code> implementation when
+	 * entered.
+	 * <p>
+	 * This method will attempt to locate the correct <code>Action</code>
+	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
+	 * The flow builder will fail-fast if Action lookup fails.
+	 * <p>
+	 * By default, the <code>id</code> of the Action to use for lookup using
+	 * the <code>FlowServiceLocator</code> will be the same as the provided
+	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
+	 * implementation be exported in the backing service locator registry under
+	 * that name, or a NoSuchActionException will be thrown.
+	 * @param stateId The qualified stateId for the state; must be unique in the
+	 *        context of the flow built by this builder
+	 * @param transition A single supported transition for this state, mapping a
+	 *        path from this state to another state (triggered by an event).
+	 * @return The action state
+	 * @throws IllegalArgumentException the stateId was not unique
+	 * @throws NoSuchActionException no action could be found with an
+	 *         <code>id</code> equal to the <code>stateId</code> value.
 	 */
-	protected String viewName(String stateIdPrefix) {
-		return view(stateIdPrefix);
+	protected ActionState addActionState(String stateId, Transition transition) throws IllegalArgumentException,
+			NoSuchActionException {
+		return new ActionState(getFlow(), stateId, executeAction(actionId(stateId)), transition);
 	}
 
 	/**
@@ -713,42 +773,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * that name, or a NoSuchActionException will be thrown.
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param transition A single supported transition for this state, mapping a
-	 *        path from this state to another state (triggered by an event).
-	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
-	 * @throws NoSuchActionException no action could be found with an
-	 *         <code>id</code> equal to the <code>stateId</code> value.
-	 */
-	protected ActionState addActionState(String stateId, Transition transition) throws IllegalStateException {
-		return new ActionState(getFlow(), stateId, executeAction(actionId(stateId)), transition);
-	}
-
-	/**
-	 * Adds an <code>ActionState</code> to the flow built by this builder. An
-	 * action state executes an <code>Action</code> implementation when
-	 * entered.
-	 * <p>
-	 * This method will attempt to locate the correct <code>Action</code>
-	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
-	 * The flow builder will fail-fast if Action lookup fails.
-	 * <p>
-	 * By default, the <code>id</code> of the Action to use for lookup using
-	 * the <code>FlowServiceLocator</code> will be the same as the provided
-	 * <code>stateId</code>. It is expected that a valid <code>Action</code>
-	 * implementation be exported in the backing service locator registry under
-	 * that name, or a NoSuchActionException will be thrown.
-	 * @param stateId The qualified stateId for the state; must be unique in the
-	 *        context of the flow built by this builder
 	 * @param transitions The supported transitions for this state, where each
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
+	 * @throws IllegalArgumentException the stateId was not unique
 	 * @throws NoSuchActionException no action could be found with an
 	 *         <code>id</code> equal to the <code>stateId</code> value.
 	 */
-	protected ActionState addActionState(String stateId, Transition[] transitions) throws IllegalStateException,
+	protected ActionState addActionState(String stateId, Transition[] transitions) throws IllegalArgumentException,
 			NoSuchActionException {
 		return new ActionState(getFlow(), stateId, executeAction(actionId(stateId)), transitions);
 	}
@@ -757,71 +790,16 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds an <code>ActionState</code> to the flow built by this builder. An
 	 * action state executes an <code>Action</code> implementation when
 	 * entered.
-	 * <p>
-	 * This method will attempt to locate the correct <code>Action</code>
-	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
-	 * The flow builder will fail-fast if Action lookup fails. It is expected
-	 * that a valid <code>Action</code> implementation be exported in the
-	 * backing service locator registry under that name, or a
-	 * NoSuchActionException will be thrown.
-	 * @param stateId The qualified stateId for the state; must be unique in the
-	 *        context of the flow built by this builder
-	 * @param actionId The id of the action service, locatable by the
-	 *        FlowServiceLocator
-	 * @param transition A single supported transition for this state, mapping a
-	 *        path from this state to another state (triggered by an event).
-	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
-	 * @throws NoSuchActionException no action could be found with an
-	 *         <code>id</code> equal to the <code>stateId</code> value.
-	 */
-	protected ActionState addActionState(String stateId, String actionId, Transition transition)
-			throws IllegalStateException, NoSuchActionException {
-		return new ActionState(getFlow(), stateId, executeAction(actionId), transition);
-	}
-
-	/**
-	 * Adds an <code>ActionState</code> to the flow built by this builder. An
-	 * action state executes an <code>Action</code> implementation when
-	 * entered.
-	 * <p>
-	 * This method will attempt to locate the correct <code>Action</code>
-	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
-	 * The flow builder will fail-fast if Action lookup fails. It is expected
-	 * that a valid <code>Action</code> implementation be exported in the
-	 * backing service locator registry under that name, or a
-	 * NoSuchActionException will be thrown.
-	 * @param stateId The qualified stateId for the state; must be unique in the
-	 *        context of the flow built by this builder
-	 * @param actionId The id of the action service, locatable by the
-	 *        FlowServiceLocator
-	 * @param transitions The supported transitions for this state, where each
-	 *        transition maps a path from this state to another state (triggered
-	 *        by an event).
-	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
-	 * @throws NoSuchActionException no action could be found with an
-	 *         <code>id</code> equal to the <code>stateId</code> value.
-	 */
-	protected ActionState addActionState(String stateId, String actionId, Transition[] transitions) {
-		return new ActionState(getFlow(), stateId, executeAction(actionId), transitions);
-	}
-
-	/**
-	 * Adds an <code>ActionState</code> to the flow built by this builder. An
-	 * action state executes an <code>Action</code> implementation when
-	 * entered.
-	 * <p>
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
 	 * @param action the action implementation
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
+	 * @throws IllegalArgumentException the stateId was not unique
 	 */
 	protected ActionState addActionState(String stateId, Action action, Transition transition)
-			throws IllegalStateException {
+			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, action, transition);
 	}
 
@@ -829,7 +807,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds an <code>ActionState</code> to the flow built by this builder. An
 	 * action state executes an <code>Action</code> implementation when
 	 * entered.
-	 * <p>
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
 	 * @param action the action implementation
@@ -837,10 +814,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
+	 * @throws IllegalArgumentException the stateId was not unique
 	 */
 	protected ActionState addActionState(String stateId, Action action, Transition[] transitions)
-			throws IllegalStateException {
+			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, action, transitions);
 	}
 
@@ -848,7 +825,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds an <code>ActionState</code> to the flow built by this builder. An
 	 * action state executes an <code>Action</code> implementation when
 	 * entered.
-	 * <p>
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
 	 * @param actionName a logical name to associate with this action, used to
@@ -859,10 +835,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param transition A single supported transition for this state, mapping a
 	 *        path from this state to another state (triggered by an event).
 	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
+	 * @throws IllegalArgumentException the stateId was not unique
 	 */
 	protected ActionState addActionState(String stateId, String actionName, Action action, Transition transition)
-			throws IllegalStateException {
+			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, actionName, action, transition);
 	}
 
@@ -870,38 +846,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds an <code>ActionState</code> to the flow built by this builder. An
 	 * action state executes an <code>Action</code> implementation when
 	 * entered.
-	 * <p>
-	 * This method will attempt to locate the correct <code>Action</code>
-	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
-	 * The flow builder will fail-fast if Action lookup fails. It is expected
-	 * that a valid <code>Action</code> implementation be exported in the
-	 * backing service locator registry under that name, or a
-	 * NoSuchActionException will be thrown.
-	 * @param stateId The qualified stateId for the state; must be unique in the
-	 *        context of the flow built by this builder
-	 * @param actionName a logical name to associate with this action, used to
-	 *        qualify action results (e.g "myAction.success"), so one action can
-	 *        be reused in different flows with other actions that return the
-	 *        same logical result
-	 * @param actionId The id of the action service, locatable by the
-	 *        FlowServiceLocator
-	 * @param transition A single supported transition for this state, mapping a
-	 *        path from this state to another state (triggered by an event).
-	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
-	 * @throws NoSuchActionException no action could be found with an
-	 *         <code>id</code> equal to the <code>stateId</code> value.
-	 */
-	protected ActionState addActionState(String stateId, String actionName, String actionId, Transition transition)
-			throws IllegalStateException, NoSuchActionException {
-		return new ActionState(getFlow(), stateId, actionName, executeAction(actionId), transition);
-	}
-
-	/**
-	 * Adds an <code>ActionState</code> to the flow built by this builder. An
-	 * action state executes an <code>Action</code> implementation when
-	 * entered.
-	 * <p>
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
 	 * @param actionName a logical name to associate with this action, used to
@@ -913,49 +857,17 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
+	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, String actionName, Action action, Transition[] transitions) {
+	protected ActionState addActionState(String stateId, String actionName, Action action, Transition[] transitions)
+			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, actionName, action, transitions);
-	}
-
-	/**
-	 * Adds an <code>ActionState</code> to the flow built by this builder. An
-	 * action state executes an <code>Action</code> implementation when
-	 * entered.
-	 * <p>
-	 * This method will attempt to locate the correct <code>Action</code>
-	 * implementation by ID by contacting the <code>FlowServiceLocator</code>.
-	 * The flow builder will fail-fast if Action lookup fails. It is expected
-	 * that a valid <code>Action</code> implementation be exported in the
-	 * backing service locator registry under that name, or a
-	 * NoSuchActionException will be thrown.
-	 * @param stateId The qualified stateId for the state; must be unique in the
-	 *        context of the flow built by this builder
-	 * @param actionName a logical name to associate with this action, used to
-	 *        qualify action results (e.g "myAction.success"), so one action can
-	 *        be reused in different flows with other actions that return the
-	 *        same logical result
-	 * @param actionId The id of the action service, locatable by the
-	 *        FlowServiceLocator
-	 * @param transitions The supported transitions for this state, where each
-	 *        transition maps a path from this state to another state (triggered
-	 *        by an event).
-	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
-	 * @throws NoSuchActionException no action could be found with an
-	 *         <code>id</code> equal to the <code>stateId</code> value.
-	 */
-	protected ActionState addActionState(String stateId, String actionName, String actionId, Transition[] transitions)
-			throws IllegalStateException, NoSuchActionException {
-		return new ActionState(getFlow(), stateId, actionName, executeAction(actionId), transitions);
 	}
 
 	/**
 	 * Adds an <code>ActionState</code> to the flow built by this builder. An
 	 * action state executes one or more <code>Action</code> implementations
 	 * when entered.
-	 * <p>
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
 	 * @param actions the action implementations, to be executed in order until
@@ -964,9 +876,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
+	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, Action[] actions, Transition[] transitions) {
+	protected ActionState addActionState(String stateId, Action[] actions, Transition[] transitions)
+			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, actions, transitions);
 	}
 
@@ -974,7 +887,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * Adds an <code>ActionState</code> to the flow built by this builder. An
 	 * action state executes one or more <code>Action</code> implementations
 	 * when entered.
-	 * <p>
 	 * @param stateId The qualified stateId for the state; must be unique in the
 	 *        context of the flow built by this builder
 	 * @param actionNames the logical names to associate with each action, used
@@ -987,82 +899,46 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        transition maps a path from this state to another state (triggered
 	 *        by an event).
 	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
+	 * @throws IllegalArgumentException the stateId was not unique
 	 */
 	protected ActionState addActionState(String stateId, String[] actionNames, Action[] actions,
-			Transition[] transitions) {
+			Transition[] transitions) throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, actionNames, actions, transitions);
 	}
 
 	/**
-	 * Adds an <code>ActionState</code> to the flow built by this builder. An
-	 * action state executes one or more <code>Action</code> implementations
-	 * when entered.
+	 * Adds a <i>create </i> <code>ActionState</code> to the flow built by
+	 * this builder. The <i>create </i> stereotype is a simple qualifier that
+	 * notes this action state executes object creational logic when entered. It
+	 * also used to establish consistent naming conventions and defaults,
+	 * discussed below.
 	 * <p>
-	 * This method will attempt to locate the correct <code>Action</code>
-	 * implementations by ID by contacting the <code>FlowServiceLocator</code>.
-	 * The flow builder will fail-fast if Action lookup fails. It is expected
-	 * that a valid <code>Action</code> implementation be exported in the
-	 * backing service locator registry under that ID, or a
-	 * NoSuchActionException will be thrown.
-	 * @param stateId The qualified stateId for the state; must be unique in the
-	 *        context of the flow built by this builder
-	 * @param actionIds The ids of the action services, locatable by the
-	 *        FlowServiceLocator, and to be resolved and added in order
-	 * @param transitions The supported transitions for this state, where each
-	 *        transition maps a path from this state to another state (triggered
-	 *        by an event).
-	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
-	 * @throws NoSuchActionException no action could be found with an
-	 *         <code>id</code> equal to the <code>stateId</code> value.
-	 */
-	protected ActionState addActionState(String stateId, String[] actionIds, Transition[] transitions) {
-		return new ActionState(getFlow(), stateId, executeActions(actionIds), transitions);
-	}
-
-	/**
-	 * Adds an <code>ActionState</code> to the flow built by this builder. An
-	 * action state executes one or more <code>Action</code> implementations
-	 * when entered.
-	 * <p>
-	 * This method will attempt to locate the correct <code>Action</code>
-	 * implementations by ID by contacting the <code>FlowServiceLocator</code>.
-	 * The flow builder will fail-fast if Action lookup fails. It is expected
-	 * that a valid <code>Action</code> implementation be exported in the
-	 * backing service locator registry under that ID, or a
-	 * NoSuchActionException will be thrown.
-	 * @param stateId The qualified stateId for the state; must be unique in the
-	 *        context of the flow built by this builder
-	 * @param actionNames the logical names to associate with each action, used
-	 *        to qualify action results (e.g "myAction.success"), so one action
-	 *        can be reused in different flows with other actions that return
-	 *        the same logical result
-	 * @param actionIds The ids of the action services, locatable by the
-	 *        FlowServiceLocator, and to be resolved and added in order
-	 * @param transitions The supported transitions for this state, where each
-	 *        transition maps a path from this state to another state (triggered
-	 *        by an event).
-	 * @return The action state
-	 * @throws IllegalStateException the stateId was not unique
-	 * @throws NoSuchActionException no action could be found with an
-	 *         <code>id</code> equal to the <code>stateId</code> value.
-	 */
-	protected ActionState addActionState(String stateId, String[] actionNames, String[] actionIds,
-			Transition[] transitions) throws IllegalStateException, NoSuchActionException {
-		return new ActionState(getFlow(), stateId, actionNames, executeActions(actionIds), transitions);
-	}
-
-	/**
-	 * Adds a 'create' <code>ActionState</code> to the flow built by this
-	 * builder. An action state executes one or more <code>Action</code>
-	 * implementations when entered. 'create' is treated as a qualifier that
-	 * stereotypes this action state as one that executes object creational
-	 * logic when entered.
+	 * For example, the usage:
 	 * 
+	 * <pre>
+	 *   ActionState createState = addCreateState("person");
+	 * </pre>
+	 * 
+	 * ... builds an action state with the following properties:
+	 * <ul>
+	 * <li>id: <code>person.create</code>
+	 * <li>action: set to the <code>Action</code> implementation in the
+	 * registry exported with id '<code>person.create</code>'
+	 * </ul>
+	 * <p>
+	 * In addition, the create action state will be configured with the
+	 * following default state transitions:
+	 * <ul>
+	 * <li>on event 'success', transition to the '${stateIdPrefix}.view' state
+	 * (e.g <code>person.view</code>) This assumes, after successfully
+	 * executing some object creational logic you will wish to view the results
+	 * of that creation.
+	 * </ul>
 	 * @param stateIdPrefix The <code>ActionState</code> id prefix; note: the
-	 *        CREATE action constant will be appended to this prefix to build a
-	 *        qualified state id (e.g person.create)
+	 *        {@link CREATE}action constant will be appended to this prefix to
+	 *        build the qualified state id (e.g person.create). Note: the
+	 *        qualified state ID will also be used as the actionId, to lookup in
+	 *        the locator's registry.
 	 * @return The action state
 	 */
 	protected ActionState addCreateState(String stateIdPrefix) {
@@ -1482,16 +1358,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * @param stateIdPrefix
-	 * @param saveActionName
-	 * @param transitions
-	 * @return
-	 */
-	protected ActionState addSaveState(String stateIdPrefix, String saveActionName, Transition[] transitions) {
-		return addActionState(save(stateIdPrefix), saveActionName, transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
 	 * @param transitions
 	 * @return
 	 */
@@ -1554,16 +1420,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected ActionState addDeleteState(String stateIdPrefix, Transition[] transitions) {
 		return addActionState(delete(stateIdPrefix), transitions);
-	}
-
-	/**
-	 * @param stateIdPrefix
-	 * @param deleteActionName
-	 * @param transitions
-	 * @return
-	 */
-	protected ActionState addDeleteState(String stateIdPrefix, String deleteActionName, Transition[] transitions) {
-		return addActionState(delete(stateIdPrefix), deleteActionName, transitions);
 	}
 
 	/**
