@@ -172,8 +172,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param lastModified if the mapped handler provides Last-Modified support
 	 * @throws ServletException if the request cannot be handled because a check failed
 	 */
-	protected final void checkAndPrepare(HttpServletRequest request, HttpServletResponse response,
-	                                     boolean lastModified)
+	protected final void checkAndPrepare(
+			HttpServletRequest request, HttpServletResponse response, boolean lastModified)
 	    throws ServletException {
 		checkAndPrepare(request, response, this.cacheSeconds, lastModified);
 	}
@@ -189,8 +189,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param lastModified if the mapped handler provides Last-Modified support
 	 * @throws ServletException if the request cannot be handled because a check failed
 	 */
-	protected final void checkAndPrepare(HttpServletRequest request, HttpServletResponse response,
-	                                     int cacheSeconds, boolean lastModified)
+	protected final void checkAndPrepare(
+			HttpServletRequest request, HttpServletResponse response, int cacheSeconds, boolean lastModified)
 	    throws ServletException {
 
 		// check whether we should support the request method
@@ -248,7 +248,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param mustRevalidate whether the client should revalidate the resource
 	 * (typically only necessary for controllers with last-modified support)
 	 */
-	protected final void cacheForSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
+	protected final void cacheForSeconds(
+			HttpServletResponse response, int seconds, boolean mustRevalidate) {
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
 			response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + seconds * 1000L);
@@ -287,7 +288,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param mustRevalidate whether the client should revalidate the resource
 	 * (typically only necessary for controllers with last-modified support)
 	 */
-	protected final void applyCacheSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
+	protected final void applyCacheSeconds(
+			HttpServletResponse response, int seconds, boolean mustRevalidate) {
 		if (seconds > 0) {
 			cacheForSeconds(response, seconds, mustRevalidate);
 		}

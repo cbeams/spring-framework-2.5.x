@@ -29,8 +29,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
- * Convenient abstract superclass for ApplicationContext implementations
- * drawing their configuration from XML documents containing bean definitions
+ * Convenient abstract superclass for ApplicationContext implementations,
+ * drawing configuration from XML documents containing bean definitions
  * understood by an XmlBeanDefinitionParser.
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -68,8 +68,8 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 			}
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("I/O error parsing XML document for application context [" +
-			                                      getDisplayName() + "]", ex);
+			throw new ApplicationContextException(
+					"I/O error parsing XML document for application context [" + getDisplayName() + "]", ex);
 		}
 	}
 
