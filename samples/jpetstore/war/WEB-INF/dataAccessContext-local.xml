@@ -14,7 +14,7 @@
 
 	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
 
-	<!-- Local DataSource that refers to a combined database -->
+	<!-- Local Apache Commons DBCP DataSource that refers to a combined database -->
 	<!-- (see dataAccessContext-jta.xml for an alternative) -->
 	<!-- The placeholders are resolved from jdbc.properties through -->
 	<!-- the PropertyPlaceholderConfigurer in applicationContext.xml -->

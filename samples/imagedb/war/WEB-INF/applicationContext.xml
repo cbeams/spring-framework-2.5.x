@@ -17,11 +17,13 @@
 		</property>
 	</bean>
 
-	<!-- Local DataSource that works in any environment -->
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
-		<property name="url"><value>${jdbc.url}</value></property>
-		<property name="username"><value>${jdbc.username}</value></property>
+	<!-- Local C3P0 DataSource that works in any environment -->
+	<!-- See JPetStore for an example of using Apache Commons DBCP as alternative -->
+	<!-- (Both DataSource implementations have a "close" method to be called on shutdown) -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass"><value>${jdbc.driverClassName}</value></property>
+		<property name="jdbcUrl"><value>${jdbc.url}</value></property>
+		<property name="user"><value>${jdbc.username}</value></property>
 		<property name="password"><value>${jdbc.password}</value></property>
 	</bean>
 
