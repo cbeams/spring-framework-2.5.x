@@ -21,22 +21,34 @@ import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Extension of the BeanFactory interface to be implemented by bean
- * factories that are capable of autowiring and expose this functionality
- * for existing bean instances.
+ * factories that are capable of autowiring, provided that they want
+ * to expose this functionality for existing bean instances.
+ *
+ * <p>This subinterface of BeanFactory is not meant to be used in normal
+ * application code: Stick to BeanFactory or ListableBeanFactory for
+ * typical use cases.
+ *
+ * <p>Integration code for other frameworks can leverage this interface to
+ * wire and populate existing bean instances that Spring does not control
+ * the lifecycle of. This is particularly useful for WebWork Actions or
+ * Tapestry Page objects, for example.
+ *
  * @author Juergen Hoeller
  * @since 04.12.2003
+ * @see org.springframework.beans.factory.BeanFactory
+ * @see org.springframework.beans.factory.ListableBeanFactory
  */
 public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
-	 * Constant that indicates autowiring by name.
+	 * Constant that indicates autowiring bean properties by name.
 	 * @see #autowire
 	 * @see #autowireBeanProperties
 	 */
 	int AUTOWIRE_BY_NAME = 1;
 
 	/**
-	 * Constant that indicates autowiring by type.
+	 * Constant that indicates autowiring bean properties by type.
 	 * @see #autowire
 	 * @see #autowireBeanProperties
 	 */
@@ -84,6 +96,19 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 */
 	void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
 			throws BeansException;
+
+	/**
+	 * Apply the property values of the bean definition with the given name
+	 * to the given bean instance. The bean definition can either define a
+	 * fully self-contained bean, reusing its property values, or just
+	 * property values meant to be used for existing bean instances.
+	 * @param existingBean the existing bean instance
+	 * @param name the name of the bean definition in the bean factory
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * if there is no bean with the given name
+	 * @throws BeansException if applying the property values failed
+	 */
+	void applyBeanPropertyValues(Object existingBean, String name) throws BeansException;
 
 	/**
 	 * Apply BeanPostProcessors to the given existing bean instance,

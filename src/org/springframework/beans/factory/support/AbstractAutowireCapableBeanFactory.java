@@ -155,6 +155,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		populateBean(existingBean.getClass().getName(), bd, new BeanWrapperImpl(existingBean));
 	}
 
+	public void applyBeanPropertyValues(Object existingBean, String name) throws BeansException {
+		RootBeanDefinition bd = getMergedBeanDefinition(name, true);
+		applyPropertyValues(name, bd, new BeanWrapperImpl(existingBean), bd.getPropertyValues());
+	}
+
 	public Object applyBeanPostProcessorsBeforeInitialization(Object bean, String name) throws BeansException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking BeanPostProcessors before initialization of bean '" + name + "'");
@@ -181,10 +186,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			result = beanProcessor.postProcessAfterInitialization(result, name);
 			if (result == null) {
-				throw new BeanCreationException("postProcessAfter" +
-				                                "Initialization method of BeanPostProcessor [" +
-				                                beanProcessor + "] returned null for bean [" + result +
-				                                "] with name [" + name + "]");
+				throw new BeanCreationException(
+				    "postProcessAfterInitialization method of BeanPostProcessor [" + beanProcessor +
+				    "] returned null for bean [" + result + "] with name [" + name + "]");
 			}
 		}
 		return result;
@@ -763,8 +767,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Apply the given property values, resolving any runtime references
-	 * to other beans in this bean factory.
-	 * Must use deep copy, so we don't permanently modify this property
+	 * to other beans in this bean factory. Must use deep copy, so we
+	 * don't permanently modify this property.
 	 * @param beanName bean name passed for better exception information
 	 * @param bw BeanWrapper wrapping the target object
 	 * @param pvs new property values
