@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface ActionBean {
+public interface Action {
 
 	/**
 	 * Execute this action bean.
@@ -36,11 +36,11 @@ public interface ActionBean {
 	 * @param response The http response, enabling direct response writing by
 	 *        the action in neccessary
 	 * @param model The data model for the current flow session execution
-	 * @return A logical result outcome, called an "ActionBeanEvent"; used as
-	 *         grounds for a transition in the current state
+	 * @return A logical result outcome, used as grounds for a transition in the
+	 *         current state
 	 * @throws RuntimeException An unrecoverable exception occured because of
 	 *         programmer error
 	 */
-	public ActionBeanEvent execute(HttpServletRequest request, HttpServletResponse response,
+	public ActionResult execute(HttpServletRequest request, HttpServletResponse response,
 			MutableAttributesAccessor model) throws RuntimeException;
 }

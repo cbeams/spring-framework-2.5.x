@@ -28,83 +28,84 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ActionState extends TransitionableState {
 
-	private Set actionBeans = new LinkedHashSet(1);
+	private Set actions = new LinkedHashSet(1);
 
-	public ActionState(Flow flow, String id, ActionBean actionBean, Transition transition) {
+	public ActionState(Flow flow, String id, Action action, Transition transition) {
 		super(flow, id, transition);
-		addActionBean(actionBean);
+		addActionBean(action);
 	}
 
-	public ActionState(Flow flow, String id, ActionBean actionBean, Transition[] transitions) {
+	public ActionState(Flow flow, String id, Action action, Transition[] transitions) {
 		super(flow, id, transitions);
-		addActionBean(actionBean);
+		addActionBean(action);
 	}
 
-	public ActionState(Flow flow, String id, ActionBean[] actionBeans, Transition[] transitions) {
+	public ActionState(Flow flow, String id, Action[] actions, Transition[] transitions) {
 		super(flow, id, transitions);
-		addActionBeans(actionBeans);
+		addActionBeans(actions);
 	}
 
 	public boolean isActionState() {
 		return true;
 	}
 
-	protected void addActionBean(ActionBean actionBean) {
-		this.actionBeans.add(actionBean);
+	protected void addActionBean(Action action) {
+		this.actions.add(action);
 	}
 
-	protected void addActionBeans(ActionBean[] actionBeans) {
-		for (int i = 0; i < actionBeans.length; i++) {
-			this.actionBeans.add(actionBeans[i]);;
+	protected void addActionBeans(Action[] actions) {
+		for (int i = 0; i < actions.length; i++) {
+			this.actions.add(actions[i]);
+			;
 		}
 	}
 
-	protected ActionBean getActionBean() {
-		Iterator it = actionBeanIterator();
-		return (ActionBean)it.next();
+	protected Action getActionBean() {
+		Iterator it = actionIterator();
+		return (Action)it.next();
 	}
 
 	/**
 	 * @return An iterator that returns the set of action beans to execute for
 	 *         this state.
 	 */
-	protected Iterator actionBeanIterator() {
-		return actionBeans.iterator();
+	protected Iterator actionIterator() {
+		return actions.iterator();
 	}
 
 	/**
 	 * Hook method implementation that initiates state processing.
 	 * 
 	 * This implementation iterators over each configured ActionBean for this
-	 * state and executes it. If the <code>actionBeanName</code> is provided
-	 * and not the ActionBean instance, the instance is retrieved from the
+	 * state and executes it. If the <code>actionName</code> is provided and
+	 * not the ActionBean instance, the instance is retrieved from the
 	 * <code>FlowServiceLocator</code>
 	 */
 	protected ViewDescriptor doEnterState(FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) {
-		Iterator it = actionBeanIterator();
-		int beanExecutionCount = 0;
+		Iterator it = actionIterator();
+		int executionCount = 0;
 		while (it.hasNext()) {
-			ActionBean actionBean = (ActionBean)it.next();
+			Action action = (Action)it.next();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing action bean '" + actionBean + "'");
+				logger.debug("Executing action bean '" + action + "'");
 			}
-			ActionBeanEvent event = actionBean.execute(request, response, sessionExecution);
-			beanExecutionCount++;
-			if (event != null) {
-				return execute(event.getId(), sessionExecution, request, response);
+			ActionResult result = action.execute(request, response, sessionExecution);
+			executionCount++;
+			if (result != null) {
+				return execute(result.getId(), sessionExecution, request, response);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Action bean execution #" + beanExecutionCount + " resulted in no event - "
+					logger.debug("Action bean execution #" + executionCount + " resulted in no event - "
 							+ "I will attempt to proceed to the next action in the chain");
 				}
 			}
 		}
-		if (beanExecutionCount > 0) {
+		if (executionCount > 0) {
 			throw new CannotExecuteStateTransitionException(this, new IllegalStateException(
-					"No valid event was signaled by any of the " + beanExecutionCount
-							+ " action bean(s) that executed in this action state '" + getId() + "' of flow '"
+					"No valid event was signaled by any of the " + executionCount
+							+ " actions that executed in this action state '" + getId() + "' of flow '"
 							+ getFlow().getId() + "' -- programmer error?"));
 		}
 		else {

@@ -117,7 +117,7 @@ public abstract class AbstractFlowTests extends AbstractTransactionalSpringConte
 
 	protected ViewDescriptor executeEvent(String eventId, MockHttpServletRequest request,
 			MockHttpServletResponse response) {
-		return getEventProcessor().execute(eventId, getCurrentStateId(), getFlowSessionExecution(), request, response);
+		return getEventProcessor().signal(eventId, getCurrentStateId(), getFlowSessionExecution(), request, response);
 	}
 
 }

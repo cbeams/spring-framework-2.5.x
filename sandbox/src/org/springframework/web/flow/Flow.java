@@ -408,7 +408,7 @@ public class Flow implements FlowEventProcessor, Serializable {
 	/*
 	 * see #FlowEventProcessor.execute
 	 */
-	public ViewDescriptor execute(String eventId, String stateId, FlowExecutionInfo sessionExecution,
+	public ViewDescriptor signal(String eventId, String stateId, FlowExecutionInfo sessionExecution,
 			HttpServletRequest request, HttpServletResponse response) throws FlowNavigationException {
 		Assert.isTrue(sessionExecution.isActive(),
 				"The currently executing flow stack is not active - this should not happen");

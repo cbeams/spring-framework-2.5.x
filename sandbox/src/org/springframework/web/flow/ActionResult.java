@@ -15,19 +15,27 @@
  */
 package org.springframework.web.flow;
 
-import java.util.EventObject;
+import java.io.Serializable;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ToStringCreator;
 
 /**
  * A event object representing the result of an ActionBean execution.
  * @author Keith Donald
  */
-public class ActionBeanEvent extends EventObject {
+public class ActionResult implements Serializable {
+	public static final ActionResult NULL_RESULT = new ActionResult();
+
 	private String id;
 
-	public ActionBeanEvent(ActionBean source, String id) {
-		super(source);
+	private ActionResult() {
+
+	}
+
+	public ActionResult(String id) {
+		Assert.hasText(id, "The action result id is required");
 		this.id = id;
 	}
 
@@ -36,15 +44,20 @@ public class ActionBeanEvent extends EventObject {
 	}
 
 	public boolean equals(Object o) {
-		if (!(o instanceof ActionBeanEvent)) {
+		if (!(o instanceof ActionResult)) {
 			return false;
 		}
-		ActionBeanEvent event = (ActionBeanEvent)o;
-		return id.equals(event.id);
+		ActionResult result = (ActionResult)o;
+		return ObjectUtils.nullSafeEquals(id, result.id);
 	}
 
 	public int hashCode() {
-		return id.hashCode();
+		if (id != null) {
+			return id.hashCode();
+		}
+		else {
+			return 0;
+		}
 	}
 
 	public String toString() {
