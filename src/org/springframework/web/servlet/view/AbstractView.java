@@ -32,10 +32,15 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Abstract View superclass. Standard framework View implementations
- * and application-specific custom Views can extend this class
- * to simplify their implementation. Subclasses should be JavaBeans,
- * to allow for configuration as Spring-managed bean instances.
+ * Abstract View superclass. Standard framework View implementations and
+ * application-specific custom Views can extend this class to simplify
+ * their implementation. Subclasses should be JavaBeans, to allow for
+ * convenient configuration as Spring-managed bean instances.
+ *
+ * <p>Provides support for static attributes, to be made available to the view,
+ * with a variety of ways to specify them. Static attributes will be merged
+ * with the given dynamic attributes (the model that the controller returned)
+ * for each render operation.
  *
  * <p>Extends WebApplicationObjectSupport, which will be helpful to some views.
  * Handles static attributes, and merging static with dynamic attributes.
@@ -43,6 +48,8 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #setAttributes
+ * @see #setAttributesMap
  * @see #renderMergedOutputModel
  */
 public abstract class AbstractView extends WebApplicationObjectSupport implements View, BeanNameAware {
@@ -141,17 +148,15 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			value = value.substring(1);
 			value = value.substring(0, value.length() - 1);
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Set static attribute with name '" + name + "' and value [" + value + "] on view");
-			}
 			addStaticAttribute(name, value);
 		}
 	}
 
 	/**
-	 * Set static attributes from a java.util.Properties object. This is
-	 * the most convenient way to set static attributes. Note that static
-	 * attributes can be overridden by dynamic attributes, if a value
+	 * Set static attributes for this view from a
+	 * <code>java.util.Properties</code> object.
+	 * <p>This is the most convenient way to set static attributes. Note that
+	 * static attributes can be overridden by dynamic attributes, if a value
 	 * with the same name is included in the model.
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
 	 * or a "props" element in XML bean definitions.
@@ -162,12 +167,10 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Set static attributes from a Map. This allows to set any kind
-	 * of attribute values, for example bean references.
-	 * <p>Can be populated with a "map" or "props" element in XML bean
-	 * definitions.
-	 * @param attributes Map with name Strings as keys and attribute
-	 * objects as values
+	 * Set static attributes for this view from a Map. This allows to set
+	 * any kind of attribute values, for example bean references.
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
+	 * @param attributes Map with name Strings as keys and attribute objects as values
 	 */
 	public void setAttributesMap(Map attributes) {
 		if (attributes != null) {
@@ -193,19 +196,21 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Add static data to this view, exposed in each view.
-	 * <p>Must be invoked before any calls to render().
+	 * <p>Must be invoked before any calls to <code>render</code>.
 	 * @param name name of attribute to expose
 	 * @param value object to expose
+	 * @see #render
 	 */
 	public void addStaticAttribute(String name, Object value) {
 		this.staticAttributes.put(name, value);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Set static attribute with name '" + name + "' and value [" + value + "] on view");
+			logger.debug("Set static attribute with name '" + name + "' and value [" + value +
+					"] on view with name '" + getBeanName() + "'");
 		}
 	}
 
 	/**
-	 * Return the static attributes held in this view. Handy for testing.
+	 * Return the static attributes for this view. Handy for testing.
 	 * <p>Returns an unmodifiable Map, as this is not intended for
 	 * manipulating the Map but rather just for checking the contents.
 	 * @return the static attributes in this view
