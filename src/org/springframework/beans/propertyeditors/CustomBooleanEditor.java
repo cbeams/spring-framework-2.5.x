@@ -103,8 +103,14 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 		else if (text.equalsIgnoreCase(this.falseString)) {
 			setValue(Boolean.FALSE);
 		}
-		else
+		else if (text.equalsIgnoreCase(VALUE_TRUE) || text.equalsIgnoreCase(VALUE_ON) || text.equalsIgnoreCase(VALUE_YES)) {
+		    setValue(Boolean.TRUE);
+		}
+		else if (text.equalsIgnoreCase(VALUE_FALSE) || text.equalsIgnoreCase(VALUE_OFF) || text.equalsIgnoreCase(VALUE_NO)) {
+		    setValue(Boolean.FALSE);
+		} else {
 			throw new IllegalArgumentException("Invalid boolean value [" + text + "]");
+		}
 	}
 
 	public String getAsText() {
