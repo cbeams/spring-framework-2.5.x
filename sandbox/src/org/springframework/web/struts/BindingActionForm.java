@@ -28,6 +28,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.util.MessageResources;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.Errors;
@@ -36,7 +37,6 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.flow.AttributesAccessor;
-
 
 /**
  * @author Keith Donald
@@ -122,26 +122,45 @@ public class BindingActionForm extends ActionForm {
             ObjectError objectError = (ObjectError)it.next();
             if (objectError instanceof FieldError) {
                 FieldError fieldError = (FieldError)objectError;
-
                 String effectiveMessageKey = findEffectiveMessageKey(objectError.getCode(),
                         objectError.getObjectName(), fieldError.getField());
-
-                // If we want to pass arguments, they're in
-                // objectError.getArguments()
-                actionErrors.add(fieldError.getField(), new ActionMessage(effectiveMessageKey, null));
+                actionErrors.add(fieldError.getField(), new ActionMessage(effectiveMessageKey, resolveArgs(fieldError
+                        .getArguments())));
             }
             else {
                 String effectiveMessageKey = findEffectiveMessageKey(objectError.getCode(),
                         objectError.getObjectName(), null);
-
-                actionErrors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(effectiveMessageKey, null));
+                actionErrors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(effectiveMessageKey,
+                        resolveArgs(objectError.getArguments())));
             }
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Final ActionErrors: " + actionErrors);
         }
-
         return actionErrors;
+    }
+
+    private Object[] resolveArgs(Object[] arguments) {
+        if (arguments == null || arguments.length == 0) {
+            return arguments;
+        }
+        for (int i = 0; i < arguments.length; i++) {
+            Object arg = arguments[i];
+            if (arg instanceof MessageSourceResolvable) {
+                MessageSourceResolvable resolvable = (MessageSourceResolvable)arg;
+                String[] codes = resolvable.getCodes();
+                for (int j = 0; j < codes.length; j++) {
+                    String code = codes[j];
+                    if (messageResources.isPresent(this.locale, code)) {
+                        arguments[i] = messageResources.getMessage(this.locale, code, resolveArgs(resolvable
+                                .getArguments()));
+                        break;
+                    }
+                }
+                arguments[i] = resolvable.getDefaultMessage();
+            }
+        }
+        return arguments;
     }
 
     private String findEffectiveMessageKey(String errorCode, String objectName, String field) {
