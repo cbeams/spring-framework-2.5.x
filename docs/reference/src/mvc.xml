@@ -820,6 +820,81 @@ public class SampleDelegate {
                 The following example provides an interceptor that
                 intercepts all requests and reroutes the user to a specific page
                 if the time is not between 9 a.m. and 6 p.m.
+            
+                <programlisting><![CDATA[
+<beans>
+    <bean 
+            id="handlerMapping" 
+            class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">            
+        <property name="interceptors">
+			<list>
+				<ref bean="officeHoursInterceptor"/>
+			</list>
+		</property>
+        <property name="mappings">
+            <props>
+                <prop key="/*.form">editAccountFormController</prop>
+                <prop key="/*.view">editAccountFormController</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <bean 
+            id="officeHoursInterceptor" 
+            class="samples.TimeBasedAccessInterceptor">
+        <property name="openingTime"><value>9</value></property>
+        <property name="closingTime"><value>18</value></property>
+    </bean>    
+<beans>    
+                ]]></programlisting>
+                
+                <programlisting><![CDATA[
+package samnples;
+
+public class TimeBasedAccessInterceptor implements HandlerInterceptor {
+
+    private int openingTime;    
+    private int closingTime;    
+    public void setOpeningTime(int openingTime) {
+        this.openingTime = openingTime;
+    }    
+    public void setClosingTime(int closingTime) {
+        this.closingTime = closingTime;
+    }    
+    public boolean preHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler)
+    throws Exception {
+        Calendar cal = Calendar.getInstance();
+        int hour = cal.get(HOUR_OF_DAY);
+        if (openingTime <= hour < closingTime) {
+            return true;
+        } else {
+            response.sendRedirect("http://host.com/outsideOfficeHours.html");
+            return false;
+        }
+    }
+    
+    public void postHandle(
+            HttpServletRequest request, 
+            HttpServletResponse response,
+            Object handler)
+    throws Exception {     // do nothing      }
+    
+    public void afterCompletion(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler, 
+            Exception ex) 
+    throws Exception {     // do nothing      }
+}
+                ]]></programlisting>
+                Any request coming in, will be intercepted by the
+                <literal>TimeBasedAccessInterceptor</literal>, and if the
+                current time is outside office hours, the user will be redirect
+                to a static html file, saying for instance he can only access
+                the website during office hours.
             </para>
         </sect2>
 	</sect1>
