@@ -43,7 +43,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>Typically used to implement data access or business logic services that
  * use Hibernate within their implementation but are Hibernate-agnostic in
  * their interface. The latter resp. code calling the latter only have to deal
- * with business objects, query objects, and org.springframework.dao exceptions.
+ * with domain objects, query objects, and org.springframework.dao exceptions.
  *
  * <p>The central method is "execute", supporting Hibernate code implementing
  * the HibernateCallback interface. It provides Hibernate Session handling
@@ -61,29 +61,33 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>This class can be considered a programmatic alternative to
  * HibernateInterceptor. The major advantage is its straightforwardness, the
  * major disadvantage that no checked application exceptions can get thrown
- * from within data access code. Respective checks and the actual throwing of
- * such exceptions can often be deferred to after callback execution, though.
+ * from within data access code. Such checks and the actual throwing of such
+ * exceptions can often be deferred to after callback execution, though.
  *
  * <p>Note that even if HibernateTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
  * access layer don't need need to be Hibernate-aware. Setting such a special
- * PlatformTransactionManager is a configuration issue, without introducing
- * code dependencies. For example, switching to JTA is just a matter of
- * Spring configuration (use JtaTransactionManager instead), without needing
- * to touch application code.
+ * PlatformTransactionManager is a configuration issue: For example,
+ * switching to JTA is just a matter of Spring configuration (use
+ * JtaTransactionManager instead) that does not affect application code.
  *
  * <p>LocalSessionFactoryBean is the preferred way of obtaining a reference
  * to a specific Hibernate SessionFactory, at least in a non-EJB environment.
+ * Alternatively, use a JndiObjectFactoryBean to fetch a SessionFactory
+ * from JNDI (possibly set up via a JCA Connector).
  *
  * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
+ * @see #setSessionFactory
+ * @see #setJdbcExceptionTranslator
  * @see HibernateCallback
  * @see HibernateInterceptor
  * @see HibernateTransactionManager
  * @see LocalSessionFactoryBean
  * @see org.springframework.jndi.JndiObjectFactoryBean
+ * @see org.springframework.jdbc.support.SQLExceptionTranslator
  * @see net.sf.hibernate.Session
  */
 public class HibernateTemplate extends HibernateAccessor implements HibernateOperations {
@@ -496,7 +500,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public List findByNamedQuery(final String queryName, final String[] paramNames, final Object[] values)
 			throws DataAccessException {
 		if (paramNames.length != values.length) {
-			throw new IllegalArgumentException("Length of parmNames array must match length of values array");
+			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
 		return executeFind(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
@@ -512,10 +516,10 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public List findByNamedQuery(final String queryName, final String[] paramNames, final Object[] values,
 															 final Type[] types) throws DataAccessException {
 		if (paramNames.length != values.length) {
-			throw new IllegalArgumentException("Length of parmNames array must match length of values array");
+			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
-		if (values.length != types.length) {
-			throw new IllegalArgumentException("Length of values array must match length of types array");
+		if (paramNames.length != types.length) {
+			throw new IllegalArgumentException("Length of paramNames array must match length of types array");
 		}
 		return executeFind(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
