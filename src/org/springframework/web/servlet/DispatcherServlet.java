@@ -81,7 +81,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: DispatcherServlet.java,v 1.20 2003-12-12 19:45:37 jhoeller Exp $
+ * @version $Id: DispatcherServlet.java,v 1.21 2003-12-13 18:13:07 luke_t Exp $
  * @see HandlerMapping
  * @see HandlerAdapter
  * @see ViewResolver
@@ -109,7 +109,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
 	/**
-	 * Well-known name for the ViewResolver object in the bean factory for this namespace.
+	 * Well-known name for the ExceptionResolver object in the bean factory for this namespace.
 	 */
 	public static final String EXCEPTION_RESOLVER_BEAN_NAME = "exceptionResolver";
 
