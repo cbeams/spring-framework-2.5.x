@@ -15,8 +15,11 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
+import org.springframework.binding.TypeConverters;
 import org.springframework.samples.phonebook.web.flow.action.QueryAction;
+import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.action.SetAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
@@ -53,11 +56,12 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 				onSuccessView(RESULTS) });
 
 		// view results
-		String setUserId = qualify(set("userId"));
+		String setUserId = set("userId");
 		addViewState(RESULTS, new Transition[] { onEvent("newSearch", view(CRITERIA)), onSelect(setUserId) });
 
 		// set a user id in the model (selected from result list)
-		addActionState(setUserId, new Transition[] { onError("error"), onSuccess("person.Detail") });
+		Action setAction = new SetAction("userId", TypeConverters.instance().getNumberToString(Long.class));
+		addActionState(setUserId, setAction, new Transition[] { onError("error"), onSuccess("person.Detail") });
 
 		// view details for selected user id
 		addSubFlowState("person.Detail", PersonDetailFlowBuilder.class, useModelMapper("userId"), new Transition[] {

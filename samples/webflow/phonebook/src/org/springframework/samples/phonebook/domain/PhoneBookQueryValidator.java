@@ -26,7 +26,6 @@ public class PhoneBookQueryValidator implements Validator {
 
 	public void validate(Object obj, Errors errors) {
 		PhoneBookQuery query = (PhoneBookQuery)obj;
-
 		if ((query.getFirstName() == null || query.getFirstName().length() == 0)
 				&& (query.getLastName() == null || query.getLastName().length() == 0)) {
 			errors.reject("noCriteria", "Please provide some query criteria!");

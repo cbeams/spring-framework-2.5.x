@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.samples.phonebook.domain.Person;
 import org.springframework.samples.phonebook.domain.PhoneBook;
-import org.springframework.samples.phonebook.domain.UserId;
 import org.springframework.web.flow.MutableFlowModel;
 import org.springframework.web.flow.action.AbstractAction;
 
@@ -35,8 +34,8 @@ public class GetPersonAction extends AbstractAction {
 	protected String doExecuteAction(HttpServletRequest request,
 			HttpServletResponse response, MutableFlowModel model)
 			throws Exception {
-		UserId userId = (UserId)model.getAttribute("id");
-		Person person = phoneBook.getPerson(userId);
+		Long id = (Long)model.getAttribute("id");
+		Person person = phoneBook.getPerson(id);
 		if (person != null) {
 			model.setAttribute("person", person);
 			return success();

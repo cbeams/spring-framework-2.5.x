@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.binding.AttributeAccessor;
 import org.springframework.util.closure.Constraint;
 
 /**

@@ -15,8 +15,11 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
+import org.springframework.binding.TypeConverters;
 import org.springframework.samples.phonebook.web.flow.action.GetPersonAction;
+import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.action.SetAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 
@@ -41,13 +44,14 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 		addGetState(executeAction(GetPersonAction.class));
 
 		String collegueId = "collegueId";
-		String setCollegueId = qualify(set(collegueId));
+		String setCollegueId = set(collegueId);
 		// view the person
 		addViewState(new Transition[] { onBackFinish(), onSelect(setCollegueId) });
 
 		String collegueDetail = "collegueDetail";
 		// set the selected collegue (chosen from the person's collegue list)
-		addActionState(setCollegueId, onSuccess(collegueDetail));
+		Action setAction = new SetAction(collegueId, TypeConverters.instance().getNumberToString(Long.class));
+		addActionState(setCollegueId, setAction, onSuccess(collegueDetail));
 
 		// spawn subflow to view selected collegue details
 		addSubFlowState(collegueDetail, PersonDetailFlowBuilder.class, useModelMapper(collegueId), new Transition[] {

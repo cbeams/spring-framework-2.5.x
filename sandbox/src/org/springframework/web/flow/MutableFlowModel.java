@@ -17,6 +17,8 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
+import org.springframework.binding.AttributeSetter;
+
 /**
  * Extension of flow model allowing for mutable operations. If you don't need
  * mutability, pass the immutable {@link FlowModel} interface around instead.

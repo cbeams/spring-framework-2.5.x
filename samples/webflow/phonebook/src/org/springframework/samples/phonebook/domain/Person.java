@@ -21,27 +21,34 @@ import java.util.List;
 
 public class Person implements Serializable {
 
+	private Long id;
+
 	private String firstName;
 
 	private String lastName;
 
-	private UserId userId;
-
+	private String userId;
+	
 	private String phone;
 
 	private List colleagues = new ArrayList();
 
 	public Person() {
-		this("", "", "", "");
+		this(-1, "", "", "", "");
 	}
 
-	public Person(String firstName, String lastName, String userId, String phone) {
+	public Person(long id, String firstName, String lastName, String userId, String phone) {
+		this.id = new Long(id);
 		this.firstName = firstName;
 		this.lastName = lastName;
-		this.userId = new UserId(userId);
+		this.userId = userId;
 		this.phone = phone;
 	}
 
+	public Long getId() {
+		return id;
+	}
+	
 	public String getFirstName() {
 		return this.firstName;
 	}
@@ -50,10 +57,10 @@ public class Person implements Serializable {
 		return this.lastName;
 	}
 
-	public UserId getUserId() {
-		return this.userId;
+	public String getUserId() {
+		return userId;
 	}
-
+	
 	public String getPhone() {
 		return this.phone;
 	}

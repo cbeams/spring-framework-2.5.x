@@ -25,15 +25,15 @@ public class PhoneBook {
 
 	public PhoneBook() {
 		// setup some test data
-		Person kd = new Person("Keith", "Donald", "kdonald", "11111");
-		Person ev = new Person("Erwin", "Vervaet", "klr8", "22222");
-		Person cs = new Person("Colin", "Sampaleanu", "sampa", "33333");
-		Person jh = new Person("Juergen", "Hoeller", "jhoeller", "44444");
-		Person rj = new Person("Rod", "Johnson", "rod", "55555");
-		Person tr = new Person("Thomas", "Risberg", "trisberg", "66666");
-		Person aa = new Person("Alef", "Andersen", "alef", "77777");
-		Person mp = new Person("Mark", "Pollack", "mark", "888888");
-		
+		Person kd = new Person(1, "Keith", "Donald", "kdonald", "11111");
+		Person ev = new Person(2, "Erwin", "Vervaet", "klr8", "22222");
+		Person cs = new Person(3, "Colin", "Sampaleanu", "sampa", "33333");
+		Person jh = new Person(4, "Juergen", "Hoeller", "jhoeller", "44444");
+		Person rj = new Person(5, "Rod", "Johnson", "rod", "55555");
+		Person tr = new Person(6, "Thomas", "Risberg", "trisberg", "66666");
+		Person aa = new Person(7, "Alef", "Arendsen", "alef", "77777");
+		Person mp = new Person(8, "Mark", "Pollack", "mark", "888888");
+
 		kd.addColleague(ev);
 		kd.addColleague(cs);
 		kd.addColleague(jh);
@@ -41,12 +41,12 @@ public class PhoneBook {
 		kd.addColleague(tr);
 		kd.addColleague(aa);
 		kd.addColleague(mp);
-		
+
 		ev.addColleague(kd);
 		ev.addColleague(cs);
 		ev.addColleague(jh);
 		ev.addColleague(rj);
-		
+
 		cs.addColleague(kd);
 		cs.addColleague(ev);
 		cs.addColleague(jh);
@@ -69,8 +69,8 @@ public class PhoneBook {
 		jh.addColleague(tr);
 		jh.addColleague(aa);
 
-		Person sa = new Person("Shaun", "Alexander", "rolltide", "44444");
-		Person dj = new Person("Darell", "Jackson", "gatorcountry", "55555");
+		Person sa = new Person(9, "Shaun", "Alexander", "rolltide", "44444");
+		Person dj = new Person(10, "Darell", "Jackson", "gatorcountry", "55555");
 		sa.addColleague(dj);
 		dj.addColleague(sa);
 
@@ -100,14 +100,26 @@ public class PhoneBook {
 		return res;
 	}
 
-	public Person getPerson(UserId userId) {
+	public Person getPerson(Long id) {
 		Iterator it = persons.iterator();
 		while (it.hasNext()) {
 			Person person = (Person)it.next();
-			if (userId.equals(person.getUserId())) {
+			if (person.getId().equals(id)) {
 				return person;
 			}
 		}
 		return null;
 	}
+
+	public Person getPerson(String userId) {
+		Iterator it = persons.iterator();
+		while (it.hasNext()) {
+			Person person = (Person)it.next();
+			if (person.getUserId().equals(userId)) {
+				return person;
+			}
+		}
+		return null;
+	}
+
 }
