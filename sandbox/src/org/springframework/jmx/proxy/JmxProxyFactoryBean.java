@@ -8,6 +8,7 @@ import javax.management.ObjectName;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jmx.JmxUtils;
 import org.springframework.jmx.ObjectNameManager;
 
 /**
@@ -48,11 +49,11 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
     }
 
     public Object getObject() throws Exception {
-        
-        if(proxy == null) {
+
+        if (proxy == null) {
             proxy = factory.createProxy(mbeanServer, name);
         }
-        
+
         return proxy;
     }
 
@@ -75,6 +76,19 @@ public class JmxProxyFactoryBean implements FactoryBean, InitializingBean {
                 throw new IllegalArgumentException(
                         "The implementation class must implement JmxObjectProxyFactory.");
             }
+        }
+
+        // no server specified - locate
+        if (mbeanServer == null) {
+            mbeanServer = JmxUtils.locateMBeanServer();
+        }
+
+        // no server found - error
+        if (mbeanServer == null) {
+            throw new IllegalArgumentException(
+                    "The server property of "
+                            + JmxObjectProxyFactory.class.getName()
+                            + " is required when not running in an environment with an existing MBeanServer instance.");
         }
 
         factory = (JmxObjectProxyFactory) implementationClass.newInstance();
