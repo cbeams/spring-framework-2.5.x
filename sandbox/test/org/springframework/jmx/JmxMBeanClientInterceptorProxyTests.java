@@ -14,11 +14,6 @@ import org.springframework.jmx.proxy.JmxObjectProxyFactory;
  */
 public class JmxMBeanClientInterceptorProxyTests extends AbstractProxyTests {
 
-
-    public JmxMBeanClientInterceptorProxyTests(String name) {
-        super(name);
-    }
-
     protected ObjectName getObjectNameForProxy() throws Exception {
         return ObjectNameManager.getInstance("bean:name=testBean3");
     }

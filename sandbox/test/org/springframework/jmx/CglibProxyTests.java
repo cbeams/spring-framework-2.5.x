@@ -14,9 +14,6 @@ import org.springframework.jmx.proxy.JmxObjectProxyFactory;
  */
 public class CglibProxyTests extends AbstractProxyTests {
 
-    public CglibProxyTests(String name) {
-        super(name);
-    }
 
     protected ObjectName getObjectNameForProxy() throws Exception {
         return ObjectNameManager.getInstance("bean:name=testBean3");

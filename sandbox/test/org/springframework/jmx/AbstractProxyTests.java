@@ -5,20 +5,51 @@ package org.springframework.jmx;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.Descriptor;
 
 import org.springframework.jmx.proxy.InvalidInvocationException;
 import org.springframework.jmx.proxy.JmxObjectProxyFactory;
+import org.springframework.jmx.assemblers.AbstractReflectionBasedModelMBeanInfoAssembler;
+import junit.framework.TestCase;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.lang.reflect.Method;
+import java.beans.PropertyDescriptor;
 
 /**
  * @author robh
  */
-public abstract class AbstractProxyTests extends AbstractJmxTests {
+public abstract class AbstractProxyTests extends TestCase {
 
-    public AbstractProxyTests(String name) {
-        super(name);
+    protected static final String OBJECT_NAME = "spring:test=proxy";
+
+    protected MBeanServer server;
+
+    protected JmxTestBean target;
+
+    public void setUp() throws Exception{
+        server = MBeanServerFactory.createMBeanServer();
+
+        target = new JmxTestBean();
+        target.setAge(100);
+        target.setName("Rob Harrop");
+
+        JmxMBeanAdapter adapter = new JmxMBeanAdapter();
+        Map beans = new HashMap();
+        beans.put(OBJECT_NAME, target);
+        adapter.setServer(server);
+        adapter.setBeans(beans);
+        adapter.setAssembler(new ProxyTestAssembler());
+        adapter.registerBeans();
+
     }
 
-    protected abstract ObjectName getObjectNameForProxy() throws Exception;
+    public void tearDown() throws Exception{
+        server = null;
+    }
 
     protected abstract JmxObjectProxyFactory getProxyFactory() throws Exception;
     
@@ -30,7 +61,7 @@ public abstract class AbstractProxyTests extends AbstractJmxTests {
 
     protected IJmxTestBean getProxy(JmxObjectProxyFactory factory)
             throws Exception {
-        ObjectName objectName = getObjectNameForProxy();
+        ObjectName objectName = ObjectNameManager.getInstance(OBJECT_NAME);
         factory.setProxyInterfaces(new Class[] { IJmxTestBean.class });
         return (IJmxTestBean) factory.createProxy(getServerConnection(), objectName);
     }
@@ -66,9 +97,8 @@ public abstract class AbstractProxyTests extends AbstractJmxTests {
             t.getCause().printStackTrace();
             throw t;
         }
-        
-        JmxTestBean bean = (JmxTestBean)getContext().getBean("testBean");
-        assertEquals("The name of the bean should have been updated", "Rob Harrop", bean.getName());
+
+        assertEquals("The name of the bean should have been updated", "Rob Harrop", target.getName());
     }
     
     public void testSetReadOnlyAttribute() throws Exception {
@@ -114,5 +144,49 @@ public abstract class AbstractProxyTests extends AbstractJmxTests {
         // execute a no-op because the method is not exposed by the metadata
         // assembler
         proxy.dontExposeMe();
+    }
+
+    private static class ProxyTestAssembler extends AbstractReflectionBasedModelMBeanInfoAssembler {
+        protected boolean includeReadAttribute(Method method) {
+            return true;
+        }
+
+        protected boolean includeWriteAttribute(Method method) {
+            if("setAge".equals(method.getName())) {
+                return false;
+            }
+            return true;
+        }
+
+        protected boolean includeOperation(Method method) {
+            if("dontExposeMe".equals(method.getName())) {
+                return false;
+            }
+            return true;
+        }
+
+        protected String getOperationDescription(Method method) {
+            return method.getName();
+        }
+
+        protected String getAttributeDescription(PropertyDescriptor propertyDescriptor) {
+            return propertyDescriptor.getDisplayName();
+        }
+
+        protected void populateAttributeDescriptor(Descriptor descriptor, Method getter, Method setter) {
+
+        }
+
+        protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
+
+        }
+
+        protected String getDescription(Object bean) {
+            return "";
+        }
+
+        protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, Object bean) {
+
+        }
     }
 }

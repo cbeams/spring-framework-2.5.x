@@ -24,12 +24,7 @@ public class RemoteCglibProxyTests extends CglibProxyTests {
 	private JMXConnectorServer connectorServer;
 	
 	private JMXConnector connector;
-	
-	public RemoteCglibProxyTests(String name) {
-		super(name);
-	
-	}
-	
+		
 	public void setUp() throws Exception {
 		super.setUp();
 		

@@ -7,25 +7,38 @@ import javax.management.ObjectInstance;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.jmx.naming.ObjectNamingStrategy;
+import org.springframework.jmx.naming.IdentityNamingStrategy;
 
 /**
  * @author robh
  */
-public class IdentityNamingStrategyTests extends AbstractJmxTests {
+public class IdentityNamingStrategyTests extends AbstractNamingStrategyTests {
 
-    public IdentityNamingStrategyTests(String name) {
-        super(name);
+    private JmxTestBean bean = new JmxTestBean();
+
+    protected ObjectNamingStrategy getStrategy() throws Exception {
+        return new IdentityNamingStrategy();
     }
 
-    public void testNaming() throws Exception {
-        JmxTestBean testBean = (JmxTestBean) getContext().getBean("testBean");
-        String desiredName = testBean.getClass().getPackage().getName();
-        desiredName += ":class=" + ClassUtils.getShortName(testBean.getClass());
-        desiredName += ",hashCode="
-                + ObjectUtils.getIdentityHexString(testBean);
+    protected Object getManagedResource() throws Exception {
+        return bean;
+    }
 
-        ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance(desiredName));
-        
-        assertNotNull("ObjectInstance should not be null", instance);
+    protected String getKey() {
+        return "identity";
+    }
+
+    protected String getCorrectObjectName() {
+        StringBuffer sb = new StringBuffer(256);
+
+        sb.append(bean.getClass().getPackage().getName());
+        sb.append(":");
+        sb.append("class=");
+        sb.append(ClassUtils.getShortName(bean.getClass()));
+        sb.append(",hashCode=");
+        sb.append(ObjectUtils.getIdentityHexString(bean));
+
+        return sb.toString();
     }
 }

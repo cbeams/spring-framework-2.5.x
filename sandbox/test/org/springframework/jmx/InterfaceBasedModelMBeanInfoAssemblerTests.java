@@ -30,5 +30,8 @@ public class InterfaceBasedModelMBeanInfoAssemblerTests extends AbstractJmxAssem
         return new InterfaceBasedModelMBeanInfoAssembler();
     }
 
-  
+    protected String getApplicationContextPath() {
+        return "org/springframework/jmx/interfaceAssembler.xml";
+    }
+
 }

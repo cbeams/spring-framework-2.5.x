@@ -2,18 +2,19 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 
-	<bean id="jmxAdapter" class="org.springframework.jmx.JmxMBeanAdapter">
-	    <property name="beans">
+    <bean id="jmxAdapter" class="org.springframework.jmx.JmxMBeanAdapter">
+		<property name="beans">
 			<map>
-				<entry key="namingTest">
+				<entry key="bean:name=testBean4">
 					<ref local="testBean"/>
 				</entry>
 			</map>
 		</property>
-		<property name="namingStrategy">
-	        <ref local="metadataNamingStrategy"/>
-	    </property>
+        <property name="assembler">
+            <bean class="org.springframework.jmx.assemblers.reflection.InterfaceBasedModelMBeanInfoAssembler"/>
+        </property>
 	</bean>
+
 
 	<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
 		<property name="name">
@@ -24,7 +25,6 @@
 		</property>
 	</bean>
 
-	<bean id="metadataNamingStrategy" class="org.springframework.jmx.naming.MetadataNamingStrategy"/>
 
 
 </beans>

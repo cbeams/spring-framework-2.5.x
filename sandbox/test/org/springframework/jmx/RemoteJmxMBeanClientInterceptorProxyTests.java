@@ -24,11 +24,6 @@ public class RemoteJmxMBeanClientInterceptorProxyTests extends JmxMBeanClientInt
 
 	private JMXConnector connector;
 
-	public RemoteJmxMBeanClientInterceptorProxyTests(String name) {
-		super(name);
-
-	}
-
 	public void setUp() throws Exception {
 		super.setUp();
 

@@ -43,4 +43,8 @@ public class InterfaceBasedModelMBeanInfoAssemblerWithCustomInterfaceTests exten
         assertTrue(attr.isReadable());
         assertFalse(attr.isWritable());
     }
+
+    protected String getApplicationContextPath() {
+        return "org/springframework/jmx/interfaceAssemblerCustom.xml";
+    }
 }
