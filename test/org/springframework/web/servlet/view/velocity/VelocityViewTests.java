@@ -1,9 +1,16 @@
+/*
+ * The Spring Framework is published under the terms
+ * of the Apache Software License.
+ */
+ 
 package org.springframework.web.servlet.view.velocity;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,6 +31,7 @@ import com.mockobjects.servlet.MockHttpServletResponse;
 
 /**
  * @author Rod Johnson
+ * @version $Id: VelocityViewTests.java,v 1.2 2003-09-20 17:56:10 johnsonr Exp $
  */
 public class VelocityViewTests extends TestCase {
 
@@ -77,7 +85,88 @@ public class VelocityViewTests extends TestCase {
 		wmc.verify();
 	}
 
-	public void testValidTemplateName() throws Exception {
+	public void testCannotResolveTemplateNameResourceNotFoundException() throws Exception {
+		testCannotResolveTemplateName(new ResourceNotFoundException(""));
+	}
+
+	public void testCannotResolveTemplateNameParseErrorException() throws Exception {
+		testCannotResolveTemplateName(new ParseErrorException(""));
+	}
+
+	public void testCannotResolveTemplateNameNonspecificException() throws Exception {
+		testCannotResolveTemplateName(new Exception(""));
+	}
+
+	/**
+	 * Check for failure to lookup a template for a range of reasons
+	 * @param templateLookupException
+	 * @throws Exception
+	 */
+	private void testCannotResolveTemplateName(final Exception templateLookupException) throws Exception {
+		final String templateName = "test.vm";
+
+		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
+		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
+		wac.getBeanDefinitionNames(VelocityConfiguration.class);
+		String configurerName = "velocityConfigurer";
+		wmc.setReturnValue(new String[] { configurerName });
+		wac.getParentBeanFactory();
+		wmc.setReturnValue(null);
+		wac.getBean(configurerName);
+		final Template expectedTemplate = new Template();
+		wmc.setReturnValue(new VelocityConfiguration() {
+			public VelocityEngine getVelocityEngine() {
+				return new VelocityEngine() {
+					public Template getTemplate(String tn)
+						throws ResourceNotFoundException, ParseErrorException, Exception {
+						assertEquals(tn, templateName);
+						throw templateLookupException;
+					}
+				};
+
+			}
+		});
+		wmc.replay();
+
+		VelocityView vv = new VelocityView();
+		//vv.setExposeDateFormatter(false);
+		//vv.setExposeCurrencyFormatter(false);
+		vv.setTemplateName(templateName);
+
+		try {
+			vv.setApplicationContext(wac);
+			fail();
+		}
+		catch (ApplicationContextException ex) {
+			assertEquals(ex.getRootCause(), templateLookupException);
+		}
+
+		wmc.verify();
+	}
+	
+	public void testMergeTemplateSucceeds() throws Exception {
+		testValidTemplateName(null);
+	}
+	
+	public void testMergeTemplateFailureWithIOException() throws Exception {
+		testValidTemplateName(new IOException());
+	}
+	
+	public void testMergeTemplateFailureWithParseErrorException() throws Exception {
+		testValidTemplateName(new ParseErrorException(""));
+	}
+		
+	public void testMergeTemplateFailureWithUnspecifiedException() throws Exception {
+		testValidTemplateName(new Exception(""));
+	}
+
+	/**
+	 * 
+	 * @param mergeTemplateFailureException may be null in which case mergeTemplate override will succeed.
+	 * If it's non null it will be checked
+	 * @throws Exception
+	 */
+	private void testValidTemplateName(final Exception mergeTemplateFailureException) throws Exception {
 		Map model = new HashMap();
 		model.put("foo", "bar");
 
@@ -107,15 +196,18 @@ public class VelocityViewTests extends TestCase {
 		req.getLocale();
 		reqControl.setReturnValue(Locale.CANADA);
 		reqControl.replay();
-	
+
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
 
 		VelocityView vv = new VelocityView() {
-			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
+			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
 				assertTrue(template == expectedTemplate);
 				assertTrue(context.getKeys().length >= 1);
 				assertTrue(context.get("foo").equals("bar"));
 				assertTrue(response == expectedResponse);
+				if (mergeTemplateFailureException != null) {
+					throw mergeTemplateFailureException;
+				}
 			}
 
 		};
@@ -124,11 +216,22 @@ public class VelocityViewTests extends TestCase {
 		vv.setTemplateName(templateName);
 		vv.setApplicationContext(wac);
 
-		vv.render(model, req, expectedResponse);
+		try {
+			vv.render(model, req, expectedResponse);
+			if (mergeTemplateFailureException != null) {
+				fail();
+			}
+		}
+		catch (ServletException ex) {
+			assertNotNull(mergeTemplateFailureException);
+			assertEquals(ex.getRootCause(), mergeTemplateFailureException);
+		}
 
 		wmc.verify();
 		reqControl.verify();
 	}
+	
+	
 
 	//	Damn thing is a class so we can't mock it
 	private class TestVelocityEngine extends VelocityEngine {
