@@ -111,12 +111,34 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	 * require special treatment.
 	 * @return whether we're in the root flow
 	 */
-	public boolean isRootFlow() {
+	public boolean isRootFlowActive() {
 		return executingFlowSessions.size() == 1;
 	}
 
 	public String getCurrentStateId() {
 		return getActiveFlowSession().getCurrentStateId();
+	}
+
+	public boolean exists(String flowId) {
+		Iterator it = executingFlowSessions.iterator();
+		while (it.hasNext()) {
+			FlowSession fs = (FlowSession)it.next();
+			if (fs.getFlowId().equals(flowId)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public FlowSessionStatus getStatus(String flowId) throws IllegalArgumentException {
+		Iterator it = executingFlowSessions.iterator();
+		while (it.hasNext()) {
+			FlowSession fs = (FlowSession)it.next();
+			if (fs.getFlowId().equals(flowId)) {
+				return fs.getStatus();
+			}
+		}
+		throw new IllegalArgumentException("No such session for flow '" + flowId + "'");
 	}
 
 	public Object getAttribute(String attributeName) {
@@ -236,8 +258,12 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		return (FlowSession)executingFlowSessions.peek();
 	}
 
-	protected void push(FlowSession subFlowSession) {
+	protected void activate(FlowSession subFlowSession) {
+		if (!executingFlowSessions.isEmpty()) {
+			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
+		}
 		executingFlowSessions.push(subFlowSession);
+		subFlowSession.setStatus(FlowSessionStatus.ACTIVE);
 		if (logger.isDebugEnabled()) {
 			logger.debug("After push of new Flow Session '" + subFlowSession.getFlowId()
 					+ "' - excutingFlowSessionsCount=" + executingFlowSessions.size() + ", sessionStack="
@@ -245,8 +271,12 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 		}
 	}
 
-	protected FlowSession pop() {
+	protected FlowSession endActiveSession() {
 		FlowSession s = (FlowSession)executingFlowSessions.pop();
+		s.setStatus(FlowSessionStatus.ENDED);
+		if (!executingFlowSessions.isEmpty()) {
+			getActiveFlowSession().setStatus(FlowSessionStatus.ACTIVE);
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("After pop of ended Flow Session '" + s.getFlowId() + "' - excutingFlowSessionsCount="
 					+ executingFlowSessions.size() + ", sessionStack=" + executingFlowSessions);
@@ -257,7 +287,7 @@ public class FlowSessionExecutionStack implements MutableAttributesAccessor, Ser
 	public String toString() {
 		return executingFlowSessions.isEmpty() ? "[Empty FlowSessionExecutionStack " + getId()
 				+ "; no flows are active]" : new ToStringCreator(this).append("id", getId()).append("activeFlowId",
-				getActiveFlowId()).append("currentStateId", getCurrentStateId()).append("rootFlow", isRootFlow())
+				getActiveFlowId()).append("currentStateId", getCurrentStateId()).append("rootFlow", isRootFlowActive())
 				.append("executingFlowSessions", executingFlowSessions).toString();
 	}
 }

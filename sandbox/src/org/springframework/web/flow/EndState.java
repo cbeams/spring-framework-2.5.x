@@ -58,7 +58,7 @@ public class EndState extends AbstractState {
 		else {
 			descriptor = ViewDescriptor.NULL_OBJECT;
 		}
-		FlowSession endingFlowSession = sessionExecutionStack.pop();
+		FlowSession endingFlowSession = sessionExecutionStack.endActiveSession();
 		Assert.isTrue(endingFlowSession.getCurrentStateId().equals(getId()),
 				"The ending flow session current state should equal this end state - this should not happen");
 		if (logger.isDebugEnabled()) {

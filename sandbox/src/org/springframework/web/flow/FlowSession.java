@@ -44,6 +44,8 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 
 	private String flowId;
 
+	private FlowSessionStatus status;
+	
 	private String currentStateId;
 
 	private Map attributes = new HashMap();
@@ -68,6 +70,14 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 		return flowId;
 	}
 
+	public FlowSessionStatus getStatus() {
+		return status;
+	}
+	
+	public void setStatus(FlowSessionStatus status) {
+		this.status = status;
+	}
+	
 	/**
 	 * @return Returns the stateId.
 	 */
