@@ -172,11 +172,14 @@ public class FlowSession implements MutableAttributesAccessor, Serializable {
 	//methods implementing AttributesAccessor
 
 	/**
-	 * Note: the map returned is unmodifiable
-	 * @return Map of all model attributes in this flow session
+	 * Returns a shallow copy (new map) snapshot of this model on each
+	 * invocation.
+	 * @return a map of all model attributes in this flow session; modifying the
+	 *         map does not modify the internal model here!
 	 */
 	public Map getAttributes() {
-		return Collections.unmodifiableMap(attributes);
+		Map attributes = new HashMap(this.attributes);
+		return attributes;
 	}
 
 	public Object getAttribute(String attributeName) {
