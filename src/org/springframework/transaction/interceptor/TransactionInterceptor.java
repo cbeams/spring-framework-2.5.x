@@ -11,6 +11,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -26,7 +27,7 @@ import org.springframework.transaction.TransactionStatus;
  * implementation does not need any specific configuration. JTA is
  * <i>not</i> the default though to avoid unnecessary dependencies.
  *  
- * @version $Id: TransactionInterceptor.java,v 1.13 2004-01-09 06:48:32 jhoeller Exp $
+ * @version $Id: TransactionInterceptor.java,v 1.14 2004-01-13 13:57:12 johnsonr Exp $
  * @author Rod Johnson
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see TransactionProxyFactoryBean
@@ -41,14 +42,14 @@ public class TransactionInterceptor implements MethodInterceptor, InitializingBe
 	 * Return the transaction status of the current method invocation.
 	 * Mainly intended for code that wants to set the current transaction
 	 * rollback-only but not throw an application exception.
-	 * @throws org.aopalliance.intercept.AspectException
+	 * @throws NoTransactionException
 	 * if the invocation cannot be found, because the method was invoked
 	 * outside an AOP invocation context
 	 */
 	public static TransactionStatus currentTransactionStatus() throws AspectException {
 		TransactionStatus status = (TransactionStatus) currentTransactionStatus.get();
 		if (status == null)
-			throw new AspectException("No transaction status in scope");
+			throw new NoTransactionException("No transaction status in scope");
 		return status;
 	}
 
