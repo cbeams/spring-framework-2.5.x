@@ -16,11 +16,9 @@
 
 package org.springframework.jdbc.support.lob;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -171,31 +169,31 @@ public class OracleLobHandler implements LobHandler {
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as bytes");
 		Blob blob = rs.getBlob(columnIndex);
-		return (blob != null ? blob.getBytes(1, (int) blob.length()) : new byte[0]);
+		return (blob != null ? blob.getBytes(1, (int) blob.length()) : null);
 	}
 
 	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as binary stream");
 		Blob blob = rs.getBlob(columnIndex);
-		return (blob != null ? blob.getBinaryStream() : new ByteArrayInputStream(new byte[0]));
+		return (blob != null ? blob.getBinaryStream() : null);
 	}
 
 	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as string");
 		Clob clob = rs.getClob(columnIndex);
-		return (clob != null ? clob.getSubString(1, (int) clob.length()) : "");
+		return (clob != null ? clob.getSubString(1, (int) clob.length()) : null);
 	}
 
 	public InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as ASCII stream");
 		Clob clob = rs.getClob(columnIndex);
-		return (clob != null ? clob.getAsciiStream() : new ByteArrayInputStream(new byte[0]));
+		return (clob != null ? clob.getAsciiStream() : null);
 	}
 
 	public Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as character stream");
 		Clob clob = rs.getClob(columnIndex);
-		return (clob != null ? clob.getCharacterStream() : new StringReader(""));
+		return (clob != null ? clob.getCharacterStream() : null);
 	}
 
 	public LobCreator getLobCreator() {
