@@ -37,7 +37,9 @@ import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.ViewState;
 
 /**
- * Test java based flow builder logic.
+ * Test Java based flow builder logic (subclasses of AbstractFlowBuilder).
+ * 
+ * @see org.springframework.web.flow.config.AbstractFlowBuilder
  * 
  * @author Keith Donald
  * @author Rod Johnson
