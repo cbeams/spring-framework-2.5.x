@@ -17,9 +17,9 @@ package org.springframework.enums.support;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
@@ -121,16 +121,16 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
         }
     }
 
-    public CodedEnum getEnum(Class type, Object code) {
+    public CodedEnum getEnum(Class type, Comparable code) {
         return getEnum(type.getName(), code, null);
     }
 
-    public CodedEnum getRequiredEnum(Class type, Object code) throws ObjectRetrievalFailureException {
+    public CodedEnum getRequiredEnum(Class type, Comparable code) throws ObjectRetrievalFailureException {
         return getRequiredEnum(type.getName(), code, null);
     }
 
-    public Set getEnumAsSet(Class type) {
-        return getEnumsAsSet(type.getName(), null);
+    public Collection getEnumAsCollection(Class type) {
+        return getEnumsAsCollection(type.getName(), null);
     }
 
     public Map getEnumAsMap(Class type) {

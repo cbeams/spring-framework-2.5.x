@@ -34,13 +34,39 @@ public class CodedEnumEditor extends PropertyEditorSupport {
 
     private CodedEnumResolver resolver = StaticCodedEnumResolver.instance();
 
+    private boolean allowsEmpty = true;
+
+    private Class type;
+
+    public CodedEnumEditor() {
+
+    }
+
+    public CodedEnumEditor(Class type) {
+        setType(type);
+    }
+
+    public CodedEnumEditor(Class type, CodedEnumResolver enumResolver) {
+        setType(type);
+        setEnumResolver(resolver);
+    }
+
+    public void setType(Class type) {
+        this.type = type;
+    }
+
     /**
      * Set the resolver to used to lookup enums.
      * 
      * @param resolver the coded enum resolver
      */
     public void setEnumResolver(CodedEnumResolver resolver) {
+        Assert.notNull(resolver, "The enum resolver is required");
         this.resolver = resolver;
+    }
+
+    public void setAllowsEmpty(boolean allowsEmpty) {
+        this.allowsEmpty = allowsEmpty;
     }
 
     /**
@@ -53,22 +79,69 @@ public class CodedEnumEditor extends PropertyEditorSupport {
     }
 
     private Locale getLocale() {
-        return Locale.getDefault();
+        return locale;
     }
 
-    public void setAsText(String text) throws IllegalArgumentException {
-        String[] keyParts = StringUtils.delimitedListToStringArray(text, ".");
-        Assert.isTrue(keyParts.length == 2, "Enum string key must in the format '<type>.<code>'");
+    public void setAsText(String encodedCode) throws IllegalArgumentException {
+        if (!StringUtils.hasText(encodedCode)) {
+            Assert.isTrue(allowsEmpty, "This property editor does not allow empty encoded enum code values");
+            setValue(null);
+            return;
+        }
 
-        Object code;
-        String strCode = keyParts[1];
+        String type;
+        Comparable code;
+
+        if (this.type == null) {
+            String[] keyParts = StringUtils.delimitedListToStringArray(encodedCode, ".");
+            Assert.isTrue(keyParts.length == 2, "Enum string key must in the format '<type>.<code>'");
+            type = keyParts[0];
+            code = getCodeFromString(keyParts[1]);
+        }
+        else {
+            type = this.type.getName();
+            if (ShortCodedEnum.class.isAssignableFrom(this.type)) {
+                try {
+                    code = Short.valueOf(encodedCode);
+                }
+                catch (NumberFormatException e) {
+                    IllegalArgumentException iae = new IllegalArgumentException("The encoded enum argument '"
+                            + encodedCode + "' could not be converted to a Short, and the enum type is ShortCoded.");
+                    iae.initCause(e);
+                    throw iae;
+                }
+            }
+            else if (LetterCodedEnum.class.isAssignableFrom(this.type)) {
+                Assert.isTrue(encodedCode.length() == 1,
+                        "Character letter codes should have length == 1, this one has '" + encodedCode + "' of length "
+                                + encodedCode.length());
+                char c = encodedCode.charAt(0);
+                Assert.isTrue(Character.isLetter(c), "Character code '" + encodedCode + "' is not a letter");
+                code = new Character(c);
+            }
+            else {
+                code = encodedCode;
+            }
+        }
+        CodedEnum ce = resolver.getEnum(type, code, getLocale());
+        if (!allowsEmpty) {
+            Assert.notNull(ce, "The encoded code '" + encodedCode
+                    + "' did not map to a valid enum instance for type " + type);
+            if (this.type != null) {
+                Assert.isInstanceOf(this.type, ce);
+            }
+        }
+        setValue(ce);
+    }
+
+    private Comparable getCodeFromString(String strCode) {
         if (strCode.length() == 1) {
             char c = strCode.charAt(0);
             if (Character.isLetter(c)) {
-                code = new Character(c);
+                return new Character(c);
             }
             else if (Character.isDigit(c)) {
-                code = new Integer(c);
+                return new Short((short)c);
             }
             else {
                 throw new IllegalArgumentException("Invalid enum code '" + strCode + "'");
@@ -76,20 +149,17 @@ public class CodedEnumEditor extends PropertyEditorSupport {
         }
         else {
             try {
-                code = new Integer(strCode);
+                return new Short(strCode);
             }
             catch (NumberFormatException e) {
-                code = strCode;
+                return strCode;
             }
         }
-        CodedEnum enum = resolver.getEnum(keyParts[0], code, getLocale());
-        Assert.notNull(enum, "No enum with string key '" + text + "' was found.");
-        setValue(enum);
     }
 
     public String getAsText() {
-        CodedEnum enum = (CodedEnum)getValue();
-        return enum.getKey();
+        CodedEnum ce = (CodedEnum)getValue();
+        return (ce != null ? ce.getLabel() : "");
     }
 
 }

@@ -79,8 +79,8 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
     }
 
     public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
-        Object code;
-        code = persistentType().nullSafeGet(rs, names[0]);
+        Comparable code;
+        code = (Comparable)persistentType().nullSafeGet(rs, names[0]);
         if (code == null) {
             return null;
         }
