@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2004 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
 
@@ -62,7 +63,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	/**
 	 * JUnit assertion support class, for common assertions.
 	 */
-	private JUnitAssertSupport asserts=new JUnitAssertSupport();
+	private JUnitAssertSupport asserts = new JUnitAssertSupport();
 
 	/**
 	 * Returns the flow locator used to resolve the Flow to be tested by
@@ -72,14 +73,15 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 		return flowLocator;
 	}
 
-	/**
-	 * Set the flow locator.
-	 * @param flowLocator the locator
-	 */
-	public void setFlowLocator(FlowLocator flowLocator) {
-		this.flowLocator = flowLocator;
+	protected final void onSetUpInTransaction() throws Exception {
+		this.flowLocator = new BeanFactoryFlowServiceLocator(this.applicationContext);
+		onSetupInTransactionalFlowTest();
 	}
-
+	
+	protected void onSetupInTransactionalFlowTest() {
+		
+	}
+	
 	/**
 	 * Get the singleton flow definition whose execution is being tested.
 	 * @return the singleton flow definition
