@@ -34,7 +34,7 @@ import org.springframework.jdbc.core.SqlParameter;
  * The appropriate execute or update method can then be invoked.
  *
  * @author Rod Johnson
- * @version $Id: RdbmsOperation.java,v 1.2 2003-08-26 17:31:16 jhoeller Exp $
+ * @version $Id: RdbmsOperation.java,v 1.3 2003-08-28 17:26:36 jhoeller Exp $
  * @see org.springframework.dao
  * @see org.springframework.jdbc.core
  */
@@ -56,16 +56,15 @@ public abstract class RdbmsOperation implements InitializingBean {
 	private boolean compiled;
 
 	/**
-	 * Add anonymous parameters, specifying only their SQL types as defined in the
-	 * java.sql.Types class.
-	 * <br>Parameter ordering is significant. This method is an alternative
-	 * to the declareParameter() method, which should normally
-	 * be preferred.
+	 * Add anonymous parameters, specifying only their SQL types
+	 * as defined in the java.sql.Types class.
+	 * <p>Parameter ordering is significant. This method is an alternative
+	 * to the declareParameter() method, which should normally be preferred.
 	 * @param types array of SQL types as defined in the
 	 * java.sql.Types class
 	 * @throws InvalidDataAccessApiUsageException if the operation is already compiled
 	 */
-	protected void setTypes(int[] types) throws InvalidDataAccessApiUsageException {
+	public void setTypes(int[] types) throws InvalidDataAccessApiUsageException {
 		if (compiled)
 			throw new InvalidDataAccessApiUsageException("Cannot add parameters once query is compiled");
 		if (types != null) {
