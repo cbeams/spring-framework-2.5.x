@@ -27,8 +27,8 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
@@ -45,7 +45,7 @@ import org.springframework.context.support.StaticMessageSource;
  * @author Juergen Hoeller
  * @since 09.12.2003
  */
-public class AutoProxyCreatorTestSuite extends TestCase {
+public class AutoProxyCreatorTests extends TestCase {
 
 	protected StaticApplicationContext sac;
 
@@ -120,7 +120,7 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 		ACATest acaPr = (ACATest) sac.getBean("aca-prototype");
 		acaPr.getApplicationContext();
 		TestInterceptor ti = (TestInterceptor) sac.getBean("testInterceptorForCreator");
-		assertEquals(19, ti.nrOfInvocations);
+		assertEquals(11, ti.nrOfInvocations);
 		TestAutoProxyCreator tapc = (TestAutoProxyCreator) sac.getBean("testAutoProxyCreator");
 		assertEquals(3, tapc.testInterceptor.nrOfInvocations);
 	}
@@ -136,12 +136,15 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 		}
 
 		protected Object[] getAdvicesAndAdvisorsForBean(Object bean, String name, TargetSource customTargetSource) {
-			if (bean instanceof StaticMessageSource || bean instanceof IndexedTestBean)
+			if (bean instanceof StaticMessageSource || bean instanceof IndexedTestBean) {
 				return DO_NOT_PROXY;
-			else if (name.startsWith("aca"))
+			}
+			else if (name.startsWith("aca")) {
 				return new Object[] {testInterceptor};
-			else
+			}
+			else {
 				return PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS;
+			}
 		}
 	}
 
@@ -150,11 +153,11 @@ public class AutoProxyCreatorTestSuite extends TestCase {
 
 		public int nrOfInvocations = 0;
 
-		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-			if (!methodInvocation.getMethod().getName().equals("finalize")) {
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			if (!invocation.getMethod().getName().equals("finalize")) {
 				nrOfInvocations++;
 			}
-			return methodInvocation.proceed();
+			return invocation.proceed();
 		}
 	}
 
