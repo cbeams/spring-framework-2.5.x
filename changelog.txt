@@ -1,9 +1,9 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.99 2004-02-27 16:54:29 luke_t Exp $
+$Id: changelog.txt,v 1.100 2004-03-01 14:39:36 jhoeller Exp $
 
 
-Changes in version 1.0 RC2 (29.2.2003)
+Changes in version 1.0 RC2 (1.3.2003)
 --------------------------------------
 
 Package org.springframework.aop
@@ -19,6 +19,7 @@ Package org.springframework.beans
 * renamed SimpleJndiBeanFactoryLocator to JndiBeanFactoryLocator
 * added "systemPropertiesMode" setting to PropertyPlaceholderConfigurer, with values "never", "fallback" and "override"
 * added PreferencesPlaceholderConfigurer, being able to resolve placeholders via J2SE 1.4 Preferences
+* added CustomEditorConfigurer, for registering custom PropertyEditors in a declarative way
 * reworked MethodInvocationFactoryBean to derive from org.springframework.util.MethodInvoker
 * added "null" tag to XML bean definition format, for denoting Java null values
 * added optional "type" attribute to "constructor-arg" tag, for resolving ambiguities when converting String values
@@ -39,14 +40,15 @@ Package org.springframework.core
 
 Package org.springframework.ejb
 * moved logger instance from AbstractEnterpriseBean to AbstractStatelessSession Bean and AbstractMessageDrivenBean
+* propagate BeansException in AbstractStatelessSessionBean's "ejbCreate" rather than wrapping it in a CreateException
 
 Package org.springframework.jdbc
 * moved CannotGetJdbcConnectionException and CannotCloseJdbcConnectionException to root jdbc package
-* added "execute(String sql) method to support static sql and ddl statements
-* renamed method "execute(CallableStatementCreator csc, List declaredParameters)" to call
 * added support for new SQL error code categories: DataRetrieval/OptimisticLocking/DataAccessResourceFailureException
-* added overloaded query methods to JdbcTemplate, allowing to pass in prepared statement arguments as Object array
-* added queryForList/queryForObject/queryForInt methods to JdbcTemplate class and JdbcOperations interface
+* added "execute(String sql)" method to JdbcTemplate, supporting static SQL and DDL statements
+* renamed JdbcTemplate's "execute(CallableStatementCreator csc, List declaredParameters)" method to "call"
+* added overloaded "query" methods to JdbcTemplate, allowing to pass in prepared statement arguments as Object array
+* added "queryForList"/"queryForObject"/"queryForInt" methods to JdbcTemplate class and JdbcOperations interface
 * allowed ResultSetExtractor's "extractData" and JdbcTemplate's "doWithResultSetXxx" to return a result object
 * removed "doWithResultSetXxx" methods from JdbcOperations interface
 * removed JdbcHelper and its helper classes ColumnExtractor and DefaultColumnExtractor
@@ -56,6 +58,9 @@ Package org.springframework.jdbc
 
 Package org.springframework.jndi
 * renamed the "inContainer" property to "resourceRef", and changed the default value from "true" to "false"
+
+Package org.springframework.mail
+* added "javaMailProperties" to JavaMailSender, for creating a Session with specific JavaMail properties
 
 Package org.springframework.orm
 * reworked LocalSessionFactoryBean's "configLocation" into Resource
@@ -71,10 +76,8 @@ Package org.springframework.remoting
 * renamed RemoteInvocationHandler/RemoteInvocationWrapper to RmiInvocationHandler/RmiInvocationWrapper
 * RmiInvocationHandler uses RemoteInvocation class as argument, allowing for custom subclasses with additional params
 
-Package org.springframework.transaction
-* consider a JTA transaction with STATUS_MARKED_ROLLBACK as existing transaction in JtaTransactionManager
-
 Package org.springframework.samples
+* added optional SendOrderConfirmationEmailAdvice to JPetStore, illustrating MethodAfterReturningAdvice and MailSender
 * added scheduling demo to Image Database sample app, illustrating Quartz and Timer, also showing MailSender usage
 
 Package org.springframework.scheduler
@@ -83,6 +86,9 @@ Package org.springframework.scheduler
 * added MethodInvocationJobDetailFactoryBean, a convenience class for delegating a job to a business method
 * added J2SE Timer support, for setting up Timers and ScheduledTimerTasks
 * added MethodInvocationTimerTaskFactoryBean, a convenience class for delegating a task to a business method
+
+Package org.springframework.transaction
+* consider a JTA transaction with STATUS_MARKED_ROLLBACK as existing transaction in JtaTransactionManager
 
 Package org.springframework.ui
 * renamed NestingThemeSource to HierarchicalThemeSource
