@@ -47,7 +47,7 @@ import org.springframework.web.flow.FlowExecution;
  *  &lt;web-app&gt;
  *  	&lt;filter&gt;
  *  		&lt;filter-name&gt;flowCleanup&lt;/filter-name&gt;
- *  		&lt;filter-class&gt;org.springframework.web.flow.support.FlowExecutionCleanupFilter&lt;/filter-class&gt;
+ *  		&lt;filter-class&gt;org.springframework.web.flow.support.ExpiredFlowCleanupFilter&lt;/filter-class&gt;
  *  	&lt;/filter&gt;
  *  	&lt;filter-mapping&gt;
  *  		&lt;filter-name&gt;flowCleanup&lt;/filter-name&gt;
@@ -78,7 +78,7 @@ import org.springframework.web.flow.FlowExecution;
  * 
  * @author Erwin Vervaet
  */
-public class FlowExecutionCleanupFilter extends OncePerRequestFilter {
+public class ExpiredFlowCleanupFilter extends OncePerRequestFilter {
 
 	/**
 	 * Default web flow timout: 10 minutes.
