@@ -16,8 +16,12 @@
 
 package org.springframework.orm.jdo;
 
+import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
+import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOFatalUserException;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.JDOOptimisticVerificationException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -50,10 +54,10 @@ public abstract class PersistenceManagerFactoryUtils {
 	private static final Log logger = LogFactory.getLog(PersistenceManagerFactoryUtils.class);
 
 	/**
-	 * Get a JDO PersistenceManager via the given factory.
-	 * Is aware of a corresponding PersistenceManager bound to the current thread,
-	 * for example when using JdoTransactionManager.
-	 * Will create a new PersistenceManager else, if allowCreate is true.
+	 * Get a JDO PersistenceManager via the given factory. Is aware of a
+	 * corresponding PersistenceManager bound to the current thread,
+	 * for example when using JdoTransactionManager. Will create a new
+	 * PersistenceManager else, if allowCreate is true.
 	 * @param pmf PersistenceManagerFactory to create the session with
 	 * @param allowCreate if a new PersistenceManager should be created if no thread-bound found
 	 * @return the PersistenceManager
@@ -65,16 +69,35 @@ public abstract class PersistenceManagerFactoryUtils {
 		return getPersistenceManager(pmf, allowCreate, true);
 	}
 
+	/**
+	 * Get a JDO PersistenceManager via the given factory. Is aware of a
+	 * corresponding PersistenceManager bound to the current thread,
+	 * for example when using JdoTransactionManager. Will create a new
+	 * PersistenceManager else, if allowCreate is true.
+	 * @param pmf PersistenceManagerFactory to create the session with
+	 * @param allowCreate if a new PersistenceManager should be created if no thread-bound found
+	 * @param allowSynchronization if a new JDO PersistenceManager is supposed to be
+	 * registered with transaction synchronization (if synchronization is active).
+	 * This will always be true for typical data access code.
+	 * @return the PersistenceManager
+	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be created
+	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
+	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate,
 	                                                       boolean allowSynchronization)
 	    throws DataAccessResourceFailureException {
-		PersistenceManagerHolder pmHolder = (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
+
+		PersistenceManagerHolder pmHolder =
+				(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
 		if (pmHolder != null) {
 			return pmHolder.getPersistenceManager();
 		}
+
 		if (!allowCreate) {
-			throw new IllegalStateException("Not allowed to create new persistence manager");
+			throw new IllegalStateException("No JDO persistence manager bound to thread, and configuration " +
+																			"does not allow creation of new one here");
 		}
+
 		logger.debug("Opening JDO persistence manager");
 		try {
 			PersistenceManager pm = pmf.getPersistenceManager();
@@ -97,21 +120,37 @@ public abstract class PersistenceManagerFactoryUtils {
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
 	 * org.springframework.dao hierarchy.
-	 * <p>Unfortunately, JDO's JDOUserException covers a lot of distinct causes
-	 * like unparsable query, optimistic locking failure, etc. Thus, we are not able
-	 * to convert to Spring's DataAccessException hierarchy in a fine-granular way
-	 * with standard JDO. JdoAccessor and JdoTransactionManager support more
-	 * sophisticated translation of exceptions via a JdoDialect.
+	 * <p>The most important cases like object not found or optimistic verification
+	 * failure are covered here. For more fine-granular conversion, JdoAccessor and
+	 * JdoTransactionManager support sophisticated translation of exceptions via a
+	 * JdoDialect.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
+	 * @see JdoAccessor#convertJdoAccessException
+	 * @see JdoTransactionManager#convertJdoAccessException
 	 * @see JdoDialect#translateException
 	 */
 	public static DataAccessException convertJdoAccessException(JDOException ex) {
-		if (ex instanceof JDOUserException || ex instanceof JDOFatalUserException) {
-			return new JdoUsageException(ex);
+		if (ex instanceof JDOObjectNotFoundException) {
+			throw new JdoObjectRetrievalFailureException((JDOObjectNotFoundException) ex);
+		}
+		else if (ex instanceof JDOOptimisticVerificationException) {
+			throw new JdoOptimisticLockingFailureException((JDOOptimisticVerificationException) ex);
+		}
+		else if (ex instanceof JDODataStoreException) {
+			return new JdoResourceFailureException((JDODataStoreException) ex);
+		}
+		else if (ex instanceof JDOFatalDataStoreException) {
+			return new JdoResourceFailureException((JDOFatalDataStoreException) ex);
+		}
+		else if (ex instanceof JDOUserException) {
+			return new JdoUsageException((JDOUserException) ex);
+		}
+		else if (ex instanceof JDOFatalUserException) {
+			return new JdoUsageException((JDOFatalUserException) ex);
 		}
 		else {
-			// fallback
+			// fallback: assuming internal exception
 			return new JdoSystemException(ex);
 		}
 	}
