@@ -17,6 +17,7 @@
 package org.springframework.jms;
 
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -34,145 +35,191 @@ import javax.jms.Session;
  * {@link AbstractJmsTemplate#setPubSubDomain(boolean) setPubSubDomain}.
  * 
  * 
- * @version $Id: JmsTemplate11.java,v 1.2 2004-07-08 16:46:37 johnsonr Exp $
+ * @version $Id: JmsTemplate11.java,v 1.3 2004-07-12 02:21:01 markpollack Exp $
  * @author Mark Pollack
  */
 public class JmsTemplate11 extends AbstractJmsTemplate {
 
-	public void send(MessageCreator messageCreator) {
-		if (this.getDefaultDestination() == null) {
-			logger.warn("No Default Destination specified. Check configuration of JmsSender");
-			return;
-		}
-		else {
-			send(null, getDefaultDestination(), true, messageCreator);
-		}
+    /**
+     * Construct a new JmsTemplate for bean usage.
+     * Note: The ConnectionFactory has to be set before using the instance.
+     * This constructor can be used to prepare a JmsTemplate via a BeanFactory,
+     * typically setting the ConnectionFactory via setConnectionFactory.
+     * @see #setConnectionFactory
+     */
+    public JmsTemplate11() {
+    }
 
-	}
+    /**
+     * Construct a new JmsTemplate, given a ConnectionFactory to obtain connections from.
+     * @param cf JMS ConnectionFactory to obtain connections from
+     */
+    public JmsTemplate11(ConnectionFactory cf) {
+        setConnectionFactory(cf);
+        afterPropertiesSet();
+    }
 
-	public void send(String destinationName, MessageCreator messageCreator) throws JmsException {
-		send(destinationName, null, false, messageCreator);
-	}
+    public void send(MessageCreator messageCreator) {
+        if (this.getDefaultDestination() == null) {
+            logger.warn(
+                "No Default Destination specified. Check configuration of JmsSender");
+            return;
+        } else {
+            send(null, getDefaultDestination(), true, messageCreator);
+        }
 
-	public void send(Destination d, MessageCreator messageCreator) {
-		send(null, d, true, messageCreator);
+    }
 
-	}
+    public void send(String destinationName, MessageCreator messageCreator)
+        throws JmsException {
+        send(destinationName, null, false, messageCreator);
+    }
 
-	public void execute(JmsSenderCallback action) throws JmsException {
-		Connection connection = null;
-		try {
-			connection = getConnectionFactory().createConnection();
-			Session session = connection.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
+    public void send(Destination d, MessageCreator messageCreator) {
+        send(null, d, true, messageCreator);
 
-			MessageProducer producer = session.createProducer(null);
+    }
 
-			action.doInJms(session, producer);
+    public void execute(JmsSenderCallback action) throws JmsException {
+        Connection connection = null;
+        try {
+            connection = getConnectionFactory().createConnection();
+            Session session =
+                connection.createSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
 
-		}
-		catch (JMSException e) {
-			throw convertJMSException("Call JmsSenderCallback", e);
-		}
-		finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				}
-				catch (JMSException e) {
-					logger.warn("Failed to close the connection", e);
-				}
+            MessageProducer producer = session.createProducer(null);
+
+            action.doInJms(session, producer);
+
+        } catch (JMSException e) {
+            throw convertJMSException("Call JmsSenderCallback", e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    logger.warn("Failed to close the connection", e);
+                }
+            }
+        }
+
+    }
+
+    public void execute(SessionCallback action) throws JmsException {
+        Connection connection = null;
+        try {
+            connection = getConnectionFactory().createConnection();
+            Session session =
+                connection.createSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
+            action.doInJms(session);
+
+        } catch (JMSException e) {
+            throw convertJMSException("Call SessionCallback", e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    logger.warn("Failed to close the connection", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Send a message on a destination optionally using values for deliveryMode, priority, and timetoLive.
+     * 
+     * @param destinationName
+     *            the queue to send the message to
+     * @param destination
+     *            the destination to send the message to
+     * @param explicitDestination
+     *            if true, use the javax.jms.Destination parameter, otherwise lookup the javax.jms.Destination using the
+     *            string destinationName.
+     * @param messageCreator
+     *            the message creator callback used to create a message
+     * @param ignoreQOS
+     *            if true, send the message using default values of the deliveryMode, priority, and timetoLive. Some
+     *            vendors administration options let you set these values.
+     * @param deliveryMode
+     *            the delivery mode to use.
+     * @param priority
+     *            the priority for this message.
+     * @param timetoLive
+     *            the message's lifetime, in milliseconds.
+     */
+    private void send(
+        String destinationName,
+        Destination destination,
+        boolean explicitDestination,
+        MessageCreator messageCreator) {
+
+        Connection connection = null;
+        try {
+            connection = getConnectionFactory().createConnection();
+            Session session =
+                connection.createSession(
+                    isSessionTransacted(),
+                    getSessionAcknowledgeMode());
+
+            if (!explicitDestination) {
+                destination =
+                    (Destination) getJmsAdmin().lookup(
+                        destinationName,
+                        isDynamicDestinationEnabled(),
+                        isPubSubDomain());
+            }
+
+            MessageProducer producer = session.createProducer(destination);
+
+            Message message = messageCreator.createMessage(session);
+            if (logger.isInfoEnabled()) {
+                logger.info("Message created was [" + message + "]");
+            }
+            if (isExplicitQosEnabled()) {
+                producer.send(
+                    message,
+                    getDeliveryMode(),
+                    getPriority(),
+                    getTimeToLive());
+            } else {
+                producer.send(message);
+            }
+			if (isSessionTransacted())
+			{
+				session.commit();
 			}
-		}
 
-	}
+        } catch (JMSException e) {
+            throw convertJMSException(
+                "Send message on destinaton name = " + destinationName,
+                e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) {
+                    logger.warn("Failed to close the connection", e);
+                }
+            }
+        }
+    }
 
-	public void execute(SessionCallback action) throws JmsException {
-		Connection connection = null;
-		try {
-			connection = getConnectionFactory().createConnection();
-			Session session = connection.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
-			action.doInJms(session);
-
-		}
-		catch (JMSException e) {
-			throw convertJMSException("Call SessionCallback", e);
-		}
-		finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				}
-				catch (JMSException e) {
-					logger.warn("Failed to close the connection", e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Send a message on a destination optionally using values for deliveryMode, priority, and timetoLive.
-	 * 
-	 * @param destinationName
-	 *            the queue to send the message to
-	 * @param destination
-	 *            the destination to send the message to
-	 * @param explicitDestination
-	 *            if true, use the javax.jms.Destination parameter, otherwise lookup the javax.jms.Destination using the
-	 *            string destinationName.
-	 * @param messageCreator
-	 *            the message creator callback used to create a message
-	 * @param ignoreQOS
-	 *            if true, send the message using default values of the deliveryMode, priority, and timetoLive. Some
-	 *            vendors administration options let you set these values.
-	 * @param deliveryMode
-	 *            the delivery mode to use.
-	 * @param priority
-	 *            the priority for this message.
-	 * @param timetoLive
-	 *            the message's lifetime, in milliseconds.
-	 */
-	private void send(String destinationName, Destination destination, boolean explicitDestination,
-			MessageCreator messageCreator) {
-
-		Connection connection = null;
-		try {
-			connection = getConnectionFactory().createConnection();
-			Session session = connection.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
-
-			if (!explicitDestination) {
-				destination = (Destination) getJmsAdmin().lookup(destinationName, isDynamicDestinationEnabled(),
-						isPubSubDomain());
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Looked up destination with name [" + destinationName + "]");
-			}
-			MessageProducer producer = session.createProducer(destination);
-
-			Message message = messageCreator.createMessage(session);
-			if (logger.isInfoEnabled()) {
-				logger.info("Message created was [" + message + "]");
-			}
-			if (isExplicitQosEnabled()) {
-				producer.send(destination, message, getDeliveryMode(), getPriority(), getTimeToLive());
-			}
-			else {
-				producer.send(destination, message);
-			}
-
-		}
-		catch (JMSException e) {
-			throw convertJMSException("Send message on destinaton name = " + destinationName, e);
-		}
-		finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				}
-				catch (JMSException e) {
-					logger.warn("Failed to close the connection", e);
-				}
-			}
-		}
-	}
-
+    public void send(Destination d, final Object o) {
+        if (this.getJmsConverter() == null) {
+            logger.warn("No JmsConverter. Check configuration of JmsSender");
+            return;
+        } else {
+            send(d, new MessageCreator() {
+                public Message createMessage(Session session)
+                    throws JMSException {
+                    return getJmsConverter().toMessage(o, session);
+                }
+            });
+        }
+    }
 }

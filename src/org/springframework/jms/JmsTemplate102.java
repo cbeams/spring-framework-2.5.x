@@ -16,6 +16,7 @@
 
 package org.springframework.jms;
 
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -24,6 +25,7 @@ import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
+import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
@@ -50,7 +52,7 @@ import javax.jms.TopicSession;
  * {@link AbstractJmsTemplate#setEnabledDynamicDestinations(boolean) setEnabledDynamicDestinations}
  * to enable this functionality.
  * 
- * @author <a href="mailto:mark.pollack@codestreet.com">Mark Pollack</a>
+ * @author Mark Pollack
  */
 public class JmsTemplate102 extends AbstractJmsTemplate {
 
@@ -62,6 +64,16 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
      * @see #setConnectionFactory
      */
     public JmsTemplate102() {
+    }
+    
+    /**
+     * Construct a new JmsTemplate, given a ConnectionFactory.
+     * @param cf The ConnectionFactory to obtain connections from.
+     */
+    public JmsTemplate102(ConnectionFactory cf)
+    {
+    	setConnectionFactory(cf);
+    	afterPropertiesSet();
     }
 
     public void send(String destinationName, MessageCreator messageCreator)
@@ -136,14 +148,13 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
             }
             if (isExplicitQosEnabled()) {
                 publisher.publish(
-                    topic,
                     message,
                     getDeliveryMode(),
                     getPriority(),
                     getTimeToLive());
 
             } else {
-                publisher.publish(topic, message);
+                publisher.publish(message);
             }
 
         } catch (JMSException e) {
@@ -198,25 +209,26 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
                         isDynamicDestinationEnabled(),
                         isPubSubDomain());
             }
-            if (logger.isInfoEnabled()) {
-                logger.info("Looked up queue with name [" + queueName + "]");
-            }
+
             QueueSender queueSender = queueSession.createSender(queue);
             Message message = messageCreator.createMessage(queueSession);
-            //TODO put in pretty printer.
+
             if (logger.isInfoEnabled()) {
                 logger.info("Message created was [" + message + "]");
             }
             if (this.isExplicitQosEnabled()) {
                 queueSender.send(
-                    queue,
                     message,
                     getDeliveryMode(),
                     getPriority(),
                     getTimeToLive());
 
             } else {
-                queueSender.send(queue, message);
+                queueSender.send(message);
+            }
+            if (isSessionTransacted())
+            {
+            	queueSession.commit();
             }
             logger.info("Message sent OK");
 
@@ -390,5 +402,19 @@ public class JmsTemplate102 extends AbstractJmsTemplate {
             }
         }
     }
+    
+	public void send(Destination d, final Object o) {
+		if (this.getJmsConverter() == null) {
+			logger.warn("No JmsConverter. Check configuration of JmsSender");
+			return;
+		} else {
+			send(d, new MessageCreator() {
+				public Message createMessage(Session session)
+					throws JMSException {
+					return getJmsConverter().toMessage(o, session);
+				}
+			});
+		}
+	}
 
 }
