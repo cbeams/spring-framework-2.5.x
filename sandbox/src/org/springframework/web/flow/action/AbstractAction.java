@@ -100,10 +100,12 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * <pre>
 	 *    protected Event doExecuteAction(RequestContext context) {
 	 *      // do some work
+	 *      Map resultParameters = new HashMap();
+	 *      resultParameters.put("parameterName", "parameterValue");
 	 *      if (some condition) {
-	 *        return result(&quot;success&quot;);
+	 *        return result(&quot;success&quot;, resultParameters);
 	 *      } else {
-	 *        return result(&quot;error&quot;);
+	 *        return result(&quot;error&quot;, resultParameters);
 	 *      }
 	 *    }
 	 * </pre>

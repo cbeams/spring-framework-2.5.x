@@ -146,10 +146,16 @@
 <!ATTLIST subflow-state flow CDATA #REQUIRED>
 
 <!--
-	Optional indentifier of a mapper that will map data to and from
+	Optional indentifier of a FlowAttributeMapper that will map data to and from
 	the spawned sub flow.
 -->
 <!ATTLIST subflow-state attribute-mapper CDATA #IMPLIED>
+
+<!--
+	Optional FlowAttributeMapper implementation class that will map data to and from
+	the spawned sub flow.
+-->
+<!ATTLIST subflow-state attribute-mapper-class CDATA #IMPLIED>
 
 <!--
 	Defines an end state: a state that terminates the flow.

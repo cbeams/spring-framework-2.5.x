@@ -38,16 +38,16 @@ import org.springframework.web.flow.RequestContext;
  * of the flow, so the follow state definition
  * 
  * <pre>
- *      &lt;action-state id=&quot;search&quot;&gt;
- *          &lt;action bean=&quot;my.search.action&quot;/&gt;
- *          &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
- *      &lt;/action-state&gt;
+ *    &lt;action-state id=&quot;search&quot;&gt;
+ *         &lt;action bean=&quot;my.search.action&quot;/&gt;
+ *         &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
+ *    &lt;/action-state&gt;
  * </pre>
  * 
  * ... will execute the method:
  * 
  * <pre>
- *      public Event search(RequestContext context) throws Exception
+ *    public Event search(RequestContext context) throws Exception
  * </pre>
  * 
  * <p>
@@ -107,7 +107,7 @@ public class MultiAction extends AbstractAction {
 				throw new ActionExecutionException(
 						"Unable to resolve action execute method with signature 'public Event " + executeMethodName
 								+ "(RequestContext context)' - make sure the method name is correct "
-								+ "and such a method is defined in this action implementation", e);
+								+ "and such a public method is defined in this action implementation", e);
 			}
 		}
 	};
@@ -134,7 +134,9 @@ public class MultiAction extends AbstractAction {
 			Object result = actionExecuteMethod.invoke(getDelegate(), new Object[] { context });
 			if (result != null) {
 				Assert.isInstanceOf(Event.class, result,
-						"Event handler methods should return a result object of type Event");
+						"Dispatched multi-action execute methods must return result objects of type Event or null; "
+								+ "however, this method '" + actionExecuteMethod.getName()
+								+ "' returned an object of type " + result.getClass());
 			}
 			return (Event)result;
 		}
