@@ -87,6 +87,10 @@ public class BufferedValueModel extends AbstractValueModel implements
         }
     }
 
+    public ValueModel getWrappedModel() {
+        return wrappedModel;
+    }
+    
     public boolean isChangeBuffered() {
         return bufferedValue != NO_VALUE;
     }

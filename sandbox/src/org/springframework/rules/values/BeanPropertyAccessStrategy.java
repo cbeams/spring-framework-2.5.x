@@ -46,12 +46,15 @@ public class BeanPropertyAccessStrategy implements MutableAspectAccessStrategy {
     private MetaAspectAccessStrategy metaAspectAccessor;
 
     public BeanPropertyAccessStrategy(Object bean) {
-        this.beanWrapper = new BeanWrapperImpl(bean);
-        this.beanHolder = new ValueHolder(bean);
+        this(new ValueHolder(bean));
     }
 
     public BeanPropertyAccessStrategy(final ValueModel beanHolder) {
-        this.beanWrapper = new BeanWrapperImpl(beanHolder.get());
+        if (beanHolder.get() != null) {
+            this.beanWrapper = new BeanWrapperImpl(beanHolder.get());
+        } else {
+            this.beanWrapper = new BeanWrapperImpl();
+        }
         this.beanHolder = beanHolder;
         if (logger.isDebugEnabled()) {
             logger.debug("[Bean accessor attaching to mutable bean holder.]");
