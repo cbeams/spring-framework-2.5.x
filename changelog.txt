@@ -1,15 +1,20 @@
 SPRING FRAMEWORK CHANGELOG
 ==========================
-$Id: changelog.txt,v 1.73 2004-01-05 18:46:45 johnsonr Exp $
+$Id: changelog.txt,v 1.74 2004-01-05 23:37:38 jhoeller Exp $
 
 
 Changes in version 1.0 RC1 (xx.01.2003)
 ---------------------------------------
 
 * added "xdoclet/xjavadoc.jar" to release target in the framework build script (needed for building with attributes)
+* put Commons Attributes and XDoclet jars in Ant classpath instead of expecting them in Ant's lib directory
+* added "ant.bat" files to framework root
+* added "ant.bat" and "warfile.bat" to "samples/jpetstore/attributes" directory
+* added AfterReturning advice to complete AOP advice types
 * removed Servlet 2.3 "getServletContextName" call from ServletContextResource, for Servlet 2.2 compatibility
 * turned AbstractWizardFormController's "getCurrentPage" method non-final, to be overridden if determined by request
-* added AfterReturning advice to complete AOP advice types
+* re-evaluate EL expressions on each tag rendering instead of on tag instance initialization in all Spring tags
+* moved TagUtils helper class from package web.servlet.tags to web.util, renamed scope constants
 
 
 Changes in version 1.0 M4 (04.01.2003)
