@@ -27,6 +27,7 @@ import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JRDataSourceProvider;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
@@ -65,6 +66,8 @@ public abstract class JasperReportsUtils {
 		}
 		else if (value instanceof Object[]) {
 			return new JRBeanArrayDataSource((Object[]) value);
+		} else if(value instanceof JRDataSourceProvider) {
+			return null;			
 		}
 		else {
 			throw new IllegalArgumentException("Value [" + value + "] cannot be converted to a JRDataSource");
