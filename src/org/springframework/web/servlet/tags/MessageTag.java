@@ -30,7 +30,7 @@ import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
- * Custom tag to look up a message in the scope of this page.
+ * Custom JSP tag to look up a message in the scope of this page.
  * Messages are looked up using the ApplicationContext, and thus should
  * support internationalization.
  *
@@ -53,7 +53,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 	private String code;
 
-	private String arguments;
+	private Object arguments;
 
 	private String text;
 	
@@ -72,10 +72,11 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Set optional message arguments for this tag,
-	 * as comma-delimited list of Strings.
+	 * Set optional message arguments for this tag, as a comma-delimited
+	 * String (each String argument can contain JSP EL), an Object array
+	 * (used as argument array), or a single Object (used as single argument).
 	 */
-	public void setArguments(String arguments) {
+	public void setArguments(Object arguments) {
 		this.arguments = arguments;
 	}
 
@@ -130,16 +131,30 @@ public class MessageTag extends HtmlEscapingAwareTag {
 		try {
 			String msg = null;
 			if (resolvedCode != null) {
-				String resolvedArguments =
-				    ExpressionEvaluationUtils.evaluateString("arguments", this.arguments, pageContext);
-				String[] argumentsArray = StringUtils.commaDelimitedListToStringArray(resolvedArguments);
+				Object[] argumentsArray = null;
+				if (this.arguments instanceof String) {
+					argumentsArray = StringUtils.commaDelimitedListToStringArray((String) this.arguments);
+					for (int i = 0; i < argumentsArray.length; i++) {
+						argumentsArray[i] =
+						    ExpressionEvaluationUtils.evaluateString(
+						        "argument[" + i + "]", (String) argumentsArray[i], pageContext);
+
+					}
+				}
+				else if (this.arguments instanceof Object[]) {
+					argumentsArray = (Object[]) this.arguments;
+				}
+				else {
+					// assume a single argument object
+					argumentsArray = new Object[] {this.arguments};
+				}
 				if (resolvedText != null) {
 					msg = messageSource.getMessage(
-					    resolvedCode, argumentsArray, resolvedText, getRequestContext().getLocale());
+							resolvedCode, argumentsArray, resolvedText, getRequestContext().getLocale());
 				}
 				else {
 					msg = messageSource.getMessage(
-					    resolvedCode, argumentsArray, getRequestContext().getLocale());
+							resolvedCode, argumentsArray, getRequestContext().getLocale());
 				}
 			}
 			else {
@@ -167,6 +182,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 	/**
 	 * Write the message to the page.
+	 * <p>Can be overridden in subclasses, e.g. for testing purposes.
 	 * @param msg the message to write
 	 * @throws IOException if writing failed
 	 */
