@@ -100,6 +100,15 @@ public class ConcurrentBeanFactoryTests extends TestCase {
 		}
 	}
 
+	private void performTest() {
+		ConcurrentBean b1 = (ConcurrentBean) factory.getBean("bean1");
+		ConcurrentBean b2 = (ConcurrentBean) factory.getBean("bean2");
+
+		assertEquals(b1.getDate(), date1);
+		assertEquals(b2.getDate(), date2);
+	}
+
+
 	private class TestRun implements Runnable {
 
 		public void run() {
@@ -117,17 +126,7 @@ public class ConcurrentBeanFactoryTests extends TestCase {
 					set.notifyAll();
 				}
 			}
-		};
-
-	}
-
-	private void performTest() {
-
-		ConcurrentBean b1 = (ConcurrentBean) factory.getBean("bean1");
-		ConcurrentBean b2 = (ConcurrentBean) factory.getBean("bean2");
-
-		assertEquals(b1.getDate(), date1);
-		assertEquals(b2.getDate(), date2);
+		}
 	}
 
 

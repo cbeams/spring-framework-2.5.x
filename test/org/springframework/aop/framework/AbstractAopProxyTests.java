@@ -1227,7 +1227,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				names.add(mi.getArguments()[0]);
 				return mi.proceed();
 			}
-		};
+		}
+
 		NameSaver saver = new NameSaver();
 		
 		pc.addAdvisor(new DefaultPointcutAdvisor(Pointcuts.SETTERS, nameReverter));

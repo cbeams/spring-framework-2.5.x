@@ -218,19 +218,6 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 	    assertTrue("Introduced method returning delegate returns proxy", AopUtils.isAopProxy(introduction.getSpouse()));
 	}
 	
-	protected static class SerializableTimeStamped implements TimeStamped, Serializable {
-		private final long ts;
-		public SerializableTimeStamped(long ts) {
-			this.ts = ts;
-		}
-		 /**
-		 * @see org.springframework.aop.framework.TimeStamped#getTimeStamp()
-		 */
-		public long getTimeStamp() {
-			return ts;
-		}
-	};
-	
 	public void testSerializableDelegatingIntroductionInterceptorSerializable() throws Exception {
 		SerializablePerson serializableTarget = new SerializablePerson();
 		String name = "Tony";
@@ -268,18 +255,7 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 //		assertFalse(proxy instanceof Serializable);
 //	}
 
-
-	public static class TargetClass extends TestBean implements TimeStamped {
-		long t;
-		public TargetClass(long t) {
-			this.t = t;
-		}
-		public long getTimeStamp() {
-			return t;
-		}
-	}
-	
-	// test when target implements the interface: should get interceptor by preference
+	// Test when target implements the interface: should get interceptor by preference.
 	public void testIntroductionMasksTargetImplementation() throws Exception {
 		final long t = 1001L;
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped {
@@ -302,7 +278,36 @@ public class DelegatingIntroductionInterceptorTests extends TestCase {
 	}
 
 
+	private static class SerializableTimeStamped implements TimeStamped, Serializable {
+
+		private final long ts;
+
+		public SerializableTimeStamped(long ts) {
+			this.ts = ts;
+		}
+
+		public long getTimeStamp() {
+			return ts;
+		}
+	}
+
+
+	public static class TargetClass extends TestBean implements TimeStamped {
+
+		long t;
+
+		public TargetClass(long t) {
+			this.t = t;
+		}
+
+		public long getTimeStamp() {
+			return t;
+		}
+	}
+
+
 	public interface ITest {
+
 		void foo() throws Exception;
 	}
 

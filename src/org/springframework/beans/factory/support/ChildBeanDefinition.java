@@ -77,7 +77,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 			String parentName, Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		this.parentName = parentName;
 		setBeanClass(beanClass);
-		setConstructorArgumentValues(cargs);;
+		setConstructorArgumentValues(cargs);
 		setPropertyValues(pvs);
 	}
 

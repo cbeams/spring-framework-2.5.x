@@ -437,8 +437,7 @@ public abstract class RequestUtils {
 			}
 			return parameters;
 		}
-
-	};
+	}
 
 
 	private static class LongParser extends ParameterParser {
@@ -463,7 +462,7 @@ public abstract class RequestUtils {
 			}
 			return parameters;
 		}
-	};
+	}
 
 
 	private static class FloatParser extends ParameterParser {
@@ -488,7 +487,7 @@ public abstract class RequestUtils {
 			}
 			return parameters;
 		}
-	};
+	}
 
 
 	private static class DoubleParser extends ParameterParser {
@@ -513,7 +512,7 @@ public abstract class RequestUtils {
 			}
 			return parameters;
 		}
-	};
+	}
 
 
 	private static class BooleanParser extends ParameterParser {
@@ -539,7 +538,7 @@ public abstract class RequestUtils {
 			}
 			return parameters;
 		}
-	};
+	}
 
 
 	private static class StringParser extends ParameterParser {
@@ -566,6 +565,6 @@ public abstract class RequestUtils {
 			}
 			return values;
 		}
-	};
+	}
 
 }

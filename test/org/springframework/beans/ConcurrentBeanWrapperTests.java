@@ -72,33 +72,6 @@ public class ConcurrentBeanWrapperTests extends TestCase {
 		}
 	}
 
-
-	private static class TestRun implements Runnable {
-
-		private ConcurrentBeanWrapperTests test;
-
-		public TestRun(ConcurrentBeanWrapperTests test) {
-			this.test = test;
-		}
-
-		public void run() {
-			try {
-				for (int i = 0; i < 100; i++) {
-					performSet();
-				}
-			}
-			catch (Throwable e) {
-				test.ex = e;
-			}
-			finally {
-				synchronized (test) {
-					test.set.remove(this);
-					test.notifyAll();
-				}
-			}
-		};
-	}
-
 	private static void performSet() {
 		TestBean bean = new TestBean();
 
@@ -126,6 +99,33 @@ public class ConcurrentBeanWrapperTests extends TestCase {
 		BeanWrapperImpl wrapper = new BeanWrapperImpl(bean);
 		wrapper.setPropertyValue("properties", value);
 		assertEquals(p, bean.getProperties());
+	}
+
+
+	private static class TestRun implements Runnable {
+
+		private ConcurrentBeanWrapperTests test;
+
+		public TestRun(ConcurrentBeanWrapperTests test) {
+			this.test = test;
+		}
+
+		public void run() {
+			try {
+				for (int i = 0; i < 100; i++) {
+					performSet();
+				}
+			}
+			catch (Throwable e) {
+				test.ex = e;
+			}
+			finally {
+				synchronized (test) {
+					test.set.remove(this);
+					test.notifyAll();
+				}
+			}
+		}
 	}
 
 
