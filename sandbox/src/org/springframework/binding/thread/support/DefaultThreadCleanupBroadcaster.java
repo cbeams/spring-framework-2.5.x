@@ -23,30 +23,18 @@ import org.springframework.binding.thread.ThreadCleanupListener;
 import org.springframework.util.EventListenerListHelper;
 
 public class DefaultThreadCleanupBroadcaster implements ThreadCleanupBroadcaster, DisposableBean {
-	private ThreadLocal listenerListHolder = new ThreadLocal();
+	private EventListenerListHelper listenerList = new EventListenerListHelper(ThreadCleanupListener.class);
 
 	public void addThreadCleanupListener(ThreadCleanupListener listener) {
-		EventListenerListHelper list = (EventListenerListHelper)listenerListHolder.get();
-		if (list == null) {
-			list = new EventListenerListHelper(ThreadCleanupListener.class);
-			listenerListHolder.set(list);
-		}
-		list.add(listener);
+		listenerList.add(listener);
 	}
 
 	public void removeThreadCleanupListener(ThreadCleanupListener listener) {
-		EventListenerListHelper list = (EventListenerListHelper)listenerListHolder.get();
-		if (list != null) {
-			list.remove(listener);
-		}
+		listenerList.remove(listener);
 	}
 
 	public void fireCleanupEvent() {
-		EventListenerListHelper list = (EventListenerListHelper)listenerListHolder.get();
-		if (list == null) {
-			return;
-		}
-		Iterator it = list.iterator();
+		Iterator it = listenerList.iterator();
 		while (it.hasNext()) {
 			ThreadCleanupListener listener = (ThreadCleanupListener)it.next();
 			listener.onCleanup();
