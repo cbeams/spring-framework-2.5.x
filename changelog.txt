@@ -20,6 +20,7 @@ Package org.springframework.beans
 * moved BeanDefinitionHolder class from factory.support to factory.config, to avoid cyclic package dependencies
 * CustomEditorConfigurer and ClassEditor delegate to same ClassUtils.forName method, understanding array class names
 * added FieldRetrievingFactoryBean, for retrieving static fields (and also non-static field values of target objects)
+* fixed AbstractBeanFactory's "getSingletonNames" implementation to properly synchronize on the singletonCache Map
 * introduced BeanDefinitionReader interface, implemented by AbstractBeanDefinitionReader and subclasses
 * reworked XmlBeanDefinitionParser SPI (warning: not backwards-compatible!) to receive a bean definition reader
 
@@ -49,7 +50,8 @@ Package org.springframework.orm
 * added "entityInterceptorBeanName" property to HibernateTransactionManager, allowing to refer to a prototype bean
 * added "entityInterceptorBeanName" property to HibernateInterceptor, allowing to refer to a prototype bean
 * LocalSessionFactoryBean trims "mappingResources" locations before passing them to the ClassPathResource constructor
-* OpenSessionInViewInterceptor participates in existing thread-bound single session or deferred close mode now
+* OpenSessionInViewFilter/Interceptor participate in existing thread-bound single session or deferred close mode
+* OpenPersistenceManagerInViewFilter/Interceptor participate in existing thread-bound single persistence manager
 
 Package org.springframework.remoting
 * added RemoteInvocationResult class, for convenient serialization of a method invocation result
