@@ -37,9 +37,9 @@ the SpringappController</B></P>
 want to prepare Ant and our build script to be able to handle this.
 Ant has a built in JUnit target, but we need to add junit.jar to
 Ant's lib directory. I used the one that came with the Spring
-distribution spring-framework-1.0-m3/lib/junit/junit.jar. Just copy
+distribution spring-framework-1.0-m4/lib/junit/junit.jar. Just copy
 this file to the lib directory in your Ant installation. I also added
-the following target to our build script. 
+the following target to our build script.
 </P>
 <TABLE WIDTH=807 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=797>
@@ -83,7 +83,7 @@ the following target to our build script.
 </TABLE>
 <P STYLE="margin-bottom: 0in">Now I add a new sub-directory in the
 src directory that I name tests. This directory will, as you might
-have guessed, contain all the unit tests. 
+have guessed, contain all the unit tests.
 </P>
 <P STYLE="margin-bottom: 0in">After all this, we are ready to start
 writing the first unit test. The SpringappController depends on both
@@ -224,7 +224,7 @@ the prices that I am planning on adding to the ProductManager.</P>
 	<TR>
 		<TD WIDTH=898 VALIGN=TOP BGCOLOR="#ffcc99">
 			<P><B><FONT SIZE=2><FONT FACE="Nimbus Mono L">springapp/src/tests/TestProductManager
-			.java</FONT></FONT></B> 
+			.java</FONT></FONT></B>
 			</P>
 		</TD>
 	</TR>
@@ -328,7 +328,7 @@ public class ProductManager implements Serializable {
 <P STYLE="margin-bottom: 0in">Next I build and run the tests. As you
 can see, this test is just like any regular test &ndash; the business
 classes don't depend on any of the servlet classes so these classes
-are very easy to test. 
+are very easy to test.
 </P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
@@ -338,7 +338,7 @@ application, I add a form that will allow the user to enter a
 percentage value. This form uses a tag library named &ldquo;spring&rdquo;
 that is provided with the Spring Framework. We have to copy this file
 from the Spring distribution
-spring-framework-1.0-m3/samples/petclinic/war/WEB-INF/spring.tld to
+spring-framework-1.0-m4/samples/petclinic/war/WEB-INF/spring.tld to
 the springapp/war/WEB-INF directory. Now we must also add a &lt;taglib&gt;
 entry to web.xml.</P>
 <TABLE WIDTH=1004 BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
@@ -385,7 +385,7 @@ entry to web.xml.</P>
 <P STYLE="margin-bottom: 0in">We also have to declare this taglib in
 a page directive in the jsp file. We declare a form the normal way
 with a &lt;form&gt; tag and an &lt;input&gt; text field and a submit
-button. 
+button.
 </P>
 <TABLE WIDTH=90% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>
 	<COL WIDTH=256*>
@@ -518,11 +518,11 @@ public class PriceIncreaseValidator implements Validator {
         else {
             logger.info(&quot;Validating with &quot; + pi + &quot;: &quot; + pi.getPercentage());
             if (pi.getPercentage() &gt; maxPercentage) {
-                errors.rejectValue(&quot;percentage&quot;, &quot;error.too-high&quot;, 
+                errors.rejectValue(&quot;percentage&quot;, &quot;error.too-high&quot;,
                     new Object[] {new Integer(maxPercentage)}, &quot;Value too high.&quot;);
             }
             if (pi.getPercentage() &lt;= minPercentage) {
-                errors.rejectValue(&quot;percentage&quot;, &quot;error.too-low&quot;, 
+                errors.rejectValue(&quot;percentage&quot;, &quot;error.too-low&quot;,
                     new Object[] {new Integer(minPercentage)}, &quot;Value too low.&quot;);
             }
         }
@@ -563,7 +563,7 @@ and a view where output will go after successful form processing.</P>
 	<TR>
 		<TD WIDTH=890 VALIGN=TOP BGCOLOR="#ffffcc">
 			<PRE>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;!DOCTYPE beans PUBLIC &quot;-//SPRING//DTD BEAN//EN&quot; 
+&lt;!DOCTYPE beans PUBLIC &quot;-//SPRING//DTD BEAN//EN&quot;
  &quot;http://www.springframework.org/dtd/spring-beans.dtd&quot;&gt;
 
 &lt;!--
@@ -607,7 +607,7 @@ and a view where output will go after successful form processing.</P>
         &lt;property name=&quot;description&quot;&gt;&lt;value&gt;Lamp&lt;/value&gt;&lt;/property&gt;
         &lt;property name=&quot;price&quot;&gt;&lt;value&gt;5.75&lt;/value&gt;&lt;/property&gt;
     &lt;/bean&gt;
-        
+
     &lt;bean id=&quot;product2&quot; class=&quot;bus.Product&quot;&gt;
         &lt;property name=&quot;description&quot;&gt;&lt;value&gt;Table&lt;/value&gt;&lt;/property&gt;
         &lt;property name=&quot;price&quot;&gt;&lt;value&gt;75.25&lt;/value&gt;&lt;/property&gt;
@@ -622,7 +622,7 @@ and a view where output will go after successful form processing.</P>
         &lt;property name=&quot;basename&quot;&gt;&lt;value&gt;messages&lt;/value&gt;&lt;/property&gt;
     &lt;/bean&gt;
 
-    &lt;bean id=&quot;urlMapping&quot; class=&quot;org.springframework.web.servlet.handler.SimpleUrlHandlerMapping&quot;&gt; 
+    &lt;bean id=&quot;urlMapping&quot; class=&quot;org.springframework.web.servlet.handler.SimpleUrlHandlerMapping&quot;&gt;
         &lt;property name=&quot;mappings&quot;&gt;
             &lt;props&gt;
                 &lt;prop key=&quot;/hello.htm&quot;&gt;springappController&lt;/prop&gt;
@@ -683,7 +683,7 @@ public class PriceIncreaseFormController extends SimpleFormController {
 
     private ProductManager prodMan;
 
-    public ModelAndView onSubmit(Object command) 
+    public ModelAndView onSubmit(Object command)
             throws ServletException {
 
         int increase = ((PriceIncrease) command).getPercentage();
@@ -691,14 +691,14 @@ public class PriceIncreaseFormController extends SimpleFormController {
 
         prodMan.increasePrice(increase);
 
-        String now = (new java.util.Date()).toString(); 
-        logger.info(&quot;returning from PriceIncreaseForm view to &quot; + getSuccessView() + 
+        String now = (new java.util.Date()).toString();
+        logger.info(&quot;returning from PriceIncreaseForm view to &quot; + getSuccessView() +
                     &quot; with &quot; + now);
 
         Map myModel = new HashMap();
         myModel.put(&quot;now&quot;, now);
         myModel.put(&quot;products&quot;, getProductManager().getProducts());
-        
+
         return new ModelAndView(getSuccessView(), &quot;model&quot;, myModel);
     }
 
@@ -706,7 +706,7 @@ public class PriceIncreaseFormController extends SimpleFormController {
 
         PriceIncrease priceIncrease = new PriceIncrease();
         priceIncrease.setPercentage(20);
-        
+
         return priceIncrease;
 
     }
