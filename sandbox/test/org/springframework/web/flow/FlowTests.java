@@ -25,6 +25,7 @@ import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.flow.action.AbstractActionBean;
+import org.springframework.web.flow.config.AbstractFlowBuilder;
 
 /**
  * @author Keith Donald
@@ -52,9 +53,9 @@ public class FlowTests extends TestCase {
 
 		TestFlowDependencyLookup flow = new TestFlowDependencyLookup();
 
-		String getStateId = flow.get(PERSON_DETAILS);
-		String viewStateId = flow.view(PERSON_DETAILS);
-		String bindAndValidateStateId = flow.bindAndValidate(PERSON_DETAILS);
+		String getStateId = PERSON_DETAILS + ".get";
+		String viewStateId = PERSON_DETAILS + ".view";
+		String bindAndValidateStateId = PERSON_DETAILS + ".bindAndValidate";
 
 		MockControl flowDaoMc = MockControl.createControl(FlowServiceLocator.class);
 		FlowServiceLocator dao = (FlowServiceLocator)flowDaoMc.getMock();
@@ -63,55 +64,52 @@ public class FlowTests extends TestCase {
 		dao.getActionBean(bindAndValidateStateId);
 		flowDaoMc.setReturnValue(new NoOpActionBean());
 		flowDaoMc.replay();
-		flow.setFlowServiceLocator(dao);
 	}
 
-	private class TestMasterFlowDependencyLookup extends Flow {
+	private class TestMasterFlowDependencyLookup extends AbstractFlowBuilder {
 		private String PERSONS_LIST = "persons";
 
-		public TestMasterFlowDependencyLookup() {
-			super("test.masterFlow");
+		protected String flowId() {
+			return "test.masterFlow";
 		}
 
-		protected void initFlow() {
-			add(createGetState(PERSONS_LIST));
-			add(createViewState(PERSONS_LIST, onSubmit(edit(PERSON_DETAILS))));
+		protected void doBuildStates() {
+			addGetState(PERSONS_LIST);
+			addViewState(PERSONS_LIST, onSubmit(edit(PERSON_DETAILS)));
 			addSubFlowState(edit(PERSON_DETAILS), edit(PERSON_DETAILS), null, get(PERSONS_LIST));
-			add(createFinishEndState());
+			addFinishEndState();
 		}
 	}
 
-	private class TestFlowDependencyLookup extends Flow {
+	private class TestFlowDependencyLookup extends AbstractFlowBuilder {
 
-		public TestFlowDependencyLookup() {
-			final String flowId = "testFlow";
-			initFlow();
+		protected String flowId() {
+			return "test.detailFlow";
 		}
 
-		protected void initFlow() {
-			add(createGetState(PERSON_DETAILS));
-			add(createViewState(PERSON_DETAILS));
-			add(createBindAndValidateState(PERSON_DETAILS));
-			add(createFinishEndState());
+		protected void doBuildStates() {
+			addGetState(PERSON_DETAILS);
+			addViewState(PERSON_DETAILS);
+			addBindAndValidateState(PERSON_DETAILS);
+			addFinishEndState();
 		}
-	};
+	}
 
-	private class TestFlowTypeSafeDependencyLookup extends Flow {
+	private class TestFlowTypeSafeDependencyLookup extends AbstractFlowBuilder {
 
-		public TestFlowTypeSafeDependencyLookup() {
-			super("test.detailFlow");
-			initFlow();
+		protected String flowId() {
+			return "test.detailFlow";
 		}
 
-		protected void initFlow() {
-			add(createGetState(PERSON_DETAILS, useActionBean(NoOpActionBean.class)));
-			add(createViewState(PERSON_DETAILS));
-			add(createBindAndValidateState(PERSON_DETAILS, useActionBean(NoOpActionBean.class)));
-			add(createFinishEndState());
+		protected void doBuildStates() {
+			addGetState(PERSON_DETAILS, useActionBean(NoOpActionBean.class));
+			addViewState(PERSON_DETAILS);
+			addBindAndValidateState(PERSON_DETAILS, useActionBean(NoOpActionBean.class));
+			addFinishEndState();
 		}
 	};
 
-	private class TestFlowTypeSafeDependencyInjection extends Flow {
+	private class TestFlowTypeSafeDependencyInjection extends AbstractFlowBuilder {
 
 		private NoOpActionBean noOpAction;
 
@@ -119,16 +117,15 @@ public class FlowTests extends TestCase {
 			this.noOpAction = noOpAction;
 		}
 
-		public TestFlowTypeSafeDependencyInjection() {
-			super("test.detailFlow");
-			initFlow();
+		protected String flowId() {
+			return "test.detailFlow";
 		}
 
-		protected void initFlow() {
-			add(createGetState(PERSON_DETAILS, noOpAction));
-			add(createViewState(PERSON_DETAILS));
-			add(createBindAndValidateState(PERSON_DETAILS, noOpAction));
-			add(createFinishEndState());
+		protected void doBuildStates() {
+			addGetState(PERSON_DETAILS, noOpAction);
+			addViewState(PERSON_DETAILS);
+			addBindAndValidateState(PERSON_DETAILS, noOpAction);
+			addFinishEndState();
 		}
 	};
 

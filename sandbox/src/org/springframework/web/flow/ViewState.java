@@ -29,31 +29,10 @@ import org.springframework.util.ToStringCreator;
  */
 public class ViewState extends TransitionableState {
 
-	protected static final String VIEW_SUFFIX = "View";
-
 	/**
 	 * The logical name of the view.
 	 */
 	private String viewName;
-
-	public ViewState(String id) {
-		super(id);
-	}
-	
-	public ViewState(String id, String viewName) {
-		super(id);
-		setViewName(viewName);
-	}
-
-	public ViewState(String id, String viewName, Transition transition) {
-		super(id, transition);
-		setViewName(viewName);
-	}
-
-	public ViewState(String id, String viewName, Transition[] transitions) {
-		super(id, transitions);
-		setViewName(viewName);
-	}
 
 	public ViewState(Flow flow, String id) {
 		super(flow, id);
@@ -86,7 +65,7 @@ public class ViewState extends TransitionableState {
 		return viewName;
 	}
 
-	public void setViewName(String viewName) {
+	protected void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 

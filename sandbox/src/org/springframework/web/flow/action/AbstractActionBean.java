@@ -28,20 +28,14 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.flow.ActionBean;
 import org.springframework.web.flow.ActionBeanEvent;
 import org.springframework.web.flow.AttributesAccessor;
-import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.MutableAttributesAccessor;
+import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.util.WebUtils;
 
 /**
  * @author Keith Donald
  */
 public abstract class AbstractActionBean implements ActionBean, InitializingBean {
-
-	public static final String SUCCESS_EVENT_ID = "success";
-
-	public static final String ERROR_EVENT_ID = "error";
-
-	public static final String SEARCH_EVENT_ID = "search";
 
 	/**
 	 * Default name used for a form object in flow scope.
@@ -79,19 +73,19 @@ public abstract class AbstractActionBean implements ActionBean, InitializingBean
 	}
 
 	protected ActionBeanEvent success() {
-		return new ActionBeanEvent(this, Flow.SUCCESS);
+		return new ActionBeanEvent(this, AbstractFlowBuilder.SUCCESS);
 	}
 
 	protected ActionBeanEvent error() {
-		return new ActionBeanEvent(this, Flow.ERROR);
+		return new ActionBeanEvent(this, AbstractFlowBuilder.ERROR);
 	}
 
 	protected ActionBeanEvent add() {
-		return new ActionBeanEvent(this, Flow.ADD);
+		return new ActionBeanEvent(this, AbstractFlowBuilder.ADD);
 	}
 
 	protected ActionBeanEvent search() {
-		return new ActionBeanEvent(this, Flow.SEARCH);
+		return new ActionBeanEvent(this, AbstractFlowBuilder.SEARCH);
 	}
 
 	/**

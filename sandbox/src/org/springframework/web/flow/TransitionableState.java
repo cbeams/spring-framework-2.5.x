@@ -35,20 +35,6 @@ import org.springframework.util.ToStringCreator;
 public abstract class TransitionableState extends AbstractState {
 	private Set transitions = new LinkedHashSet();
 
-	public TransitionableState(String id) {
-		super(id);
-	}
-
-	public TransitionableState(String id, Transition transition) {
-		super(id);
-		add(transition);
-	}
-
-	public TransitionableState(String id, Transition[] transitions) {
-		super(id);
-		addAll(transitions);
-	}
-
 	public TransitionableState(Flow flow, String id) {
 		super(flow, id);
 	}
@@ -67,19 +53,15 @@ public abstract class TransitionableState extends AbstractState {
 		return true;
 	}
 
-	public void add(Transition transition) {
+	protected void add(Transition transition) {
 		transition.setSourceState(this);
 		transitions.add(transition);
 	}
 
-	public void addAll(Transition[] transitions) {
+	protected void addAll(Transition[] transitions) {
 		for (int i = 0; i < transitions.length; i++) {
 			add(transitions[i]);
 		}
-	}
-
-	public Collection getTransitions() {
-		return Collections.unmodifiableSet(transitions);
 	}
 
 	/**
@@ -96,7 +78,7 @@ public abstract class TransitionableState extends AbstractState {
 	 * @throws CannotExecuteStateTransitionException if the <code>eventId</code>
 	 *         does not map to a valid transition for this state.
 	 */
-	public ViewDescriptor execute(String eventId, FlowExecutionStack sessionExecution, HttpServletRequest request,
+	protected ViewDescriptor execute(String eventId, FlowExecutionStack sessionExecution, HttpServletRequest request,
 			HttpServletResponse response) throws CannotExecuteStateTransitionException {
 		updateCurrentStateIfNeccessary(eventId, sessionExecution);
 		if (logger.isDebugEnabled()) {
@@ -119,8 +101,24 @@ public abstract class TransitionableState extends AbstractState {
 		return viewDescriptor;
 	}
 
+	protected Iterator transitionsIterator() {
+		return transitions.iterator();
+	}
+
+	public Collection getEventIdCriterion() {
+		if (transitions.isEmpty()) {
+			return Collections.EMPTY_SET;
+		}
+		Iterator it = transitionsIterator();
+		Set criterion = new LinkedHashSet(transitions.size());
+		while (it.hasNext()) {
+			criterion.add(((Transition)it.next()).getEventIdCriteria());
+		}
+		return Collections.unmodifiableSet(criterion);
+	}
+
 	protected Transition getTransition(String eventId) throws EventNotSupportedException {
-		Iterator it = transitions.iterator();
+		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
 			if (transition.executesOn(eventId)) {

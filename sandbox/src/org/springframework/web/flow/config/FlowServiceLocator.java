@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.config;
+
+import org.springframework.web.flow.ActionBean;
+import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowAttributesMapper;
 
 /**
  * Service locator interface used by flows to retrieve needed artifacts

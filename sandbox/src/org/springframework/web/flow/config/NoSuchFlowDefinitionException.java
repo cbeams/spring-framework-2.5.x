@@ -1,7 +1,7 @@
 /*
  * Copyright 2004-2005 the original author or authors.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.config;
 
 /**
  * @author Keith Donald

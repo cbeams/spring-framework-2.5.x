@@ -1,9 +1,10 @@
 /*
  * Copyright 2004-2005 the original author or authors.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.config;
 
 import org.springframework.util.StringUtils;
+import org.springframework.web.flow.FlowException;
 
 /**
  * @author Keith Donald
