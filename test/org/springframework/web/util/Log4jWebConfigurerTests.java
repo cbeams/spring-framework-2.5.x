@@ -59,10 +59,12 @@ public class Log4jWebConfigurerTests extends TestCase {
 		doTestInitLogging("test/org/springframework/util/testlog4j.properties", true);
 	}
 
+	/* only works on Windows
 	public void testInitLoggingWithAbsoluteFilePathAndRefreshInterval() throws FileNotFoundException {
 		URL url = Log4jConfigurerTests.class.getResource("testlog4j.properties");
 		doTestInitLogging(url.getFile(), true);
 	}
+	*/
 
 	public void testInitLoggingWithFileUrlAndRefreshInterval() throws FileNotFoundException {
 		URL url = Log4jConfigurerTests.class.getResource("testlog4j.properties");
