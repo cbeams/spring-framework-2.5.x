@@ -37,9 +37,9 @@ public class EditPetForm extends AbstractClinicForm {
 		return getClinic().loadPet(RequestUtils.getRequiredIntParameter(request, "petId"));
 	}
 
-	protected void onBind(HttpServletRequest request, Object command) {
+	protected void onBind(HttpServletRequest request, Object command) throws ServletException {
 		Pet pet = (Pet) command;
-		int typeId = Integer.parseInt(request.getParameter("typeId"));
+		int typeId = RequestUtils.getRequiredIntParameter(request, "typeId");
 		pet.setType((PetType) EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
 	}
 
