@@ -24,7 +24,7 @@
 			<include name="jdbc2_0-stdext.jar"/>
 			<include name="servlet.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/itext-pdf">
+		<fileset dir="${spring.root}/lib/itext">
 			<include name="*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/poi">
@@ -89,7 +89,7 @@
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/itext-pdf">
+			<fileset dir="${spring.root}/lib/itext">
 				<include name="*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/poi">
