@@ -1,32 +1,13 @@
 package org.springframework.util;
 
-import java.io.InputStream;
-
 /**
- * Utility class for class loading, and for diagnostic purposes
- * to analyze the ClassLoader hierarchy for any object.
+ * Utility class for diagnostic purposes, to analyze the
+ * ClassLoader hierarchy for any object.
  * @author Rod Johnson
- * @author Juergen Hoeller
  * @since 02 April 2001
- * @see ClassLoader
+ * @see java.lang.ClassLoader
  */
 public abstract class ClassLoaderUtils {
-
-	/**
-	 * Load a resource from the class path, via the thread context class loader.
-	 * Will always load relative to the class path root. Accepts path with or
-	 * without leading slashes, i.e. "/a/b/myresource" and "a/b/myresource".
-	 * @param name the resource name
-	 * @return an input stream for reading the resource, or null if not found
-	 * @see ClassLoader#getResourceAsStream
-	 */
-	public static InputStream getResourceAsStream(String name) {
-		if (name.startsWith("/")) {
-			name = name.substring(1);
-		}
-		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-		return ccl.getResourceAsStream(name);
-	}
 
 	/**
 	 * Show the class loader hierarchy for this class.
@@ -80,10 +61,12 @@ public abstract class ClassLoaderUtils {
 	 * @see java.lang.Class#getResource
 	 */
 	public static String addResourcePathToPackagePath(Class	clazz, String resourceName)	{
-		if (!resourceName.startsWith("/"))
+		if (!resourceName.startsWith("/")) {
 			return classPackageAsResourcePath(clazz) + "/" + resourceName;
-		else
+		}
+		else {
 			return classPackageAsResourcePath(clazz) + resourceName;
+		}
 	}
 
 	/**
@@ -100,10 +83,9 @@ public abstract class ClassLoaderUtils {
 	 * @see java.lang.Class#getResource
 	 */
 	public static String classPackageAsResourcePath(Class clazz) {
-		
-		if (clazz == null || clazz.getPackage() == null)
+		if (clazz == null || clazz.getPackage() == null) {
 			return "";
-
+		}
 		return clazz.getPackage().getName().replace('.', '/');
 	}
   
