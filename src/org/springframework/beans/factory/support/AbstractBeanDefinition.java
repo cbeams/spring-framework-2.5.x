@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -94,8 +94,16 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Create a new AbstractBeanDefinition with default settings.
 	 */
 	protected AbstractBeanDefinition() {
-		setConstructorArgumentValues(new ConstructorArgumentValues());
-		setPropertyValues(new MutablePropertyValues());
+		this(null, null);
+	}
+
+	/**
+	 * Create a new AbstractBeanDefinition with the given
+	 * constructor argument values and property values.
+	 */
+	protected AbstractBeanDefinition(ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+		setConstructorArgumentValues(cargs);
+		setPropertyValues(pvs);
 	}
 
 	/**

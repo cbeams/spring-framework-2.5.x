@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -36,14 +36,34 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
+	 * Create a new RootBeanDefinition for a singleton.
+	 * @param beanClass the class of the bean to instantiate
+	 */
+	public RootBeanDefinition(Class beanClass) {
+		super();
+		setBeanClass(beanClass);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition with the given singleton status.
+	 * @param beanClass the class of the bean to instantiate
+	 * @param singleton the singleton status of the bean
+	 */
+	public RootBeanDefinition(Class beanClass, boolean singleton) {
+		super();
+		setBeanClass(beanClass);
+		setSingleton(singleton);
+	}
+
+	/**
 	 * Create a new RootBeanDefinition for a singleton,
 	 * using the given autowire mode.
 	 * @param beanClass the class of the bean to instantiate
 	 * @param autowireMode by name or type, using the constants in this interface
 	 */
 	public RootBeanDefinition(Class beanClass, int autowireMode) {
+		super();
 		setBeanClass(beanClass);
-		setPropertyValues(null);
 		setAutowireMode(autowireMode);
 	}
 
@@ -56,8 +76,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * (not applicable to autowiring a constructor, thus ignored there)
 	 */
 	public RootBeanDefinition(Class beanClass, int autowireMode, boolean dependencyCheck) {
+		super();
 		setBeanClass(beanClass);
-		setPropertyValues(null);
 		setAutowireMode(autowireMode);
 		if (dependencyCheck && getResolvedAutowireMode() != AUTOWIRE_CONSTRUCTOR) {
 			setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
@@ -71,8 +91,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param pvs the property values to apply
 	 */
 	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs) {
+		super(null, pvs);
 		setBeanClass(beanClass);
-		setPropertyValues(pvs);
 	}
 
 	/**
@@ -83,8 +103,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param singleton the singleton status of the bean
 	 */
 	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs, boolean singleton) {
+		super(null, pvs);
 		setBeanClass(beanClass);
-		setPropertyValues(pvs);
 		setSingleton(singleton);
 	}
 
@@ -96,9 +116,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param pvs the property values to apply
 	 */
 	public RootBeanDefinition(Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+		super(cargs, pvs);
 		setBeanClass(beanClass);
-		setConstructorArgumentValues(cargs);
-		setPropertyValues(pvs);
 	}
 
 	/**
@@ -110,9 +129,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param pvs the property values to apply
 	 */
 	public RootBeanDefinition(String beanClassName, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+		super(cargs, pvs);
 		setBeanClassName(beanClassName);
-		setConstructorArgumentValues(cargs);
-		setPropertyValues(pvs);
 	}
 
 	/**

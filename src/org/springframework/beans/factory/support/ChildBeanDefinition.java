@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory.support;
 
@@ -48,8 +48,8 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 * @param pvs the additional property values of the child
 	 */
 	public ChildBeanDefinition(String parentName, MutablePropertyValues pvs) {
+		super(null, pvs);
 		this.parentName = parentName;
-		setPropertyValues(pvs);
 	}
 
 	/**
@@ -60,9 +60,8 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public ChildBeanDefinition(
 			String parentName, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+		super(cargs, pvs);
 		this.parentName = parentName;
-		setConstructorArgumentValues(cargs);
-		setPropertyValues(pvs);
 	}
 
 	/**
@@ -75,10 +74,9 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public ChildBeanDefinition(
 			String parentName, Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+		super(cargs, pvs);
 		this.parentName = parentName;
 		setBeanClass(beanClass);
-		setConstructorArgumentValues(cargs);
-		setPropertyValues(pvs);
 	}
 
 	/**
@@ -92,10 +90,9 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public ChildBeanDefinition(
 			String parentName, String beanClassName, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+		super(cargs, pvs);
 		this.parentName = parentName;
 		setBeanClassName(beanClassName);
-		setConstructorArgumentValues(cargs);;
-		setPropertyValues(pvs);
 	}
 
 	/**

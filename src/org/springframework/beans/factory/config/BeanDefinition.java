@@ -66,14 +66,16 @@ public interface BeanDefinition {
 	boolean isLazyInit();
 
 	/**
-	 * Return the PropertyValues to be applied to a new instance of the bean.
+	 * Return the PropertyValues to be applied to a new instance of the bean, if any.
 	 * Can be modified during bean factory post-processing.
+	 * @return the PropertyValues object, or null
 	 */
 	MutablePropertyValues getPropertyValues();
 
 	/**
-	 * Return the constructor argument values for this bean.
+	 * Return the constructor argument values for this bean, if any.
 	 * Can be modified during bean factory post-processing.
+	 * @return the ConstructorArgumentValues object, or null
 	 */
 	ConstructorArgumentValues getConstructorArgumentValues();
 
