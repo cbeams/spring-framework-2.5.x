@@ -63,118 +63,96 @@ public class DispatcherServletTestSuite extends TestCase {
 	public void testInvalidRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/invalid.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			simpleControllerServlet.doGet(request, response);
-			assertTrue("Not forwarded", response.forwarded == null);
-			assertTrue("correct error code", response.getStatusCode() == HttpServletResponse.SC_NOT_FOUND);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		simpleControllerServlet.doGet(request, response);
+		assertTrue("Not forwarded", response.forwarded == null);
+		assertTrue("correct error code", response.getStatusCode() == HttpServletResponse.SC_NOT_FOUND);
 	}
 
 	public void testFormRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/form.do");
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			simpleControllerServlet.doGet(request, response);
-			assertTrue("forwarded to form", "form".equals(response.forwarded));
-			MessageSourceResolvableImpl resolvable = new MessageSourceResolvableImpl(new String[] {"test"}, null);
-			RequestContext rc = new RequestContext(request);
 
-			assertTrue("hasn't RequestContext attribute", request.getAttribute("rc") == null);
-			assertTrue("Correct WebApplicationContext", RequestContextUtils.getWebApplicationContext(request) instanceof SimpleWebApplicationContext);
-			assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
-			assertTrue("Correct locale", Locale.CANADA.equals(RequestContextUtils.getLocale(request)));
-			assertTrue("Correct theme", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(RequestContextUtils.getTheme(request).getName()));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
+		simpleControllerServlet.doGet(request, response);
+		assertTrue("forwarded to form", "form".equals(response.forwarded));
+		MessageSourceResolvableImpl resolvable = new MessageSourceResolvableImpl(new String[] {"test"}, null);
+		RequestContext rc = new RequestContext(request);
 
-			assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == simpleControllerServlet.getWebApplicationContext());
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
-			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable)));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable, true)));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", "default")));
-			assertTrue("Correct message", "default".equals(rc.getMessage("testa", "default")));
-			assertTrue("Correct message", "default &amp;".equals(rc.getMessage("testa", null, "default &", true)));
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		assertTrue("hasn't RequestContext attribute", request.getAttribute("rc") == null);
+		assertTrue("Correct WebApplicationContext", RequestContextUtils.getWebApplicationContext(request) instanceof SimpleWebApplicationContext);
+		assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
+		assertTrue("Correct locale", Locale.CANADA.equals(RequestContextUtils.getLocale(request)));
+		assertTrue("Correct theme", AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(RequestContextUtils.getTheme(request).getName()));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
+
+		assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == simpleControllerServlet.getWebApplicationContext());
+		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
+		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
+		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
+		assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable)));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
+		assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable, true)));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", "default")));
+		assertTrue("Correct message", "default".equals(rc.getMessage("testa", "default")));
+		assertTrue("Correct message", "default &amp;".equals(rc.getMessage("testa", null, "default &", true)));
 	}
 
 	public void testLocaleRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			assertEquals(98, simpleControllerServlet.getLastModified(request));
-			simpleControllerServlet.doGet(request, response);
-			assertTrue("Not forwarded", response.forwarded == null);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		assertEquals(98, simpleControllerServlet.getLastModified(request));
+		simpleControllerServlet.doGet(request, response);
+		assertTrue("Not forwarded", response.forwarded == null);
 	}
 
 	public void testUnknownRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/unknown.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			fail("Should have thrown ServletException");
-		}
-		catch (ServletException ex) {
-			// expected
-		}
+		complexControllerServlet.doGet(request, response);
+		assertEquals("forwarded to failed", "failed0.jsp", response.forwarded);
+		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
 
 	public void testAnotherFormRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/form.do;jsessionid=xxx");
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			assertTrue("forwarded to form", "myform.jsp".equals(response.forwarded));
-			assertTrue("has RequestContext attribute", request.getAttribute("rc") != null);
-			MessageSourceResolvableImpl resolvable = new MessageSourceResolvableImpl(new String[] {"test"}, null);
 
-			RequestContext rc = (RequestContext) request.getAttribute("rc");
-			assertTrue("Not in HTML escaping mode", !rc.isDefaultHtmlEscape());
-			assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == complexControllerServlet.getWebApplicationContext());
-			assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
-			assertTrue("Correct locale", Locale.CANADA.equals(rc.getLocale()));
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
-			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable)));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable, true)));
+		complexControllerServlet.doGet(request, response);
+		assertTrue("forwarded to form", "myform.jsp".equals(response.forwarded));
+		assertTrue("has RequestContext attribute", request.getAttribute("rc") != null);
+		MessageSourceResolvableImpl resolvable = new MessageSourceResolvableImpl(new String[] {"test"}, null);
 
-			rc.setDefaultHtmlEscape(true);
-			assertTrue("Is in HTML escaping mode", rc.isDefaultHtmlEscape());
-			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors);
-			assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
-			assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test")));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable)));
-			assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
-			assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable, true)));
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		RequestContext rc = (RequestContext) request.getAttribute("rc");
+		assertTrue("Not in HTML escaping mode", !rc.isDefaultHtmlEscape());
+		assertTrue("Correct WebApplicationContext", rc.getWebApplicationContext() == complexControllerServlet.getWebApplicationContext());
+		assertTrue("Correct context path", rc.getContextPath().equals(request.getContextPath()));
+		assertTrue("Correct locale", Locale.CANADA.equals(rc.getLocale()));
+		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
+		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
+		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
+		assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable)));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
+		assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable, true)));
+
+		rc.setDefaultHtmlEscape(true);
+		assertTrue("Is in HTML escaping mode", rc.isDefaultHtmlEscape());
+		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors);
+		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
+		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
+		assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test")));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
+		assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage("test", null, true)));
+		assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable)));
+		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
+		assertTrue("Correct message", "Canadian &amp; test message".equals(rc.getMessage(resolvable, true)));
 	}
 
 	public void testAnotherLocaleRequest() throws Exception {
@@ -182,21 +160,15 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addPreferredLocale(Locale.CANADA);
 		request.addRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			assertEquals(99, complexControllerServlet.getLastModified(request));
-			complexControllerServlet.doGet(request, response);
-			assertTrue("Not forwarded", response.forwarded == null);
-
-			assertTrue(request.getAttribute("test1") != null);
-			assertTrue(request.getAttribute("test1x") == null);
-			assertTrue(request.getAttribute("test1y") == null);
-			assertTrue(request.getAttribute("test2") != null);
-			assertTrue(request.getAttribute("test2x") == null);
-			assertTrue(request.getAttribute("test2y") == null);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		assertEquals(99, complexControllerServlet.getLastModified(request));
+		complexControllerServlet.doGet(request, response);
+		assertTrue("Not forwarded", response.forwarded == null);
+		assertTrue(request.getAttribute("test1") != null);
+		assertTrue(request.getAttribute("test1x") == null);
+		assertTrue(request.getAttribute("test1y") == null);
+		assertTrue(request.getAttribute("test2") != null);
+		assertTrue(request.getAttribute("test2x") == null);
+		assertTrue(request.getAttribute("test2y") == null);
 	}
 
 	public void testModelAndViewDefiningException() throws Exception {
@@ -220,14 +192,9 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("access", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			assertEquals("forwarded to failed", "failed2.jsp", response.forwarded);
-			assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		complexControllerServlet.doGet(request, response);
+		assertEquals("forwarded to failed", "failed2.jsp", response.forwarded);
+		assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
 	}
 
 	public void testSimpleMappingExceptionResolverWithSpecificHandler2() throws Exception {
@@ -236,14 +203,9 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("servlet", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			assertEquals("forwarded to failed", "failed3.jsp", response.forwarded);
-			assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		complexControllerServlet.doGet(request, response);
+		assertEquals("forwarded to failed", "failed3.jsp", response.forwarded);
+		assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
 	}
 
 	public void testSimpleMappingExceptionResolverWithAllHandlers1() throws Exception {
@@ -252,14 +214,9 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("access", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			assertEquals("forwarded to failed", "failed1.jsp", response.forwarded);
-			assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		complexControllerServlet.doGet(request, response);
+		assertEquals("forwarded to failed", "failed1.jsp", response.forwarded);
+		assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
 	}
 
 	public void testSimpleMappingExceptionResolverWithAllHandlers2() throws Exception {
@@ -268,14 +225,20 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("servlet", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			assertEquals("forwarded to failed", "failed1.jsp", response.forwarded);
-			assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		complexControllerServlet.doGet(request, response);
+		assertEquals("forwarded to failed", "failed1.jsp", response.forwarded);
+		assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
+	}
+
+	public void testSimpleMappingExceptionResolverWithDefaultErrorView() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletConfig.getServletContext(), "GET", "/locale.do");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addRole("role1");
+		request.addParameter("exception", "yes");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexControllerServlet.doGet(request, response);
+		assertEquals("forwarded to failed", "failed0.jsp", response.forwarded);
+		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(RuntimeException.class));
 	}
 
 	public void testLocaleChangeInterceptor1() throws Exception {
@@ -284,14 +247,9 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role2");
 		request.addParameter("locale", "en");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			assertTrue("Not forwarded", response.forwarded == null);
-			fail("Should have thrown ServletException");
-		}
-		catch (ServletException ex) {
-			// expected
-		}
+		complexControllerServlet.doGet(request, response);
+		assertEquals("forwarded to failed", "failed0.jsp", response.forwarded);
+		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
 
 	public void testLocaleChangeInterceptor2() throws Exception {
@@ -301,13 +259,8 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addParameter("locale", "en");
 		request.addParameter("locale2", "en_CA");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			assertTrue("Not forwarded", response.forwarded == null);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		complexControllerServlet.doGet(request, response);
+		assertTrue("Not forwarded", response.forwarded == null);
 	}
 
 	public void testThemeChangeInterceptor1() throws Exception {
@@ -316,14 +269,9 @@ public class DispatcherServletTestSuite extends TestCase {
 		request.addRole("role1");
 		request.addParameter("theme", "mytheme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexControllerServlet.doGet(request, response);
-			assertTrue("Not forwarded", response.forwarded == null);
-			fail("Should have thrown ServletException");
-		}
-		catch (ServletException ex) {
-			// expected
-		}
+		complexControllerServlet.doGet(request, response);
+		assertEquals("forwarded to failed", "failed0.jsp", response.forwarded);
+		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
 
 	public void testThemeChangeInterceptor2() throws Exception {

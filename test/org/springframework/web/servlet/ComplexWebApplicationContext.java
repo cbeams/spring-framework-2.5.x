@@ -74,6 +74,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("order", "1");
 		pvs.addPropertyValue("exceptionMappings", "java.lang.IllegalAccessException=failed2\norg.springframework.web.bind.ServletRequestBindingException=failed3");
+		pvs.addPropertyValue("defaultErrorView", "failed0");
 		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
@@ -252,6 +253,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			}
 			if (request.getParameter("servlet") != null) {
 				throw new ServletRequestBindingException("servlet");
+			}
+			if (request.getParameter("exception") != null) {
+				throw new RuntimeException("servlet");
 			}
 		}
 

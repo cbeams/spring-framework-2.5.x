@@ -1,8 +1,14 @@
 package org.springframework.web.servlet;
 
 /**
- * Interface to be implemented by objects than can resolve exceptions thrown by handlers.
- * Implementors are typically registered as beans in the application context.
+ * Interface to be implemented by objects than can resolve exceptions thrown
+ * by handlers to error views. Implementors are typically registered as beans
+ * in the application context.
+ *
+ * <p>Error views are analogous to the error page JSPs, but can be used with
+ * any kind of exception including any checked exception, with potentially
+ * fine-granular mappings for specific handlers.
+ *
  * @author Juergen Hoeller
  * @since 22.11.2003
  */
