@@ -22,18 +22,16 @@ import org.springframework.util.StringUtils;
 
 /**
  * Editor for String arrays. Strings must be in CSV format.
- *
- * <p>This property editor is automatically registered by BeanWrapperImpl.
- *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see org.springframework.util.StringUtils#commaDelimitedListToStringArray
- * @see org.springframework.beans.BeanWrapperImpl
+ * @see org.springframework.util.StringUtils#arrayToCommaDelimitedString
  */
 public class StringArrayPropertyEditor extends PropertyEditorSupport {
 
 	public void setAsText(String s) throws IllegalArgumentException {
-		String[] sa = StringUtils.commaDelimitedListToStringArray(s);
-		setValue(sa);
+		String[] array = StringUtils.commaDelimitedListToStringArray(s);
+		setValue(array);
 	}
 
 	public String getAsText() {

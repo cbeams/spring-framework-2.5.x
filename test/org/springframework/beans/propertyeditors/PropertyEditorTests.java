@@ -18,9 +18,9 @@
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditor;
+import java.io.File;
 import java.util.Locale;
 import java.util.Properties;
-import java.io.File;
 
 import junit.framework.TestCase;
 
@@ -94,7 +94,7 @@ public class PropertyEditorTests extends TestCase {
 	public void testIgnoresCommentLinesAndEmptyLines() {
 		String s = "#Ignore this comment\n" +
 			"foo=bar\n" +
-			"#Another=comment more junk \n" +
+			"#Another=comment more junk /\n" +
 			"me=mi\n" +
 			"x=x\n" +
 			"\n";
@@ -105,13 +105,12 @@ public class PropertyEditorTests extends TestCase {
 		assertTrue("foo is bar", p.get("foo").equals("bar"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
 	}
-	
-	
+
 	/**
-	 * We'll typically align by indenting with tabs or
-	 * spaces. These should be ignored if at the beginning of a line.
-	 * We must ensure that comment lines beginning with whitespace
-	 * are still ignored: the standard syntax doesn't allow this.
+	 * We'll typically align by indenting with tabs or spaces.
+	 * These should be ignored if at the beginning of a line.
+	 * We must ensure that comment lines beginning with whitespace are
+	 * still ignored: The standard syntax doesn't allow this on JDK 1.3.
 	 */
 	public void testIgnoresLeadingSpacesAndTabs() {
 		String s = "    #Ignore this comment\n" +
@@ -123,7 +122,6 @@ public class PropertyEditorTests extends TestCase {
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
 		Properties p= (Properties) pe.getValue();
-		//p.list(System.out);
 		assertTrue("contains 3 entries, not " + p.size(), p.size() == 3);
 		assertTrue("foo is bar", p.get("foo").equals("bar"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
