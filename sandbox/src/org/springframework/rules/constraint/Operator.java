@@ -18,7 +18,7 @@ package org.springframework.rules.constraint;
 import org.springframework.enums.StringCodedEnum;
 
 /**
- * @author keith
+ * @author Keith Donald
  */
 public abstract class Operator extends StringCodedEnum {
 
@@ -33,5 +33,8 @@ public abstract class Operator extends StringCodedEnum {
 	public Operator negation() {
 		return null;
 	}
-
+	
+	public String toString() {
+		return getSymbol();
+	}
 }
