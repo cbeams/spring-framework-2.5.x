@@ -1,5 +1,6 @@
 package org.springframework.orm.jdo.support;
 
+import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
@@ -8,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.jdo.JdoTemplate;
 import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
@@ -88,7 +90,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
 	 */
 	protected final PersistenceManager getPersistenceManager() {
-		return getPersistenceManager(getJdoTemplate().isAllowCreate());
+		return getPersistenceManager(this.jdoTemplate.isAllowCreate());
 	}
 
 	/**
@@ -103,6 +105,19 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	protected final PersistenceManager getPersistenceManager(boolean allowCreate)
 	    throws DataAccessResourceFailureException {
 		return PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), allowCreate);
+	}
+
+	/**
+	 * Convert the given JDOException to an appropriate exception from the
+	 * org.springframework.dao hierarchy.
+	 * <p>Delegates to the convertJdoAccessException method of this DAO's JdoTemplate.
+	 * @param ex JDOException that occured
+	 * @return the corresponding DataAccessException instance
+	 * @see #setJdoTemplate
+	 * @see org.springframework.orm.jdo.JdoTemplate#convertJdoAccessException
+	 */
+	protected final DataAccessException convertJdoAccessException(JDOException ex) {
+		return this.jdoTemplate.convertJdoAccessException(ex);
 	}
 
 	/**

@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.CannotCloseJdbcConnectionException;
 import org.springframework.jdbc.datasource.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
  * Convenient super class for JDBC data access objects.
@@ -86,6 +87,14 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 */
 	protected final Connection getConnection() throws CannotGetJdbcConnectionException {
 		return DataSourceUtils.getConnection(getDataSource());
+	}
+
+	/**
+	 * Return the SQLExceptionTranslator of this DAO's JdbcTemplate,
+	 * for translating SQLExceptions in custom JDBC access code.
+	 */
+	protected final SQLExceptionTranslator getExceptionTranslator() {
+		return this.jdbcTemplate.getExceptionTranslator();
 	}
 
 	/**

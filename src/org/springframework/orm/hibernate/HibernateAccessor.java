@@ -177,7 +177,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 * @param existingTransaction if executing within an existing transaction
 	 * @throws HibernateException in case of Hibernate flushing errors
 	 */
-	protected void flushIfNecessary(Session session, boolean existingTransaction) throws HibernateException {
+	public void flushIfNecessary(Session session, boolean existingTransaction) throws HibernateException {
 		if (getFlushMode() == FLUSH_EAGER || (!existingTransaction && getFlushMode() == FLUSH_AUTO)) {
 			logger.debug("Eagerly flushing Hibernate session");
 			session.flush();
@@ -195,7 +195,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 * @see #convertJdbcAccessException
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */
-	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
+	public DataAccessException convertHibernateAccessException(HibernateException ex) {
 		if (ex instanceof JDBCException) {
 			return convertJdbcAccessException(((JDBCException) ex).getSQLException());
 		}

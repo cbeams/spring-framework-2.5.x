@@ -1,5 +1,6 @@
 package org.springframework.orm.hibernate.support;
 
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import org.apache.commons.logging.Log;
@@ -7,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate.HibernateTemplate;
 import org.springframework.orm.hibernate.SessionFactoryUtils;
@@ -113,6 +115,21 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 				SessionFactoryUtils.getSession(getSessionFactory(),
 				                               this.hibernateTemplate.getEntityInterceptor(),
 																			 this.hibernateTemplate.getJdbcExceptionTranslator()));
+	}
+
+	/**
+	 * Convert the given HibernateException to an appropriate exception from
+	 * the org.springframework.dao hierarchy. Will automatically detect
+	 * wrapped SQLExceptions and convert them accordingly.
+	 * <p>Delegates to the convertHibernateAccessException method of this
+	 * DAO's HibernateTemplate.
+	 * @param ex HibernateException that occured
+	 * @return the corresponding DataAccessException instance
+	 * @see #setHibernateTemplate
+	 * @see org.springframework.orm.hibernate.HibernateTemplate#convertHibernateAccessException
+	 */
+	protected final DataAccessException convertHibernateAccessException(HibernateException ex) {
+		return this.hibernateTemplate.convertHibernateAccessException(ex);
 	}
 
 	/**
