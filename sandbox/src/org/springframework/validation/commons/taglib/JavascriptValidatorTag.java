@@ -1,7 +1,7 @@
 /*
- * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/validation/commons/taglib/JavascriptValidatorTag.java,v 1.1 2004-04-05 21:43:52 kdonald Exp $
- * $Revision: 1.1 $
- * $Date: 2004-04-05 21:43:52 $
+ * $Header: /var/local/springframework.cvs.sourceforge.net/spring/sandbox/src/org/springframework/validation/commons/taglib/JavascriptValidatorTag.java,v 1.2 2004-04-25 22:46:01 kdonald Exp $
+ * $Revision: 1.2 $
+ * $Date: 2004-04-25 22:46:01 $
  *
  * ====================================================================
  *
@@ -69,8 +69,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyTagSupport;
 
 import org.apache.commons.validator.Field;
 import org.apache.commons.validator.Form;
@@ -79,12 +81,13 @@ import org.apache.commons.validator.ValidatorResources;
 import org.apache.commons.validator.ValidatorUtil;
 import org.apache.commons.validator.Var;
 
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.validation.commons.Resources;
 import org.springframework.validation.commons.ValidatorFactory;
-import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
 /**
  * Custom tag that generates JavaScript for client side validation based
@@ -98,10 +101,12 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
  * @author David Winterfeldt.
  * @author Daniel Miller (Springframework adaptation)
  */
-public class JavascriptValidatorTag extends RequestContextAwareTag {
+public class JavascriptValidatorTag extends BodyTagSupport {
 
 	// ----------------------------------------------------------- Properties
 
+    protected RequestContext requestContext;
+    
 	/**
 	 * The name of the form that corresponds with the action name
 	 * in struts-config.xml. Specifying a form name places a
@@ -333,11 +338,12 @@ public class JavascriptValidatorTag extends RequestContextAwareTag {
 	 *
 	 * @exception JspException if a JSP exception has occurred
 	 */
-	public int doStartTagInternal() throws JspException {
+	public int doStartTag() throws JspException {
 		StringBuffer results = new StringBuffer();
 
+        Locale locale = pageContext.getRequest().getLocale();
+
 		ValidatorResources resources = getValidatorResources();
-		Locale locale = getRequestContext().getLocale();
 
 		Form form = resources.get(locale, formName);
 		if (form != null) {
@@ -741,7 +747,17 @@ public class JavascriptValidatorTag extends RequestContextAwareTag {
 	 * Use the application context itself for default message resolution.
 	 */
 	private MessageSource getMessageSource() {
-		return getRequestContext().getWebApplicationContext();
+        try {
+            this.requestContext =   
+                new RequestContext((HttpServletRequest) this.pageContext.getRequest());
+        }
+        catch (RuntimeException ex) {
+            throw ex;
+        }
+        catch (Exception ex) {
+            pageContext.getServletContext().log("Exception in custom tag", ex);
+        }
+        return requestContext.getWebApplicationContext();
 	}
 
 	/**
@@ -752,7 +768,8 @@ public class JavascriptValidatorTag extends RequestContextAwareTag {
 	 * @return ValidatorResources from a ValidatorFactory.
 	 */
 	private ValidatorResources getValidatorResources() {
-		ListableBeanFactory lbf = getRequestContext().getWebApplicationContext();
+		ListableBeanFactory lbf = WebApplicationContextUtils
+            .getRequiredWebApplicationContext(pageContext.getServletContext());
 		ValidatorFactory factory = (ValidatorFactory) BeanFactoryUtils
 				.beanOfTypeIncludingAncestors(lbf, ValidatorFactory.class, true, true);
 		return factory.getValidatorResources();
