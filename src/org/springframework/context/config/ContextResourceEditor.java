@@ -1,13 +1,11 @@
 package org.springframework.context.config;
 
 import java.beans.PropertyEditorSupport;
-import java.io.IOException;
 
 import org.springframework.context.ApplicationContext;
 
 /**
- * ApplicationContext-aware Editor for Resource descriptors, to directly
- * feed a Resource property instead of using a String location property.
+ * ApplicationContext-aware Editor for Resource descriptors.
  *
  * <p>Delegates to the ApplicationContext's getResource method for resolving
  * resource locations to Resource instances. Resource loading behavior is
@@ -30,12 +28,7 @@ public class ContextResourceEditor extends PropertyEditorSupport {
 	}
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		try {
-			setValue(this.applicationContext.getResource(text));
-		}
-		catch (IOException ex) {
-			throw new IllegalArgumentException("Could not find resource '" + text + ": " + ex.getMessage());
-		}
+		setValue(this.applicationContext.getResource(text));
 	}
 
 }

@@ -5,8 +5,6 @@
 
 package org.springframework.context.support;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -64,7 +62,7 @@ import org.springframework.core.io.UrlResource;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #MESSAGE_SOURCE_BEAN_NAME
@@ -187,7 +185,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * @see #getResourceByPath
 	 * @see org.springframework.core.io.ResourceEditor#CLASSPATH_URL_PREFIX
 	 */
-	public Resource getResource(String location) throws IOException {
+	public Resource getResource(String location) {
 		if (location.startsWith(ResourceEditor.CLASSPATH_URL_PREFIX)) {
 			return new ClassPathResource(location.substring(ResourceEditor.CLASSPATH_URL_PREFIX.length()));
 		}
@@ -198,11 +196,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 		}
 		catch (MalformedURLException ex) {
 			// no URL -> try path
-			Resource resource = getResourceByPath(location);
-			if (resource == null) {
-				throw new FileNotFoundException("Location [" + location + "] could not be opened as path");
-			}
-			return resource;
+			return getResourceByPath(location);
 		}
 	}
 
@@ -213,10 +207,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 	 * appropriate for standalone implementations but can be overridden,
 	 * e.g. for implementations targeted at a container.
 	 * @param path path to the resource
-	 * @return Resource handle, or null if not found
-	 * @throws IOException exception when opening the specified resource
+	 * @return Resource handle
 	 */
-	protected Resource getResourceByPath(String path) throws IOException {
+	protected Resource getResourceByPath(String path) {
 		return new FileSystemResource(path);
 	}
 

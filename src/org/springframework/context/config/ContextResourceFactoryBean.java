@@ -1,9 +1,5 @@
 package org.springframework.context.config;
 
-import java.io.IOException;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.io.Resource;
@@ -33,13 +29,8 @@ public class ContextResourceFactoryBean extends ApplicationObjectSupport impleme
 		this.location = location;
 	}
 
-	protected void initApplicationContext() throws BeansException {
-		try {
-			this.resource = getApplicationContext().getResource(this.location);
-		}
-		catch (IOException ex) {
-			throw new BeanInitializationException("Could not find resource '" + this.location, ex);
-		}
+	protected void initApplicationContext() {
+		this.resource = getApplicationContext().getResource(this.location);
 	}
 
 	public Object getObject() {

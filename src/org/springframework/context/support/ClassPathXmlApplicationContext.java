@@ -58,7 +58,7 @@ public class ClassPathXmlApplicationContext extends FileSystemXmlApplicationCont
 	 * like "/mypackage/myresource.dat". A root slash gets prepended to
 	 * the path if not already contained.
 	 */
-	protected Resource getResourceByPath(String path) throws IOException {
+	protected Resource getResourceByPath(String path) {
 		return new ClassPathResource(path);
 	}
 
