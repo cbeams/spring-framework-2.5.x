@@ -36,7 +36,7 @@ public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerT
 	}
 
 	protected IJmxTestBean createJmxTestBean() {
-		return new org.springframework.jmx.export.annotation.AnnotationTestBean();
+		return new AnnotationTestBean();
 	}
 
 	protected String getApplicationContextPath() {
