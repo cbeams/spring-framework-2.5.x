@@ -214,6 +214,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 					(ResultSetMetaData) ctrlCountResultSetMetaData[i].getMock();
 				mockCountResultSetMetaData[i].getColumnCount();
 				ctrlCountResultSetMetaData[i].setReturnValue(1);
+				mockCountResultSetMetaData[i].getColumnType(1);
+				ctrlCountResultSetMetaData[i].setReturnValue(Types.NUMERIC);
 
 				ctrlCountResultSet[i] =
 					MockControl.createControl(ResultSet.class);
@@ -224,8 +226,8 @@ public class SqlQueryTestSuite extends JdbcTestCase {
 					mockCountResultSetMetaData[i]);
 				mockCountResultSet[i].next();
 				ctrlCountResultSet[i].setReturnValue(true);
-				mockCountResultSet[i].getObject(1);
-				ctrlCountResultSet[i].setReturnValue(new Integer(1));
+				mockCountResultSet[i].getInt(1);
+				ctrlCountResultSet[i].setReturnValue(1);
 				mockCountResultSet[i].next();
 				ctrlCountResultSet[i].setReturnValue(false);
 				mockCountResultSet[i].close();
