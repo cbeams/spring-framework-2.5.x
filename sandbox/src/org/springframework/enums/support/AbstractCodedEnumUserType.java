@@ -84,11 +84,11 @@ public abstract class AbstractCodedEnumUserType implements UserType, Serializabl
         if (code == null) {
             return null;
         }
-        CodedEnum enum = enumResolver.getEnum(enumType(), code, null);
+        CodedEnum e = enumResolver.getEnum(enumType(), code, null);
         if (logger.isDebugEnabled()) {
-            logger.debug("Resolved enum '" + enum + "' of type '" + enumType() + "' from persisted code " + code);
+            logger.debug("Resolved enum '" + e + "' of type '" + enumType() + "' from persisted code " + code);
         }
-        return enum;
+        return e;
     }
 
     public void nullSafeSet(PreparedStatement stmt, Object value, int index) throws HibernateException, SQLException {
