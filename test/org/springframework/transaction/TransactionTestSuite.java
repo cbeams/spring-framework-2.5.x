@@ -2,7 +2,6 @@ package org.springframework.transaction;
 
 import junit.framework.TestCase;
 
-import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -45,20 +44,6 @@ public class TransactionTestSuite extends TestCase {
 			TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
 			assertTrue("Must have transaction", status3.getTransaction() != null);
 			assertTrue("Must not be new transaction", !status3.isNewTransaction());
-		}
-		catch (NoTransactionException ex) {
-			fail("Should not have thrown NoTransactionException");
-		}
-	}
-
-	public void testNonTransactionalExecution() {
-		AbstractPlatformTransactionManager tm = new TestTransactionManager(false, false);
-		tm.setAllowNonTransactionalExecution(true);
-		assertTrue("Correctly allowed non-transaction execution", tm.getAllowNonTransactionalExecution());
-		try {
-			TransactionStatus status = tm.getTransaction(null);
-			assertTrue("Must not have transaction", status.getTransaction() == null);
-			tm.rollback(status);
 		}
 		catch (NoTransactionException ex) {
 			fail("Should not have thrown NoTransactionException");

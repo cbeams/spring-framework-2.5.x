@@ -13,7 +13,6 @@ import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.HeuristicCompletionException;
 import org.springframework.transaction.InvalidIsolationException;
-import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.NestedTransactionNotPermittedException;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.TransactionDefinition;
@@ -23,7 +22,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 
 /**
- * PlatformTransactionManager implementation for JTA.
+ * PlatformTransactionManager implementation for JTA, i.e. J2EE container transactions.
  *
  * <p>This transaction manager is appropriate for handling distributed transactions,
  * i.e. transactions that span multiple resources, and for managing transactions
@@ -39,18 +38,13 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
  * synchronization needs to be turned off to avoid dangling resource holders that
  * wait for afterTransactionCompletion callbacks.
  *
- * <p>Set "allowNonTransactionalExecution" to be able to fall back to
- * non-transactional execution if JTA isn't available in the container.
- * This can be handy for demo-ing applications e.g. on Tomcat.
- *
- * <p>Note: This implementation does not handle isolation levels. This needs
- * to be done by server-specific subclasses, overriding applyIsolationLevel.
- * Note that DataSourceTransactionManager and HibernateTransactionManager do
- * support custom isolation levels.
+ * <p>Note: This implementation supports timeouts but not custom isolation levels.
+ * The latter need to be interpreted in container-specific subclasses, overriding
+ * the applyIsolationLevel method in this class. Note that DataSourceTransactionManager
+ * and HibernateTransactionManager do support both custom isolation levels and timeouts.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
- * @see #setAllowNonTransactionalExecution
  * @see #setTransactionSynchronization
  * @see #applyIsolationLevel
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -124,10 +118,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager {
 			logger.warn("JtaTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
 		}
 		try {
-			if (definition.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
-				throw new InvalidTimeoutException("Invalid transaction timeout", definition.getTimeout());
-			}
-			else if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
+			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
 				ut.setTransactionTimeout(definition.getTimeout());
 			}
 			ut.begin();

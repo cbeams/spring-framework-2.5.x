@@ -2,7 +2,9 @@ package org.springframework.transaction.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.InvalidTimeoutException;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -18,8 +20,6 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * <ul>
  * <li>determines if there is an existing transaction;
  * <li>applies the appropriate propagation behavior;
- * <li>supports falling back to non-transactional execution
- * (if allowNonTransactionExecution is set);
  * <li>determines programmatic rollback on commit;
  * <li>applies the appropriate modification on rollback
  * (actual rollback or setting rollback only);
@@ -29,32 +29,13 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
- * @see #setAllowNonTransactionalExecution
  * @see #setTransactionSynchronization
  */
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private boolean allowNonTransactionalExecution = false;
-
 	private boolean transactionSynchronization = false;
-
-	/**
-	 * Set if transaction support does not need to be available,
-	 * e.g. when JTA isn't available in the container.
-	 * Non-transactional fallback behavior is enabled in this case.
-	 */
-	public final void setAllowNonTransactionalExecution(boolean allowNonTransactionalExecution) {
-		this.allowNonTransactionalExecution = allowNonTransactionalExecution;
-	}
-
-	/**
-	 * Return if transaction support does not need to be available.
-	 */
-	public final boolean getAllowNonTransactionalExecution() {
-		return allowNonTransactionalExecution;
-	}
 
 	/**
 	 * Set if this transaction manager should activate the thread-bound
@@ -78,26 +59,33 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * This implementation of getTransaction handles propagation behavior and
-	 * checks non-transactional execution (on CannotCreateTransactionException).
+	 * This implementation of getTransaction handles propagation behavior.
 	 * Delegates to doGetTransaction, isExistingTransaction, doBegin.
+	 * @see #doGetTransaction
+	 * @see #isExistingTransaction
+	 * @see #doBegin
 	 */
-	public final TransactionStatus getTransaction(TransactionDefinition definition)
-	    throws TransactionException {
+	public final TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 		try {
 			Object transaction = doGetTransaction();
 			logger.debug("Using transaction object [" + transaction + "]");
+			
 			if (isExistingTransaction(transaction)) {
 				logger.debug("Participating in existing transaction");
 				return new TransactionStatus(transaction, false);
 			}
+
 			if (definition == null) {
 				// use defaults
 				definition = new DefaultTransactionDefinition();
 			}
+			if (definition.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
+				throw new InvalidTimeoutException("Invalid transaction timeout", definition.getTimeout());
+			}
 			if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 				throw new NoTransactionException("Transaction propagation mandatory but no existing transaction context found");
 			}
+
 			if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED) {
 				// create new transaction
 				doBegin(transaction, definition);
@@ -106,28 +94,23 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 				return new TransactionStatus(transaction, true);
 			}
-		}
-		catch (CannotCreateTransactionException ex) {
-			// throw exception if transactional execution required
-			if (!this.allowNonTransactionalExecution) {
-				logger.error(ex.getMessage());
-				throw ex;
+			else {
+				// empty (-> "no") transaction
+				return new TransactionStatus(null, false);
 			}
-			// else non-transactional execution
-			logger.warn("Transaction support is not available: falling back to non-transactional execution", ex);
 		}
 		catch (TransactionException ex) {
 			logger.error(ex.getMessage());
 			throw ex;
 		}
-		// empty (-> "no") transaction
-		return new TransactionStatus(null, false);
 	}
 
 	/**
 	 * This implementation of commit handles programmatic rollback requests,
 	 * i.e. status.isRollbackOnly(), and non-transactional execution.
 	 * Delegates to doCommit and rollback.
+	 * @see #doCommit
+	 * @see #rollback
 	 */
 	public final void commit(TransactionStatus status) throws TransactionException {
 		if (status.isRollbackOnly()) {
@@ -159,6 +142,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * This implementation of rollback handles participating in
 	 * existing transactions and non-transactional execution.
 	 * Delegates to doRollback and doSetRollbackOnly.
+	 * @see #doRollback
+	 * @see #doSetRollbackOnly
 	 */
 	public final void rollback(TransactionStatus status) throws TransactionException {
 		if (status.isNewTransaction()) {
