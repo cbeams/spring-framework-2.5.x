@@ -108,19 +108,23 @@ public class ValidatingFormModel extends DefaultFormModel implements
 
     protected ValueModel preProcessNewFormValueModel(
             String domainObjectProperty, ValueModel formValueModel) {
-        if (getFormObject() instanceof PropertyEditorProvider) {
-            PropertyEditorProvider provider = (PropertyEditorProvider)getFormObject();
-            PropertyEditor editor = provider
-                    .getPropertyEditor(domainObjectProperty);
-            formValueModel = installTypeConverter(formValueModel,
-                domainObjectProperty, editor);
-        }
-        else {
-            PropertyEditor editor = getAspectAccessStrategy().findCustomEditor(
-                getMetaAspectAccessor().getAspectClass(domainObjectProperty),
-                domainObjectProperty);
-            formValueModel = installTypeConverter(formValueModel,
-                domainObjectProperty, editor);
+        if (!(formValueModel instanceof TypeConverter)) {
+            if (getFormObject() instanceof PropertyEditorProvider) {
+                PropertyEditorProvider provider = (PropertyEditorProvider)getFormObject();
+                PropertyEditor editor = provider
+                        .getPropertyEditor(domainObjectProperty);
+                formValueModel = installTypeConverter(formValueModel,
+                        domainObjectProperty, editor);
+            }
+            else {
+                PropertyEditor editor = getAspectAccessStrategy()
+                        .findCustomEditor(
+                                getMetaAspectAccessor().getAspectClass(
+                                        domainObjectProperty),
+                                domainObjectProperty);
+                formValueModel = installTypeConverter(formValueModel,
+                        domainObjectProperty, editor);
+            }
         }
         return new ValidatingFormValueModel(domainObjectProperty,
                 formValueModel, getValidationRule(domainObjectProperty));
@@ -167,7 +171,7 @@ public class ValidatingFormModel extends DefaultFormModel implements
                                 + "please set a valid reference to enable rules-based validation.");
             }
             constraint = rulesSource.getRules(getFormObjectClass(),
-                domainObjectProperty);
+                    domainObjectProperty);
         }
         return constraint;
     }
@@ -199,18 +203,23 @@ public class ValidatingFormModel extends DefaultFormModel implements
         }
 
         public void set(Object value) {
-            valueIsSetting = true;
-            if (!setterConstraint.test(value)) {
-                PropertyResults results = new PropertyResults(setterConstraint
-                        .getPropertyName(), value, setterConstraint);
-                constraintViolated(setterConstraint, this, results);
+            try {
+                valueIsSetting = true;
+                if (!setterConstraint.test(value)) {
+                    PropertyResults results = new PropertyResults(
+                            setterConstraint.getPropertyName(), value,
+                            setterConstraint);
+                    constraintViolated(setterConstraint, this, results);
+                }
+                else {
+                    constraintSatisfied(setterConstraint, this);
+                    // we validate after a set attempt
+                    validate();
+                }
             }
-            else {
-                constraintSatisfied(setterConstraint, this);
-                // we validate after a set attempt
-                validate();
+            finally {
+                valueIsSetting = false;
             }
-            valueIsSetting = false;
         }
 
         public void validate() {
@@ -257,6 +266,11 @@ public class ValidatingFormModel extends DefaultFormModel implements
         public boolean test(Object value) {
             //@TODO this error handling needs work - message source resolvable?
             try {
+                if (logger.isDebugEnabled()) {
+                    Class valueClass = (value != null ? value.getClass() : null);
+                    logger.debug("Setting value to convert/validate '" + value
+                            + "', class=" + valueClass);
+                }
                 valueModel.set(value);
                 return true;
             }

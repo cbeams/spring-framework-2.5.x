@@ -58,7 +58,7 @@ public class DefaultFormModel implements MutableFormModel {
             boolean bufferChanges) {
         this.domainObjectAccessStrategy = domainObjectAccessStrategy;
         this.commitTrigger = new ValueHolder(null);
-        setBufferChanges(bufferChanges);
+        setBufferChangesDefault(bufferChanges);
     }
 
     public void setFormProperties(String[] domainObjectProperties) {
@@ -72,7 +72,11 @@ public class DefaultFormModel implements MutableFormModel {
         this.parent = parent;
     }
 
-    public void setBufferChanges(boolean bufferChanges) {
+    public boolean getBufferChanges() {
+        return bufferChanges;
+    }
+
+    public void setBufferChangesDefault(boolean bufferChanges) {
         this.bufferChanges = bufferChanges;
     }
 
@@ -102,10 +106,10 @@ public class DefaultFormModel implements MutableFormModel {
             String formProperty) {
         Assert
                 .isTrue(
-                    valueModel != null,
-                    "The property '"
-                            + formProperty
-                            + "' has not been added to this form model (or to any parents.)");
+                        valueModel != null,
+                        "The property '"
+                                + formProperty
+                                + "' has not been added to this form model (or to any parents.)");
     }
 
     public ValueModel add(String domainObjectProperty) {
@@ -142,7 +146,7 @@ public class DefaultFormModel implements MutableFormModel {
                     .setCommitTrigger(commitTrigger);
         }
         formValueModel = preProcessNewFormValueModel(domainObjectProperty,
-            formValueModel);
+                formValueModel);
         formValueModels.put(domainObjectProperty, formValueModel);
         if (logger.isDebugEnabled()) {
             logger
@@ -164,6 +168,18 @@ public class DefaultFormModel implements MutableFormModel {
 
     }
 
+    public String getDisplayValue(String formProperty) {
+        ValueModel valueModel = getDisplayValueModel(formProperty);
+        assertValueModelNotNull(valueModel, formProperty);
+        Object o = valueModel.get();
+        if (o == null) { return ""; }
+        return String.valueOf(o);
+    }
+
+    public ValueModel getDisplayValueModel(String formProperty) {
+        return getValueModel(formProperty, true);
+    }
+
     public Object getValue(String formProperty) {
         ValueModel valueModel = getValueModel(formProperty);
         assertValueModelNotNull(valueModel, formProperty);
@@ -173,7 +189,16 @@ public class DefaultFormModel implements MutableFormModel {
     }
 
     public ValueModel getValueModel(String formProperty) {
-        return getValueModel(formProperty, true);
+        ValueModel valueModel = getDisplayValueModel(formProperty);
+        return recursiveGetWrappedModel(valueModel);
+    }
+
+    private ValueModel recursiveGetWrappedModel(ValueModel valueModel) {
+        if (valueModel instanceof ValueModelWrapper) {
+            return recursiveGetWrappedModel(((ValueModelWrapper)valueModel)
+                    .getWrappedModel());
+        }
+        return valueModel;
     }
 
     public ValueModel getValueModel(String domainObjectProperty,
@@ -183,7 +208,7 @@ public class DefaultFormModel implements MutableFormModel {
         if (valueModel == null) {
             if (parent != null && queryParent) {
                 valueModel = parent.findValueModelFor(this,
-                    domainObjectProperty);
+                        domainObjectProperty);
             }
         }
         return valueModel;

@@ -16,6 +16,9 @@
 package org.springframework.rules.values;
 
 import java.beans.PropertyEditor;
+import java.text.ParseException;
+
+import javax.swing.JFormattedTextField;
 
 import org.springframework.rules.UnaryFunction;
 
@@ -56,11 +59,37 @@ public class TypeConverter extends ValueModelWrapper {
         };
     }
 
-    public Object get() {
+    public TypeConverter(ValueModel wrappedModel,
+            final JFormattedTextField textField) {
+        super(wrappedModel);
+        this.convertFrom = new UnaryFunction() {
+            public Object evaluate(Object o) {
+                try {
+                    return textField.getFormatter().valueToString(o);
+                }
+                catch (ParseException e) {
+                    throw new IllegalArgumentException(e.getMessage());
+                }
+            }
+        };
+        this.convertTo = new UnaryFunction() {
+            public Object evaluate(Object o) {
+                try {
+                    textField.commitEdit();
+                    return textField.getValue();
+                }
+                catch (ParseException e) {
+                    throw new IllegalArgumentException(e.getMessage());
+                }
+            }
+        };
+    }
+
+    public Object get() throws IllegalArgumentException {
         return convertFrom.evaluate(super.get());
     }
 
-    public void set(Object value) {
+    public void set(Object value) throws IllegalArgumentException {
         super.set(convertTo.evaluate(value));
     }
 

@@ -33,8 +33,12 @@ public interface FormModel {
 
     public ValueModel getFormObjectHolder();
 
+    public String getDisplayValue(String formProperty);
+    
     public Object getValue(String formProperty);
 
+    public ValueModel getDisplayValueModel(String formProperty);
+    
     public ValueModel getValueModel(String formProperty);
 
     public Map getErrors();
@@ -43,6 +47,8 @@ public interface FormModel {
 
     public boolean isDirty();
 
+    public boolean getBufferChanges();
+    
     public void commit();
 
     public void revert();

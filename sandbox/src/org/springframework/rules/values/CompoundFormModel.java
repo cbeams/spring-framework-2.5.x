@@ -63,7 +63,7 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
         this.rulesSource = rulesSource;
     }
 
-    public void setBufferChanges(boolean bufferChanges) {
+    public void setBufferChangesDefault(boolean bufferChanges) {
         this.bufferChanges = bufferChanges;
     }
 
@@ -140,12 +140,20 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
                             + "' has not been added to this form model (or to any parents.)");
     }
 
+    public String getDisplayValue(String formProperty) {
+        return "";
+    }
+    
     public Object getValue(String formProperty) {
         ValueModel valueModel = getValueModel(formProperty);
         assertValueModelNotNull(valueModel, formProperty);
         return valueModel.get();
     }
 
+    public ValueModel getDisplayValueModel(String formProperty) {
+        return null;
+    }
+    
     public ValueModel getValueModel(String formProperty) {
         return findValueModelFor(null, formProperty);
     }
@@ -202,6 +210,9 @@ public class CompoundFormModel implements FormModel, NestingFormModel {
             });
     }
 
+    public boolean getBufferChanges() {
+        return bufferChanges;
+    }
     public boolean hasErrors(String childModelName) {
         FormModel model = getChildFormModel(childModelName);
         Assert.notNull(model, "No child model by name " + childModelName
