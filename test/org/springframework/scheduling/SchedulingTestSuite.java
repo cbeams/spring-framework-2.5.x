@@ -90,7 +90,7 @@ public class SchedulingTestSuite extends TestCase {
 		TestQuartzJob.counter = 0;
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
-			Thread.sleep(200);
+			Thread.sleep(300);
 		}
 		finally {
 			schedulerFactoryBean.destroy();
