@@ -947,7 +947,7 @@ public class SampleDelegate {
     &lt;/bean&gt;
     
     &lt;bean id="someViewController"
-          class="org.springframework.web.servlet.mvc.FilenameViewController"/&gt;
+          class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/&gt;
     
     &lt;bean id="editAccountFormController"
           class="org.springframework.web.servlet.mvc.SimpleFormController"&gt;
@@ -959,7 +959,7 @@ public class SampleDelegate {
 &lt;beans&gt;</programlisting> This handlermapping first of all reroutes all
       requests in all directories for a file named
       <literal>help.html</literal> to the
-      <literal>someViewController</literal>, which is a FilenameViewController
+      <literal>someViewController</literal>, which is a UrlFilenameViewController
       (more about that can be found in <xref linkend="mvc-controller" />).
       Also, all requests for a resource beginning with
       <literal>view</literal>, ending with <literal>.html</literal>, in the
