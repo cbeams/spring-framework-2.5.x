@@ -13,10 +13,10 @@ import java.util.List;
 
 /**
  * Static convenience methods for JavaBeans.
- * Provides e.g. methods for sorting lists of beans by any property.
+ * Provides method for instantiating beans and copying bean properties.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: BeanUtils.java,v 1.11 2003-12-09 08:48:20 jhoeller Exp $
+ * @version $Id: BeanUtils.java,v 1.12 2004-01-14 22:13:12 jhoeller Exp $
  */
 public abstract class BeanUtils {
 
@@ -132,7 +132,7 @@ public abstract class BeanUtils {
 			PropertyDescriptor sourceDesc = sourceBw.getPropertyDescriptors()[i];
 			String name = sourceDesc.getName();
 			PropertyDescriptor targetDesc = targetBw.getPropertyDescriptor(name);
-			if (targetDesc.getWriteMethod() != null &&
+			if (targetDesc.getWriteMethod() != null && targetDesc.getReadMethod() != null &&
 			    (ignoreProperties == null || (!ignoreList.contains(name)))) {
 				values.addPropertyValue(new PropertyValue(name, sourceBw.getPropertyValue(name)));
 			}
