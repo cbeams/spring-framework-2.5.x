@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum.support;
+package org.springframework.enums.support;
 
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
@@ -27,7 +27,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.enum.CodedEnum;
+import org.springframework.enums.CodedEnum;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.util.Assert;

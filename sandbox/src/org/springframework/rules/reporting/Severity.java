@@ -15,8 +15,8 @@
  */
 package org.springframework.rules.reporting;
 
-import org.springframework.enum.ShortCodedEnum;
-import org.springframework.enum.support.StaticCodedEnumResolver;
+import org.springframework.enums.ShortCodedEnum;
+import org.springframework.enums.support.StaticCodedEnumResolver;
 
 public class Severity extends ShortCodedEnum {
     public static final Severity INFO = new Severity(0, "Info");

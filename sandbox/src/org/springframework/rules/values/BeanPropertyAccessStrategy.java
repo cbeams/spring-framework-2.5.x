@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NullValueInNestedPathException;
-import org.springframework.enum.CodedEnum;
+import org.springframework.enums.CodedEnum;
 
 /**
  * Aspect access strategy that accesses bean property values. An "aspect" in

@@ -13,32 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum.support;
+package org.springframework.enums;
 
-import org.springframework.enum.AbstractCodedEnum;
+import org.springframework.util.Assert;
 
 /**
- * @author  keith
+ * @author Keith Donald
  */
-public class GenericLabeledCodedEnum extends AbstractCodedEnum {
-    private String type;
-    
-    public GenericLabeledCodedEnum(String type, int code, String label) {
-        super(new Integer(code), label);
-        this.type = type;
+public abstract class LetterCodedEnum extends AbstractCodedEnum {
+    protected LetterCodedEnum(char code) {
+        super(new Character(code));
+        Assert.isTrue(Character.isLetter(code), "The code " + code
+                + " is invalid; it must be a letter.");
     }
 
-    public GenericLabeledCodedEnum(String type, char code, String label) {
+    protected LetterCodedEnum(char code, String label) {
         super(new Character(code), label);
-        this.type = type;
+        Assert.isTrue(Character.isLetter(code), "The code " + code
+                + " is invalid; it must be a letter.");
     }
 
-    public GenericLabeledCodedEnum(String type, String code, String label) {
-        super(code, label);
-        this.type = type;
+    public char getLetterCode() {
+        return ((Character)getCode()).charValue();
     }
 
-    public String getType() {
-        return type;
-    }
 }

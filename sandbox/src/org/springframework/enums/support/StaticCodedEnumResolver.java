@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum.support;
+package org.springframework.enums.support;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import org.springframework.enum.CodedEnum;
+import org.springframework.enums.CodedEnum;
 import org.springframework.rules.Generator;
 import org.springframework.rules.UnaryProcedure;
 import org.springframework.util.Assert;
@@ -33,28 +33,6 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
 
     public static StaticCodedEnumResolver instance() {
         return INSTANCE;
-    }
-
-    /**
-     * Generator that generates a list of static fields that can be processed.
-     * 
-     * @author Keith Donald
-     */
-    private static class FieldGenerator implements Generator {
-        private Class clazz;
-
-        public FieldGenerator(Class clazz) {
-            Assert.notNull(clazz);
-            this.clazz = clazz;
-        }
-
-        public void forEachRun(UnaryProcedure procedure) {
-            Field[] fields = clazz.getFields();
-            for (int i = 0; i < fields.length; i++) {
-                Field field = fields[i];
-                procedure.run(field);
-            }
-        }
     }
 
     /**
@@ -73,26 +51,49 @@ public class StaticCodedEnumResolver extends AbstractCodedEnumResolver {
                     .debug("Registering statically defined coded enums for class "
                             + clazz);
         }
-        new FieldGenerator(clazz).forEachRun(new UnaryProcedure() {
-            public void run(Object o) {
-                Field f = (Field)o;
-                if (Modifier.isStatic(f.getModifiers())
-                        && Modifier.isPublic(f.getModifiers())) {
-                    if (CodedEnum.class.isAssignableFrom(f.getType())) {
+        new FieldValueGenerator(clazz).forEachRun(new UnaryProcedure() {
+            public void run(Object value) {
+                add((CodedEnum)value);
+            }
+        });
+    }
+
+    /**
+     * Generator that generates a list of static field values that can be
+     * processed.
+     * 
+     * @author Keith Donald
+     */
+    private static class FieldValueGenerator implements Generator {
+        private Class clazz;
+
+        public FieldValueGenerator(Class clazz) {
+            Assert.notNull(clazz);
+            this.clazz = clazz;
+        }
+
+        public void forEachRun(UnaryProcedure procedure) {
+            Field[] fields = clazz.getFields();
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                if (Modifier.isStatic(field.getModifiers())
+                        && Modifier.isPublic(field.getModifiers())) {
+                    if (CodedEnum.class.isAssignableFrom(field.getType())) {
                         try {
-                            Object value = f.get(null);
+                            Object value = field.get(null);
                             Assert
                                     .isTrue(CodedEnum.class.isInstance(value),
                                             "Field value must be a CodedEnum instance.");
-                            add((CodedEnum)value);
+                            procedure.run(value);
                         }
                         catch (IllegalAccessException e) {
-                            throw new RuntimeException(e);
+                            logger.warn(
+                                    "Unable to access field value " + field, e);
                         }
                     }
                 }
             }
-        });
+        }
     }
 
 }

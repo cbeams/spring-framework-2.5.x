@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum.support;
+package org.springframework.enums.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,8 +24,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.enum.CodedEnum;
-import org.springframework.enum.CodedEnumResolver;
+import org.springframework.enums.CodedEnum;
+import org.springframework.enums.CodedEnumResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.DefaultObjectStyler;
 
@@ -40,19 +40,11 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
     protected static final Log logger = LogFactory
             .getLog(AbstractCodedEnumResolver.class);
 
-    /**
-     * @see org.springframework.enum.CodedEnumResolver#getEnumsAsList(java.lang.String,
-     *      java.util.Locale)
-     */
     public List getEnumsAsList(String type, Locale locale) {
         return Collections.unmodifiableList(new ArrayList(getEnumsAsMap(type,
                 locale).values()));
     }
 
-    /**
-     * @see org.springframework.enum.CodedEnumResolver#getEnumsAsMap(java.lang.String,
-     *      java.util.Locale)
-     */
     public Map getEnumsAsMap(String type, Locale locale) {
         Assert.notNull(type);
         Map localizedEnumTypes = getLocaleEnums(locale);
@@ -76,10 +68,6 @@ public abstract class AbstractCodedEnumResolver implements CodedEnumResolver {
         return Collections.unmodifiableMap(typeEnums);
     }
 
-    /**
-     * @see org.springframework.enum.CodedEnumResolver#getEnum(java.lang.String,
-     *      java.lang.Object, java.util.Locale)
-     */
     public CodedEnum getEnum(String type, Object code, Locale locale) {
         Assert.notNull(code);
         Map typeEnums = (Map)getEnumsAsMap(type, locale);

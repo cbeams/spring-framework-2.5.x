@@ -15,7 +15,7 @@
  */ 
 package org.springframework.rules;
 
-import org.springframework.enum.StringCodedEnum;
+import org.springframework.enums.StringCodedEnum;
 
 /**
  * @author keith

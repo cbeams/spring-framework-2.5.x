@@ -13,28 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum;
-
-import org.springframework.util.Assert;
+package org.springframework.enums;
 
 /**
  * @author Keith Donald
  */
-public abstract class LetterCodedEnum extends AbstractCodedEnum {
-    protected LetterCodedEnum(char code) {
-        super(new Character(code));
-        Assert.isTrue(Character.isLetter(code), "The code " + code
-                + " is invalid; it must be a letter.");
+public abstract class ShortCodedEnum extends AbstractCodedEnum {
+    protected ShortCodedEnum(int code) {
+        this(code, null);
     }
 
-    protected LetterCodedEnum(char code, String label) {
-        super(new Character(code), label);
-        Assert.isTrue(Character.isLetter(code), "The code " + code
-                + " is invalid; it must be a letter.");
+    protected ShortCodedEnum(int code, String label) {
+        super(new Short((short)code), label);
     }
 
-    public char getLetterCode() {
-        return ((Character)getCode()).charValue();
+    public short getShortCode() {
+        return ((Short)getCode()).shortValue();
     }
 
 }

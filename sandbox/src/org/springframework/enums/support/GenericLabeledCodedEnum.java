@@ -13,22 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum;
+package org.springframework.enums.support;
+
+import org.springframework.enums.AbstractCodedEnum;
 
 /**
  * @author Keith Donald
  */
-public abstract class ShortCodedEnum extends AbstractCodedEnum {
-    protected ShortCodedEnum(int code) {
-        this(code, null);
+public class GenericLabeledCodedEnum extends AbstractCodedEnum {
+    private String type;
+
+    public GenericLabeledCodedEnum(String type, int code, String label) {
+        super(new Integer(code), label);
+        this.type = type;
     }
 
-    protected ShortCodedEnum(int code, String label) {
-        super(new Short((short)code), label);
+    public GenericLabeledCodedEnum(String type, char code, String label) {
+        super(new Character(code), label);
+        this.type = type;
     }
 
-    public short getShortCode() {
-        return ((Short)getCode()).shortValue();
+    public GenericLabeledCodedEnum(String type, String code, String label) {
+        super(code, label);
+        this.type = type;
     }
 
+    public String getType() {
+        return type;
+    }
 }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum;
+package org.springframework.enums;
 
 import java.io.Serializable;
 import java.util.Comparator;

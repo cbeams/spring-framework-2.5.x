@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum;
+package org.springframework.enums;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Locale;
 
-import org.springframework.enum.support.StaticCodedEnumResolver;
+import org.springframework.enums.support.StaticCodedEnumResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -57,9 +57,6 @@ public class CodedEnumEditor extends PropertyEditorSupport {
         return Locale.getDefault();
     }
 
-    /**
-     * @see java.beans.PropertyEditor#setAsText(java.lang.String)
-     */
     public void setAsText(String text) throws IllegalArgumentException {
         String[] keyParts = StringUtils.delimitedListToStringArray(text, ".");
         Assert.isTrue(keyParts.length == 2,
@@ -94,9 +91,6 @@ public class CodedEnumEditor extends PropertyEditorSupport {
         setValue(enum);
     }
 
-    /**
-     * @see java.beans.PropertyEditor#getAsText()
-     */
     public String getAsText() {
         CodedEnum enum = (CodedEnum)getValue();
         return enum.getKey();

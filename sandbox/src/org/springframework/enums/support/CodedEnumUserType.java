@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.enum.support;
+package org.springframework.enums.support;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,11 +26,11 @@ import net.sf.hibernate.type.NullableType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.enum.CodedEnum;
-import org.springframework.enum.CodedEnumResolver;
-import org.springframework.enum.LetterCodedEnum;
-import org.springframework.enum.ShortCodedEnum;
-import org.springframework.enum.StringCodedEnum;
+import org.springframework.enums.CodedEnum;
+import org.springframework.enums.CodedEnumResolver;
+import org.springframework.enums.LetterCodedEnum;
+import org.springframework.enums.ShortCodedEnum;
+import org.springframework.enums.StringCodedEnum;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -53,31 +53,30 @@ public class CodedEnumUserType implements UserType {
     protected CodedEnumUserType(Class enumClass) {
         Assert.notNull(enumClass);
         Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
-        setTypes(enumClass);
         this.enumClass = enumClass;
+        setPersistentTypeFromEnumClass(enumClass);
     }
 
     protected CodedEnumUserType(Class enumClass, String enumType) {
         Assert.notNull(enumClass);
         Assert.notNull(enumType);
         Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
-        setTypes(enumClass);
         this.enumClass = enumClass;
         this.enumType = enumType;
+        setPersistentTypeFromEnumClass(enumClass);
     }
 
-    protected CodedEnumUserType(Class enumClass, NullableType type) {
+    protected CodedEnumUserType(Class enumClass, NullableType persistentType) {
         Assert.notNull(enumClass);
-        Assert.notNull(type);
+        Assert.notNull(persistentType);
         Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
         this.enumClass = enumClass;
-        this.persistentType = type;
+        this.persistentType = persistentType;
     }
 
     protected CodedEnumUserType(Class enumClass, String enumType,
             NullableType persistentType) {
         Assert.notNull(enumClass);
-        Assert.notNull(enumType);
         Assert.notNull(persistentType);
         Assert.isTrue(CodedEnum.class.isAssignableFrom(enumClass));
         this.enumClass = enumClass;
@@ -85,7 +84,7 @@ public class CodedEnumUserType implements UserType {
         this.persistentType = persistentType;
     }
 
-    private void setTypes(Class enumClass) {
+    private void setPersistentTypeFromEnumClass(Class enumClass) {
         if (ShortCodedEnum.class.isAssignableFrom(enumClass)) {
             this.persistentType = Hibernate.SHORT;
         }
