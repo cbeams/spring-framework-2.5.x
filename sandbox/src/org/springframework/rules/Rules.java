@@ -165,6 +165,10 @@ public class Rules extends ConstraintsAccessor implements Constraint, PropertyCo
 		add(propertyName, required());
 	}
 
+	public void addRequired(String propertyName, Constraint otherConstraints) {
+		add(propertyName, and(required(), otherConstraints));
+	}
+
 	public void addMaxLength(String propertyName, int maxLength) {
 		add(propertyName, maxLength(maxLength));
 	}

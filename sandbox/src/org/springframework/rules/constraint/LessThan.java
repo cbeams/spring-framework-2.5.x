@@ -45,7 +45,7 @@ public class LessThan extends ComparisonBinaryPredicate implements BinaryConstra
 		return INSTANCE.bind(instance(), value);
 	}
 
-	public static Constraint value(Comparable value, Comparator comparator) {
+	public static Constraint value(Object value, Comparator comparator) {
 		return INSTANCE.bind(instance(comparator), value);
 	}
 
