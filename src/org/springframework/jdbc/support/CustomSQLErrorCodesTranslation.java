@@ -17,14 +17,16 @@
 package org.springframework.jdbc.support;
 
 /**
- * JavaBean for holding Custom JDBC Error Codes translation for a 
- * particular database.  The exceptionClass property defines which
- * exception will be thrown for the list of error codes specified 
- * in the errorCodes property.
- * Normally loaded through a BeanFactory implementation. 
+ * JavaBean for holding Custom JDBC Error Codes translation for a particular
+ * database. The exceptionClass property defines which exception will be
+ * thrown for the list of error codes specified in the errorCodes property.
+ *
+ * <p>Normally loaded through a BeanFactory implementation.
  * Used by the SQLErrorCodeSQLExceptionTranslator.
+ *
  * @author Thomas Risberg
  * @since 30.06.2004
+ * @see SQLErrorCodeSQLExceptionTranslator
  */
 public class CustomSQLErrorCodesTranslation {
 
@@ -33,28 +35,28 @@ public class CustomSQLErrorCodesTranslation {
 	private String exceptionClass = null;
 	
 	/**
-	 * Sets the errorCodes.
+	 * Set the SQL error codes to match.
 	 */
 	public void setErrorCodes(String[] errorCodes) {
 		this.errorCodes = errorCodes;
 	}
 
 	/**
-	 * Returns the errorCodes.
+	 * Return the SQL error codes to match.
 	 */
 	public String[] getErrorCodes() {
 		return errorCodes;
 	}
 
 	/**
-	 * Sets the exceptionClass.
+	 * Set the exception class for the specified error codes.
 	 */
 	public void setExceptionClass(String exceptionClass) {
 		this.exceptionClass = exceptionClass;
 	}
 
 	/**
-	 * Returns the exceptionClass.
+	 * Return the exception class for the specified error codes.
 	 */
 	public String getExceptionClass() {
 		return exceptionClass;
