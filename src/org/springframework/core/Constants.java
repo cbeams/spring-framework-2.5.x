@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
 
-package org.springframework.util;
+package org.springframework.core;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -26,7 +26,7 @@ import java.util.Set;
  * the same names as the constants themselves, and freeing them from
  * maintaining their own mapping.
  *
- * @version $Id: Constants.java,v 1.3 2003-12-18 19:07:17 jhoeller Exp $
+ * @version $Id: Constants.java,v 1.1 2004-02-02 11:24:51 jhoeller Exp $
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16-Mar-2003
@@ -76,7 +76,7 @@ public class Constants {
 	 * @param code name of the field
 	 * @return long value if successful
 	 * @see #asObject
-	 * @throws ConstantException if the field name wasn't found or
+	 * @throws org.springframework.core.ConstantException if the field name wasn't found or
 	 * if the type wasn't compatible with Number
 	 */
 	public Number asNumber(String code) throws ConstantException {
@@ -92,7 +92,7 @@ public class Constants {
 	 * @return String string value if successful.
 	 * Works even if it's not a string (invokes toString()).
 	 * @see #asObject
-	 * @throws ConstantException if the field name wasn't found
+	 * @throws org.springframework.core.ConstantException if the field name wasn't found
 	 */
 	public String asString(String code) throws ConstantException {
 		return asObject(code).toString();
@@ -102,7 +102,7 @@ public class Constants {
 	 * Parse the given string (upper or lower case accepted) and return 
 	 * the appropriate value if it's the name of a constant field in the
 	 * class we're analysing.
-	 * @throws ConstantException if there's no such field
+	 * @throws org.springframework.core.ConstantException if there's no such field
 	 */
 	public Object asObject(String code) throws ConstantException {
 		code = code.toUpperCase();
@@ -147,7 +147,7 @@ public class Constants {
 	 * @param value constant value to look up
 	 * @param namePrefix prefix of the constant names to search
 	 * @return the name of the constant field
-	 * @throws ConstantException if the value wasn't found
+	 * @throws org.springframework.core.ConstantException if the value wasn't found
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
 		namePrefix = namePrefix.toUpperCase();
@@ -167,7 +167,7 @@ public class Constants {
 	 * @param value constant value to look up
 	 * @param propertyName the name of the bean property
 	 * @return the name of the constant field
-	 * @throws ConstantException if the value wasn't found
+	 * @throws org.springframework.core.ConstantException if the value wasn't found
 	 * @see #propertyToConstantNamePrefix
 	 */
 	public String toCodeForProperty(Object value, String propertyName) throws ConstantException {

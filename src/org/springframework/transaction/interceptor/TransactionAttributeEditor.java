@@ -25,9 +25,9 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @since 24-Apr-2003
- * @version $Id: TransactionAttributeEditor.java,v 1.2 2003-08-18 16:23:42 jhoeller Exp $
+ * @version $Id: TransactionAttributeEditor.java,v 1.3 2004-02-02 11:24:51 jhoeller Exp $
  * @see org.springframework.transaction.TransactionDefinition
- * @see org.springframework.util.Constants
+ * @see org.springframework.core.Constants
  */
 public class TransactionAttributeEditor extends PropertyEditorSupport {
 

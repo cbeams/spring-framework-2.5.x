@@ -3,7 +3,7 @@
  * of the Apache Software License.
  */
  
-package org.springframework.util;
+package org.springframework.core;
 
 import java.util.Set;
 
@@ -12,7 +12,7 @@ import junit.framework.TestCase;
 /**
  * @author Rod Johnson
  * @since 28-Apr-2003
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
 public class ConstantsTests extends TestCase {
 

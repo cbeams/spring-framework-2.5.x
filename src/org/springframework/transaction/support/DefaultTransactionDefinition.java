@@ -1,7 +1,7 @@
 package org.springframework.transaction.support;
 
+import org.springframework.core.Constants;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.util.Constants;
 
 /**
  * Default implementation of the TransactionDefinition interface,
