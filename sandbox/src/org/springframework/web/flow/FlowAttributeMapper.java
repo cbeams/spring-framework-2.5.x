@@ -66,6 +66,11 @@ import org.springframework.binding.MutableAttributeSource;
  * which attributes to map as output up to the parent. In this case the
  * attribute "localAttr1" will be mapped up to the parent as "attr3", updating
  * the value of "attr3" in the parent's flow scope.
+ * <p>
+ * Note: because FlowAttributeMappers are singletons, take care not to store
+ * and/or modify caller-specific state in a unsafe manner. The FlowAttributeMapper
+ * methods run in an independently executing thread on each invocation, so make
+ * sure you deal only with local data or internal, thread-safe services.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

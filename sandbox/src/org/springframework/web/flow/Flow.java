@@ -68,6 +68,8 @@ import org.springframework.util.ToStringCreator;
  * A flow object also acts as a factory for <code>FlowExecution</code>s
  * executing the flow as the top-level flow. See the {@link #createExecution()}
  * factory method for more information.
+ * <p>
+ * Note: flows are singleton objects so they should be thread-safe!
  * 
  * @see org.springframework.web.flow.ActionState
  * @see org.springframework.web.flow.ViewState
