@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -589,6 +590,10 @@ public class XmlBeanFactoryTests extends TestCase {
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertTrue(hasMap.getSet().contains(jenny));
 		assertTrue(hasMap.getSet().contains(null));
+		Iterator it = hasMap.getSet().iterator();
+		assertEquals("bar", it.next());
+		assertEquals(jenny, it.next());
+		assertEquals(null, it.next());
 	}
 
 	public void testEmptyProps() throws Exception {

@@ -978,7 +978,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			String beanName, RootBeanDefinition mergedBeanDefinition, String argName, Set ms)
 			throws BeansException {
 
-		Set resolved = new HashSet(ms.size());
+		Set resolved = CollectionFactory.createLinkedSetIfPossible(ms.size());
 		int i = 0;
 		for (Iterator it = ms.iterator(); it.hasNext();) {
 			resolved.add(
