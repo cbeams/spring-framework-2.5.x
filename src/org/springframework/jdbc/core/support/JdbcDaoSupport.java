@@ -50,7 +50,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	  return jdbcTemplate;
 	}
 
-	public final void afterPropertiesSet() {
+	public final void afterPropertiesSet() throws Exception {
 		if (this.jdbcTemplate == null) {
 			throw new IllegalArgumentException("dataSource is required");
 		}
@@ -60,8 +60,9 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	/**
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called after population of this instance's bean properties.
+	 * @throws Exception if initialization fails
 	 */
-	protected void initDao() {
+	protected void initDao() throws Exception {
 	}
 
 }

@@ -50,7 +50,7 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	  return jdoTemplate;
 	}
 
-	public final void afterPropertiesSet() {
+	public final void afterPropertiesSet() throws Exception {
 		if (this.jdoTemplate == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory is required");
 		}
@@ -60,8 +60,9 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	/**
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called after population of this instance's bean properties.
+	 * @throws Exception if initialization fails
 	 */
-	protected void initDao() {
+	protected void initDao() throws Exception {
 	}
 
 }

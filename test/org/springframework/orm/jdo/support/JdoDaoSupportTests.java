@@ -15,7 +15,7 @@ import org.easymock.MockControl;
  */
 public class JdoDaoSupportTests extends TestCase {
 
-	public void testJdoDaoSupport() {
+	public void testJdoDaoSupport() throws Exception {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		pmfControl.replay();

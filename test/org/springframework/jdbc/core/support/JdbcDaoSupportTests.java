@@ -17,7 +17,7 @@ import org.easymock.MockControl;
  */
 public class JdbcDaoSupportTests extends TestCase {
 
-	public void testJdbcDaoSupport() throws SQLException {
+	public void testJdbcDaoSupport() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl dsControl = MockControl.createControl(DataSource.class);

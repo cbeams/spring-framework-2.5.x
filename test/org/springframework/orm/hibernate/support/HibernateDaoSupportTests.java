@@ -14,7 +14,7 @@ import org.easymock.MockControl;
  */
 public class HibernateDaoSupportTests extends TestCase {
 
-	public void testHibernateDaoSupport() {
+	public void testHibernateDaoSupport() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		sfControl.replay();

@@ -50,7 +50,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	  return hibernateTemplate;
 	}
 
-	public final void afterPropertiesSet() {
+	public final void afterPropertiesSet() throws Exception {
 		if (this.hibernateTemplate == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
 		}
@@ -60,8 +60,9 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	/**
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called after population of this instance's bean properties.
+	 * @throws Exception if initialization fails
 	 */
-	protected void initDao() {
+	protected void initDao() throws Exception {
 	}
 
 }
