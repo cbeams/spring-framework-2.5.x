@@ -52,7 +52,7 @@ public class DispatchMethodInvoker {
 	/**
 	 * The description of the signature.
 	 */
-	private String signatureCaption;
+	private String signatureCaption = "not specified";
 
 	/**
 	 * The resolved method cache.
@@ -64,7 +64,7 @@ public class DispatchMethodInvoker {
 				return getTarget().getClass().getMethod(methodName, parameterTypes);
 			} catch (NoSuchMethodException e) {
 				throw new MethodLookupException("Unable to resolve " + getTypeCaption() + " method with name '"
-						+ methodName + "'" + getSignatureCaption() + "; make sure the method name is correct "
+						+ methodName + "and signature '" + getSignatureCaption() + "'; make sure the method name is correct "
 						+ "and such a public method is defined on targetClass " + getTarget().getClass().getName(), e);
 			}
 		}
@@ -72,12 +72,14 @@ public class DispatchMethodInvoker {
 
 	/**
 	 * Create a method cache on the target object.
-	 * @param target the object
 	 * @param the parameter types defining the form of the dispatch method
 	 */
-	public DispatchMethodInvoker(Object target, Class[] parameterTypes) {
-		setTarget(target);
+	public DispatchMethodInvoker(Class[] parameterTypes, Class returnType, String typeCaption,
+			String signatureCaption) {
 		setParameterTypes(parameterTypes);
+		setReturnType(returnType);
+		setTypeCaption(typeCaption);
+		setSignatureCaption(signatureCaption);
 	}
 
 	/**
@@ -123,7 +125,7 @@ public class DispatchMethodInvoker {
 	/**
 	 * @param methodTypeCaption The methodTypeCaption to set.
 	 */
-	public void setTypeCaption(String methodTypeCaption) {
+	public void setTypeCaption(String typeCaption) {
 		this.typeCaption = typeCaption;
 	}
 

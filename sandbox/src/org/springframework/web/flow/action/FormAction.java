@@ -210,7 +210,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	/**
 	 * A cache for dispatched action execute methods.
 	 */
-	private DispatchMethodInvoker validateMethodDispatcher = new DispatchMethodInvoker(this, new Class[] {
+	private DispatchMethodInvoker validateMethodDispatcher = new DispatchMethodInvoker(new Class[] {
 			Object.class, Errors.class }, null, "validator", "public void <methodName>(Object, Errors)");
 
 	/**
@@ -324,6 +324,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 */
 	public void setValidator(Validator validator) {
 		this.validator = validator;
+		this.validateMethodDispatcher.setTarget(validator);
 	}
 
 	/**
