@@ -28,23 +28,28 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * AdvisorAdapters that need to be "recognized" by Spring's AOP framework.
  * 
  * @author Dmitriy Kopylenko
- * @version $Id: AdvisorAdapterRegistrationManager.java,v 1.3 2004-04-01 15:35:46 jhoeller Exp $
+ * @version $Id: AdvisorAdapterRegistrationManager.java,v 1.4 2004-05-23 20:13:03 jhoeller Exp $
  */
 public class AdvisorAdapterRegistrationManager implements BeanPostProcessor {
 
+	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
+
 	/**
-	 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization
+	 * Specify the AdvisorAdapterRegistry to use.
+	 * Default is the global AdvisorAdapterRegistry.
+	 * @see org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry
 	 */
+	public void setAdvisorAdapterRegistry(AdvisorAdapterRegistry advisorAdapterRegistry) {
+		this.advisorAdapterRegistry = advisorAdapterRegistry;
+	}
+
 	public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 		return bean;
 	}
 
-	/**
-	 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization
-	 */
 	public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
-		if(bean instanceof AdvisorAdapter){
-			GlobalAdvisorAdapterRegistry.getInstance().registerAdvisorAdapter((AdvisorAdapter)bean);
+		if (bean instanceof AdvisorAdapter){
+			this.advisorAdapterRegistry.registerAdvisorAdapter((AdvisorAdapter) bean);
 		}
 		return bean;
 	}

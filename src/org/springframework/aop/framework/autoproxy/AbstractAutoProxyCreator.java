@@ -30,6 +30,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -74,7 +75,7 @@ import org.springframework.core.Ordered;
  * @since October 13, 2003
  * @see #setInterceptorNames
  * @see BeanNameAutoProxyCreator
- * @version $Id: AbstractAutoProxyCreator.java,v 1.9 2004-05-04 06:09:00 jhoeller Exp $
+ * @version $Id: AbstractAutoProxyCreator.java,v 1.10 2004-05-23 20:13:05 jhoeller Exp $
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		implements BeanPostProcessor, BeanFactoryAware, Ordered {
@@ -83,21 +84,23 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * Convenience constant for subclasses: Return value for "do not proxy".
 	 * @see #getInterceptorsAndAdvisorsForBean
 	 */
-	protected final Object[] DO_NOT_PROXY = null;
+	protected static final Object[] DO_NOT_PROXY = null;
 
 	/**
 	 * Convenience constant for subclasses: Return value for
 	 * "proxy without additional interceptors, just the common ones".
 	 * @see #getInterceptorsAndAdvisorsForBean
 	 */
-	protected final Object[] PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS = new Object[0];
+	protected static final Object[] PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS = new Object[0];
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Default value is same as non-ordered
-	 */
-	private int order = Integer.MAX_VALUE; 
+	/** Default value is same as non-ordered */
+	private int order = Integer.MAX_VALUE;
+
+	/** Default is global AdvisorAdapterRegistry */
+	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
 	 * Names of common interceptors. We must use bean name rather than object references
@@ -127,6 +130,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	  return order;
 	}
 	
+	/**
+	 * Specify the AdvisorAdapterRegistry to use.
+	 * Default is the global AdvisorAdapterRegistry.
+	 * @see org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry
+	 */
+	public void setAdvisorAdapterRegistry(AdvisorAdapterRegistry advisorAdapterRegistry) {
+		this.advisorAdapterRegistry = advisorAdapterRegistry;
+	}
+
 	/**
 	 * Set custom TargetSourceCreators to be applied in this order.
 	 * If the list is empty, or they all return null, a SingletonTargetSource
@@ -236,7 +248,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			}
 			
 			for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
-				Advisor advisor = GlobalAdvisorAdapterRegistry.getInstance().wrap(it.next());
+				Advisor advisor = this.advisorAdapterRegistry.wrap(it.next());
 				proxyFactory.addAdvisor(advisor);
 			}
 			proxyFactory.setTargetSource(getTargetSource(bean, beanName));
@@ -252,7 +264,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		Advisor[] advisors = new Advisor[this.interceptorNames.length];
 		for (int i = 0; i < this.interceptorNames.length; i++) {
 			Object next = this.owningBeanFactory.getBean(this.interceptorNames[i]);
-			advisors[i] = GlobalAdvisorAdapterRegistry.getInstance().wrap(next);
+			advisors[i] = this.advisorAdapterRegistry.wrap(next);
 		}
 		return advisors;
 	}

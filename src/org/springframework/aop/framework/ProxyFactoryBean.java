@@ -28,6 +28,7 @@ import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.UnknownAdviceTypeException;
 import org.springframework.aop.support.AopUtils;
@@ -72,7 +73,7 @@ import org.springframework.core.OrderComparator;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: ProxyFactoryBean.java,v 1.28 2004-04-22 07:58:22 jhoeller Exp $
+ * @version $Id: ProxyFactoryBean.java,v 1.29 2004-05-23 20:13:06 jhoeller Exp $
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
@@ -86,17 +87,26 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * This suffix in a value in an interceptor list indicates to expand globals.
 	 */
 	public static final String GLOBAL_SUFFIX = "*";
+
+
+	/**
+	 * Names of interceptor and pointcut beans in the factory.
+	 * Default is for globals expansion only.
+	 */
+	private String[] interceptorNames;
 	
 	private boolean singleton = true;
-	
-	/** If this is a singleton, the cached instance */
-	private Object singletonInstance;
-	
+
+	/** Default is global AdvisorAdapterRegistry */
+	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
+
 	/**
 	 * Owning bean factory, which cannot be changed after this
 	 * object is initialized.
 	 */
 	private BeanFactory beanFactory;
+
+	private String targetName;
 
 	/**
 	 * Map from PointCut or interceptor to bean name or null,
@@ -106,13 +116,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private Map sourceMap = new HashMap();
 
-	/**
-	 * Names of interceptor and pointcut beans in the factory.
-	 * Default is for globals expansion only.
-	 */
-	private String[] interceptorNames = null;
-	
-	private String targetName = null;
+	/** If this is a singleton, the cached instance */
+	private Object singletonInstance;
 
 
 	/**
@@ -151,6 +156,15 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
+	}
+
+	/**
+	 * Specify the AdvisorAdapterRegistry to use.
+	 * Default is the global AdvisorAdapterRegistry.
+	 * @see org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry
+	 */
+	public void setAdvisorAdapterRegistry(AdvisorAdapterRegistry advisorAdapterRegistry) {
+		this.advisorAdapterRegistry = advisorAdapterRegistry;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -361,7 +375,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private Object namedBeanToAdvisorOrTargetSource(Object next) {
 		try {
-			Advisor adv = GlobalAdvisorAdapterRegistry.getInstance().wrap(next);
+			Advisor adv = this.advisorAdapterRegistry.wrap(next);
 			return adv;
 		}
 		catch (UnknownAdviceTypeException ex) {
