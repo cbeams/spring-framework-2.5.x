@@ -1,5 +1,7 @@
 package org.springframework.remoting.caucho;
 
+import java.lang.reflect.Constructor;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -8,9 +10,9 @@ import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.server.HessianSkeleton;
 
+import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
-import org.springframework.remoting.support.RemoteExporter;
 
 /**
  * Web controller that exports the specified service bean as Hessian service
@@ -19,6 +21,9 @@ import org.springframework.remoting.support.RemoteExporter;
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>
+ *
+ * <p>This exporter will work with both Hessian 2.x and 3.x (respectively
+ * Resin 2.x and 3.x), auto-detecting the corresponding skeleton class.
  *
  * <p>Note: Hessian services exported with this class can be accessed by
  * any Hessian client, as there isn't any special handling involved.
@@ -33,7 +38,17 @@ public class HessianServiceExporter extends RemoteExporter implements Controller
 
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
-		this.skeleton = new HessianSkeleton(getProxyForService());
+		try {
+			// try Hessian 3.x (with service interface argument)
+			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
+			this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getService(), getServiceInterface()});
+			logger.info("Created Hessian 2.x skeleton");
+		}
+		catch (NoSuchMethodException ex) {
+			// fall back to Hessian 2.x (without service interface argument)
+			Constructor ctor = HessianSkeleton.class.getConstructor(new Class[] {Object.class});
+			this.skeleton = (HessianSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
+		}
 	}
 
 	/**

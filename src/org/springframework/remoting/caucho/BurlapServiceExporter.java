@@ -1,5 +1,7 @@
 package org.springframework.remoting.caucho;
 
+import java.lang.reflect.Constructor;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,8 +19,11 @@ import org.springframework.web.servlet.mvc.Controller;
  * endpoint, accessible via a Burlap proxy.
  *
  * <p>Burlap is a slim, XML-based RPC protocol.
- * For information on Hessian, see the
+ * For information on Burlap, see the
  * <a href="http://www.caucho.com/burlap">Burlap website</a>
+ *
+ * <p>This exporter will work with both Burlap 2.x and 3.x (respectively
+ * Resin 2.x and 3.x), auto-detecting the corresponding skeleton class.
  *
  * <p>Note: Burlap services exported with this class can be accessed by
  * any Burlap client, as there isn't any special handling involved.
@@ -33,7 +38,16 @@ public class BurlapServiceExporter extends RemoteExporter implements Controller 
 
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
-		this.skeleton = new BurlapSkeleton(getProxyForService());
+		try {
+			// try Burlap 3.x (with service interface argument)
+			Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class, Class.class});
+			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getService(), getServiceInterface()});
+		}
+		catch (NoSuchMethodException ex) {
+			// fall back to Burlap 2.x (without service interface argument)
+			Constructor ctor = BurlapSkeleton.class.getConstructor(new Class[] {Object.class});
+			this.skeleton = (BurlapSkeleton) ctor.newInstance(new Object[] {getProxyForService()});
+		}
 	}
 
 	/**

@@ -9,7 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.framework.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -66,31 +65,30 @@ public abstract class RemoteExporter implements InitializingBean {
 	}
 
 	public void afterPropertiesSet() throws Exception {
+		if (this.serviceInterface == null) {
+			throw new IllegalArgumentException("serviceInterface is required");
+		}
 		if (this.service == null) {
 			throw new IllegalArgumentException("service is required");
 		}
-		if (this.serviceInterface != null && !this.serviceInterface.isInstance(service)) {
+		if (!this.serviceInterface.isInstance(this.service)) {
 			throw new IllegalArgumentException("serviceInterface [" + this.serviceInterface.getName() +
 																				 "] needs to be implemented by service [" + this.service + "]");
 		}
 	}
 
 	/**
-	 * Get a proxy for the given service object, either just implementing the specified
-	 * service interface or all the interfaces implemented by the service object.
-	 * <p>Used to export a proxy that does not expose any internals but just specific
-	 * interfaces intended for remote access.
+	 * Get a proxy for the given service object, implementing the specified
+	 * service interface.
+	 * <p>Used to export a proxy that does not expose any internals but just
+	 * a specific interface intended for remote access. Only applied if the
+	 * remoting tool itself does not offer such means itself.
 	 * @return the proxy
 	 * @see #setServiceInterface
 	 */
 	protected Object getProxyForService() {
 		ProxyFactory proxyFactory = new ProxyFactory();
-		if (this.serviceInterface != null) {
-			proxyFactory.addInterface(this.serviceInterface);
-		}
-		else {
-			proxyFactory.setInterfaces(AopUtils.getAllInterfaces(this.service));
-		}
+		proxyFactory.addInterface(this.serviceInterface);
 		proxyFactory.setTarget(this.service);
 		return proxyFactory.getProxy();
 	}
