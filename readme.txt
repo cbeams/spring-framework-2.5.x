@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.1 (September 2004)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 1.1.1 (September 2004)
+----------------------------------------------------
 http://www.springframework.org
 
 
@@ -53,9 +53,9 @@ knowledge about it immediately.
 
 The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). J2SE 1.4 is
 required for building the framework. Note that J2EE 1.2 (Servlet 2.2, JSP 1.1) is good enough if not using
-Spring's web MVC or EJB support. Integration is provided with Log4J 1.2, CGLIB 1.0, Jakarta Commons Attributes,
-Hibernate 2.1, JDO 1.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0, JAX-RPC 1.1, Caucho's Hessian/Burlap 2.1/3.0,
-Quartz 1.3, JSTL 1.0, Velocity 1.3, FreeMarker 2.3, Struts/Tiles 1.1, Jakarta Commons FileUpload 1.0,
+Spring's web MVC or EJB support. Integration is provided with Log4J 1.2, CGLIB 1.0, Jakarta Commons Attributes
+2.1, Hibernate 2.1, JDO 1.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0, JAX-RPC 1.1, Caucho's Hessian and Burlap
+2.1/3.0, Quartz 1.4, JSTL 1.0, Velocity 1.4, FreeMarker 2.3, Struts/Tiles 1.1, Jakarta Commons FileUpload 1.0,
 Jason Hunter's COS, etc.
 
 Release contents:
