@@ -168,11 +168,13 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see javax.ejb.EJBObject#remove
 	 */
 	protected void removeSessionBeanInstance(EJBObject ejb) {
-		try {
-			ejb.remove();
-		}
-		catch (Throwable ex) {
-			logger.warn("Could not invoke 'remove' on remote EJB proxy", ex);
+		if (ejb != null) {
+			try {
+				ejb.remove();
+			}
+			catch (Throwable ex) {
+				logger.warn("Could not invoke 'remove' on remote EJB proxy", ex);
+			}
 		}
 	}
 

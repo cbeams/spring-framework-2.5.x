@@ -134,11 +134,13 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * @see javax.ejb.EJBLocalObject#remove
 	 */
 	protected void removeSessionBeanInstance(EJBLocalObject ejb) {
-		try {
-			ejb.remove();
-		}
-		catch (Throwable ex) {
-			logger.warn("Could not invoke 'remove' on local EJB proxy", ex);
+		if (ejb != null) {
+			try {
+				ejb.remove();
+			}
+			catch (Throwable ex) {
+				logger.warn("Could not invoke 'remove' on local EJB proxy", ex);
+			}
 		}
 	}
 
