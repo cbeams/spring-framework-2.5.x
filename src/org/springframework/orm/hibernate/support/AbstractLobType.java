@@ -224,10 +224,6 @@ public abstract class AbstractLobType implements UserType {
 			this.lobCreator = lobCreator;
 		}
 
-		/**
-		 * Returns 0, to enforce early execution of this synchronization
-		 * (before any JDBC Connection or Hibernate Session cleanup).
-		 */
 		public int getOrder() {
 			return LOB_CREATOR_SYNCHRONIZATION_ORDER;
 		}
@@ -242,8 +238,8 @@ public abstract class AbstractLobType implements UserType {
 
 		public void afterCompletion(int status) {
 			if (!this.beforeCompletionCalled) {
-				// beforeCompletion not called before
-				// (probably because of flushing on commit in HibernateTransactionManager).
+				// beforeCompletion not called before (probably because of flushing on commit
+				// in HibernateTransactionManager, after the chain of beforeCompletion calls).
 				// Close the LobCreator here.
 				this.lobCreator.close();
 			}
