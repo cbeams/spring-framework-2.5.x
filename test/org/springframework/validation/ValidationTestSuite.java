@@ -190,7 +190,7 @@ public class ValidationTestSuite extends TestCase {
 		assertEquals("tb", ((ObjectError) errors.getGlobalErrors().get(0)).getObjectName());
 		assertEquals("GENERAL_ERROR", ((ObjectError) errors.getGlobalErrors().get(1)).getCode());
 		assertEquals("msg", ((ObjectError) errors.getGlobalErrors().get(1)).getDefaultMessage());
-		assertEquals("arg", ((ObjectError) errors.getGlobalErrors().get(1)).getArgs()[0]);
+		assertEquals("arg", ((ObjectError) errors.getGlobalErrors().get(1)).getArguments()[0]);
 		assertEquals(2, errors.getFieldErrorCount("age"));
 		assertEquals("TOO_YOUNG", errors.getFieldError("age").getCode());
 		assertEquals("TOO_YOUNG", ((FieldError) errors.getFieldErrors("age").get(0)).getCode());

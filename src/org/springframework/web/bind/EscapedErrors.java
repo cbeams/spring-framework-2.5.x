@@ -1,9 +1,9 @@
 package org.springframework.web.bind;
 
+import java.beans.PropertyEditor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.beans.PropertyEditor;
 
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -129,9 +129,9 @@ public class EscapedErrors implements Errors {
 				value = HtmlUtils.htmlEscape((String) fieldError.getRejectedValue());
 			}
 			return new FieldError(fieldError.getObjectName(), fieldError.getField(), value, fieldError.isBindingFailure(),
-														fieldError.getCode(), fieldError.getArgs(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
+														fieldError.getCode(), fieldError.getArguments(), HtmlUtils.htmlEscape(fieldError.getDefaultMessage()));
 		}
-		return new ObjectError(source.getObjectName(), source.getCode(), source.getArgs(),
+		return new ObjectError(source.getObjectName(), source.getCode(), source.getArguments(),
 													 HtmlUtils.htmlEscape(source.getDefaultMessage()));
 	}
 
@@ -143,4 +143,5 @@ public class EscapedErrors implements Errors {
 		}
 		return escaped;
 	}
+
 }

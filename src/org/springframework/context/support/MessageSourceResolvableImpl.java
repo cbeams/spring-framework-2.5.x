@@ -6,17 +6,18 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.StringUtils;
 
 /**
- * Easy way to store all the necessary values needed
- * to resolve messages from a MessageSource.
- *
+ * Default implementation of the MessageSourceResolvable interface.
+ * Easy way to store all the necessary values needed to resolve
+ * messages from a MessageSource.
  * @author Tony Falabella
- * @version $Id: MessageSourceResolvableImpl.java,v 1.1.1.1 2003-08-14 16:20:23 trisberg Exp $
+ * @author Juergen Hoeller
+ * @version $Id: MessageSourceResolvableImpl.java,v 1.2 2004-02-04 18:44:07 jhoeller Exp $
  */
 public class MessageSourceResolvableImpl implements MessageSourceResolvable, Serializable {
 
   private final String[] codes;
 
-  private final Object[] args;
+  private final Object[] arguments;
 
 	private final String defaultMessage;
 
@@ -25,9 +26,9 @@ public class MessageSourceResolvableImpl implements MessageSourceResolvable, Ser
    * default message.
    * @see MessageSourceResolvable#getCodes
    */
-	public MessageSourceResolvableImpl(String[] codes, Object[] args, String defaultMessage) {
+	public MessageSourceResolvableImpl(String[] codes, Object[] arguments, String defaultMessage) {
     this.codes = codes;
-    this.args = args;
+    this.arguments = arguments;
     this.defaultMessage = defaultMessage;
   }
 
@@ -35,15 +36,15 @@ public class MessageSourceResolvableImpl implements MessageSourceResolvable, Ser
 	 * Create a new instance, using multiple codes.
 	 * @see MessageSourceResolvable#getCodes
 	 */
-  public MessageSourceResolvableImpl(String[] codes, Object[] args) {
-    this(codes, args, null);
+  public MessageSourceResolvableImpl(String[] codes, Object[] arguments) {
+    this(codes, arguments, null);
   }
 
 	/**
 	 * Copy constructor: Create a new instance from another resolvable.
 	 */
   public MessageSourceResolvableImpl(MessageSourceResolvable resolvable) {
-    this(resolvable.getCodes(), resolvable.getArgs(), resolvable.getDefaultMessage());
+    this(resolvable.getCodes(), resolvable.getArguments(), resolvable.getDefaultMessage());
   }
 
   public String[] getCodes() {
@@ -58,8 +59,8 @@ public class MessageSourceResolvableImpl implements MessageSourceResolvable, Ser
 		return (codes != null && codes.length > 0) ? codes[codes.length-1] : null;
 	}
 
-	public Object[] getArgs() {
-	  return args;
+	public Object[] getArguments() {
+	  return arguments;
 	}
 
 	public String getDefaultMessage() {
@@ -68,23 +69,19 @@ public class MessageSourceResolvableImpl implements MessageSourceResolvable, Ser
 
   protected String resolvableToString() {
     StringBuffer msgBuff = new StringBuffer();
-
-    msgBuff.append("codes=[" + StringUtils.arrayToDelimitedString(getCodes(), ",") + "]; args=[");
-
-    if (args == null) {
+    msgBuff.append("codes=[" + StringUtils.arrayToDelimitedString(getCodes(), ",") + "]; arguments=[");
+    if (arguments == null) {
       msgBuff.append("null");
     }
     else {
-      for (int i = 0; i < getArgs().length; i++) {
-        msgBuff.append("(" + getArgs()[i].getClass().getName() +
-                       ")[" + getArgs()[i] + "]");
-	      if (i < getArgs().length-1)
+      for (int i = 0; i < getArguments().length; i++) {
+        msgBuff.append("(" + getArguments()[i].getClass().getName() +
+                       ")[" + getArguments()[i] + "]");
+	      if (i < getArguments().length-1)
 		      msgBuff.append(", ");
       }
     }
-
     msgBuff.append("]; defaultMessage=[" + getDefaultMessage() + "]");
-
     return msgBuff.toString();
   }
 
