@@ -31,6 +31,9 @@ public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
 
 	private String namespace;
 
+	/**
+	 * Set the namespace to use for custom type mappings.
+	 */
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
 	}
@@ -38,10 +41,10 @@ public class AxisPortProxyFactoryBean extends JaxRpcPortProxyFactoryBean {
 	protected void postProcessJaxRpcService(Service service) {
 		TypeMappingRegistry registry = service.getTypeMappingRegistry();
 		TypeMapping mapping = registry.createTypeMapping();
-		registerBeanMapping(mapping, Product.class, "Product");
-		registerBeanMapping(mapping, Item.class, "Item");
-		registerBeanMapping(mapping, LineItem.class, "LineItem");
 		registerBeanMapping(mapping, Order.class, "Order");
+		registerBeanMapping(mapping, LineItem.class, "LineItem");
+		registerBeanMapping(mapping, Item.class, "Item");
+		registerBeanMapping(mapping, Product.class, "Product");
 		registry.register("http://schemas.xmlsoap.org/soap/encoding/", mapping);
 	}
 
