@@ -58,7 +58,7 @@ public abstract class AbstractSpringContextTests extends TestCase {
      * @param locations
      */
     protected void setDirty(String[] locations) {
-        contextKeyToContextMap.remove(locations);
+        contextKeyToContextMap.remove(contextKeyString(locations));
     }
     
     protected boolean hasCachedContext(Object contextKey) {
