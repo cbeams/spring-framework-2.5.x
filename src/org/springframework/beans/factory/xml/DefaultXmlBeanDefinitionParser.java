@@ -392,7 +392,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 		}
 		if (valueRefOrCollectionElement == null) {
-			throw new BeanDefinitionStoreException("<property> element must have a subelement like 'value' or 'ref'");
+			throw new BeanDefinitionStoreException(this.resource, beanName,
+																						 "<property> element must have a subelement like 'value' or 'ref'");
 		}
 		return parsePropertySubelement(valueRefOrCollectionElement, beanName);
 	}
