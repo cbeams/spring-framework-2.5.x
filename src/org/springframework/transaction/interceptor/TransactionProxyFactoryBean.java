@@ -173,8 +173,8 @@ public class TransactionProxyFactoryBean extends ProxyConfig implements FactoryB
 	 * @see org.springframework.orm.hibernate.HibernateInterceptor
 	 * @see org.springframework.orm.jdo.JdoInterceptor
 	 */
-	public void setPostInterceptors(Object[] preInterceptors) {
-		this.postInterceptors = preInterceptors;
+	public void setPostInterceptors(Object[] postInterceptors) {
+		this.postInterceptors = postInterceptors;
 	}
 
 	/**
