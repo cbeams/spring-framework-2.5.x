@@ -35,7 +35,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * </ul>
  *
  * @author Rod Johnson
- * @version $Id: ApplicationContext.java,v 1.1.1.1 2003-08-14 16:20:21 trisberg Exp $
+ * @version $Id: ApplicationContext.java,v 1.2 2003-08-21 09:15:49 jhoeller Exp $
  */
 public interface ApplicationContext extends MessageSource, ListableBeanFactory, HierarchicalBeanFactory {
 	
@@ -132,6 +132,7 @@ public interface ApplicationContext extends MessageSource, ListableBeanFactory, 
 	
 	/**
 	 * Retrieve a shared object added with a call to shareObject().
+	 * Delegate to the parent application context if not found.
 	 * @return the object, or null if no object is known under
 	 * this name (this is not an error).
 	 */

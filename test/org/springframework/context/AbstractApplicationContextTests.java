@@ -122,6 +122,14 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		assertTrue("==", o == bar);
 	}
 
+	public void testRetrievesSharedObjectFromParent() {
+		Object bar = new Object();
+		applicationContext.getParent().shareObject("foo", bar);
+		Object o = applicationContext.sharedObject("foo");
+		assertTrue("Shared object is found", o != null);
+		assertTrue("==", o == bar);
+	}
+
 	public void testRemoveSharedObject() {
 		Object bar = new Object();
 		applicationContext.shareObject("foo", bar);

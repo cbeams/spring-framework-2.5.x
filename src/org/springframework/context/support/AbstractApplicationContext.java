@@ -59,7 +59,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 21, 2001
- * @version $Revision: 1.1.1.1 $
+ * @version $Revision: 1.2 $
  * @see #refreshBeanFactory
  * @see #getBeanFactory
  * @see #OPTIONS_BEAN_NAME
@@ -426,7 +426,13 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 	}
 
 	public synchronized Object sharedObject(String key) {
-		return this.sharedObjects.get(key);
+		Object sharedObject = this.sharedObjects.get(key);
+		if (sharedObject == null && getParent() != null) {
+			return getParent().sharedObject(key);
+		}
+		else {
+			return sharedObject;
+		}
 	}
 
 	public synchronized void shareObject(String key, Object o) {
