@@ -258,7 +258,9 @@ public class JavaMailSenderTests extends TestCase {
 		sender.setPassword("password");
 
 		MimeMessage mimeMessage = sender.createMimeMessage();
+		mimeMessage.setSubject("custom");
 		mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("you@mail.org"));
+		mimeMessage.setSentDate(new Date(2005, 3, 1));
 		sender.send(mimeMessage);
 
 		assertEquals(sender.transport.getConnectedHost(), "host");
@@ -447,6 +449,12 @@ public class JavaMailSenderTests extends TestCase {
 			List addr2 = Arrays.asList(addresses);
 			if (!addr1.equals(addr2)) {
 				throw new MessagingException("addresses not correct");
+			}
+			if (message.getSentDate() == null) {
+				throw new MessagingException("No sentDate specified");
+			}
+			if (message.getSubject() != null && message.getSubject().indexOf("custom") != -1) {
+				assertEquals(new Date(2005, 3, 1), message.getSentDate());
 			}
 			this.sentMessages.add(message);
 		}

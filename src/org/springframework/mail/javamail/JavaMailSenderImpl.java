@@ -12,13 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.mail.javamail;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,8 @@ import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 
 /**
- * Implementation of the JavaMailSender interface.
+ * Production implementation of the JavaMailSender interface.
+ * Supports both JavaMail MimeMessages and Spring SimpleMailMessages.
  * Can also be used as plain MailSender implementation.
  *
  * <p>Allows for defining all settings locally as bean properties.
@@ -51,19 +53,27 @@ import org.springframework.mail.SimpleMailMessage;
  *
  * <p>Non-default properties in this object will always override the settings
  * in the JavaMail Session. Note that if overriding all values locally, there
- * is no value in setting a pre-configured Session.
+ * is no added value in setting a pre-configured Session.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 10.09.2003
- * @see JavaMailSender
+ * @see javax.mail.internet.MimeMessage
+ * @see org.springframework.mail.SimpleMailMessage
  * @see org.springframework.mail.MailSender
+ * @see #setJavaMailProperties
+ * @see #setHost
+ * @see #setPort
+ * @see #setUsername
+ * @see #setPassword
+ * @see #setSession
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
 	public static final String DEFAULT_PROTOCOL = "smtp";
 
 	public static final int DEFAULT_PORT = -1;
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -157,6 +167,14 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Set the username for the account at the mail host, if any.
+	 * <p>Note that the underlying JavaMail Session has to be configured
+	 * with the property "mail.smtp.auth" set to "true", else the specified
+	 * username will not be sent to the mail server by the JavaMail runtime.
+	 * If you are not explicitly passing in a Session to use, simply specify
+	 * this setting via JavaMailSenderImpl's "javaMailProperties".
+	 * @see #setJavaMailProperties
+	 * @see #setSession
+	 * @see #setPassword
 	 */
 	public void setUsername(String username) {
 		this.username = username;
@@ -171,6 +189,14 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Set the password for the account at the mail host, if any.
+	 * <p>Note that the underlying JavaMail Session has to be configured
+	 * with the property "mail.smtp.auth" set to "true", else the specified
+	 * password will not be sent to the mail server by the JavaMail runtime.
+	 * If you are not explicitly passing in a Session to use, simply specify
+	 * this setting via JavaMailSenderImpl's "javaMailProperties".
+	 * @see #setJavaMailProperties
+	 * @see #setSession
+	 * @see #setUsername
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -203,7 +229,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			simpleMessage.copyTo(message);
 			mimeMessages.add(message.getMimeMessage());
 		}
-		send((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
+		doSend((MimeMessage[]) mimeMessages.toArray(new MimeMessage[mimeMessages.size()]), simpleMessages);
 	}
 
 
@@ -229,40 +255,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(MimeMessage[] mimeMessages) throws MailException {
-		send(mimeMessages, null);
-	}
-
-	public void send(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
-		Map failedMessages = new HashMap();
-		try {
-			Transport transport = getTransport(getSession());
-			transport.connect(getHost(), getPort(), getUsername(), getPassword());
-			try {
-				for (int i = 0; i < mimeMessages.length; i++) {
-					MimeMessage mimeMessage = mimeMessages[i];
-					try {
-						mimeMessage.saveChanges();
-						transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
-					}
-					catch (MessagingException ex) {
-						Object original = (originalMessages != null) ? originalMessages[i] : mimeMessage;
-						failedMessages.put(original, ex);
-					}
-				}
-			}
-			finally {
-				transport.close();
-			}
-		}
-		catch (AuthenticationFailedException ex) {
-			throw new MailAuthenticationException(ex);
-		}
-		catch (MessagingException ex) {
-			throw new MailSendException("Mail server connection failed", ex);
-		}
-		if (!failedMessages.isEmpty()) {
-			throw new MailSendException(failedMessages);
-		}
+		doSend(mimeMessages, null);
 	}
 
 	public void send(MimeMessagePreparator mimeMessagePreparator) throws MailException {
@@ -295,8 +288,57 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 
 	/**
+	 * Actually send the given array of MimeMessages via JavaMail.
+	 * @param mimeMessages MimeMessage objects to send
+	 * @param originalMessages corresponding original message objects
+	 * that the MimeMessages have been created from (with same array
+	 * length and indices as the "mimeMessages" array), if any
+	 * @throws org.springframework.mail.MailAuthenticationException
+	 * in case of authentication failure
+	 * @throws org.springframework.mail.MailSendException
+	 * in case of failure when sending a message
+	 */
+	protected void doSend(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
+		Map failedMessages = new HashMap();
+		try {
+			Transport transport = getTransport(getSession());
+			transport.connect(getHost(), getPort(), getUsername(), getPassword());
+			try {
+				for (int i = 0; i < mimeMessages.length; i++) {
+					MimeMessage mimeMessage = mimeMessages[i];
+					try {
+						if (mimeMessage.getSentDate() == null) {
+							mimeMessage.setSentDate(new Date());
+						}
+						mimeMessage.saveChanges();
+						transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
+					}
+					catch (MessagingException ex) {
+						Object original = (originalMessages != null ? originalMessages[i] : mimeMessage);
+						failedMessages.put(original, ex);
+					}
+				}
+			}
+			finally {
+				transport.close();
+			}
+		}
+		catch (AuthenticationFailedException ex) {
+			throw new MailAuthenticationException(ex);
+		}
+		catch (MessagingException ex) {
+			throw new MailSendException("Mail server connection failed", ex);
+		}
+		if (!failedMessages.isEmpty()) {
+			throw new MailSendException(failedMessages);
+		}
+	}
+
+	/**
 	 * Get a Transport object for the given JavaMail Session.
 	 * Can be overridden in subclasses, e.g. to return a mock Transport object.
+	 * @see javax.mail.Session#getTransport
+	 * @see #getProtocol
 	 */
 	protected Transport getTransport(Session session) throws NoSuchProviderException {
 		return session.getTransport(getProtocol());
