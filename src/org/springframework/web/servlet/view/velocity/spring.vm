@@ -31,6 +31,7 @@
  * RequestContext. This can be customized by calling "setDefaultHtmlEscape"
  * on the "springMacroRequestContext" context variable, or via the
  * "defaultHtmlEscape" context-param in web.xml (same as for the JSP bind tag).
+ * Also regards a "springHtmlEscape" variable in the template context.
  *
  * Producing no output, the following context variable will be available
  * each time this macro is referenced:
@@ -43,7 +44,11 @@
  *   by user config.
  *#
 #macro( springBind $path )
-	#set ($status = $springMacroRequestContext.getBindStatus($path))
+	#if($springHtmlEscape == true || $springHtmlEscape == false)
+		#set( $status = $springMacroRequestContext.getBindStatus($path, $springHtmlEscape) )
+	#else
+		#set( $status = $springMacroRequestContext.getBindStatus($path) )
+	#end
 #end
 
 #**
@@ -52,29 +57,15 @@
  * Similar to springBind, but takes an explicit HTML escape flag rather
  * than relying on the default HTML escape setting.
  *#
-#macro( springBindEscaped $path $escape)
-	#set ($status = $springMacroRequestContext.getBindStatus($path, $escape))
-#end
-
-#**
- * springDoBind
- * 
- * determine status of html escaping set by the user and call the correct
- * bind macro
- *#
-#macro( springDoBind $path )
-	#if($springHtmlEscape && ($springHtmlEscape == true || $springHtmlEscape == false))
-		#springBindEscaped($path $springHtmlEscape)
-	#else
-		#springBind($path)
-	#end
+#macro( springBindEscaped $path $htmlEscape )
+	#set( $status = $springMacroRequestContext.getBindStatus($path, $htmlEscape) )
 #end
 
 #**
  * springFormInput
  *
- * display a form input field of type 'text' and bind it to an attribute
- * of a command or bean
+ * Display a form input field of type 'text' and bind it to an attribute
+ * of a command or bean.
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
@@ -82,13 +73,9 @@
  *
  *#
 #macro( springFormInput $path $attributes )    
-	#springDoBind($path)
-    <input
-        type="text"
-        name="${status.expression}"
-        value="$!status.value"
-        ${attributes}
-    #springCloseTag()
+	#springBind($path)
+	<input type="text" name="${status.expression}" value="$!status.value" ${attributes}
+	#springCloseTag()
 #end
 
 #**
@@ -102,18 +89,15 @@
  *        or CSS styles or size
  *
  *#
-#macro( springFormTextArea $path $attributes )
-    #springDoBind($path)
-    <textarea
-        name="${status.expression}"
-        ${attributes}
-    >$!status.value</textarea>
+#macro( springFormTextarea $path $attributes )
+	#springBind($path)
+	<textarea name="${status.expression}" ${attributes}>$!status.value</textarea>
 #end
 
 #**
  * springFormSingleSelect
  *
- * show a selectbox (dropdown) input element allowing a single value to be chosen
+ * Show a selectbox (dropdown) input element allowing a single value to be chosen
  * from a list of options.
  *
  * @param path the name of the field to bind to
@@ -122,21 +106,23 @@
  *        or CSS styles or size
 *#
 #macro( springFormSingleSelect $path $options $attributes )
-    #springDoBind($path)
-    <select
-        name="${status.expression}"
-        ${attributes}>
-        #foreach($option in $options)
-        <option #if($status.value && $status.value == $option)selected="true"#end>${option}</option>
-        #end
-    </select>
+	#springBind($path)
+	<select name="${status.expression}" ${attributes}>
+		#foreach($option in $options)
+			<option
+			#if($status.value && $status.value == $option)
+				selected="true"
+			#end>
+			${option}</option>
+		#end
+	</select>
 #end
 
 #**
  * springFormMultiSelect
  *
- * show a listbox of options allowing the user to make 0 or more choices from 
- * the list of options
+ * Show a listbox of options allowing the user to make 0 or more choices from
+ * the list of options.
  *
  * @param path the name of the field to bind to
  * @param options a list (sequence) of all the available options
@@ -144,25 +130,24 @@
  *        or CSS styles or size
 *#
 #macro( springFormMultiSelect $path $options $attributes )
-    #springDoBind($path)
-    <select
-        multiple="multiple"
-        name="${status.expression}"
-        ${attributes}>
-        #foreach($option in $options)
-        <option
-        #foreach($item in $status.value)
-        	#if($item == $option)selected="true"#end
-        #end
-        >${option}</option>
-        #end
-    </select>
+	#springBind($path)
+	<select multiple="multiple" name="${status.expression}" ${attributes}>
+		#foreach($option in $options)
+			<option
+			#foreach($item in $status.value)
+				#if($item == $option)
+					selected="true"
+				#end
+			#end
+			>${option}</option>
+		#end
+	</select>
 #end
 
 #**
  * springFormRadioButtons
  *
- * show radio
+ * Show radio buttons.
  *
  * @param path the name of the field to bind to
  * @param options a list (sequence) of all the available options
@@ -172,22 +157,22 @@
  *        or CSS styles or size
 *#
 #macro( springFormRadioButtons $path $options $separator $attributes )
-    #springDoBind($path)
-    #foreach($option in $options)
-    <input
-        type="radio"
-        name="${status.expression}"
-        value="${option}"
-        #if($status.value && $status.value == $option)checked="checked"#end
-        ${attributes}
-    #springCloseTag() ${option}${separator}
-    #end
+	#springBind($path)
+	#foreach($option in $options)
+		<input type="radio" name="${status.expression}" value="${option}"
+		#if($status.value == $option)
+			checked="checked"
+		#end
+		${attributes}
+		#springCloseTag()
+		${option} ${separator}
+	#end
 #end
 
 #**
- * springFormCheckBoxes
+ * springFormCheckboxes
  *
- * show checkboxes
+ * Show checkboxes.
  *
  * @param path the name of the field to bind to
  * @param options a list (sequence) of all the available options
@@ -196,51 +181,56 @@
  * @param attributes any additional attributes for the element (such as class
  *        or CSS styles or size
 *#
-#macro( springFormCheckBoxes $path $options $separator $attributes )
-    #springDoBind($path)
-    #foreach($option in $options)
-    <input
-        type="checkbox"
-        name="${status.expression}"
-        value="${option}"
-        #foreach($item in $status.value)
-        	#if($item == $option)checked="checked"#end
-        #end
-        ${attributes}
-    #springCloseTag() ${option}${separator}
-    #end
+#macro( springFormCheckboxes $path $options $separator $attributes )
+	#springBind($path)
+	#foreach($option in $options)
+		<input type="checkbox" name="${status.expression}" value="${option}"
+		#foreach($item in $status.value)
+			#if($item == $option)
+				checked="checked"
+			#end
+		#end
+		${attributes} #springCloseTag()
+		${option} ${separator}
+	#end
 #end
 
 #**
  * springShowErrors
  *
- * show validation errors for the currently bound field, with
- * optional style attributes
+ * Show validation errors for the currently bound field, with
+ * optional style attributes.
  *
  * @param separator the html tag or other character list that should be used to
- *        separate each option.  Typically '<br>'
+ *        separate each option. Typically '<br>'.
  * @param classOrStyle either the name of a CSS class element (which is defined in
  *        the template or an external CSS file) or an inline style.  If the value passed in here
  *        contains a colon (:) then a 'style=' attribute will be used, else a 'class=' attribute
  *        will be used.
 *#
 #macro( springShowErrors $separator $classOrStyle )
-    #foreach($error in $status.errorMessages)
-        #if($classOrStyle == "")
-        <b>${error}</b>
-        #else
-            #if($classOrStyle.indexOf(":") == -1) #set($attr="class") #else #set($attr="style") #end
-            <span ${attr}="${classOrStyle}">${error}</span>
-        #end ${separator}
-    #end
+	#foreach($error in $status.errorMessages)
+		#if($classOrStyle == "")
+			<b>${error}</b>
+		#else
+			#if($classOrStyle.indexOf(":") == -1)
+				#set($attr="class")
+			#else
+				#set($attr="style")
+			#end
+			<span ${attr}="${classOrStyle}">${error}</span>
+		#end
+		${separator}
+	#end
 #end
 
 #**
  * springCloseTag
  *
- * simple macro to close an HTML tag that has no body  with '>' or '/>'
- * depending on the value of a 'global' variable called 'xhtmlCompliant'
+ * Simple macro to close an HTML tag that has no body with '>' or '/>',
+ * depending on the value of a 'springXhtmlCompliant' variable in the
+ * template context.
  *#
 #macro( springCloseTag )
-	#if($xhtmlCompliant)/>#else>#end
+	#if($springXhtmlCompliant)/>#else>#end
 #end

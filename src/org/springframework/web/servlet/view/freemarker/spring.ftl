@@ -31,6 +31,7 @@
  * RequestContext. This can be customized by calling "setDefaultHtmlEscape"
  * on the "springMacroRequestContext" context variable, or via the
  * "defaultHtmlEscape" context-param in web.xml (same as for the JSP bind tag).
+ * Also regards a "htmlEscape" variable in the namespace of this library.
  *
  * Producing no output, the following context variable will be available
  * each time this macro is referenced (assuming you import this library in
@@ -44,7 +45,11 @@
  *   by user config.
  -->
 <#macro bind path>
-    <#assign status = springMacroRequestContext.getBindStatus(path)>
+	<#if htmlEscape?exists>
+		<#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
+	<#else>
+		<#assign status = springMacroRequestContext.getBindStatus(path)>
+	</#if>
 </#macro>
 
 <#--
@@ -53,68 +58,43 @@
  * Similar to spring:bind, but takes an explicit HTML escape flag rather
  * than relying on the default HTML escape setting.
  -->
-<#macro bindEscaped path, escape>
-    <#assign status = springMacroRequestContext.getBindStatus(path, escape)>
-</#macro>
-
-<#--
- * spring:doBind
- * 
- * determine status of html escaping set by the user and call the correct
- * bind macro
- -->
-<#macro doBind path >
-	<#if htmlEscape?exists>
-		<@bindEscaped path, htmlEscape />
-	<#else>
-		<@bind path/>
-	</#if>
+<#macro bindEscaped path, htmlEscape>
+	<#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
 </#macro>
 
 <#--
  * formInput
  *
- * display a form input field of type 'text' and bind it to an attribute
- * of a command or bean
+ * Display a form input field of type 'text' and bind it to an attribute
+ * of a command or bean.
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
  *        or CSS styles or size
- *
  -->
 <#macro formInput path attributes="" >
-    <@doBind path/>
-    <input
-        type="text"
-        name="${spring.status.expression}"
-        value="${spring.status.value?default("")}"
-        ${attributes}
-    <@closeTag/>
+	<@bind path/>
+	<input type="text" name="${spring.status.expression}" value="${spring.status.value?default("")}" ${attributes} <@closeTag/>
 </#macro>
 
 <#--
- * formTextArea
+ * formTextarea
  *
- * display a text area and bind it to an attribute
- * of a command or bean
+ * Display a text area and bind it to an attribute of a command or bean.
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
  *        or CSS styles or size
- *
  -->
-<#macro formTextArea path attributes="" >
-    <@doBind path/>
-    <textarea
-        name="${spring.status.expression}"
-        ${attributes}
-    >${spring.status.value?default("")}</textarea>
+<#macro formTextarea path attributes="" >
+	<@bind path/>
+	<textarea name="${spring.status.expression}" ${attributes}>${spring.status.value?default("")}</textarea>
 </#macro>
 
 <#--
  * formSingleSelect
  *
- * show a selectbox (dropdown) input element allowing a single value to be chosen
+ * Show a selectbox (dropdown) input element allowing a single value to be chosen
  * from a list of options.
  *
  * @param path the name of the field to bind to
@@ -123,21 +103,19 @@
  *        or CSS styles or size
 -->
 <#macro formSingleSelect path options attributes="">
-    <@doBind path/>
-    <select
-        name="${spring.status.expression}"
-        ${attributes}>
-        <#list options as option>
-        <option <#if spring.status.value?default("") == option>selected="true"</#if>>${option}</option>
-        </#list>
-    </select>
+	<@bind path/>
+	<select name="${spring.status.expression}" ${attributes}>
+		<#list options as option>
+		<option <#if spring.status.value?default("") == option>selected="true"</#if>>${option}</option>
+		</#list>
+	</select>
 </#macro>
 
 <#--
  * formMultiSelect
  *
- * show a listbox of options allowing the user to make 0 or more choices from 
- * the list of options
+ * Show a listbox of options allowing the user to make 0 or more choices from
+ * the list of options.
  *
  * @param path the name of the field to bind to
  * @param options a list (sequence) of all the available options
@@ -145,22 +123,19 @@
  *        or CSS styles or size
 -->
 <#macro formMultiSelect path options attributes="">
-    <@doBind path/>
-    <select
-        multiple="multiple"
-        name="${spring.status.expression}"
-        ${attributes}>
-        <#list options as option>
-        <#assign isSelected = contains(spring.status.value?default([""]), option)>
-        <option <#if isSelected>selected="true"</#if>>${option}</option>
-        </#list>
-    </select>
+	<@bind path/>
+	<select multiple="multiple" name="${spring.status.expression}" ${attributes}>
+		<#list options as option>
+		<#assign isSelected = contains(spring.status.value?default([""]), option)>
+		<option <#if isSelected>selected="true"</#if>>${option}</option>
+		</#list>
+	</select>
 </#macro>
 
 <#--
  * formRadioButtons
  *
- * show radio
+ * Show radio buttons.
  *
  * @param path the name of the field to bind to
  * @param options a list (sequence) of all the available options
@@ -170,22 +145,19 @@
  *        or CSS styles or size
 -->
 <#macro formRadioButtons path options separator attributes="">
-    <@doBind path/>
-    <#list options as option>
-    <input
-        type="radio"
-        name="${spring.status.expression}"
-        value="${option}"
-        <#if spring.status.value?default("") == option>checked="checked"</#if>
-        ${attributes}
-    <@closeTag/> ${option}${separator}
-    </#list>
+	<@bind path/>
+	<#list options as option>
+	<input type="radio" name="${spring.status.expression}" value="${option}"
+	  <#if spring.status.value?default("") == option>checked="checked"</#if> ${attributes}
+	<@closeTag/>
+	${option}${separator}
+	</#list>
 </#macro>
 
 <#--
- * formCheckBoxes
+ * formCheckboxes
  *
- * show checkboxes
+ * Show checkboxes.
  *
  * @param path the name of the field to bind to
  * @param options a list (sequence) of all the available options
@@ -194,49 +166,46 @@
  * @param attributes any additional attributes for the element (such as class
  *        or CSS styles or size
 -->
-<#macro formCheckBoxes path options separator attributes="">
-    <@doBind path/>
-    <#list options as option>
-    <input
-        type="checkbox"
-        name="${spring.status.expression}"
-        value="${option}"
-        <#assign isSelected = contains(spring.status.value?default([""]), option)>
-        <#if isSelected>checked="checked"</#if>
-        ${attributes}
-    <@closeTag/> ${option}${separator}
-    </#list>
+<#macro formCheckboxes path options separator attributes="">
+	<@bind path/>
+	<#list options as option>
+	<#assign isSelected = contains(spring.status.value?default([""]), option)>
+	<input type="checkbox" name="${spring.status.expression}" value="${option}"
+	  <#if isSelected>checked="checked"</#if> ${attributes}
+	<@closeTag/>
+	${option}${separator}
+  </#list>
 </#macro>
 
 <#--
  * showErrors
  *
- * show validation errors for the currently bound field, with
- * optional style attributes
+ * Show validation errors for the currently bound field, with
+ * optional style attributes.
  *
  * @param separator the html tag or other character list that should be used to
- *        separate each option.  Typically '<br>'
+ *        separate each option. Typically '<br>'.
  * @param classOrStyle either the name of a CSS class element (which is defined in
  *        the template or an external CSS file) or an inline style.  If the value passed in here
  *        contains a colon (:) then a 'style=' attribute will be used, else a 'class=' attribute
  *        will be used.
 -->
 <#macro showErrors separator classOrStyle="">
-    <#list spring.status.errorMessages as error>
-        <#if classOrStyle == "">
-        <b>${error}</b>
-        <#else>
-            <#if classOrStyle?index_of(":") == -1><#assign attr="class"><#else><#assign attr="style"></#if>
-            <span ${attr}="${classOrStyle}">${error}</span>
-        </#if>${separator}
-    </#list>
+	<#list spring.status.errorMessages as error>
+	<#if classOrStyle == "">
+	<b>${error}</b>
+	<#else>
+	<#if classOrStyle?index_of(":") == -1><#assign attr="class"><#else><#assign attr="style"></#if>
+	<span ${attr}="${classOrStyle}">${error}</span>
+	</#if>${separator}
+	</#list>
 </#macro>
 
 <#--
  * listContains
  *
- * macro to return true if the list contains the scalar, false if not.
- * Surprisingly not a freemarker builtin.  This function is used internally but
+ * Macro to return true if the list contains the scalar, false if not.
+ * Surprisingly not a FreeMarker builtin. This function is used internally but
  * can be accessed by user code if required.
  *
  * @param list the list to search for the item
@@ -244,17 +213,18 @@
  * @return true if item is found in the list, false otherwise.
 -->
 <#function contains list item>
-    <#list list as nextInList>
-        <#if nextInList == item><#return true></#if>
-    </#list>
-    <#return false>
+	<#list list as nextInList>
+	<#if nextInList == item><#return true></#if>
+	</#list>
+	<#return false>
 </#function>
 
 <#--
  * closeTag
  *
- * simple macro to close an HTML tag that has no body  with '>' or '/>'
- * depending on the value of a 'global' variable called 'xhtmlCompliant'
+ * Simple macro to close an HTML tag that has no body with '>' or '/>',
+ * depending on the value of a 'xhtmlCompliant' variable in the namespace
+ * of this library.
 -->
 <#macro closeTag>
 	<#if xhtmlCompliant?exists && xhtmlCompliant>/><#else>></#if>
