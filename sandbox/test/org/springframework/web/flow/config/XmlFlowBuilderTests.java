@@ -152,7 +152,7 @@ public class XmlFlowBuilderTests extends TestCase {
 					}
 				};
 			}
-			throw new NoSuchFlowModelMapperException(flowModelMapperId);
+			throw new NoSuchFlowAttributeMapperException(flowModelMapperId);
 		}
 	};
 

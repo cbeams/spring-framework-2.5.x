@@ -435,10 +435,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        appended to produce the qualified service identifier (e.g
 	 *        userId.modelMapper) See: {@link #modelMapper(String)}
 	 * @return The model mapper
-	 * @throws NoSuchFlowModelMapperException no FlowModelMapper implementation
+	 * @throws NoSuchFlowAttributeMapperException no FlowModelMapper implementation
 	 *         was exported with the specified id.
 	 */
-	protected FlowAttributeMapper useModelMapper(String modelMapperIdPrefix) throws NoSuchFlowModelMapperException {
+	protected FlowAttributeMapper useModelMapper(String modelMapperIdPrefix) throws NoSuchFlowAttributeMapperException {
 		if (!StringUtils.hasText(modelMapperIdPrefix)) {
 			return null;
 		}
@@ -452,12 +452,12 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param flowModelMapperImplementationClass The model mapper
 	 *        implementation, there must be only one instance in the registry.
 	 * @return The model mapper
-	 * @throws NoSuchFlowModelMapperException no FlowModelMapper implementation
+	 * @throws NoSuchFlowAttributeMapperException no FlowModelMapper implementation
 	 *         was exported with the specified implementation, or more than one
 	 *         existed.
 	 */
 	protected FlowAttributeMapper useModelMapper(Class flowModelMapperImplementationClass)
-			throws NoSuchFlowModelMapperException {
+			throws NoSuchFlowAttributeMapperException {
 		return getFlowServiceLocator().getFlowModelMapper(flowModelMapperImplementationClass);
 	}
 

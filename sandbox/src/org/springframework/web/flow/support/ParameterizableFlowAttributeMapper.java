@@ -91,7 +91,7 @@ import org.springframework.web.flow.FlowAttributeMapper;
  * @author Keith Donald
  * @author Colin Sampaleanu
  */
-public class ParameterizableFlowModelMapper implements FlowAttributeMapper, Serializable {
+public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());;
 

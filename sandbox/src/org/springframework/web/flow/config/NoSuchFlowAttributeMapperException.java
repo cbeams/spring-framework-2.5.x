@@ -23,14 +23,14 @@ import org.springframework.web.flow.ServiceLookupException;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class NoSuchFlowModelMapperException extends ServiceLookupException {
+public class NoSuchFlowAttributeMapperException extends ServiceLookupException {
 
 	/**
 	 * Create a new flow model mapper lookup exception.
 	 * @param serviceImplementationClass The required implementation class of
 	 *        the service that cannot be found
 	 */
-	public NoSuchFlowModelMapperException(Class serviceImplementationClass) {
+	public NoSuchFlowAttributeMapperException(Class serviceImplementationClass) {
 		super(serviceImplementationClass);
 	}
 
@@ -40,7 +40,7 @@ public class NoSuchFlowModelMapperException extends ServiceLookupException {
 	 *        the service that cannot be found
 	 * @param cause The underlying cause of this exception
 	 */
-	public NoSuchFlowModelMapperException(Class serviceImplementationClass, Throwable cause) {
+	public NoSuchFlowAttributeMapperException(Class serviceImplementationClass, Throwable cause) {
 		super(serviceImplementationClass, cause);
 	}
 
@@ -48,7 +48,7 @@ public class NoSuchFlowModelMapperException extends ServiceLookupException {
 	 * Create a new flow model mapper lookup exception.
 	 * @param serviceId The id of the service that cannot be found
 	 */
-	public NoSuchFlowModelMapperException(String serviceId) {
+	public NoSuchFlowAttributeMapperException(String serviceId) {
 		super(serviceId);
 	}
 
@@ -57,7 +57,7 @@ public class NoSuchFlowModelMapperException extends ServiceLookupException {
 	 * @param serviceId The id of the service that cannot be found
 	 * @param cause The underlying cause of this exception
 	 */
-	public NoSuchFlowModelMapperException(String serviceId, Throwable cause) {
+	public NoSuchFlowAttributeMapperException(String serviceId, Throwable cause) {
 		super(serviceId, cause);
 	}
 
