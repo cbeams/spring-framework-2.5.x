@@ -236,7 +236,7 @@ public void setMyComponent(MyComponent myComponent) {
 
     <para>And finally the Stateless Session Bean itself:</para>
 
-    <programlisting>public class MyComponentEJB implements extends AbstractStatelessSessionBean
+    <programlisting>public class MyComponentEJB extends AbstractStatelessSessionBean
         implements MyComponent {
 
     MyComponent _myComp;
