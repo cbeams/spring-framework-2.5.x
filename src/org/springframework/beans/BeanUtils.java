@@ -50,7 +50,7 @@ public abstract class BeanUtils {
 		}
 		catch (NoSuchMethodException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + clazz.getName() +
-			                             "]: no default constructor found", ex);
+					"]: no default constructor found", ex);
 		}
 	}
 
@@ -72,19 +72,19 @@ public abstract class BeanUtils {
 		}
 		catch (InstantiationException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
-			                             "]: Is it an interface or an abstract class?", ex);
+					"]: Is it an interface or an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
-			                             "]: Has the class definition changed? Is the constructor accessible?", ex);
+					"]: Has the class definition changed? Is the constructor accessible?", ex);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
-			                             "]: illegal arguments for constructor", ex);
+					"]: illegal arguments for constructor", ex);
 		}
 		catch (InvocationTargetException ex) {
 			throw new FatalBeanException("Could not instantiate class [" + constructor.getDeclaringClass().getName() +
-			                             "]; constructor threw exception", ex.getTargetException());
+					"]; constructor threw exception", ex.getTargetException());
 		}
 	}
 
@@ -178,7 +178,7 @@ public abstract class BeanUtils {
 	public static void copyProperties(Object source, Object target, String[] ignoreProperties)
 	    throws IllegalArgumentException, BeansException {
 		if (source == null || target == null || !source.getClass().isInstance(target)) {
-			throw new IllegalArgumentException("Target must an instance of source");
+			throw new IllegalArgumentException("Target must be an instance of source");
 		}
 		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
 		BeanWrapper sourceBw = new BeanWrapperImpl(source);
