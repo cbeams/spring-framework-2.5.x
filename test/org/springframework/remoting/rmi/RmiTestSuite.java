@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.remoting;
+package org.springframework.remoting.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -27,27 +27,21 @@ import java.util.Map;
 import javax.xml.rpc.Stub;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
-import org.springframework.remoting.caucho.HessianProxyFactoryBean;
-import org.springframework.remoting.rmi.RmiClientInterceptor;
-import org.springframework.remoting.rmi.RmiProxyFactoryBean;
-import org.springframework.remoting.rmi.RmiServiceExporter;
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.support.RemoteInvocation;
 
 /**
  * @author Juergen Hoeller
  * @since 16.05.2003
  */
-public class RemotingTestSuite extends TestCase {
+public class RmiTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBean() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote lookupRmiProxy() {
+			protected Remote lookupStub() {
 				return new RemoteBean();
 			}
 		};
@@ -63,7 +57,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithRemoteException() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote lookupRmiProxy() {
+			protected Remote lookupStub() {
 				return new RemoteBean();
 			}
 		};
@@ -83,7 +77,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithBusinessInterface() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote lookupRmiProxy() {
+			protected Remote lookupStub() {
 				return new RemoteBean();
 			}
 		};
@@ -99,7 +93,7 @@ public class RemotingTestSuite extends TestCase {
 
 	public void testRmiProxyFactoryBeanWithBusinessInterfaceAndRemoteException() throws Exception {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote lookupRmiProxy() {
+			protected Remote lookupStub() {
 				return new RemoteBean();
 			}
 		};
@@ -118,49 +112,6 @@ public class RemotingTestSuite extends TestCase {
 		}
 	}
 
-	public void testHessianProxyFactoryBeanWithAccessError() throws Exception {
-		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-		try {
-			factory.setServiceInterface(TestBean.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("http://localhosta/testbean");
-		factory.setUsername("test");
-		factory.setPassword("bean");
-		factory.afterPropertiesSet();
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue(factory.getObject() instanceof ITestBean);
-		ITestBean bean = (ITestBean) factory.getObject();
-		try {
-			bean.setName("test");
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
-	}
-
-	public void testBurlapProxyFactoryBeanWithAccessError() throws Exception {
-		BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
-		factory.setServiceInterface(ITestBean.class);
-		factory.setServiceUrl("http://localhosta/testbean");
-		factory.afterPropertiesSet();
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue(factory.getObject() instanceof ITestBean);
-		ITestBean bean = (ITestBean) factory.getObject();
-		try {
-			bean.setName("test");
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
-	}
-	
 	public void testRmiClientInterceptorRequiresUrl() throws Exception{
 		RmiClientInterceptor client = new RmiClientInterceptor();
 		client.setServiceInterface(IRemoteBean.class);
@@ -215,7 +166,7 @@ public class RemotingTestSuite extends TestCase {
 		
 		assertEquals("setName", inv.getMethodName());
 		assertEquals("bla", inv.getArguments()[0]);
-		assertEquals(String.class, inv.getParameterTypes()[0]);		
+		assertEquals(String.class, inv.getParameterTypes()[0]);
 		
 		// this is a bit BS, but we need to test it
 		inv = new RemoteInvocation();

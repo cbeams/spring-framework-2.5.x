@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.remoting;
+package org.springframework.remoting.jaxrpc;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,8 +33,7 @@ import javax.xml.rpc.Stub;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean;
-import org.springframework.remoting.jaxrpc.LocalJaxRpcServiceFactoryBean;
+import org.springframework.remoting.RemoteAccessException;
 
 /**
  * @author Juergen Hoeller
@@ -76,8 +75,8 @@ public class JaxRpcTestSuite extends TestCase {
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
 
-		assertTrue(factory.getPortProxy() instanceof Stub);
-		Stub stub = (Stub) factory.getPortProxy();
+		assertTrue(factory.getPortStub() instanceof Stub);
+		Stub stub = (Stub) factory.getPortStub();
 		assertEquals("user", stub._getProperty(Stub.USERNAME_PROPERTY));
 		assertEquals("pw", stub._getProperty(Stub.PASSWORD_PROPERTY));
 		assertEquals("ea", stub._getProperty(Stub.ENDPOINT_ADDRESS_PROPERTY));
@@ -100,8 +99,8 @@ public class JaxRpcTestSuite extends TestCase {
 		factory.setServiceInterface(IRemoteBean.class);
 		factory.afterPropertiesSet();
 
-		assertTrue(factory.getPortProxy() instanceof Stub);
-		Stub stub = (Stub) factory.getPortProxy();
+		assertTrue(factory.getPortStub() instanceof Stub);
+		Stub stub = (Stub) factory.getPortStub();
 		assertNull(stub._getProperty(Stub.USERNAME_PROPERTY));
 		assertNull(stub._getProperty(Stub.PASSWORD_PROPERTY));
 		assertNull(stub._getProperty(Stub.ENDPOINT_ADDRESS_PROPERTY));
