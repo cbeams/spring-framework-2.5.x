@@ -31,8 +31,8 @@ import org.springframework.binding.support.ParameterizableAttributeMapper;
 import org.springframework.web.flow.FlowAttributeMapper;
 
 /**
- * Generic flow model mapper implementation that allows mappings to be
- * configured programatically or in a Spring application context.
+ * Generic flow attribute mapper implementation that allows mappings to be
+ * configured in a declarative fashion.
  * <p>
  * <b>Exposed configuration properties:</b> <br>
  * <table border="1">
