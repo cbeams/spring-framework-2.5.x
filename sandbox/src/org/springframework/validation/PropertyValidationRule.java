@@ -5,7 +5,6 @@
 package org.springframework.validation;
 
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.validation.Errors;
 
 /**
  * A single property validation rule that can be declaratively associated with
@@ -42,11 +41,24 @@ public interface PropertyValidationRule {
     public MessageSourceResolvable createTypingHint(String propertyNamePath);
 
     /**
-     * Convenience method for rejecting a property value on a <code>Errors</code>
-     * object.  
+     * Creates a validation error message for the specified property. This
+     * assumes validation failure was caused by this property validation rule.
      * 
-     * @param errors The errors object.
-     * @param propertyNamePath The erred property name path.
+     * @param propertyNamePath
+     *            The property name path, could be qualified by object name,
+     *            for example "pet.name.lastName"
+     * @return The resolvable error message.
+     */
+    public MessageSourceResolvable createErrorMessage(String propertyNamePath);
+
+    /**
+     * Convenience method for rejecting a property value on a <code>Errors</code>
+     * object.
+     * 
+     * @param errors
+     *            The errors object.
+     * @param propertyNamePath
+     *            The erred property name path.
      */
     public void invokeRejectValue(Errors errors, String propertyNamePath);
 }

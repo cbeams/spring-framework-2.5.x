@@ -14,6 +14,7 @@ import org.springframework.context.MessageSourceResolvable;
  * @author Keith Donald
  */
 public interface PropertyValidator {
+    
     /**
      * Get the typing hints associated with this property. The nestedPathPrefix
      * is an optional object qualifier prefix used for populating message
