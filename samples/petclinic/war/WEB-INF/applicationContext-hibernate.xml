@@ -79,7 +79,10 @@
 		<property name="target"><ref local="clinicTarget"/></property>
 		<property name="transactionAttributes">
 			<props>
-				<prop key="*">PROPAGATION_REQUIRED</prop>
+				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="load*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="store*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
 	</bean>
