@@ -14,7 +14,7 @@ import org.springframework.util.Assert;
 /**
  * @author Keith Donald
  */
-public class BeanFactoryAwareFlow extends Flow implements InitializingBean, BeanFactoryAware, BeanNameAware {
+public class BeanFactoryAwareFlow extends Flow implements BeanFactoryAware, BeanNameAware, InitializingBean {
 
 	private BeanFactory beanFactory;
 

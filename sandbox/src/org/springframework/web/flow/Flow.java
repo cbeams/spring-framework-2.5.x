@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.util.ToStringCreator;
 import org.springframework.util.closure.support.AbstractConstraint;
@@ -134,7 +133,7 @@ import org.springframework.util.closure.support.AbstractConstraint;
  * @author Colin Sampaleanu
  * @see FlowEventProcessor
  */
-public class Flow implements FlowEventProcessor, InitializingBean, Serializable {
+public class Flow implements FlowEventProcessor, Serializable {
 
 	private static final long serialVersionUID = 3258695403305513015L;
 
@@ -296,11 +295,15 @@ public class Flow implements FlowEventProcessor, InitializingBean, Serializable 
 
 	private transient FlowLifecycleListener flowLifecycleListener;
 
+	protected Flow() {
+
+	}
+
 	/**
 	 * @param id
 	 */
 	public Flow(String id) {
-		this.id = id;
+		setId(id);
 	}
 
 	/**
@@ -308,7 +311,7 @@ public class Flow implements FlowEventProcessor, InitializingBean, Serializable 
 	 * @param flowDao
 	 */
 	public Flow(String id, FlowDao flowDao) {
-		this.id = id;
+		setId(id);
 		setFlowDao(flowDao);
 	}
 
@@ -318,10 +321,15 @@ public class Flow implements FlowEventProcessor, InitializingBean, Serializable 
 	 * @param states
 	 */
 	public Flow(String id, String startStateId, FlowDao flowDao, AbstractState[] states) {
-		this.id = id;
+		setId(id);
 		setFlowDao(flowDao);
 		addAll(states);
 		setStartState(startStateId);
+	}
+
+	protected void setId(String id) {
+		Assert.notNull("The flow id is required");
+		this.id = id;
 	}
 
 	/**
@@ -339,10 +347,6 @@ public class Flow implements FlowEventProcessor, InitializingBean, Serializable 
 	 */
 	public void setFlowLifecycleListener(FlowLifecycleListener listener) {
 		this.flowLifecycleListener = listener;
-	}
-
-	public void afterPropertiesSet() {
-		initFlow();
 	}
 
 	/**
