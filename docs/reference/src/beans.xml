@@ -275,16 +275,18 @@
     <sect2 id="beans-factory-modes">
       <title>To singleton or not to singleton</title>
 
-      <para>Beans exist in two modes, singletons or prototypes. When a bean
+      <para>Beans are defined to be deployed in one of two modes: singleton or
+	  non-singleton. (The latter is also called a prototype, although the 
+	  term is used loosely as as it doesn't quite fit). When a bean
       is a singleton, only one <emphasis>shared</emphasis> instance of the
-      bean will be managed and all requests for instances of that specific
-      instances of bean will result in that one specific bean instance being
+      bean will be managed and all requests for beans with and id or ids matching 
+      that bean definition will result in that one specific bean instance being
       returned.</para>
 
-      <para>The prototype mode of a bean results in <emphasis>creation of a
-      new bean instance</emphasis> every time a request for that specific bean
-      is being done. This is ideal for situation where for example each user
-      needs an independent user object or something similar.</para>
+      <para>The non-singleton, prototype mode of a bean deployment results in
+	  <emphasis>creation of a new bean instance</emphasis> every time a
+	  request for that specific bean is done. This is ideal for situation where for 
+      example each user needs an independent user object or something similar.</para>
 
       <para>Beans exist in singleton mode by default, unless you specify
       otherwise. Keep in mind that by changing the type to prototype, each
