@@ -26,6 +26,7 @@ import org.springframework.web.mock.MockServletContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 
@@ -136,8 +137,8 @@ public class ViewResolverTestSuite extends TestCase {
 		assertTrue("Correct rc attribute", request.getAttribute("rc") == null);
 		assertTrue("Correct JSTL attributes", request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT) instanceof LocalizationContext);
 		assertTrue("Correct JSTL attributes", locale.equals(request.getAttribute(Config.FMT_LOCALE)));
-		assertTrue("Correct JSTL attributes", request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlView.REQUEST_SCOPE_PREFIX) instanceof LocalizationContext);
-		assertTrue("Correct JSTL attributes", locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlView.REQUEST_SCOPE_PREFIX)));
+		assertTrue("Correct JSTL attributes", request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
+		assertTrue("Correct JSTL attributes", locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
 	}
 
 	public void testXmlViewResolver() throws ServletException, IOException {

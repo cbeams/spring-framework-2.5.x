@@ -1,31 +1,32 @@
-package org.springframework.web.servlet.view;
+package org.springframework.web.servlet.view.tiles;
 
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletException;
 
 import org.springframework.web.servlet.support.JstlUtils;
 
 /**
- * Specialization of InternalResourceView for JSTL pages,
- * i.e. JSP pages that use the JSP Standard Tag Library.
+ * Specialization of TilesView for JSTL pages,
+ * i.e. Tiles pages that use the JSP Standard Tag Library.
  *
  * <p>Exposes JSTL-specific request attributes specifying locale
  * and resource bundle for JSTL's formatting and message tags,
  * using Spring's locale and message source.
  *
  * <p>This is a separate class mainly to avoid JSTL dependencies
- * in InternalResourceView itself.
+ * in TilesView itself.
  *
  * @author Juergen Hoeller
- * @since 27.02.2003
+ * @since 20.08.2003
  * @see org.springframework.web.servlet.support.JstlUtils#exposeLocalizationContext
  */
-public class JstlView extends InternalResourceView {
+public class TilesJstlView extends TilesView {
 
 	protected void exposeModelsAsRequestAttributes(Map model, HttpServletRequest request) throws ServletException {
 		super.exposeModelsAsRequestAttributes(model, request);
 		JstlUtils.exposeLocalizationContext(request, getApplicationContext());
 	}
+
 }
