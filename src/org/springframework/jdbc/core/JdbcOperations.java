@@ -20,7 +20,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @version $Id: JdbcOperations.java,v 1.3 2004-02-20 12:04:48 trisberg Exp $
+ * @version $Id: JdbcOperations.java,v 1.4 2004-02-27 08:53:58 jhoeller Exp $
  * @see JdbcTemplate
  */
 public interface JdbcOperations {
@@ -88,7 +88,6 @@ public interface JdbcOperations {
 	int queryForInt(String sql) throws DataAccessException;
 
 
-
 	//-------------------------------------------------------------------------
 	// Query methods dealing with prepared statements
 	//-------------------------------------------------------------------------
@@ -144,7 +143,6 @@ public interface JdbcOperations {
 	void query(String sql, final Object[] args, RowCallbackHandler callbackHandler)
 	    throws DataAccessException;
 
-
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
 	 * list of arguments to bind to the query, expecting a result list.
@@ -194,20 +192,15 @@ public interface JdbcOperations {
 
 	
 	//-------------------------------------------------------------------------
-	// Execute methods
+	// Execute and update methods
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Issue a single SQL execute.
+	 * Issue a single SQL execute, typically a DDL statement.
 	 * @param sql static SQL to execute
 	 * @throws DataAccessException if there is any problem.
 	 */
 	void execute(final String sql) throws DataAccessException;
-
-
-	//-------------------------------------------------------------------------
-	// Update methods
-	//-------------------------------------------------------------------------
 
 	/**
 	 * Issue a single SQL update.
