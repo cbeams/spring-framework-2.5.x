@@ -625,9 +625,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				Map matchingBeans = findMatchingBeans(argTypes[j]);
 				if (matchingBeans == null || matchingBeans.size() != 1) {
+					int matchingBeansCount = (matchingBeans != null ? matchingBeans.size() : 0);
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-							"There are " + matchingBeans.size() + " beans of type [" + argTypes[j] +
+							"There are " + matchingBeansCount + " beans of type [" + argTypes[j] +
 							"] for autowiring constructor. There should have been 1 to be able to " +
 							"autowire constructor of bean '" + beanName + "'.");
 				}
