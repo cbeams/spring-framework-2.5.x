@@ -22,14 +22,14 @@
 		<property name="url">
 			<value>/WEB-INF/reports/subReportParent.jrxml</value>
 		</property>
-		<property name="subReports">
+		<property name="subReportUrls">
 			<map>
 				<entry key="ProductsSubReport">
 					<value>/WEB-INF/reports/subReportChild.jrxml</value>
 				</entry>
 			</map>
 		</property>
-		<property name="subReportDataSources">
+		<property name="subReportDataKeys">
 			<value>SubReportData</value>
 		</property>
 		<property name="reportDataKey">
