@@ -37,6 +37,7 @@ Package org.springframework.web
 * removed deprecated BindStatus class from "servlet.tags": use BindStatus from "servlet.support" (recompile old JSPs)
 * enhanced ParameterMethodNameResolver to also be able to resolve methods base purely based on existence of specified parameters
 * included debug logging for session attributes being added and removed (AbstractFormController and AbstractWizardFormController)
+* added createBinder and initBinder methods to MultiActionController, which may be overriden by subclasses
 
 Changes in version 1.1.5 (28.2.2005)
 ------------------------------------
