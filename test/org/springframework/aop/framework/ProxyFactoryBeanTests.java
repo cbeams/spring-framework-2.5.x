@@ -5,7 +5,6 @@
 
 package org.springframework.aop.framework;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.LinkedList;
@@ -42,29 +41,15 @@ import org.springframework.core.io.ClassPathResource;
  * implementation.
  * @author Rod Johnson
  * @since 13-Mar-2003
- * @version $Id: ProxyFactoryBeanTests.java,v 1.18 2003-12-30 00:55:42 jhoeller Exp $
+ * @version $Id: ProxyFactoryBeanTests.java,v 1.19 2004-01-14 17:22:11 jhoeller Exp $
  */
 public class ProxyFactoryBeanTests extends TestCase {
 	
 	private BeanFactory factory;
 
-	/**
-	 * Constructor for ProxyFactoryBeanTests.
-	 * @param arg0
-	 */
-	public ProxyFactoryBeanTests(String arg0) {
-		super(arg0);
-	}
-
-	/**
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	protected void setUp() throws Exception {
-		// Load from classpath, NOT a file path
-		InputStream is = getClass().getResourceAsStream("proxyFactoryTests.xml");
-		this.factory = new XmlBeanFactory(is);
+		this.factory = new XmlBeanFactory(new ClassPathResource("proxyFactoryTests.xml", getClass()));
 	}
-
 
 	public void testIsDynamicProxy() {
 		ITestBean test1 = (ITestBean) factory.getBean("test1");
@@ -72,8 +57,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	}
 	
 	public void testGetObjectTypeWithDirectTarget() {
-		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is);
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTargetSourceTests.xml", getClass()));
 		
 		// We have a counting before advice here
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) bf.getBean("countingBeforeAdvice");
@@ -96,8 +80,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	}
 	
 	public void testGetObjectTypeWithNoTargetOrTargetSource() {
-		InputStream is = getClass().getResourceAsStream("proxyFactoryTargetSourceTests.xml");
-		BeanFactory bf = new XmlBeanFactory(is);
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("proxyFactoryTargetSourceTests.xml", getClass()));
 
 		ITestBean tb = (ITestBean) bf.getBean("noTarget");
 		try {
@@ -397,8 +380,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	}
 	
 	public void testCanAddThrowsAdviceWithoutAdvisor() throws Throwable {
-		InputStream is = getClass().getResourceAsStream("throwsAdvice.xml");
-		BeanFactory f = new XmlBeanFactory(is);
+		BeanFactory f = new XmlBeanFactory(new ClassPathResource("throwsAdvice.xml", getClass()));
 		ThrowsAdviceInterceptorTests.MyThrowsHandler th = (ThrowsAdviceInterceptorTests.MyThrowsHandler) f.getBean("throwsAdvice");
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) f.getBean("countingBeforeAdvice");
 		assertEquals(0, cba.getCalls());
