@@ -18,14 +18,12 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
- * Convenience methods operating on bean factories.
- * Use to get a collection of beans of a given type
- * (rather than bean names), and for methods that return 
- * bean instances, names or counts taking into account the
- * hierarchy a bean factory may participate in.
+ * Convenience methods operating on bean factories, returning bean instances,
+ * names or counts taking into account the nesting hierarchy of a bean factory.
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 04-Jul-2003
- * @version $Id: BeanFactoryUtils.java,v 1.5 2003-11-13 15:21:53 colins Exp $
+ * @version $Id: BeanFactoryUtils.java,v 1.6 2003-11-21 15:33:31 jhoeller Exp $
  */
 public abstract class BeanFactoryUtils {
 	
@@ -118,7 +116,7 @@ public abstract class BeanFactoryUtils {
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @return the Map of bean instances, or an empty Map if none
-	 * @throws BeanDefinitionStoreException if 0 or more than 1 beans of the given type were found
+	 * @throws NoSuchBeanDefinitionException if 0 or more than 1 beans of the given type were found
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type,
