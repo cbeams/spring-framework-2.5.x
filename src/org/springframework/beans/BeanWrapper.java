@@ -37,7 +37,7 @@ import java.util.Map;
  * 
  * @author Rod Johnson
  * @since 13 April 2001
- * @version $Id: BeanWrapper.java,v 1.1.1.1 2003-08-14 16:20:15 trisberg Exp $
+ * @version $Id: BeanWrapper.java,v 1.2 2003-10-08 15:23:19 jhoeller Exp $
  */
 public interface BeanWrapper {
 
@@ -133,11 +133,10 @@ public interface BeanWrapper {
 	PropertyDescriptor[] getPropertyDescriptors() throws BeansException;
 
 	/**
-	 * Get the property descriptor for a particular property, or null if there
-	 * is no such property.
+	 * Get the property descriptor for a particular property.
 	 * @param propertyName property to check status for
-	 * @return the property descriptor for a particular property, or null if there
-	 * is no such property
+	 * @return the property descriptor for a particular property
+	 * @throws FatalBeanException if there is no such property
 	 */
 	PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException;
 
