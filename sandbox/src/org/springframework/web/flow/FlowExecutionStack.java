@@ -237,7 +237,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		// create a new flow session for the root flow and activate it
 		createAndActivateFlowSession(this.rootFlow, event.getParameters());
 		// execute the event
-		InternalRequestContext context = new InternalRequestContext(event, this);
+		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted(event);
 		context.fireStarted();
 		setLastEvent(event);
@@ -272,7 +272,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 			setCurrentState(state);
 		}
 		// execute the event
-		InternalRequestContext context = new InternalRequestContext(event, this);
+		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted(event);
 		context.setLastEvent(event);
 		ViewDescriptor viewDescriptor = state.transitionFor(context).execute(context);
@@ -281,6 +281,17 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	// flow session management helpers
+	
+	/**
+	 * Create a flow execution request context for given event.
+	 * <p>
+	 * The default implementation uses the <code>InternalRequestContext</code>
+	 * class. Subclasses can override this to use a custom class.
+	 * @param originatingEvent the event at the origin of this request
+	 */
+	protected InternalRequestContext createRequestContext(Event originatingEvent) {
+		return new InternalRequestContext(originatingEvent, this);
+	}
 
 	/**
 	 * Returns the flow of the currently active flow session.
