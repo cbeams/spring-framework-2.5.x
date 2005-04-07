@@ -2,7 +2,7 @@ package org.springframework.web.flow;
 
 import junit.framework.TestCase;
 
-import org.springframework.test.web.flow.MockFlowExecutionListener;
+import org.springframework.mock.web.flow.MockFlowExecutionListener;
 import org.springframework.web.flow.StateTests.ExecutionCounterAction;
 import org.springframework.web.flow.StateTests.InputOutputMapper;
 import org.springframework.web.flow.action.AbstractAction;

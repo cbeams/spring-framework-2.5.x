@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.test.web.flow;
+package org.springframework.mock.web.flow;
 
 import java.util.Map;
 
@@ -40,6 +40,7 @@ import org.springframework.web.flow.TransactionSynchronizer;
  * Fowler's</a> reasoning. This class is called <i>Mock</i>RequestContext to
  * be consistent with the naming convention in the rest of the Spring framework
  * (e.g. MockHttpServletRequest, ...).
+ * TODO - belongs in the spring-mock.jar
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

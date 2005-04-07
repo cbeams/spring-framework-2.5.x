@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.test.web.flow;
+package org.springframework.mock.web.flow;
 
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
@@ -25,6 +25,7 @@ import org.springframework.web.flow.State;
 /**
  * Mock implementation of the <code>FlowExecutionListener</code> interface for
  * use in unit tests.
+ * TODO - belongs in the spring-mock.jar
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.test.web.flow.MockRequestContext;
+import org.springframework.mock.web.flow.MockRequestContext;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;

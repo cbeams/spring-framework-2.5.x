@@ -35,11 +35,9 @@ import org.springframework.web.flow.config.FlowFactoryBean;
  * Base class for tests that verify a flow executes as expected; that is, it
  * responds to all supported events correctly, transitioning to the correct
  * states.
- * <p>
- * Belongs in the spring-test.jar.
+ * TODO - belongs in the spring-mock.jar
  * 
  * @author Keith Donald
- * @author Erwin Vervaet
  */
 public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSpringContextTests {
 
@@ -79,7 +77,6 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	}
 	
 	protected void onSetupInTransactionalFlowTest() {
-		
 	}
 	
 	/**
