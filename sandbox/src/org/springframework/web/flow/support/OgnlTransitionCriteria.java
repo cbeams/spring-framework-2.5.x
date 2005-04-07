@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.flow.support;
 
+import ognl.ExpressionSyntaxException;
 import ognl.Ognl;
 import ognl.OgnlException;
 
@@ -28,33 +30,48 @@ import org.springframework.web.flow.TransitionCriteria;
  * Navigation Language: an expression language for getting and setting
  * the properties of Java objects. In this case, it is used to express
  * a condition that guards transition execution in a web flow.
- * 
+ *
  * @author Keith Donald
  * @author Erwin Vervaet
+ * @author Rob Harrop
  */
 public class OgnlTransitionCriteria implements TransitionCriteria {
 
-	private String expressionString;
+	/**
+	 * Stores the pre-parsed OGNL abstract syntax tree.
+	 */
+	private Object expression;
 
 	/**
 	 * Create a new OGNL based transition criteria object.
-	 * 
+	 *
 	 * @param expressionString the OGNL expression testing the criteria, this
-	 *        expression should be a condition that returns a Boolean value
+	 * expression should be a condition that returns a Boolean value
 	 */
 	public OgnlTransitionCriteria(String expressionString) {
-		this.expressionString = expressionString;
+		Assert.hasText(expressionString);
+
+		try {
+			// is is *possible* to check that the expression can only return
+			// a boolean in most cases but it is not foolproof so we don't
+			this.expression = Ognl.parseExpression(expressionString);
+		}
+		catch (ExpressionSyntaxException ex) {
+			throw new IllegalArgumentException("The expression [" + expressionString + "] has a syntax error", ex);
+		}
+		catch (OgnlException ex) {
+			throw new IllegalStateException("Unable to evaluate syntactically correct OGNL expression.", ex);
+		}
 	}
 
 	public boolean test(RequestContext context) {
 		try {
-			//TODO: should this use "Ognl.parseExpression(this.expressionString)"?
-			//and can we cache the parsed expression? i.e. is it thread-safe?
-			Object result = Ognl.getValue(this.expressionString, context);
+			Object result = Ognl.getValue(this.expression, context);
 			Assert.isInstanceOf(Boolean.class, result);
-			return ((Boolean)result).booleanValue();
-		} catch (OgnlException e) {
-			throw new IllegalArgumentException("Invalid transition expression '" + this.expressionString + "':" + e);
+			return ((Boolean) result).booleanValue();
+		}
+		catch (OgnlException e) {
+			throw new IllegalArgumentException("Invalid transition expression '" + this.expression + "':" + e);
 		}
 	}
 }
