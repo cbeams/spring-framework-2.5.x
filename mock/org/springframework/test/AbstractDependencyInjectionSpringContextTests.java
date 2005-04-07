@@ -66,7 +66,9 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public abstract class AbstractDependencyInjectionSpringContextTests extends AbstractSpringContextTests {
 
-	private boolean populateProtectedVariables = false;
+	private boolean populateProtectedVariables;
+	
+	private boolean dependencyCheck;
 
 	/**
 	 * Key for the context.
@@ -90,6 +92,14 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	public boolean isPopulateProtectedVariables() {
 		return populateProtectedVariables;
+	}
+	
+	public void setDependencyCheck(boolean dependencyCheck) {
+		this.dependencyCheck = dependencyCheck;
+	}
+	
+	public boolean isDependencyCheck() {
+		return dependencyCheck;
 	}
 
 	public final int getLoadCount() {
@@ -121,7 +131,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		}
 		else {
 			this.applicationContext.getBeanFactory().autowireBeanProperties(
-			    this, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+			    this, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, isDependencyCheck());
 		}
 
 		try {
