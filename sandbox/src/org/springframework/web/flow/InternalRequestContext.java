@@ -26,10 +26,12 @@ import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
 
 /**
- * Request context implementation used internally by the web flow system.
+ * Default request context implementation used internally by the web flow system.
  * <p>
  * This implementation uses a <i>synchronizer token</i> to implement
- * application transaction functionality.
+ * application transaction functionality. The token will be stored in flow
+ * scope for the duration of an application transaction. This implies that there
+ * needs to be a unique flow execution for each running application transaction.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -359,8 +361,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Returns <code>false</code> when
 	 * <ul>
 	 * <li>there is no transaction token saved in the flow scope</li>
-	 * <li>there is no transaction token included as a request event parameter
-	 * </li>
+	 * <li>there is no transaction token included as an event parameter</li>
 	 * <li>the included transaction token value does not match the transaction
 	 * token in the flow scope</li>
 	 * </ul>
