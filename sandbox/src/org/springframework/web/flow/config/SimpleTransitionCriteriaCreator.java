@@ -39,8 +39,8 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 */
 	public static final String WILDCARD_EVENT_ID = "*";
 
-	public TransitionCriteria create(String eventId) {
-		return createDefaultTransitionCriteria(eventId);
+	public TransitionCriteria create(String onCriteria) {
+		return createDefaultTransitionCriteria(onCriteria);
 	}
 
 	/**
@@ -51,14 +51,14 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 * returned that matches any event. Otherwise you get a criteria object that
 	 * matches given event id exactly.
 	 */
-	protected TransitionCriteria createDefaultTransitionCriteria(String eventId) {
-		if (WILDCARD_EVENT_ID.equals(eventId)) {
+	protected TransitionCriteria createDefaultTransitionCriteria(String onCriteria) {
+		if (WILDCARD_EVENT_ID.equals(onCriteria)) {
 			return WILDCARD_TRANSITION_CRITERIA;
 		}
 		else {
 			// implementation note: this inner class is not a class constant
 			// because we need the eventId
-			return new EventIdTransitionCriteria(eventId);
+			return new EventIdTransitionCriteria(onCriteria);
 		}
 	}
 
@@ -82,18 +82,18 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 */
 	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
 
-		private String eventId;
+		private String onCriteria;
 
-		public EventIdTransitionCriteria(String eventId) {
-			this.eventId = eventId;
+		public EventIdTransitionCriteria(String onCriteria) {
+			this.onCriteria = onCriteria;
 		}
 
 		public boolean test(RequestContext context) {
-			return context.getLastEvent().getId().equals(eventId);
+			return context.getLastEvent().getId().equals(onCriteria);
 		}
 
 		public String toString() {
-			return eventId;
+			return onCriteria;
 		}
 	}
 }
