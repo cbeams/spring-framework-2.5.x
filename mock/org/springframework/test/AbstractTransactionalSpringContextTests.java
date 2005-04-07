@@ -23,6 +23,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 /**
  * Convenient superclass for tests that should occur in a transaction, but normally
  * will roll the transaction back on the completion of each test.
+ * <br>
  *
  * <p>This is useful in a range of circumstances, allowing the following benefits:
  * <ul>
@@ -37,11 +38,18 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * The defaultRollback() property, which defaults to true, determines whether
  * transactions will complete by default.
  *
- * <p>Requires a single bean in the context implementing the PlatformTransactionManager
+ * <p>Transactional behaviour requires a single bean in the context implementing the PlatformTransactionManager
  * interface. This will be set by the superclass's Dependency Injection mechanism.
  * If using the superclass's Field Injection mechanism, the implementation should be
  * named "transactionManager". This mechanism allows the use of this superclass even
  * when there's more than one transaction manager in the context.
+ * 
+ * <p><i>This superclass can also be used without transaction management, if no PlatformTransactionManager
+ * bean is found in the context provided. Be careful about using this mode,
+ * as it allows the potential to permanently modify data. 
+ * This mode is available only if dependency checking is turned off in
+ * the AbstractDependencyInjectionSpringContextTests superclass. The non-transactional
+ * capability is provided to enabled use of the same subclass in different environments.</i>
  *
  * @author Rod Johnson
  * @since 1.1.1
@@ -73,6 +81,9 @@ public abstract class AbstractTransactionalSpringContextTests
 	}
 
 	/**
+	 * The transaction manager to use. No transaction management will be available
+	 * if this is not set. (This mode works only if dependency checking is turned off in
+	 * the AbstractDependencyInjectionSpringContextTests superclass.)
 	 * Populated by dependency injection by superclass.
 	 */
 	public void setTransactionManager(PlatformTransactionManager ptm) {
@@ -81,30 +92,37 @@ public abstract class AbstractTransactionalSpringContextTests
 
 	protected final void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
-
-		// start a transaction
-		this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
-
-		logger.info("Began transaction: transaction manager [" + this.transactionManager +
-		    "]; defaultCommit " + this.complete);
-
-		onSetUpInTransaction();
+		
+		if (transactionManager != null) {
+			// start a transaction
+			this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+			logger.info("Began transaction: transaction manager [" + this.transactionManager +
+			    "]; defaultCommit " + this.complete);
+			onSetUpInTransaction();
+		}
+		else {
+			logger.info("No transaction manager set: tests will NOT occur in a transaction");
+		}
 	}
 
 	/**
 	 * Subclasses can override this method to perform any setup operations, such
 	 * as populating a database table, in the transaction created by this class.
+	 * <b>NB:</b> Not called if there is no transaction management, due to no transaction
+	 * manager being provided in the context.
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUpInTransaction() throws Exception {
 	}
 
 	protected final void onTearDown() throws Exception {
-		try {
-			onTearDownInTransaction();
-		}
-		finally {
-			endTransaction();
+		if (transactionManager != null) {
+			try {
+				onTearDownInTransaction();
+			}
+			finally {
+				endTransaction();
+			}
 		}
 	}
 
@@ -113,6 +131,8 @@ public abstract class AbstractTransactionalSpringContextTests
 	 * The transaction is still open, so any changes made in the transaction will
 	 * still be visible.
 	 * There is no need to clean up the database, as rollback will follow automatically.
+	 * <b>NB:</b> Not called if there is no transaction management, due to no transaction
+	 * manager being provided in the context.
 	 */
 	protected void onTearDownInTransaction() {
 	}
@@ -120,8 +140,13 @@ public abstract class AbstractTransactionalSpringContextTests
 	/**
 	 * Cause the transaction to commit for this test method,
 	 * even if default is set to rollback.
+	 * @throws UnsupportedOperationException if the operation cannot be set to complete
+	 * as no transaction manager was provided
 	 */
-	protected void setComplete() {
+	protected void setComplete() throws UnsupportedOperationException {
+		if (this.transactionManager == null) {
+			throw new UnsupportedOperationException("Cannot set complete: no transaction manager");
+		}
 		this.complete = true;
 	}
 
