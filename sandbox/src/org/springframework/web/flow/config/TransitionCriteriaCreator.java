@@ -16,7 +16,7 @@ import org.springframework.web.flow.TransitionCriteria;
 public interface TransitionCriteriaCreator {
 
 	/**
-	 * Create a new transition criteria object that will match the
+	 * Create a new transition criteria object that will match on the
 	 * specified encoded criteria expression.
 	 * @param encodedCriteria the encoded criteria to match on
 	 * @return the transition criteria object
