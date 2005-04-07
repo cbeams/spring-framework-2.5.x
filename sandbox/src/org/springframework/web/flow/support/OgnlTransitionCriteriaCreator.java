@@ -45,37 +45,37 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 	 * If the supplied <code>onCriteria</code> value is an expression, then an instance
 	 * of <code>OgnlTransitionCriteria</code> is created. Otherwise, the super
 	 * class is asked to provide the default implementation of <code>TransitionCriteria</code>.
-	 * @param onCriteria an event name or expression
+	 * @param encodedCriteria an event name or expression
 	 */
-	public TransitionCriteria create(String onCriteria) {
-		if (isExpression(onCriteria)) {
+	public TransitionCriteria create(String encodedCriteria) {
+		if (isExpression(encodedCriteria)) {
 			try {
-				return new OgnlTransitionCriteria(cutExpression(onCriteria));
+				return new OgnlTransitionCriteria(cutExpression(encodedCriteria));
 			}
 			catch (ExpressionSyntaxException ex) {
-				throw new FlowBuilderException("The expression [" + onCriteria + "] has a syntax error.", ex);
+				throw new FlowBuilderException("The expression [" + encodedCriteria + "] has a syntax error.", ex);
 			}
 			catch (OgnlException ex) {
 				throw new FlowBuilderException("Unable to evaluate syntactically correct OGNL expression.", ex);
 			}
 		}
 		else {
-			return super.create(onCriteria);
+			return super.create(encodedCriteria);
 		}
 	}
 
 	/**
 	 * Check whether or not given criteria are expressed as an expression.
 	 */
-	private boolean isExpression(String onCriteria) {
-		return (onCriteria.startsWith("${") && onCriteria.endsWith("}"));
+	private boolean isExpression(String encodedCriteria) {
+		return (encodedCriteria.startsWith("${") && encodedCriteria.endsWith("}"));
 	}
 
 	/**
 	 * Cut the expression from given criteria string and return it.
 	 */
-	private String cutExpression(String onCriteria) {
-		return onCriteria.substring(2, onCriteria.length() - 1);
+	private String cutExpression(String encodedCriteria) {
+		return encodedCriteria.substring(2, encodedCriteria.length() - 1);
 	}
 
 
