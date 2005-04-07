@@ -468,7 +468,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected Transition parseTransition(Element element) {
 		String event = element.getAttribute(EVENT_ATTRIBUTE);
 		String to = element.getAttribute(TO_ATTRIBUTE);
-		return new Transition(event, to);
+		return new Transition(getTransitionCriteriaCreator().create(event), to);
 	}
 
 	/**

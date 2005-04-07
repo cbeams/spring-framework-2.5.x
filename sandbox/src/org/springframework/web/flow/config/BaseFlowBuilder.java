@@ -55,6 +55,11 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	 * An abstract factory for flow creation.
 	 */
 	private FlowCreator flowCreator = new DefaultFlowCreator();
+	
+	/**
+	 * Factory that creates transition criteria.
+	 */
+	private TransitionCriteriaCreator transitionCriteriaCreator = new SimpleTransitionCriteriaCreator();
 
 	/**
 	 * The <code>Flow</code> produced by this builder.
@@ -106,6 +111,20 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	 */
 	public void setFlowCreator(FlowCreator flowCreator) {
 		this.flowCreator = flowCreator;
+	}
+	
+	/**
+	 * Returns the factory used to create transition criteria.
+	 */
+	public TransitionCriteriaCreator getTransitionCriteriaCreator() {
+		return transitionCriteriaCreator;
+	}
+	
+	/**
+	 * Set the factory used to create transition criteria.
+	 */
+	public void setTransitionCriteriaCreator(TransitionCriteriaCreator transitionCriteriaCreator) {
+		this.transitionCriteriaCreator = transitionCriteriaCreator;
 	}
 
 	/**
