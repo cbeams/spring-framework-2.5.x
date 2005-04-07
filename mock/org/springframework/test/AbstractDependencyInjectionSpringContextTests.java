@@ -68,7 +68,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	private boolean populateProtectedVariables;
 	
-	private boolean dependencyCheck;
+	private boolean dependencyCheck = true;
 
 	/**
 	 * Key for the context.
@@ -94,6 +94,14 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		return populateProtectedVariables;
 	}
 	
+	/**
+	 * Set whether or not dependency checking should be performed
+	 * for test properties set by Dependency Injection. The default
+	 * is true, meaning that tests cannot be run unless all properties
+	 * are populated.
+	 * @param dependencyCheck whether or not to perform
+	 * dependency checking on all object properties.
+	 */
 	public void setDependencyCheck(boolean dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;
 	}
