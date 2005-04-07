@@ -1,7 +1,6 @@
 package org.springframework.samples.countries.web.views;
 
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,13 +23,16 @@ import org.springframework.web.servlet.view.document.AbstractExcelView;
 /**
  * This view demonstrates how to send an Excel file with the Spring Framework
  * using the jakarta's POI library.
- * <br>Here create a document from scratch, but it is also possible to start from a template
- * document. In this case, add an url property in the view definition like:
- * <br>countries_excelView.url=/WEB-INF/views/excel/countries
- * <br>Creating the directories, put an excel file '/WEB-INF/views/excel/countries.xls', it will be taken
- * as a starting point.
- * <br>You can also add in the same directory files like 'countries_en.xls', 'countries_fr.xls' and so on.
- * Theses files will take precedence if the user's locale matches.
+ *
+ * <p>Here create a document from scratch, but it is also possible to start from a template
+ * document. In this case, add an url property in the view definition like:<br>
+ * countries_excelView.url=/WEB-INF/views/excel/countries
+ *
+ * <p>Creating the directories, put an excel file '/WEB-INF/views/excel/countries.xls',
+ * it will be taken as a starting point.
+ *
+ * <p>You can also add in the same directory files like 'countries_en.xls', 'countries_fr.xls'
+ * and so on. Theses files will take precedence if the user's locale matches.
  *
  * @author Jean-Pierre Pawlak
  */
@@ -42,17 +44,16 @@ public class CountriesExcelView extends AbstractExcelView {
 
 		// We search the data to insert.
 		RefreshablePagedListHolder pgHolder = (RefreshablePagedListHolder) model.get("countries");
-		Locale loc = pgHolder.getLocale();
 
 		// As we use a from scratch document, we create a new sheet.
-		HSSFSheet sheet = wb.createSheet("SPRING-Countries");
+		HSSFSheet sheet = wb.createSheet("Spring Countries");
 		// If we will use the first sheet from an existing document, replace by this:
 		// sheet = wb.getSheetAt(0);
 
 		// We simply put an error message on the first cell if no list is available
 		// Nevertheless, it should never be null as the controller verify it.
-		if (null == pgHolder) {
-			getCell(sheet, 0, 0).setCellValue(getMessageSourceAccessor().getMessage("nolist", loc));
+		if (pgHolder == null) {
+			getCell(sheet, 0, 0).setCellValue(getMessageSourceAccessor().getMessage("nolist"));
 			return;
 		}
 
@@ -96,53 +97,53 @@ public class CountriesExcelView extends AbstractExcelView {
 		// We put some information about the user request on the sheet
 		// getCell is a useful add-on provided by the AbstractExcelView
 		// The labels could be pre-inserted in a template document
-		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("date.extraction", loc));
+		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("date.extraction"));
 		getCell(sheet, row, 1).setCellValue(pgHolder.getRefreshDate());
 		getCell(sheet, row, 1).setCellStyle(dateStyle);
 		row++;
 
-		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("nbRecords", loc));
+		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("nbRecords"));
 		getCell(sheet, row, 1).setCellValue(pgHolder.getNrOfElements());
 		getCell(sheet, row, 1).setCellStyle(csp);
 		row++;
 
-		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("sort.name", loc));
-		getCell(sheet, row, 1).setCellValue(getMessageSourceAccessor().getMessage(sort.getProperty(), "", loc));
+		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("sort.name"));
+		getCell(sheet, row, 1).setCellValue(getMessageSourceAccessor().getMessage(sort.getProperty(), ""));
 		getCell(sheet, row, 1).setCellStyle(csp);
 		row++;
 
-		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("sort.asc", loc));
-		getCell(sheet, row, 1).setCellValue(getMessageSourceAccessor().getMessage(new Boolean(sort.isAscending()).toString(), loc));
+		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("sort.asc"));
+		getCell(sheet, row, 1).setCellValue(getMessageSourceAccessor().getMessage(new Boolean(sort.isAscending()).toString()));
 		getCell(sheet, row, 1).setCellStyle(csp);
 		row++;
 
-		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("sort.igncase", loc));
-		getCell(sheet, row, 1).setCellValue(getMessageSourceAccessor().getMessage(new Boolean(sort.isIgnoreCase()).toString(), loc));
+		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("sort.igncase"));
+		getCell(sheet, row, 1).setCellValue(getMessageSourceAccessor().getMessage(new Boolean(sort.isIgnoreCase()).toString()));
 		getCell(sheet, row, 1).setCellStyle(csp);
 		row++;
 
-		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("filter.name", loc));
+		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("filter.name"));
 		getCell(sheet, row, 1).setCellValue(filter.getName());
 		getCell(sheet, row, 1).setCellStyle(csp);
 		row++;
 
-		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("filter.code", loc));
+		getCell(sheet, row, 0).setCellValue(getMessageSourceAccessor().getMessage("filter.code"));
 		getCell(sheet, row, 1).setCellValue(filter.getCode());
 		getCell(sheet, row, 1).setCellStyle(csp);
 		// row += 3;
 
 		// We create a second shhet for the data
-		sheet = wb.createSheet(getMessageSourceAccessor().getMessage("countries", loc));
+		sheet = wb.createSheet(getMessageSourceAccessor().getMessage("countries"));
 		sheet.setColumnWidth((short) 1, (short) (30 * 256));
 		row = 0;
 
 		// We put now the headers of the list on the sheet
 		HSSFCell cell = getCell(sheet, row, 0);
 		cell.setCellStyle(cs);
-		cell.setCellValue(getMessageSourceAccessor().getMessage("code", loc));
+		cell.setCellValue(getMessageSourceAccessor().getMessage("code"));
 		cell = getCell(sheet, row, 1);
 		cell.setCellStyle(cs);
-		cell.setCellValue(getMessageSourceAccessor().getMessage("name", loc));
+		cell.setCellValue(getMessageSourceAccessor().getMessage("name"));
 		row++;
 
 		// We put now the countries from the list on the sheet
