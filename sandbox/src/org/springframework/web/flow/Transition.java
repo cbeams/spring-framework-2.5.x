@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.io.Serializable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.ToStringCreator;
@@ -38,12 +36,6 @@ import org.springframework.util.Assert;
 public class Transition {
 
 	protected final Log logger = LogFactory.getLog(Transition.class);
-
-	/**
-	 * Event id value ("*") that will cause this transition to match on any
-	 * event.
-	 */
-	public static final String WILDCARD_EVENT_ID = "*";
 
 	/**
 	 * The source state that owns this transition.
@@ -69,20 +61,6 @@ public class Transition {
 
 	/**
 	 * Create a new transition.
-	 * @param eventId id of the event on which this transition should be
-	 *        executed, or "*" if it should execute on any event
-	 * @param targetStateId the id of the state to transition to when this
-	 *        transition is executed
-	 */
-	public Transition(String eventId, String targetStateId) {
-		Assert.notNull(eventId, "The event id property is required");
-		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.criteria = createDefaultTransitionCriteria(eventId);
-		this.targetStateId = targetStateId;
-	}
-
-	/**
-	 * Create a new transition.
 	 * @param criteria strategy object used to determine if this transition
 	 *        should be executed given contextual information
 	 * @param targetStateId the id of the state to transition to when this
@@ -96,33 +74,13 @@ public class Transition {
 	}
 
 	/**
-	 * Create a default constraint implementation that will match true on events
-	 * with the provided event id.
-	 * <p>
-	 * If the given event id is "*", a wildcard event criteria object will be
-	 * returned that matches any event. Otherwise you get a criteria object that
-	 * matches given event id exactly.
-	 */
-	protected TransitionCriteria createDefaultTransitionCriteria(String eventId) {
-		if (WILDCARD_EVENT_ID.equals(eventId)) {
-			return WILDCARD_TRANSITION_CRITERIA;
-		}
-		else {
-			// implementation note: this inner class is not a class constant
-			// because we need the eventId
-			return new EventIdTransitionCriteria(eventId);
-		}
-	}
-
-	/**
 	 * Returns the owning source (<i>from</i>) state of this transition.
 	 * @return the source state
 	 * @throws IllegalStateException if the source state has not been set
 	 */
 	public TransitionableState getSourceState() throws IllegalStateException {
-		Assert
-				.state(sourceState != null,
-						"The source state is not yet been set -- this transition must be added to exactly one owning state definition!");
+		Assert.state(sourceState != null,
+				"The source state is not yet been set -- this transition must be added to exactly one owning state definition!");
 		return sourceState;
 	}
 
@@ -206,41 +164,6 @@ public class Transition {
 			}
 		}
 		return viewDescriptor;
-	}
-
-	/**
-	 * Event matching criteria that matches on any event.
-	 */
-	public static final TransitionCriteria WILDCARD_TRANSITION_CRITERIA = new TransitionCriteria() {
-		public boolean test(RequestContext context) {
-			return true;
-		}
-
-		public String toString() {
-			return WILDCARD_EVENT_ID;
-		}
-	};
-
-	/**
-	 * Simple, default transition criteria that matches on an eventId and
-	 * nothing else. Specifically, if the last event that occured has id
-	 * ${eventId}, this criteria will return true.
-	 */
-	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
-
-		private String eventId;
-
-		public EventIdTransitionCriteria(String eventId) {
-			this.eventId = eventId;
-		}
-
-		public boolean test(RequestContext context) {
-			return context.getLastEvent().getId().equals(eventId);
-		}
-
-		public String toString() {
-			return eventId;
-		}
 	}
 
 	public String toString() {
