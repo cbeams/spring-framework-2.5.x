@@ -1,4 +1,3 @@
-
 package org.springframework.web.flow.config;
 
 import org.springframework.web.flow.TransitionCriteria;
@@ -17,11 +16,11 @@ import org.springframework.web.flow.TransitionCriteria;
 public interface TransitionCriteriaCreator {
 
 	/**
-	 * Create a new transition criteria object that will match <i>on</i>
-	 * given criteria, which are expressed as a string.
-	 * @param onCriteria the criteria to match on
+	 * Create a new transition criteria object that will match the
+	 * specified encoded criteria expression.
+	 * @param encodedCriteria the encoded criteria to match on
 	 * @return the transition criteria object
 	 */
-	TransitionCriteria create(String onCriteria);
+	public TransitionCriteria create(String encodedCriteria);
 
 }

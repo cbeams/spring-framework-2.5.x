@@ -39,8 +39,8 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 */
 	public static final String WILDCARD_EVENT_ID = "*";
 
-	public TransitionCriteria create(String onCriteria) {
-		return createDefaultTransitionCriteria(onCriteria);
+	public TransitionCriteria create(String encodedCriteria) {
+		return createDefaultTransitionCriteria(encodedCriteria);
 	}
 
 	/**
@@ -51,14 +51,14 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 * returned that matches any event. Otherwise you get a criteria object that
 	 * matches given event id exactly.
 	 */
-	protected TransitionCriteria createDefaultTransitionCriteria(String onCriteria) {
-		if (WILDCARD_EVENT_ID.equals(onCriteria)) {
+	protected TransitionCriteria createDefaultTransitionCriteria(String encodedCriteria) {
+		if (WILDCARD_EVENT_ID.equals(encodedCriteria)) {
 			return WILDCARD_TRANSITION_CRITERIA;
 		}
 		else {
 			// implementation note: this inner class is not a class constant
 			// because we need the eventId
-			return new EventIdTransitionCriteria(onCriteria);
+			return new EventIdTransitionCriteria(encodedCriteria);
 		}
 	}
 
