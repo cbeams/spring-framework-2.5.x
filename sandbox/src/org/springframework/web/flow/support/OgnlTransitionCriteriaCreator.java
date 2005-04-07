@@ -13,7 +13,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-
 package org.springframework.web.flow.support;
 
 import ognl.ExpressionSyntaxException;
@@ -31,43 +30,66 @@ import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
  * of <code>OgnlTransitionCriteria</code> that will evaluate <code>expr</code> against
  * the <code>RequestContext</code> using OGNL during <code>test(RequestContext)</code>.
  *
- * If the <code>on</code> value passed to <code>create(String)</code> is not an expression
- * this class delegates to the super class to get an instance of the default
+ * If the <code>onCriteria</code> value passed to <code>create(String)</code> is not an
+ * expression this class delegates to the super class to get an instance of the default
  * <code>TransitionCriteria</code> for the event name.
+ * 
+ * @see OgnlTransitionCriteriaCreator
+ * @see org.springframework.web.flow.config.SimpleTransitionCriteriaCreator
+ * 
  * @author Rob Harrop
- * @see OgnlTransitionCriteria
- * @see SimpleTransitionCriteriaCreator
  */
 public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreator {
 
 	/**
-	 * If the supplied <code>on</code> value is an expression, then an instance
+	 * If the supplied <code>onCriteria</code> value is an expression, then an instance
 	 * of <code>OgnlTransitionCriteria</code> is created. Otherwise, the super
 	 * class is asked to provide the default implementation of <code>TransitionCriteria</code>.
-	 * @param on an event name or expression
+	 * @param onCriteria an event name or expression
 	 */
-	public TransitionCriteria create(String on) {
-
-		if (isExpression(on)) {
+	public TransitionCriteria create(String onCriteria) {
+		if (isExpression(onCriteria)) {
 			try {
-				return new OgnlTransitionCriteria(on.substring(2, on.length() - 1));
+				return new OgnlTransitionCriteria(cutExpression(onCriteria));
 			}
 			catch (ExpressionSyntaxException ex) {
-				throw new FlowBuilderException("The expression [" + on + "] has a syntax error.", ex);
+				throw new FlowBuilderException("The expression [" + onCriteria + "] has a syntax error.", ex);
 			}
 			catch (OgnlException ex) {
 				throw new FlowBuilderException("Unable to evaluate syntactically correct OGNL expression.", ex);
 			}
 		}
 		else {
-			return super.create(on);
+			return super.create(onCriteria);
 		}
 	}
 
-	private boolean isExpression(String on) {
-		return (on.startsWith("${") && on.endsWith("}"));
+	/**
+	 * Check whether or not given criteria are expressed as an expression.
+	 */
+	private boolean isExpression(String onCriteria) {
+		return (onCriteria.startsWith("${") && onCriteria.endsWith("}"));
 	}
 
+	/**
+	 * Cut the expression from given criteria string and return it.
+	 */
+	private String cutExpression(String onCriteria) {
+		return onCriteria.substring(2, onCriteria.length() - 1);
+	}
+
+
+	/**
+	 * Transtition criteria that tests the value of a OGNL expression.
+	 * <a href="http://www.ognl.org">OGNL</a> is the Object Graph
+	 * Navigation Language: an expression language for getting and setting
+	 * the properties of Java objects. In this case, it is used to express
+	 * a condition that guards transition execution in a web flow.
+	 *
+	 * @author Keith Donald
+	 * @author Erwin Vervaet
+	 * @author Rob Harrop
+	 */
 	public static class OgnlTransitionCriteria implements TransitionCriteria {
 
 		/**
@@ -79,7 +101,7 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 		 * Create a new OGNL based transition criteria object.
 		 *
 		 * @param expressionString the OGNL expression testing the criteria, this
-		 * expression should be a condition that returns a Boolean value
+		 *        expression should be a condition that returns a Boolean value
 		 */
 		public OgnlTransitionCriteria(String expressionString) throws OgnlException {
 			Assert.hasText(expressionString);
