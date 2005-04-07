@@ -23,10 +23,10 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 				return new OgnlTransitionCriteria(on.substring(2, on.length() - 1));
 			}
 			catch (ExpressionSyntaxException ex) {
-				throw new FlowBuilderException("The expression [" + on + "] has a syntax error", ex);
+				throw new FlowBuilderException("The expression [" + on + "] has a syntax error.", ex);
 			}
 			catch (OgnlException ex) {
-				throw new FlowBuilderException(("Unable to evaluate syntactically correct OGNL expression.", ex);
+				throw new FlowBuilderException("Unable to evaluate syntactically correct OGNL expression.", ex);
 			}
 		}
 		else {
