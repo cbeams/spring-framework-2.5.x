@@ -26,8 +26,8 @@ import org.springframework.web.flow.TransitionCriteria;
  * on events with the provided event id. If the given event id is "*",
  * a wildcard event criteria object will be returned that matches any event.
  * Otherwise you get a criteria object that matches given event id exactly.
- * 
- * @author Rob Harraop
+ *
+ * @author Rob Harrop
  * @author Erwin Vervaet
  * @author Keith Donald
  */
@@ -38,7 +38,7 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 * on any event.
 	 */
 	public static final String WILDCARD_EVENT_ID = "*";
-	
+
 	public TransitionCriteria create(String eventId) {
 		return createDefaultTransitionCriteria(eventId);
 	}
