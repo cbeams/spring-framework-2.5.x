@@ -8,6 +8,7 @@ import ognl.OgnlException;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
 
 /**
@@ -18,7 +19,15 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 	public TransitionCriteria create(String on) {
 
 		if (isExpression(on)) {
-			return new OgnlTransitionCriteria(on.substring(2, on.length() - 1));
+			try {
+				return new OgnlTransitionCriteria(on.substring(2, on.length() - 1));
+			}
+			catch (ExpressionSyntaxException ex) {
+				throw new FlowBuilderException("The expression [" + on + "] has a syntax error", ex);
+			}
+			catch (OgnlException ex) {
+				throw new FlowBuilderException(("Unable to evaluate syntactically correct OGNL expression.", ex);
+			}
 		}
 		else {
 			return super.create(on);
@@ -42,20 +51,12 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 		 * @param expressionString the OGNL expression testing the criteria, this
 		 * expression should be a condition that returns a Boolean value
 		 */
-		public OgnlTransitionCriteria(String expressionString) {
+		public OgnlTransitionCriteria(String expressionString) throws OgnlException {
 			Assert.hasText(expressionString);
 
-			try {
-				// is is *possible* to check that the expression can only return
-				// a boolean in most cases but it is not foolproof so we don't
-				this.expression = Ognl.parseExpression(expressionString);
-			}
-			catch (ExpressionSyntaxException ex) {
-				throw new IllegalArgumentException("The expression [" + expressionString + "] has a syntax error: " + ex);
-			}
-			catch (OgnlException ex) {
-				throw new IllegalStateException("Unable to evaluate syntactically correct OGNL expression.", ex);
-			}
+			// is is *possible* to check that the expression can only return
+			// a boolean in most cases but it is not foolproof so we don't
+			this.expression = Ognl.parseExpression(expressionString);
 		}
 
 		public boolean test(RequestContext context) {
