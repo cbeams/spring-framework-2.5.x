@@ -61,7 +61,7 @@ public abstract class LocaleContextHolder {
 	 * Will implicitly create a LocaleContext for the given Locale.
 	 * @param locale the current Locale, or null to reset
 	 * the thread-bound context
-	 * @see SimpleLocaleContext(java.util.Locale)
+	 * @see SimpleLocaleContext#SimpleLocaleContext(java.util.Locale)
 	 */
 	public static void setLocale(Locale locale) {
 		localeContextHolder.set(locale != null ? new SimpleLocaleContext(locale) : null);
