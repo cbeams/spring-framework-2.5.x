@@ -39,7 +39,7 @@ import org.springframework.web.servlet.ModelAndView;
  * <table border="1">
  * <tr>
  * <td><b>name</b></td>
- * <td><b>default</b><td>
+ * <td><b>default</b></td>
  * <td><b>description</b></td>
  * </tr>
  * <tr>
