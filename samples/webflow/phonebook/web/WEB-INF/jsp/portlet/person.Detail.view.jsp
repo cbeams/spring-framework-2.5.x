@@ -1,16 +1,12 @@
 <%@ page session="false" %>
-
 <%@ page import="org.springframework.samples.phonebook.domain.Person" %>
-
 <%@ taglib uri="http://java.sun.com/portlet" prefix="portlet" %>
 
-<jsp:useBean id="person" scope="request" 
-             class="org.springframework.samples.phonebook.domain.Person"/>
+<jsp:useBean id="person" scope="request" class="org.springframework.samples.phonebook.domain.Person"/>
 
 <FORM method="post" name="backForm" action="<portlet:actionURL />">
     <INPUT type="hidden" name="_flowId" value="person.Detail" />
-    <INPUT type="hidden" name="_flowExecutionId" 
-           value="<%=request.getAttribute("flowExecutionId") %>" />
+    <INPUT type="hidden" name="_flowExecutionId" value="<%=request.getAttribute("flowExecutionId") %>" />
     <INPUT type="hidden" name="_eventId" value="back" />
 </FORM>
 <TABLE>
@@ -64,8 +60,7 @@
   <TR>
     <TD COLSPAN="2">
       <DIV align="right">
-        <INPUT type="button" class="portlet-form-button" value="Back"
-               onclick="javascript:document.backForm.submit()" >
+        <INPUT type="button" class="portlet-form-button" value="Back" onclick="javascript:document.backForm.submit()" >
       </DIV>
     </TD>
   </TR>
