@@ -26,7 +26,7 @@
 	<!--  For Portlet support. -->
 	<servlet>
 		<servlet-name>viewRendererServlet</servlet-name>
-		<servlet-class>org.springframework.web.servlet.ViewRendererServlet</servlet-class>
+		<servlet-class>org.springframework.web.servlet.TomcatViewRendererServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>viewRendererServlet</servlet-name>
