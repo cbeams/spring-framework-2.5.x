@@ -1349,6 +1349,7 @@
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/util/**"/>
 				<include name="org/springframework/validation/*"/>
+				<include name="org/springframework/web/servlet/**"/>
 				<include name="org/springframework/web/portlet/**"/>
 				<include name="org/springframework/web/struts/**"/>
 				<include name="org/springframework/mock/**"/>
@@ -1373,6 +1374,7 @@
 			<classpath location="${target.classes.dir}"/>
 			<packageset dir="${sandbox.src.dir}">
 				<include name="org/springframework/web/flow/**"/>
+				<include name="org/springframework/web/servlet/**"/>
 				<include name="org/springframework/web/portlet/**"/>
 				<include name="org/springframework/web/struts/**"/>
 				<include name="org/springframework/binding/**"/>
@@ -1392,6 +1394,7 @@
 		<zip zipfile="${dist.dir}/spring-webflow-src.zip">
 			<fileset dir="${sandbox.src.dir}">
 				<include name="org/springframework/web/flow/**"/>
+				<include name="org/springframework/web/servlet/**"/>
 				<include name="org/springframework/web/portlet/**"/>
 				<include name="org/springframework/web/struts/**"/>
 				<include name="org/springframework/binding/**"/>
@@ -1414,6 +1417,7 @@
 			<include name="dist/spring-webflow.dtd"/>
 			<include name="builds/**"/>
 			<include name="sandbox/src/org/springframework/web/flow/**"/>
+			<include name="sandbox/src/org/springframework/web/servlet/**"/>
 			<include name="sandbox/src/org/springframework/web/portlet/**"/>
 			<include name="sandbox/src/org/springframework/web/struts/**"/>
             <include name="sandbox/src/org/springframework/core/**"/>
