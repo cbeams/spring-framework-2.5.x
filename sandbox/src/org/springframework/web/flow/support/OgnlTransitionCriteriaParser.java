@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.config.FlowBuilderException;
-import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
+import org.springframework.web.flow.config.SimpleTransitionCriteriaParser;
 
 /**
  * When presented with expressions in the format <code>${expr}</code>, creates instances
@@ -34,12 +34,12 @@ import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
  * expression this class delegates to the super class to get an instance of the default
  * <code>TransitionCriteria</code> for the event name.
  * 
- * @see OgnlTransitionCriteriaCreator
- * @see org.springframework.web.flow.config.SimpleTransitionCriteriaCreator
+ * @see OgnlTransitionCriteriaParser
+ * @see org.springframework.web.flow.config.SimpleTransitionCriteriaParser
  * 
  * @author Rob Harrop
  */
-public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreator {
+public class OgnlTransitionCriteriaParser extends SimpleTransitionCriteriaParser {
 
 	/**
 	 * If the supplied <code>onCriteria</code> value is an expression, then an instance
@@ -47,7 +47,7 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 	 * class is asked to provide the default implementation of <code>TransitionCriteria</code>.
 	 * @param encodedCriteria an event name or expression
 	 */
-	public TransitionCriteria create(String encodedCriteria) {
+	public TransitionCriteria parse(String encodedCriteria) {
 		if (isExpression(encodedCriteria)) {
 			try {
 				return new OgnlTransitionCriteria(cutExpression(encodedCriteria));
@@ -60,7 +60,7 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 			}
 		}
 		else {
-			return super.create(encodedCriteria);
+			return super.parse(encodedCriteria);
 		}
 	}
 

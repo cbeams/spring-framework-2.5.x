@@ -13,7 +13,7 @@ import org.springframework.web.flow.TransitionCriteria;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public interface TransitionCriteriaCreator {
+public interface TransitionCriteriaParser {
 
 	/**
 	 * Create a new transition criteria object that will match on the
@@ -21,6 +21,6 @@ public interface TransitionCriteriaCreator {
 	 * @param encodedCriteria the encoded criteria to match on
 	 * @return the transition criteria object
 	 */
-	public TransitionCriteria create(String encodedCriteria);
+	public TransitionCriteria parse(String encodedCriteria);
 
 }

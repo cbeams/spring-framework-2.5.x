@@ -31,7 +31,7 @@ import org.springframework.web.flow.TransitionCriteria;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreator {
+public class SimpleTransitionCriteriaParser implements TransitionCriteriaParser {
 
 	/**
 	 * Event id value ("*") that will cause the transition to match
@@ -39,7 +39,7 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 */
 	public static final String WILDCARD_EVENT_ID = "*";
 
-	public TransitionCriteria create(String encodedCriteria) {
+	public TransitionCriteria parse(String encodedCriteria) {
 		return createDefaultTransitionCriteria(encodedCriteria);
 	}
 
