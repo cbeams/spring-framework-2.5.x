@@ -41,20 +41,26 @@ import org.apache.commons.logging.LogFactory;
  * without fetching a Connection from the pool or communicating with the
  * database; this will be done lazily on first creation of a JDBC Statement.
  *
+ * <p><b>If you configure both a LazyConnectionDataSourceProxy and a
+ * TransactionAwareDataSourceProxy, make sure that the latter is the outermost
+ * DataSource.</b> In such a scenario, data access code will talk to the
+ * transaction-aware DataSource, which will in turn work with the
+ * LazyConnectionDataSourceProxy.
+ *
  * <p>Lazy fetching of physical JDBC Connections is particularly beneficial
  * in a generic transaction demarcation environment. It allows you to demarcate
  * transactions on all methods that could potentially perform data access,
  * without paying a performance penalty if no actual data access happens.
  *
- * <p><b>This DataSource proxy gives you behavior analogous to JTA and a
+ * <p>This DataSource proxy gives you behavior analogous to JTA and a
  * transactional JNDI DataSource (as provided by the J2EE server), even
  * with a local transaction strategy like DataSourceTransactionManager or
- * HibernateTransactionManager.</b> It does not add value with Spring's
+ * HibernateTransactionManager. It does not add value with Spring's
  * JtaTransactionManager as transaction strategy.
  *
  * <p>Lazy fetching of JDBC Connections is also recommended for read-only
  * operations with Hibernate, in particular if the chances of resolving the
- * result in the second-level cache are high.</b> This avoids the need to
+ * result in the second-level cache are high. This avoids the need to
  * communicate with the database at all for such read-only operations.
  * You will get the same effect with non-transactional reads, but lazy fetching
  * of JDBC Connections allows you to still perform reads in transactions.
@@ -243,8 +249,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			// Handle getTargetConnection method: return underlying connection.
 			if (method.getName().equals("getTargetConnection")) {
+				// Handle getTargetConnection method: return underlying connection.
 				return getTargetConnection(method);
 			}
 			else if (method.getName().equals("equals")) {

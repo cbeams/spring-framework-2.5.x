@@ -30,6 +30,16 @@ import javax.sql.DataSource;
  * Proxy for a target DataSource, adding awareness of Spring-managed transactions.
  * Similar to a transactional JNDI DataSource as provided by a J2EE server.
  *
+ * <p>Data access code that should remain unaware of Spring's data access support
+ * can work with this proxy to seamlessly participate in Spring-managed transactions.
+ * Note that the transaction manager, for example DataSourceTransactionManager,
+ * still needs to work with underlying DataSource, <i>not</i> with this proxy.
+ *
+ * <p><b>Make sure that TransactionAwareDataSourceProxy is the outermost DataSource
+ * of a chain of DataSource proxies/adapters.</b> TransactionAwareDataSourceProxy
+ * can delegate either directly to the target connection pool or to some intermediate
+ * proxy/adapter like LazyConnectionDataSourceProxy or UserCredentialsDataSourceAdapter.
+ *
  * <p>Delegates to DataSourceUtils for automatically participating in thread-bound
  * transactions, for example managed by DataSourceTransactionManager.
  * <code>getConnection</code> calls and <code>close<code> calls on returned Connections
@@ -42,10 +52,10 @@ import javax.sql.DataSource;
  * JDBC operation objects to get transaction participation even without a proxy for
  * the target DataSource, avoiding the need to define such a proxy in the first place.
  *
- * <p>As a further effect, using a transaction-aware DataSource will apply
- * remaining transaction timeouts to all created JDBC Statements.
- * This means that all operations performed by the SqlMapClient will
- * automatically participate in Spring-managed transaction timeouts.
+ * <p>As a further effect, using a transaction-aware DataSource will apply remaining
+ * transaction timeouts to all created JDBC (Prepared/Callable)Statement. This means
+ * that all operations performed through standard JDBC will automatically participate
+ * in Spring-managed transaction timeouts.
  *
  * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections to
  * handle close calls on them properly. Therefore, the returned Connections cannot
