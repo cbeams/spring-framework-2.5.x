@@ -1348,8 +1348,10 @@
 				<include name="org/springframework/binding/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/util/**"/>
-				<include name="org/springframework/validation/**"/>
+				<include name="org/springframework/validation/PropertyEditorRegistrar.java"/>
+				<include name="org/springframework/web/portlet/**"/>
 				<include name="org/springframework/web/struts/**"/>
+				<include name="org/springframework/mock/**"/>
 				<include name="org/springframework/test/**"/>
 			</fileset>
 			<manifest>
@@ -1371,10 +1373,13 @@
 			<classpath location="${target.classes.dir}"/>
 			<packageset dir="${sandbox.src.dir}">
 				<include name="org/springframework/web/flow/**"/>
+				<include name="org/springframework/web/portlet/**"/>
 				<include name="org/springframework/web/struts/**"/>
 				<include name="org/springframework/binding/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/util/**"/>
+				<include name="org/springframework/validation/PropertyEditorRegistrar.java"/>
+				<include name="org/springframework/mock/**"/>
 				<include name="org/springframework/test/**"/>
 			</packageset>
 			<!-- Unfortunately, jDocs have switched off their package listing, so we can't link to jDocs :( -->
@@ -1387,10 +1392,13 @@
 		<zip zipfile="${dist.dir}/spring-webflow-src.zip">
 			<fileset dir="${sandbox.src.dir}">
 				<include name="org/springframework/web/flow/**"/>
+				<include name="org/springframework/web/portlet/**"/>
 				<include name="org/springframework/web/struts/**"/>
 				<include name="org/springframework/binding/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/util/**"/>
+				<include name="org/springframework/validation/PropertyEditorRegistrar.java"/>
+				<include name="org/springframework/mock/**"/>
 				<include name="org/springframework/test/**"/>
 			</fileset>
 		</zip>
@@ -1406,16 +1414,20 @@
 			<include name="dist/spring-webflow.dtd"/>
 			<include name="builds/**"/>
 			<include name="sandbox/src/org/springframework/web/flow/**"/>
-            <include name="sandbox/src/org/springframework/web/struts/**"/>
+			<include name="sandbox/src/org/springframework/web/portlet/**"/>
+			<include name="sandbox/src/org/springframework/web/struts/**"/>
             <include name="sandbox/src/org/springframework/core/**"/>
-			<include name="sandbox/src/org/springframework/util/**"/>
             <include name="sandbox/src/org/springframework/binding/**"/>
-  			<include name="sandbox/test/org/springframework/web/flow/**"/>
-            <include name="sandbox/test/org/springframework/web/struts/**"/>
+			<include name="sandbox/src/org/springframework/util/**"/>
+			<include name="sandbox/src/org/springframework/validation/PropertyEditorRegistrar.java"/>
+			<include name="sandbox/src/org/springframework/mock/**"/>
+			<include name="sandbox/src/org/springframework/test/**"/>
+			<include name="sandbox/test/org/springframework/web/flow/**"/>
+			<include name="sandbox/test/org/springframework/web/portlet/**"/>
+			<include name="sandbox/test/org/springframework/web/struts/**"/>
 			<include name="sandbox/test/springframework/core/**"/>
-            <include name="sandbox/test/org/springframework/util/**"/>
             <include name="sandbox/test/org/springframework/binding/**"/>
-            <include name="sandbox/test/org/springframework/validation/**"/>
+            <include name="sandbox/test/org/springframework/util/**"/>
 			<include name="samples/webflow/**"/>
 			<include name="notice.txt"/>
 			<include name="license.txt"/>
