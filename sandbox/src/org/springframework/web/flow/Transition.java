@@ -44,7 +44,8 @@ public class Transition {
 
 	/**
 	 * The criteria that determine whether or not this transition should
-	 * execute.
+	 * execute. These criteria are said to <i>guard</i> execution of the
+	 * transition.
 	 */
 	private TransitionCriteria criteria;
 
@@ -148,7 +149,8 @@ public class Transition {
 		State state = null;
 		try {
 			state = getTargetState();
-		} catch (NoSuchFlowStateException e) {
+		}
+		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
 		// enter the target state (note: any exceptions are propagated)
