@@ -35,6 +35,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -555,7 +556,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			catch (UnsatisfiedDependencyException ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Ignoring constructor [" + constructor + "] of bean '" + beanName +
-							"': could not satisfy dependencies", ex);
+							"': " + ex.getMessage());
 				}
 				if (i == candidates.length - 1 && constructorToUse == null) {
 					throw ex;
@@ -641,7 +642,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				try {
 					args[j] = doTypeConversionIfNecessary(valueHolder.getValue(), argTypes[j], bw);
 				}
-				catch (BeansException ex) {
+				catch (TypeMismatchException ex) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
 							"Could not convert constructor argument value [" + valueHolder.getValue() +

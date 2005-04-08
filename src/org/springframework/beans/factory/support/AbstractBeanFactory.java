@@ -37,6 +37,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -578,10 +579,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param targetType the target type
 	 * @param bw the BeanWrapper to work on
 	 * @return the converted value, matching the target type
-	 * @throws BeansException in case of errors
+	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
+	 * @see org.springframework.beans.BeanWrapperImpl#doTypeConversionIfNecessary(Object, Class)
 	 */
 	protected Object doTypeConversionIfNecessary(Object value, Class targetType, BeanWrapper bw)
-			throws BeansException {
+			throws TypeMismatchException {
 
 		// We need BeanWrapperImpl for separate type conversion.
 		if (!(bw instanceof BeanWrapperImpl)) {
