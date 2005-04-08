@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+  <!-- ResourceViewResolver -->
+
+  <bean id="viewResolver"
+        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <property name="cache">
+      <value>true</value>
+    </property>
+    <property name="viewClass">
+      <value>org.springframework.web.servlet.view.JstlView</value>
+    </property>
+    <property name="prefix">
+      <value>/WEB-INF/jsp/portlet/</value>
+    </property>
+    <property name="suffix">
+      <value>.jsp</value>
+    </property>
+  </bean>
+
+  <!-- PortletMode controller Map -->
+
+  <bean id="portletModeControllerMapping"
+        class="org.springframework.web.portlet.support.PortletModeControllerMapping">
+    <property name="portletModeMap">
+      <map>
+        <entry key="view">
+          <ref bean="viewModeFrontController" />
+        </entry>
+      </map>
+    </property>
+  </bean>
+
+	<!--
+	  - Front controller for VIEW PortletMode. A view that kicks off a new flow
+	  - execution may parameterize this controller with a _flowId parameter.
+	  - A view participating in an existing flow execution may simply pass it the
+	  - appropriate _flowExecutionId and _eventId.
+    -->
+  <bean id="viewModeFrontController"
+        class="org.springframework.web.flow.portlet.PortletFlowController">
+		<property name="flowExecutionManager">
+			<bean class="org.springframework.web.flow.execution.portlet.PortletFlowExecutionManager">
+				<property name="flow" ref="person.Search"/>
+			</bean>
+		</property>
+  </bean>
+
+  <!-- search flow beans -->
+
+	<!-- xml FlowBuilder definition for the search flow -->
+
+  <bean id="person.Search"
+        class="org.springframework.web.flow.config.FlowFactoryBean">
+    <property name="flowBuilder">
+      <bean
+        class="org.springframework.web.flow.config.XmlFlowBuilder">
+        <property name="resource">
+          <value>classpath:org/springframework/samples/phonebook/web/flow/search-flow.xml</value>
+        </property>
+      </bean>
+    </property>
+  </bean>
+
+	<bean id="person.Search.criteria.formAction"
+	      class="org.springframework.web.flow.action.FormAction">
+		<property name="formObjectName"><value>query</value></property>
+		<property name="formObjectClass">
+		  <value>
+		    org.springframework.samples.phonebook.domain.PhoneBookQuery
+		  </value>
+		</property>
+		<property name="formObjectScopeAsString"><value>flow</value></property>
+		<property name="validator">
+			<bean id="queryValidator"
+			      class="org.springframework.samples.phonebook.domain.PhoneBookQueryValidator"/>
+		</property>
+	</bean>
+
+	<bean id="person.Search.executeQuery"
+	      class="org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction"
+	      autowire="byType" />
+
+	<!--
+	  - The event parameter mapper action sets request parameters as attributes
+	  - in the flow model.
+	  - The exact mapping(s) policies are fully configurable; in this case, the
+	  - "id" request parameter is mapped to the "id" attribute and converted
+	  - to a java.lang.Long in the target flow model!
+	  -->
+	<bean id="person.Search.id.set"
+	      class="org.springframework.web.flow.action.EventParameterMapperAction">
+		<property name="mapping"><value>id,java.lang.Long</value></property>
+                <property name="targetScopeAsString"><value>flow</value></property>
+	</bean>
+
+	<!--
+	  - The model mapper maps attributes in a parent flow down to a spawning
+	  - child subflow as input. The mapper may also map output attributes up to
+	  - the parent flow when the child subflow ends. In this case the "id"
+	  - attribute will be mapped to the "id" attribute, as the person.Detail
+	  - flow expects that a person ID be provided as as input when spawned.
+	  -->
+	<bean id="id.attributeMapper"
+	      class="org.springframework.web.flow.support.ParameterizableFlowAttributeMapper">
+		<property name="inputMappings">
+			<list>
+				<value>id</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- detail flow beans -->
+
+	<!-- xml FlowBuilder definition for the detail flow -->
+
+	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+				<property name="resource">
+				  <value>classpath:org/springframework/samples/phonebook/web/flow/detail-flow.xml</value>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!--
+	  - A type conversion service, a more flexible/threadsafe/lightweight
+	  - alternative to the PropertyEditor!
+	  -->
+	<bean id="conversion.service"
+	      class="org.springframework.binding.convert.support.DefaultConversionService"
+	      autowire="byType"/>
+
+	<!--
+	  - A formatter registry, a thread-safe cache for Formatters: a thread-safe,
+	  - lighter weight alt. to PropertyEditors!
+	  -->
+	<bean id="formatter.locator"
+	      class="org.springframework.binding.format.support.ThreadLocalFormatterLocator"
+	      autowire="byType"/>
+
+	<!--
+	  - A broadcaster that will notify the formatter registry to cleanup all
+	  - thread locals on app shutdown
+	  -->
+	<bean id="thread.cleanupBroadcaster"
+	      class="org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster"/>
+
+	<!--
+	  - The event parameter mapper action sets request parameters as attributes
+	  - in the flow model.
+	  - The exact mapping(s) policies are fully configurable; in this case, the
+	  - "id" request parameter is mapped to the "colleagueId" attribute and converted
+	  - to a java.lang.Long in the target flow model!
+	  -->
+	<bean id="person.Detail.colleagueId.set"
+	      class="org.springframework.web.flow.action.EventParameterMapperAction">
+		<property name="mapping">
+			<value>id->colleagueId,java.lang.Long</value>
+		</property>
+		<property name="targetScopeAsString"><value>flow</value></property>
+	</bean>
+
+	<!--
+	  - The model mapper maps attributes in a parent flow down to a spawning
+	  - child subflow as input. The mapper may also map output attributes up to
+	  - the parent flow when the child subflow ends. In this case the
+	  - "colleagueId" attribute will be mapped to the "id" attribute, as the
+	  - person.Detail flow expects that a person ID be provided as as input when
+	  - spawned.
+	  -->
+	<bean id="colleagueId.attributeMapper"
+	      class="org.springframework.web.flow.support.ParameterizableFlowAttributeMapper">
+		<property name="inputMappings">
+			<map>
+				<entry key="colleagueId"><value>id</value></entry>
+			</map>
+		</property>
+	</bean>
+
+</beans>
