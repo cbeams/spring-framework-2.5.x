@@ -54,8 +54,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @author Rod Johnson
  * @since 1.1.1
  */
-public abstract class AbstractTransactionalSpringContextTests
-    extends AbstractDependencyInjectionSpringContextTests {
+public abstract class AbstractTransactionalSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
 
 	protected PlatformTransactionManager transactionManager;
 
@@ -70,7 +69,6 @@ public abstract class AbstractTransactionalSpringContextTests
 	 * Should we commit this transaction?
 	 */
 	private boolean complete;
-
 
 	/**
 	 * Subclasses can set this value in their constructor to change
@@ -92,17 +90,17 @@ public abstract class AbstractTransactionalSpringContextTests
 
 	protected final void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
-		
+
 		if (transactionManager != null) {
 			// start a transaction
 			this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
-			logger.info("Began transaction: transaction manager [" + this.transactionManager +
-			    "]; defaultCommit " + this.complete);
-			onSetUpInTransaction();
+			logger.info("Began transaction: transaction manager [" + this.transactionManager + "]; defaultCommit "
+					+ this.complete);
 		}
 		else {
 			logger.info("No transaction manager set: tests will NOT occur in a transaction");
 		}
+		onSetUpInTransaction();
 	}
 
 	/**
@@ -116,13 +114,11 @@ public abstract class AbstractTransactionalSpringContextTests
 	}
 
 	protected final void onTearDown() throws Exception {
-		if (transactionManager != null) {
-			try {
-				onTearDownInTransaction();
-			}
-			finally {
-				endTransaction();
-			}
+		try {
+			onTearDownInTransaction();
+		}
+		finally {
+			endTransaction();
 		}
 	}
 
