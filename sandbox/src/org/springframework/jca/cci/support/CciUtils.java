@@ -25,7 +25,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * 
  * @author Thierry TEMPLIER
  */
-public class CciUtils {
+public abstract class CciUtils {
 	private static final Log logger = LogFactory.getLog(CciUtils.class);
 
 	/**
