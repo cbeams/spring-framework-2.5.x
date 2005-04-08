@@ -25,6 +25,7 @@ import java.util.prefs.Preferences;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -45,8 +46,8 @@ public class PropertyResourceConfigurerTests extends TestCase {
 
 	public void testPropertyOverrideConfigurer() {
 		StaticApplicationContext ac = new StaticApplicationContext();
-		ac.registerSingleton("tb1", TestBean.class, new MutablePropertyValues());
-		ac.registerSingleton("tb2", TestBean.class, new MutablePropertyValues());
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("properties", "tb1.age=99\ntb2.name=test");
 		ac.registerSingleton("configurer1", PropertyOverrideConfigurer.class, pvs);
@@ -63,10 +64,22 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", tb2.getName());
 	}
 
+	public void testPropertyOverrideConfigurerWithNestedProperty() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb", IndexedTestBean.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "tb.array[0].age=99\ntb.list[1].name=test");
+		ac.registerSingleton("configurer", PropertyOverrideConfigurer.class, pvs);
+		ac.refresh();
+		IndexedTestBean tb = (IndexedTestBean) ac.getBean("tb");
+		assertEquals(99, tb.getArray()[0].getAge());
+		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
+	}
+
 	public void testPropertyOverrideConfigurerWithInvalidKey() {
 		StaticApplicationContext ac = new StaticApplicationContext();
-		ac.registerSingleton("tb1", TestBean.class, new MutablePropertyValues());
-		ac.registerSingleton("tb2", TestBean.class, new MutablePropertyValues());
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("properties", "argh=hgra\ntb1.age=99\ntb2.name=test");
 		pvs.addPropertyValue("ignoreInvalidKeys", "true");
@@ -85,8 +98,8 @@ public class PropertyResourceConfigurerTests extends TestCase {
 
 	public void testPropertyOverrideConfigurerWithIgnoreInvalidKeys() {
 		StaticApplicationContext ac = new StaticApplicationContext();
-		ac.registerSingleton("tb1", TestBean.class, new MutablePropertyValues());
-		ac.registerSingleton("tb2", TestBean.class, new MutablePropertyValues());
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("properties", "argh=hgra\ntb1.age=99\ntb2.name=test");
 		pvs.addPropertyValue("ignoreInvalidKeys", "true");
@@ -387,11 +400,12 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurer() {
-	    // ignore for JAVA_13
-	    if (JdkVersion.getMajorJavaVersion() == JdkVersion.JAVA_13) 
-	        return;
-	    
-	    StaticApplicationContext ac = new StaticApplicationContext();
+		// ignore for JDK < 1.4
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "${myName}");
 		pvs.addPropertyValue("age", "${myAge}");
@@ -416,10 +430,11 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurerWithCustomTreePaths() {
-	    // ignore for JAVA_13
-	    if (JdkVersion.getMajorJavaVersion() == JdkVersion.JAVA_13) 
-	        return;
-	    
+		// ignore for JDK < 1.4
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "${myName}");
