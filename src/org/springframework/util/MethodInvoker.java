@@ -208,10 +208,9 @@ public class MethodInvoker {
 	/**
 	 * Invoke the specified method.
 	 * The invoker needs to have been prepared before.
-	 * @return the object returned by the method invocation,
-	 * or VOID if the method returns void
+	 * @return the object (possibly null) returned by the method invocation,
+	 * or {@link #VOID} if the method has a void return type
 	 * @see #prepare
-	 * @see #VOID
 	 */
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
 		if (this.methodObject == null) {
@@ -219,7 +218,9 @@ public class MethodInvoker {
 		}
 		// in the static case, target will just be null
 		Object result = this.methodObject.invoke(this.targetObject, this.arguments);
-		return (result == null ? VOID : result);
+		if (this.methodObject.getReturnType().equals(void.class))
+			return VOID;
+		return result;
 	}
 
 
