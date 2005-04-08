@@ -22,7 +22,6 @@ import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.LocalTransaction;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.datasource.DataSourceTransactionObject;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -37,16 +36,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * potentially allowing for one thread connection per data source.
  *
  * <p>Application code is required to retrieve the CCI Connection via
- * <code>DataSourceUtils.getConnection(ConnectionFactory)</code> or
- * <code>DataSourceUtils.getConnection(ConnectionFactory,ConnectionSpec)</code>
+ * <code>ConnectionFactoryUtils.getConnection(ConnectionFactory)</code> or
+ * <code>ConnectionFactoryUtils.getConnection(ConnectionFactory,ConnectionSpec)</code>
  * instead of J2EE's standard <code>ConnectionFactory.getConnection()</code> or
  * <code>ConnectionFactory.getConnection(ConnectionSpec)</code>. This is
- * recommended anyway, as it throws unchecked org.springframework.dao exceptions
- * instead of checked RessourceException.
- * All framework classes like CciTemplate or MappingRecordQuery use this strategy
- * implicitly.
- * If not used with this transaction manager, the lookup strategy behaves exactly
- * like the common one - it can thus be used in any case.
+ * recommended anyway, as it throws unchecked <code>org.springframework.dao</code>
+ * exceptions instead of checked ResourceException. All framework classes like
+ * CciTemplate or MappingRecordQuery use this strategy implicitly. If not used
+ * with this transaction manager, the lookup strategy behaves exactly like the
+ * common one - it can thus be used in any case.
  *
  * @author Thierry TEMPLIER
  */

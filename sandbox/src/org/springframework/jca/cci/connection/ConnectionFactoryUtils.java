@@ -16,7 +16,6 @@
 
 package org.springframework.jca.cci.connection;
 
-import javax.naming.NamingException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
@@ -24,9 +23,8 @@ import javax.resource.cci.ConnectionSpec;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.jca.cci.CannotGetCciConnectionException;
-import org.springframework.jndi.AbstractJndiLocator;
-import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
  
@@ -42,72 +40,30 @@ public abstract class ConnectionFactoryUtils {
 	private static final Log logger = LogFactory.getLog(ConnectionFactoryUtils.class);
 
 	/**
-	 * Look up the specified DataSource in JNDI, assuming that the lookup
-	 * occurs in a J2EE container, i.e. adding the prefix "java:comp/env/"
-	 * to the JNDI name if it doesn't already contain it.
-	 * <p>Use getDataSourceFromJndi(jndiName,false) in case of a custom JNDI name.
-	 * @param jndiName jndiName of the DataSource
-	 * @return the DataSource
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
-	 * if the data source cannot be located
-	 * @see #getDataSourceFromJndi(String, boolean)
-	 */
-	public static ConnectionFactory getConnectionFactoryFromJndi(String jndiName)
-	    throws CannotGetCciConnectionException {
-		return getConnectionFactoryFromJndi(jndiName, true);
-	}
-
-	/**
-	 * Look up the specified DataSource in JNDI, explicitly specifying
-	 * if the lookup occurs in a J2EE container.
-	 * @param jndiName jndiName of the DataSource
-	 * @param resourceRef if the lookup occurs in a J2EE container, i.e. if the prefix
-	 * "java:comp/env/" needs to be added if the JNDI name doesn't already contain it.
-	 * @return the DataSource
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
-	 * if the data source cannot be located
-	 */
-	public static ConnectionFactory getConnectionFactoryFromJndi(String jndiName, boolean resourceRef)
-	    throws CannotGetCciConnectionException {
-		if (jndiName == null || "".equals(jndiName)) {
-			throw new IllegalArgumentException("jndiName must not be empty");
-		}
-		if (resourceRef && !jndiName.startsWith(AbstractJndiLocator.CONTAINER_PREFIX)) {
-			jndiName = AbstractJndiLocator.CONTAINER_PREFIX + jndiName;
-		}
-		try {
-			// Perform JNDI lookup to obtain resource manager connection factory
-			return (ConnectionFactory) new JndiTemplate().lookup(jndiName);
-		}
-		catch (NamingException ex) {
-			throw new CannotGetCciConnectionException("Naming exception looking up JNDI connection factory [" +
-																								 jndiName + "]", ex);
-		}
-	}
-
-	/**
 	 * Get a Connection from the given DataSource. Changes any SQL exception into
 	 * the Spring hierarchy of unchecked generic data access exceptions, simplifying
 	 * calling code and making any exception that is thrown more meaningful.
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
-	 * @param ds DataSource to get Connection from
+	 * @param cf ConnectionFactory to get Connection from
 	 * @return a JDBC Connection from this DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the attempt to get a Connection failed
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
-	 * @see DataSourceTransactionManager
+	 * @see CciTransactionManager
 	 */
 	public static Connection getConnection(ConnectionFactory cf) throws CannotGetCciConnectionException {
 		return getConnection(cf, true);
 	}
 
-	public static Connection getConnection(ConnectionFactory cf,ConnectionSpec spec) throws CannotGetCciConnectionException {
+	public static Connection getConnection(ConnectionFactory cf,ConnectionSpec spec)
+			throws CannotGetCciConnectionException {
 		return getConnection(cf, spec, true);
 	}
 
-	public static Connection getConnection(ConnectionFactory cf,boolean allowSynchronization) throws CannotGetCciConnectionException {
+	public static Connection getConnection(ConnectionFactory cf,boolean allowSynchronization)
+			throws CannotGetCciConnectionException {
 		return getConnection(cf,null,allowSynchronization);
 	}
 
@@ -118,7 +74,7 @@ public abstract class ConnectionFactoryUtils {
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
-	 * @param ds DataSource to get Connection from
+	 * @param cf ConnectionFactory to get Connection from
 	 * @param allowSynchronization if a new JDBC Connection is supposed to be
 	 * registered with transaction synchronization (if synchronization is active).
 	 * This will always be true for typical data access code.
@@ -127,7 +83,7 @@ public abstract class ConnectionFactoryUtils {
 	 * if the attempt to get a Connection failed
 	 * @see #doGetConnection
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
-	 * @see DataSourceTransactionManager
+	 * @see CciTransactionManager
 	 */
 	public static Connection getConnection(ConnectionFactory cf, ConnectionSpec spec, boolean allowSynchronization)
 	    throws CannotGetCciConnectionException {
@@ -140,12 +96,10 @@ public abstract class ConnectionFactoryUtils {
 	}
 
 	/**
-	 * Actually get a JDBC Connection for the given DataSource.
+	 * Actually get a JCA CCI Connection for the given DataSource.
 	 * Same as getConnection, but throwing the original SQLException.
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see #getConnection(DataSource, boolean)
-	 * @see TransactionAwareDataSourceProxy
+	 * @throws ResourceException if thrown by JCA CCI methods
 	 */
 	protected static Connection doGetConnection(ConnectionFactory cf, ConnectionSpec spec, boolean allowSynchronization)
 			throws ResourceException {
@@ -173,8 +127,7 @@ public abstract class ConnectionFactoryUtils {
 	 * and it is not created by a SmartDataSource returning shouldClose=false.
 	 * @param con Connection to close if necessary
 	 * (if this is null, the call will be ignored)
-	 * @param ds DataSource that the Connection came from
-	 * @see SmartDataSource#shouldClose
+	 * @param cf ConnectionFactory that the Connection came from
 	 */
 	public static void closeConnectionIfNecessary(Connection con, ConnectionFactory cf) {
 		try {
@@ -186,18 +139,16 @@ public abstract class ConnectionFactoryUtils {
 	}
 
 	/**
-	 * Actually close a JDBC Connection for the given DataSource.
+	 * Actually close a JCA CCI Connection for the given DataSource.
 	 * Same as closeConnectionIfNecessary, but throwing the original SQLException.
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
-	 * @throws SQLException if thrown by JDBC methods
+	 * @throws ResourceException if thrown by JCA CCI methods
 	 * @see #closeConnectionIfNecessary
-	 * @see TransactionAwareDataSourceProxy
 	 */
 	protected static void doCloseConnectionIfNecessary(Connection con, ConnectionFactory cf) throws ResourceException {
 		if (con == null || TransactionSynchronizationManager.hasResource(cf)) {
 			return;
 		}
-
 		con.close();
 	}
 
