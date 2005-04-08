@@ -862,16 +862,17 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	/**
 	 * Convert the value to the required type (if necessary from a String).
-	 * Conversions from String to any type use the setAsText method of
-	 * the PropertyEditor class. Note that a PropertyEditor must be registered
-	 * for this class for this to work. This is a standard Java Beans API.
+	 * Conversions from String to any type use the <code>setAsText</code> method
+	 * of the PropertyEditor class. Note that a PropertyEditor must be registered
+	 * for the given class for this to work. This is a standard Java Beans API.
 	 * A number of property editors are automatically registered by this class.
-	 * @param newValue proposed change value.
-	 * @param requiredType type we must convert to
-	 * @throws BeansException if there is an internal error
-	 * @return new value, possibly the result of type convertion
+	 * @param newValue proposed change value
+	 * @param requiredType the type we must convert to
+	 * @return the new value, possibly the result of type conversion
+	 * @throws TypeMismatchException if type conversion failed
+	 * @see java.beans.PropertyEditor#setAsText(String)
 	 */
-	public Object doTypeConversionIfNecessary(Object newValue, Class requiredType) throws BeansException {
+	public Object doTypeConversionIfNecessary(Object newValue, Class requiredType) throws TypeMismatchException {
 		return doTypeConversionIfNecessary(null, null, null, newValue, requiredType);
 	}
 
@@ -883,11 +884,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @param newValue proposed change value
 	 * @param requiredType the type we must convert to
 	 * (or null if not known, for example in case of a collection element)
-	 * @throws BeansException if there is an internal error
-	 * @return converted value (i.e. possibly the result of type conversion)
+	 * @return the new value, possibly the result of type conversion
+	 * @throws TypeMismatchException if type conversion failed
 	 */
 	protected Object doTypeConversionIfNecessary(String propertyName, String fullPropertyName,
-			Object oldValue, Object newValue, Class requiredType) throws BeansException {
+			Object oldValue, Object newValue, Class requiredType) throws TypeMismatchException {
 
 		Object convertedValue = newValue;
 		if (convertedValue != null) {
