@@ -9,6 +9,8 @@ import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.FlowFactoryBean;
+import org.springframework.web.flow.config.SimpleTransitionCriteriaParser;
+import org.springframework.web.flow.config.TransitionCriteriaParser;
 
 /**
  * General flow execution tests.
@@ -18,16 +20,22 @@ import org.springframework.web.flow.config.FlowFactoryBean;
  */
 public class FlowExecutionTests extends TestCase {
 
+	private static TransitionCriteriaParser parser = new SimpleTransitionCriteriaParser();
+
+	public static TransitionCriteria on(String event) {
+		return parser.parse(event);
+	}
+	
 	public void testFlowExecutionListener() {
 		Flow subFlow = new Flow("mySubFlow");
-		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition("submit", "finish"));
+		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(on("submit"), "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
-		new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition("success", "viewState"));
-		new ViewState(flow, "viewState", "myView", new Transition("submit", "subFlowState"));
-		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition("finish", "finish"));
+		new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition(on("success"), "viewState"));
+		new ViewState(flow, "viewState", "myView", new Transition(on("submit"), "subFlowState"));
+		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(on("finish"), "finish"));
 		new EndState(flow, "finish");
-		
+
 		FlowExecution flowExecution = flow.createExecution();
 		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
 		flowExecution.getListenerList().add(flowExecutionListener);
@@ -41,7 +49,7 @@ public class FlowExecutionTests extends TestCase {
 		assertEquals(0, flowExecutionListener.getFlowNestingLevel());
 		assertEquals(6, flowExecutionListener.countStateTransitions());
 	}
-	
+
 	public void testLoopInFlow() {
 		AbstractFlowBuilder builder = new AbstractFlowBuilder() {
 			protected String flowId() {
