@@ -27,8 +27,8 @@
 
 	<action-state id="bindAndValidateCategory">
 		<action bean="sellItemAction" method="bindAndValidate"/>
-		<transition on="${lastEvent.id == 'success' and flowScope.sale.shipping}" to="enterShippingDetails"/>
-		<transition on="${lastEvent.id == 'success' and !flowScope.sale.shipping}" to="showCostOverview"/>
+		<transition on="${#result == 'success' and flowScope.sale.shipping}" to="enterShippingDetails"/>
+		<transition on="${#result == 'success' and !flowScope.sale.shipping}" to="showCostOverview"/>
 		<transition on="error" to="enterCategory"/>
 	</action-state>
 	

@@ -15,6 +15,9 @@
 */
 package org.springframework.web.flow.support;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import ognl.ExpressionSyntaxException;
 import ognl.Ognl;
 import ognl.OgnlException;
@@ -120,13 +123,24 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 
 		public boolean test(RequestContext context) {
 			try {
-				Object result = Ognl.getValue(this.expression, context);
+				Object result = Ognl.getValue(this.expression, getAliasMap(context), context);
 				Assert.isInstanceOf(Boolean.class, result);
 				return ((Boolean) result).booleanValue();
 			}
 			catch (OgnlException e) {
 				throw new IllegalArgumentException("Invalid transition expression '" + this + "':" + e);
 			}
+		}
+		
+		/**
+		 * Setup a map with a few aliased values to make writing
+		 * OGNL based transition conditions a bit easier.
+		 */
+		protected Map getAliasMap(RequestContext context) {
+			Map res=new HashMap();
+			// ${#result == lastEvent.id}
+			res.put("result", context.getLastEvent().getId());
+			return res;
 		}
 		
 		public String toString() {
