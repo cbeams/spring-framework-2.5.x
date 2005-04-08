@@ -41,6 +41,9 @@ import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
  */
 public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreator {
 
+	private static final String EXPRESSION_PREFIX = "${";
+	private static final String EXPRESSION_SUFFIX = "}";
+	
 	/**
 	 * If the supplied <code>encodedCriteria</code> value is an expression, then an instance
 	 * of <code>OgnlTransitionCriteria</code> is created. Otherwise, the super
@@ -68,14 +71,16 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 	 * Check whether or not given criteria are expressed as an expression.
 	 */
 	private boolean isExpression(String encodedCriteria) {
-		return (encodedCriteria.startsWith("${") && encodedCriteria.endsWith("}"));
+		return (encodedCriteria.startsWith(EXPRESSION_PREFIX) && encodedCriteria.endsWith(EXPRESSION_SUFFIX));
 	}
 
 	/**
 	 * Cut the expression from given criteria string and return it.
 	 */
 	private String cutExpression(String encodedCriteria) {
-		return encodedCriteria.substring(2, encodedCriteria.length() - 1);
+		return encodedCriteria.substring(
+				EXPRESSION_PREFIX.length(),
+				encodedCriteria.length() - EXPRESSION_SUFFIX.length());
 	}
 
 
@@ -91,6 +96,8 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 	 * @author Rob Harrop
 	 */
 	public static class OgnlTransitionCriteria implements TransitionCriteria {
+		
+		private String expressionString;
 
 		/**
 		 * Stores the pre-parsed OGNL abstract syntax tree.
@@ -105,7 +112,7 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 		 */
 		public OgnlTransitionCriteria(String expressionString) throws OgnlException {
 			Assert.hasText(expressionString);
-
+			this.expressionString = expressionString;
 			// is is *possible* to check that the expression can only return
 			// a boolean in most cases but it is not foolproof so we don't
 			this.expression = Ognl.parseExpression(expressionString);
@@ -118,8 +125,12 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 				return ((Boolean) result).booleanValue();
 			}
 			catch (OgnlException e) {
-				throw new IllegalArgumentException("Invalid transition expression '" + this.expression + "':" + e);
+				throw new IllegalArgumentException("Invalid transition expression '" + this + "':" + e);
 			}
+		}
+		
+		public String toString() {
+			return EXPRESSION_PREFIX + expressionString + EXPRESSION_SUFFIX;
 		}
 	}
 }
