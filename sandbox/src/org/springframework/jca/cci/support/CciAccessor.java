@@ -21,10 +21,10 @@ import javax.resource.cci.ConnectionFactory;
 import org.springframework.jca.cci.core.OutputRecordCreator;
 
 /**
- * Base class for JdbcTemplate and other JDBC-accessing DAO helpers,
- * defining common properties like DataSource and exception translator.
+ * Base class for CciTemplate
+ * defining common properties like ConnectionFactory and OutputRecordCreator
  *
- * <p>Not intended to be used directly. See JdbcTemplate.
+ * <p>Not intended to be used directly. See CciTemplate
  *
  * @author Thierry TEMPLIER
  * @see org.springframework.cci.core.CciTemplate
