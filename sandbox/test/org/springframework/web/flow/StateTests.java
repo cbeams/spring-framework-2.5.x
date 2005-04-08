@@ -33,10 +33,10 @@ import org.springframework.web.flow.config.TransitionCriteriaCreator;
  */
 public class StateTests extends TestCase {
 
-	private static TransitionCriteriaCreator parser = new SimpleTransitionCriteriaCreator();
+	private static TransitionCriteriaCreator factory = new SimpleTransitionCriteriaCreator();
 
 	public static TransitionCriteria on(String event) {
-		return parser.parse(event);
+		return factory.create(event);
 	}
 	public void testActionStateSingleAction() {
 		Flow flow = new Flow("myFlow");
