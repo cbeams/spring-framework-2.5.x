@@ -18,6 +18,8 @@ package org.springframework.web.flow;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.binding.AttributeSource;
+
 /**
  * Holder for a logical view name and the dynamic model data neccessary to
  * render it. It is expected that a client map this logical view descriptor to a
@@ -32,7 +34,7 @@ import java.util.Map;
  * @author Juergen Hoeller
  * @author Erwin Vervaet
  */
-public class ViewDescriptor {
+public class ViewDescriptor implements AttributeSource {
 
 	private String viewName;
 
@@ -138,4 +140,15 @@ public class ViewDescriptor {
 	public boolean isEmpty() {
 		return (this.viewName == null && this.model == null);
 	}
+	
+	// attribute source implementation
+	
+	public boolean containsAttribute(String attributeName) {
+		return model.containsKey(attributeName);
+	}
+	
+	public Object getAttribute(String attributeName) {
+		return model.get(attributeName);
+	}
+
 }
