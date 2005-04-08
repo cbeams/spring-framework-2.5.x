@@ -1,11 +1,12 @@
 package org.springframework.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.InvocationTargetException;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.TestBean;
 
 /**
@@ -25,10 +26,19 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals("Class name did not match", "ClassUtilsTests", className);
 	}
 
-	public void testGetInnerShortName() {
+	public void testGetInnerClassShortName() {
 		String className = ClassUtils.getShortName(InnerClass.class);
-		assertEquals("Class name did not match", "ClassUtilsTests.InnerClass",
-		    className);
+		assertEquals("Class name did not match", "ClassUtilsTests.InnerClass", className);
+	}
+
+	public void testGetCglibClassShortName() {
+		TestBean tb = new TestBean();
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTarget(tb);
+		pf.setProxyTargetClass(true);
+		TestBean proxy = (TestBean) pf.getProxy();
+		String className = ClassUtils.getShortName(proxy.getClass());
+		assertEquals("Class name did not match", "TestBean", className);
 	}
 
 	public void testGetShortNameAsProperty() {

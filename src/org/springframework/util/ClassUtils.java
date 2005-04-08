@@ -43,6 +43,9 @@ public abstract class ClassUtils {
 	/** The inner class separator character '$' */
 	private static final char INNER_CLASS_SEPARATOR_CHAR = '$';
 
+	/** The CGLIB class separator character "$$" */
+	private static final String CGLIB_CLASS_SEPARATOR_CHAR = "$$";
+
 
 	/**
 	 * Replacement for <code>Class.forName()</code> that also returns Class instances
@@ -113,18 +116,15 @@ public abstract class ClassUtils {
 	 * @throws IllegalArgumentException if the className is empty
 	 */
 	public static String getShortName(String className) {
-		Assert.hasText(className, "class name must not be empty");
-		char[] charArray = className.toCharArray();
-		int lastDot = 0;
-		for (int i = 0; i < charArray.length; i++) {
-			if (charArray[i] == PACKAGE_SEPARATOR_CHAR) {
-				lastDot = i + 1;
-			}
-			else if (charArray[i] == INNER_CLASS_SEPARATOR_CHAR) {
-				charArray[i] = PACKAGE_SEPARATOR_CHAR;
-			}
+		Assert.hasLength(className, "class name must not be empty");
+		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
+		int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR_CHAR);
+		if (nameEndIndex == -1) {
+			nameEndIndex = className.length();
 		}
-		return new String(charArray, lastDot, charArray.length - lastDot);
+		String shortName = className.substring(lastDotIndex + 1, nameEndIndex);
+		shortName = shortName.replace(INNER_CLASS_SEPARATOR_CHAR, PACKAGE_SEPARATOR_CHAR);
+		return shortName;
 	}
 
 	/**
