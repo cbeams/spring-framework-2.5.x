@@ -25,6 +25,7 @@
 			<fileset file="${spring.jar}" />
 			<fileset file="${spring.webflow.jar}" />
 			<fileset file="${spring.webflow.support.jar}" />
+			<fileset file="${ognl.jar}" />
 		</copy>
 	</target>
 </project>

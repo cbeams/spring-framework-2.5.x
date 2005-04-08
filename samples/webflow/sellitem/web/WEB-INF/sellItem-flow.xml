@@ -27,15 +27,9 @@
 
 	<action-state id="bindAndValidateCategory">
 		<action bean="sellItemAction" method="bindAndValidate"/>
-		<transition on="success" to="isShipping"/>
+		<transition on="${lastEvent.id == 'success' and flowScope.sale.shipping}" to="enterShippingDetails"/>
+		<transition on="${lastEvent.id == 'success' and !flowScope.sale.shipping}" to="showCostOverview"/>
 		<transition on="error" to="enterCategory"/>
-	</action-state>
-	
-	<!-- TODO: improve this with conditional transitions -->
-	<action-state id="isShipping">
-		<action bean="sellItemAction"/>
-		<transition on="yes" to="enterShippingDetails"/>
-		<transition on="no" to="showCostOverview"/>
 	</action-state>
 	
 	<view-state id="enterShippingDetails" view="shippingDetailsForm">

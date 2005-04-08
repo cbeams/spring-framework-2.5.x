@@ -44,6 +44,10 @@
 		<property name="flowBuilder">
 			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
 				<property name="resource" value="/WEB-INF/sellItem-flow.xml"/>
+				<property name="transitionCriteriaCreator">
+					<!-- Enable transition criteria expressed as OGNL expressions. -->
+					<bean class="org.springframework.web.flow.support.OgnlTransitionCriteriaCreator"/>
+				</property>
 			</bean>
 		</property>
 	</bean>

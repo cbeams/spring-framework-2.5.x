@@ -15,7 +15,6 @@
  */
 package org.springframework.samples.sellitem.web.flow.action;
 
-import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.action.FormAction;
@@ -37,11 +36,5 @@ public class SellItemAction extends FormAction {
 	 */
 	protected boolean validationEnabled(RequestContext context) {
 		return containsProperty(VALIDATOR_METHOD_PROPERTY, context);
-	}
-
-	public Event isShipping(RequestContext context) throws Exception {
-		//TODO: improve this with conditional transitions
-		Sale sale = (Sale)context.getFlowScope().getAttribute("sale");
-		return sale.isShipping() ? result("yes") : result("no");
 	}
 }

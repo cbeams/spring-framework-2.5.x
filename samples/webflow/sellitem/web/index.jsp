@@ -32,6 +32,9 @@
 						Multi actions to group several action execution methods together on
 						a single action implementation class.
 					</LI>
+					<LI>
+						Using <A href="http://www.ognl.org/">OGNL</A> based conditional expressions.
+					</LI>
 				</UL>
 			</P>
 		</DIV>
