@@ -13,24 +13,36 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.samples.phonebook.web.flow.action;
+package org.springframework.samples.phonebook.web.flow;
 
 import org.springframework.test.web.flow.AbstractFlowExecutionTests;
-import org.springframework.web.flow.SimpleEvent;
 
 public class SearchPersonFlowTests extends AbstractFlowExecutionTests {
+
+	public SearchPersonFlowTests() {
+		setDependencyCheck(false);
+	}
 
 	protected String flowId() {
 		return "person.Search";
 	}
 
 	protected String[] getConfigLocations() {
-		return new String[] {
-				"classpath:org/springframework/samples/phonebook/deploy/application-context.xml",
-				"classpath:org/springframework/samples/phonebook/deploy/phonebook-servlet.xml" };
+		return new String[] { "classpath:org/springframework/samples/phonebook/deploy/service-layer.xml",
+				"classpath:org/springframework/samples/phonebook/deploy/web-layer.xml" };
 	}
 
 	public void testStartFlow() {
-		startFlow(new SimpleEvent(this, "start"));
+		startFlow();
+		assertCurrentStateEquals("criteria.view");
 	}
+	
+	public void testCriteriaView_Submit_Success() {
+		startFlow();
+	}
+	
+	public void testCriteriaView_Submit_Error() {
+		startFlow();
+	}
+
 }
