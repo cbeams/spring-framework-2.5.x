@@ -48,9 +48,10 @@ import org.springframework.util.ClassUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * <p>Also supports "java.lang.String[]"-style array class names.
- * Delegates to ClassUtils for actual class name resolution.
- *
+ * <p>Also supports "java.lang.String[]"-style array class names and primitive
+ * class names (e.g. "boolean"). Delegates to ClassUtils for actual class name
+ * resolution.
+ * 
  * @author Juergen Hoeller
  * @since 27.02.2004
  * @see ConfigurableBeanFactory#registerCustomEditor
