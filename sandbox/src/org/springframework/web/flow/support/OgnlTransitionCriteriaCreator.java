@@ -23,31 +23,31 @@ import org.springframework.util.Assert;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.config.FlowBuilderException;
-import org.springframework.web.flow.config.SimpleTransitionCriteriaParser;
+import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
 
 /**
  * When presented with expressions in the format <code>${expr}</code>, creates instances
  * of <code>OgnlTransitionCriteria</code> that will evaluate <code>expr</code> against
  * the <code>RequestContext</code> using OGNL during <code>test(RequestContext)</code>.
  *
- * If the <code>onCriteria</code> value passed to <code>create(String)</code> is not an
+ * If the <code>encodedCriteria</code> value passed to <code>create(String)</code> is not an
  * expression this class delegates to the super class to get an instance of the default
  * <code>TransitionCriteria</code> for the event name.
  * 
- * @see OgnlTransitionCriteriaParser
- * @see org.springframework.web.flow.config.SimpleTransitionCriteriaParser
+ * @see OgnlTransitionCriteriaCreator
+ * @see org.springframework.web.flow.config.SimpleTransitionCriteriaCreator
  * 
  * @author Rob Harrop
  */
-public class OgnlTransitionCriteriaParser extends SimpleTransitionCriteriaParser {
+public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreator {
 
 	/**
-	 * If the supplied <code>onCriteria</code> value is an expression, then an instance
+	 * If the supplied <code>encodedCriteria</code> value is an expression, then an instance
 	 * of <code>OgnlTransitionCriteria</code> is created. Otherwise, the super
 	 * class is asked to provide the default implementation of <code>TransitionCriteria</code>.
 	 * @param encodedCriteria an event name or expression
 	 */
-	public TransitionCriteria parse(String encodedCriteria) {
+	public TransitionCriteria create(String encodedCriteria) {
 		if (isExpression(encodedCriteria)) {
 			try {
 				return new OgnlTransitionCriteria(cutExpression(encodedCriteria));
@@ -60,7 +60,7 @@ public class OgnlTransitionCriteriaParser extends SimpleTransitionCriteriaParser
 			}
 		}
 		else {
-			return super.parse(encodedCriteria);
+			return super.create(encodedCriteria);
 		}
 	}
 

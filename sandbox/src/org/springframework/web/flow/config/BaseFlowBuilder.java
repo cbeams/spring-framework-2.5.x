@@ -59,7 +59,7 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	/**
 	 * Factory that creates transition criteria.
 	 */
-	private TransitionCriteriaParser transitionCriteriaParser = new SimpleTransitionCriteriaParser();
+	private TransitionCriteriaCreator transitionCriteriaCreator = new SimpleTransitionCriteriaCreator();
 
 	/**
 	 * The <code>Flow</code> produced by this builder.
@@ -116,15 +116,15 @@ public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuild
 	/**
 	 * Returns the factory used to create transition criteria.
 	 */
-	public TransitionCriteriaParser getTransitionCriteriaParser() {
-		return transitionCriteriaParser;
+	public TransitionCriteriaCreator getTransitionCriteriaCreator() {
+		return transitionCriteriaCreator;
 	}
 
 	/**
 	 * Set the factory used to create transition criteria.
 	 */
-	public void setTransitionCriteriaParser(TransitionCriteriaParser transitionCriteriaParser) {
-		this.transitionCriteriaParser = transitionCriteriaParser;
+	public void setTransitionCriteriaCreator(TransitionCriteriaCreator transitionCriteriaCreator) {
+		this.transitionCriteriaCreator = transitionCriteriaCreator;
 	}
 
 	/**

@@ -23,8 +23,8 @@ import junit.framework.TestCase;
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.config.SimpleTransitionCriteriaParser;
-import org.springframework.web.flow.config.TransitionCriteriaParser;
+import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
+import org.springframework.web.flow.config.TransitionCriteriaCreator;
 
 /**
  * Tests that each of the Flow state types execute as expected when entered.
@@ -33,7 +33,7 @@ import org.springframework.web.flow.config.TransitionCriteriaParser;
  */
 public class StateTests extends TestCase {
 
-	private static TransitionCriteriaParser parser = new SimpleTransitionCriteriaParser();
+	private static TransitionCriteriaCreator parser = new SimpleTransitionCriteriaCreator();
 
 	public static TransitionCriteria on(String event) {
 		return parser.parse(event);

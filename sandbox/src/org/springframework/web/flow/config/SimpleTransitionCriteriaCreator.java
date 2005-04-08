@@ -17,6 +17,7 @@ package org.springframework.web.flow.config;
 
 import java.io.Serializable;
 
+import org.springframework.util.Assert;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.TransitionCriteria;
 
@@ -31,7 +32,7 @@ import org.springframework.web.flow.TransitionCriteria;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public class SimpleTransitionCriteriaParser implements TransitionCriteriaParser {
+public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreator {
 
 	/**
 	 * Event id value ("*") that will cause the transition to match
@@ -39,7 +40,7 @@ public class SimpleTransitionCriteriaParser implements TransitionCriteriaParser 
 	 */
 	public static final String WILDCARD_EVENT_ID = "*";
 
-	public TransitionCriteria parse(String encodedCriteria) {
+	public TransitionCriteria create(String encodedCriteria) {
 		return createDefaultTransitionCriteria(encodedCriteria);
 	}
 
@@ -82,18 +83,23 @@ public class SimpleTransitionCriteriaParser implements TransitionCriteriaParser 
 	 */
 	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
 
-		private String onCriteria;
+		private String eventId;
 
-		public EventIdTransitionCriteria(String onCriteria) {
-			this.onCriteria = onCriteria;
+		/**
+		 * Create a new event id matching criteria object.
+		 * @param eventId the event id
+		 */
+		public EventIdTransitionCriteria(String eventId) {
+			Assert.notNull(eventId);
+			this.eventId = eventId;
 		}
 
 		public boolean test(RequestContext context) {
-			return context.getLastEvent().getId().equals(onCriteria);
+			return eventId.equals(context.getLastEvent().getId());
 		}
 
 		public String toString() {
-			return onCriteria;
+			return eventId;
 		}
 	}
 }

@@ -640,7 +640,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (eventId->stateId)
 	 */
 	protected Transition on(String eventId, String stateId) {
-		return new Transition(getTransitionCriteriaParser().parse(eventId), stateId);
+		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId);
 	}
 
 	/**
@@ -655,7 +655,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition
 	 */
 	protected Transition on(String eventId, String resultQualifier, String stateId) {
-		return new Transition(getTransitionCriteriaParser().parse(join(resultQualifier, eventId)), stateId);
+		return new Transition(getTransitionCriteriaCreator().create(join(resultQualifier, eventId)), stateId);
 	}
 
 	/**
@@ -667,7 +667,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (*->stateId)
 	 */
 	protected Transition onAnyEvent(String stateId) {
-		return new Transition(SimpleTransitionCriteriaParser.WILDCARD_TRANSITION_CRITERIA, stateId);
+		return new Transition(SimpleTransitionCriteriaCreator.WILDCARD_TRANSITION_CRITERIA, stateId);
 	}
 
 	/**

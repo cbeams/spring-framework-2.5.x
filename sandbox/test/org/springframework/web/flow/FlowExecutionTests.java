@@ -9,8 +9,8 @@ import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.FlowFactoryBean;
-import org.springframework.web.flow.config.SimpleTransitionCriteriaParser;
-import org.springframework.web.flow.config.TransitionCriteriaParser;
+import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
+import org.springframework.web.flow.config.TransitionCriteriaCreator;
 
 /**
  * General flow execution tests.
@@ -20,7 +20,7 @@ import org.springframework.web.flow.config.TransitionCriteriaParser;
  */
 public class FlowExecutionTests extends TestCase {
 
-	private static TransitionCriteriaParser parser = new SimpleTransitionCriteriaParser();
+	private static TransitionCriteriaCreator parser = new SimpleTransitionCriteriaCreator();
 
 	public static TransitionCriteria on(String event) {
 		return parser.parse(event);
