@@ -58,7 +58,7 @@ public class ConnectorServerFactoryBean implements FactoryBean, InitializingBean
 	/**
 	 * The default service URL.
 	 */
-	public static final String DEFAULT_SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
+	public static final String DEFAULT_SERVICE_URL = "service:jmx:jmxmp://localhost:9875";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());

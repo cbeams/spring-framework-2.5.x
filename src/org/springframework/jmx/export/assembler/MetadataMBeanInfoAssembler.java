@@ -47,47 +47,6 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		implements AutodetectCapableMBeanInfoAssembler, InitializingBean {
 
 	/**
-	 * Key for <code>log</code> descriptor.
-	 */
-	private static final String LOG = "log";
-
-	/**
-	 * Key for <code>logFile</code> descriptor.
-	 */
-	private static final String LOG_FILE = "logFile";
-
-	/**
-	 * Key for <code>currencyTimeLimit</code> descriptor.
-	 */
-	private static final String CURRENCY_TIME_LIMIT = "currencyTimeLimit";
-
-	/**
-	 * Key for <code>default</code> descriptor.
-	 */
-	private static final String DEFAULT = "default";
-
-	/**
-	 * Key for <code>persistPolicy</code> descriptor.
-	 */
-	private static final String PERSIST_POLICY = "persistPolicy";
-
-	/**
-	 * Key for <code>persistPeriod</code> descriptor.
-	 */
-	private static final String PERSIST_PERIOD = "persistPeriod";
-
-	/**
-	 * Key for <code>persistLocation</code> descriptor.
-	 */
-	private static final String PERSIST_LOCATION = "persistLocation";
-
-	/**
-	 * Key for <code>persistName</code> descriptor.
-	 */
-	private static final String PERSIST_NAME = "persistName";
-
-
-	/**
 	 * The <code>JmxAttributeSource</code> implementation used to read
 	 * the metadata from the bean class.
 	 */
@@ -251,6 +210,12 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 				(setter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(setter);
 
 		int ctl = resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit());
+
+		if (ctl == -1) {
+			// support for non-compliant implementations
+			ctl = getAlwaysStaleCurrencyTimeLimit();
+		}
+
 		descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(ctl));
 
 		Object defaultValue = resolveObjectDescriptor(gma.getDefaultValue(), sma.getDefaultValue());
@@ -273,7 +238,14 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
 		ManagedOperation mo = this.attributeSource.getManagedOperation(method);
 		if (mo != null) {
-			descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(mo.getCurrencyTimeLimit()));
+			int ctl = mo.getCurrencyTimeLimit();
+
+			if (ctl == -1) {
+				// support for non-compliant implementations
+				ctl = getAlwaysStaleCurrencyTimeLimit();
+			}
+
+			descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(ctl));
 		}
 	}
 
