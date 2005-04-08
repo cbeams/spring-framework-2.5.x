@@ -26,6 +26,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
@@ -139,12 +140,27 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * or JdbcTemplate. The Connection will be taken from the JDO PersistenceManager.
 	 * <p>Note that you need to use a JDO dialect for a specific JDO implementation
 	 * to allow for exposing JDO transactions as JDBC transactions.
+	 * <p>The DataSource specified here should be the target DataSource to manage
+	 * transactions for, not a TransactionAwareDataSourceProxy. Only data access
+	 * code may work with TransactionAwareDataSourceProxy, while the transaction
+	 * manager needs to work on the underlying target DataSource. If there's
+	 * nevertheless a TransactionAwareDataSourceProxy passed in, it will be
+	 * unwrapped to extract its target DataSource.
 	 * @see #setAutodetectDataSource
 	 * @see #setJdoDialect
 	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory
+	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 	 */
 	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
+		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
+			// for its underlying target DataSource, else data access code won't see
+			// properly exposed transactions (i.e. transactions for the target DataSource).
+			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
+		}
+		else {
+			this.dataSource = dataSource;
+		}
 	}
 
 	/**

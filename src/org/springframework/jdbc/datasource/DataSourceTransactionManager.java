@@ -97,7 +97,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 */
 	public DataSourceTransactionManager(DataSource dataSource) {
 		this();
-		this.dataSource = dataSource;
+		setDataSource(dataSource);
 		afterPropertiesSet();
 	}
 
@@ -107,10 +107,25 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * Jakarta Commons DBCP connection pool. Alternatively, you can also drive
 	 * transactions for a non-XA J2EE DataSource fetched from JNDI. For an XA
 	 * DataSource, use JtaTransactionManager.
+	 * <p>The DataSource specified here should be the target DataSource to manage
+	 * transactions for, not a TransactionAwareDataSourceProxy. Only data access
+	 * code may work with TransactionAwareDataSourceProxy, while the transaction
+	 * manager needs to work on the underlying target DataSource. If there's
+	 * nevertheless a TransactionAwareDataSourceProxy passed in, it will be
+	 * unwrapped to extract its target DataSource.
+	 * @see TransactionAwareDataSourceProxy
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
 	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
+		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
+			// for its underlying target DataSource, else data access code won't see
+			// properly exposed transactions (i.e. transactions for the target DataSource).
+			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
+		}
+		else {
+			this.dataSource = dataSource;
+		}
 	}
 
 	/**
