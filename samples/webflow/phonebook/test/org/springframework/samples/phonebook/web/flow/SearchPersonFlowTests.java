@@ -15,7 +15,12 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.test.web.flow.AbstractFlowExecutionTests;
+import org.springframework.web.flow.SimpleEvent;
+import org.springframework.web.flow.ViewDescriptor;
 
 public class SearchPersonFlowTests extends AbstractFlowExecutionTests {
 
@@ -39,10 +44,18 @@ public class SearchPersonFlowTests extends AbstractFlowExecutionTests {
 	
 	public void testCriteriaView_Submit_Success() {
 		startFlow();
+		Map properties = new HashMap();
+		properties.put("firstName", "Keith");
+		properties.put("lastName", "Donald");
+		ViewDescriptor view = signalEvent(new SimpleEvent(this, "submit", properties));
+		assertCurrentStateEquals("results.view");
+		asserts().assertCollectionAttributeSize(view, "persons", 1);
 	}
 	
 	public void testCriteriaView_Submit_Error() {
 		startFlow();
+		ViewDescriptor view = signalEvent(new SimpleEvent(this, "submit", null));
+		assertCurrentStateEquals("criteria.view");
 	}
 
 }
