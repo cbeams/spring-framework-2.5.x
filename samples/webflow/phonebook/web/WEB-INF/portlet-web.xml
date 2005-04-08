@@ -3,24 +3,27 @@
 
 <web-app id="WebApp">
 	<display-name>phonebook</display-name>
-	<context-param>
-		<param-name>webAppRootKey</param-name>
-		<param-value>phonebook.root</param-value>
-	</context-param>
+	
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:org/springframework/samples/phonebook/deploy/service-layer.xml</param-value>
 	</context-param>
-	<context-param>
-		<param-name>log4jConfigLocation</param-name>
-		<param-value>/WEB-INF/classes/log4j.properties</param-value>
-	</context-param>
-	<listener>
-		<listener-class>com.liferay.portal.servlet.PortletContextListener</listener-class>
-	</listener>
+	
+	<!--
+	  - Loads the root application context of this web app at startup,
+	  - by default from "/WEB-INF/applicationContext.xml".
+	  - Use WebApplicationContextUtils.getWebApplicationContext(servletContext)
+	  - to access it anywhere in the web application, outside of the framework.
+	  -
+	  - The root context is the parent of all portlet-specific contexts.
+	  - This means that its beans are automatically available in these child contexts,
+	  - both for getBean(name) calls and (external) bean references.
+    -->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
+	
+	<!--  For Portlet support. -->
 	<servlet>
 		<servlet-name>viewRendererServlet</servlet-name>
 		<servlet-class>org.springframework.web.servlet.ViewRendererServlet</servlet-class>
