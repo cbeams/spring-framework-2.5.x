@@ -29,6 +29,9 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * using this FactoryBean to link it in and expose it under a different name.
  * Effectively, this corresponds to an alias for the target bean.
  *
+ * <p><b>NOTE:</b> For XML bean definition files, a <code>&lt;alias&gt;</code>
+ * tag is available that effectively achieves the same.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  */

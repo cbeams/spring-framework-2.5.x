@@ -98,9 +98,12 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String IMPORT_ELEMENT = "import";
 	public static final String RESOURCE_ATTRIBUTE = "resource";
 
+	public static final String ALIAS_ELEMENT = "alias";
+	public static final String NAME_ATTRIBUTE = "name";
+	public static final String ALIAS_ATTRIBUTE = "alias";
+
 	public static final String BEAN_ELEMENT = "bean";
 	public static final String ID_ATTRIBUTE = "id";
-	public static final String NAME_ATTRIBUTE = "name";
 	public static final String PARENT_ATTRIBUTE = "parent";
 
 	public static final String CLASS_ATTRIBUTE = "class";
@@ -179,6 +182,41 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			logger.debug("Default autowire '" + this.defaultAutowire + "'");
 		}
 
+		int beanDefinitionCount = parseBeanDefinitions(root);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Found " + beanDefinitionCount + " <bean> elements defining beans");
+		}
+		return beanDefinitionCount;
+	}
+
+	protected final BeanDefinitionReader getBeanDefinitionReader() {
+		return beanDefinitionReader;
+	}
+
+	protected final Resource getResource() {
+		return resource;
+	}
+
+	protected final String getDefaultLazyInit() {
+		return defaultLazyInit;
+	}
+
+	protected final String getDefaultDependencyCheck() {
+		return defaultDependencyCheck;
+	}
+
+	protected final String getDefaultAutowire() {
+		return defaultAutowire;
+	}
+
+
+	/**
+	 * Parse the elements at the root level in the document:
+	 * "import", "alias", "bean".
+	 * @param root the DOM root element of the document
+	 * @return the number of bean definitions found
+	 */
+	protected int parseBeanDefinitions(Element root) {
 		NodeList nl = root.getChildNodes();
 		int beanDefinitionCounter = 0;
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -188,6 +226,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				if (IMPORT_ELEMENT.equals(node.getNodeName())) {
 					importBeanDefinitionResource(ele);
 				}
+				else if (ALIAS_ELEMENT.equals(node.getNodeName())) {
+					String name = ele.getAttribute(NAME_ATTRIBUTE);
+					String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
+					this.beanDefinitionReader.getBeanFactory().registerAlias(name, alias);
+				}
 				else if (BEAN_ELEMENT.equals(node.getNodeName())) {
 					beanDefinitionCounter++;
 					BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele);
@@ -196,33 +239,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				}
 			}
 		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Found " + beanDefinitionCounter + " <" + BEAN_ELEMENT + "> elements defining beans");
-		}
 		return beanDefinitionCounter;
 	}
-
-	protected BeanDefinitionReader getBeanDefinitionReader() {
-		return beanDefinitionReader;
-	}
-
-	protected String getDefaultLazyInit() {
-		return defaultLazyInit;
-	}
-
-	protected String getDefaultDependencyCheck() {
-		return defaultDependencyCheck;
-	}
-
-	protected String getDefaultAutowire() {
-		return defaultAutowire;
-	}
-
-	protected Resource getResource() {
-		return resource;
-	}
-
 
 	/**
 	 * Parse an "import" element and load the bean definitions

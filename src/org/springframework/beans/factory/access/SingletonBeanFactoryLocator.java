@@ -264,13 +264,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
  * 
  * &lt;beans>
- *   &lt;!-- define an alias -->
- *   &lt;bean id="com.mycompany.myapp.mypackage"
- *         class="org.springframework.beans.factory.config.BeanReferenceFactoryBean">
- *     &lt;property name="targetBeanName>
- *       &lt;value>com.mycompany.myapp.services&lt;/value>
- *     &lt;/property>
- *   &lt;/bean>
+ *   &lt;!-- define an alias for "com.mycompany.myapp.services" -->
+ *   &lt;alias name="com.mycompany.myapp.services" alias="com.mycompany.myapp.mypackage"/&gt;
  * &lt;/beans>
  * </pre>
  *   
@@ -405,7 +400,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				if (bean instanceof String) {
 					logger.warn("You're using the deprecated alias-through-String-bean feature, " +
 							"which will be removed as of Spring 1.3. It is recommended to replace this " +
-							"with a BeanReferenceFactoryBean (see SingletonBeanFactoryLocator javadoc).");
+							"with an <alias> tag (see SingletonBeanFactoryLocator javadoc).");
 					beanName = (String) bean;
 					bean = groupContext.getBean(beanName);
 				}

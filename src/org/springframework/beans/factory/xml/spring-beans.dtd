@@ -46,8 +46,7 @@
 -->
 <!ELEMENT beans (
 	description?,
-	import*,
-	bean*
+	(import | alias | bean)*
 )>
 
 <!--
@@ -65,6 +64,7 @@
 -->
 <!ELEMENT description (#PCDATA)>
 
+
 <!--
 	Specifies an XML bean definition resource to import.
 -->
@@ -74,7 +74,24 @@
 	The relative resource location of the XML bean definition file to import,
 	for example "myImport.xml" or "includes/myImport.xml" or "../myImport.xml".
 -->
-<!ATTLIST import resource CDATA #IMPLIED>
+<!ATTLIST import resource CDATA #REQUIRED>
+
+
+<!--
+	Defines an alias for a bean, which can reside in a different definition file.
+-->
+<!ELEMENT alias EMPTY>
+
+<!--
+	The name of the bean to define an alias for.
+-->
+<!ATTLIST alias name CDATA #REQUIRED>
+
+<!--
+	The alias name to define for the bean.
+-->
+<!ATTLIST alias alias CDATA #REQUIRED>
+
 
 <!--
 	Defines a single (usually named) bean.
@@ -85,8 +102,7 @@
 -->
 <!ELEMENT bean (
 	description?,
-	(constructor-arg | property)*,
-	(lookup-method | replaced-method)*
+	(constructor-arg | property | lookup-method | replaced-method)*
 )>
 
 <!--
@@ -271,6 +287,7 @@
 -->
 <!ATTLIST bean factory-bean CDATA #IMPLIED>
 
+
 <!--
 	Bean definitions can specify zero or more constructor arguments.
 	This is an alternative to "autowire constructor".
@@ -313,6 +330,7 @@
 -->
 <!ATTLIST constructor-arg value CDATA #IMPLIED>
 
+
 <!--
 	Bean definitions can have zero or more properties.
 	Property elements correspond to JavaBean setter methods exposed
@@ -341,6 +359,7 @@
 -->
 <!ATTLIST property value CDATA #IMPLIED>
 
+
 <!--
 	A lookup method causes the IoC container to override the given method and return
 	the bean with the name given in the bean attribute. This is a form of Method Injection.
@@ -354,6 +373,15 @@
 	Name of a lookup method. This method should take no arguments.
 -->
 <!ATTLIST lookup-method name CDATA #IMPLIED>
+
+<!--
+	Name of the bean in the current or ancestor factories that the lookup method
+	should resolve to. Often this bean will be a prototype, in which case the
+	lookup method will return a distinct instance on every invocation. This
+	is useful for single-threaded objects.
+-->
+<!ATTLIST lookup-method bean CDATA #IMPLIED>
+
 
 <!--
 	Similar to the lookup method mechanism, the replaced-method element is used to control
@@ -399,13 +427,6 @@
 -->
 <!ATTLIST arg-type match CDATA #IMPLIED>
 
-<!--
-	Name of the bean in the current or ancestor factories that the lookup method
-	should resolve to. Often this bean will be a prototype, in which case the
-	lookup method will return a distinct instance on every invocation. This
-	is useful for single-threaded objects.
--->
-<!ATTLIST lookup-method bean CDATA #IMPLIED>
 
 <!--
 	Defines a reference to another bean in this factory or an external
@@ -424,6 +445,7 @@
 <!ATTLIST ref bean CDATA #IMPLIED>
 <!ATTLIST ref local IDREF #IMPLIED>
 <!ATTLIST ref parent CDATA #IMPLIED>
+
 
 <!--
 	Defines a string property value, which must also be the id of another
@@ -444,6 +466,7 @@
 -->
 <!ATTLIST idref bean CDATA #IMPLIED>
 <!ATTLIST idref local IDREF #IMPLIED>
+
 
 <!--
 	Contains a string representation of a property value.
@@ -474,6 +497,7 @@
 -->
 <!ELEMENT null (#PCDATA)>
 
+
 <!--
 	A list can contain multiple inner bean, ref, collection, or value elements.
 	Java lists are untyped, pending generics support in Java 1.5,
@@ -493,6 +517,7 @@
 <!ELEMENT set (
 	(bean | ref | idref | value | null | list | set | map | props)*
 )>
+
 
 <!--
 	A Spring map is a mapping from a string key to object.
@@ -539,6 +564,7 @@
 	(bean | ref | idref | value | null | list | set | map | props)
 )>
 
+
 <!--
 	Props elements differ from map elements in that values must be strings.
 	Props may be empty.
@@ -558,3 +584,4 @@
 	Each property element must specify its key.
 -->
 <!ATTLIST prop key CDATA #REQUIRED>
+
