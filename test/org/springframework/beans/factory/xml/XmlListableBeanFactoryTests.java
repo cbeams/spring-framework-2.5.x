@@ -16,7 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -77,16 +79,78 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	public void testCount() {
-		assertCount(15);
+		assertCount(22);
 	}
 
 	public void testTestBeanCount() {
-		assertTestBeanCount(9);
+		assertTestBeanCount(13);
 	}
 
 	public void testDescriptionButNoProperties() throws Exception {
 		TestBean validEmpty = (TestBean) getBeanFactory().getBean("validEmptyWithDescription");
 		assertEquals(0, validEmpty.getAge());
+	}
+
+	/**
+	 * Test that properties with name as well as id creating an alias up front.
+	 */
+	public void testAutoAliasing() throws Exception {
+		List beanNames = Arrays.asList(getListableBeanFactory().getBeanDefinitionNames());
+
+		TestBean tb1 = (TestBean) getBeanFactory().getBean("aliased");
+		TestBean alias1 = (TestBean) getBeanFactory().getBean("myalias");
+		assertTrue(tb1 == alias1);
+		List tb1Aliases = Arrays.asList(getBeanFactory().getAliases("aliased"));
+		assertEquals(2, tb1Aliases.size());
+		assertTrue(tb1Aliases.contains("myalias"));
+		assertTrue(tb1Aliases.contains("youralias"));
+		assertTrue(beanNames.contains("aliased"));
+		assertFalse(beanNames.contains("myalias"));
+		assertFalse(beanNames.contains("youralias"));
+
+		TestBean tb2 = (TestBean) getBeanFactory().getBean("multiAliased");
+		TestBean alias2 = (TestBean) getBeanFactory().getBean("alias1");
+		TestBean alias3 = (TestBean) getBeanFactory().getBean("alias2");
+		TestBean alias3a = (TestBean) getBeanFactory().getBean("alias3");
+		TestBean alias3b = (TestBean) getBeanFactory().getBean("alias4");
+		assertTrue(tb2 == alias2);
+		assertTrue(tb2 == alias3);
+		assertTrue(tb2 == alias3a);
+		assertTrue(tb2 == alias3b);
+
+		List tb2Aliases = Arrays.asList(getBeanFactory().getAliases("multiAliased"));
+		assertEquals(4, tb2Aliases.size());
+		assertTrue(tb2Aliases.contains("alias1"));
+		assertTrue(tb2Aliases.contains("alias2"));
+		assertTrue(tb2Aliases.contains("alias3"));
+		assertTrue(tb2Aliases.contains("alias4"));
+		assertTrue(beanNames.contains("multiAliased"));
+		assertFalse(beanNames.contains("alias1"));
+		assertFalse(beanNames.contains("alias2"));
+		assertFalse(beanNames.contains("alias3"));
+		assertFalse(beanNames.contains("alias4"));
+
+		TestBean tb3 = (TestBean) getBeanFactory().getBean("aliasWithoutId1");
+		TestBean alias4 = (TestBean) getBeanFactory().getBean("aliasWithoutId2");
+		TestBean alias5 = (TestBean) getBeanFactory().getBean("aliasWithoutId3");
+		assertTrue(tb3 == alias4);
+		assertTrue(tb3 == alias5);
+		List tb3Aliases = Arrays.asList(getBeanFactory().getAliases("aliasWithoutId1"));
+		assertEquals(2, tb3Aliases.size());
+		assertTrue(tb3Aliases.contains("aliasWithoutId2"));
+		assertTrue(tb3Aliases.contains("aliasWithoutId3"));
+		assertTrue(beanNames.contains("aliasWithoutId1"));
+		assertFalse(beanNames.contains("aliasWithoutId2"));
+		assertFalse(beanNames.contains("aliasWithoutId3"));
+
+		TestBean tb4 = (TestBean) getBeanFactory().getBean(TestBean.class.getName());
+		assertEquals(null, tb4.getName());
+
+		Map drs = getListableBeanFactory().getBeansOfType(DummyReferencer.class, false, false);
+		assertEquals(4, drs.size());
+		assertTrue(drs.containsKey(DummyReferencer.class.getName()));
+		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#2"));
+		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#3"));
 	}
 
 	public void testFactoryNesting() {

@@ -3,15 +3,42 @@
 
 <beans>
 
-	<description>
-		Tests for list and map handling in an XML bean definition file.
-	</description>
-
 	<bean id="validEmptyWithDescription" class="org.springframework.beans.TestBean">
 		<description>
 			I have no properties and I'm happy without them.
 		</description>
 	</bean>
+
+	<!--
+		Check automatic creation of alias, to allow for names that are illegal as XML ids.
+	-->
+	<bean id="aliased" class="org.springframework.beans.TestBean" name="myalias">
+		<property name="name"><value>aliased</value></property>
+	</bean>
+
+	<alias name="aliased" alias="youralias"/>
+
+	<alias name="multiAliased" alias="alias3"/>
+
+	<bean id="multiAliased" class="org.springframework.beans.TestBean" name="alias1,alias2">
+		<property name="name"><value>aliased</value></property>
+	</bean>
+
+	<alias name="multiAliased" alias="alias4"/>
+
+	<bean class="org.springframework.beans.TestBean" name="aliasWithoutId1,aliasWithoutId2,aliasWithoutId3">
+		<property name="name"><value>aliased</value></property>
+	</bean>
+
+	<bean class="org.springframework.beans.TestBean">
+		<property name="name"><null/></property>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
+
+	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
+
+	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
 
 	<bean id="rod" class="org.springframework.beans.TestBean">
 		<property name="name"><value><!-- a comment -->Rod</value></property>
@@ -45,8 +72,7 @@
 	</bean>
 
 	<!-- Test of lifecycle callbacks -->
-	<bean id="mustBeInitialized" class="org.springframework.beans.factory.MustBeInitialized">
-	</bean>
+	<bean id="mustBeInitialized" class="org.springframework.beans.factory.MustBeInitialized"/>
 
 	<bean id="lifecycle" class="org.springframework.beans.factory.LifecycleBean"
 		  init-method="declaredInitMethod">

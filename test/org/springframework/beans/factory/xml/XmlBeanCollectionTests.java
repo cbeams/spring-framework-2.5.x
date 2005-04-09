@@ -135,58 +135,6 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertTrue(l.get(3).equals("rod"));
 	}
 
-	/**
-	 * Test that properties with name as well as id creating an alias up front.
-	 */
-	public void testAutoAliasing() throws Exception {
-		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
-		List beanNames = Arrays.asList(xbf.getBeanDefinitionNames());
-
-		TestBean tb1 = (TestBean) xbf.getBean("aliased");
-		TestBean alias1 = (TestBean) xbf.getBean("myalias");
-		assertTrue(tb1 == alias1);
-		List tb1Aliases = Arrays.asList(xbf.getAliases("aliased"));
-		assertEquals(1, tb1Aliases.size());
-		assertTrue(tb1Aliases.contains("myalias"));
-		assertTrue(beanNames.contains("aliased"));
-		assertFalse(beanNames.contains("myalias"));
-
-		TestBean tb2 = (TestBean) xbf.getBean("multiAliased");
-		TestBean alias2 = (TestBean) xbf.getBean("alias1");
-		TestBean alias3 = (TestBean) xbf.getBean("alias2");
-		assertTrue(tb2 == alias2);
-		assertTrue(tb2 == alias3);
-		List tb2Aliases = Arrays.asList(xbf.getAliases("multiAliased"));
-		assertEquals(2, tb2Aliases.size());
-		assertTrue(tb2Aliases.contains("alias1"));
-		assertTrue(tb2Aliases.contains("alias2"));
-		assertTrue(beanNames.contains("multiAliased"));
-		assertFalse(beanNames.contains("alias1"));
-		assertFalse(beanNames.contains("alias2"));
-
-		TestBean tb3 = (TestBean) xbf.getBean("aliasWithoutId1");
-		TestBean alias4 = (TestBean) xbf.getBean("aliasWithoutId2");
-		TestBean alias5 = (TestBean) xbf.getBean("aliasWithoutId3");
-		assertTrue(tb3 == alias4);
-		assertTrue(tb3 == alias5);
-		List tb3Aliases = Arrays.asList(xbf.getAliases("aliasWithoutId1"));
-		assertEquals(2, tb2Aliases.size());
-		assertTrue(tb3Aliases.contains("aliasWithoutId2"));
-		assertTrue(tb3Aliases.contains("aliasWithoutId3"));
-		assertTrue(beanNames.contains("aliasWithoutId1"));
-		assertFalse(beanNames.contains("aliasWithoutId2"));
-		assertFalse(beanNames.contains("aliasWithoutId3"));
-
-		TestBean tb4 = (TestBean) xbf.getBean(TestBean.class.getName());
-		assertEquals(null, tb4.getName());
-
-		Map drs = xbf.getBeansOfType(DummyReferencer.class, false, false);
-		assertEquals(3, drs.size());
-		assertTrue(drs.containsKey(DummyReferencer.class.getName()));
-		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#2"));
-		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#3"));
-	}
-
 	public void testEmptyMap() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("emptyMap");
