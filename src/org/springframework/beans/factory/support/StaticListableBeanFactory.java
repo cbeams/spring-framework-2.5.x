@@ -171,6 +171,10 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	}
 
 	public String[] getBeanNamesForType(Class type) {
+		return getBeanNamesForType(type, true, true);
+	}
+
+	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 		List matches = new ArrayList();
 		Set keys = this.beans.keySet();
@@ -179,9 +183,11 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			String name = (String) it.next();
 			Object beanInstance = this.beans.get(name);
 			if (beanInstance instanceof FactoryBean && !isFactoryType) {
-				Class objectType = ((FactoryBean) beanInstance).getObjectType();
-				if (objectType != null && type.isAssignableFrom(objectType)) {
-					matches.add(name);
+				if (includeFactoryBeans) {
+					Class objectType = ((FactoryBean) beanInstance).getObjectType();
+					if (objectType != null && type.isAssignableFrom(objectType)) {
+						matches.add(name);
+					}
 				}
 			}
 			else {

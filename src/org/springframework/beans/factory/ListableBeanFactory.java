@@ -105,6 +105,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @param type the class or interface to match, or null for all bean names
 	 * @return the names of beans matching the given object type 
 	 * (including subclasses), or an empty array if none
+	 * @deprecated in favor of getBeanNamesForType.
+	 * This method will be removed as of Spring 1.3.
 	 * @see #getBeanNamesForType
 	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory, Class)
 	 */
@@ -121,6 +123,9 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
+	 * <p>This version of getBeanNamesForType matches all kinds of beans, be it
+	 * singletons, prototypes, or FactoryBeans. In most implementations, the
+	 * result will be the same as for <code>getBeanNamesOfType(type, true, true)</code>.
 	 * @param type the class or interface to match, or null for all bean names
 	 * @return the names of beans (or objects created by FactoryBeans) matching
 	 * the given object type (including subclasses), or an empty array if none
@@ -128,6 +133,29 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, Class)
 	 */
 	String[] getBeanNamesForType(Class type);
+
+	/**
+	 * Return the names of beans matching the given type (including subclasses),
+	 * judging from either bean definitions or the value of <code>getObjectType</code>
+	 * in the case of FactoryBeans.
+	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
+	 * classes themselves, which means that FactoryBeans will get instantiated.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' <code>beanNamesForTypeIncludingAncestors</code>
+	 * to include beans in ancestor factories too.
+	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
+	 * by other means than bean definitions.
+	 * @param type the class or interface to match, or null for all bean names
+	 * @param includePrototypes whether to include prototype beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
+	 * or just conventional beans
+	 * @return the names of beans (or objects created by FactoryBeans) matching
+	 * the given object type (including subclasses), or an empty array if none
+	 * @see FactoryBean#getObjectType
+	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
+	 */
+	String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans);
 
 	/**
 	 * Return the bean instances that match the given object type (including
@@ -167,7 +195,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @param type the class or interface to match, or null for all concrete beans
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include FactoryBeans too
+	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
 	 * or just conventional beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values

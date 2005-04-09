@@ -103,6 +103,8 @@ public abstract class BeanFactoryUtils {
 	 * @param lbf the bean factory
 	 * @param type the type that beans must match
 	 * @return the array of bean names, or an empty array if none
+	 * @deprecated in favor of beanNamesForTypeIncludingAncestors.
+	 * This method will be removed as of Spring 1.3.
 	 * @see #beanNamesForTypeIncludingAncestors
 	 */
 	public static String[] beanNamesIncludingAncestors(ListableBeanFactory lbf, Class type) {
@@ -143,6 +145,35 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
+	 * Get all bean names for the given type, including those defined in ancestor
+	 * factories. Will return unique names in case of overridden bean definitions.
+	 * <p>Does consider objects created by FactoryBeans but rather the FactoryBean
+	 * classes themselves, which means that FactoryBeans will get instantiated.
+	 * @param lbf the bean factory
+	 * @param includePrototypes whether to include prototype beans too or just singletons
+	 * (also applies to FactoryBeans)
+	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
+	 * or just conventional beans
+	 * @param type the type that beans must match
+	 * @return the array of bean names, or an empty array if none
+	 */
+	public static String[] beanNamesForTypeIncludingAncestors(
+			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+
+		Set result = new HashSet();
+		result.addAll(Arrays.asList(lbf.getBeanNamesForType(type, includePrototypes, includeFactoryBeans)));
+		if (lbf instanceof HierarchicalBeanFactory) {
+			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
+			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				String[] parentResult = beanNamesForTypeIncludingAncestors(
+						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, includeFactoryBeans);
+				result.addAll(Arrays.asList(parentResult));
+			}
+		}
+		return (String[]) result.toArray(new String[result.size()]);
+	}
+
+	/**
 	 * Return all beans of the given type or subtypes, also picking up beans defined in
 	 * ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
 	 * The return list will only contain beans of this type.
@@ -153,6 +184,7 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static Map beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type)
 	    throws BeansException {
+
 		Map result = new HashMap();
 		result.putAll(lbf.getBeansOfType(type));
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -179,13 +211,15 @@ public abstract class BeanFactoryUtils {
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include FactoryBeans too or just normal beans
+	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
+	 * or just conventional beans
 	 * @return the Map of bean instances, or an empty Map if none
 	 * @throws BeansException if a bean could not be created
 	 */
 	public static Map beansOfTypeIncludingAncestors(
 			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans)
 	    throws BeansException {
+
 		Map result = new HashMap();
 		result.putAll(lbf.getBeansOfType(type, includePrototypes, includeFactoryBeans));
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -220,6 +254,7 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static Object beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type)
 			throws BeansException {
+
 		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
@@ -237,7 +272,8 @@ public abstract class BeanFactoryUtils {
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include FactoryBeans too or just normal beans
+	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
+	 * or just conventional beans
 	 * @return the Map of bean instances, or an empty Map if none
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
@@ -248,6 +284,7 @@ public abstract class BeanFactoryUtils {
 	public static Object beanOfTypeIncludingAncestors(
 			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans)
 	    throws BeansException {
+
 		Map beansOfType = beansOfTypeIncludingAncestors(lbf, type, includePrototypes, includeFactoryBeans);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
@@ -287,7 +324,8 @@ public abstract class BeanFactoryUtils {
 	 * @param type type of bean to match
 	 * @param includePrototypes whether to include prototype beans too or just singletons
 	 * (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include FactoryBeans too or just normal beans
+	 * @param includeFactoryBeans whether to include objects created FactoryBeans too
+	 * or just conventional beans
 	 * @return the Map of bean instances, or an empty Map if none
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
@@ -298,6 +336,7 @@ public abstract class BeanFactoryUtils {
 	public static Object beanOfType(
 			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean includeFactoryBeans)
 	    throws BeansException {
+
 		Map beansOfType = lbf.getBeansOfType(type, includePrototypes, includeFactoryBeans);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();

@@ -126,54 +126,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public String[] getBeanNamesForType(Class type) {
-		List beanNames = doGetBeanNamesForType(type, true, true);
-		return (String[]) beanNames.toArray(new String[beanNames.size()]);
+		return getBeanNamesForType(type, true, true);
 	}
 
-	public Map getBeansOfType(Class type) throws BeansException {
-		return getBeansOfType(type, true, true);
-	}
-
-	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
-			throws BeansException {
-
-		List beanNames = doGetBeanNamesForType(type, includePrototypes, includeFactoryBeans);
-		Map result = CollectionFactory.createLinkedMapIfPossible(beanNames.size());
-		for (Iterator it = beanNames.iterator(); it.hasNext();) {
-			String beanName = (String) it.next();
-			try {
-				result.put(beanName, getBean(beanName));
-			}
-			catch (BeanCreationException ex) {
-				if (ex.contains(BeanCurrentlyInCreationException.class)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring match to currently created bean '" + beanName + "'", ex);
-					}
-					// Ignore: indicates a circular reference when autowiring constructors.
-					// We want to find matches other than the currently created bean itself.
-				}
-				else {
-					throw ex;
-				}
-			}
-		}
-		return result;
-	}
-
-
-	/**
-	 * Get a List of all bean names that match the given type (including subclasses),
-	 * judging from either bean definitions or the value of <code>getObjectType</code>
-	 * in the case of FactoryBeans.
-	 * @param type the class or interface to match, or null for all concrete beans
-	 * @param includePrototypes whether to include prototype beans too
-	 * or just singletons (also applies to FactoryBeans)
-	 * @param includeFactoryBeans whether to include FactoryBeans too
-	 * or just conventional beans
-	 * @return the names of beans (or objects created by FactoryBeans) matching
-	 * the given object type (including subclasses), or an empty List if none
-	 */
-	protected List doGetBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 		List result = new ArrayList();
 
@@ -231,22 +187,37 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		return result;
+		return (String[]) result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * Check whether the specified bean matches the given type.
-	 * @param beanName the name of the bean to check
-	 * @param type the type to check for
-	 * @return whether the bean matches the given type
-	 * @see #getType
-	 */
-	private boolean isBeanTypeMatch(String beanName, Class type) {
-		if (type == null) {
-			return true;
+	public Map getBeansOfType(Class type) throws BeansException {
+		return getBeansOfType(type, true, true);
+	}
+
+	public Map getBeansOfType(Class type, boolean includePrototypes, boolean includeFactoryBeans)
+			throws BeansException {
+
+		String[] beanNames = getBeanNamesForType(type, includePrototypes, includeFactoryBeans);
+		Map result = CollectionFactory.createLinkedMapIfPossible(beanNames.length);
+		for (int i = 0; i < beanNames.length; i++) {
+			String beanName = beanNames[i];
+			try {
+				result.put(beanName, getBean(beanName));
+			}
+			catch (BeanCreationException ex) {
+				if (ex.contains(BeanCurrentlyInCreationException.class)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring match to currently created bean '" + beanName + "'", ex);
+					}
+					// Ignore: indicates a circular reference when autowiring constructors.
+					// We want to find matches other than the currently created bean itself.
+				}
+				else {
+					throw ex;
+				}
+			}
 		}
-		Class beanType = getType(beanName);
-		return (beanType != null && type.isAssignableFrom(beanType));
+		return result;
 	}
 
 	/**
@@ -264,6 +235,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
 		return (rbd.hasBeanClass() && type.isAssignableFrom(rbd.getBeanClass()));
+	}
+
+	/**
+	 * Check whether the specified bean matches the given type.
+	 * @param beanName the name of the bean to check
+	 * @param type the type to check for
+	 * @return whether the bean matches the given type
+	 * @see #getType
+	 */
+	private boolean isBeanTypeMatch(String beanName, Class type) {
+		if (type == null) {
+			return true;
+		}
+		Class beanType = getType(beanName);
+		return (beanType != null && type.isAssignableFrom(beanType));
 	}
 
 
