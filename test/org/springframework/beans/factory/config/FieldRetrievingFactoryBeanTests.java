@@ -33,6 +33,13 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), fr.getObject());
 	}
 
+	public void testStaticFieldWithWhitespace() throws Exception {
+		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
+		fr.setStaticField("  java.sql.Connection.TRANSACTION_SERIALIZABLE  ");
+		fr.afterPropertiesSet();
+		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), fr.getObject());
+	}
+
 	public void testStaticFieldViaClassAndFieldName() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetClass(Connection.class);

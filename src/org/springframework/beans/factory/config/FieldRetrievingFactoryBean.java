@@ -103,7 +103,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, I
 	 * @see #setTargetObject
 	 */
 	public void setTargetField(String targetField) {
-		this.targetField = targetField;
+		this.targetField = (targetField != null ? targetField.trim() : null);
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, I
 	 * @see #setTargetField
 	 */
 	public void setStaticField(String staticField) {
-		this.staticField = staticField;
+		this.staticField = (staticField != null ? staticField.trim() : null);
 	}
 
 	/**
