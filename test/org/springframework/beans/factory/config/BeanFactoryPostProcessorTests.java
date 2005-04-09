@@ -18,7 +18,6 @@ package org.springframework.beans.factory.config;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -26,59 +25,70 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 
 /**
- * This test will go away once a real lifecycle test is created for AppContexts
- * 
  * @author Colin Sampaleanu
+ * @author Juergen Hoeller
  * @since 02.10.2003
  */
 public class BeanFactoryPostProcessorTests extends TestCase {
 
-	public void testBeanFactoryPostProcessorExecutedByAppContext() {
-		
+	public void testRegisteredBeanFactoryPostProcessor() {
 		StaticApplicationContext ac = new StaticApplicationContext();
-		ac.registerSingleton("tb1", TestBean.class, new MutablePropertyValues());
-		ac.registerSingleton("tb2", TestBean.class, new MutablePropertyValues());
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
 		TestBeanFactoryPostProcessor bfpp = new TestBeanFactoryPostProcessor();
 		ac.addBeanFactoryPostProcessor(bfpp);
-		assertTrue(bfpp.wasCalled == false);
+		assertFalse(bfpp.wasCalled);
 		ac.refresh();
-		assertTrue(bfpp.wasCalled == true);
+		assertTrue(bfpp.wasCalled);
 	}
 	
-	public void testBeanFactoryPostProcessorExecutedByAppContext2() {
-		
+	public void testDefinedBeanFactoryPostProcessor() {
 		StaticApplicationContext ac = new StaticApplicationContext();
-		ac.registerSingleton("tb1", TestBean.class, new MutablePropertyValues());
-		ac.registerSingleton("tb2", TestBean.class, new MutablePropertyValues());
-		ac.registerSingleton("bfpp", TestBeanFactoryPostProcessor.class, new MutablePropertyValues());
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
+		ac.registerSingleton("bfpp", TestBeanFactoryPostProcessor.class);
 		ac.refresh();
 		TestBeanFactoryPostProcessor bfpp = (TestBeanFactoryPostProcessor) ac.getBean("bfpp");
-		assertTrue(bfpp.wasCalled == true);
+		assertTrue(bfpp.wasCalled);
 	}
 
+	public void testMultipleDefinedBeanFactoryPostProcessors() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
+		MutablePropertyValues pvs1 = new MutablePropertyValues();
+		pvs1.addPropertyValue("initValue", "${key}");
+		ac.registerSingleton("bfpp1", TestBeanFactoryPostProcessor.class, pvs1);
+		MutablePropertyValues pvs2 = new MutablePropertyValues();
+		pvs2.addPropertyValue("properties", "key=value");
+		ac.registerSingleton("bfpp2", PropertyPlaceholderConfigurer.class, pvs2);
+		ac.refresh();
+		TestBeanFactoryPostProcessor bfpp = (TestBeanFactoryPostProcessor) ac.getBean("bfpp1");
+		assertEquals("value", bfpp.initValue);
+		assertTrue(bfpp.wasCalled);
+	}
 
 	public void testBeanFactoryPostProcessorNotExecutedByBeanFactory() {
-		
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-        bf.registerBeanDefinition("tb1",
-				new RootBeanDefinition(TestBean.class, new MutablePropertyValues()));
-        bf.registerBeanDefinition("tb2",
-				new RootBeanDefinition(TestBean.class, new MutablePropertyValues()));
-        bf.registerBeanDefinition("bfpp",
-				new RootBeanDefinition(TestBeanFactoryPostProcessor.class, new MutablePropertyValues()));
-		
+		bf.registerBeanDefinition("tb1", new RootBeanDefinition(TestBean.class));
+		bf.registerBeanDefinition("tb2", new RootBeanDefinition(TestBean.class));
+		bf.registerBeanDefinition("bfpp", new RootBeanDefinition(TestBeanFactoryPostProcessor.class));
 		TestBeanFactoryPostProcessor bfpp = (TestBeanFactoryPostProcessor) bf.getBean("bfpp");
-		assertTrue(bfpp.wasCalled == false);
+		assertFalse(bfpp.wasCalled);
 	}
 
 	
 	public static class TestBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
-		
+
+		public String initValue;
+
+		public void setInitValue(String initValue) {
+			this.initValue = initValue;
+		}
+
 		public boolean wasCalled = false;
 		
-		public TestBeanFactoryPostProcessor() {
-		}
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 			wasCalled = true;
 		}
 	}

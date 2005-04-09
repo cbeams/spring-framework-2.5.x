@@ -53,6 +53,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
@@ -312,7 +313,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		onRefresh();
 
 		// Check for listener beans and register them.
-		refreshListeners();
+		registerListeners();
 
 		// iIstantiate singletons this late to allow them to access the message source.
 		beanFactory.preInstantiateSingletons();
@@ -354,12 +355,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Must be called before singleton instantiation.
 	 */
 	private void invokeBeanFactoryPostProcessors() throws BeansException {
-		Map factoryProcessorMap = getBeansOfType(BeanFactoryPostProcessor.class, true, false);
-		List factoryProcessors = new ArrayList(factoryProcessorMap.values());
-		Collections.sort(factoryProcessors, new OrderComparator());
-		for (Iterator it = factoryProcessors.iterator(); it.hasNext();) {
+		String[] factoryProcessorNames = getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
+		// Separate between BeanFactoryPostProcessor that implement the Ordered
+		// interface and those that do not.
+		List orderedFactoryProcessors = new ArrayList();
+		List nonOrderedFactoryProcessorNames = new ArrayList();
+		for (int i = 0; i < factoryProcessorNames.length; i++) {
+			if (Ordered.class.isAssignableFrom(getType(factoryProcessorNames[i]))) {
+				orderedFactoryProcessors.add(getBean(factoryProcessorNames[i]));
+			}
+			else {
+				nonOrderedFactoryProcessorNames.add(factoryProcessorNames[i]);
+			}
+		}
+		// First, invoke the BeanFactoryPostProcessors that implement Ordered.
+		Collections.sort(orderedFactoryProcessors, new OrderComparator());
+		for (Iterator it = orderedFactoryProcessors.iterator(); it.hasNext();) {
 			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
 			factoryProcessor.postProcessBeanFactory(getBeanFactory());
+		}
+		// Second, invoke all other BeanFactoryPostProcessors, one by one.
+		for (Iterator it = nonOrderedFactoryProcessorNames.iterator(); it.hasNext();) {
+			String factoryProcessorName = (String) it.next();
+			((BeanFactoryPostProcessor) getBean(factoryProcessorName)).postProcessBeanFactory(getBeanFactory());
 		}
 	}
 
@@ -435,7 +453,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * We cannot use <code>containsBean</code> here, as we do not want a bean
 	 * from an ancestor bean factory.
 	 */
-	private boolean containsLocalBean(String beanName) {
+	protected final boolean containsLocalBean(String beanName) {
 		return (containsBeanDefinition(beanName) || getBeanFactory().containsSingleton(beanName));
 	}
 
@@ -453,18 +471,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Add beans that implement ApplicationListener as listeners.
 	 * Doesn't affect other listeners, which can be added without being beans.
 	 */
-	private void refreshListeners() throws BeansException {
-		logger.debug("Refreshing listeners");
+	private void registerListeners() throws BeansException {
 		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Found " + listeners.size() + " listeners in bean factory");
-		}
 		for (Iterator it = listeners.iterator(); it.hasNext();) {
-			ApplicationListener listener = (ApplicationListener) it.next();
-			addListener(listener);
-			if (logger.isInfoEnabled()) {
-				logger.info("Application listener [" + listener + "] added");
-			}
+			addListener((ApplicationListener) it.next());
 		}
 	}
 
@@ -564,6 +574,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public String[] getBeanNamesForType(Class type) {
 		return getBeanFactory().getBeanNamesForType(type);
+	}
+
+	public String[] getBeanNamesForType(Class type, boolean includePrototypes, boolean includeFactoryBeans) {
+		return getBeanFactory().getBeanNamesForType(type, includePrototypes, includeFactoryBeans);
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {
