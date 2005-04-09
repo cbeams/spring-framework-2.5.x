@@ -110,14 +110,17 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 			throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 		prepare();
 		if (this.singleton) {
-			this.singletonObject = invoke();
+			Object obj = invoke();
+			this.singletonObject = obj != null ? obj : MethodInvoker.VOID;
 		}
 	}
 
 	/**
-	 * Will return the same value each time if the singleton property is set
-	 * to true, and otherwise return the value returned from invoking the
-	 * specified method.
+	 * Returns the same value each time if the singleton property is set
+	 * to true, otherwise returns the value returned from invoking the
+	 * specified method. However, returns {@link MethodInvoker#VOID} if the
+	 * method returns null or has a void return type, since factory beans
+	 * must return a result.
 	 */
 	public Object getObject() throws InvocationTargetException, IllegalAccessException {
 		if (this.singleton) {

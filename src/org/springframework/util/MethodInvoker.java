@@ -42,8 +42,10 @@ import java.lang.reflect.Modifier;
  */
 public class MethodInvoker {
 
+    /**
+     * Marker now used only by MethodInvokingFactoryBean, but left here for compatibility
+     */
 	public static final VoidType VOID = new VoidType();
-
 
 	private Class targetClass;
 
@@ -209,7 +211,7 @@ public class MethodInvoker {
 	 * Invoke the specified method.
 	 * The invoker needs to have been prepared before.
 	 * @return the object (possibly null) returned by the method invocation,
-	 * or {@link #VOID} if the method has a void return type
+	 * or null if the method has a void return type
 	 * @see #prepare
 	 */
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
@@ -217,16 +219,14 @@ public class MethodInvoker {
 			throw new IllegalStateException( "prepare() must be called prior to invoke() on MethodInvoker");
 		}
 		// in the static case, target will just be null
-		Object result = this.methodObject.invoke(this.targetObject, this.arguments);
-		if (this.methodObject.getReturnType().equals(void.class))
-			return VOID;
-		return result;
+		return this.methodObject.invoke(this.targetObject, this.arguments);
 	}
-
 
 	/**
 	 * Special marker class used for a void return value,
 	 * differentiating void from a null value returned by the method.
+	 * This is not used any longer by MethodInvoker, only MethodInvokingFactoryBean, but
+	 * left here for backwards compatibility.
 	 */
 	public static class VoidType {
 	}
