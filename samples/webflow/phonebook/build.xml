@@ -26,4 +26,16 @@
 			<fileset file="${spring.webflow.support.jar}" />
 		</copy>
 	</target>
+	
+    <target name="dist.portlet" depends="dist" description="Build a Portlet WAR file">
+		<war warfile="${dist.dir}/${project.name}-portlet.war"
+			basedir="${target.war.dir}"
+			webxml="${target.webinf.dir}/portlet-web.xml" duplicate="fail">
+			<exclude name="WEB-INF/web.xml" />
+			<exclude name="WEB-INF/portlet-web.xml" />
+			<exclude name="index.jsp" />
+			<include name="**/*" />
+		</war>
+    </target>
+
 </project>
