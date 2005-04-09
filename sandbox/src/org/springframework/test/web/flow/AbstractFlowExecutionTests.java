@@ -15,8 +15,6 @@
  */
 package org.springframework.test.web.flow;
 
-import java.util.Map;
-
 import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.test.JUnitAssertSupport;
 import org.springframework.util.Assert;
@@ -128,7 +126,6 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 
 	/**
 	 * Start a new flow execution for the flow definition that is being tested.
-	 * @param input any input attribtes to pass to the flow execution
 	 * @return the model and view returned as a result of starting the flow
 	 *         (returned when the first view state is entered)
 	 */
