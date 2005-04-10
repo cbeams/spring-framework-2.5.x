@@ -56,7 +56,7 @@ public class ActionStateAction {
 	 * that groups several action execute methods together on a single
 	 * class. The methods follow the following signature:
 	 * <pre>
-	 * public Event ${executeMethodName}(RequestContext context)
+	 * public Event ${method}(RequestContext context)
 	 * </pre>
 	 */
 	public static final String METHOD_PROPERTY = "method";

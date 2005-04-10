@@ -90,7 +90,7 @@
 	A property associated with an action in an action state. Properties are simple strings that 
 	allow you to annotate the action in the context of the state it is being linked with.
 	For example, the 'caption' property might serve a GUI tooltip or logging statement, and
-	the 'executeMethodName' property might specify a target method to invoke on a multi-action
+	the 'validatorMethod' property might specify a target method to invoke on a multi-action
 	instance.
 -->
 <!ELEMENT property ( value? )>

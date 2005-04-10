@@ -29,10 +29,10 @@ import org.springframework.web.flow.RequestContext;
  * subclasses should follow the following signature:
  * 
  * <pre>
- *     public Event ${executeMethodName}(RequestContext context) throws Exception
+ *     public Event ${method}(RequestContext context) throws Exception
  * </pre>
  * 
- * By default, the ${executeMethodName} will be the name of the "executeMethodName"
+ * By default, the ${method} will be the value of the "method" action
  * property associated with the action in the current state, or the name of the
  * current state of the flow if there is no such property defined.
  * So the following state definition
@@ -50,14 +50,11 @@ import org.springframework.web.flow.RequestContext;
  *     public Event search(RequestContext context) throws Exception
  * </pre>
  * 
- * Alternatively you could have explictly specified the method name using a
- * property:
+ * Alternatively you could have explictly specified the method name:
  * 
  * <pre>
  *     &lt;action-state id=&quot;searchState&quot;&gt;
- *         &lt;action bean=&quot;my.search.action&quot;&gt;
- *             &lt;property name="executeMethodName" value="search"/&gt;
- *         &lt;/action&gt;
+ *         &lt;action bean=&quot;my.search.action&quot method=&quot;search&quot;/&gt;
  *         &lt;transition on=&quot;success&quot; to=&quot;results&quot;/&gt;
  *     &lt;/action-state&gt;
  * </pre>
