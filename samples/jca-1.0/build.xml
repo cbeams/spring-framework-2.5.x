@@ -22,10 +22,12 @@
 		<fileset dir="${spring.dist}">
 			<include name="spring.jar"/>
 		</fileset>
+		<fileset dir="${spring.dist}">
+			<include name="spring-sandbox.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/aopalliance">
 			<include name="aopalliance.jar"/>
 		</fileset>
-		<dirset dir="${spring.root}/build"/>
 		<fileset dir="${spring.root}/lib/hsqldb">
 			<include name="hsqldb.jar"/>
 		</fileset>
@@ -38,7 +40,7 @@
 		<fileset dir="${sample.jca.root}/lib">
 			<include name="spring-cciblackbox-tx.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/rowset">
+		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="rowset.jar"/>
 		</fileset>
 
@@ -46,15 +48,11 @@
 
 	<path id="dist-classpath">
 
-		<!-- Dirset to remove when added in Spring -->
-		<dirset dir="${spring.root}/build">
-			<include name="**/*.class"/>
-		</dirset>
 		<fileset dir="${sample.jca.root}">
 			<include name="**/*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/log4j">
-			<include name="log4j-1.2.8.jar"/>
+			<include name="log4j-1.2.9.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="connector-api.jar"/>
