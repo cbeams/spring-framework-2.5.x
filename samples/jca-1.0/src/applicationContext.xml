@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="connectionFactory" class="org.springframework.jca.cci.CciLocalConnectionFactoryBean">
+		<property name="managedConnectionFactoryClass">
+			<value>com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory</value>
+		</property>
+		<property name="properties">
+			<map>
+				<entry key="connectionURL"><value>jdbc:hsqldb:hsql://localhost:9001</value></entry>
+				<entry key="driverName"><value>org.hsqldb.jdbcDriver</value></entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="personDao" class="org.springframework.samples.jca.dao.PersonDaoImpl">
+		<property name="connectionFactory"><ref local="connectionFactory"/></property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jca.cci.connection.CciTransactionManager">
+		<property name="connectionFactory">
+			<ref local="connectionFactory" />
+		</property>
+	</bean>
+
+	<bean id="personServiceTarget" class="org.springframework.samples.jca.service.PersonServiceImpl">
+		<property name="personDao"><ref local="personDao"/></property>
+		<!--property name="enterpriseDao"><ref local="enterpriseDao"/></property-->
+	</bean>
+
+	<bean id="personService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="target">
+			<ref bean="personServiceTarget" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="insert*">PROPAGATION_REQUIRED</prop>
+				<prop key="update*">PROPAGATION_REQUIRED</prop>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

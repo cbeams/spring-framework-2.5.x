@@ -1,0 +1,8 @@
+create table PERSON
+(
+    PERSON_ID         INT not null,
+    PERSON_LAST_NAME  VARCHAR(255) not null,
+    PERSON_FIRST_NAME VARCHAR(255) not null,
+    constraint PK_PERSON primary key (PERSON_ID)
+);
+
