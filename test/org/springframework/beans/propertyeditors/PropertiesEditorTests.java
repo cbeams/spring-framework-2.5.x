@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
@@ -17,14 +16,9 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.beans.PropertyEditor;
-import java.io.File;
-import java.util.Locale;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-
-import org.springframework.beans.TestBean;
 
 /**
  * Test the conversion of Strings to java.util.Properties objects,
@@ -32,7 +26,7 @@ import org.springframework.beans.TestBean;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class PropertyEditorTests extends TestCase {
+public class PropertiesEditorTests extends TestCase {
 
 	public void testOneProperty() {
 		String s = "foo=bar";
@@ -143,34 +137,6 @@ public class PropertyEditorTests extends TestCase {
 		pe.setAsText("");
 		Properties p= (Properties) pe.getValue();
 		assertTrue("empty string means empty properties", p.isEmpty());
-	}
-
-	public void testClassEditor() {
-		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("org.springframework.beans.TestBean");
-		assertEquals(TestBean.class, classEditor.getValue());
-		assertEquals("org.springframework.beans.TestBean", classEditor.getAsText());
-	}
-
-	public void testClassEditorWithArray() {
-		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("org.springframework.beans.TestBean[]");
-		assertEquals(TestBean[].class, classEditor.getValue());
-		assertEquals("org.springframework.beans.TestBean[]", classEditor.getAsText());
-	}
-
-	public void testFileEditor() {
-		PropertyEditor fileEditor = new FileEditor();
-		fileEditor.setAsText("C:/test/myfile.txt");
-		assertEquals(new File("C:/test/myfile.txt"), fileEditor.getValue());
-		assertEquals((new File("C:/test/myfile.txt")).getAbsolutePath(), fileEditor.getAsText());
-	}
-
-	public void testLocaleEditor() {
-		PropertyEditor localeEditor = new LocaleEditor();
-		localeEditor.setAsText("en_CA");
-		assertEquals(Locale.CANADA, localeEditor.getValue());
-		assertEquals("en_CA", localeEditor.getAsText());
 	}
 
 }

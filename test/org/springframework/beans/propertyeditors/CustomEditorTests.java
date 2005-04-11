@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.beans.PropertyVetoException;
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -29,10 +30,16 @@ import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.propertyeditors.CustomBooleanEditor;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.BooleanTestBean;
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.IndexedTestBean;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.NumberTestBean;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
@@ -44,22 +51,18 @@ public class CustomEditorTests extends TestCase {
 		TestBean t = new TestBean();
 		String newName = "Rod";
 		String tbString = "Kerry_34";
-		try {
-			BeanWrapper bw = new BeanWrapperImpl(t);
-			bw.registerCustomEditor(ITestBean.class, null, new TestBeanEditor());
-			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
-			pvs.addPropertyValue(new PropertyValue("name", newName));
-			pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
-			pvs.addPropertyValue(new PropertyValue("spouse", tbString));
-			bw.setPropertyValues(pvs);
-			assertTrue("spouse is non-null", t.getSpouse() != null);
-			assertTrue("spouse name is Kerry and age is 34",
-					t.getSpouse().getName().equals("Kerry") && t.getSpouse().getAge() == 34);
-		}
-		catch (BeansException ex) {
-			fail("Shouldn't throw exception when everything is valid: " + ex.getMessage());
-		}
+
+		BeanWrapper bw = new BeanWrapperImpl(t);
+		bw.registerCustomEditor(ITestBean.class, new TestBeanEditor());
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("age", new Integer(55)));
+		pvs.addPropertyValue(new PropertyValue("name", newName));
+		pvs.addPropertyValue(new PropertyValue("touchy", "valid"));
+		pvs.addPropertyValue(new PropertyValue("spouse", tbString));
+		bw.setPropertyValues(pvs);
+		assertTrue("spouse is non-null", t.getSpouse() != null);
+		assertTrue("spouse name is Kerry and age is 34",
+				t.getSpouse().getName().equals("Kerry") && t.getSpouse().getAge() == 34);
 	}
 
 	public void testCustomEditorForSingleProperty() {
@@ -70,13 +73,8 @@ public class CustomEditorTests extends TestCase {
 				setValue("prefix" + text);
 			}
 		});
-		try {
-			bw.setPropertyValue("name", "value");
-			bw.setPropertyValue("touchy", "value");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("name", "value");
+		bw.setPropertyValue("touchy", "value");
 		assertEquals("prefixvalue", bw.getPropertyValue("name"));
 		assertEquals("prefixvalue", tb.getName());
 		assertEquals("value", bw.getPropertyValue("touchy"));
@@ -86,18 +84,13 @@ public class CustomEditorTests extends TestCase {
 	public void testCustomEditorForAllStringProperties() {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		bw.registerCustomEditor(String.class, null, new PropertyEditorSupport() {
+		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
 		});
-		try {
-			bw.setPropertyValue("name", "value");
-			bw.setPropertyValue("touchy", "value");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("name", "value");
+		bw.setPropertyValue("touchy", "value");
 		assertEquals("prefixvalue", bw.getPropertyValue("name"));
 		assertEquals("prefixvalue", tb.getName());
 		assertEquals("prefixvalue", bw.getPropertyValue("touchy"));
@@ -113,13 +106,8 @@ public class CustomEditorTests extends TestCase {
 				setValue("prefix" + text);
 			}
 		});
-		try {
-			bw.setPropertyValue("spouse.name", "value");
-			bw.setPropertyValue("touchy", "value");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("spouse.name", "value");
+		bw.setPropertyValue("touchy", "value");
 		assertEquals("prefixvalue", bw.getPropertyValue("spouse.name"));
 		assertEquals("prefixvalue", tb.getSpouse().getName());
 		assertEquals("value", bw.getPropertyValue("touchy"));
@@ -130,60 +118,103 @@ public class CustomEditorTests extends TestCase {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		bw.registerCustomEditor(String.class, null, new PropertyEditorSupport() {
+		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
 		});
-		try {
-			bw.setPropertyValue("spouse.name", "value");
-			bw.setPropertyValue("touchy", "value");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("spouse.name", "value");
+		bw.setPropertyValue("touchy", "value");
 		assertEquals("prefixvalue", bw.getPropertyValue("spouse.name"));
 		assertEquals("prefixvalue", tb.getSpouse().getName());
 		assertEquals("prefixvalue", bw.getPropertyValue("touchy"));
 		assertEquals("prefixvalue", tb.getTouchy());
 	}
 
-	public void testBooleanPrimitiveEditor() {
+	public void testDefaultBooleanEditorForPrimitiveType() {
 		BooleanTestBean tb = new BooleanTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 
-		try {
-			bw.setPropertyValue("bool1", "true");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool1", "true");
 		assertTrue("Correct bool1 value", Boolean.TRUE.equals(bw.getPropertyValue("bool1")));
 		assertTrue("Correct bool1 value", tb.isBool1());
 
-		try {
-			bw.setPropertyValue("bool1", "false");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool1", "false");
 		assertTrue("Correct bool1 value", Boolean.FALSE.equals(bw.getPropertyValue("bool1")));
+		assertTrue("Correct bool1 value", !tb.isBool1());
+
+		bw.setPropertyValue("bool1", "on");
+		assertTrue("Correct bool1 value", tb.isBool1());
+
+		bw.setPropertyValue("bool1", "off");
+		assertTrue("Correct bool1 value", !tb.isBool1());
+
+		bw.setPropertyValue("bool1", "yes");
+		assertTrue("Correct bool1 value", tb.isBool1());
+
+		bw.setPropertyValue("bool1", "no");
+		assertTrue("Correct bool1 value", !tb.isBool1());
+
+		bw.setPropertyValue("bool1", "1");
+		assertTrue("Correct bool1 value", tb.isBool1());
+
+		bw.setPropertyValue("bool1", "0");
 		assertTrue("Correct bool1 value", !tb.isBool1());
 
 		try {
 			bw.setPropertyValue("bool1", "argh");
+			fail("Should have thrown BeansException");
 		}
 		catch (BeansException ex) {
 			// expected
-			return;
 		}
-		fail("Should have thrown BeansException");
 	}
 
-	public void testBooleanObjectEditorWithAllowEmpty() {
+	public void testDefaultBooleanEditorForWrapperType() {
 		BooleanTestBean tb = new BooleanTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		bw.registerCustomEditor(Boolean.class, null, new CustomBooleanEditor(true));
+
+		bw.setPropertyValue("bool2", "true");
+		assertTrue("Correct bool2 value", Boolean.TRUE.equals(bw.getPropertyValue("bool2")));
+		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "false");
+		assertTrue("Correct bool2 value", Boolean.FALSE.equals(bw.getPropertyValue("bool2")));
+		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "on");
+		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "off");
+		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "yes");
+		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "no");
+		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "1");
+		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
+
+		bw.setPropertyValue("bool2", "0");
+		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
+
+		try {
+			bw.setPropertyValue("bool2", "");
+			fail("Should have throw BeansException");
+		}
+		catch (BeansException ex) {
+			// expected
+			assertTrue("Correct bool2 value", bw.getPropertyValue("bool2") != null);
+			assertTrue("Correct bool2 value", tb.getBool2() != null);
+		}
+	}
+
+	public void testCustomBooleanEditorWithAllowEmpty() {
+		BooleanTestBean tb = new BooleanTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(Boolean.class, new CustomBooleanEditor(true));
 
 		bw.setPropertyValue("bool2", "true");
 		assertTrue("Correct bool2 value", Boolean.TRUE.equals(bw.getPropertyValue("bool2")));
@@ -216,75 +247,22 @@ public class CustomEditorTests extends TestCase {
 		assertTrue("Correct bool2 value", tb.getBool2() == null);
 	}
 
-	public void testBooleanObjectEditorWithoutAllowEmpty() {
-		BooleanTestBean tb = new BooleanTestBean();
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-		bw.registerCustomEditor(Boolean.class, null, new CustomBooleanEditor(false));
-
-		try {
-			bw.setPropertyValue("bool2", "true");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
-		assertTrue("Correct bool2 value", Boolean.TRUE.equals(bw.getPropertyValue("bool2")));
-		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
-
-		try {
-			bw.setPropertyValue("bool2", "false");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
-		assertTrue("Correct bool2 value", Boolean.FALSE.equals(bw.getPropertyValue("bool2")));
-		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
-
-		try {
-			bw.setPropertyValue("bool2", "");
-		}
-		catch (BeansException ex) {
-			// expected
-			assertTrue("Correct bool2 value", bw.getPropertyValue("bool2") != null);
-			assertTrue("Correct bool2 value", tb.getBool2() != null);
-			return;
-		}
-		fail("Should have throw BeansException");
-	}
-
-	public void testNumberEditorWithoutAllowEmpty() {
-		NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
+	public void testDefaultNumberEditor() {
 		NumberTestBean tb = new NumberTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		bw.registerCustomEditor(short.class, null, new CustomNumberEditor(Short.class, nf, false));
-		bw.registerCustomEditor(Short.class, null, new CustomNumberEditor(Short.class, nf, false));
-		bw.registerCustomEditor(int.class, null, new CustomNumberEditor(Short.class, nf, false));
-		bw.registerCustomEditor(Integer.class, null, new CustomNumberEditor(Integer.class, nf, false));
-		bw.registerCustomEditor(long.class, null, new CustomNumberEditor(Long.class, nf, false));
-		bw.registerCustomEditor(Long.class, null, new CustomNumberEditor(Long.class, nf, false));
-		bw.registerCustomEditor(BigInteger.class, null, new CustomNumberEditor(BigInteger.class, nf, false));
-		bw.registerCustomEditor(float.class, null, new CustomNumberEditor(Float.class, nf, false));
-		bw.registerCustomEditor(Float.class, null, new CustomNumberEditor(Float.class, nf, false));
-		bw.registerCustomEditor(double.class, null, new CustomNumberEditor(Double.class, nf, false));
-		bw.registerCustomEditor(Double.class, null, new CustomNumberEditor(Double.class, nf, false));
-		bw.registerCustomEditor(BigDecimal.class, null, new CustomNumberEditor(BigDecimal.class, nf, false));
 
-		try {
-			bw.setPropertyValue("short1", "1");
-			bw.setPropertyValue("short2", "2");
-			bw.setPropertyValue("int1", "7");
-			bw.setPropertyValue("int2", "8");
-			bw.setPropertyValue("long1", "5");
-			bw.setPropertyValue("long2", "6");
-			bw.setPropertyValue("bigInteger", "3");
-			bw.setPropertyValue("float1", "7,1");
-			bw.setPropertyValue("float2", "8,1");
-			bw.setPropertyValue("double1", "5,1");
-			bw.setPropertyValue("double2", "6,1");
-			bw.setPropertyValue("bigDecimal", "4,5");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("short1", "1");
+		bw.setPropertyValue("short2", "2");
+		bw.setPropertyValue("int1", "7");
+		bw.setPropertyValue("int2", "8");
+		bw.setPropertyValue("long1", "5");
+		bw.setPropertyValue("long2", "6");
+		bw.setPropertyValue("bigInteger", "3");
+		bw.setPropertyValue("float1", "7.1");
+		bw.setPropertyValue("float2", "8.1");
+		bw.setPropertyValue("double1", "5.1");
+		bw.setPropertyValue("double2", "6.1");
+		bw.setPropertyValue("bigDecimal", "4.5");
 
 		assertTrue("Correct short1 value", new Short("1").equals(bw.getPropertyValue("short1")));
 		assertTrue("Correct short1 value", tb.getShort1() == 1);
@@ -312,44 +290,135 @@ public class CustomEditorTests extends TestCase {
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(tb.getBigDecimal()));
 	}
 
-	public void testNumberEditorsWithAllowEmpty() {
+	public void testCustomNumberEditorWithoutAllowEmpty() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 		NumberTestBean tb = new NumberTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
-		bw.registerCustomEditor(long.class, null, new CustomNumberEditor(Long.class, nf, true));
-		bw.registerCustomEditor(Long.class, null, new CustomNumberEditor(Long.class, nf, true));
+		bw.registerCustomEditor(short.class, new CustomNumberEditor(Short.class, nf, false));
+		bw.registerCustomEditor(Short.class, new CustomNumberEditor(Short.class, nf, false));
+		bw.registerCustomEditor(int.class, new CustomNumberEditor(Short.class, nf, false));
+		bw.registerCustomEditor(Integer.class, new CustomNumberEditor(Integer.class, nf, false));
+		bw.registerCustomEditor(long.class, new CustomNumberEditor(Long.class, nf, false));
+		bw.registerCustomEditor(Long.class, new CustomNumberEditor(Long.class, nf, false));
+		bw.registerCustomEditor(BigInteger.class, new CustomNumberEditor(BigInteger.class, nf, false));
+		bw.registerCustomEditor(float.class, new CustomNumberEditor(Float.class, nf, false));
+		bw.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, false));
+		bw.registerCustomEditor(double.class, new CustomNumberEditor(Double.class, nf, false));
+		bw.registerCustomEditor(Double.class, new CustomNumberEditor(Double.class, nf, false));
+		bw.registerCustomEditor(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, nf, false));
 
-		try {
-			bw.setPropertyValue("long1", "5");
-			bw.setPropertyValue("long2", "6");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("short1", "1");
+		bw.setPropertyValue("short2", "2");
+		bw.setPropertyValue("int1", "7");
+		bw.setPropertyValue("int2", "8");
+		bw.setPropertyValue("long1", "5");
+		bw.setPropertyValue("long2", "6");
+		bw.setPropertyValue("bigInteger", "3");
+		bw.setPropertyValue("float1", "7,1");
+		bw.setPropertyValue("float2", "8,1");
+		bw.setPropertyValue("double1", "5,1");
+		bw.setPropertyValue("double2", "6,1");
+		bw.setPropertyValue("bigDecimal", "4,5");
+
+		assertTrue("Correct short1 value", new Short("1").equals(bw.getPropertyValue("short1")));
+		assertTrue("Correct short1 value", tb.getShort1() == 1);
+		assertTrue("Correct short2 value", new Short("2").equals(bw.getPropertyValue("short2")));
+		assertTrue("Correct short2 value", new Short("2").equals(tb.getShort2()));
+		assertTrue("Correct int1 value", new Integer("7").equals(bw.getPropertyValue("int1")));
+		assertTrue("Correct int1 value", tb.getInt1() == 7);
+		assertTrue("Correct int2 value", new Integer("8").equals(bw.getPropertyValue("int2")));
+		assertTrue("Correct int2 value", new Integer("8").equals(tb.getInt2()));
+		assertTrue("Correct long1 value", new Long("5").equals(bw.getPropertyValue("long1")));
+		assertTrue("Correct long1 value", tb.getLong1() == 5);
+		assertTrue("Correct long2 value", new Long("6").equals(bw.getPropertyValue("long2")));
+		assertTrue("Correct long2 value", new Long("6").equals(tb.getLong2()));
+		assertTrue("Correct bigInteger value", new BigInteger("3").equals(bw.getPropertyValue("bigInteger")));
+		assertTrue("Correct bigInteger value", new BigInteger("3").equals(tb.getBigInteger()));
+		assertTrue("Correct float1 value", new Float("7.1").equals(bw.getPropertyValue("float1")));
+		assertTrue("Correct float1 value", new Float("7.1").equals(new Float(tb.getFloat1())));
+		assertTrue("Correct float2 value", new Float("8.1").equals(bw.getPropertyValue("float2")));
+		assertTrue("Correct float2 value", new Float("8.1").equals(tb.getFloat2()));
+		assertTrue("Correct double1 value", new Double("5.1").equals(bw.getPropertyValue("double1")));
+		assertTrue("Correct double1 value", tb.getDouble1() == 5.1);
+		assertTrue("Correct double2 value", new Double("6.1").equals(bw.getPropertyValue("double2")));
+		assertTrue("Correct double2 value", new Double("6.1").equals(tb.getDouble2()));
+		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(bw.getPropertyValue("bigDecimal")));
+		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(tb.getBigDecimal()));
+	}
+
+	public void testCustomNumberEditorWithAllowEmpty() {
+		NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
+		NumberTestBean tb = new NumberTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(long.class, new CustomNumberEditor(Long.class, nf, true));
+		bw.registerCustomEditor(Long.class, new CustomNumberEditor(Long.class, nf, true));
+
+		bw.setPropertyValue("long1", "5");
+		bw.setPropertyValue("long2", "6");
 		assertTrue("Correct long1 value", new Long("5").equals(bw.getPropertyValue("long1")));
 		assertTrue("Correct long1 value", tb.getLong1() == 5);
 		assertTrue("Correct long2 value", new Long("6").equals(bw.getPropertyValue("long2")));
 		assertTrue("Correct long2 value", new Long("6").equals(tb.getLong2()));
 
-		try {
-			bw.setPropertyValue("long2", "");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("long2", "");
 		assertTrue("Correct long2 value", bw.getPropertyValue("long2") == null);
 		assertTrue("Correct long2 value", tb.getLong2() == null);
 
 		try {
 			bw.setPropertyValue("long1", "");
+			fail("Should have thrown BeansException");
 		}
 		catch (BeansException ex) {
 			// expected
 			assertTrue("Correct long1 value", new Long("5").equals(bw.getPropertyValue("long1")));
 			assertTrue("Correct long1 value", tb.getLong1() == 5);
-			return;
 		}
-		fail("Should have thrown BeansException");
+	}
+
+	public void testByteArrayPropertyEditor() {
+		ByteArrayBean bean = new ByteArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.setPropertyValue("array", "myvalue");
+		assertEquals("myvalue", new String(bean.getArray()));
+	}
+
+	public void testCharacterEditor() {
+		CharBean cb = new CharBean();
+		BeanWrapper bw = new BeanWrapperImpl(cb);
+
+		bw.setPropertyValue("myChar", new Character('c'));
+		assertEquals('c', cb.getMyChar());
+
+		bw.setPropertyValue("myChar", "c");
+		assertEquals('c', cb.getMyChar());
+	}
+
+	public void testClassEditor() {
+		PropertyEditor classEditor = new ClassEditor();
+		classEditor.setAsText("org.springframework.beans.TestBean");
+		assertEquals(TestBean.class, classEditor.getValue());
+		assertEquals("org.springframework.beans.TestBean", classEditor.getAsText());
+	}
+
+	public void testClassEditorWithArray() {
+		PropertyEditor classEditor = new ClassEditor();
+		classEditor.setAsText("org.springframework.beans.TestBean[]");
+		assertEquals(TestBean[].class, classEditor.getValue());
+		assertEquals("org.springframework.beans.TestBean[]", classEditor.getAsText());
+	}
+
+	public void testFileEditor() {
+		PropertyEditor fileEditor = new FileEditor();
+		fileEditor.setAsText("C:/test/myfile.txt");
+		assertEquals(new File("C:/test/myfile.txt"), fileEditor.getValue());
+		assertEquals((new File("C:/test/myfile.txt")).getAbsolutePath(), fileEditor.getAsText());
+	}
+
+	public void testLocaleEditor() {
+		PropertyEditor localeEditor = new LocaleEditor();
+		localeEditor.setAsText("en_CA");
+		assertEquals(Locale.CANADA, localeEditor.getValue());
+		assertEquals("en_CA", localeEditor.getAsText());
 	}
 
 	public void testCustomBooleanEditor() {
@@ -478,7 +547,7 @@ public class CustomEditorTests extends TestCase {
 	public void testIndexedPropertiesWithCustomEditorForType() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
-		bw.registerCustomEditor(String.class, null, new PropertyEditorSupport() {
+		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
@@ -978,6 +1047,34 @@ public class CustomEditorTests extends TestCase {
 			tb.setName(st.nextToken());
 			tb.setAge(Integer.parseInt(st.nextToken()));
 			setValue(tb);
+		}
+	}
+
+
+	private static class ByteArrayBean {
+
+		private byte[] array;
+
+		public byte[] getArray() {
+			return array;
+		}
+
+		public void setArray(byte[] array) {
+			this.array = array;
+		}
+	}
+
+
+	private static class CharBean {
+
+		private char myChar;
+
+		public char getMyChar() {
+			return myChar;
+		}
+
+		public void setMyChar(char myChar) {
+			this.myChar = myChar;
 		}
 	}
 

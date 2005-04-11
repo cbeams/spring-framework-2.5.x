@@ -850,13 +850,6 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(2, tb.getArray()[1]);
 	}
 
-	public void testByteArrayPropertyEditor() {
-		ByteArrayBean bean = new ByteArrayBean();
-		BeanWrapper bw = new BeanWrapperImpl(bean);
-		bw.setPropertyValue("array", "myvalue");
-		assertEquals("myvalue", new String(bean.getArray()));
-	}
-
 	public void testPropertiesInProtectedBaseBean() {
 		DerivedFromProtectedBaseBean bean = new DerivedFromProtectedBaseBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1095,20 +1088,6 @@ public class BeanWrapperTests extends TestCase {
 		}
 
 		public void setArray(int[] array) {
-			this.array = array;
-		}
-	}
-
-
-	private static class ByteArrayBean {
-
-		private byte[] array;
-
-		public byte[] getArray() {
-			return array;
-		}
-
-		public void setArray(byte[] array) {
 			this.array = array;
 		}
 	}
