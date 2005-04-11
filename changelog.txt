@@ -3,18 +3,26 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC2 (11.4.2005)
+Changes in version 1.2 RC2 (12.4.2005)
 --------------------------------------
 
 Package org.springframework.aop
+* added "targetName" property to ProxyFactoryBean, as alternative to target name at the end of "interceptorNames" array
 * changed RegexpMethodPointcutAdvisor to use JdkRegexpMethodPointcut by default on JDK 1.4+, unless "perl5" is specified
 
 Package org.springframework.beans
+* BeanUtils' "isSimpleProperty" considers primitive wrapper types (Boolean, Integer, etc) as "simple" types too
+* BeanWrapperImpl registers a default CustomBooleanEditor for primitive boolean fields (accepting various flag values)
+* added CharacterEditor, registered as default editor for "java.lang.Character" and "char" by BeanWrapperImpl
 * CustomCollectionEditor's/InputStreamEditor's "getAsText" returns null to indicate that there is no text representation
+* added "getBeanNamesForType" method with "includePrototypes" and "includeFactoryBean" arguments to ListableBeanFactory
+* deprecated ListableBeanFactory's "getBeanDefinitionNames(type)" method, in favor of "getBeanNamesForType"
+* refined FieldRetrievingFactoryBean to trim passed-in "targetField" and "staticField" values, stripping off whitespace
 * fixed ServiceLocatorFactoryBean to explicitly check for calls of java.lang.Object methods (for JRockit compatibility)
 * AbstractAutowireCapableBeanFactory supports autowiring for factory methods too
 * DefaultXmlBeanDefinitionParser accepts entity references in text values
 * added "value"/"value-ref" attributes to XML "entry" tag for maps, as shortcut alternative to respective child elements
+* added "alias" root element for XML bean definition files, allowing to define aliases for beans in other files
 * removed JndiBeanFactoryLocator, in favor of the existing default ContextJndiBeanFactoryLocator in the context package
 * deprecated SingletonBeanFactoryLocator's alias-through-String-bean feature, in favor of BeanReferenceFactoryBean
 
@@ -25,12 +33,20 @@ Package org.springframework.context
 * added "i18n" subpackage, with LocaleContext abstraction and global LocaleContextHolder (holding a thread-bound Locale)
 * reworked MessageSourceAccessor to use LocaleContextHolder to determine the default locale for the current thread
 * AbstractApplicationContext implements DisposableBean, to properly shut down when running in a bean factory itself
+* AbstractApplicationContext creates and invokes non-Ordered BeanFactoryPostProcessors separately, after Ordered ones
 
 Package org.springframework.ejb
 * added SmartSessionBean interface, exposing a "getSessionContext()" method, implemented by Spring's AbstractSessionBean
 
+Package org.springframework.jca
+* added support for the Common Client Interface (CCI) as Spring-style data access option: CciTemplate, EisOperation, etc
+* added CciLocalTransactionManager, a Spring PlatformTransactionManager implementation for CCI's local transactions
+* added various JCA connection support classes: LocalConnectionFactoryBean, SingleConnectionFactory, etc
+
 Package org.springframework.jdbc
 * changed SmartDataSource interface to only have package visibility (it is only used internally)
+* TransactionAwareDataSourceProxy handles "equals" and "hashCode" locally within the Connection proxy
+* DataSourceTransactionManager unwraps a passed-in TransactionAwareDataSourceProxy to get access to the raw DataSource
 * added no-arg constructor plus "requiredType" bean property to SingleColumnRowMapper, to allow for property injection
 
 Package org.springframework.mail
@@ -41,6 +57,7 @@ Package org.springframework.mail
 * added default "mime.types" file, loaded by ConfigurableFileTypeMap if no overriding file location specified
 
 Package org.springframework.orm
+* Hibernate/Jdo/PersistenceBrokerTransactionManager unwraps a passed-in TransactionAwareDataSourceProxy
 * added "eventListeners" property to LocalSessionFactoryBean for Hibernate3, accepting listener type/object pairs
 * added "filterDefinitions" property to LocalSessionFactoryBean for Hibernate3, accepting FilterDefinition objects
 * added FilterDefinitionFactoryBean, to allow for defining Hibernate FilterDefinitions as Spring beans

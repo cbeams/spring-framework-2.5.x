@@ -53,10 +53,10 @@ knowledge about it immediately.
 
 The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). J2SE 1.4 is
 required for building the framework; for the full build including Tiger support, J2SE 5.0 is required.
-Due to a severe bug in Sun's JDK 1.3.0, Spring requires JDK 1.3.1+ when running on a Sun JDK.
+Due to a severe bug in Sun's (already end-of-lifed) JDK 1.3.0, JDK 1.3.1+ is required when running on a Sun VM.
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2,
+Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2, JCA 1.0,
 Hibernate 2.1/3.0, JDO 1.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0, Caucho's Hessian & Burlap 2.1/3.0,
 JAX-RPC 1.1, Quartz 1.4, EHCache 1.1, JSTL 1.0, Velocity 1.4, FreeMarker 2.3, JasperReports 0.6,
 Struts/Tiles 1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, Jason Hunter's COS, etc.
@@ -93,7 +93,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~205 KB)
+* "spring-beans" (~210 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
@@ -105,9 +105,17 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: application context, validation, JNDI, UI context support
 - Dependencies: spring-beans, (spring-aop, Velocity, FreeMarker, JasperReports)
 
-* "spring-support" (~115 KB)
-- Contents: JMX support, mail support, scheduling support, caching support
-- Dependencies: spring-beans, (JMX, JavaMail, COS, Quartz, EHCache)
+* "spring-dao" (~90 KB)
+- Contents: DAO support, transaction infrastructure
+- Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
+
+* "spring-jdbc" (~175 KB)
+- Contents: JDBC support
+- Dependencies: spring-dao, spring-beans
+
+* "spring-support" (~145 KB)
+- Contents: JMX support, JCA support, scheduling support, mail support, caching support
+- Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
 * "spring-web" (~115 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
@@ -121,14 +129,6 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
-* "spring-dao" (~90 KB)
-- Contents: DAO support, transaction infrastructure
-- Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
-
-* "spring-jdbc" (~175 KB)
-- Contents: JDBC support
-- Dependencies: spring-dao, spring-beans
-
 * "spring-orm" (~105 KB)
 - Contents: iBATIS SQL Maps support, JDO support, Apache OJB support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, JDO, Apache OJB)
@@ -137,7 +137,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.0 support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1590 KB)
+* "spring" (~1625 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
