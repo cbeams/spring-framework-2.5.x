@@ -19,6 +19,8 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.springframework.util.Assert;
+
 /**
  * An adapter for a target DataSource, applying the given user credentials to
  * every standard <code>getConnection()</code> call, that is, implicitly
@@ -133,6 +135,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 * @see javax.sql.DataSource#getConnection()
 	 */
 	protected Connection doGetConnection(String username, String password) throws SQLException {
+		Assert.state(getTargetDataSource() != null, "targetDataSource is required");
 		if (!"".equals(username)) {
 			return getTargetDataSource().getConnection(username, password);
 		}

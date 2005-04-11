@@ -26,6 +26,8 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
+import org.springframework.util.Assert;
+
 /**
  * Proxy for a target DataSource, adding awareness of Spring-managed transactions.
  * Similar to a transactional JNDI DataSource as provided by a J2EE server.
@@ -48,7 +50,7 @@ import javax.sql.DataSource;
  *
  * <p>This proxy allows data access code to work with the plain JDBC API and still
  * participate in Spring-managed transactions, similar to JDBC code in a J2EE/JTA
- * environment. However, if possible, use Spring's DataAccessUtils, JdbcTemplate or
+ * environment. However, if possible, use Spring's DataSourceUtils, JdbcTemplate or
  * JDBC operation objects to get transaction participation even without a proxy for
  * the target DataSource, avoiding the need to define such a proxy in the first place.
  *
@@ -101,6 +103,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * @see ConnectionProxy#getTargetConnection
 	 */
 	public Connection getConnection() throws SQLException {
+		Assert.state(getTargetDataSource() != null, "targetDataSource is required");
 		Connection con = DataSourceUtils.doGetConnection(getTargetDataSource());
 		return getTransactionAwareConnectionProxy(con, getTargetDataSource());
 	}
@@ -143,8 +146,8 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			// Handle getTargetConnection method: return underlying connection.
 			if (method.getName().equals(GET_TARGET_CONNECTION_METHOD_NAME)) {
+				// Handle getTargetConnection method: return underlying connection.
 				return this.target;
 			}
 			else if (method.getName().equals("equals")) {
