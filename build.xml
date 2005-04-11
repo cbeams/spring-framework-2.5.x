@@ -1379,7 +1379,6 @@
 				<include name="org/springframework/binding/**"/>
 				<include name="org/springframework/core/**"/>
 				<include name="org/springframework/util/**"/>
-				<include name="org/springframework/validation/*"/>
 				<include name="org/springframework/mock/**"/>
 				<include name="org/springframework/test/**"/>
 			</packageset>
