@@ -30,6 +30,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -219,6 +220,29 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 		txObject.getConnectionHolder().clear();
 		JmsUtils.closeSession(txObject.getConnectionHolder().getSession());
 		JmsUtils.closeConnection(txObject.getConnectionHolder().getConnection());
+	}
+
+
+	/**
+	 * JMS transaction object, representing a ConnectionHolder.
+	 * Used as transaction object by JmsTransactionManager.
+	 * @see ConnectionHolder
+	 */
+	private static class JmsTransactionObject implements SmartTransactionObject {
+
+		private ConnectionHolder connectionHolder;
+
+		public void setConnectionHolder(ConnectionHolder connectionHolder) {
+			this.connectionHolder = connectionHolder;
+		}
+
+		public ConnectionHolder getConnectionHolder() {
+			return connectionHolder;
+		}
+
+		public boolean isRollbackOnly() {
+			return getConnectionHolder().isRollbackOnly();
+		}
 	}
 
 }
