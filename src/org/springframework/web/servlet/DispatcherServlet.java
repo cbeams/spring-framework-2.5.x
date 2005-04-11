@@ -43,6 +43,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
@@ -50,7 +51,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.servlet.i18n.LocaleResolverLocaleContext;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -643,13 +643,17 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param response current HTTP response
 	 * @throws Exception in case of any kind of processing failure
 	 */
-	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected void doDispatch(final HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
 
 		// Expose current LocaleResolver and request as LocaleContext.
-		LocaleContextHolder.setLocaleContext(new LocaleResolverLocaleContext(this.localeResolver, request));
+		LocaleContextHolder.setLocaleContext(new LocaleContext() {
+			public Locale getLocale() {
+				return localeResolver.resolveLocale(request);
+			}
+		});
 
 		try {
 			ModelAndView mv = null;
