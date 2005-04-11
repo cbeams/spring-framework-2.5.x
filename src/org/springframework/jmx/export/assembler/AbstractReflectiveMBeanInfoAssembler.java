@@ -23,8 +23,8 @@ import java.util.List;
 
 import javax.management.Descriptor;
 import javax.management.JMException;
-import javax.management.MBeanParameterInfo;
 import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanConstructorInfo;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
@@ -61,103 +61,38 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	/**
 	 * Key for the visibility descriptor field.
 	 */
-	protected static final String VISIBILITY = "visibility";
+	private static final String VISIBILITY = "visibility";
 
 	/**
 	 * Lowest visibility. Used for operations that correspond to accessors or mutators
 	 * for attributes.
 	 */
-	protected static final Integer ATTRIBUTE_OPERATION_VISIBILITY = new Integer(4);
+	private static final Integer ATTRIBUTE_OPERATION_VISIBILITY = new Integer(4);
 
 	/**
 	 * Key for the role descriptor field.
 	 */
-	protected static final String ROLE = "role";
+	private static final String ROLE = "role";
 
 	/**
 	 * Role for attribute accessors.
 	 */
-	protected static final String GETTER = "getter";
+	private static final String GETTER = "getter";
 
 	/**
 	 * Role for attribute mutators.
 	 */
-	protected static final String SETTER = "setter";
+	private static final String SETTER = "setter";
 
 	/**
 	 * Role for operations.
 	 */
-	protected static final String OPERATION = "operation";
-
-	/**
-	 * Key for <code>log</code> descriptor.
-	 */
-	protected static final String LOG = "log";
-
-	/**
-	 * Key for <code>logFile</code> descriptor.
-	 */
-	protected static final String LOG_FILE = "logFile";
-
-	/**
-	 * Key for <code>currencyTimeLimit</code> descriptor.
-	 */
-	protected static final String CURRENCY_TIME_LIMIT = "currencyTimeLimit";
-
-	/**
-	 * Key for <code>default</code> descriptor.
-	 */
-	protected static final String DEFAULT = "default";
-
-	/**
-	 * Key for <code>persistPolicy</code> descriptor.
-	 */
-	protected static final String PERSIST_POLICY = "persistPolicy";
-
-	/**
-	 * Key for <code>persistPeriod</code> descriptor.
-	 */
-	protected static final String PERSIST_PERIOD = "persistPeriod";
-
-	/**
-	 * Key for <code>persistLocation</code> descriptor.
-	 */
-	protected static final String PERSIST_LOCATION = "persistLocation";
-
-	/**
-	 * Key for <code>persistName</code> descriptor.
-	 */
-	protected static final String PERSIST_NAME = "persistName";
+	private static final String OPERATION = "operation";
 
 	/**
 	 * Indicates whether or not strict casing is being used for attributes.
 	 */
-	private boolean useStrictCasing = true;
-
-	/**
-	 * Stores the value that will be attributed to the <code>currencyTimeLimit</code> descriptor
-	 * to indicate that values are always stale. Default value is <code>-1</code> as per the
-	 * JMX 1.2 specification.
-	 */
-	private int alwaysStaleCurrencyTimeLimit = -1;
-
-	/**
-	 * Sets the value used to indicate that an attribute or operation
-	 * value is always stale. The JMX 1.2 specification states that
-	 * this value should -1, but some JMX implementations use different
-	 * values. Most commonly, JBoss 3.2.* uses 0.
-	 */
-	public void setAlwaysStaleCurrencyTimeLimit(int alwaysStaleCurrencyTimeLimit) {
-		this.alwaysStaleCurrencyTimeLimit =  alwaysStaleCurrencyTimeLimit;
-	}
-
-	/**
-	 * Gets the value used to indicate that an attribute or operation value
-	 * is always stale.
-	 */
-	protected int getAlwaysStaleCurrencyTimeLimit() {
-		return this.alwaysStaleCurrencyTimeLimit;
-	}
+  private boolean useStrictCasing = true;
 
 	/**
 	 * Enables and disables strict casing for attributes. When using strict casing a JavaBean property
@@ -211,8 +146,6 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 				}
 
 				populateAttributeDescriptor(desc, getter, setter);
-
-
 				info.setDescriptor(desc);
 				infos.add(info);
 			}
@@ -371,15 +304,13 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	/**
 	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
-	 * attribute. Default implementation sets the <code>currencyTimeLimit</code> field to
-	 * <code>-1</code>.
+	 * attribute. Default implementation is empty.
 	 *
 	 * @param descriptor the attribute descriptor
-	 * @param getter the accessor method for the attribute
-	 * @param setter the mutator method for the attribute
+	 * @param getter     the accessor method for the attribute
+	 * @param setter     the mutator method for the attribute
 	 */
 	protected void populateAttributeDescriptor(Descriptor descriptor, Method getter, Method setter) {
-		descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(getAlwaysStaleCurrencyTimeLimit()));
 	}
 
 	/**
@@ -387,10 +318,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * operation. Default implementation is empty.
 	 *
 	 * @param descriptor the operation descriptor
-	 * @param method the method corresponding to the operation
+	 * @param method     the method corresponding to the operation
 	 */
 	protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
-		descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(getAlwaysStaleCurrencyTimeLimit()));
 	}
 
 	/**
