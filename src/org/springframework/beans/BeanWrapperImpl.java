@@ -44,6 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
+import org.springframework.beans.propertyeditors.CharacterEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
@@ -89,6 +90,7 @@ import org.springframework.util.StringUtils;
  * @see java.beans.PropertyEditorSupport#setValue
  * @see org.springframework.beans.propertyeditors.ByteArrayPropertyEditor
  * @see org.springframework.beans.propertyeditors.ClassEditor
+ * @see org.springframework.beans.propertyeditors.CharacterEditor
  * @see org.springframework.beans.propertyeditors.CustomBooleanEditor
  * @see org.springframework.beans.propertyeditors.CustomNumberEditor
  * @see org.springframework.beans.propertyeditors.CustomCollectionEditor
@@ -154,6 +156,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		this.defaultEditors = new HashMap(32);
 
 		// Simple editors, without parameterization capabilities.
+		// The JDK does not contain a default editor for any of these target types.
 		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
 		this.defaultEditors.put(Class.class, new ClassEditor());
 		this.defaultEditors.put(File.class, new FileEditor());
@@ -164,9 +167,17 @@ public class BeanWrapperImpl implements BeanWrapper {
 		this.defaultEditors.put(String[].class, new StringArrayPropertyEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 
-		// Default instances of boolean and number editors.
+		// Default instances of character, boolean and number editors.
 		// Can be overridden by registering custom instances of those as custom editors.
-		this.defaultEditors.put(Boolean.class, new CustomBooleanEditor(false));
+		PropertyEditor characterEditor = new CharacterEditor(false);
+		PropertyEditor booleanEditor = new CustomBooleanEditor(false);
+		// The JDK does not contain a default editor for char!
+		this.defaultEditors.put(char.class, characterEditor);
+		this.defaultEditors.put(Character.class, characterEditor);
+		// Spring's CustomBooleanEditor accepts more flag values than the JDK's default editor.
+		this.defaultEditors.put(boolean.class, booleanEditor);
+		this.defaultEditors.put(Boolean.class, booleanEditor);
+		// The JDK does not contain default editors for number wrapper types!
 		this.defaultEditors.put(Short.class, new CustomNumberEditor(Short.class, false));
 		this.defaultEditors.put(Integer.class, new CustomNumberEditor(Integer.class, false));
 		this.defaultEditors.put(Long.class, new CustomNumberEditor(Long.class, false));
