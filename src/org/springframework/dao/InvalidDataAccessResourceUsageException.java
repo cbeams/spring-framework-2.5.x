@@ -31,6 +31,7 @@ public class InvalidDataAccessResourceUsageException extends DataAccessException
 	public InvalidDataAccessResourceUsageException(String msg) {
 		super(msg);
 	}
+	
 	/**
 	 * Constructor for InvalidDataAccessResourceUsageException.
 	 * @param msg message
