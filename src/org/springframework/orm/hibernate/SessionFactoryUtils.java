@@ -766,7 +766,7 @@ public abstract class SessionFactoryUtils {
 
 		private Transaction jtaTransaction;
 
-		private SpringSessionSynchronization(
+		public SpringSessionSynchronization(
 				SessionHolder sessionHolder, SessionFactory sessionFactory,
 				SQLExceptionTranslator jdbcExceptionTranslator, boolean newSession) {
 
@@ -928,7 +928,7 @@ public abstract class SessionFactoryUtils {
 
 		private boolean beforeCompletionCalled = false;
 
-		private JtaSessionSynchronization(
+		public JtaSessionSynchronization(
 				SpringSessionSynchronization springSessionSynchronization, TransactionManager jtaTransactionManager) {
 			this.springSessionSynchronization = springSessionSynchronization;
 			this.jtaTransactionManager = jtaTransactionManager;

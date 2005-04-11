@@ -251,7 +251,7 @@ public abstract class PersistenceManagerFactoryUtils {
 
 		private final PersistenceManagerFactory persistenceManagerFactory;
 
-		private PersistenceManagerSynchronization(PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf) {
+		public PersistenceManagerSynchronization(PersistenceManagerHolder pmHolder, PersistenceManagerFactory pmf) {
 			this.persistenceManagerHolder = pmHolder;
 			this.persistenceManagerFactory = pmf;
 		}
