@@ -43,10 +43,14 @@ public interface JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Execute the action specified by the given action object within a JDBC
-	 * Connection. Allows for returning a result object, i.e. a domain object
-	 * or a collection of domain objects.
-	 * @param action callback object that specifies the action
+	 * Execute a JDBC data access operation, implemented as callback action
+	 * working on a JDBC Connection. This allows for implementing arbitrary
+	 * data access operations, within Spring's managed JDBC environment:
+	 * that is, participating in Spring-managed transactions and converting
+	 * JDBC SQLExceptions into Spring's DataAccessException hierarchy.
+	 * <p>The callback action can return a result object, for example a
+	 * domain object or a collection of domain objects.
+	 * @param action the callback object that specifies the action
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException if there is any problem
 	 */
@@ -58,9 +62,13 @@ public interface JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Execute the action specified by the given action object within a JDBC
-	 * Statement. Allows for returning a result object, i.e. a domain object
-	 * or a collection of domain objects.
+	 * Execute a JDBC data access operation, implemented as callback action
+	 * working on a JDBC Statement. This allows for implementing arbitrary data
+	 * access operations on a single Statement, within Spring's managed JDBC
+	 * environment: that is, participating in Spring-managed transactions and
+	 * converting JDBC SQLExceptions into Spring's DataAccessException hierarchy.
+	 * <p>The callback action can return a result object, for example a
+	 * domain object or a collection of domain objects.
 	 * @param action callback object that specifies the action
 	 * @return a result object returned by the action, or null
 	 * @throws DataAccessException if there is any problem
@@ -278,9 +286,13 @@ public interface JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Execute the action specified by the given action object within a JDBC
-	 * PreparedStatement. Allows for returning a result object, i.e. a domain
-	 * object or a collection of domain objects.
+	 * Execute a JDBC data access operation, implemented as callback action
+	 * working on a JDBC PreparedStatement. This allows for implementing arbitrary
+	 * data access operations on a single Statement, within Spring's managed
+	 * JDBC environment: that is, participating in Spring-managed transactions
+	 * and converting JDBC SQLExceptions into Spring's DataAccessException hierarchy.
+	 * <p>The callback action can return a result object, for example a
+	 * domain object or a collection of domain objects.
 	 * @param psc object that can create a PreparedStatement given a Connection
 	 * @param action callback object that specifies the action
 	 * @return a result object returned by the action, or null
@@ -290,9 +302,13 @@ public interface JdbcOperations {
 			throws DataAccessException;
 
 	/**
-	 * Execute the action specified by the given action object within a JDBC
-	 * PreparedStatement. Allows for returning a result object, i.e. a domain
-	 * object or a collection of domain objects.
+	 * Execute a JDBC data access operation, implemented as callback action
+	 * working on a JDBC PreparedStatement. This allows for implementing arbitrary
+	 * data access operations on a single Statement, within Spring's managed
+	 * JDBC environment: that is, participating in Spring-managed transactions
+	 * and converting JDBC SQLExceptions into Spring's DataAccessException hierarchy.
+	 * <p>The callback action can return a result object, for example a
+	 * domain object or a collection of domain objects.
 	 * @param sql SQL to execute
 	 * @param action callback object that specifies the action
 	 * @return a result object returned by the action, or null
@@ -835,9 +851,13 @@ public interface JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Execute the action specified by the given action object within a JDBC
-	 * CallableStatement. Allows for returning a result object, i.e. a domain
-	 * object or a collection of domain objects.
+	 * Execute a JDBC data access operation, implemented as callback action
+	 * working on a JDBC CallableStatement. This allows for implementing arbitrary
+	 * data access operations on a single Statement, within Spring's managed
+	 * JDBC environment: that is, participating in Spring-managed transactions
+	 * and converting JDBC SQLExceptions into Spring's DataAccessException hierarchy.
+	 * <p>The callback action can return a result object, for example a
+	 * domain object or a collection of domain objects.
 	 * @param csc object that can create a CallableStatement given a Connection
 	 * @param action callback object that specifies the action
 	 * @return a result object returned by the action, or null
@@ -847,9 +867,13 @@ public interface JdbcOperations {
 			throws DataAccessException;
 
 	/**
-	 * Execute the action specified by the given action object within a JDBC
-	 * CallableStatement. Allows for returning a result object, i.e. a domain
-	 * object or a collection of domain objects.
+	 * Execute a JDBC data access operation, implemented as callback action
+	 * working on a JDBC CallableStatement. This allows for implementing arbitrary
+	 * data access operations on a single Statement, within Spring's managed
+	 * JDBC environment: that is, participating in Spring-managed transactions
+	 * and converting JDBC SQLExceptions into Spring's DataAccessException hierarchy.
+	 * <p>The callback action can return a result object, for example a
+	 * domain object or a collection of domain objects.
 	 * @param callString the SQL call string to execute
 	 * @param action callback object that specifies the action
 	 * @return a result object returned by the action, or null
