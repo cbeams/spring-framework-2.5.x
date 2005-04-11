@@ -4,11 +4,12 @@
  * phonebook - central sample demonstrating most webflow features
  * itemlist - demonstrates application transaction tokens and expired flow cleanup
  * fileupload - demonstrates multipart file upload with webflow
- * birthdate - demonstrates the MultiAction
+ * birthdate - demonstrates Struts integration and the MultiAction
+ * sellitem - demonstrates a wizard with conditional transitions and continuations
  *
  * @author Keith Donald
  * @since Mar 2005
- * @version $Id: readme.txt,v 1.1 2005-03-30 04:11:58 kdonald Exp $
+ * @version $Id: readme.txt,v 1.2 2005-04-11 06:19:53 kdonald Exp $
  */
  
 HOW TO BUILD WEBFLOW SAMPLES
