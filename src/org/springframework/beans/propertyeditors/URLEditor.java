@@ -24,11 +24,17 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 
 /**
- * Editor for java.net.URL, to directly feed a URL property
- * instead of using a String property.
+ * Editor for <code>java.net.URL</code>, to directly populate a URL property
+ * instead of using a String property as bridge.
+ *
+ * <p>Supports Spring-style URL notation: any fully qualified standard URL
+ * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL.
+ * 
  * @author Juergen Hoeller
  * @since 15.12.2003
  * @see java.net.URL
+ * @see org.springframework.core.io.ResourceEditor
+ * @see org.springframework.core.io.ResourceLoader
  */
 public class URLEditor extends PropertyEditorSupport {
 

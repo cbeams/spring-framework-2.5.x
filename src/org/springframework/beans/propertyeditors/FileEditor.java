@@ -22,11 +22,15 @@ import java.io.File;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for java.io.File, to directly feed a File property
- * instead of using a String file name property.
+ * Editor for <code>java.io.File</code>, to directly populate a File property
+ * instead of using a String file name property as bridge.
+ *
+ * <p>Supports any pathname accepted by the <code>File(pathname)</code>
+ * constructor.
+ *
  * @author Juergen Hoeller
  * @since 09.12.2003
- * @see java.io.File
+ * @see java.io.File#File(String)
  */
 public class FileEditor extends PropertyEditorSupport {
 

@@ -23,16 +23,18 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 
 /**
- * One-way PropertyEditor, which can convert from a text string to an InputStream,
- * allowing InputStream properties to be set directly as a text string.
+ * One-way PropertyEditor, which can convert from a text string to a
+ * <code>java.io.InputStream</code>, allowing InputStream properties
+ * to be set directly as a text string.
  *
- * <p>The string should be suitable for feeding to a ResourceEditor,
- * since this is what is actually used to produce a Resource from the text,
- * which is then asked for an InputStream.
+ * <p>Supports Spring-style URL notation: any fully qualified standard URL
+ * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL.
  *
  * <p>Note that in the default usage, the stream is not closed by Spring itself!
+ *
  * @author Juergen Hoeller
  * @since 1.0.1
+ * @see java.io.InputStream
  */
 public class InputStreamEditor extends PropertyEditorSupport {
 

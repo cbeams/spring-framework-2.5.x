@@ -21,7 +21,7 @@ import java.beans.PropertyEditorSupport;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for <code>java.util.Locale</code>, to directly feed a Locale property.
+ * Editor for <code>java.util.Locale</code>, to directly populate a Locale property.
  *
  * <p>Expects the same syntax as Locale's <code>toString</code>, i.e. language +
  * optionally country + optionally variant, separated by "_" (e.g. "en", "en_US").
@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 26.05.2003
+ * @see java.util.Locale
  * @see org.springframework.util.StringUtils#parseLocaleString
  */
 public class LocaleEditor extends PropertyEditorSupport {

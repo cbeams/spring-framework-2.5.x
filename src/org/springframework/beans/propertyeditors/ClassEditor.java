@@ -22,8 +22,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for java.lang.Class, to directly feed a Class property
- * instead of using a String class name property.
+ * Editor for <code>java.lang.Class</code>, to directly populate a Class property
+ * instead of using a String class name property as bridge.
  *
  * <p>Also supports "java.lang.String[]"-style array class names,
  * in contrast to the standard <code>Class.forName</code> method.
@@ -31,7 +31,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
- * @see java.lang.Class
  * @see java.lang.Class#forName
  * @see org.springframework.util.ClassUtils#forName
  */
