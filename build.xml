@@ -1325,12 +1325,11 @@
 		<delete file="${dist.dir}/spring-webflow.jar"/>
 		<jar jarfile="${dist.dir}/spring-webflow.jar">
 			<fileset dir="${sandbox.target.classes.dir}">
-				<include name="META-INF/**"/>
 				<include name="org/springframework/web/flow/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-webflow-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Implementation-Version" value="${spring-webflow-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
