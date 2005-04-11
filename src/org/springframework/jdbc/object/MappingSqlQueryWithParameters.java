@@ -97,7 +97,7 @@ public abstract class MappingSqlQueryWithParameters extends SqlQuery {
 
 	/**
 	 * Implementation of ResultReader that calls the enclosing
-	 * class's mapRow() method for each row.
+	 * class's <code>mapRow</code> method for each row.
 	 */
 	protected class ResultReaderImpl implements ResultReader {
 

@@ -31,8 +31,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * PlatformTransactionManager implementation for a single JDBC DataSource.
- * Binds a JDBC connection from the specified DataSource to the thread,
- * potentially allowing for one thread connection per data source.
+ * Binds a JDBC Connection from the specified DataSource to the thread,
+ * potentially allowing for one thread Connection per DataSource.
  *
  * <p>Application code is required to retrieve the JDBC Connection via
  * <code>DataSourceUtils.getConnection(DataSource)</code> instead of J2EE's standard
@@ -71,11 +71,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @since 02.05.2003
  * @see #setNestedTransactionAllowed
  * @see java.sql.Savepoint
- * @see DataSourceUtils#getConnection
+ * @see DataSourceUtils#getConnection(javax.sql.DataSource)
  * @see DataSourceUtils#applyTransactionTimeout
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see TransactionAwareDataSourceProxy
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.object
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 

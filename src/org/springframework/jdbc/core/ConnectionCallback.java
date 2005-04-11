@@ -47,14 +47,14 @@ public interface ConnectionCallback {
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
 	 * DataSourceTransactionManager), the code will simply get executed on the
 	 * JDBC connection with its transactional semantics. If JdbcTemplate is
-	 * configured to use a JTA-aware DataSource, the JDBC connection and thus
+	 * configured to use a JTA-aware DataSource, the JDBC Connection and thus
 	 * the callback code will be transactional if a JTA transaction is active.
 	 *
 	 * <p>Allows for returning a result object created within the callback, i.e.
-	 * a domain object or a collection of domain objects. Note that there's
-	 * special support for single step actions: see JdbcTemplate.queryForObject etc.
-	 * A thrown RuntimeException is treated as application exception, it gets
-	 * propagated to the caller of the template.
+	 * a domain object or a collection of domain objects. Note that there's special
+	 * support for single step actions: see <code>JdbcTemplate.queryForObject</code>
+	 * etc. A thrown RuntimeException is treated as application exception:
+	 * it gets propagated to the caller of the template.
 	 *
 	 * @param con active JDBC Connection
 	 * @return a result object, or null if none

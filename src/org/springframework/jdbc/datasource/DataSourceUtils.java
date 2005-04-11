@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
  * @see #closeConnectionIfNecessary
  * @see DataSourceTransactionManager
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @see org.springframework.jdbc.object.RdbmsOperation
+ * @see org.springframework.jdbc.object
  */
 public abstract class DataSourceUtils {
 
@@ -66,7 +66,7 @@ public abstract class DataSourceUtils {
 	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
 	 * @param dataSource DataSource to get Connection from
-	 * @return a JDBC Connection from this DataSource
+	 * @return a JDBC Connection from the given DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the attempt to get a Connection failed
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
@@ -87,7 +87,7 @@ public abstract class DataSourceUtils {
 	 * @param allowSynchronization if a new JDBC Connection is supposed to be
 	 * registered with transaction synchronization (if synchronization is active).
 	 * This will always be true for typical data access code.
-	 * @return a JDBC Connection from this DataSource
+	 * @return a JDBC Connection from the given DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the attempt to get a Connection failed
 	 * @see #doGetConnection
@@ -112,7 +112,7 @@ public abstract class DataSourceUtils {
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
 	 * @param dataSource DataSource to get Connection from
-	 * @return a JDBC Connection from this DataSource
+	 * @return a JDBC Connection from the given DataSource
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #getConnection(DataSource)
 	 * @see TransactionAwareDataSourceProxy
@@ -128,7 +128,7 @@ public abstract class DataSourceUtils {
 	 * @param allowSynchronization if a new JDBC Connection is supposed to be
 	 * registered with transaction synchronization (if synchronization is active).
 	 * This will always be true for typical data access code.
-	 * @return a JDBC Connection from this DataSource
+	 * @return a JDBC Connection from the given DataSource
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #getConnection(DataSource, boolean)
 	 */
@@ -326,7 +326,7 @@ public abstract class DataSourceUtils {
 
 
 	/**
-	 * Callback for resource cleanup at the end of a non-native-JDBC transaction
+	 * Callback for resource cleanup at the end of a non-native JDBC transaction
 	 * (e.g. when participating in a JTA transaction).
 	 */
 	private static class ConnectionSynchronization extends TransactionSynchronizationAdapter {
@@ -335,7 +335,7 @@ public abstract class DataSourceUtils {
 
 		private final DataSource dataSource;
 
-		private ConnectionSynchronization(ConnectionHolder connectionHolder, DataSource dataSource) {
+		public ConnectionSynchronization(ConnectionHolder connectionHolder, DataSource dataSource) {
 			this.connectionHolder = connectionHolder;
 			this.dataSource = dataSource;
 		}
