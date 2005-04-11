@@ -22,9 +22,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -35,9 +32,6 @@ import org.springframework.beans.factory.InitializingBean;
  * @since 1.1
  */
 public abstract class DelegatingDataSource implements DataSource, InitializingBean {
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private DataSource targetDataSource;
 
@@ -56,7 +50,7 @@ public abstract class DelegatingDataSource implements DataSource, InitializingBe
 	}
 
 	public void afterPropertiesSet() {
-		if (this.targetDataSource == null) {
+		if (getTargetDataSource() == null) {
 			throw new IllegalArgumentException("targetDataSource is required");
 		}
 	}
