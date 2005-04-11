@@ -161,9 +161,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * <p>The referenced beans should be of type Interceptor, Advisor or Advice
 	 * The last entry in the list can be the name of any bean in the factory.
 	 * If it's neither an Advice nor an Advisor, a new SingletonTargetSource
-	 * is added to wrap it. Such a target bean cannot be used if the target or targetSource
-	 * property is set, in which case the interceptorNames array must contain
-	 * only Advice/Advisor bean names.
+	 * is added to wrap it. Such a target bean cannot be used if the "target"
+	 * or "targetSource" or "targetName" property is set, in which case the
+	 * "interceptorNames" array must contain only Advice/Advisor bean names.
 	 * @see org.aopalliance.intercept.MethodInterceptor
 	 * @see org.springframework.aop.Advisor
 	 * @see org.aopalliance.aop.Advice
@@ -171,6 +171,19 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	public void setInterceptorNames(String[] interceptorNames) {
 		this.interceptorNames = interceptorNames;
+	}
+
+	/**
+	 * Set the name of the target bean. This is an alternative to specifying
+	 * the target name at the end of the "interceptorNames" array.
+	 * <p>You can also specify a target object or a TargetSource object
+	 * directly, via the "target"/"targetSource" property, respectively.
+	 * @see #setInterceptorNames(String[])
+	 * @see #setTarget(Object)
+	 * @see #setTargetSource(org.springframework.aop.TargetSource)
+	 */
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	/**
@@ -302,14 +315,15 @@ public class ProxyFactoryBean extends AdvisedSupport
 				    name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
 				continue;
 			}
-			else if (i == this.interceptorNames.length - 1 && this.targetSource == EMPTY_TARGET_SOURCE) {
+			else if (i == this.interceptorNames.length - 1 &&
+					this.targetName == null && this.targetSource == EMPTY_TARGET_SOURCE) {
 				// The last name in the chain may be an Advisor/Advice or a target/TargetSource.
 				// Unfortunately we don't know; we must look at type of the bean.
 				if (!isNamedBeanAnAdvisorOrAdvice(this.interceptorNames[i])) {
 					// Must be an interceptor.
 					this.targetName = this.interceptorNames[i];
-					if (logger.isInfoEnabled()) {
-						logger.info("Bean with name '" + this.interceptorNames[i] +
+					if (logger.isDebugEnabled()) {
+						logger.debug("Bean with name '" + this.interceptorNames[i] +
 								"' concluding interceptor chain is not an advisor class: " +
 								"treating it as a target or TargetSource");
 					}

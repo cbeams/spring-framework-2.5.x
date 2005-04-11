@@ -46,12 +46,13 @@
 	<bean id="test2" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value> org.springframework.beans.ITestBean </value></property>
 		<property name="singleton"><value>false</value></property>
-		<property name="interceptorNames"><value>test</value></property>
+		<property name="targetName"><value>test</value></property>
 	</bean>
 	
 	<bean id="pointcuts" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>
-		<property name="interceptorNames"><value>pointcutForVoid,test</value></property>
+		<property name="interceptorNames"><value>pointcutForVoid</value></property>
+		<property name="targetName"><value>test</value></property>
 	</bean>
 	
 	<bean id="pointcutForVoid" class="org.springframework.aop.framework.ProxyFactoryBeanTests$PointcutForVoid"/>
