@@ -9,10 +9,10 @@
 
 	<!-- The default project compile classpath -->
 	<path id="project.compile.classpath">
-		<path refid="base.compile.classpath" />
-		<path refid="all.libs.classpath" />
 		<pathelement location="${spring.webflow.jar}" />
 		<pathelement location="${spring.webflow.support.jar}" />
+		<path refid="base.compile.classpath" />
+		<path refid="all.libs.classpath" />
 	</path>
 
 	<target name="build.webapp.libs">
