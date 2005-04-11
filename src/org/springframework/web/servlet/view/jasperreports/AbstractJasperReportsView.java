@@ -38,8 +38,8 @@ import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.design.JRBshCompiler;
 import net.sf.jasperreports.engine.design.JRCompiler;
+import net.sf.jasperreports.engine.design.JRJdtCompiler;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
@@ -128,6 +128,27 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	private static final String CONTENT_DISPOSITION_INLINE = "inline";
 
+	/**
+	 * Stores the name of the JasperReports JDT <code>JRJdtCompiler</code> class.
+	 */
+	private static final String JASPER_JDT_COMPILER = "net.sf.jasperreports.engine.design.JRJdtCompiler";
+
+	/**
+	 * Stores the name of the JasperReports BSH <code>JRBshCompiler</code> class.
+	 */
+	private static final String JASPER_BSH_COMPILER = "net.sf.jasperreports.engine.design.JRBshCompiler";
+
+	/**
+	 * Flag indicating whether or not the JDT report compiler should be used.
+	 * If the JDT compiler is not available, the BSH compiler is used instead.
+	 */
+	private static boolean useJdtCompiler = false;
+
+	/**
+	 * Stores a reference to the BSH compiler class. Must be loaded dynamically because it is no
+	 * longer available in JasperReports as of 0.6.6.
+	 */
+	private static Class bshCompilerClass;
 
 	/**
 	 * A String key used to lookup the <code>JRDataSource</code> in the model.
@@ -178,6 +199,25 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	private DataSource jdbcDataSource;
 
+	/**
+	 * Checks for availability of Jasper's JDT compiler. If it is not available falls back
+	 * to the BSH compiler.
+	 */
+	static {
+		try {
+			Class.forName(JASPER_JDT_COMPILER);
+			useJdtCompiler = true;
+		}
+		catch (Throwable t) {
+			useJdtCompiler = false;
+			try {
+				bshCompilerClass = Class.forName(JASPER_BSH_COMPILER);
+			}
+			catch (Throwable th) {
+				throw new ExceptionInInitializerError("Unable to load JasperReports BSH compiler:" + th);
+			}
+		}
+	}
 
 	/**
 	 * Set the name of the model attribute that represents the report data.
@@ -271,7 +311,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Allows subclasses to retrieve the converted exporter parameters.
 	 */
 	protected Map getConvertedExporterParameters() {
-		 return this.convertedExporterParameters;
+		return this.convertedExporterParameters;
 	}
 
 	/**
@@ -303,7 +343,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		// Load sub reports if required, and check data source parameters.
 		if (this.subReportUrls != null) {
 			if (this.subReportDataKeys != null && this.subReportDataKeys.length > 0 &&
-					this.reportDataKey == null) {
+							this.reportDataKey == null) {
 				throw new ApplicationContextException(
 						"'reportDataKey' for main report is required when specifying a value for 'subReportDataKeys'");
 			}
@@ -452,13 +492,26 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 	/**
 	 * Return the JasperReports compiler to use for compiling a ".jrxml"
-	 * file into a a report class. Default is <code>JRBshCompiler</code>,
-	 * which requires BeanShell on the class path.
+	 * file into a a report class. Where available, the <code>JRJdtCompiler</code>
+	 * is used, which requires the JDT compiler on the classpath. In versions of
+	 * JasperReports &lt; 0.6.4, JDT is not available so the <code>JRBshCompiler</code>
+	 * is used instead.
 	 * @see net.sf.jasperreports.engine.design.JRCompiler
+	 * @see net.sf.jasperreports.engine.design.JRJdtCompiler
 	 * @see net.sf.jasperreports.engine.design.JRBshCompiler
 	 */
 	protected JRCompiler getReportCompiler() {
-		return new JRBshCompiler();
+		if (useJdtCompiler) {
+			return new JRJdtCompiler();
+		}
+		else {
+			try {
+				return (JRCompiler) bshCompilerClass.newInstance();
+			}
+			catch (Exception ex) {
+				throw new ApplicationContextException("Unable to load JRBshCompiler class.", ex);
+			}
+		}
 	}
 
 	/**
@@ -632,7 +685,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #convertReportData
 	 */
 	protected Class[] getReportDataTypes() {
-		return new Class[] {JRDataSource.class, JRDataSourceProvider.class, Collection.class, Object[].class};
+		return new Class[]{JRDataSource.class, JRDataSourceProvider.class, Collection.class, Object[].class};
 	}
 
 	/**
