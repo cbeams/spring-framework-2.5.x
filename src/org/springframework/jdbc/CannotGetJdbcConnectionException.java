@@ -18,8 +18,6 @@ package org.springframework.jdbc;
 
 import java.sql.SQLException;
 
-import javax.naming.NamingException;
-
 import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
@@ -43,15 +41,6 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 	 * @param ex ClassNotFoundException root cause
 	 */
 	public CannotGetJdbcConnectionException(String msg, ClassNotFoundException ex) {
-		super(msg, ex);
-	}
-
-	/**
-	 * Constructor for CannotGetJdbcConnectionException.
-	 * @param msg message
-	 * @param ex NamingException root cause
-	 */
-	public CannotGetJdbcConnectionException(String msg, NamingException ex) {
 		super(msg, ex);
 	}
 
