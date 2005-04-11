@@ -22,11 +22,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.util.Assert;
 
 /**
- * Static convenience methods for JavaBeans, for instantiating beans,
- * copying bean properties, etc.
+ * Static convenience methods for JavaBeans: for instantiating beans,
+ * checking bean property types, copying bean properties, etc.
  *
  * <p>Mainly for use within the framework, but to some degree also
  * useful for application classes.
@@ -38,6 +42,22 @@ import java.util.List;
 public abstract class BeanUtils {
 
 	/**
+	 * Map with primitive wrapper type as key and corresponding primitive
+	 * type as value, for example: Integer.class -> int.class
+	 */
+	private static final Map primitiveWrapperTypeMap = new HashMap(8);
+	static {
+		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
+		primitiveWrapperTypeMap.put(Byte.class, byte.class);
+		primitiveWrapperTypeMap.put(Character.class, char.class);
+		primitiveWrapperTypeMap.put(Short.class, short.class);
+		primitiveWrapperTypeMap.put(Integer.class, int.class);
+		primitiveWrapperTypeMap.put(Long.class, long.class);
+		primitiveWrapperTypeMap.put(Float.class, float.class);
+		primitiveWrapperTypeMap.put(Double.class, double.class);
+	}
+
+	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
@@ -47,6 +67,7 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Class clazz) throws BeansException {
+		Assert.notNull(clazz, "clazz must not be null");
 		if (clazz.isInterface()) {
 			throw new FatalBeanException(
 					"Class [" + clazz.getName() + "] cannot be instantiated: it is an interface");
@@ -70,6 +91,7 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 */
 	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeansException {
+		Assert.notNull(ctor, "ctor must not be null");
 		try {
 			if (!Modifier.isPublic(ctor.getModifiers()) ||
 					!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
@@ -215,6 +237,7 @@ public abstract class BeanUtils {
 	 * @return if the type is assignable from the value
 	 */
 	public static boolean isAssignable(Class type, Object value) {
+		Assert.notNull(type, "type must not be null");
 		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
 	}
 
@@ -228,15 +251,10 @@ public abstract class BeanUtils {
 	 * @return if the target type is assignable from the value type
 	 */
 	public static boolean isAssignable(Class targetType, Class valueType) {
-		return (targetType.isAssignableFrom(valueType)) ||
-				(targetType.equals(boolean.class) && valueType.equals(Boolean.class)) ||
-				(targetType.equals(byte.class) && valueType.equals(Byte.class)) ||
-				(targetType.equals(char.class) && valueType.equals(Character.class)) ||
-				(targetType.equals(short.class) && valueType.equals(Short.class)) ||
-				(targetType.equals(int.class) && valueType.equals(Integer.class)) ||
-				(targetType.equals(long.class) && valueType.equals(Long.class)) ||
-				(targetType.equals(float.class) && valueType.equals(Float.class)) ||
-				(targetType.equals(double.class) && valueType.equals(Double.class));
+		Assert.notNull(targetType, "targetType must not be null");
+		Assert.notNull(valueType, "valueType must not be null");
+		return (targetType.isAssignableFrom(valueType) ||
+				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
 	}
 
 	/**
@@ -247,19 +265,27 @@ public abstract class BeanUtils {
 	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#dependencyCheck
 	 */
 	public static boolean isSimpleProperty(Class clazz) {
-		return clazz.isPrimitive() || isPrimitiveArray(clazz) || isPrimitiveWrapperArray(clazz) ||
+		Assert.notNull(clazz, "clazz must not be null");
+		return clazz.isPrimitive() || isPrimitiveArray(clazz) ||
+				isPrimitiveWrapper(clazz) || isPrimitiveWrapperArray(clazz) ||
 				clazz.equals(String.class) || clazz.equals(String[].class) ||
 				clazz.equals(Class.class) || clazz.equals(Class[].class);
 	}
 
 	/**
-	 * Check if the given class represents a primitive array,
+	 * Check if the given class represents an array of primitives,
 	 * i.e. boolean, byte, char, short, int, long, float, or double.
 	 */
 	public static boolean isPrimitiveArray(Class clazz) {
-		return boolean[].class.equals(clazz) || byte[].class.equals(clazz) || char[].class.equals(clazz) ||
-				short[].class.equals(clazz) || int[].class.equals(clazz) || long[].class.equals(clazz) ||
-				float[].class.equals(clazz) || double[].class.equals(clazz);
+		return (clazz.isArray() && clazz.getComponentType().isPrimitive());
+	}
+
+	/**
+	 * Check if the given class represents a primitive wrapper,
+	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 */
+	public static boolean isPrimitiveWrapper(Class clazz) {
+		return primitiveWrapperTypeMap.containsKey(clazz);
 	}
 
 	/**
@@ -267,9 +293,7 @@ public abstract class BeanUtils {
 	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
 	 */
 	public static boolean isPrimitiveWrapperArray(Class clazz) {
-		return Boolean[].class.equals(clazz) || Byte[].class.equals(clazz) || Character[].class.equals(clazz) ||
-				Short[].class.equals(clazz) || Integer[].class.equals(clazz) || Long[].class.equals(clazz) ||
-				Float[].class.equals(clazz) || Double[].class.equals(clazz);
+		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
 	}
 
 	/**
@@ -293,9 +317,8 @@ public abstract class BeanUtils {
 	 */
 	public static void copyProperties(Object source, Object target, String[] ignoreProperties)
 			throws IllegalArgumentException, BeansException {
-		if (source == null || target == null) {
-			throw new IllegalArgumentException("Source and target must not be null");
-		}
+		Assert.notNull(source, "source must not be null");
+		Assert.notNull(target, "source must not be null");
 		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
 		BeanWrapper sourceBw = new BeanWrapperImpl(source);
 		BeanWrapper targetBw = new BeanWrapperImpl(target);
@@ -333,6 +356,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor look fails
 	 */
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
+		Assert.notNull(method, "method must not be null");
 		PropertyDescriptor[] pds = getPropertyDescriptors(method.getDeclaringClass());
 		for (int i = 0; i < pds.length; i++) {
 			if (method.equals(pds[i].getReadMethod()) || method.equals(pds[i].getWriteMethod())) {
