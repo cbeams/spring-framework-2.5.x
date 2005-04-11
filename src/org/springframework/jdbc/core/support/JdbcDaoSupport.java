@@ -114,6 +114,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 * Get a JDBC Connection, either from the current transaction or a new one.
 	 * @return the JDBC Connection
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the attempt to get a Connection failed
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection(javax.sql.DataSource)
 	 */
 	protected final Connection getConnection() throws CannotGetJdbcConnectionException {
 		return DataSourceUtils.getConnection(getDataSource());
@@ -122,6 +123,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	/**
 	 * Return the SQLExceptionTranslator of this DAO's JdbcTemplate,
 	 * for translating SQLExceptions in custom JDBC access code.
+	 * @see org.springframework.jdbc.core.JdbcTemplate#getExceptionTranslator
 	 */
 	protected final SQLExceptionTranslator getExceptionTranslator() {
 		return this.jdbcTemplate.getExceptionTranslator();
@@ -131,6 +133,7 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	 * Close the given JDBC Connection if necessary, created via this bean's
 	 * DataSource, if it isn't bound to the thread.
 	 * @param con Connection to close
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
 	 */
 	protected final void closeConnectionIfNecessary(Connection con) {
 		DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
