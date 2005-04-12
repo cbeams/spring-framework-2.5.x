@@ -186,7 +186,7 @@ public class DataBinder {
 		this.allowedFields = allowedFields;
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder restricted to binding allowed fields [" +
-					StringUtils.arrayToCommaDelimitedString(this.allowedFields) + "]");
+					StringUtils.arrayToCommaDelimitedString(allowedFields) + "]");
 		}
 	}
 
@@ -212,7 +212,7 @@ public class DataBinder {
 		this.requiredFields = requiredFields;
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder requires binding of required fields [" +
-					StringUtils.arrayToCommaDelimitedString(this.requiredFields) + "]");
+					StringUtils.arrayToCommaDelimitedString(requiredFields) + "]");
 		}
 	}
 
@@ -254,7 +254,7 @@ public class DataBinder {
 	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
 	 */
 	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
-		this.errors.getBeanWrapper().registerCustomEditor(requiredType, field, propertyEditor);
+		getBeanWrapper().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
 	/**
@@ -278,6 +278,13 @@ public class DataBinder {
 		this.bindingErrorProcessor = bindingErrorProcessor;
 	}
 
+	/**
+	 * Return the strategy for processing binding errors.
+	 */
+	public BindingErrorProcessor getBindingErrorProcessor() {
+		return bindingErrorProcessor;
+	}
+
 
 	/**
 	 * Bind the given property values to this binder's target.
@@ -289,14 +296,29 @@ public class DataBinder {
 	 * implements the MutablePropertyValues interface; else, an internal mutable
 	 * copy will be created for this purpose. Pass in a copy of the PropertyValues
 	 * if you want your original instance to stay unmodified in any case.
-	 * @param pvs property values to bind.
+	 * @param pvs property values to bind
+	 * @see #checkAllowedFields
+	 * @see #checkRequiredFields
+	 * @see #applyPropertyValues
 	 */
 	public void bind(PropertyValues pvs) {
-		// Check for fields to bind.
-		List allowedFieldsList = (this.allowedFields != null) ? Arrays.asList(this.allowedFields) : null;
 		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues) ?
 				(MutablePropertyValues) pvs : new MutablePropertyValues(pvs);
-		PropertyValue[] pvArray = pvs.getPropertyValues();
+		checkAllowedFields(mpvs);
+		checkRequiredFields(mpvs);
+		applyPropertyValues(mpvs);
+	}
+
+	/**
+	 * Check the given property values against the allowed fields,
+	 * removing values for fields that are not allowed.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @see #getAllowedFields
+	 * @see #isAllowed(String)
+	 */
+	protected void checkAllowedFields(MutablePropertyValues mpvs) {
+		List allowedFieldsList = (getAllowedFields() != null) ? Arrays.asList(getAllowedFields()) : null;
+		PropertyValue[] pvArray = mpvs.getPropertyValues();
 		for (int i = 0; i < pvArray.length; i++) {
 			String field = pvArray[i].getName();
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
@@ -306,35 +328,6 @@ public class DataBinder {
 							"and will not be bound, because it has not been found in the list of allowed fields " +
 							allowedFieldsList);
 				}
-			}
-		}
-		pvs = mpvs;
-
-		// Check for missing fields.
-		if (this.requiredFields != null) {
-			for (int i = 0; i < this.requiredFields.length; i++) {
-				PropertyValue pv = pvs.getPropertyValue(this.requiredFields[i]);
-				if (pv == null || pv.getValue() == null ||
-						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
-					// Use bind error processor to create FieldError.
-					String field = this.requiredFields[i];
-					this.bindingErrorProcessor.processMissingFieldError(field, this.errors);
-					// Remove property from property values to bind:
-					// It has already caused a field error with a rejected value.
-					mpvs.removePropertyValue(field);
-				}
-			}
-		}
-
-		try {
-			// Bind request parameters onto target object.
-			this.errors.getBeanWrapper().setPropertyValues(pvs, this.ignoreUnknownFields);
-		}
-		catch (PropertyAccessExceptionsException ex) {
-			// Use bind error processor to create FieldErrors.
-			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
-			for (int i = 0; i < exs.length; i++) {
-				this.bindingErrorProcessor.processPropertyAccessException(exs[i], this.errors);
 			}
 		}
 	}
@@ -351,9 +344,10 @@ public class DataBinder {
 	 * @see #setAllowedFields
 	 */
 	protected boolean isAllowed(String field) {
-		if (this.allowedFields != null) {
-			for (int i = 0; i < this.allowedFields.length; i++) {
-				String allowed = this.allowedFields[i];
+		if (getAllowedFields() != null) {
+			String[] allowedFields = getAllowedFields();
+			for (int i = 0; i < allowedFields.length; i++) {
+				String allowed = allowedFields[i];
 				if ((allowed.endsWith("*") && field.startsWith(allowed.substring(0, allowed.length() - 1))) ||
 						(allowed.startsWith("*") && field.endsWith(allowed.substring(1, allowed.length())))) {
 					return true;
@@ -365,6 +359,58 @@ public class DataBinder {
 	}
 
 	/**
+	 * Check the given property values against the required fields,
+	 * generating missing field errors where appropriate.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @see #getRequiredFields
+	 * @see #getBindingErrorProcessor
+	 * @see BindingErrorProcessor#processMissingFieldError
+	 */
+	protected void checkRequiredFields(MutablePropertyValues mpvs) {
+		if (getRequiredFields() != null) {
+			String[] requiredFields = getRequiredFields();
+			for (int i = 0; i < requiredFields.length; i++) {
+				PropertyValue pv = mpvs.getPropertyValue(requiredFields[i]);
+				if (pv == null || pv.getValue() == null ||
+						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
+					// Use bind error processor to create FieldError.
+					String field = requiredFields[i];
+					getBindingErrorProcessor().processMissingFieldError(field, getErrors());
+					// Remove property from property values to bind:
+					// It has already caused a field error with a rejected value.
+					mpvs.removePropertyValue(field);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Apply given property values to the target object.
+	 * <p>Default implementation applies them all of them as bean property
+	 * values via the corresponding BeanWrapper. Unknown fields will by
+	 * default be ignored.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @see #getTarget
+	 * @see #getBeanWrapper
+	 * @see #isIgnoreUnknownFields
+	 * @see #getBindingErrorProcessor
+	 * @see BindingErrorProcessor#processPropertyAccessException
+	 */
+	protected void applyPropertyValues(MutablePropertyValues mpvs) {
+		try {
+			// Bind request parameters onto target object.
+			getBeanWrapper().setPropertyValues(mpvs, isIgnoreUnknownFields());
+		}
+		catch (PropertyAccessExceptionsException ex) {
+			// Use bind error processor to create FieldErrors.
+			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
+			for (int i = 0; i < exs.length; i++) {
+				getBindingErrorProcessor().processPropertyAccessException(exs[i], getErrors());
+			}
+		}
+	}
+
+	/**
 	 * Close this DataBinder, which may result in throwing
 	 * a BindException if it encountered any errors
 	 * @return the model Map, containing target object and Errors instance
@@ -372,10 +418,10 @@ public class DataBinder {
 	 * @see BindException#getModel
 	 */
 	public Map close() throws BindException {
-		if (this.errors.hasErrors()) {
-			throw this.errors;
+		if (getErrors().hasErrors()) {
+			throw getErrors();
 		}
-		return this.errors.getModel();
+		return getErrors().getModel();
 	}
 
 }
