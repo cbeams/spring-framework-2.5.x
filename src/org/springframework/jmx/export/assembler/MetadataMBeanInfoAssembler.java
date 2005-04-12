@@ -172,27 +172,28 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * to the MBean descriptor. Specifically, adds the <code>currencyTimeLimit</code>,
 	 * <code>persistPolicy</code>, <code>persistPeriod</code>, <code>persistLocation</code>
 	 * and <code>persistName</code> descriptor fields if they are present in the metdata.
-	 * @param mbeanDescriptor the <code>Descriptor</code> for the MBean
+	 * @param descriptor the <code>Descriptor</code> for the MBean
 	 * @param beanKey the key associated with the MBean in the beans map
 	 * @param beanClass the <code>Class</code> of the managed resource
 	 */
-	protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, String beanKey, Class beanClass) {
+	protected void populateMBeanDescriptor(Descriptor descriptor, String beanKey, Class beanClass) {
 		ManagedResource mr = this.attributeSource.getManagedResource(beanClass);
 		if (mr == null) {
 			throw new InvalidMetadataException(
 					"No ManagedResource attribute found for class: " + beanClass.getName());
 		}
-		if (mr.getCurrencyTimeLimit() > 0) {
-			mbeanDescriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(mr.getCurrencyTimeLimit()));
-		}
-		mbeanDescriptor.setField(LOG, mr.isLog() ? "true" : "false");
+
+		applyCurrencyTimeLimit(descriptor, mr.getCurrencyTimeLimit());
+
+		descriptor.setField(LOG, mr.isLog() ? "true" : "false");
 		if (mr.getLogFile() != null) {
-			mbeanDescriptor.setField(LOG_FILE, mr.getLogFile());
+			descriptor.setField(LOG_FILE, mr.getLogFile());
 		}
-		mbeanDescriptor.setField(PERSIST_POLICY, mr.getPersistPolicy());
-		mbeanDescriptor.setField(PERSIST_PERIOD, Integer.toString(mr.getPersistPeriod()));
-		mbeanDescriptor.setField(PERSIST_NAME, mr.getPersistName());
-		mbeanDescriptor.setField(PERSIST_LOCATION, mr.getPersistLocation());
+
+		descriptor.setField(PERSIST_POLICY, mr.getPersistPolicy());
+		descriptor.setField(PERSIST_PERIOD, Integer.toString(mr.getPersistPeriod()));
+		descriptor.setField(PERSIST_NAME, mr.getPersistName());
+		descriptor.setField(PERSIST_LOCATION, mr.getPersistLocation());
 	}
 
 	/**

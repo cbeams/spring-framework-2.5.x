@@ -406,6 +406,23 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 
 	/**
+	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for an
+	 * Mbean. Default implementation sets the <code>currencyTimeLimit</code> field to
+	 * the specified "defaultCurrencyTimeLimit", if any (by default none).
+	 * @param descriptor the <code>Descriptor</code> for the MBean resource.
+	 * @param beanKey the key associated with the MBean in the beans map
+	 * of the <code>MBeanExporter</code>
+	 * @param beanClass the class of the MBean
+	 * @throws JMException in case of errors
+	 * @see #setDefaultCurrencyTimeLimit(Integer)
+	 * @see #applyDefaultCurrencyTimeLimit(javax.management.Descriptor)
+	 */
+	protected void populateMBeanDescriptor(Descriptor descriptor, String beanKey, Class beanClass)
+			throws JMException {
+		applyDefaultCurrencyTimeLimit(descriptor);
+	}
+
+	/**
 	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
 	 * attribute. Default implementation sets the <code>currencyTimeLimit</code> field to
 	 * the specified "defaultCurrencyTimeLimit", if any (by default none).
