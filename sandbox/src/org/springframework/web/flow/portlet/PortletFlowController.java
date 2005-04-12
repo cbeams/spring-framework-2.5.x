@@ -35,6 +35,10 @@ import org.springframework.web.servlet.ModelAndView;
  * bean definitions in the application context, you can use the Spring nested
  * bean definition syntax.
  * <p>
+ * Also note that the PortletFlowController requires a session and will create
+ * one if it does not yet exist. It needs this session to be able to share information
+ * between the action and render requests.
+ * <p>
  * <b>Exposed configuration properties:</b><br>
  * <table border="1">
  * <tr>
@@ -57,7 +61,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class PortletFlowController extends AbstractController implements InitializingBean {
 
 	/**
-	 * Name of the attribute used to pass the view descriptor from the
+	 * Name of the session attribute used to pass the view descriptor from the
 	 * action request to the render request.
 	 */
 	public static final String VIEWDESCRIPTOR_ATTRIBUTE = "ActionRequest:ViewDescriptor";
@@ -117,7 +121,7 @@ public class PortletFlowController extends AbstractController implements Initial
 	 */
 	protected void handleRequestInternal(ActionRequest request, ActionResponse response) throws Exception {
 		ViewDescriptor viewDescriptor = flowExecutionManager.handle(request, response);
-		request.setAttribute(VIEWDESCRIPTOR_ATTRIBUTE, viewDescriptor);
+		request.getPortletSession().setAttribute(VIEWDESCRIPTOR_ATTRIBUTE, viewDescriptor);
 	}
 
 	/**
@@ -131,13 +135,23 @@ public class PortletFlowController extends AbstractController implements Initial
 	 * @throws Exception in case of errors
 	 */
 	protected ModelAndView handleRequestInternal(RenderRequest request, RenderResponse response) throws Exception {
-		ViewDescriptor viewDescriptor = (ViewDescriptor) request.getAttribute(VIEWDESCRIPTOR_ATTRIBUTE);
-		if (viewDescriptor == null) {
-			viewDescriptor = flowExecutionManager.handle(request, response);
+		try {
+			// note that we can't put the view descriptor in a request attribute because
+			// request attributes are objects associated with a portlet during a single
+			// portlet request: a portlet cannot assume that attributes are shared between
+			// action and render requests
+			ViewDescriptor viewDescriptor =
+				(ViewDescriptor) request.getPortletSession().getAttribute(VIEWDESCRIPTOR_ATTRIBUTE);
+			if (viewDescriptor == null) {
+				viewDescriptor = flowExecutionManager.handle(request, response);
+			}
+	
+			// convert the view descriptor to a ModelAndView object
+			return toModelAndView(viewDescriptor);
 		}
-
-		// convert the view descriptor to a ModelAndView object
-		return toModelAndView(viewDescriptor);
+		finally {
+			request.getPortletSession().removeAttribute(VIEWDESCRIPTOR_ATTRIBUTE);
+		}
 	}
 
 	/**
