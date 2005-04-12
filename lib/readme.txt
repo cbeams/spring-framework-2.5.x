@@ -195,7 +195,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-httpclient.jar
-- Commons HttpClient 2.0.2 (http://jakarta.apache.org/commons/httpclient)
+- Commons HttpClient 3.0 RC2 (http://jakarta.apache.org/commons/httpclient)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
@@ -226,8 +226,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-0.6.5.jar
-- JasperReports 0.6.5 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-0.6.6.jar
+- JasperReports 0.6.6 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
@@ -275,8 +275,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
-* ojb/db-ojb-1.0.1.jar
-- Apache ObJectRelationalBridge 1.0.1 (http://db.apache.org/ojb)
+* ojb/db-ojb-1.0.3.jar
+- Apache ObJectRelationalBridge 1.0.3 (http://db.apache.org/ojb)
 - required for building the framework
 - required at runtime when using Spring's OJB support
 
