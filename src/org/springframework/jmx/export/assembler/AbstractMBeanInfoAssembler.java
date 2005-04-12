@@ -131,13 +131,13 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * before it is passed to the <code>MBeanExporter</code>.
 	 * <p>Subclasses can implement this method to add additional descriptors to the
 	 * MBean metadata. Default implementation is empty.
-	 * @param mbeanDescriptor the <code>Descriptor</code> for the MBean resource.
+	 * @param descriptor the <code>Descriptor</code> for the MBean resource.
 	 * @param beanKey the key associated with the MBean in the beans map
 	 * of the <code>MBeanExporter</code>
 	 * @param beanClass the class of the MBean
 	 * @throws JMException in case of errors
 	 */
-	protected void populateMBeanDescriptor(Descriptor mbeanDescriptor, String beanKey, Class beanClass)
+	protected void populateMBeanDescriptor(Descriptor descriptor, String beanKey, Class beanClass)
 			throws JMException {
 	}
 
