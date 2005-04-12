@@ -35,7 +35,6 @@ import org.springframework.util.StringUtils;
 /**
  * Collection of generic utility methods to support Spring JMX.
  * Includes a convenient method to locate an MBeanServer.
- *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
@@ -47,12 +46,11 @@ public class JmxUtils {
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
 	/**
-		 * Attempt to find a locally running <code>MBeanServer</code>. Fails if no
-		 * <code>MBeanServer</code> can be found, or if more than one is found.
-		 *
-		 * @return the <code>MBeanServer</code> if found
-		 * @throws org.springframework.jmx.MBeanServerNotFoundException if no <code>MBeanServer</code> is found, or more than one is found
-		 */
+	 * Attempt to find a locally running <code>MBeanServer</code>. Fails if no
+	 * <code>MBeanServer</code> can be found, or if more than one is found.
+	 * @return the <code>MBeanServer</code> if found
+	 * @throws org.springframework.jmx.MBeanServerNotFoundException if no <code>MBeanServer</code> is found, or more than one is found
+	 */
 	public static MBeanServer locateMBeanServer() throws MBeanServerNotFoundException {
 		List servers = MBeanServerFactory.findMBeanServer(null);
 		// Check to see if an MBeanServer is registered.
@@ -98,6 +96,16 @@ public class JmxUtils {
 		return signature;
 	}
 
+	/**
+	 * Return the JMX attribute name to use for the given JavaBeans property.
+	 * <p>When using strict casing, a JavaBean property with a getter method
+	 * such as <code>getFoo()</code> translates to an attribute called
+	 * <code>Foo</code>. With strict casing disabled, <code>getFoo()</code>
+	 * would translate to just <code>foo</code>.
+	 * @param property the JavaBeans property descriptor
+	 * @param useStrictCasing whether to use strict casing
+	 * @return the JMX attribute name to use
+	 */
 	public static String getAttributeName(PropertyDescriptor property, boolean useStrictCasing) {
 		if (useStrictCasing) {
 			return StringUtils.capitalize(property.getName());
@@ -105,14 +113,12 @@ public class JmxUtils {
 		else {
 			return property.getName();
 		}
-
 	}
 
 	/**
-		 * Check whether the supplied <code>Class</code> is a valid MBean resource.
-		 *
-		 * @param beanClass the class of the bean to test
-		 */
+	 * Check whether the supplied <code>Class</code> is a valid MBean resource.
+	 * @param beanClass the class of the bean to test
+	 */
 	public static boolean isMBean(Class beanClass) {
 		if (beanClass == null) {
 			return false;
@@ -131,12 +137,11 @@ public class JmxUtils {
 	}
 
 	/**
-		 * Return whether an MBean interface exists for the given class
-		 * (that is, an interface whose name matches the class name of
-		 * the given class but with suffix "MBean).
-		 *
-		 * @param clazz the class to check
-		 */
+	 * Return whether an MBean interface exists for the given class
+	 * (that is, an interface whose name matches the class name of
+	 * the given class but with suffix "MBean).
+	 * @param clazz the class to check
+	 */
 	private static boolean hasMBeanInterface(Class clazz) {
 		Class[] implementedInterfaces = clazz.getInterfaces();
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
