@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  * be read using any supported implementation.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
  * @see #setAttributeSource
  */
@@ -209,14 +210,8 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		ManagedAttribute sma =
 				(setter == null) ? ManagedAttribute.EMPTY : this.attributeSource.getManagedAttribute(setter);
 
-		int ctl = resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit());
-
-		if (ctl == -1) {
-			// support for non-compliant implementations
-			ctl = getAlwaysStaleCurrencyTimeLimit();
-		}
-
-		descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(ctl));
+		applyCurrencyTimeLimit(descriptor,
+				resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit()));
 
 		Object defaultValue = resolveObjectDescriptor(gma.getDefaultValue(), sma.getDefaultValue());
 		descriptor.setField(DEFAULT, defaultValue);
@@ -238,14 +233,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
 		ManagedOperation mo = this.attributeSource.getManagedOperation(method);
 		if (mo != null) {
-			int ctl = mo.getCurrencyTimeLimit();
-
-			if (ctl == -1) {
-				// support for non-compliant implementations
-				ctl = getAlwaysStaleCurrencyTimeLimit();
-			}
-
-			descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(ctl));
+			applyCurrencyTimeLimit(descriptor, mo.getCurrencyTimeLimit());
 		}
 	}
 

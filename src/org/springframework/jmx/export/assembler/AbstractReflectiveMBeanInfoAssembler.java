@@ -37,24 +37,24 @@ import org.springframework.jmx.support.JmxUtils;
  * Extends the <code>AbstractMBeanInfoAssembler</code> to add a basic
  * algorithm for building metadata based on the reflective metadata of
  * the MBean class.
- * <p/>
+ *
  * <p>The logic for creating MBean metadata from the reflective metadata is contained
  * in this class, but this class makes no desicions as to which methods and
  * properties are to be exposed. Instead it gives subclasses a chance to 'vote'
  * on each property or method through the <code>includeXXX</code> methods.
- * <p/>
+ *
  * <p>Subclasses are also given the opportunity to populate attribute and operation
  * metadata with additional descriptors once the metadata is assembled through the
  * <code>populateXXXDescriptor</code> methods.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @since 1.2
  * @see #includeOperation
  * @see #includeReadAttribute
  * @see #includeWriteAttribute
  * @see #populateAttributeDescriptor
  * @see #populateOperationDescriptor
- * @since 1.2
  */
 public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBeanInfoAssembler {
 
@@ -89,29 +89,118 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	private static final String OPERATION = "operation";
 
+
+	/**
+	 * Key for <code>log</code> descriptor.
+	 */
+	protected static final String LOG = "log";
+
+	/**
+	 * Key for <code>logFile</code> descriptor.
+	 */
+	protected static final String LOG_FILE = "logFile";
+
+	/**
+	 * Key for <code>currencyTimeLimit</code> descriptor.
+	 */
+	protected static final String CURRENCY_TIME_LIMIT = "currencyTimeLimit";
+
+	/**
+	 * Key for <code>default</code> descriptor.
+	 */
+	protected static final String DEFAULT = "default";
+
+	/**
+	 * Key for <code>persistPolicy</code> descriptor.
+	 */
+	protected static final String PERSIST_POLICY = "persistPolicy";
+
+	/**
+	 * Key for <code>persistPeriod</code> descriptor.
+	 */
+	protected static final String PERSIST_PERIOD = "persistPeriod";
+
+	/**
+	 * Key for <code>persistLocation</code> descriptor.
+	 */
+	protected static final String PERSIST_LOCATION = "persistLocation";
+
+	/**
+	 * Key for <code>persistName</code> descriptor.
+	 */
+	protected static final String PERSIST_NAME = "persistName";
+
+
+	/**
+	 * Default value for the JMX field "currencyTimeLimit".
+	 */
+	private Integer defaultCurrencyTimeLimit;
+
 	/**
 	 * Indicates whether or not strict casing is being used for attributes.
 	 */
-  private boolean useStrictCasing = true;
+	private boolean useStrictCasing = true;
+
 
 	/**
-	 * Enables and disables strict casing for attributes. When using strict casing a JavaBean property
-	 * with a getter such as <code>getFoo()</code> translates to an attribute called <code>Foo</code>.
-	 * With strict casing disable <code>getFoo()</code> would translate to just <code>foo</code>.
+	 * Set the default for the JMX field "currencyTimeLimit".
+	 * The default will usually indicate to never cache attribute values.
+	 * <p>Default is none, not explicitly setting that field, as recommended by the
+	 * JMX 1.2 specification. This should result in "never cache" behavior, always
+	 * reading attribute values freshly (which corresponds to a "currencyTimeLimit"
+	 * of <code>-1</code> in JMX 1.2).
+	 * <p>However, some JMX implementations require an explicit value to be set
+	 * here to get "never cache" behavior: most notably, JBoss requires a value of
+	 * <code>0</code> for this (conflicting with the JMX 1.2 spec, which defines
+	 * <code>0</code> as "always cache").
+	 * <p>Note that the "currencyTimeLimit" value can also be specified on a
+	 * managed attribute or operation. The default value will apply if not
+	 * overridden with a "currencyTimeLimit" value <code>>= 0</code> there:
+	 * a metadata "currencyTimeLimit" value of <code>-1</code> indicates
+	 * to use the default; a value of <code>0</code> indicates to "always cache"
+	 * and will be translated to <code>Integer.MAX_VALUE</code>; a positive
+	 * value indicates the number of cache seconds.
+	 * @see org.springframework.jmx.export.metadata.AbstractJmxAttribute#setCurrencyTimeLimit
+	 * @see #applyCurrencyTimeLimit(javax.management.Descriptor, int)
+	 */
+	public void setDefaultCurrencyTimeLimit(Integer defaultCurrencyTimeLimit) {
+		this.defaultCurrencyTimeLimit = defaultCurrencyTimeLimit;
+	}
+
+	/**
+	 * Return default value for the JMX field "currencyTimeLimit", if any.
+	 */
+	protected Integer getDefaultCurrencyTimeLimit() {
+		return this.defaultCurrencyTimeLimit;
+	}
+
+	/**
+	 * Enables and disables strict casing for attributes. When using strict casing,
+	 * a JavaBean property with a getter method such as <code>getFoo()</code>
+	 * translates to an attribute called <code>Foo</code>. With strict casing disabled,
+	 * <code>getFoo()</code> would translate to just <code>foo</code>.
 	 */
 	public void setUseStrictCasing(boolean useStrictCasing) {
 		this.useStrictCasing = useStrictCasing;
 	}
 
 	/**
-	 * Iterate through all properties on the MBean class and gives subclasses the chance to vote on the
-	 * inclusion of both the accessor and mutator. If a particular accessor or mutator is voted for
-	 * inclusion the appropriate metadata is assembled and passed to the subclass for descriptor population.
-	 *
-	 * @param beanKey   the key associated with the MBean in the <code>beans</code> <code>Map</code>
-	 *                  of the <code>MBeanExporter</code>.
-	 * @param beanClass the <code>Class</code> of the MBean.
-	 * @return the attribute metadata.
+	 * Return whether strict casing for attributes is enabled.
+	 */
+	protected boolean isUseStrictCasing() {
+		return useStrictCasing;
+	}
+
+
+	/**
+	 * Iterate through all properties on the MBean class and gives subclasses
+	 * the chance to vote on the inclusion of both the accessor and mutator.
+	 * If a particular accessor or mutator is voted for inclusion, the appropriate
+	 * metadata is assembled and passed to the subclass for descriptor population.
+	 * @param beanKey the key associated with the MBean in the beans map
+	 * of the <code>MBeanExporter</code>
+	 * @param beanClass the class of the MBean
+	 * @return the attribute metadata
 	 * @see #populateAttributeDescriptor(javax.management.Descriptor, java.lang.reflect.Method, java.lang.reflect.Method)
 	 */
 	protected ModelMBeanAttributeInfo[] getAttributeInfo(String beanKey, Class beanClass) throws JMException {
@@ -134,8 +223,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 			if (getter != null || setter != null) {
 				// If both getter and setter are null, then this does not need exposing.
-				String attributeName = JmxUtils.getAttributeName(props[i], this.useStrictCasing);
-				ModelMBeanAttributeInfo info = new ModelMBeanAttributeInfo(attributeName, getAttributeDescription(props[i]), getter, setter);
+				String attributeName = JmxUtils.getAttributeName(props[i], isUseStrictCasing());
+				ModelMBeanAttributeInfo info =
+						new ModelMBeanAttributeInfo(attributeName, getAttributeDescription(props[i]), getter, setter);
 
 				Descriptor desc = info.getDescriptor();
 				if (getter != null) {
@@ -160,9 +250,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * or mutator of an attribute that is inclued in the managment interface, then
 	 * the corresponding operation is exposed with the &quot;role&quot; descriptor
 	 * field set to the appropriate value.
-	 *
-	 * @param beanKey   the key associated with the MBean in the beans map
-	 *                  of the <code>MBeanExporter</code>
+	 * @param beanKey the key associated with the MBean in the beans map
+	 * of the <code>MBeanExporter</code>
 	 * @param beanClass the class of the MBean
 	 * @return the operation metadata
 	 * @see #populateOperationDescriptor
@@ -185,7 +274,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 						(method.equals(pd.getWriteMethod()) && includeWriteAttribute(method, beanKey))) {
 					// Attributes need to have their methods exposed as
 					// operations to the JMX server as well.
-					info = createModelMBeanOperationInfo(method, pd.getName(), true);
+					info = createModelMBeanOperationInfo(method, pd.getName());
 					Descriptor desc = info.getDescriptor();
 					desc.setField(VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
 					if (method.equals(pd.getReadMethod())) {
@@ -198,7 +287,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 				}
 			}
 			else if (includeOperation(method, beanKey)) {
-				info = createModelMBeanOperationInfo(method, method.getName(), false);
+				info = createModelMBeanOperationInfo(method, method.getName());
 				Descriptor desc = info.getDescriptor();
 				desc.setField(ROLE, OPERATION);
 				populateOperationDescriptor(desc, method);
@@ -214,125 +303,13 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	}
 
 	/**
-	 * Create constructor info for the given bean key and class.
-	 * <p>Default implementation returns an empty array of
-	 * <code>ModelMBeanConstructorInfo</code>.
-	 *
-	 * @param beanKey   the key associated with the MBean in the beans map
-	 *                  of the <code>MBeanExporter</code>
-	 * @param beanClass the class of the MBean
-	 * @return the ModelMBeanConstructorInfo array
-	 */
-	protected ModelMBeanConstructorInfo[] getConstructorInfo(String beanKey, Class beanClass) {
-		return new ModelMBeanConstructorInfo[0];
-	}
-
-	/**
-	 * Create notification info for the given bean key and class.
-	 * <p>Default implementation returns an empty array of
-	 * <code>ModelMBeanNotificationInfo</code>.
-	 *
-	 * @param beanKey   the key associated with the MBean in the beans map
-	 *                  of the <code>MBeanExporter</code>
-	 * @param beanClass the class of the MBean
-	 * @return the ModelMBeanNotificationInfo array
-	 */
-	protected ModelMBeanNotificationInfo[] getNotificationInfo(String beanKey, Class beanClass) {
-		return new ModelMBeanNotificationInfo[0];
-	}
-
-	/**
-	 * Create parameter info for the given method. Default implementation
-	 * returns an empty arry of <code>MBeanParameterInfo</code>.
-	 *
-	 * @param method the <code>Method</code> to get the parameter information for.
-	 * @return the <code>MBeanParameterInfo</code> array.
-	 */
-	protected MBeanParameterInfo[] getOperationParameters(Method method) {
-		return new MBeanParameterInfo[0];
-	}
-
-	/**
-	 * Allows subclasses to vote on the inclusion of a particular attribute accessor.
-	 *
-	 * @param method the accessor <code>Method</code>.
-	 * @return <code>true</code> if the accessor should be included in the management interface,
-	 *         otherwise <code>false<code>.
-	 */
-	protected abstract boolean includeReadAttribute(Method method, String beanKey);
-
-	/**
-	 * Allows subclasses to vote on the inclusion of a particular attribute mutator.
-	 *
-	 * @param method the mutator <code>Method</code>.
-	 * @return <code>true</code> if the mutator should be included in the management interface,
-	 *         otherwise <code>false<code>.
-	 */
-	protected abstract boolean includeWriteAttribute(Method method, String beanKey);
-
-	/**
-	 * Allows subclasses to vote on the inclusion of a particular operation.
-	 *
-	 * @param method the operation method
-	 * @return whether the operation should be included in the management interface
-	 */
-	protected abstract boolean includeOperation(Method method, String beanKey);
-
-	/**
-	 * Get the description for a particular attribute.
-	 * <p>Default implementation returns a description for the operation
-	 * that is the name of corresponding <code>Method</code>.
-	 *
-	 * @param propertyDescriptor the PropertyDescriptor for the attribute
-	 * @return the description for the attribute
-	 */
-	protected String getAttributeDescription(PropertyDescriptor propertyDescriptor) {
-		return propertyDescriptor.getDisplayName();
-	}
-
-	/**
-	 * Get the description for a particular operation.
-	 * <p>Default implementation returns a description for the operation
-	 * that is the name of corresponding <code>Method</code>.
-	 *
-	 * @param method the operation method
-	 * @return the description for the operation.
-	 */
-	protected String getOperationDescription(Method method) {
-		return method.getName();
-	}
-
-	/**
-	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
-	 * attribute. Default implementation is empty.
-	 *
-	 * @param descriptor the attribute descriptor
-	 * @param getter     the accessor method for the attribute
-	 * @param setter     the mutator method for the attribute
-	 */
-	protected void populateAttributeDescriptor(Descriptor descriptor, Method getter, Method setter) {
-	}
-
-	/**
-	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
-	 * operation. Default implementation is empty.
-	 *
-	 * @param descriptor the operation descriptor
-	 * @param method     the method corresponding to the operation
-	 */
-	protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
-	}
-
-	/**
 	 * Creates an instance of <code>ModelMBeanOperationInfo</code> for the
 	 * given method. Populates the parameter info for the operation.
-	 *
-	 * @param method the <code>Method</code> to create a <code>ModelMBeanOperationInfo</code> for.
-	 * @return the <code>ModelMBeanOperationInfo</code>.
+	 * @param method the <code>Method</code> to create a <code>ModelMBeanOperationInfo</code> for
+	 * @return the <code>ModelMBeanOperationInfo</code>
 	 */
-	private ModelMBeanOperationInfo createModelMBeanOperationInfo(Method method, String name, boolean isAttributeOperation) {
+	private ModelMBeanOperationInfo createModelMBeanOperationInfo(Method method, String name) {
 		MBeanParameterInfo[] params = getOperationParameters(method);
-
 		if (params.length == 0) {
 			return new ModelMBeanOperationInfo(getOperationDescription(method), method);
 		}
@@ -344,4 +321,153 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 				MBeanOperationInfo.UNKNOWN);
 		}
 	}
+
+
+	/**
+	 * Create constructor info for the given bean key and class.
+	 * <p>Default implementation returns an empty array of
+	 * <code>ModelMBeanConstructorInfo</code>.
+	 * @param beanKey the key associated with the MBean in the beans map
+	 * of the <code>MBeanExporter</code>
+	 * @param beanClass the class of the MBean
+	 * @return the ModelMBeanConstructorInfo array
+	 */
+	protected ModelMBeanConstructorInfo[] getConstructorInfo(String beanKey, Class beanClass) {
+		return new ModelMBeanConstructorInfo[0];
+	}
+
+	/**
+	 * Create notification info for the given bean key and class.
+	 * <p>Default implementation returns an empty array of
+	 * <code>ModelMBeanNotificationInfo</code>.
+	 * @param beanKey the key associated with the MBean in the beans map
+	 * of the <code>MBeanExporter</code>
+	 * @param beanClass the class of the MBean
+	 * @return the ModelMBeanNotificationInfo array
+	 */
+	protected ModelMBeanNotificationInfo[] getNotificationInfo(String beanKey, Class beanClass) {
+		return new ModelMBeanNotificationInfo[0];
+	}
+
+	/**
+	 * Create parameter info for the given method. Default implementation
+	 * returns an empty arry of <code>MBeanParameterInfo</code>.
+	 * @param method the <code>Method</code> to get the parameter information for
+	 * @return the <code>MBeanParameterInfo</code> array
+	 */
+	protected MBeanParameterInfo[] getOperationParameters(Method method) {
+		return new MBeanParameterInfo[0];
+	}
+
+	/**
+	 * Allows subclasses to vote on the inclusion of a particular attribute accessor.
+	 * @param method the accessor <code>Method</code>
+	 * @return <code>true</code> if the accessor should be included in the management interface,
+	 * otherwise <code>false<code>
+	 */
+	protected abstract boolean includeReadAttribute(Method method, String beanKey);
+
+	/**
+	 * Allows subclasses to vote on the inclusion of a particular attribute mutator.
+	 * @param method the mutator <code>Method</code>.
+	 * @return <code>true</code> if the mutator should be included in the management interface,
+	 * otherwise <code>false<code>.
+	 */
+	protected abstract boolean includeWriteAttribute(Method method, String beanKey);
+
+	/**
+	 * Allows subclasses to vote on the inclusion of a particular operation.
+	 * @param method the operation method
+	 * @return whether the operation should be included in the management interface
+	 */
+	protected abstract boolean includeOperation(Method method, String beanKey);
+
+	/**
+	 * Get the description for a particular attribute.
+	 * <p>Default implementation returns a description for the operation
+	 * that is the name of corresponding <code>Method</code>.
+	 * @param propertyDescriptor the PropertyDescriptor for the attribute
+	 * @return the description for the attribute
+	 */
+	protected String getAttributeDescription(PropertyDescriptor propertyDescriptor) {
+		return propertyDescriptor.getDisplayName();
+	}
+
+	/**
+	 * Get the description for a particular operation.
+	 * <p>Default implementation returns a description for the operation
+	 * that is the name of corresponding <code>Method</code>.
+	 * @param method the operation method
+	 * @return the description for the operation.
+	 */
+	protected String getOperationDescription(Method method) {
+		return method.getName();
+	}
+
+
+	/**
+	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
+	 * attribute. Default implementation sets the <code>currencyTimeLimit</code> field to
+	 * the specified "defaultCurrencyTimeLimit", if any (by default none).
+	 * @param descriptor the attribute descriptor
+	 * @param getter the accessor method for the attribute
+	 * @param setter the mutator method for the attribute
+	 * @see #setDefaultCurrencyTimeLimit(Integer)
+	 * @see #applyDefaultCurrencyTimeLimit(javax.management.Descriptor)
+	 */
+	protected void populateAttributeDescriptor(Descriptor descriptor, Method getter, Method setter) {
+		applyDefaultCurrencyTimeLimit(descriptor);
+	}
+
+	/**
+	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
+	 * operation. Default implementation sets the <code>currencyTimeLimit</code> field to
+	 * the specified "defaultCurrencyTimeLimit", if any (by default none).
+	 * @param descriptor the operation descriptor
+	 * @param method the method corresponding to the operation
+	 * @see #setDefaultCurrencyTimeLimit(Integer)
+	 * @see #applyDefaultCurrencyTimeLimit(javax.management.Descriptor)
+	 */
+	protected void populateOperationDescriptor(Descriptor descriptor, Method method) {
+		applyDefaultCurrencyTimeLimit(descriptor);
+	}
+
+	/**
+	 * Set the <code>currencyTimeLimit</code> field to the specified
+	 * "defaultCurrencyTimeLimit", if any (by default none).
+	 * @param descriptor the JMX attribute or operation descriptor
+	 * @see #setDefaultCurrencyTimeLimit(Integer)
+	 */
+	protected final void applyDefaultCurrencyTimeLimit(Descriptor descriptor) {
+		if (getDefaultCurrencyTimeLimit() != null) {
+			descriptor.setField(CURRENCY_TIME_LIMIT, getDefaultCurrencyTimeLimit().toString());
+		}
+	}
+
+	/**
+	 * Apply the given JMX "currencyTimeLimit" value to the given descriptor.
+	 * <p>Default implementation sets a value <code>>0</code> as-is (as number of cache seconds),
+	 * turns a value of <code>0</code> into <code>Integer.MAX_VALUE</code> ("always cache")
+	 * and sets the "defaultCurrencyTimeLimit" (if any, indicating "never cache") in case of
+	 * a value <code><0</code>. This follows the recommendation in the JMX 1.2 specification.
+	 * @param descriptor the JMX attribute or operation descriptor
+	 * @param currencyTimeLimit the "currencyTimeLimit" value to apply
+	 * @see #setDefaultCurrencyTimeLimit(Integer)
+	 * @see #applyDefaultCurrencyTimeLimit(javax.management.Descriptor)
+	 */
+	protected void applyCurrencyTimeLimit(Descriptor descriptor, int currencyTimeLimit) {
+		if (currencyTimeLimit > 0) {
+			// number of cache seconds
+			descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(currencyTimeLimit));
+		}
+		else if (currencyTimeLimit == 0) {
+			// "always cache"
+			descriptor.setField(CURRENCY_TIME_LIMIT, Integer.toString(Integer.MAX_VALUE));
+		}
+		else {
+			// "never cache"
+			applyDefaultCurrencyTimeLimit(descriptor);
+		}
+	}
+
 }
