@@ -106,6 +106,13 @@ public class ServletRequestDataBinder extends DataBinder {
 	}
 
 	/**
+	 * Return the prefix for parameters that mark potentially empty fields.
+	 */
+	public String getFieldMarkerPrefix() {
+		return fieldMarkerPrefix;
+	}
+
+	/**
 	 * Set whether to bind empty MultipartFile parameters. Default is true.
 	 * <p>Turn this off if you want to keep an already bound MultipartFile
 	 * when the user resubmits the form without choosing a different file.
@@ -114,6 +121,13 @@ public class ServletRequestDataBinder extends DataBinder {
 	 */
 	public void setBindEmptyMultipartFiles(boolean bindEmptyMultipartFiles) {
 		this.bindEmptyMultipartFiles = bindEmptyMultipartFiles;
+	}
+
+	/**
+	 * Return whether to bind empty MultipartFile parameters.
+	 */
+	public boolean isBindEmptyMultipartFiles() {
+		return bindEmptyMultipartFiles;
 	}
 
 
@@ -132,38 +146,82 @@ public class ServletRequestDataBinder extends DataBinder {
 	 * @param request request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
 	 * @see org.springframework.web.multipart.MultipartFile
+	 * @see #checkFieldMarkers
+	 * @see #checkMultipartFiles
+	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(ServletRequest request) {
-		// Bind normal HTTP parameters.
-		MutablePropertyValues pvs = new ServletRequestParameterPropertyValues(request);
+		MutablePropertyValues mpvs = new ServletRequestParameterPropertyValues(request);
+		checkFieldMarkers(mpvs, request);
+		checkMultipartFiles(mpvs, request);
+		bind(mpvs);
+	}
 
-		// Check for special field markers.
-		if (this.fieldMarkerPrefix != null) {
-			PropertyValue[] pvArray = pvs.getPropertyValues();
+	/**
+	 * Check the given property values for field markers,
+	 * i.e. for fields that start with the field marker prefix.
+	 * <p>The existence of a field marker indicates that the specified
+	 * field existed in the form. If the property values do not contain
+	 * a corresponding field value, the field will be considered as empty
+	 * and will be reset appropriately.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @param request current request (can be multipart)
+	 * @see #getFieldMarkerPrefix
+	 * @see #getEmptyValue(String, Class)
+	 */
+	protected void checkFieldMarkers(MutablePropertyValues mpvs, ServletRequest request) {
+		if (getFieldMarkerPrefix() != null) {
+			String fieldMarkerPrefix = getFieldMarkerPrefix();
+			PropertyValue[] pvArray = mpvs.getPropertyValues();
 			for (int i = 0; i < pvArray.length; i++) {
 				PropertyValue pv = pvArray[i];
-				if (pv.getName().startsWith(this.fieldMarkerPrefix)) {
-					String field = pv.getName().substring(this.fieldMarkerPrefix.length());
-					if (getBeanWrapper().isWritableProperty(field) && !pvs.contains(field)) {
-						Class type = getBeanWrapper().getPropertyType(field);
-						if (type != null && boolean.class.equals(type) || Boolean.class.equals(type)) {
-							// Special handling of boolean property.
-							pvs.addPropertyValue(field, Boolean.FALSE);
-						}
-						else if (type != null && type.isArray()) {
-							// Special handling of array property.
-							pvs.addPropertyValue(field, Array.newInstance(type.getComponentType(), 0));
-						}
-						else {
-							// Fallback: try to set to null.
-							pvs.addPropertyValue(field, null);
-						}
+				if (pv.getName().startsWith(fieldMarkerPrefix)) {
+					String field = pv.getName().substring(fieldMarkerPrefix.length());
+					if (getBeanWrapper().isWritableProperty(field) && !mpvs.contains(field)) {
+						Class fieldType = getBeanWrapper().getPropertyType(field);
+						mpvs.addPropertyValue(field, getEmptyValue(field, fieldType));
 					}
 				}
 			}
 		}
+	}
 
-		// Bind multipart files contained in the request.
+	/**
+	 * Determine an empty value for the specified field.
+	 * <p>Default implementation returns <code>Boolean.FALSE</code>
+	 * for boolean fields and an empty array of array types.
+	 * Else, <code>null</code> is used as default.
+	 * @param field the name of the field
+	 * @param fieldType the type of the field
+	 * @return the empty value (for most fields: null)
+	 */
+	protected Object getEmptyValue(String field, Class fieldType) {
+		if (fieldType != null && boolean.class.equals(fieldType) || Boolean.class.equals(fieldType)) {
+			// Special handling of boolean property.
+			return Boolean.FALSE;
+		}
+		else if (fieldType != null && fieldType.isArray()) {
+			// Special handling of array property.
+			return Array.newInstance(fieldType.getComponentType(), 0);
+		}
+		else {
+			// Default value: try null.
+			return null;
+		}
+	}
+
+	/**
+	 * Check the multipart files contained in the given request, if any
+	 * (in case of a multipart request).
+	 * <p>Multipart files will only be added to the property values if they
+	 * are not empty or if we're configured to bind empty multipart files too.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @param request current request (can be multipart)
+	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
+	 * @see org.springframework.web.multipart.MultipartFile
+	 * @see #isBindEmptyMultipartFiles
+	 */
+	protected void checkMultipartFiles(MutablePropertyValues mpvs, ServletRequest request) {
 		if (request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 			Map fileMap = multipartRequest.getFileMap();
@@ -171,13 +229,11 @@ public class ServletRequestDataBinder extends DataBinder {
 				Map.Entry entry = (Map.Entry) it.next();
 				String key = (String) entry.getKey();
 				MultipartFile value = (MultipartFile) entry.getValue();
-				if (this.bindEmptyMultipartFiles || !value.isEmpty()) {
-					pvs.addPropertyValue(key, value);
+				if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
+					mpvs.addPropertyValue(key, value);
 				}
 			}
 		}
-		
-		bind(pvs);
 	}
 
 	/**
