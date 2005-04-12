@@ -41,12 +41,12 @@ public abstract class AbstractResource implements Resource {
 	 * This will cover both directories and content resources.
 	 */
 	public boolean exists() {
-		// try file existence
+		// Try file existence: can we find the file in the file system?
 		try {
 			return getFile().exists();
 		}
 		catch (IOException ex) {
-			// fall back to stream existence
+			// Fall back to stream existence: can we open the stream?
 			try {
 				InputStream is = getInputStream();
 				is.close();
@@ -96,6 +96,15 @@ public abstract class AbstractResource implements Resource {
 	public String getFilename() throws IllegalStateException {
 		throw new IllegalStateException(getDescription() + " does not carry a filename");
 	}
+
+	/**
+	 * This abstract method declaration shadows the method in the Resource interface.
+	 * This is necessary to make the <code>toString</code> implementation in this
+	 * class work on Sun's JDK 1.3 classic VM, which can't find the
+	 * <code>getDescription</code> method when executing <code>toString</code> else.
+	 * @see Resource#getDescription()
+	 */
+	public abstract String getDescription();
 
 	/**
 	 * This implementation returns the description of this resource.
