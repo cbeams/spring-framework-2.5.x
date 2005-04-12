@@ -35,14 +35,33 @@ import org.springframework.util.StringUtils;
  */
 public class CustomizableTraceInterceptor implements MethodInterceptor {
 
+	/**
+	 * The ${methodName} placeholder. Replaced with the name of the method being invoked.
+	 */
 	public static final String METHOD_NAME_PLACEHOLDER = "${methodName}";
 
+	/**
+	 * The <code>${targetClassName}</code> placeholder. Replaced with the fully-qualifed name of the <code>Class</code>
+	 * of the method invocation target.
+	 */
 	public static final String TARGET_CLASS_NAME_PLACEHOLDER = "${targetClassName}";
 
+	/**
+	 * The <code>${targetClassShortName}</code> placeholder. Replaced with the short name of the <code>Class</code> of the
+	 * method invocation target.
+	 */
 	public static final String TARGET_CLASS_SHORT_NAME_PLACEHOLDER = "${targetClassShortName}";
 
+	/**
+	 * The <code>${returnValue}</code> placeholder. Replaced with the <code>String</code> representation of the value
+	 * returned by the method invocation.
+	 */
 	public static final String RETURN_VALUE_PLACEHOLDER = "${returnValue}";
 
+	/**
+	 * The <code>${argumentTypes}</code> placeholder. Replaced with a comma seperated list of the argument types for the
+	 * method invocation. Argument types are written as short class names.
+	 */
 	public static final String ARGUMENT_TYPES_PLACEHOLDER = "${argumentTypes}";
 
 	public static final String ARGUMENTS_PLACEHOLDER = "${arguments}";
@@ -62,7 +81,7 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 
 	private static final Pattern PATTERN = Pattern.compile("\\$\\{\\p{Alpha}+\\}");
 
-	private static final Constants CONSTANTS = new Constants(CustomizableTraceInterceptor.class);
+	private static final Set ALLOWED_PLACEHOLDERS = new Constants(CustomizableTraceInterceptor.class).getValues("");
 
 	private String enterMessage = DEFAULT_ENTER_MESSAGE;
 
@@ -77,7 +96,18 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 	 */
 	private boolean useDynamicLog = false;
 
-	public void setEnterMessage(String enterMessage) {
+	/**
+	 * Sets the template used for method entry log messages. This template can contain any of the following place holders:
+	 * <ul>
+	 * <li><code>${targetClassName}</code></li>
+	 * <li><code>${targetClassShortName}</code></li>
+	 * <li><code>${argumentTypes}</code></li>
+	 * <li><code>${arguments}</code></li>
+	 * </ul>
+	 *
+	 * @throws IllegalArgumentException if the message template is empty or it contains any invalid placeholders.
+	 */
+	public void setEnterMessage(String enterMessage) throws IllegalArgumentException {
 		Assert.hasText(enterMessage, "enterMessage cannot be null or zero length.");
 		checkForInvalidPlaceholders(enterMessage);
 		assertDoesNotContainsText(enterMessage, RETURN_VALUE_PLACEHOLDER, "enterMessage cannot contain placeholder " + RETURN_VALUE_PLACEHOLDER);
@@ -86,6 +116,18 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 		this.enterMessage = enterMessage;
 	}
 
+	/**
+	 * Sets the template used for method exit log messages. This template can contain any of the following place holders:
+	 * <ul>
+	 * <li><code>${targetClassName}</code></li>
+	 * <li><code>${targetClassShortName}</code></li>
+	 * <li><code>${argumentTypes}</code></li>
+	 * <li><code>${arguments}</code></li>
+	 * <li><code>${returnValue}</code></li>
+	 * </ul>
+	 *
+	 * @throws IllegalArgumentException if the message template is empty or it contains any invalid placeholders.
+	 */
 	public void setExitMessage(String exitMessage) {
 		Assert.hasText(exitMessage, "exitMessage cannot be null or zero length.");
 		checkForInvalidPlaceholders(exitMessage);
@@ -94,6 +136,18 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 		this.exitMessage = exitMessage;
 	}
 
+	/**
+	 * Sets the template used for method exit log messages. This template can contain any of the following place holders:
+	 * <ul>
+	 * <li><code>${targetClassName}</code></li>
+	 * <li><code>${targetClassShortName}</code></li>
+	 * <li><code>${argumentTypes}</code></li>
+	 * <li><code>${arguments}</code></li>
+	 * <li><code>${exception}</code></li>
+	 * </ul>
+	 *
+	 * @throws IllegalArgumentException if the message template is empty or it contains any invalid placeholders.
+	 */
 	public void setExceptionMessage(String exceptionMessage) {
 		Assert.hasText(exceptionMessage, "exceptionMessage cannot be null or zero length.");
 		checkForInvalidPlaceholders(exceptionMessage);
@@ -102,6 +156,11 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 		this.exceptionMessage = exceptionMessage;
 	}
 
+	/**
+	 * Sets the value of the <code>useDynamicLog</code> flag. When set to <code>false</code>, log messages are written using
+	 * the <code>Log</code> instance for this class. When set to <code>true</code> log messages are written using the
+	 * <code>Log</code> instance for the <code>Class</code> that is the target of the method invocation.
+	 */
 	public void setUseDynamicLog(boolean useDynamicLog) {
 		this.useDynamicLog = useDynamicLog;
 	}
@@ -212,13 +271,11 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 	}
 
 	private void checkForInvalidPlaceholders(String message) throws IllegalArgumentException {
-		Set allowedPlaceholders = CONSTANTS.getValues("");
-
 		Matcher matcher = PATTERN.matcher(message);
 
 		while (matcher.find()) {
 			String match = matcher.group();
-			if (!allowedPlaceholders.contains(match)) {
+			if (!ALLOWED_PLACEHOLDERS.contains(match)) {
 				throw new IllegalArgumentException("Placeholder " + match + " is not valid.");
 			}
 		}
