@@ -34,6 +34,7 @@
 		<war destfile="${dir.dist}/jasperdemo.war" webxml="${dir.src.war}/WEB-INF/web.xml">
 			<classes dir="${spring.root}/target/classes">
 				<include name="**/*.class"/>
+				<include name="**/*.properties"/>
 			</classes>
 			<classes dir="${dir.build}">
 				<include name="**/*.class"/>
