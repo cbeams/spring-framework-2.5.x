@@ -185,8 +185,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 		else {
 			this.handlerMap.put(urlPath, handler);
-			if (logger.isInfoEnabled()) {
-				logger.info("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
 			}
 		}
 	}
