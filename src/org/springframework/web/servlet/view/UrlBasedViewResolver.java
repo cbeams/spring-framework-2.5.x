@@ -124,6 +124,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
+	 * Return the view class to be used to create views.
+	 */ 
+	protected Class getViewClass() {
+		return viewClass;
+	}
+
+	/**
 	 * Return the required type of view for this resolver.
 	 * This implementation returns AbstractUrlBasedView.
 	 * @see AbstractUrlBasedView

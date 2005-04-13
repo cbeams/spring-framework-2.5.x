@@ -373,4 +373,29 @@ public class VelocityViewTests extends TestCase {
 		assertEquals("Correct URL", "myUrl", ((InternalResourceView) view).getUrl());
 	}
 
+	public void testVelocityViewResolverWithToolbox() throws Exception {
+		final Template expectedTemplate = new Template();
+		VelocityConfig vc = new VelocityConfig() {
+			public VelocityEngine getVelocityEngine() {
+				return new TestVelocityEngine("prefix_test_suffix", expectedTemplate);
+			}
+		};
+
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.getBeanFactory().registerSingleton("configurer",vc);
+
+		String toolbox = "org/springframework/web/servlet/view/velocity/toolbox.xml";
+
+		VelocityViewResolver vr = new VelocityViewResolver();
+		vr.setPrefix("prefix_");
+		vr.setSuffix("_suffix");
+		vr.setToolboxConfigLocation(toolbox);
+		vr.setApplicationContext(wac);
+
+		View view = vr.resolveViewName("test", Locale.CANADA);
+		assertEquals("Correct view class", VelocityToolboxView.class, view.getClass());
+		assertEquals("Correct URL", "prefix_test_suffix", ((VelocityView) view).getUrl());
+		assertEquals("Correct toolbox", toolbox, ((VelocityToolboxView) view).getToolboxConfigLocation());
+	}
+
 }

@@ -53,6 +53,8 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 
 	private String numberToolAttribute;
 
+	private String toolboxConfigLocation;
+
 
 	/**
 	 * Sets default viewClass to VelocityView.
@@ -98,12 +100,34 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 		this.numberToolAttribute = numberToolAttribute;
 	}
 
+	/**
+	 * Set a Velocity Toolbox config location, for example "/WEB-INF/toolbox.xml",
+	 * to automatically load a Velocity Tools toolbox definition file and expose
+	 * all defined tools in the specified scopes. If no config location is
+	 * specified, no toolbox will be loaded and exposed.
+	 * <p>The specfied location string needs to refer to a ServletContext
+	 * resource, as expected by ServletToolboxManager which is part of
+	 * the view package of Velocity Tools.
+	 * <p><b>Note:</b> Specifying a Toolbox config location will lead to
+	 * VelocityToolboxView instances being created.
+	 * @see org.apache.velocity.tools.view.servlet.ServletToolboxManager#getInstance
+	 */
+	public void setToolboxConfigLocation(String toolboxConfigLocation) {
+		if (!VelocityToolboxView.class.isAssignableFrom(getViewClass())) {
+			setViewClass(VelocityToolboxView.class);
+		}
+		this.toolboxConfigLocation = toolboxConfigLocation;
+	}
+
 
 	protected View loadView(String viewName, Locale locale) throws BeansException {
 		VelocityView view = (VelocityView) super.loadView(viewName, locale);
 		view.setVelocityFormatterAttribute(this.velocityFormatterAttribute);
 		view.setDateToolAttribute(this.dateToolAttribute);
 		view.setNumberToolAttribute(this.numberToolAttribute);
+		if (this.toolboxConfigLocation != null) {
+			((VelocityToolboxView) view).setToolboxConfigLocation(this.toolboxConfigLocation);
+		}
 		return view;
 	}
 

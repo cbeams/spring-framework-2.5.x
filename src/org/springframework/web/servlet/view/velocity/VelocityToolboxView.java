@@ -66,17 +66,24 @@ public class VelocityToolboxView extends VelocityView {
 	private String toolboxConfigLocation;
 
 	/**
-	 * Set a "toolboxConfigLocation", for example "/WEB-INF/toolbox.xml",
+	 * Set a Velocity Toolbox config location, for example "/WEB-INF/toolbox.xml",
 	 * to automatically load a Velocity Tools toolbox definition file and expose
 	 * all defined tools in the specified scopes. If no config location is
 	 * specified, no toolbox will be loaded and exposed.
 	 * <p>The specfied location string needs to refer to a ServletContext
-	 * resources, as expected by ServletToolboxManager which is part of
+	 * resource, as expected by ServletToolboxManager which is part of
 	 * the view package of Velocity Tools.
 	 * @see org.apache.velocity.tools.view.servlet.ServletToolboxManager#getInstance
 	 */
 	public void setToolboxConfigLocation(String toolboxConfigLocation) {
 		this.toolboxConfigLocation = toolboxConfigLocation;
+	}
+
+	/**
+	 * Return the Velocity Toolbox config location, if any.
+	 */
+	protected String getToolboxConfigLocation() {
+		return toolboxConfigLocation;
 	}
 
 	/**
@@ -93,9 +100,9 @@ public class VelocityToolboxView extends VelocityView {
 				new VelocityContext(model), request, response, getServletContext());
 
 		// Load a Velocity Tools toolbox, if necessary.
-		if (this.toolboxConfigLocation != null) {
+		if (getToolboxConfigLocation() != null) {
 			ToolboxManager toolboxManager = ServletToolboxManager.getInstance(
-					getServletContext(), this.toolboxConfigLocation);
+					getServletContext(), getToolboxConfigLocation());
 			ToolboxContext toolboxContext = toolboxManager.getToolboxContext(velocityContext);
 			velocityContext.setToolbox(toolboxContext);
 		}
