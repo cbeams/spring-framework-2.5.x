@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.util.StringUtils;
 
 /**
@@ -76,14 +77,16 @@ public class UrlPathHelper {
 	 * in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Note: Setting this to true requires J2SE 1.4, as J2SE 1.3's
-	 * URLDecoder class does not offer a way to specify the encoding.
+	 * <p>Note: Setting this to true requires JDK 1.4 if the encoding differs
+	 * from the VM's platform default encoding, as JDK 1.3's URLDecoder class
+	 * does not offer a way to specify the encoding.
 	 * @see #getServletPath
 	 * @see #getContextPath
 	 * @see #getRequestUri
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding
 	 * @see java.net.URLDecoder#decode(String, String)
+	 * @see java.net.URLDecoder#decode(String)
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlDecode = urlDecode;
@@ -250,11 +253,16 @@ public class UrlPathHelper {
 		if (this.urlDecode) {
 			String enc = determineEncoding(request);
 			try {
+				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+					throw new UnsupportedEncodingException("JDK URLDecoder does not support custom encoding");
+				}
 				return URLDecoder.decode(source, enc);
 			}
 			catch (UnsupportedEncodingException ex) {
-				logger.warn("Could not decode request string [" + source + "] with encoding '" +
-				    enc + "': using platform default");
+				if (logger.isWarnEnabled()) {
+					logger.warn("Could not decode request string [" + source + "] with encoding '" + enc +
+							"': falling back to platform default encoding; exception message: " + ex.getMessage());
+				}
 				return URLDecoder.decode(source);
 			}
 		}
