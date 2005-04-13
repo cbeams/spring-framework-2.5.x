@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC2 (12.4.2005)
+Changes in version 1.2 RC2 (14.4.2005)
 --------------------------------------
 
 Package org.springframework.aop
@@ -27,6 +27,7 @@ Package org.springframework.beans
 * deprecated SingletonBeanFactoryLocator's alias-through-String-bean feature, in favor of BeanReferenceFactoryBean
 
 Package org.springframework.core
+* added explicit abstract "getDescription" method to AbstractResource, to work around a bug in Sun's JDK 1.3 classic VM
 * fixed PathMatchingResourcePatternResolver's jar entry matching to also work with BEA JRockit's additional slashes
 
 Package org.springframework.context
@@ -49,6 +50,10 @@ Package org.springframework.jdbc
 * DataSourceTransactionManager unwraps a passed-in TransactionAwareDataSourceProxy to get access to the raw DataSource
 * added no-arg constructor plus "requiredType" bean property to SingleColumnRowMapper, to allow for property injection
 
+Package org.springframework.jmx
+* added "defaultCurrencyTimeLimit" property to AbstractReflectiveMBeanInfoAssembler, for specifying an explicit default
+* AbstractReflectiveMBeanInfoAssembler translates "getFoo" getter to "Foo" attribute now (see "useStrictCasing" flag)
+
 Package org.springframework.mail
 * added "setFileTypeMap" method to MimeMessageHelper, allowing to override the default Activation Framework FileTypeMap
 * added "defaultFileTypeMap" property to JavaMailSenderImpl, specifying a default FileTypeMap for MimeMessageHelpers
@@ -65,6 +70,8 @@ Package org.springframework.orm
 Package org.springframework.remoting
 * added RemoteInvocationTraceInterceptor, logging incoming remote calls and resulting exceptions on the server
 * RemoteExporter and its subclasses register a RemoteInvocationTraceInterceptor for the service proxy (by default)
+* CodebaseAwareObjectInputStream explicitly resolves primitive class names (necessary on JDK 1.3)
+* HTTP invoker uses CodebaseAwareObjectInputStream even with no codebase specified, to deserialize primitives on JDK 1.3
 
 Package org.springframework.transaction
 * added "jndiEnvironment" property to JtaTransactionManager, as alternative to specifying a JndiTemplate instance
@@ -75,10 +82,18 @@ Package org.springframework.util
 
 Package org.springframework.validation
 * BindException's "getFieldValue" only transforms the value if the PropertyEditor's "getAsText" does not return null
+* factored out protected "checkAllowedFields", "checkRequiredFields" and "applyPropertyValues" methods in DataBinder
+* factored out protected "checkFieldMarkers", "getEmptyValue", "checkMultipartFiles" methods in ServletRequestDataBinder
 
 Package org.springframework.web
+* UrlPathHelper supports URL-decoding with the VM platform default encoding on JDK 1.3 (instead of just working on 1.4)
+* factored out WebDataBinder from ServletRequestDataBinder, offering field marker support without Servlet API dependency
 * DispatcherServlet exposes the current LocaleResolver and its current Locale through the global LocaleContextHolder
 * EscapedErrors and BindTag perform HTML escaping for any non-null value (stringifying it), not just for String values
+* added "toolboxConfigLocation" property to VelocityViewResolver, for creating VelocityToolboxView instances
+* removed "spring." prefix for internal access to variables in Spring's FreeMarker macro library (spring.ftl)
+* updated AbstractJasperReportsView for JasperReports 0.6.6, using either JRJdtCompiler or JRBshCompiler as default
+* added "reportCompiler" bean property to AbstractJasperReportsView, to override the default JRCompiler implementation
 * reworked AbstractJasperReportsView to work on JasperPrint instance rather than JasperReport instance
 * reworked JasperReportsMultiFormatView's "formatMappings" to replace existing properties, also replacing defaults
 * added support for reports with embedded SQL statements to AbstractJasperReportsView, via the "jdbcDataSource" property
