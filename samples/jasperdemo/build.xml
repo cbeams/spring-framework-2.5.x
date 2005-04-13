@@ -23,6 +23,24 @@
 		<mkdir dir="${dir.build}"/>
 	</target>
 
+	<target name="compile-jasper-reports">
+		<delete>
+			<fileset dir="${dir.src.war}">
+				<include name="**/*.jasper"/>
+			</fileset>
+		</delete>
+		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask">
+			<classpath>
+				<fileset dir="${spring.root}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</taskdef>
+		<jrc>
+			<src location="${dir.src.war}/WEB-INF/reports/simpleReport.jrxml"/>
+		</jrc>
+	</target>
+
 	<target name="compile" depends="clean">
 		<javac srcdir="${dir.src.java}"
 			destdir="${dir.build}"
@@ -30,7 +48,7 @@
 			includes="**/*.java"/>
 	</target>
 
-	<target name="war" depends="compile">
+	<target name="war" depends="compile-jasper-reports, compile">
 		<war destfile="${dir.dist}/jasperdemo.war" webxml="${dir.src.war}/WEB-INF/web.xml">
 			<classes dir="${spring.root}/target/classes">
 				<include name="**/*.class"/>
