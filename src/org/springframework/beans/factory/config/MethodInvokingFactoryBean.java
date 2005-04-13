@@ -32,13 +32,12 @@ import org.springframework.util.MethodInvoker;
  * to force some sort of initialization to happen). This use case is not supported
  * by factory-methods, since a return value is needed to become the bean.</p.
  *
- * <p>Note that as it is expected to be used mostly for accessing
- * factory methods, this factory by default operates in a <b>singleton</b> fashion.
- * The first request to {@link #getObject} by the owning bean factory will cause
- * a method invocation, whose return value will be cached for subsequent requests.
- * An internal {@link #setSingleton singleton} property may be set to false, to
- * cause this factory to invoke the target method each time it is asked for an
- * object.</p>
+ * <p>Note that as it is expected to be used mostly for accessing factory methods,
+ * this factory by default operates in a <b>singleton</b> fashion. The first request
+ * to {@link #getObject} by the owning bean factory will cause a method invocation,
+ * whose return value will be cached for subsequent requests. An internal
+ * {@link #setSingleton singleton} property may be set to "false", to cause this
+ * factory to invoke the target method each time it is asked for an object.</p>
  *
  * <p>A static target method may be specified by setting the
  * {@link #setTargetMethod targetMethod} property to a String representing the static
@@ -77,7 +76,7 @@ import org.springframework.util.MethodInvoker;
  * &lt;/bean>
  *
  * &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
- *   &lt;property name="targetObject">&lt;ref local='sysProps'/>&lt;/property>
+ *   &lt;property name="targetObject">&lt;ref local="sysProps"/>&lt;/property>
  *   &lt;property name="targetMethod">&lt;value>getProperty&lt;/value>&lt;/property>
  *   &lt;property name="arguments">
  *     &lt;list>
@@ -88,7 +87,7 @@ import org.springframework.util.MethodInvoker;
  * 
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
- * @since 2003-11-21
+ * @since 21.11.2003
  */
 public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		implements FactoryBean, InitializingBean {
@@ -97,6 +96,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 
 	/** method call result in the singleton case */
 	private Object singletonObject;
+
 
 	/**
 	 * Set if a singleton should be created, or a new object on each
@@ -111,7 +111,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		prepare();
 		if (this.singleton) {
 			Object obj = invoke();
-			this.singletonObject = obj != null ? obj : MethodInvoker.VOID;
+			this.singletonObject = (obj != null ? obj : MethodInvoker.VOID);
 		}
 	}
 
@@ -129,7 +129,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		else {
 			// prototype: new object on each call
 			Object retval = invoke();
-			return retval != null ? retval : MethodInvoker.VOID;
+			return (retval != null ? retval : MethodInvoker.VOID);
 		}
 	}
 
