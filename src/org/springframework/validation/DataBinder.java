@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  * those if needed, for example to generate different error codes.
  *
  * <p>This generic data binder can be used in any sort of environment.
- * It is heavily used by Spring's web binding features, via the subclass
+ * It is heavily used by Spring's web MVC controllers, via the subclass
  * <code>org.springframework.web.bind.ServletRequestDataBinder</code>.
  *
  * @author Rod Johnson
@@ -288,7 +288,7 @@ public class DataBinder {
 
 	/**
 	 * Bind the given property values to this binder's target.
-	 * This call can create field errors, representing basic binding
+	 * <p>This call can create field errors, representing basic binding
 	 * errors like a required field (code "required"), or type mismatch
 	 * between value and bean property (code "typeMismatch").
 	 * <p>Note that the given PropertyValues should be a throwaway instance:
@@ -297,13 +297,24 @@ public class DataBinder {
 	 * copy will be created for this purpose. Pass in a copy of the PropertyValues
 	 * if you want your original instance to stay unmodified in any case.
 	 * @param pvs property values to bind
-	 * @see #checkAllowedFields
-	 * @see #checkRequiredFields
-	 * @see #applyPropertyValues
+	 * @see #doBind(org.springframework.beans.MutablePropertyValues)
 	 */
 	public void bind(PropertyValues pvs) {
 		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues) ?
 				(MutablePropertyValues) pvs : new MutablePropertyValues(pvs);
+		doBind(mpvs);
+	}
+
+	/**
+	 * Actual implementation of the binding process, working with the
+	 * passed-in MutablePropertyValues instance.
+	 * @param mpvs the property values to bind,
+	 * as MutablePropertyValues instance
+	 * @see #checkAllowedFields
+	 * @see #checkRequiredFields
+	 * @see #applyPropertyValues
+	 */
+	protected void doBind(MutablePropertyValues mpvs) {
 		checkAllowedFields(mpvs);
 		checkRequiredFields(mpvs);
 		applyPropertyValues(mpvs);
