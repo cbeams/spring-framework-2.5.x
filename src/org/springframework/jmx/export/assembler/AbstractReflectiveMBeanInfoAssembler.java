@@ -277,6 +277,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 					info = createModelMBeanOperationInfo(method, pd.getName());
 					Descriptor desc = info.getDescriptor();
 					desc.setField(VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
+					desc.setField("class", beanClass.getName());
 					if (method.equals(pd.getReadMethod())) {
 						desc.setField(ROLE, GETTER);
 					}
@@ -290,6 +291,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 				info = createModelMBeanOperationInfo(method, method.getName());
 				Descriptor desc = info.getDescriptor();
 				desc.setField(ROLE, OPERATION);
+				desc.setField("class", beanClass.getName());
 				populateOperationDescriptor(desc, method);
 				info.setDescriptor(desc);
 			}
