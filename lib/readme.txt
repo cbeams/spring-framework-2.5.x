@@ -103,12 +103,12 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JavaMailSender
 
-* j2ee/connector-api.jar
-- J2EE Connector Architecture 1.5 (http://java.sun.com/j2ee/connector)
+* j2ee/connector.jar
+- J2EE Connector Architecture 1.0 (http://java.sun.com/j2ee/connector)
 - required at runtime when using Hibernate's JCA Connector
 
-* j2ee/ejb-api.jar
-- Enterprise JavaBeans API 2.1 (http://java.sun.com/products/ejb)
+* j2ee/ejb.jar
+- Enterprise JavaBeans API 2.0 (http://java.sun.com/products/ejb)
 - required for building the framework
 - required at runtime when using Spring's EJB support
 

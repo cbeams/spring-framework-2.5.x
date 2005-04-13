@@ -74,7 +74,7 @@
 	<classpathentry kind="lib" path="lib/velocity/velocity-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/portlet/portlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/velocity/velocity-tools-generic-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/j2ee/connector-api.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/connector.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
@@ -101,7 +101,7 @@
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-codec.jar"/>
 	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/aspectwerkz/aspectwerkz-2.0.jar"/>
-	<classpathentry kind="lib" path="lib/j2ee/ejb-api.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/ejb.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jsp-api.jar"/>
 	<classpathentry kind="lib" path="lib/c3p0/c3p0-0.8.5.1.jar"/>
