@@ -46,10 +46,6 @@ import org.springframework.jca.cci.core.RecordExtractor;
  */
 public class CciTemplateTests extends TestCase {
 
-	/**
-	 * Test that the "IndexedRecord createIndexedRecord(String)" method
-	 * is called when "createIndexedRecord(String);"is executed.
-	 */
 	public void testCreateIndexedRecord() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -74,10 +70,6 @@ public class CciTemplateTests extends TestCase {
 		recordFactoryControl.verify();
 	}
 
-	/**
-	 * Test that the "MappedRecord createMappedRecord(String)" method
-	 * is called when "createMappedRecord(String);"is executed.
-	 */
 	public void testCreateMappedRecord() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -102,11 +94,6 @@ public class CciTemplateTests extends TestCase {
 		recordFactoryControl.verify();
 	}
 
-	/**
-	 * Test that the "boolean execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,record,true);"
-	 * is executed.
-	 */
 	public void testTemplateExecuteInputOutput() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -150,11 +137,6 @@ public class CciTemplateTests extends TestCase {
 		interactionControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,true);"
-	 * is executed when a output record creator is specified.
-	 */
 	public void testTemplateExecuteInputTrueWithCreator() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -211,11 +193,6 @@ public class CciTemplateTests extends TestCase {
 		creatorControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,false);"
-	 * is executed.
-	 */
 	public void testTemplateExecuteInputFalse() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -259,11 +236,6 @@ public class CciTemplateTests extends TestCase {
 		interactionControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,extractor,true);"
-	 * is executed when a output record creator is specified.
-	 */
 	public void testTemplateExecuteInputExtractorTrueWithCreator() throws ResourceException, SQLException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -329,11 +301,6 @@ public class CciTemplateTests extends TestCase {
 		creatorControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,extractor,false);"
-	 * is executed.
-	 */
 	public void testTemplateExecuteInputExtractorFalse() throws ResourceException, SQLException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -386,11 +353,6 @@ public class CciTemplateTests extends TestCase {
 		extractorControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,generator,true);"
-	 * is executed when a output record creator is specified.
-	 */
 	public void testTemplateExecuteInputGeneratorTrueWithCreator() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -457,11 +419,6 @@ public class CciTemplateTests extends TestCase {
 		creatorControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,generator,false);"
-	 * is executed.
-	 */
 	public void testTemplateExecuteInputGeneratorFalse() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -517,11 +474,6 @@ public class CciTemplateTests extends TestCase {
 		generatorControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,generator,extractor,true);"
-	 * is executed when a output record creator is specified.
-	 */
 	public void testTemplateExecuteInputGeneratorExtractorTrueWithCreator() throws ResourceException, SQLException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -597,11 +549,6 @@ public class CciTemplateTests extends TestCase {
 		creatorControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,generator,extractor,false);"
-	 * is executed.
-	 */
 	public void testTemplateExecuteInputGeneratorExtractorFalse() throws ResourceException, SQLException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -666,11 +613,6 @@ public class CciTemplateTests extends TestCase {
 		extractorControl.verify();
 	}
 
-	/**
-	 * Test that the "boolean execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,record,true);"
-	 * is executed.
-	 */
 	public void testTemplateExecuteInputOutputConnectionSpec() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -719,10 +661,6 @@ public class CciTemplateTests extends TestCase {
 		interactionControl.verify();
 	}
 
-	/**
-	 * Test that the CCI ResultSet is closed at the end of the
-	 * execution of "template.execute(record,false);".
-	 */
 	public void testTemplateExecuteInputOutputResultsSetFalse() throws ResourceException, SQLException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -791,10 +729,6 @@ public class CciTemplateTests extends TestCase {
 		resultsetControl.verify();
 	}
 
-	/**
-	 * Test that the CCI Connection callback is called during the
-	 * execution of "template.execute(holder,callback);".
-	 */
 	public void testTemplateExecuteConnectionCallback() throws ResourceException, SQLException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -808,7 +742,7 @@ public class CciTemplateTests extends TestCase {
 		connectionFactory.getConnection();
 		connectionFactoryControl.setReturnValue(connection);
 
-		connectionCallback.doInConnection(connection);
+		connectionCallback.doInConnection(connection, connectionFactory);
 		connectionCallbackControl.setReturnValue(obj);
 
 		connection.close();
@@ -826,10 +760,6 @@ public class CciTemplateTests extends TestCase {
 		connectionCallbackControl.verify();
 	}
 
-	/**
-	 * Test that the CCI Interaction callback is called during the
-	 * execution of "template.execute(holder,callback);".
-	 */
 	public void testTemplateExecuteInteractionCallback() throws ResourceException, SQLException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -848,7 +778,7 @@ public class CciTemplateTests extends TestCase {
 		connection.createInteraction();
 		connectionControl.setReturnValue(interaction);
 
-		interactionCallback.doInInteraction(interaction);
+		interactionCallback.doInInteraction(interaction, connectionFactory);
 		interactionCallbackControl.setReturnValue(obj);
 
 		interaction.close();
@@ -871,11 +801,6 @@ public class CciTemplateTests extends TestCase {
 		interactionCallbackControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,true);"
-	 * is executed when a output record creator is specified.
-	 */
 	public void testTemplateExecuteInputTrueTrueWithCreator() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -922,11 +847,6 @@ public class CciTemplateTests extends TestCase {
 		creatorControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,true);"
-	 * is executed when a output record creator is specified.
-	 */
 	public void testTemplateExecuteInputTrueTrue() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
@@ -968,11 +888,6 @@ public class CciTemplateTests extends TestCase {
 		interactionControl.verify();
 	}
 
-	/**
-	 * Test that the "Record execute(InteractionSpec,Record,Record)" method
-	 * is called when "ct.execute(new CciSpecs(null,null),record,true);"
-	 * is executed when a output record creator is specified.
-	 */
 	public void testTemplateExecuteInputFalseTrue() throws ResourceException {
 		MockControl connectionFactoryControl = MockControl.createStrictControl(ConnectionFactory.class);
 		ConnectionFactory connectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
