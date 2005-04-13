@@ -149,10 +149,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * JMX 1.2 specification. This should result in "never cache" behavior, always
 	 * reading attribute values freshly (which corresponds to a "currencyTimeLimit"
 	 * of <code>-1</code> in JMX 1.2).
-	 * <p>However, some JMX implementations require an explicit value to be set
-	 * here to get "never cache" behavior: most notably, JBoss requires a value of
-	 * <code>0</code> for this (conflicting with the JMX 1.2 spec, which defines
-	 * <code>0</code> as "always cache").
+	 * <p>However, some JMX implementations might require an explicit value
+	 * to be set here to get "never cache" behavior.
 	 * <p>Note that the "currencyTimeLimit" value can also be specified on a
 	 * managed attribute or operation. The default value will apply if not
 	 * overridden with a "currencyTimeLimit" value <code>>= 0</code> there:
