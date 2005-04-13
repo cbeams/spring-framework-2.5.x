@@ -27,6 +27,7 @@ import java.lang.reflect.Modifier;
  * @author Keith Donald
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @since 1.1
  */
 public abstract class ClassUtils {
 
@@ -70,6 +71,26 @@ public abstract class ClassUtils {
 	 * @see java.lang.Thread#getContextClassLoader
 	 */
 	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
+		Class clazz = resolvePrimitiveClassName(name);
+		if (clazz != null) {
+			return clazz;
+		}
+		if (name.endsWith(ARRAY_SUFFIX)) {
+			// special handling for array class names
+			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
+			Class elementClass = Class.forName(elementClassName, true, classLoader);
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+		return Class.forName(name, true, classLoader);
+	}
+
+	/**
+	 * Resolve the given class name as primitive class, if appropriate.
+	 * @param name the name of the potentially primitive class
+	 * @return the primitive class, or null if the name does not denote
+	 * a primitive class
+	 */
+	public static Class resolvePrimitiveClassName(String name) {
 		// Most class names will be quite long, considering that they
 		// SHOULD sit in a package, so a length check is worthwhile.
 		if (name.length() <= 8) {
@@ -81,13 +102,7 @@ public abstract class ClassUtils {
 				}
 			}
 		}
-		if (name.endsWith(ARRAY_SUFFIX)) {
-			// special handling for array class names
-			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
-			Class elementClass = Class.forName(elementClassName, true, classLoader);
-			return Array.newInstance(elementClass, 0).getClass();
-		}
-		return Class.forName(name, true, classLoader);
+		return null;
 	}
 
 	/**

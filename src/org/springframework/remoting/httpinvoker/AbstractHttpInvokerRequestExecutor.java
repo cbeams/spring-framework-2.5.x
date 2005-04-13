@@ -150,15 +150,6 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 			throws IOException, ClassNotFoundException;
 
 	/**
-	 * @deprecated in favor of readRemoteInvocationResult(InputStream, String)
-	 * @see #readRemoteInvocationResult(java.io.InputStream, String)
-	 */
-	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is)
-			throws IOException, ClassNotFoundException {
-		return readRemoteInvocationResult(is, null);
-	}
-
-	/**
 	 * Deserialize a RemoteInvocationResult object from the given InputStream.
 	 * <p>Gives <code>decorateInputStream</code> a chance to decorate the stream
 	 * first (for example, for custom encryption or compression). Creates an
@@ -176,6 +167,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 */
 	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, String codebaseUrl)
 			throws IOException, ClassNotFoundException {
+
 		ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl);
 		try {
 			return doReadRemoteInvocationResult(ois);
@@ -199,22 +191,20 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 
 	/**
 	 * Create an ObjectInputStream for the given InputStream and codebase.
-	 * The default implementation creates a CodebaseAwareObjectInputStream
-	 * if a codebase is specified, and a standard ObjectInputStream else.
+	 * The default implementation creates a CodebaseAwareObjectInputStream.
+	 * <p>Spring's CodebaseAwareObjectInputStream is not only used for loading
+	 * from a specified codebase, but also to explicitly resolve primitive
+	 * class names. This is done by the standard ObjectInputStream
+	 * on JDK 1.4+, but needs to be done explicitly on JDK 1.3.
 	 * @param is the InputStream to read from
 	 * @param codebaseUrl the codebase URL to load classes from if not found locally
+	 * (can be null)
 	 * @return the new ObjectInputStream instance to use
 	 * @throws IOException if creation of the ObjectInputStream failed
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
-	 * @see java.io.ObjectInputStream
 	 */
 	protected ObjectInputStream createObjectInputStream(InputStream is, String codebaseUrl) throws IOException {
-		if (codebaseUrl != null) {
-			return new CodebaseAwareObjectInputStream(is, codebaseUrl);
-		}
-		else {
-			return new ObjectInputStream(is);
-		}
+		return new CodebaseAwareObjectInputStream(is, codebaseUrl);
 	}
 
 	/**
@@ -230,10 +220,11 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 */
 	protected RemoteInvocationResult doReadRemoteInvocationResult(ObjectInputStream ois)
 			throws IOException, ClassNotFoundException {
+
 		Object obj = ois.readObject();
 		if (!(obj instanceof RemoteInvocationResult)) {
-			throw new IOException("Deserialized object needs to be assignable to type ["
-					+ RemoteInvocationResult.class.getName() + "]: " + obj);
+			throw new IOException("Deserialized object needs to be assignable to type [" +
+					RemoteInvocationResult.class.getName() + "]: " + obj);
 		}
 		return (RemoteInvocationResult) obj;
 	}
