@@ -16,18 +16,18 @@
 
 package org.springframework.transaction.interceptor;
 
-import javax.ejb.EJBException;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
+import org.springframework.mail.MailSendException;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
  * Tests to check conversion from String to TransactionAttribute.
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 26-Apr-2003
+ * @since 26.04.2003
  */
 public class TransactionAttributeEditorTests extends TestCase {
 	
@@ -88,7 +88,7 @@ public class TransactionAttributeEditorTests extends TestCase {
 	
 	public void testValidPropagationCodeAndIsolationCodeAndRollbackRules1() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
-		pe.setAsText("PROPAGATION_MANDATORY,ISOLATION_REPEATABLE_READ,timeout_10,-ServletException,+EJBException");
+		pe.setAsText("PROPAGATION_MANDATORY,ISOLATION_REPEATABLE_READ,timeout_10,-ServletException,+MailSendException");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertNotNull(ta);
 		assertEquals(ta.getPropagationBehavior(), TransactionDefinition.PROPAGATION_MANDATORY);
@@ -99,12 +99,12 @@ public class TransactionAttributeEditorTests extends TestCase {
 		assertFalse(ta.rollbackOn(new Exception()));
 		// Check for our bizarre customized rollback rules
 		assertTrue(ta.rollbackOn(new ServletException()));
-		assertTrue(!ta.rollbackOn(new EJBException()));
+		assertTrue(!ta.rollbackOn(new MailSendException("")));
 	}
 
 	public void testValidPropagationCodeAndIsolationCodeAndRollbackRules2() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
-		pe.setAsText("+ServletException,readOnly,ISOLATION_READ_COMMITTED,-EJBException,PROPAGATION_SUPPORTS");
+		pe.setAsText("+ServletException,readOnly,ISOLATION_READ_COMMITTED,-MailSendException,PROPAGATION_SUPPORTS");
 		TransactionAttribute ta = (TransactionAttribute) pe.getValue();
 		assertNotNull(ta);
 		assertEquals(ta.getPropagationBehavior(), TransactionDefinition.PROPAGATION_SUPPORTS);
@@ -115,7 +115,7 @@ public class TransactionAttributeEditorTests extends TestCase {
 		assertFalse(ta.rollbackOn(new Exception()));
 		// Check for our bizarre customized rollback rules
 		assertFalse(ta.rollbackOn(new ServletException()));
-		assertTrue(ta.rollbackOn(new EJBException()));
+		assertTrue(ta.rollbackOn(new MailSendException("")));
 	}
 
 	public void testDefaultTransactionAttributeToString() {

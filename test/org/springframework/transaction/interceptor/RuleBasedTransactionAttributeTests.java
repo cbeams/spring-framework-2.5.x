@@ -21,24 +21,24 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.ejb.EJBException;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
+import org.springframework.mail.MailSendException;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
  * 
  * @author Rod Johnson
- * @since 09-Apr-2003
+ * @since 09.04.2003
  */
 public class RuleBasedTransactionAttributeTests extends TestCase {
 
 	public void testDefaultRule() {
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute();
 		assertTrue(rta.rollbackOn(new RuntimeException()));
-		assertTrue(rta.rollbackOn(new EJBException()));
+		assertTrue(rta.rollbackOn(new MailSendException("")));
 		assertTrue(!rta.rollbackOn(new Exception()));
 		assertTrue(!rta.rollbackOn(new ServletException()));
 	}
@@ -53,7 +53,7 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
 		
 		assertTrue(rta.rollbackOn(new RuntimeException()));
-		assertTrue(rta.rollbackOn(new EJBException()));
+		assertTrue(rta.rollbackOn(new MailSendException("")));
 		assertTrue(!rta.rollbackOn(new Exception()));
 		// Check that default behaviour is overridden
 		assertTrue(rta.rollbackOn(new ServletException()));
@@ -61,13 +61,13 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	
 	public void testRuleForCommitOnUnchecked() {
 		List l = new LinkedList();
-		l.add(new NoRollbackRuleAttribute("javax.ejb.EJBException"));
+		l.add(new NoRollbackRuleAttribute("org.springframework.mail.MailSendException"));
 		l.add(new RollbackRuleAttribute("javax.servlet.ServletException"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, l);
 		
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		// Check default behaviour is overridden
-		assertTrue(!rta.rollbackOn(new EJBException()));
+		assertTrue(!rta.rollbackOn(new MailSendException("")));
 		assertTrue(!rta.rollbackOn(new Exception()));
 		// Check that default behaviour is overridden
 		assertTrue(rta.rollbackOn(new ServletException()));
@@ -119,7 +119,7 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	
 		assertTrue(!rta.rollbackOn(new Throwable()));
 		assertTrue(!rta.rollbackOn(new RuntimeException()));
-		assertTrue(!rta.rollbackOn(new EJBException()));
+		assertTrue(!rta.rollbackOn(new MailSendException("")));
 		assertTrue(!rta.rollbackOn(new Exception()));
 		assertTrue(!rta.rollbackOn(new ServletException()));
 	}
