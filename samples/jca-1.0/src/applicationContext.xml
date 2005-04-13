@@ -3,23 +3,32 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-	<bean id="connectionFactory" class="org.springframework.jca.cci.CciLocalConnectionFactoryBean">
-		<property name="managedConnectionFactoryClass">
-			<value>com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory</value>
-		</property>
-		<property name="properties">
-			<map>
-				<entry key="connectionURL"><value>jdbc:hsqldb:hsql://localhost:9001</value></entry>
-				<entry key="driverName"><value>org.hsqldb.jdbcDriver</value></entry>
-			</map>
+	<bean id="managedConnectionFactory" class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory">
+		<property name="connectionURL"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
+		<property name="driverName"><value>org.hsqldb.jdbcDriver</value></property>
+	</bean>
+
+	<bean id="targetConnectionFactory" class="org.springframework.jca.support.LocalConnectionFactoryBean">
+		<property name="managedConnectionFactory">
+			<ref local="managedConnectionFactory"/>
 		</property>
 	</bean>
+
+	<bean id="connectionFactory" class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter">
+     <property name="targetConnectionFactory"><ref bean="targetConnectionFactory"/></property>
+     <property name="connectionSpec">
+       <bean class="com.sun.connector.cciblackbox.CciConnectionSpec">
+         <property name="user"><value>sa</value></property>
+         <property name="password"><value/></property>
+       </bean>
+     </property>
+    </bean>
 
 	<bean id="personDao" class="org.springframework.samples.jca.dao.PersonDaoImpl">
 		<property name="connectionFactory"><ref local="connectionFactory"/></property>
 	</bean>
 
-	<bean id="transactionManager" class="org.springframework.jca.cci.connection.CciTransactionManager">
+	<bean id="transactionManager" class="org.springframework.jca.cci.connection.CciLocalTransactionManager">
 		<property name="connectionFactory">
 			<ref local="connectionFactory" />
 		</property>
