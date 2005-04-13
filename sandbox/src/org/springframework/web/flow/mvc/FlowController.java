@@ -89,9 +89,10 @@ public class FlowController extends AbstractController implements InitializingBe
 		setCacheSeconds(0);
 		setFlowExecutionManager(new HttpServletFlowExecutionManager());
 	}
-
+	
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(this.flowExecutionManager, "The http servlet flow execution manager is required");
+		this.flowExecutionManager.setBeanFactory(getApplicationContext());
 	}
 
 	/**

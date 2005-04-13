@@ -17,6 +17,9 @@ package org.springframework.web.flow.portlet;
 
 import javax.portlet.*;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.ViewDescriptor;
@@ -58,13 +61,18 @@ import org.springframework.web.servlet.ModelAndView;
  * @author J.Enrique Ruiz
  * @author César Ordiñana
  */
-public class PortletFlowController extends AbstractController implements InitializingBean {
+public class PortletFlowController extends AbstractController implements BeanFactoryAware, InitializingBean {
 
 	/**
 	 * Name of the session attribute used to pass the view descriptor from the
 	 * action request to the render request.
 	 */
 	public static final String VIEWDESCRIPTOR_ATTRIBUTE = "ActionRequest:ViewDescriptor";
+	
+	/**
+	 * Our bean factory.
+	 */
+	private BeanFactory beanFactory;
 	
 	/**
 	 * The portlet based manager for flow executions.
@@ -92,9 +100,18 @@ public class PortletFlowController extends AbstractController implements Initial
 	protected void initDefaults() {
 		setFlowExecutionManager(new PortletFlowExecutionManager());
 	}
+	
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
+	}
+	
+	protected BeanFactory getBeanFactory() {
+		return this.beanFactory;
+	}
 
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(this.flowExecutionManager, "The portlet flow execution manager is required");
+		this.flowExecutionManager.setBeanFactory(getBeanFactory());
 	}
 
 	/**
