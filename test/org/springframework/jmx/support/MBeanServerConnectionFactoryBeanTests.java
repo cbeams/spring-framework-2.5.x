@@ -23,6 +23,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.jmx.AbstractJmxTests;
 
 /**
@@ -41,6 +42,11 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractJmxTests {
 	}
 
 	public void testValidConnection() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return;
+		}
+
 		JMXConnectorServer connectorServer = getConnectorServer();
 		connectorServer.start();
 

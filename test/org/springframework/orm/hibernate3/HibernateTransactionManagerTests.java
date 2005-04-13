@@ -40,6 +40,7 @@ import org.hibernate.classic.Session;
 import org.hibernate.dialect.HSQLDialect;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
@@ -1068,6 +1069,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 	private void doTestExistingTransactionWithPropagationNestedAndRollback(final boolean manualSavepoint)
 			throws SQLException, HibernateException {
+
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
 
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();

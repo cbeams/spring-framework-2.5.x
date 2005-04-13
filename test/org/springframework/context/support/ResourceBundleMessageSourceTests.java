@@ -25,6 +25,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.JdkVersion;
 
 /**
  * @author Juergen Hoeller
@@ -66,6 +67,8 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		Class clazz = reloadable ? ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
 		ac.registerSingleton("messageSource", clazz, pvs);
 		ac.refresh();
+
+		expectGermanFallback = expectGermanFallback && (JdkVersion.getMajorJavaVersion() > JdkVersion.JAVA_13);
 
 		Locale.setDefault(expectGermanFallback ? Locale.GERMAN : Locale.CANADA);
 		assertEquals("message1", ac.getMessage("code1", null, Locale.ENGLISH));

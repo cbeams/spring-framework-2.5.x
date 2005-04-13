@@ -24,6 +24,7 @@ import java.sql.Types;
 
 import org.easymock.MockControl;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.SqlParameter;
@@ -69,7 +70,9 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		ctrlPreparedStatement.verify();
+		if (shouldVerify()) {
+			ctrlPreparedStatement.verify();
+		}
 	}
 
 	protected void replay() {
@@ -180,6 +183,10 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 	}
 
 	public void testUpdateAndGeneratedKeys() throws SQLException {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
 		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
 		mockResultSetMetaData.getColumnCount();
@@ -430,6 +437,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		}
 	}
 
+
 	private class GeneratedKeysUpdater extends SqlUpdate {
 
 		public GeneratedKeysUpdater() {
@@ -441,24 +449,24 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		}
 
 		public int run(String name, KeyHolder generatedKeyHolder) {
-			Object[] params =
-				new Object[] {name};
+			Object[] params = new Object[] {name};
 			return update(params, generatedKeyHolder);
 		}
 	}
+
 
 	private class ConstructorUpdater extends SqlUpdate {
 
 		public ConstructorUpdater() {
 			super(mockDataSource, UPDATE_OBJECTS,
-						new int[] {Types.NUMERIC, Types.NUMERIC, Types.VARCHAR, Types.BOOLEAN });
+					new int[] {Types.NUMERIC, Types.NUMERIC, Types.VARCHAR, Types.BOOLEAN });
 			compile();
 		}
 
 		public int run(int performanceId, int type, String name, boolean confirmed) {
 			Object[] params =
-				new Object[] {new Integer(performanceId), new Integer(type), name,
-											new Boolean(confirmed)};
+				new Object[] {
+					new Integer(performanceId), new Integer(type), name, new Boolean(confirmed)};
 			return update(params);
 		}
 	}

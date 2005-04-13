@@ -24,7 +24,7 @@ import javax.management.StandardMBean;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.TestDynamicMBean;
@@ -36,19 +36,16 @@ public class JmxUtilsTests extends TestCase {
 
 	public void testIsMBeanWithDynamicMBean() throws Exception {
 		DynamicMBean mbean = new TestDynamicMBean();
-
 		assertTrue("Dynamic MBean not detected correctly", JmxUtils.isMBean(mbean.getClass()));
 	}
 
 	public void testIsMBeanWithStandardMBeanWrapper() throws Exception {
 		StandardMBean mbean = new StandardMBean(new JmxTestBean(), IJmxTestBean.class);
-
 		assertTrue("Standard MBean not detected correctly", JmxUtils.isMBean(mbean.getClass()));
 	}
 
 	public void testIsMBeanWithStandardMBeanInherited() throws Exception {
 		StandardMBean mbean = new StandardMBeanImpl();
-
 		assertTrue("Standard MBean not detected correctly", JmxUtils.isMBean(mbean.getClass()));
 	}
 
@@ -58,14 +55,12 @@ public class JmxUtilsTests extends TestCase {
 
 	public void testSimpleMBean() throws Exception {
 		Foo foo = new Foo();
-
 		assertTrue("Simple MBean not detected correctly", JmxUtils.isMBean(foo.getClass()));
 	}
 
 	public void testSimpleMBeanThroughInheritance() throws Exception {
 		Bar bar = new Bar();
 		Abc abc = new Abc();
-
 		assertTrue("Simple MBean (through inheritance) not detected correctly",
 				JmxUtils.isMBean(bar.getClass()));
 		assertTrue("Simple MBean (through 2 levels of inheritance) not detected correctly",
@@ -73,16 +68,17 @@ public class JmxUtilsTests extends TestCase {
 	}
 
 	public void testGetAttributeNameWithStrictCasing() {
-		PropertyDescriptor pd = BeanUtils.getPropertyDescriptors(AttributeTest.class)[1];
+		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, true);
 		assertEquals("Incorrect casing on attribute name", "Name", attributeName);
 	}
 
 	public void testGetAttributeNameWithoutStrictCasing() {
-		PropertyDescriptor pd = BeanUtils.getPropertyDescriptors(AttributeTest.class)[1];
+		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTest.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, false);
 		assertEquals("Incorrect casing on attribute name", "name", attributeName);
 	}
+
 
 	public static class AttributeTest {
 
@@ -96,6 +92,7 @@ public class JmxUtilsTests extends TestCase {
 			this.name = name;
 		}
 	}
+
 
 	public static class StandardMBeanImpl extends StandardMBean implements IJmxTestBean {
 

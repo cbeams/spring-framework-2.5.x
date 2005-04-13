@@ -30,7 +30,12 @@ public class Jdk14ControlFlowTests extends AbstractControlFlowTests {
 	}
 
 	protected ControlFlow createControlFlow() {
-		return new ControlFlowFactory.Jdk14ControlFlow();
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			return new ControlFlowFactory.Jdk14ControlFlow();
+		}
+		else {
+			return new ControlFlowFactory.Jdk13ControlFlow();
+		}
 	}
 
 }

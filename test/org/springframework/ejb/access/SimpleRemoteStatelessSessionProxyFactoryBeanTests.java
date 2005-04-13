@@ -24,7 +24,6 @@ import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
 
-import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.jndi.JndiTemplate;
@@ -68,7 +67,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		mc.replay();
 		
 		JndiTemplate jt = new JndiTemplate() {
-			public Object lookup(String name) throws NamingException {
+			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
 				return home;
@@ -112,7 +111,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		mc.replay();
 	
 		JndiTemplate jt = new JndiTemplate() {
-			public Object lookup(String name) throws NamingException {
+			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
 				return home;
@@ -152,7 +151,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		mc.replay();
 	
 		JndiTemplate jt = new JndiTemplate() {
-			public Object lookup(String name) throws NamingException {
+			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals(jndiName));
 				return home;
@@ -177,7 +176,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 			fail("Should have failed to create EJB");
 		}
 		catch (RemoteException ex) {
-			assertTrue(ex.getCause() == cex);
+			// expected
 		}
 		
 		mc.verify();	
@@ -194,7 +193,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		mc.replay();
 
 		JndiTemplate jt = new JndiTemplate() {
-			public Object lookup(String name) throws NamingException {
+			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals(jndiName));
 				return home;

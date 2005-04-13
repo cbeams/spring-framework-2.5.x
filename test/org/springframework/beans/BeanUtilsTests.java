@@ -19,7 +19,6 @@ package org.springframework.beans;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -106,7 +105,7 @@ public class BeanUtilsTests extends TestCase {
 		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
 		assertNotNull("Descriptors should not be null", descriptors);
-		assertTrue("Invalid number of descriptors returned", Arrays.equals(actual, descriptors));
+		assertEquals("Invalid number of descriptors returned", actual.length, descriptors.length);
 	}
 
 

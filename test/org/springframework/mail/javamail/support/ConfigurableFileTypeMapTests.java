@@ -1,3 +1,18 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.springframework.mail.javamail.support;
 
@@ -6,15 +21,21 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.io.Resource;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
- * @author robh
+ * @author Rob Harrop
  */
 public class ConfigurableFileTypeMapTests extends TestCase {
 
 	public void testAgainstDefaultConfiguration() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for java.util.regex
+			return;
+		}
+
 		ConfigurableFileTypeMap ftm = new ConfigurableFileTypeMap();
 		ftm.afterPropertiesSet();
 
@@ -27,6 +48,11 @@ public class ConfigurableFileTypeMapTests extends TestCase {
 	}
 
 	public void testAgainstDefaultConfigurationWithFile() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for java.util.regex
+			return;
+		}
+
 		ConfigurableFileTypeMap ftm = new ConfigurableFileTypeMap();
 		ftm.afterPropertiesSet();
 
@@ -34,6 +60,11 @@ public class ConfigurableFileTypeMapTests extends TestCase {
 	}
 
 	public void testWithAdditionalMappings() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for java.util.regex
+			return;
+		}
+
 		Properties mappings = new Properties();
 		mappings.setProperty("HTM", "foo/bar");
 		mappings.setProperty("c++", "foo/cpp");
@@ -49,6 +80,11 @@ public class ConfigurableFileTypeMapTests extends TestCase {
 	}
 
 	public void testWithCustomMappingLocation() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for java.util.regex
+			return;
+		}
+
 		Resource resource = new ClassPathResource("test.mime.types", getClass());
 
 		ConfigurableFileTypeMap ftm = new ConfigurableFileTypeMap();
@@ -60,4 +96,5 @@ public class ConfigurableFileTypeMapTests extends TestCase {
 		assertEquals("Invalid content type for fimg", "image/foo", ftm.getContentType("foobar.fimg"));
 		assertEquals("Invalid content type for bimg", "image/bar", ftm.getContentType("foobar.bimg"));
 	}
+
 }

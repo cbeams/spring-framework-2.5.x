@@ -28,6 +28,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.jmx.AbstractJmxTests;
 
 /**
@@ -38,6 +39,11 @@ public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
 	public void testStartupWithLocatedServer() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return;
+		}
+
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.afterPropertiesSet();
 
@@ -50,6 +56,11 @@ public class ConnectorServerFactoryBeanTests extends AbstractJmxTests {
 	}
 
 	public void testStartupWithSuppliedServer() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return;
+		}
+
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.setServer(server);
 		bean.afterPropertiesSet();

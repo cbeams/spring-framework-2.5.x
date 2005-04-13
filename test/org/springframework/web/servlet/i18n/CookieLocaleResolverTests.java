@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
@@ -25,7 +24,6 @@ import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.util.WebUtils;
 
 /**
  * @author Alef Arendsen
@@ -49,7 +47,7 @@ public class CookieLocaleResolverTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		CookieLocaleResolver resolver = new CookieLocaleResolver();
-		resolver.setLocale(request, response, new Locale("nl"));
+		resolver.setLocale(request, response, new Locale("nl", ""));
 
 		Cookie cookie = response.getCookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		assertNotNull(cookie);
@@ -75,7 +73,7 @@ public class CookieLocaleResolverTests extends TestCase {
 		resolver.setCookieDomain(".springframework.org");
 		resolver.setCookiePath("/mypath");
 		resolver.setCookieMaxAge(10000);
-		resolver.setLocale(request, response, new Locale("nl"));
+		resolver.setLocale(request, response, new Locale("nl", ""));
 
 		Cookie cookie = response.getCookie("LanguageKoek");
 		assertNotNull(cookie);

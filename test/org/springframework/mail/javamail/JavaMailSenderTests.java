@@ -37,6 +37,7 @@ import javax.mail.internet.MimeMessage;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
@@ -240,6 +241,11 @@ public class JavaMailSenderTests extends TestCase {
 	}
 
 	public void testJavaMailSenderWithMimeMessageHelperAndSpecificEncoding() throws MessagingException {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for java.util.regex
+			return;
+		}
+
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -263,14 +269,19 @@ public class JavaMailSenderTests extends TestCase {
 	}
 
 	public void testJavaMailSenderWithMimeMessageHelperAndDefaultEncoding() throws MessagingException {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for java.util.regex
+			return;
+		}
+
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
 		sender.setPassword("password");
 		sender.setDefaultEncoding("UTF-8");
+
 		FileTypeMap fileTypeMap = new ConfigurableFileTypeMap();
 		sender.setDefaultFileTypeMap(fileTypeMap);
-
 		MimeMessageHelper message = new MimeMessageHelper(sender.createMimeMessage());
 		assertEquals("UTF-8", message.getEncoding());
 		assertEquals(fileTypeMap, message.getFileTypeMap());

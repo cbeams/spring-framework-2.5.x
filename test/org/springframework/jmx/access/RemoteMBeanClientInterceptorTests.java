@@ -25,6 +25,8 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springframework.core.JdkVersion;
+
 /**
  * @author Rob Harrop
  */
@@ -42,13 +44,18 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		this.connectorServer.start();
 	}
 
-	protected MBeanServerConnection getServerConnection() throws Exception {
-		this.connector = JMXConnectorFactory.connect(getServiceUrl());
-		return this.connector.getMBeanServerConnection();
-	}
-
 	private JMXServiceURL getServiceUrl() throws MalformedURLException {
 		return new JMXServiceURL(SERVICE_URL);
+	}
+
+	protected MBeanServerConnection getServerConnection() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return super.getServerConnection();
+		}
+		
+		this.connector = JMXConnectorFactory.connect(getServiceUrl());
+		return this.connector.getMBeanServerConnection();
 	}
 
 	public void tearDown() throws Exception {

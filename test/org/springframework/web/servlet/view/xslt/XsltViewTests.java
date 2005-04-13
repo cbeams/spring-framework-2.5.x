@@ -10,6 +10,7 @@ import javax.xml.transform.TransformerException;
 import junit.framework.TestCase;
 
 import org.springframework.context.ApplicationContextException;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
@@ -44,20 +45,25 @@ public class XsltViewTests extends TestCase {
 	}
 
 	public void testNoSuchStylesheet() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		view.setStylesheetLocation(new FileSystemResource("/does/not/exist.xsl"));
 		try {
 			view.initApplicationContext();
 			fail("Should have thrown ApplicationContextException");
 		}
 		catch (ApplicationContextException e) {
-			// ok
-		}
-		catch (Exception e) {
-			fail("Should have thrown ApplicationContextException");
+			// OK
 		}
 	}
 
 	public void testChangeStylesheetReCachesTemplate() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/valid.xsl"));
 		view.initApplicationContext();
 
@@ -66,11 +72,15 @@ public class XsltViewTests extends TestCase {
 			fail("Should throw ApplicationContextException on re-caching template");
 		}
 		catch (ApplicationContextException ex) {
-			// ok
+			// OK
 		}
 	}
 
 	public void testCustomErrorListener() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		view.setErrorListener(new ErrorListener() {
 			public void warning(TransformerException ex) {
 				incWarnings();

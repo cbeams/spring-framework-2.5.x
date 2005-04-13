@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import org.springframework.core.JdkVersion;
+
 /**
  * @author Dmitriy Kopylenko
  * @since 1.1
@@ -23,7 +25,12 @@ package org.springframework.aop.support;
 public class JdkRegexpMethodPointcutTests extends AbstractRegexpMethodPointcutTests {
 
 	protected AbstractRegexpMethodPointcut getRegexpMethodPointcut() {
-		return new JdkRegexpMethodPointcut();
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+			return new JdkRegexpMethodPointcut();
+		}
+		else {
+			return new Perl5RegexpMethodPointcut();
+		}
 	}
 
 }

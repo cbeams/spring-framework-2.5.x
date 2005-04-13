@@ -50,6 +50,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.core.JdkVersion;
 
 /**
  * @author Juergen Hoeller
@@ -1057,6 +1058,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 	private void doTestExistingTransactionWithPropagationNestedAndRollback(final boolean manualSavepoint)
 			throws SQLException, HibernateException {
+
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
 
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();

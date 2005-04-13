@@ -43,6 +43,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.core.JdkVersion;
 
 /**
  * @author Juergen Hoeller
@@ -947,6 +948,10 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testExistingTransactionWithPropagationNested() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -1008,6 +1013,10 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testExistingTransactionWithPropagationNestedAndRollback() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -1070,6 +1079,10 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testExistingTransactionWithManualSavepoint() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -1126,6 +1139,10 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testExistingTransactionWithManualSavepointAndRollback() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);

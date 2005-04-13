@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 /**
- * @author <a href="mailto:tcook@interprisesoftware.com">Trevor D. Cook</a>
+ * @author Trevor D. Cook
  */
 public abstract class AbstractJdbcTests extends TestCase {
 
@@ -63,9 +63,9 @@ public abstract class AbstractJdbcTests extends TestCase {
 	}
 
 	protected void replay() {
-		this.shouldVerify = true;
 		ctrlDataSource.replay();
 		ctrlConnection.replay();
+		this.shouldVerify = true;
 	}
 
 	protected void tearDown() throws Exception {
