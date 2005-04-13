@@ -19,6 +19,7 @@ package org.springframework.jca.cci.core;
 import java.sql.SQLException;
 
 import javax.resource.ResourceException;
+import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.Interaction;
 
 import org.springframework.dao.DataAccessException;
@@ -61,14 +62,19 @@ public interface InteractionCallback {
 	 * it gets propagated to the caller of the template.
 	 *
 	 * @param interaction active CCI Interaction
+	 * @param connectionFactory the CCI ConnectionFactory that the Connection was
+	 * created with (gives access to RecordFactory and ResourceAdapterMetaData)
 	 * @return a result object, or null if none
 	 * @throws ResourceException if thrown by a CCI method, to be auto-converted
 	 * to a DataAccessException
 	 * @throws SQLException if thrown by a ResultSet method, to be auto-converted
 	 * to a DataAccessException
 	 * @throws DataAccessException in case of custom exceptions
+	 * @see javax.resource.cci.ConnectionFactory#getRecordFactory()
+	 * @see javax.resource.cci.ConnectionFactory#getMetaData()
 	 * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, RecordCreator, RecordExtractor)
 	 */
-	Object doInInteraction(Interaction interaction) throws ResourceException, SQLException, DataAccessException;
+	Object doInInteraction(Interaction interaction, ConnectionFactory connectionFactory)
+			throws ResourceException, SQLException, DataAccessException;
 
 }

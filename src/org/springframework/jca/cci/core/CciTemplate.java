@@ -153,7 +153,7 @@ public class CciTemplate implements CciOperations {
 	public Object execute(ConnectionCallback action) throws DataAccessException {
 		Connection connection = ConnectionFactoryUtils.getConnection(getConnectionFactory());
 		try {
-			return action.doInConnection(connection);
+			return action.doInConnection(connection, getConnectionFactory());
 		}
 		catch (NotSupportedException ex) {
 			throw new CciOperationNotSupportedException("CCI operation not supported by connector", ex);
@@ -171,12 +171,12 @@ public class CciTemplate implements CciOperations {
 
 	public Object execute(final InteractionCallback action) throws DataAccessException {
 		return execute(new ConnectionCallback() {
-			public Object doInConnection(Connection connection)
+			public Object doInConnection(Connection connection, ConnectionFactory connectionFactory)
 					throws ResourceException, SQLException, DataAccessException {
 
 				Interaction interaction = connection.createInteraction();
 				try {
-					return action.doInInteraction(interaction);
+					return action.doInInteraction(interaction, connectionFactory);
 				}
 				finally {
 					closeInteraction(interaction);
@@ -223,7 +223,7 @@ public class CciTemplate implements CciOperations {
 			final RecordExtractor outputExtractor) throws DataAccessException {
 
 		return execute(new InteractionCallback() {
-			public Object doInInteraction(Interaction interaction)
+			public Object doInInteraction(Interaction interaction, ConnectionFactory connectionFactory)
 					throws ResourceException, SQLException, DataAccessException {
 
 				Record outputRecordToUse = outputRecord;
