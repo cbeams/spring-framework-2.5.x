@@ -22,6 +22,7 @@
 <!ENTITY remoting			SYSTEM "remoting.xml">
 <!ENTITY background			SYSTEM "background.xml">
 <!ENTITY testing			SYSTEM "testing.xml">
+<!ENTITY jmx          SYSTEM "jmx.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 ]>
 
@@ -121,7 +122,9 @@
 	    &mail;
 	    
 	    &scheduling;
-	    
+
+			&jmx;
+
 	    &testing;
 	
 	    &dtd;
