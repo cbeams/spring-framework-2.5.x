@@ -23,18 +23,24 @@
 
 <!--
 		Set up properties that indicate whether we're building on JDK 1.5.
-		Currently simply checks whether the Java version is not 1.4,
+		Currently simply checks whether the Java version is not 1.3 or 1.4,
 		due to the lack of a greater-than comparator in Ant.
 	-->
 
 	<condition property="tiger.available">
 		<not>
-			<equals arg1="${ant.java.version}" arg2="1.4"/>
+			<or>
+				<equals arg1="${ant.java.version}" arg2="1.3"/>
+				<equals arg1="${ant.java.version}" arg2="1.4"/>
+			</or>
 		</not>
 	</condition>
 
 	<condition property="tiger.unavailable">
-		<equals arg1="${ant.java.version}" arg2="1.4"/>
+		<or>
+			<equals arg1="${ant.java.version}" arg2="1.3"/>
+			<equals arg1="${ant.java.version}" arg2="1.4"/>
+		</or>
 	</condition>
 
 
