@@ -99,7 +99,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 * "spring-aop" (~145 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
-- Dependencies: spring-core, (CGLIB, Commons Attributes)
+- Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
 * "spring-context" (~100 KB)
 - Contents: application context, validation, JNDI, UI context support
