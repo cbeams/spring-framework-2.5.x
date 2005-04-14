@@ -28,6 +28,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.PropertyEditorRegistrar;
 import org.springframework.validation.Validator;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ScopeType;
@@ -527,7 +528,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * Create a new binder instance for the given form object and request
 	 * context. Can be overridden to plug in custom DataBinder subclasses.
 	 * <p>
-	 * Default implementation creates a standard DataBinder, and invokes
+	 * Default implementation creates a standard WebDataBinder, and invokes
 	 * initBinder. Note that initBinder will not be invoked if you override this
 	 * method!
 	 * @param context the action execution context, for accessing and setting
@@ -537,7 +538,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * @see #initBinder(RequestContext, DataBinder)
 	 */
 	protected DataBinder createBinder(RequestContext context, Object formObject) {
-		DataBinder binder = new DataBinder(formObject, getFormObjectName());
+		DataBinder binder = new WebDataBinder(formObject, getFormObjectName());
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
 		}
