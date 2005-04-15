@@ -28,26 +28,30 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Implementation of SmartDataSource that wraps a single connection which is not
+ * Implementation of SmartDataSource that wraps a single Connection which is not
  * closed after use. Obviously, this is not multi-threading capable.
  *
  * <p>Note that at shutdown, someone should close the underlying connection via the
- * close() method. Client code will never call close on the connection handle if it
- * is SmartDataSource-aware (e.g. uses DataSourceUtils.closeConnectionIfNecessary).
+ * <code>close()</code> method. Client code will never call close on the Connection
+ * handle if it is SmartDataSource-aware (e.g. uses
+ * <code>DataSourceUtils.closeConnectionIfNecessary</code>).
  *
- * <p>If client code will call close in the assumption of a pooled connection,
- * like when using persistence tools, set suppressClose to true. This will return a
- * close-suppressing proxy instead of the physical connection. Be aware that you will
- * not be able to cast this to a native OracleConnection or the like anymore.
+ * <p>If client code will call <code>close()</code> in the assumption of a pooled
+ * Connection, like when using persistence tools, set "suppressClose" to "true".
+ * This will return a close-suppressing proxy instead of the physical Connection.
+ * Be aware that you will not be able to cast this to a native OracleConnection
+ * or the like anymore (you need to use a NativeJdbcExtractor for this then).
  *
- * <p>This is primarily a test class. For example, it enables easy testing of code
- * outside an application server, in conjunction with a simple JNDI environment.
- * In contrast to DriverManagerDataSource, it reuses the same connection all the time,
- * avoiding excessive creation of physical connections.
+ * <p>This is primarily intended for testing. For example, it enables easy testing
+ * outside an application server, for code that expects to work on a DataSource.
+ * In contrast to DriverManagerDataSource, it reuses the same Connection all the
+ * time, avoiding excessive creation of physical Connections.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see java.sql.Connection#close()
  * @see DataSourceUtils#closeConnectionIfNecessary
+ * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
  */
 public class SingleConnectionDataSource extends DriverManagerDataSource
 		implements SmartDataSource, DisposableBean {
@@ -70,13 +74,48 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	/**
 	 * Create a new SingleConnectionDataSource with the given standard
 	 * DriverManager parameters.
+	 * @param driverClassName the JDBC driver class name
+	 * @param url the JDBC URL to use for accessing the DriverManager
+	 * @param username the JDBC username to use for accessing the DriverManager
+	 * @param password the JDBC password to use for accessing the DriverManager
 	 * @param suppressClose if the returned connection should be a
 	 * close-suppressing proxy or the physical connection.
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public SingleConnectionDataSource(
 			String driverClassName, String url, String username, String password, boolean suppressClose)
 			throws CannotGetJdbcConnectionException {
 		super(driverClassName, url, username, password);
+		this.suppressClose = suppressClose;
+	}
+
+	/**
+	 * Create a new SingleConnectionDataSource with the given standard
+	 * DriverManager parameters.
+	 * @param url the JDBC URL to use for accessing the DriverManager
+	 * @param username the JDBC username to use for accessing the DriverManager
+	 * @param password the JDBC password to use for accessing the DriverManager
+	 * @param suppressClose if the returned connection should be a
+	 * close-suppressing proxy or the physical connection.
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
+	 */
+	public SingleConnectionDataSource(String url, String username, String password, boolean suppressClose)
+			throws CannotGetJdbcConnectionException {
+		super(url, username, password);
+		this.suppressClose = suppressClose;
+	}
+
+	/**
+	 * Create a new SingleConnectionDataSource with the given standard
+	 * DriverManager parameters.
+	 * @param url the JDBC URL to use for accessing the DriverManager
+	 * @param suppressClose if the returned connection should be a
+	 * close-suppressing proxy or the physical connection.
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
+	 */
+	public SingleConnectionDataSource(String url, boolean suppressClose)
+			throws CannotGetJdbcConnectionException {
+		super(url);
 		this.suppressClose = suppressClose;
 	}
 
@@ -94,6 +133,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		this.suppressClose = suppressClose;
 		init(target);
 	}
+
 
 	/**
 	 * Set if the returned connection should be a close-suppressing proxy

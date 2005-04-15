@@ -21,15 +21,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.util.StringUtils;
 
 /**
- * Implementation of SmartDataSource that configures a plain old JDBC Driver
- * via bean properties, and returns a new Connection every time.
+ * Simple implementation of the standard JDBC DataSource interface, configuring
+ * a plain old JDBC Driver via bean properties, and returning a new Connection
+ * for every <code>getConnection</code> call.
  *
  * <p>Useful for test or standalone environments outside of a J2EE container, either
  * as a DataSource bean in a respective ApplicationContext, or in conjunction with a
- * simple JNDI environment. Pool-assuming Connection.close() calls will simply
- * close the connection, so any DataSource-aware persistence code should work.
+ * simple JNDI environment. Pool-assuming <code>Connection.close()</code> calls will
+ * simply close the Connection, so any DataSource-aware persistence code should work.
  *
  * <p>In a J2EE container, it is recommended to use a JNDI DataSource provided by
  * the container. Such a DataSource can be exported as a DataSource bean in an
@@ -51,13 +53,13 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
  */
 public class DriverManagerDataSource extends AbstractDataSource {
 
-	private String driverClassName = "";
+	private String driverClassName;
 
-	private String url = "";
+	private String url;
 
-	private String username = "";
+	private String username;
 
-	private String password = "";
+	private String password;
 
 
 	/**
@@ -67,8 +69,13 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	}
 
 	/**
-	 * Create a new SingleConnectionDataSource with the given standard
+	 * Create a new DriverManagerDataSource with the given standard
 	 * DriverManager parameters.
+	 * @param driverClassName the JDBC driver class name
+	 * @param url the JDBC URL to use for accessing the DriverManager
+	 * @param username the JDBC username to use for accessing the DriverManager
+	 * @param password the JDBC password to use for accessing the DriverManager
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public DriverManagerDataSource(String driverClassName, String url, String username, String password)
 			throws CannotGetJdbcConnectionException {
@@ -78,8 +85,45 @@ public class DriverManagerDataSource extends AbstractDataSource {
 		setPassword(password);
 	}
 
+	/**
+	 * Create a new DriverManagerDataSource with the given standard
+	 * DriverManager parameters.
+	 * @param url the JDBC URL to use for accessing the DriverManager
+	 * @param username the JDBC username to use for accessing the DriverManager
+	 * @param password the JDBC password to use for accessing the DriverManager
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
+	 */
+	public DriverManagerDataSource(String url, String username, String password)
+			throws CannotGetJdbcConnectionException {
+		setUrl(url);
+		setUsername(username);
+		setPassword(password);
+	}
 
+	/**
+	 * Create a new DriverManagerDataSource with the given JDBC URL,
+	 * not specifying a username or password for JDBC access.
+	 * @param url the JDBC URL to use for accessing the DriverManager
+	 * @see java.sql.DriverManager#getConnection(String)
+	 */
+	public DriverManagerDataSource(String url)
+			throws CannotGetJdbcConnectionException {
+		setUrl(url);
+	}
+
+
+	/**
+	 * Set the JDBC driver class name. This driver will get initialized
+	 * on startup, registering itself with the JDK's DriverManager.
+	 * <p>Alternatively, consider initializing the JDBC driver yourself
+	 * before instantiating this DataSource.
+	 * @see Class#forName(String)
+	 * @see java.sql.DriverManager#registerDriver(java.sql.Driver)
+	 */
 	public void setDriverClassName(String driverClassName) throws CannotGetJdbcConnectionException {
+		if (!StringUtils.hasText(driverClassName)) {
+			throw new IllegalArgumentException("driverClassName must not be empty");
+		}
 		this.driverClassName = driverClassName;
 		try {
 			Class.forName(this.driverClassName, true, Thread.currentThread().getContextClassLoader());
@@ -88,60 +132,102 @@ public class DriverManagerDataSource extends AbstractDataSource {
 			throw new CannotGetJdbcConnectionException(
 					"Could not load JDBC driver class [" + this.driverClassName + "]", ex);
 		}
-		logger.info("Loaded JDBC driver: " + this.driverClassName);
+		if (logger.isInfoEnabled()) {
+			logger.info("Loaded JDBC driver: " + this.driverClassName);
+		}
 	}
 
+	/**
+	 * Return the JDBC driver class name, if any.
+	 */
 	public String getDriverClassName() {
 		return driverClassName;
 	}
 
+	/**
+	 * Set the JDBC URL to use for accessing the DriverManager.
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
+	 */
 	public void setUrl(String url) {
+		if (!StringUtils.hasText(url)) {
+			throw new IllegalArgumentException("url must not be empty");
+		}
 		this.url = url;
 	}
 
+	/**
+	 * Return the JDBC URL to use for accessing the DriverManager.
+	 */
 	public String getUrl() {
 		return url;
 	}
 
+	/**
+	 * Set the JDBC username to use for accessing the DriverManager.
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
+	 */
 	public void setUsername(String username) {
 		this.username = username;
 	}
 
+	/**
+	 * Return the JDBC username to use for accessing the DriverManager.
+	 */
 	public String getUsername() {
 		return username;
 	}
 
+	/**
+	 * Set the JDBC password to use for accessing the DriverManager.
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	/**
+	 * Return the JDBC password to use for accessing the DriverManager.
+	 */
 	public String getPassword() {
 		return password;
 	}
 
 
+	/**
+	 * This implementation delegates to <code>getConnectionFromDriverManager</code>,
+	 * using the default username and password of this DataSource.
+	 * @see #getConnectionFromDriverManager()
+	 */
 	public Connection getConnection() throws SQLException {
 		return getConnectionFromDriverManager();
 	}
 
+	/**
+	 * This implementation delegates to <code>getConnectionFromDriverManager</code>,
+	 * using the given username and password.
+	 * @see #getConnectionFromDriverManager(String, String, String)
+	 */
 	public Connection getConnection(String username, String password) throws SQLException {
-		return getConnectionFromDriverManager(this.url, username, password);
+		return getConnectionFromDriverManager(getUrl(), username, password);
 	}
 
 	/**
-	 * Get a new Connection from DriverManager, with the connection
-	 * properties of this DataSource.
+	 * Get a Connection from the DriverManager,
+	 * using the default username and password of this DataSource.
+	 * @see #getConnectionFromDriverManager(String, String, String)
 	 */
 	protected Connection getConnectionFromDriverManager() throws SQLException {
-		return getConnectionFromDriverManager(this.url, this.username, this.password);
+		return getConnectionFromDriverManager(getUrl(), getUsername(), getPassword());
 	}
 
 	/**
 	 * Getting a connection using the nasty static from DriverManager is extracted
 	 * into a protected method to allow for easy unit testing.
+	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	protected Connection getConnectionFromDriverManager(String url, String username, String password)
 	    throws SQLException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new JDBC connection to [" + url + "]");
 		}
