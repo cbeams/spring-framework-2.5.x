@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
+		<property name="suffix"><value>.jsp</value></property>
+	</bean>
+
+	<bean id="frontController" name="/play.htm" class="org.springframework.web.flow.mvc.FlowController"/>
+
+	<bean id="numberGuess" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+				<property name="resource"><value>/WEB-INF/numberGuess-flow.xml</value></property>
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="numberGuessAction" class="org.springframework.samples.numberguess.web.flow.action.NumberGuessAction"/>
+
+</beans>
