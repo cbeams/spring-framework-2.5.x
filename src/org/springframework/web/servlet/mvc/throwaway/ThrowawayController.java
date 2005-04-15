@@ -30,10 +30,10 @@ import org.springframework.web.servlet.ModelAndView;
  * are testable without HttpServletRequest/HttpServletResponse mocks, just like
  * WebWork actions. They are still web UI workflow controllers: Spring does not
  * aim for the arguably hard-to-achieve reusability of such controllers in non-web
- * environments, as XWork does (the generic command framework from WebWork2)
+ * environments, as XWork (the generic command framework from WebWork2) does
  * but just for ease of testing.
  *
- * <p>A ThrowawayController differs from the command notion of Base- respectively
+ * <p>A ThrowawayController differs from the command notion of Base- or
  * AbstractCommandController in that a ThrowawayController is an <i>executable</i>
  * command that contains workflow logic to determine the next view to render,
  * while BaseCommandController treats commands as plain parameter holders.

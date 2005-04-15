@@ -126,6 +126,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
+
 	private String commandName = DEFAULT_COMMAND_NAME;
 
 	private Class commandClass;
@@ -292,6 +293,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected final ServletRequestDataBinder bindAndValidate(HttpServletRequest request, Object command)
 			throws Exception {
+
 		ServletRequestDataBinder binder = createBinder(request, command);
 		binder.bind(request);
 		onBind(request, command, binder.getErrors());
@@ -306,11 +308,11 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Create a new binder instance for the given command and request.
-	 * Called by bindAndValidate. Can be overridden to plug in custom
-	 * ServletRequestDataBinder subclasses.
+	 * <p>Called by <code>bindAndValidate</code>. Can be overridden to plug in
+	 * custom ServletRequestDataBinder subclasses.
 	 * <p>Default implementation creates a standard ServletRequestDataBinder,
 	 * sets the specified MessageCodesResolver (if any), and invokes initBinder.
-	 * Note that initBinder will not be invoked if you override this method!
+	 * Note that <code>initBinder</code> will not be invoked if you override this method!
 	 * @param request current HTTP request
 	 * @param command the command to bind onto
 	 * @return the new binder instance
@@ -321,6 +323,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
 	    throws Exception {
+
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
 		if (this.messageCodesResolver != null) {
 			binder.setMessageCodesResolver(this.messageCodesResolver);
@@ -331,7 +334,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Initialize the given binder instance, for example with custom editors.
-	 * Called by createBinder.
+	 * Called by <code>createBinder</code>.
 	 * <p>This method allows you to register custom editors for certain fields of your
 	 * command class. For instance, you will be able to transform Date objects into a
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
