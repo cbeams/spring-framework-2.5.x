@@ -115,9 +115,6 @@ public class BindStatus {
 						this.editor = ((BindException) this.errors).getCustomEditor(this.expression);
 					}
 					this.value = this.errors.getFieldValue(this.expression);
-					if (htmlEscape && this.value != null) {
-						this.value = HtmlUtils.htmlEscape(this.value.toString());
-					}
 				}
 			}
 			else {
@@ -146,6 +143,10 @@ public class BindStatus {
 
 			this.errorCodes = new String[0];
 			this.errorMessages = new String[0];
+		}
+
+		if (htmlEscape && this.value != null) {
+			this.value = HtmlUtils.htmlEscape(this.value.toString());
 		}
 	}
 

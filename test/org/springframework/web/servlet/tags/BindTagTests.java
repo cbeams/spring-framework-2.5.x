@@ -344,11 +344,24 @@ public class BindTagTests extends AbstractTagTests {
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb.name");
-		pc.getRequest().setAttribute("tb", new TestBean("juergen", 99));
+		pc.getRequest().setAttribute("tb", new TestBean("juergen&eva", 99));
 		tag.doStartTag();
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertEquals("name", status.getExpression());
-		assertEquals("juergen", status.getValue());
+		assertEquals("juergen&eva", status.getValue());
+	}
+
+	public void testBindTagWithFieldButWithoutErrorsInstanceAndHtmlEscaping() throws JspException {
+		PageContext pc = createPageContext();
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.name");
+		tag.setHtmlEscape("true");
+		pc.getRequest().setAttribute("tb", new TestBean("juergen&eva", 99));
+		tag.doStartTag();
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("name", status.getExpression());
+		assertEquals("juergen&#38;eva", status.getValue());
 	}
 
 	public void testBindTagWithBeanButWithoutErrorsInstance() throws JspException {
