@@ -11,7 +11,7 @@
 	<name>Spring Framework</name>
 
 	<!-- The version of the project under development, e.g. 1.1, 1.2, 2.0-dev -->
-	<currentVersion>1.1.3</currentVersion>
+	<currentVersion>1.2</currentVersion>
 
 	<organization>
 		<name>Spring Framework Project</name>
@@ -199,6 +199,11 @@
 			<version>1.0</version>
 			<jar>jaxrpc.jar</jar>
 		</dependency>
+                <dependency>
+			<groupId>jca</groupId>
+    			<artifactId>connector</artifactId>
+                        <version>1.0</version>
+ 		</dependency>
 		<dependency>
 			<id>jdo</id>
 			<version>1.0</version>
