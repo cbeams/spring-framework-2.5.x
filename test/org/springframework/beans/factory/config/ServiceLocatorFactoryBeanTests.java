@@ -22,6 +22,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.NestedCheckedException;
+import org.springframework.core.NestedRuntimeException;
 
 /**
  * @author Colin Sampaleanu
@@ -40,7 +42,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 		TestService testBean = factory.getTestService();
 	}
 
-	public void testErrorOnTooManyOrTooFew() {
+	public void testErrorOnTooManyOrTooFew() throws Exception {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
 		ctx.registerSingleton("testServiceInstance2", TestService.class, new MutablePropertyValues());
@@ -60,7 +62,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 			TestService testService = factory.getTestService();
 			fail("should fail on more than one matching type");
 		}
-		catch (NoSuchBeanDefinitionException e) {
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 		TestServiceLocator2 factory2 = (TestServiceLocator2) ctx.getBean("factory2");
@@ -68,7 +70,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 			TestService testService = factory2.getTestService(null);
 			fail("should fail on more than one matching type");
 		}
-		catch (NoSuchBeanDefinitionException e) {
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 		TestService2Locator factory3 = (TestService2Locator) ctx.getBean("factory3");
@@ -76,12 +78,58 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 			TestService2 testService2 = factory3.getTestService();
 			fail("should fail on no matching types");
 		}
-		catch (NoSuchBeanDefinitionException e) {
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 	}
 
-	public void testStringArgGetter() {
+	public void testErrorOnTooManyOrTooFewWithCustomServiceLocatorException() {
+		StaticApplicationContext ctx = new StaticApplicationContext();
+		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
+		ctx.registerSingleton("testServiceInstance2", TestService.class, new MutablePropertyValues());
+		MutablePropertyValues mpv = new MutablePropertyValues();
+		mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface", TestServiceLocator.class));
+		mpv.addPropertyValue(new PropertyValue("serviceLocatorExceptionClass", CustomServiceLocatorException1.class));
+		ctx.registerSingleton("factory", ServiceLocatorFactoryBean.class, mpv);
+		mpv = new MutablePropertyValues();
+		mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface", TestServiceLocator2.class));
+		mpv.addPropertyValue(new PropertyValue("serviceLocatorExceptionClass", CustomServiceLocatorException2.class));
+		ctx.registerSingleton("factory2", ServiceLocatorFactoryBean.class, mpv);
+		mpv = new MutablePropertyValues();
+		mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface", TestService2Locator.class));
+		mpv.addPropertyValue(new PropertyValue("serviceLocatorExceptionClass", CustomServiceLocatorException3.class));
+		ctx.registerSingleton("factory3", ServiceLocatorFactoryBean.class, mpv);
+		ctx.refresh();
+
+		TestServiceLocator factory = (TestServiceLocator) ctx.getBean("factory");
+		try {
+			TestService testService = factory.getTestService();
+			fail("should fail on more than one matching type");
+		}
+		catch (CustomServiceLocatorException1 ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof NoSuchBeanDefinitionException);
+		}
+		TestServiceLocator2 factory2 = (TestServiceLocator2) ctx.getBean("factory2");
+		try {
+			TestService testService = factory2.getTestService(null);
+			fail("should fail on more than one matching type");
+		}
+		catch (CustomServiceLocatorException2 ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof NoSuchBeanDefinitionException);
+		}
+		TestService2Locator factory3 = (TestService2Locator) ctx.getBean("factory3");
+		try {
+			TestService2 testService2 = factory3.getTestService();
+			fail("should fail on no matching types");
+		}
+		catch (CustomServiceLocatorException3 ex) {
+			// expected
+		}
+	}
+
+	public void testStringArgGetter() throws Exception {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 		ctx.registerSingleton("testService", TestService.class, new MutablePropertyValues());
 		MutablePropertyValues mpv = new MutablePropertyValues();
@@ -91,15 +139,15 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 
 		// test string-arg getter with null id
 		TestServiceLocator2 factory = (TestServiceLocator2) ctx.getBean("factory");
-		TestService tetsBean = factory.getTestService(null);
+		TestService testBean = factory.getTestService(null);
 		// now test with explicit id
-		tetsBean = factory.getTestService("testService");
+		testBean = factory.getTestService("testService");
 		// now verify failure on bad id
 		try {
-			tetsBean = factory.getTestService("bogusTestService");
+			testBean = factory.getTestService("bogusTestService");
 			fail("illegal operation allowed");
 		}
-		catch (NoSuchBeanDefinitionException e) {
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 	}
@@ -176,7 +224,7 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 
 	public static interface TestServiceLocator2 {
 
-		TestService getTestService(String id);
+		TestService getTestService(String id) throws CustomServiceLocatorException2;
 	}
 
 
@@ -194,7 +242,31 @@ public class ServiceLocatorFactoryBeanTests extends TestCase {
 
 	public static interface TestService2Locator {
 
-		TestService2 getTestService();
+		TestService2 getTestService() throws CustomServiceLocatorException3;
+	}
+
+
+	public static class CustomServiceLocatorException1 extends NestedRuntimeException {
+
+		public CustomServiceLocatorException1(String message, Throwable cause) {
+			super(message, cause);
+		}
+	}
+
+
+	public static class CustomServiceLocatorException2 extends NestedCheckedException {
+
+		public CustomServiceLocatorException2(Throwable cause) {
+			super("", cause);
+		}
+	}
+
+
+	public static class CustomServiceLocatorException3 extends NestedCheckedException {
+
+		public CustomServiceLocatorException3(String message) {
+			super(message);
+		}
 	}
 
 }

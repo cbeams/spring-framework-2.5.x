@@ -16,12 +16,14 @@
 
 package org.springframework.beans.factory.config;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Properties;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -69,6 +71,8 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 
 	private Class serviceLocatorInterface;
 
+	private Constructor serviceLocatorExceptionConstructor;
+
 	private Properties serviceMappings;
 
 	private ListableBeanFactory beanFactory;
@@ -84,6 +88,29 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 	 */
 	public void setServiceLocatorInterface(Class interfaceName) {
 		this.serviceLocatorInterface = interfaceName;
+	}
+
+	/**
+	 * Set the exception class that the service locator should throw if service
+	 * lookup failed. The specified exception class should have a constructor
+	 * with one of the following parameter types: <code>(String, Throwable)</code>
+	 * or <code>(Throwable)</code> or <code>(String)</code>.
+	 * <p>If not specified, subclasses of Spring's BeansException will be thrown,
+	 * for example NoSuchBeanDefinitionException. As those are unchecked, the
+	 * caller does not need to handle them, so it might be acceptable that
+	 * Spring exceptions get thrown as long as they are just handled generically.
+	 * @see #determineServiceLocatorExceptionConstructor(Class)
+	 * @see #createServiceLocatorException(java.lang.reflect.Constructor, org.springframework.beans.BeansException)
+	 * @see org.springframework.beans.BeansException
+	 * @see org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 */
+	public void setServiceLocatorExceptionClass(Class serviceLocatorExceptionClass) {
+		if (serviceLocatorExceptionClass != null && !Exception.class.isAssignableFrom(serviceLocatorExceptionClass)) {
+			throw new IllegalArgumentException(
+					"serviceLocatorException [" + serviceLocatorExceptionClass.getName() + "] is not a subclass of Exception");
+		}
+		this.serviceLocatorExceptionConstructor =
+				determineServiceLocatorExceptionConstructor(serviceLocatorExceptionClass);
 	}
 
 	/**
@@ -108,14 +135,72 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 		this.beanFactory = (ListableBeanFactory) beanFactory;
 	}
 
-	public void afterPropertiesSet() throws BeansException {
+	public void afterPropertiesSet() {
 		if (this.serviceLocatorInterface == null) {
-			throw new FatalBeanException("serviceLocatorInterface is required");
+			throw new IllegalArgumentException("serviceLocatorInterface is required");
 		}
+
+		// Create service locator proxy.
 		this.proxy = Proxy.newProxyInstance(
 				this.serviceLocatorInterface.getClassLoader(),
 				new Class[] {this.serviceLocatorInterface},
 				new ServiceLocatorInvocationHandler());
+	}
+
+
+	/**
+	 * Determine the constructor to use for the given service locator exception
+	 * class. Only called in case of a custom service locator exception.
+	 * <p>The default implementation looks for a constructor with one of the
+	 * following parameter types: <code>(String, Throwable)</code>
+	 * or <code>(Throwable)</code> or <code>(String)</code>.
+	 * @param exceptionClass the exception class
+	 * @return the constructor to use
+	 * @see #setServiceLocatorExceptionClass
+	 */
+	protected Constructor determineServiceLocatorExceptionConstructor(Class exceptionClass) {
+		try {
+			return exceptionClass.getConstructor(new Class[] {String.class, Throwable.class});
+		}
+		catch (NoSuchMethodException ex) {
+			try {
+				return exceptionClass.getConstructor(new Class[] {Throwable.class});
+			}
+			catch (NoSuchMethodException ex2) {
+				try {
+					return exceptionClass.getConstructor(new Class[] {String.class});
+				}
+				catch (NoSuchMethodException ex3) {
+					throw new IllegalArgumentException(
+							"serviceLocatorException [" + exceptionClass.getName() +
+							"] neither has a (String, Throwable) constructor nor a (String) constructor");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Create a service locator exception for the given cause.
+	 * Only called in case of a custom service locator exception.
+	 * <p>The default implementation can handle all variations of
+	 * message and exception arguments.
+	 * @param exceptionConstructor the constructor to use
+	 * @param cause the cause of the service lookup failure
+	 * @return the service locator exception to throw
+	 * @see #setServiceLocatorExceptionClass
+	 */
+	protected Exception createServiceLocatorException(Constructor exceptionConstructor, BeansException cause) {
+		Class[] paramTypes = exceptionConstructor.getParameterTypes();
+		Object[] args = new Object[paramTypes.length];
+		for (int i = 0; i < paramTypes.length; i++) {
+			if (paramTypes[i].equals(String.class)) {
+				args[i] = cause.getMessage();
+			}
+			else if (paramTypes[i].isInstance(cause)) {
+				args[i] = cause;
+			}
+		}
+		return (Exception) BeanUtils.instantiateClass(exceptionConstructor, args);
 	}
 
 
@@ -174,13 +259,21 @@ public class ServiceLocatorFactoryBean implements FactoryBean, BeanFactoryAware,
 				}
 			}
 
-			if (StringUtils.hasLength(beanName)) {
-				// Service locator for a specific bean name.
-				return beanFactory.getBean(beanName, serviceLocatorReturnType);
+			try {
+				if (StringUtils.hasLength(beanName)) {
+					// Service locator for a specific bean name.
+					return beanFactory.getBean(beanName, serviceLocatorReturnType);
+				}
+				else {
+					// Service locator for a bean type.
+					return BeanFactoryUtils.beanOfTypeIncludingAncestors(beanFactory, serviceLocatorReturnType);
+				}
 			}
-			else {
-				// Service locator for a bean type.
-				return BeanFactoryUtils.beanOfTypeIncludingAncestors(beanFactory, serviceLocatorReturnType);
+			catch (BeansException ex) {
+				if (serviceLocatorExceptionConstructor != null) {
+					throw createServiceLocatorException(serviceLocatorExceptionConstructor, ex);
+				}
+				throw ex;
 			}
 		}
 
