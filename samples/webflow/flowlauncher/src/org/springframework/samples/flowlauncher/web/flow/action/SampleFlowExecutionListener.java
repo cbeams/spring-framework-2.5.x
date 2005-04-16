@@ -27,7 +27,7 @@ public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 	
 	public static final String INPUT_ATTRIBUTE = "input";
 
-	public void requestSubmitted(RequestContext context, Event event) {
+	public void requestSubmitted(RequestContext context) {
 		/*
 		 * On each request coming into the flow, check if there is input data in the
 		 * request and if so, put it in flow scope.
@@ -37,15 +37,13 @@ public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 		 */
 		
 		//check to see if input was explicitly specified in the request
-		HttpServletRequest request = ((HttpServletRequestEvent)context.getOriginatingEvent()).getRequest();
-		String input = request.getParameter(INPUT_ATTRIBUTE);
+		Event event = context.getOriginatingEvent();
+		String input = (String)event.getParameter(INPUT_ATTRIBUTE);
 		if (StringUtils.hasText(input)) {
 			//put the input in the flow scope
 			context.getFlowScope().setAttribute(INPUT_ATTRIBUTE, input);
 		}
-		if (!context.getFlowScope().containsAttribute(INPUT_ATTRIBUTE)) {
-			throw new IllegalStateException("input parameter cannot be found");
-		}
+		context.getFlowScope().assertAttributePresent(INPUT_ATTRIBUTE);
 	}
 
 }

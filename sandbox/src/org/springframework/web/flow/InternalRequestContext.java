@@ -124,7 +124,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	public void setLastEvent(Event event) {
 		this.lastEvent = event;
 		this.flowExecution.setLastEvent(event);
-		fireEventSignaled(event);
+		fireEventSignaled();
 	}
 
 	public FlowSession getActiveFlowSession() {
@@ -192,14 +192,14 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Notify all interested listeners that a request was submitted to this flow
 	 * execution.
 	 */
-	protected void fireRequestSubmitted(final Event event) {
+	protected void fireRequestSubmitted() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing request submitted event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestSubmitted(InternalRequestContext.this, event);
+				((FlowExecutionListener)o).requestSubmitted(InternalRequestContext.this);
 			}
 		});
 	}
@@ -208,14 +208,14 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Notify all interested listeners that this flow execution finished
 	 * processing a request.
 	 */
-	protected void fireRequestProcessed(final Event event) {
+	protected void fireRequestProcessed() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing request processed event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestProcessed(InternalRequestContext.this, event);
+				((FlowExecutionListener)o).requestProcessed(InternalRequestContext.this);
 			}
 		});
 	}
@@ -224,7 +224,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Notify all interested listeners that an event was signaled in this flow
 	 * execution.
 	 */
-	protected void fireEventSignaled(final Event event) {
+	protected void fireEventSignaled() {
 		if (logger.isDebugEnabled()) {
 			logger
 					.debug("Publishing event signaled event to " + getFlowExecutionListenerList().size()
@@ -232,7 +232,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).eventSignaled(InternalRequestContext.this, event);
+				((FlowExecutionListener)o).eventSignaled(InternalRequestContext.this);
 			}
 		});
 	}

@@ -38,25 +38,22 @@ public interface FlowExecutionListener {
 	/**
 	 * Called when a new client request is submitted to manipulate this
 	 * flow execution.
-	 * @param context the source of the event
-	 * @param triggeringEvent the event encapsulating the client request
+	 * @param context the source of the event, with an 'orignatingEvent' property for access the request event
 	 */
-	public void requestSubmitted(RequestContext context, Event triggeringEvent);
+	public void requestSubmitted(RequestContext context);
 
 	/**
 	 * Called when a client request has completed processing.
-	 * @param context the source of the event
-	 * @param triggeringEvent the event encapsulating the client request
+	 * @param context the source of the event, with an 'orignatingEvent' property for access the request event
 	 */
-	public void requestProcessed(RequestContext context, Event triggeringEvent);
+	public void requestProcessed(RequestContext context);
 
 	/**
 	 * Called when an event is signaled in a state, but prior to a state
 	 * transition.
-	 * @param context the source of the event
-	 * @param event the event that was signaled
+	 * @param context the source of the event, with a 'lastEvent' property for accessing the signaled event
 	 */
-	public void eventSignaled(RequestContext context, Event event);
+	public void eventSignaled(RequestContext context);
 
 	/**
 	 * Called when a state transitions, after the transition occurs.
