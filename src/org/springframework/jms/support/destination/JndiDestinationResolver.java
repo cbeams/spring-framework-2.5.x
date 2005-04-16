@@ -90,13 +90,16 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
+
 		Destination dest = (Destination) this.destinationCache.get(destinationName);
 		if (dest == null) {
 			try {
 				dest = (Destination) lookup(destinationName);
 			}
 			catch (NamingException ex) {
-				logger.debug("Destination [" + destinationName + "] not found in JNDI", ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Destination [" + destinationName + "] not found in JNDI", ex);
+				}
 				if (this.fallbackToDynamicDestination) {
 					dest = this.dynamicDestinationResolver.resolveDestinationName(session, destinationName, pubSubDomain);
 				}

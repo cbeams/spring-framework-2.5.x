@@ -41,23 +41,25 @@ public class DynamicDestinationResolver implements DestinationResolver {
 
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
+
 		if (pubSubDomain) {
 			if (session instanceof TopicSession) {
-				// cast to TopicSession: will work on both JMS 1.1 and 1.0.2
+				// Cast to TopicSession: will work on both JMS 1.1 and 1.0.2
 				return ((TopicSession) session).createTopic(destinationName);
 			}
 			else {
-				// fallback to generic JMS Session: will only work on JMS 1.1
+				// Fall back to generic JMS Session: will only work on JMS 1.1
 				return session.createTopic(destinationName);
 			}
 		}
+
 		else {
 			if (session instanceof QueueSession) {
-				// cast to QueueSession: will work on both JMS 1.1 and 1.0.2
+				// Cast to QueueSession: will work on both JMS 1.1 and 1.0.2
 				return ((QueueSession) session).createQueue(destinationName);
 			}
 			else {
-				// fallback to generic JMS Session: will only work on JMS 1.1
+				// Fall back to generic JMS Session: will only work on JMS 1.1
 				return session.createQueue(destinationName);
 			}
 		}
