@@ -10,17 +10,17 @@
 			<BR>
 			From Sample A, you can terminate Sample A and launch Sample B from an end state of Sample A.
 			Input parameters are given as normal request parameters. Again, this can be done using
-			either an achor or a form:
+			either an anchor or a form:
 			<LI>
 				<A href="<c:url value="/flow.htm?_flowExecutionId=${flowExecutionId}&_eventId=endAAndLaunchB&input=someInputForSampleB"/>">
-					End Sample A and Lauch Sample B
+					End Sample A and Launch Sample B
 				</A>
 			</LI>
 			<LI>
 				<FORM action="<c:url value="/flow.htm"/>" method="post">
 					<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 					<INPUT type="text" name="input" value="someInputForSampleB">
-					<INPUT type="submit" name="_eventId_endAAndLaunchB" value="End Sample A and Lauch Sample B">
+					<INPUT type="submit" name="_eventId_endAAndLaunchB" value="End Sample A and Launch Sample B">
 				</FORM>
 			</LI>
 			<BR>
@@ -29,13 +29,13 @@
 			using either an anchor or a form:
 			<LI>
 				<A href="<c:url value="/flow.htm?_flowExecutionId=${flowExecutionId}&_eventId=launchBAsSubFlow"/>">
-					Lauch Sample B as a Sub Flow
+					Launch Sample B as a Sub Flow
 				</A>
 			</LI>
 			<LI>
 				<FORM action="<c:url value="/flow.htm"/>" method="post">
 					<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
-					<INPUT type="submit" name="_eventId_launchBAsSubFlow" value="Lauch Sample B as a Sub Flow">
+					<INPUT type="submit" name="_eventId_launchBAsSubFlow" value="Launch Sample B as a Sub Flow">
 				</FORM>
 			</LI>
 			<BR>
@@ -43,14 +43,14 @@
 			Sample A:
 			<LI>
 				<A href="<c:url value="/flow.htm?_flowId=sampleB&input=someInputForSampleB"/>">
-					Lauch Sample B
+					Launch Sample B
 				</A>
 			</LI>
 			<LI>
 				<FORM action="<c:url value="/flow.htm"/>" method="post">
 					<INPUT type="hidden" name="_flowId" value="sampleB">
 					<INPUT type="text" name="input" value="someInputForSampleB">
-					<INPUT type="submit" value="Lauch Sample B">
+					<INPUT type="submit" value="Launch Sample B">
 				</FORM>
 			</LI>
 		</DIV>
