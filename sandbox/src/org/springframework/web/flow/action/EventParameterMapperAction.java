@@ -79,11 +79,31 @@ public class EventParameterMapperAction extends AbstractAction {
 	}
 
 	/**
+	 * Create a new action with the specified mapping.
+	 * @param mapping the mapping
+	 * @param targetScope the target scope type to map to
+	 */
+	public EventParameterMapperAction(Mapping mapping, ScopeType targetScope) {
+		setMappings(new Mapping[] { mapping });
+		setTargetScope(targetScope);
+	}
+
+	/**
 	 * Create a new action with the specified mappings.
 	 * @param mappings the mappings
 	 */
 	public EventParameterMapperAction(Mapping[] mappings) {
 		setMappings(mappings);
+	}
+
+	/**
+	 * Create a new action with the specified mappings.
+	 * @param mappings the mappings
+	 * @param targetScope the target scope type to map to
+	 */
+	public EventParameterMapperAction(Mapping[] mappings, ScopeType targetScope) {
+		setMappings(mappings);
+		setTargetScope(targetScope);
 	}
 
 	/**
