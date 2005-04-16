@@ -27,6 +27,7 @@ import org.springframework.web.flow.action.MultiAction;
 /**
  * Action that encapsulates logic for the number guess sample flow.
  * 
+ * @author Erwin Vervaet
  * @author Keith Donald
  */
 public class NumberGuessAction extends MultiAction {
@@ -67,14 +68,15 @@ public class NumberGuessAction extends MultiAction {
 	}
 
 	private int getGuess(RequestContext context) {
-		return ((Integer)new TextToNumberConverter().convert(context.getOriginatingEvent().getParameter(GUESS_PARAMETER),
-				Integer.class)).intValue();
+		return ((Integer)new TextToNumberConverter().convert(
+				context.getOriginatingEvent().getParameter(GUESS_PARAMETER), Integer.class)).intValue();
 	}
 
 	/**
 	 * Simple data holder for number guess info.
 	 */
 	public static class NumberGuessData implements Serializable {
+		
 		private static Random random = new Random();
 
 		private Calendar start = Calendar.getInstance();
