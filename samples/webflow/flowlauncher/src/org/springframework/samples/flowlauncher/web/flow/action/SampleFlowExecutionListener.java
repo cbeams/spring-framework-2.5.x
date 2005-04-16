@@ -20,17 +20,22 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.action.MultiAction;
 import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
+import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 
-public class SampleAction extends MultiAction {
+public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 	
 	public static final String INPUT_ATTRIBUTE = "input";
 
-	/**
-	 * Setup input attributes for the sample flows.
-	 */
-	public Event captureInput(RequestContext context) throws Exception {
+	public void requestSubmitted(RequestContext context, Event event) {
+		/*
+		 * On each request coming into the flow, check if there is input data in the
+		 * request and if so, put it in flow scope.
+		 * You could also do this in a "captureInput" action, but using a flow execution
+		 * listener is more elegant and keeps the flow and it's actions protocol
+		 * independent!
+		 */
+		
 		//check to see if input was explicitly specified in the request
 		HttpServletRequest request = ((HttpServletRequestEvent)context.getOriginatingEvent()).getRequest();
 		String input = request.getParameter(INPUT_ATTRIBUTE);
@@ -38,11 +43,9 @@ public class SampleAction extends MultiAction {
 			//put the input in the flow scope
 			context.getFlowScope().setAttribute(INPUT_ATTRIBUTE, input);
 		}
-		if (context.getFlowScope().containsAttribute(INPUT_ATTRIBUTE)) {
-			return success();
-		}
-		else {
+		if (!context.getFlowScope().containsAttribute(INPUT_ATTRIBUTE)) {
 			throw new IllegalStateException("input parameter cannot be found");
 		}
 	}
+
 }

@@ -24,7 +24,7 @@ public class SampleFlowAttributeMapper extends ParameterizableFlowAttributeMappe
 
 	public SampleFlowAttributeMapper() {
 		Map mappings=new HashMap();
-		mappings.put(SampleAction.INPUT_ATTRIBUTE, SampleAction.INPUT_ATTRIBUTE);
+		mappings.put(SampleFlowExecutionListener.INPUT_ATTRIBUTE, SampleFlowExecutionListener.INPUT_ATTRIBUTE);
 		setInputMappingsMap(mappings);
 	}
 }
