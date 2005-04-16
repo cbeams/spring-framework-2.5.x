@@ -22,8 +22,8 @@ import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 
 /**
- * Convenience wrapper that encapsulates logic on how to retrieve and expose
- * form objects and associated errors to and from a flow execution context.
+ * Convenience wrapper that encapsulates logic on how to retrieve and expose form objects and associated errors to and
+ * from a flow execution context.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -31,8 +31,8 @@ import org.springframework.web.flow.ScopeType;
 public class FormObjectAccessor {
 
 	/**
-	 * The form object instance is aliased under this attribute name in the flow
-	 * context by the default form setup and bind and validate actions.
+	 * The form object instance is aliased under this attribute name in the flow context by the default form setup and
+	 * bind and validate actions.
 	 */
 	public static final String FORM_OBJECT_ATTRIBUTE_NAME = "formObject";
 
@@ -40,33 +40,54 @@ public class FormObjectAccessor {
 
 	/**
 	 * Creates a form object accessor that wraps the given context.
-	 * @param context the flow execution request context
+	 * 
+	 * @param context
+	 *            the flow execution request context
 	 */
 	public FormObjectAccessor(RequestContext context) {
 		this.context = context;
 	}
 
 	/**
-	 * Gets the form object from the context, using the well-known attribute
-	 * name {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
-	 * @param scope the scope to obtain the form object from
+	 * Gets the form object from the context, using the well-known attribute name {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
+	 * Will try all scopes.
+	 * 
 	 * @return the form object
-	 * @throws IllegalStateException if the form object is not found in the
-	 *         context
+	 * @throws IllegalStateException
+	 *             if the form object is not found in the context
+	 */
+	public Object getFormObject() throws IllegalStateException {
+		try {
+			return (Errors)getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, ScopeType.REQUEST);
+		}
+		catch (IllegalStateException e) {
+			return (Errors)getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, ScopeType.FLOW);
+		}
+	}
+
+	/**
+	 * Gets the form object from the context, using the well-known attribute name {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
+	 * 
+	 * @param scope
+	 *            the scope to obtain the form object from
+	 * @return the form object
+	 * @throws IllegalStateException
+	 *             if the form object is not found in the context
 	 */
 	public Object getFormObject(ScopeType scope) throws IllegalStateException {
 		return getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, scope);
 	}
 
 	/**
-	 * Gets the form object from the context, using the well-known attribute
-	 * name {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
-	 * @param formObjectClass the class of the form object, which will be
-	 *        verified
-	 * @param scope the scope to obtain the form object from
+	 * Gets the form object from the context, using the well-known attribute name {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
+	 * 
+	 * @param formObjectClass
+	 *            the class of the form object, which will be verified
+	 * @param scope
+	 *            the scope to obtain the form object from
 	 * @return the form object
-	 * @throws IllegalStateException if the form object is not found in the
-	 *         context or is not of the required type
+	 * @throws IllegalStateException
+	 *             if the form object is not found in the context or is not of the required type
 	 */
 	public Object getFormObject(Class formObjectClass, ScopeType scope) throws IllegalStateException {
 		return getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, formObjectClass, scope);
@@ -74,11 +95,14 @@ public class FormObjectAccessor {
 
 	/**
 	 * Gets the form object from the context, using the specified name.
-	 * @param formObjectName the name of the form object in the context
-	 * @param scope the scope to obtain the form object from
+	 * 
+	 * @param formObjectName
+	 *            the name of the form object in the context
+	 * @param scope
+	 *            the scope to obtain the form object from
 	 * @return the form object
-	 * @throws IllegalStateException if the form object is not found in the
-	 *         context
+	 * @throws IllegalStateException
+	 *             if the form object is not found in the context
 	 */
 	public Object getFormObject(String formObjectName, ScopeType scope) throws IllegalStateException {
 		return getScope(scope).getRequiredAttribute(formObjectName);
@@ -86,13 +110,16 @@ public class FormObjectAccessor {
 
 	/**
 	 * Gets the form object from the context, using the specified name.
-	 * @param formObjectName the name of the form in the context
-	 * @param formObjectClass the class of the form object, which will be
-	 *        verified
-	 * @param scope the scope to obtain the form object from
+	 * 
+	 * @param formObjectName
+	 *            the name of the form in the context
+	 * @param formObjectClass
+	 *            the class of the form object, which will be verified
+	 * @param scope
+	 *            the scope to obtain the form object from
 	 * @return the form object
-	 * @throws IllegalStateException if the form object is not found in the
-	 *         context or is not of the required type
+	 * @throws IllegalStateException
+	 *             if the form object is not found in the context or is not of the required type
 	 */
 	public Object getFormObject(String formObjectName, Class formObjectClass, ScopeType scope)
 			throws IllegalStateException {
@@ -100,10 +127,12 @@ public class FormObjectAccessor {
 	}
 
 	/**
-	 * Expose given form object using the well known name
-	 * {@link #FORM_OBJECT_ATTRIBUTE_NAME} in specified scope.
-	 * @param formObject the form object
-	 * @param scope the scope in which to expose the form object
+	 * Expose given form object using the well known name {@link #FORM_OBJECT_ATTRIBUTE_NAME} in specified scope.
+	 * 
+	 * @param formObject
+	 *            the form object
+	 * @param scope
+	 *            the scope in which to expose the form object
 	 */
 	public void exposeFormObject(Object formObject, ScopeType scope) {
 		exposeFormObject(formObject, FORM_OBJECT_ATTRIBUTE_NAME, scope);
@@ -111,35 +140,61 @@ public class FormObjectAccessor {
 
 	/**
 	 * Expose given form object using given name in specified scope.
-	 * @param formObject the form object
-	 * @param formObjectName the name of the form object
-	 * @param scope the scope in which to expose the form object
+	 * 
+	 * @param formObject
+	 *            the form object
+	 * @param formObjectName
+	 *            the name of the form object
+	 * @param scope
+	 *            the scope in which to expose the form object
 	 */
 	public void exposeFormObject(Object formObject, String formObjectName, ScopeType scope) {
 		getScope(scope).setAttribute(formObjectName, formObject);
 	}
 
 	/**
-	 * Gets the form object <code>Errors</code> tracker from the context,
-	 * using the form object name {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
-	 * @param scope the scope to obtain the errors from
+	 * Gets the form object <code>Errors</code> tracker from the context, using the form object name
+	 * {@link #FORM_OBJECT_ATTRIBUTE_NAME}. This method will search all scopes.
+	 * 
+	 * @param scope
+	 *            the scope to obtain the errors from
 	 * @return the form object Errors tracker
-	 * @throws IllegalStateException if the Errors instance is not found in the
-	 *         context
+	 * @throws IllegalStateException
+	 *             if the Errors instance is not found in the context
+	 */
+	public Errors getFormErrors() throws IllegalStateException {
+		try {
+			return (Errors)getFormErrors(FORM_OBJECT_ATTRIBUTE_NAME, ScopeType.REQUEST);
+		}
+		catch (IllegalStateException e) {
+			return (Errors)getFormErrors(FORM_OBJECT_ATTRIBUTE_NAME, ScopeType.FLOW);
+		}
+	}
+
+	/**
+	 * Gets the form object <code>Errors</code> tracker from the context, using the form object name
+	 * {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
+	 * 
+	 * @param scope
+	 *            the scope to obtain the errors from
+	 * @return the form object Errors tracker
+	 * @throws IllegalStateException
+	 *             if the Errors instance is not found in the context
 	 */
 	public Errors getFormErrors(ScopeType scope) throws IllegalStateException {
 		return getFormErrors(FORM_OBJECT_ATTRIBUTE_NAME, scope);
 	}
 
 	/**
-	 * Gets the form object <code>Errors</code> tracker from the context,
-	 * using the specified form object name.
-	 * @param formObjectName The name of the Errors object, which will be
-	 *        prefixed with {@link BindException#ERROR_KEY_PREFIX}
-	 * @param scope the scope to obtain the errors from
+	 * Gets the form object <code>Errors</code> tracker from the context, using the specified form object name.
+	 * 
+	 * @param formObjectName
+	 *            The name of the Errors object, which will be prefixed with {@link BindException#ERROR_KEY_PREFIX}
+	 * @param scope
+	 *            the scope to obtain the errors from
 	 * @return the form object errors instance
-	 * @throws IllegalStateException if the Errors instance is not found in the
-	 *         context
+	 * @throws IllegalStateException
+	 *             if the Errors instance is not found in the context
 	 */
 	public Errors getFormErrors(String formObjectName, ScopeType scope) throws IllegalStateException {
 		return (Errors)getScope(scope).getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName,
@@ -147,21 +202,28 @@ public class FormObjectAccessor {
 	}
 
 	/**
-	 * Expose a <i>new</i> errors instance in the specified scope for
-	 * given form object using name {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
-	 * @param formObject the form object to expose an errors instance for
-	 * @param scope the scope to expose the errors in
+	 * Expose a <i>new</i> errors instance in the specified scope for given form object using name
+	 * {@link #FORM_OBJECT_ATTRIBUTE_NAME}.
+	 * 
+	 * @param formObject
+	 *            the form object to expose an errors instance for
+	 * @param scope
+	 *            the scope to expose the errors in
 	 */
 	public void exposeErrors(Object formObject, ScopeType scope) {
 		exposeErrors(formObject, FORM_OBJECT_ATTRIBUTE_NAME, scope);
 	}
 
 	/**
-	 * Expose a <i>new</i> errors instance in the specified scope for
-	 * given form object with the specified form object name.
-	 * @param formObject the form object
-	 * @param formObjectName the name of the form object
-	 * @param scope the scope to expose the errors in
+	 * Expose a <i>new</i> errors instance in the specified scope for given form object with the specified form object
+	 * name.
+	 * 
+	 * @param formObject
+	 *            the form object
+	 * @param formObjectName
+	 *            the name of the form object
+	 * @param scope
+	 *            the scope to expose the errors in
 	 */
 	public void exposeErrors(Object formObject, String formObjectName, ScopeType scope) {
 		exposeErrors(new BindException(formObject, formObjectName), scope);
@@ -169,16 +231,18 @@ public class FormObjectAccessor {
 
 	/**
 	 * Expose given errors instance in the specified scope.
-	 * @param errors the errors object
-	 * @param scope the scope to expose the errors in
+	 * 
+	 * @param errors
+	 *            the errors object
+	 * @param scope
+	 *            the scope to expose the errors in
 	 */
 	public void exposeErrors(Errors errors, ScopeType scope) {
 		getScope(scope).setAttribute(BindException.ERROR_KEY_PREFIX + errors.getObjectName(), errors);
 	}
 
 	/**
-	 * Helper method to get the indicated scope from the flow execution
-	 * request context.
+	 * Helper method to get the indicated scope from the flow execution request context.
 	 */
 	private Scope getScope(ScopeType scope) {
 		return scope == ScopeType.FLOW ? this.context.getFlowScope() : this.context.getRequestScope();
