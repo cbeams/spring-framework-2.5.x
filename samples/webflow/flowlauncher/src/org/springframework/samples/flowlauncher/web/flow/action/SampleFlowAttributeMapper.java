@@ -15,16 +15,11 @@
  */
 package org.springframework.samples.flowlauncher.web.flow.action;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.springframework.binding.support.Mapping;
 import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
 
 public class SampleFlowAttributeMapper extends ParameterizableFlowAttributeMapper {
-
 	public SampleFlowAttributeMapper() {
-		Map mappings=new HashMap();
-		mappings.put(SampleFlowExecutionListener.INPUT_ATTRIBUTE, SampleFlowExecutionListener.INPUT_ATTRIBUTE);
-		setInputMappingsMap(mappings);
+		setInputMapping(new Mapping(SampleFlowExecutionListener.INPUT_ATTRIBUTE));
 	}
 }
