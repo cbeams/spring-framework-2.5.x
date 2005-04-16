@@ -1,6 +1,6 @@
 <%@ page session="false" %>
 <%@ taglib uri="http://java.sun.com/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="/tags/struts-html" prefix="html" %>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
@@ -19,31 +19,20 @@
 				
 				<TABLE>
 					<TR>
+						<TD colspan="2">
+							<html:errors />
+						</TD>
+					</TR>
+					<TR>
 						<TD>Your name</TD>
 						<TD>
-							<spring:bind path="birthDate.name">
-								<INPUT
-									type="text"
-									name="<c:out value="${status.expression}"/>"
-									value="<c:out value="${status.value}"/>">
-								<c:if test="${status.error}">
-									<DIV style="color: red"><c:out value="${status.errorMessage}"/></DIV>
-								</c:if>
-							</spring:bind>
+							<html:text property="name" size="25" maxlength="30"/>
 						</TD>
 					</TR>
 					<TR>
 						<TD>Your Birth Date (DD-MM-YYYY)</TD>
 						<TD>
-							<spring:bind path="birthDate.date">
-								<INPUT
-									type="text"
-									name="<c:out value="${status.expression}"/>"
-									value="<c:out value="${status.value}"/>">
-								<c:if test="${status.error}">
-									<DIV style="color: red"><c:out value="${status.errorMessage}"/></DIV>
-								</c:if>
-							</spring:bind>
+							<html:text property="date" size="10" maxlength="10"/>
 						</TD>
 					</TR>
 				</TABLE>
