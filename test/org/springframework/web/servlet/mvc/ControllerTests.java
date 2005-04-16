@@ -119,11 +119,8 @@ public class ControllerTests extends TestCase {
 
 		StaticWebApplicationContext sac = new StaticWebApplicationContext();
 		sac.setServletContext(context);
-		ServletForwardingController swc = new ServletForwardingController();
-		swc.setServletName("action");
-		swc.setApplicationContext(sac);
-		swc.initApplicationContext();
-		assertNull(swc.handleRequest(request, response));
+		sfc.setApplicationContext(sac);
+		assertNull(sfc.handleRequest(request, response));
 
 		requestControl.verify();
 		contextControl.verify();
