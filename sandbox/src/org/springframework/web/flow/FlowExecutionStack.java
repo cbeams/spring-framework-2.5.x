@@ -235,7 +235,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	public synchronized ViewDescriptor start(Event event) throws IllegalStateException {
 		Assert.state(!isActive(), "This flow execution is already started");
 		// create a new flow session for the root flow and activate it
-		createAndActivateFlowSession(this.rootFlow, event.getParameters());
+		createAndActivateFlowSession(this.rootFlow, null);
 		// execute the event
 		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted(event);
@@ -252,13 +252,12 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		String stateId = event.getStateId();
 		if (!StringUtils.hasText(stateId)) {
 			if (logger.isDebugEnabled()) {
-				logger
-						.debug("Current state id was not provided in request to signal event '"
-								+ eventId
-								+ "' in flow "
-								+ getCaption()
-								+ "' -- pulling current state id from session -- "
-								+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
+				logger.debug("Current state id was not provided in request to signal event '"
+						+ eventId
+						+ "' in flow "
+						+ getCaption()
+						+ "' -- pulling current state id from session -- "
+						+ "note: if the user has been using the browser back/forward buttons, the currentState could be incorrect.");
 			}
 			stateId = getCurrentStateId();
 		}
