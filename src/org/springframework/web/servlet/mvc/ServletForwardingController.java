@@ -103,7 +103,7 @@ public class ServletForwardingController extends AbstractController implements B
 	private String beanName;
 
 	/**
-	 * Set  the name of the servlet to forward to,
+	 * Set the name of the servlet to forward to,
 	 * i.e. the "servlet-name" of the target servlet in web.xml.
 	 * <p>Default is the bean name of this controller.
 	 */
@@ -113,16 +113,14 @@ public class ServletForwardingController extends AbstractController implements B
 
 	public void setBeanName(String name) {
 		this.beanName = name;
-	}
-
-	protected void initApplicationContext() {
 		if (this.servletName == null) {
-			this.servletName = this.beanName;
+			this.servletName = name;
 		}
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		RequestDispatcher rd = getServletContext().getNamedDispatcher(this.servletName);
 		if (rd == null) {
 			throw new ServletException("No servlet with name '" + this.servletName + "' defined in web.xml");
