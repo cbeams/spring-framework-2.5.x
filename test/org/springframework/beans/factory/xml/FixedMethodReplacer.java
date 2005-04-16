@@ -28,10 +28,7 @@ public class FixedMethodReplacer implements MethodReplacer {
 	
 	public static final String VALUE = "fixedMethodReplacer";
 
-	/**
-	 * @see org.springframework.beans.factory.support.MethodReplacer#reimplement(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
-	 */
-	public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
+	public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
 		return VALUE;
 	}
 

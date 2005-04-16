@@ -29,7 +29,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * Simple object instantiation strategy for use in BeanFactories.
+ * Simple object instantiation strategy for use in a BeanFactory.
  *
  * <p>Does not support Method Injection, although it provides hooks for subclasses
  * to override to add Method Injection  support, for example by overriding methods.
@@ -43,12 +43,13 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 	public Object instantiate(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
-		// don't override the class with CGLIB if no overrides
+
+		// Don't override the class with CGLIB if no overrides.
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(beanDefinition.getBeanClass());
 		}
 		else {
-			// must generate CGLIB subclass
+			// Must generate CGLIB subclass.
 			return instantiateWithMethodInjection(beanDefinition, beanName, owner);
 		}
 	}
@@ -61,6 +62,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 */
 	protected Object instantiateWithMethodInjection(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
+
 		throw new UnsupportedOperationException(
 				"Method Injection not supported in SimpleInstantiationStrategy");
 	}
@@ -68,6 +70,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	public Object instantiate(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			Constructor ctor, Object[] args) {
+
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(ctor, args);
 		}
@@ -85,6 +88,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	protected Object instantiateWithMethodInjection(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			Constructor ctor, Object[] args) {
+
 		throw new UnsupportedOperationException(
 				"Method Injection not supported in SimpleInstantiationStrategy");
 	}
