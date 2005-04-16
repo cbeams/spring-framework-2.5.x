@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
  * <p>Methods eligible for lookup override must not have arguments.
  *
  * @author Rod Johnson
+ * @since 1.1
  */
 public class LookupOverride extends MethodOverride {
 	
@@ -31,7 +32,7 @@ public class LookupOverride extends MethodOverride {
 
 	/**
 	 * Construct a new LookupOverride.
-	 * @param methodName name of the method to override. This
+	 * @param methodName the name of the method to override. This
 	 * method must have no arguments.
 	 * @param beanName name of the bean in the current BeanFactory
 	 * or ApplicationContext that the overriden method should return
@@ -52,7 +53,7 @@ public class LookupOverride extends MethodOverride {
 	/**
 	 * Doesn't allow for overloading, so matching method name is fine.
 	 */
-	public boolean matches(Method method, MethodOverrides overrides) {
+	public boolean matches(Method method) {
 		return method.getName().equals(getMethodName());
 	}
 

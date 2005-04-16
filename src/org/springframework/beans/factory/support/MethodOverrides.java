@@ -24,17 +24,20 @@ import java.util.Set;
 /**
  * Set of method overrides, determining which, if any, methods on a
  * managed object the Spring IoC container will override at runtime.
+ *
+ * <p>The currently supported MethodOverride variants are
+ * LookupOverride and ReplaceOverride.
+ *
  * @author Rod Johnson
+ * @since 1.1
+ * @see MethodOverride
+ * @see LookupOverride
+ * @see ReplaceOverride
  */
 public class MethodOverrides {
 
 	private final Set overrides = new HashSet();
 	
-	/**
-	 * Set of method names that are overloaded
-	 */
-	private final Set overloadedMethodNames = new HashSet();
-
 	/**
 	 * Create new MethodOverrides.
 	 */
@@ -54,7 +57,6 @@ public class MethodOverrides {
 	public void addOverrides(MethodOverrides other) {
 		if (other != null) {
 			this.overrides.addAll(other.getOverrides());
-			this.overloadedMethodNames.addAll(other.overloadedMethodNames);
 		}
 	}
 
@@ -67,19 +69,13 @@ public class MethodOverrides {
 
 	/**
 	 * Return all method overrides contained by this object.
+	 * @return Set of MethodOverride objects
+	 * @see MethodOverride
 	 */
 	public Set getOverrides() {
 		return overrides;
 	}
 
-	public void addOverloadedMethodName(String methodName) {
-		this.overloadedMethodNames.add(methodName);
-	}
-	
-	public boolean isOverloadedMethodName(String methodName) {
-		return this.overloadedMethodNames.contains(methodName);
-	}
-	
 	/**
 	 * Return whether the set of method overrides is empty.
 	 */
@@ -95,7 +91,7 @@ public class MethodOverrides {
 	public MethodOverride getOverride(Method method) {
 		for (Iterator it = this.overrides.iterator(); it.hasNext();) {
 			MethodOverride methodOverride = (MethodOverride) it.next();
-			if (methodOverride.matches(method, this)) {
+			if (methodOverride.matches(method)) {
 				return methodOverride;
 			}			
 		}

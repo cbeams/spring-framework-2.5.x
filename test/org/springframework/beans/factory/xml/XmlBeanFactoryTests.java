@@ -1234,9 +1234,9 @@ public class XmlBeanFactoryTests extends TestCase {
 
 		public Object lastArg;
 
-		public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
+		public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
 			assertEquals(1, args.length);
-			assertEquals("doSomething", m.getName());
+			assertEquals("doSomething", method.getName());
 			lastArg = args[0];
 			return null;
 		}

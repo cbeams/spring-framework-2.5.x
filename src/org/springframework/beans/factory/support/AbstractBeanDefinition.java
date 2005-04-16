@@ -531,10 +531,15 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	protected void validateMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
-		if (!ClassUtils.hasAtLeastOneMethodWithName(getBeanClass(), mo.getMethodName())) {
+		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
+		if (count == 0) {
 			throw new BeanDefinitionValidationException(
 			    "Invalid method override: no method with name '" + mo.getMethodName() +
 			    "' on class [" + getBeanClassName() + "]");
+		}
+		else if (count == 1) {
+			// Mark override as not overloaded, to avoid the overhead of arg type checking.
+			mo.setOverloaded(false);
 		}
 	}
 

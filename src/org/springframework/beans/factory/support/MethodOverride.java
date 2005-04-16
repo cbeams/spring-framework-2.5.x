@@ -26,14 +26,17 @@ import java.lang.reflect.Method;
  * generic means of inserting crosscutting code: use AOP for that.
  *
  * @author Rod Johnson
+ * @since 1.1
  */
 public abstract class MethodOverride {
 	
 	private final String methodName;
 
+	private boolean overloaded = true;
+
 	/**
-	 * Create a new override for the given method.
-	 * @param methodName the name of the method to be overridden
+	 * Construct a new override for the given method.
+	 * @param methodName the name of the method to override
 	 */
 	protected MethodOverride(String methodName) {
 		this.methodName = methodName;
@@ -45,16 +48,31 @@ public abstract class MethodOverride {
 	public String getMethodName() {
 		return methodName;
 	}
-	
+
+	/**
+	 * Set whether the overridden method has to be considered as overloaded
+	 * (that is, whether arg type matching has to happen).
+	 * Default is true; can be switched to false to optimize runtime performance.
+	 */
+	protected void setOverloaded(boolean overloaded) {
+		this.overloaded = overloaded;
+	}
+
+	/**
+	 * Return whether the overridden method has to be considered as overloaded
+	 * (that is, whether arg type matching has to happen).
+	 */
+	protected boolean isOverloaded() {
+		return overloaded;
+	}
+
 	/**
 	 * Subclasses must override this to indicate whether they match
 	 * the given method. This allows for argument list checking
 	 * as well as method name checking.
 	 * @param method the method to check
-	 * @param overrides owning MethodOverrides object.
-	 * This allows us to check whether the method is overloaded.
 	 * @return whether this override matches the given method
 	 */
-	public abstract boolean matches(Method method, MethodOverrides overrides);
+	public abstract boolean matches(Method method);
 
 }

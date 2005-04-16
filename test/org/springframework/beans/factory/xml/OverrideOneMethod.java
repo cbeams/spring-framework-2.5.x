@@ -34,12 +34,20 @@ public abstract class OverrideOneMethod extends MethodReplaceCandidate {
 	public String echo(String echo) {
 		return echo;
 	}
-	
+
 	/**
-	 * Overloaded form of replaceMe
+	 * Overloaded form of replaceMe.
 	 */
 	public String replaceMe() {
 		return "replaceMe";
+	}
+
+	/**
+	 * Another overloaded form of replaceMe, not getting replaced.
+	 * Must not cause errors when the other replaceMe methods get replaced.
+	 */
+	public String replaceMe(int someParam) {
+		return "replaceMe:" + someParam;
 	}
 
 }

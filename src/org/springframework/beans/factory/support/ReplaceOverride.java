@@ -28,6 +28,7 @@ import java.util.List;
  * parameters and return types.
  *
  * @author Rod Johnson
+ * @since 1.1
  */
 public class ReplaceOverride extends MethodOverride {
 	
@@ -38,6 +39,11 @@ public class ReplaceOverride extends MethodOverride {
 	 */
 	private List typeIdentifiers = new LinkedList();
 
+	/**
+	 * Construct a new ReplaceOverride.
+	 * @param methodName the name of the method to override
+	 * @param methodReplacerBeanName the bean name of the MethodReplacer
+	 */
 	public ReplaceOverride(String methodName, String methodReplacerBeanName) {
 		super(methodName);
 		this.methodReplacerBeanName = methodReplacerBeanName;
@@ -52,14 +58,14 @@ public class ReplaceOverride extends MethodOverride {
 		this.typeIdentifiers.add(s);
 	}
 	
-	public boolean matches(Method method, MethodOverrides overrides) {
+	public boolean matches(Method method) {
 		// TODO could cache result for efficiency
 		if (!method.getName().equals(getMethodName())) {
 			// it can't match
 			return false;
 		}
 		
-		if (!overrides.isOverloadedMethodName(method.getName())) {
+		if (!isOverloaded()) {
 			// No overloaded: don't worry about arg type matching.
 			return true;
 		}
@@ -71,7 +77,7 @@ public class ReplaceOverride extends MethodOverride {
 		for (int i = 0; i < this.typeIdentifiers.size(); i++) {
 			String identifier = (String) this.typeIdentifiers.get(i);
 			if (method.getParameterTypes()[i].getName().indexOf(identifier) == -1) {
-				// this parameter can't match
+				// This parameter cannot match.
 				return false;
 			}
 		}
