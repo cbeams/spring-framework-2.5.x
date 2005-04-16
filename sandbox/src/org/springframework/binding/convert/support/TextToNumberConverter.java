@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.springframework.binding.format.FormatterLocator;
+import org.springframework.binding.format.support.DefaultFormatterLocator;
 
 /**
  * Converts textual representations of numbers to a <code>Number</code>
@@ -27,6 +28,10 @@ import org.springframework.binding.format.FormatterLocator;
  */
 public class TextToNumberConverter extends AbstractFormattingConverter {
 
+	public TextToNumberConverter() {
+		super(new DefaultFormatterLocator());
+	}
+	
 	public TextToNumberConverter(FormatterLocator locator) {
 		super(locator);
 	}

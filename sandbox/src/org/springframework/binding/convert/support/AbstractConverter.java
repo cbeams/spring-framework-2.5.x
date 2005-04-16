@@ -20,14 +20,25 @@ import org.springframework.binding.convert.Converter;
 
 /**
  * Base class for converters -- provided as a convenience to implementors.
+ * 
  * @author Keith Donald
  */
 public abstract class AbstractConverter implements Converter {
 
+	/**
+	 * Convenience convert method that converts the provided source to the first target object supported by this
+	 * converter. Useful when a converter only supports conversion to a single target.
+	 * 
+	 * @param source
+	 *            The source to convert
+	 * @return the converted object
+	 * @throws ConversionException
+	 *             a exception occured converting the source value
+	 */
 	public Object convert(Object source) throws ConversionException {
 		return convert(source, getTargetClasses()[0]);
 	}
-	
+
 	public Object convert(Object source, Class targetClass) throws ConversionException {
 		try {
 			return doConvert(source, targetClass);

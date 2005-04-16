@@ -19,66 +19,18 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Random;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.springframework.binding.convert.support.TextToNumberConverter;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.action.MultiAction;
-import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
 
+/**
+ * Action that encapsulates logic for the number guess sample flow.
+ * 
+ * @author Keith Donald
+ */
 public class NumberGuessAction extends MultiAction {
-	
-	private static final String DATA_ATTRIBUTE = "data";
-	private static final String GUESS_PARAMETER = "guess";
-	
-	private static Random random = new Random(); 
 
-	/**
-	 * Simple data holder.
-	 */
-	public static class NumberGuessData implements Serializable {
-		public Calendar start = Calendar.getInstance();
-		public int answer = random.nextInt(101);
-		public int guesses = 0;
-		public String indication = "";
-		public long durationSeconds = -1;
-		
-		// property accessors for JSTL EL
-		
-		public int getAnswer() {
-			return answer;
-		}
-		
-		public long getDurationSeconds() {
-			return durationSeconds;
-		}
-		
-		public int getGuesses() {
-			return guesses;
-		}
-		
-		public String getIndication() {
-			return indication;
-		}
-	}
-	
-	private NumberGuessData getNumberGuessData(RequestContext context) {
-		if (!context.getFlowScope().containsAttribute(DATA_ATTRIBUTE)) {
-			context.getFlowScope().setAttribute(DATA_ATTRIBUTE, new NumberGuessData());
-		}
-		return (NumberGuessData)context.getFlowScope().getAttribute(DATA_ATTRIBUTE);
-	}
-	
-	private int getGuess(RequestContext context) {
-		HttpServletRequest request=((HttpServletRequestEvent)context.getOriginatingEvent()).getRequest();
-		try {
-			return Integer.parseInt(request.getParameter(GUESS_PARAMETER));
-		}
-		catch (NumberFormatException e) {
-			return -1;
-		}
-	}
-	
 	public Event guess(RequestContext context) throws Exception {
 		NumberGuessData data = getNumberGuessData(context);
 		int guess = getGuess(context);
@@ -88,7 +40,6 @@ public class NumberGuessAction extends MultiAction {
 		}
 		else {
 			data.guesses++;
-			
 			if (data.answer < guess) {
 				data.indication = "lower";
 				return result("retry");
@@ -99,12 +50,59 @@ public class NumberGuessAction extends MultiAction {
 			}
 			else {
 				data.indication = "correct";
-		        Calendar now = Calendar.getInstance(); 
-		        long durationMilliseconds = now.getTime().getTime()-data.start.getTime().getTime(); 
-		        data.durationSeconds = durationMilliseconds / 1000;
-		        return success();
+				Calendar now = Calendar.getInstance();
+				long durationMilliseconds = now.getTime().getTime() - data.start.getTime().getTime();
+				data.durationSeconds = durationMilliseconds / 1000;
+				return success();
 			}
 		}
 	}
 
+	private static final String DATA_ATTRIBUTE = "data";
+
+	private static final String GUESS_PARAMETER = "guess";
+
+	private NumberGuessData getNumberGuessData(RequestContext context) {
+		return (NumberGuessData)context.getFlowScope().getOrCreateAttribute(DATA_ATTRIBUTE, NumberGuessData.class);
+	}
+
+	private int getGuess(RequestContext context) {
+		return ((Integer)new TextToNumberConverter().convert(context.getOriginatingEvent().getParameter(GUESS_PARAMETER),
+				Integer.class)).intValue();
+	}
+
+	/**
+	 * Simple data holder for number guess info.
+	 */
+	public static class NumberGuessData implements Serializable {
+		private static Random random = new Random();
+
+		private Calendar start = Calendar.getInstance();
+
+		private int answer = random.nextInt(101);
+
+		private int guesses = 0;
+
+		private String indication = "";
+
+		private long durationSeconds = -1;
+
+		// property accessors for JSTL EL
+
+		public int getAnswer() {
+			return answer;
+		}
+
+		public long getDurationSeconds() {
+			return durationSeconds;
+		}
+
+		public int getGuesses() {
+			return guesses;
+		}
+
+		public String getIndication() {
+			return indication;
+		}
+	}
 }
