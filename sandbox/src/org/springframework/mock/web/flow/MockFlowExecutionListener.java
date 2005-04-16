@@ -60,19 +60,19 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		stateTransitions = 0;
 	}
 
-	public void requestSubmitted(RequestContext context, Event event) {
+	public void requestSubmitted(RequestContext context) {
 		Assert.state(!requestInProcess, "There is already a request being processed");
 		requestsSubmitted++;
 		requestInProcess = true;
 	}
 
-	public void requestProcessed(RequestContext context, Event event) {
+	public void requestProcessed(RequestContext context) {
 		Assert.state(requestInProcess, "There is no request being processed");
 		requestsProcessed++;
 		requestInProcess = false;
 	}
 
-	public void eventSignaled(RequestContext context, Event event) {
+	public void eventSignaled(RequestContext context) {
 		assertStarted();
 		eventsSignaled++;
 	}
