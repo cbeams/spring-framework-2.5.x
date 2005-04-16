@@ -58,10 +58,10 @@ public class FormObjectAccessor {
 	 */
 	public Object getFormObject() throws IllegalStateException {
 		try {
-			return (Errors)getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, ScopeType.REQUEST);
+			return getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, ScopeType.REQUEST);
 		}
 		catch (IllegalStateException e) {
-			return (Errors)getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, ScopeType.FLOW);
+			return getFormObject(FORM_OBJECT_ATTRIBUTE_NAME, ScopeType.FLOW);
 		}
 	}
 
