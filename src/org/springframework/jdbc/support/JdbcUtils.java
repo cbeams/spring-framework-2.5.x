@@ -170,7 +170,7 @@ public abstract class JdbcUtils {
 	public static Object extractDatabaseMetaData(DataSource dataSource, final String metaDataMethodName)
 			throws MetaDataAccessException {
 
-		return JdbcUtils.extractDatabaseMetaData(dataSource,
+		return extractDatabaseMetaData(dataSource,
 				new DatabaseMetaDataCallback() {
 					public Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException {
 						try {
