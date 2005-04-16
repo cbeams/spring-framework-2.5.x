@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix"><value>/WEB-INF/jsp/</value></property>
+		<property name="suffix"><value>.jsp</value></property>
+	</bean>
+
+	<bean id="frontController" name="/flow.htm" class="org.springframework.web.flow.mvc.FlowController">
+		<property name="cacheSeconds"><value>5</value></property>
+		<property name="flowExecutionManager">
+			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
+				<property name="flowExecutionStorage">
+					<bean class="org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage"/>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="sampleA" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+				<property name="resource"><value>/WEB-INF/sampleA-flow.xml</value></property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="sampleB" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+				<property name="resource"><value>/WEB-INF/sampleB-flow.xml</value></property>
+			</bean>
+		</property>
+	</bean>
+
+</beans>

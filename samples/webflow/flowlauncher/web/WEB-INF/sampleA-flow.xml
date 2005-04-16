@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
+
+<webflow id="sampleA" start-state="captureInput">
+
+	<action-state id="captureInput">
+		<action class="org.springframework.samples.flowlauncher.web.flow.action.SampleAction"/>
+		<transition on="success" to="aPage"/>
+	</action-state>
+	
+	<view-state id="aPage" view="aPage">
+		<transition on="launchBAsSubFlow" to="launchB"/>
+		<transition on="endAAndLaunchB" to="captureInputEndLaunchB"/>
+	</view-state>
+	
+	<subflow-state id="launchB" flow="sampleB">
+		<attribute-mapper class="org.springframework.samples.flowlauncher.web.flow.action.SampleFlowAttributeMapper"/>
+		<transition on="end" to="aPage"/>
+	</subflow-state>
+
+	<action-state id="captureInputEndLaunchB">
+		<action class="org.springframework.samples.flowlauncher.web.flow.action.SampleAction" method="captureInput"/>
+		<transition on="success" to="endLaunchB"/>
+	</action-state>
+	
+	<end-state id="endLaunchB" view="redirect:/flow.htm?_flowId=sampleB"/>
+
+</webflow>
