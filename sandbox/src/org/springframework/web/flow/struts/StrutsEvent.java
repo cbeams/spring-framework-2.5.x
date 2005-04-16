@@ -7,6 +7,12 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
 import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
 
+/**
+ * A client flow event orignating from a struts environment. Provides access to the struts ActionMapping and ActionForm
+ * objects, as well as all HttpServlet information.
+ * 
+ * @author Keith Donald
+ */
 public class StrutsEvent extends HttpServletRequestEvent {
 
 	/**
@@ -20,10 +26,11 @@ public class StrutsEvent extends HttpServletRequestEvent {
 	private ActionForm actionForm;
 
 	/**
-	 * @param actionMapping
-	 * @param actionForm
-	 * @param request
-	 * @param response
+	 * Creates a new struts event.
+	 * @param actionMapping the action mapping
+	 * @param actionForm the action form
+	 * @param request the request
+	 * @param response the response
 	 */
 	public StrutsEvent(ActionMapping actionMapping, ActionForm actionForm, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -33,10 +40,11 @@ public class StrutsEvent extends HttpServletRequestEvent {
 	}
 
 	/**
-	 * @param actionMapping
-	 * @param actionForm
-	 * @param request
-	 * @param response
+	 * Creates a new struts event.
+	 * @param actionMapping the action mapping
+	 * @param actionForm the action form
+	 * @param request the request
+	 * @param response the response
 	 * @param eventIdParameterName
 	 * @param eventIdAttributeName
 	 * @param currentStateIdParameterName
@@ -57,7 +65,7 @@ public class StrutsEvent extends HttpServletRequestEvent {
 	public ActionForm getActionForm() {
 		return actionForm;
 	}
-	
+
 	/**
 	 * @return the action mapping
 	 */
