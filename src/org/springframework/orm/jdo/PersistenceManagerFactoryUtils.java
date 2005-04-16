@@ -80,16 +80,14 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
 	public static SQLExceptionTranslator newJdbcExceptionTranslator(PersistenceManagerFactory pmf) {
-		SQLExceptionTranslator jdbcExceptionTranslator = null;
-		// check for PersistenceManagerFactory's DataSource
-		Object cf = pmf.getConnectionFactory();
-		if (cf instanceof DataSource) {
-			jdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator((DataSource) cf);
+		if (pmf != null) {
+			// Check for PersistenceManagerFactory's DataSource.
+			Object cf = pmf.getConnectionFactory();
+			if (cf instanceof DataSource) {
+				return new SQLErrorCodeSQLExceptionTranslator((DataSource) cf);
+			}
 		}
-		else {
-			jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
-		}
-		return jdbcExceptionTranslator;
+		return new SQLStateSQLExceptionTranslator();
 	}
 
 	/**
@@ -105,6 +103,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
+
 		return getPersistenceManager(pmf, allowCreate, true);
 	}
 
@@ -125,6 +124,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	public static PersistenceManager getPersistenceManager(
 			PersistenceManagerFactory pmf, boolean allowCreate, boolean allowSynchronization)
 	    throws DataAccessResourceFailureException, IllegalStateException {
+
 		Assert.notNull(pmf, "No PersistenceManagerFactory specified");
 
 		PersistenceManagerHolder pmHolder =
@@ -143,8 +143,8 @@ public abstract class PersistenceManagerFactoryUtils {
 			PersistenceManager pm = pmf.getPersistenceManager();
 			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
 				logger.debug("Registering transaction synchronization for JDO persistence manager");
-				// use same PersistenceManager for further JDO actions within the transaction
-				// thread object will get removed by synchronization at transaction completion
+				// Use same PersistenceManager for further JDO actions within the transaction
+				// thread object will get removed by synchronization at transaction completion.
 				pmHolder = new PersistenceManagerHolder(pm);
 				TransactionSynchronizationManager.bindResource(pmf, pmHolder);
 				TransactionSynchronizationManager.registerSynchronization(
@@ -167,6 +167,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 */
 	public static void applyTransactionTimeout(
 			Query query, PersistenceManagerFactory pmf, JdoDialect jdoDialect) throws JDOException {
+
 		Assert.notNull(query, "No Query object specified");
 		PersistenceManagerHolder pmHolder =
 		    (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);

@@ -132,9 +132,7 @@ public abstract class SessionFactoryUtils {
 		if (ds != null) {
 			return new SQLErrorCodeSQLExceptionTranslator(ds);
 		}
-		else {
-			return new SQLStateSQLExceptionTranslator();
-		}
+		return new SQLStateSQLExceptionTranslator();
 	}
 
 	/**
@@ -191,6 +189,7 @@ public abstract class SessionFactoryUtils {
 	 */
 	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
+
 		return getSession(sessionFactory, null, null, true, allowCreate);
 	}
 
@@ -214,6 +213,7 @@ public abstract class SessionFactoryUtils {
 	public static Session getSession(
 			SessionFactory sessionFactory, Interceptor entityInterceptor,
 			SQLExceptionTranslator jdbcExceptionTranslator) {
+
 		return getSession(sessionFactory, entityInterceptor, jdbcExceptionTranslator, true);
 	}
 
@@ -257,6 +257,7 @@ public abstract class SessionFactoryUtils {
 			SessionFactory sessionFactory, Interceptor entityInterceptor,
 			SQLExceptionTranslator jdbcExceptionTranslator, boolean allowSynchronization)
 			throws DataAccessResourceFailureException {
+
 		return getSession(sessionFactory, entityInterceptor, jdbcExceptionTranslator, allowSynchronization, true);
 	}
 

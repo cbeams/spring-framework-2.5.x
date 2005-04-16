@@ -151,7 +151,8 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 	/**
 	 * Return the JDBC exception translator for this instance.
-	 * Creates a default one for the specified SessionFactory if none set.
+	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator or SQLStateSQLExceptionTranslator
+	 * for the specified SessionFactory, if no exception translator explicitly specified.
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
 		if (this.jdbcExceptionTranslator == null) {
@@ -190,15 +191,10 @@ public abstract class HibernateAccessor implements InitializingBean {
 		return flushMode;
 	}
 
-	/**
-	 * Eagerly initialize the exception translator, creating a default one
-	 * for the specified SessionFactory if none set.
-	 */
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
 		}
-		getJdbcExceptionTranslator();
 	}
 
 

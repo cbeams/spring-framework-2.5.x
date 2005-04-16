@@ -302,7 +302,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Return the JDBC exception translator for this transaction manager.
-	 * Creates a default one for the specified SessionFactory if none set.
+	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator or SQLStateSQLExceptionTranslator
+	 * for the specified SessionFactory, if no exception translator explicitly specified.
 	 * @see #setJdbcExceptionTranslator
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
@@ -333,9 +334,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (this.entityInterceptor instanceof String && this.beanFactory == null) {
 			throw new IllegalArgumentException("beanFactory is required for entityInterceptorBeanName");
 		}
-
-		// Initialize the JDBC exception translator.
-		getJdbcExceptionTranslator();
 
 		// Check for SessionFactory's DataSource.
 		if (this.autodetectDataSource && getDataSource() == null) {

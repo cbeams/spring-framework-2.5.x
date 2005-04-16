@@ -28,11 +28,9 @@ import javax.jdo.Transaction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -57,7 +55,7 @@ import org.springframework.transaction.TransactionException;
  * @see JdoAccessor#setJdoDialect
  * @see JdoTransactionManager#setJdoDialect
  */
-public class DefaultJdoDialect implements JdoDialect, InitializingBean {
+public class DefaultJdoDialect implements JdoDialect {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
@@ -79,7 +77,6 @@ public class DefaultJdoDialect implements JdoDialect, InitializingBean {
 	 */
 	public DefaultJdoDialect(PersistenceManagerFactory pmf) {
 		setPersistenceManagerFactory(pmf);
-		afterPropertiesSet();
 	}
 
 	/**
@@ -117,27 +114,15 @@ public class DefaultJdoDialect implements JdoDialect, InitializingBean {
 
 	/**
 	 * Return the JDBC exception translator for this instance.
-	 * Creates a default one for the specified PersistenceManagerFactory if none set.
+	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator or SQLStateSQLExceptionTranslator
+	 * for the specified PersistenceManagerFactory, if no exception translator explicitly specified.
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
 		if (this.jdbcExceptionTranslator == null) {
-			if (this.persistenceManagerFactory != null) {
-				this.jdbcExceptionTranslator =
-						PersistenceManagerFactoryUtils.newJdbcExceptionTranslator(this.persistenceManagerFactory);
-			}
-			else {
-				this.jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
-			}
+			this.jdbcExceptionTranslator =
+					PersistenceManagerFactoryUtils.newJdbcExceptionTranslator(this.persistenceManagerFactory);
 		}
 		return this.jdbcExceptionTranslator;
-	}
-
-	/**
-	 * Eagerly initialize the exception translator, creating a default one
-	 * for the specified PersistenceManagerFactory if none set.
-	 */
-	public void afterPropertiesSet() {
-		getJdbcExceptionTranslator();
 	}
 
 
@@ -150,6 +135,7 @@ public class DefaultJdoDialect implements JdoDialect, InitializingBean {
 	 */
 	public Object beginTransaction(Transaction transaction, TransactionDefinition definition)
 			throws JDOException, SQLException, TransactionException {
+
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException(
 					"Standard JDO does not support custom isolation levels - " +
