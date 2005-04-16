@@ -154,7 +154,29 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Does the given class or/and its superclasses at least have one or more
+	 * Return the number of methods with a given name (with any argument types),
+	 * for the given class and/or its superclasses. Includes non-public methods.
+	 * @param clazz the clazz to check
+	 * @param methodName the name of the method
+	 * @return the number of methods with the given name
+	 */
+	public static int getMethodCountForName(Class clazz, String methodName) {
+		int count = 0;
+		do {
+			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
+				Method method = clazz.getDeclaredMethods()[i];
+				if (methodName.equals(method.getName())) {
+					count++;
+				}
+			}
+			clazz = clazz.getSuperclass();
+		}
+		while (clazz != null);
+		return count;
+	}
+
+	/**
+	 * Does the given class and/or its superclasses at least have one or more
 	 * methods (with any argument types)? Includes non-public methods.
 	 * @param clazz the clazz to check
 	 * @param methodName the name of the method
