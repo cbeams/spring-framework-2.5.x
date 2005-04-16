@@ -65,15 +65,13 @@ public class BatchSqlUpdateTests extends AbstractJdbcTests {
 
 		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
 		mockDatabaseMetaData.supportsBatchUpdates();
 		ctrlDatabaseMetaData.setReturnValue(true);
 
 		mockConnection.prepareStatement(sql);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
 		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 1);
 
 		ctrlPreparedStatement.replay();
 		ctrlDatabaseMetaData.replay();

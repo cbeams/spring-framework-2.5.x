@@ -43,7 +43,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/** Helper to translate SQL exceptions to DataAccessExceptions */
 	private SQLExceptionTranslator exceptionTranslator;
 
-	private boolean lazyInit = false;
+	private boolean lazyInit = true;
 
 
 	/**
@@ -61,9 +61,21 @@ public abstract class JdbcAccessor implements InitializingBean {
 	}
 
 	/**
+	 * Specify the database product name for the DataSource that this accessor uses.
+	 * This allows to initialize a SQLErrorCodeSQLExceptionTranslator without
+	 * obtaining a Connection from the DataSource to get the metadata.
+	 * @param dbName the database product name that identifies the error codes entry
+	 * @see SQLErrorCodeSQLExceptionTranslator#setDatabaseProductName
+	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
+	 */
+	public void setDatabaseProductName(String dbName) {
+		this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dbName);
+	}
+
+	/**
 	 * Set the exception translator for this instance.
-	 * <p>If no custom translator is provided, a default is used
-	 * which examines the SQLException's vendor-specific error code.
+	 * <p>If no custom translator is provided, a default SQLErrorCodeSQLExceptionTranslator
+	 * is used which examines the SQLException's vendor-specific error code.
 	 * @param exceptionTranslator exception translator
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
@@ -74,7 +86,8 @@ public abstract class JdbcAccessor implements InitializingBean {
 
 	/**
 	 * Return the exception translator for this instance.
-	 * <p>Creates a default one for the specified DataSource if none set.
+	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator for the specified
+	 * DataSource if none set.
 	 */
 	public SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
@@ -90,8 +103,10 @@ public abstract class JdbcAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Set whether to lazily initialize the SQLExceptionTranslator for this
-	 * template. Only applies if <code>afterPropertiesSet</code> is called.
+	 * Set whether to lazily initialize the SQLExceptionTranslator for this accessor,
+	 * on first encounter of a SQLException. Default is "true"; can be switched to
+	 * "false" for initialization on startup.
+	 * <p>Early initialization only applies if <code>afterPropertiesSet</code> is called.
 	 * @see #getExceptionTranslator
 	 * @see #afterPropertiesSet
 	 */
@@ -100,8 +115,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Return whether to lazily initialize the SQLExceptionTranslator for
-	 * this template.
+	 * Return whether to lazily initialize the SQLExceptionTranslator for this accessor.
 	 */
 	public boolean isLazyInit() {
 		return lazyInit;

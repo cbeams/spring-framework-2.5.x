@@ -114,13 +114,27 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Construct a new JdbcTemplate, given a DataSource to obtain connections from.
-	 * Note: This will trigger eager initialization of the exception translator.
+	 * Note: This will not trigger initialization of the exception translator.
 	 * @param dataSource JDBC DataSource to obtain connections from
 	 */
 	public JdbcTemplate(DataSource dataSource) {
 		setDataSource(dataSource);
 		afterPropertiesSet();
 	}
+
+	/**
+	 * Construct a new JdbcTemplate, given a DataSource to obtain connections from.
+	 * Note: Depending on the "lazyInit" flag, initialization of the exception translator
+	 * will be triggered.
+	 * @param dataSource JDBC DataSource to obtain connections from
+	 * @param lazyInit whether to lazily initialize the SQLExceptionTranslator
+	 */
+	public JdbcTemplate(DataSource dataSource, boolean lazyInit) {
+		setDataSource(dataSource);
+		setLazyInit(lazyInit);
+		afterPropertiesSet();
+	}
+
 
 	/**
 	 * Set a NativeJdbcExtractor to extract native JDBC objects from wrapped handles.

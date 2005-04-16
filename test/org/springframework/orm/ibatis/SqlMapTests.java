@@ -54,11 +54,9 @@ public class SqlMapTests extends TestCase {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		final Connection con = (Connection) conControl.getMock();
 		ds.getConnection();
-		dsControl.setReturnValue(con, 2);
-		con.getMetaData();
-		conControl.setReturnValue(null, 1);
+		dsControl.setReturnValue(con, 1);
 		con.close();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		dsControl.replay();
 		conControl.replay();
 

@@ -82,14 +82,26 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 
 	/**
 	 * Create a SQL error code translator for the given DataSource.
-	 * Invoking this constructor will cause a connection to be obtained from the
-	 * DataSource to get the metadata.
+	 * Invoking this constructor will cause a Connection to be obtained
+	 * from the DataSource to get the metadata.
 	 * @param dataSource DataSource to use to find metadata and establish
 	 * which error codes are usable
 	 * @see SQLErrorCodesFactory
 	 */
 	public SQLErrorCodeSQLExceptionTranslator(DataSource dataSource) {
 		setDataSource(dataSource);
+	}
+
+	/**
+	 * Create a SQL error code translator for the given database product name.
+	 * Invoking this constructor will avoid obtaining a Connection from the
+	 * DataSource to get the metadata.
+	 * @param dbName the database product name that identifies the error codes entry
+	 * @see SQLErrorCodesFactory
+	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
+	 */
+	public SQLErrorCodeSQLExceptionTranslator(String dbName) {
+		setDatabaseProductName(dbName);
 	}
 
 	/**
@@ -103,14 +115,27 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	
 	/**
 	 * Set the DataSource for this translator.
-	 * <p>Setting this property will cause a connection to be obtained
-	 * from the DataSource to get the metadata.
+	 * <p>Setting this property will cause a Connection to be obtained from
+	 * the DataSource to get the metadata.
 	 * @param dataSource DataSource to use to find metadata and establish
 	 * which error codes are usable
-	 * @see SQLErrorCodesFactory
+	 * @see SQLErrorCodesFactory#getErrorCodes(javax.sql.DataSource)
+	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.sqlErrorCodes = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
+	}
+
+	/**
+	 * Set the database product name for this translator.
+	 * <p>Setting this property will avoid obtaining a Connection from the DataSource
+	 * to get the metadata.
+	 * @param dbName the database product name that identifies the error codes entry
+	 * @see SQLErrorCodesFactory#getErrorCodes(String)
+	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
+	 */
+	public void setDatabaseProductName(String dbName) {
+		this.sqlErrorCodes = SQLErrorCodesFactory.getInstance().getErrorCodes(dbName);
 	}
 
 	/**
