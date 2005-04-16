@@ -48,10 +48,11 @@ public class Constants {
 	/** Map from String field name to object value */
 	private final Map fieldCache = new HashMap();
 
+
 	/**
 	 * Create a new Constants converter class wrapping the given class.
 	 * All public static final variables will be exposed, whatever their type.
-	 * @param clazz class to analyze
+	 * @param clazz the class to analyze
 	 */
 	public Constants(Class clazz) {
 		this.className = clazz.getName();
@@ -73,11 +74,27 @@ public class Constants {
 	}
 
 	/**
+	 * Return the name of the analyzed class.
+	 */
+	public final String getClassName() {
+		return className;
+	}
+
+	/**
 	 * Return the number of constants exposed.
 	 */
-	public int getSize() {
+	public final int getSize() {
 		return this.fieldCache.size();
 	}
+
+	/**
+	 * Exposes the field cache to subclasses:
+	 * a Map from String field name to object value.
+	 */
+	protected final Map getFieldCache() {
+		return fieldCache;
+	}
+
 
 	/**
 	 * Return a constant value cast to a Number.
@@ -88,11 +105,11 @@ public class Constants {
 	 * or if the type wasn't compatible with Number
 	 */
 	public Number asNumber(String code) throws ConstantException {
-		Object o = asObject(code);
-		if (!(o instanceof Number)) {
+		Object obj = asObject(code);
+		if (!(obj instanceof Number)) {
 			throw new ConstantException(this.className, code, "not a Number");
 		}
-		return (Number) o;
+		return (Number) obj;
 	}
 
 	/**
@@ -114,10 +131,10 @@ public class Constants {
 	 * @throws ConstantException if there's no such field
 	 */
 	public Object asObject(String code) throws ConstantException {
-		code = code.toUpperCase();
-		Object val = this.fieldCache.get(code);
+		String codeToUse = code.toUpperCase();
+		Object val = this.fieldCache.get(codeToUse);
 		if (val == null) {
-			throw new ConstantException(this.className, code, "not found");
+			throw new ConstantException(this.className, codeToUse, "not found");
 		}
 		return val;
 	}
@@ -128,11 +145,11 @@ public class Constants {
 	 * @return the set of values
 	 */
 	public Set getValues(String namePrefix) {
-		namePrefix = namePrefix.toUpperCase();
+		String prefixToUse = namePrefix.toUpperCase();
 		Set values = new HashSet();
 		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
 			String code = (String) it.next();
-			if (code.startsWith(namePrefix)) {
+			if (code.startsWith(prefixToUse)) {
 				values.add(this.fieldCache.get(code));
 			}
 		}
@@ -159,15 +176,15 @@ public class Constants {
 	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
-		namePrefix = namePrefix.toUpperCase();
+		String prefixToUse = namePrefix.toUpperCase();
 		for (Iterator it = this.fieldCache.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = (String) entry.getKey();
-			if (key.startsWith(namePrefix) && entry.getValue().equals(value)) {
+			if (key.startsWith(prefixToUse) && entry.getValue().equals(value)) {
 				return key;
 			}
 		}
-		throw new ConstantException(this.className, namePrefix, value);
+		throw new ConstantException(this.className, prefixToUse, value);
 	}
 
 	/**

@@ -22,13 +22,15 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- * @since 28-Apr-2003
+ * @author Juergen Hoeller
+ * @since 28.04.2003
  */
 public class ConstantsTests extends TestCase {
 
 	public void testConstants() {
 		Constants c = new Constants(A.class);
-		assertTrue(c.getSize() == 5);
+		assertEquals(A.class.getName(), c.getClassName());
+		assertEquals(5, c.getSize());
 		
 		assertEquals(c.asNumber("DOG").intValue(), A.DOG);
 		assertEquals(c.asNumber("dog").intValue(), A.DOG);
