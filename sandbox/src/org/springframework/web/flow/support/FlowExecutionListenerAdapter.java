@@ -35,13 +35,13 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	public void started(RequestContext context) {
 	}
 
-	public void requestSubmitted(RequestContext context, Event event) {
+	public void requestSubmitted(RequestContext context) {
 	}
 
-	public void requestProcessed(RequestContext context, Event event) {
+	public void requestProcessed(RequestContext context) {
 	}
 
-	public void eventSignaled(RequestContext context, Event event) {
+	public void eventSignaled(RequestContext context) {
 	}
 
 	public void stateTransitioned(RequestContext context, State previousState, State newState) {
