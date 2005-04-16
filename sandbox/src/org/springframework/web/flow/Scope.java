@@ -23,23 +23,23 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.Styler;
 import org.springframework.util.Assert;
 
 /**
- * Holder for data placed in a specific scope, for example "request scope" or
- * "flow scope".
+ * Holder for data placed in a specific scope, for example "request scope" or "flow scope".
  * 
  * @see org.springframework.web.flow.ScopeType
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class Scope implements MutableAttributeSource, Map, Serializable {
 
 	/**
-	 * The scope type; e.g FLOW or REQUEST. 
+	 * The scope type; e.g FLOW or REQUEST.
 	 */
 	private ScopeType scopeType;
 
@@ -50,7 +50,9 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 
 	/**
 	 * Create a scope attribute container for the specified scope type.
-	 * @param scopeType the scope type
+	 * 
+	 * @param scopeType
+	 *            the scope type
 	 */
 	public Scope(ScopeType scopeType) {
 		this.scopeType = scopeType;
@@ -68,11 +70,14 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 
 	/**
 	 * Get an attribute value and make sure it is of the required type.
-	 * @param attributeName name of the attribute to get
-	 * @param requiredType the required type of the attribute value
+	 * 
+	 * @param attributeName
+	 *            name of the attribute to get
+	 * @param requiredType
+	 *            the required type of the attribute value
 	 * @return the attribute value, or null if not found
-	 * @throws IllegalStateException when the value is not of the required
-	 *         type
+	 * @throws IllegalStateException
+	 *             when the value is not of the required type
 	 */
 	public Object getAttribute(String attributeName, Class requiredType) throws IllegalStateException {
 		Object value = getAttribute(attributeName);
@@ -84,9 +89,12 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 
 	/**
 	 * Get the value of a required attribute.
-	 * @param attributeName name of the attribute to get
+	 * 
+	 * @param attributeName
+	 *            name of the attribute to get
 	 * @return the attribute value
-	 * @throws IllegalStateException when the attribute is not found
+	 * @throws IllegalStateException
+	 *             when the attribute is not found
 	 */
 	public Object getRequiredAttribute(String attributeName) throws IllegalStateException {
 		Object value = getAttribute(attributeName);
@@ -98,13 +106,15 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	}
 
 	/**
-	 * Get the value of a required attribute and make sure it is of
-	 * the required type.
-	 * @param attributeName name of the attribute to get
-	 * @param requiredType the required type of the attribute value
+	 * Get the value of a required attribute and make sure it is of the required type.
+	 * 
+	 * @param attributeName
+	 *            name of the attribute to get
+	 * @param requiredType
+	 *            the required type of the attribute value
 	 * @return the attribute value
-	 * @throws IllegalStateException when the attribute is not found or
-	 *         not of the required type
+	 * @throws IllegalStateException
+	 *             when the attribute is not found or not of the required type
 	 */
 	public Object getRequiredAttribute(String attributeName, Class requiredType) throws IllegalStateException {
 		Object value = getRequiredAttribute(attributeName);
@@ -112,6 +122,28 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 			Assert.isInstanceOf(requiredType, value);
 		}
 		return value;
+	}
+
+	/**
+	 * Gets the value of the specified <code>attributeName</code>, if such an attribute exists in this scope. If the
+	 * attribute does not exist, a new instance will be created of the type <code>attributeClass</code>
+	 * 
+	 * @param attributeName
+	 *            the attribute name
+	 * @param attributeClass
+	 *            the attribute class
+	 * @return the value
+	 * @throws IllegalStateException
+	 *             when the attribute is not of the required type
+	 * @throws BeansException
+	 *             if the attribute could not be created
+	 */
+	public Object getOrCreateAttribute(String attributeName, Class attributeClass) throws IllegalStateException,
+			BeansException {
+		if (!containsAttribute(attributeName)) {
+			setAttribute(attributeName, BeanUtils.instantiateClass(attributeClass));
+		}
+		return getAttribute(attributeName, attributeClass);
 	}
 
 	/**
@@ -141,9 +173,11 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 
 	/**
 	 * Remove an attribute from this scope.
-	 * @param attributeName the name of the attribute to remove
-	 * @return previous value associated with specified attribute name,
-	 *         or <tt>null</tt> if there was no mapping for the name
+	 * 
+	 * @param attributeName
+	 *            the name of the attribute to remove
+	 * @return previous value associated with specified attribute name, or <tt>null</tt> if there was no mapping for
+	 *         the name
 	 */
 	public Object removeAttribute(String attributeName) {
 		return this.attributes.remove(attributeName);
