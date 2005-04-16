@@ -113,7 +113,7 @@ public class BindingActionForm extends ActionForm {
 
 	private void assertErrorsSet() {
 		Assert.notNull(this.errors,
-				"The errors instance must be set on this action form in order to access form properties");
+				"The errors instance must be set on this BindingActionForm in order to access form properties, however it is null.");
 	}
 
 	private Object[] resolveArgs(Object[] arguments) {
