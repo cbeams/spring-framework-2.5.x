@@ -24,11 +24,11 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionServlet;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.Errors;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.FormObjectAccessor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
@@ -178,8 +178,7 @@ public class FlowAction extends TemplateAction {
 				if (context.isFlowExecutionActive()) {
 					if (form instanceof BindingActionForm) {
 						BindingActionForm bindingForm = (BindingActionForm)form;
-						bindingForm.setErrors((Errors)context.getRequestScope().getAttribute(
-								FormObjectAccessor.FORM_OBJECT_ATTRIBUTE_NAME, Errors.class));
+						bindingForm.setErrors(new FormObjectAccessor(context).getFormErrors());
 						bindingForm.setRequest(request);
 					}
 				}
