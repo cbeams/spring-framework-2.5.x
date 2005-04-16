@@ -1105,12 +1105,6 @@
 			</fileset>
 		</copy>
 
-		<copy todir="${sandbox.target.classes.dir}/META-INF" preservelastmodified="true">
-			<fileset dir="${sandbox.src.dir}/org/springframework/validation/commons/taglib">
-				<include name="*.tld"/>
-			</fileset>
-		</copy>
-
 	</target>
 
 
