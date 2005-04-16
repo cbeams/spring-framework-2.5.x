@@ -26,13 +26,10 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TransactionInProgressException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionHolder;
+import org.springframework.jms.support.JmsAccessor;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
@@ -75,7 +72,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see javax.jms.MessageProducer
  * @see javax.jms.MessageConsumer
  */
-public class JmsTemplate implements JmsOperations, InitializingBean {
+public class JmsTemplate extends JmsAccessor implements JmsOperations {
 
 	/**
 	 * Default timeout for receive operations:
@@ -86,86 +83,36 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	/** Constants instance for javax.jms.Session */
 	private static final Constants constants = new Constants(Session.class);
 
-	protected final Log logger = LogFactory.getLog(getClass());
 
-
-	/**
-	 * Used to obtain JMS connections.
-	 */
-	private ConnectionFactory connectionFactory;
-
-	/**
-	 * By default uses the Point-to-Point domain.
-	 */
 	private boolean pubSubDomain = false;
 
-	/**
-	 * Default transaction mode for a JMS Session.
-	 */
 	private boolean sessionTransacted = false;
 
-	/**
-	 * Default ack mode for a JMS Session.
-	 */
 	private int sessionAcknowledgeMode = Session.AUTO_ACKNOWLEDGE;
 
 
-	/**
-	 * The default destination to use on send operations that do not specify an explicit destination.
-	 */
-	private Destination defaultDestination;
+	private Object defaultDestination;
 
-	/**
-	 * Delegate management of JNDI lookups and dynamic destination creation
-	 * to a DestinationResolver implementation.
-	 */
 	private DestinationResolver destinationResolver;
 
-	/**
-	 * The messageConverter to use for send(object) methods.
-	 */
 	private MessageConverter messageConverter;
 
 
-	/**
-	 * Whether message IDs are enabled on producers.
-	 */
 	private boolean messageIdEnabled = true;
 
-	/**
-	 * Whether message timestamps are enabled on producers.
-	 */
 	private boolean messageTimestampEnabled = true;
 
-	/**
-	 * Whether to inhibit the delivery of messages published by its own connection.
-	 */
 	private boolean pubSubNoLocal = false;
 
-	/**
-	 * The timeout to use for receive operations.
-	 */
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
 
-	/**
-	 * Use the default or explicit QOS parameters.
-	 */
 	private boolean explicitQosEnabled = false;
 
-	/**
-	 * The delivery mode to use when sending a message. Only used if isExplicitQosEnabled = true.
-	 */
 	private int deliveryMode = Message.DEFAULT_DELIVERY_MODE;
 
-	/**
-	 * The priority of the message. Only used if isExplicitQosEnabled = true.
-	 */
 	private int priority = Message.DEFAULT_PRIORITY;
 
-	/**
-	 * The message's lifetime in milliseconds. Only used if isExplicitQosEnabled = true.
-	 */
 	private long timeToLive = Message.DEFAULT_TIME_TO_LIVE;
 
 
@@ -203,20 +150,6 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 		setMessageConverter(new SimpleMessageConverter());
 	}
 
-
-	/**
-	 * Set the connection factory used for obtaining JMS connections.
-	 */
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
-		this.connectionFactory = connectionFactory;
-	}
-    
-	/**
-	 * Return the connection factory used for obtaining JMS connections.
-	 */
-	public ConnectionFactory getConnectionFactory() {
-		return connectionFactory;
-	}
 
 	/**
 	 * Configure the JmsTemplate with knowledge of the JMS domain used.
@@ -302,9 +235,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	/**
 	 * Set the destination to be used on send operations that do not
 	 * have a destination parameter.
+	 * <p>Alternatively, specify a "defaultDestinationName", to be
+	 * dynamically resolved via the DestinationResolver.
 	 * @see #send(MessageCreator)
 	 * @see #convertAndSend(Object)
 	 * @see #convertAndSend(Object, MessagePostProcessor)
+	 * @see #setDefaultDestinationName(String)
 	 */
 	public void setDefaultDestination(Destination destination) {
 		this.defaultDestination = destination;
@@ -315,7 +251,30 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 * have a destination parameter.
 	 */
 	public Destination getDefaultDestination() {
-		return defaultDestination;
+		return (this.defaultDestination instanceof Destination ? (Destination) this.defaultDestination : null);
+	}
+
+	/**
+	 * Set the destination name to be used on send operations that do not
+	 * have a destination parameter. The specified name will be dynamically
+	 * resolved via the DestinationResolver.
+	 * <p>Alternatively, specify a JMS Destination object as "defaultDestination".
+	 * @see #send(MessageCreator)
+	 * @see #convertAndSend(Object)
+	 * @see #convertAndSend(Object, MessagePostProcessor)
+	 * @see #setDestinationResolver
+	 * @see #setDefaultDestination(javax.jms.Destination)
+	 */
+	public void setDefaultDestinationName(String defaultDestinationName) {
+		this.defaultDestination = defaultDestinationName;
+	}
+
+	/**
+	 * Return the destination name to be used on send operations that do not
+	 * have a destination parameter.
+	 */
+	public String getDefaultDestinationName() {
+		return (this.defaultDestination instanceof String ? (String) this.defaultDestination : null);
 	}
 
 	/**
@@ -512,15 +471,10 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	}
 
 
-	public void afterPropertiesSet() {
-		if (this.connectionFactory == null) {
-			throw new IllegalArgumentException("connectionFactory is required");
-		}
-	}
-
 	private void checkDefaultDestination() throws IllegalStateException {
-		if (getDefaultDestination() == null) {
-			throw new IllegalStateException("No defaultDestination specified. Check configuration of JmsTemplate.");
+		if (this.defaultDestination == null) {
+			throw new IllegalStateException(
+					"No defaultDestination or defaultDestinationName specified. Check configuration of JmsTemplate.");
 		}
 	}
 
@@ -541,19 +495,6 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 */
 	protected Destination resolveDestinationName(Session session, String destinationName) throws JMSException {
 		return getDestinationResolver().resolveDestinationName(session, destinationName, isPubSubDomain());
-	}
-
-	/**
-	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to
-	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
-	 * equivalent.
-	 * <p>Default implementation delegates to JmsUtils.
-	 * @param ex the original checked JMSException to convert
-	 * @return the Spring runtime JmsException wrapping <code>ex</code>
-	 * @see org.springframework.jms.support.JmsUtils#convertJmsAccessException
-	 */
-	protected JmsException convertJmsAccessException(JMSException ex) {
-		return JmsUtils.convertJmsAccessException(ex);
 	}
 
 
@@ -641,6 +582,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
 			throws JMSException {
+
 		if (isPubSubNoLocal()) {
 			return session.createConsumer(destination, messageSelector, true);
 		}
@@ -730,7 +672,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	public void send(MessageCreator messageCreator) throws JmsException {
 		checkDefaultDestination();
-		send(getDefaultDestination(), messageCreator);
+		if (getDefaultDestination() != null) {
+			send(getDefaultDestination(), messageCreator);
+		}
+		else {
+			send(getDefaultDestinationName(), messageCreator);
+		}
 	}
 
 	public void send(final Destination destination, final MessageCreator messageCreator) throws JmsException {
@@ -754,6 +701,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	protected void doSend(Session session, Destination destination, MessageCreator messageCreator)
 			throws JMSException {
+
 		MessageProducer producer = createProducer(session, destination);
 		Message message = messageCreator.createMessage(session);
 		if (logger.isDebugEnabled()) {
@@ -780,7 +728,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	public void convertAndSend(Object message) throws JmsException {
 		checkDefaultDestination();
-		convertAndSend(getDefaultDestination(), message);
+		if (getDefaultDestination() != null) {
+			convertAndSend(getDefaultDestination(), message);
+		}
+		else {
+			convertAndSend(getDefaultDestinationName(), message);
+		}
 	}
 
 	public void convertAndSend(Destination destination, final Object message) throws JmsException {
@@ -803,12 +756,18 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	public void convertAndSend(Object message, MessagePostProcessor postProcessor) throws JmsException {
 		checkDefaultDestination();
-		convertAndSend(getDefaultDestination(), message, postProcessor);
+		if (getDefaultDestination() != null) {
+			convertAndSend(getDefaultDestination(), message, postProcessor);
+		}
+		else {
+			convertAndSend(getDefaultDestinationName(), message, postProcessor);
+		}
 	}
 
 	public void convertAndSend(
 			Destination destination, final Object message, final MessagePostProcessor postProcessor)
 			throws JmsException {
+
 		checkMessageConverter();
 		send(destination, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
@@ -821,6 +780,7 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 	public void convertAndSend(
 			String destinationName, final Object message, final MessagePostProcessor postProcessor)
 	    throws JmsException {
+
 		checkMessageConverter();
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
@@ -833,7 +793,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	public Message receive() throws JmsException {
 		checkDefaultDestination();
-		return receive(getDefaultDestination());
+		if (getDefaultDestination() != null) {
+			return receive(getDefaultDestination());
+		}
+		else {
+			return receive(getDefaultDestinationName());
+		}
 	}
 
 	public Message receive(final Destination destination) throws JmsException {
@@ -855,7 +820,12 @@ public class JmsTemplate implements JmsOperations, InitializingBean {
 
 	public Message receiveSelected(String messageSelector) throws JmsException {
 		checkDefaultDestination();
-		return receiveSelected(getDefaultDestination(), messageSelector);
+		if (getDefaultDestination() != null) {
+			return receiveSelected(getDefaultDestination(), messageSelector);
+		}
+		else {
+			return receiveSelected(getDefaultDestinationName(), messageSelector);
+		}
 	}
 
 	public Message receiveSelected(final Destination destination, final String messageSelector) throws JmsException {

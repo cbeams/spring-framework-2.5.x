@@ -255,7 +255,15 @@ public class JmsTemplateTests extends TestCase {
 	 * send(Destination d, MessageCreator messageCreator)
 	 */
 	public void testSendDestination() throws Exception {
-		doTestSendDestination(true, true, false, false);
+		doTestSendDestination(true, false, true, false);
+	}
+
+	/**
+	 * Test seding to a destination using the method
+	 * send(String d, MessageCreator messageCreator)
+	 */
+	public void testSendDestinationName() throws Exception {
+		doTestSendDestination(false, false, true, false);
 	}
 
 	/**
@@ -263,14 +271,6 @@ public class JmsTemplateTests extends TestCase {
 	 * send(Destination d, MessageCreator messageCreator) using QOS parameters.
 	 */
 	public void testSendDestinationWithQOS() throws Exception {
-		doTestSendDestination(false, true, false, true);
-	}
-
-	/**
-	 * Test seding to a destination using the method
-	 * send(String d, MessageCreator messageCreator)
-	 */
-	public void testSendStringDestination() throws Exception {
 		doTestSendDestination(true, false, false, true);
 	}
 
@@ -278,8 +278,8 @@ public class JmsTemplateTests extends TestCase {
 	 * Test sending to a destination using the method
 	 * send(String d, MessageCreator messageCreator) using QOS parameters.
 	 */
-	public void testSendStringDestinationWithQOS() throws Exception {
-		doTestSendDestination(false, false, false, false);
+	public void testSendDestinationNameWithQOS() throws Exception {
+		doTestSendDestination(false, false, false, true);
 	}
 
 	/**
@@ -290,10 +290,24 @@ public class JmsTemplateTests extends TestCase {
 	}
 
 	/**
+	 * Test sending to the default destination name.
+	 */
+	public void testSendDefaultDestinationName() throws Exception {
+		doTestSendDestination(false, true, true, true);
+	}
+
+	/**
 	 * Test sending to the default destination using explicit QOS parameters.
 	 */
 	public void testSendDefaultDestinationWithQOS() throws Exception {
-		doTestSendDestination(false, true, true, false);
+		doTestSendDestination(true, true, false, false);
+	}
+
+	/**
+	 * Test sending to the default destination name using explicit QOS parameters.
+	 */
+	public void testSendDefaultDestinationNameWithQOS() throws Exception {
+		doTestSendDestination(false, true, false, false);
 	}
 
 	/**
@@ -301,13 +315,22 @@ public class JmsTemplateTests extends TestCase {
 	 * callback but with different QOS options.
 	 * @param ignoreQOS test using default QOS options.
 	 */
-	private void doTestSendDestination(boolean ignoreQOS, boolean explicitDestination,
-			boolean useDefaultDestination, boolean disableIdAndTimestamp) throws Exception {
+	private void doTestSendDestination(
+			boolean explicitDestination, boolean useDefaultDestination,
+			boolean ignoreQOS, boolean disableIdAndTimestamp) throws Exception {
 
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(mockConnectionFactory);
+
+		String destinationName = "testDestination";
+
 		if (useDefaultDestination) {
-			template.setDefaultDestination(mockQueue);
+			if (explicitDestination) {
+				template.setDefaultDestination(mockQueue);
+			}
+			else {
+				template.setDefaultDestinationName(destinationName);
+			}
 		}
 		if (disableIdAndTimestamp) {
 			template.setMessageIdEnabled(false);
@@ -376,7 +399,7 @@ public class JmsTemplateTests extends TestCase {
 				});
 			}
 			else {
-				template.send("testDestination", new MessageCreator() {
+				template.send(destinationName, new MessageCreator() {
 					public Message createMessage(Session session)
 							throws JMSException {
 						return session.createTextMessage("just testing");
@@ -434,6 +457,10 @@ public class JmsTemplateTests extends TestCase {
 	}
 
 	public void testReceiveDefaultDestination() throws Exception {
+		doTestReceive(true, true, false, false, false, false, false);
+	}
+
+	public void testReceiveDefaultDestinationName() throws Exception {
 		doTestReceive(false, true, false, false, false, false, false);
 	}
 
@@ -445,11 +472,15 @@ public class JmsTemplateTests extends TestCase {
 		doTestReceive(true, false, false, true, false, false, true);
 	}
 
-	public void testReceiveStringDestination() throws Exception {
+	public void testReceiveDestinationName() throws Exception {
 		doTestReceive(false, false, false, false, false, true, true);
 	}
 
 	public void testReceiveDefaultDestinationWithSelector() throws Exception {
+		doTestReceive(true, true, false, false, true, true, true);
+	}
+
+	public void testReceiveDefaultDestinationNameWithSelector() throws Exception {
 		doTestReceive(false, true, false, false, true, true, true);
 	}
 
@@ -461,15 +492,19 @@ public class JmsTemplateTests extends TestCase {
 		doTestReceive(true, false, false, true, true, true, false);
 	}
 
-	public void testReceiveStringDestinationWithSelector() throws Exception {
+	public void testReceiveDestinationNameWithSelector() throws Exception {
 		doTestReceive(false, false, false, false, true, false, false);
 	}
 
 	public void testReceiveAndConvertDefaultDestination() throws Exception {
+		doTestReceive(true, true, true, false, false, false, true);
+	}
+
+	public void testReceiveAndConvertDefaultDestinationName() throws Exception {
 		doTestReceive(false, true, true, false, false, false, true);
 	}
 
-	public void testReceiveAndConvertStringDestination() throws Exception {
+	public void testReceiveAndConvertDestinationName() throws Exception {
 		doTestReceive(false, false, true, false, false, true, false);
 	}
 
@@ -478,10 +513,10 @@ public class JmsTemplateTests extends TestCase {
 	}
 
 	public void testReceiveAndConvertDefaultDestinationWithSelector() throws Exception {
-		doTestReceive(false, true, true, false, true, true, true);
+		doTestReceive(true, true, true, false, true, true, true);
 	}
 
-	public void testReceiveAndConvertStringDestinationWithSelector() throws Exception {
+	public void testReceiveAndConvertDestinationNameWithSelector() throws Exception {
 		doTestReceive(false, false, true, false, true, true, false);
 	}
 
@@ -497,8 +532,15 @@ public class JmsTemplateTests extends TestCase {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(mockConnectionFactory);
 
+		String destinationName = "testDestination";
+
 		if (useDefaultDestination) {
-			template.setDefaultDestination(mockQueue);
+			if (explicitDestination) {
+				template.setDefaultDestination(mockQueue);
+			}
+			else {
+				template.setDefaultDestinationName(destinationName);
+			}
 		}
 		if (noLocal) {
 			template.setPubSubNoLocal(true);
@@ -604,7 +646,6 @@ public class JmsTemplateTests extends TestCase {
 			}
 		}
 		else {
-			String destinationName = "testDestination";
 			if (testConverter) {
 				textFromMessage = (String)
 						(messageSelector ? template.receiveSelectedAndConvert(destinationName, selectorString) :
