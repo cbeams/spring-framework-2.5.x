@@ -52,7 +52,7 @@
 		</property>
 	</bean>
 	
-	<bean id="sellItemAction" class="org.springframework.samples.sellitem.web.flow.action.SellItemAction">
+	<bean id="sellItemAction" class="org.springframework.samples.sellitem.SellItemAction">
 		<property name="validator">
 			<bean class="org.springframework.samples.sellitem.SaleValidator"/>
 		</property>
