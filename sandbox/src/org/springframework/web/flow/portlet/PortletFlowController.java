@@ -138,6 +138,10 @@ public class PortletFlowController extends AbstractController implements BeanFac
 	 */
 	protected void handleRequestInternal(ActionRequest request, ActionResponse response) throws Exception {
 		ViewDescriptor viewDescriptor = flowExecutionManager.handle(request, response);
+		// note that we can't put the view descriptor in a request attribute because
+		// request attributes are objects associated with a portlet during a single
+		// portlet request: a portlet cannot assume that attributes are shared between
+		// action and render requests
 		request.getPortletSession().setAttribute(VIEWDESCRIPTOR_ATTRIBUTE, viewDescriptor);
 	}
 
@@ -153,10 +157,6 @@ public class PortletFlowController extends AbstractController implements BeanFac
 	 */
 	protected ModelAndView handleRequestInternal(RenderRequest request, RenderResponse response) throws Exception {
 		try {
-			// note that we can't put the view descriptor in a request attribute because
-			// request attributes are objects associated with a portlet during a single
-			// portlet request: a portlet cannot assume that attributes are shared between
-			// action and render requests
 			ViewDescriptor viewDescriptor =
 				(ViewDescriptor) request.getPortletSession().getAttribute(VIEWDESCRIPTOR_ATTRIBUTE);
 			if (viewDescriptor == null) {

@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ import org.springframework.binding.AttributeSource;
  * @author Juergen Hoeller
  * @author Erwin Vervaet
  */
-public class ViewDescriptor implements AttributeSource {
+public class ViewDescriptor implements AttributeSource, Serializable {
 
 	private String viewName;
 
