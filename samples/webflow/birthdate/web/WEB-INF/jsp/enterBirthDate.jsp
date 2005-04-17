@@ -13,7 +13,7 @@
 		<HR>
 		
 		<DIV align="left">
-			<FORM name="submitForm" action="birthDate.do" method="post">
+			<html:form action="birthDate" method="post">
 				<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 				
@@ -36,13 +36,14 @@
 						</TD>
 					</TR>
 				</TABLE>
-			</FORM>
-		</DIV>
-		
-		<HR>
 
-		<DIV align="right">
-			<INPUT type="button" onclick="javascript:document.submitForm.submit()" value="Calculate Age">
+			<HR>
+	
+			<DIV align="right">
+				<html:submit value="Calculate Age"/>
+			</DIV>
+				
+			</html:form>
 		</DIV>
 		
 	</BODY>
