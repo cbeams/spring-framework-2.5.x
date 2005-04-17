@@ -136,7 +136,7 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	/**
 	 * Assert that the attribute is contained in this scope.
 	 * @param attributeName the attribute
-	 * @throws IllegalStateException the assertion failed; the attribute is not present.
+	 * @throws IllegalStateException the assertion failed; the attribute is not present
 	 */
 	public void assertAttributePresent(String attributeName) throws IllegalStateException {
 		if (!containsAttribute(attributeName)) {

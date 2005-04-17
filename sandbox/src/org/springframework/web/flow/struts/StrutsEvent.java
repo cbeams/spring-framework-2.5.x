@@ -8,25 +8,26 @@ import org.apache.struts.action.ActionMapping;
 import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
 
 /**
- * A client flow event orignating from a struts environment. Provides access to the struts ActionMapping and ActionForm
- * objects, as well as all HttpServlet information.
+ * A client flow event originating from a Struts environment. Provides access
+ * to the Struts ActionMapping and ActionForm objects, as well as all
+ * HttpServlet information.
  * 
  * @author Keith Donald
  */
 public class StrutsEvent extends HttpServletRequestEvent {
 
 	/**
-	 * The struts action mapping.
+	 * The Struts action mapping.
 	 */
 	private ActionMapping actionMapping;
 
 	/**
-	 * The struts action form.
+	 * The Struts action form.
 	 */
 	private ActionForm actionForm;
 
 	/**
-	 * Creates a new struts event.
+	 * Creates a new Struts event.
 	 * @param actionMapping the action mapping
 	 * @param actionForm the action form
 	 * @param request the request
@@ -40,15 +41,17 @@ public class StrutsEvent extends HttpServletRequestEvent {
 	}
 
 	/**
-	 * Creates a new struts event.
+	 * Creates a new Struts event.
 	 * @param actionMapping the action mapping
 	 * @param actionForm the action form
 	 * @param request the request
 	 * @param response the response
-	 * @param eventIdParameterName
-	 * @param eventIdAttributeName
-	 * @param currentStateIdParameterName
-	 * @param parameterValueDelimiter
+	 * @param eventIdParameterName name of the event id parameter in the request
+	 * @param eventIdAttributeName name of the event id attribute in the request
+	 * @param currentStateIdParameterName name of the current state id parameter
+	 *        in the request
+	 * @param parameterValueDelimiter delimiter used when a parameter value is
+	 *        sent as part of the name of a request parameter (e.g. "_eventId_value=bar")
 	 */
 	public StrutsEvent(ActionMapping actionMapping, ActionForm actionForm, HttpServletRequest request,
 			HttpServletResponse response, String eventIdParameterName, String eventIdAttributeName,
@@ -60,14 +63,14 @@ public class StrutsEvent extends HttpServletRequestEvent {
 	}
 
 	/**
-	 * @return the action form
+	 * Returns the action form.
 	 */
 	public ActionForm getActionForm() {
 		return actionForm;
 	}
 
 	/**
-	 * @return the action mapping
+	 * Returns the action mapping.
 	 */
 	public ActionMapping getActionMapping() {
 		return actionMapping;
