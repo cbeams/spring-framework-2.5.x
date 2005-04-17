@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow.support;
 
-import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
