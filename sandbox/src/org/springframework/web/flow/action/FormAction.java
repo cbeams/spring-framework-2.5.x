@@ -164,7 +164,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	/**
 	 * The name the form object should be exposed under.
 	 */
-	private String formObjectName = FormObjectAccessor.FORM_OBJECT_ATTRIBUTE_NAME;
+	private String formObjectName = FormObjectAccessor.FORM_OBJECT_ALIAS;
 
 	/**
 	 * The type of form object - typically a instantiable class. 
