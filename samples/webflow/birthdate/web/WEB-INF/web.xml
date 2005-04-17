@@ -5,7 +5,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			/WEB-INF/webflows.xml
+			/WEB-INF/webflow-context.xml
 		</param-value>
 	</context-param>
 	
@@ -27,14 +27,6 @@
 		<url-pattern>*.do</url-pattern>
 	</servlet-mapping>
 
-	<!-- uncomment out to use Spring MVC
-	<servlet>
-		<servlet-name>dispatcher</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	-->
-	
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>

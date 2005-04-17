@@ -11,6 +11,6 @@
 		</property>
 	</bean>
 	
-	<bean id="birthDateFormAction" class="org.springframework.samples.birthdate.web.flow.action.BirthDateFormAction"/>
+	<bean id="birthDateFormAction" class="org.springframework.samples.birthdate.BirthDateFormAction"/>
 
 </beans>

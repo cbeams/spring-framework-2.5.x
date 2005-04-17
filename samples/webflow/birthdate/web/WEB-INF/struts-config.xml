@@ -32,6 +32,8 @@
 	<!-- A custom request processor is neccessary for deferred, POJO-based binding and validation
 		 No more Action Form proliferation! :-) -->
     <controller processorClass="org.springframework.web.struts.BindingRequestProcessor"/>
+
+	<message-resources parameter="org.springframework.samples.birthdate.MessageResources" />
 	
 	<!-- plugin neccessary for making Commons BeanUtils aware of the BindingActionForm adapter -->
     <plug-in className="org.springframework.web.struts.BindingPlugin"/>
