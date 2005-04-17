@@ -10,7 +10,7 @@
 	</view-state>
 	
 	<subflow-state id="launchB" flow="sampleB">
-		<attribute-mapper class="org.springframework.samples.flowlauncher.web.flow.action.SampleFlowAttributeMapper"/>
+		<attribute-mapper class="org.springframework.samples.flowlauncher.SampleFlowAttributeMapper"/>
 		<transition on="end" to="aPage"/>
 	</subflow-state>
 

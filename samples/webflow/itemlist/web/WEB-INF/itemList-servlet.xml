@@ -21,9 +21,9 @@
 		</property>
 	</bean>
 
-	<bean id="item.create" class="org.springframework.samples.itemlist.web.flow.NewItemAction"/>
+	<bean id="item.create" class="org.springframework.samples.itemlist.NewItemAction"/>
 	
-	<bean id="item.add" class="org.springframework.samples.itemlist.web.flow.AddItemAction"/>
+	<bean id="item.add" class="org.springframework.samples.itemlist.AddItemAction"/>
 	
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix" value="/WEB-INF/jsp/"/>

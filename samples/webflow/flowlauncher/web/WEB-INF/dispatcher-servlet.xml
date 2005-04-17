@@ -16,7 +16,7 @@
 					<bean class="org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage"/>
 				</property>
 				<property name="flowExecutionListener">
-					<bean class="org.springframework.samples.flowlauncher.web.flow.action.SampleFlowExecutionListener"/>
+					<bean class="org.springframework.samples.flowlauncher.SampleFlowExecutionListener"/>
 				</property>
 			</bean>
 		</property>

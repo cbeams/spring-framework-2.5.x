@@ -19,9 +19,9 @@
 		</property>
 	</bean>
 	
-	<bean id="upload.process" class="org.springframework.samples.fileupload.web.flow.ProcessUploadAction">
+	<bean id="upload.process" class="org.springframework.samples.fileupload.ProcessUploadAction">
 		<property name="formObjectName" value="file"/>
-		<property name="formObjectClass" value="org.springframework.samples.fileupload.web.flow.FileUploadBean"/>
+		<property name="formObjectClass" value="org.springframework.samples.fileupload.FileUploadBean"/>
 	</bean>
 
 	<!-- 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.fileupload.web.flow;
+package org.springframework.samples.fileupload;
 
 import org.springframework.validation.DataBinder;
 import org.springframework.web.flow.RequestContext;

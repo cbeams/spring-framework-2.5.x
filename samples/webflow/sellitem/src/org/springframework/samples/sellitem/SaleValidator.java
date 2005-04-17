@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.samples.sellitem.web.flow.action;
+package org.springframework.samples.sellitem;
 
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;

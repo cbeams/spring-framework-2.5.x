@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.itemlist.web.flow;
+package org.springframework.samples.itemlist;
 
 import java.util.ArrayList;
 import java.util.List;
