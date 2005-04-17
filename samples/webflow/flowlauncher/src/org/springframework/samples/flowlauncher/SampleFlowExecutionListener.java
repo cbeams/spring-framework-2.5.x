@@ -16,7 +16,6 @@
 package org.springframework.samples.flowlauncher;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 
