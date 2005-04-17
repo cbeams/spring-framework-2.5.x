@@ -29,6 +29,16 @@ public class FourDigitNumberGuessActionTests extends TestCase {
 		assertEquals("invalidInput", result.getId());
 	}
 
+	public void testGuessInputNotAllDigits() throws Exception {
+		MockRequestContext context = new MockRequestContext();
+		Map parameters = new HashMap();
+		parameters.put("guess", "12AB");
+		context.setOriginatingEvent(new SimpleEvent(this, "submit", parameters));
+		FourDigitNumberGuessAction action = new FourDigitNumberGuessAction();
+		Event result = action.guess(context);
+		assertEquals("invalidInput", result.getId());
+	}
+
 	public void testGuessInputNotUniqueDigits() throws Exception {
 		MockRequestContext context = new MockRequestContext();
 		Map parameters = new HashMap();
@@ -57,7 +67,6 @@ public class FourDigitNumberGuessActionTests extends TestCase {
 		Event result = action.guess(context);
 		NumberGuessData data = (NumberGuessData)context.getFlowScope().getAttribute("data");
 		String answer = data.getAnswer();
-		System.out.println(answer);
 		parameters.put("guess", answer);
 		context.setOriginatingEvent(new SimpleEvent(this, "submit", parameters));
 		result = action.guess(context);

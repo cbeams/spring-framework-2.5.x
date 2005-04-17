@@ -41,6 +41,9 @@ public class FourDigitNumberGuessAction extends MultiAction {
 			return result("invalidInput");
 		}
 		for (int i = 0; i < 4; i++) {
+			if (!Character.isDigit(guess.charAt(i))) {
+				return result("invalidInput");
+			}
 			int digit = Character.getNumericValue(guess.charAt(i));
 			for (int j = 0; j < i; j++) {
 				if (digit == Character.getNumericValue(guess.charAt(j))) {
