@@ -22,6 +22,11 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 
 public class ProcessUploadAction extends FormAction {
 	
+	public ProcessUploadAction() {
+		setFormObjectName("file");
+		setFormObjectClass(FileUploadBean.class);
+	}
+	
 	protected void initBinder(RequestContext context, DataBinder binder) {
 		// to actually be able to convert a multipart object to a byte[]
 		// we have to register a custom editor (in this case the

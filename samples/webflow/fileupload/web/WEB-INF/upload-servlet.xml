@@ -19,10 +19,7 @@
 		</property>
 	</bean>
 	
-	<bean id="upload.process" class="org.springframework.samples.fileupload.ProcessUploadAction">
-		<property name="formObjectName" value="file"/>
-		<property name="formObjectClass" value="org.springframework.samples.fileupload.FileUploadBean"/>
-	</bean>
+	<bean id="upload.process" class="org.springframework.samples.fileupload.ProcessUploadAction"/>
 
 	<!-- 
 		support for multipart requests using commons file upload, make sure you have the fileupload jar
