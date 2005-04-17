@@ -36,21 +36,21 @@ public class NumberGuessAction extends MultiAction {
 		NumberGuessData data = getNumberGuessData(context);
 		int guess = getGuess(context);
 		if (guess < 0 || guess > 100) {
-			data.indication = "invalid";
+			data.lastGuessResult = "invalid";
 			return result("invalidInput");
 		}
 		else {
 			data.guesses++;
 			if (data.answer < guess) {
-				data.indication = "lower";
+				data.lastGuessResult = "lower";
 				return result("retry");
 			}
 			else if (data.answer > guess) {
-				data.indication = "higher";
+				data.lastGuessResult = "higher";
 				return result("retry");
 			}
 			else {
-				data.indication = "correct";
+				data.lastGuessResult = "correct";
 				Calendar now = Calendar.getInstance();
 				long durationMilliseconds = now.getTime().getTime() - data.start.getTime().getTime();
 				data.durationSeconds = durationMilliseconds / 1000;
@@ -85,7 +85,7 @@ public class NumberGuessAction extends MultiAction {
 
 		private int guesses = 0;
 
-		private String indication = "";
+		private String lastGuessResult = "";
 
 		private long durationSeconds = -1;
 
@@ -103,8 +103,8 @@ public class NumberGuessAction extends MultiAction {
 			return guesses;
 		}
 
-		public String getIndication() {
-			return indication;
+		public String getLastGuessResult() {
+			return lastGuessResult;
 		}
 	}
 }
