@@ -17,7 +17,17 @@
 			</bean>
 		</property>
 	</bean>
+
+	<bean id="fourDigitNumberGuess" class="org.springframework.web.flow.config.FlowFactoryBean">
+		<property name="flowBuilder">
+			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
+				<property name="resource"><value>/WEB-INF/fourDigitNumberGuess-flow.xml</value></property>
+			</bean>
+		</property>
+	</bean>
 	
-	<bean id="numberGuessAction" class="org.springframework.samples.numberguess.web.flow.action.NumberGuessAction"/>
+	<bean id="numberGuessAction" class="org.springframework.samples.numberguess.NumberGuessAction"/>
+
+	<bean id="fourDigitNumberGuessAction" class="org.springframework.samples.numberguess.FourDigitNumberGuessAction"/>
 
 </beans>

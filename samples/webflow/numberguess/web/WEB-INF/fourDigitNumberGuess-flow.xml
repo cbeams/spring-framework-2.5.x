@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+	"http://www.springframework.org/dtd/spring-webflow.dtd">
+
+<webflow id="fourDigitNumberGuess" start-state="enterGuess">
+	
+	<view-state id="enterGuess" view="enterFourDigitGuess">
+		<transition on="submit" to="guess"/>
+	</view-state>
+	
+	<action-state id="guess">
+		<action bean="fourDigitNumberGuessAction"/>
+		<transition on="invalidInput" to="enterGuess"/>
+		<transition on="retry" to="enterGuess"/>
+		<transition on="correct" to="showAnswer"/>
+	</action-state>
+	
+	<end-state id="showAnswer" view="showFourDigitAnswer"/>
+
+</webflow>
