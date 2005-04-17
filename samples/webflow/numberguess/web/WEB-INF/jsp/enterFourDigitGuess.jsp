@@ -17,6 +17,9 @@
 				<INPUT type="hidden" name="_flowExecutionId" value="<c:out value="${flowExecutionId}"/>">
 				<INPUT type="hidden" name="_eventId" value="submit">
 				<table>
+					<c:if test="${flowExecution.lastEventId == 'invalidInput'}">
+						<tr><td colspan="2"><font color="red">Your guess was invalid: it must be a 4 digit number (e.g 1234), and each digit must be unique.</font></td></tr>
+					</c:if>
 				    <tr><td>Guess:</td><td><INPUT type="text" name="guess" value="<c:out value="${param.guess}"/>"/></td></tr>
 				</table>
 			</FORM>
