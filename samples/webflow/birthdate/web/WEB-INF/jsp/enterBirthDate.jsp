@@ -20,7 +20,7 @@
 				<TABLE>
 					<TR>
 						<TD colspan="2">
-							<html:errors />
+							<html:errors/>
 						</TD>
 					</TR>
 					<TR>
