@@ -36,12 +36,10 @@ public class FourDigitNumberGuessAction extends MultiAction {
 
 	public Event guess(RequestContext context) throws Exception {
 		NumberGuessData data = getNumberGuessData(context);
-		
 		String guess = getGuess(context);
 		if (guess == null || guess.length() != 4) {
 			return result("invalidInput");
 		}
-
 		for (int i = 0; i < 4; i++) {
 			int digit = Character.getNumericValue(guess.charAt(i));
 			for (int j = 0; j < i; j++) {
@@ -50,7 +48,6 @@ public class FourDigitNumberGuessAction extends MultiAction {
 				}
 			}
 		}
-
 		int rightPosition = 0;
 		int correctButWrongPosition = 0;
 		for (int i = 0; i < guess.length(); i++) {
@@ -121,7 +118,7 @@ public class FourDigitNumberGuessAction extends MultiAction {
 				int digit = random.nextInt(10);
 				for (int j = 0; j < i; j++) {
 					if (digit == Character.getNumericValue(buffer.charAt(j))) {
-						j = 0;
+						j = -1;
 						digit = random.nextInt(10);
 					}
 				}
