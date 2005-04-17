@@ -29,13 +29,9 @@ public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 		 * On each request coming into the flow, check if there is input data in the
 		 * request and if so, put it in flow scope.
 		 * You could also do this in a "captureInput" action, but using a flow execution
-		 * listener is more elegant and keeps the flow and it's actions protocol
-		 * independent!
+		 * listener is more flexible.
 		 */
-		
-		//check to see if input was explicitly specified in the request
-		Event event = context.getOriginatingEvent();
-		String input = (String)event.getParameter(INPUT_ATTRIBUTE);
+		String input = (String)context.getOriginatingEvent().getParameter(INPUT_ATTRIBUTE);
 		if (StringUtils.hasText(input)) {
 			//put the input in the flow scope
 			context.getFlowScope().setAttribute(INPUT_ATTRIBUTE, input);
