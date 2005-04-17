@@ -34,7 +34,7 @@ public class FormObjectAccessor {
 	 * The form object instance is aliased under this attribute name in the
 	 * flow context by the default form setup and bind and validate actions.
 	 */
-	public static final String FORM_OBJECT_ALIAS = "formObject";
+	public static final String FORM_OBJECT_ALIAS = "#formObject";
 
 	private RequestContext context;
 
