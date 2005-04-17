@@ -36,21 +36,21 @@ public class NumberGuessAction extends MultiAction {
 		NumberGuessData data = getNumberGuessData(context);
 		int guess = getGuess(context);
 		if (guess < 0 || guess > 100) {
-			data.lastGuessResult = "Invalid";
+			data.lastGuessResult = "invalid";
 			return result("invalidInput");
 		}
 		else {
 			data.guesses++;
 			if (data.answer < guess) {
-				data.lastGuessResult = "Too High!";
+				data.lastGuessResult = "too high!";
 				return result("retry");
 			}
 			else if (data.answer > guess) {
-				data.lastGuessResult = "Too Low!";
+				data.lastGuessResult = "too low!";
 				return result("retry");
 			}
 			else {
-				data.lastGuessResult = "Correct!";
+				data.lastGuessResult = "correct!";
 				Calendar now = Calendar.getInstance();
 				long durationMilliseconds = now.getTime().getTime() - data.start.getTime().getTime();
 				data.durationSeconds = durationMilliseconds / 1000;
