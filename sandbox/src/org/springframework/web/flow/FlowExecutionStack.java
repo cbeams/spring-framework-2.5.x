@@ -240,7 +240,6 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted();
 		context.fireStarted();
-		setLastEvent(event);
 		ViewDescriptor viewDescriptor = this.rootFlow.getStartState().enter(context);
 		context.fireRequestProcessed();
 		return viewDescriptor;
@@ -273,7 +272,6 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		// execute the event
 		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted();
-		setLastEvent(event);
 		ViewDescriptor viewDescriptor = state.transitionFor(context).execute(context);
 		context.fireRequestProcessed();
 		return viewDescriptor;

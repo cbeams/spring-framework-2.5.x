@@ -54,9 +54,12 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * @param flowExecution the owning flow execution
 	 */
 	public InternalRequestContext(Event originatingEvent, FlowExecutionStack flowExecution) {
+		Assert.notNull(originatingEvent, "the originating event is required");
+		Assert.notNull(flowExecution, "the flow execution is required");
 		this.originatingEvent = originatingEvent;
 		this.lastEvent = originatingEvent;
 		this.flowExecution = flowExecution;
+		this.flowExecution.setLastEvent(originatingEvent);
 	}
 
 	// implementing RequestContext
