@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Random;
 
+import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.support.TextToNumberConverter;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
@@ -68,8 +69,13 @@ public class NumberGuessAction extends MultiAction {
 	}
 
 	private int getGuess(RequestContext context) {
-		return ((Integer)new TextToNumberConverter().convert(
-				context.getOriginatingEvent().getParameter(GUESS_PARAMETER), Integer.class)).intValue();
+		try {
+			return ((Integer)new TextToNumberConverter().convert(
+					context.getOriginatingEvent().getParameter(GUESS_PARAMETER), Integer.class)).intValue();
+		}
+		catch (ConversionException e) {
+			return -1;
+		}
 	}
 
 	/**
