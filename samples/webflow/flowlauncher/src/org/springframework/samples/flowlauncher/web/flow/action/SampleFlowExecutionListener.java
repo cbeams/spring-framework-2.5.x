@@ -15,12 +15,9 @@
  */
 package org.springframework.samples.flowlauncher.web.flow.action;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 
 public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
