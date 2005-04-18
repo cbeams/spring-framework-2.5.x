@@ -497,14 +497,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			logger.info("Closing application context [" + getDisplayName() + "]");
 		}
 
-		// Publish shutdown event.
-		publishEvent(new ContextClosedEvent(this));
-
-		// Destroy all cached singletons in this context,
-		// invoking DisposableBean.destroy and/or "destroy-method".
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		if (beanFactory != null) {
-			beanFactory.destroySingletons();
+		try {
+			// Publish shutdown event.
+			publishEvent(new ContextClosedEvent(this));
+		}
+		finally {
+			// Destroy all cached singletons in this context, invoking
+			// DisposableBean.destroy and/or the specified "destroy-method".
+			ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+			if (beanFactory != null) {
+				beanFactory.destroySingletons();
+			}
 		}
 	}
 
