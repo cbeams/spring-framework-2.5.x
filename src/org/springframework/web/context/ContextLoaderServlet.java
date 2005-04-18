@@ -100,7 +100,9 @@ public class ContextLoaderServlet extends HttpServlet {
 	 * Close the root web application context.
 	 */
 	public void destroy() {
-		this.contextLoader.closeWebApplicationContext(getServletContext());
+		if (this.contextLoader != null) {
+			this.contextLoader.closeWebApplicationContext(getServletContext());
+		}
 	}
 
 	/**

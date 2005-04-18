@@ -67,7 +67,9 @@ public class ContextLoaderListener implements ServletContextListener {
 	 * Close the root web application context.
 	 */
 	public void contextDestroyed(ServletContextEvent event) {
-		this.contextLoader.closeWebApplicationContext(event.getServletContext());
+		if (this.contextLoader != null) {
+			this.contextLoader.closeWebApplicationContext(event.getServletContext());
+		}
 	}
 
 }
