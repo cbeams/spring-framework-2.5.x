@@ -96,6 +96,19 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 
 	/**
+	 * Constructor for JavaMailSenderImpl.
+	 * <p>Initializes the "defaultFileTypeMap" property with a default
+	 * ConfigurableMimeFileTypeMap.
+	 * @see #setDefaultFileTypeMap
+	 * @see ConfigurableMimeFileTypeMap
+	 */
+	public JavaMailSenderImpl() {
+		ConfigurableMimeFileTypeMap fileTypeMap = new ConfigurableMimeFileTypeMap();
+		fileTypeMap.afterPropertiesSet();
+		this.defaultFileTypeMap = fileTypeMap;
+	}
+
+	/**
 	 * Set JavaMail properties for the Session. A new Session will be created
 	 * with those properties. Use either this or setSession, not both.
 	 * <p>Non-default properties in this MailSender will override given
@@ -232,16 +245,16 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Set the default Java Activation FileTypeMap to use for MimeMessages
-	 * created by this JavaMailSender. Such a FileTypeMap will be auto-detected
-	 * by MimeMessageHelper.
-	 * <p>For example, you can specify an instance of Spring's
-	 * <code>ConfigurableFileTypeMap</code> here, which will by default provide
-	 * an extended set of MIME type mappings (as included in the Spring jar).
-	 * Such a <code>ConfigurableFileTypeMap</code> can also be customized to
-	 * read in a custom mapping file or to override MIME type mappings in the
-	 * default mapping file.
-	 * @see MimeMessageHelper
-	 * @see org.springframework.mail.javamail.support.ConfigurableFileTypeMap
+	 * created by this JavaMailSender. A FileTypeMap specified here will be
+	 * autodetected by MimeMessageHelper, avoiding the need to specify the
+	 * FileTypeMap for each MimeMessageHelper instance.
+	 * <p>For example, you can specify a custom instance of Spring's
+	 * ConfigurableMimeFileTypeMap here. If not explicitly specified, a default
+	 * ConfigurableMimeFileTypeMap will be used, containing an extended set
+	 * of MIME type mappings (as defined by the <code>mime.types</code> file
+	 * contained in the Spring jar).
+	 * @see MimeMessageHelper#setFileTypeMap
+	 * @see ConfigurableMimeFileTypeMap
 	 */
 	public void setDefaultFileTypeMap(FileTypeMap defaultFileTypeMap) {
 		this.defaultFileTypeMap = defaultFileTypeMap;
@@ -284,18 +297,16 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	//---------------------------------------------------------------------
 
 	/**
-	 * This implementation creates a SmartMimeMessage in case of a specified default
-	 * encoding and/or default FileTypeMap. This special defaults-carrying message
-	 * will be auto-detected by MimeMessageHelper, which will use the carried encoding
+	 * This implementation creates a SmartMimeMessage, holding the specified default
+	 * encoding and default FileTypeMap. This special defaults-carrying message will
+	 * be autodetected by MimeMessageHelper, which will use the carried encoding
 	 * and FileTypeMap unless explicitly overridden.
 	 * @see #setDefaultEncoding
 	 * @see #setDefaultFileTypeMap
+	 * @see MimeMessageHelper
 	 */
 	public MimeMessage createMimeMessage() {
-		if (getDefaultEncoding() != null || getDefaultFileTypeMap() != null) {
-			return new SmartMimeMessage(getSession(), getDefaultEncoding(), getDefaultFileTypeMap());
-		}
-		return new MimeMessage(getSession());
+		return new SmartMimeMessage(getSession(), getDefaultEncoding(), getDefaultFileTypeMap());
 	}
 
 	public MimeMessage createMimeMessage(InputStream contentStream) throws MailException {
@@ -336,7 +347,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 			throw new MailParseException(ex);
 		}
 		catch (IOException ex) {
-			throw new MailParseException(ex);
+			throw new MailPreparationException(ex);
 		}
 		catch (Exception ex) {
 			throw new MailPreparationException(ex);

@@ -37,11 +37,9 @@ import javax.mail.internet.MimeMessage;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.support.ConfigurableFileTypeMap;
 
 /**
  * @author Juergen Hoeller
@@ -227,7 +225,7 @@ public class JavaMailSenderTests extends TestCase {
 
 		MimeMessageHelper message = new MimeMessageHelper(sender.createMimeMessage());
 		assertNull(message.getEncoding());
-		assertEquals(FileTypeMap.getDefaultFileTypeMap(), message.getFileTypeMap());
+		assertTrue(message.getFileTypeMap() instanceof ConfigurableMimeFileTypeMap);
 
 		message.setTo("you@mail.org");
 		sender.send(message.getMimeMessage());
@@ -241,11 +239,6 @@ public class JavaMailSenderTests extends TestCase {
 	}
 
 	public void testJavaMailSenderWithMimeMessageHelperAndSpecificEncoding() throws MessagingException {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for java.util.regex
-			return;
-		}
-
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -253,7 +246,7 @@ public class JavaMailSenderTests extends TestCase {
 
 		MimeMessageHelper message = new MimeMessageHelper(sender.createMimeMessage(), "UTF-8");
 		assertEquals("UTF-8", message.getEncoding());
-		FileTypeMap fileTypeMap = new ConfigurableFileTypeMap();
+		FileTypeMap fileTypeMap = new ConfigurableMimeFileTypeMap();
 		message.setFileTypeMap(fileTypeMap);
 		assertEquals(fileTypeMap, message.getFileTypeMap());
 
@@ -269,18 +262,13 @@ public class JavaMailSenderTests extends TestCase {
 	}
 
 	public void testJavaMailSenderWithMimeMessageHelperAndDefaultEncoding() throws MessagingException {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for java.util.regex
-			return;
-		}
-
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
 		sender.setPassword("password");
 		sender.setDefaultEncoding("UTF-8");
 
-		FileTypeMap fileTypeMap = new ConfigurableFileTypeMap();
+		FileTypeMap fileTypeMap = new ConfigurableMimeFileTypeMap();
 		sender.setDefaultFileTypeMap(fileTypeMap);
 		MimeMessageHelper message = new MimeMessageHelper(sender.createMimeMessage());
 		assertEquals("UTF-8", message.getEncoding());

@@ -109,10 +109,7 @@ public class MimeMessageHelper {
 
 	private final String encoding;
 
-	/**
-	 * <code>FileTypeMap</code> used to determine the MIME type of a file.
-	 */
-	private FileTypeMap fileTypeMap = FileTypeMap.getDefaultFileTypeMap();
+	private FileTypeMap fileTypeMap;
 
 	private boolean validateAddresses = false;
 
@@ -242,14 +239,19 @@ public class MimeMessageHelper {
 	 * Determine the default Java Activation FileTypeMap for the given MimeMessage.
 	 * @param mimeMessage the passed-in MimeMessage
 	 * @return the default FileTypeMap associated with the MimeMessage,
-	 * or the global default if none found for the message
-	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
+	 * or a default ConfigurableMimeFileTypeMap if none found for the message
+	 * @see ConfigurableMimeFileTypeMap
 	 */
 	protected FileTypeMap getDefaultFileTypeMap(MimeMessage mimeMessage) {
 		if (mimeMessage instanceof SmartMimeMessage) {
-			return ((SmartMimeMessage) mimeMessage).getDefaultFileTypeMap();
+			FileTypeMap fileTypeMap = ((SmartMimeMessage) mimeMessage).getDefaultFileTypeMap();
+			if (fileTypeMap != null) {
+				return fileTypeMap;
+			}
 		}
-		return FileTypeMap.getDefaultFileTypeMap();
+		ConfigurableMimeFileTypeMap fileTypeMap = new ConfigurableMimeFileTypeMap();
+		fileTypeMap.afterPropertiesSet();
+		return fileTypeMap;
 	}
 
 	/**
@@ -264,10 +266,10 @@ public class MimeMessageHelper {
 	 * @see #getDefaultFileTypeMap(javax.mail.internet.MimeMessage)
 	 * @see JavaMailSenderImpl#setDefaultFileTypeMap
 	 * @see javax.activation.FileTypeMap#getDefaultFileTypeMap
-	 * @see org.springframework.mail.javamail.support.ConfigurableFileTypeMap
+	 * @see ConfigurableMimeFileTypeMap
 	 */
 	public void setFileTypeMap(FileTypeMap fileTypeMap) {
-		this.fileTypeMap = (fileTypeMap != null ? fileTypeMap : FileTypeMap.getDefaultFileTypeMap());
+		this.fileTypeMap = (fileTypeMap != null ? fileTypeMap : getDefaultFileTypeMap(getMimeMessage()));
 	}
 
 	/**

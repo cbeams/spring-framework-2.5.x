@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.mail.javamail.support;
+package org.springframework.mail.javamail;
 
 import java.io.File;
-import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
-public class ConfigurableFileTypeMapTests extends TestCase {
+public class ConfigurableMimeFileTypeMapTests extends TestCase {
 
 	public void testAgainstDefaultConfiguration() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for java.util.regex
-			return;
-		}
-
-		ConfigurableFileTypeMap ftm = new ConfigurableFileTypeMap();
+		ConfigurableMimeFileTypeMap ftm = new ConfigurableMimeFileTypeMap();
 		ftm.afterPropertiesSet();
 
 		assertEquals("Invalid content type for HTM", "text/html", ftm.getContentType("foobar.HTM"));
@@ -47,31 +41,14 @@ public class ConfigurableFileTypeMapTests extends TestCase {
 		assertEquals("Invalid default content type", "application/octet-stream", ftm.getContentType("foobar.foo"));
 	}
 
-	public void testAgainstDefaultConfigurationWithFile() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for java.util.regex
-			return;
-		}
-
-		ConfigurableFileTypeMap ftm = new ConfigurableFileTypeMap();
-		ftm.afterPropertiesSet();
-
+	public void testAgainstDefaultConfigurationWithFilePath() throws Exception {
+		ConfigurableMimeFileTypeMap ftm = new ConfigurableMimeFileTypeMap();
 		assertEquals("Invalid content type for HTM", "text/html", ftm.getContentType(new File("/tmp/foobar.HTM")));
 	}
 
 	public void testWithAdditionalMappings() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for java.util.regex
-			return;
-		}
-
-		Properties mappings = new Properties();
-		mappings.setProperty("HTM", "foo/bar");
-		mappings.setProperty("c++", "foo/cpp");
-		mappings.setProperty("foo", "foo/bar");
-
-		ConfigurableFileTypeMap ftm = new ConfigurableFileTypeMap();
-		ftm.setMappings(mappings);
+		ConfigurableMimeFileTypeMap ftm = new ConfigurableMimeFileTypeMap();
+		ftm.setMappings(new String[] {"foo/bar HTM foo", "foo/cpp c++"});
 		ftm.afterPropertiesSet();
 
 		assertEquals("Invalid content type for HTM - override didn't work", "foo/bar", ftm.getContentType("foobar.HTM"));
@@ -80,14 +57,9 @@ public class ConfigurableFileTypeMapTests extends TestCase {
 	}
 
 	public void testWithCustomMappingLocation() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for java.util.regex
-			return;
-		}
-
 		Resource resource = new ClassPathResource("test.mime.types", getClass());
 
-		ConfigurableFileTypeMap ftm = new ConfigurableFileTypeMap();
+		ConfigurableMimeFileTypeMap ftm = new ConfigurableMimeFileTypeMap();
 		ftm.setMappingLocation(resource);
 		ftm.afterPropertiesSet();
 
