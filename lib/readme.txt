@@ -14,18 +14,14 @@ distribution/website before using any of them in your own applications.
 * aopalliance/aopalliance.jar
 - AOP Alliance 1.0 (http://aopalliance.sourceforge.net)
 - required for building the framework
-- required at runtime when using AOP functionality
+- included in spring.jar and spring-aop.jar
 
-* axis/axis.jar, axis/saaj.jar, axis/wsdl.jar
-- Apache Axis 1.1 (http://ws.apache.org/axis)
+* axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
+- Apache Axis 1.2 RC3 (http://ws.apache.org/axis)
 - required for running JPetStore
 
-* bsh/bsh-2.0b2.jar
-- BeanShell 2.0 beta2 (http://www.beanshell.org)
-- required for running the test suite (by JasperReports)
-
-* c3p0/c3p0-0.8.5.1.jar
-- C3P0 0.8.5.1 connection pool (http://sourceforge.net/projects/c3p0)
+* c3p0/c3p0-0.8.5.2.jar
+- C3P0 0.8.5.2 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
@@ -50,9 +46,10 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's CosMultipartResolver or CosMailSender
 
-* dom4j/dom4j.jar
-- DOM4J 1.5.2 XML parser (http://dom4j.sourceforge.net)
+* dom4j/dom4j-1.6, dom4j/jaxen-1.1-beta-4.jar
+- DOM4J 1.6 XML parser (http://www.dom4j.org)
 - required for running Petclinic (by Hibernate)
+- required for building and running Tiles Example
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
 - EasyMock 1.1 (http://www.easymock.org)
@@ -75,7 +72,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.0 final (http://www.hibernate.org)
+- Hibernate 3.0.1 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
