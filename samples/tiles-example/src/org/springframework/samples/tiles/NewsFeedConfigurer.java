@@ -4,7 +4,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * NewsFeed configurator. See tiles-servlet.xml for more info.
+ * News feed configurator. See tiles-servlet.xml for more info.
  * @author Alef Arendsen.
  */
 public class NewsFeedConfigurer {
@@ -16,11 +16,11 @@ public class NewsFeedConfigurer {
 	}
 	
 	public String feedUri(String feedName) {
-		return feeds.getProperty(feedName);
+		return this.feeds.getProperty(feedName);
 	}
 	
 	public Set allNames() {
-		return feeds.keySet();
+		return this.feeds.keySet();
 	}
 
 }
