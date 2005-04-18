@@ -20,7 +20,7 @@ arbitrary number of queries, and import declarations of arbitrary classes.
 	meta*, 
 	typedef*, 
 	import*, 
-	(class|subclass|joined-subclass)*,
+	(class|subclass|joined-subclass|union-subclass)*,
 	(query|sql-query)*, 
 	filter-def*
 )>
@@ -332,6 +332,7 @@ etc. to an entity). -->
 	<!ATTLIST many-to-one formula CDATA #IMPLIED>
 	<!ATTLIST many-to-one index CDATA #IMPLIED>				 	<!-- include the columns spanned by this association in an index -->
 	<!ATTLIST many-to-one lazy (true|false) "false">
+	<!ATTLIST many-to-one not-found (exception|ignore) "exception">
 	<!ATTLIST many-to-one node CDATA #IMPLIED>
 	<!ATTLIST many-to-one embed-xml (true|false) "true">
 	
@@ -685,6 +686,7 @@ element type of a collection and specifies a one-to-many relational model -->
 
 <!ELEMENT one-to-many EMPTY>
 	<!ATTLIST one-to-many class CDATA #IMPLIED>
+	<!ATTLIST one-to-many not-found (exception|ignore) "exception">
 	<!ATTLIST one-to-many node CDATA #IMPLIED>
 	<!ATTLIST one-to-many embed-xml (true|false) "true">
 	<!ATTLIST one-to-many entity-name CDATA #IMPLIED>
@@ -701,6 +703,7 @@ element type of a collection and specifies a many-to-many relational model -->
 	<!ATTLIST many-to-many entity-name CDATA #IMPLIED>
 	<!ATTLIST many-to-many column CDATA #IMPLIED>
 	<!ATTLIST many-to-many formula CDATA #IMPLIED>
+	<!ATTLIST many-to-many not-found (exception|ignore) "exception">
 	<!ATTLIST many-to-many outer-join (true|false|auto) #IMPLIED>
 	<!ATTLIST many-to-many fetch (join|select) "join">
 	<!ATTLIST many-to-many foreign-key CDATA #IMPLIED>
