@@ -420,7 +420,7 @@
 		<attributes>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/c3p0/c3p0-0.8.5.1.jar">
+	<classpathentry kind="lib" path="lib/c3p0/c3p0-0.8.5.2.jar">
 		<attributes>
 		</attributes>
 	</classpathentry>
