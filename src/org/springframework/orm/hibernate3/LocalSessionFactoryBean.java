@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -169,6 +170,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	private Interceptor entityInterceptor;
 
 	private NamingStrategy namingStrategy;
+
+	private Properties entityCacheStrategies;
+
+	private Properties collectionCacheStrategies;
 
 	private Map eventListeners;
 
@@ -401,10 +406,51 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
-	 * Specify the Hibernate event listeners to register, with listener type
-	 * Strings as keys and listener objects as values.
+	 * Specify the cache strategies for entities (persistent classes or named entities).
+	 * This configuration setting corresponds to the &lt;class-cache> entry
+	 * in the "hibernate.cfg.xml" configuration format.
+	 * <p>For example:
+	 * <pre>
+	 * &lt;property name="entityCacheStrategies">
+	 *   &lt;props>
+	 *     &lt;prop key="com.mycompany.Customer">read-write</prop>
+	 *     &lt;prop key="com.mycompany.Product">read-only</prop>
+	 *   &lt;/props>
+	 * &lt;/property></pre>
+	 * @param entityCacheStrategies properties that define entity cache strategies,
+	 * with class names as keys and cache concurrency strategies as values
+	 * @see Configuration#setCacheConcurrencyStrategy(String, String)
+	 */
+	public void setEntityCacheStrategies(Properties entityCacheStrategies) {
+		this.entityCacheStrategies = entityCacheStrategies;
+	}
+
+	/**
+	 * Specify the cache strategies for persistent collections (with specific roles).
+	 * This configuration setting corresponds to the &lt;collection-cache> entry
+	 * in the "hibernate.cfg.xml" configuration format.
+	 * <p>For example:
+	 * <pre>
+	 * &lt;property name="collectionCacheStrategies">
+	 *   &lt;props>
+	 *     &lt;prop key="com.mycompany.Order.items">read-only</prop>
+	 *   &lt;/props>
+	 * &lt;/property></pre>
+	 * @param collectionCacheStrategies properties that define collection cache strategies,
+	 * with collection roles as keys and cache concurrency strategies as values
+	 * @see Configuration#setCollectionCacheConcurrencyStrategy(String, String)
+	 */
+	public void setCollectionCacheStrategies(Properties collectionCacheStrategies) {
+		this.collectionCacheStrategies = collectionCacheStrategies;
+	}
+
+	/**
+	 * Specify the Hibernate event listeners to register, with listener types
+	 * as keys and listener objects as values.
 	 * <p>See the Hibernate documentation for further details on listener types
 	 * and associated listener interfaces.
+	 * @param eventListeners Map with listener type Strings as keys and
+	 * listener objects as values
 	 * @see org.hibernate.cfg.Configuration#setListener(String, Object)
 	 */
 	public void setEventListeners(Map eventListeners) {
@@ -492,7 +538,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 			if (this.jtaTransactionManager != null) {
 				// Set Spring-provided JTA TransactionManager as Hibernate property.
-				config.setProperty(Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
+				config.setProperty(
+						Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
 			}
 
 			if (this.mappingLocations != null) {
@@ -520,6 +567,23 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 								"] does not denote a directory");
 					}
 					config.addDirectory(file);
+				}
+			}
+
+			if (this.entityCacheStrategies != null) {
+				// Register cache strategies for mapped entities.
+				for (Enumeration classNames = this.entityCacheStrategies.propertyNames(); classNames.hasMoreElements();) {
+					String className = (String) classNames.nextElement();
+					config.setCacheConcurrencyStrategy(className, this.entityCacheStrategies.getProperty(className));
+				}
+			}
+
+			if (this.collectionCacheStrategies != null) {
+				// Register cache strategies for mapped collections.
+				for (Enumeration collRoles = this.collectionCacheStrategies.propertyNames(); collRoles.hasMoreElements();) {
+					String collRole = (String) collRoles.nextElement();
+					config.setCollectionCacheConcurrencyStrategy(
+							collRole, this.collectionCacheStrategies.getProperty(collRole));
 				}
 			}
 
