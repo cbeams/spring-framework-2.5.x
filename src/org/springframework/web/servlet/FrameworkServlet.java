@@ -271,6 +271,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * XmlWebApplicationContext or a custom context class if set. This implementation
 	 * expects custom contexts to implement ConfigurableWebApplicationContext.
 	 * Can be overridden in subclasses.
+	 * @param parent the parent ApplicationContext to use, or null if none
+	 * @return the WebApplicationContext for this servlet
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #setContextClass
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
