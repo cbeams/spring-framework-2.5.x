@@ -44,9 +44,23 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	protected static final String SUB_REPORT_PARENT =
 			"org/springframework/ui/jasperreports/subReportParent.jrxml";
 
+	protected static boolean canCompileReport;
+
+	static {
+		try {
+			Class.forName("org.eclipse.jdt.internal.compiler.Compiler");
+			canCompileReport = true;
+		}
+		catch (ClassNotFoundException ex) {
+			canCompileReport = false;
+		}
+	}
+
+
 	protected MockHttpServletRequest request;
 
 	protected MockHttpServletResponse response;
+
 
 	public void setUp() {
 		request = new MockHttpServletRequest();
@@ -66,7 +80,7 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	 * Subclasses can extend the model if they need to.
 	 */
 	protected void extendModel(Map model) {
-	};
+	}
 
 	protected List getData() {
 		List list = new ArrayList();

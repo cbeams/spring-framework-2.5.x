@@ -34,6 +34,10 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	}
 
 	public void testSimpleHtmlRender() throws Exception {
+		if (!canCompileReport) {
+			return;
+		}
+
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
 		Map model = getBaseModel();
@@ -45,6 +49,10 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	}
 
 	public void testOverrideContentDisposition() throws Exception {
+		if (!canCompileReport) {
+			return;
+		}
+
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
 		Map model = getBaseModel();
@@ -64,6 +72,10 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	}
 
 	public void testExporterParametersAreCarriedAcross() throws Exception {
+		if (!canCompileReport) {
+			return;
+		}
+
 		JasperReportsMultiFormatView view = (JasperReportsMultiFormatView) getView(UNCOMPILED_REPORT);
 
 		Properties mappings = new Properties();

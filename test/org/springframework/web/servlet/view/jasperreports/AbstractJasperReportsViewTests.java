@@ -60,6 +60,10 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	}
 
 	public void testUncompiledReport() throws Exception {
+		if (!canCompileReport) {
+			return;
+		}
+
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 		view.render(getModel(), request, response);
 		assertTrue(response.getContentAsByteArray().length > 0);
@@ -188,6 +192,10 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	}
 
 	public void testWithSubReport() throws Exception {
+		if (!canCompileReport) {
+			return;
+		}
+
 		Map model = getModel();
 		model.put("SubReportData", getProductData());
 
@@ -205,6 +213,10 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	}
 
 	public void testWithNonExistentSubReport() throws Exception {
+		if (!canCompileReport) {
+			return;
+		}
+
 		Map model = getModel();
 		model.put("SubReportData", getProductData());
 
@@ -226,6 +238,10 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	}
 
 	public void testSubReportWithUnspecifiedParentDataSource() throws Exception {
+		if (!canCompileReport) {
+			return;
+		}
+
 		Map model = getModel();
 		model.put("SubReportData", getProductData());
 
@@ -281,11 +297,12 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	}
 
 	public void testWithSqlDataSource() throws Exception {
-
-		DataSource ds = getMockSqlDataSource();
+		if (!canCompileReport) {
+			return;
+		}
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
-		view.setJdbcDataSource(ds);
+		view.setJdbcDataSource(getMockSqlDataSource());
 
 		Map model = getModel();
 		model.remove("dataSource");
@@ -294,41 +311,41 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 			view.render(model, request, response);
 			fail("DataSource was not used as report DataSource");
 		}
-		catch (SQLException e) {
-			assertTrue(true);
+		catch (SQLException ex) {
+			// expected
 		}
 	}
 
 	public void testJRDataSourceOverridesDataSource() throws Exception {
-		DataSource ds = getMockSqlDataSource();
+		if (!canCompileReport) {
+			return;
+		}
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
-		view.setJdbcDataSource(ds);
-
+		view.setJdbcDataSource(getMockSqlDataSource());
 
 		try {
 			view.render(getModel(), request, response);
-		} catch(SQLException ex) {
+		}
+		catch (SQLException ex) {
 			fail("javax.sql.DataSource was used when JRDataSource should have overriden it");
 		}
 	}
 
 	private DataSource getMockSqlDataSource() throws SQLException {
 		MockControl ctl = MockControl.createControl(DataSource.class);
-
 		DataSource ds = (DataSource) ctl.getMock();
 		ds.getConnection();
 		ctl.setThrowable(new SQLException());
-
 		ctl.replay();
-
 		return ds;
 	}
 
+
 	private class MockDataSourceProvider extends JRAbstractBeanDataSourceProvider {
 
-		public MockDataSourceProvider(Class aClass) {
-			super(aClass);
+		public MockDataSourceProvider(Class clazz) {
+			super(clazz);
 		}
 
 		public JRDataSource create(JasperReport jasperReport) throws JRException {
