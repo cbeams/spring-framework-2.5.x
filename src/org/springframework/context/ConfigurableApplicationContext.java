@@ -75,10 +75,9 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 
 	/**
 	 * Close this application context, releasing all resources and locks that the
-	 * implementation might hold. This includes disposing all cached singleton beans.
+	 * implementation might hold. This includes destroying all cached singleton beans.
 	 * <p>Note: Does <i>not</i> invoke close on a parent context.
-	 * @throws ApplicationContextException if there were fatal errors
 	 */
-	void close() throws ApplicationContextException;
+	void close();
 
 }
