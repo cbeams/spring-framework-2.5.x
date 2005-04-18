@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 RC2 (14.4.2005)
+Changes in version 1.2 RC2 (18.4.2005)
 --------------------------------------
 
 Package org.springframework.aop
@@ -19,7 +19,9 @@ Package org.springframework.beans
 * deprecated ListableBeanFactory's "getBeanDefinitionNames(type)" method, in favor of "getBeanNamesForType"
 * refined FieldRetrievingFactoryBean to trim passed-in "targetField" and "staticField" values, stripping off whitespace
 * fixed ServiceLocatorFactoryBean to explicitly check for calls of java.lang.Object methods (for JRockit compatibility)
+* added "serviceLocatorExceptionClass" property to ServiceLocatorFactoryBean, allowing for custom locator exceptions
 * AbstractAutowireCapableBeanFactory supports autowiring for factory methods too
+* fixed CglibSubclassingInstantiationStrategy's overload detection for method overrides
 * DefaultXmlBeanDefinitionParser accepts entity references in text values
 * added "value"/"value-ref" attributes to XML "entry" tag for maps, as shortcut alternative to respective child elements
 * added "alias" root element for XML bean definition files, allowing to define aliases for beans in other files
@@ -27,6 +29,7 @@ Package org.springframework.beans
 * deprecated SingletonBeanFactoryLocator's alias-through-String-bean feature, in favor of BeanReferenceFactoryBean
 
 Package org.springframework.core
+* added public "getClassName" method and protected "getFieldCache" method to Constants
 * added explicit abstract "getDescription" method to AbstractResource, to work around a bug in Sun's JDK 1.3 classic VM
 * fixed PathMatchingResourcePatternResolver's jar entry matching to also work with BEA JRockit's additional slashes
 
@@ -46,9 +49,17 @@ Package org.springframework.jca
 
 Package org.springframework.jdbc
 * changed SmartDataSource interface to only have package visibility (it is only used internally)
+* added convenience constructors to DriverManagerDataSource and SingleConnectionDataSource
 * TransactionAwareDataSourceProxy handles "equals" and "hashCode" locally within the Connection proxy
 * DataSourceTransactionManager unwraps a passed-in TransactionAwareDataSourceProxy to get access to the raw DataSource
+* added "setDatabaseProductName" method to SQLErrorCodeSQLExceptionTranslator, for specifying the DB name explicitly
+* added "setDatabaseProductName" method to JdbcAccessor, for specifying the DB name explicitly to avoid metadata lookup
+* switched default value of JdbcAccessor's "lazyInit" flag to "true", for lazy SQLExceptionTranslator initialization
 * added no-arg constructor plus "requiredType" bean property to SingleColumnRowMapper, to allow for property injection
+
+Package org.springframework.jms
+* factored out JmsAccessor base class from JmsTemplate, containing the "connectionFactory" property
+* added "defaultDestinationName" property to JmsTemplate, allowing for resolving the default destination dynamically
 
 Package org.springframework.jmx
 * added "defaultCurrencyTimeLimit" property to AbstractReflectiveMBeanInfoAssembler, for specifying an explicit default
@@ -58,11 +69,13 @@ Package org.springframework.mail
 * added "setFileTypeMap" method to MimeMessageHelper, allowing to override the default Activation Framework FileTypeMap
 * added "defaultFileTypeMap" property to JavaMailSenderImpl, specifying a default FileTypeMap for MimeMessageHelpers
 * added "defaultEncoding" property to JavaMailSenderImpl, specifying a default character encoding for MimeMessageHelpers
-* added ConfigurableFileTypeMap, allowing to load an Activation FileTypeMap from a custom file and from local properties
-* added default "mime.types" file, loaded by ConfigurableFileTypeMap if no overriding file location specified
+* added ConfigurableMimeFileTypeMap, building an Activation FileTypeMap from a mapping file and from local mappings
+* added default "mime.types" mapping file, loaded by default ConfigurableMimeFileTypeMap, used by JavaMailSenderImpl
 
 Package org.springframework.orm
 * Hibernate/Jdo/PersistenceBrokerTransactionManager unwraps a passed-in TransactionAwareDataSourceProxy
+* HibernateAccessor, HibernateTransactionManager and DefaultJdoDialect lazily initialize their JDBC exception translator
+* added "entityCacheStrategies"/"collectionCacheStrategies" properties to LocalSessionFactoryBean for Hibernate3
 * added "eventListeners" property to LocalSessionFactoryBean for Hibernate3, accepting listener type/object pairs
 * added "filterDefinitions" property to LocalSessionFactoryBean for Hibernate3, accepting FilterDefinition objects
 * added FilterDefinitionFactoryBean, to allow for defining Hibernate FilterDefinitions as Spring beans
@@ -89,10 +102,12 @@ Package org.springframework.web
 * UrlPathHelper supports URL-decoding with the VM platform default encoding on JDK 1.3 (instead of just working on 1.4)
 * factored out WebDataBinder from ServletRequestDataBinder, offering field marker support without Servlet API dependency
 * DispatcherServlet exposes the current LocaleResolver and its current Locale through the global LocaleContextHolder
+* added "commandName" property and "createBinder" and "initBinder" callbacks to ThrowawayControllerHandlerAdapter
+* fixed BindStatus to apply HTML-escaping to plain bean values too (when no Errors object is available in the model)
 * EscapedErrors and BindTag perform HTML escaping for any non-null value (stringifying it), not just for String values
 * added "toolboxConfigLocation" property to VelocityViewResolver, for creating VelocityToolboxView instances
 * removed "spring." prefix for internal access to variables in Spring's FreeMarker macro library (spring.ftl)
-* updated AbstractJasperReportsView for JasperReports 0.6.6, using either JRJdtCompiler or JRBshCompiler as default
+* updated AbstractJasperReportsView for JasperReports 0.6.6, using JRDefaultCompiler instead of JRBshCompiler
 * added "reportCompiler" bean property to AbstractJasperReportsView, to override the default JRCompiler implementation
 * reworked AbstractJasperReportsView to work on JasperPrint instance rather than JasperReport instance
 * reworked JasperReportsMultiFormatView's "formatMappings" to replace existing properties, also replacing defaults
