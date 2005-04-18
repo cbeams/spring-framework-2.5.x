@@ -23,7 +23,7 @@
 	<path id="master-classpath">
 
 		<fileset dir="${spring.root}/lib/dom4j">
-			<include name="dom4j.jar"/>
+			<include name="dom4j*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
 			<include name="servlet-api.jar"/>
@@ -36,24 +36,6 @@
 		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
-		</fileset>
-
-	</path>
-
-
-	<path id="test-classpath">
-
-		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet-api.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/jakarta-commons">
-			<include name="commons-lang.jar"/>
-			<include name="commons-collections.jar"/>
-			<include name="commons-digester.jar"/>
-			<include name="commons-beanutils.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/dist">
-			<include name="spring-mock.jar"/>
 		</fileset>
 
 	</path>
@@ -102,7 +84,8 @@
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
 			<fileset dir="${spring.root}/lib/dom4j">
-				<include name="dom4j.jar"/>
+				<include name="dom4j*.jar"/>
+				<include name="jaxen*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jstl.jar"/>
@@ -154,9 +137,6 @@
 
 	<target name="warfile" depends="build,docs" description="Build the web application archive">
 
-		<!-- To not include jboss file if jboss.root was not set before -->
-		<property name="jboss.root" value="${war.dir}/WEB-INF"/>
-
 		<mkdir dir="${dist.dir}"/>
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
@@ -169,45 +149,6 @@
 			<include name="WEB-INF/classes/**"/>
 			<exclude name="**/.*"/>
 		</war>
-
-	</target>
-
-
-	<target name="tests" depends="build">
-
-		<delete dir="${testbuild.dir}"/>
-		<mkdir dir="${testbuild.dir}"/>
-		<delete dir="${testreports.dir}"/>
-		<mkdir dir="${testreports.dir}"/>
-		<delete dir="${testhtml.dir}"/>
-		<mkdir dir="${testhtml.dir}"/>
-
-		<javac srcdir="${testsrc.dir}" destdir="${testbuild.dir}" deprecation="true">
-			<classpath path="${build.dir}"/>
-			<classpath refid="master-classpath"/>
-			<classpath path="${spring.root}/lib/junit/junit.jar"/>
-			<classpath refid="test-classpath"/>
-		</javac>
-
-		<junit printsummary="true" fork="yes">
-			<formatter type="xml"/>
-			<formatter type="plain" usefile="false"/>
-			<test name="org.springframework.samples.tiles.NewsFeedControllerTests" todir="${testreports.dir}"/>
-			<classpath path="${build.dir}"/>
-			<classpath path="${src.dir}"/>
-			<classpath path="${testbuild.dir}"/>
-			<classpath path="${testsrc.dir}"/>
-			<classpath path="${basedir}/"/>
-			<classpath refid="master-classpath"/>
-			<classpath refid="test-classpath"/>
-		</junit>
-
-		<junitreport todir="${testhtml.dir}">
-			<fileset dir="${testreports.dir}">
-				<include name="TEST-*.xml"/>
-			</fileset>
-			<report format="frames" todir="${testhtml.dir}"/>
-		</junitreport>
 
 	</target>
 

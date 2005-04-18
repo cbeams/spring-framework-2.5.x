@@ -57,7 +57,7 @@
 			<include name="cglib*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/dom4j">
-			<include name="dom4j.jar"/>
+			<include name="dom4j*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/ehcache">
 			<include name="ehcache*.jar"/>
@@ -164,7 +164,7 @@
 				<include name="cglib*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/dom4j">
-				<include name="dom4j.jar"/>
+				<include name="dom4j*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/ehcache">
 				<include name="ehcache*.jar"/>

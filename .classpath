@@ -204,7 +204,7 @@
 		<attributes>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/dom4j/dom4j.jar">
+	<classpathentry kind="lib" path="lib/dom4j/dom4j-1.6.jar">
 		<attributes>
 		</attributes>
 	</classpathentry>
