@@ -89,6 +89,7 @@
 				<include name="freemarker.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
+				<include name="commons-collections.jar"/>
 				<include name="commons-fileupload.jar"/>
 				<include name="commons-logging.jar"/>
 			</fileset>
