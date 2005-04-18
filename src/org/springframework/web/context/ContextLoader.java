@@ -27,7 +27,6 @@ import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -118,10 +117,15 @@ public class ContextLoader {
 	private final Log logger = LogFactory.getLog(ContextLoader.class);
 
 	/**
+	 * The root WebApplicationContext instance that this loaded manages.
+	 */
+	private WebApplicationContext context;
+
+	/**
 	 * Holds BeanFactoryReference when loading parent factory via
 	 * ContextSingletonBeanFactoryLocator.
 	 */
-	protected BeanFactoryReference beanFactoryRef = null;
+	private BeanFactoryReference parentContextRef;
 
 
 	/**
@@ -147,26 +151,27 @@ public class ContextLoader {
 			// Determine parent for root web application context, if any.
 			ApplicationContext parent = loadParentContext(servletContext);
 
-			WebApplicationContext wac = createWebApplicationContext(servletContext, parent);
+			// Store context in local instance variable, to guarantee that
+			// it is available on ServletContext shutdown.
+			this.context = createWebApplicationContext(servletContext, parent);
 			servletContext.setAttribute(
-					WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+					WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
 			if (logger.isInfoEnabled()) {
-				logger.info("Using context class [" + wac.getClass().getName() +
+				logger.info("Using context class [" + this.context.getClass().getName() +
 						"] for root WebApplicationContext");
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Published root WebApplicationContext [" + wac +
+				logger.debug("Published root WebApplicationContext [" + this.context +
 						"] as ServletContext attribute with name [" +
 						WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
 			}
-
 			if (logger.isInfoEnabled()) {
 				long elapsedTime = System.currentTimeMillis() - startTime;
 				logger.info("Root WebApplicationContext: initialization completed in " + elapsedTime + " ms");
 			}
 
-			return wac;
+			return this.context;
 		}
 		catch (RuntimeException ex) {
 			logger.error("Context initialization failed", ex);
@@ -187,6 +192,7 @@ public class ContextLoader {
 	 * ConfigurableWebApplicationContext. Can be overridden in subclasses.
 	 * @param servletContext current servlet context
 	 * @param parent the parent ApplicationContext to use, or null if none
+	 * @return the root WebApplicationContext
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #CONTEXT_CLASS_PARAM
 	 * @see #DEFAULT_CONTEXT_CLASS
@@ -262,8 +268,8 @@ public class ContextLoader {
 						parentContextKey + "' with BeanFactoryLocator");
 			}
 
-			this.beanFactoryRef = locator.useBeanFactory(parentContextKey);
-			parentContext = (ApplicationContext) this.beanFactoryRef.getFactory();
+			this.parentContextRef = locator.useBeanFactory(parentContextKey);
+			parentContext = (ApplicationContext) this.parentContextRef.getFactory();
 		}
 
 		return parentContext;
@@ -276,25 +282,17 @@ public class ContextLoader {
 	 * parent context, release one reference to that shared parent context.
 	 * <p>If overriding {@link #loadParentContext(ServletContext)}, you may have
 	 * to override this method as well.
-	 * @param servletContext current servlet context
 	 */
-	public void closeWebApplicationContext(ServletContext servletContext)
-			throws ApplicationContextException {
-
+	public void closeWebApplicationContext(ServletContext servletContext) {
 		servletContext.log("Closing Spring root WebApplicationContext");
-		Object wac = servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		ApplicationContext parent = null;
-		if (wac instanceof ApplicationContext) {
-			parent = ((ApplicationContext) wac).getParent();
-		}
 		try {
-			if (wac instanceof ConfigurableApplicationContext) {
-				((ConfigurableApplicationContext) wac).close();
+			if (this.context instanceof ConfigurableWebApplicationContext) {
+				((ConfigurableWebApplicationContext) this.context).close();
 			}
 		}
 		finally {
-			if (parent != null && this.beanFactoryRef != null) {
-				this.beanFactoryRef.release();
+			if (this.parentContextRef != null) {
+				this.parentContextRef.release();
 			}
 		}
 	}
