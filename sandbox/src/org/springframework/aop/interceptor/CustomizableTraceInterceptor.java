@@ -24,7 +24,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.Constants;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -33,10 +32,10 @@ import org.springframework.util.StringUtils;
 /**
  * @author Rob Harrop
  */
-public class CustomizableTraceInterceptor implements MethodInterceptor {
+public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
-	 * The ${methodName} placeholder. Replaced with the name of the method being invoked.
+	 * The <code>${methodName}</code> placeholder. Replaced with the name of the method being invoked.
 	 */
 	public static final String METHOD_NAME_PLACEHOLDER = "${methodName}";
 
@@ -64,40 +63,59 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 	 */
 	public static final String ARGUMENT_TYPES_PLACEHOLDER = "${argumentTypes}";
 
+	/**
+	 * The <code>${arguments}</code> placeholder. Replaced with a comma separated list of the argument values for the
+	 * method invocation. Relies on the <code>toString()</code> method of each argument type.
+	 */
 	public static final String ARGUMENTS_PLACEHOLDER = "${arguments}";
 
+	/**
+	 * The <code>${exception}</code> placeholder. Replaced with the
+	 */
 	public static final String EXCEPTION_PLACEHOLDER = "${exception}";
 
 	/**
-	 * Default <code>Log</code> used for writing trace messages.
+	 * The default message used for writing method entry messages.
 	 */
-	protected static final Log defaultLogger = LogFactory.getLog(CustomizableTraceInterceptor.class);
-
 	private static final String DEFAULT_ENTER_MESSAGE = "Entering method [" + METHOD_NAME_PLACEHOLDER + "] in class [" + TARGET_CLASS_NAME_PLACEHOLDER + "].";
 
+	/**
+	 * The default message used for writing method exit messages.
+	 */
 	private static final String DEFAULT_EXIT_MESSAGE = "Exiting method [" + METHOD_NAME_PLACEHOLDER + "] in class [" + TARGET_CLASS_NAME_PLACEHOLDER + "].";
 
+	/**
+	 * The default method used for writing exception messages.
+	 */
 	private static final String DEFAULT_EXCEPTION_MESSAGE = "Exception thrown in method [" + METHOD_NAME_PLACEHOLDER + "] in class [" + TARGET_CLASS_NAME_PLACEHOLDER + "].";
 
+	/**
+	 * The <code>Pattern</code> used to match placeholders.
+	 */
 	private static final Pattern PATTERN = Pattern.compile("\\$\\{\\p{Alpha}+\\}");
 
+	/**
+	 * The <code>Set</code> of allowed placeholders.
+	 */
 	private static final Set ALLOWED_PLACEHOLDERS = new Constants(CustomizableTraceInterceptor.class).getValues("");
 
+	/**
+	 * The message for method entry.
+	 */
 	private String enterMessage = DEFAULT_ENTER_MESSAGE;
 
+	/**
+	 * The message for method exit.
+	 */
 	private String exitMessage = DEFAULT_EXIT_MESSAGE;
 
+	/**
+	 * The message for exceptions during method execution.
+	 */
 	private String exceptionMessage = DEFAULT_EXCEPTION_MESSAGE;
 
-
 	/**
-	 * Flag indicating whether the default <code>Log</code> should be used (false) or whether each invocation should be
-	 * logged against a <code>Log</code> for the <code>Class</code> of the invocation target.
-	 */
-	private boolean useDynamicLog = false;
-
-	/**
-	 * Sets the template used for method entry log messages. This template can contain any of the following place holders:
+	 * Sets the template used for method entry log messages. This template can contain any of the following placeholders:
 	 * <ul>
 	 * <li><code>${targetClassName}</code></li>
 	 * <li><code>${targetClassShortName}</code></li>
@@ -117,7 +135,7 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 	}
 
 	/**
-	 * Sets the template used for method exit log messages. This template can contain any of the following place holders:
+	 * Sets the template used for method exit log messages. This template can contain any of the following placeholders:
 	 * <ul>
 	 * <li><code>${targetClassName}</code></li>
 	 * <li><code>${targetClassShortName}</code></li>
@@ -137,7 +155,7 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 	}
 
 	/**
-	 * Sets the template used for method exit log messages. This template can contain any of the following place holders:
+	 * Sets the template used for method exception log messages. This template can contain any of the following placeholders:
 	 * <ul>
 	 * <li><code>${targetClassName}</code></li>
 	 * <li><code>${targetClassShortName}</code></li>
@@ -156,35 +174,15 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 		this.exceptionMessage = exceptionMessage;
 	}
 
-	/**
-	 * Sets the value of the <code>useDynamicLog</code> flag. When set to <code>false</code>, log messages are written using
-	 * the <code>Log</code> instance for this class. When set to <code>true</code> log messages are written using the
-	 * <code>Log</code> instance for the <code>Class</code> that is the target of the method invocation.
-	 */
-	public void setUseDynamicLog(boolean useDynamicLog) {
-		this.useDynamicLog = useDynamicLog;
-	}
-
-	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-		Log logger = getLoggerForInvocation(methodInvocation);
-
-		if (logger.isDebugEnabled()) {
-			return invokeUnderTrace(logger, methodInvocation);
-		}
-		else {
-			return methodInvocation.proceed();
-		}
-	}
-
-	private Object invokeUnderTrace(Log logger, MethodInvocation methodInvocation) throws Throwable {
+	protected Object invokeUnderTrace(MethodInvocation methodInvocation, Log logger) throws Throwable {
 		try {
-			logger.debug(replaceTokens(this.enterMessage, methodInvocation, null, null));
+			logger.trace(replaceTokens(this.enterMessage, methodInvocation, null, null));
 			Object returnValue = methodInvocation.proceed();
-			logger.debug(replaceTokens(this.exitMessage, methodInvocation, returnValue, null));
+			logger.trace(replaceTokens(this.exitMessage, methodInvocation, returnValue, null));
 			return returnValue;
 		}
 		catch (Throwable t) {
-			logger.debug(replaceTokens(this.exceptionMessage, methodInvocation, null, t));
+			logger.trace(replaceTokens(this.exceptionMessage, methodInvocation, null, t));
 			throw t;
 		}
 	}
@@ -221,10 +219,13 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 				appendArgumentTypes(methodInvocation, matcher, output);
 			}
 			else if (RETURN_VALUE_PLACEHOLDER.equals(match)) {
-				appendReturnTypes(methodInvocation, matcher, output, returnValue);
+				appendReturnValue(methodInvocation, matcher, output, returnValue);
+			}
+			else if (EXCEPTION_PLACEHOLDER.equals(match)) {
+				matcher.appendReplacement(output, throwable.toString());
 			}
 			else {
-				// consider throwing earlier
+				// should not happen since placeholders are checked earlier.
 				throw new IllegalArgumentException("Unknown placeholder [" + match + "]");
 			}
 		}
@@ -233,7 +234,15 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 		return output.toString();
 	}
 
-	private void appendReturnTypes(MethodInvocation methodInvocation, Matcher matcher, StringBuffer output, Object returnValue) {
+	/**
+	 * Adds the <code>String</code> representation of the method return value to the supplied <code>StringBuffer</code>.
+	 *
+	 * @param methodInvocation the <code>MethodInvocation</code> that returned the value.
+	 * @param matcher the <code>Matcher</code> containing the matched placeholder.
+	 * @param output the <code>StringBuffer</code> to write output to.
+	 * @param returnValue the value returned by the method invocation.
+	 */
+	private void appendReturnValue(MethodInvocation methodInvocation, Matcher matcher, StringBuffer output, Object returnValue) {
 		if (methodInvocation.getMethod().getReturnType() == void.class) {
 			matcher.appendReplacement(output, "void");
 		}
@@ -252,16 +261,6 @@ public class CustomizableTraceInterceptor implements MethodInterceptor {
 			argumentTypeShortNames[i] = ClassUtils.getShortName(argumentTypes[i]);
 		}
 		matcher.appendReplacement(output, StringUtils.arrayToCommaDelimitedString(argumentTypeShortNames));
-	}
-
-	/**
-	 * Returns the appropriate <code>Log</code> instance to use for the given <code>MethodInvocation</code>.
-	 *
-	 * @param methodInvocation
-	 * @return
-	 */
-	private Log getLoggerForInvocation(MethodInvocation methodInvocation) {
-		return (this.useDynamicLog) ? LogFactory.getLog(methodInvocation.getThis().getClass()) : defaultLogger;
 	}
 
 	private void assertDoesNotContainsText(String target, String desiredText, String message) {
