@@ -638,9 +638,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Set usedValueHolders = new HashSet(argTypes.length);
 
 		for (int j = 0; j < argTypes.length; j++) {
+			// Try to find matching constructor argument value, either indexed or generic.
 			ConstructorArgumentValues.ValueHolder valueHolder =
 					resolvedValues.getArgumentValue(j, argTypes[j], usedValueHolders);
+			// If we couldn't find a direct match and are not supposed to autowire,
+			// let's try the next generic, untyped argument value as fallback:
+			// it could match after type conversion (for example, String -> int).
+			if (valueHolder == null &&
+					mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+				valueHolder = resolvedValues.getGenericArgumentValue(null, usedValueHolders);
+			}
 			if (valueHolder != null) {
+				// We found a potential match - let's give it a try.
 				// Do not consider the same value definition multiple times!
 				usedValueHolders.add(valueHolder);
 				try {
@@ -654,6 +663,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			else {
+				// No explicit match found: we're either supposed to autowire or
+				// have to fail creating an argument array for the given constructor.
 				if (mergedBeanDefinition.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],

@@ -94,6 +94,12 @@
 		<constructor-arg><ref bean="kerry1"/></constructor-arg>
 	</bean>
 
+	<bean id="rod16" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg><value>29</value></constructor-arg>
+	</bean>
+
 	<bean id="kerry1" class="org.springframework.beans.TestBean">
 		<property name="name">
 			<value>Kerry1</value>
@@ -119,12 +125,21 @@
 	</bean>
 
 	<bean id="beanWithBoolean" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
-	   <constructor-arg type="boolean" value="true"/>
+		<constructor-arg type="boolean" value="true"/>
+	</bean>
+
+	<bean id="beanWithBoolean2" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
+		<constructor-arg value="true"/>
 	</bean>
 
 	<bean id="beanWithBooleanAndString" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
-	   <constructor-arg type="boolean"><value>true</value></constructor-arg>
-	   <constructor-arg><value>A String</value></constructor-arg>
+		<constructor-arg type="boolean"><value>true</value></constructor-arg>
+		<constructor-arg><value>A String</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithBooleanAndString2" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
+		<constructor-arg value="A String"/>
+		<constructor-arg value="true"/>
 	</bean>
 
 	<bean id="Boolean" class="java.lang.Boolean">

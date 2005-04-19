@@ -55,6 +55,12 @@ public class ConstructorDependenciesBean implements Serializable {
 		this.spouse2 = spouse2;
 	}
 
+	public ConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, int age) {
+		this.spouse1 = spouse1;
+		this.spouse2 = spouse2;
+		this.age = age;
+	}
+
 	public ConstructorDependenciesBean(TestBean spouse1, TestBean spouse2, IndexedTestBean other) {
 		this.spouse1 = spouse1;
 		this.spouse2 = spouse2;
