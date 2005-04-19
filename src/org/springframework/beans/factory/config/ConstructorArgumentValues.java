@@ -18,25 +18,29 @@ package org.springframework.beans.factory.config;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 
 /**
- * Holder for constructor argument values for a bean.
- * Supports values for a specific index in the constructor argument list
- * and generic matches by type.
+ * Holder for constructor argument values, as part of a bean definition.
+ *
+ * <p>Supports values for a specific index in the constructor argument
+ * list and for generic matches by type.
+ *
  * @author Juergen Hoeller
  * @since 09.11.2003
+ * @see BeanDefinition#getConstructorArgumentValues
  */
 public class ConstructorArgumentValues {
 
 	private final Map indexedArgumentValues = new HashMap();
 
-	private final Set genericArgumentValues = new HashSet();
+	private final List genericArgumentValues = new LinkedList();
 
 
 	/**
@@ -130,28 +134,44 @@ public class ConstructorArgumentValues {
 	 * @return the ValueHolder for the argument, or null if none set
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType) {
+		return getGenericArgumentValue(requiredType, null);
+	}
+
+	/**
+	 * Look for the next generic argument value that matches the given type,
+	 * ignoring argument values that have already been used in the current
+	 * resolution process.
+	 * @param requiredType the type to match
+	 * @param usedValueHolders a Set of ValueHolder objects that have already
+	 * been used in the current resolution process and should therefore not
+	 * be returned again
+	 * @return the ValueHolder for the argument, or null if none set
+	 */
+	public ValueHolder getGenericArgumentValue(Class requiredType, Set usedValueHolders) {
 		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
 			ValueHolder valueHolder = (ValueHolder) it.next();
-			Object value = valueHolder.getValue();
-			if (valueHolder.getType() != null) {
-				if (valueHolder.getType().equals(requiredType.getName())) {
+			if (usedValueHolders == null || !usedValueHolders.contains(valueHolder)) {
+				Object value = valueHolder.getValue();
+				if (valueHolder.getType() != null) {
+					if (valueHolder.getType().equals(requiredType.getName())) {
+						return valueHolder;
+					}
+				}
+				else if (BeanUtils.isAssignable(requiredType, value) ||
+						(requiredType.isArray() && Collection.class.isInstance(value))) {
 					return valueHolder;
 				}
-			}
-			else if (BeanUtils.isAssignable(requiredType, value) ||
-					(requiredType.isArray() && Collection.class.isInstance(value))) {
-				return valueHolder;
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * Return the set of generic argument values.
-	 * @return Set of ValueHolders
+	 * Return the list of generic argument values.
+	 * @return List of ValueHolders
 	 * @see ValueHolder
 	 */
-	public Set getGenericArgumentValues() {
+	public List getGenericArgumentValues() {
 		return this.genericArgumentValues;
 	}
 
@@ -163,9 +183,24 @@ public class ConstructorArgumentValues {
 	 * @return the ValueHolder for the argument, or null if none set
 	 */
 	public ValueHolder getArgumentValue(int index, Class requiredType) {
+		return getArgumentValue(index, requiredType, null);
+	}
+
+	/**
+	 * Look for an argument value that either corresponds to the given index
+	 * in the constructor argument list or generically matches by type.
+	 * @param index the index in the constructor argument list
+	 * @param requiredType the type to match
+	 * @param usedValueHolders a Set of ValueHolder objects that have already
+	 * been used in the current resolution process and should therefore not
+	 * be returned again (allowing to return the next generic argument match
+	 * in case of multiple generic argument values of the same type)
+	 * @return the ValueHolder for the argument, or null if none set
+	 */
+	public ValueHolder getArgumentValue(int index, Class requiredType, Set usedValueHolders) {
 		ValueHolder valueHolder = getIndexedArgumentValue(index, requiredType);
 		if (valueHolder == null) {
-			valueHolder = getGenericArgumentValue(requiredType);
+			valueHolder = getGenericArgumentValue(requiredType, usedValueHolders);
 		}
 		return valueHolder;
 	}

@@ -267,7 +267,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		}
 	}
 
-	protected void parseGenericArgumentValues(Properties props, Set gas) {
+	protected void parseGenericArgumentValues(Properties props, List gas) {
 		for (Iterator it = gas.iterator(); it.hasNext();) {
 			ConstructorArgumentValues.ValueHolder valueHolder =
 					(ConstructorArgumentValues.ValueHolder) it.next();
