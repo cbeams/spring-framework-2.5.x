@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -130,7 +129,8 @@ public class ConstructorArgumentValues {
 
 	/**
 	 * Look for a generic argument value that matches the given type.
-	 * @param requiredType the type to match
+	 * @param requiredType the type to match (can be null to find an
+	 * arbitrary next generic argument value, as fallback)
 	 * @return the ValueHolder for the argument, or null if none set
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType) {
@@ -141,24 +141,28 @@ public class ConstructorArgumentValues {
 	 * Look for the next generic argument value that matches the given type,
 	 * ignoring argument values that have already been used in the current
 	 * resolution process.
-	 * @param requiredType the type to match
+	 * @param requiredType the type to match (can be null to find an
+	 * arbitrary next generic argument value, as fallback)
 	 * @param usedValueHolders a Set of ValueHolder objects that have already
 	 * been used in the current resolution process and should therefore not
 	 * be returned again
-	 * @return the ValueHolder for the argument, or null if none set
+	 * @return the ValueHolder for the argument, or null if none found
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType, Set usedValueHolders) {
 		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
 			ValueHolder valueHolder = (ValueHolder) it.next();
 			if (usedValueHolders == null || !usedValueHolders.contains(valueHolder)) {
-				Object value = valueHolder.getValue();
-				if (valueHolder.getType() != null) {
-					if (valueHolder.getType().equals(requiredType.getName())) {
+				if (requiredType != null) {
+					if (valueHolder.getType() != null) {
+						if (valueHolder.getType().equals(requiredType.getName())) {
+							return valueHolder;
+						}
+					}
+					else if (BeanUtils.isAssignable(requiredType, valueHolder.getValue())) {
 						return valueHolder;
 					}
 				}
-				else if (BeanUtils.isAssignable(requiredType, value) ||
-						(requiredType.isArray() && Collection.class.isInstance(value))) {
+				else {
 					return valueHolder;
 				}
 			}
