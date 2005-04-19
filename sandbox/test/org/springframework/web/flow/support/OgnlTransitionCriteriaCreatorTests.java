@@ -21,7 +21,9 @@ import org.springframework.mock.web.flow.MockRequestContext;
 import org.springframework.web.flow.RequestContext;
 
 /**
- * @author robh
+ * Test case for OgnlTransitionCriteriaCreator.
+ * 
+ * @author Rob Harrop
  */
 public class OgnlTransitionCriteriaCreatorTests extends TestCase {
 

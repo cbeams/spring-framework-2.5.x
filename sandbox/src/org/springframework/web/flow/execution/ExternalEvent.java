@@ -100,7 +100,7 @@ public abstract class ExternalEvent extends SimpleEvent {
 				// support images buttons, which would submit parameters as
 				// name_value.x=123
 				if (strValue.endsWith(".x") || strValue.endsWith(".y")) {
-					value = strValue.substring(0, strValue.length() - 2);
+					strValue = strValue.substring(0, strValue.length() - 2);
 				}
 				return strValue;
 			}
