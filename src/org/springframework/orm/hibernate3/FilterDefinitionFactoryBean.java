@@ -40,7 +40,7 @@ import org.springframework.beans.factory.InitializingBean;
  *   &lt;property name="filterDefinitions"&gt;
  *     &lt;list&gt;
  *       &lt;bean class="org.springframework.orm.hibernate3.FilterDefinitionFactoryBean"&gt;
- *         &lt;property name="filterName"&gt;&lt;value&gt;myFilter&lt;/value&gt;&lt;/property&gt;
+ *         &lt;property name="filterName" value="myFilter"/&gt;
  *         &lt;property name="parameterTypes"&gt;
  *           &lt;props&gt;
  *             &lt;prop key="myParam"&gt;string&lt;/prop&gt;
@@ -50,14 +50,15 @@ import org.springframework.beans.factory.InitializingBean;
  *       &lt;/bean&gt;
  *     &lt;/list&gt;
  *   &lt;/property&gt;
+ *   ...
  * &lt;/bean&gt;</pre>
  *
- * Alternatively, specify a bean id (or name) attribute instead of the
- * "filterName" property.
+ * Alternatively, specify a bean id (or name) attribute for the inner bean,
+ * instead of the "filterName" property.
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see LocalSessionFactoryBean#setFilterDefinitions
+ * @see LocalSessionFactoryBean#setFilterDefinitions(org.hibernate.engine.FilterDefinition[])
  */
 public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, InitializingBean {
 
