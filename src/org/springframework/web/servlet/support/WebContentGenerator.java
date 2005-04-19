@@ -174,6 +174,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	protected final void checkAndPrepare(
 			HttpServletRequest request, HttpServletResponse response, boolean lastModified)
 	    throws ServletException {
+
 		checkAndPrepare(request, response, this.cacheSeconds, lastModified);
 	}
 
@@ -221,8 +222,10 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			response.setDateHeader(HEADER_EXPIRES, 1L);
 		}
 		if (this.useCacheControlHeader) {
-			// HTTP 1.1 header
+			// HTTP 1.1 header: "no-cache" is the standard value,
+			// "no-store" is necessary to prevent caching on FireFox.
 			response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
+			response.addHeader(HEADER_CACHE_CONTROL, "no-store");
 		}
 	}
 
@@ -247,8 +250,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param mustRevalidate whether the client should revalidate the resource
 	 * (typically only necessary for controllers with last-modified support)
 	 */
-	protected final void cacheForSeconds(
-			HttpServletResponse response, int seconds, boolean mustRevalidate) {
+	protected final void cacheForSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
 			response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + seconds * 1000L);
@@ -287,8 +289,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param mustRevalidate whether the client should revalidate the resource
 	 * (typically only necessary for controllers with last-modified support)
 	 */
-	protected final void applyCacheSeconds(
-			HttpServletResponse response, int seconds, boolean mustRevalidate) {
+	protected final void applyCacheSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
 		if (seconds > 0) {
 			cacheForSeconds(response, seconds, mustRevalidate);
 		}

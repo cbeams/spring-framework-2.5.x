@@ -20,6 +20,7 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -144,7 +145,9 @@ public class CommandControllerTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
-		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
+		List cacheControl = response.getHeaders("Cache-Control");
+		assertTrue("Correct cache control", cacheControl.contains("no-cache"));
+		assertTrue("Correct cache control", cacheControl.contains("no-store"));
 	}
 
 	public void testNoCachingWithoutExpires() throws Exception {
@@ -155,7 +158,9 @@ public class CommandControllerTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("No expires header", response.getHeader("Expires") == null);
-		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
+		List cacheControl = response.getHeaders("Cache-Control");
+		assertTrue("Correct cache control", cacheControl.contains("no-cache"));
+		assertTrue("Correct cache control", cacheControl.contains("no-store"));
 	}
 
 	public void testNoCachingWithoutCacheControl() throws Exception {
@@ -255,7 +260,9 @@ public class CommandControllerTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
 		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
-		assertTrue("Correct cache control", response.getHeader("Cache-Control").equals("no-cache"));
+		List cacheControl = response.getHeaders("Cache-Control");
+		assertTrue("Correct cache control", cacheControl.contains("no-cache"));
+		assertTrue("Correct cache control", cacheControl.contains("no-store"));
 	}
 
 	public void testCachingWithCustomApplyCacheSecondsCall3() throws Exception {
