@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.cfg.Mappings;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
@@ -175,9 +176,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private Properties collectionCacheStrategies;
 
-	private Map eventListeners;
+	private TypeDefinitionBean[] typeDefinitions;
 
 	private FilterDefinition[] filterDefinitions;
+
+	private Map eventListeners;
 
 	private boolean schemaUpdate = false;
 
@@ -419,7 +422,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * &lt;/property></pre>
 	 * @param entityCacheStrategies properties that define entity cache strategies,
 	 * with class names as keys and cache concurrency strategies as values
-	 * @see Configuration#setCacheConcurrencyStrategy(String, String)
+	 * @see org.hibernate.cfg.Configuration#setCacheConcurrencyStrategy(String, String)
 	 */
 	public void setEntityCacheStrategies(Properties entityCacheStrategies) {
 		this.entityCacheStrategies = entityCacheStrategies;
@@ -438,10 +441,37 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * &lt;/property></pre>
 	 * @param collectionCacheStrategies properties that define collection cache strategies,
 	 * with collection roles as keys and cache concurrency strategies as values
-	 * @see Configuration#setCollectionCacheConcurrencyStrategy(String, String)
+	 * @see org.hibernate.cfg.Configuration#setCollectionCacheConcurrencyStrategy(String, String)
 	 */
 	public void setCollectionCacheStrategies(Properties collectionCacheStrategies) {
 		this.collectionCacheStrategies = collectionCacheStrategies;
+	}
+
+	/**
+	 * Specify the Hibernate FilterDefinitions to register with the SessionFactory.
+	 * This is an alternative to specifying <&lt;filter-def&gt; elements in
+	 * Hibernate mapping files.
+	 * <p>Typically, the passed-in FilterDefinition objects will have been defined
+	 * as Spring FilterDefinitionFactoryBeans, probably as inner beans within the
+	 * LocalSessionFactoryBean definition.
+	 * @see FilterDefinitionFactoryBean
+	 * @see org.hibernate.cfg.Configuration#addFilterDefinition
+	 */
+	public void setFilterDefinitions(FilterDefinition[] filterDefinitions) {
+		this.filterDefinitions = filterDefinitions;
+	}
+
+	/**
+	 * Specify the Hibernate type definitions to register with the SessionFactory,
+	 * as Spring TypeDefinitionBean instances. This is an alternative to specifying
+	 * <&lt;typedef&gt; elements in Hibernate mapping files.
+	 * <p>Unfortunately, Hibernate itself does not define a complete object that
+	 * represents a type definition, hence the need for Spring's TypeDefinitionBean.
+	 * @see TypeDefinitionBean
+	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
+	 */
+	public void setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
+		this.typeDefinitions = typeDefinitions;
 	}
 
 	/**
@@ -455,17 +485,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 */
 	public void setEventListeners(Map eventListeners) {
 		this.eventListeners = eventListeners;
-	}
-
-	/**
-	 * Specify the Hibernate FilterDefinitions to register for the SessionFactory.
-	 * <p>Typically, the passed-in FilterDefinition objects will have been defined
-	 * as Spring FilterDefinitionFactoryBeans, probably as inner beans within the
-	 * LocalSessionFactoryBean definition.
-	 * @see FilterDefinitionFactoryBean
-	 */
-	public void setFilterDefinitions(FilterDefinition[] filterDefinitions) {
-		this.filterDefinitions = filterDefinitions;
 	}
 
 	/**
@@ -587,13 +606,12 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				}
 			}
 
-			if (this.eventListeners != null) {
-				// Register specified Hibernate event listeners.
-				for (Iterator it = this.eventListeners.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					String listenerType = (String) entry.getKey();
-					Object listenerObject = entry.getValue();
-					config.setListener(listenerType, listenerObject);
+			if (this.typeDefinitions != null) {
+				// Register specified Hibernate type definitions.
+				Mappings mappings = config.createMappings();
+				for (int i = 0; i < this.typeDefinitions.length; i++) {
+					TypeDefinitionBean typeDef = this.typeDefinitions[i];
+					mappings.addTypeDef(typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
 				}
 			}
 
@@ -601,6 +619,16 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				// Register specified Hibernate FilterDefinitions.
 				for (int i = 0; i < this.filterDefinitions.length; i++) {
 					config.addFilterDefinition(this.filterDefinitions[i]);
+				}
+			}
+
+			if (this.eventListeners != null) {
+				// Register specified Hibernate event listeners.
+				for (Iterator it = this.eventListeners.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					String listenerType = (String) entry.getKey();
+					Object listenerObject = entry.getValue();
+					config.setListener(listenerType, listenerObject);
 				}
 			}
 
