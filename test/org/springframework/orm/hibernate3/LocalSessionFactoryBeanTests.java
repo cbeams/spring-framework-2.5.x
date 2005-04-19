@@ -39,9 +39,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.ImprovedNamingStrategy;
+import org.hibernate.cfg.Mappings;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.connection.UserSuppliedConnectionProvider;
 import org.hibernate.engine.FilterDefinition;
+import org.hibernate.mapping.TypeDef;
 
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -418,6 +420,22 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals(Hibernate.INTEGER, filter2.getParameterType("myParam"));
 	}
 
+	public void testLocalSessionFactoryBeanWithTypeDefinitions() throws Exception {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("typeDefinitions.xml", getClass()));
+		TypeTestLocalSessionFactoryBean sf = (TypeTestLocalSessionFactoryBean) xbf.getBean("&sessionFactory");
+		TypeDef type1 = (TypeDef) sf.mappings.getTypeDef("type1");
+		TypeDef type2 = (TypeDef) sf.mappings.getTypeDef("type2");
+
+		assertEquals("mypackage.MyTypeClass", type1.getTypeClass());
+		assertEquals(2, type1.getParameters().size());
+		assertEquals("value1", type1.getParameters().getProperty("param1"));
+		assertEquals("othervalue", type1.getParameters().getProperty("otherParam"));
+
+		assertEquals("mypackage.MyOtherTypeClass", type2.getTypeClass());
+		assertEquals(1, type2.getParameters().size());
+		assertEquals("myvalue", type2.getParameters().getProperty("myParam"));
+	}
+
 
 	public static class FilterTestLocalSessionFactoryBean extends LocalSessionFactoryBean {
 
@@ -431,6 +449,17 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 			};
 		}
 		protected SessionFactory newSessionFactory(Configuration config) {
+			return null;
+		}
+	}
+
+
+	public static class TypeTestLocalSessionFactoryBean extends LocalSessionFactoryBean {
+
+		public Mappings mappings;
+
+		protected SessionFactory newSessionFactory(Configuration config) {
+			this.mappings = config.createMappings();
 			return null;
 		}
 	}
