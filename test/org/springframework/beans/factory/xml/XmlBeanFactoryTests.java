@@ -663,6 +663,14 @@ public class XmlBeanFactoryTests extends TestCase {
 		ConstructorDependenciesBean rod13 = (ConstructorDependenciesBean) xbf.getBean("rod13");
 		assertEquals(kerry1, rod13.getSpouse1());
 		assertEquals(kerry2, rod13.getSpouse2());
+
+		ConstructorDependenciesBean rod14 = (ConstructorDependenciesBean) xbf.getBean("rod14");
+		assertEquals(kerry1, rod14.getSpouse1());
+		assertEquals(kerry2, rod14.getSpouse2());
+
+		ConstructorDependenciesBean rod15 = (ConstructorDependenciesBean) xbf.getBean("rod15");
+		assertEquals(kerry2, rod15.getSpouse1());
+		assertEquals(kerry1, rod15.getSpouse2());
 	}
 
 	public void testConstructorArgWithSingleMatch() {

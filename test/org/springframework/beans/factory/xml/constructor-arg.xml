@@ -84,15 +84,31 @@
 		<constructor-arg index="1"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
+	<bean id="rod14" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod15" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg><ref bean="kerry1"/></constructor-arg>
+	</bean>
+
 	<bean id="kerry1" class="org.springframework.beans.TestBean">
 		<property name="name">
 			<value>Kerry1</value>
+		</property>
+		<property name="age">
+			<value>33</value>
 		</property>
 	</bean>
 
 	<bean id="kerry2" class="org.springframework.beans.TestBean">
 		<property name="name">
 			<value>Kerry2</value>
+		</property>
+		<property name="age">
+			<value>32</value>
 		</property>
 	</bean>
 

@@ -152,6 +152,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck)
 			throws BeansException {
+
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
 		if (bd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR) {
 			return autowireConstructor(beanClass.getName(), bd).getWrappedInstance();
@@ -191,6 +192,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName)
 			throws BeansException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking BeanPostProcessors before instantiaion of bean '" + beanName + "'");
 		}
@@ -227,6 +229,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking BeanPostProcessors after initialization of bean '" + beanName + "'");
 		}
@@ -635,8 +638,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Set usedValueHolders = new HashSet(argTypes.length);
 
 		for (int j = 0; j < argTypes.length; j++) {
-			ConstructorArgumentValues.ValueHolder valueHolder = resolvedValues.getArgumentValue(j, argTypes[j]);
-			if (valueHolder != null && !usedValueHolders.contains(valueHolder)) {
+			ConstructorArgumentValues.ValueHolder valueHolder =
+					resolvedValues.getArgumentValue(j, argTypes[j], usedValueHolders);
+			if (valueHolder != null) {
 				// Do not consider the same value definition multiple times!
 				usedValueHolders.add(valueHolder);
 				try {

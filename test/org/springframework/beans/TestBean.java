@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.18 2005-03-25 09:28:21 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.19 2005-04-19 10:24:52 jhoeller Exp $
  */
 
 /*
@@ -31,6 +31,7 @@ import java.util.Set;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Simple test bean used for testing bean factories,
@@ -256,23 +257,18 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 
 	public boolean equals(Object other) {
-		if (this == other)
+		if (this == other) {
 			return true;
-
-		if (other == null || !(other instanceof TestBean))
+		}
+		if (other == null || !(other instanceof TestBean)) {
 			return false;
-
+		}
 		TestBean tb2 = (TestBean) other;
-		if (tb2.age != age)
-			return false;
+		return (ObjectUtils.nullSafeEquals(this.name, tb2.name) && this.age == tb2.age);
+	}
 
-		if (name == null)
-			return tb2.name == null;
-
-		if (!tb2.name.equals(name))
-			return false;
-
-		return true;
+	public int hashCode() {
+		return this.age;
 	}
 
 	public int compareTo(Object other) {
