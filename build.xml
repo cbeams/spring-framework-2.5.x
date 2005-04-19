@@ -1572,6 +1572,11 @@
 	</target>
 
 	<target name="compile-jasper-reports">
+		<delete>
+			<fileset dir="${test.dir}">
+				<include name="**/*.jasper"/>
+			</fileset>
+		</delete>
 		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask">
 			<classpath>
 				<fileset dir="./lib">
@@ -1579,11 +1584,11 @@
 				</fileset>
 			</classpath>
 		</taskdef>
-		<jrc >
-			  <src location="${test.dir}/org/springframework/ui/jasperreports/DataSourceReport.jrxml"/>
+		<jrc>
+			<src location="${test.dir}/org/springframework/ui/jasperreports/DataSourceReport.jrxml"/>
 			<src location="${test.dir}/org/springframework/ui/jasperreports/subReportParent.jrxml"/>
 			<src location="${test.dir}/org/springframework/ui/jasperreports/subReportChild.jrxml"/>
-			</jrc>
+		</jrc>
 	</target>
 
 </project>
