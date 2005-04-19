@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-dependency-check="all">
+
+    <bean id="testBean" class="org.springframework.aop.framework.CglibTestBean">
+        <property name="name">
+            <value>Rob Harrop</value>
+        </property>
+        <lookup-method name="getName" bean="fixedName"/>
+    </bean>
+
+    <bean id="fixedName" class="java.lang.String"/>
+</beans>
