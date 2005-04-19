@@ -3,6 +3,18 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2 final (6.5.2005)
+---------------------------------------
+
+Package org.springframework.beans
+* ConstructorArgumentValues holds generic ValueHolders in a List instead of a Set now, keeping their definition order
+* ConstructorArgumentValues offers "get(Generic)ArgumentValue" variant that excludes already used ValueHolders
+* AbstractAutowireCapableBeanFactory applies generic constructor argument values of the same type in definition order
+
+Package org.springframework.web
+* WebContentGenerator sets "no-store" value for "Cache-Control" header too, to prevent caching on FireFox
+
+
 Changes in version 1.2 RC2 (18.4.2005)
 --------------------------------------
 
