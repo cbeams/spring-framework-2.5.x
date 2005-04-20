@@ -761,8 +761,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.setVoidCallable(1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
-		query.setReadOnly(true);
-		queryControl.setReturnValue(query, 1);
 		query.list();
 		queryControl.setReturnValue(list, 1);
 		tx.commit();
