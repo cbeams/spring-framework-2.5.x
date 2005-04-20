@@ -83,6 +83,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 15 April 2001
  * @see #registerCustomEditor
  * @see java.beans.PropertyEditorManager
@@ -177,14 +178,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// Spring's CustomBooleanEditor accepts more flag values than the JDK's default editor.
 		this.defaultEditors.put(boolean.class, booleanEditor);
 		this.defaultEditors.put(Boolean.class, booleanEditor);
-		// The JDK does not contain default editors for number wrapper types!
-		this.defaultEditors.put(Short.class, new CustomNumberEditor(Short.class, false));
-		this.defaultEditors.put(Integer.class, new CustomNumberEditor(Integer.class, false));
-		this.defaultEditors.put(Long.class, new CustomNumberEditor(Long.class, false));
-		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, false));
-		this.defaultEditors.put(Float.class, new CustomNumberEditor(Float.class, false));
-		this.defaultEditors.put(Double.class, new CustomNumberEditor(Double.class, false));
-		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, false));
+
+		registerCustomNumberEditors();
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.
@@ -306,7 +301,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	protected void setIntrospectionClass(Class clazz) {
 		if (this.cachedIntrospectionResults == null ||
-		    !this.cachedIntrospectionResults.getBeanClass().equals(clazz)) {
+						!this.cachedIntrospectionResults.getBeanClass().equals(clazz)) {
 			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(clazz);
 		}
 	}
@@ -424,7 +419,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 */
 	private int getNestedPropertySeparatorIndex(String propertyPath, boolean last) {
 		boolean inKey = false;
-		int i = (last ? propertyPath.length()-1 : 0);
+		int i = (last ? propertyPath.length() - 1 : 0);
 		while ((last && i >= 0) || i < propertyPath.length()) {
 			switch (propertyPath.charAt(i)) {
 				case PROPERTY_KEY_PREFIX_CHAR:
@@ -436,7 +431,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 						return i;
 					}
 			}
-			if (last) i--; else i++;
+			if (last) i--;
+			else i++;
 		}
 		return -1;
 	}
@@ -501,7 +497,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
 			}
 			nestedBw = new BeanWrapperImpl(
-					propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR, this);
+							propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR, this);
 			// inherit all type-specific PropertyEditors
 			if (this.customEditors != null) {
 				for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
@@ -715,7 +711,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce = new PropertyChangeEvent(
-							this.rootObject, this.nestedPath + propertyName, null, newValue);
+									this.rootObject, this.nestedPath + propertyName, null, newValue);
 					throw new TypeMismatchException(pce, requiredType, ex);
 				}
 				catch (IndexOutOfBoundsException ex) {
@@ -759,7 +755,6 @@ public class BeanWrapperImpl implements BeanWrapper {
 						"' is neither an array nor a List nor a Map; returned value was [" + value + "]");
 			}
 		}
-
 		else {
 			if (!isWritableProperty(propertyName)) {
 				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName);
@@ -773,14 +768,14 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 				if (pd.getPropertyType().isPrimitive() && (newValue == null || "".equals(newValue))) {
 					throw new IllegalArgumentException("Invalid value [" + value + "] for property '" +
-								pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
+							pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
 				}
 
 				if (logger.isDebugEnabled()) {
 					logger.debug("About to invoke write method [" + writeMethod + "] on object of class [" +
 							this.object.getClass().getName() + "]");
 				}
-				writeMethod.invoke(this.object, new Object[] { newValue });
+				writeMethod.invoke(this.object, new Object[]{newValue});
 				if (logger.isDebugEnabled()) {
 					String msg = "Invoked write method [" + writeMethod + "] with value ";
 					// only cause toString invocation of new value in case of simple property
@@ -859,7 +854,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		// If we encountered individual exceptions, throw the composite exception.
 		if (!propertyAccessExceptions.isEmpty()) {
 			Object[] paeArray = propertyAccessExceptions.toArray(
-					new PropertyAccessException[propertyAccessExceptions.size()]);
+							new PropertyAccessException[propertyAccessExceptions.size()]);
 			throw new PropertyAccessExceptionsException(this, (PropertyAccessException[]) paeArray);
 		}
 	}
@@ -899,7 +894,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 	 * @throws TypeMismatchException if type conversion failed
 	 */
 	protected Object doTypeConversionIfNecessary(String propertyName, String fullPropertyName,
-			Object oldValue, Object newValue, Class requiredType) throws TypeMismatchException {
+																																	Object oldValue, Object newValue, Class requiredType) throws TypeMismatchException {
 
 		Object convertedValue = newValue;
 		if (convertedValue != null) {
@@ -909,8 +904,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 			// Value not of required type?
 			if (pe != null ||
-					(requiredType != null &&
-					 (requiredType.isArray() || !requiredType.isAssignableFrom(convertedValue.getClass())))) {
+							(requiredType != null &&
+							(requiredType.isArray() || !requiredType.isAssignableFrom(convertedValue.getClass())))) {
 
 				if (requiredType != null) {
 					if (pe == null) {
@@ -974,8 +969,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 							int i = 0;
 							for (Iterator it = coll.iterator(); it.hasNext(); i++) {
 								Object value = doTypeConversionIfNecessary(
-										propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-										null, it.next(), componentType);
+												propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+												null, it.next(), componentType);
 								Array.set(result, i, value);
 							}
 							return result;
@@ -986,18 +981,18 @@ public class BeanWrapperImpl implements BeanWrapper {
 							Object result = Array.newInstance(componentType, arrayLength);
 							for (int i = 0; i < arrayLength; i++) {
 								Object value = doTypeConversionIfNecessary(
-										propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
-										null, Array.get(convertedValue, i), componentType);
+												propertyName, propertyName + PROPERTY_KEY_PREFIX + i + PROPERTY_KEY_SUFFIX,
+												null, Array.get(convertedValue, i), componentType);
 								Array.set(result, i, value);
 							}
 							return result;
 						}
 						else {
 							// A plain value: convert it to an array with a single component.
-							Object result = Array.newInstance(componentType, 1) ;
+							Object result = Array.newInstance(componentType, 1);
 							Object val = doTypeConversionIfNecessary(
-									propertyName, propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
-									null, convertedValue, componentType);
+											propertyName, propertyName + PROPERTY_KEY_PREFIX + 0 + PROPERTY_KEY_SUFFIX,
+											null, convertedValue, componentType);
 							Array.set(result, 0, val);
 							return result;
 						}
@@ -1006,7 +1001,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 					// Throw explicit TypeMismatchException with full context information
 					// if the resulting value definitely doesn't match the required type.
 					if (convertedValue != null && !requiredType.isPrimitive() &&
-							!requiredType.isAssignableFrom(convertedValue.getClass())) {
+									!requiredType.isAssignableFrom(convertedValue.getClass())) {
 						throw new TypeMismatchException(
 								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType);
 					}
@@ -1032,7 +1027,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 		else {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-			    "No property '" + propertyName + "' found");
+					"No property '" + propertyName + "' found");
 		}
 	}
 
@@ -1127,6 +1122,42 @@ public class BeanWrapperImpl implements BeanWrapper {
 		return sb.toString();
 	}
 
+	/**
+	 * Registers a <code>CustomNumberEditor</code> for all primitive number types, their corresponding wrapper types,
+	 * <code>BigInteger</code> and <code>BigDecimal</code>.
+	 */
+	private void registerCustomNumberEditors() {
+		// The JDK does not contain default editors for number wrapper types!
+		// override JDK primitive number editors with our own CustomNumberEditor
+		PropertyEditor byteEditor = new CustomNumberEditor(Byte.class, false);
+		PropertyEditor shortEditor = new CustomNumberEditor(Short.class, false);
+		PropertyEditor integerEditor = new CustomNumberEditor(Integer.class, false);
+		PropertyEditor longEditor = new CustomNumberEditor(Long.class, false);
+		PropertyEditor floatEditor = new CustomNumberEditor(Float.class, false);
+		PropertyEditor doubleEditor = new CustomNumberEditor(Double.class, false);
+
+
+		this.defaultEditors.put(byte.class, byteEditor);
+		this.defaultEditors.put(Byte.class, byteEditor);
+
+		this.defaultEditors.put(short.class, shortEditor);
+		this.defaultEditors.put(Short.class, shortEditor);
+
+		this.defaultEditors.put(int.class, integerEditor);
+		this.defaultEditors.put(Integer.class, integerEditor);
+
+		this.defaultEditors.put(long.class, longEditor);
+		this.defaultEditors.put(Long.class, longEditor);
+
+		this.defaultEditors.put(float.class, floatEditor);
+		this.defaultEditors.put(Float.class, floatEditor);
+
+		this.defaultEditors.put(double.class, doubleEditor);
+		this.defaultEditors.put(Double.class, doubleEditor);
+
+		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, false));
+		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, false));
+	}
 
 	/**
 	 * Holder for a registered custom editor with property name.
@@ -1159,11 +1190,11 @@ public class BeanWrapperImpl implements BeanWrapper {
 			// (If not registered for Collection or array, it is assumed to be intended
 			// for elements.)
 			if (this.registeredType == null ||
-					(requiredType != null &&
-			    (BeanUtils.isAssignable(this.registeredType, requiredType) ||
-			    BeanUtils.isAssignable(requiredType, this.registeredType))) ||
-					(requiredType == null &&
-			    (!Collection.class.isAssignableFrom(this.registeredType) && !this.registeredType.isArray()))) {
+							(requiredType != null &&
+							(BeanUtils.isAssignable(this.registeredType, requiredType) ||
+							BeanUtils.isAssignable(requiredType, this.registeredType))) ||
+							(requiredType == null &&
+							(!Collection.class.isAssignableFrom(this.registeredType) && !this.registeredType.isArray()))) {
 				return this.propertyEditor;
 			}
 			else {

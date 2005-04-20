@@ -26,6 +26,7 @@ import java.text.ParseException;
  * Mainly for internal use within the framework; consider Jakarta's
  * Commons Lang for a more comprehensive suite of string utilities.
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.1.2
  */
 public abstract class NumberUtils {
@@ -37,6 +38,7 @@ public abstract class NumberUtils {
 	 * @return the converted number
 	 * @throws IllegalArgumentException if the target class is not supported
 	 * (i.e. not a standard Number subclass as included in the JDK)
+	 * @see java.lang.Byte
 	 * @see java.lang.Short
 	 * @see java.lang.Integer
 	 * @see java.lang.Long
@@ -49,6 +51,9 @@ public abstract class NumberUtils {
 			throws IllegalArgumentException {
 		if (targetClass.isInstance(number)) {
 			return number;
+		}
+		else if(targetClass.equals(Byte.class)) {
+			return new Byte(number.byteValue());
 		}
 		else if (targetClass.equals(Short.class)) {
 			return new Short(number.shortValue());
@@ -81,12 +86,14 @@ public abstract class NumberUtils {
 
 	/**
 	 * Parse the given text into a number instance of the given target class,
-	 * using the corresponding default <code>valueOf</code> methods.
+	 * using the corresponding default <code>valueOf</code> methods. Trims the
+	 * input <code>String</code> before attempting to parse the number.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
 	 * @throws IllegalArgumentException if the target class is not supported
 	 * (i.e. not a standard Number subclass as included in the JDK)
+	 * @see java.lang.Byte#valueOf
 	 * @see java.lang.Short#valueOf
 	 * @see java.lang.Integer#valueOf
 	 * @see java.lang.Long#valueOf
@@ -96,36 +103,42 @@ public abstract class NumberUtils {
 	 * @see java.math.BigDecimal#BigDecimal(String)
 	 */
 	public static Number parseNumber(String text, Class targetClass) {
-		if (targetClass.equals(Short.class)) {
-			return Short.valueOf(text);
+		String trimmed = text.trim();
+
+		if(targetClass.equals(Byte.class)) {
+			return Byte.valueOf(trimmed);
+		}
+		else if (targetClass.equals(Short.class)) {
+			return Short.valueOf(trimmed);
 		}
 		else if (targetClass.equals(Integer.class)) {
-			return Integer.valueOf(text);
+			return Integer.valueOf(trimmed);
 		}
 		else if (targetClass.equals(Long.class)) {
-			return Long.valueOf(text);
+			return Long.valueOf(trimmed);
 		}
 		else if (targetClass.equals(BigInteger.class)) {
-			return new BigInteger(text);
+			return new BigInteger(trimmed);
 		}
 		else if (targetClass.equals(Float.class)) {
-			return Float.valueOf(text);
+			return Float.valueOf(trimmed);
 		}
 		else if (targetClass.equals(Double.class)) {
-			return Double.valueOf(text);
+			return Double.valueOf(trimmed);
 		}
 		else if (targetClass.equals(BigDecimal.class)) {
-			return new BigDecimal(text);
+			return new BigDecimal(trimmed);
 		}
 		else {
 			throw new IllegalArgumentException(
-					"Cannot convert [" + text + "] to target class [" + targetClass.getName() + "]");
+					"Cannot convert [" + trimmed + "] to target class [" + targetClass.getName() + "]");
 		}
 	}
 
 	/**
 	 * Parse the given text into a number instance of the given target class,
-	 * using the given NumberFormat.
+	 * using the given NumberFormat. Trims the input <code>String</code>
+	 * before attempting to parse the number.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @param numberFormat the NumberFormat to use for parsing
@@ -137,7 +150,7 @@ public abstract class NumberUtils {
 	 */
 	public static Number parseNumber(String text, Class targetClass, NumberFormat numberFormat) {
 		try {
-			Number number = numberFormat.parse(text);
+			Number number = numberFormat.parse(text.trim());
 			return NumberUtils.convertNumberToTargetClass(number, targetClass);
 		}
 		catch (ParseException ex) {
