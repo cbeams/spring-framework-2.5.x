@@ -837,9 +837,40 @@ public class AnnotationTestBean implements IJmxTestBean {
     </section>
 
     <section id="jmx-interface-methodnames">
-      <title>Using MethodNameBasedMBeanInfoAssembler</title>
+      <title>Using
+      <literal>MethodNameBasedMBeanInfoAssembler</literal></title>
 
-      <para></para>
+      <para>The <literal>MethodNameBasedMBeanInfoAssembler</literal> allows
+      you to specify a list of method names that will be exposed to JMX as
+      attributes and operations. The code below shows a sample configuration
+      for this:</para>
+
+      <programlisting>&lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
+    &lt;property name="beans"&gt;
+      &lt;map&gt;
+        &lt;entry key="bean:name=testBean5"&gt;
+          &lt;ref local="testBean"/&gt;
+        &lt;/entry&gt;
+      &lt;/map&gt;
+    &lt;/property&gt;
+    &lt;property name="assembler"&gt;
+      &lt;bean class="org.springframework.jmx.export.assembler.MethodNameBasedMBeanInfoAssembler"&gt;
+        &lt;property name="managedMethods"&gt;
+          &lt;value&gt;add,myOperation,getName,setName,getAge&lt;/value&gt;
+        &lt;/property&gt;
+      &lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>Here you can see that the methods <literal>add</literal> and
+      <literal>myOperation</literal> will be exposed as JMX operations and
+      <literal>getName</literal>, <literal>setName</literal> and
+      <literal>getAge</literal> will be exposed as the appropriate half of a
+      JMX attribute. In the code above, the method mappings apply to beans
+      that are exposed to JMX. To control method exposure on a bean by bean
+      basis, use the <literal>methodMappings</literal> property of
+      <literal>MethodNameMBeanInfoAssembler</literal> to map bean names to
+      lists of method names.</para>
     </section>
   </section>
 
