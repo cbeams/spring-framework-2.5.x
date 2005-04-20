@@ -561,9 +561,6 @@ public abstract class SessionFactoryUtils {
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			query.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
-		if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-			query.setReadOnly(true);
-		}
 	}
 
 	/**
