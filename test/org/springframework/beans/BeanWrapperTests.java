@@ -1013,6 +1013,55 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue(tb.getList().containsAll(list));
 	}
 
+	public void testSetNumberProperties() {
+    NumberPropertyBean bean = new NumberPropertyBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+
+		String byteValue = " " + Byte.MAX_VALUE + " ";
+		String shortValue = " " + Short.MAX_VALUE + " ";
+		String intValue = " " + Integer.MAX_VALUE + " ";
+		String longValue = " " + Long.MAX_VALUE + " ";
+		String floatValue = " " + Float.MAX_VALUE + " ";
+		String doubleValue = " " + Double.MAX_VALUE + " ";
+
+		bw.setPropertyValue("myPrimitiveByte", byteValue);
+		bw.setPropertyValue("myByte", byteValue);
+
+		bw.setPropertyValue("myPrimitiveShort", shortValue);
+		bw.setPropertyValue("myShort", shortValue);
+
+		bw.setPropertyValue("myPrimitiveInt", intValue);
+		bw.setPropertyValue("myInteger", intValue);
+
+		bw.setPropertyValue("myPrimitiveLong", longValue);
+		bw.setPropertyValue("myLong", longValue);
+
+		bw.setPropertyValue("myPrimitiveFloat", floatValue);
+		bw.setPropertyValue("myFloat", floatValue);
+
+		bw.setPropertyValue("myPrimitiveDouble", doubleValue);
+		bw.setPropertyValue("myDouble", doubleValue);
+
+		assertEquals(Byte.MAX_VALUE, bean.getMyPrimitiveByte());
+		assertEquals(Byte.MAX_VALUE, bean.getMyByte().byteValue());
+
+		assertEquals(Short.MAX_VALUE, bean.getMyPrimitiveShort());
+		assertEquals(Short.MAX_VALUE, bean.getMyShort().shortValue());
+
+		assertEquals(Integer.MAX_VALUE, bean.getMyPrimitiveInt());
+		assertEquals(Integer.MAX_VALUE, bean.getMyInteger().intValue());
+
+		assertEquals(Long.MAX_VALUE, bean.getMyPrimitiveLong());
+		assertEquals(Long.MAX_VALUE, bean.getMyLong().longValue());
+
+		assertEquals(Float.MAX_VALUE, bean.getMyPrimitiveFloat(), 0.001);
+		assertEquals(Float.MAX_VALUE, bean.getMyFloat().floatValue(), 0.001);
+
+		assertEquals(Double.MAX_VALUE, bean.getMyPrimitiveDouble(), 0.001);
+		assertEquals(Double.MAX_VALUE, bean.getMyDouble().doubleValue(), 0.001);
+
+	}
+
 
 	private static class DifferentTestBean extends TestBean {
 		// class to test naming of beans in a BeanWrapper error message
@@ -1092,4 +1141,119 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+	private static class NumberPropertyBean {
+		private byte myPrimitiveByte;
+		private Byte myByte;
+
+		private short myPrimitiveShort;
+		private Short myShort;
+
+		private int myPrimitiveInt;
+		private Integer myInteger;
+
+		private long myPrimitiveLong;
+		private Long myLong;
+
+		private float myPrimitiveFloat;
+		private Float myFloat;
+
+		private double myPrimitiveDouble;
+		private Double myDouble;
+
+		public byte getMyPrimitiveByte() {
+			return myPrimitiveByte;
+		}
+
+		public void setMyPrimitiveByte(byte myPrimitiveByte) {
+			this.myPrimitiveByte = myPrimitiveByte;
+		}
+
+		public Byte getMyByte() {
+			return myByte;
+		}
+
+		public void setMyByte(Byte myByte) {
+			this.myByte = myByte;
+		}
+
+		public short getMyPrimitiveShort() {
+			return myPrimitiveShort;
+		}
+
+		public void setMyPrimitiveShort(short myPrimitiveShort) {
+			this.myPrimitiveShort = myPrimitiveShort;
+		}
+
+		public Short getMyShort() {
+			return myShort;
+		}
+
+		public void setMyShort(Short myShort) {
+			this.myShort = myShort;
+		}
+
+		public int getMyPrimitiveInt() {
+			return myPrimitiveInt;
+		}
+
+		public void setMyPrimitiveInt(int myPrimitiveInt) {
+			this.myPrimitiveInt = myPrimitiveInt;
+		}
+
+		public Integer getMyInteger() {
+			return myInteger;
+		}
+
+		public void setMyInteger(Integer myInteger) {
+			this.myInteger = myInteger;
+		}
+
+		public long getMyPrimitiveLong() {
+			return myPrimitiveLong;
+		}
+
+		public void setMyPrimitiveLong(long myPrimitiveLong) {
+			this.myPrimitiveLong = myPrimitiveLong;
+		}
+
+		public Long getMyLong() {
+			return myLong;
+		}
+
+		public void setMyLong(Long myLong) {
+			this.myLong = myLong;
+		}
+
+		public float getMyPrimitiveFloat() {
+			return myPrimitiveFloat;
+		}
+
+		public void setMyPrimitiveFloat(float myPrimitiveFloat) {
+			this.myPrimitiveFloat = myPrimitiveFloat;
+		}
+
+		public Float getMyFloat() {
+			return myFloat;
+		}
+
+		public void setMyFloat(Float myFloat) {
+			this.myFloat = myFloat;
+		}
+
+		public double getMyPrimitiveDouble() {
+			return myPrimitiveDouble;
+		}
+
+		public void setMyPrimitiveDouble(double myPrimitiveDouble) {
+			this.myPrimitiveDouble = myPrimitiveDouble;
+		}
+
+		public Double getMyDouble() {
+			return myDouble;
+		}
+
+		public void setMyDouble(Double myDouble) {
+			this.myDouble = myDouble;
+		}
+	}
 }
