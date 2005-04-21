@@ -18,6 +18,7 @@ package org.springframework.beans.factory.dynamic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
@@ -32,8 +33,7 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
  * <p>Call the refresh() method before use.
  * @author Rod Johnson
  */
-public abstract class AbstractRefreshableTargetSource 
-	implements TargetSource, DynamicObject {
+public abstract class AbstractRefreshableTargetSource implements TargetSource, DynamicObject {
 	
 	protected final Log log = LogFactory.getLog(getClass());
 	
@@ -48,13 +48,14 @@ public abstract class AbstractRefreshableTargetSource
 	private boolean autoRefresh;
 	
 	private long lastRefreshTime;
-	
+
 	private long lastCheck;
 	
 	private boolean modified;
 	
 	private DelegatingIntroductionInterceptor dii = new DelegatingIntroductionInterceptor(this);
-	
+
+
 	public AbstractRefreshableTargetSource() {
 		lastRefresh = lastCheck = System.currentTimeMillis();
 		loads = 0;
@@ -100,13 +101,13 @@ public abstract class AbstractRefreshableTargetSource
 	}
 
 	/**
-	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#getLastRefreshMillis()
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#getLastRefreshMillis()
 	 */
 	public long getLastRefreshMillis() {
 		return lastRefresh;
 	}
 	/**
-	 * @see org.springframework.beans.factory.dynamic.ExpirableObject#getLoadCount()
+	 * @see org.springframework.beans.factory.dynamic.DynamicObject#getLoadCount()
 	 */
 	public int getLoadCount() {
 		return loads;
@@ -116,7 +117,7 @@ public abstract class AbstractRefreshableTargetSource
 	/**
 	 * @see org.springframework.aop.TargetSource#getTarget()
 	 */
-	public synchronized Object getTarget() throws Exception {
+	public synchronized Object getTarget() {
 		if (autoRefresh && isModified()) {
 			refresh();
 		}
@@ -145,8 +146,9 @@ public abstract class AbstractRefreshableTargetSource
 	 * @see org.springframework.aop.TargetSource#getTargetClass()
 	 */
 	public Class getTargetClass() {
-		return (currentTarget != null) ? currentTarget.getClass() : null;
+		return getTarget().getClass();
 	}
+
 	/**
 	 * @see org.springframework.aop.TargetSource#isStatic()
 	 */
@@ -187,4 +189,5 @@ public abstract class AbstractRefreshableTargetSource
 	public void suppressInterface(Class intf) {
 		dii.suppressInterface(intf);
 	}
+
 }
