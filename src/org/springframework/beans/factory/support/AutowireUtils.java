@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -91,6 +92,16 @@ public abstract class AutowireUtils {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Determine whether the given bean property is excluded from dependency checks.
+	 * <p>This implementation excludes properties defined by CGLIB.
+	 * @param pd the PropertyDescriptor of the bean property
+	 * @return whether the bean property is excluded
+	 */
+	public static boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
+		return (pd.getWriteMethod().getDeclaringClass().getName().indexOf("$$") != -1);
 	}
 
 }

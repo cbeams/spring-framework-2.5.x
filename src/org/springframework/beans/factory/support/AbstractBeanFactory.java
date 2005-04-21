@@ -36,7 +36,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -503,6 +502,14 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return (String[]) this.singletonCache.keySet().toArray(new String[this.singletonCache.size()]);
 	}
 
+	/**
+	 * Return whether the specified singleton is currently in creation
+	 * @param beanName the name of the bean
+	 */ 
+	protected boolean isSingletonCurrentlyInCreation(String beanName) {
+		return (CURRENTLY_IN_CREATION == this.singletonCache.get(beanName));
+	}
+
 	public boolean containsSingleton(String beanName) {
 		Assert.hasText(beanName, "Bean name must not be empty");
 		return this.singletonCache.containsKey(beanName);
@@ -547,18 +554,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Create a new BeanWrapper for the given bean instance.
-	 * <p>Default implementation creates a BeanWrapperImpl.
-	 * Can be overridden for custom BeanWrapper adaptations.
-	 * @param beanInstance the bean instance to create the BeanWrapper for,
-	 * or null for a BeanWrapper that does not yet contain a target object
-	 * @return the BeanWrapper
-	 */
-	protected BeanWrapper createBeanWrapper(Object beanInstance) {
-		return (beanInstance != null ? new BeanWrapperImpl(beanInstance) : new BeanWrapperImpl());
-	}
-
-	/**
 	 * Initialize the given BeanWrapper with the custom editors registered
 	 * with this factory. To be called for BeanWrappers that will create
 	 * and populate bean instances.
@@ -574,7 +569,21 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Convert the given value into the specified target type.
+	 * Convert the given value into the specified target type,
+	 * using a default BeanWrapper instance.
+	 * @param value the original value
+	 * @param targetType the target type
+	 * @return the converted value, matching the target type
+	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
+	 * @see #doTypeConversionIfNecessary(Object, Class, org.springframework.beans.BeanWrapperImpl)
+	 */
+	protected Object doTypeConversionIfNecessary(Object value, Class targetType) throws TypeMismatchException {
+		return doTypeConversionIfNecessary(value, targetType, new BeanWrapperImpl());
+	}
+
+	/**
+	 * Convert the given value into the specified target type,
+	 * using the specified BeanWrapper.
 	 * @param value the original value
 	 * @param targetType the target type
 	 * @param bw the BeanWrapper to work on
@@ -582,29 +591,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
 	 * @see org.springframework.beans.BeanWrapperImpl#doTypeConversionIfNecessary(Object, Class)
 	 */
-	protected Object doTypeConversionIfNecessary(Object value, Class targetType, BeanWrapper bw)
+	protected Object doTypeConversionIfNecessary(Object value, Class targetType, BeanWrapperImpl bw)
 			throws TypeMismatchException {
-
-		// We need BeanWrapperImpl for separate type conversion.
-		if (!(bw instanceof BeanWrapperImpl)) {
-			// Don't complain if the value matches anyway.
-			if (targetType.isInstance(value)) {
-				return value;
-			}
-			throw new FatalBeanException(
-					"Type conversion is only available with BeanWrapperImpl, not with: " + bw);
-		}
-		BeanWrapperImpl bwi = (BeanWrapperImpl) bw;
 
 		// Synchronize if custom editors are registered.
 		// Necessary because PropertyEditors are not thread-safe.
 		if (!getCustomEditors().isEmpty()) {
 			synchronized (getCustomEditors()) {
-				return bwi.doTypeConversionIfNecessary(value, targetType);
+				return bw.doTypeConversionIfNecessary(value, targetType);
 			}
 		}
 		else {
-			return bwi.doTypeConversionIfNecessary(value, targetType);
+			return bw.doTypeConversionIfNecessary(value, targetType);
 		}
 	}
 
@@ -1060,9 +1058,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @param args arguments to use if creating a prototype using explicit arguments
 	 * to a static factory method. This parameter must be null except in this case.
 	 * @return a new instance of the bean
-	 * @throws BeansException in case of errors
+	 * @throws BeanCreationException if the bean could not be created
 	 */
 	protected abstract Object createBean(
-			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeansException;
+			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeanCreationException;
 
 }

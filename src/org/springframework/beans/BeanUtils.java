@@ -262,7 +262,7 @@ public abstract class BeanUtils {
 	 * i.e. a primitive, a String, a Class, or a corresponding array.
 	 * Used to determine properties to check for a "simple" dependency-check.
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
-	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#dependencyCheck
+	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
 	 */
 	public static boolean isSimpleProperty(Class clazz) {
 		Assert.notNull(clazz, "clazz must not be null");
