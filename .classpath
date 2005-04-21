@@ -452,5 +452,9 @@
 		<attributes>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/toplink/toplink.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
