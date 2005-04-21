@@ -16,16 +16,17 @@
 
 package org.springframework.jmx;
 
-import javax.management.JMException;
+import org.springframework.core.NestedRuntimeException;
 
 /**
- * Thrown when <code>JmxUtils</code> cannot locate an instance of <code>MBeanServer</code>
- * running locally, or when more than one instance is found.
+ * Thrown when we cannot locate an instance of an <code>MBeanServer</code>,
+ * or when more than one instance is found.
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.jmx.support.JmxUtils#locateMBeanServer
  */
-public class MBeanServerNotFoundException extends JMException {
+public class MBeanServerNotFoundException extends NestedRuntimeException {
 
 	/**
 	 * Create a new <code>MBeanServerNotFoundException</code> with the
@@ -34,6 +35,16 @@ public class MBeanServerNotFoundException extends JMException {
 	 */
 	public MBeanServerNotFoundException(String msg) {
 		super(msg);
+	}
+
+	/**
+	 * Create a new <code>MBeanServerNotFoundException</code> with the
+	 * specified error message and root cause.
+	 * @param msg the error message
+	 * @param ex the root cause
+	 */
+	public MBeanServerNotFoundException(String msg, Throwable ex) {
+		super(msg, ex);
 	}
 
 }
