@@ -138,25 +138,24 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	public void testManyProxies() {
 		int howmany = 10000;
 		StopWatch sw = new StopWatch();
-		sw.start(getClass() + getName() + ": create " + howmany + " proxies");
+		sw.start(getClass() + "." + getName() + ": create " + howmany + " proxies");
 		testManyProxies(howmany);
 		sw.stop();
 		System.out.println(sw);
 		// Set a performance benchmark.
-		// It's pretty generous so as not to cause failures
-		// on slow machines.
+		// It's pretty generous so as not to cause failures on slow machines.
 		assertTrue("Proxy creation was too slow",  sw.getTotalTimeSeconds() < 20);
 	}
 	
-	private void testManyProxies(int howmany) {
+	private void testManyProxies(int howMany) {
 		int age1 = 33;
 		TestBean target1 = new TestBean();
 		target1.setAge(age1);
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		pf1.addAdvice(new NopInterceptor());
 		pf1.addAdvice(new NopInterceptor());
-		ITestBean proxies[] = new ITestBean[howmany];
-		for (int i = 0; i < howmany; i++) {
+		ITestBean proxies[] = new ITestBean[howMany];
+		for (int i = 0; i < howMany; i++) {
 			proxies[i] = (ITestBean) createAopProxy(pf1).getProxy();
 			assertEquals(age1, proxies[i].getAge());
 		}

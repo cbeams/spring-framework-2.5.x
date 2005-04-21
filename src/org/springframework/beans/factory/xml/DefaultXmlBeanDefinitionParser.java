@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -216,7 +215,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * @param root the DOM root element of the document
 	 * @return the number of bean definitions found
 	 */
-	protected int parseBeanDefinitions(Element root) {
+	protected int parseBeanDefinitions(Element root) throws BeanDefinitionStoreException {
 		NodeList nl = root.getChildNodes();
 		int beanDefinitionCounter = 0;
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -246,7 +245,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Parse an "import" element and load the bean definitions
 	 * from the given resource into the bean factory.
 	 */
-	protected void importBeanDefinitionResource(Element ele) {
+	protected void importBeanDefinitionResource(Element ele) throws BeanDefinitionStoreException {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
 		Resource relativeResource = null;
 		if (ResourceUtils.isUrl(location)) {
@@ -277,7 +276,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * <p>If no "id" specified, uses the first name in the "name" attribute
 	 * as canonical name, registering all others as aliases.
 	 */
-	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele) {
+	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele) throws BeanDefinitionStoreException {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
@@ -314,7 +313,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse the BeanDefinition itself, without regard to name or aliases.
 	 */
-	protected BeanDefinition parseBeanDefinitionElement(Element ele, String beanName) {
+	protected BeanDefinition parseBeanDefinitionElement(Element ele, String beanName)
+			throws BeanDefinitionStoreException {
+
 		String className = null;
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE);
@@ -373,13 +374,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
 			}
 
-			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+			if (ele.hasAttribute(SINGLETON_ATTRIBUTE) ) {
 				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
 			}
 
 			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
-				// just apply default to singletons, as lazy-init has no meaning for prototypes
+				// Just apply default to singletons, as lazy-init has no meaning for prototypes.
 				lazyInit = this.defaultLazyInit;
 			}
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
@@ -433,7 +434,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Parse constructor-arg sub-elements of the given bean element.
 	 */
 	protected ConstructorArgumentValues parseConstructorArgElements(Element beanEle, String beanName)
-			throws ClassNotFoundException {
+			throws BeanDefinitionStoreException {
+
 		NodeList nl = beanEle.getChildNodes();
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -448,7 +450,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse property sub-elements of the given bean element.
 	 */
-	protected MutablePropertyValues parsePropertyElements(Element beanEle, String beanName) {
+	protected MutablePropertyValues parsePropertyElements(Element beanEle, String beanName)
+			throws BeanDefinitionStoreException {
+
 		NodeList nl = beanEle.getChildNodes();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -463,7 +467,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse lookup-override sub-elements of the given bean element.
 	 */
-	protected void parseLookupOverrideSubElements(Element beanEle, String beanName, MethodOverrides overrides) {
+	protected void parseLookupOverrideSubElements(Element beanEle, String beanName, MethodOverrides overrides)
+			throws BeanDefinitionStoreException {
+
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
@@ -479,7 +485,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse replaced-method sub-elements of the given bean element.
 	 */
-	protected void parseReplacedMethodSubElements(Element beanEle, String beanName, MethodOverrides overrides) {
+	protected void parseReplacedMethodSubElements(Element beanEle, String beanName, MethodOverrides overrides)
+			throws BeanDefinitionStoreException {
+
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
@@ -503,7 +511,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Parse a constructor-arg element.
 	 */
 	protected void parseConstructorArgElement(Element ele, String beanName, ConstructorArgumentValues cargs)
-			throws DOMException, ClassNotFoundException {
+			throws BeanDefinitionStoreException {
 
 		Object val = parsePropertyValue(ele, beanName, null);
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
@@ -539,7 +547,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a property element.
 	 */
-	protected void parsePropertyElement(Element ele, String beanName, MutablePropertyValues pvs) {
+	protected void parsePropertyElement(Element ele, String beanName, MutablePropertyValues pvs)
+			throws BeanDefinitionStoreException {
+
 		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
 		if (!StringUtils.hasLength(propertyName)) {
 			throw new BeanDefinitionStoreException(
@@ -557,7 +567,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * Get the value of a property element. May be a list etc.
 	 * Also used for constructor arguments, "propertyName" being null in this case.
 	 */
-	protected Object parsePropertyValue(Element ele, String beanName, String propertyName) {
+	protected Object parsePropertyValue(Element ele, String beanName, String propertyName)
+			throws BeanDefinitionStoreException {
+
 		String elementName = (propertyName != null) ?
 				"<property> element for property '" + propertyName + "'" :
 				"<constructor-arg> element";
@@ -611,7 +623,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * constructor-arg element.
 	 * @param ele subelement of property element; we don't know which yet
 	 */
-	protected Object parsePropertySubElement(Element ele, String beanName) {
+	protected Object parsePropertySubElement(Element ele, String beanName) throws BeanDefinitionStoreException {
 		if (ele.getTagName().equals(BEAN_ELEMENT)) {
 			return parseBeanDefinitionElement(ele);
 		}
@@ -685,7 +697,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a list element.
 	 */
-	protected List parseListElement(Element collectionEle, String beanName) {
+	protected List parseListElement(Element collectionEle, String beanName) throws BeanDefinitionStoreException {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList list = new ManagedList(nl.getLength());
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -700,7 +712,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a set element.
 	 */
-	protected Set parseSetElement(Element collectionEle, String beanName) {
+	protected Set parseSetElement(Element collectionEle, String beanName) throws BeanDefinitionStoreException {
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet set = new ManagedSet(nl.getLength());
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -715,7 +727,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a map element.
 	 */
-	protected Map parseMapElement(Element mapEle, String beanName) {
+	protected Map parseMapElement(Element mapEle, String beanName) throws BeanDefinitionStoreException {
 		List entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
 		Map map = new ManagedMap(entryEles.size());
 
@@ -797,7 +809,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a key sub-element of a map element.
 	 */
-	protected Object parseKeyElement(Element keyEle, String beanName) {
+	protected Object parseKeyElement(Element keyEle, String beanName) throws BeanDefinitionStoreException {
 		NodeList nl = keyEle.getChildNodes();
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -817,7 +829,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	/**
 	 * Parse a props element.
 	 */
-	protected Properties parsePropsElement(Element propsEle, String beanName) {
+	protected Properties parsePropsElement(Element propsEle, String beanName) throws BeanDefinitionStoreException {
 		Properties props = new Properties();
 		List propEles = DomUtils.getChildElementsByTagName(propsEle, PROP_ELEMENT);
 		for (Iterator it = propEles.iterator(); it.hasNext();) {
