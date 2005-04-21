@@ -17,6 +17,7 @@
 package org.springframework.transaction.jta;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.transaction.InvalidTransactionException;
@@ -121,6 +122,10 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					this.transactionHelperClass.getMethod("getUserTransaction", new Class[0]);
 			return (UserTransaction) getUserTransactionMethod.invoke(this.transactionHelper, new Object[0]);
 		}
+		catch (InvocationTargetException ex) {
+			throw new TransactionSystemException(
+					"WebLogic's TransactionHelper/TxHelper.getUserTransaction() method failed", ex.getTargetException());
+		}
 		catch (Exception ex) {
 			throw new TransactionSystemException(
 					"Could not invoke WebLogic's TransactionHelper/TxHelper.getUserTransaction() method", ex);
@@ -134,6 +139,10 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			Method getTransactionManagerMethod =
 					this.transactionHelperClass.getMethod("getTransactionManager", new Class[0]);
 			return (TransactionManager) getTransactionManagerMethod.invoke(this.transactionHelper, new Object[0]);
+		}
+		catch (InvocationTargetException ex) {
+			throw new TransactionSystemException(
+					"WebLogic's TransactionHelper/TxHelper.getTransactionManager() method failed", ex.getTargetException());
 		}
 		catch (Exception ex) {
 			throw new TransactionSystemException(
@@ -158,9 +167,13 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					logger.debug("WebLogic 7.0 TxHelper found");
 				}
 			}
+			catch (InvocationTargetException ex) {
+				throw new TransactionSystemException(
+						"WebLogic's TransactionHelper.getTransactionHelper() method failed", ex.getTargetException());
+			}
 			catch (Exception ex) {
 				throw new TransactionSystemException(
-						"Couldn't initialize WebLogicJtaTransactionManager because WebLogic API classes are not available",
+						"Could not initialize WebLogicJtaTransactionManager because WebLogic API classes are not available",
 						ex);
 			}
 		}
@@ -214,7 +227,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		}
 		catch (Exception ex) {
 			throw new TransactionSystemException(
-					"Couldn't initialize WebLogicJtaTransactionManager because WebLogic API classes are not available",
+					"Could not initialize WebLogicJtaTransactionManager because WebLogic API classes are not available",
 			    ex);
 		}
 	}
@@ -242,6 +255,10 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					this.beginWithNameMethod.invoke(getUserTransaction(), new Object[] {definition.getName()});
 				}
 			}
+			catch (InvocationTargetException ex) {
+				throw new TransactionSystemException(
+						"WebLogic's UserTransaction.begin() method failed", ex.getTargetException());
+			}
 			catch (Exception ex) {
 				throw new TransactionSystemException(
 						"Could not invoke WebLogic's UserTransaction.begin() method", ex);
@@ -265,6 +282,10 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					wtx.setProperty(ISOLATION_LEVEL_KEY, isolationLevel);
 					*/
 					this.setPropertyMethod.invoke(tx, new Object[] {ISOLATION_LEVEL_KEY, isolationLevel});
+				}
+				catch (InvocationTargetException ex) {
+					throw new TransactionSystemException(
+							"WebLogic's Transaction.setProperty() method failed", ex.getTargetException());
 				}
 				catch (Exception ex) {
 					throw new TransactionSystemException(
@@ -300,9 +321,13 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			try {
 				this.forceResumeMethod.invoke(getTransactionManager(), new Object[] {suspendedTransaction});
 			}
+			catch (InvocationTargetException ex2) {
+				throw new TransactionSystemException(
+						"WebLogic's TransactionManager.forceResume() method failed", ex2.getTargetException());
+			}
 			catch (Exception ex2) {
 				throw new TransactionSystemException(
-						"Could not invoke WebLogic's TransactionManager.forceResume() method", ex2);
+						"Could not access WebLogic's TransactionManager.forceResume() method", ex2);
 			}
 		}
 	}

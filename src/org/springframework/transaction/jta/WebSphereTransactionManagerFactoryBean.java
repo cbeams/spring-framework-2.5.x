@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.jta;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.transaction.TransactionManager;
@@ -54,9 +55,11 @@ public class WebSphereTransactionManagerFactoryBean implements FactoryBean {
 
 	private static final String FACTORY_CLASS_4 = "com.ibm.ejs.jts.jta.JTSXA";
 
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final TransactionManager transactionManager;
+
 
 	/**
 	 * This constructor retrieves the WebSphere TransactionManager factory class,
@@ -86,21 +89,26 @@ public class WebSphereTransactionManagerFactoryBean implements FactoryBean {
 				catch (ClassNotFoundException ex3) {
 					logger.debug("Could not find WebSphere 4 TransactionManager factory class", ex3);
 					throw new TransactionSystemException(
-							"Couldn't find any WebSphere TransactionManager factory class, " +
+							"Could not find any WebSphere TransactionManager factory class, " +
 							"neither for WebSphere version 5.1 nor 5.0 nor 4");
 				}
 			}
 		}
+
 		try {
 			Method method = clazz.getMethod("getTransactionManager", (Class[]) null);
 			this.transactionManager = (TransactionManager) method.invoke(null, (Object[]) null);
 		}
+		catch (InvocationTargetException ex) {
+			throw new TransactionSystemException(
+					"WebSphere's TransactionManagerFactory.getTransactionManager method failed", ex.getTargetException());
+		}
 		catch (Exception ex) {
 			throw new TransactionSystemException(
-					"Found WebSphere TransactionManager factory class [" + clazz.getName() +
-					"], but couldn't invoke its static 'getTransactionManager' method", ex);
+					"Could not access WebSphere's TransactionManagerFactory.getTransactionManager method", ex);
 		}
 	}
+	
 
 	public Object getObject() {
 		return this.transactionManager;

@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -54,6 +55,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String WRAPPED_RESULT_SET_NAME = "org.jboss.resource.adapter.jdbc.WrappedResultSet";
 
+
 	private Class wrappedConnectionClass;
 
 	private Class wrappedStatementClass;
@@ -61,6 +63,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	private Method getUnderlyingConnectionMethod;
 
 	private Method getUnderlyingStatementMethod;
+
 
 	/**
 	 * This constructor retrieves JBoss JDBC wrapper classes,
@@ -77,7 +80,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		}
 		catch (Exception ex) {
 			throw new InvalidDataAccessApiUsageException(
-					"Couldn't initialize JBossNativeJdbcExtractor because JBoss API classes are not available", ex);
+					"Could not initialize JBossNativeJdbcExtractor because JBoss API classes are not available", ex);
 		}
 	}
 
@@ -89,8 +92,13 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			try {
 				return (Connection) this.getUnderlyingConnectionMethod.invoke(con, (Object[]) null);
 			}
+			catch (InvocationTargetException ex) {
+				throw new DataAccessResourceFailureException(
+						"JBoss' getUnderlyingConnection method failed", ex.getTargetException());
+			}
 			catch (Exception ex) {
-				throw new DataAccessResourceFailureException("Could not invoke JBoss' getUnderlyingConnection method", ex);
+				throw new DataAccessResourceFailureException(
+						"Could not access JBoss' getUnderlyingConnection method", ex);
 			}
 		}
 		return con;
@@ -104,8 +112,13 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			try {
 				return (Statement) this.getUnderlyingStatementMethod.invoke(stmt, (Object[]) null);
 			}
+			catch (InvocationTargetException ex) {
+				throw new DataAccessResourceFailureException(
+						"JBoss' getUnderlyingStatement method failed", ex.getTargetException());
+			}
 			catch (Exception ex) {
-				throw new DataAccessResourceFailureException("Could not invoke JBoss' getUnderlyingStatement method", ex);
+				throw new DataAccessResourceFailureException(
+						"Could not access JBoss' getUnderlyingStatement method", ex);
 			}
 		}
 		return stmt;
@@ -136,8 +149,13 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 				Method getUnderlyingResultSetMethod = rs.getClass().getMethod("getUnderlyingResultSet", (Class[]) null);
 				return (ResultSet) getUnderlyingResultSetMethod.invoke(rs, (Object[]) null);
 			}
+			catch (InvocationTargetException ex) {
+				throw new DataAccessResourceFailureException(
+						"JBoss' getUnderlyingResultSet method failed", ex.getTargetException());
+			}
 			catch (Exception ex) {
-				throw new DataAccessResourceFailureException("Could not invoke JBoss' getUnderlyingResultSet method", ex);
+				throw new DataAccessResourceFailureException(
+						"Could not access JBoss' getUnderlyingResultSet method", ex);
 			}
 		}
 		return rs;

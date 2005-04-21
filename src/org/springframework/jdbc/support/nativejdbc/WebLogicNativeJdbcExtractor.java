@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -34,7 +35,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * with a WebLogic DataSource: If a given object is not a WebLogic
  * Connection wrapper, it will be returned as-is.
  *
- * <p>Currently only tested with BEA WebLogic 8.1 SP2.
+ * <p>Currently only tested with BEA WebLogic 8.1.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -49,7 +50,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	private final Class jdbcExtensionClass;
 
 	private final Method getVendorConnectionMethod;
-	
+
 	/**
 	 * This constructor retrieves the WebLogic JDBC extension interface,
 	 * so we can get the underlying vendor connection using reflection.
@@ -61,7 +62,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		}
 		catch (Exception ex) {
 			throw new InvalidDataAccessApiUsageException(
-					"Couldn't initialize WebLogicNativeJdbcExtractor because WebLogic API classes are not available", ex);
+					"Could not initialize WebLogicNativeJdbcExtractor because WebLogic API classes are not available", ex);
 		}
 	}
 
@@ -94,8 +95,13 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			try {
 				return (Connection) this.getVendorConnectionMethod.invoke(con, (Object[]) null);
 			}
+			catch (InvocationTargetException ex) {
+				throw new DataAccessResourceFailureException(
+						"WebLogic's getVendorConnection method failed", ex.getTargetException());
+			}
 			catch (Exception ex) {
-				throw new DataAccessResourceFailureException("Could not invoke WebLogic's getVendorConnection method", ex);
+				throw new DataAccessResourceFailureException(
+						"Could not access WebLogic's getVendorConnection method", ex);
 			}
 		}
 		return con;

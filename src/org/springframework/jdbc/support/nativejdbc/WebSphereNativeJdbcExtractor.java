@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -128,9 +129,13 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 				// WebSphere 5's WSJdbcUtil.getNativeConnection(wsJdbcConnection)
 				return (Connection) this.webSphere5NativeConnectionMethod.invoke(null, new Object[] {con});
 			}
+			catch (InvocationTargetException ex) {
+				throw new DataAccessResourceFailureException(
+						"WebSphere5's getNativeConnection method failed", ex.getTargetException());
+			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException(
-						"Could not invoke WebSphere5's getNativeConnection method", ex);
+						"Could not access WebSphere5's getNativeConnection method", ex);
 			}
 		}
 
@@ -141,16 +146,20 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 				// WebSphere 4's connectionProxy.getPhysicalConnection()
 				return (Connection) this.webSphere4PhysicalConnectionMethod.invoke(con, (Object[]) null);
 			}
+			catch (InvocationTargetException ex) {
+				throw new DataAccessResourceFailureException(
+						"WebSphere4's getPhysicalConnection method failed", ex.getTargetException());
+			}
 			catch (Exception ex) {
 				throw new DataAccessResourceFailureException(
-						"Could not invoke WebSphere4's getPhysicalConnection method", ex);
+						"Could not access WebSphere4's getPhysicalConnection method", ex);
 			}
 		}
 
 		// No known WebSphere connection -> return as-is.
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Connection [" + con + "] is not a WebSphere 5/4 connection, returning as-is.");
+				logger.debug("Connection [" + con + "] is not a WebSphere 5/4 connection, returning as-is");
 			}
 			return con;
 		}

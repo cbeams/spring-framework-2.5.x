@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.jta;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.transaction.TransactionManager;
@@ -66,24 +67,25 @@ public class WebLogicServerTransactionManagerFactoryBean implements FactoryBean 
 	 * so we can get access to the JTA TransactionManager.
 	 */
 	public WebLogicServerTransactionManagerFactoryBean() throws TransactionSystemException {
-		Class clazz;
 		try {
 			logger.debug("Looking for WebLogic TxHelper: " + TX_HELPER_CLASS_NAME);
-			clazz = Class.forName(TX_HELPER_CLASS_NAME);
-			logger.info("Found WebLogic TxHelper: " + clazz.getName());
+			Class helperClass = Class.forName(TX_HELPER_CLASS_NAME);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found WebLogic TxHelper: " + helperClass.getName());
+			}
+			Method method = helperClass.getMethod("getTransactionManager", (Class[]) null);
+			this.transactionManager = (TransactionManager) method.invoke(null, (Object[]) null);
 		}
 		catch (ClassNotFoundException ex) {
-			logger.debug("Could not find WebLogic TxHelper class", ex);
-			throw new TransactionSystemException("Couldn't find WebLogic TxHelper class");
+			throw new TransactionSystemException("Could not find WebLogic's TxHelper class", ex);
 		}
-		try {
-			Method method = clazz.getMethod("getTransactionManager", (Class[]) null);
-			this.transactionManager = (TransactionManager) method.invoke(null, (Object[]) null);
+		catch (InvocationTargetException ex) {
+			throw new TransactionSystemException(
+					"WebLogic's TxHelper.getTransactionManager method failed", ex.getTargetException());
 		}
 		catch (Exception ex) {
 			throw new TransactionSystemException(
-					"Found WebLogic TxHelper class [" + clazz.getName() +
-					"], but couldn't invoke its static 'getTransactionManager' method", ex);
+					"Could not access WebLogic's TxHelper.getTransactionManager method", ex);
 		}
 	}
 
