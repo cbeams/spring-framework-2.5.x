@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -55,6 +56,10 @@ public abstract class StringUtils {
 	private static final String CURRENT_PATH = ".";  // current folder
 
 
+	//---------------------------------------------------------------------
+	// General convenience methods for working with Strings
+	//---------------------------------------------------------------------
+
 	/**
 	 * Check if a String has length.
 	 * <p><pre>
@@ -83,7 +88,7 @@ public abstract class StringUtils {
 	 * </pre>
 	 * @param str the String to check, may be null
 	 * @return <code>true</code> if the String is not null, length > 0,
-	 * and not whitespace only
+	 *         and not whitespace only
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static boolean hasText(String str) {
@@ -217,17 +222,17 @@ public abstract class StringUtils {
 
 	/**
 	 * Delete any character in a given string.
-	 * @param chars a set of characters to delete.
+	 * @param charsToDelete a set of characters to delete.
 	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
 	 */
-	public static String deleteAny(String inString, String chars) {
-		if (inString == null || chars == null) {
+	public static String deleteAny(String inString, String charsToDelete) {
+		if (inString == null || charsToDelete == null) {
 			return inString;
 		}
 		StringBuffer out = new StringBuffer();
 		for (int i = 0; i < inString.length(); i++) {
 			char c = inString.charAt(i);
-			if (chars.indexOf(c) == -1) {
+			if (charsToDelete.indexOf(c) == -1) {
 				out.append(c);
 			}
 		}
@@ -235,223 +240,9 @@ public abstract class StringUtils {
 	}
 
 
-	/**
-	 * Tokenize the given String into a String array via a StringTokenizer.
-	 * Trims tokens and omits empty tokens.
-	 * <p>The given delimiters string is supposed to consist of any number of
-	 * delimiter characters. Each of those characters can be used to separate
-	 * tokens. A delimiter is always a single character; for multi-character
-	 * delimiters, consider using <code>delimitedListToStringArray</code>
-	 * @param str the String to tokenize
-	 * @param delimiters the delimiter characters, assembled as String
-	 * (each of those characters is individually considered as delimiter).
-	 * @return an array of the tokens
-	 * @see java.util.StringTokenizer
-	 * @see java.lang.String#trim
-	 * @see #delimitedListToStringArray
-	 */
-	public static String[] tokenizeToStringArray(String str, String delimiters) {
-		return tokenizeToStringArray(str, delimiters, true, true);
-	}
-
-	/**
-	 * Tokenize the given String into a String array via a StringTokenizer.
-	 * <p>The given delimiters string is supposed to consist of any number of
-	 * delimiter characters. Each of those characters can be used to separate
-	 * tokens. A delimiter is always a single character; for multi-character
-	 * delimiters, consider using <code>delimitedListToStringArray</code>
-	 * @param str the String to tokenize
-	 * @param delimiters the delimiter characters, assembled as String
-	 * (each of those characters is individually considered as delimiter)
-	 * @param trimTokens trim the tokens via String's <code>trim</code>
-	 * @param ignoreEmptyTokens omit empty tokens from the result array
-	 * (only applies to tokens that are empty after trimming; StringTokenizer
-	 * will not consider subsequent delimiters as token in the first place).
-	 * @return an array of the tokens
-	 * @see java.util.StringTokenizer
-	 * @see java.lang.String#trim
-	 * @see #delimitedListToStringArray
-	 */
-	public static String[] tokenizeToStringArray(
-			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
-
-		StringTokenizer st = new StringTokenizer(str, delimiters);
-		List tokens = new ArrayList();
-		while (st.hasMoreTokens()) {
-			String token = st.nextToken();
-			if (trimTokens) {
-				token = token.trim();
-			}
-			if (!ignoreEmptyTokens || token.length() > 0) {
-				tokens.add(token);
-			}
-		}
-		return (String[]) tokens.toArray(new String[tokens.size()]);
-	}
-
-	/**
-	 * Take a String which is a delimited list and convert it to a String array.
-	 * <p>A single delimiter can consists of more than one character: It will still
-	 * be considered as single delimiter string, rather than as bunch of potential
-	 * delimiter characters - in contrast to <code>tokenizeToStringArray</code>.
-	 * @param str the input String
-	 * @param delimiter the delimiter between elements (this is a single delimiter,
-	 * rather than a bunch individual delimiter characters)
-	 * @return an array of the tokens in the list
-	 * @see #tokenizeToStringArray
-	 */
-	public static String[] delimitedListToStringArray(String str, String delimiter) {
-		if (str == null) {
-			return new String[0];
-		}
-		if (delimiter == null) {
-			return new String[] {str};
-		}
-
-		List result = new ArrayList();
-		int pos = 0;
-		int delPos = 0;
-		while ((delPos = str.indexOf(delimiter, pos)) != -1) {
-			result.add(str.substring(pos, delPos));
-			pos = delPos + delimiter.length();
-		}
-		if (str.length() > 0 && pos <= str.length()) {
-			// Add rest of String, but not in case of empty input.
-			result.add(str.substring(pos));
-		}
-
-		return (String[]) result.toArray(new String[result.size()]);
-	}
-
-	/**
-	 * Convert a CSV list into an array of Strings.
-	 * @param str CSV list
-	 * @return an array of Strings, or the empty array if s is null
-	 */
-	public static String[] commaDelimitedListToStringArray(String str) {
-		return delimitedListToStringArray(str, ",");
-	}
-
-	/**
-	 * Convenience method to convert a CSV string list to a set.
-	 * Note that this will suppress duplicates.
-	 * @param str CSV String
-	 * @return a Set of String entries in the list
-	 */
-	public static Set commaDelimitedListToSet(String str) {
-		Set set = new TreeSet();
-		String[] tokens = commaDelimitedListToStringArray(str);
-		for (int i = 0; i < tokens.length; i++) {
-			set.add(tokens[i]);
-		}
-		return set;
-	}
-
-	/**
-	 * Convenience method to return a String array as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
-	 * @param arr array to display. Elements may be of any type (toString
-	 * will be called on each element).
-	 * @param delim delimiter to use (probably a ",")
-	 */
-	public static String arrayToDelimitedString(Object[] arr, String delim) {
-		if (arr == null) {
-			return "";
-		}
-		else {
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < arr.length; i++) {
-				if (i > 0) {
-					sb.append(delim);
-				}
-				sb.append(arr[i]);
-			}
-			return sb.toString();
-		}
-	}
-
-	/**
-	 * Convenience method to return a Collection as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 * @param delim delimiter to use (probably a ",")
-	 * @param prefix string to start each element with
-	 * @param suffix string to end each element with
-	 */
-	public static String collectionToDelimitedString(
-			Collection coll, String delim, String prefix, String suffix) {
-		if (coll == null) {
-			return "";
-		}
-		StringBuffer sb = new StringBuffer();
-		Iterator it = coll.iterator();
-		int i = 0;
-		while (it.hasNext()) {
-			if (i > 0) {
-				sb.append(delim);
-			}
-			sb.append(prefix).append(it.next()).append(suffix);
-			i++;
-		}
-		return sb.toString();
-	}
-	
-	/**
-	 * Convenience method to return a Collection as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 * @param delim delimiter to use (probably a ",")
-	 */
-	public static String collectionToDelimitedString(Collection coll, String delim) {
-		return collectionToDelimitedString(coll, delim, "", "");
-	}
-
-	/**
-	 * Convenience method to return a String array as a CSV String.
-	 * E.g. useful for toString() implementations.
-	 * @param arr array to display. Elements may be of any type (toString
-	 * will be called on each element).
-	 */
-	public static String arrayToCommaDelimitedString(Object[] arr) {
-		return arrayToDelimitedString(arr, ",");
-	}
-
-	/**
-	 * Convenience method to return a Collection as a CSV String.
-	 * E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 */
-	public static String collectionToCommaDelimitedString(Collection coll) {
-		return collectionToDelimitedString(coll, ",");
-	}
-
-	/**
-	 * Append the given String to the given String array, returning a new array
-	 * consisting of the input array contents plus the given String.
-	 * @param arr the array to append to
-	 * @param str the String to append
-	 * @return the new array
-	 */
-	public static String[] addStringToArray(String[] arr, String str) {
-		String[] newArr = new String[arr.length + 1];
-		System.arraycopy(arr, 0, newArr, 0, arr.length);
-		newArr[arr.length] = str;
-		return newArr;
-	}
-
-	/**
-	 * Turn given source String array into sorted array.
-	 * @param source the source array
-	 * @return the sorted array (never null)
-	 */
-	public static String[] sortStringArray(String[] source) {
-		if (source == null) {
-			return new String[0];
-		}
-		Arrays.sort(source);
-		return source;
-	}
-
+	//---------------------------------------------------------------------
+	// Convenience methods for working with formatted Strings
+	//---------------------------------------------------------------------
 
 	/**
 	 * Unqualify a string qualified by a '.' dot character. For example,
@@ -480,7 +271,7 @@ public abstract class StringUtils {
 	 * @return the capitalized String, <code>null</code> if null
 	 */
 	public static String capitalize(String str) {
-		return changeFirstCharacterCase(true, str);
+		return changeFirstCharacterCase(str, true);
 	}
 
 	/**
@@ -491,15 +282,14 @@ public abstract class StringUtils {
 	 * @return the uncapitalized String, <code>null</code> if null
 	 */
 	public static String uncapitalize(String str) {
-		return changeFirstCharacterCase(false, str);
+		return changeFirstCharacterCase(str, false);
 	}
 
-	private static String changeFirstCharacterCase(boolean capitalize, String str) {
-		int strLen;
-		if (str == null || (strLen = str.length()) == 0) {
+	private static String changeFirstCharacterCase(String str, boolean capitalize) {
+		if (str == null || str.length() == 0) {
 			return str;
 		}
-		StringBuffer buf = new StringBuffer(strLen);
+		StringBuffer buf = new StringBuffer(str.length());
 		if (capitalize) {
 			buf.append(Character.toUpperCase(str.charAt(0)));
 		}
@@ -599,6 +389,299 @@ public abstract class StringUtils {
 		String country = parts.length > 1 ? parts[1] : "";
 		String variant = parts.length > 2 ? parts[2] : "";
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
+	}
+
+
+	//---------------------------------------------------------------------
+	// Convenience methods for working with String arrays
+	//---------------------------------------------------------------------
+
+	/**
+	 * Append the given String to the given String array, returning a new array
+	 * consisting of the input array contents plus the given String.
+	 * @param arr the array to append to
+	 * @param str the String to append
+	 * @return the new array
+	 */
+	public static String[] addStringToArray(String[] arr, String str) {
+		String[] newArr = new String[arr.length + 1];
+		System.arraycopy(arr, 0, newArr, 0, arr.length);
+		newArr[arr.length] = str;
+		return newArr;
+	}
+
+	/**
+	 * Turn given source String array into sorted array.
+	 * @param source the source array
+	 * @return the sorted array (never null)
+	 */
+	public static String[] sortStringArray(String[] source) {
+		if (source == null) {
+			return new String[0];
+		}
+		Arrays.sort(source);
+		return source;
+	}
+
+	/**
+	 * Split a String at the first occurrence of the delimiter.
+	 * Does not include the delimiter in the result.
+	 * @param toSplit the string to split
+	 * @param delimiter to split the string up with
+	 * @return a two element array with index 0 being before the delimiter, and
+	 * index 1 being after the delimiter (neither element includes the delimiter);
+	 * or null if the delimiter wasn't found in the given input String
+	 */
+	public static String[] split(String toSplit, String delimiter) {
+		Assert.hasLength(toSplit, "Cannot split a null or empty string");
+		Assert.hasLength(delimiter, "Cannot use a null or empty delimiter to split a string");
+		int offset = toSplit.indexOf(delimiter);
+		if (offset < 0) {
+			return null;
+		}
+		String beforeDelimiter = toSplit.substring(0, offset);
+		String afterDelimiter = toSplit.substring(offset + delimiter.length());
+		return new String[]{beforeDelimiter, afterDelimiter};
+	}
+
+	/**
+	 * Take an array Strings and split each element based on the given delimiter.
+	 * A <code>Properties</code> instance is then generated, with the left of the
+	 * delimiter providing the key, and the right of the delimiter providing the value.
+	 * <p>Will trim both the key and value before adding them to the
+	 * <code>Properties</code> instance.
+	 * @param array the array to process
+	 * @param delimiter to split each element using (typically the equals symbol)
+	 * @return a <code>Properties</code> instance representing the array contents,
+	 * or <code>null</code> if the array to process was null or empty
+	 */
+	public static Properties splitArrayElementsIntoProperties(String[] array, String delimiter) {
+		return splitArrayElementsIntoProperties(array, delimiter, null);
+	}
+
+	/**
+	 * Take an array Strings and split each element based on the given delimiter.
+	 * A <code>Properties</code> instance is then generated, with the left of the
+	 * delimiter providing the key, and the right of the delimiter providing the value.
+	 * <p>Will trim both the key and value before adding them to the
+	 * <code>Properties</code> instance.
+	 * @param array the array to process
+	 * @param delimiter to split each element using (typically the equals symbol)
+	 * @param charsToDelete one or more characters to remove from each element
+	 * prior to attempting the split operation (typically the quotation mark
+	 * symbol), or <code>null</code> if no removal should occur
+	 * @return a <code>Properties</code> instance representing the array contents,
+	 * or <code>null</code> if the array to process was null or empty
+	 */
+	public static Properties splitArrayElementsIntoProperties(
+			String[] array, String delimiter, String charsToDelete) {
+
+		if (array == null || array.length == 0) {
+			return null;
+		}
+
+		Properties result = new Properties();
+		for (int i = 0; i < array.length; i++) {
+			String element = array[i];
+			if (charsToDelete != null) {
+				element = deleteAny(array[i], charsToDelete);
+			}
+			String[] splittedElement = split(element, delimiter);
+			if (splittedElement == null) {
+				continue;
+			}
+			result.setProperty(splittedElement[0].trim(), splittedElement[1].trim());
+		}
+		return result;
+	}
+
+	/**
+	 * Tokenize the given String into a String array via a StringTokenizer.
+	 * Trims tokens and omits empty tokens.
+	 * <p>The given delimiters string is supposed to consist of any number of
+	 * delimiter characters. Each of those characters can be used to separate
+	 * tokens. A delimiter is always a single character; for multi-character
+	 * delimiters, consider using <code>delimitedListToStringArray</code>
+	 * @param str the String to tokenize
+	 * @param delimiters the delimiter characters, assembled as String
+	 * (each of those characters is individually considered as delimiter).
+	 * @return an array of the tokens
+	 * @see java.util.StringTokenizer
+	 * @see java.lang.String#trim
+	 * @see #delimitedListToStringArray
+	 */
+	public static String[] tokenizeToStringArray(String str, String delimiters) {
+		return tokenizeToStringArray(str, delimiters, true, true);
+	}
+
+	/**
+	 * Tokenize the given String into a String array via a StringTokenizer.
+	 * <p>The given delimiters string is supposed to consist of any number of
+	 * delimiter characters. Each of those characters can be used to separate
+	 * tokens. A delimiter is always a single character; for multi-character
+	 * delimiters, consider using <code>delimitedListToStringArray</code>
+	 * @param str the String to tokenize
+	 * @param delimiters the delimiter characters, assembled as String
+	 * (each of those characters is individually considered as delimiter)
+	 * @param trimTokens trim the tokens via String's <code>trim</code>
+	 * @param ignoreEmptyTokens omit empty tokens from the result array
+	 * (only applies to tokens that are empty after trimming; StringTokenizer
+	 * will not consider subsequent delimiters as token in the first place).
+	 * @return an array of the tokens
+	 * @see java.util.StringTokenizer
+	 * @see java.lang.String#trim
+	 * @see #delimitedListToStringArray
+	 */
+	public static String[] tokenizeToStringArray(
+			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
+
+		StringTokenizer st = new StringTokenizer(str, delimiters);
+		List tokens = new ArrayList();
+		while (st.hasMoreTokens()) {
+			String token = st.nextToken();
+			if (trimTokens) {
+				token = token.trim();
+			}
+			if (!ignoreEmptyTokens || token.length() > 0) {
+				tokens.add(token);
+			}
+		}
+		return (String[]) tokens.toArray(new String[tokens.size()]);
+	}
+
+	/**
+	 * Take a String which is a delimited list and convert it to a String array.
+	 * <p>A single delimiter can consists of more than one character: It will still
+	 * be considered as single delimiter string, rather than as bunch of potential
+	 * delimiter characters - in contrast to <code>tokenizeToStringArray</code>.
+	 * @param str the input String
+	 * @param delimiter the delimiter between elements (this is a single delimiter,
+	 * rather than a bunch individual delimiter characters)
+	 * @return an array of the tokens in the list
+	 * @see #tokenizeToStringArray
+	 */
+	public static String[] delimitedListToStringArray(String str, String delimiter) {
+		if (str == null) {
+			return new String[0];
+		}
+		if (delimiter == null) {
+			return new String[]{str};
+		}
+
+		List result = new ArrayList();
+		int pos = 0;
+		int delPos = 0;
+		while ((delPos = str.indexOf(delimiter, pos)) != -1) {
+			result.add(str.substring(pos, delPos));
+			pos = delPos + delimiter.length();
+		}
+		if (str.length() > 0 && pos <= str.length()) {
+			// Add rest of String, but not in case of empty input.
+			result.add(str.substring(pos));
+		}
+
+		return (String[]) result.toArray(new String[result.size()]);
+	}
+
+	/**
+	 * Convert a CSV list into an array of Strings.
+	 * @param str CSV list
+	 * @return an array of Strings, or the empty array if s is null
+	 */
+	public static String[] commaDelimitedListToStringArray(String str) {
+		return delimitedListToStringArray(str, ",");
+	}
+
+	/**
+	 * Convenience method to convert a CSV string list to a set.
+	 * Note that this will suppress duplicates.
+	 * @param str CSV String
+	 * @return a Set of String entries in the list
+	 */
+	public static Set commaDelimitedListToSet(String str) {
+		Set set = new TreeSet();
+		String[] tokens = commaDelimitedListToStringArray(str);
+		for (int i = 0; i < tokens.length; i++) {
+			set.add(tokens[i]);
+		}
+		return set;
+	}
+
+	/**
+	 * Convenience method to return a String array as a delimited (e.g. CSV)
+	 * String. E.g. useful for toString() implementations.
+	 * @param arr array to display. Elements may be of any type (toString
+	 * will be called on each element).
+	 * @param delim delimiter to use (probably a ",")
+	 */
+	public static String arrayToDelimitedString(Object[] arr, String delim) {
+		if (arr == null) {
+			return "";
+		}
+
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < arr.length; i++) {
+			if (i > 0) {
+				sb.append(delim);
+			}
+			sb.append(arr[i]);
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Convenience method to return a Collection as a delimited (e.g. CSV)
+	 * String. E.g. useful for toString() implementations.
+	 * @param coll Collection to display
+	 * @param delim delimiter to use (probably a ",")
+	 * @param prefix string to start each element with
+	 * @param suffix string to end each element with
+	 */
+	public static String collectionToDelimitedString(Collection coll, String delim, String prefix, String suffix) {
+		if (coll == null) {
+			return "";
+		}
+
+		StringBuffer sb = new StringBuffer();
+		Iterator it = coll.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			if (i > 0) {
+				sb.append(delim);
+			}
+			sb.append(prefix).append(it.next()).append(suffix);
+			i++;
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Convenience method to return a Collection as a delimited (e.g. CSV)
+	 * String. E.g. useful for toString() implementations.
+	 * @param coll Collection to display
+	 * @param delim delimiter to use (probably a ",")
+	 */
+	public static String collectionToDelimitedString(Collection coll, String delim) {
+		return collectionToDelimitedString(coll, delim, "", "");
+	}
+
+	/**
+	 * Convenience method to return a String array as a CSV String.
+	 * E.g. useful for toString() implementations.
+	 * @param arr array to display. Elements may be of any type (toString
+	 * will be called on each element).
+	 */
+	public static String arrayToCommaDelimitedString(Object[] arr) {
+		return arrayToDelimitedString(arr, ",");
+	}
+
+	/**
+	 * Convenience method to return a Collection as a CSV String.
+	 * E.g. useful for toString() implementations.
+	 * @param coll Collection to display
+	 */
+	public static String collectionToCommaDelimitedString(Collection coll) {
+		return collectionToDelimitedString(coll, ",");
 	}
 
 }

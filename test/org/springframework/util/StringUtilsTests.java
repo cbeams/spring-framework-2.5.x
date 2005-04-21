@@ -17,11 +17,13 @@
 package org.springframework.util;
 
 import java.util.Arrays;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class StringUtilsTests extends TestCase {
 
@@ -155,6 +157,81 @@ public class StringUtilsTests extends TestCase {
 	}
 
 
+	public void testUnqualify() throws Exception {
+		String qualified = "i.am.not.unqualified";
+		assertEquals("unqualified", StringUtils.unqualify(qualified));
+	}
+
+	public void testUncapitalize() throws Exception {
+		String capitalized = "I am capitalized";
+		assertEquals("i am capitalized", StringUtils.uncapitalize(capitalized));
+	}
+
+	public void testCapitalize() throws Exception {
+		String capitalized = "i am not capitalized";
+		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
+	}
+
+	public void testPathEquals() {
+		assertTrue("Must be true for the same strings",
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
+						"/dummy1/dummy2/dummy3"));
+		assertTrue("Must be true for the same win strings",
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
+						"C:\\dummy1\\dummy2\\dummy3"));
+		assertTrue("Must be true for one top path on 1",
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3",
+						"/dummy1/dummy2/dummy3"));
+		assertTrue("Must be true for one win top path on 2",
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
+						"C:\\dummy1\\bin\\..\\dummy2\\dummy3"));
+		assertTrue("Must be true for two top paths on 1",
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/bin/../dummy3",
+						"/dummy1/dummy2/dummy3"));
+		assertTrue("Must be true for two win top paths on 2",
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
+						"C:\\dummy1\\bin\\..\\dummy2\\bin\\..\\dummy3"));
+		assertTrue("Must be true for double top paths on 1",
+				StringUtils.pathEquals("/dummy1/bin/tmp/../../dummy2/dummy3",
+						"/dummy1/dummy2/dummy3"));
+		assertTrue("Must be true for double top paths on 2 with similarity",
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
+						"/dummy1/dum/dum/../../dummy2/dummy3"));
+		assertTrue("Must be true for current paths",
+				StringUtils.pathEquals("./dummy1/dummy2/dummy3",
+						"dummy1/dum/./dum/../../dummy2/dummy3"));
+		assertFalse("Must be false for relative/absolute paths",
+				StringUtils.pathEquals("./dummy1/dummy2/dummy3",
+						"/dummy1/dum/./dum/../../dummy2/dummy3"));
+		assertFalse("Must be false for different strings",
+				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
+						"/dummy1/dummy4/dummy3"));
+		assertFalse("Must be false for one false path on 1",
+				StringUtils.pathEquals("/dummy1/bin/tmp/../dummy2/dummy3",
+						"/dummy1/dummy2/dummy3"));
+		assertFalse("Must be false for one false win top path on 2",
+				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
+						"C:\\dummy1\\bin\\tmp\\..\\dummy2\\dummy3"));
+		assertFalse("Must be false for top path on 1 + difference",
+				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3",
+						"/dummy1/dummy2/dummy4"));
+	}
+
+
+	public void testSplitArrayElementsIntoProperties() {
+		String[] input = new String[] {"key1=value1 ", "key2 =\"value2\""};
+		Properties result = StringUtils.splitArrayElementsIntoProperties(input, "=");
+		assertEquals("value1", result.getProperty("key1"));
+		assertEquals("\"value2\"", result.getProperty("key2"));
+	}
+
+	public void testSplitArrayElementsIntoPropertiesAndDeletedChars() {
+		String[] input = new String[] {"key1=value1 ", "key2 =\"value2\""};
+		Properties result = StringUtils.splitArrayElementsIntoProperties(input, "=", "\"");
+		assertEquals("value1", result.getProperty("key1"));
+		assertEquals("value2", result.getProperty("key2"));
+	}
+
 	public void testTokenizeToStringArray() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",");
 		assertEquals(3, sa.length);
@@ -223,8 +300,7 @@ public class StringUtilsTests extends TestCase {
 
 	public void testCommaDelimitedListToStringArrayWithOtherPunctuation() {
 		// Could read these from files
-		String[] sa =
-				new String[] {"xcvwert4456346&*.", "///", ".!", ".", ";"};
+		String[] sa = new String[] {"xcvwert4456346&*.", "///", ".!", ".", ";"};
 		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
 	}
 
@@ -255,67 +331,6 @@ public class StringUtilsTests extends TestCase {
 		assertTrue("String array isn't null with legal match", sa != null);
 		assertEquals("String array length is correct with legal match", components.length, sa.length);
 		assertTrue("Output equals input", Arrays.equals(sa, components));
-	}
-
-
-	public void testUnqualify() throws Exception {
-		String qualified = "i.am.not.unqualified";
-		assertEquals("unqualified", StringUtils.unqualify(qualified));
-	}
-
-	public void testUncapitalize() throws Exception {
-		String capitalized = "I am capitalized";
-		assertEquals("i am capitalized", StringUtils.uncapitalize(capitalized));
-	}
-
-	public void testCapitalize() throws Exception {
-		String capitalized = "i am not capitalized";
-		assertEquals("I am not capitalized", StringUtils.capitalize(capitalized));
-	}
-
-	public void testPathEquals() {
-		assertTrue("Must be true for the same strings",
-				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
-						"/dummy1/dummy2/dummy3"));
-		assertTrue("Must be true for the same win strings",
-				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
-						"C:\\dummy1\\dummy2\\dummy3"));
-		assertTrue("Must be true for one top path on 1",
-				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3",
-						"/dummy1/dummy2/dummy3"));
-		assertTrue("Must be true for one win top path on 2",
-				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
-						"C:\\dummy1\\bin\\..\\dummy2\\dummy3"));
-		assertTrue("Must be true for two top paths on 1",
-				StringUtils.pathEquals("/dummy1/bin/../dummy2/bin/../dummy3",
-						"/dummy1/dummy2/dummy3"));
-		assertTrue("Must be true for two win top paths on 2",
-				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
-						"C:\\dummy1\\bin\\..\\dummy2\\bin\\..\\dummy3"));
-		assertTrue("Must be true for double top paths on 1",
-				StringUtils.pathEquals("/dummy1/bin/tmp/../../dummy2/dummy3",
-						"/dummy1/dummy2/dummy3"));
-		assertTrue("Must be true for double top paths on 2 with similarity",
-				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
-						"/dummy1/dum/dum/../../dummy2/dummy3"));
-		assertTrue("Must be true for current paths",
-				StringUtils.pathEquals("./dummy1/dummy2/dummy3",
-						"dummy1/dum/./dum/../../dummy2/dummy3"));
-		assertFalse("Must be false for relative/absolute paths",
-				StringUtils.pathEquals("./dummy1/dummy2/dummy3",
-						"/dummy1/dum/./dum/../../dummy2/dummy3"));
-		assertFalse("Must be false for different strings",
-				StringUtils.pathEquals("/dummy1/dummy2/dummy3",
-						"/dummy1/dummy4/dummy3"));
-		assertFalse("Must be false for one false path on 1",
-				StringUtils.pathEquals("/dummy1/bin/tmp/../dummy2/dummy3",
-						"/dummy1/dummy2/dummy3"));
-		assertFalse("Must be false for one false win top path on 2",
-				StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3",
-						"C:\\dummy1\\bin\\tmp\\..\\dummy2\\dummy3"));
-		assertFalse("Must be false for top path on 1 + difference",
-				StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3",
-						"/dummy1/dummy2/dummy4"));
 	}
 
 }
