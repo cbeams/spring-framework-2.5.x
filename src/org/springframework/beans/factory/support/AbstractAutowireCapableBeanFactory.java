@@ -959,15 +959,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			logger.debug("Invoking custom init method '" + initMethodName +
 					"' on bean with name '" + beanName + "'");
 		}
+		Method initMethod = BeanUtils.findMethod(bean.getClass(), initMethodName, null);
+		if (initMethod == null) {
+			throw new NoSuchMethodException("Couldn't find an init method named '" + initMethodName +
+					"' on bean with name '" + beanName + "'");
+		}
+		if (!Modifier.isPublic(initMethod.getModifiers())) {
+			initMethod.setAccessible(true);
+		}
 		try {
-			Method initMethod = BeanUtils.findMethod(bean.getClass(), initMethodName, null);
-			if (initMethod == null) {
-				throw new NoSuchMethodException("Couldn't find an init method named '" + initMethodName +
-						"' on bean with name '" + beanName + "'");
-			}
-			if (!Modifier.isPublic(initMethod.getModifiers())) {
-				initMethod.setAccessible(true);
-			}
 			initMethod.invoke(bean, (Object[]) null);
 		}
 		catch (InvocationTargetException ex) {

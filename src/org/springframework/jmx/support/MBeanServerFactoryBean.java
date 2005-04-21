@@ -24,12 +24,17 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * <code>FactoryBean</code> implementation to create and obtain an
- * <code>MBeanServer</code> instance. Exposes the <code>MBeanServer</code>
- * for bean references.
+ * FactoryBean that obtains an <code>MBeanServer</code> instance
+ * through the standard JMX 1.2 <code>MBeanServerFactory</code> API
+ * (which is available on JDK 1.5 or as part of a JMX 1.2 provider).
+ *
+ * <p>Exposes the <code>MBeanServer</code> for bean references.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
+ * @see javax.management.MBeanServerFactory#createMBeanServer
+ * @see javax.management.MBeanServerFactory#newMBeanServer
  * @see MBeanServerConnectionFactoryBean
  * @see ConnectorServerFactoryBean
  */
@@ -79,7 +84,7 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 	/**
 	 * Creates the <code>MBeanServer</code> instance.
 	 */
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (this.registerWithFactory) {
 			// Create an MBeanServer instance that is accessible
 			// using MBeanServerFactory.findMBeanServer().
