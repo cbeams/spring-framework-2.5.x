@@ -27,8 +27,11 @@ import javax.management.modelmbean.ModelMBeanInfo;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.support.ObjectNameManager;
@@ -116,6 +119,40 @@ public class MBeanExporterTests extends TestCase {
 		}
 		finally {
 			bf.destroySingletons();
+		}
+	}
+
+	public void testExportAopProxy() throws Exception {
+		JmxTestBean bean = new JmxTestBean();
+		bean.setName("Rob Harrop");
+
+		ProxyFactory factory = new ProxyFactory();
+		factory.setTarget(bean);
+		factory.addAdvice(new NopInterceptor());
+		//factory.setProxyTargetClass(true);
+		factory.setInterfaces(new Class[]{IJmxTestBean.class});
+
+		IJmxTestBean proxy = (IJmxTestBean) factory.getProxy();
+
+		String name = "bean:proxy=true";
+
+		Map beans = new HashMap();
+		beans.put(name, proxy);
+		MBeanServer server = MBeanServerFactory.newMBeanServer();
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.registerBeans();
+
+		ObjectName oname = ObjectName.getInstance(name);
+
+		try {
+			Object nameValue = server.getAttribute(oname, "Name");
+			assertEquals("Rob Harrop", nameValue);
+		}
+		catch (Exception ex) {
+			fail("Should be able to get value from an AOP JDK proxy");
 		}
 	}
 
