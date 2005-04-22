@@ -136,28 +136,6 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		return ((ActionState)context.getCurrentState());
 	}
 
-	/**
-	 * Returns the value of the specified action property in the context of the
-	 * calling action state associated with the current request context.
-	 * @param propertyName the action property name
-	 * @param context the request context
-	 * @return the property value, or <code>null</code> if no property was present.
-	 */
-	protected String getProperty(String propertyName, RequestContext context) {
-		return context.getActionStateAction().getProperty(propertyName);
-	}
-
-	/**
-	 * Returns <code>true</code> if the specified action property exists in the
-	 * context of the calling action state associated with the current request context.
-	 * @param propertyName the action property name
-	 * @param context the request context
-	 * @return true if the property is present, false if it isn't
-	 */
-	protected boolean containsProperty(String propertyName, RequestContext context) {
-		return context.getActionStateAction().containsProperty(propertyName);
-	}
-
 	// action pre and post execution logic
 
 	public final Event execute(RequestContext context) throws Exception {

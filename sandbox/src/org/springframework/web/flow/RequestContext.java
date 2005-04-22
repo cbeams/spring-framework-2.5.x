@@ -17,6 +17,8 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
+import org.springframework.binding.AttributeSource;
+
 /**
  * Central interface that allows clients to access contextual information about
  * an ongoing flow execution within the context of a client request. The term
@@ -119,7 +121,7 @@ public interface RequestContext {
 	 * 
 	 * @return the action state action, or null
 	 */
-	public ActionStateAction getActionStateAction();
+	public AttributeSource getActionExecutionAttributes();
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in

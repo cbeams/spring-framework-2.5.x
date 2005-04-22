@@ -17,6 +17,8 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
+import org.springframework.binding.AttributeSource;
+
 /**
  * Mutable control interface for states to use to manipulate the state of an
  * ongoing flow execution request. Used internally by the various state types when
@@ -42,9 +44,9 @@ public interface StateContext extends RequestContext {
 	/**
 	 * Update contextual properties about the action that is about to execute
 	 * in this request context.
-	 * @param actionStateAction the action state action
+	 * @param attributes the action execution attributes
 	 */
-	public void setActionStateAction(ActionStateAction actionStateAction);
+	public void setActionExecutionAttributes(AttributeSource attributes);
 	
 	/**
 	 * Get the flow session currently active in the flow execution.

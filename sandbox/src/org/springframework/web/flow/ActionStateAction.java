@@ -17,6 +17,7 @@ package org.springframework.web.flow;
 
 import java.util.Properties;
 
+import org.springframework.binding.AttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -31,7 +32,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Keith Donald
  */
-public class ActionStateAction {
+public class ActionStateAction implements AttributeSource {
 
 	// predefined properties
 
@@ -261,7 +262,17 @@ public class ActionStateAction {
 		return getProperties().containsKey(propertyName);
 	}
 
+	public boolean containsAttribute(String attributeName) {
+		return containsProperty(attributeName);
+	}
+
+	public Object getAttribute(String attributeName) {
+		return getProperty(attributeName);
+	}
+	
 	public String toString() {
 		return new ToStringCreator(this).append("action", targetAction).append("properties", properties).toString();
 	}
+
+
 }

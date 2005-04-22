@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.binding.AttributeSource;
 import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
 import org.springframework.util.RandomGuid;
@@ -44,7 +45,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private Event lastEvent;
 
-	private ActionStateAction actionStateAction;
+	private AttributeSource actionExecutionAttributes;
 	
 	private FlowExecutionStack flowExecution;
 
@@ -98,8 +99,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return lastEvent;
 	}
 
-	public ActionStateAction getActionStateAction() {
-		return actionStateAction;
+	public AttributeSource getActionExecutionAttributes() {
+		return actionExecutionAttributes;
 	}
 	
 	public Scope getRequestScope() {
@@ -136,8 +137,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		fireEventSignaled();
 	}
 
-	public void setActionStateAction(ActionStateAction action) {
-		this.actionStateAction = action;
+	public void setActionExecutionAttributes(AttributeSource attributes) {
+		this.actionExecutionAttributes = attributes;
 	}
 	
 	public FlowSession getActiveFlowSession() {

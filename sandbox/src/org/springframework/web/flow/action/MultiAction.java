@@ -17,9 +17,8 @@ package org.springframework.web.flow.action;
 
 import java.lang.reflect.Method;
 
+import org.springframework.binding.AttributeSource;
 import org.springframework.util.DispatchMethodInvoker;
-import org.springframework.util.StringUtils;
-import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 
@@ -181,10 +180,10 @@ public class MultiAction extends AbstractAction {
 	 */
 	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
 		public String getMethodName(RequestContext context, MultiAction action) {
-			ActionStateAction actionStateAction = context.getActionStateAction();
-			if (StringUtils.hasText(actionStateAction.getMethod())) {
+			AttributeSource attributes = context.getActionExecutionAttributes();
+			if (attributes.containsAttribute("method")) {
 				// use specified execute method name
-				return actionStateAction.getMethod();
+				return (String)attributes.getAttribute("method");
 			}
 			else {
 				// use current state name as method name

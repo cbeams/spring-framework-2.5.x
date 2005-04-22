@@ -91,8 +91,8 @@ public class SetPortletModeAction extends AbstractAction {
 
 		if (event.getResponse() instanceof ActionResponse) {
 			PortletMode mode = getPortletMode();
-			if (containsProperty(PORTLET_MODE_PROPERTY, context)) {
-				mode = (PortletMode)PORTLET_MODE_CONSTANTS.asObject(getProperty(PORTLET_MODE_PROPERTY, context));
+			if (context.getActionExecutionAttributes().containsAttribute(PORTLET_MODE_PROPERTY)) {
+				mode = (PortletMode)PORTLET_MODE_CONSTANTS.asObject((String)context.getActionExecutionAttributes().getAttribute(PORTLET_MODE_PROPERTY));
 			}
 			((ActionResponse)event.getResponse()).setPortletMode(mode);
 			return success();
