@@ -31,6 +31,12 @@ public class FlowActionMapping extends ActionMapping {
 	private String flowId;
 
 	/**
+	 * The encoded flow storage strategy to use - supported values:
+	 * ("default", "session", "sessionContinuation", "clientContinuation")
+	 */
+	private String storage = "default";
+	
+	/**
 	 * Returns the flowId.
 	 */
 	public String getFlowId() {
@@ -42,5 +48,21 @@ public class FlowActionMapping extends ActionMapping {
 	 */
 	public void setFlowId(String flowId) {
 		this.flowId = flowId;
+	}
+
+	/**
+	 * Returns the encoded flow execution storage strategy
+	 * @return the encoded storage strategy
+	 */
+	public String getStorage() {
+		return storage;
+	}
+
+	/**
+	 * Sets the encoded flow execution storage strategy
+	 * @param storage the storage strategy
+	 */
+	public void setStorage(String storage) {
+		this.storage = storage;
 	}
 }
