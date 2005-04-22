@@ -1,18 +1,18 @@
 /*
-* Copyright 2002-2005 the original author or authors.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.web.flow.support;
 
 import java.util.HashMap;
@@ -29,29 +29,32 @@ import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
 
 /**
- * When presented with expressions in the format <code>${expr}</code>, creates instances
- * of <code>OgnlTransitionCriteria</code> that will evaluate <code>expr</code> against
- * the <code>RequestContext</code> using OGNL during <code>test(RequestContext)</code>.
- *
- * If the <code>encodedCriteria</code> value passed to <code>create(String)</code> is not an
- * expression this class delegates to the super class to get an instance of the default
- * <code>TransitionCriteria</code> for the event name.
+ * When presented with expressions in the format <code>${expr}</code>,
+ * creates instances of <code>OgnlTransitionCriteria</code> that will evaluate
+ * <code>expr</code> against the <code>RequestContext</code> using OGNL
+ * during <code>test(RequestContext)</code>. If the
+ * <code>encodedCriteria</code> value passed to <code>create(String)</code>
+ * is not an expression this class delegates to the super class to get an
+ * instance of the default <code>TransitionCriteria</code> for the event name.
  * 
  * @see OgnlTransitionCriteriaCreator
  * @see org.springframework.web.flow.config.SimpleTransitionCriteriaCreator
- * 
  * @author Rob Harrop
  */
 public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreator {
 
 	private static final String EXPRESSION_PREFIX = "${";
+
 	private static final String EXPRESSION_SUFFIX = "}";
-	
+
 	/**
-	 * If the supplied <code>encodedCriteria</code> value is an expression, then an instance
-	 * of <code>OgnlTransitionCriteria</code> is created. Otherwise, the super
-	 * class is asked to provide the default implementation of <code>TransitionCriteria</code>.
-	 * @param encodedCriteria an event name or expression
+	 * If the supplied <code>encodedCriteria</code> value is an expression,
+	 * then an instance of <code>OgnlTransitionCriteria</code> is created.
+	 * Otherwise, the super class is asked to provide the default implementation
+	 * of <code>TransitionCriteria</code>.
+	 * 
+	 * @param encodedCriteria
+	 *            an event name or expression
 	 */
 	public TransitionCriteria create(String encodedCriteria) {
 		if (isExpression(encodedCriteria)) {
@@ -81,25 +84,23 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 	 * Cut the expression from given criteria string and return it.
 	 */
 	private String cutExpression(String encodedCriteria) {
-		return encodedCriteria.substring(
-				EXPRESSION_PREFIX.length(),
-				encodedCriteria.length() - EXPRESSION_SUFFIX.length());
+		return encodedCriteria.substring(EXPRESSION_PREFIX.length(), encodedCriteria.length()
+				- EXPRESSION_SUFFIX.length());
 	}
 
-
 	/**
-	 * Transtition criteria that tests the value of a OGNL expression.
-	 * <a href="http://www.ognl.org">OGNL</a> is the Object Graph
-	 * Navigation Language: an expression language for getting and setting
-	 * the properties of Java objects. In this case, it is used to express
-	 * a condition that guards transition execution in a web flow.
-	 *
+	 * Transtition criteria that tests the value of a OGNL expression. <a
+	 * href="http://www.ognl.org">OGNL</a> is the Object Graph Navigation
+	 * Language: an expression language for getting and setting the properties
+	 * of Java objects. In this case, it is used to express a condition that
+	 * guards transition execution in a web flow.
+	 * 
 	 * @author Keith Donald
 	 * @author Erwin Vervaet
 	 * @author Rob Harrop
 	 */
 	public static class OgnlTransitionCriteria implements TransitionCriteria {
-		
+
 		private String expressionString;
 
 		/**
@@ -109,9 +110,10 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 
 		/**
 		 * Create a new OGNL based transition criteria object.
-		 *
-		 * @param expressionString the OGNL expression testing the criteria, this
-		 *        expression should be a condition that returns a Boolean value
+		 * 
+		 * @param expressionString
+		 *            the OGNL expression testing the criteria, this expression
+		 *            should be a condition that returns a Boolean value
 		 */
 		public OgnlTransitionCriteria(String expressionString) throws OgnlException {
 			Assert.hasText(expressionString);
@@ -125,24 +127,24 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 			try {
 				Object result = Ognl.getValue(this.expression, getAliasMap(context), context);
 				Assert.isInstanceOf(Boolean.class, result);
-				return ((Boolean) result).booleanValue();
+				return ((Boolean)result).booleanValue();
 			}
 			catch (OgnlException e) {
 				throw new IllegalArgumentException("Invalid transition expression '" + this + "':" + e);
 			}
 		}
-		
+
 		/**
-		 * Setup a map with a few aliased values to make writing
-		 * OGNL based transition conditions a bit easier.
+		 * Setup a map with a few aliased values to make writing OGNL based
+		 * transition conditions a bit easier.
 		 */
 		protected Map getAliasMap(RequestContext context) {
-			Map res=new HashMap();
+			Map res = new HashMap();
 			// ${#result == lastEvent.id}
 			res.put("result", context.getLastEvent().getId());
 			return res;
 		}
-		
+
 		public String toString() {
 			return EXPRESSION_PREFIX + expressionString + EXPRESSION_SUFFIX;
 		}
