@@ -50,12 +50,12 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 	 * Reads the <code>ObjectName</code> from the source level metadata associated
 	 * with the managed resource's <code>Class</code>.
 	 */
-	public ObjectName getObjectName(Object managedResource, String key) throws MalformedObjectNameException {
-		ManagedResource mr = this.attributeSource.getManagedResource(managedResource.getClass());
+	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
+		ManagedResource mr = this.attributeSource.getManagedResource(managedBean.getClass());
 
 		// Check that the managed resource attribute has been specified.
 		if (mr == null) {
-			throw new MalformedObjectNameException("Your bean class [" + managedResource.getClass().getName() +
+			throw new MalformedObjectNameException("Your bean class [" + managedBean.getClass().getName() +
 					"] must be marked with a valid ManagedResource attribute when using MetadataNamingStrategy");
 		}
 
@@ -63,8 +63,8 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 		String objectName = mr.getObjectName();
 
 		if (!StringUtils.hasText(objectName)) {
-			throw new MalformedObjectNameException("You must specify an ObjectName for class [" +
-					managedResource.getClass().getName() + "]");
+			throw new MalformedObjectNameException(
+					"You must specify an ObjectName for class [" + managedBean.getClass().getName() + "]");
 		}
 
 		// Now try to parse the name.

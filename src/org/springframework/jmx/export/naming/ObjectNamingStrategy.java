@@ -34,12 +34,13 @@ public interface ObjectNamingStrategy {
 
 	/**
 	 * Obtain an <code>ObjectName</code> for the supplied bean.
-	 * @param managedResource the bean that will be exposed under the returned <code>ObjectName</code>
-	 * @param key the key associated with this bean in the beans map
+	 * @param managedBean the bean that will be exposed under the
+	 * returned <code>ObjectName</code>
+	 * @param beanKey the key associated with this bean in the beans map
 	 * passed to the <code>MBeanExporter</code>
 	 * @return the <code>ObjectName</code> instance
 	 * @throws MalformedObjectNameException if the resulting <code>ObjectName</code> is invalid
 	 */
-	ObjectName getObjectName(Object managedResource, String key) throws MalformedObjectNameException;
+	ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException;
 
 }

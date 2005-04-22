@@ -138,13 +138,13 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 * Attempts to retrieve the <code>ObjectName</code> via the given key, trying to
 	 * find a mapped value in the mappings first.
 	 */
-	public ObjectName getObjectName(Object managedResource, String key) throws MalformedObjectNameException {
+	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
 		String objectName = null;
 		if (this.mergedMappings != null) {
-			objectName = this.mergedMappings.getProperty(key);
+			objectName = this.mergedMappings.getProperty(beanKey);
 		}
 		if (objectName == null) {
-			objectName = key;
+			objectName = beanKey;
 		}
 		return ObjectNameManager.getInstance(objectName);
 	}
