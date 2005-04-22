@@ -16,8 +16,8 @@
 package org.springframework.web.flow;
 
 /**
- * An action that executes controller, mediator (bridge), and/or command-like
- * behavior. Actions typically delegate down to the service-layer to perform
+ * An action that executes mediator and/or command-like behavior.
+ * Actions typically delegate down to the service-layer to perform
  * business operations, and/or prep views with dynamic model data for rendering.
  * They act as a bridge between the web-tier (browser/views) and the middle-tier
  * (service layer).
