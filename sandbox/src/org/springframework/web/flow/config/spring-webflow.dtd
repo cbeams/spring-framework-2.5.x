@@ -17,7 +17,7 @@
 	Defines the root element for a web flow definition. Web flows
 	are composed of one or more states.
 -->
-<!ELEMENT webflow ( (action-state | view-state | subflow-state | end-state)+ )>
+<!ELEMENT webflow ( (action-state | view-state | subflow-state | end-state | precondition )+ )>
 
 <!--
 	Unique identifier of the web flow; should be unique to all other web flows.

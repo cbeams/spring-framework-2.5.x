@@ -480,7 +480,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				Node node = nodeList.item(i);
 				if (node instanceof Element) {
 					Element ele = (Element)node;
-					precondition = (TransitionCriteria)parseFlowService(element, TransitionCriteria.class);
+					precondition = (TransitionCriteria)parseFlowService(ele, TransitionCriteria.class);
 				}
 			}
 		}
