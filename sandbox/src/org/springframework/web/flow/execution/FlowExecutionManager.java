@@ -30,7 +30,7 @@ import org.springframework.web.flow.ViewDescriptor;
 
 /**
  * Objects of this class can manage flow executions on behalf of
- * a client, mostly a web MVC controller. 
+ * a client, typically a web MVC controller. 
  * <p>
  * The {@link #handle(Event) handle} method implements the following algorithm:
  * <ol>
