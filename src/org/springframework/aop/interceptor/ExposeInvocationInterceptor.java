@@ -27,16 +27,22 @@ import org.aopalliance.intercept.MethodInvocation;
  * Interceptor that exposes the current MethodInvocation.
  * We occasionally need to do this--for example, when a pointcut
  * or target object needs to know the Invocation context.
- * <br>Don't use this interceptor unless this is really necessary.
+ *
+ * <p>Don't use this interceptor unless this is really necessary.
  * Target objects should not normally know about Spring AOP,
  * as this creates a dependency on Spring. Target objects
  * should be plain POJOs as far as possible.
- * <br>If used, this interceptor will normally be the first
+ *
+ * <p>If used, this interceptor will normally be the first
  * in the interceptor chain.
+ *
  * @author Rod Johnson
  */
 public class ExposeInvocationInterceptor implements MethodInterceptor, Serializable {
 	
+	/** Singleton instance of this class */
+	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
+
 	private static ThreadLocal invocation = new ThreadLocal();
 	
 	/**
@@ -50,25 +56,18 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	public static MethodInvocation currentInvocation() throws AspectException {
 		MethodInvocation mi = (MethodInvocation) invocation.get();
 		if (mi == null)
-			throw new AspectException("No MethodInvocation found: " +
-					"Check that an AOP invocation is in progress, and that the ExposeInvocationInterceptor is in the interceptor chain");
+			throw new AspectException(
+					"No MethodInvocation found: check that an AOP invocation is in progress, " +
+					"and that the ExposeInvocationInterceptor is in the interceptor chain");
 		return mi;
 	}
 	
 	/**
-	 * Singleton instance of this class
-	 */
-	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
-	
-	/**
-	 * Ensure that only the canonical instance can be used
+	 * Ensure that only the canonical instance can be created.
 	 */
 	private ExposeInvocationInterceptor() {
 	}
 
-	/**
-	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
-	 */
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		Object old = invocation.get();
 		invocation.set(mi);
@@ -81,10 +80,9 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	}
 	
 	/**
-	 * Required to support serialization.
-	 * Replaces with canonical instance on deserialization,
-	 * protecting Singleton pattern. 
-	 * Alternative to overriding equals().
+	 * Required to support serialization. Replaces with canonical instance
+	 * on deserialization, protecting Singleton pattern.
+	 * Alternative to overriding the <code>equals</code> method.
 	 */
 	private Object readResolve() throws ObjectStreamException {
 		return INSTANCE;
