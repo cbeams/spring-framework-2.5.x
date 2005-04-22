@@ -164,6 +164,35 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertTrue("Not included in autodetection", assembler.includeBean(proxy.getClass(), "some bean name"));
 	}
 
+	public void testWithJdkProxy() throws Exception {
+		IJmxTestBean tb = createJmxTestBean();
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTarget(tb);
+		pf.addInterface(IJmxTestBean.class);
+		pf.addAdvice(new NopInterceptor());
+		Object proxy = pf.getProxy();
+
+		MetadataMBeanInfoAssembler assembler = (MetadataMBeanInfoAssembler) getAssembler();
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setBeanFactory(getContext());
+		exporter.setAssembler(assembler);
+
+		String objectName = "spring:bean=test,proxy=true";
+
+		Map beans = new HashMap();
+		beans.put(objectName, proxy);
+		exporter.setBeans(beans);
+
+		try {
+			exporter.afterPropertiesSet();
+			fail("Should have thrown an IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
 	protected abstract String getObjectName();
 
 	protected int getExpectedAttributeCount() {

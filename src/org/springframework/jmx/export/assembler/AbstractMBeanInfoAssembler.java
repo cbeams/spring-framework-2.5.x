@@ -51,7 +51,7 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	/**
 	 * Create an instance of the <code>ModelMBeanInfoSupport</code> class supplied with all
 	 * JMX implementations and populates the metadata through calls to the subclass.
-	 * @param managedBean the bean that will be exposed
+	 * @param managedBean the bean that will be exposed (might be an AOP proxy)
 	 * @param beanKey the key associated with the managed bean
 	 * @return the populated ModelMBeanInfo instance
 	 * @throws JMException in case of errors
@@ -63,6 +63,7 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * @see #populateMBeanDescriptor(javax.management.Descriptor, Object, String)
 	 */
 	public ModelMBeanInfo getMBeanInfo(Object managedBean, String beanKey) throws JMException {
+		checkManagedBean(managedBean);
 		ModelMBeanInfo info = new ModelMBeanInfoSupport(
 				getClassName(managedBean, beanKey), getDescription(managedBean, beanKey),
 				getAttributeInfo(managedBean, beanKey), getConstructorInfo(managedBean, beanKey),
@@ -71,6 +72,16 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 		populateMBeanDescriptor(desc, managedBean, beanKey);
 		info.setMBeanDescriptor(desc);
 		return info;
+	}
+
+	/**
+	 * Check the given bean instance, throwing an IllegalArgumentException
+	 * if it is not eligible for exposure with this assembler.
+	 * <p>Default implementation is empty, accepting every bean instance.
+	 * @param managedBean the bean that will be exposed (might be an AOP proxy)
+	 * @throws IllegalArgumentException the bean is not valid for exposure
+	 */
+	protected void checkManagedBean(Object managedBean) throws IllegalArgumentException {
 	}
 
 	/**

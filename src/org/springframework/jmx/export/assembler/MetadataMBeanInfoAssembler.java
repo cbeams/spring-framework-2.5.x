@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import javax.management.Descriptor;
 import javax.management.MBeanParameterInfo;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
@@ -73,6 +74,18 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		}
 	}
 
+
+	/**
+	 * Throws an IllegalArgumentException if it encounters a JDK dynamic proxy.
+	 * Metadata can only be read from target classes and CGLIB proxies!
+	 */
+	protected void checkManagedBean(Object managedBean) throws IllegalArgumentException {
+		if (AopUtils.isJdkDynamicProxy(managedBean)) {
+			throw new IllegalArgumentException(
+					"MetadataMBeanInfoAssembler does not support JDK dynamic proxies - " +
+					"export the target beans directly or use CGLIB proxies instead");
+		}
+	}
 
 	/**
 	 * Used for autodetection of beans. Checks to see if the bean's class has a
