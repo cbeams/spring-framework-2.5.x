@@ -154,6 +154,8 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	 * @see TransactionAttributeSourceEditor
 	 * @see MethodMapTransactionAttributeSource
 	 * @see NameMatchTransactionAttributeSource
+	 * @see AttributesTransactionAttributeSource
+	 * @see org.springframework.transaction.annotation.AnnotationTransactionAttributeSource
 	 */
 	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
 		this.transactionAttributeSource = transactionAttributeSource;

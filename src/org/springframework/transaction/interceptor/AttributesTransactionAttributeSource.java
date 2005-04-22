@@ -34,7 +34,6 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @see org.springframework.metadata.Attributes
  * @see org.springframework.metadata.commons.CommonsAttributes
- * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource
  */
 public class AttributesTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
 		implements InitializingBean {
@@ -54,6 +53,7 @@ public class AttributesTransactionAttributeSource extends AbstractFallbackTransa
 	/**
 	 * Create a new AttributesTransactionAttributeSource.
 	 * @param attributes the Attributes implementation to use
+	 * @see org.springframework.metadata.commons.CommonsAttributes
 	 */
 	public AttributesTransactionAttributeSource(Attributes attributes) {
 		if (attributes == null) {
@@ -64,6 +64,7 @@ public class AttributesTransactionAttributeSource extends AbstractFallbackTransa
 
 	/**
 	 * Set the Attributes implementation to use.
+	 * @see org.springframework.metadata.commons.CommonsAttributes
 	 */
 	public void setAttributes(Attributes attributes) {
 		this.attributes = attributes;

@@ -16,9 +16,6 @@
 
 package org.springframework.jmx.export.annotation;
 
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.jmx.IJmxTestBean;
 
 /**
@@ -27,7 +24,7 @@ import org.springframework.jmx.IJmxTestBean;
 @ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
 		logFile = "jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
-		public class AnnotationTestBean implements IJmxTestBean {
+public class AnnotationTestBean implements IJmxTestBean {
 
 	private String name;
 
@@ -38,8 +35,8 @@ import org.springframework.jmx.IJmxTestBean;
 	private boolean isSuperman;
 
 
-	@org.springframework.jmx.export.annotation.ManagedAttribute(description = "The Age Attribute", currencyTimeLimit = 15)
-			public int getAge() {
+	@ManagedAttribute(description = "The Age Attribute", currencyTimeLimit = 15)
+	public int getAge() {
 		return age;
 	}
 
@@ -47,29 +44,26 @@ import org.springframework.jmx.IJmxTestBean;
 		this.age = age;
 	}
 
-
-	@org.springframework.jmx.export.annotation.ManagedOperation(currencyTimeLimit = 30)
-			public long myOperation() {
+	@ManagedOperation(currencyTimeLimit = 30)
+	public long myOperation() {
 		return 1L;
 	}
-
 
 	@ManagedAttribute(description = "The Name Attribute",
 			currencyTimeLimit = 20,
 			defaultValue = "bar",
 			persistPolicy = "OnUpdate")
-			public void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
 	@ManagedAttribute(defaultValue = "foo", persistPeriod = 300)
-			public String getName() {
+	public String getName() {
 		return name;
 	}
 
-
 	@org.springframework.jmx.export.annotation.ManagedAttribute(description = "The Nick Name Attribute")
-			public String getNickName() {
+	public String getNickName() {
 		return this.nickName;
 	}
 
@@ -78,7 +72,7 @@ import org.springframework.jmx.IJmxTestBean;
 	}
 
 	@org.springframework.jmx.export.annotation.ManagedAttribute(description = "The Is Superman Attribute")
-			public void setSuperman(boolean superman) {
+	public void setSuperman(boolean superman) {
 		this.isSuperman = superman;
 	}
 
@@ -88,13 +82,13 @@ import org.springframework.jmx.IJmxTestBean;
 
 	@org.springframework.jmx.export.annotation.ManagedOperation(description = "Add Two Numbers Together")
 	@ManagedOperationParameters({@ManagedOperationParameter(name="x", description="Left operand"),
-			@ManagedOperationParameter(name="y", description="Right operand")})
+	@ManagedOperationParameter(name="y", description="Right operand")})
 	public int add(int x, int y) {
 		return x + y;
 	}
 
 	/**
-	 * Test method that is not exposed by the MetadataAssembler
+	 * Test method that is not exposed by the MetadataAssembler.
 	 */
 	public void dontExposeMe() {
 		throw new RuntimeException();

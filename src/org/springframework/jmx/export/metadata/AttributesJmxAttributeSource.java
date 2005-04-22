@@ -47,7 +47,6 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 
 	/**
 	 * Create a new AttributesJmxAttributeSource.
-	 *
 	 * @see #setAttributes
 	 */
 	public AttributesJmxAttributeSource() {
@@ -55,8 +54,8 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 
 	/**
 	 * Create a new AttributesJmxAttributeSource.
-	 *
 	 * @param attributes the Attributes implementation to use
+	 * @see org.springframework.metadata.commons.CommonsAttributes
 	 */
 	public AttributesJmxAttributeSource(Attributes attributes) {
 		if (attributes == null) {
@@ -67,6 +66,7 @@ public class AttributesJmxAttributeSource implements JmxAttributeSource, Initial
 
 	/**
 	 * Set the Attributes implementation to use.
+	 * @see org.springframework.metadata.commons.CommonsAttributes
 	 */
 	public void setAttributes(Attributes attributes) {
 		this.attributes = attributes;
