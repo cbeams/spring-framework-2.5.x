@@ -19,6 +19,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
@@ -53,7 +54,7 @@ public class BindAndValidateTransitionPrecondition implements TransitionCriteria
 	 */
 	public boolean test(RequestContext context) {
 		try {
-			Event result = formAction.bindAndValidate(context);
+			Event result = this.formAction.bindAndValidate(context);
 			if (result.getId().equals(AbstractAction.SUCCESS_RESULT_EVENT_ID)) {
 				return true;
 			}

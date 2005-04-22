@@ -159,7 +159,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * Optional property that identifies the method that should be invoked on the 
 	 * configured validator instance, to support piecemeal wizard page validation.
 	 */
-	public static final String VALIDATOR_METHOD_PROPERTY = "validatorMethod";
+	public static final String VALIDATOR_METHOD = "validatorMethod";
 
 	/**
 	 * The name the form object should be exposed under.
@@ -582,7 +582,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * @param errors possible binding errors
 	 */
 	protected void validate(RequestContext context, Object formObject, Errors errors) throws Exception {
-		String validatorMethod = (String)context.getActionExecutionAttributes().getAttribute(VALIDATOR_METHOD_PROPERTY);
+		String validatorMethod = (String)context.getActionExecutionAttributes().getAttribute(VALIDATOR_METHOD);
 		if (StringUtils.hasText(validatorMethod)) {
 			invokeValidatorMethod(validatorMethod, formObject, errors);
 		}

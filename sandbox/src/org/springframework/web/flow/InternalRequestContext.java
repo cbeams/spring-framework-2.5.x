@@ -21,18 +21,20 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeSource;
+import org.springframework.binding.support.EmptyAttributeSource;
 import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
 import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
 
 /**
- * Default request context implementation used internally by the web flow system.
+ * Default request context implementation used internally by the web flow
+ * system.
  * <p>
  * This implementation uses a <i>synchronizer token</i> to implement
- * application transaction functionality. The token will be stored in flow
- * scope for the duration of an application transaction. This implies that there
- * needs to be a unique flow execution for each running application transaction.
+ * application transaction functionality. The token will be stored in flow scope
+ * for the duration of an application transaction. This implies that there needs
+ * to be a unique flow execution for each running application transaction.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -45,16 +47,19 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private Event lastEvent;
 
-	private AttributeSource actionExecutionAttributes;
-	
+	private AttributeSource actionExecutionAttributes = EmptyAttributeSource.INSTANCE;
+
 	private FlowExecutionStack flowExecution;
 
 	private Scope requestScope = new Scope(ScopeType.REQUEST);
 
 	/**
 	 * Create a new request context.
-	 * @param originatingEvent the event at the origin of this request
-	 * @param flowExecution the owning flow execution
+	 * 
+	 * @param originatingEvent
+	 *            the event at the origin of this request
+	 * @param flowExecution
+	 *            the owning flow execution
 	 */
 	public InternalRequestContext(Event originatingEvent, FlowExecutionStack flowExecution) {
 		Assert.notNull(originatingEvent, "the originating event is required");
@@ -102,7 +107,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	public AttributeSource getActionExecutionAttributes() {
 		return actionExecutionAttributes;
 	}
-	
+
 	public Scope getRequestScope() {
 		return this.requestScope;
 	}
@@ -138,9 +143,14 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	public void setActionExecutionAttributes(AttributeSource attributes) {
-		this.actionExecutionAttributes = attributes;
+		if (attributes != null) {
+			this.actionExecutionAttributes = attributes;
+		}
+		else {
+			this.actionExecutionAttributes = EmptyAttributeSource.INSTANCE;
+		}
 	}
-	
+
 	public FlowSession getActiveFlowSession() {
 		return this.flowExecution.getActiveFlowSession();
 	}
@@ -173,9 +183,13 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	/**
 	 * Spawn the provided flow definition as a subflow, activating it and
 	 * parameterizing it with the provided sub flow input.
-	 * @param subFlow the subflow
-	 * @param stateId the id of the state to start execution in
-	 * @param subFlowInput the subflow input attributes
+	 * 
+	 * @param subFlow
+	 *            the subflow
+	 * @param stateId
+	 *            the id of the state to start execution in
+	 * @param subFlowInput
+	 *            the subflow input attributes
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the spawned subflow
 	 */
@@ -352,7 +366,9 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	/**
 	 * Save a new transaction token in flow scope.
-	 * @param tokenName the key used to save the token in the scope
+	 * 
+	 * @param tokenName
+	 *            the key used to save the token in the scope
 	 */
 	protected void setToken(String tokenName) {
 		String txToken = new RandomGuid().toString();
@@ -363,7 +379,9 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Reset the saved transaction token in the flow scope. This indicates that
 	 * transactional token checking will not be needed on the next request event
 	 * that is submitted.
-	 * @param tokenName the key used to save the token in the scope
+	 * 
+	 * @param tokenName
+	 *            the key used to save the token in the scope
 	 */
 	protected void clearToken(String tokenName) {
 		getFlowScope().removeAttribute(tokenName);
@@ -379,10 +397,14 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * <li>the included transaction token value does not match the transaction
 	 * token in the flow scope</li>
 	 * </ul>
-	 * @param tokenName the key used to save the token in the scope
-	 * @param tokenParameterName name of the event parameter holding the token
-	 * @param clear indicates whether or not the token should be reset after
-	 *        checking it
+	 * 
+	 * @param tokenName
+	 *            the key used to save the token in the scope
+	 * @param tokenParameterName
+	 *            name of the event parameter holding the token
+	 * @param clear
+	 *            indicates whether or not the token should be reset after
+	 *            checking it
 	 * @return true when the token is valid, false otherwise
 	 */
 	protected boolean isEventTokenValid(String tokenName, String tokenParameterName, boolean clear) {
@@ -400,10 +422,14 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * <li>the given transaction token value does not match the transaction
 	 * token in the flow scope</li>
 	 * </ul>
-	 * @param tokenName the key used to save the token in the model
-	 * @param tokenValue the token value to check
-	 * @param clear indicates whether or not the token should be reset after
-	 *        checking it
+	 * 
+	 * @param tokenName
+	 *            the key used to save the token in the model
+	 * @param tokenValue
+	 *            the token value to check
+	 * @param clear
+	 *            indicates whether or not the token should be reset after
+	 *            checking it
 	 * @return true when the token is valid, false otherwise
 	 */
 	protected boolean isTokenValid(String tokenName, String tokenValue, boolean clear) {

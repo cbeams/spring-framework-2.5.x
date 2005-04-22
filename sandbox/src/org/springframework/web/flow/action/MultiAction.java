@@ -179,11 +179,14 @@ public class MultiAction extends AbstractAction {
 	 * @author Erwin Vervaet
 	 */
 	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
+		
+		public static final String METHOD = "method";
+
 		public String getMethodName(RequestContext context, MultiAction action) {
 			AttributeSource attributes = context.getActionExecutionAttributes();
-			if (attributes.containsAttribute("method")) {
+			if (attributes.containsAttribute(METHOD)) {
 				// use specified execute method name
-				return (String)attributes.getAttribute("method");
+				return (String)attributes.getAttribute(METHOD);
 			}
 			else {
 				// use current state name as method name

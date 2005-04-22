@@ -31,10 +31,10 @@ public class SellItemAction extends FormAction {
 	 * Hook method that returns a boolean telling the form action whether
 	 * validation should occur in the context of the current request.
 	 * <p>
-	 * Here it should only happen if and only if a 'validatorMethod' property was
-	 * specified in the calling action state.
+	 * Here it should only happen if and only if a 'validatorMethod' property
+	 * was specified in the calling action state.
 	 */
 	protected boolean validationEnabled(RequestContext context) {
-		return containsProperty(VALIDATOR_METHOD_PROPERTY, context);
+		return context.getActionExecutionAttributes().containsAttribute(VALIDATOR_METHOD);
 	}
 }
