@@ -45,13 +45,17 @@
 	</bean>
 	-->
 	
-	<bean id="person.Search.criteria.formAction" class="org.springframework.web.flow.action.FormAction">
-		<property name="formObjectName" value="query"/>
-		<property name="formObjectClass" value="org.springframework.samples.phonebook.domain.PhoneBookQuery"/>
-		<property name="formObjectScopeAsString" value="flow"/>
-		<property name="validator">
-			<bean id="queryValidator" class="org.springframework.samples.phonebook.domain.PhoneBookQueryValidator"/>
-		</property>
+	<bean id="person.Search.criteria.bindAndValidate" class="org.springframework.web.flow.action.BindAndValidateTransitionPrecondition">
+		<constructor-arg>
+			<bean class="org.springframework.web.flow.action.FormAction">
+				<property name="formObjectName" value="query"/>
+				<property name="formObjectClass" value="org.springframework.samples.phonebook.domain.PhoneBookQuery"/>
+				<property name="formObjectScopeAsString" value="flow"/>
+				<property name="validator">
+					<bean class="org.springframework.samples.phonebook.domain.PhoneBookQueryValidator"/>
+				</property>
+			</bean>
+		</constructor-arg>
 	</bean>
 
 	<bean id="person.Search.executeQuery" class="org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction" autowire="byType"/>
