@@ -484,7 +484,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				}
 			}
 		}
-		return new Transition(getTransitionCriteriaCreator().create(event), to);
+		return new Transition(getTransitionCriteriaCreator().create(event), to, precondition);
 	}
 
 	/**
