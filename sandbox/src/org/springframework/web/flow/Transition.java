@@ -211,6 +211,7 @@ public class Transition {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("on", criteria).append("to", targetStateId).toString();
+		return new ToStringCreator(this).append("on", criteria).append("to", targetStateId).append("precondition",
+				precondition).toString();
 	}
 }
