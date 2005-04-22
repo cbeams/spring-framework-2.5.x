@@ -31,6 +31,7 @@ import junit.framework.TestCase;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -75,6 +76,12 @@ public class WizardFormControllerTests extends TestCase {
 
 		params.clear();
 		params.setProperty("name", "myname");
+		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1.y", "value");
+		performRequest(wizard, session, params, 1, "myname", 0, "currentPage");
+		// name set -> now allowed to go to 1
+
+		params.clear();
+		params.setProperty("date", "not a date");
 		params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1.y", "value");
 		performRequest(wizard, session, params, 1, "myname", 0, "currentPage");
 		// name set -> now allowed to go to 1
@@ -357,7 +364,7 @@ public class WizardFormControllerTests extends TestCase {
 		}
 		TestBean tb = (TestBean) mv.getModel().get("tb");
 		assertTrue("Has model", tb != null);
-		assertTrue("Name is " + name, (tb.getName() == name || name.equals(tb.getName())));
+		assertTrue("Name is " + name, ObjectUtils.nullSafeEquals(name, tb.getName()));
 		assertTrue("Age is " + age, tb.getAge() == age);
 		Errors errors = (Errors) mv.getModel().get(BindException.ERROR_KEY_PREFIX + "tb");
 		if (params != null && params.containsKey("formChange")) {
