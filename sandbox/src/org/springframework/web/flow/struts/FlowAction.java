@@ -62,18 +62,12 @@ import org.springframework.web.util.WebUtils;
  * FlowAction that fronts a single top-level flow:
  * 
  * <pre>
- * 
- *  
- *   
- *        &lt;action path=&quot;/userRegistration&quot;
- *        	type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
- *        	name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
- *        	className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
- *        	&lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
- *        &lt;/action&gt;
- *    
- *   
- *  
+ * &lt;action path=&quot;/userRegistration&quot;
+ *    	type=&quot;org.springframework.web.flow.struts.FlowAction&quot;
+ *     	name=&quot;bindingActionForm&quot; scope=&quot;request&quot; 
+ *     	className=&quot;org.springframework.web.flow.struts.FlowActionMapping&quot;&gt;
+ *     	&lt;set-property property=&quot;flowId&quot; value=&quot;user.Registration&quot; /&gt;
+ * &lt;/action&gt;
  * </pre>
  * 
  * This example associates the logical request URL
@@ -97,26 +91,14 @@ import org.springframework.web.util.WebUtils;
  * form population:
  * 
  * <pre>
- * 
- *  
- *   
- *        &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
- *    
- *   
- *  
+ *     &lt;controller processorClass=&quot;org.springframework.web.struts.BindingRequestProcessor&quot;/&gt; 
  * </pre>
  * 
  * <li>A <code>BindingPlugin</code> is needed, to plugin an Errors-aware
  * <code>jakarta-commons-beanutils</code> adapter:
  * 
  * <pre>
- * 
- *  
- *   
- *        &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
- *    
- *   
- *  
+ *     &lt;plug-in className=&quot;org.springframework.web.struts.BindingPlugin&quot;/&gt;
  * </pre>
  * 
  * </ol>
@@ -139,7 +121,6 @@ public class FlowAction extends TemplateAction {
 	private FlowLocator flowLocator;
 
 	private StrutsFlowExecutionManager flowExecutionManager;
-	
 	
 	public void setServlet(ActionServlet actionServlet) {
 		super.setServlet(actionServlet);
