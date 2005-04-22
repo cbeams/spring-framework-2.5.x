@@ -8,6 +8,12 @@ import org.springframework.web.flow.execution.FlowExecutionStorage;
 import org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage;
 import org.springframework.web.flow.execution.servlet.HttpSessionFlowExecutionStorage;
 
+/**
+ * Converts a string representation of a FlowExecutionStorage strategy
+ * implementation into a valid instance.
+ * 
+ * @author Keith Donald
+ */
 public class TextToFlowExecutionStorageConverter extends AbstractConverter {
 
 	public Class[] getSourceClasses() {
