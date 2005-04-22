@@ -34,9 +34,9 @@ public interface AutodetectCapableMBeanInfoAssembler extends MBeanInfoAssembler 
 	 * Indicate whether a particular bean should be included in the registration
 	 * process, if it is not specified in the <code>beans</code> map of the
 	 * <code>MBeanExporter</code>.
+	 * @param beanClass the class of the bean (might be a proxy class)
 	 * @param beanName the name of the bean in the bean factory
-	 * @param beanClass the class of the bean
 	 */
-	boolean includeBean(String beanName, Class beanClass);
+	boolean includeBean(Class beanClass, String beanName);
 
 }

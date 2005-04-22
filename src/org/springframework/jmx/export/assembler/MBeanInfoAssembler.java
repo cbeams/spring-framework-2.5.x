@@ -27,6 +27,7 @@ import javax.management.modelmbean.ModelMBeanInfo;
  * interface for any bean that is not an MBean.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.jmx.export.MBeanExporter
  */
@@ -34,11 +35,11 @@ public interface MBeanInfoAssembler {
 
 	/**
 	 * Create the ModelMBeanInfo for the given managed resource.
+	 * @param managedBean the bean that will be exposed (might be an AOP proxy)
 	 * @param beanKey the key associated with the managed bean
-	 * @param beanClass the Class of the managed resource
 	 * @return the ModelMBeanInfo metadata object
 	 * @throws JMException in case of errors
 	 */
-	ModelMBeanInfo getMBeanInfo(String beanKey, Class beanClass) throws JMException;
+	ModelMBeanInfo getMBeanInfo(Object managedBean, String beanKey) throws JMException;
 
 }

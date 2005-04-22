@@ -62,7 +62,7 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 				getWithMapping("foobar", "org.springframework.jmx.export.assembler.ICustomJmxBean");
 		assembler.setManagedInterfaces(new Class[] {IAdditionalTestMethods.class});
 
-		ModelMBeanInfo inf = assembler.getMBeanInfo(getObjectName(), getBean().getClass());
+		ModelMBeanInfo inf = assembler.getMBeanInfo(getBean(), getObjectName());
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
 
 		assertNickName(attr);

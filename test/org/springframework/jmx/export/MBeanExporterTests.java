@@ -19,6 +19,7 @@ package org.springframework.jmx.export;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectInstance;
@@ -122,18 +123,16 @@ public class MBeanExporterTests extends TestCase {
 		}
 	}
 
-	public void testExportAopProxy() throws Exception {
+	public void testExportJdkProxy() throws Exception {
 		JmxTestBean bean = new JmxTestBean();
 		bean.setName("Rob Harrop");
 
 		ProxyFactory factory = new ProxyFactory();
 		factory.setTarget(bean);
 		factory.addAdvice(new NopInterceptor());
-		//factory.setProxyTargetClass(true);
-		factory.setInterfaces(new Class[]{IJmxTestBean.class});
+		factory.setInterfaces(new Class[] {IJmxTestBean.class});
 
 		IJmxTestBean proxy = (IJmxTestBean) factory.getProxy();
-
 		String name = "bean:proxy=true";
 
 		Map beans = new HashMap();
@@ -146,14 +145,8 @@ public class MBeanExporterTests extends TestCase {
 		exporter.registerBeans();
 
 		ObjectName oname = ObjectName.getInstance(name);
-
-		try {
-			Object nameValue = server.getAttribute(oname, "Name");
-			assertEquals("Rob Harrop", nameValue);
-		}
-		catch (Exception ex) {
-			fail("Should be able to get value from an AOP JDK proxy");
-		}
+		Object nameValue = server.getAttribute(oname, "Name");
+		assertEquals("Rob Harrop", nameValue);
 	}
 
 	private Map getBeanMap() {
@@ -172,7 +165,7 @@ public class MBeanExporterTests extends TestCase {
 
 		private boolean invoked = false;
 
-		public ModelMBeanInfo getMBeanInfo(String beanKey, Class beanClass) {
+		public ModelMBeanInfo getMBeanInfo(Object managedResource, String beanKey) throws JMException {
 			invoked = true;
 			return null;
 		}

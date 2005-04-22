@@ -29,7 +29,7 @@ public abstract class AbstractAutodetectTests extends TestCase {
 		JmxTestBean bean = new JmxTestBean();
 
 		AutodetectCapableMBeanInfoAssembler assembler = getAssembler();
-		assertTrue("The bean should be included", assembler.includeBean("testBean", bean.getClass()));
+		assertTrue("The bean should be included", assembler.includeBean(bean.getClass(), "testBean"));
 	}
 
 	protected abstract AutodetectCapableMBeanInfoAssembler getAssembler();

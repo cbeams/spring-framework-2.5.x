@@ -101,24 +101,24 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractReflectiveMBeanInf
 		for (Enumeration en = mappings.keys(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
-			Class[] classes = convertToClasses(beanKey, classNames);
+			Class[] classes = convertToClasses(classNames, beanKey);
 			this.interfaceMappings.put(beanKey, classes);
 		}
 	}
 
-	private Class[] convertToClasses(String beanKey, String[] names) {
-		Class[] classes = new Class[names.length];
+	private Class[] convertToClasses(String[] classNames, String beanKey) {
+		Class[] classes = new Class[classNames.length];
 		for (int x = 0; x < classes.length; x++) {
 			try {
-				Class cls = ClassUtils.forName(names[x].trim());
+				Class cls = ClassUtils.forName(classNames[x].trim());
 				if (!cls.isInterface()) {
-					throw new IllegalArgumentException("Class [" + names[x] + "] mapped to bean key [" +
-							beanKey + "] is not an interface.");
+					throw new IllegalArgumentException("Class [" + classNames[x] + "] mapped to bean key [" +
+							beanKey + "] is not an interface");
 				}
 				classes[x] = cls;
 			}
 			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException("Class [" + names[x] + "] mapped to bean key [" +
+				throw new IllegalArgumentException("Class [" + classNames[x] + "] mapped to bean key [" +
 						beanKey + "] cannot be found: " + ex.getMessage());
 			}
 		}

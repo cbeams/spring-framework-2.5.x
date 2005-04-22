@@ -42,7 +42,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 				getWithMapping("foobar", "add,myOperation,getName,setName,getAge");
 		assembler.setManagedMethods(new String[] {"getNickName", "setNickName"});
 
-		ModelMBeanInfo inf = assembler.getMBeanInfo(getObjectName(), getBean().getClass());
+		ModelMBeanInfo inf = assembler.getMBeanInfo(getBean(), getObjectName());
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
 
 		assertNickName(attr);

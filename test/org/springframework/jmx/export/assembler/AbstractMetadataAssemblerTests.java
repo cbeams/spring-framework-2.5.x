@@ -47,18 +47,14 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 	public void testAttributeDescriptionOnSetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
-
 		ModelMBeanAttributeInfo attr = inf.getAttribute(AGE_ATTRIBUTE);
-
 		assertEquals("The description for the age attribute is incorrect",
 				"The Age Attribute", attr.getDescription());
 	}
 
 	public void testAttributeDescriptionOnGetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
-
 		ModelMBeanAttributeInfo attr = inf.getAttribute(NAME_ATTRIBUTE);
-
 		assertEquals("The description for the name attribute is incorrect",
 				"The Name Attribute", attr.getDescription());
 	}
@@ -68,55 +64,37 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	 */
 	public void testReadOnlyAttribute() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
-
 		ModelMBeanAttributeInfo attr = inf.getAttribute(AGE_ATTRIBUTE);
-
-		assertFalse("The age attribute should not be writable",
-				attr.isWritable());
+		assertFalse("The age attribute should not be writable", attr.isWritable());
 	}
 
 	public void testReadWriteAttribute() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
-
 		ModelMBeanAttributeInfo attr = inf.getAttribute(NAME_ATTRIBUTE);
-
-		assertTrue("The name attribute should be writable",
-				attr.isWritable());
-		assertTrue("The name attribute should be readable",
-				attr.isReadable());
+		assertTrue("The name attribute should be writable", attr.isWritable());
+		assertTrue("The name attribute should be readable", attr.isReadable());
 	}
 
 	/**
-	 * Tests the situation where the property only has
-	 * a getter
-	 *
-	 * @throws java.lang.Exception
+	 * Tests the situation where the property only has a getter.
 	 */
 	public void testWithOnlyGetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
-
 		ModelMBeanAttributeInfo attr = inf.getAttribute("NickName");
-
 		assertNotNull("Attribute should not be null", attr);
 	}
 
 	/**
-	 * Tests the situation where the property only
-	 * has a setter
-	 *
-	 * @throws java.lang.Exception
+	 * Tests the situation where the property only has a setter.
 	 */
 	public void testWithOnlySetter() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
-
 		ModelMBeanAttributeInfo attr = info.getAttribute("Superman");
-
 		assertNotNull("Attribute should not be null", attr);
 	}
 
 	public void testManagedResourceDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
-
 		Descriptor desc = info.getMBeanDescriptor();
 
 		assertEquals("Logging should be set to true", "true", desc.getFieldValue("log"));
@@ -130,7 +108,6 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 	public void testAttributeDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
-
 		Descriptor desc = info.getAttribute(NAME_ATTRIBUTE).getDescriptor();
 
 		assertEquals("Default value should be foo", "foo", desc.getFieldValue("default"));
@@ -141,7 +118,6 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 	public void testOperationDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
-
 		Descriptor desc = info.getOperation("myOperation").getDescriptor();
 
 		assertEquals("Currency Time Limit should be 30", "30", desc.getFieldValue("currencyTimeLimit"));
@@ -150,9 +126,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 	public void testOperationParameterMetadata() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
-
 		ModelMBeanOperationInfo oper = info.getOperation("add");
-
 		MBeanParameterInfo[] params = oper.getSignature();
 
 		assertEquals("Invalid number of params", 2, params.length);
@@ -163,28 +137,31 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertEquals("Incorrect type for y param", int.class.getName(), params[1].getType());
 	}
 
-	public void testWithProxy() throws Exception {
+	public void testWithCglibProxy() throws Exception {
 		IJmxTestBean tb = createJmxTestBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(tb);
 		pf.addAdvice(new NopInterceptor());
+		Object proxy = pf.getProxy();
+
+		MetadataMBeanInfoAssembler assembler = (MetadataMBeanInfoAssembler) getAssembler();
 
 		MBeanExporter exporter = new MBeanExporter();
-		exporter.setBeanFactory(this.getContext());
-		exporter.setAssembler(getAssembler());
+		exporter.setBeanFactory(getContext());
+		exporter.setAssembler(assembler);
 
 		String objectName = "spring:bean=test,proxy=true";
 
 		Map beans = new HashMap();
-		beans.put(objectName, pf.getProxy());
+		beans.put(objectName, proxy);
 		exporter.setBeans(beans);
-
 		exporter.afterPropertiesSet();
 
 		MBeanInfo inf = server.getMBeanInfo(ObjectNameManager.getInstance(objectName));
-		System.out.println(inf.getClassName());
 		assertEquals("Incorrect number of operations", getExpectedOperationCount(), inf.getOperations().length);
 		assertEquals("Incorrect number of attributes", getExpectedAttributeCount(), inf.getAttributes().length);
+
+		assertTrue("Not included in autodetection", assembler.includeBean(proxy.getClass(), "some bean name"));
 	}
 
 	protected abstract String getObjectName();
