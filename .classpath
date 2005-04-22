@@ -20,6 +20,14 @@
 		<attributes>
 		</attributes>
 	</classpathentry>
+	<classpathentry output="target/sandbox/classes" kind="src" path="sandbox/src">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry output="target/sandbox/test-classes" kind="src" path="sandbox/test">
+		<attributes>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path="samples/countries/src">
 		<attributes>
 		</attributes>
@@ -89,14 +97,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry output="target/autobuilds/classes" kind="src" path="autobuilds/src">
-		<attributes>
-		</attributes>
-	</classpathentry>
-	<classpathentry output="target/sandbox/classes" kind="src" path="sandbox/src">
-		<attributes>
-		</attributes>
-	</classpathentry>
-	<classpathentry output="target/sandbox/test-classes" kind="src" path="sandbox/test">
 		<attributes>
 		</attributes>
 	</classpathentry>
