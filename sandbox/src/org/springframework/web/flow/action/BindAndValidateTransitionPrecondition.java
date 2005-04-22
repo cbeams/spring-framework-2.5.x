@@ -54,7 +54,7 @@ public class BindAndValidateTransitionPrecondition implements TransitionCriteria
 	public boolean test(RequestContext context) {
 		try {
 			Event result = formAction.bindAndValidate(context);
-			if (result.getId().equals("success")) {
+			if (result.getId().equals(AbstractAction.SUCCESS_RESULT_EVENT_ID)) {
 				return true;
 			}
 			else {

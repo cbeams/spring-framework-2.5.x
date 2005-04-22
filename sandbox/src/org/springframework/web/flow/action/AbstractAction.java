@@ -41,6 +41,10 @@ import org.springframework.web.flow.SimpleEvent;
  */
 public abstract class AbstractAction implements Action, InitializingBean {
 
+	public static final String SUCCESS_RESULT_EVENT_ID = "success";
+	
+	public static final String ERROR_RESULT_EVENT_ID = "error";
+	
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	public void afterPropertiesSet() {
@@ -60,14 +64,14 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * Returns the default error event.
 	 */
 	protected Event error() {
-		return result("error");
+		return result(ERROR_RESULT_EVENT_ID);
 	}
 
 	/**
 	 * Returns the default success event.
 	 */
 	protected Event success() {
-		return result("success");
+		return result(SUCCESS_RESULT_EVENT_ID);
 	}
 
 	/**
