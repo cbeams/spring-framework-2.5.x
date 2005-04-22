@@ -44,6 +44,7 @@ import org.springframework.web.flow.NoSuchFlowExecutionException;
  * @see org.springframework.web.flow.execution.FlowExecutionManager
  * 
  * @author Erwin Vervaet
+ * @author Keith Donald
  */
 public interface FlowExecutionStorage {
 
