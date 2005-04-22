@@ -217,7 +217,7 @@ public class FlowAction extends TemplateAction {
 	 */
 	protected FlowExecutionStorage getStorage(ActionMapping mapping) {
 		Assert.isInstanceOf(FlowActionMapping.class, mapping);
-		String storage = ((FlowActionMapping)mapping).getFlowId();
+		String storage = ((FlowActionMapping)mapping).getStorage();
 		return (FlowExecutionStorage)new TextToFlowExecutionStorageConverter().convert(storage);
 	}
 
