@@ -44,6 +44,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private Event lastEvent;
 
+	private ActionStateAction actionStateAction;
+	
 	private FlowExecutionStack flowExecution;
 
 	private Scope requestScope = new Scope(ScopeType.REQUEST);
@@ -96,6 +98,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return lastEvent;
 	}
 
+	public ActionStateAction getActionStateAction() {
+		return actionStateAction;
+	}
+	
 	public Scope getRequestScope() {
 		return this.requestScope;
 	}
@@ -130,6 +136,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		fireEventSignaled();
 	}
 
+	public void setActionStateAction(ActionStateAction action) {
+		this.actionStateAction = action;
+	}
+	
 	public FlowSession getActiveFlowSession() {
 		return this.flowExecution.getActiveFlowSession();
 	}

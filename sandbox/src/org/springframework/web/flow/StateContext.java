@@ -40,6 +40,13 @@ public interface StateContext extends RequestContext {
 	public void setLastEvent(Event lastEvent);
 
 	/**
+	 * Update contextual properties about the action that is about to execute
+	 * in this request context.
+	 * @param actionStateAction the action state action
+	 */
+	public void setActionStateAction(ActionStateAction actionStateAction);
+	
+	/**
 	 * Get the flow session currently active in the flow execution.
 	 * @throws IllegalStateException when the flow execution is not active
 	 */

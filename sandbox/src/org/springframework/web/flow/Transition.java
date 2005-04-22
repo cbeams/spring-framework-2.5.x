@@ -169,6 +169,6 @@ public class Transition {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("criteria", criteria).append("targetStateId", targetStateId).toString();
+		return new ToStringCreator(this).append("on", criteria).append("to", targetStateId).toString();
 	}
 }

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -418,33 +419,33 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected ActionStateAction parseActionStateAction(Element element) {
 		Action targetAction = (Action)parseFlowService(element, Action.class);
-		ActionStateAction actionStateAction = new ActionStateAction(targetAction);
+		Properties properties = new Properties();
 		if (element.hasAttribute(NAME_ATTRIBUTE)) {
-			actionStateAction.setName(element.getAttribute(NAME_ATTRIBUTE));
+			properties.put(ActionStateAction.NAME_PROPERTY, element.getAttribute(NAME_ATTRIBUTE));
 		}
 		if (element.hasAttribute(METHOD_ATTRIBUTE)) {
-			actionStateAction.setMethod(element.getAttribute(METHOD_ATTRIBUTE));
+			properties.put(ActionStateAction.METHOD_PROPERTY, element.getAttribute(METHOD_ATTRIBUTE));
 		}
 		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
 		for (int i = 0; i < propertyElements.size(); i++) {
-			parseAndAddProperty((Element)propertyElements.get(i), actionStateAction);
+			parseAndAddProperty((Element)propertyElements.get(i), properties);
 		}
-		return actionStateAction;
+		return new ActionStateAction(targetAction, properties);
 	}
 
 	/**
 	 * Parse a property definition from given element and add the property
 	 * to given action.
 	 */
-	protected void parseAndAddProperty(Element element, ActionStateAction action) {
+	protected void parseAndAddProperty(Element element, Properties properties) {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		if (element.hasAttribute(VALUE_ATTRIBUTE)) {
-			action.setProperty(name, element.getAttribute(VALUE_ATTRIBUTE));
+			properties.put(name, element.getAttribute(VALUE_ATTRIBUTE));
 		}
 		else {
 			List valueElements = DomUtils.getChildElementsByTagName(element, VALUE_ELEMENT);
 			Assert.state(valueElements.size() == 1, "A property value should be specified for property '" + name + "'");
-			action.setProperty(name, DomUtils.getTextValue((Element)valueElements.get(0)));
+			properties.put(name, DomUtils.getTextValue((Element)valueElements.get(0)));
 		}
 	}
 

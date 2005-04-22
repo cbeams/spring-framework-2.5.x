@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow;
 
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -164,5 +165,9 @@ public class EndState extends State {
 	 */
 	protected Event createEndingSubFlowResultEvent() {
 		return new SimpleEvent(this, getId());
+	}
+	
+	protected void createToString(ToStringCreator creator) {
+		creator.append("viewName", viewName);
 	}
 }

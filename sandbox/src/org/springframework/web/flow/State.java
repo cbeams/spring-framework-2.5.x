@@ -144,7 +144,7 @@ public abstract class State {
 	protected abstract ViewDescriptor doEnterState(StateContext context);
 
 	public String toString() {
-		ToStringCreator creator = new ToStringCreator(this).append("id", getId());
+		ToStringCreator creator = new ToStringCreator(this).append("id", getId()).append("flow", flow.getId());
 		createToString(creator);
 		return creator.toString();
 	}

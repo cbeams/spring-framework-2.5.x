@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
@@ -189,4 +190,10 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 			}
 		}
 	}
+	
+	protected void createToString(ToStringCreator creator) {
+		creator.append("subFlow", subFlow.getId()).append("attributeMapper", flowAttributeMapper);
+		super.createToString(creator);
+	}
+
 }

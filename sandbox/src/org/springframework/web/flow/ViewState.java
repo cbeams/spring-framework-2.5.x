@@ -143,7 +143,7 @@ public class ViewState extends TransitionableState {
 	}
 
 	protected void createToString(ToStringCreator creator) {
-		super.createToString(creator);
 		creator.append("viewName", viewName);
+		super.createToString(creator);
 	}
 }

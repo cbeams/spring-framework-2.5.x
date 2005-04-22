@@ -422,8 +422,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action state action
 	 */
 	protected ActionStateAction name(Action action, String name) {
-		ActionStateAction stateAction = new ActionStateAction(action);
-		stateAction.setName(name);
+		Properties properties = new Properties();
+		properties.put(ActionStateAction.NAME_PROPERTY, name);
+		ActionStateAction stateAction = new ActionStateAction(action, properties);
 		return stateAction;
 	}
 
@@ -435,8 +436,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action state action
 	 */
 	protected ActionStateAction method(String methodName, Action action) {
-		ActionStateAction stateAction = new ActionStateAction(action);
-		stateAction.setMethod(methodName);
+		Properties properties = new Properties();
+		properties.put(ActionStateAction.METHOD_PROPERTY, methodName);
+		ActionStateAction stateAction = new ActionStateAction(action, properties);
 		return stateAction;
 	}
 

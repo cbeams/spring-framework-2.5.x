@@ -134,16 +134,6 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Returns the parameter object that provides contextual information about
-	 * this action's use within the calling action state.
-	 * @param context the current request context
-	 * @return the action state action
-	 */
-	protected ActionStateAction getActionStateAction(RequestContext context) {
-		return getActionState(context).getAction(this);
-	}
-
-	/**
 	 * Returns the value of the specified action property in the context of the
 	 * calling action state associated with the current request context.
 	 * @param propertyName the action property name
@@ -151,7 +141,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return the property value, or <code>null</code> if no property was present.
 	 */
 	protected String getProperty(String propertyName, RequestContext context) {
-		return getActionStateAction(context).getProperty(propertyName);
+		return context.getActionStateAction().getProperty(propertyName);
 	}
 
 	/**
@@ -162,7 +152,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return true if the property is present, false if it isn't
 	 */
 	protected boolean containsProperty(String propertyName, RequestContext context) {
-		return getActionStateAction(context).containsProperty(propertyName);
+		return context.getActionStateAction().containsProperty(propertyName);
 	}
 
 	// action pre and post execution logic

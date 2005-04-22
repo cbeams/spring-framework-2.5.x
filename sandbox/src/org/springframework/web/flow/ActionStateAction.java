@@ -52,11 +52,14 @@ public class ActionStateAction {
 
 	/**
 	 * Property storing the name of the method that should handle action
-	 * execution when using a multi-action. A multi-action is an action
-	 * that groups several action execute methods together on a single
-	 * class. The methods follow the following signature:
+	 * execution when using a multi-action. A multi-action is an action that
+	 * groups several action execute methods together on a single class. The
+	 * methods follow the following signature:
+	 * 
 	 * <pre>
-	 * public Event ${method}(RequestContext context)
+	 * 
+	 *  public Event ${method}(RequestContext context)
+	 *  
 	 * </pre>
 	 */
 	public static final String METHOD_PROPERTY = "method";
@@ -80,8 +83,11 @@ public class ActionStateAction {
 	/**
 	 * Creates a new action state action-info object for the specified action.
 	 * No contextual properties are provided.
-	 * @param state the owning state
-	 * @param targetAction the action
+	 * 
+	 * @param state
+	 *            the owning state
+	 * @param targetAction
+	 *            the action
 	 */
 	public ActionStateAction(ActionState state, Action targetAction) {
 		this(state, targetAction, null);
@@ -90,16 +96,23 @@ public class ActionStateAction {
 	/**
 	 * Creates a new action state action-info object for the specified action.
 	 * The map of properties is provided.
-	 * @param state the owning state
-	 * @param targetAction the action
-	 * @param properties the properties describing usage of the action
+	 * 
+	 * @param state
+	 *            the owning state
+	 * @param targetAction
+	 *            the action
+	 * @param properties
+	 *            the properties describing usage of the action
 	 */
 	public ActionStateAction(ActionState state, Action targetAction, Properties properties) {
 		Assert.notNull(state, "The action state is required");
 		this.state = state;
 		setTargetAction(targetAction);
 		if (properties != null) {
-			this.properties = new Properties(properties);
+			this.properties = properties;
+		}
+		else {
+			this.properties = new Properties();
 		}
 	}
 
@@ -108,7 +121,9 @@ public class ActionStateAction {
 	 * No contextual properties are provided. The owning state is not yet
 	 * specified so this object should be associated with a state later on using
 	 * the <code>setState()</code> method.
-	 * @param targetAction the action
+	 * 
+	 * @param targetAction
+	 *            the action
 	 */
 	public ActionStateAction(Action targetAction) {
 		this(targetAction, null);
@@ -119,20 +134,29 @@ public class ActionStateAction {
 	 * The map of properties is provided. The owning state is not yet specified
 	 * so this object should be associated with a state later on using the
 	 * <code>setState()</code> method.
-	 * @param targetAction the action
-	 * @param properties the properties describing usage of the action
+	 * 
+	 * @param targetAction
+	 *            the action
+	 * @param properties
+	 *            the properties describing usage of the action
 	 */
 	public ActionStateAction(Action targetAction, Properties properties) {
 		setTargetAction(targetAction);
 		if (properties != null) {
-			this.properties = new Properties(properties);
+			this.properties = properties;
+		}
+		else {
+			this.properties = new Properties();
 		}
 	}
 
 	/**
 	 * Set the owning action state; this may only be set once and is required.
-	 * @param state the owning action state
-	 * @throws IllegalStateException if the action state has already been set
+	 * 
+	 * @param state
+	 *            the owning action state
+	 * @throws IllegalStateException
+	 *             if the action state has already been set
 	 */
 	protected void setState(ActionState state) throws IllegalStateException {
 		Assert.state(this.state == null, "The action state must not already be set -- it may only be set once");
@@ -149,6 +173,7 @@ public class ActionStateAction {
 
 	/**
 	 * Returns the owning action state
+	 * 
 	 * @return the owning action state
 	 */
 	public ActionState getState() {
@@ -158,45 +183,11 @@ public class ActionStateAction {
 
 	/**
 	 * Returns the wrapped target action.
+	 * 
 	 * @return the action
 	 */
 	public Action getTargetAction() {
 		return targetAction;
-	}
-
-	/**
-	 * Sets the name of a named action. This is optional and can be
-	 * <code>null</code>.
-	 * @param name the action name
-	 */
-	public void setName(String name) {
-		setProperty(NAME_PROPERTY, name);
-	}
-
-	/**
-	 * Sets the short description for the action in the owning action state.
-	 * @param caption the caption
-	 */
-	public void setCaption(String caption) {
-		setProperty(CAPTION_PROPERTY, caption);
-	}
-
-	/**
-	 * Sets the long description for the action in the owning action state.
-	 * @param description the long description
-	 */
-	public void setDescription(String description) {
-		setProperty(DESCRIPTION_PROPERTY, description);
-	}
-
-	/**
-	 * Sets the name of the handler method on the target action instance to
-	 * invoke when this action is executed. Only used by multi-actions.
-	 * @param methodName the method name, with the signature
-	 *        <code>Event ${methodName}(RequestContext context)</code>
-	 */
-	public void setMethod(String methodName) {
-		setProperty(METHOD_PROPERTY, methodName);
 	}
 
 	/**
@@ -234,6 +225,7 @@ public class ActionStateAction {
 	 * Returns the name of the handler method to invoke on the target action
 	 * instance to handle action execution for this state. Only used by
 	 * multi-actions.
+	 * 
 	 * @return the execute method name
 	 */
 	public String getMethod() {
@@ -243,7 +235,9 @@ public class ActionStateAction {
 	/**
 	 * Gets the property of the specified name, returning <code>null</code> if
 	 * not found.
-	 * @param propertyName the property name
+	 * 
+	 * @param propertyName
+	 *            the property name
 	 * @return the property value, or <code>null</code> if not found
 	 */
 	public String getProperty(String propertyName) {
@@ -255,24 +249,14 @@ public class ActionStateAction {
 	 * state.
 	 */
 	protected Properties getProperties() {
-		if (properties == null) {
-			this.properties = new Properties();
-		}
 		return properties;
 	}
 
 	/**
-	 * Sets the property of the specified name to the specified value.
-	 * @param propertyName the property name
-	 * @param value the property value
-	 */
-	public void setProperty(String propertyName, String value) {
-		getProperties().setProperty(propertyName, value);
-	}
-
-	/**
 	 * Does this action state action have the specified property present?
-	 * @param propertyName the property name
+	 * 
+	 * @param propertyName
+	 *            the property name
 	 * @return true if present, false if not present
 	 */
 	public boolean containsProperty(String propertyName) {
@@ -280,7 +264,7 @@ public class ActionStateAction {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("stateId", state.getId()).append("targetAction", targetAction).append(
+		return new ToStringCreator(this).append("targetAction", targetAction).append("stateId", state.getId()).append(
 				"properties", properties).toString();
 	}
 }

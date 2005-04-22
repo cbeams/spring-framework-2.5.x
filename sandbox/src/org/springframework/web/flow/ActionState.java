@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Styler;
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
@@ -274,26 +275,6 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Returns this state's action instance associated with the requesting
-	 * target action instance.
-	 * @param targetAction the requesting target action object
-	 * @return the action
-	 * @throws NoSuchElementException when given action is not an action
-	 *         executed by this state
-	 */
-	public ActionStateAction getAction(Action targetAction) throws NoSuchElementException {
-		Assert.notNull(targetAction, "The action should not be [null]");
-		for (Iterator it = actionExecutors(); it.hasNext();) {
-			ActionStateAction actionInfo = ((ActionExecutor)it.next()).getAction();
-			if (actionInfo.getTargetAction() == targetAction) {
-				return actionInfo;
-			}
-		}
-		throw new NoSuchElementException("Target action '" + targetAction + "' is not an action executed by state '"
-				+ this + "'");
-	}
-
-	/**
 	 * Specialization of State's <code>doEnterState</code> template method
 	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
@@ -386,12 +367,15 @@ public class ActionState extends TransitionableState {
 		 * @param context the flow execution request context
 		 * @return result of execution
 		 */
-		protected Event execute(RequestContext context) {
+		protected Event execute(StateContext context) {
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				return getEvent(action.getTargetAction().execute(context));
+				context.setActionStateAction(action);
+				Event result = decorateResult(action.getTargetAction().execute(context));
+				context.setActionStateAction(null);
+				return result;
 			} catch (Exception e) {
 				throw new ActionExecutionException(action, e);
 			}
@@ -404,8 +388,9 @@ public class ActionState extends TransitionableState {
 		 * <p>
 		 * If the wrapped action is named, the name will be used as a qualifier
 		 * for the event (e.g. "myAction.success").
+		 * @param resultEvent the action result event
 		 */
-		protected Event getEvent(Event resultEvent) {
+		protected Event decorateResult(Event resultEvent) {
 			if (resultEvent == null) {
 				return null;
 			}
@@ -462,4 +447,10 @@ public class ActionState extends TransitionableState {
 			return action.toString();
 		}
 	}
+	
+	protected void createToString(ToStringCreator creator) {
+		creator.append("actions", actionExecutors);
+		super.createToString(creator);
+	}
+
 }

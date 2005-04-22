@@ -181,7 +181,7 @@ public class MultiAction extends AbstractAction {
 	 */
 	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
 		public String getMethodName(RequestContext context, MultiAction action) {
-			ActionStateAction actionStateAction = action.getActionStateAction(context);
+			ActionStateAction actionStateAction = context.getActionStateAction();
 			if (StringUtils.hasText(actionStateAction.getMethod())) {
 				// use specified execute method name
 				return actionStateAction.getMethod();
