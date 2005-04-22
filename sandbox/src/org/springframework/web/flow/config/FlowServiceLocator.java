@@ -19,6 +19,7 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * Service locator interface used by flow builders at configuration time to
@@ -90,5 +91,12 @@ public interface FlowServiceLocator extends FlowLocator {
 	 */
 	public FlowAttributeMapper getFlowAttributeMapper(Class flowAttributeMapperImplementationClass)
 			throws ServiceLookupException;
+
+	/**
+	 * Lookup a transition criteria object using the specified service id.
+	 * @param serviceId the service id
+	 * @return the transition criteria
+	 */
+	public TransitionCriteria getTransitionCriteria(String serviceId) throws ServiceLookupException;
 
 }

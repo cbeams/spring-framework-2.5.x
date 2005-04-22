@@ -28,6 +28,7 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * A flow service locator that uses a Spring bean factory to lookup flow-related
@@ -224,6 +225,14 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 					flowModelMapperImplementationClass);
 		} catch (BeansException e) {
 			throw new NoSuchFlowAttributeMapperException(flowModelMapperImplementationClass, e);
+		}
+	}
+
+	public TransitionCriteria getTransitionCriteria(String serviceId) {
+		try {
+			return (TransitionCriteria)getBeanFactory().getBean(serviceId, TransitionCriteria.class);
+		} catch (BeansException e) {
+			throw new NoSuchTransitionCriteriaException(serviceId, e);
 		}
 	}
 }

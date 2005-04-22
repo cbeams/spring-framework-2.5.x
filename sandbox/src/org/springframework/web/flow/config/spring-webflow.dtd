@@ -166,31 +166,11 @@
 <!ATTLIST precondition id ID #REQUIRED>
 
 <!--
-	Identifier of the TransitionCriteria implmentation acting as a precondition.
-	The implementation is exported in the configured registry, typically a Spring Bean
+	Identifier of the TransitionCriteria or TransitionCriteriaFactoryBean implementation acting
+	as a precondition.  The implementation is exported in the configured registry, typically a Spring Bean
 	Factory. This is similar to the <ref bean="myBean"/> notation of the Spring beans DTD.
 -->
 <!ATTLIST precondition bean CDATA #IMPLIED>
-
-<!--
-	Fully qualified class of the TransitionCriteria implementation acting as the 
-	transitional precondition. An instance of the class will be instantiated and possibly autowired
-	depending on the value of the autowire attribute.
--->
-<!ATTLIST precondition class CDATA #IMPLIED>
-	
-<!--
-	Dependency (collaborator) autowiring options for use when instantiating the transition precondition
-	implementation with the class attribute.
--->
-<!ATTLIST precondition autowire (no | byName | byType | constructor | autodetect | default) "default">
-
-<!--
-	Fully qualified implementation class of a TransitionCriteria exported
-	in the configured registry. For this "by type" mapper lookup to work, there must
-	be exactly one implementation exported of that type.
--->
-<!ATTLIST precondition classref CDATA #IMPLIED>
 
 <!--
 	Defines a sub flow state: a state that spawns a sub flow when entered. When the

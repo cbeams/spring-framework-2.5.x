@@ -41,6 +41,7 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -152,6 +153,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String EVENT_ATTRIBUTE = "on";
 
 	private static final String TO_ATTRIBUTE = "to";
+	
+	private static final String PRECONDITION = "precondition";
 
 	private static final String PROPERTY_ELEMENT = "property";
 
@@ -469,6 +472,18 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected Transition parseTransition(Element element) {
 		String event = element.getAttribute(EVENT_ATTRIBUTE);
 		String to = element.getAttribute(TO_ATTRIBUTE);
+		String preconditionId = element.getAttribute(PRECONDITION);
+		TransitionCriteria precondition = null;
+		if (StringUtils.hasText(preconditionId)) {
+			NodeList nodeList = element.getOwnerDocument().getElementsByTagName(PRECONDITION);
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Node node = nodeList.item(i);
+				if (node instanceof Element) {
+					Element ele = (Element)node;
+					precondition = (TransitionCriteria)parseFlowService(element, TransitionCriteria.class);
+				}
+			}
+		}
 		return new Transition(getTransitionCriteriaCreator().create(event), to);
 	}
 
@@ -503,6 +518,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			}
 			else if (FlowAttributeMapper.class.equals(serviceType)) {
 				return getFlowServiceLocator().getFlowAttributeMapper(serviceId);
+			} else if (TransitionCriteria.class.equals(serviceType)) {
+				return getFlowServiceLocator().getTransitionCriteria(serviceId);
 			}
 		}
 		else {
