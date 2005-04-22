@@ -28,8 +28,10 @@ import javax.management.MBeanParameterInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.jmx.support.JmxUtils;
+import org.springframework.util.Assert;
 
 /**
  * Extends the <code>AbstractMBeanInfoAssembler</code> to add a basic
@@ -60,6 +62,14 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	protected static final String FIELD_SET_METHOD = "setMethod";
 
+	protected static final String FIELD_ROLE = "role";
+
+	protected static final String ROLE_GETTER = "getter";
+
+	protected static final String ROLE_SETTER = "setter";
+
+	protected static final String ROLE_OPERATION = "operation";
+
 	protected static final String FIELD_VISIBILITY = "visibility";
 
 	/**
@@ -68,13 +78,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	protected static final Integer ATTRIBUTE_OPERATION_VISIBILITY = new Integer(4);
 
-	protected static final String FIELD_ROLE = "role";
-
-	protected static final String ROLE_GETTER = "getter";
-
-	protected static final String ROLE_SETTER = "setter";
-
-	protected static final String ROLE_OPERATION = "operation";
+	protected static final String FIELD_CLASS = "class";
 
 	protected static final String FIELD_LOG = "log";
 
@@ -104,6 +108,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Indicates whether or not strict casing is being used for attributes.
 	 */
 	private boolean useStrictCasing = true;
+
+	private boolean exposeClassDescriptor = false;
 
 
 	/**
@@ -151,6 +157,33 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	protected boolean isUseStrictCasing() {
 		return useStrictCasing;
+	}
+
+	/**
+	 * Set whether to expose the JMX descriptor field "class" for managed operations.
+	 * Default is false, letting the JMX implementation determine the actual class
+	 * through reflection.
+	 * <p>Set this property to <code>true</code> for JMX implementations that
+	 * require the "class" field to be specified, for example WebLogic's.
+	 * In that case, Spring will expose the target class name there, in case of
+	 * a plain bean instance or a CGLIB proxy. When encountering a JDK dynamic
+	 * proxy, the <b>first</b> interface implemented by the proxy will be specified.
+	 * <p><b>WARNING:</b> Review your proxy definitions when exposing a JDK dynamic
+	 * proxy through JMX, in particular with this property turned to <code>true</code>:
+	 * the specified interface list should start with your management interface in
+	 * this case, with all other interfaces following. In general, consider exposing
+	 * your target bean directly or a CGLIB proxy for it instead.
+	 * @see #getClassForDescriptor(Object)
+	 */
+	public void setExposeClassDescriptor(boolean exposeClassDescriptor) {
+		this.exposeClassDescriptor = exposeClassDescriptor;
+	}
+
+	/**
+	 * Return whether to expose the JMX descriptor field "class" for managed operations.
+	 */
+	protected boolean isExposeClassDescriptor() {
+		return exposeClassDescriptor;
 	}
 
 
@@ -246,6 +279,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 						desc.setField(FIELD_ROLE, ROLE_SETTER);
 					}
 					desc.setField(FIELD_VISIBILITY, ATTRIBUTE_OPERATION_VISIBILITY);
+					if (isExposeClassDescriptor()) {
+						desc.setField(FIELD_CLASS, getClassForDescriptor(managedBean).getName());
+					}
 					info.setDescriptor(desc);
 				}
 			}
@@ -253,6 +289,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 				info = createModelMBeanOperationInfo(method, method.getName(), beanKey);
 				Descriptor desc = info.getDescriptor();
 				desc.setField(FIELD_ROLE, ROLE_OPERATION);
+				if (isExposeClassDescriptor()) {
+					desc.setField(FIELD_CLASS, getClassForDescriptor(managedBean).getName());
+				}
 				populateOperationDescriptor(desc, method, beanKey);
 				info.setDescriptor(desc);
 			}
@@ -286,6 +325,24 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 				method.getReturnType().getName(),
 				MBeanOperationInfo.UNKNOWN);
 		}
+	}
+
+	/**
+	 * Return the class to be used for the JMX descriptor field "class".
+	 * Only applied when the "exposeClassDescriptor" property is "true".
+	 * <p>Default implementation returns the first implemented interface
+	 * for a JDK proxy, and the target class else.
+	 * @param managedBean the bean instance (might be an AOP proxy)
+	 * @return the class to expose in the descriptor field "class"
+	 * @see #setExposeClassDescriptor
+	 */
+	protected Class getClassForDescriptor(Object managedBean) {
+		if (AopUtils.isJdkDynamicProxy(managedBean)) {
+			Class[] proxyInterfaces = managedBean.getClass().getInterfaces();
+			Assert.notEmpty(proxyInterfaces, "JDK proxy must implement at least 1 interface");
+			return proxyInterfaces[0];
+		}
+		return getClassToExpose(managedBean);
 	}
 
 
