@@ -36,6 +36,7 @@ import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
 
 /**
@@ -184,6 +185,13 @@ public class XmlFlowBuilderTests extends TestCase {
 				};
 			}
 			throw new NoSuchFlowAttributeMapperException(flowModelMapperId, null);
+		}
+		
+		public TransitionCriteria getTransitionCriteria(String serviceId) throws ServiceLookupException {
+			if ("precondition1".equals(serviceId)) {
+				return new SimpleTransitionCriteriaCreator().create("submit");
+			}
+			throw new NoSuchTransitionCriteriaException(serviceId, null);
 		}
 	};
 
