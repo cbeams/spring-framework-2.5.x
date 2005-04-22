@@ -16,12 +16,16 @@
 
 package org.springframework.aop.framework;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 
 /**
  * 
@@ -86,6 +90,44 @@ public class AopProxyUtilsTests extends TestCase {
 		assertFalse(l.contains(Advised.class));
 		assertTrue(l.contains(ITestBean.class));
 		assertTrue(l.contains(Comparable.class));
+	}
+
+	public void testProxiedUserInterfacesWithSingleInterface() {
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTarget(new TestBean());
+		pf.addInterface(ITestBean.class);
+		Object proxy = pf.getProxy();
+		Class[] userInterfaces = AopProxyUtils.proxiedUserInterfaces(proxy);
+		assertEquals(1, userInterfaces.length);
+		assertEquals(ITestBean.class, userInterfaces[0]);
+	}
+
+	public void testProxiedUserInterfacesWithMultipleInterfaces() {
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTarget(new TestBean());
+		pf.addInterface(ITestBean.class);
+		pf.addInterface(Comparable.class);
+		Object proxy = pf.getProxy();
+		Class[] userInterfaces = AopProxyUtils.proxiedUserInterfaces(proxy);
+		assertEquals(2, userInterfaces.length);
+		assertEquals(ITestBean.class, userInterfaces[0]);
+		assertEquals(Comparable.class, userInterfaces[1]);
+	}
+
+	public void testProxiedUserInterfacesWithNoInterface() {
+		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[0],
+				new InvocationHandler() {
+					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+						return null;
+					}
+				});
+		try {
+			Class[] userInterfaces = AopProxyUtils.proxiedUserInterfaces(proxy);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 }

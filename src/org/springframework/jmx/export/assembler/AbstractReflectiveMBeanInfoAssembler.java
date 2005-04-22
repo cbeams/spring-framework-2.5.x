@@ -28,11 +28,10 @@ import javax.management.MBeanParameterInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeanUtils;
 import org.springframework.jmx.support.JmxUtils;
-import org.springframework.util.Assert;
 
 /**
  * Extends the <code>AbstractMBeanInfoAssembler</code> to add a basic
@@ -336,18 +335,12 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @param managedBean the bean instance (might be an AOP proxy)
 	 * @return the class to expose in the descriptor field "class"
 	 * @see #setExposeClassDescriptor
+	 * @see #getClassToExpose(Class)
+	 * @see org.springframework.aop.framework.AopProxyUtils#proxiedUserInterfaces(Object)
 	 */
 	protected Class getClassForDescriptor(Object managedBean) {
 		if (AopUtils.isJdkDynamicProxy(managedBean)) {
-			Class[] proxyInterfaces = managedBean.getClass().getInterfaces();
-
-			if(managedBean instanceof Advised) {
-				Assert.isTrue((proxyInterfaces.length > 1), "JDK proxy must implement at least 1 interface aside from Advised");
-				return proxyInterfaces[1];
-			} else {
-			 Assert.notEmpty(proxyInterfaces, "JDK proxy must implement at least 1 interface aside from Advised");
-				return proxyInterfaces[0];
-			}
+			return AopProxyUtils.proxiedUserInterfaces(managedBean)[0];
 		}
 		return getClassToExpose(managedBean);
 	}

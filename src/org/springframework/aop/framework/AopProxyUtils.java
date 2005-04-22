@@ -18,6 +18,8 @@ package org.springframework.aop.framework;
 
 import java.util.Arrays;
 
+import org.springframework.util.Assert;
+
 /**
  * Miscellaneous utilities for AOP proxy implementations.
  * @author Rod Johnson
@@ -40,6 +42,30 @@ public abstract class AopProxyUtils {
 			System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 1, specifiedInterfaces.length);
 		}
 		return proxiedInterfaces;
+	}
+
+	/**
+	 * Extract the user-specified interfaces that the given proxy implements,
+	 * i.e. all non-Advised interfaces that the proxy implements.
+	 * @param proxy the proxy to analyze (usually a JDK dynamic proxy)
+	 * @return all user-specified interfaces that the proxy implements,
+	 * in the original order (never null or empty)
+	 * @see Advised
+	 */
+	public static Class[] proxiedUserInterfaces(Object proxy) {
+		Class[] proxyInterfaces = proxy.getClass().getInterfaces();
+		if (proxy instanceof Advised) {
+			Assert.isTrue((proxyInterfaces.length > 1),
+					"JDK proxy must implement at least 1 interface aside from Advised");
+			Class[] beanInterfaces = new Class[proxyInterfaces.length - 1];
+			System.arraycopy(proxyInterfaces, 1, beanInterfaces, 0, beanInterfaces.length);
+			return beanInterfaces;
+		}
+		else {
+			Assert.notEmpty(proxyInterfaces,
+					"JDK proxy must implement at least 1 interface aside from Advised");
+			return proxyInterfaces;
+		}
 	}
 
 	/**
