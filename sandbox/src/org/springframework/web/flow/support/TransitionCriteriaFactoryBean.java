@@ -22,7 +22,10 @@ import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.config.TransitionCriteriaCreator;
 
 /**
- * A factory bean that produces Flow state transition criteria when requested.
+ * A factory bean that produces Flow state transition criteria when requested by
+ * the Spring Bean Factory.  The criteria construction process is encapsulated to clients
+ * of this bean - what they get is a fully configured TransitionCriteria instance ready
+ * for use.
  * 
  * @author Keith Donald
  */

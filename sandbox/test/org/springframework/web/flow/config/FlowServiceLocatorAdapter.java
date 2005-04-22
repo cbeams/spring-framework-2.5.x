@@ -19,6 +19,7 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * Simple helper adapter for the flow service locator interface. For testing.
@@ -62,6 +63,10 @@ public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 
 	public FlowAttributeMapper getFlowAttributeMapper(Class flowModelMapperImplementationClass)
 			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public TransitionCriteria getTransitionCriteria(String serviceId) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
 }
