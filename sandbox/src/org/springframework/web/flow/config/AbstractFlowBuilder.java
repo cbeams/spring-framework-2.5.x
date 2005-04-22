@@ -634,6 +634,22 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
+	 * <li>On the occurence of an event that matches the criteria defined by
+	 * ${criteria}, transition to state ${stateId} if and only if the ${precondition}
+	 * is met.
+	 * </ul>
+	 * @param criteria the transition criteria
+	 * @param stateId the state Id
+	 * @param precondition the precondition
+	 * @return the transition (event matching criteria + precondition->stateId)
+	 */
+	protected Transition on(TransitionCriteria criteria, String stateId, TransitionCriteria precondition) {
+		return new Transition(criteria, stateId, precondition);
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
 	 * <li>On the occurence of event ${eventId}, transition to state
 	 * ${stateId}.
 	 * </ul>
@@ -648,16 +664,17 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
-	 * <li>On the occurence of event ${eventId} returned by the action with
-	 * result qualifier ${resultQualifier}, transition to state ${stateId}.
+	 * <li>On the occurence of an event that matches the criteria defined by
+	 * ${criteria}, transition to state ${stateId} if and only if the ${precondition}
+	 * is met.
 	 * </ul>
 	 * @param eventId the event id
-	 * @param resultQualifier the action result event id qualifier
 	 * @param stateId the state Id
-	 * @return the transition
+	 * @param precondition the precondition
+	 * @return the transition (eventId+precondition->stateId)
 	 */
-	protected Transition on(String eventId, String resultQualifier, String stateId) {
-		return new Transition(getTransitionCriteriaCreator().create(join(resultQualifier, eventId)), stateId);
+	protected Transition on(String eventId, String stateId, TransitionCriteria precondition) {
+		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId);
 	}
 
 	/**
