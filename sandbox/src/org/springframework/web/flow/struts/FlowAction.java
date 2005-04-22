@@ -138,6 +138,9 @@ public class FlowAction extends TemplateAction {
 
 	private FlowLocator flowLocator;
 
+	private StrutsFlowExecutionManager flowExecutionManager;
+	
+	
 	public void setServlet(ActionServlet actionServlet) {
 		super.setServlet(actionServlet);
 		this.flowLocator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
@@ -151,28 +154,14 @@ public class FlowAction extends TemplateAction {
 		return flowLocator;
 	}
 
-	/**
-	 * Get the flow id from given action mapping, which should be of type
-	 * <code>FlowActionMapping</code>.
-	 */
-	protected String getFlowId(ActionMapping mapping) {
-		Assert.isInstanceOf(FlowActionMapping.class, mapping);
-		return ((FlowActionMapping)mapping).getFlowId();
-	}
-
-	/**
-	 * Get the flow execution storage from given action mapping, which should be
-	 * of type <code>FlowActionMapping</code>.
-	 */
-	protected FlowExecutionStorage getStorage(ActionMapping mapping) {
-		Assert.isInstanceOf(FlowActionMapping.class, mapping);
-		String storage = ((FlowActionMapping)mapping).getFlowId();
-		return (FlowExecutionStorage)new TextToFlowExecutionStorageConverter().convert(storage);
-	}
-
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		StrutsFlowExecutionManager flowExecutionManager = createFlowExecutionManager(mapping);
+		// is it better to sync here, or just create each time?
+		synchronized (this) {
+			if (flowExecutionManager == null) {
+				this.flowExecutionManager = createFlowExecutionManager(mapping);
+			}
+		}
 		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
 		ViewDescriptor viewDescriptor = flowExecutionManager
 				.handle(mapping, form, request, response, actionFormAdapter);
@@ -189,6 +178,7 @@ public class FlowAction extends TemplateAction {
 		if (StringUtils.hasText(flowId)) {
 			manager.setFlow(getFlowLocator().getFlow(flowId));
 		}
+		manager.setFlowExecutionStorage(getStorage(mapping));
 		return manager;
 	}
 
@@ -229,6 +219,25 @@ public class FlowAction extends TemplateAction {
 				HttpServletResponse response, FlowExecutionListener listener) throws Exception {
 			return handle(new StrutsEvent(mapping, form, request, response), listener);
 		}
+	}
+
+	/**
+	 * Get the flow id from given action mapping, which should be of type
+	 * <code>FlowActionMapping</code>.
+	 */
+	protected String getFlowId(ActionMapping mapping) {
+		Assert.isInstanceOf(FlowActionMapping.class, mapping);
+		return ((FlowActionMapping)mapping).getFlowId();
+	}
+
+	/**
+	 * Get the flow execution storage from given action mapping, which should be
+	 * of type <code>FlowActionMapping</code>.
+	 */
+	protected FlowExecutionStorage getStorage(ActionMapping mapping) {
+		Assert.isInstanceOf(FlowActionMapping.class, mapping);
+		String storage = ((FlowActionMapping)mapping).getFlowId();
+		return (FlowExecutionStorage)new TextToFlowExecutionStorageConverter().convert(storage);
 	}
 
 	/**
