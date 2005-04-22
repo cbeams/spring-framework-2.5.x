@@ -17,6 +17,7 @@ package org.springframework.mock.web.flow;
 
 import java.util.Map;
 
+import org.springframework.binding.AttributeSource;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.Event;
@@ -57,7 +58,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 
 	private Event lastEvent;
 
-	private ActionStateAction actionStateAction;
+	private AttributeSource actionExecutionAttributes;
 
 	private Scope requestScope = new Scope(ScopeType.REQUEST);
 
@@ -154,8 +155,8 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	 * @param action
 	 *            the action state action
 	 */
-	public void setActionStateAction(ActionStateAction action) {
-		this.actionStateAction = action;
+	public void setActionExecutionAttributes(AttributeSource attributes) {
+		this.actionExecutionAttributes = attributes;
 	}
 
 	public Flow getRootFlow() {
@@ -182,8 +183,8 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		return lastEvent;
 	}
 
-	public ActionStateAction getActionStateAction() {
-		return actionStateAction;
+	public AttributeSource getActionExecutionAttributes() {
+		return actionExecutionAttributes;
 	}
 
 	public Scope getFlowScope() {
