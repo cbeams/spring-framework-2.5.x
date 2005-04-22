@@ -28,6 +28,7 @@ import org.springframework.web.flow.TransitionCriteria;
  * FormAction. This precondition will return <code>true</code> if binding and
  * validation is successful (no errors), <code>false</code> otherwise.
  * 
+ * @TODO - support action execution attributes...
  * @author Keith Donald
  */
 public class BindAndValidateTransitionPrecondition implements TransitionCriteria {
