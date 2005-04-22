@@ -24,7 +24,7 @@ import org.springframework.web.flow.TransitionCriteria;
  * <p>
  * The factory is completely free in deciding how the result objects are
  * created: e.g. by parsing an expression, looking up an object in a bean
- * factory, ...
+ * factory, etc.
  * 
  * @see org.springframework.web.flow.TransitionCriteria
  * 
@@ -41,5 +41,4 @@ public interface TransitionCriteriaCreator {
 	 * @return the created transition criteria object
 	 */
 	public TransitionCriteria create(String encodedCriteria);
-
 }
