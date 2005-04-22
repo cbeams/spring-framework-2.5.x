@@ -58,7 +58,11 @@ public class ActionStateAction {
 	 * 
 	 * <pre>
 	 * 
-	 *  public Event ${method}(RequestContext context)
+	 *  
+	 *   
+	 *    public Event ${method}(RequestContext context)
+	 *    
+	 *   
 	 *  
 	 * </pre>
 	 */
@@ -264,7 +268,6 @@ public class ActionStateAction {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("targetAction", targetAction).append("stateId", state.getId()).append(
-				"properties", properties).toString();
+		return new ToStringCreator(this).append("action", targetAction).append("properties", properties).toString();
 	}
 }

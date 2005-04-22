@@ -17,6 +17,7 @@ package org.springframework.web.flow;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -91,10 +92,12 @@ public class StateTests extends TestCase {
 		ActionStateAction[] actions = new ActionStateAction[4];
 		actions[0] = new ActionStateAction(new ExecutionCounterAction("not mapped result"));
 		actions[1] = new ActionStateAction(new ExecutionCounterAction(null));
-		actions[2] = new ActionStateAction(new ExecutionCounterAction(""));
-		actions[2].setName("action3");
-		actions[3] = new ActionStateAction(new ExecutionCounterAction("success"));
-		actions[3].setName("action4");
+		Properties properties = new Properties();
+		properties.put("name", "action3");
+		actions[2] = new ActionStateAction(new ExecutionCounterAction(""), properties);
+		properties = new Properties();
+		properties.put("name", "action4");
+		actions[3] = new ActionStateAction(new ExecutionCounterAction("success"), properties);
 		ActionState state = new ActionState(flow, "actionState", actions, new Transition(on("action4.success"), "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
