@@ -57,13 +57,7 @@ public class ActionStateAction {
 	 * methods follow the following signature:
 	 * 
 	 * <pre>
-	 * 
-	 *  
-	 *   
 	 *    public Event ${method}(RequestContext context)
-	 *    
-	 *   
-	 *  
 	 * </pre>
 	 */
 	public static final String METHOD_PROPERTY = "method";
