@@ -29,6 +29,7 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeanUtils;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.util.Assert;
@@ -339,8 +340,14 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	protected Class getClassForDescriptor(Object managedBean) {
 		if (AopUtils.isJdkDynamicProxy(managedBean)) {
 			Class[] proxyInterfaces = managedBean.getClass().getInterfaces();
-			Assert.notEmpty(proxyInterfaces, "JDK proxy must implement at least 1 interface");
-			return proxyInterfaces[0];
+
+			if(managedBean instanceof Advised) {
+				Assert.isTrue((proxyInterfaces.length > 1), "JDK proxy must implement at least 1 interface aside from Advised");
+				return proxyInterfaces[1];
+			} else {
+			 Assert.notEmpty(proxyInterfaces, "JDK proxy must implement at least 1 interface aside from Advised");
+				return proxyInterfaces[0];
+			}
 		}
 		return getClassToExpose(managedBean);
 	}
