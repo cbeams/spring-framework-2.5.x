@@ -22,7 +22,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 
 /**
- * Miscellaneous utility methos for number conversion and parsing.
+ * Miscellaneous utility methods for number conversion and parsing.
  * Mainly for internal use within the framework; consider Jakarta's
  * Commons Lang for a more comprehensive suite of string utilities.
  * @author Juergen Hoeller
@@ -49,6 +49,7 @@ public abstract class NumberUtils {
 	 */
 	public static Number convertNumberToTargetClass(Number number, Class targetClass)
 			throws IllegalArgumentException {
+
 		if (targetClass.isInstance(number)) {
 			return number;
 		}
@@ -151,7 +152,7 @@ public abstract class NumberUtils {
 	public static Number parseNumber(String text, Class targetClass, NumberFormat numberFormat) {
 		try {
 			Number number = numberFormat.parse(text.trim());
-			return NumberUtils.convertNumberToTargetClass(number, targetClass);
+			return convertNumberToTargetClass(number, targetClass);
 		}
 		catch (ParseException ex) {
 			throw new IllegalArgumentException(ex.getMessage());
