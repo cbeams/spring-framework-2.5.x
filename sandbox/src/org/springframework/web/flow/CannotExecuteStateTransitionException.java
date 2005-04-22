@@ -63,7 +63,18 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	public CannotExecuteStateTransitionException(Transition transition, Throwable cause) {
 		super(transition.getSourceState().getFlow(), "Could not execute transition from state '"
 				+ transition.getSourceState().getId() + "' to state '" + transition.getTargetStateId() + "' in flow '"
-				+ transition.getSourceState().getFlow() + "'", cause);
+				+ transition.getSourceState().getFlow().getId() + "'", cause);
+		this.sourceState = transition.getSourceState();
+		this.transition = transition;
+	}
+
+	/**
+	 * Create a new state transition execution exception.
+	 * @param transition the transition that was executing
+	 * @param cause the exception message
+	 */
+	protected CannotExecuteStateTransitionException(Transition transition, String message) {
+		super(transition.getSourceState().getFlow(), message);
 		this.sourceState = transition.getSourceState();
 		this.transition = transition;
 	}

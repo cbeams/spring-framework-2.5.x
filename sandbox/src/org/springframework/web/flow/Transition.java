@@ -29,7 +29,6 @@ import org.springframework.util.Assert;
  * @see org.springframework.web.flow.TransitionableState
  * @see org.springframework.web.flow.Flow
  * @see org.springframework.web.flow.TransitionCriteria
- * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -43,11 +42,16 @@ public class Transition {
 	private TransitionableState sourceState;
 
 	/**
-	 * The criteria that determine whether or not this transition should
-	 * execute. These criteria are said to <i>guard</i> execution of the
-	 * transition.
+	 * The criteria that determine whether or not this transition matches as
+	 * eligible for execution.
 	 */
 	private TransitionCriteria criteria;
+
+	/**
+	 * The criteria that determine whether or not this transition, once matched,
+	 * meets all execution preconditions.
+	 */
+	private TransitionCriteria precondition;
 
 	/**
 	 * The target state that this transition should transition to when executed.
@@ -62,10 +66,13 @@ public class Transition {
 
 	/**
 	 * Create a new transition.
-	 * @param criteria strategy object used to determine if this transition
-	 *        should be executed given contextual information
-	 * @param targetStateId the id of the state to transition to when this
-	 *        transition is executed
+	 * 
+	 * @param criteria
+	 *            strategy object used to determine if this transition should be
+	 *            matched eligible for execution
+	 * @param targetStateId
+	 *            the id of the state to transition to when this transition is
+	 *            executed
 	 */
 	public Transition(TransitionCriteria criteria, String targetStateId) {
 		Assert.notNull(criteria, "The transition criteria property is required");
@@ -75,13 +82,37 @@ public class Transition {
 	}
 
 	/**
+	 * Create a new transition.
+	 * 
+	 * @param criteria
+	 *            strategy object used to determine if this transition should be
+	 *            matched eligible for execution
+	 * @param targetStateId
+	 *            the id of the state to transition to when this transition is
+	 *            executed
+	 * @param precondition
+	 *            strategy object used to determine if this transition, once
+	 *            matched for execution, is allowed to execute.
+	 */
+	public Transition(TransitionCriteria criteria, String targetStateId, TransitionCriteria precondition) {
+		Assert.notNull(criteria, "The transition criteria property is required");
+		Assert.notNull(targetStateId, "The targetStateId property is required");
+		this.criteria = criteria;
+		this.targetStateId = targetStateId;
+		this.precondition = precondition;
+	}
+
+	/**
 	 * Returns the owning source (<i>from</i>) state of this transition.
+	 * 
 	 * @return the source state
-	 * @throws IllegalStateException if the source state has not been set
+	 * @throws IllegalStateException
+	 *             if the source state has not been set
 	 */
 	public TransitionableState getSourceState() throws IllegalStateException {
-		Assert.state(sourceState != null,
-				"The source state is not yet been set -- this transition must be added to exactly one owning state definition!");
+		Assert
+				.state(sourceState != null,
+						"The source state is not yet been set -- this transition must be added to exactly one owning state definition!");
 		return sourceState;
 	}
 
@@ -94,6 +125,7 @@ public class Transition {
 
 	/**
 	 * Returns the id of the target (<i>to</i>) state of this transition.
+	 * 
 	 * @return the target state id
 	 */
 	public String getTargetStateId() {
@@ -102,8 +134,10 @@ public class Transition {
 
 	/**
 	 * Returns the target (<i>to</i>) state of this transition.
+	 * 
 	 * @return the target state
-	 * @throws NoSuchFlowStateException when the target state cannot be found
+	 * @throws NoSuchFlowStateException
+	 *             when the target state cannot be found
 	 */
 	public State getTargetState() throws NoSuchFlowStateException {
 		synchronized (this) {
@@ -121,6 +155,7 @@ public class Transition {
 	/**
 	 * Returns the strategy used to determine if this transition should execute
 	 * given an execution context.
+	 * 
 	 * @return the constraint
 	 */
 	public TransitionCriteria getCriteria() {
@@ -130,7 +165,9 @@ public class Transition {
 	/**
 	 * Checks if this transition should be executed given the state of the
 	 * provided flow execution request context.
-	 * @param context the flow execution request context
+	 * 
+	 * @param context
+	 *            the flow execution request context
 	 * @return true if this transition should execute, false otherwise
 	 */
 	public boolean shouldExecute(RequestContext context) {
@@ -139,11 +176,13 @@ public class Transition {
 
 	/**
 	 * Execute this state transition.
-	 * @param context the flow execution request context
+	 * 
+	 * @param context
+	 *            the flow execution request context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the transition execution
-	 * @throws CannotExecuteStateTransitionException when this transition cannot
-	 *         be executed
+	 * @throws CannotExecuteStateTransitionException
+	 *             when this transition cannot be executed
 	 */
 	protected ViewDescriptor execute(StateContext context) throws CannotExecuteStateTransitionException {
 		State state = null;
@@ -152,6 +191,9 @@ public class Transition {
 		}
 		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, e);
+		}
+		if (this.precondition != null && !this.precondition.test(context)) {
+			throw new TransitionNotAllowedException(precondition, this);
 		}
 		// enter the target state (note: any exceptions are propagated)
 		ViewDescriptor viewDescriptor = state.enter(context);

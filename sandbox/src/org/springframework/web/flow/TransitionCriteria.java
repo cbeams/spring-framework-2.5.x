@@ -35,5 +35,4 @@ public interface TransitionCriteria {
 	 * @return true if the transition should fire, false otherwise
 	 */
 	public boolean test(RequestContext context);
-
 }
