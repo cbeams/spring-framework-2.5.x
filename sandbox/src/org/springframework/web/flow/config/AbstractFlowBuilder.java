@@ -678,6 +678,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
+	 * Retrieve the <code>TransitionCriteria</code> to be used as a transition precondition with the
+	 * specified id
+	 * @param serviceId the id of the transition criteria implementation in the registry
+	 * @return the transition precondition
+	 */
+	protected TransitionCriteria precondition(String serviceId) {
+		return getFlowServiceLocator().getTransitionCriteria(serviceId);
+	}
+	/**
 	 * Creates a transition stating:
 	 * <ul>
 	 * <li>On the occurence of any event (*), transition to state ${stateId}.
