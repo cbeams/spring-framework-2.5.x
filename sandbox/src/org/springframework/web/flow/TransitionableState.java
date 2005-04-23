@@ -174,7 +174,8 @@ public abstract class TransitionableState extends State {
 	 * @return the view descriptor
 	 * @throws CannotExcuteStateTransitionException could not transition on receipt of the last event
 	 */
-	protected ViewDescriptor onEvent(StateContext context) throws CannotExecuteStateTransitionException {
+	protected ViewDescriptor onEvent(Event event, StateContext context) throws CannotExecuteStateTransitionException {
+		context.setLastEvent(event);
 		return transitionFor(context).execute(context);
 	}
 	

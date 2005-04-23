@@ -272,7 +272,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		// execute the event
 		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted();
-		ViewDescriptor viewDescriptor = state.onEvent(context);
+		ViewDescriptor viewDescriptor = state.onEvent(event, context);
 		context.fireRequestProcessed();
 		return viewDescriptor;
 	}

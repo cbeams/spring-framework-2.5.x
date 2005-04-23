@@ -151,11 +151,7 @@ public class EndState extends State {
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
 			// actually end the subflow
 			context.endActiveFlowSession();
-			// treat this end state id as a transitional event in the
-			// resuming state, this is so cool!
-			context.setLastEvent(createEndingSubFlowResultEvent());
-			Transition toNextState = ((TransitionableState)resumingState).transitionFor(context);
-			return toNextState.execute(context);
+			return ((TransitionableState)resumingState).onEvent(createEndingSubFlowResultEvent(), context);
 		}
 	}
 
@@ -164,6 +160,8 @@ public class EndState extends State {
 	 * parameters. Subclasses may override.
 	 */
 	protected Event createEndingSubFlowResultEvent() {
+		// treat this end state id as a transitional event in the
+		// resuming state, this is so cool!
 		return new SimpleEvent(this, getId());
 	}
 	

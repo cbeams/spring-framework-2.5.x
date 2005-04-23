@@ -297,14 +297,12 @@ public class ActionState extends TransitionableState {
 		while (it.hasNext()) {
 			ActionExecutor actionExecutor = (ActionExecutor)it.next();
 			Event event = actionExecutor.execute(context);
+			executionCount++;
 			if (event != null) {
 				eventIds[executionCount] = event.getId();
-				context.setLastEvent(event);
-				Transition toNextState = getTransition(context);
-				if (toNextState != null) {
-					return toNextState.execute(context);
-				}
-				else {
+				try {
+					return onEvent(event, context);
+				} catch (NoMatchingTransitionException e) {
 					if (logger.isDebugEnabled()) {
 						logger
 								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
@@ -316,7 +314,6 @@ public class ActionState extends TransitionableState {
 			else {
 				eventIds[executionCount] = null;
 			}
-			executionCount++;
 		}
 		if (executionCount > 0) {
 			throw new NoMatchingTransitionException(this, context, "No transition was matched to the event(s) "
