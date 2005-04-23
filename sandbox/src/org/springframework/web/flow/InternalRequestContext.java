@@ -99,7 +99,12 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	public Event getLastEvent() {
-		return lastEvent;
+		if (lastEvent != null) {
+			return lastEvent;
+		}
+		else {
+			return originatingEvent;
+		}
 	}
 
 	public AttributeSource getActionExecutionAttributes() {
