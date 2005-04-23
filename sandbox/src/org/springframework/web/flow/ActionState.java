@@ -299,7 +299,7 @@ public class ActionState extends TransitionableState {
 			Event event = actionExecutor.execute(context);
 			executionCount++;
 			if (event != null) {
-				eventIds[executionCount] = event.getId();
+				eventIds[executionCount - 1] = event.getId();
 				try {
 					return onEvent(event, context);
 				} catch (NoMatchingTransitionException e) {

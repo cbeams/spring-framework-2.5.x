@@ -175,14 +175,18 @@ public class Transition {
 	}
 
 	/**
-	 * Execute this state transition.
+	 * Execute this state transition. If this transition is not permitted due
+	 * to the configured precondition failing, a
+	 * <code>TransitionNotAllowedException</code> is thrown.
 	 * 
 	 * @param context
 	 *            the flow execution request context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the transition execution
 	 * @throws CannotExecuteStateTransitionException
-	 *             when this transition cannot be executed
+	 *             when this transition cannot be executed - either the target
+	 *             state is invalid or transition was disallowed because the
+	 *             precondition did not hold true.
 	 */
 	protected ViewDescriptor execute(StateContext context) throws CannotExecuteStateTransitionException {
 		State state = null;
