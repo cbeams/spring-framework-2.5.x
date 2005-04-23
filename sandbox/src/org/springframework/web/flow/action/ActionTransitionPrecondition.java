@@ -17,7 +17,7 @@ package org.springframework.web.flow.action;
 
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.ActionAttributes;
+import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
@@ -36,7 +36,7 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 	/**
 	 * The action to execute when the precondition is tested, annotated with usage attributes.
 	 */
-	private ActionAttributes action;
+	private AnnotatedAction action;
 
 	/**
 	 * The result event id that should map to a <code>true</code> precondition
@@ -49,14 +49,14 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 	 * @param action the action
 	 */
 	public ActionTransitionPrecondition(Action action) {
-		this(new ActionAttributes(action));
+		this(new AnnotatedAction(action));
 	}
 
 	/**
 	 * Create a action precondition delegating to the specified action.
 	 * @param action the action
 	 */
-	public ActionTransitionPrecondition(ActionAttributes action) {
+	public ActionTransitionPrecondition(AnnotatedAction action) {
 		Assert.notNull(action, "The action is required");
 		this.action = action;
 	}
@@ -84,7 +84,7 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 	 * Returns the action attributes associated with this action precondition.
 	 * @return the attributes
 	 */
-	protected ActionAttributes getAction() {
+	protected AnnotatedAction getAction() {
 		return action;
 	}
 	

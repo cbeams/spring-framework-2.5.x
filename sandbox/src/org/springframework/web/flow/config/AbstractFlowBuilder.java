@@ -20,7 +20,7 @@ import java.util.Properties;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.ActionAttributes;
+import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
@@ -305,7 +305,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, ActionAttributes action, Transition transition)
+	protected ActionState addActionState(String stateId, AnnotatedAction action, Transition transition)
 			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, action, transition);
 	}
@@ -323,7 +323,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, ActionAttributes action, Transition[] transitions)
+	protected ActionState addActionState(String stateId, AnnotatedAction action, Transition[] transitions)
 			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, action, transitions);
 	}
@@ -362,7 +362,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, ActionAttributes[] actions, Transition[] transitions)
+	protected ActionState addActionState(String stateId, AnnotatedAction[] actions, Transition[] transitions)
 			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, actions, transitions);
 	}
@@ -422,10 +422,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action the action
 	 * @return the action state action
 	 */
-	protected ActionAttributes name(Action action, String name) {
+	protected AnnotatedAction name(Action action, String name) {
 		Properties properties = new Properties();
-		properties.put(ActionAttributes.NAME_PROPERTY, name);
-		ActionAttributes stateAction = new ActionAttributes(action, properties);
+		properties.put(AnnotatedAction.NAME_PROPERTY, name);
+		AnnotatedAction stateAction = new AnnotatedAction(action, properties);
 		return stateAction;
 	}
 
@@ -436,10 +436,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        <code>Event ${methodName}(RequestContext context)</code>
 	 * @return the action state action
 	 */
-	protected ActionAttributes method(String methodName, Action action) {
+	protected AnnotatedAction method(String methodName, Action action) {
 		Properties properties = new Properties();
-		properties.put(ActionAttributes.METHOD_PROPERTY, methodName);
-		ActionAttributes stateAction = new ActionAttributes(action, properties);
+		properties.put(AnnotatedAction.METHOD_PROPERTY, methodName);
+		AnnotatedAction stateAction = new AnnotatedAction(action, properties);
 		return stateAction;
 	}
 
@@ -451,8 +451,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param properties the action state properties
 	 * @return the action state action
 	 */
-	protected ActionAttributes annotate(Action action, Map properties) {
-		return new ActionAttributes(action, properties);
+	protected AnnotatedAction annotate(Action action, Map properties) {
+		return new AnnotatedAction(action, properties);
 	}
 
 	/**

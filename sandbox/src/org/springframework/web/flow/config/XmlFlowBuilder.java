@@ -33,7 +33,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.ActionAttributes;
+import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
@@ -359,7 +359,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected void parseAndAddActionState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
-		ActionAttributes[] actions = parseActions(element);
+		AnnotatedAction[] actions = parseActions(element);
 		Transition[] transitions = parseTransitions(element);
 		new ActionState(flow, id, actions, transitions);
 	}
@@ -413,21 +413,21 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Parse all given action state action definitions contained in given element.
 	 */
-	protected ActionAttributes[] parseActions(Element element) {
+	protected AnnotatedAction[] parseActions(Element element) {
 		List actions = new LinkedList();
 		List actionElements = DomUtils.getChildElementsByTagName(element, ACTION_ELEMENT);
 		for (int i = 0; i < actionElements.size(); i++) {
 			actions.add(parseAction((Element)actionElements.get(i)));
 		}
-		return (ActionAttributes[])actions.toArray(new ActionAttributes[actions.size()]);
+		return (AnnotatedAction[])actions.toArray(new AnnotatedAction[actions.size()]);
 	}
 
 	/**
 	 * Parse an action state action definition and return the corresponding
 	 * object.
 	 */
-	protected ActionAttributes parseAction(Element element) {
-		ActionAttributes attributes = new ActionAttributes((Action)parseFlowService(element, Action.class));
+	protected AnnotatedAction parseAction(Element element) {
+		AnnotatedAction attributes = new AnnotatedAction((Action)parseFlowService(element, Action.class));
 		if (element.hasAttribute(NAME_ATTRIBUTE)) {
 			attributes.setName(element.getAttribute(NAME_ATTRIBUTE));
 		}
@@ -445,7 +445,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * Parse a property definition from given element and add the property
 	 * to given action.
 	 */
-	protected void parseAndAddProperty(Element element, ActionAttributes attributes) {
+	protected void parseAndAddProperty(Element element, AnnotatedAction attributes) {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		if (element.hasAttribute(VALUE_ATTRIBUTE)) {
 			attributes.setAttribute(name, element.getAttribute(VALUE_ATTRIBUTE));
@@ -482,7 +482,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		if (StringUtils.hasText(encodedPrecondition)) {
 			preconditions.add((TransitionCriteria)getFlowServiceLocator().getTransitionCriteria(encodedPrecondition));
 		}
-		ActionAttributes[] actions = parseActions(element);
+		AnnotatedAction[] actions = parseActions(element);
 		for (int i = 0; i < actions.length; i++) {
 			preconditions.add(new ActionTransitionPrecondition(actions[i]));
 		}

@@ -23,7 +23,8 @@ package org.springframework.web.flow.action;
 public class BindAndValidateTransitionPrecondition extends ActionTransitionPrecondition {
 
 	/**
-	 * @param action
+	 * Creates a bind and validation action precondiiton for the specified form action.
+	 * @param action the form action
 	 */
 	public BindAndValidateTransitionPrecondition(FormAction action) {
 		super(action);
