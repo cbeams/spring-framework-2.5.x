@@ -166,6 +166,18 @@ public abstract class TransitionableState extends State {
 		return null;
 	}
 
+	/**
+	 * Notify this state that a event was signaled within it.  By default, this will trigger
+	 * execution of a state transition, or throw an exception of no transition was found or
+	 * execution was not allowed.
+	 * @param context the state context associated with this request
+	 * @return the view descriptor
+	 * @throws CannotExcuteStateTransitionException could not transition on receipt of the last event
+	 */
+	protected ViewDescriptor onEvent(StateContext context) throws CannotExecuteStateTransitionException {
+		return transitionFor(context).execute(context);
+	}
+	
 	protected void createToString(ToStringCreator creator) {
 		creator.append("transitions", this.transitions);
 	}
