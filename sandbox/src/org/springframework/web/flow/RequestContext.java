@@ -114,12 +114,11 @@ public interface RequestContext {
 
 	/**
 	 * Returns a holder for properties about the currently executing
-	 * <code>Action</code> in the context of the current calling
-	 * <code>ActionState</code>. A <code>Action</code> can use these
-	 * properties to influence its behaivor based on the current state. Returns
-	 * <code>null</code> if the current state is not an action state.
-	 * 
-	 * @return the action state action, or null
+	 * <code>Action</code> in the context of the current request.
+	 * <p>
+	 * An <code>Action</code> can use these properties to influence its behaivor
+	 * based on the current state.
+	 * @return the action attributes, or empty if not set
 	 */
 	public AttributeSource getActionAttributes();
 

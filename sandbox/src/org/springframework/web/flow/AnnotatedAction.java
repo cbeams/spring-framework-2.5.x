@@ -26,11 +26,8 @@ import org.springframework.util.StringUtils;
 /**
  * A parameter object that allows for storing arbitrary properties about a
  * target <code>Action</code> implementation for use within exactly one
- * <code>ActionState</code> definition.
- * <p>
- * Note: these objects should NOT be reused between <code>ActionStates</code>.
- * Attempting to do so will generate an <code>IllegalStateException</code>.
- * 
+ * context, for example a <code>ActionState</code> definition, a
+ * <code>TransitionCriteria</code> definition, or in a test environment.
  * @author Keith Donald
  */
 public class AnnotatedAction extends MapAttributeSource {
