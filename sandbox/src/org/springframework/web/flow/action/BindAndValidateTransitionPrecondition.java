@@ -15,13 +15,25 @@
  */
 package org.springframework.web.flow.action;
 
+/**
+ * A transition precondition that will execute a bind and validate method on a configured FormAction
+ * instance.
+ * @author Keith Donald
+ */
 public class BindAndValidateTransitionPrecondition extends ParameterizableActionTransitionPrecondition {
 
+	/**
+	 * @param action
+	 */
 	public BindAndValidateTransitionPrecondition(FormAction action) {
 		super(action);
 		setAttribute("method", "bindAndValidate");
 	}
-	
+
+	/**
+	 * Sets the validator method to invoke on the FormAction's configured <code>Validator</code>.
+	 * @param validatorMethod the name of the validator method
+	 */
 	public void setValidatorMethod(String validatorMethod) {
 		setAttribute("validatorMethod", validatorMethod);
 	}

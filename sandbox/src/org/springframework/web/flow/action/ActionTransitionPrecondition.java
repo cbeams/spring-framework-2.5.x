@@ -43,11 +43,8 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 	private String trueEventId = AbstractAction.SUCCESS_RESULT_EVENT_ID;
 
 	/**
-	 * Create a bind and validate precondition delegating to the specified form
-	 * action.
-	 * 
-	 * @param formAction
-	 *            The form action
+	 * Create a action precondition delegating to the specified action.
+	 * @param action the action
 	 */
 	public ActionTransitionPrecondition(Action action) {
 		Assert.notNull(action, "The action is required");

@@ -17,9 +17,7 @@ package org.springframework.web.flow.action;
 
 import java.util.Map;
 
-import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
-import org.springframework.binding.support.EmptyAttributeSource;
 import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.RequestContext;
@@ -27,6 +25,8 @@ import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
+ * A action transition precondition that can be parameterized with attributes that can influence
+ * the behaivor of the action when it is executed.
  * @author Keith Donald
  */
 public class ParameterizableActionTransitionPrecondition implements TransitionCriteria {
@@ -41,23 +41,39 @@ public class ParameterizableActionTransitionPrecondition implements TransitionCr
 	 */
 	private MutableAttributeSource actionExecutionAttributes = new MapAttributeSource();
 
+	/**
+	 * Create an action precondition delegating to the specified action.
+	 * @param action the action
+	 */
 	public ParameterizableActionTransitionPrecondition(Action action) {
 		this.actionPrecondition = new ActionTransitionPrecondition(action);
 	}
 
+	/**
+	 * Create a parameterized action precondition delegating to the specified action.
+	 * @param action the action
+	 * @param actionExecutionAttributes the action execution properties
+	 */
 	public ParameterizableActionTransitionPrecondition(Action action, Map actionExecutionAttributes) {
 		this.actionPrecondition = new ActionTransitionPrecondition(action);
 		setAttributes(actionExecutionAttributes);
 	}
 
+	/**
+	 * @param actionExecutionAttributes
+	 */
 	public void setAttributes(Map actionExecutionAttributes) {
 		this.actionExecutionAttributes = new MapAttributeSource(actionExecutionAttributes);
 	}
 
+	/**
+	 * @param attributeName
+	 * @param attributeValue
+	 */
 	public void setAttribute(String attributeName, Object attributeValue) {
 		this.actionExecutionAttributes.setAttribute(attributeName, attributeValue);
 	}
-	
+
 	/**
 	 * Returns the action result <code>eventId</code> that should cause this
 	 * precondition to return true (it will return false otherwise).
