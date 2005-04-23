@@ -18,6 +18,8 @@ package org.springframework.binding.support;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 /**
  * Adapter class to set data in a map using the <code>AttributeSetter</code>
  * interface.
@@ -39,6 +41,7 @@ public class MapAttributeSource extends AttributeSourceSupport {
 	 * @param map the map to wrap
 	 */
 	public MapAttributeSource(Map map) {
+		Assert.notNull(map, "The map is required");
 		this.map = map;
 	}
 
