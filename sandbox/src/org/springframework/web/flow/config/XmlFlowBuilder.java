@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,8 +33,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.flow.Action;
+import org.springframework.web.flow.ActionAttributes;
 import org.springframework.web.flow.ActionState;
-import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -43,6 +42,8 @@ import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.action.ActionTransitionPrecondition;
+import org.springframework.web.flow.support.TransitionCriteriaChain;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -153,7 +154,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String EVENT_ATTRIBUTE = "on";
 
 	private static final String TO_ATTRIBUTE = "to";
-	
+
 	private static final String PRECONDITION = "precondition";
 
 	private static final String PROPERTY_ELEMENT = "property";
@@ -248,11 +249,14 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Assert.notNull(getFlowCreator(), "flowCreator is a required property");
 		try {
 			loadFlowDefinition();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new FlowBuilderException("Cannot load the XML flow definition resource '" + resource + "'", e);
-		} catch (ParserConfigurationException e) {
+		}
+		catch (ParserConfigurationException e) {
 			throw new FlowBuilderException("Cannot configure parser to parse the XML flow definition", e);
-		} catch (SAXException e) {
+		}
+		catch (SAXException e) {
 			throw new FlowBuilderException("Cannot parse the flow definition XML document '" + resource + "'", e);
 		}
 		parseFlowDefinition();
@@ -294,11 +298,13 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			docBuilder.setEntityResolver(this.entityResolver);
 			is = resource.getInputStream();
 			doc = docBuilder.parse(is);
-		} finally {
+		}
+		finally {
 			if (is != null) {
 				try {
 					is.close();
-				} catch (IOException ex) {
+				}
+				catch (IOException ex) {
 					logger.warn("Could not close InputStream", ex);
 				}
 			}
@@ -353,9 +359,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected void parseAndAddActionState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
-		ActionStateAction[] actionStateActions = parseActionStateActions(element);
+		ActionAttributes[] actions = parseActions(element);
 		Transition[] transitions = parseTransitions(element);
-		new ActionState(flow, id, actionStateActions, transitions);
+		new ActionState(flow, id, actions, transitions);
 	}
 
 	/**
@@ -407,48 +413,47 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Parse all given action state action definitions contained in given element.
 	 */
-	protected ActionStateAction[] parseActionStateActions(Element element) {
-		List actionStateActions = new LinkedList();
+	protected ActionAttributes[] parseActions(Element element) {
+		List actions = new LinkedList();
 		List actionElements = DomUtils.getChildElementsByTagName(element, ACTION_ELEMENT);
 		for (int i = 0; i < actionElements.size(); i++) {
-			actionStateActions.add(parseActionStateAction((Element)actionElements.get(i)));
+			actions.add(parseAction((Element)actionElements.get(i)));
 		}
-		return (ActionStateAction[])actionStateActions.toArray(new ActionStateAction[actionStateActions.size()]);
+		return (ActionAttributes[])actions.toArray(new ActionAttributes[actions.size()]);
 	}
 
 	/**
 	 * Parse an action state action definition and return the corresponding
 	 * object.
 	 */
-	protected ActionStateAction parseActionStateAction(Element element) {
-		Action targetAction = (Action)parseFlowService(element, Action.class);
-		Properties properties = new Properties();
+	protected ActionAttributes parseAction(Element element) {
+		ActionAttributes attributes = new ActionAttributes((Action)parseFlowService(element, Action.class));
 		if (element.hasAttribute(NAME_ATTRIBUTE)) {
-			properties.put(ActionStateAction.NAME_PROPERTY, element.getAttribute(NAME_ATTRIBUTE));
+			attributes.setName(element.getAttribute(NAME_ATTRIBUTE));
 		}
 		if (element.hasAttribute(METHOD_ATTRIBUTE)) {
-			properties.put(ActionStateAction.METHOD_PROPERTY, element.getAttribute(METHOD_ATTRIBUTE));
+			attributes.setMethod(element.getAttribute(METHOD_ATTRIBUTE));
 		}
 		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
 		for (int i = 0; i < propertyElements.size(); i++) {
-			parseAndAddProperty((Element)propertyElements.get(i), properties);
+			parseAndAddProperty((Element)propertyElements.get(i), attributes);
 		}
-		return new ActionStateAction(targetAction, properties);
+		return attributes;
 	}
 
 	/**
 	 * Parse a property definition from given element and add the property
 	 * to given action.
 	 */
-	protected void parseAndAddProperty(Element element, Properties properties) {
+	protected void parseAndAddProperty(Element element, ActionAttributes attributes) {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		if (element.hasAttribute(VALUE_ATTRIBUTE)) {
-			properties.put(name, element.getAttribute(VALUE_ATTRIBUTE));
+			attributes.setAttribute(name, element.getAttribute(VALUE_ATTRIBUTE));
 		}
 		else {
 			List valueElements = DomUtils.getChildElementsByTagName(element, VALUE_ELEMENT);
 			Assert.state(valueElements.size() == 1, "A property value should be specified for property '" + name + "'");
-			properties.put(name, DomUtils.getTextValue((Element)valueElements.get(0)));
+			attributes.setAttribute(name, DomUtils.getTextValue((Element)valueElements.get(0)));
 		}
 	}
 
@@ -472,19 +477,16 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected Transition parseTransition(Element element) {
 		String event = element.getAttribute(EVENT_ATTRIBUTE);
 		String to = element.getAttribute(TO_ATTRIBUTE);
-		String preconditionId = element.getAttribute(PRECONDITION);
-		TransitionCriteria precondition = null;
-		if (StringUtils.hasText(preconditionId)) {
-			NodeList nodeList = element.getOwnerDocument().getElementsByTagName(PRECONDITION);
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-				if (node instanceof Element) {
-					Element ele = (Element)node;
-					precondition = (TransitionCriteria)parseFlowService(ele, TransitionCriteria.class);
-				}
-			}
+		String encodedPrecondition = element.getAttribute(PRECONDITION);
+		TransitionCriteriaChain preconditions = new TransitionCriteriaChain();
+		if (StringUtils.hasText(encodedPrecondition)) {
+			preconditions.add((TransitionCriteria)getFlowServiceLocator().getTransitionCriteria(encodedPrecondition));
 		}
-		return new Transition(getTransitionCriteriaCreator().create(event), to, precondition);
+		ActionAttributes[] actions = parseActions(element);
+		for (int i = 0; i < actions.length; i++) {
+			preconditions.add(new ActionTransitionPrecondition(actions[i]));
+		}
+		return new Transition(getTransitionCriteriaCreator().create(event), to, preconditions);
 	}
 
 	/**
@@ -518,7 +520,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			}
 			else if (FlowAttributeMapper.class.equals(serviceType)) {
 				return getFlowServiceLocator().getFlowAttributeMapper(serviceId);
-			} else if (TransitionCriteria.class.equals(serviceType)) {
+			}
+			else if (TransitionCriteria.class.equals(serviceType)) {
 				return getFlowServiceLocator().getTransitionCriteria(serviceId);
 			}
 		}
@@ -538,25 +541,26 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 					else if (FlowAttributeMapper.class.equals(serviceType)) {
 						return getFlowServiceLocator().createFlowAttributeMapper(serviceClass, autowireMode);
 					}
-				} catch (InvalidFormatException e) {
+				}
+				catch (InvalidFormatException e) {
 					throw new FlowBuilderException("Unsupported autowire mode '" + autowireLabel + "'", e);
 				}
 			}
 			else {
 				// try service lookup by type
 				serviceClassName = element.getAttribute(CLASSREF_ATTRIBUTE);
-				Assert.hasText(serviceClassName, "Exactly one of the bean, class, or classref attributes "
-						+ "are required for a '" + ClassUtils.getShortName(serviceType) + "' service definition");
-				Class serviceClass = (Class)new TextToClassConverter().convert(serviceClassName);
-				if (Action.class.equals(serviceType)) {
-					return getFlowServiceLocator().getAction(serviceClass);
-				}
-				else {
-					return getFlowServiceLocator().getFlowAttributeMapper(serviceClass);
+				if (StringUtils.hasText(serviceClassName)) {
+					Class serviceClass = (Class)new TextToClassConverter().convert(serviceClassName);
+					if (Action.class.equals(serviceType)) {
+						return getFlowServiceLocator().getAction(serviceClass);
+					}
+					else {
+						return getFlowServiceLocator().getFlowAttributeMapper(serviceClass);
+					}
 				}
 			}
 		}
-		throw new FlowBuilderException("Illegal service definition for service of type '"
+		throw new FlowBuilderException("Illegal service definition for service with id '" + serviceId + "' of type '"
 				+ ClassUtils.getShortName(serviceType) + "'");
 	}
 }

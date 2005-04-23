@@ -15,12 +15,13 @@
  */
 package org.springframework.web.flow.config;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
+import org.springframework.web.flow.ActionAttributes;
 import org.springframework.web.flow.ActionState;
-import org.springframework.web.flow.ActionStateAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -304,7 +305,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, ActionStateAction action, Transition transition)
+	protected ActionState addActionState(String stateId, ActionAttributes action, Transition transition)
 			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, action, transition);
 	}
@@ -322,7 +323,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, ActionStateAction action, Transition[] transitions)
+	protected ActionState addActionState(String stateId, ActionAttributes action, Transition[] transitions)
 			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, action, transitions);
 	}
@@ -361,7 +362,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action state
 	 * @throws IllegalArgumentException the stateId was not unique
 	 */
-	protected ActionState addActionState(String stateId, ActionStateAction[] actions, Transition[] transitions)
+	protected ActionState addActionState(String stateId, ActionAttributes[] actions, Transition[] transitions)
 			throws IllegalArgumentException {
 		return new ActionState(getFlow(), stateId, actions, transitions);
 	}
@@ -421,10 +422,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param action the action
 	 * @return the action state action
 	 */
-	protected ActionStateAction name(Action action, String name) {
+	protected ActionAttributes name(Action action, String name) {
 		Properties properties = new Properties();
-		properties.put(ActionStateAction.NAME_PROPERTY, name);
-		ActionStateAction stateAction = new ActionStateAction(action, properties);
+		properties.put(ActionAttributes.NAME_PROPERTY, name);
+		ActionAttributes stateAction = new ActionAttributes(action, properties);
 		return stateAction;
 	}
 
@@ -435,10 +436,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *        <code>Event ${methodName}(RequestContext context)</code>
 	 * @return the action state action
 	 */
-	protected ActionStateAction method(String methodName, Action action) {
+	protected ActionAttributes method(String methodName, Action action) {
 		Properties properties = new Properties();
-		properties.put(ActionStateAction.METHOD_PROPERTY, methodName);
-		ActionStateAction stateAction = new ActionStateAction(action, properties);
+		properties.put(ActionAttributes.METHOD_PROPERTY, methodName);
+		ActionAttributes stateAction = new ActionAttributes(action, properties);
 		return stateAction;
 	}
 
@@ -450,8 +451,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @param properties the action state properties
 	 * @return the action state action
 	 */
-	protected ActionStateAction annotate(Action action, Properties properties) {
-		return new ActionStateAction(action, properties);
+	protected ActionAttributes annotate(Action action, Map properties) {
+		return new ActionAttributes(action, properties);
 	}
 
 	/**

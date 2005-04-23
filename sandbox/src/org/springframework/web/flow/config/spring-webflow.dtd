@@ -42,7 +42,7 @@
 <!ATTLIST action-state id ID #REQUIRED>
 
 <!--
-	Defines a single Action to be executed when the action state is entered.
+	Defines a single action to be executed.
 -->
 <!ELEMENT action ( property* )>
 
@@ -134,7 +134,7 @@
 	Defines a transition from one state to another. Transitions define the supported 
 	paths through the flow.
 -->
-<!ELEMENT transition EMPTY>
+<!ELEMENT transition ( action* )>
 
 <!--
 	The identifier of the event that can trigger this transition. An event describes something
@@ -152,25 +152,7 @@
 	A id of a configured transition precondition; a precondition tests if this transition, once matched
 	to an event in a request context, is allowed to execute.
 -->
-<!ATTLIST transition precondition IDREF #IMPLIED>
-
-<!--
-	Defines a transition precondition: a conditional object that determines
-	if a state transition is allowed to execute.
--->
-<!ELEMENT precondition EMPTY>
-
-<!--
-	Unique identifier of the transition precondition; must be unique to this flow.
--->
-<!ATTLIST precondition id ID #REQUIRED>
-
-<!--
-	Identifier of the TransitionCriteria or TransitionCriteriaFactoryBean implementation acting
-	as a precondition.  The implementation is exported in the configured registry, typically a Spring Bean
-	Factory. This is similar to the <ref bean="myBean"/> notation of the Spring beans DTD.
--->
-<!ATTLIST precondition bean CDATA #IMPLIED>
+<!ATTLIST transition precondition CDATA #IMPLIED>
 
 <!--
 	Defines a sub flow state: a state that spawns a sub flow when entered. When the
