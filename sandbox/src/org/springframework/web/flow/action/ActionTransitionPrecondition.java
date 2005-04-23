@@ -80,6 +80,10 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 		this.trueEventId = trueEventId;
 	}
 
+	protected ActionAttributes getAction() {
+		return action;
+	}
+	
 	public boolean test(RequestContext context) {
 		try {
 			((StateContext)context).setActionAttributes(action);

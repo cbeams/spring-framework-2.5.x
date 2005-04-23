@@ -91,8 +91,8 @@ public class SetPortletModeAction extends AbstractAction {
 
 		if (event.getResponse() instanceof ActionResponse) {
 			PortletMode mode = getPortletMode();
-			if (context.getActionExecutionAttributes().containsAttribute(PORTLET_MODE)) {
-				mode = (PortletMode)PORTLET_MODE_CONSTANTS.asObject((String)context.getActionExecutionAttributes().getAttribute(PORTLET_MODE));
+			if (context.getActionAttributes().containsAttribute(PORTLET_MODE)) {
+				mode = (PortletMode)PORTLET_MODE_CONSTANTS.asObject((String)context.getActionAttributes().getAttribute(PORTLET_MODE));
 			}
 			((ActionResponse)event.getResponse()).setPortletMode(mode);
 			return success();
@@ -101,7 +101,7 @@ public class SetPortletModeAction extends AbstractAction {
 			// portlet mode and the window state can be changed through
 			// ActionResponse only, if this is not the case, it means that this
 			// action has been invoked directly in a RenderRequest
-			throw new ActionExecutionException(
+			throw new ActionExecutionException(context.getCurrentState(), this, context.getActionAttributes(),
 					"SetPortletModeAction can only work with 'ActionResponse' " +
 					"-- make sure you are not invoking it in a RenderRequest", null);
 		}

@@ -184,7 +184,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		return lastEvent;
 	}
 
-	public AttributeSource getActionExecutionAttributes() {
+	public AttributeSource getActionAttributes() {
 		return actionExecutionAttributes;
 	}
 
