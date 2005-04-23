@@ -180,19 +180,6 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return subFlow.getStartState().enter(this);
 	}
 
-	/**
-	 * Spawn the provided flow definition as a subflow, activating it and
-	 * parameterizing it with the provided sub flow input.
-	 * 
-	 * @param subFlow
-	 *            the subflow
-	 * @param stateId
-	 *            the id of the state to start execution in
-	 * @param subFlowInput
-	 *            the subflow input attributes
-	 * @return a view descriptor containing model and view information needed to
-	 *         render the results of the spawned subflow
-	 */
 	public ViewDescriptor spawn(Flow subFlow, String stateId, Map subFlowInput) {
 		this.flowExecution.createAndActivateFlowSession(subFlow, subFlowInput);
 		fireSubFlowSpawned();

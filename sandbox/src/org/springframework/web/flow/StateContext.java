@@ -21,8 +21,8 @@ import org.springframework.binding.AttributeSource;
 
 /**
  * Mutable control interface for states to use to manipulate the state of an
- * ongoing flow execution request. Used internally by the various state types when
- * they are entered.
+ * ongoing flow execution request. Used internally by the various state types
+ * when they are entered.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -31,49 +31,78 @@ public interface StateContext extends RequestContext {
 
 	/**
 	 * Update the current state of the ongoing flow execution.
-	 * @param state the new current state
+	 * 
+	 * @param state
+	 *            the new current state
 	 */
 	public void setCurrentState(State state) throws IllegalStateException;
 
 	/**
 	 * Update the last event that occured in the ongoing flow execution.
-	 * @param lastEvent the last event that occured
+	 * 
+	 * @param lastEvent
+	 *            the last event that occured
 	 */
 	public void setLastEvent(Event lastEvent);
 
 	/**
-	 * Update contextual properties about the action that is about to execute
-	 * in this request context.
-	 * @param attributes the action execution attributes
+	 * Update contextual properties about the action that is about to execute in
+	 * this request context.
+	 * 
+	 * @param attributes
+	 *            the action execution attributes
 	 */
 	public void setActionExecutionAttributes(AttributeSource attributes);
-	
+
 	/**
 	 * Get the flow session currently active in the flow execution.
-	 * @throws IllegalStateException when the flow execution is not active
+	 * 
+	 * @throws IllegalStateException
+	 *             when the flow execution is not active
 	 */
 	public FlowSession getActiveFlowSession() throws IllegalStateException;
 
 	/**
-	 * Get the flow session of the parent flow of the flow currently
-	 * active in the flow execution.
-	 * @throws IllegalStateException when the flow execution is not active
+	 * Get the flow session of the parent flow of the flow currently active in
+	 * the flow execution.
+	 * 
+	 * @throws IllegalStateException
+	 *             when the flow execution is not active
 	 */
 	public FlowSession getParentFlowSession() throws IllegalStateException;
 
 	/**
 	 * End the active flow session.
+	 * 
 	 * @return the ended session
 	 */
 	public FlowSession endActiveFlowSession() throws IllegalStateException;
 
 	/**
-	 * Spawn the provided flow definition as a subflow, activating
-	 * it and parameterizing it with the provided sub flow input.
-	 * @param subFlow the subflow
-	 * @param subFlowInput the subflow input attributes
+	 * Spawn the provided flow definition as a subflow, activating it and
+	 * parameterizing it with the provided sub flow input.
+	 * 
+	 * @param subFlow
+	 *            the subflow
+	 * @param subFlowInput
+	 *            the subflow input attributes
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the spawned subflow
 	 */
 	public ViewDescriptor spawn(Flow subFlow, Map subFlowInput);
+
+	/**
+	 * Spawn the provided flow definition as a subflow, activating it in the
+	 * specified state and parameterizing it with the provided sub flow input.
+	 * 
+	 * @param subFlow
+	 *            the subflow
+	 * @param stateId
+	 *            the stateId to start in
+	 * @param subFlowInput
+	 *            the subflow input attributes
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the spawned subflow
+	 */
+	public ViewDescriptor spawn(Flow subFlow, String stateId, Map subFlowInput);
 }
