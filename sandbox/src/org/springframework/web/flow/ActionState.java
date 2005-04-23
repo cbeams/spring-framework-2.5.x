@@ -87,7 +87,7 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionAttributes action, Transition transition)
+	public ActionState(Flow flow, String id, AnnotatedAction action, Transition transition)
 			throws IllegalArgumentException {
 		super(flow, id, transition);
 		addAction(action);
@@ -119,7 +119,7 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionAttributes action, Transition[] transitions)
+	public ActionState(Flow flow, String id, AnnotatedAction action, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
 		addAction(action);
@@ -165,7 +165,7 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionAttributes[] actions, Transition transition)
+	public ActionState(Flow flow, String id, AnnotatedAction[] actions, Transition transition)
 			throws IllegalArgumentException {
 		super(flow, id, transition);
 		addActions(actions);
@@ -181,7 +181,7 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionAttributes[] actions, Transition[] transitions)
+	public ActionState(Flow flow, String id, AnnotatedAction[] actions, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
 		addActions(actions);
@@ -192,14 +192,14 @@ public class ActionState extends TransitionableState {
 	 * @param action the action to add
 	 */
 	protected void addAction(Action action) {
-		this.actionExecutors.add(new ActionExecutor(this, new ActionAttributes(action)));
+		this.actionExecutors.add(new ActionExecutor(this, new AnnotatedAction(action)));
 	}
 
 	/**
 	 * Add an action instance to this state.
 	 * @param action the state action to add
 	 */
-	protected void addAction(ActionAttributes action) {
+	protected void addAction(AnnotatedAction action) {
 		this.actionExecutors.add(new ActionExecutor(this, action));
 	}
 
@@ -218,7 +218,7 @@ public class ActionState extends TransitionableState {
 	 * Add a collection of actions to this state.
 	 * @param actions the actions to add
 	 */
-	protected void addActions(ActionAttributes[] actions) {
+	protected void addActions(AnnotatedAction[] actions) {
 		Assert.notEmpty(actions, "You must add at least one action");
 		for (int i = 0; i < actions.length; i++) {
 			addAction(actions[i]);
@@ -248,7 +248,7 @@ public class ActionState extends TransitionableState {
 	 * Returns the first action executed by this action state.
 	 * @return the first action
 	 */
-	public ActionAttributes getAction() {
+	public AnnotatedAction getAction() {
 		return getActions()[0];
 	}
 
@@ -256,8 +256,8 @@ public class ActionState extends TransitionableState {
 	 * Returns the list of actions executed by this action state.
 	 * @return the action list, as a typed array
 	 */
-	public ActionAttributes[] getActions() {
-		ActionAttributes[] actions = new ActionAttributes[actionExecutors.size()];
+	public AnnotatedAction[] getActions() {
+		AnnotatedAction[] actions = new AnnotatedAction[actionExecutors.size()];
 		int i = 0;
 		for (Iterator it = actionExecutors(); it.hasNext();) {
 			actions[i++] = ((ActionExecutor)it.next()).getAction();
@@ -335,13 +335,13 @@ public class ActionState extends TransitionableState {
 
 		private ActionState actionState;
 		
-		private ActionAttributes action;
+		private AnnotatedAction action;
 
 		/**
 		 * Create a new action executor.
 		 * @param action the action to wrap
 		 */
-		public ActionExecutor(ActionState actionState, ActionAttributes action) {
+		public ActionExecutor(ActionState actionState, AnnotatedAction action) {
 			Assert.notNull(action, "The action state's action is required");
 			this.actionState = actionState;
 			this.action = action;
@@ -350,7 +350,7 @@ public class ActionState extends TransitionableState {
 		/**
 		 * Returns the wrapped action.
 		 */
-		public ActionAttributes getAction() {
+		public AnnotatedAction getAction() {
 			return action;
 		}
 

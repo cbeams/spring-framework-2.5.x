@@ -47,7 +47,7 @@ public class ActionExecutionException extends NestedRuntimeException {
 	 * @param attributes
 	 * @param cause
 	 */
-	public ActionExecutionException(State state, ActionAttributes attributes, Throwable cause) {
+	public ActionExecutionException(State state, AnnotatedAction attributes, Throwable cause) {
 		this(state, attributes.getTargetAction(), attributes, cause);
 	}
 

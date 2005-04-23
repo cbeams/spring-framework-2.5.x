@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Keith Donald
  */
-public class ActionAttributes extends MapAttributeSource {
+public class AnnotatedAction extends MapAttributeSource {
 
 	/**
 	 * The name of a named action.
@@ -76,7 +76,7 @@ public class ActionAttributes extends MapAttributeSource {
 	 * @param targetAction
 	 *            the action
 	 */
-	public ActionAttributes(Action targetAction) {
+	public AnnotatedAction(Action targetAction) {
 		this(targetAction, new HashMap(3));
 	}
 
@@ -91,7 +91,7 @@ public class ActionAttributes extends MapAttributeSource {
 	 * @param properties
 	 *            the properties describing usage of the action
 	 */
-	public ActionAttributes(Action targetAction, Map attributes) {
+	public AnnotatedAction(Action targetAction, Map attributes) {
 		super(attributes);
 		setTargetAction(targetAction);
 	}
