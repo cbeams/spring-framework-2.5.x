@@ -94,6 +94,7 @@ public class ParameterizableActionTransitionPrecondition implements TransitionCr
 	}
 
 	public boolean test(RequestContext context) {
+		// not sure if we like this down cast
 		((StateContext)context).setActionExecutionAttributes(actionExecutionAttributes);
 		return this.actionPrecondition.test(context);
 	}
