@@ -31,7 +31,7 @@ import org.springframework.web.flow.TransitionCriteria;
  * 
  * @author Keith Donald
  */
-public class ActionTransitionPrecondition implements TransitionCriteria {
+public class ActionTransitionCriteria implements TransitionCriteria {
 
 	/**
 	 * The action to execute when the precondition is tested, annotated with usage attributes.
@@ -48,7 +48,7 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 	 * Create a action precondition delegating to the specified action.
 	 * @param action the action
 	 */
-	public ActionTransitionPrecondition(Action action) {
+	public ActionTransitionCriteria(Action action) {
 		this(new AnnotatedAction(action));
 	}
 
@@ -56,7 +56,7 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 	 * Create a action precondition delegating to the specified action.
 	 * @param action the action
 	 */
-	public ActionTransitionPrecondition(AnnotatedAction action) {
+	public ActionTransitionCriteria(AnnotatedAction action) {
 		Assert.notNull(action, "The action is required");
 		this.action = action;
 	}
