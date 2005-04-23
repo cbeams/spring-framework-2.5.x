@@ -34,7 +34,7 @@ import javax.sql.DataSource;
  * @see DataSourceUtils#closeConnectionIfNecessary
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
-interface SmartDataSource extends DataSource {
+public interface SmartDataSource extends DataSource {
 		
 	/** 
 	 * Should we close this connection, obtained from this DataSource?
