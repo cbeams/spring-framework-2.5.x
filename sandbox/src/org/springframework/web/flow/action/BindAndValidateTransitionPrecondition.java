@@ -27,7 +27,7 @@ public class BindAndValidateTransitionPrecondition extends ActionTransitionPreco
 	 */
 	public BindAndValidateTransitionPrecondition(FormAction action) {
 		super(action);
-		//setAttribute("method", "bindAndValidate");
+		getAction().setMethod("bindAndValidate");
 	}
 
 	/**
@@ -35,6 +35,6 @@ public class BindAndValidateTransitionPrecondition extends ActionTransitionPreco
 	 * @param validatorMethod the name of the validator method
 	 */
 	public void setValidatorMethod(String validatorMethod) {
-		//setAttribute("validatorMethod", validatorMethod);
+		getAction().setAttribute("validatorMethod", validatorMethod);
 	}
 }

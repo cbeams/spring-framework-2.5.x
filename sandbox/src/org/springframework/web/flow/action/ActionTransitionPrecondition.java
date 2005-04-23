@@ -34,7 +34,7 @@ import org.springframework.web.flow.TransitionCriteria;
 public class ActionTransitionPrecondition implements TransitionCriteria {
 
 	/**
-	 * The action to execute when the precondition is tested.
+	 * The action to execute when the precondition is tested, annotated with usage attributes.
 	 */
 	private ActionAttributes action;
 
@@ -80,6 +80,10 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 		this.trueEventId = trueEventId;
 	}
 
+	/**
+	 * Returns the action attributes associated with this action precondition.
+	 * @return the attributes
+	 */
 	protected ActionAttributes getAction() {
 		return action;
 	}
