@@ -163,14 +163,14 @@ public class Transition {
 	}
 
 	/**
-	 * Checks if this transition should be executed given the state of the
+	 * Checks if this transition is eligible for execution given the state of the
 	 * provided flow execution request context.
 	 * 
 	 * @param context
 	 *            the flow execution request context
 	 * @return true if this transition should execute, false otherwise
 	 */
-	public boolean shouldExecute(RequestContext context) {
+	public boolean matches(RequestContext context) {
 		return this.criteria.test(context);
 	}
 

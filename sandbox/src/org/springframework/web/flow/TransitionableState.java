@@ -176,7 +176,7 @@ public abstract class TransitionableState extends State {
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
-			if (transition.shouldExecute(context)) {
+			if (transition.matches(context)) {
 				return transition;
 			}
 		}
