@@ -48,7 +48,7 @@ public class SetPortletModeAction extends AbstractAction {
 	 * The portlet mode to set can be specified in an action state action
 	 * property with this name.
 	 */
-	public static final String PORTLET_MODE_PROPERTY = "portletMode";
+	public static final String PORTLET_MODE = "portletMode";
 	
 	private PortletMode portletMode;
 	
@@ -91,8 +91,8 @@ public class SetPortletModeAction extends AbstractAction {
 
 		if (event.getResponse() instanceof ActionResponse) {
 			PortletMode mode = getPortletMode();
-			if (context.getActionExecutionAttributes().containsAttribute(PORTLET_MODE_PROPERTY)) {
-				mode = (PortletMode)PORTLET_MODE_CONSTANTS.asObject((String)context.getActionExecutionAttributes().getAttribute(PORTLET_MODE_PROPERTY));
+			if (context.getActionExecutionAttributes().containsAttribute(PORTLET_MODE)) {
+				mode = (PortletMode)PORTLET_MODE_CONSTANTS.asObject((String)context.getActionExecutionAttributes().getAttribute(PORTLET_MODE));
 			}
 			((ActionResponse)event.getResponse()).setPortletMode(mode);
 			return success();
