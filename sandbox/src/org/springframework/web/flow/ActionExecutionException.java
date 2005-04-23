@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow;
 
+import org.springframework.binding.AttributeSource;
 import org.springframework.core.NestedRuntimeException;
 
 /**
@@ -29,26 +30,54 @@ public class ActionExecutionException extends NestedRuntimeException {
 	/**
 	 * The action that threw an exception while executing.
 	 */
-	private ActionStateAction action;
+	private State state;
 
 	/**
-	 * Create a new action execution exception.
-	 * @param message a descriptive error message
-	 * @param cause the underlying cause of the exception
+	 * The action that threw an exception while executing.
 	 */
-	public ActionExecutionException(String message, Throwable cause) {
-		super(message, cause);
+	private Action action;
+
+	/**
+	 * Action execution attributes.
+	 */
+	private AttributeSource actionAttributes;
+
+	/**
+	 * @param state
+	 * @param attributes
+	 * @param cause
+	 */
+	public ActionExecutionException(State state, ActionAttributes attributes, Throwable cause) {
+		this(state, attributes.getTargetAction(), attributes, cause);
 	}
 
 	/**
 	 * Create a new action execution exception.
-	 * @param action the action that generated the exception
-	 * @param cause the underlying cause of the exception, thrown by the action
 	 */
-	public ActionExecutionException(ActionStateAction action, Throwable cause) {
-		super("Executing action '" + action + "' in state '" + action.getState().getId() + "' of flow '"
-				+ action.getState().getFlow().getId() + "' threw an unrecoverable exception", cause);
+	public ActionExecutionException(State state, Action action, AttributeSource actionAttributes, Throwable cause) {
+		super("Exception thrown executing action '" + action + "' in state '" + state.getId() + "' of flow '"
+				+ state.getFlow().getId() + "'", cause);
+		this.state = state;
 		this.action = action;
+		this.actionAttributes = actionAttributes;
+	}
+
+	/**
+	 * Create a new action execution exception.
+	 */
+	public ActionExecutionException(State state, Action action, AttributeSource actionAttributes, String message, Throwable cause) {
+		super(message, cause);
+		this.state = state;
+		this.action = action;
+		this.actionAttributes = actionAttributes;
+	}
+
+	/**
+	 * Returns information about the action state that invoked the action.
+	 * @return the action state
+	 */
+	public State getState() {
+		return state;
 	}
 
 	/**
@@ -56,7 +85,14 @@ public class ActionExecutionException extends NestedRuntimeException {
 	 * executed.
 	 * @return the failing action
 	 */
-	public ActionStateAction getAction() {
+	public Action getAction() {
 		return action;
+	}
+	
+	/**
+	 * @return
+	 */
+	public AttributeSource getActionAttributes() {
+		return actionAttributes;
 	}
 }

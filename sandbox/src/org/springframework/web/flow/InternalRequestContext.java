@@ -107,7 +107,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		}
 	}
 
-	public AttributeSource getActionExecutionAttributes() {
+	public AttributeSource getActionAttributes() {
 		return actionExecutionAttributes;
 	}
 
@@ -145,7 +145,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		fireEventSignaled();
 	}
 
-	public void setActionExecutionAttributes(AttributeSource attributes) {
+	public void setActionAttributes(AttributeSource attributes) {
 		if (attributes != null) {
 			this.actionExecutionAttributes = attributes;
 		}

@@ -18,7 +18,6 @@ package org.springframework.web.flow;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -88,7 +87,7 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionStateAction action, Transition transition)
+	public ActionState(Flow flow, String id, ActionAttributes action, Transition transition)
 			throws IllegalArgumentException {
 		super(flow, id, transition);
 		addAction(action);
@@ -120,7 +119,7 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionStateAction action, Transition[] transitions)
+	public ActionState(Flow flow, String id, ActionAttributes action, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
 		addAction(action);
@@ -166,7 +165,7 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionStateAction[] actions, Transition transition)
+	public ActionState(Flow flow, String id, ActionAttributes[] actions, Transition transition)
 			throws IllegalArgumentException {
 		super(flow, id, transition);
 		addActions(actions);
@@ -182,7 +181,7 @@ public class ActionState extends TransitionableState {
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public ActionState(Flow flow, String id, ActionStateAction[] actions, Transition[] transitions)
+	public ActionState(Flow flow, String id, ActionAttributes[] actions, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
 		addActions(actions);
@@ -193,16 +192,15 @@ public class ActionState extends TransitionableState {
 	 * @param action the action to add
 	 */
 	protected void addAction(Action action) {
-		this.actionExecutors.add(new ActionExecutor(createActionStateAction(action)));
+		this.actionExecutors.add(new ActionExecutor(this, new ActionAttributes(action)));
 	}
 
 	/**
 	 * Add an action instance to this state.
 	 * @param action the state action to add
 	 */
-	protected void addAction(ActionStateAction action) {
-		action.setState(this);
-		this.actionExecutors.add(new ActionExecutor(action));
+	protected void addAction(ActionAttributes action) {
+		this.actionExecutors.add(new ActionExecutor(this, action));
 	}
 
 	/**
@@ -220,18 +218,11 @@ public class ActionState extends TransitionableState {
 	 * Add a collection of actions to this state.
 	 * @param actions the actions to add
 	 */
-	protected void addActions(ActionStateAction[] actions) {
+	protected void addActions(ActionAttributes[] actions) {
 		Assert.notEmpty(actions, "You must add at least one action");
 		for (int i = 0; i < actions.length; i++) {
 			addAction(actions[i]);
 		}
-	}
-
-	/**
-	 * Create an action state action wrapper for the provided action.
-	 */
-	protected ActionStateAction createActionStateAction(Action action) {
-		return new ActionStateAction(this, action);
 	}
 
 	/**
@@ -257,7 +248,7 @@ public class ActionState extends TransitionableState {
 	 * Returns the first action executed by this action state.
 	 * @return the first action
 	 */
-	public ActionStateAction getAction() {
+	public ActionAttributes getAction() {
 		return getActions()[0];
 	}
 
@@ -265,8 +256,8 @@ public class ActionState extends TransitionableState {
 	 * Returns the list of actions executed by this action state.
 	 * @return the action list, as a typed array
 	 */
-	public ActionStateAction[] getActions() {
-		ActionStateAction[] actions = new ActionStateAction[actionExecutors.size()];
+	public ActionAttributes[] getActions() {
+		ActionAttributes[] actions = new ActionAttributes[actionExecutors.size()];
 		int i = 0;
 		for (Iterator it = actionExecutors(); it.hasNext();) {
 			actions[i++] = ((ActionExecutor)it.next()).getAction();
@@ -302,7 +293,8 @@ public class ActionState extends TransitionableState {
 				eventIds[executionCount - 1] = event.getId();
 				try {
 					return onEvent(event, context);
-				} catch (NoMatchingTransitionException e) {
+				}
+				catch (NoMatchingTransitionException e) {
 					if (logger.isDebugEnabled()) {
 						logger
 								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
@@ -341,21 +333,24 @@ public class ActionState extends TransitionableState {
 
 		protected final Log logger = LogFactory.getLog(ActionExecutor.class);
 
-		private ActionStateAction action;
+		private ActionState actionState;
+		
+		private ActionAttributes action;
 
 		/**
 		 * Create a new action executor.
 		 * @param action the action to wrap
 		 */
-		public ActionExecutor(ActionStateAction action) {
+		public ActionExecutor(ActionState actionState, ActionAttributes action) {
 			Assert.notNull(action, "The action state's action is required");
+			this.actionState = actionState;
 			this.action = action;
 		}
 
 		/**
 		 * Returns the wrapped action.
 		 */
-		public ActionStateAction getAction() {
+		public ActionAttributes getAction() {
 			return action;
 		}
 
@@ -369,12 +364,13 @@ public class ActionState extends TransitionableState {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				context.setActionExecutionAttributes(action);
+				context.setActionAttributes(action);
 				Event result = decorateResult(action.getTargetAction().execute(context));
-				context.setActionExecutionAttributes(null);
+				context.setActionAttributes(null);
 				return result;
-			} catch (Exception e) {
-				throw new ActionExecutionException(action, e);
+			}
+			catch (Exception e) {
+				throw new ActionExecutionException(actionState, action, e);
 			}
 		}
 
@@ -444,10 +440,9 @@ public class ActionState extends TransitionableState {
 			return action.toString();
 		}
 	}
-	
+
 	protected void createToString(ToStringCreator creator) {
 		creator.append("actions", actionExecutors);
 		super.createToString(creator);
 	}
-
 }

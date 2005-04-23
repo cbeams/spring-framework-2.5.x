@@ -52,7 +52,7 @@ public interface StateContext extends RequestContext {
 	 * @param attributes
 	 *            the action execution attributes
 	 */
-	public void setActionExecutionAttributes(AttributeSource attributes);
+	public void setActionAttributes(AttributeSource attributes);
 
 	/**
 	 * Get the flow session currently active in the flow execution.

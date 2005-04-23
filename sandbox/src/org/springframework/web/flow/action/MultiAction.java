@@ -183,7 +183,7 @@ public class MultiAction extends AbstractAction {
 		public static final String METHOD = "method";
 
 		public String getMethodName(RequestContext context, MultiAction action) {
-			AttributeSource attributes = context.getActionExecutionAttributes();
+			AttributeSource attributes = context.getActionAttributes();
 			if (attributes.containsAttribute(METHOD)) {
 				// use specified execute method name
 				return (String)attributes.getAttribute(METHOD);

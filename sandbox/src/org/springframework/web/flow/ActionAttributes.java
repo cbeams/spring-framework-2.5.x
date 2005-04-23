@@ -15,9 +15,10 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.springframework.binding.AttributeSource;
+import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -32,9 +33,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Keith Donald
  */
-public class ActionStateAction implements AttributeSource {
-
-	// predefined properties
+public class ActionAttributes extends MapAttributeSource {
 
 	/**
 	 * The name of a named action.
@@ -64,56 +63,9 @@ public class ActionStateAction implements AttributeSource {
 	public static final String METHOD_PROPERTY = "method";
 
 	/**
-	 * The owning state that executes the action when entered.
-	 */
-	private ActionState state;
-
-	/**
 	 * The action to execute when the action state is entered.
 	 */
 	private Action targetAction;
-
-	/**
-	 * Contextual properties about the configured action's use within the owning
-	 * state.
-	 */
-	private Properties properties;
-
-	/**
-	 * Creates a new action state action-info object for the specified action.
-	 * No contextual properties are provided.
-	 * 
-	 * @param state
-	 *            the owning state
-	 * @param targetAction
-	 *            the action
-	 */
-	public ActionStateAction(ActionState state, Action targetAction) {
-		this(state, targetAction, null);
-	}
-
-	/**
-	 * Creates a new action state action-info object for the specified action.
-	 * The map of properties is provided.
-	 * 
-	 * @param state
-	 *            the owning state
-	 * @param targetAction
-	 *            the action
-	 * @param properties
-	 *            the properties describing usage of the action
-	 */
-	public ActionStateAction(ActionState state, Action targetAction, Properties properties) {
-		Assert.notNull(state, "The action state is required");
-		this.state = state;
-		setTargetAction(targetAction);
-		if (properties != null) {
-			this.properties = properties;
-		}
-		else {
-			this.properties = new Properties();
-		}
-	}
 
 	/**
 	 * Creates a new action state action-info object for the specified action.
@@ -124,8 +76,8 @@ public class ActionStateAction implements AttributeSource {
 	 * @param targetAction
 	 *            the action
 	 */
-	public ActionStateAction(Action targetAction) {
-		this(targetAction, null);
+	public ActionAttributes(Action targetAction) {
+		this(targetAction, new HashMap(3));
 	}
 
 	/**
@@ -139,27 +91,9 @@ public class ActionStateAction implements AttributeSource {
 	 * @param properties
 	 *            the properties describing usage of the action
 	 */
-	public ActionStateAction(Action targetAction, Properties properties) {
+	public ActionAttributes(Action targetAction, Map attributes) {
+		super(attributes);
 		setTargetAction(targetAction);
-		if (properties != null) {
-			this.properties = properties;
-		}
-		else {
-			this.properties = new Properties();
-		}
-	}
-
-	/**
-	 * Set the owning action state; this may only be set once and is required.
-	 * 
-	 * @param state
-	 *            the owning action state
-	 * @throws IllegalStateException
-	 *             if the action state has already been set
-	 */
-	protected void setState(ActionState state) throws IllegalStateException {
-		Assert.state(this.state == null, "The action state must not already be set -- it may only be set once");
-		this.state = state;
 	}
 
 	/**
@@ -171,15 +105,40 @@ public class ActionStateAction implements AttributeSource {
 	}
 
 	/**
-	 * Returns the owning action state
-	 * 
-	 * @return the owning action state
+	 * Sets the name of a named action. This is optional and can be
+	 * <code>null</code>.
+	 * @param name the action name
 	 */
-	public ActionState getState() {
-		Assert.state(this.state != null, "The action state is required - this should not happen");
-		return state;
+	public void setName(String name) {
+		setAttribute(NAME_PROPERTY, name);
 	}
 
+	/**
+	 * Sets the short description for the action in the owning action state.
+	 * @param caption the caption
+	 */
+	public void setCaption(String caption) {
+		setAttribute(CAPTION_PROPERTY, caption);
+	}
+
+	/**
+	 * Sets the long description for the action in the owning action state.
+	 * @param description the long description
+	 */
+	public void setDescription(String description) {
+		setAttribute(DESCRIPTION_PROPERTY, description);
+	}
+
+	/**
+	 * Sets the name of the handler method on the target action instance to
+	 * invoke when this action is executed. Only used by multi-actions.
+	 * @param methodName the method name, with the signature
+	 *        <code>Event ${methodName}(RequestContext context)</code>
+	 */
+	public void setMethod(String methodName) {
+		setAttribute(METHOD_PROPERTY, methodName);
+	}
+	
 	/**
 	 * Returns the wrapped target action.
 	 * 
@@ -195,7 +154,7 @@ public class ActionStateAction implements AttributeSource {
 	 * transitions.
 	 */
 	public String getName() {
-		return (String)getProperty(NAME_PROPERTY);
+		return (String)getAttribute(NAME_PROPERTY);
 	}
 
 	/**
@@ -210,14 +169,14 @@ public class ActionStateAction implements AttributeSource {
 	 * Returns the short description of the action in the action state.
 	 */
 	public String getCaption() {
-		return (String)getProperty(CAPTION_PROPERTY);
+		return (String)getAttribute(CAPTION_PROPERTY);
 	}
 
 	/**
 	 * Returns the logical description of this action in this action state.
 	 */
 	public String getDescription() {
-		return (String)getProperty(DESCRIPTION_PROPERTY);
+		return (String)getAttribute(DESCRIPTION_PROPERTY);
 	}
 
 	/**
@@ -228,51 +187,10 @@ public class ActionStateAction implements AttributeSource {
 	 * @return the execute method name
 	 */
 	public String getMethod() {
-		return (String)getProperty(METHOD_PROPERTY);
+		return (String)getAttribute(METHOD_PROPERTY);
 	}
 
-	/**
-	 * Gets the property of the specified name, returning <code>null</code> if
-	 * not found.
-	 * 
-	 * @param propertyName
-	 *            the property name
-	 * @return the property value, or <code>null</code> if not found
-	 */
-	public String getProperty(String propertyName) {
-		return (String)getProperties().get(propertyName);
-	}
-
-	/**
-	 * Returns the properties associated with the target action in the owning
-	 * state.
-	 */
-	protected Properties getProperties() {
-		return properties;
-	}
-
-	/**
-	 * Does this action state action have the specified property present?
-	 * 
-	 * @param propertyName
-	 *            the property name
-	 * @return true if present, false if not present
-	 */
-	public boolean containsProperty(String propertyName) {
-		return getProperties().containsKey(propertyName);
-	}
-
-	public boolean containsAttribute(String attributeName) {
-		return containsProperty(attributeName);
-	}
-
-	public Object getAttribute(String attributeName) {
-		return getProperty(attributeName);
-	}
-	
 	public String toString() {
-		return new ToStringCreator(this).append("action", targetAction).append("properties", properties).toString();
+		return new ToStringCreator(this).append("action", targetAction).append("attributes", getAttributeMap()).toString();
 	}
-
-
 }

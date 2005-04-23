@@ -121,7 +121,7 @@ public interface RequestContext {
 	 * 
 	 * @return the action state action, or null
 	 */
-	public AttributeSource getActionExecutionAttributes();
+	public AttributeSource getActionAttributes();
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in

@@ -20,14 +20,14 @@ package org.springframework.web.flow.action;
  * instance.
  * @author Keith Donald
  */
-public class BindAndValidateTransitionPrecondition extends ParameterizableActionTransitionPrecondition {
+public class BindAndValidateTransitionPrecondition extends ActionTransitionPrecondition {
 
 	/**
 	 * @param action
 	 */
 	public BindAndValidateTransitionPrecondition(FormAction action) {
 		super(action);
-		setAttribute("method", "bindAndValidate");
+		//setAttribute("method", "bindAndValidate");
 	}
 
 	/**
@@ -35,6 +35,6 @@ public class BindAndValidateTransitionPrecondition extends ParameterizableAction
 	 * @param validatorMethod the name of the validator method
 	 */
 	public void setValidatorMethod(String validatorMethod) {
-		setAttribute("validatorMethod", validatorMethod);
+		//setAttribute("validatorMethod", validatorMethod);
 	}
 }

@@ -17,9 +17,11 @@ package org.springframework.web.flow.action;
 
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Action;
+import org.springframework.web.flow.ActionAttributes;
 import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
@@ -34,7 +36,7 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 	/**
 	 * The action to execute when the precondition is tested.
 	 */
-	private Action action;
+	private ActionAttributes action;
 
 	/**
 	 * The result event id that should map to a <code>true</code> precondition
@@ -47,6 +49,14 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 	 * @param action the action
 	 */
 	public ActionTransitionPrecondition(Action action) {
+		this(new ActionAttributes(action));
+	}
+
+	/**
+	 * Create a action precondition delegating to the specified action.
+	 * @param action the action
+	 */
+	public ActionTransitionPrecondition(ActionAttributes action) {
 		Assert.notNull(action, "The action is required");
 		this.action = action;
 	}
@@ -72,7 +82,8 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 
 	public boolean test(RequestContext context) {
 		try {
-			Event result = this.action.execute(context);
+			((StateContext)context).setActionAttributes(action);
+			Event result = this.action.getTargetAction().execute(context);
 			if (result.getId().equals(getTrueEventId())) {
 				return true;
 			}
@@ -81,7 +92,7 @@ public class ActionTransitionPrecondition implements TransitionCriteria {
 			}
 		}
 		catch (Exception e) {
-			throw new ActionExecutionException("Unable to execute target action " + action, e);
+			throw new ActionExecutionException(context.getCurrentState(), action, e);
 		}
 	}
 }

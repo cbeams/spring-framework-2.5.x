@@ -22,8 +22,6 @@
 		<transition on="event1" to="subFlowState1" precondition="precondition1"/>
 	</view-state>
 	
-	<precondition id="precondition1" bean="precondition1"/>
-	
 	<view-state id="viewState2">
 		<transition on="event2" to="subFlowState2"/>
 	</view-state>
