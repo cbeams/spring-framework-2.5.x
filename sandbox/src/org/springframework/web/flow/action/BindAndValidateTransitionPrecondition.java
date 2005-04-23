@@ -15,9 +15,9 @@
  */
 package org.springframework.web.flow.action;
 
-public class BindAndValidateActionTransitionPrecondition extends ParameterizableActionTransitionPrecondition {
+public class BindAndValidateTransitionPrecondition extends ParameterizableActionTransitionPrecondition {
 
-	public BindAndValidateActionTransitionPrecondition(FormAction action) {
+	public BindAndValidateTransitionPrecondition(FormAction action) {
 		super(action);
 		setAttribute("method", "bindAndValidate");
 	}
