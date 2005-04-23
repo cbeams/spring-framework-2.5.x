@@ -42,7 +42,7 @@ import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
-import org.springframework.web.flow.action.ActionTransitionPrecondition;
+import org.springframework.web.flow.action.ActionTransitionCriteria;
 import org.springframework.web.flow.support.TransitionCriteriaChain;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -484,7 +484,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 		AnnotatedAction[] actions = parseActions(element);
 		for (int i = 0; i < actions.length; i++) {
-			preconditions.add(new ActionTransitionPrecondition(actions[i]));
+			preconditions.add(new ActionTransitionCriteria(actions[i]));
 		}
 		return new Transition(getTransitionCriteriaCreator().create(event), to, preconditions);
 	}

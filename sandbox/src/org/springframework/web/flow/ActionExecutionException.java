@@ -38,11 +38,13 @@ public class ActionExecutionException extends NestedRuntimeException {
 	private Action action;
 
 	/**
-	 * Action execution attributes.
+	 * Action usage attributes.
 	 */
 	private AttributeSource actionAttributes;
 
 	/**
+	 * Create a new action execution exception.
+	 * 
 	 * @param state
 	 * @param attributes
 	 * @param cause
@@ -53,6 +55,11 @@ public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new action execution exception.
+	 * 
+	 * @param state
+	 * @param action
+	 * @param actionAttributes
+	 * @param cause
 	 */
 	public ActionExecutionException(State state, Action action, AttributeSource actionAttributes, Throwable cause) {
 		super("Exception thrown executing action '" + action + "' in state '" + state.getId() + "' of flow '"
@@ -64,6 +71,12 @@ public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new action execution exception.
+	 * 
+	 * @param state
+	 * @param action
+	 * @param actionAttributes
+	 * @param message
+	 * @param cause
 	 */
 	public ActionExecutionException(State state, Action action, AttributeSource actionAttributes, String message, Throwable cause) {
 		super(message, cause);

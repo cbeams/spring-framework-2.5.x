@@ -64,9 +64,9 @@ public class StateTests extends TestCase {
 		ViewDescriptor view = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNull(view);
 		assertEquals("success", flowExecution.getLastEventId());
-		ActionAttributes[] actions = state.getActions();
+		AnnotatedAction[] actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
-			ActionAttributes action = actions[i];
+			AnnotatedAction action = actions[i];
 			assertEquals(1, ((ExecutionCounterAction)(action.getTargetAction())).getExecutionCount());
 		}
 	}
@@ -89,15 +89,15 @@ public class StateTests extends TestCase {
 
 	public void testActionAttributesChainNamedActions() {
 		Flow flow = new Flow("myFlow");
-		ActionAttributes[] actions = new ActionAttributes[4];
-		actions[0] = new ActionAttributes(new ExecutionCounterAction("not mapped result"));
-		actions[1] = new ActionAttributes(new ExecutionCounterAction(null));
+		AnnotatedAction[] actions = new AnnotatedAction[4];
+		actions[0] = new AnnotatedAction(new ExecutionCounterAction("not mapped result"));
+		actions[1] = new AnnotatedAction(new ExecutionCounterAction(null));
 		Properties properties = new Properties();
 		properties.put("name", "action3");
-		actions[2] = new ActionAttributes(new ExecutionCounterAction(""), properties);
+		actions[2] = new AnnotatedAction(new ExecutionCounterAction(""), properties);
 		properties = new Properties();
 		properties.put("name", "action4");
-		actions[3] = new ActionAttributes(new ExecutionCounterAction("success"), properties);
+		actions[3] = new AnnotatedAction(new ExecutionCounterAction("success"), properties);
 		ActionState state = new ActionState(flow, "actionState", actions, new Transition(on("action4.success"), "finish"));
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = flow.createExecution();
@@ -106,7 +106,7 @@ public class StateTests extends TestCase {
 		assertEquals("action4.success", flowExecution.getLastEventId());
 		actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
-			ActionAttributes action = actions[i];
+			AnnotatedAction action = actions[i];
 			assertEquals(1, ((ExecutionCounterAction)(action.getTargetAction())).getExecutionCount());
 		}
 	}
