@@ -19,7 +19,7 @@ import org.springframework.util.Assert;
  * Support class for attribute setters. TODO - should this implement map?
  * @author Keith Donald
  */
-public abstract class AttributeSourceSupport implements MutableAttributeSource, Map {
+public abstract class AttributeSourceSupport implements MutableAttributeSource {
 
 	/**
 	 * Get an attribute value and make sure it is of the required type.
@@ -138,33 +138,4 @@ public abstract class AttributeSourceSupport implements MutableAttributeSource, 
 	 */
 	protected abstract Map getAttributeMap();
 
-	// map operations
-
-	public boolean containsKey(Object key) {
-		return containsAttribute(String.valueOf(key));
-	}
-
-	public Set entrySet() {
-		return attributeEntries();
-	}
-
-	public Object get(Object key) {
-		return getAttribute(String.valueOf(key));
-	}
-
-	public Set keySet() {
-		return attributeNames();
-	}
-
-	public Object put(Object key, Object value) {
-		return setAttribute(String.valueOf(key), value);
-	}
-
-	public void putAll(Map attributes) {
-		setAttributes(attributes);
-	}
-
-	public Collection values() {
-		return attributeValues();
-	}
 }
