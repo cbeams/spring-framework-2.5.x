@@ -18,5 +18,6 @@ package org.springframework.binding;
 public interface AttributeValueResolutionStrategy {
 	public boolean isValuePlaceholder(String value);
 
-	public Object resolveAttributeValue(String valuePlaceholder, AttributeSource attributes);
+	public Object resolveAttributeValue(String valuePlaceholder, AttributeSource attributes)
+			throws NoSuchAttributeValueException;
 }
