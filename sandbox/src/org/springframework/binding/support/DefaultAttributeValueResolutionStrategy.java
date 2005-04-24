@@ -5,10 +5,10 @@ package org.springframework.binding.support;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.binding.AttributeSource;
-import org.springframework.binding.AttributeResolutionStrategy;
+import org.springframework.binding.AttributeValueResolutionStrategy;
 import org.springframework.util.StringUtils;
 
-public class DefaultPropertyResolutionStrategy implements AttributeResolutionStrategy {
+public class DefaultAttributeValueResolutionStrategy implements AttributeValueResolutionStrategy {
 
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
 
@@ -18,16 +18,15 @@ public class DefaultPropertyResolutionStrategy implements AttributeResolutionStr
 
 	private String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
-	public boolean isAttributePlaceholder(String token) {
-		if (!StringUtils.hasText(token)) {
+	public boolean isValuePlaceholder(String value) {
+		if (!StringUtils.hasText(value)) {
 			return false;
 		}
-		System.out.println(token);
-		return token.startsWith(placeholderPrefix) && token.endsWith(placeholderSuffix);
+		return value.startsWith(placeholderPrefix) && value.endsWith(placeholderSuffix);
 	}
 
-	public Object resolveAttribute(String placeholder, AttributeSource parameters) {
-		return parseStringValue(placeholder, parameters, null);
+	public Object resolveAttributeValue(String valuePlaceholder, AttributeSource parameters) {
+		return parseStringValue(valuePlaceholder, parameters, null);
 	}
 
 	protected String parseStringValue(String strVal, AttributeSource parameters, String originalPlaceholder) {
@@ -35,7 +34,6 @@ public class DefaultPropertyResolutionStrategy implements AttributeResolutionStr
 		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
 		// method to retain JDK 1.3 compatibility. The slight loss in performance
 		// is not really relevant, as this code will typically just run on startup.
-
 		int startIndex = strVal.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
 			int endIndex = buf.toString().indexOf(this.placeholderSuffix,
@@ -43,7 +41,6 @@ public class DefaultPropertyResolutionStrategy implements AttributeResolutionStr
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholderToUse = null;
-
 				if (originalPlaceholder != null) {
 					originalPlaceholderToUse = originalPlaceholder;
 					if (placeholder.equals(originalPlaceholder)) {
@@ -70,7 +67,6 @@ public class DefaultPropertyResolutionStrategy implements AttributeResolutionStr
 				startIndex = -1;
 			}
 		}
-
 		return buf.toString();
 	}
 }
