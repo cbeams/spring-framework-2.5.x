@@ -10,38 +10,39 @@
 	</action-state>
 
 	<view-state id="enterPriceAndItemCount" view="priceAndItemCountForm">
-		<transition on="submit" to="bindAndValidatePriceAndItemCount"/>
-	</view-state>
-	
-	<action-state id="bindAndValidatePriceAndItemCount">
-		<action bean="sellItemAction" method="bindAndValidate">
+		<transition on="submit" to="bindAndValidate">
 			<property name="validatorMethod" value="validatePriceAndItemCount"/>
-		</action>
-		<transition on="success" to="enterCategory"/>
-		<transition on="error" to="enterPriceAndItemCount"/>
-	</action-state>
+			<property name="successState" value="enterCategory"/>
+			<property name="errorState" value="enterPriceAndItemCount"/>
+		</transition>
+	</view-state>
 	
 	<view-state id="enterCategory" view="categoryForm">
-		<transition on="submit" to="bindAndValidateCategory"/>
+		<transition on="submit" to="bindAndValidate">
+			<property name="successState" value="shippingRequired"/>
+			<property name="errorState" value="enterCategory"/>
+		</transition>
 	</view-state>
 
-	<action-state id="bindAndValidateCategory">
-		<action bean="sellItemAction" method="bindAndValidate"/>
-		<transition on="${#result == 'success' and flowScope.sale.shipping}" to="enterShippingDetails"/>
-		<transition on="${#result == 'success' and !flowScope.sale.shipping}" to="showCostOverview"/>
-		<transition on="error" to="enterCategory"/>
-	</action-state>
-	
+	<decision-state id="shippingRequired">
+		<if test="${flowScope.sale.shipping}" then="enterShippingDetails" else="showCostOverview"/>
+	</decision-state>
+
 	<view-state id="enterShippingDetails" view="shippingDetailsForm">
-		<transition on="submit" to="bindAndValidateShippingDetails"/>
+		<transition on="submit" to="bindAndValidate">
+			<property name="successState" value="showCostOverview"/>
+			<property name="errorState" value="enterShippingDetails"/>
+		</transition>
 	</view-state>
 
-	<action-state id="bindAndValidateShippingDetails">
-		<action bean="sellItemAction" method="bindAndValidate"/>
-		<transition on="success" to="showCostOverview"/>
-		<transition on="error" to="enterShippingDetails"/>
-	</action-state>
-	
 	<end-state id="showCostOverview" view="costOverview"/>
 
+	<action-state id="bindAndValidate">
+		<action bean="sellItemAction" method="bindAndValidate">
+			<property name="validatorMethod" value="${validatorMethod}"/>
+		</action>
+		<transition on="success" to="${successState}"/>
+		<transition on="error" to="${errorState}"/>
+	</action-state>
+	
 </webflow>
