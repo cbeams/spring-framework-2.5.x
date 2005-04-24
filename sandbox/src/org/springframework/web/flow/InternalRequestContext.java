@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.AttributeValueResolutionStrategy;
 import org.springframework.binding.AttributeValueResolver;
+import org.springframework.binding.NoSuchAttributeValueException;
 import org.springframework.binding.support.DefaultAttributeValueResolutionStrategy;
 import org.springframework.binding.support.EmptyAttributeSource;
 import org.springframework.core.closure.support.Block;
@@ -92,7 +93,12 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		}
 
 		public Object resolveAttributeValue(String placeholder) {
-			return propertyResolutionStrategy.resolveAttributeValue(placeholder, stateAttributes);
+			try {
+				return propertyResolutionStrategy.resolveAttributeValue(placeholder, stateAttributes);
+			}
+			catch (NoSuchAttributeValueException e) {
+				return null;
+			}
 		}
 	}
 

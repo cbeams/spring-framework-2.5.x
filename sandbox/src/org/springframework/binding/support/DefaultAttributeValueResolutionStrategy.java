@@ -6,6 +6,7 @@ package org.springframework.binding.support;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.AttributeValueResolutionStrategy;
+import org.springframework.binding.NoSuchAttributeValueException;
 import org.springframework.util.StringUtils;
 
 public class DefaultAttributeValueResolutionStrategy implements AttributeValueResolutionStrategy {
@@ -25,7 +26,8 @@ public class DefaultAttributeValueResolutionStrategy implements AttributeValueRe
 		return value.startsWith(placeholderPrefix) && value.endsWith(placeholderSuffix);
 	}
 
-	public Object resolveAttributeValue(String valuePlaceholder, AttributeSource parameters) {
+	public Object resolveAttributeValue(String valuePlaceholder, AttributeSource parameters)
+			throws NoSuchAttributeValueException {
 		return parseStringValue(valuePlaceholder, parameters, null);
 	}
 
@@ -36,8 +38,7 @@ public class DefaultAttributeValueResolutionStrategy implements AttributeValueRe
 		// is not really relevant, as this code will typically just run on startup.
 		int startIndex = strVal.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
-			int endIndex = buf.toString().indexOf(this.placeholderSuffix,
-					startIndex + this.placeholderPrefix.length());
+			int endIndex = buf.toString().indexOf(this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholderToUse = null;
@@ -60,7 +61,7 @@ public class DefaultAttributeValueResolutionStrategy implements AttributeValueRe
 					startIndex = buf.toString().indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
 				else {
-					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");
+					throw new NoSuchAttributeValueException(strVal);
 				}
 			}
 			else {
