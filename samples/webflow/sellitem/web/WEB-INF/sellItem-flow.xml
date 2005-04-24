@@ -17,14 +17,6 @@
 		</transition>
 	</view-state>
 
-	<action-state id="bindAndValidate">
-		<action bean="sellItemAction" method="bindAndValidate">
-			<property name="validatorMethod" value="${validatorMethod}"/>
-		</action>
-		<transition on="success" to="${successState}"/>
-		<transition on="error" to="${errorState}"/>
-	</action-state>
-	
 	<view-state id="enterCategory" view="categoryForm">
 		<transition on="submit" to="bindAndValidate">
 			<property name="successState" value="shippingRequired"/>
@@ -45,4 +37,14 @@
 
 	<end-state id="showCostOverview" view="costOverview"/>
 
+	<!-- parameterized states -->
+
+	<action-state id="bindAndValidate">
+		<action bean="sellItemAction" method="bindAndValidate">
+			<property name="validatorMethod" value="${validatorMethod}"/>
+		</action>
+		<transition on="success" to="${successState}"/>
+		<transition on="error" to="${errorState}"/>
+	</action-state>
+	
 </webflow>
