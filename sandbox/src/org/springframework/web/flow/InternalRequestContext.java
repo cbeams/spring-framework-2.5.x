@@ -115,7 +115,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		}
 
 		public boolean containsAttribute(String attributeName) {
-			return actionAttributes.containsAttribute(attributeName);
+			if (!actionAttributes.containsAttribute(attributeName)) {
+				return false;
+			}
+			return getAttribute(attributeName) != null;
 		}
 
 		public Object getAttribute(String attributeName) {
