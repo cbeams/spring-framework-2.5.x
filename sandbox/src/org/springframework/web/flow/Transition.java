@@ -210,7 +210,7 @@ public class Transition {
 				this.targetState = targetState;
 			}
 		}
-		return this.targetState;
+		return targetState;
 	}
 
 	public String toString() {
