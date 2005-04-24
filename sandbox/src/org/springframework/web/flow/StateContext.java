@@ -47,24 +47,6 @@ public interface StateContext extends RequestContext {
 	public void setLastEvent(Event lastEvent);
 
 	/**
-	 * Returns a holder for properties about the currently entering
-	 * <code>State</code> in the context of the current request.
-	 * <p>
-	 * An <code>State</code> can use these properties to influence its behaivor.
-	 * @return the state parameters, or empty if not set
-	 */
-	public AttributeValueResolver getStateAttributeResolver();
-	
-	/**
-	 * Update contextual properties about the state that is about to enter in
-	 * this request context.
-	 * 
-	 * @param attributes
-	 *            the state parameters
-	 */
-	public void setStateAttributes(AttributeSource attributes);
-
-	/**
 	 * Update contextual properties about the action that is about to execute in
 	 * this request context.
 	 * 

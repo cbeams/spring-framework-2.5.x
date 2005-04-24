@@ -663,14 +663,15 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Retrieve the <code>TransitionCriteria</code> to be used as a transition precondition with the
-	 * specified id
-	 * @param serviceId the id of the transition criteria implementation in the registry
+	 * Retrieve the <code>TransitionCriteria</code> to be used as a transition executional
+	 * criteria.
+	 * @param encodedCriteria the encoded criteria
 	 * @return the transition precondition
 	 */
-	protected TransitionCriteria precondition(String serviceId) {
-		return getFlowServiceLocator().getTransitionCriteria(serviceId);
+	protected TransitionCriteria executionCriteria(String encodedCriteria) {
+		return getTransitionCriteriaCreator().create(encodedCriteria);
 	}
+	
 	/**
 	 * Creates a transition stating:
 	 * <ul>

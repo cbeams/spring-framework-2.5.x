@@ -51,9 +51,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private Event lastEvent;
 
-	private ActionAttributes actionAttributes = new ActionAttributes();
-
-	private StateAttributes stateAttributes = new StateAttributes();
+	private AttributeSource actionAttributes = EmptyAttributeSource.INSTANCE;
 
 	private FlowExecutionStack flowExecution;
 
@@ -72,65 +70,6 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		Assert.notNull(flowExecution, "the flow execution is required");
 		this.originatingEvent = originatingEvent;
 		this.flowExecution = flowExecution;
-	}
-
-	private static class StateAttributes implements AttributeValueResolver {
-		private AttributeSource stateAttributes = EmptyAttributeSource.INSTANCE;
-
-		private AttributeValueResolutionStrategy propertyResolutionStrategy = new DefaultAttributeValueResolutionStrategy();
-
-		public void setStateAttributes(AttributeSource stateAttributes) {
-			if (stateAttributes != null) {
-				this.stateAttributes = stateAttributes;
-			}
-			else {
-				this.stateAttributes = EmptyAttributeSource.INSTANCE;
-			}
-		}
-
-		public boolean isValuePlaceholder(String value) {
-			return propertyResolutionStrategy.isValuePlaceholder(value);
-		}
-
-		public Object resolveAttributeValue(String placeholder) {
-			try {
-				return propertyResolutionStrategy.resolveAttributeValue(placeholder, stateAttributes);
-			}
-			catch (NoSuchAttributeValueException e) {
-				return null;
-			}
-		}
-	}
-
-	private class ActionAttributes implements AttributeSource {
-		private AttributeSource actionAttributes = EmptyAttributeSource.INSTANCE;
-
-		public void setActionAttributes(AttributeSource actionAttributes) {
-			if (actionAttributes != null) {
-				this.actionAttributes = actionAttributes;
-			}
-			else {
-				this.actionAttributes = EmptyAttributeSource.INSTANCE;
-			}
-		}
-
-		public boolean containsAttribute(String attributeName) {
-			if (!actionAttributes.containsAttribute(attributeName)) {
-				return false;
-			}
-			return getAttribute(attributeName) != null;
-		}
-
-		public Object getAttribute(String attributeName) {
-			Object attributeValue = actionAttributes.getAttribute(attributeName);
-			if (attributeValue instanceof String
-					&& getStateAttributeResolver().isValuePlaceholder((String)attributeValue)) {
-				return getStateAttributeResolver().resolveAttributeValue((String)attributeValue);
-			}
-			else {
-				return actionAttributes.getAttribute(attributeName);
-			}
-		}
 	}
 
 	// implementing RequestContext
@@ -210,16 +149,13 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		fireEventSignaled();
 	}
 
-	public void setActionAttributes(AttributeSource parameters) {
-		this.actionAttributes.setActionAttributes(parameters);
-	}
-
-	public void setStateAttributes(AttributeSource parameters) {
-		this.stateAttributes.setStateAttributes(parameters);
-	}
-
-	public AttributeValueResolver getStateAttributeResolver() {
-		return stateAttributes;
+	public void setActionAttributes(AttributeSource actionAttributes) {
+		if (actionAttributes != null) {
+			this.actionAttributes = actionAttributes;
+		}
+		else {
+			this.actionAttributes = EmptyAttributeSource.INSTANCE;
+		}
 	}
 
 	public FlowSession getActiveFlowSession() {

@@ -17,7 +17,7 @@
 	Defines the root element for a web flow definition. Web flows
 	are composed of one or more states.
 -->
-<!ELEMENT webflow ( (action-state | view-state | decision-state | subflow-state | end-state | precondition )+ )>
+<!ELEMENT webflow ( (action-state | view-state | subflow-state | end-state | precondition )+ )>
 
 <!--
 	Unique identifier of the web flow; should be unique to all other web flows.
@@ -134,7 +134,7 @@
 	Defines a transition from one state to another. Transitions define the supported 
 	paths through the flow.
 -->
-<!ELEMENT transition ( property* )>
+<!ELEMENT transition ( action* )>
 
 <!--
 	The identifier of the event that can trigger this transition. An event describes something
@@ -146,38 +146,13 @@
 <!--
 	Target state of the transition.
 -->
-<!ATTLIST transition to CDATA #REQUIRED>
+<!ATTLIST transition to IDREF #REQUIRED>
 
 <!--
-	Defines a decision state: a state where a expression is evaluated to
-	determine what state to route to next.
+	A id of a configured transition execution criteria, tests if this transition, once matched
+	to an event in a request context, is allowed to execute.
 -->
-<!ELEMENT decision-state ( if+ )>
-
-<!--
-	Unique identifier of a decision state; must be unique to this flow.
--->
-<!ATTLIST decision-state id ID #REQUIRED>
-
-<!--
-	Defines an eligible state transition.
--->
-<!ELEMENT if EMPTY>
-
-<!--
-	The transition criteria expression.
--->
-<!ATTLIST if test CDATA #REQUIRED>
-
-<!--
-	The target state to enter when the expression evaluates to true.
--->
-<!ATTLIST if then CDATA #REQUIRED>
-
-<!--
-	The optional target state to enter when the expression evaluates to false.
--->
-<!ATTLIST if else CDATA #IMPLIED>
+<!ATTLIST transition executionCriteria CDATA #IMPLIED>
 
 <!--
 	Defines a sub flow state: a state that spawns a sub flow when entered. When the

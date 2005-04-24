@@ -17,7 +17,6 @@ package org.springframework.web.flow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.binding.AttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
@@ -46,7 +45,13 @@ public class Transition {
 	 * The criteria that determine whether or not this transition matches as
 	 * eligible for execution.
 	 */
-	private TransitionCriteria criteria;
+	private TransitionCriteria matchingCriteria;
+
+	/**
+	 * The criteria that determine whether or not this transition, once matched,
+	 * meets all execution preconditions.
+	 */
+	private TransitionCriteria executionCriteria;
 
 	/**
 	 * The target state that this transition should transition to when executed.
@@ -58,12 +63,6 @@ public class Transition {
 	 * state once on first execution (after configuration).
 	 */
 	private String targetStateId;
-
-	/**
-	 * Parameters that to make available to the targetState that the state may use
-	 * to effect its behavior.
-	 */
-	private AttributeSource targetStateAttributes;
 
 	/**
 	 * Create a new transition.
@@ -78,7 +77,7 @@ public class Transition {
 	public Transition(TransitionCriteria criteria, String targetStateId) {
 		Assert.notNull(criteria, "The transition criteria property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.criteria = criteria;
+		this.matchingCriteria = criteria;
 		this.targetStateId = targetStateId;
 	}
 
@@ -91,13 +90,16 @@ public class Transition {
 	 * @param targetStateId
 	 *            the id of the state to transition to when this transition is
 	 *            executed
+	 * @param executionCriteria
+	 *            strategy object used to determine if this transition, once
+	 *            matched for execution, is allowed to execute.
 	 */
-	public Transition(TransitionCriteria criteria, String targetStateId, AttributeSource targetStateAttributes) {
+	public Transition(TransitionCriteria criteria, String targetStateId, TransitionCriteria executionCriteria) {
 		Assert.notNull(criteria, "The transition criteria property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.criteria = criteria;
+		this.matchingCriteria = criteria;
 		this.targetStateId = targetStateId;
-		this.targetStateAttributes = targetStateAttributes;
+		this.executionCriteria = executionCriteria;
 	}
 
 	/**
@@ -122,17 +124,42 @@ public class Transition {
 	}
 
 	/**
+	 * Returns the id of the target (<i>to</i>) state of this transition.
+	 * 
+	 * @return the target state id
+	 */
+	public String getTargetStateId() {
+		return targetStateId;
+	}
+
+	/**
+	 * Returns the target (<i>to</i>) state of this transition.
+	 * 
+	 * @return the target state
+	 * @throws NoSuchFlowStateException
+	 *             when the target state cannot be found
+	 */
+	public State getTargetState() throws NoSuchFlowStateException {
+		synchronized (this) {
+			if (this.targetState != null) {
+				return this.targetState;
+			}
+		}
+		State targetState = getSourceState().getFlow().getRequiredState(getTargetStateId());
+		synchronized (this) {
+			this.targetState = targetState;
+		}
+		return this.targetState;
+	}
+
+	/**
 	 * Returns the strategy used to determine if this transition should execute
 	 * given an execution context.
 	 * 
 	 * @return the constraint
 	 */
 	public TransitionCriteria getCriteria() {
-		return this.criteria;
-	}
-	
-	public String getTargetStateId() {
-		return targetStateId;
+		return this.matchingCriteria;
 	}
 
 	/**
@@ -144,7 +171,7 @@ public class Transition {
 	 * @return true if this transition should execute, false otherwise
 	 */
 	public boolean matches(RequestContext context) {
-		return this.criteria.test(context);
+		return this.matchingCriteria.test(context);
 	}
 
 	/**
@@ -164,15 +191,19 @@ public class Transition {
 	protected ViewDescriptor execute(StateContext context) throws CannotExecuteStateTransitionException {
 		State state = null;
 		try {
-			state = getTargetState(context);
+			state = getTargetState();
 		}
 		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
-		// set parameters the state may use to effect its behaivor
-		context.setStateAttributes(targetStateAttributes);
-		// enter the target state (note: any exceptions are propagated)
-		ViewDescriptor viewDescriptor = state.enter(context);
+		ViewDescriptor viewDescriptor;
+		if (this.executionCriteria != null && !this.executionCriteria.test(context)) {
+			viewDescriptor = getSourceState().enter(context);
+		}
+		else {
+			// enter the target state (note: any exceptions are propagated)
+			viewDescriptor = state.enter(context);
+		}
 		if (logger.isDebugEnabled()) {
 			if (context.isFlowExecutionActive()) {
 				logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
@@ -186,34 +217,8 @@ public class Transition {
 		return viewDescriptor;
 	}
 
-	/**
-	 * Returns the target (<i>to</i>) state of this transition.
-	 * 
-	 * @return the target state
-	 * @throws NoSuchFlowStateException
-	 *             when the target state cannot be found
-	 */
-	protected State getTargetState(StateContext context) throws NoSuchFlowStateException {
-		synchronized (this) {
-			if (this.targetState != null) {
-				return this.targetState;
-			}
-		}
-		String targetStateIdParameter = null;
-		if (context.getStateAttributeResolver().isValuePlaceholder(targetStateId)) {
-			targetStateIdParameter = (String)context.getStateAttributeResolver().resolveAttributeValue(targetStateId);
-		}
-		State targetState = getSourceState().getFlow().getRequiredState(
-				(targetStateIdParameter != null ? targetStateIdParameter : targetStateId));
-		if (targetStateIdParameter == null) {
-			synchronized (this) {
-				this.targetState = targetState;
-			}
-		}
-		return targetState;
-	}
-
 	public String toString() {
-		return new ToStringCreator(this).append("on", criteria).append("to", targetStateId).toString();
+		return new ToStringCreator(this).append("on", matchingCriteria).append("to", targetStateId).append(
+				"executionCriteria", executionCriteria).toString();
 	}
 }
