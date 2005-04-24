@@ -19,15 +19,14 @@ public class DefaultPropertyResolutionStrategy implements AttributeResolutionStr
 	private String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
 	public boolean isAttributePlaceholder(String token) {
-		// TODO Auto-generated method stub
 		if (!StringUtils.hasText(token)) {
 			return false;
 		}
+		System.out.println(token);
 		return token.startsWith(placeholderPrefix) && token.endsWith(placeholderSuffix);
 	}
 
 	public Object resolveAttribute(String placeholder, AttributeSource parameters) {
-		// TODO Auto-generated method stub
 		return parseStringValue(placeholder, parameters, null);
 	}
 

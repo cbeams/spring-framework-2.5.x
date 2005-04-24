@@ -162,22 +162,6 @@ public class ViewState extends TransitionableState {
 		}
 	}
 
-	/*
-	 * Overrides onEvent with default behaivor to catch TransitionNotAllowed and
-	 * forward back to the view rendered by this state.
-	 * 
-	 * @see org.springframework.web.flow.TransitionableState#onEvent(org.springframework.web.flow.Event,
-	 *      org.springframework.web.flow.StateContext)
-	 */
-	protected ViewDescriptor onEvent(Event event, StateContext context) {
-		try {
-			return super.onEvent(event, context);
-		}
-		catch (TransitionNotAllowedException e) {
-			return createViewDescriptor(context);
-		}
-	}
-
 	protected ViewDescriptor createViewDescriptor(RequestContext context) {
 		return new ViewDescriptor(this.viewName, context.getModel());
 	}

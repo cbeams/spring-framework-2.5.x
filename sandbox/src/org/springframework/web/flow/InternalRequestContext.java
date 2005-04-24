@@ -110,6 +110,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 		public boolean containsAttribute(String attributeName) {
 			if (getStateAttributeResolver().isAttributePlaceholder(attributeName)) {
+				System.out.println("is attribute placeholder " + attributeName);
 				return getStateAttributeResolver().resolveAttribute(attributeName) != null;
 			}
 			else {
@@ -119,6 +120,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 		public Object getAttribute(String attributeName) {
 			if (getStateAttributeResolver().isAttributePlaceholder(attributeName)) {
+				System.out.println("resolving attribute placeholder " + attributeName);
 				return getStateAttributeResolver().resolveAttribute(attributeName);
 			}
 			else {
