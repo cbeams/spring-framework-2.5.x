@@ -17,6 +17,7 @@ package org.springframework.web.flow.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import org.springframework.util.xml.DomUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.AnnotatedAction;
+import org.springframework.web.flow.DecisionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -140,6 +142,16 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String VIEW_STATE_ELEMENT = "view-state";
 
 	private static final String VIEW_ATTRIBUTE = "view";
+
+	private static final String DECISION_STATE_ELEMENT = "decision-state";
+
+	private static final String IF_ELEMENT = "if";
+
+	private static final String TEST_ATTRIBUTE = "test";
+
+	private static final String THEN_ATTRIBUTE = "then";
+
+	private static final String ELSE_ATTRIBUTE = "else";
 
 	private static final String SUBFLOW_STATE_ELEMENT = "subflow-state";
 
@@ -345,6 +357,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				else if (SUBFLOW_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddSubFlowState(flow, element);
 				}
+				else if (DECISION_STATE_ELEMENT.equals(element.getNodeName())) {
+					parseAndAddDecisionState(flow, element);
+				}
 				else if (END_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddEndState(flow, element);
 				}
@@ -378,6 +393,46 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		else {
 			// a marker state
 			new ViewState(flow, id, transitions);
+		}
+	}
+
+	/**
+	 * Parse given decision state definition and add a corresponding state to given
+	 * flow.
+	 */
+	protected void parseAndAddDecisionState(Flow flow, Element element) {
+		String id = element.getAttribute(ID_ATTRIBUTE);
+		Transition[] transitions = parseIfs(element);
+		new DecisionState(flow, id, transitions);
+	}
+
+	/**
+	 * Find all transition definitions in given state definition and return a
+	 * list of corresponding Transition objects.
+	 */
+	protected Transition[] parseIfs(Element element) {
+		List transitions = new LinkedList();
+		List transitionElements = DomUtils.getChildElementsByTagName(element, IF_ELEMENT);
+		for (int i = 0; i < transitionElements.size(); i++) {
+			transitions.addAll(Arrays.asList(parseIf((Element)transitionElements.get(i))));
+		}
+		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
+	}
+
+	/**
+	 * Parse a transition definition and return a corresponding Transition
+	 * object.
+	 */
+	protected Transition[] parseIf(Element element) {
+		String expression = element.getAttribute(TEST_ATTRIBUTE);
+		String thenAttr = element.getAttribute(THEN_ATTRIBUTE);
+		String elseAttr = element.getAttribute(ELSE_ATTRIBUTE);
+		if (!StringUtils.hasText(elseAttr)) {
+			return new Transition[] { new Transition(getTransitionCriteriaCreator().create(expression), thenAttr) };
+		}
+		else {
+			return new Transition[] { new Transition(getTransitionCriteriaCreator().create(expression), thenAttr),
+					new Transition(getTransitionCriteriaCreator().create("*"), elseAttr) };
 		}
 	}
 
@@ -477,12 +532,12 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected Transition parseTransition(Element element) {
 		String event = element.getAttribute(EVENT_ATTRIBUTE);
 		String to = element.getAttribute(TO_ATTRIBUTE);
-		MapAttributeSource targetStateParameters = new MapAttributeSource();
+		MapAttributeSource targetStateAttributes = new MapAttributeSource();
 		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
 		for (int i = 0; i < propertyElements.size(); i++) {
-			parseAndAddProperty((Element)propertyElements.get(i), targetStateParameters);
+			parseAndAddProperty((Element)propertyElements.get(i), targetStateAttributes);
 		}
-		return new Transition(getTransitionCriteriaCreator().create(event), to, targetStateParameters);
+		return new Transition(getTransitionCriteriaCreator().create(event), to, targetStateAttributes);
 	}
 
 	/**

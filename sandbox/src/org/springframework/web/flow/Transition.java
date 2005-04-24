@@ -63,7 +63,7 @@ public class Transition {
 	 * Parameters that to make available to the targetState that the state may use
 	 * to effect its behavior.
 	 */
-	private AttributeSource targetStateParameters;
+	private AttributeSource targetStateAttributes;
 
 	/**
 	 * Create a new transition.
@@ -92,12 +92,12 @@ public class Transition {
 	 *            the id of the state to transition to when this transition is
 	 *            executed
 	 */
-	public Transition(TransitionCriteria criteria, String targetStateId, AttributeSource targetStateParameters) {
+	public Transition(TransitionCriteria criteria, String targetStateId, AttributeSource targetStateAttributes) {
 		Assert.notNull(criteria, "The transition criteria property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
 		this.criteria = criteria;
 		this.targetStateId = targetStateId;
-		this.targetStateParameters = targetStateParameters;
+		this.targetStateAttributes = targetStateAttributes;
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class Transition {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
 		// set parameters the state may use to effect its behaivor
-		context.setStateAttributes(targetStateParameters);
+		context.setStateAttributes(targetStateAttributes);
 		// enter the target state (note: any exceptions are propagated)
 		ViewDescriptor viewDescriptor = state.enter(context);
 		if (logger.isDebugEnabled()) {

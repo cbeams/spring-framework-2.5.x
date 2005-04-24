@@ -73,14 +73,14 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		this.flowExecution = flowExecution;
 	}
 
-	private class StateAttributes implements AttributeResolver {
+	private static class StateAttributes implements AttributeResolver {
 		private AttributeSource stateAttributes = EmptyAttributeSource.INSTANCE;
 
 		private AttributeResolutionStrategy propertyResolutionStrategy = new DefaultPropertyResolutionStrategy();
 
 		public void setStateAttributes(AttributeSource stateAttributes) {
 			if (stateAttributes != null) {
-				this.stateAttributes = actionAttributes;
+				this.stateAttributes = stateAttributes;
 			}
 			else {
 				this.stateAttributes = EmptyAttributeSource.INSTANCE;

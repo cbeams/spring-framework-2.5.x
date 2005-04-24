@@ -18,6 +18,7 @@ package org.springframework.binding.support;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
@@ -83,5 +84,9 @@ public class MapAttributeSource extends AttributeSourceSupport {
 
 	public int size() {
 		return map.size();
+	}
+	
+	public String toString() {
+		return new ToStringCreator(this).append("map", map).toString();
 	}
 }
