@@ -200,8 +200,8 @@ public class Transition {
 			}
 		}
 		String targetStateIdParameter = null;
-		if (context.getStateAttributeResolver().isAttributePlaceholder(targetStateId)) {
-			targetStateIdParameter = (String)context.getStateAttributeResolver().resolveAttribute(targetStateId);
+		if (context.getStateAttributeResolver().isValuePlaceholder(targetStateId)) {
+			targetStateIdParameter = (String)context.getStateAttributeResolver().resolveAttributeValue(targetStateId);
 		}
 		State targetState = getSourceState().getFlow().getRequiredState(
 				(targetStateIdParameter != null ? targetStateIdParameter : targetStateId));

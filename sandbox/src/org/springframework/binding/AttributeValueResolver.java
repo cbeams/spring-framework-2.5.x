@@ -15,8 +15,8 @@
  */
 package org.springframework.binding;
 
-public interface AttributeResolver {
-	public boolean isAttributePlaceholder(String token);
+public interface AttributeValueResolver {
+	public boolean isValuePlaceholder(String value);
 
-	public Object resolveAttribute(String placeholder);
+	public Object resolveAttributeValue(String valuePlaceholder);
 }

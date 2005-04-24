@@ -21,9 +21,9 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeSource;
-import org.springframework.binding.AttributeResolutionStrategy;
-import org.springframework.binding.AttributeResolver;
-import org.springframework.binding.support.DefaultPropertyResolutionStrategy;
+import org.springframework.binding.AttributeValueResolutionStrategy;
+import org.springframework.binding.AttributeValueResolver;
+import org.springframework.binding.support.DefaultAttributeValueResolutionStrategy;
 import org.springframework.binding.support.EmptyAttributeSource;
 import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
@@ -73,10 +73,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		this.flowExecution = flowExecution;
 	}
 
-	private static class StateAttributes implements AttributeResolver {
+	private static class StateAttributes implements AttributeValueResolver {
 		private AttributeSource stateAttributes = EmptyAttributeSource.INSTANCE;
 
-		private AttributeResolutionStrategy propertyResolutionStrategy = new DefaultPropertyResolutionStrategy();
+		private AttributeValueResolutionStrategy propertyResolutionStrategy = new DefaultAttributeValueResolutionStrategy();
 
 		public void setStateAttributes(AttributeSource stateAttributes) {
 			if (stateAttributes != null) {
@@ -87,12 +87,12 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 			}
 		}
 
-		public boolean isAttributePlaceholder(String token) {
-			return propertyResolutionStrategy.isAttributePlaceholder(token);
+		public boolean isValuePlaceholder(String value) {
+			return propertyResolutionStrategy.isValuePlaceholder(value);
 		}
 
-		public Object resolveAttribute(String placeholder) {
-			return propertyResolutionStrategy.resolveAttribute(placeholder, stateAttributes);
+		public Object resolveAttributeValue(String placeholder) {
+			return propertyResolutionStrategy.resolveAttributeValue(placeholder, stateAttributes);
 		}
 	}
 
@@ -109,19 +109,14 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		}
 
 		public boolean containsAttribute(String attributeName) {
-			if (getStateAttributeResolver().isAttributePlaceholder(attributeName)) {
-				System.out.println("is attribute placeholder " + attributeName);
-				return getStateAttributeResolver().resolveAttribute(attributeName) != null;
-			}
-			else {
-				return actionAttributes.containsAttribute(attributeName);
-			}
+			return actionAttributes.containsAttribute(attributeName);
 		}
 
 		public Object getAttribute(String attributeName) {
-			if (getStateAttributeResolver().isAttributePlaceholder(attributeName)) {
-				System.out.println("resolving attribute placeholder " + attributeName);
-				return getStateAttributeResolver().resolveAttribute(attributeName);
+			Object attributeValue = actionAttributes.getAttribute(attributeName);
+			if (attributeValue instanceof String
+					&& getStateAttributeResolver().isValuePlaceholder((String)attributeValue)) {
+				return getStateAttributeResolver().resolveAttributeValue((String)attributeValue);
 			}
 			else {
 				return actionAttributes.getAttribute(attributeName);
@@ -214,7 +209,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		this.stateAttributes.setStateAttributes(parameters);
 	}
 
-	public AttributeResolver getStateAttributeResolver() {
+	public AttributeValueResolver getStateAttributeResolver() {
 		return stateAttributes;
 	}
 

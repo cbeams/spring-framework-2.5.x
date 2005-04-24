@@ -18,7 +18,7 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 import org.springframework.binding.AttributeSource;
-import org.springframework.binding.AttributeResolver;
+import org.springframework.binding.AttributeValueResolver;
 
 /**
  * Mutable control interface for states to use to manipulate the state of an
@@ -53,7 +53,7 @@ public interface StateContext extends RequestContext {
 	 * An <code>State</code> can use these properties to influence its behaivor.
 	 * @return the state parameters, or empty if not set
 	 */
-	public AttributeResolver getStateAttributeResolver();
+	public AttributeValueResolver getStateAttributeResolver();
 	
 	/**
 	 * Update contextual properties about the state that is about to enter in
