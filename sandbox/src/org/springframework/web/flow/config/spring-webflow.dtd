@@ -146,7 +146,7 @@
 <!--
 	Target state of the transition.
 -->
-<!ATTLIST transition to IDREF #REQUIRED>
+<!ATTLIST transition to CDATA #REQUIRED>
 
 <!--
 	Defines a sub flow state: a state that spawns a sub flow when entered. When the

@@ -10,35 +10,38 @@
 	</action-state>
 
 	<view-state id="enterPriceAndItemCount" view="priceAndItemCountForm">
-		<transition on="submit" to="enterCategory">
-			<parameter name="validatorMethod" value="validatePriceAndItemCount"/>
-			<parameter name="successState" value="enterCategory"/>
-		</transition>
+		<transition on="submit" to="bindAndValidatePriceAndItemCount"/>
 	</view-state>
 	
-	<action-state id="bindAndValidate">
+	<action-state id="bindAndValidatePriceAndItemCount">
 		<action bean="sellItemAction" method="bindAndValidate">
-			<property name="validatorMethod" value="${validatorMethod}"/>
+			<property name="validatorMethod" value="validatePriceAndItemCount"/>
 		</action>
-		<transition on="success" to="${successState}"/>
+		<transition on="success" to="enterCategory"/>
+		<transition on="error" to="enterPriceAndItemCount"/>
 	</action-state>
-		
+	
 	<view-state id="enterCategory" view="categoryForm">
-		<transition on="submit" to="shippingRequired">
-			<action bean="sellItemAction" method="bindAndValidate"/>
-		</transition>
+		<transition on="submit" to="bindAndValidateCategory"/>
 	</view-state>
 
-	<decision-state id="shippingRequired">
-		<if test="${flowScope.sale.shipping}" then="enterShippingDetails" else="showCostOverview/>
-	</decision-state>
+	<action-state id="bindAndValidateCategory">
+		<action bean="sellItemAction" method="bindAndValidate"/>
+		<transition on="${#result == 'success' and flowScope.sale.shipping}" to="enterShippingDetails"/>
+		<transition on="${#result == 'success' and !flowScope.sale.shipping}" to="showCostOverview"/>
+		<transition on="error" to="enterCategory"/>
+	</action-state>
 	
 	<view-state id="enterShippingDetails" view="shippingDetailsForm">
-		<transition on="submit" to="showCostOverview">
-			<action bean="sellItemAction" method="bindAndValidate"/>
-		</transition>
+		<transition on="submit" to="bindAndValidateShippingDetails"/>
 	</view-state>
 
+	<action-state id="bindAndValidateShippingDetails">
+		<action bean="sellItemAction" method="bindAndValidate"/>
+		<transition on="success" to="showCostOverview"/>
+		<transition on="error" to="enterShippingDetails"/>
+	</action-state>
+	
 	<end-state id="showCostOverview" view="costOverview"/>
 
 </webflow>

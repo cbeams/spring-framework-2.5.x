@@ -6,11 +6,15 @@
 <webflow id="person.Search" start-state="criteria.view">
 
 	<view-state id="criteria.view" view="person.Search.criteria.view">
-		<transition on="submit" to="executeQuery">
-			<action bean="person.Search.formAction" method="bindAndValidate"/>
-		</transition>
+		<transition on="submit" to="bindAndValidate"/>
 	</view-state>
-
+	
+	<action-state id="bindAndValidate">
+		<action bean="person.Search.criteria.formAction"/>
+		<transition on="success" to="executeQuery"/>
+		<transition on="error" to="criteria.view"/>
+	</action-state>
+	
 	<action-state id="executeQuery">
 		<action bean="person.Search.executeQuery"/>
 		<transition on="success" to="results.view"/>
