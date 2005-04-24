@@ -635,22 +635,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
-	 * <li>On the occurence of an event that matches the criteria defined by
-	 * ${criteria}, transition to state ${stateId} if and only if the ${precondition}
-	 * is met.
-	 * </ul>
-	 * @param criteria the transition criteria
-	 * @param stateId the state Id
-	 * @param precondition the precondition
-	 * @return the transition (event matching criteria + precondition->stateId)
-	 */
-	protected Transition on(TransitionCriteria criteria, String stateId, TransitionCriteria precondition) {
-		return new Transition(criteria, stateId, precondition);
-	}
-
-	/**
-	 * Creates a transition stating:
-	 * <ul>
 	 * <li>On the occurence of event ${eventId}, transition to state
 	 * ${stateId}.
 	 * </ul>
@@ -696,7 +680,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (*->stateId)
 	 */
 	protected Transition onAnyEvent(String stateId) {
-		return new Transition(SimpleTransitionCriteriaCreator.WILDCARD_TRANSITION_CRITERIA, stateId);
+		return new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, stateId);
 	}
 
 	/**

@@ -34,10 +34,6 @@ import org.springframework.web.flow.TransitionCriteria;
  */
 public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreator {
 
-	/**
-	 * Event id value ("*") that will cause the transition to match
-	 * on any event.
-	 */
 	public static final String WILDCARD_EVENT_ID = "*";
 
 	public TransitionCriteria create(String encodedCriteria) {
@@ -54,7 +50,7 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 */
 	protected TransitionCriteria createDefaultTransitionCriteria(String encodedCriteria) {
 		if (WILDCARD_EVENT_ID.equals(encodedCriteria)) {
-			return WILDCARD_TRANSITION_CRITERIA;
+			return TransitionCriteria.WILDCARD_TRANSITION_CRITERIA;
 		}
 		else {
 			// implementation note: this inner class is not a class constant
@@ -62,19 +58,6 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 			return new EventIdTransitionCriteria(encodedCriteria);
 		}
 	}
-
-	/**
-	 * Event matching criteria that matches on any event.
-	 */
-	public static final TransitionCriteria WILDCARD_TRANSITION_CRITERIA = new TransitionCriteria() {
-		public boolean test(RequestContext context) {
-			return true;
-		}
-
-		public String toString() {
-			return WILDCARD_EVENT_ID;
-		}
-	};
 
 	/**
 	 * Simple, default transition criteria that matches on an eventId and

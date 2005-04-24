@@ -35,4 +35,19 @@ public interface TransitionCriteria {
 	 * @return true if the transition should fire, false otherwise
 	 */
 	public boolean test(RequestContext context);
+
+	/**
+	 * Transition criteria that always returns true.
+	 */
+	public static final TransitionCriteria WILDCARD_TRANSITION_CRITERIA = new TransitionCriteria() {
+
+		public boolean test(RequestContext context) {
+			return true;
+		}
+
+		public String toString() {
+			return "*";
+		}
+	};
+	
 }

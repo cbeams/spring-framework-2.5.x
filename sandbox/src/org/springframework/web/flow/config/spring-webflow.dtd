@@ -134,7 +134,7 @@
 	Defines a transition from one state to another. Transitions define the supported 
 	paths through the flow.
 -->
-<!ELEMENT transition ( action* )>
+<!ELEMENT transition ( property* )>
 
 <!--
 	The identifier of the event that can trigger this transition. An event describes something
@@ -147,12 +147,6 @@
 	Target state of the transition.
 -->
 <!ATTLIST transition to IDREF #REQUIRED>
-
-<!--
-	A id of a configured transition precondition; a precondition tests if this transition, once matched
-	to an event in a request context, is allowed to execute.
--->
-<!ATTLIST transition precondition CDATA #IMPLIED>
 
 <!--
 	Defines a sub flow state: a state that spawns a sub flow when entered. When the

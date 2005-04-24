@@ -17,6 +17,7 @@ package org.springframework.web.flow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.binding.AttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
@@ -48,12 +49,6 @@ public class Transition {
 	private TransitionCriteria criteria;
 
 	/**
-	 * The criteria that determine whether or not this transition, once matched,
-	 * meets all execution preconditions.
-	 */
-	private TransitionCriteria precondition;
-
-	/**
 	 * The target state that this transition should transition to when executed.
 	 */
 	private State targetState;
@@ -63,6 +58,12 @@ public class Transition {
 	 * state once on first execution (after configuration).
 	 */
 	private String targetStateId;
+
+	/**
+	 * Parameters that to make available to the targetState that the state may use
+	 * to effect its behavior.
+	 */
+	private AttributeSource targetStateParameters;
 
 	/**
 	 * Create a new transition.
@@ -90,16 +91,13 @@ public class Transition {
 	 * @param targetStateId
 	 *            the id of the state to transition to when this transition is
 	 *            executed
-	 * @param precondition
-	 *            strategy object used to determine if this transition, once
-	 *            matched for execution, is allowed to execute.
 	 */
-	public Transition(TransitionCriteria criteria, String targetStateId, TransitionCriteria precondition) {
+	public Transition(TransitionCriteria criteria, String targetStateId, AttributeSource targetStateParameters) {
 		Assert.notNull(criteria, "The transition criteria property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
 		this.criteria = criteria;
 		this.targetStateId = targetStateId;
-		this.precondition = precondition;
+		this.targetStateParameters = targetStateParameters;
 	}
 
 	/**
@@ -124,35 +122,6 @@ public class Transition {
 	}
 
 	/**
-	 * Returns the id of the target (<i>to</i>) state of this transition.
-	 * 
-	 * @return the target state id
-	 */
-	public String getTargetStateId() {
-		return targetStateId;
-	}
-
-	/**
-	 * Returns the target (<i>to</i>) state of this transition.
-	 * 
-	 * @return the target state
-	 * @throws NoSuchFlowStateException
-	 *             when the target state cannot be found
-	 */
-	public State getTargetState() throws NoSuchFlowStateException {
-		synchronized (this) {
-			if (this.targetState != null) {
-				return this.targetState;
-			}
-		}
-		State targetState = getSourceState().getFlow().getRequiredState(getTargetStateId());
-		synchronized (this) {
-			this.targetState = targetState;
-		}
-		return this.targetState;
-	}
-
-	/**
 	 * Returns the strategy used to determine if this transition should execute
 	 * given an execution context.
 	 * 
@@ -160,6 +129,10 @@ public class Transition {
 	 */
 	public TransitionCriteria getCriteria() {
 		return this.criteria;
+	}
+	
+	public String getTargetStateId() {
+		return targetStateId;
 	}
 
 	/**
@@ -191,14 +164,13 @@ public class Transition {
 	protected ViewDescriptor execute(StateContext context) throws CannotExecuteStateTransitionException {
 		State state = null;
 		try {
-			state = getTargetState();
+			state = getTargetState(context);
 		}
 		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
-		if (this.precondition != null && !this.precondition.test(context)) {
-			throw new TransitionNotAllowedException(precondition, this);
-		}
+		// set parameters the state may use to effect its behaivor
+		context.setStateAttributes(targetStateParameters);
 		// enter the target state (note: any exceptions are propagated)
 		ViewDescriptor viewDescriptor = state.enter(context);
 		if (logger.isDebugEnabled()) {
@@ -214,8 +186,34 @@ public class Transition {
 		return viewDescriptor;
 	}
 
+	/**
+	 * Returns the target (<i>to</i>) state of this transition.
+	 * 
+	 * @return the target state
+	 * @throws NoSuchFlowStateException
+	 *             when the target state cannot be found
+	 */
+	protected State getTargetState(StateContext context) throws NoSuchFlowStateException {
+		synchronized (this) {
+			if (this.targetState != null) {
+				return this.targetState;
+			}
+		}
+		String targetStateIdParameter = null;
+		if (context.getStateAttributeResolver().isAttributePlaceholder(targetStateId)) {
+			targetStateIdParameter = (String)context.getStateAttributeResolver().resolveAttribute(targetStateId);
+		}
+		State targetState = getSourceState().getFlow().getRequiredState(
+				(targetStateIdParameter != null ? targetStateIdParameter : targetStateId));
+		if (targetStateIdParameter == null) {
+			synchronized (this) {
+				this.targetState = targetState;
+			}
+		}
+		return this.targetState;
+	}
+
 	public String toString() {
-		return new ToStringCreator(this).append("on", criteria).append("to", targetStateId).append("precondition",
-				precondition).toString();
+		return new ToStringCreator(this).append("on", criteria).append("to", targetStateId).toString();
 	}
 }

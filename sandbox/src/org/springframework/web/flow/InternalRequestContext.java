@@ -21,6 +21,9 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeSource;
+import org.springframework.binding.AttributeResolutionStrategy;
+import org.springframework.binding.AttributeResolver;
+import org.springframework.binding.support.DefaultPropertyResolutionStrategy;
 import org.springframework.binding.support.EmptyAttributeSource;
 import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
@@ -47,7 +50,9 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private Event lastEvent;
 
-	private AttributeSource actionExecutionAttributes = EmptyAttributeSource.INSTANCE;
+	private ActionAttributes actionAttributes = new ActionAttributes();
+
+	private StateAttributes stateAttributes = new StateAttributes();
 
 	private FlowExecutionStack flowExecution;
 
@@ -66,6 +71,60 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		Assert.notNull(flowExecution, "the flow execution is required");
 		this.originatingEvent = originatingEvent;
 		this.flowExecution = flowExecution;
+	}
+
+	private class StateAttributes implements AttributeResolver {
+		private AttributeSource stateAttributes = EmptyAttributeSource.INSTANCE;
+
+		private AttributeResolutionStrategy propertyResolutionStrategy = new DefaultPropertyResolutionStrategy();
+
+		public void setStateAttributes(AttributeSource stateAttributes) {
+			if (stateAttributes != null) {
+				this.stateAttributes = actionAttributes;
+			}
+			else {
+				this.stateAttributes = EmptyAttributeSource.INSTANCE;
+			}
+		}
+
+		public boolean isAttributePlaceholder(String token) {
+			return propertyResolutionStrategy.isAttributePlaceholder(token);
+		}
+
+		public Object resolveAttribute(String placeholder) {
+			return propertyResolutionStrategy.resolveAttribute(placeholder, stateAttributes);
+		}
+	}
+
+	private class ActionAttributes implements AttributeSource {
+		private AttributeSource actionAttributes = EmptyAttributeSource.INSTANCE;
+
+		public void setActionAttributes(AttributeSource actionAttributes) {
+			if (actionAttributes != null) {
+				this.actionAttributes = actionAttributes;
+			}
+			else {
+				this.actionAttributes = EmptyAttributeSource.INSTANCE;
+			}
+		}
+
+		public boolean containsAttribute(String attributeName) {
+			if (getStateAttributeResolver().isAttributePlaceholder(attributeName)) {
+				return getStateAttributeResolver().resolveAttribute(attributeName) != null;
+			}
+			else {
+				return actionAttributes.containsAttribute(attributeName);
+			}
+		}
+
+		public Object getAttribute(String attributeName) {
+			if (getStateAttributeResolver().isAttributePlaceholder(attributeName)) {
+				return getStateAttributeResolver().resolveAttribute(attributeName);
+			}
+			else {
+				return actionAttributes.getAttribute(attributeName);
+			}
+		}
 	}
 
 	// implementing RequestContext
@@ -108,7 +167,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	public AttributeSource getActionAttributes() {
-		return actionExecutionAttributes;
+		return actionAttributes;
 	}
 
 	public Scope getRequestScope() {
@@ -145,13 +204,16 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		fireEventSignaled();
 	}
 
-	public void setActionAttributes(AttributeSource attributes) {
-		if (attributes != null) {
-			this.actionExecutionAttributes = attributes;
-		}
-		else {
-			this.actionExecutionAttributes = EmptyAttributeSource.INSTANCE;
-		}
+	public void setActionAttributes(AttributeSource parameters) {
+		this.actionAttributes.setActionAttributes(parameters);
+	}
+
+	public void setStateAttributes(AttributeSource parameters) {
+		this.stateAttributes.setStateAttributes(parameters);
+	}
+
+	public AttributeResolver getStateAttributeResolver() {
+		return stateAttributes;
 	}
 
 	public FlowSession getActiveFlowSession() {

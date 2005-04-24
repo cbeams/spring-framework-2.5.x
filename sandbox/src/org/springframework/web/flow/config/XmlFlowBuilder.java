@@ -24,17 +24,19 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.convert.support.TextToClassConverter;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
+import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -42,8 +44,6 @@ import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
-import org.springframework.web.flow.action.ActionTransitionCriteria;
-import org.springframework.web.flow.support.TransitionCriteriaChain;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -427,25 +427,25 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * object.
 	 */
 	protected AnnotatedAction parseAction(Element element) {
-		AnnotatedAction attributes = new AnnotatedAction((Action)parseFlowService(element, Action.class));
+		AnnotatedAction action = new AnnotatedAction((Action)parseFlowService(element, Action.class));
 		if (element.hasAttribute(NAME_ATTRIBUTE)) {
-			attributes.setName(element.getAttribute(NAME_ATTRIBUTE));
+			action.setName(element.getAttribute(NAME_ATTRIBUTE));
 		}
 		if (element.hasAttribute(METHOD_ATTRIBUTE)) {
-			attributes.setMethod(element.getAttribute(METHOD_ATTRIBUTE));
+			action.setMethod(element.getAttribute(METHOD_ATTRIBUTE));
 		}
 		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
 		for (int i = 0; i < propertyElements.size(); i++) {
-			parseAndAddProperty((Element)propertyElements.get(i), attributes);
+			parseAndAddProperty((Element)propertyElements.get(i), action);
 		}
-		return attributes;
+		return action;
 	}
 
 	/**
 	 * Parse a property definition from given element and add the property
 	 * to given action.
 	 */
-	protected void parseAndAddProperty(Element element, AnnotatedAction attributes) {
+	protected void parseAndAddProperty(Element element, MutableAttributeSource attributes) {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		if (element.hasAttribute(VALUE_ATTRIBUTE)) {
 			attributes.setAttribute(name, element.getAttribute(VALUE_ATTRIBUTE));
@@ -477,16 +477,12 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected Transition parseTransition(Element element) {
 		String event = element.getAttribute(EVENT_ATTRIBUTE);
 		String to = element.getAttribute(TO_ATTRIBUTE);
-		String encodedPrecondition = element.getAttribute(PRECONDITION);
-		TransitionCriteriaChain preconditions = new TransitionCriteriaChain();
-		if (StringUtils.hasText(encodedPrecondition)) {
-			preconditions.add((TransitionCriteria)getFlowServiceLocator().getTransitionCriteria(encodedPrecondition));
+		MapAttributeSource targetStateParameters = new MapAttributeSource();
+		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
+		for (int i = 0; i < propertyElements.size(); i++) {
+			parseAndAddProperty((Element)propertyElements.get(i), targetStateParameters);
 		}
-		AnnotatedAction[] actions = parseActions(element);
-		for (int i = 0; i < actions.length; i++) {
-			preconditions.add(new ActionTransitionCriteria(actions[i]));
-		}
-		return new Transition(getTransitionCriteriaCreator().create(event), to, preconditions);
+		return new Transition(getTransitionCriteriaCreator().create(event), to, targetStateParameters);
 	}
 
 	/**
