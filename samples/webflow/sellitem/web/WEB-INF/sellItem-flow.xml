@@ -16,6 +16,14 @@
 			<property name="errorState" value="enterPriceAndItemCount"/>
 		</transition>
 	</view-state>
+
+	<action-state id="bindAndValidate">
+		<action bean="sellItemAction" method="bindAndValidate">
+			<property name="validatorMethod" value="${validatorMethod}"/>
+		</action>
+		<transition on="success" to="${successState}"/>
+		<transition on="error" to="${errorState}"/>
+	</action-state>
 	
 	<view-state id="enterCategory" view="categoryForm">
 		<transition on="submit" to="bindAndValidate">
@@ -37,12 +45,4 @@
 
 	<end-state id="showCostOverview" view="costOverview"/>
 
-	<action-state id="bindAndValidate">
-		<action bean="sellItemAction" method="bindAndValidate">
-			<property name="validatorMethod" value="${validatorMethod}"/>
-		</action>
-		<transition on="success" to="${successState}"/>
-		<transition on="error" to="${errorState}"/>
-	</action-state>
-	
 </webflow>
