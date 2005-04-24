@@ -45,7 +45,7 @@
 	</bean>
 	-->
 	
-	<bean id="person.Search.formAction" class="org.springframework.web.flow.action.FormAction">
+	<bean id="person.Search.criteria.formAction" class="org.springframework.web.flow.action.FormAction">
 		<property name="formObjectName" value="query"/>
 		<property name="formObjectClass" value="org.springframework.samples.phonebook.domain.PhoneBookQuery"/>
 		<property name="formObjectScopeAsString" value="flow"/>
