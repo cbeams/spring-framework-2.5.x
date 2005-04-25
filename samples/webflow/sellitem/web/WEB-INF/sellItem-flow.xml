@@ -7,7 +7,8 @@
 	<action-state id="setupForm">
 		<action bean="sellItemAction"/>
 		<transition on="success" to="enterPriceAndItemCount"/>
-		<property name="role" value="manager"/>
+		<!-- uncomment to experiment with precondition violations -->
+		<!-- <property name="role" value="manager"/> -->
 	</action-state>
 
 	<view-state id="enterPriceAndItemCount" view="priceAndItemCountForm">
