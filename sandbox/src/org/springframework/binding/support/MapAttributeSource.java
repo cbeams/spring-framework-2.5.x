@@ -15,6 +15,7 @@
  */
 package org.springframework.binding.support;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ import org.springframework.util.Assert;
  * interface.
  * @author Keith Donald
  */
-public class MapAttributeSource extends AttributeSourceSupport {
+public class MapAttributeSource extends AttributeSourceSupport implements Serializable {
 
 	private Map map;
 
@@ -39,19 +40,18 @@ public class MapAttributeSource extends AttributeSourceSupport {
 
 	/**
 	 * Create a new map attribute setter adapter.
+	 */
+	public MapAttributeSource(int size) {
+		this.map = new HashMap(size);
+	}
+
+	/**
+	 * Create a new map attribute setter adapter.
 	 * @param map the map to wrap
 	 */
 	public MapAttributeSource(Map map) {
 		Assert.notNull(map, "The map is required");
 		this.map = map;
-	}
-
-	public Map getAttributeMap() {
-		return map;
-	}
-
-	public Object setAttribute(String attributeName, Object attributeValue) {
-		return map.put(attributeName, attributeValue);
 	}
 
 	public boolean containsAttribute(String attributeName) {
@@ -62,30 +62,18 @@ public class MapAttributeSource extends AttributeSourceSupport {
 		return map.get(attributeName);
 	}
 
+	public Object setAttribute(String attributeName, Object attributeValue) {
+		return map.put(attributeName, attributeValue);
+	}
+
 	public Object removeAttribute(String attributeName) {
 		return map.remove(attributeName);
 	}
 
-	public void clear() {
-		map.clear();
+	public Map getAttributeMap() {
+		return map;
 	}
 
-	public boolean containsValue(Object value) {
-		return map.containsValue(value);
-	}
-
-	public boolean isEmpty() {
-		return map.isEmpty();
-	}
-
-	public Object remove(Object key) {
-		return map.remove(key);
-	}
-
-	public int size() {
-		return map.size();
-	}
-	
 	public String toString() {
 		return new ToStringCreator(this).append("map", map).toString();
 	}

@@ -15,6 +15,8 @@
  */
 package org.springframework.web.flow;
 
+import java.util.Map;
+
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.StringUtils;
 
@@ -109,6 +111,27 @@ public class ViewState extends TransitionableState {
 	 */
 	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
+		setViewName(viewName);
+	}
+
+	/**
+	 * Create a new view state.
+	 * 
+	 * @param flow
+	 *            the owning flow
+	 * @param id
+	 *            the state identifier (must be unique to the flow)
+	 * @param viewName
+	 *            the logical name of the view to render
+	 * @param transitions
+	 *            the transitions of this state
+	 * @param properties
+	 * 			  additional properties describing this state
+	 * @throws IllegalArgumentException
+	 *             when this state cannot be added to given flow
+	 */
+	public ViewState(Flow flow, String id, String viewName, Transition[] transitions, Map properties) throws IllegalArgumentException {
+		super(flow, id, transitions, properties);
 		setViewName(viewName);
 	}
 

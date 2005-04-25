@@ -113,6 +113,23 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
+	 * @param targetAction the raw target action instance to execute in this
+	 *        state when entered
+	 * @param transitions the transitions out of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
+	 *         flow
+	 */
+	public ActionState(Flow flow, String id, Action targetAction, Transition[] transitions, Map properties)
+			throws IllegalArgumentException {
+		super(flow, id, transitions, properties);
+		addAction(targetAction);
+	}
+
+	/**
+	 * Create a new action state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
 	 * @param action the action and any configuration properties for use within
 	 *        this state
 	 * @param transitions the transitions out of this state
@@ -122,6 +139,23 @@ public class ActionState extends TransitionableState {
 	public ActionState(Flow flow, String id, AnnotatedAction action, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
+		addAction(action);
+	}
+
+	/**
+	 * Create a new action state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param action the action and any configuration properties for use within
+	 *        this state
+	 * @param transitions the transitions out of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
+	 *         flow
+	 */
+	public ActionState(Flow flow, String id, AnnotatedAction action, Transition[] transitions, Map properties)
+			throws IllegalArgumentException {
+		super(flow, id, transitions, properties);
 		addAction(action);
 	}
 
@@ -159,6 +193,22 @@ public class ActionState extends TransitionableState {
 	 * Create a new action state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
+	 * @param targetActions the raw actions to execute in this state
+	 * @param transitions the transitions (paths) out of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
+	 *         flow
+	 */
+	public ActionState(Flow flow, String id, Action[] targetActions, Transition[] transitions, Map properties)
+			throws IllegalArgumentException {
+		super(flow, id, transitions, properties);
+		addActions(targetActions);
+	}
+
+	/**
+	 * Create a new action state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
 	 * @param actions the actions with any configuration properties for use
 	 *        within this state
 	 * @param transition the transitions (paths) out of this state
@@ -184,6 +234,23 @@ public class ActionState extends TransitionableState {
 	public ActionState(Flow flow, String id, AnnotatedAction[] actions, Transition[] transitions)
 			throws IllegalArgumentException {
 		super(flow, id, transitions);
+		addActions(actions);
+	}
+
+	/**
+	 * Create a new action state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param actions the actions with any configuration properties for use
+	 *        within this state
+	 * @param transitions the transitions (paths) out of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
+	 *         flow
+	 */
+	public ActionState(Flow flow, String id, AnnotatedAction[] actions, Transition[] transitions, Map properties)
+			throws IllegalArgumentException {
+		super(flow, id, transitions, properties);
 		addActions(actions);
 	}
 
@@ -334,7 +401,7 @@ public class ActionState extends TransitionableState {
 		protected final Log logger = LogFactory.getLog(ActionExecutor.class);
 
 		private ActionState actionState;
-		
+
 		private AnnotatedAction action;
 
 		/**

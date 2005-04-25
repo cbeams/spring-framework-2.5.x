@@ -1,0 +1,115 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.web.flow;
+
+import java.util.Map;
+
+import org.springframework.util.StringUtils;
+
+/**
+ * A simple decision state that when entered, will execute the first transition whose
+ * criteria evaluates to <code>true</code> in the context of the current request.
+ * <p>
+ * A decision state is a convenient way to encapsulate reusable state transition logic in
+ * one place.
+ * @author Keith Donald
+ */
+public class DecisionState extends TransitionableState {
+
+	/**
+	 * Create a new decision state with a if/then/else transition set.
+	 * 
+	 * @param flow
+	 *            the owning flow
+	 * @param id
+	 *            the state identifier (must be unique to the flow)
+	 * @param criteria the expression
+	 * @param ifTrueStateId the state to go to if the expression is true
+	 * @param elseStateId the state to go to if the expression is false
+	 * @throws IllegalArgumentException
+	 *             when this state cannot be added to given flow
+	 */
+	public DecisionState(Flow flow, String id, TransitionCriteria criteria, String ifTrueStateId, String elseStateId) {
+		super(flow, id, new Transition(criteria, ifTrueStateId));
+		if (StringUtils.hasText(elseStateId)) {
+			add(new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, elseStateId));
+		}
+	}
+
+	/**
+	 * Create a new decision state with a if/then/else transition set.
+	 * 
+	 * @param flow
+	 *            the owning flow
+	 * @param id
+	 *            the state identifier (must be unique to the flow)
+	 * @param criteria the expression
+	 * @param ifTrueStateId the state to go to if the expression is true
+	 * @param elseStateId the state to go to if the expression is false
+	 * @throws IllegalArgumentException
+	 *             when this state cannot be added to given flow
+	 */
+	public DecisionState(Flow flow, String id, TransitionCriteria criteria, String ifTrueStateId, String elseStateId,
+			Map properties) {
+		super(flow, id, new Transition[] { new Transition(criteria, ifTrueStateId) }, properties);
+		if (StringUtils.hasText(elseStateId)) {
+			add(new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, elseStateId));
+		}
+	}
+
+	/**
+	 * Creates a new decision state with the supported set of transitions.
+	 * 
+	 * @param flow
+	 *            the owning flow
+	 * @param id
+	 *            the state identifier (must be unique to the flow)
+	 * @param transitions the transitions
+	 */
+	public DecisionState(Flow flow, String stateId, Transition[] transitions) {
+		super(flow, stateId, transitions);
+	}
+
+	/**
+	 * Creates a new decision state with the supported set of transitions.
+	 * 
+	 * @param flow
+	 *            the owning flow
+	 * @param id
+	 *            the state identifier (must be unique to the flow)
+	 * @param transitions the transitions
+	 */
+	public DecisionState(Flow flow, String stateId, Transition[] transitions, Map properties) {
+		super(flow, stateId, transitions, properties);
+	}
+
+	/**
+	 * Specialization of State's <code>doEnterState</code> template method
+	 * that executes behaviour specific to this state type in polymorphic
+	 * fashion.
+	 * <p>
+	 * Simply looks up the first transiiton that matches the state of the
+	 * StateContext.
+	 * 
+	 * @param context
+	 *            the state execution context
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the state execution
+	 */
+	protected ViewDescriptor doEnterState(StateContext context) {
+		return transitionFor(context).execute(context);
+	}
+}

@@ -21,10 +21,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeSource;
-import org.springframework.binding.AttributeValueResolutionStrategy;
-import org.springframework.binding.AttributeValueResolver;
-import org.springframework.binding.NoSuchAttributeValueException;
-import org.springframework.binding.support.DefaultAttributeValueResolutionStrategy;
 import org.springframework.binding.support.EmptyAttributeSource;
 import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
@@ -138,9 +134,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	// implementing StateContext
 
 	public void setCurrentState(State state) {
+		fireStateEntering(state);
 		State previousState = this.flowExecution.getCurrentState();
 		this.flowExecution.setCurrentState(state);
-		fireStateTransitioned(previousState);
+		fireStateEntered(previousState);
 	}
 
 	public void setLastEvent(Event event) {
@@ -194,6 +191,21 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	// lifecycle event management
+
+	/**
+	 * Notify all interested listeners that flow execution has started.
+	 */
+	protected void fireStarting() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow session execution started event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
+		}
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).starting(InternalRequestContext.this);
+			}
+		});
+	}
 
 	/**
 	 * Notify all interested listeners that flow execution has started.
@@ -263,15 +275,30 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Notify all interested listeners that a state transition happened in this
 	 * flow execution.
 	 */
-	protected void fireStateTransitioned(final State previousState) {
+	protected void fireStateEntering(final State nextState) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing state transitioned event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).stateTransitioned(InternalRequestContext.this, previousState,
-						getCurrentState());
+				((FlowExecutionListener)o).stateEntering(InternalRequestContext.this, nextState);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that a state transition happened in this
+	 * flow execution.
+	 */
+	protected void fireStateEntered(final State previousState) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing state transitioned event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
+		}
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).stateEntered(InternalRequestContext.this, previousState, getCurrentState());
 			}
 		});
 	}

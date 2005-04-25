@@ -19,6 +19,7 @@ import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
+import org.springframework.web.flow.StateEventVetoedException;
 
 /**
  * An abstract adapter class for listeners (observers) of flow execution
@@ -30,6 +31,9 @@ import org.springframework.web.flow.State;
  * @author Keith Donald
  */
 public abstract class FlowExecutionListenerAdapter implements FlowExecutionListener {
+
+	public void starting(RequestContext context) {
+	}
 
 	public void started(RequestContext context) {
 	}
@@ -43,7 +47,11 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	public void eventSignaled(RequestContext context) {
 	}
 
-	public void stateTransitioned(RequestContext context, State previousState, State newState) {
+	public void stateEntering(RequestContext context, State nextState) throws StateEventVetoedException {
+	}
+
+	public void stateEntered(RequestContext context, State previousState, State newState)
+			throws StateEventVetoedException {
 	}
 
 	public void subFlowEnded(RequestContext context, FlowSession endedSession) {

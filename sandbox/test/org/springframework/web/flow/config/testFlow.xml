@@ -19,7 +19,7 @@
 	</action-state>
 
 	<view-state id="viewState1" view="view1">
-		<transition on="event1" to="subFlowState1" precondition="precondition1"/>
+		<transition on="event1" to="subFlowState1"/>
 	</view-state>
 	
 	<view-state id="viewState2">

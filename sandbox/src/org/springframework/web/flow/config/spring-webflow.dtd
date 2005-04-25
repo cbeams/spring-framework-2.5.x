@@ -17,7 +17,7 @@
 	Defines the root element for a web flow definition. Web flows
 	are composed of one or more states.
 -->
-<!ELEMENT webflow ( (action-state | view-state | subflow-state | end-state | precondition )+ )>
+<!ELEMENT webflow ( (action-state | view-state | decision-state | subflow-state | end-state | precondition )+ )>
 
 <!--
 	Unique identifier of the web flow; should be unique to all other web flows.
@@ -34,7 +34,7 @@
 	Defines an action state: a state where an action is executed.
 	Transitions triggered by the action(s) lead on to other states.
 -->
-<!ELEMENT action-state ( action+, transition+ )>
+<!ELEMENT action-state ( action+, transition+, property*)>
 
 <!--
 	Unique identifier of an action state; must be unique to this flow.
@@ -111,26 +111,6 @@
 <!ELEMENT value ( #PCDATA )>
 
 <!--
-	Defines a view state: a state where a view will be rendered.
-	Transitions triggered by the view lead on to other states.
--->
-<!ELEMENT view-state ( transition+ )>
-
-<!--
-	Unique identifier of an view state; must be unique to this flow.
--->
-<!ATTLIST view-state id ID #REQUIRED>
-
-<!--
-	Optional name of the view that will be rendered when the view state is entered.
-	When not present, this view state will be a marker view state.
-	A marker view state does not actually render a view, but just returns
-	control to the client. Use a marker view state when an action has
-	already generated the response.
--->
-<!ATTLIST view-state view CDATA #IMPLIED>
-
-<!--
 	Defines a transition from one state to another. Transitions define the supported 
 	paths through the flow.
 -->
@@ -155,11 +135,66 @@
 <!ATTLIST transition executionCriteria CDATA #IMPLIED>
 
 <!--
+	Defines a view state: a state where a view will be rendered.
+	Transitions triggered by the view lead on to other states.
+-->
+<!ELEMENT view-state ( transition+, property* )>
+
+<!--
+	Unique identifier of an view state; must be unique to this flow.
+-->
+<!ATTLIST view-state id ID #REQUIRED>
+
+<!--
+	Optional name of the view that will be rendered when the view state is entered.
+	When not present, this view state will be a marker view state.
+	A marker view state does not actually render a view, but just returns
+	control to the client. Use a marker view state when an action has
+	already generated the response.
+-->
+<!ATTLIST view-state view CDATA #IMPLIED>
+
+<!--
+	Defines a decision state: a state that will evaluate one or more expressions to
+	decide which state to go next (aka routing state.)
+-->
+<!ELEMENT decision-state ( if+, property* )>
+
+<!--
+	Unique identifier of this decision state; must be unique to this flow.
+-->
+<!ATTLIST decision-state id ID #REQUIRED>
+
+<!--
+	A transition specification that defines a criteria expression and a state to
+	transition to if the expression is true.  Optionally, this element may also 
+	define a 'else' state to transition to if the expression is false.
+	The form is:
+ 	    <if test="${criteria}" then="${toTrueState}" [else="(toFalseState)"]>
+-->
+<!ELEMENT if EMPTY>
+
+<!--
+	The transition criteria expression to be tested.
+-->
+<!ATTLIST if test CDATA #REQUIRED>
+
+<!--
+	The state to transition to if the expression is true.
+-->
+<!ATTLIST if then CDATA #REQUIRED>
+
+<!--
+	The state to transition to if the expression is false (optional).
+-->
+<!ATTLIST if else CDATA #IMPLIED>
+
+<!--
 	Defines a sub flow state: a state that spawns a sub flow when entered. When the
 	sub flow completes execution (reaches a end state), the result of subflow execution
 	will be used as grounds for a transition out of this state.
 -->
-<!ELEMENT subflow-state ( attribute-mapper?, transition+ )>
+<!ELEMENT subflow-state ( attribute-mapper?, transition+, property* )>
 
 <!--
 	Unique identifier of a subflow state; must be unique to this flow.
@@ -206,7 +241,7 @@
 <!--
 	Defines an end state: a state that terminates the flow.
 -->
-<!ELEMENT end-state EMPTY>
+<!ELEMENT end-state ( property* )>
 
 <!--
 	Unique identifier of an end state; must be unique to this flow.

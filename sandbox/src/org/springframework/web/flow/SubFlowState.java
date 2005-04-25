@@ -79,6 +79,20 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
 	 * @param subFlow the sub flow to spawn
+	 * @param transitions the transitions of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
+	 *         flow
+	 */
+	public SubFlowState(Flow flow, String id, Flow subFlow, Transition[] transitions, Map properties) throws IllegalArgumentException {
+		this(flow, id, subFlow, null, transitions, properties);
+	}
+
+	/**
+	 * Create a new sub flow state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param subFlow the sub flow to spawn
 	 * @param attributeMapper the attribute mapper to use
 	 * @param transition the sole transition of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
@@ -102,6 +116,24 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper attributeMapper,
 			Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
+		setSubFlow(subFlow);
+		setFlowAttributeMapper(attributeMapper);
+	}
+
+	/**
+	 * Create a new sub flow state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param subFlow the sub flow to spawn
+	 * @param attributeMapper the attribute mapper to use
+	 * @param transitions the transitions of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
+	 *         flow
+	 */
+	public SubFlowState(Flow flow, String id, Flow subFlow, FlowAttributeMapper attributeMapper,
+			Transition[] transitions, Map properties) throws IllegalArgumentException {
+		super(flow, id, transitions, properties);
 		setSubFlow(subFlow);
 		setFlowAttributeMapper(attributeMapper);
 	}
@@ -195,5 +227,4 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 		creator.append("subFlow", subFlow.getId()).append("attributeMapper", flowAttributeMapper);
 		super.createToString(creator);
 	}
-
 }

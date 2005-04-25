@@ -15,8 +15,14 @@
  */
 package org.springframework.web.flow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.binding.AttributeSource;
+import org.springframework.binding.support.EmptyAttributeSource;
+import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
@@ -62,6 +68,11 @@ public abstract class State {
 	private String id;
 
 	/**
+	 * Additional properties further describing this state. 
+	 */
+	private AttributeSource properties = EmptyAttributeSource.INSTANCE;
+
+	/**
 	 * Creates a state for the provided <code>flow</code> identified by the
 	 * provided <code>id</code>. The id must be locally unique to the owning
 	 * flow. The flow state will be automatically added to the flow.
@@ -71,9 +82,26 @@ public abstract class State {
 	 *         flow
 	 */
 	protected State(Flow flow, String id) throws IllegalArgumentException {
+		this(flow, id, null);
+	}
+
+	/**
+	 * Creates a state for the provided <code>flow</code> identified by the
+	 * provided <code>id</code>. The id must be locally unique to the owning
+	 * flow. The flow state will be automatically added to the flow.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException if this state cannot be added to the
+	 *         flow
+	 */
+	protected State(Flow flow, String id, Map properties) throws IllegalArgumentException {
 		setId(id);
 		setFlow(flow);
 		flow.add(this);
+		if (properties != null) {
+			this.properties = new MapAttributeSource(new HashMap(properties));
+		}
 	}
 
 	/**
@@ -82,15 +110,6 @@ public abstract class State {
 	 */
 	public String getId() {
 		return id;
-	}
-
-	/**
-	 * Set the state identifier, unique to the owning flow.
-	 * @param id the state identifier.
-	 */
-	private void setId(String id) {
-		Assert.hasText(id, "The state must have a valid identifier");
-		this.id = id;
 	}
 
 	/**
@@ -106,6 +125,23 @@ public abstract class State {
 	protected void setFlow(Flow flow) {
 		Assert.notNull(flow, "The owning flow is required");
 		this.flow = flow;
+	}
+
+	/**
+	 * Set the state identifier, unique to the owning flow.
+	 * @param id the state identifier.
+	 */
+	private void setId(String id) {
+		Assert.hasText(id, "The state must have a valid identifier");
+		this.id = id;
+	}
+
+	public AttributeSource getProperties() {
+		return this.properties;
+	}
+
+	public Object getProperty(String propertyName) {
+		return this.properties.getAttribute(propertyName);
 	}
 
 	/**

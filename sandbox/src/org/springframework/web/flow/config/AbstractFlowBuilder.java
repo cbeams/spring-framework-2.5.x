@@ -20,8 +20,8 @@ import java.util.Properties;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -30,6 +30,7 @@ import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.action.ActionTransitionCriteria;
 
 /**
  * Base class for flow builders that programmatically build flows in Java
@@ -380,6 +381,18 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
+	 * Request that the action with the specified id be executed when the action
+	 * state being built is entered. Simply looks the action up by name and
+	 * returns it.
+	 * @param actionId the action id
+	 * @return the action
+	 * @throws NoSuchActionException the action could not be resolved
+	 */
+	protected AnnotatedAction annotatedAction(String actionId, Map properties) throws NoSuchActionException {
+		return new AnnotatedAction(action(actionId), properties);
+	}
+
+	/**
 	 * Request that the action with the specified implementation be instantiated
 	 * and executed when the action state being built is entered. Creates the
 	 * action instance.
@@ -416,7 +429,30 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Creates an named action state action suitable for adding to exactly one
+	 * Creates an annotated action suitable for adding to exactly one action
+	 * state, wrapping the specified target action, with an no properties configured
+	 * initially.
+	 * @param action the action
+	 * @return the annotated action
+	 */
+	protected AnnotatedAction annotate(Action action) {
+		return new AnnotatedAction(action);
+	}
+
+	/**
+	 * Creates an annotated action suitable for adding to exactly one action
+	 * state, wrapping the specified target action and annotating it with the
+	 * specified properties.
+	 * @param action the action
+	 * @param properties the action state properties
+	 * @return the annotated action
+	 */
+	protected AnnotatedAction annotate(Action action, Map properties) {
+		return new AnnotatedAction(action, properties);
+	}
+
+	/**
+	 * Creates an named action suitable for adding to exactly one
 	 * action state.
 	 * @param name the action name
 	 * @param action the action
@@ -430,7 +466,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Creates an action state action that has a property that indicates which
+	 * Creates an annotated action with a single property that indicates which
 	 * method should be invoked on the target action when the state is entered.
 	 * @param methodName the method name, with the signature
 	 *        <code>Event ${methodName}(RequestContext context)</code>
@@ -441,18 +477,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		properties.put(AnnotatedAction.METHOD_PROPERTY, methodName);
 		AnnotatedAction stateAction = new AnnotatedAction(action, properties);
 		return stateAction;
-	}
-
-	/**
-	 * Creates an action state action suitable for adding to exactly one action
-	 * state, wrapping the specified target action and annotating it with the
-	 * specified properties.
-	 * @param action the action
-	 * @param properties the action state properties
-	 * @return the action state action
-	 */
-	protected AnnotatedAction annotate(Action action, Map properties) {
-		return new AnnotatedAction(action, properties);
 	}
 
 	/**
@@ -663,15 +687,27 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Retrieve the <code>TransitionCriteria</code> to be used as a transition executional
-	 * criteria.
-	 * @param encodedCriteria the encoded criteria
-	 * @return the transition precondition
+	 * Produces a <code>TransitionCriteria</code> that will execute the specified action when the 
+	 * Transition is executed but before the transition's target state is entered.
+	 * @param action the action to execute after a transition is matched but before it transitions to its
+	 * target state
+	 * @return the transition execution criteria
 	 */
-	protected TransitionCriteria executionCriteria(String encodedCriteria) {
-		return getTransitionCriteriaCreator().create(encodedCriteria);
+	protected TransitionCriteria beforeExecute(Action action) {
+		return new ActionTransitionCriteria(action);
 	}
-	
+
+	/**
+	 * Produces a <code>TransitionCriteria</code> that will execute the specified action when the 
+	 * Transition is executed but before the transition's target state is entered.
+	 * @param action  annotated action to execute after a transition is matched but before it
+	 * transitions to its target state
+	 * @return the transition execution criteria
+	 */
+	protected TransitionCriteria beforeExecute(AnnotatedAction action) {
+		return new ActionTransitionCriteria(action);
+	}
+
 	/**
 	 * Creates a transition stating:
 	 * <ul>

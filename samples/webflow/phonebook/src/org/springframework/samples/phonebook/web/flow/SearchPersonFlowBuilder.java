@@ -19,6 +19,7 @@ import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction;
+import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.action.EventParameterMapperAction;
@@ -56,7 +57,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 	public void buildStates() throws FlowBuilderException {
 		// view search criteria
 		addViewState("viewCriteria", "person.Search.criteria.view", on(submit(), "executeQuery",
-				precondition("person.Search.criteria.bindAndValidate")));
+				beforeExecute(method("bindAndValidate", action("person.Search.criteria.formAction")))));
 
 		// execute query
 		addActionState("executeQuery", action(ExecuteQueryAction.class, AutowireMode.BY_TYPE), new Transition[] {

@@ -25,10 +25,11 @@ import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
- * A transitional precondition that will execute a action when tested and return
+ * A transition criteria that will execute a action when tested and return
  * <code>true</code> if the action's result is equal to the 'trueEventId', false
  * otherwise.
- * 
+ * <p>
+ * This effectively adapts an <code>Action</code> to a <code>TransitionCriteria</code>.
  * @author Keith Donald
  */
 public class ActionTransitionCriteria implements TransitionCriteria {

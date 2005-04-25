@@ -17,24 +17,29 @@ package org.springframework.web.flow.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.convert.support.TextToClassConverter;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
+import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.ActionState;
+import org.springframework.web.flow.AnnotatedAction;
+import org.springframework.web.flow.DecisionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
@@ -140,6 +145,16 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String VIEW_STATE_ELEMENT = "view-state";
 
 	private static final String VIEW_ATTRIBUTE = "view";
+
+	private static final String DECISION_STATE_ELEMENT = "decision-state";
+
+	private static final String IF_ELEMENT = "if";
+
+	private static final String TEST_ATTRIBUTE = "test";
+
+	private static final String THEN_ATTRIBUTE = "then";
+
+	private static final String ELSE_ATTRIBUTE = "else";
 
 	private static final String SUBFLOW_STATE_ELEMENT = "subflow-state";
 
@@ -342,6 +357,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				else if (VIEW_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddViewState(flow, element);
 				}
+				else if (DECISION_STATE_ELEMENT.equals(element.getNodeName())) {
+					parseAndAddDecisionState(flow, element);
+				}
 				else if (SUBFLOW_STATE_ELEMENT.equals(element.getNodeName())) {
 					parseAndAddSubFlowState(flow, element);
 				}
@@ -361,7 +379,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		AnnotatedAction[] actions = parseActions(element);
 		Transition[] transitions = parseTransitions(element);
-		new ActionState(flow, id, actions, transitions);
+		new ActionState(flow, id, actions, transitions, parseProperties(element));
 	}
 
 	/**
@@ -371,14 +389,21 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected void parseAndAddViewState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
 		Transition[] transitions = parseTransitions(element);
+		String viewName = null;
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			String viewName = element.getAttribute(VIEW_ATTRIBUTE);
-			new ViewState(flow, id, viewName, transitions);
+			viewName = element.getAttribute(VIEW_ATTRIBUTE);
 		}
-		else {
-			// a marker state
-			new ViewState(flow, id, transitions);
-		}
+		new ViewState(flow, id, viewName, transitions, parseProperties(element));
+	}
+
+	/**
+	 * Parse given decision state definition and add a corresponding state to given
+	 * flow.
+	 */
+	protected void parseAndAddDecisionState(Flow flow, Element element) {
+		String id = element.getAttribute(ID_ATTRIBUTE);
+		Transition[] transitions = parseIfs(element);
+		new DecisionState(flow, id, transitions, parseProperties(element));
 	}
 
 	/**
@@ -391,7 +416,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Flow subFlow = getFlowServiceLocator().getFlow(flowName);
 		FlowAttributeMapper mapper = parseAttributeMapper(element);
 		Transition[] transitions = parseTransitions(element);
-		new SubFlowState(flow, id, subFlow, mapper, transitions);
+		new SubFlowState(flow, id, subFlow, mapper, transitions, parseProperties(element));
 	}
 
 	/**
@@ -400,14 +425,11 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected void parseAndAddEndState(Flow flow, Element element) {
 		String id = element.getAttribute(ID_ATTRIBUTE);
+		String viewName = null;
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			String viewName = element.getAttribute(VIEW_ATTRIBUTE);
-			new EndState(flow, id, viewName);
+			viewName = element.getAttribute(VIEW_ATTRIBUTE);
 		}
-		else {
-			// a marker state
-			new EndState(flow, id);
-		}
+		new EndState(flow, id, viewName, parseProperties(element));
 	}
 
 	/**
@@ -434,18 +456,28 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		if (element.hasAttribute(METHOD_ATTRIBUTE)) {
 			attributes.setMethod(element.getAttribute(METHOD_ATTRIBUTE));
 		}
+		parseProperties(element, attributes);
+		return attributes;
+	}
+
+	protected Map parseProperties(Element element) {
+		MapAttributeSource properties = new MapAttributeSource();
+		parseProperties(element, properties);
+		return properties.getAttributeMap();
+	}
+
+	protected void parseProperties(Element element, MutableAttributeSource properties) {
 		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
 		for (int i = 0; i < propertyElements.size(); i++) {
-			parseAndAddProperty((Element)propertyElements.get(i), attributes);
+			parseAndAddProperty((Element)propertyElements.get(i), properties);
 		}
-		return attributes;
 	}
 
 	/**
 	 * Parse a property definition from given element and add the property
 	 * to given action.
 	 */
-	protected void parseAndAddProperty(Element element, AnnotatedAction attributes) {
+	protected void parseAndAddProperty(Element element, MutableAttributeSource attributes) {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		if (element.hasAttribute(VALUE_ATTRIBUTE)) {
 			attributes.setAttribute(name, element.getAttribute(VALUE_ATTRIBUTE));
@@ -487,6 +519,36 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			executionCriteria.add(new ActionTransitionCriteria(actions[i]));
 		}
 		return new Transition(getTransitionCriteriaCreator().create(event), to, executionCriteria);
+	}
+
+	/**
+	 * Find all if definitions in given state definition and return a
+	 * list of corresponding Transition objects.
+	 */
+	protected Transition[] parseIfs(Element element) {
+		List transitions = new LinkedList();
+		List transitionElements = DomUtils.getChildElementsByTagName(element, IF_ELEMENT);
+		for (int i = 0; i < transitionElements.size(); i++) {
+			transitions.addAll(Arrays.asList(parseIf((Element)transitionElements.get(i))));
+		}
+		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
+	}
+
+	/**
+	 * Parse a transition definition and return a corresponding Transition
+	 * object.
+	 */
+	protected Transition[] parseIf(Element element) {
+		String criteria = element.getAttribute(TEST_ATTRIBUTE);
+		String trueStateId = element.getAttribute(THEN_ATTRIBUTE);
+		String falseStateId = element.getAttribute(ELSE_ATTRIBUTE);
+		Transition t = new Transition(getTransitionCriteriaCreator().create(criteria), trueStateId);
+		if (!StringUtils.hasText(falseStateId)) {
+			return new Transition[] { t };
+		}
+		else {
+			return new Transition[] { t, new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, falseStateId) };
+		}
 	}
 
 	/**

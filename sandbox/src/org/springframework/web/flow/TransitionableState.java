@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
@@ -72,6 +73,25 @@ public abstract class TransitionableState extends State {
 	 */
 	public TransitionableState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id);
+		addAll(transitions);
+	}
+
+	/**
+	 * Create a new transitionable state.
+	 * 
+	 * @param flow
+	 *            the owning flow
+	 * @param id
+	 *            the state identifier (must be unique to the flow)
+	 * @param transitions
+	 *            the transitions of this state
+	 * @param properties
+	 *            additional properties describing this state
+	 * @throws IllegalArgumentException
+	 *             when this state cannot be added to given flow
+	 */
+	public TransitionableState(Flow flow, String id, Transition[] transitions, Map properties) throws IllegalArgumentException {
+		super(flow, id, properties);
 		addAll(transitions);
 	}
 

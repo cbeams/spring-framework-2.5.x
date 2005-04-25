@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * A parameter object that allows for storing arbitrary properties about a
- * target <code>Action</code> implementation for use within exactly one
+ * target <code>Action</code> implementation for use in exactly one
  * context, for example a <code>ActionState</code> definition, a
  * <code>TransitionCriteria</code> definition, or in a test environment.
  * @author Keith Donald
@@ -135,7 +135,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	public void setMethod(String methodName) {
 		setAttribute(METHOD_PROPERTY, methodName);
 	}
-	
+
 	/**
 	 * Returns the wrapped target action.
 	 * 
@@ -188,6 +188,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("action", targetAction).append("attributes", getAttributeMap()).toString();
+		return new ToStringCreator(this).append("action", targetAction).append("attributes", getAttributeMap())
+				.toString();
 	}
 }
