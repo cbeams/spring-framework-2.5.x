@@ -47,7 +47,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private Event lastEvent;
 
-	private AttributeSource actionAttributes = EmptyAttributeSource.INSTANCE;
+	private AttributeSource actionProperties = EmptyAttributeSource.INSTANCE;
 
 	private FlowExecutionStack flowExecution;
 
@@ -55,11 +55,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	/**
 	 * Create a new request context.
-	 * 
-	 * @param originatingEvent
-	 *            the event at the origin of this request
-	 * @param flowExecution
-	 *            the owning flow execution
+	 * @param originatingEvent the event at the origin of this request
+	 * @param flowExecution the owning flow execution
 	 */
 	public InternalRequestContext(Event originatingEvent, FlowExecutionStack flowExecution) {
 		Assert.notNull(originatingEvent, "the originating event is required");
@@ -107,8 +104,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		}
 	}
 
-	public AttributeSource getActionAttributes() {
-		return actionAttributes;
+	public AttributeSource getActionProperties() {
+		return actionProperties;
 	}
 
 	public Scope getRequestScope() {
@@ -146,12 +143,12 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		fireEventSignaled();
 	}
 
-	public void setActionAttributes(AttributeSource actionAttributes) {
-		if (actionAttributes != null) {
-			this.actionAttributes = actionAttributes;
+	public void setActionProperties(AttributeSource properties) {
+		if (properties != null) {
+			this.actionProperties = properties;
 		}
 		else {
-			this.actionAttributes = EmptyAttributeSource.INSTANCE;
+			this.actionProperties = EmptyAttributeSource.INSTANCE;
 		}
 	}
 
@@ -193,11 +190,27 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	// lifecycle event management
 
 	/**
-	 * Notify all interested listeners that flow execution has started.
+	 * Notify all interested listeners that a request was submitted to this flow
+	 * execution.
+	 */
+	protected void fireRequestSubmitted() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing request submitted event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
+		}
+		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).requestSubmitted(InternalRequestContext.this);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that flow execution is starting.
 	 */
 	protected void fireStarting() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution started event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing flow session execution starting event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
@@ -218,22 +231,6 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
 				((FlowExecutionListener)o).started(InternalRequestContext.this);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that a request was submitted to this flow
-	 * execution.
-	 */
-	protected void fireRequestSubmitted() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getFlowExecutionListenerList().size()
-					+ " listener(s)");
-		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestSubmitted(InternalRequestContext.this);
 			}
 		});
 	}
@@ -260,9 +257,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 */
 	protected void fireEventSignaled() {
 		if (logger.isDebugEnabled()) {
-			logger
-					.debug("Publishing event signaled event to " + getFlowExecutionListenerList().size()
-							+ " listener(s)");
+			logger.debug("Publishing event signaled event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -272,12 +268,12 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	/**
-	 * Notify all interested listeners that a state transition happened in this
+	 * Notify all interested listeners that a state is being entered in this
 	 * flow execution.
 	 */
 	protected void fireStateEntering(final State nextState) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state transitioned event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing state entering event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
@@ -288,12 +284,12 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	/**
-	 * Notify all interested listeners that a state transition happened in this
+	 * Notify all interested listeners that a state was entered in this
 	 * flow execution.
 	 */
 	protected void fireStateEntered(final State previousState) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state transitioned event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing state entered event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
@@ -325,9 +321,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 */
 	protected void fireSubFlowEnded(final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
-			logger
-					.debug("Publishing sub flow ended event to " + getFlowExecutionListenerList().size()
-							+ " listener(s)");
+			logger.debug("Publishing sub flow ended event to " + getFlowExecutionListenerList().size()
+					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -387,9 +382,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	/**
 	 * Save a new transaction token in flow scope.
-	 * 
-	 * @param tokenName
-	 *            the key used to save the token in the scope
+	 * @param tokenName the key used to save the token in the scope
 	 */
 	protected void setToken(String tokenName) {
 		String txToken = new RandomGuid().toString();
@@ -400,9 +393,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Reset the saved transaction token in the flow scope. This indicates that
 	 * transactional token checking will not be needed on the next request event
 	 * that is submitted.
-	 * 
-	 * @param tokenName
-	 *            the key used to save the token in the scope
+	 * @param tokenName the key used to save the token in the scope
 	 */
 	protected void clearToken(String tokenName) {
 		getFlowScope().removeAttribute(tokenName);
@@ -418,14 +409,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * <li>the included transaction token value does not match the transaction
 	 * token in the flow scope</li>
 	 * </ul>
-	 * 
-	 * @param tokenName
-	 *            the key used to save the token in the scope
-	 * @param tokenParameterName
-	 *            name of the event parameter holding the token
-	 * @param clear
-	 *            indicates whether or not the token should be reset after
-	 *            checking it
+	 * @param tokenName the key used to save the token in the scope
+	 * @param tokenParameterName name of the event parameter holding the token
+	 * @param clear indicates whether or not the token should be reset after
+	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */
 	protected boolean isEventTokenValid(String tokenName, String tokenParameterName, boolean clear) {
@@ -443,14 +430,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * <li>the given transaction token value does not match the transaction
 	 * token in the flow scope</li>
 	 * </ul>
-	 * 
-	 * @param tokenName
-	 *            the key used to save the token in the model
-	 * @param tokenValue
-	 *            the token value to check
-	 * @param clear
-	 *            indicates whether or not the token should be reset after
-	 *            checking it
+	 * @param tokenName the key used to save the token in the model
+	 * @param tokenValue the token value to check
+	 * @param clear indicates whether or not the token should be reset after
+	 *        checking it
 	 * @return true when the token is valid, false otherwise
 	 */
 	protected boolean isTokenValid(String tokenName, String tokenValue, boolean clear) {

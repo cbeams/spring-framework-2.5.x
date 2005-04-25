@@ -42,7 +42,6 @@ package org.springframework.web.flow;
  * the <code>ActionStateAction</code> associative object.
  * 
  * @see org.springframework.web.flow.ActionState
- * @see org.springframework.web.flow.ActionStateAction
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

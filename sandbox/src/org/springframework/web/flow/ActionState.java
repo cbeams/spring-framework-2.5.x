@@ -358,13 +358,12 @@ public class ActionState extends TransitionableState {
 			executionCount++;
 			if (event != null) {
 				eventIds[executionCount - 1] = event.getId();
-				try {
+				if (hasTransitionFor(context)) {
 					return onEvent(event, context);
 				}
-				catch (NoMatchingTransitionException e) {
+				else {
 					if (logger.isDebugEnabled()) {
-						logger
-								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
 										+ eventIds[executionCount] + "' -- "
 										+ "I will proceed to the next action in the chain");
 					}
@@ -431,13 +430,14 @@ public class ActionState extends TransitionableState {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				context.setActionAttributes(action);
-				Event result = decorateResult(action.getTargetAction().execute(context));
-				context.setActionAttributes(null);
-				return result;
+				context.setActionProperties(action);
+				return decorateResult(action.getTargetAction().execute(context));
 			}
 			catch (Exception e) {
 				throw new ActionExecutionException(actionState, action, e);
+			}
+			finally {
+				context.setActionProperties(null);
 			}
 		}
 

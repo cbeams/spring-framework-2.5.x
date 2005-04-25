@@ -41,8 +41,14 @@ import org.springframework.web.flow.SimpleEvent;
  */
 public abstract class AbstractAction implements Action, InitializingBean {
 
+	/**
+	 * Event id of the default success result event.
+	 */
 	public static final String SUCCESS_RESULT_EVENT_ID = "success";
 	
+	/**
+	 * Event id of the default error result event.
+	 */
 	public static final String ERROR_RESULT_EVENT_ID = "error";
 	
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -127,7 +133,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Returns the calling action state
+	 * Returns the calling action state.
 	 * @param context the request context
 	 * @return the current state (the calling action state)
 	 */

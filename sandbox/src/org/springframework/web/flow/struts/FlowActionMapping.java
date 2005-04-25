@@ -16,15 +16,48 @@
 package org.springframework.web.flow.struts;
 
 import org.apache.struts.action.ActionMapping;
+import org.springframework.util.StringUtils;
+import org.springframework.web.flow.execution.ClientContinuationFlowExecutionStorage;
+import org.springframework.web.flow.execution.FlowExecutionStorage;
+import org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage;
+import org.springframework.web.flow.execution.servlet.HttpSessionFlowExecutionStorage;
 
 /**
  * A flow action mapping object that allows FlowActions to be configured with a
- * flowId via a Struts <code>&lt;set-property/&gt;</code> definition.
+ * flowId and storage strategy via a Struts <code>&lt;set-property/&gt;</code>
+ * definition.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class FlowActionMapping extends ActionMapping {
-
+	
+	// known flow execution storage strategies
+	
+	/**
+	 * Constant indicating use of the default flow execution storage strategy:
+	 * {@link HttpSessionFlowExecutionStorage}.
+	 */
+	public static final String STORAGE_DEFAULT = "default";
+	
+	/**
+	 * Constant indicating use of the HTTP session flow execution storage
+	 * strategy: {@link HttpSessionFlowExecutionStorage}.
+	 */
+	public static final String STORAGE_SESSION = "session";
+	
+	/**
+	 * Constant indicating use of the HTTP session continuations based flow
+	 * execution storage strategy: {@link HttpSessionContinuationFlowExecutionStorage}.
+	 */
+	public static final String STORAGE_SESSION_CONTINUATION = "sessionContinuation";
+	
+	/**
+	 * Constant indicating use of the client side continuation based flow
+	 * execution storage strategy: {@link ClientContinuationFlowExecutionStorage}.
+	 */
+	public static final String STORAGE_CLIENT_CONTINUATION = "clientContinuation";
+	
 	/**
 	 * The id of the flow whose executions the flow action should manage.
 	 */
@@ -34,7 +67,7 @@ public class FlowActionMapping extends ActionMapping {
 	 * The encoded flow storage strategy to use - supported values:
 	 * ("default", "session", "sessionContinuation", "clientContinuation")
 	 */
-	private String storage = "default";
+	private String storage = STORAGE_DEFAULT;
 	
 	/**
 	 * Returns the flowId.
@@ -51,7 +84,7 @@ public class FlowActionMapping extends ActionMapping {
 	}
 
 	/**
-	 * Returns the encoded flow execution storage strategy
+	 * Returns the encoded flow execution storage strategy.
 	 * @return the encoded storage strategy
 	 */
 	public String getStorage() {
@@ -59,10 +92,31 @@ public class FlowActionMapping extends ActionMapping {
 	}
 
 	/**
-	 * Sets the encoded flow execution storage strategy
+	 * Sets the encoded flow execution storage strategy.
 	 * @param storage the storage strategy
 	 */
 	public void setStorage(String storage) {
 		this.storage = storage;
+	}
+	
+	/**
+	 * Returns the storage strategy encoded in the action mapping.
+	 * @throws IllegalArgumentException when the encoded storage strategy is not
+	 *         recognized
+	 */
+	public FlowExecutionStorage getFlowExecutionStorage() throws IllegalArgumentException {
+		if (!StringUtils.hasText(storage) || storage.equalsIgnoreCase(STORAGE_DEFAULT)
+				|| storage.equalsIgnoreCase(STORAGE_SESSION)) {
+			return new HttpSessionFlowExecutionStorage();
+		}
+		else if (storage.equalsIgnoreCase(STORAGE_SESSION_CONTINUATION)) {
+			return new HttpSessionContinuationFlowExecutionStorage();
+		}
+		else if (storage.equalsIgnoreCase(STORAGE_CLIENT_CONTINUATION)) {
+			return new ClientContinuationFlowExecutionStorage();
+		}
+		else {
+			throw new IllegalArgumentException("Unknown flow execution storage type: '" + storage + "'");
+		}
 	}
 }

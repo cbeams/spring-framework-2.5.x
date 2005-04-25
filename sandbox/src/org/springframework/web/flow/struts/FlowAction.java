@@ -24,16 +24,17 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionServlet;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.action.FormObjectAccessor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
+import org.springframework.web.flow.execution.FlowExecutionManager;
 import org.springframework.web.flow.execution.FlowExecutionStorage;
 import org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
-import org.springframework.web.flow.support.TextToFlowExecutionStorageConverter;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
 import org.springframework.web.util.WebUtils;
@@ -113,6 +114,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.struts.BindingActionForm
  * @see org.springframework.web.struts.BindingRequestProcessor
  * @see org.springframework.web.struts.BindingPlugin
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -120,8 +122,6 @@ public class FlowAction extends TemplateAction {
 
 	private FlowLocator flowLocator;
 
-	private StrutsFlowExecutionManager flowExecutionManager;
-	
 	public void setServlet(ActionServlet actionServlet) {
 		super.setServlet(actionServlet);
 		this.flowLocator = new BeanFactoryFlowServiceLocator(getWebApplicationContext());
@@ -137,15 +137,10 @@ public class FlowAction extends TemplateAction {
 
 	protected ActionForward doExecuteAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		// is it better to sync here, or just create each time?
-		synchronized (this) {
-			if (flowExecutionManager == null) {
-				this.flowExecutionManager = createFlowExecutionManager(mapping);
-			}
-		}
+		FlowExecutionManager flowExecutionManager = createFlowExecutionManager(mapping);
 		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
-		ViewDescriptor viewDescriptor = flowExecutionManager
-				.handle(mapping, form, request, response, actionFormAdapter);
+		Event event = createEvent(mapping, form, request, response);
+		ViewDescriptor viewDescriptor =	flowExecutionManager.handle(event, actionFormAdapter);
 		return toActionForward(viewDescriptor, mapping, request);
 	}
 
@@ -153,8 +148,9 @@ public class FlowAction extends TemplateAction {
 	 * Creates the default flow execution manager. Subclasses can override this
 	 * to return a specialized manager.
 	 */
-	protected StrutsFlowExecutionManager createFlowExecutionManager(ActionMapping mapping) {
-		StrutsFlowExecutionManager manager = new StrutsFlowExecutionManager(getFlowLocator());
+	protected FlowExecutionManager createFlowExecutionManager(ActionMapping mapping) {
+		FlowExecutionManager manager = new FlowExecutionManager();
+		manager.setFlowLocator(getFlowLocator());
 		String flowId = getFlowId(mapping);
 		if (StringUtils.hasText(flowId)) {
 			manager.setFlow(getFlowLocator().getFlow(flowId));
@@ -162,44 +158,18 @@ public class FlowAction extends TemplateAction {
 		manager.setFlowExecutionStorage(getStorage(mapping));
 		return manager;
 	}
-
+	
 	/**
-	 * Specialized HTTP based flow execution manager for use with Struts 1.x.
+	 * Creates a Struts event based on given information. Subclasses can override this
+	 * to return a specialized event object
+	 * @param mapping the action mapping
+	 * @param form the action form
+	 * @param request the current request
+	 * @param response the current response
 	 */
-	public static class StrutsFlowExecutionManager extends HttpServletFlowExecutionManager {
-
-		/**
-		 * Create a new flow execution manager
-		 * 
-		 * @param flowLocator
-		 *            the locator to lookup flows
-		 */
-		public StrutsFlowExecutionManager(FlowLocator flowLocator) {
-			super(flowLocator);
-		}
-
-		/**
-		 * Handle a Struts action request.
-		 * 
-		 * @param mapping
-		 *            the action mapping
-		 * @param form
-		 *            the action form
-		 * @param request
-		 *            the current request
-		 * @param response
-		 *            the current response
-		 * @param listener
-		 *            a flow execution listener interested in lifecycle events
-		 *            during handling of the current request
-		 * @return the view descriptor
-		 * @throws Exception
-		 *             when something goes wrong
-		 */
-		public ViewDescriptor handle(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-				HttpServletResponse response, FlowExecutionListener listener) throws Exception {
-			return handle(new StrutsEvent(mapping, form, request, response), listener);
-		}
+	protected StrutsEvent createEvent(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+			HttpServletResponse response) {
+		return new StrutsEvent(mapping, form, request, response);
 	}
 
 	/**
@@ -217,19 +187,15 @@ public class FlowAction extends TemplateAction {
 	 */
 	protected FlowExecutionStorage getStorage(ActionMapping mapping) {
 		Assert.isInstanceOf(FlowActionMapping.class, mapping);
-		String storage = ((FlowActionMapping)mapping).getStorage();
-		return (FlowExecutionStorage)new TextToFlowExecutionStorageConverter().convert(storage);
+		return ((FlowActionMapping)mapping).getFlowExecutionStorage();
 	}
 
 	/**
 	 * Creates a flow execution listener that takes a Spring Errors instance
 	 * supporting POJO-based data binding in request scope under a well-defined
 	 * name and adapts it to the Struts Action form model.
-	 * 
-	 * @param request
-	 *            the request
-	 * @param form
-	 *            the action form
+	 * @param request the request
+	 * @param form the action form
 	 * @return the adapter
 	 */
 	protected FlowExecutionListener createActionFormAdapter(final HttpServletRequest request, final ActionForm form) {

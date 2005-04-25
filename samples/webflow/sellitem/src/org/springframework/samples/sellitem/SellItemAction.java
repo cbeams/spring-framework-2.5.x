@@ -35,6 +35,6 @@ public class SellItemAction extends FormAction {
 	 * was specified in the calling action state.
 	 */
 	protected boolean validationEnabled(RequestContext context) {
-		return context.getActionAttributes().containsAttribute(VALIDATOR_METHOD);
+		return context.getActionProperties().containsAttribute(VALIDATOR_METHOD_PROPERTY);
 	}
 }

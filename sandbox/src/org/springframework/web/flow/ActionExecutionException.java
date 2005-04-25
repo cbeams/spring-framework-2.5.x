@@ -28,7 +28,7 @@ import org.springframework.core.NestedRuntimeException;
 public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
-	 * The action that threw an exception while executing.
+	 * The state that was active when the exception occured.
 	 */
 	private State state;
 
@@ -38,16 +38,15 @@ public class ActionExecutionException extends NestedRuntimeException {
 	private Action action;
 
 	/**
-	 * Action usage attributes.
+	 * Action usage properties.
 	 */
-	private AttributeSource actionAttributes;
+	private AttributeSource actionProperties;
 
 	/**
 	 * Create a new action execution exception.
-	 * 
-	 * @param state
-	 * @param action
-	 * @param cause
+	 * @param state the active state
+	 * @param action the action that generated an unrecoverable exception
+	 * @param cause the underlying cause
 	 */
 	public ActionExecutionException(State state, AnnotatedAction action, Throwable cause) {
 		this(state, action.getTargetAction(), action, cause);
@@ -55,34 +54,30 @@ public class ActionExecutionException extends NestedRuntimeException {
 
 	/**
 	 * Create a new action execution exception.
-	 * 
-	 * @param state
-	 * @param action
-	 * @param actionAttributes
-	 * @param cause
+	 * @param state the active state
+	 * @param action the action that generated an unrecoverable exception
+	 * @param actionProperties action usage properties
+	 * @param cause the underlying cause
 	 */
-	public ActionExecutionException(State state, Action action, AttributeSource actionAttributes, Throwable cause) {
-		super("Exception thrown executing action '" + action + "' in state '" + state.getId() + "' of flow '"
+	public ActionExecutionException(State state, Action action, AttributeSource actionProperties, Throwable cause) {
+		this(state, action, actionProperties,
+				"Exception thrown executing action '" + action + "' in state '" + state.getId() + "' of flow '"
 				+ state.getFlow().getId() + "'", cause);
-		this.state = state;
-		this.action = action;
-		this.actionAttributes = actionAttributes;
 	}
 
 	/**
 	 * Create a new action execution exception.
-	 * 
-	 * @param state
-	 * @param action
-	 * @param actionAttributes
-	 * @param message
-	 * @param cause
+	 * @param state the active state
+	 * @param action the action that generated an unrecoverable exception
+	 * @param actionProperties action usage properties
+	 * @param message a descriptive message
+	 * @param cause the underlying cause
 	 */
-	public ActionExecutionException(State state, Action action, AttributeSource actionAttributes, String message, Throwable cause) {
+	public ActionExecutionException(State state, Action action, AttributeSource actionProperties, String message, Throwable cause) {
 		super(message, cause);
 		this.state = state;
 		this.action = action;
-		this.actionAttributes = actionAttributes;
+		this.actionProperties = actionProperties;
 	}
 
 	/**
@@ -103,9 +98,9 @@ public class ActionExecutionException extends NestedRuntimeException {
 	}
 	
 	/**
-	 * @return
+	 * Returns the properties (attributes) associated with the action during execution.
 	 */
-	public AttributeSource getActionAttributes() {
-		return actionAttributes;
+	public AttributeSource getActionProperties() {
+		return actionProperties;
 	}
 }

@@ -32,6 +32,7 @@ import org.springframework.core.ToStringCreator;
  * @see org.springframework.web.flow.Transition
  * @see org.springframework.web.flow.TransitionCriteria
  * @see org.springframework.web.flow.Flow
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -44,15 +45,10 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Create a new transitionable state.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
-	 * @param transition
-	 *            the sole transition of this state
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public TransitionableState(Flow flow, String id, Transition transition) throws IllegalArgumentException {
 		super(flow, id);
@@ -61,15 +57,23 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Create a new transitionable state.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
-	 * @param transitions
-	 *            the transitions of this state
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transition the sole transition of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
+	 */
+	public TransitionableState(Flow flow, String id, Transition transition, Map properties) throws IllegalArgumentException {
+		super(flow, id, properties);
+		add(transition);
+	}
+
+	/**
+	 * Create a new transitionable state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public TransitionableState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id);
@@ -78,17 +82,11 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Create a new transitionable state.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
-	 * @param transitions
-	 *            the transitions of this state
-	 * @param properties
-	 *            additional properties describing this state
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transitions the transitions of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public TransitionableState(Flow flow, String id, Transition[] transitions, Map properties) throws IllegalArgumentException {
 		super(flow, id, properties);
@@ -97,9 +95,7 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Add a transition to this state.
-	 * 
-	 * @param transition
-	 *            the transition to add
+	 * @param transition the transition to add
 	 */
 	protected void add(Transition transition) {
 		transition.setSourceState(this);
@@ -114,9 +110,7 @@ public abstract class TransitionableState extends State {
 
 	/**
 	 * Add given list of transitions to this state.
-	 * 
-	 * @param transitions
-	 *            the transitions to add
+	 * @param transitions the transitions to add
 	 */
 	protected void addAll(Transition[] transitions) {
 		for (int i = 0; i < transitions.length; i++) {
@@ -141,7 +135,6 @@ public abstract class TransitionableState extends State {
 	/**
 	 * Returns a collection of the supported transitional criteria ({@link TransitionCriteria}
 	 * objects) used to fire transitions in this state.
-	 * 
 	 * @return the collection of transitional conditions
 	 */
 	public Collection getTransitionalCriteria() {
@@ -159,7 +152,6 @@ public abstract class TransitionableState extends State {
 	/**
 	 * Get a transition in this state for given flow execution request context.
 	 * Throws and exception when when there is no corresponding transition.
-	 * 
 	 * @throws NoMatchingTransitionException
 	 *             when the transition cannot be found
 	 */
@@ -176,9 +168,7 @@ public abstract class TransitionableState extends State {
 	/**
 	 * Returns whether or not this state has a transition that will fire for
 	 * given flow execution request context.
-	 * 
-	 * @param context
-	 *            a flow execution context
+	 * @param context a flow execution context
 	 */
 	public boolean hasTransitionFor(RequestContext context) {
 		return getTransition(context) != null;
@@ -187,9 +177,7 @@ public abstract class TransitionableState extends State {
 	/**
 	 * Internal helper method that gets a transition for given flow execution
 	 * request context.
-	 * 
-	 * @param context
-	 *            a flow execution context
+	 * @param context a flow execution context
 	 * @return the transition, or null if not found
 	 */
 	protected Transition getTransition(RequestContext context) {
@@ -209,14 +197,11 @@ public abstract class TransitionableState extends State {
 	 * transition. If a valid transition is matched, its execution will be
 	 * requested. If a transition could not be matched, or the transition
 	 * execution failed, an exception will be thrown.
-	 * 
-	 * @param event
-	 *            the event that occured
-	 * @param context
-	 *            the state context associated with this request
+	 * @param event the event that occured
+	 * @param context the state context associated with this request
 	 * @return the view descriptor
-	 * @throws CannotExcuteStateTransitionException
-	 *             could not match or execute a transition on receipt of the event
+	 * @throws CannotExcuteStateTransitionException could not match or execute
+	 *         a transition on receipt of the event
 	 */
 	protected ViewDescriptor onEvent(Event event, StateContext context) throws CannotExecuteStateTransitionException {
 		context.setLastEvent(event);

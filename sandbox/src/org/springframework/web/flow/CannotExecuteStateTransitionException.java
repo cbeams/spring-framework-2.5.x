@@ -71,7 +71,7 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	/**
 	 * Create a new state transition execution exception.
 	 * @param transition the transition that was executing
-	 * @param cause the exception message
+	 * @param message a descriptive message
 	 */
 	protected CannotExecuteStateTransitionException(Transition transition, String message) {
 		super(transition.getSourceState().getFlow(), message);

@@ -169,7 +169,7 @@ public class MultiAction extends AbstractAction {
 	 * Action execution method name resolver that uses the following algorithm
 	 * to calculate a method name:
 	 * <ol>
-	 * <li>If the currently executing action has a "executeMethodName" property
+	 * <li>If the currently executing action has a "method" property
 	 * defined, use the value as method name.</li>
 	 * <li>Else, use the name of the current state of the flow execution as a
 	 * method name.</li>
@@ -180,13 +180,16 @@ public class MultiAction extends AbstractAction {
 	 */
 	public static class DefaultActionExecuteMethodNameResolver implements ActionExecuteMethodNameResolver {
 		
-		public static final String METHOD = "method";
+		/**
+		 * Name of the property defining the execute method name.
+		 */
+		public static final String METHOD_PROPERTY = "method";
 
 		public String getMethodName(RequestContext context, MultiAction action) {
-			AttributeSource attributes = context.getActionAttributes();
-			if (attributes.containsAttribute(METHOD)) {
+			AttributeSource properties = context.getActionProperties();
+			if (properties.containsAttribute(METHOD_PROPERTY)) {
 				// use specified execute method name
-				return (String)attributes.getAttribute(METHOD);
+				return (String)properties.getAttribute(METHOD_PROPERTY);
 			}
 			else {
 				// use current state name as method name

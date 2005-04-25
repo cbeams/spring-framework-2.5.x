@@ -39,6 +39,7 @@ import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
  * 
  * @see OgnlTransitionCriteriaCreator
  * @see org.springframework.web.flow.config.SimpleTransitionCriteriaCreator
+ * 
  * @author Rob Harrop
  */
 public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreator {
@@ -52,9 +53,7 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 	 * then an instance of <code>OgnlTransitionCriteria</code> is created.
 	 * Otherwise, the super class is asked to provide the default implementation
 	 * of <code>TransitionCriteria</code>.
-	 * 
-	 * @param encodedCriteria
-	 *            an event name or expression
+	 * @param encodedCriteria an event name or expression
 	 */
 	public TransitionCriteria create(String encodedCriteria) {
 		if (isExpression(encodedCriteria)) {
@@ -84,13 +83,14 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 	 * Cut the expression from given criteria string and return it.
 	 */
 	private String cutExpression(String encodedCriteria) {
-		return encodedCriteria.substring(EXPRESSION_PREFIX.length(), encodedCriteria.length()
-				- EXPRESSION_SUFFIX.length());
+		return encodedCriteria.substring(
+				EXPRESSION_PREFIX.length(),
+				encodedCriteria.length() - EXPRESSION_SUFFIX.length());
 	}
 
 	/**
-	 * Transtition criteria that tests the value of a OGNL expression. <a
-	 * href="http://www.ognl.org">OGNL</a> is the Object Graph Navigation
+	 * Transtition criteria that tests the value of a OGNL expression.
+	 * <a href="http://www.ognl.org">OGNL</a> is the Object Graph Navigation
 	 * Language: an expression language for getting and setting the properties
 	 * of Java objects. In this case, it is used to express a condition that
 	 * guards transition execution in a web flow.
@@ -110,10 +110,8 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 
 		/**
 		 * Create a new OGNL based transition criteria object.
-		 * 
-		 * @param expressionString
-		 *            the OGNL expression testing the criteria, this expression
-		 *            should be a condition that returns a Boolean value
+		 * @param expressionString the OGNL expression testing the criteria,
+		 *        this expression should be a condition that returns a Boolean value
 		 */
 		public OgnlTransitionCriteria(String expressionString) throws OgnlException {
 			Assert.hasText(expressionString);

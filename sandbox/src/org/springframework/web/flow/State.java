@@ -113,6 +113,15 @@ public abstract class State {
 	}
 
 	/**
+	 * Set the state identifier, unique to the owning flow.
+	 * @param id the state identifier.
+	 */
+	private void setId(String id) {
+		Assert.hasText(id, "The state must have a valid identifier");
+		this.id = id;
+	}
+
+	/**
 	 * Returns the owning flow.
 	 */
 	public Flow getFlow() {
@@ -128,18 +137,16 @@ public abstract class State {
 	}
 
 	/**
-	 * Set the state identifier, unique to the owning flow.
-	 * @param id the state identifier.
+	 * Returns the additional properties describing this state.
 	 */
-	private void setId(String id) {
-		Assert.hasText(id, "The state must have a valid identifier");
-		this.id = id;
-	}
-
 	public AttributeSource getProperties() {
 		return this.properties;
 	}
 
+	/**
+	 * Returns the value of given additional state property, or null if
+	 * if not found.
+	 */
 	public Object getProperty(String propertyName) {
 		return this.properties.getAttribute(propertyName);
 	}

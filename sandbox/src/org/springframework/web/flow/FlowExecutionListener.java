@@ -41,9 +41,9 @@ public interface FlowExecutionListener {
 	 * Called immediately after a start event is signaled - indicating the flow
 	 * is starting but hasn't yet entered its start state.
 	 * @param context source of the event
-	 * @throws StateEventVetoedException the start state transition was not allowed
+	 * @throws EnterStateVetoException the start state transition was not allowed
 	 */
-	public void starting(RequestContext context) throws StateEventVetoedException;
+	public void starting(RequestContext context) throws EnterStateVetoException;
 
 	/**
 	 * Called when a new flow execution was started -- the start state has been
@@ -71,19 +71,18 @@ public interface FlowExecutionListener {
 	 * Called when a state transitions, after the transition is matched
 	 * but before the transition occurs.
 	 * @param context the source of the event
-	 * @param nextState the proposedState to transition to
-	 * @throws StateEventVetoedException the state transition was not allowed
+	 * @param nextState the proposed state to transition to
+	 * @throws EnterStateVetoException the state transition was not allowed
 	 */
-	public void stateEntering(RequestContext context, State nextState) throws StateEventVetoedException;
+	public void stateEntering(RequestContext context, State nextState) throws EnterStateVetoException;
 
 	/**
-	 * Called when a state transitions, after the transition occurs.
+	 * Called when a state transitions, after the transition occured.
 	 * @param context the source of the event
 	 * @param previousState <i>from</i> state of the transition
 	 * @param state <i>to</i> state of the transition
-	 * @throws StateEventVetoedException the state transition was renegged
 	 */
-	public void stateEntered(RequestContext context, State previousState, State state) throws StateEventVetoedException;
+	public void stateEntered(RequestContext context, State previousState, State state);
 
 	/**
 	 * Called when a sub flow is spawned.

@@ -26,11 +26,14 @@ import org.springframework.util.StringUtils;
 /**
  * A parameter object that allows for storing arbitrary properties about a
  * target <code>Action</code> implementation for use in exactly one
- * context, for example a <code>ActionState</code> definition, a
+ * context, for example an <code>ActionState</code> definition, a
  * <code>TransitionCriteria</code> definition, or in a test environment.
+ * 
  * @author Keith Donald
  */
 public class AnnotatedAction extends MapAttributeSource {
+	
+	// well known properties
 
 	/**
 	 * The name of a named action.
@@ -52,44 +55,35 @@ public class AnnotatedAction extends MapAttributeSource {
 	 * execution when using a multi-action. A multi-action is an action that
 	 * groups several action execute methods together on a single class. The
 	 * methods follow the following signature:
-	 * 
 	 * <pre>
 	 *    public Event ${method}(RequestContext context)
 	 * </pre>
 	 */
 	public static final String METHOD_PROPERTY = "method";
+	
 
 	/**
-	 * The action to execute when the action state is entered.
+	 * The action to execute.
 	 */
 	private Action targetAction;
 
 	/**
-	 * Creates a new action state action-info object for the specified action.
-	 * No contextual properties are provided. The owning state is not yet
-	 * specified so this object should be associated with a state later on using
-	 * the <code>setState()</code> method.
-	 * 
-	 * @param targetAction
-	 *            the action
+	 * Creates a new annotated action object for the specified action.
+	 * No contextual properties are provided.
+	 * @param targetAction the action
 	 */
 	public AnnotatedAction(Action targetAction) {
 		this(targetAction, new HashMap(3));
 	}
 
 	/**
-	 * Creates a new action state action-info object for the specified action.
-	 * The map of properties is provided. The owning state is not yet specified
-	 * so this object should be associated with a state later on using the
-	 * <code>setState()</code> method.
-	 * 
-	 * @param targetAction
-	 *            the action
-	 * @param properties
-	 *            the properties describing usage of the action
+	 * Creates a new annotated action object for the specified action.
+	 * The map of properties is provided.
+	 * @param targetAction the action
+	 * @param properties the properties describing usage of the action
 	 */
-	public AnnotatedAction(Action targetAction, Map attributes) {
-		super(attributes);
+	public AnnotatedAction(Action targetAction, Map properties) {
+		super(properties);
 		setTargetAction(targetAction);
 	}
 
@@ -111,7 +105,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	}
 
 	/**
-	 * Sets the short description for the action in the owning action state.
+	 * Sets the short description for the action.
 	 * @param caption the caption
 	 */
 	public void setCaption(String caption) {
@@ -119,7 +113,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	}
 
 	/**
-	 * Sets the long description for the action in the owning action state.
+	 * Sets the long description for the action.
 	 * @param description the long description
 	 */
 	public void setDescription(String description) {
@@ -138,7 +132,6 @@ public class AnnotatedAction extends MapAttributeSource {
 
 	/**
 	 * Returns the wrapped target action.
-	 * 
 	 * @return the action
 	 */
 	public Action getTargetAction() {
@@ -147,30 +140,28 @@ public class AnnotatedAction extends MapAttributeSource {
 
 	/**
 	 * Returns the name of a named action, or <code>null</code> if the action
-	 * is unnamed in the owning state. Used when mapping action result events to
-	 * transitions.
+	 * is unnamed. Used when mapping action result events to transitions.
 	 */
 	public String getName() {
 		return (String)getAttribute(NAME_PROPERTY);
 	}
 
 	/**
-	 * Returns whether or not the wrapped target action is a named action in the
-	 * owning action state.
+	 * Returns whether or not the wrapped target action is a named action.
 	 */
 	public boolean isNamed() {
 		return StringUtils.hasText(getName());
 	}
 
 	/**
-	 * Returns the short description of the action in the action state.
+	 * Returns the short description of the action.
 	 */
 	public String getCaption() {
 		return (String)getAttribute(CAPTION_PROPERTY);
 	}
 
 	/**
-	 * Returns the logical description of this action in this action state.
+	 * Returns the long description of this action.
 	 */
 	public String getDescription() {
 		return (String)getAttribute(DESCRIPTION_PROPERTY);
@@ -178,9 +169,7 @@ public class AnnotatedAction extends MapAttributeSource {
 
 	/**
 	 * Returns the name of the handler method to invoke on the target action
-	 * instance to handle action execution for this state. Only used by
-	 * multi-actions.
-	 * 
+	 * instance to handle action execution. Only used by multi-actions.
 	 * @return the execute method name
 	 */
 	public String getMethod() {

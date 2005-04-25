@@ -25,12 +25,14 @@ import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
- * A transition criteria that will execute a action when tested and return
+ * A transition criteria that will execute an action when tested and return
  * <code>true</code> if the action's result is equal to the 'trueEventId', false
  * otherwise.
  * <p>
  * This effectively adapts an <code>Action</code> to a <code>TransitionCriteria</code>.
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class ActionTransitionCriteria implements TransitionCriteria {
 
@@ -73,9 +75,7 @@ public class ActionTransitionCriteria implements TransitionCriteria {
 	/**
 	 * Sets the action result <code>eventId</code> that should cause this
 	 * precondition to return true (it will return false otherwise).
-	 * 
-	 * @param trueEventId
-	 *            the true result event ID
+	 * @param trueEventId the true result event ID
 	 */
 	public void setTrueEventId(String trueEventId) {
 		this.trueEventId = trueEventId;
@@ -90,18 +90,17 @@ public class ActionTransitionCriteria implements TransitionCriteria {
 	}
 	
 	public boolean test(RequestContext context) {
+		((StateContext)context).setActionProperties(action);
+		Event result;
 		try {
-			((StateContext)context).setActionAttributes(action);
-			Event result = this.action.getTargetAction().execute(context);
-			if (result.getId().equals(getTrueEventId())) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			result = this.action.getTargetAction().execute(context);
+			return getTrueEventId().equals(result.getId());
 		}
 		catch (Exception e) {
 			throw new ActionExecutionException(context.getCurrentState(), action, e);
+		}
+		finally {
+			((StateContext)context).setActionProperties(null);
 		}
 	}
 }

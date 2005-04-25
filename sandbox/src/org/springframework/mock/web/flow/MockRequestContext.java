@@ -61,7 +61,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 
 	private Event lastEvent;
 
-	private MutableAttributeSource actionExecutionAttributes = new MapAttributeSource();
+	private MutableAttributeSource actionExecutionProperties = new MapAttributeSource();
 
 	private Scope requestScope = new Scope(ScopeType.REQUEST);
 
@@ -151,7 +151,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	 * @param attributeValue the attribute value
 	 */
 	public void setActionExecutionAttribute(String attributeName, Object attributeValue) {
-		this.actionExecutionAttributes.setAttribute(attributeName, attributeValue);
+		this.actionExecutionProperties.setAttribute(attributeName, attributeValue);
 	}
 	
 	public Flow getRootFlow() {
@@ -178,8 +178,8 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		return lastEvent;
 	}
 
-	public AttributeSource getActionAttributes() {
-		return actionExecutionAttributes;
+	public AttributeSource getActionProperties() {
+		return actionExecutionProperties;
 	}
 
 	public Scope getFlowScope() {

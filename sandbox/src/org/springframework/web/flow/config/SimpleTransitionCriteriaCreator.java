@@ -34,6 +34,10 @@ import org.springframework.web.flow.TransitionCriteria;
  */
 public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreator {
 
+	/**
+	 * Event id value ("*") that will cause the transition to match
+	 * on any event.
+	 */
 	public static final String WILDCARD_EVENT_ID = "*";
 
 	public TransitionCriteria create(String encodedCriteria) {

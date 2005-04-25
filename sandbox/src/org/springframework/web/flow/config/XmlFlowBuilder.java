@@ -460,12 +460,19 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		return attributes;
 	}
 
+	/**
+	 * Parse all properties defined as nested elements of given element.
+	 */
 	protected Map parseProperties(Element element) {
 		MapAttributeSource properties = new MapAttributeSource();
 		parseProperties(element, properties);
 		return properties.getAttributeMap();
 	}
 
+	/**
+	 * Parse all properties defined as nested elements of given element
+	 * and add them to given set of properties.
+	 */
 	protected void parseProperties(Element element, MutableAttributeSource properties) {
 		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
 		for (int i = 0; i < propertyElements.size(); i++) {

@@ -31,49 +31,38 @@ public interface StateContext extends RequestContext {
 
 	/**
 	 * Update the current state of the ongoing flow execution.
-	 * 
-	 * @param state
-	 *            the new current state
+	 * @param state the new current state
 	 */
 	public void setCurrentState(State state) throws IllegalStateException;
 
 	/**
 	 * Update the last event that occured in the ongoing flow execution.
-	 * 
-	 * @param lastEvent
-	 *            the last event that occured
+	 * @param lastEvent the last event that occured
 	 */
 	public void setLastEvent(Event lastEvent);
 
 	/**
 	 * Update contextual properties about the action that is about to execute in
 	 * this request context.
-	 * 
-	 * @param attributes
-	 *            the action execution parameters
+	 * @param attributes the action execution parameters
 	 */
-	public void setActionAttributes(AttributeSource attributes);
+	public void setActionProperties(AttributeSource properties);
 
 	/**
 	 * Get the flow session currently active in the flow execution.
-	 * 
-	 * @throws IllegalStateException
-	 *             when the flow execution is not active
+	 * @throws IllegalStateException when the flow execution is not active
 	 */
 	public FlowSession getActiveFlowSession() throws IllegalStateException;
 
 	/**
 	 * Get the flow session of the parent flow of the flow currently active in
 	 * the flow execution.
-	 * 
-	 * @throws IllegalStateException
-	 *             when the flow execution is not active
+	 * @throws IllegalStateException when the flow execution is not active
 	 */
 	public FlowSession getParentFlowSession() throws IllegalStateException;
 
 	/**
 	 * End the active flow session.
-	 * 
 	 * @return the ended session
 	 */
 	public FlowSession endActiveFlowSession() throws IllegalStateException;
@@ -81,11 +70,8 @@ public interface StateContext extends RequestContext {
 	/**
 	 * Spawn the provided flow definition as a subflow, activating it and
 	 * parameterizing it with the provided sub flow input.
-	 * 
-	 * @param subFlow
-	 *            the subflow
-	 * @param subFlowInput
-	 *            the subflow input attributes
+	 * @param subFlow the subflow
+	 * @param subFlowInput the subflow input attributes
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the spawned subflow
 	 */
@@ -94,13 +80,9 @@ public interface StateContext extends RequestContext {
 	/**
 	 * Spawn the provided flow definition as a subflow, activating it in the
 	 * specified state and parameterizing it with the provided sub flow input.
-	 * 
-	 * @param subFlow
-	 *            the subflow
-	 * @param stateId
-	 *            the stateId to start in
-	 * @param subFlowInput
-	 *            the subflow input attributes
+	 * @param subFlow the subflow
+	 * @param stateId the stateId to start in
+	 * @param subFlowInput the subflow input attributes
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the spawned subflow
 	 */

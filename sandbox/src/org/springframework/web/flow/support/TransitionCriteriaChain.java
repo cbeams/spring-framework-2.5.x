@@ -24,6 +24,7 @@ import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * An ordered chain of <code>TransitionCriteria</code>.
+ * 
  * @author Keith Donald
  */
 public class TransitionCriteriaChain implements TransitionCriteria {
@@ -37,7 +38,6 @@ public class TransitionCriteriaChain implements TransitionCriteria {
 	 * Creates an initially empty transition criteria chain. 
 	 */
 	public TransitionCriteriaChain() {
-		
 	}
 
 	/**
@@ -48,6 +48,9 @@ public class TransitionCriteriaChain implements TransitionCriteria {
 		chain.addAll(Arrays.asList(criteria));
 	}
 
+	/**
+	 * Add given criteria object to the end of the chain.
+	 */
 	public void add(TransitionCriteria criteria) {
 		this.chain.add(criteria);
 	}

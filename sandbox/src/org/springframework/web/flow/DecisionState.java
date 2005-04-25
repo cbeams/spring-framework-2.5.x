@@ -25,24 +25,22 @@ import org.springframework.util.StringUtils;
  * <p>
  * A decision state is a convenient way to encapsulate reusable state transition logic in
  * one place.
+ * 
  * @author Keith Donald
  */
 public class DecisionState extends TransitionableState {
 
 	/**
-	 * Create a new decision state with a if/then/else transition set.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
+	 * Create a new decision state with an if/then/else transition set.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
 	 * @param criteria the expression
 	 * @param ifTrueStateId the state to go to if the expression is true
-	 * @param elseStateId the state to go to if the expression is false
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param elseStateId the state to go to if the expression is false (optional)
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public DecisionState(Flow flow, String id, TransitionCriteria criteria, String ifTrueStateId, String elseStateId) {
+	public DecisionState(Flow flow, String id, TransitionCriteria criteria, String ifTrueStateId, String elseStateId)
+			throws IllegalArgumentException {
 		super(flow, id, new Transition(criteria, ifTrueStateId));
 		if (StringUtils.hasText(elseStateId)) {
 			add(new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, elseStateId));
@@ -50,21 +48,18 @@ public class DecisionState extends TransitionableState {
 	}
 
 	/**
-	 * Create a new decision state with a if/then/else transition set.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
+	 * Create a new decision state with an if/then/else transition set.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
 	 * @param criteria the expression
 	 * @param ifTrueStateId the state to go to if the expression is true
 	 * @param elseStateId the state to go to if the expression is false
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public DecisionState(Flow flow, String id, TransitionCriteria criteria, String ifTrueStateId, String elseStateId,
-			Map properties) {
-		super(flow, id, new Transition[] { new Transition(criteria, ifTrueStateId) }, properties);
+			Map properties) throws IllegalArgumentException {
+		super(flow, id, new Transition(criteria, ifTrueStateId), properties);
 		if (StringUtils.hasText(elseStateId)) {
 			add(new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, elseStateId));
 		}
@@ -72,27 +67,25 @@ public class DecisionState extends TransitionableState {
 
 	/**
 	 * Creates a new decision state with the supported set of transitions.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
+	 * @param flow the owning flow
+	 * @param stateId the state identifier (must be unique to the flow)
 	 * @param transitions the transitions
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public DecisionState(Flow flow, String stateId, Transition[] transitions) {
+	public DecisionState(Flow flow, String stateId, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, stateId, transitions);
 	}
 
 	/**
 	 * Creates a new decision state with the supported set of transitions.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
+	 * @param flow the owning flow
+	 * @param stateId the state identifier (must be unique to the flow)
 	 * @param transitions the transitions
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public DecisionState(Flow flow, String stateId, Transition[] transitions, Map properties) {
+	public DecisionState(Flow flow, String stateId, Transition[] transitions, Map properties)
+			throws IllegalArgumentException {
 		super(flow, stateId, transitions, properties);
 	}
 
@@ -103,9 +96,7 @@ public class DecisionState extends TransitionableState {
 	 * <p>
 	 * Simply looks up the first transiiton that matches the state of the
 	 * StateContext.
-	 * 
-	 * @param context
-	 *            the state execution context
+	 * @param context the state execution context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */

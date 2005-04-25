@@ -46,15 +46,10 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new marker view state.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
-	 * @param transition
-	 *            the sole transition of this state
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public ViewState(Flow flow, String id, Transition transition) throws IllegalArgumentException {
 		super(flow, id, transition);
@@ -62,15 +57,10 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new marker view state.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
-	 * @param transitions
-	 *            the transitions of this state
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public ViewState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
@@ -78,17 +68,11 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new view state.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
-	 * @param viewName
-	 *            the logical name of the view to render
-	 * @param transition
-	 *            the sole transition of this state
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the logical name of the view to render
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public ViewState(Flow flow, String id, String viewName, Transition transition) throws IllegalArgumentException {
 		super(flow, id, transition);
@@ -97,17 +81,11 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new view state.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
-	 * @param viewName
-	 *            the logical name of the view to render
-	 * @param transitions
-	 *            the transitions of this state
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the logical name of the view to render
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
@@ -116,19 +94,12 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Create a new view state.
-	 * 
-	 * @param flow
-	 *            the owning flow
-	 * @param id
-	 *            the state identifier (must be unique to the flow)
-	 * @param viewName
-	 *            the logical name of the view to render
-	 * @param transitions
-	 *            the transitions of this state
-	 * @param properties
-	 * 			  additional properties describing this state
-	 * @throws IllegalArgumentException
-	 *             when this state cannot be added to given flow
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the logical name of the view to render
+	 * @param transitions the transitions of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
 	public ViewState(Flow flow, String id, String viewName, Transition[] transitions, Map properties) throws IllegalArgumentException {
 		super(flow, id, transitions, properties);
@@ -164,9 +135,7 @@ public class ViewState extends TransitionableState {
 	 * Returns a view descriptor pointing callers to a logical view resource to
 	 * be displayed. The descriptor also contains a model map needed when the
 	 * view is rendered, for populating dynamic content.
-	 * 
-	 * @param context
-	 *            the state execution context
+	 * @param context the state execution context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */
