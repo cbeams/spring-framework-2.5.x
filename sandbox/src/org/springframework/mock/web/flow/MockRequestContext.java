@@ -42,7 +42,9 @@ import org.springframework.web.flow.TransactionSynchronizer;
  * href="http://www.martinfowler.com/articles/mocksArentStubs.html">Martin
  * Fowler's</a> reasoning. This class is called <i>Mock</i>RequestContext to
  * be consistent with the naming convention in the rest of the Spring framework
- * (e.g. MockHttpServletRequest, ...). TODO - belongs in the spring-mock.jar
+ * (e.g. MockHttpServletRequest, ...).
+ * 
+ * TODO - belongs in the spring-mock.jar
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -78,12 +80,9 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	/**
 	 * Create a new stub request context.
 	 * 
-	 * @param activeFlow
-	 *            the active flow
-	 * @param currentState
-	 *            the current state
-	 * @param originatingEvent
-	 *            the event originating this request context
+	 * @param activeFlow the active flow
+	 * @param currentState the current state
+	 * @param originatingEvent the event originating this request context
 	 */
 	public MockRequestContext(Flow activeFlow, State currentState, Event originatingEvent) {
 		setActiveFlow(activeFlow);
@@ -95,8 +94,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	/**
 	 * Set the root flow of this request context.
 	 * 
-	 * @param rootFlow
-	 *            the rootFlow to set
+	 * @param rootFlow the rootFlow to set
 	 */
 	public void setRootFlow(Flow rootFlow) {
 		this.rootFlow = rootFlow;
@@ -108,8 +106,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	/**
 	 * Set the active flow of this request context.
 	 * 
-	 * @param activeFlow
-	 *            the activeFlow to set
+	 * @param activeFlow the activeFlow to set
 	 */
 	public void setActiveFlow(Flow activeFlow) {
 		this.activeFlow = activeFlow;
@@ -121,8 +118,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	/**
 	 * Set the current state of this request context.
 	 * 
-	 * @param currentState
-	 *            the currentState to set
+	 * @param currentState the currentState to set
 	 */
 	public void setCurrentState(State currentState) {
 		Assert.state(currentState.getFlow() == this.activeFlow, "The current state must be in the active flow");
@@ -132,8 +128,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	/**
 	 * Set the event originating this request context.
 	 * 
-	 * @param originatingEvent
-	 *            the originatingEvent to set
+	 * @param originatingEvent the originatingEvent to set
 	 */
 	public void setOriginatingEvent(Event originatingEvent) {
 		this.originatingEvent = originatingEvent;
@@ -142,8 +137,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	/**
 	 * Set the last event that occured in this request context.
 	 * 
-	 * @param lastEvent
-	 *            the lastEvent to set
+	 * @param lastEvent the lastEvent to set
 	 */
 	public void setLastEvent(Event lastEvent) {
 		this.lastEvent = lastEvent;
