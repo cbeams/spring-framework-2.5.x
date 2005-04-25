@@ -17,7 +17,6 @@
 package org.springframework.web.bind;
 
 import javax.portlet.PortletException;
-import javax.servlet.ServletException;
 
 /**
  * Fatal binding exception, thrown when we want to

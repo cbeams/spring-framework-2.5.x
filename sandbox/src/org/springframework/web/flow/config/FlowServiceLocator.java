@@ -19,7 +19,6 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ServiceLookupException;
-import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * Service locator interface used by flow builders at configuration time to
