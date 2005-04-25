@@ -4,13 +4,13 @@ public abstract class StateEventVetoedException extends FlowNavigationException 
 
 	private State state;
 	
-	public StateEventVetoedException(Flow flow, State state, String message) {
-		super(flow, message);
+	public StateEventVetoedException(State state, String message) {
+		super(state.getFlow(), message);
 		this.state = state;
 	}
 
-	public StateEventVetoedException(Flow flow, State state, String message, Throwable cause) {
-		super(flow, message, cause);
+	public StateEventVetoedException(State state, String message, Throwable cause) {
+		super(state.getFlow(), message, cause);
 		this.state = state;
 	}
 	
