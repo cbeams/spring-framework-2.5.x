@@ -94,8 +94,8 @@ public class DecisionState extends TransitionableState {
 	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
-	 * Simply looks up the first transiiton that matches the state of the
-	 * StateContext.
+	 * Simply looks up the first transition that matches the state of the
+	 * StateContext and executes it.
 	 * @param context the state execution context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
