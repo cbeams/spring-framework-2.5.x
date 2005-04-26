@@ -353,8 +353,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	}
 
 	public void assertInTransaction(boolean end) throws IllegalStateException {
-		Assert.state(isEventTokenValid(getTransactionTokenAttributeName(), getTransactionTokenParameterName(), end),
-				"The request is not executing in the context of an application transaction");
+		Assert.state(inTransaction(end), "The request is not executing in the context of an application transaction");
 	}
 
 	public void beginTransaction() {
@@ -416,7 +415,9 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * @return true when the token is valid, false otherwise
 	 */
 	protected boolean isEventTokenValid(String tokenName, String tokenParameterName, boolean clear) {
-		String tokenValue = (String)getLastEvent().getParameter(tokenParameterName);
+		// we use the originating event because we want to check that the
+		// client request that came into the system has a transaction token
+		String tokenValue = (String)getOriginatingEvent().getParameter(tokenParameterName);
 		return isTokenValid(tokenName, tokenValue, clear);
 	}
 
