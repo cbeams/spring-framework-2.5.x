@@ -17,7 +17,7 @@
 	Defines the root element for a web flow definition. Web flows
 	are composed of one or more states.
 -->
-<!ELEMENT webflow ( (action-state | view-state | decision-state | subflow-state | end-state | precondition )+ )>
+<!ELEMENT webflow ( ( action-state | view-state | decision-state | subflow-state | end-state )+ )>
 
 <!--
 	Unique identifier of the web flow; should be unique to all other web flows.
@@ -76,22 +76,22 @@
 <!--
 	Optional name qualifier for the action. When specified, the action will
 	qualify execution result event identifiers by this name. An action with
-	a name is ofter referred to as a "named action".
+	a name is often referred to as a "named action".
 -->
 <!ATTLIST action name CDATA #IMPLIED>
 
 <!--
-	Name of the target method to be invoked to execute this action.  The method's signature must
-	be of the form: 'public Event ${method}(RequestContext)'
+	Name of the target method to be invoked to execute this action. The method's signature must
+	be of the form: 'public Event ${method}(RequestContext) throws Exception'
 -->
 <!ATTLIST action method CDATA #IMPLIED>
 
 <!--
-	A property associated with an action in an action state. Properties are simple strings that 
-	allow you to annotate the action in the context of the state it is being linked with.
+	A property associated with an another element (action, state, ...). Properties are simple
+	strings that allow you to annotate the element.
 	For example, the 'caption' property might serve a GUI tooltip or logging statement, and
 	the 'validatorMethod' property might specify a target method to invoke on a form action's
-	validator.
+	validator in a particular action state.
 -->
 <!ELEMENT property ( value? )>
 
@@ -118,8 +118,9 @@
 
 <!--
 	The identifier of the event that can trigger this transition. An event describes something
-	that happens e.g "submit", "back", "success", "error".
-	Note: in the future, custom transitional expressions will be definable from this element.
+	that happens e.g. "submit", "back", "success", "error". The exact interpretation of the
+	value of this attribute depends on the transition criteria factory configured for the flow,
+	e.g. it is possible to have transitional expressions defined from this element.
 -->
 <!ATTLIST transition on CDATA #REQUIRED>
 
@@ -127,12 +128,6 @@
 	Target state of the transition.
 -->
 <!ATTLIST transition to IDREF #REQUIRED>
-
-<!--
-	A id of a configured transition execution criteria, tests if this transition, once matched
-	to an event in a request context, is allowed to execute.
--->
-<!ATTLIST transition executionCriteria CDATA #IMPLIED>
 
 <!--
 	Defines a view state: a state where a view will be rendered.
@@ -156,7 +151,7 @@
 
 <!--
 	Defines a decision state: a state that will evaluate one or more expressions to
-	decide which state to go next (aka routing state.)
+	decide which state to go to next.
 -->
 <!ELEMENT decision-state ( if+, property* )>
 
@@ -191,7 +186,7 @@
 
 <!--
 	Defines a sub flow state: a state that spawns a sub flow when entered. When the
-	sub flow completes execution (reaches a end state), the result of subflow execution
+	sub flow completes execution (reaches an end state), the result of subflow execution
 	will be used as grounds for a transition out of this state.
 -->
 <!ELEMENT subflow-state ( attribute-mapper?, transition+, property* )>
