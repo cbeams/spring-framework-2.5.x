@@ -139,7 +139,9 @@ public class OgnlTransitionCriteriaCreator extends SimpleTransitionCriteriaCreat
 		protected Map getAliasMap(RequestContext context) {
 			Map res = new HashMap();
 			// ${#result == lastEvent.id}
-			res.put("result", context.getLastEvent().getId());
+			if (context.getLastEvent()!=null) {
+				res.put("result", context.getLastEvent().getId());
+			}
 			return res;
 		}
 

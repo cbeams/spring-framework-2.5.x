@@ -17,8 +17,11 @@ package org.springframework.web.flow.support;
 
 import junit.framework.TestCase;
 
+import ognl.ExpressionSyntaxException;
+
 import org.springframework.mock.web.flow.MockRequestContext;
 import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.SimpleEvent;
 
 /**
  * Test case for OgnlTransitionCriteriaCreator.
@@ -28,10 +31,9 @@ import org.springframework.web.flow.RequestContext;
 public class OgnlTransitionCriteriaCreatorTests extends TestCase {
 
 	public void testTrueEvaluation() throws Exception {
-		String expr = "${foo}";
 		String expression = "flowScope.foo == 'bar'";
-		OgnlTransitionCriteriaCreator.OgnlTransitionCriteria criterion = new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria(
-				expression);
+		OgnlTransitionCriteriaCreator.OgnlTransitionCriteria criterion =
+			new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria(expression);
 		RequestContext ctx = getRequestContext();
 		assertTrue("Criterion should evaluate to true", criterion.test(ctx));
 
@@ -39,16 +41,16 @@ public class OgnlTransitionCriteriaCreatorTests extends TestCase {
 
 	public void testFalseEvaluation() throws Exception {
 		String expression = "flowScope.foo != 'bar'";
-		OgnlTransitionCriteriaCreator.OgnlTransitionCriteria criterion = new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria(
-				expression);
+		OgnlTransitionCriteriaCreator.OgnlTransitionCriteria criterion =
+			new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria(expression);
 		RequestContext ctx = getRequestContext();
 		assertFalse("Criterion should evaluate to false", criterion.test(ctx));
 	}
 
 	public void testNonBooleanEvaluation() throws Exception {
 		String expression = "flowScope.foo";
-		OgnlTransitionCriteriaCreator.OgnlTransitionCriteria criterion = new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria(
-				expression);
+		OgnlTransitionCriteriaCreator.OgnlTransitionCriteria criterion =
+			new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria(expression);
 		RequestContext ctx = getRequestContext();
 
 		try {
@@ -63,15 +65,26 @@ public class OgnlTransitionCriteriaCreatorTests extends TestCase {
 	public void testInvalidSyntax() throws Exception {
 		try {
 			new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria("&foo<<m");
-			fail("Syntax error should throw IllegalArgumentException");
+			fail("Syntax error should throw ExpressionSyntaxException");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (ExpressionSyntaxException ex) {
 			// success
 		}
 	}
+	
+	public void testEventId() throws Exception {
+		OgnlTransitionCriteriaCreator.OgnlTransitionCriteria criterion =
+			new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria("lastEvent.id == 'sample'");
+		RequestContext ctx = getRequestContext();
+		assertTrue("Criterion should evaluate to true", criterion.test(ctx));
+		
+		criterion = new OgnlTransitionCriteriaCreator.OgnlTransitionCriteria("#result == 'sample'");
+		assertTrue("Criterion should evaluate to true", criterion.test(ctx));
+	}
 
 	private RequestContext getRequestContext() {
-		RequestContext ctx = new MockRequestContext();
+		MockRequestContext ctx = new MockRequestContext();
+		ctx.setLastEvent(new SimpleEvent(this, "sample"));
 		ctx.getFlowScope().setAttribute("foo", "bar");
 		return ctx;
 	}
