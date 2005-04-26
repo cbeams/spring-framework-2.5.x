@@ -21,6 +21,7 @@ import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -86,9 +87,9 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	private String lastEventId;
 
 	/**
-	 * The timestamp when the last valid event was signaled.
+	 * The timestamp when the last request to manipulate this flow execution was processed.
 	 */
-	private long lastEventTimestamp;
+	private long lastRequestTimestamp;
 
 	/**
 	 * The stack of active, currently executing flow sessions. As subflows are
@@ -215,15 +216,13 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	protected void setLastEvent(Event lastEvent) {
 		Assert.notNull(lastEvent, "The event is required");
 		this.lastEventId = lastEvent.getId();
-		this.lastEventTimestamp = lastEvent.getTimestamp();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Set last event id to '" + this.lastEventId + "' and updated timestamp to "
-					+ this.lastEventTimestamp);
+			logger.debug("Set last event id to '" + this.lastEventId + "'");
 		}
 	}
 
-	public long getLastEventTimestamp() {
-		return this.lastEventTimestamp;
+	public long getLastRequestTimestamp() {
+		return this.lastRequestTimestamp;
 	}
 
 	// methods implementing FlowExecution
@@ -239,10 +238,12 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		// execute the event
 		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted();
+		this.lastRequestTimestamp = new Date().getTime();
 		context.fireStarting();
 		ViewDescriptor viewDescriptor = this.rootFlow.getStartState().enter(context);
 		context.fireStarted();
 		context.fireRequestProcessed();
+		updateRequestTimestamp();
 		return viewDescriptor;
 	}
 
@@ -275,7 +276,12 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		context.fireRequestSubmitted();
 		ViewDescriptor viewDescriptor = state.onEvent(event, context);
 		context.fireRequestProcessed();
+		updateRequestTimestamp();
 		return viewDescriptor;
+	}
+	
+	private void updateRequestTimestamp() {
+		this.lastRequestTimestamp = new Date().getTime();
 	}
 
 	// flow session management helpers
@@ -399,14 +405,14 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(this.getRootFlow().getId());
 		out.writeObject(this.lastEventId);
-		out.writeLong(this.lastEventTimestamp);
+		out.writeLong(this.lastRequestTimestamp);
 		out.writeObject(this.executingFlowSessions);
 	}
 
 	private void readObject(ObjectInputStream in) throws OptionalDataException, ClassNotFoundException, IOException {
 		this.rootFlowId = (String)in.readObject();
 		this.lastEventId = (String)in.readObject();
-		this.lastEventTimestamp = in.readLong();
+		this.lastRequestTimestamp = in.readLong();
 		this.executingFlowSessions = (Stack)in.readObject();
 	}
 

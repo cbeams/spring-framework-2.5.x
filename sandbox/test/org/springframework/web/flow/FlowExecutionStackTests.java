@@ -98,7 +98,7 @@ public class FlowExecutionStackTests extends TestCase {
 			assertSame(flowExecution.getRootFlow(), restoredFlowExecution.getRootFlow());
 		}
 		assertEquals(flowExecution.getLastEventId(), restoredFlowExecution.getLastEventId());
-		assertEquals(flowExecution.getLastEventTimestamp(), restoredFlowExecution.getLastEventTimestamp());
+		assertEquals(flowExecution.getLastRequestTimestamp(), restoredFlowExecution.getLastRequestTimestamp());
 		assertEquals(flowExecution.getListenerList().size(), restoredFlowExecution.getListenerList().size());
 	}
 

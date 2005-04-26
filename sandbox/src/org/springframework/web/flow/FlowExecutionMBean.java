@@ -101,8 +101,9 @@ public interface FlowExecutionMBean {
 	public String getLastEventId();
 
 	/**
-	 * Returns the timestamp noting when the last event was signaled.
-	 * @return the timestamp of the last event occurance
+	 * Returns the timestamp noting when the last request to manipulate this
+	 * executing flow was processed.
+	 * @return the timestamp of the last client request
 	 */
-	public long getLastEventTimestamp();
+	public long getLastRequestTimestamp();
 }
