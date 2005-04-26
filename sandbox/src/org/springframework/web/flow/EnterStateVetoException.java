@@ -3,7 +3,7 @@ package org.springframework.web.flow;
 /**
  * Exception thrown to veto entering of a state in a web flow.
  *  
- * @autor Keith Donald
+ * @author Keith Donald
  * @author Erwin Vervaet
  */
 public abstract class EnterStateVetoException extends FlowNavigationException {

@@ -21,7 +21,6 @@ import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -236,7 +235,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		// execute the event
 		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted();
-		this.lastRequestTimestamp = new Date().getTime();
+		updateRequestTimestamp();
 		context.fireStarting();
 		ViewDescriptor viewDescriptor = this.rootFlow.getStartState().enter(context);
 		context.fireStarted();
@@ -278,8 +277,11 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		return viewDescriptor;
 	}
 	
+	/**
+	 * Update the last request timestamp to now.
+	 */
 	private void updateRequestTimestamp() {
-		this.lastRequestTimestamp = new Date().getTime();
+		this.lastRequestTimestamp = System.currentTimeMillis();
 	}
 
 	// flow session management helpers

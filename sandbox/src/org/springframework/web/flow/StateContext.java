@@ -44,7 +44,7 @@ public interface StateContext extends RequestContext {
 	/**
 	 * Update contextual properties about the action that is about to execute in
 	 * this request context.
-	 * @param attributes the action execution parameters
+	 * @param properties the action execution parameters
 	 */
 	public void setActionProperties(AttributeSource properties);
 
