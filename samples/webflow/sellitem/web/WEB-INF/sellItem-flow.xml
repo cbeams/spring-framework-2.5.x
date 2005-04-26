@@ -29,16 +29,6 @@
 		<if test="${flowScope.sale.shipping}" then="enterShippingDetails" else="showCostOverview"/>
 	</decision-state>
 
-	<!-- the equivalent of the above decision state, only as a action
-	<action-state id="requiresShipping">
-		<action class="org.springframework.web.flow.action.DecisionAction">
-			<property name="criteria" value="${flowScope.sale.shipping}"/>
-		</action>
-		<transition on="true" to="enterShippingDetails"/>
-		<transition on="false" to="showCostOverview"/>
-	</action-state>
-	-->
-	
 	<view-state id="enterShippingDetails" view="shippingDetailsForm">
 		<transition on="submit" to="showCostOverview">
 			<action bean="sellItemAction" method="bindAndValidate"/>
