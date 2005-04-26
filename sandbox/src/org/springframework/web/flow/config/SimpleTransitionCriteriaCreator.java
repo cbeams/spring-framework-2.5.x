@@ -86,7 +86,7 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 		}
 
 		public String toString() {
-			return eventId;
+			return "'" + eventId + "'";
 		}
 	}
 }
