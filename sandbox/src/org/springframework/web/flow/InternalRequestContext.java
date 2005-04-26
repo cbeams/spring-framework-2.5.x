@@ -137,9 +137,9 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		fireStateEntered(previousState);
 	}
 
-	public void setLastEvent(Event event) {
-		this.lastEvent = event;
-		this.flowExecution.setLastEvent(event);
+	public void setLastEvent(Event lastEvent) {
+		this.lastEvent = lastEvent;
+		this.flowExecution.setLastEvent(lastEvent);
 		fireEventSignaled();
 	}
 

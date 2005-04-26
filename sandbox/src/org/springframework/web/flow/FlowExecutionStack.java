@@ -208,13 +208,11 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	/**
-	 * Set the last event processed by this flow execution. This will also
-	 * update the last event timestamp, which management clients can use to
-	 * monitor the activity of this execution to detect idle status.
+	 * Set the last event processed by this flow execution.
 	 * @param lastEvent the last event to set
 	 */
 	protected void setLastEvent(Event lastEvent) {
-		Assert.notNull(lastEvent, "The event is required");
+		Assert.notNull(lastEvent, "The last event is required");
 		this.lastEventId = lastEvent.getId();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Set last event id to '" + this.lastEventId + "'");

@@ -358,12 +358,13 @@ public class ActionState extends TransitionableState {
 			executionCount++;
 			if (event != null) {
 				eventIds[executionCount - 1] = event.getId();
-				if (hasTransitionFor(context)) {
+				try {
 					return onEvent(event, context);
 				}
-				else {
+				catch (NoMatchingTransitionException e) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
+						logger
+								.debug("Action execution #" + executionCount + " resulted in no transition on event '"
 										+ eventIds[executionCount] + "' -- "
 										+ "I will proceed to the next action in the chain");
 					}
