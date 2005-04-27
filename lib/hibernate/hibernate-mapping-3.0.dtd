@@ -696,7 +696,7 @@ element type of a collection and specifies a one-to-many relational model -->
 <!-- Many to many association. This tag declares the entity-class
 element type of a collection and specifies a many-to-many relational model -->
 
-<!ELEMENT many-to-many (meta*,(column|formula)*)>
+<!ELEMENT many-to-many (meta*,(column|formula)*,filter*)>
 	<!ATTLIST many-to-many class CDATA #IMPLIED>
 	<!ATTLIST many-to-many node CDATA #IMPLIED>
 	<!ATTLIST many-to-many embed-xml (true|false) "true">
@@ -705,9 +705,10 @@ element type of a collection and specifies a many-to-many relational model -->
 	<!ATTLIST many-to-many formula CDATA #IMPLIED>
 	<!ATTLIST many-to-many not-found (exception|ignore) "exception">
 	<!ATTLIST many-to-many outer-join (true|false|auto) #IMPLIED>
-	<!ATTLIST many-to-many fetch (join|select) "join">
+	<!ATTLIST many-to-many fetch (join|select) #IMPLIED>
 	<!ATTLIST many-to-many foreign-key CDATA #IMPLIED>
 	<!ATTLIST many-to-many unique (true|false) "false">
+	<!ATTLIST many-to-many where CDATA #IMPLIED>
 
 <!-- A composite element allows a collection to hold instances of an arbitrary 
 class, without the requirement of joining to an entity table. Composite elements
