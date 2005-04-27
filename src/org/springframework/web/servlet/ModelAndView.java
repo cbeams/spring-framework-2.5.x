@@ -54,6 +54,15 @@ public class ModelAndView {
 
 
 	/**
+	 * Default constructor for bean-style usage: populating bean
+	 * properties instead of passing in constructor arguments.
+	 * @see #setView(View)
+	 * @see #setViewName(String)
+	 */
+	public ModelAndView() {
+	}
+
+	/**
 	 * Convenient constructor when there is no model data to expose.
 	 * Can also be used in conjunction with <code>addObject</code>.
 	 * @param view View object to render
