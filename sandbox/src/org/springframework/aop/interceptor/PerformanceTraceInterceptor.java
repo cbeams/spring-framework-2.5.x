@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.springframework.util.StopWatch;
 
 /**
+ * Intended to replace current PerformanceMonitorInterceptor.
  * @author robh
  */
 public class PerformanceTraceInterceptor extends AbstractTraceInterceptor {
@@ -15,11 +16,12 @@ public class PerformanceTraceInterceptor extends AbstractTraceInterceptor {
 		StopWatch stopWatch = new StopWatch(name);
 
 		try {
+			stopWatch.start(name);
 			return methodInvocation.proceed();
 		}
 		finally {
 			stopWatch.stop();
-			logger.trace(stopWatch.shortSummary());
+			this.log(logger, stopWatch.shortSummary());
 		}
 	}
 }
