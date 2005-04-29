@@ -38,9 +38,16 @@ public class TransactionAwareDataSourceConnectionProvider extends LocalDataSourc
 		if (originalDataSource instanceof TransactionAwareDataSourceProxy) {
 			return originalDataSource;
 		}
-		else {
-			return new TransactionAwareDataSourceProxy(originalDataSource);
-		}
+		return new TransactionAwareDataSourceProxy(originalDataSource);
+	}
+
+	/**
+	 * This implementation returns <code>true</code>: We can guarantee
+	 * to receive the same Connection within a transaction, as we are
+	 * exposing a TransactionAwareDataSourceProxy.
+	 */
+	public boolean supportsAggressiveRelease() {
+		return true;
 	}
 
 }

@@ -70,6 +70,10 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		return dataSource;
 	}
 
+	/**
+	 * This implementation delegates to the underlying DataSource.
+	 * @see javax.sql.DataSource#getConnection()
+	 */
 	public Connection getConnection() throws SQLException {
 		try {
 			return this.dataSourceToUse.getConnection();
@@ -80,6 +84,10 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		}
 	}
 
+	/**
+	 * This implementation simply calls <code>Connection.close</code>.
+	 * @see java.sql.Connection#close()
+	 */
 	public void closeConnection(Connection con) throws SQLException {
 		try {
 			con.close();
@@ -90,8 +98,20 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		}
 	}
 
+	/**
+	 * This implementation does nothing:
+	 * We're dealing with an externally managed DataSource.
+	 */
 	public void close() {
-		// Do nothing here - it's an externally managed DataSource.
+	}
+
+	/**
+	 * This implementation returns <code>false</code>: We cannot guarantee
+	 * to receive the same Connection within a transaction, not even when
+	 * dealing with a JNDI DataSource.
+	 */
+	public boolean supportsAggressiveRelease() {
+		return false;
 	}
 
 }
