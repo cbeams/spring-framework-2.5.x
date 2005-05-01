@@ -208,14 +208,14 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	/**
 	 * Notify all interested listeners that flow execution is starting.
 	 */
-	protected void fireStarting() {
+	protected void fireStarting(final State startState) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow session execution starting event to " + getFlowExecutionListenerList().size()
 					+ " listener(s)");
 		}
 		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).starting(InternalRequestContext.this);
+				((FlowExecutionListener)o).starting(InternalRequestContext.this, startState);
 			}
 		});
 	}

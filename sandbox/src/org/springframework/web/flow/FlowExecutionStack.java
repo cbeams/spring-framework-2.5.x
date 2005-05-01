@@ -236,7 +236,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		InternalRequestContext context = createRequestContext(event);
 		context.fireRequestSubmitted();
 		updateRequestTimestamp();
-		context.fireStarting();
+		context.fireStarting(this.rootFlow.getStartState());
 		ViewDescriptor viewDescriptor = this.rootFlow.getStartState().enter(context);
 		context.fireStarted();
 		context.fireRequestProcessed();

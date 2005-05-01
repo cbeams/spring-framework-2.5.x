@@ -64,6 +64,14 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 		return this.attributes.containsKey(attributeName);
 	}
 
+	public boolean containsAttribute(String attributeName, Class attributeClazz) {
+		boolean contains = this.attributes.containsKey(attributeName);
+		if (contains && attributeClazz != null) {
+			contains = attributeClazz.isInstance(this.attributes.get(attributeName));
+		}
+		return contains;
+	}
+
 	public Object getAttribute(String attributeName) {
 		return this.attributes.get(attributeName);
 	}
@@ -144,6 +152,7 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 					+ "; attributes present are = " + Styler.call(getAttributeMap()));
 		}
 	}
+
 	/**
 	 * Returns the contents of this scope as a map.
 	 */
