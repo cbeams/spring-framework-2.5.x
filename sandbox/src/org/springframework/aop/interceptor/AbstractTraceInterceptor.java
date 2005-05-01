@@ -20,7 +20,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.ConstantException;
 import org.springframework.core.Constants;
 
@@ -45,18 +44,17 @@ import org.springframework.core.Constants;
  * @see #log(org.apache.commons.logging.Log, Object, Throwable)
  */
 public abstract class AbstractTraceInterceptor implements MethodInterceptor {
+	public static final int LEVEL_FATAL = 0;
 
-	public static final int LEVEL_ERROR = 0;
+	public static final int LEVEL_ERROR = 1;
 
-	public static final int LEVEL_WARN = 1;
+	public static final int LEVEL_WARN = 2;
 
-	public static final int LEVEL_INFO = 2;
+	public static final int LEVEL_INFO = 3;
 
-	public static final int LEVEL_DEBUG = 3;
+	public static final int LEVEL_DEBUG = 4;
 
-	public static final int LEVEL_TRACE = 4;
-
-	public static final int LEVEL_FATAL = 5;
+	public static final int LEVEL_TRACE = 5;
 
 	private static final String CONSTANT_PREFIX = "LEVEL_";
 
@@ -76,9 +74,9 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor {
 	private boolean useDynamicLog = false;
 
 	/**
-	 * The current log level. Default value is <code>INFO</code>.
+	 * The current log level. Default value is <code>TRACE</code>.
 	 */
-	private int logLevel = constants.asNumber("INFO").intValue();
+	private int logLevel = constants.asNumber(CONSTANT_PREFIX + "TRACE").intValue();
 
 
 	/**

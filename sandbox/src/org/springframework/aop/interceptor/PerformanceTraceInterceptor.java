@@ -7,9 +7,13 @@ import org.springframework.util.StopWatch;
 
 /**
  * Intended to replace current PerformanceMonitorInterceptor.
- * @author robh
+ * @author Rob Harrop
  */
 public class PerformanceTraceInterceptor extends AbstractTraceInterceptor {
+
+	public PerformanceTraceInterceptor() {
+		setLogLevel("INFO");
+	}
 
 	protected Object invokeUnderTrace(MethodInvocation methodInvocation, Log logger) throws Throwable {
 		String name = methodInvocation.getMethod().getDeclaringClass().getName() + "." + methodInvocation.getMethod().getName();
