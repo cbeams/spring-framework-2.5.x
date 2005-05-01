@@ -16,11 +16,11 @@
 package org.springframework.mock.web.flow;
 
 import org.springframework.util.Assert;
+import org.springframework.web.flow.EnterStateVetoException;
 import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
-import org.springframework.web.flow.EnterStateVetoException;
 
 /**
  * Mock implementation of the <code>FlowExecutionListener</code> interface for
@@ -54,7 +54,7 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		Assert.state(started, "The flow execution has not yet been started");
 	}
 
-	public void starting(RequestContext context) throws EnterStateVetoException {
+	public void starting(RequestContext context, State startState) throws EnterStateVetoException {
 		Assert.state(!started, "The flow execution was already started");
 		flowNestingLevel = 0;
 		stateTransitions = 0;
