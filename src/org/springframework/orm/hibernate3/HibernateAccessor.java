@@ -18,13 +18,13 @@ package org.springframework.orm.hibernate3;
 
 import java.sql.SQLException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
@@ -138,7 +138,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 * SQLExceptions or wrapped Hibernate JDBCExceptions.
 	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
 	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
-	 * @param jdbcExceptionTranslator exception translator
+	 * @param jdbcExceptionTranslator the exception translator
 	 * @see java.sql.SQLException
 	 * @see org.hibernate.JDBCException
 	 * @see SessionFactoryUtils#newJdbcExceptionTranslator
@@ -212,8 +212,8 @@ public abstract class HibernateAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Convert the given HibernateException to an appropriate exception from
-	 * the org.springframework.dao hierarchy. Will automatically detect
+	 * Convert the given HibernateException to an appropriate exception from the
+	 * <code>org.springframework.dao</code> hierarchy. Will automatically detect
 	 * wrapped SQLExceptions and convert them accordingly.
 	 * <p>The default implementation delegates to SessionFactoryUtils
 	 * and convertJdbcAccessException. Can be overridden in subclasses.
@@ -226,20 +226,18 @@ public abstract class HibernateAccessor implements InitializingBean {
 		if (ex instanceof JDBCException) {
 			return convertJdbcAccessException(((JDBCException) ex).getSQLException());
 		}
-		else {
-			return SessionFactoryUtils.convertHibernateAccessException(ex);
-		}
+		return SessionFactoryUtils.convertHibernateAccessException(ex);
 	}
 
 	/**
 	 * Convert the given SQLException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Can be overridden in subclasses.
-	 * <p>Note that SQLException can just occur here when callback code
-	 * performs direct JDBC access via Session.connection().
+	 * <code>org.springframework.dao</code> hierarchy. Can be overridden in subclasses.
+	 * <p>Note that a direct SQLException can just occur here when callback code
+	 * performs direct JDBC access via <code>Session.connection()</code>.
 	 * @param ex SQLException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see #setJdbcExceptionTranslator
-	 * @see org.hibernate.Session#connection
+	 * @see org.hibernate.Session#connection()
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
 		return getJdbcExceptionTranslator().translate("Hibernate operation", null, ex);

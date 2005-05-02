@@ -147,8 +147,9 @@ public abstract class JdoAccessor implements InitializingBean {
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Delegates to the JdoDialect if set, falls
-	 * back to PersistenceManagerFactoryUtils' standard exception translation else.
+	 * <code>org.springframework.dao</code> hierarchy. Delegates to the JdoDialect
+	 * if set, falling back to PersistenceManagerFactoryUtils' standard exception
+	 * translation else.
 	 * <p>May be overridden in subclasses.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
