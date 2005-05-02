@@ -218,6 +218,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	public Object queryForObject(final String statementName, final Object parameterObject)
 			throws DataAccessException {
+
 		return execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForObject(statementName, parameterObject);
@@ -228,6 +229,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	public Object queryForObject(
 			final String statementName, final Object parameterObject, final Object resultObject)
 			throws DataAccessException {
+
 		return execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForObject(statementName, parameterObject, resultObject);
@@ -237,6 +239,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	public List queryForList(final String statementName, final Object parameterObject)
 			throws DataAccessException {
+
 		return executeWithListResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForList(statementName, parameterObject);
@@ -247,6 +250,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	public List queryForList(
 			final String statementName, final Object parameterObject, final int skipResults, final int maxResults)
 			throws DataAccessException {
+
 		return executeWithListResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForList(statementName, parameterObject, skipResults, maxResults);
@@ -257,6 +261,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	public void queryWithRowHandler(
 			final String statementName, final Object parameterObject, final RowHandler rowHandler)
 			throws DataAccessException {
+
 		execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				executor.queryWithRowHandler(statementName, parameterObject, rowHandler);
@@ -287,6 +292,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	public Map queryForMap(
 			final String statementName, final Object parameterObject, final String keyProperty)
 			throws DataAccessException {
+
 		return executeWithMapResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForMap(statementName, parameterObject, keyProperty);
@@ -297,6 +303,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	public Map queryForMap(
 			final String statementName, final Object parameterObject, final String keyProperty, final String valueProperty)
 			throws DataAccessException {
+
 		return executeWithMapResult(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForMap(statementName, parameterObject, keyProperty, valueProperty);
@@ -306,6 +313,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	public Object insert(final String statementName, final Object parameterObject)
 			throws DataAccessException {
+
 		return execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.insert(statementName, parameterObject);
@@ -315,6 +323,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	public int update(final String statementName, final Object parameterObject)
 			throws DataAccessException {
+
 		Integer result = (Integer) execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return new Integer(executor.update(statementName, parameterObject));
@@ -325,6 +334,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	public int delete(final String statementName, final Object parameterObject)
 			throws DataAccessException {
+
 		Integer result = (Integer) execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return new Integer(executor.delete(statementName, parameterObject));
@@ -335,6 +345,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	public void update(String statementName, Object parameterObject, int requiredRowsAffected)
 			throws DataAccessException {
+
 		int actualRowsAffected = update(statementName, parameterObject);
 		if (actualRowsAffected != requiredRowsAffected) {
 			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(
@@ -344,6 +355,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	public void delete(String statementName, Object parameterObject, int requiredRowsAffected)
 			throws DataAccessException {
+
 		int actualRowsAffected = delete(statementName, parameterObject);
 		if (actualRowsAffected != requiredRowsAffected) {
 			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(

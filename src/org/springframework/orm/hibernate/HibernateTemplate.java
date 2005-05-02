@@ -63,11 +63,11 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * always be configured as bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
- * <p>This class can be considered a programmatic alternative to
- * HibernateInterceptor. The major advantage is its straightforwardness, the
- * major disadvantage that no checked application exceptions can get thrown
- * from within data access code. Such checks and the actual throwing of such
- * exceptions can often be deferred to after callback execution, though.
+ * <p>This class can be considered a programmatic alternative to HibernateInterceptor.
+ * The major advantage is its straightforwardness, the major disadvantage that
+ * no checked application exceptions can get thrown from within data access code.
+ * Corresponding checks and the actual throwing of such exceptions can often
+ * be deferred to after callback execution, though.
  *
  * <p>Note that even if HibernateTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data

@@ -55,17 +55,19 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * the application context, in the first case given to the service directly,
  * in the second case to the prepared template.
  *
- * <p>This class can be considered a programmatic alternative to
- * JdoInterceptor. The major advantage is its straightforwardness, the
- * major disadvantage that no checked application exceptions can get thrown
- * from within data access code. Respective checks and the actual throwing of
- * such exceptions can often be deferred to after callback execution, though.
+ * <p>This class can be considered a programmatic alternative to JdoInterceptor.
+ * The major advantage is its straightforwardness, the major disadvantage that
+ * no checked application exceptions can get thrown from within data access code.
+ * Corresponding checks and the actual throwing of such exceptions can often
+ * be deferred to after callback execution, though.
  *
  * <p>Note that even if JdoTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
  * access layer don't need need to be JDO-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue, without introducing
- * code dependencies.
+ * code dependencies: For example, switching to JTA is just a matter of
+ * Spring configuration (use JtaTransactionManager instead) and JDO vendor
+ * configuration, neither affecting application code.
  *
  * <p>LocalPersistenceManagerFactoryBean is the preferred way of obtaining a
  * reference to a specific PersistenceManagerFactory, at least in a non-EJB
