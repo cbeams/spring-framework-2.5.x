@@ -91,6 +91,7 @@ public interface PersistenceBrokerOperations {
 	 * @param entityClass a persistent class
 	 * @param idValue an id value of the persistent instance
 	 * @return the persistent instance
+	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of OJB errors
 	 * @see org.apache.ojb.broker.IdentityFactory#buildIdentity(Class, Object)
 	 * @see org.apache.ojb.broker.PersistenceBroker#getObjectByIdentity

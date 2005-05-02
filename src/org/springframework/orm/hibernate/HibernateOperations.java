@@ -125,7 +125,7 @@ public interface HibernateOperations {
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance
-	 * @throws HibernateObjectRetrievalFailureException if the instance could not be found
+	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#load(Class, java.io.Serializable)
 	 */
@@ -139,7 +139,7 @@ public interface HibernateOperations {
 	 * @param id an identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance
-	 * @throws HibernateObjectRetrievalFailureException if the instance could not be found
+	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#load(Class, java.io.Serializable)
 	 */
@@ -161,7 +161,7 @@ public interface HibernateOperations {
 	 * into the given object, throwing an exception if not found.
 	 * @param entity the object (of the target class) to load into
 	 * @param id an identifier of the persistent instance
-	 * @throws HibernateObjectRetrievalFailureException if the instance could not be found
+	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#load(Object, java.io.Serializable)
 	 */
@@ -222,6 +222,7 @@ public interface HibernateOperations {
 	 * (throwing an OptimisticLockingFailureException if not found).
 	 * @param entity the persistent instance to lock
 	 * @param lockMode the lock mode to obtain
+	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateOptimisticLockingFailureException
 	 * @see net.sf.hibernate.Session#lock(Object, net.sf.hibernate.LockMode)
@@ -261,6 +262,7 @@ public interface HibernateOperations {
 	 * (throwing an OptimisticLockingFailureException if not found).
 	 * @param entity the persistent instance to update
 	 * @param lockMode the lock mode to obtain
+	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateOptimisticLockingFailureException
 	 * @see net.sf.hibernate.Session#update(Object)
@@ -316,6 +318,7 @@ public interface HibernateOperations {
 	 * (throwing an OptimisticLockingFailureException if not found).
 	 * @param entity the persistent instance to delete
 	 * @param lockMode the lock mode to obtain
+	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateOptimisticLockingFailureException
 	 * @see net.sf.hibernate.Session#delete(Object)

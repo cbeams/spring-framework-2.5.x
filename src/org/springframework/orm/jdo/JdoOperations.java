@@ -88,6 +88,7 @@ public interface JdoOperations {
 	 * within the namespace of that class.
 	 * @param objectId a JDO object id of the persistent instance
 	 * @return the persistent instance
+	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#getObjectById
 	 */
@@ -104,6 +105,7 @@ public interface JdoOperations {
 	 * @param entityClass a persistent class
 	 * @param idValue an id value of the persistent instance
 	 * @return the persistent instance
+	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#getObjectById
 	 * @see javax.jdo.PersistenceManager#newObjectIdInstance
