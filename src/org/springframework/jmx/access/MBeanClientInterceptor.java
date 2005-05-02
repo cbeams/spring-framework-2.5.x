@@ -48,7 +48,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
-import org.springframework.util.StringUtils;
 
 /**
  * <code>MethodInterceptor</code> implementation that routes calls to an MBean
