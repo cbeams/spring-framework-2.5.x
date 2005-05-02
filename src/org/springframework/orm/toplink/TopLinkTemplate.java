@@ -1,95 +1,122 @@
 /*
-@license@
-  */ 
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.springframework.orm.toplink;
 
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
 import oracle.toplink.exceptions.TopLinkException;
+import oracle.toplink.expressions.Expression;
+import oracle.toplink.queryframework.Call;
+import oracle.toplink.queryframework.DatabaseQuery;
 import oracle.toplink.queryframework.ReadObjectQuery;
 import oracle.toplink.sessions.ObjectCopyingPolicy;
 import oracle.toplink.sessions.Session;
+import oracle.toplink.sessions.UnitOfWork;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.orm.ObjectRetrievalFailureException;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
- * Helper class that simplifies Toplink data access code, and converts
- * ToplinkExceptions into unchecked DataAccessExceptions,
- * compatible to the org.springframework.dao exception hierarchy.
+ * Helper class that simplifies TopLink data access code, and converts
+ * TopLinkExceptions into unchecked DataAccessExceptions, following the
+ * <code>org.springframework.dao</code> exception hierarchy.
  * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
  *
- * <p>Typically used to implement data access or business logic services that
- * use Toplink within their implementation but are Toplink-agnostic in
- * their interface. The latter resp. code calling the latter only have to deal
- * with business objects, query objects, and org.springframework.dao exceptions.
+ * <p>Typically used to implement data access or business logic services that use
+ * TopLink within their implementation but are TopLink-agnostic in their interface.
+ * The latter or code calling the latter only have to deal with business
+ * objects, query objects, and <code>org.springframework.dao</code> exceptions.
  *
- * <p>The central method is "execute", supporting Toplink code implementing
- * the ToplinkCallback interface. It provides Toplink Session handling
- * such that neither the ToplinkCallback implementation nor the calling
- * code needs to explicitly care about retrieving/closing Toplink Sessions,
+ * <p>The central method is "execute", supporting TopLink code implementing
+ * the TopLinkCallback interface. It provides TopLink Session handling
+ * such that neither the TopLinkCallback implementation nor the calling
+ * code needs to explicitly care about retrieving/closing TopLink Sessions,
  * or handling Session lifecycle exceptions. For typical single step actions,
- * there are various convenience methods (load, merge, delete, save, etc).
+ * there are various convenience methods (read, readAll, merge, delete, etc).
  *
  * <p>Can be used within a service implementation via direct instantiation
- * with a Session reference, or get prepared in an application context
- * and given to services as bean reference. Note: The Session should
+ * with a SessionFactory reference, or get prepared in an application context
+ * and given to services as bean reference. Note: The SessionFactory should
  * always be configured as bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
- * <p>This class can be considered a programmatic alternative to
- * ToplinkInterceptor. The major advantage is its straightforwardness, the
- * major disadvantage that no checked application exceptions can get thrown
- * from within data access code. Respective checks and the actual throwing of
- * such exceptions can often be deferred to after callback execution, though.
+ * <p>This class can be considered a programmatic alternative to TopLinkInterceptor.
+ * The major advantage is its straightforwardness, the major disadvantage that
+ * no checked application exceptions can get thrown from within data access code.
+ * Corresponding checks and the actual throwing of such exceptions can often
+ * be deferred to after callback execution, though.
  *
- * <p>Note that even if ToplinkTransactionManager is used for transaction
+ * <p>Note that even if TopLinkTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
- * access layer don't need need to be Toplink-aware. Setting such a special
+ * access layer don't need need to be TopLink-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue, without introducing
- * code dependencies. For example, switching to JTA is just a matter of
- * Spring configuration (use JtaTransactionManager instead), without needing
- * to touch application code.
+ * code dependencies. For example, switching to JTA is just a matter of Spring
+ * configuration (use JtaTransactionManager instead) and TopLink session
+ * configuration, neither affecting application code.
  *
- * <p>LocalSessionManagerFactoryBean is the preferred way of obtaining a reference
- * to a specific Toplink Session, at least in a non-EJB environment.
+ * <p>LocalSessionFactoryBean is the preferred way of obtaining a reference
+ * to a specific TopLink SessionFactory. It will usually be configured to
+ * create ClientSessions for a ServerSession held by it, allowing for seamless
+ * multi-threaded execution.
  *
- * @author <a href="mailto:slavik@dbnet.co.il">Slavik Markovich</a>
+ * <p>Thanks to Slavik Markovich for implementing the initial TopLink support prototype!
+ *
+ * @author Juergen Hoeller
  * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
- * @since 15.04.2004
+ * @since 1.2
+ * @see #setSessionFactory
+ * @see TopLinkCallback
+ * @see oracle.toplink.sessions.Session
+ * @see TopLinkInterceptor
+ * @see LocalSessionFactoryBean
+ * @see TopLinkTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-public class TopLinkTemplate extends TopLinkAccessor
-{
+public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperations {
+
 	private boolean allowCreate = true;
 
+
 	/**
-	 * Create a new ToplinkTemplate instance.
+	 * Create a new TopLinkTemplate instance.
 	 */
-	public TopLinkTemplate()
-	{
+	public TopLinkTemplate() {
 	}
 
 	/**
-	 * Create a new ToplinkTemplate instance.
-	 * @param session Session to create Sessions
-	 */      
-	public TopLinkTemplate(SessionFactory sessionFactory)
-	{
+	 * Create a new TopLinkTemplate instance.
+	 */
+	public TopLinkTemplate(SessionFactory sessionFactory) {
 		setSessionFactory(sessionFactory);
 		afterPropertiesSet();
 	}
 
 	/**
-	 * Create a new ToplinkTemplate instance.
-	 * @param session Session to create Sessions
-	 * @param allowCreate if a new Session should be created
-	 * if no thread-bound found
+	 * Create a new TopLinkTemplate instance.
+	 * @param allowCreate if a new Session should be created if no thread-bound found
 	 */
-	public TopLinkTemplate(SessionFactory sessionFactory, boolean allowCreate)
-	{
+	public TopLinkTemplate(SessionFactory sessionFactory, boolean allowCreate) {
 		setSessionFactory(sessionFactory);
 		setAllowCreate(allowCreate);
 		afterPropertiesSet();
@@ -97,285 +124,382 @@ public class TopLinkTemplate extends TopLinkAccessor
 
 	/**
 	 * Set if a new Session should be created if no thread-bound found.
-	 * <p>ToplinkTemplate is aware of a respective Session bound to the
-	 * current thread, for example when using ToplinkTransactionManager.
+	 * <p>TopLinkTemplate is aware of a respective Session bound to the
+	 * current thread, for example when using TopLinkTransactionManager.
 	 * If allowCreate is true, a new Session will be created if none found.
 	 * If false, an IllegalStateException will get thrown in this case.
 	 * @see SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 */
-	public void setAllowCreate(boolean allowCreate)
-	{
+	public void setAllowCreate(boolean allowCreate) {
 		this.allowCreate = allowCreate;
 	}
 
 	/**
 	 * Return if a new Session should be created if no thread-bound found.
 	 */
-	public boolean isAllowCreate()
-	{
+	public boolean isAllowCreate() {
 		return allowCreate;
 	}
 
-	/**
-	 * The main template method executing a given callback while providing
-	 * exception translation and session handling
-	 * @param action The action callback to execute
-	 * @return Whatever the action returns
-	 * @throws DataAccessException Unchecked exception in case of errors
-	 */
-	public Object execute(TopLinkCallback action) throws DataAccessException
-	{
-		Session session = SessionFactoryUtils.getSession(getSessionFactory(), this.allowCreate);
 
-		try
-		{
-			Object result = action.doInToplink(session);
-			return result;
+	public Object execute(TopLinkCallback action) throws DataAccessException {
+		Session session = SessionFactoryUtils.getSession(getSessionFactory(), this.allowCreate);
+		try {
+			return action.doInTopLink(session);
 		}
-		catch (TopLinkException ex)
-		{
-			throw convertToplinkAccessException(ex);
+		catch (TopLinkException ex) {
+			throw convertTopLinkAccessException(ex);
 		}
-		catch (SQLException ex)
-		{
-			throw convertJdbcAccessException(ex);
-		}
-		catch (RuntimeException ex)
-		{
+		catch (RuntimeException ex) {
 			// callback code threw application exception
 			throw ex;
 		}
-		finally
-		{
-			SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
+		finally {
+			SessionFactoryUtils.releaseSession(session, getSessionFactory());
 		}
 	}
-	
-	/**
-	 * Helper method to execute finds that return a list
-	 * @param action The action to execute
-	 * @return The list of objects returned
-	 * @throws DataAccessException
-	 */
-	public List executeFind(TopLinkCallback action) throws DataAccessException
-	{
+
+	public List executeFind(TopLinkCallback action) throws DataAccessException {
 		return (List) execute(action);
 	}
 
-	/**
-	 * Re-associate the given entity with the current UOW using simple merging 
-	 * @param entity The clone to merge
-	 * @throws DataAccessException
-	 */
-	public Object mergeClone(final Object entity) throws DataAccessException
-	{
-		return execute(new TopLinkCallback()
-		{
-			public Object doInToplink(Session session) throws TopLinkException, SQLException
-			{
-				session.readObject(entity);
-				return session.getActiveUnitOfWork().mergeClone(entity);
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for executing generic queries
+	//-------------------------------------------------------------------------
+
+	public Object executeNamedQuery(Class entityClass, String queryName) throws DataAccessException {
+		return executeNamedQuery(entityClass, queryName, null, false);
+	}
+
+	public Object executeNamedQuery(Class entityClass, String queryName, boolean enforceReadOnly)
+			throws DataAccessException {
+
+		return executeNamedQuery(entityClass, queryName, null, enforceReadOnly);
+	}
+
+	public Object executeNamedQuery(Class entityClass, String queryName, Object[] args)
+			throws DataAccessException {
+
+		return executeNamedQuery(entityClass, queryName, args, false);
+	}
+
+	public Object executeNamedQuery(
+			final Class entityClass, final String queryName, final Object[] args, final boolean enforceReadOnly)
+			throws DataAccessException {
+
+		return execute(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				if (args != null) {
+					return session.executeQuery(queryName, entityClass, new Vector(Arrays.asList(args)));
+				}
+				else {
+					return session.executeQuery(queryName, entityClass, new Vector());
+				}
 			}
 		});
 	}
 
-	/**
-	 * Re-associate the given entity with the current UOW using deep merge of all
-	 * contained entities 
-	 * @param entity The clone to merge
-	 * @throws DataAccessException
-	 */
-	public Object deepMergeClone(final Object entity) throws DataAccessException
-	{
-		return execute(new TopLinkCallback()
-		{
-			public Object doInToplink(Session session) throws TopLinkException, SQLException
-			{
-				session.readObject(entity);
-				return session.getActiveUnitOfWork().deepMergeClone(entity);
+	public Object executeQuery(DatabaseQuery query) throws DataAccessException {
+		return executeQuery(query, null, false);
+	}
+
+	public Object executeQuery(DatabaseQuery query, boolean enforceReadOnly) throws DataAccessException {
+		return executeQuery(query, null, enforceReadOnly);
+	}
+
+	public Object executeQuery(DatabaseQuery query, Object[] args) throws DataAccessException {
+		return executeQuery(query, args, false);
+	}
+
+	public Object executeQuery(final DatabaseQuery query, final Object[] args, final boolean enforceReadOnly)
+			throws DataAccessException {
+
+		return execute(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				if (args != null) {
+					return session.executeQuery(query, new Vector(Arrays.asList(args)));
+				}
+				else {
+					return session.executeQuery(query);
+				}
 			}
 		});
 	}
 
-	/**
-	 * Re-associate the given entity with the current UOW using shallow merging 
-	 * @param entity The clone to merge
-	 * @throws DataAccessException
-	 */
-	public Object shallowMergeClone(final Object entity) throws DataAccessException
-	{
-		return execute(new TopLinkCallback()
-		{
-			public Object doInToplink(Session session) throws TopLinkException, SQLException
-			{
-				session.readObject(entity);
-				return session.getActiveUnitOfWork().shallowMergeClone(entity);
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for reading a specific set of objects
+	//-------------------------------------------------------------------------
+
+	public List readAll(Class entityClass) throws DataAccessException {
+		return readAll(entityClass, false);
+	}
+
+	public List readAll(final Class entityClass, final boolean enforceReadOnly) throws DataAccessException {
+		return executeFind(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				return session.readAllObjects(entityClass);
 			}
 		});
 	}
 
-	/**
-	 * Re-associate the given entity with the current UOW using merging with all
-	 * references from this clone 
-	 * @param entity The clone to merge
-	 * @throws DataAccessException
-	 */
-	public Object mergeCloneWithReferences(final Object entity) throws DataAccessException
-	{
-		return execute(new TopLinkCallback()
-		{
-			public Object doInToplink(Session session) throws TopLinkException, SQLException
-			{
-				session.readObject(entity);
-				return session.getActiveUnitOfWork().mergeCloneWithReferences(entity);
+	public List readAll(Class entityClass, Expression expression) throws DataAccessException {
+		return readAll(entityClass, expression, false);
+	}
+
+	public List readAll(final Class entityClass, final Expression expression, final boolean enforceReadOnly)
+			throws DataAccessException {
+
+		return executeFind(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				return session.readAllObjects(entityClass, expression);
 			}
 		});
 	}
 
-	/**
-	 * Delete the given entity
-	 * @param entity The entity to delete
-	 * @throws DataAccessException
-	 */
-	public void delete(final Object entity) throws DataAccessException
-	{
-		execute(new TopLinkCallback()
-		{
-			public Object doInToplink(Session session) throws TopLinkException, SQLException
-			{
-				return session.getActiveUnitOfWork().deleteObject(entity);
+	public List readAll(Class entityClass, Call call) throws DataAccessException {
+		return readAll(entityClass, call, false);
+	}
+
+	public List readAll(final Class entityClass, final Call call, final boolean enforceReadOnly)
+			throws DataAccessException {
+
+		return executeFind(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				return session.readAllObjects(entityClass, call);
 			}
 		});
 	}
 
-	/**
-	 * Delete all the entities
-	 * @param entities The entities to delete
-	 * @throws DataAccessException
-	 */
-	public void deleteAll(final Collection entities) throws DataAccessException
-	{
-		execute(new TopLinkCallback()
-		{
-			public Object doInToplink(Session session) throws TopLinkException, SQLException
-			{
-				session.getActiveUnitOfWork().deleteAllObjects(entities);
+	public Object read(Class entityClass, Expression expression) throws DataAccessException {
+		return read(entityClass, expression, false);
+	}
+
+	public Object read(final Class entityClass, final Expression expression, final boolean enforceReadOnly)
+			throws DataAccessException {
+
+		return execute(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				return session.readObject(entityClass, expression);
+			}
+		});
+	}
+
+	public Object read(Class entityClass, Call call) throws DataAccessException {
+		return read(entityClass, call, false);
+	}
+
+	public Object read(final Class entityClass, final Call call, final boolean enforceReadOnly)
+			throws DataAccessException {
+
+		return execute(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				return session.readObject(entityClass, call);
+			}
+		});
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for reading an individual object by id
+	//-------------------------------------------------------------------------
+
+	public Object readById(Class entityClass, Object id) throws DataAccessException {
+		return readById(entityClass, id, false);
+	}
+
+	public Object readById(Class entityClass, Object id, boolean enforceReadOnly) throws DataAccessException {
+		return readById(entityClass, new Object[] {id}, enforceReadOnly);
+	}
+
+	public Object readById(Class entityClass, Object[] keys) throws DataAccessException {
+		return readById(entityClass, keys, false);
+	}
+
+	public Object readById(final Class entityClass, final Object[] keys, final boolean enforceReadOnly)
+			throws DataAccessException {
+
+		Assert.isTrue(keys != null && keys.length > 0, "Non-empty keys or id is required");
+
+		ReadObjectQuery query = new ReadObjectQuery(entityClass);
+		query.setSelectionKey(new Vector(Arrays.asList(keys)));
+		Object result = executeQuery(query, enforceReadOnly);
+
+		if (result == null) {
+			Object identifier = (keys.length == 1 ? keys[0] : StringUtils.arrayToCommaDelimitedString(keys));
+			throw new ObjectRetrievalFailureException(entityClass, identifier);
+		}
+		return result;
+	}
+
+	public Object readAndCopy(Class entityClass, Object id) throws DataAccessException {
+		Object entity = readById(entityClass, id, true);
+		return copy(entity);
+	}
+
+	public Object readAndCopy(Class entityClass, Object[] keys) throws DataAccessException {
+		Object entity = readById(entityClass, keys, true);
+		return copy(entity);
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for copying and refreshing objects
+	//-------------------------------------------------------------------------
+
+	public Object copy(Object entity) throws DataAccessException {
+		ObjectCopyingPolicy copyingPolicy = new ObjectCopyingPolicy();
+		copyingPolicy.cascadeAllParts();
+		copyingPolicy.setShouldResetPrimaryKey(false);
+		return copy(entity, copyingPolicy);
+	}
+
+	public Object copy(final Object entity, final ObjectCopyingPolicy copyingPolicy)
+			throws DataAccessException {
+
+		return execute(new TopLinkCallback() {
+			public Object doInTopLink(Session session) throws TopLinkException {
+				return session.copyObject(entity, copyingPolicy);
+			}
+		});
+	}
+
+	public List copyAll(Collection entities) throws DataAccessException {
+		ObjectCopyingPolicy copyingPolicy = new ObjectCopyingPolicy();
+		copyingPolicy.cascadeAllParts();
+		copyingPolicy.setShouldResetPrimaryKey(false);
+		return copyAll(entities, copyingPolicy);
+	}
+
+	public List copyAll(final Collection entities, final ObjectCopyingPolicy copyingPolicy)
+			throws DataAccessException {
+
+		return (List) execute(new TopLinkCallback() {
+			public Object doInTopLink(Session session) throws TopLinkException {
+				List result = new ArrayList(entities.size());
+				for (Iterator it = entities.iterator(); it.hasNext();) {
+					Object entity = it.next();
+					result.add(session.copyObject(entity, copyingPolicy));
+				}
+				return result;
+			}
+		});
+	}
+
+	public Object refresh(Object entity) throws DataAccessException {
+		return refresh(entity, false);
+	}
+
+	public Object refresh(final Object entity, final boolean enforceReadOnly) throws DataAccessException {
+		return execute(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				return session.refreshObject(entity);
+			}
+		});
+	}
+
+	public List refreshAll(Collection entities) throws DataAccessException {
+		return refreshAll(entities, false);
+	}
+
+	public List refreshAll(final Collection entities, final boolean enforceReadOnly) throws DataAccessException {
+		return (List) execute(new SessionReadCallback(enforceReadOnly) {
+			protected Object readFromSession(Session session) throws TopLinkException {
+				List result = new ArrayList(entities.size());
+				for (Iterator it = entities.iterator(); it.hasNext();) {
+					Object entity = it.next();
+					result.add(session.refreshObject(entity));
+				}
+				return result;
+			}
+		});
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for persisting and deleting objects
+	//-------------------------------------------------------------------------
+
+	public Object register(final Object entity) {
+		return execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.registerObject(entity);
+			}
+		});
+	}
+
+	public List registerAll(final Collection entities) {
+		return (List) execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.registerAllObjects(entities);
+			}
+		});
+	}
+
+	public void registerNew(final Object entity) {
+		execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.registerNewObject(entity);
+			}
+		});
+	}
+
+	public Object registerExisting(final Object entity) {
+		return execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.registerExistingObject(entity);
+			}
+		});
+	}
+
+	public Object merge(final Object entity) throws DataAccessException {
+		return execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.mergeClone(entity);
+			}
+		});
+	}
+
+	public Object deepMerge(final Object entity) throws DataAccessException {
+		return execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.deepMergeClone(entity);
+			}
+		});
+	}
+
+	public Object shallowMerge(final Object entity) throws DataAccessException {
+		return execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.shallowMergeClone(entity);
+			}
+		});
+	}
+
+	public Object mergeWithReferences(final Object entity) throws DataAccessException {
+		return execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.mergeCloneWithReferences(entity);
+			}
+		});
+	}
+
+	public void delete(final Object entity) throws DataAccessException {
+		execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				return unitOfWork.deleteObject(entity);
+			}
+		});
+	}
+
+	public void deleteAll(final Collection entities) throws DataAccessException {
+		execute(new UnitOfWorkCallback() {
+			protected Object doInUnitOfWork(UnitOfWork unitOfWork) throws TopLinkException {
+				unitOfWork.deleteAllObjects(entities);
 				return null;
 			}
 		});
 	}
 
-	/**
-	 * Execute a given named query with the given parameters
-	 * @param entityClass The class that has the named query descriptor
-	 * @param queryName The name of the query
-	 * @param params Parameters for the query
-	 * @param readOnly Should we return clones or read directly through the session
-	 * @return A list of objects matching the query
-	 * @throws DataAccessException
-	 */
-	public List findByNamedQuery(final Class entityClass,
-		final String queryName, final Vector params, final boolean readOnly)
-	throws DataAccessException
-	{
-		return executeFind(new TopLinkCallback()
-		{
-			public Object doInToplink(Session session) throws TopLinkException, SQLException
-			{
-			    Session s = (readOnly?session:session.getActiveUnitOfWork());
-				return s.executeQuery(queryName,entityClass,params);
-			}
-		});
-	}
-	
-	/**
-	 * execute a named query against the currently active UnitOfWork
-	 * 
-	 * @param entityClass
-	 * @param queryName
-	 * @param params
-	 * @return
-	 * @throws DataAccessException
-	 */
-	public List findByNamedQuery(final Class entityClass,
-			final String queryName, final Vector params)
-		throws DataAccessException
-	{
-	    return findByNamedQuery(entityClass,queryName,params,false);
-	}
-
-	public Object refresh(final Object object, final boolean readOnly) throws DataAccessException
-    {
-        return execute(new TopLinkCallback()
-        {
-            public Object doInToplink(Session session) throws TopLinkException,
-                    SQLException
-            {
-                Session s = (readOnly?session:session.getActiveUnitOfWork());
-                return s.refreshObject(object);
-            }
-        });
-    }
-	
-	public Object load(final Class entityClass, final Vector keys, final boolean readOnly) throws DataAccessException
-    {
-        return execute(new TopLinkCallback() {
-            public Object doInToplink(Session session) throws TopLinkException,
-                    SQLException
-            {
-                Session s = (readOnly?session:session.getActiveUnitOfWork());
-                ReadObjectQuery readObjectQuery = new ReadObjectQuery(entityClass);
-                readObjectQuery.setSelectionKey(keys);
-                return s.executeQuery(readObjectQuery);
-            }
-        });
-    }
-	 
-	public Object load(final Class entityClass, final Object id, final boolean readOnly)
-            throws DataAccessException
-    {
-        Vector v = new Vector();
-        v.add(id);
-        return load(entityClass, v, readOnly);
-    }
-	
-	public Object loadAndCopy(final Class entityClass, final Vector keys) throws DataAccessException
-    {
-        return execute(new TopLinkCallback() {
-            public Object doInToplink(Session session) throws TopLinkException,
-                    SQLException
-            {
-                ReadObjectQuery readObjectQuery = new ReadObjectQuery(
-                        entityClass);
-                readObjectQuery.setSelectionKey(keys);
-                Object object = session.executeQuery(readObjectQuery);
-
-                ObjectCopyingPolicy copyPolicy = new ObjectCopyingPolicy();
-        	    copyPolicy.cascadeAllParts();
-        	    copyPolicy.setShouldResetPrimaryKey(false);
-
-                return session.copyObject(object,copyPolicy);
-            }
-        });
-    }
-
-	public Object loadAndCopy(final Class entityClass, final Object id)
-            throws DataAccessException
-    {
-        Vector v = new Vector();
-        v.add(id);
-        return loadAndCopy(entityClass, v);
-    }
-
-    public Object registerObject(final Object object)
-    {
-        return execute( new TopLinkCallback(){
-            public Object doInToplink(Session session) throws TopLinkException,
-                    SQLException
-            {
-                return session.getActiveUnitOfWork().registerObject(object);
-            }
-        });
-    }
-	
 }

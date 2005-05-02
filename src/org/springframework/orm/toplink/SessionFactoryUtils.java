@@ -1,11 +1,20 @@
 /*
-@license@
-  */ 
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.springframework.orm.toplink;
-
-import javax.transaction.Synchronization;
-import javax.transaction.Transaction;
 
 import oracle.toplink.exceptions.ConcurrencyException;
 import oracle.toplink.exceptions.ConversionException;
@@ -13,237 +22,162 @@ import oracle.toplink.exceptions.DatabaseException;
 import oracle.toplink.exceptions.OptimisticLockException;
 import oracle.toplink.exceptions.QueryException;
 import oracle.toplink.exceptions.TopLinkException;
-import oracle.toplink.jts.AbstractExternalTransactionController;
 import oracle.toplink.queryframework.DatabaseQuery;
 import oracle.toplink.sessions.Session;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.CleanupFailureDataAccessException;
+
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.orm.toplink.exceptions.TopLinkJdbcException;
-import org.springframework.orm.toplink.exceptions.TopLinkOptimisticLockingFailureException;
-import org.springframework.orm.toplink.exceptions.TopLinkQueryException;
-import org.springframework.orm.toplink.exceptions.TopLinkSystemException;
-import org.springframework.orm.toplink.exceptions.TopLinkTypeMismatchDataAccessException;
-import org.springframework.orm.toplink.sessions.SessionHolder;
-import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.dao.TypeMismatchDataAccessException;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Utility methods used by the TopLinkInterceptor and the TopLinkTemplate to access 
- * the Thread-bound Session for a specific SessionFactory. 
- * 
- * These methods deal with ensuring that Sessions are properly bound to the current Thread
- * and that Resource cleanup is properly handled by either Spring Synchronization or JTA
- * Synchronization Objects (usually Spring ones).  
- * 
- * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
+ * Helper class featuring methods for TopLink Session handling,
+ * allowing for reuse of TopLink Session instances within transactions.
  *
+ * <p>Supports synchronization with both Spring-managed JTA transactions
+ * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
+ * or EJB CMT). See the <code>getSession</code> version with all parameters
+ * for details.
+ *
+ * <p>Used internally by TopLinkTemplate and TopLinkInterceptor. Can also be used
+ * directly in application code, e.g. in combination with TopLinkInterceptor.
+ *
+ * @author Juergen Hoeller
+ * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
+ * @since 1.2
+ * @see #getSession(SessionFactory, boolean, boolean)
+ * @see TopLinkTemplate
+ * @see TopLinkInterceptor
+ * @see TopLinkTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-public abstract class SessionFactoryUtils
-{
+public abstract class SessionFactoryUtils {
+
 	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
 	/**
-	 * <p>Get the Thread-bound Session for a SessionFactory.  Only create a new Session if the allowCreate
-	 * parameter is true.  If a new Session is created, the Session will be bound to the Thread and will register
-	 * a SynchronizationListener if there is an active PlatformTransactionManager which is initialized to accept 
-	 * Syncrhonization Listeners.
-	 * 
-	 * @param sessionFactory
-	 * @param allowCreate if a new Session should be created when no Thread-bound one is found
-	 * @return
-	 * @throws DataAccessResourceFailureException
-	 * @throws IllegalStateException
+	 * Get a TopLink Session for the given SessionFactory. Is aware of and will
+	 * return any existing corresponding Session bound to the current thread, for
+	 * example when using TopLinkTransactionManager. Will create a new Session
+	 * otherwise, if allowCreate is true.
+	 * <p>This is the <code>getSession</code> method used by typical data access code,
+	 * in combination with <code>releaseSession</code> called when done with
+	 * the Session. Note that TopLinkTemplate allows to write data access code
+	 * without caring about such resource handling.
+	 * <p>Supports synchronization with both Spring-managed JTA transactions
+	 * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
+	 * or EJB CMT). See the <code>getSession</code> version with all parameters
+	 * for details.
+	 * @param sessionFactory TopLink SessionFactory to create the session with
+	 * @param allowCreate if a new Session should be created if no thread-bound found
+	 * @return the TopLink Session
+	 * @throws DataAccessResourceFailureException if the Session couldn't be created
+	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @see #getSession(SessionFactory, boolean, boolean)
+	 * @see #releaseSession
+	 * @see TopLinkTemplate
 	 */
 	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate)
-		throws DataAccessResourceFailureException, IllegalStateException
-	{
-		return getSession(sessionFactory, true, allowCreate);
+			throws DataAccessResourceFailureException, IllegalStateException {
+
+		return getSession(sessionFactory, allowCreate, true);
 	}
 
 	/**
-	 * <p>Get the Thread-bound Session for a specific SessionFactory.  This method creates a new Session if one
-	 * is not currently bound.  This new Session will only be bound to the Thread if the allowSynchronization argument 
-	 * is true.
-	 * 
-	 * <p>An example of code creating a new Session but not binding it to the current Thread would be when a 
-	 * TopLinkTransactionManager creates a new TransactionObject. and then applies some Transaction specific 
-	 * settings before handling the Synchronization itself.  
-	 * 
-	 * @param sessionFactory
-	 * @param jdbcExceptionTranslator
-	 * @param allowSynchronization determines whether a new SessionHolder is bound to the current Thread
-	 * @return
-	 * @throws DataAccessResourceFailureException
+	 * Get a TopLink Session for the given SessionFactory. Is aware of and will
+	 * return any existing corresponding Session bound to the current thread, for
+	 * example when using TopLinkTransactionManager. Will always create a new
+	 * Session otherwise.
+	 * <p>Supports synchronization with Spring-managed JTA transactions
+	 * (i.e. JtaTransactionManager) via TransactionSynchronizationManager, to allow
+	 * for transaction-scoped TopLink Sessions and proper transactional handling
+	 * of the JVM-level cache. This will only occur if "allowSynchronization" is true.
+	 * @param sessionFactory TopLink SessionFactory to create the session with
+	 * @param allowSynchronization if a new TopLink Session is supposed to be
+	 * registered with transaction synchronization (if synchronization is active).
+	 * This will always be true for typical data access code.
+	 * @return the TopLink Session
+	 * @throws DataAccessResourceFailureException if the Session couldn't be created
+	 * @see TopLinkTransactionManager
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public static Session getSession(SessionFactory sessionFactory,
-		boolean allowSynchronization, boolean allowCreate)
-			throws DataAccessResourceFailureException
-	{
-		SessionHolder sessionHolder = (SessionHolder)
-			TransactionSynchronizationManager.getResource(sessionFactory);
-		
-		if (sessionHolder != null)
-		{
-		    logger.debug("found SessionHolder bound to Session");
-		    
-		    if(TransactionSynchronizationManager.isSynchronizationActive())
-		    {
-				if (allowSynchronization && !sessionHolder.isSynchronizedWithTransaction())
-				{
-				    // TopLinkTransactionManager
-				    logger.debug("no Synchronization registered.  Registering new Synchronization with existing Session.");
-				    TransactionSynchronizationManager.registerSynchronization(
-							new SpringSessionSynchronization(
-							        sessionHolder,
-							        sessionFactory,
-							        null,
-							        false));
-								
-					sessionHolder.setSynchronizedWithTransaction(true);
-				}
-				else
-				{
-				    // probabaly JTA is active
-				    logger.debug("not registered synchronization for pre-bound Session");
-				}
-		    }
+	public static Session getSession(
+			SessionFactory sessionFactory, boolean allowCreate, boolean allowSynchronization)
+			throws DataAccessResourceFailureException, IllegalStateException {
+
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		if (sessionHolder != null) {
 			return sessionHolder.getSession();
 		}
 
-		if (!allowCreate)
-		{
-			throw new IllegalStateException(
-					"No Toplink Session bound to thread, and configuration " +
+		if (!allowCreate) {
+			throw new IllegalStateException("No TopLink Session bound to thread, and configuration " +
 					"does not allow creation of new one here");
 		}
 
-		logger.debug("Opening Toplink session");
-		
-		try
-		{
-			// If this is a server session, use it to acquire client session
-			// else, just use the session (it is a database session)
+		try {
+			logger.debug("Creating TopLink Session");
 			Session session = sessionFactory.createSession();
 
-			if (allowSynchronization)
-			{
-				// Use same Session for further Toplink actions within the transaction.
+			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
+				logger.debug("Registering new Spring transaction synchronization for new TopLink Session");
+				// Use same Session for further TopLink actions within the transaction.
 				// Thread object will get removed by synchronization at transaction completion.
-				if (TransactionSynchronizationManager.isSynchronizationActive())
-				{
-					// We're within a Spring-managed transaction, possibly from JtaTransactionManager.
-					logger.debug("Registering new Spring transaction synchronization for new Toplink session");
-					sessionHolder = new SessionHolder(session);
-				    //oracle.toplink.publicinterface.UnitOfWork uowImpl = (oracle.toplink.publicinterface.UnitOfWork)sessionHolder.getSession().getActiveUnitOfWork();
-				    //oracle.toplink.publicinterface.Session sessionImpl = (oracle.toplink.publicinterface.Session)sessionHolder.getSession();
-					
-				    TransactionSynchronizationManager.registerSynchronization(
-						new SpringSessionSynchronization(
-						        sessionHolder,
-						        sessionFactory,
-						        null,
-						        true));
-				    TransactionSynchronizationManager.bindResource(sessionFactory,
-						sessionHolder);
-			    
-					sessionHolder.setSynchronizedWithTransaction(true);
-				}
-				else if (session.hasExternalTransactionController())
-				{
-				    // no Spring TransactionManager is active but there is still a JTA TM controlling the tx
-				    logger.debug("register a JTA Synchronization to clean up Thread-bound resources");
-				    AbstractExternalTransactionController etc = (AbstractExternalTransactionController)session.getExternalTransactionController();
-
-					sessionHolder = new SessionHolder(session);
-
-					try
-					{
-					    Transaction transaction = (Transaction)etc.getExternalTransaction();
-					    transaction.registerSynchronization(new JTASessionSynchronization(sessionFactory,sessionHolder,true));
-						sessionHolder.setSynchronizedWithTransaction(true);
-					    TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
-					    sessionHolder.setSynchronizedWithTransaction(true);
-					}
-					catch(Exception e)
-					{
-					    logger.error("unable to register listener with JTA Transaction",e);
-						throw new DataAccessResourceFailureException("Could not register synchronization " +
-								 "with JTA TransactionManager", e);
-					}
-				}
-				else
-				{
-				    logger.debug("not registering synchronization because synchronizations are not initialized");
-				}
+				sessionHolder = new SessionHolder(session);
+				sessionHolder.setSynchronizedWithTransaction(true);
+				TransactionSynchronizationManager.registerSynchronization(
+						new SessionSynchronization(sessionHolder, sessionFactory));
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 			}
-			else
-			{
-			    logger.debug("not registering Synchronization or binding SessionHolder to Thread");
-			}
+
 			return session;
 		}
-		catch (DatabaseException ex)
-		{
-			// SQLException underneath
-			throw new DataAccessResourceFailureException("Could not open Toplink session",
-				ex.getInternalException());
-		}
-		catch (TopLinkException ex)
-		{
-			throw new DataAccessResourceFailureException("Could not open Toplink session", ex);
+		catch (TopLinkException ex) {
+			throw new DataAccessResourceFailureException("Could not open TopLink Session", ex);
 		}
 	}
 
 	/**
 	 * Apply the current transaction timeout, if any, to the given
-	 * Toplink Query object.
-	 * @param query the Toplink Query object
-	 * @param session Toplink Session that the Query was created for
+	 * TopLink Query object.
+	 * @param query the TopLink Query object
+	 * @param session TopLink Session that the Query was created for
 	 */
-	public static void applyTransactionTimeout(DatabaseQuery query,
-		Session session)
-	{
-		SessionHolder sessionHolder = (SessionHolder)
-			TransactionSynchronizationManager.getResource(session);
-		if (sessionHolder != null && sessionHolder.getDeadline() != null)
-		{
+	public static void applyTransactionTimeout(DatabaseQuery query, Session session) {
+		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(session);
+		if (sessionHolder != null && sessionHolder.getDeadline() != null) {
 			query.setQueryTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}
 	}
 
 	/**
 	 * Convert the given TopLinkException to an appropriate exception from the
-	 * org.springframework.dao hierarchy.
+	 * <code>org.springframework.dao</code> hierarchy.
 	 * @param ex TopLinkException that occured
 	 * @return the corresponding DataAccessException instance
 	 */
-	public static DataAccessException convertToplinkAccessException(TopLinkException ex)
-	{
-		if (ex instanceof DatabaseException)
-		{
-			// SQLException during Toplink access: only passed in here from custom code,
-			// as ToplinkTemplate will use SQLExceptionTranslator-based handling
+	public static DataAccessException convertTopLinkAccessException(TopLinkException ex) {
+		if (ex instanceof DatabaseException) {
+			// SQLException during TopLink access: only passed in here from custom code,
+			// as TopLinkTemplate will use SQLExceptionTranslator-based handling.
 			return new TopLinkJdbcException((DatabaseException) ex);
 		}
-		if (ex instanceof ConcurrencyException)
-		{
-		    return new TopLinkSystemException(ex);
+		if (ex instanceof ConcurrencyException) {
+			return new ConcurrencyFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof ConversionException)
-		{
-		    return new TopLinkTypeMismatchDataAccessException(ex.getMessage(),ex);
+		if (ex instanceof ConversionException) {
+			return new TypeMismatchDataAccessException(ex.getMessage(), ex);
 		}
-		if (ex instanceof QueryException)
-		{
+		if (ex instanceof QueryException) {
 			return new TopLinkQueryException((QueryException) ex);
 		}
-		if (ex instanceof OptimisticLockException)
-		{
+		if (ex instanceof OptimisticLockException) {
 			return new TopLinkOptimisticLockingFailureException((OptimisticLockException) ex);
 		}
 		// fallback
@@ -251,137 +185,60 @@ public abstract class SessionFactoryUtils
 	}
 
 	/**
-	 * This is called during cleanup at the end of using a TopLinkTemplate, a TopLinkInterceptor, or
-	 * at the end of a managed Transaction.  It is important in cases where the current Session is not
-	 * bound or synchronized to an external transaction.  For these cases, the SessionManagement code 
-	 * must both acquire and commit the underlying UnitOfWork.  This method determines whether or not
-	 * the Session is externally managed and if not, delegates the "closing" operation to the Session itself.
+	 * Close the given Session, created via the given factory,
+	 * if it is not managed externally (i.e. not bound to the thread).
+	 * @param session the TopLink Session to close
+	 * @param sessionFactory TOpLink SessionFactory that the Session was created with
 	 */
-	public static void closeSessionIfNecessary(Session session, SessionFactory sessionFactory)
-	    throws CleanupFailureDataAccessException
-	{
-		if (session == null || TransactionSynchronizationManager.hasResource(sessionFactory))
-		{
+	public static void releaseSession(Session session, SessionFactory sessionFactory) {
+		if (session == null || TransactionSynchronizationManager.hasResource(sessionFactory)) {
 			return;
 		}
-		logger.debug("Closing Toplink session "+session);
-		try
-		{
-		    //session.getActiveUnitOfWork().release();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing TopLink Session");
+		}
+		try {
 			session.release();
 		}
-		catch (DatabaseException ex)
-		{
-			// SQLException underneath
-			throw new CleanupFailureDataAccessException("Could not close Toplink session",
-				ex.getInternalException());
+		catch (TopLinkException ex) {
+			logger.error("Could not close TopLink Session", ex);
 		}
-		catch (TopLinkException ex)
-		{
-			throw new CleanupFailureDataAccessException("Could not close Toplink session", ex);
+		catch (RuntimeException ex) {
+			logger.error("Unexpected exception on closing TopLink Session", ex);
 		}
 	}
+
 
 	/**
 	 * Callback for resource cleanup at the end of a Spring-managed JTA transaction,
-	 * i.e. when participating in a JtaTransactionManager transaction or a TopLinkTransactionManager
+	 * i.e. when participating in a JtaTransactionManager transaction.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class SpringSessionSynchronization implements TransactionSynchronization
-	{
-		private final SessionHolder sessionHolder;
-		private final SessionFactory sessionFactory;
-		private final SQLExceptionTranslator jdbcExceptionTranslator;
-		private final boolean newSession;
+	private static class SessionSynchronization extends TransactionSynchronizationAdapter {
 
-		private SpringSessionSynchronization(SessionHolder sessionHolder,
-			SessionFactory sessionFactory,
-		    SQLExceptionTranslator jdbcExceptionTranslator,
-			boolean newSession)
-		{
+		private final SessionHolder sessionHolder;
+
+		private final SessionFactory sessionFactory;
+
+		private SessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory) {
 			this.sessionHolder = sessionHolder;
 			this.sessionFactory = sessionFactory;
-			this.jdbcExceptionTranslator = jdbcExceptionTranslator;
-			this.newSession = newSession;
 		}
 
-		public void suspend()
-		{
+		public void suspend() {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		}
 
-		public void resume()
-		{
-			TransactionSynchronizationManager.bindResource(this.sessionFactory,
-				this.sessionHolder);
-		}
-
-		public void beforeCommit(boolean readOnly) throws DataAccessException
-		{
-		}
-
-		public void beforeCompletion() throws CleanupFailureDataAccessException
-		{
-			if (this.newSession)
-			{
-				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			}
-		}
-
-		public void afterCompletion(int status)
-		{
-			Session session = this.sessionHolder.getSession();
-			if (this.newSession)
-			{
-				closeSessionIfNecessary(session, sessionFactory);
-			}
-			this.sessionHolder.setSynchronizedWithTransaction(false);
-			this.sessionHolder.clear();
-		    this.sessionHolder.resetTransaction();
-		}
-	}
-
-	/**
-	 * Callback for resource cleanup at the end of a non-Spring JTA transaction,
-	 * i.e. when plain JTA or EJB CMT is used without Spring's JtaTransactionManager.
-	 */
-	private static class JTASessionSynchronization implements Synchronization {
-	    
-	    private final SessionFactory sessionFactory;
-	    private final SessionHolder sessionHolder;
-	    private final boolean newSession;
-
-
-		private JTASessionSynchronization(SessionFactory sessionFactory, SessionHolder sessionHolder, boolean newSession)
-		{
-		    this.sessionFactory = sessionFactory;
-		    this.sessionHolder = sessionHolder;
-		    this.newSession = newSession;
+		public void resume() {
+			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
 		}
 
 		public void beforeCompletion() {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		}
 
-		/**
-		 * JTA afterCompletion callback: invoked after commit/rollback.
-		 * <p>Needs to invoke SpringSessionSynchronization's beforeCompletion
-		 * at this late stage, as there's no corresponding callback with JTA.
-		 */
 		public void afterCompletion(int status) {
-			// unbind the SessionHolder from the thread
-			if (this.newSession)
-			{
-				TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			}
-
-			// just reset the synchronizedWithTransaction flag
-			Session session = this.sessionHolder.getSession();
-			if (this.newSession)
-			{
-				closeSessionIfNecessary(session, sessionFactory);
-			}
-			this.sessionHolder.setSynchronizedWithTransaction(false);
-
+			releaseSession(this.sessionHolder.getSession(), this.sessionFactory);
 		}
 	}
 
