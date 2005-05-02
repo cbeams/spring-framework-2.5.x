@@ -78,6 +78,7 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	public DefaultTransactionStatus(
 	    Object transaction, boolean newTransaction, boolean newSynchronization,
 	    boolean readOnly, boolean debug, Object suspendedResources) {
+
 		this.transaction = transaction;
 		this.newTransaction = newTransaction;
 		this.newSynchronization = newSynchronization;
