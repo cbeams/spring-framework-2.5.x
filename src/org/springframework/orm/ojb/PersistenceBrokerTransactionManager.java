@@ -56,7 +56,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see #setJcdAlias
  * @see #setPbKey
  * @see OjbFactoryUtils#getPersistenceBroker
- * @see OjbFactoryUtils#closePersistenceBrokerIfNecessary
+ * @see OjbFactoryUtils#releasePersistenceBroker
  * @see PersistenceBrokerTemplate#execute
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
@@ -153,34 +153,6 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	}
 
 
-	/**
-	 * Get an OJB PersistenceBroker for the PBKey of this transaction manager.
-	 * <p>Default implementation delegates to OjbFactoryUtils.
-	 * Can be overridden in subclasses, e.g. for testing purposes.
-	 * @return the PersistenceBroker
-	 * @see #setJcdAlias
-	 * @see #setPbKey
-	 * @see OjbFactoryUtils#getPersistenceBroker
-	 */
-	protected PersistenceBroker getPersistenceBroker() {
-		return OjbFactoryUtils.getPersistenceBroker(getPbKey(), true, false);
-	}
-
-	/**
-	 * Close the given PersistenceBroker, created for the PBKey of this
-	 * transaction manager, if it isn't bound to the thread.
-	 * <p>Default implementation delegates to OjbFactoryUtils.
-	 * Can be overridden in subclasses, e.g. for testing purposes.
-	 * @param pb PersistenceBroker to close
-	 * @see #setJcdAlias
-	 * @see #setPbKey
-	 * @see OjbFactoryUtils#closePersistenceBrokerIfNecessary
-	 */
-	protected void closePersistenceBrokerIfNecessary(PersistenceBroker pb) {
-		OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, getPbKey());
-	}
-
-
 	protected Object doGetTransaction() {
 		PersistenceBrokerTransactionObject txObject = new PersistenceBrokerTransactionObject();
 		PersistenceBrokerHolder pbHolder =
@@ -190,7 +162,8 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
-		return TransactionSynchronizationManager.hasResource(getPbKey());
+		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) transaction;
+		return (txObject.getPersistenceBrokerHolder() != null);
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
@@ -230,11 +203,12 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 				txObject.setConnectionHolder(conHolder);
 			}
 
+			// Bind the persistence broker holder to the thread.
 			TransactionSynchronizationManager.bindResource(getPbKey(), txObject.getPersistenceBrokerHolder());
 		}
 
 		catch (Exception ex) {
-			closePersistenceBrokerIfNecessary(pb);
+			releasePersistenceBroker(pb);
 			throw new CannotCreateTransactionException("Could not create OJB transaction", ex);
 		}
 	}
@@ -321,7 +295,35 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing OJB persistence broker [" + pb + "] after transaction");
 		}
-		closePersistenceBrokerIfNecessary(pb);
+		releasePersistenceBroker(pb);
+	}
+
+
+	/**
+	 * Get an OJB PersistenceBroker for the PBKey of this transaction manager.
+	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * Can be overridden in subclasses, e.g. for testing purposes.
+	 * @return the PersistenceBroker
+	 * @see #setJcdAlias
+	 * @see #setPbKey
+	 * @see OjbFactoryUtils#getPersistenceBroker
+	 */
+	protected PersistenceBroker getPersistenceBroker() {
+		return OjbFactoryUtils.getPersistenceBroker(getPbKey(), true, false);
+	}
+
+	/**
+	 * Close the given PersistenceBroker, created for the PBKey of this
+	 * transaction manager, if it isn't bound to the thread.
+	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * Can be overridden in subclasses, e.g. for testing purposes.
+	 * @param pb PersistenceBroker to close
+	 * @see #setJcdAlias
+	 * @see #setPbKey
+	 * @see OjbFactoryUtils#releasePersistenceBroker
+	 */
+	protected void releasePersistenceBroker(PersistenceBroker pb) {
+		OjbFactoryUtils.releasePersistenceBroker(pb, getPbKey());
 	}
 
 

@@ -68,6 +68,7 @@ public abstract class OjbFactoryUtils {
 	 */
 	public static PersistenceBroker getPersistenceBroker(PBKey pbKey, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
+
 		return getPersistenceBroker(pbKey, allowCreate, true);
 	}
 
@@ -97,34 +98,45 @@ public abstract class OjbFactoryUtils {
 
 		if (!allowCreate) {
 			throw new IllegalStateException(
-			    "No OJB persistence broker bound to thread, and configuration " +
+			    "No OJB PersistenceBroker bound to thread, and configuration " +
 			    "does not allow creation of new one here");
 		}
 
-		logger.debug("Opening OJB persistence broker");
 		try {
+			logger.debug("Opening OJB PersistenceBroker");
 			PersistenceBroker pb = PersistenceBrokerFactory.createPersistenceBroker(pbKey);
 			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
-				logger.debug("Registering transaction synchronization for OJB persistence broker");
+				logger.debug("Registering transaction synchronization for OJB PersistenceBroker");
 				pbHolder = new PersistenceBrokerHolder(pb);
-				TransactionSynchronizationManager.bindResource(pbKey, pbHolder);
+				pbHolder.setSynchronizedWithTransaction(true);
 				TransactionSynchronizationManager.registerSynchronization(
 				    new PersistenceBrokerSynchronization(pbHolder, pbKey));
+				TransactionSynchronizationManager.bindResource(pbKey, pbHolder);
 			}
 			return pb;
 		}
 		catch (OJBRuntimeException ex) {
-			throw new DataAccessResourceFailureException("Could not open OJB persistence broker", ex);
+			throw new DataAccessResourceFailureException("Could not open OJB PersistenceBroker", ex);
 		}
 	}
 
 	/**
 	 * Close the given PersistenceBroker, created for the given PBKey,
 	 * if it isn't bound to the thread.
+	 * @deprecated in favor of releasePersistenceBroker
+	 * @see #releasePersistenceBroker
+	 */
+	public static void closePersistenceBrokerIfNecessary(PersistenceBroker pb, PBKey pbKey) {
+		releasePersistenceBroker(pb, pbKey);
+	}
+
+	/**
+	 * Close the given PersistenceBroker, created for the given PBKey,
+	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param pb PersistenceBroker to close
 	 * @param pbKey PBKey that the PersistenceBroker was created with
 	 */
-	public static void closePersistenceBrokerIfNecessary(PersistenceBroker pb, PBKey pbKey) {
+	public static void releasePersistenceBroker(PersistenceBroker pb, PBKey pbKey) {
 		if (pb == null) {
 			return;
 		}
@@ -136,14 +148,15 @@ public abstract class OjbFactoryUtils {
 			return;
 		}
 
-		logger.debug("Closing OJB persistence broker");
+		logger.debug("Closing OJB PersistenceBroker");
 		pb.close();
 	}
 
 
 	/**
 	 * Callback for resource cleanup at the end of a non-OJB transaction
-	 * (e.g. when participating in a JTA transaction).
+	 * (e.g. when participating in a JtaTransactionManager transaction).
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
 	private static class PersistenceBrokerSynchronization extends TransactionSynchronizationAdapter {
 
@@ -170,7 +183,7 @@ public abstract class OjbFactoryUtils {
 
 		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.pbKey);
-			closePersistenceBrokerIfNecessary(this.persistenceBrokerHolder.getPersistenceBroker(), this.pbKey);
+			releasePersistenceBroker(this.persistenceBrokerHolder.getPersistenceBroker(), this.pbKey);
 		}
 	}
 

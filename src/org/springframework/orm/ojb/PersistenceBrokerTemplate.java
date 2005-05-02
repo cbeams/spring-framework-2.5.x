@@ -129,38 +129,6 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 	}
 
 
-	/**
-	 * Get an OJB PersistenceBroker for the PBKey of this template.
-	 * <p>Default implementation delegates to OjbFactoryUtils.
-	 * Can be overridden in subclasses, e.g. for testing purposes.
-	 * @return the PersistenceBroker
-	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
-	 * @throws IllegalStateException if no thread-bound PersistenceBroker found and allowCreate false
-	 * @see #setJcdAlias
-	 * @see #setPbKey
-	 * @see #setAllowCreate
-	 * @see OjbFactoryUtils#getPersistenceBroker(PBKey, boolean)
-	 */
-	protected PersistenceBroker getPersistenceBroker()
-	    throws DataAccessResourceFailureException, IllegalStateException {
-		return OjbFactoryUtils.getPersistenceBroker(getPbKey(), isAllowCreate());
-	}
-
-	/**
-	 * Close the given PersistenceBroker, created for the PBKey of this
-	 * template, if it isn't bound to the thread.
-	 * <p>Default implementation delegates to OjbFactoryUtils.
-	 * Can be overridden in subclasses, e.g. for testing purposes.
-	 * @param pb PersistenceBroker to close
-	 * @see #setJcdAlias
-	 * @see #setPbKey
-	 * @see OjbFactoryUtils#closePersistenceBrokerIfNecessary
-	 */
-	protected void closePersistenceBrokerIfNecessary(PersistenceBroker pb) {
-		OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, getPbKey());
-	}
-
-
 	public Object execute(PersistenceBrokerCallback action) throws DataAccessException {
 		PersistenceBroker pb = getPersistenceBroker();
 		try {
@@ -180,7 +148,7 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 			throw ex;
 		}
 		finally {
-			closePersistenceBrokerIfNecessary(pb);
+			releasePersistenceBroker(pb);
 		}
 	}
 
@@ -287,5 +255,39 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 			}
 		});
 	}
+
+
+	/**
+	 * Get an OJB PersistenceBroker for the PBKey of this template.
+	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * Can be overridden in subclasses, e.g. for testing purposes.
+	 * @return the PersistenceBroker
+	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
+	 * @throws IllegalStateException if no thread-bound PersistenceBroker found and allowCreate false
+	 * @see #setJcdAlias
+	 * @see #setPbKey
+	 * @see #setAllowCreate
+	 * @see OjbFactoryUtils#getPersistenceBroker(PBKey, boolean)
+	 */
+	protected PersistenceBroker getPersistenceBroker()
+			throws DataAccessResourceFailureException, IllegalStateException {
+
+		return OjbFactoryUtils.getPersistenceBroker(getPbKey(), isAllowCreate());
+	}
+
+	/**
+	 * Close the given PersistenceBroker, created for the PBKey of this
+	 * template, if it isn't bound to the thread.
+	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * Can be overridden in subclasses, e.g. for testing purposes.
+	 * @param pb PersistenceBroker to close
+	 * @see #setJcdAlias
+	 * @see #setPbKey
+	 * @see OjbFactoryUtils#releasePersistenceBroker
+	 */
+	protected void releasePersistenceBroker(PersistenceBroker pb) {
+		OjbFactoryUtils.releasePersistenceBroker(pb, getPbKey());
+	}
+
 
 }

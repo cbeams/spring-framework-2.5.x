@@ -36,7 +36,7 @@ import org.springframework.orm.ojb.PersistenceBrokerTemplate;
  *
  * <p>This base class is mainly intended for PersistenceBrokerTemplate usage but
  * can also be used when working with OjbFactoryUtils directly. Convenience
- * <code>getPersistenceBroker</code> and <code>closePersistenceBrokerIfNecessary</code>
+ * <code>getPersistenceBroker</code> and <code>releasePersistenceBroker</code>
  * methods are provided for that usage style.
  *
  * <p>This class will create its own PersistenceBrokerTemplate if no explicit
@@ -50,7 +50,7 @@ import org.springframework.orm.ojb.PersistenceBrokerTemplate;
  * @see #setPersistenceBrokerTemplate
  * @see #createPersistenceBrokerTemplate
  * @see #getPersistenceBroker
- * @see #closePersistenceBrokerIfNecessary
+ * @see #releasePersistenceBroker
  * @see org.springframework.orm.ojb.PersistenceBrokerTemplate
  */
 public class PersistenceBrokerDaoSupport {
@@ -150,10 +150,19 @@ public class PersistenceBrokerDaoSupport {
 
 	/**
 	 * Close the given PersistenceBroker if it isn't bound to the thread.
-	 * @param pb PersistenceBroker to close
+	 * @deprecated in favor of releasePersistenceBroker
+	 * @see #releasePersistenceBroker
 	 */
 	protected final void closePersistenceBrokerIfNecessary(PersistenceBroker pb) {
-		OjbFactoryUtils.closePersistenceBrokerIfNecessary(pb, this.persistenceBrokerTemplate.getPbKey());
+		releasePersistenceBroker(pb);
+	}
+
+	/**
+	 * Close the given PersistenceBroker if it isn't bound to the thread.
+	 * @param pb PersistenceBroker to close
+	 */
+	protected final void releasePersistenceBroker(PersistenceBroker pb) {
+		OjbFactoryUtils.releasePersistenceBroker(pb, this.persistenceBrokerTemplate.getPbKey());
 	}
 
 }
