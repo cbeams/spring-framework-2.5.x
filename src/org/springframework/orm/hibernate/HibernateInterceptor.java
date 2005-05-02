@@ -31,14 +31,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * This interceptor binds a new Hibernate Session to the thread before a method
  * call, closing and removing it afterwards in case of any method outcome.
- * If there already was a pre-bound Session (e.g. from HibernateTransactionManager,
+ * If there already is a pre-bound Session (e.g. from HibernateTransactionManager,
  * or from a surrounding Hibernate-intercepted method), the interceptor simply
- * takes part in it.
+ * participates in it.
  *
- * <p>Application code must retrieve a Hibernate Session via SessionFactoryUtils'
- * getSession method, to be able to detect a thread-bound Session. It is preferable
- * to use getSession with allowCreate=false, as the code relies on the interceptor
- * to provide proper Session handling. Typically the code will look as follows:
+ * <p>Application code must retrieve a Hibernate Session via the
+ * <code>SessionFactoryUtils.getSession</code> method, to be able to detect a
+ * thread-bound Session. It is preferable to use <code>getSession</code> with
+ * allowCreate=false, if the code relies on the interceptor to provide proper
+ * Session handling. Typically, the code will look as follows:
  *
  * <pre>
  * public void doHibernateAction() {
@@ -52,9 +53,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * }</pre>
  *
  * Note that the application must care about handling HibernateExceptions itself,
- * preferably via delegating to SessionFactoryUtils' convertHibernateAccessException
- * that converts them to ones that are compatible with the org.springframework.dao
- * exception hierarchy (like HibernateTemplate does).
+ * preferably via delegating to the <code>SessionFactoryUtils.convertHibernateAccessException</code>
+ * method that converts them to exceptions that are compatible with the
+ * <code>org.springframework.dao</code> exception hierarchy (like HibernateTemplate does).
  *
  * <p>Unfortunately, this interceptor cannot convert checked HibernateExceptions
  * to unchecked dao ones automatically. The intercepted method would have to throw
@@ -149,11 +150,11 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 		Session session = SessionFactoryUtils.getSession(
 				getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
 		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
-			logger.debug("Found thread-bound session for Hibernate interceptor");
+			logger.debug("Found thread-bound Session for Hibernate interceptor");
 			existingTransaction = true;
 		}
 		else {
-			logger.debug("Using new session for Hibernate interceptor");
+			logger.debug("Using new Session for Hibernate interceptor");
 			if (getFlushMode() == FLUSH_NEVER) {
 				session.setFlushMode(FlushMode.NEVER);
 			}
@@ -169,7 +170,7 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 		}
 		finally {
 			if (existingTransaction) {
-				logger.debug("Not closing pre-bound Hibernate session after interceptor");
+				logger.debug("Not closing pre-bound Hibernate Session after interceptor");
 			}
 			else {
 				TransactionSynchronizationManager.unbindResource(getSessionFactory());

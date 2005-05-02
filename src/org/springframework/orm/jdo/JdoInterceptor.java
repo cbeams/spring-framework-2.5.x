@@ -26,14 +26,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * This interceptor binds a new JDO PersistenceManager to the thread before a method
  * call, closing and removing it afterwards in case of any method outcome.
- * If there already was a pre-bound PersistenceManager (e.g. from JdoTransactionManager,
- * or from a surrounding JDO-intercepted method), the interceptor simply takes part in it.
+ * If there already is a pre-bound PersistenceManager (e.g. from JdoTransactionManager,
+ * or from a surrounding JDO-intercepted method), the interceptor simply participates in it.
  *
- * <p>Application code must retrieve a JDO PersistenceManager via
- * PersistenceManagerFactoryUtils' getPersistenceManager method, to be able to detect
- * a thread-bound PersistenceManager. It is preferable to use getPersistenceManager
- * with allowCreate=false, as the code relies on the interceptor to provide proper
- * PersistenceManager handling. Typically the code will look as follows:
+ * <p>Application code must retrieve a JDO PersistenceManager via the
+ * <code>PersistenceManagerFactoryUtils.getPersistenceManager</code> method,
+ * to be able to detect a thread-bound PersistenceManager. It is preferable to use
+ * <code>getPersistenceManager</code> with allowCreate=false, if the code relies on
+ * the interceptor to provide proper PersistenceManager handling. Typically, the code
+ * will look as follows:
  *
  * <pre>
  * public void doJdoAction() {
@@ -47,10 +48,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * }</pre>
  *
  * Note that the application must care about handling JDOExceptions itself,
- * preferably via delegating to PersistenceManagerFactoryUtils' convertJdoAccessException
- * that converts them to ones that are compatible with the org.springframework.dao exception
- * hierarchy (jlike JdoTemplate does). As JDOExceptions are unchecked, they can simply
- * get thrown too, sacrificing generic DAO abstraction in terms of exceptions though.
+ * preferably via delegating to the <code>PersistenceManagerFactoryUtils.convertJdoAccessException</code>
+ * method that converts them to exceptions that are compatible with the
+ * <code>org.springframework.dao</code> exception hierarchy (like JdoTemplate does).
  *
  * <p>This interceptor could convert unchecked JDOExceptions to unchecked dao ones
  * on-the-fly. The intercepted method wouldn't have to throw any special checked
