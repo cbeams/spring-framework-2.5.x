@@ -30,6 +30,7 @@ import javax.sql.DataSource;
 
 import org.easymock.MockControl;
 
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,10 +53,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 	private static final String SELECT_ID_FORENAME_WHERE_ID =
 		"select id, forename from custmr where id <= ?";
 	
-	private static final String[] COLUMN_NAMES =
-		new String[] { "id", "forename" };
-	private static final int[] COLUMN_TYPES =
-		new int[] { Types.INTEGER, Types.VARCHAR };
+	private static final String[] COLUMN_NAMES = new String[] { "id", "forename" };
+	private static final int[] COLUMN_TYPES = new int[] { Types.INTEGER, Types.VARCHAR };
 
 	private MockControl ctrlPreparedStatement;
 	private PreparedStatement mockPreparedStatement;
@@ -71,9 +70,9 @@ public class SqlQueryTests extends AbstractJdbcTests {
 	}
 
 	protected void tearDown() throws Exception {
-		//super.tearDown();
-		//ctrlPreparedStatement.verify();
-		//ctrlResultSet.verify();
+		super.tearDown();
+		ctrlPreparedStatement.verify();
+		ctrlResultSet.verify();
 	}
 
 	protected void replay() {
@@ -248,9 +247,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			ctrlCountPreparedStatement[i].setVoidCallable();
 
 			mockConnection.prepareStatement(
-				"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='"
-					+ dbResults[i]
-					+ "'");
+				"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='" + dbResults[i] + "'");
 			ctrlConnection.setReturnValue(mockCountPreparedStatement[i]);
 
 			ctrlCountResultSetMetaData[i].replay();
@@ -273,8 +270,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		for (int i = 0; i < results.length; i++) {
 			// BREAKS ON ' in name
 			int dbCount = helper.queryForInt(
-					"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='" +
-					results[i] + "'", null);
+					"SELECT COUNT(FORENAME) FROM CUSTMR WHERE FORENAME='" + results[i] + "'", null);
 			assertTrue("found in db", dbCount == 1);
 		}
 
@@ -472,9 +468,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		Customer cust = query.findCustomer("rod");
 
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
-		assertTrue(
-			"Customer forename was assigned correctly",
-			cust.getForename().equals("rod"));
+		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}
 
 	public void testFindCustomerMixed() throws SQLException {
@@ -512,10 +506,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		mockResultSet2.close();
 		ctrlResultSet2.setVoidCallable();
 
-		ctrlPreparedStatement2 =
-			MockControl.createControl(PreparedStatement.class);
-		mockPreparedStatement2 =
-			(PreparedStatement) ctrlPreparedStatement2.getMock();
+		ctrlPreparedStatement2 = MockControl.createControl(PreparedStatement.class);
+		mockPreparedStatement2 = (PreparedStatement) ctrlPreparedStatement2.getMock();
 		mockPreparedStatement2.setObject(1, new Integer(1), Types.INTEGER);
 		ctrlPreparedStatement2.setVoidCallable();
 		mockPreparedStatement2.setString(2, "Roger");
@@ -627,7 +619,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			Customer cust = query.findCustomer("rod");
 			fail("Should fail if more than one row found");
 		}
-		catch (InvalidDataAccessApiUsageException idaauex) {
+		catch (IncorrectResultSizeDataAccessException ex) {
 			// OK
 		}
 	}
@@ -772,7 +764,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
-		mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		mockConnection.prepareStatement(
+				SELECT_ID_FORENAME_WHERE, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
@@ -802,9 +795,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		Customer cust = query.findCustomer(1);
 
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
-		assertTrue(
-			"Customer forename was assigned correctly",
-			cust.getForename().equals("rod"));
+		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}
 
 	public void testUpdateCustomers() throws SQLException {
@@ -838,7 +829,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		mockPreparedStatement.close();
 		ctrlPreparedStatement.setVoidCallable();
 
-		mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+		mockConnection.prepareStatement(
+				SELECT_ID_FORENAME_WHERE_ID, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
@@ -889,34 +881,18 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		private int id;
 		private String forename;
 
-		/**
-		 * Gets the id.
-		 * @return Returns a int
-		 */
 		public int getId() {
 			return id;
 		}
 
-		/**
-		 * Sets the id.
-		 * @param id The id to set
-		 */
 		public void setId(int id) {
 			this.id = id;
 		}
 
-		/**
-		 * Gets the forename.
-		 * @return Returns a String
-		 */
 		public String getForename() {
 			return forename;
 		}
 
-		/**
-		 * Sets the forename.
-		 * @param forename The forename to set
-		 */
 		public void setForename(String forename) {
 			this.forename = forename;
 		}
@@ -924,7 +900,6 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		public String toString() {
 			return "Customer: id=" + id + "; forename=" + forename;
 		}
-
 	}
 
 }

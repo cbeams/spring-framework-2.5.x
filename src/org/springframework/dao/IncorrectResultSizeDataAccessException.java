@@ -22,7 +22,7 @@ package org.springframework.dao;
  * @author Juergen Hoeller
  * @since 1.0.2
  */
-public class IncorrectResultSizeDataAccessException extends InvalidDataAccessApiUsageException {
+public class IncorrectResultSizeDataAccessException extends DataRetrievalFailureException {
 
 	private int expectedSize;
 
