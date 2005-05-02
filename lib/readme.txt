@@ -4,7 +4,7 @@ of these libraries is subject to the respective license; check the respective pr
 distribution/website before using any of them in your own applications.
 
 * ant/ant.jar
-- Ant 1.6.2 (http://ant.apache.org)
+- Ant 1.6.3 (http://ant.apache.org)
 - used to build the framework and the sample apps
 
 * antlr/antlr-2.7.5H3.jar
@@ -72,7 +72,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.0.1 (http://www.hibernate.org)
+- Hibernate 3.0.2 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
@@ -249,7 +249,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using the JMXMP connector (even on JDK 1.5)
 
 * jotm/jotm.jar
-- JOTM 2.0.3 (http://jotm.objectweb.org)
+- JOTM 2.0.8 (http://jotm.objectweb.org)
 - required for building the framework
 - required at runtime when using Spring's JotmFactoryBean
 
@@ -297,6 +297,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using the Struts support or TilesView
 - required for running JPetStore's Struts web tier
+
+* toplink/toplink-api.jar
+- Oracle TopLink 9.0.4 API (http://www.oracle.com/technology/products/ias/toplink)
+- required for building the framework
+- replaced with full toplink.jar at runtime when using Spring's TopLink support
 
 * velocity/velocity-1.4.jar
 - Velocity 1.4 (http://jakarta.apache.org/velocity)
