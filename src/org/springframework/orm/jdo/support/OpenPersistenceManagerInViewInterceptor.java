@@ -130,7 +130,7 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
 			logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
-			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(
+			PersistenceManagerFactoryUtils.releasePersistenceManager(
 					pmHolder.getPersistenceManager(), getPersistenceManagerFactory());
 		}
 	}

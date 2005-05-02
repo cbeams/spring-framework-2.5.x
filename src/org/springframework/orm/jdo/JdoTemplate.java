@@ -208,7 +208,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			throw ex;
 		}
 		finally {
-			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
+			PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 		}
 	}
 
@@ -336,6 +336,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	public Collection find(final Class entityClass, final String filter, final String ordering)
 			throws DataAccessException {
+
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = (filter != null ? pm.newQuery(entityClass, filter) : pm.newQuery(entityClass));
@@ -350,12 +351,14 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	public Collection find(Class entityClass, String filter, String parameters, Object[] values)
 			throws DataAccessException {
+
 		return find(entityClass, filter, parameters, values, null);
 	}
 
 	public Collection find(
 			final Class entityClass, final String filter, final String parameters, final Object[] values,
 			final String ordering) throws DataAccessException {
+
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
@@ -371,12 +374,14 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	public Collection find(Class entityClass, String filter, String parameters, Map values)
 			throws DataAccessException {
+
 		return find(entityClass, filter, parameters, values, null);
 	}
 
 	public Collection find(
 			final Class entityClass, final String filter, final String parameters, final Map values,
 			final String ordering) throws DataAccessException {
+
 		return executeFind(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);

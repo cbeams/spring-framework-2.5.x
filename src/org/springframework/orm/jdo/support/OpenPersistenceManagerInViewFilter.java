@@ -110,7 +110,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 			if (!participate) {
 				TransactionSynchronizationManager.unbindResource(pmf);
 				logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewFilter");
-				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, pmf);
+				PersistenceManagerFactoryUtils.releasePersistenceManager(pm, pmf);
 			}
 		}
 	}

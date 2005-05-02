@@ -78,10 +78,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory
  * @see LocalPersistenceManagerFactoryBean
  * @see PersistenceManagerFactoryUtils#getPersistenceManager
- * @see PersistenceManagerFactoryUtils#closePersistenceManagerIfNecessary
+ * @see PersistenceManagerFactoryUtils#releasePersistenceManager
  * @see JdoTemplate#execute
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
- * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
@@ -321,11 +321,11 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		catch (TransactionException ex) {
-			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
+			PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 			throw ex;
 		}
 		catch (Exception ex) {
-			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
+			PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 			throw new CannotCreateTransactionException("Could not create JDO transaction", ex);
 		}
 	}
@@ -416,7 +416,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing JDO persistence manager [" + pm + "] after transaction");
 			}
-			PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
+			PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 		}
 		else {
 			logger.debug("Not closing pre-bound JDO persistence manager after transaction");

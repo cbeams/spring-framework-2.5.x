@@ -40,7 +40,7 @@ import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
  * <p>This base class is mainly intended for JdoTemplate usage but can also
  * be used when working with PersistenceManagerFactoryUtils directly, e.g. in
  * combination with JdoInterceptor-managed PersistenceManagers. Convenience
- * <code>getPersistenceManager</code> and <code>closePersistenceManagerIfNecessary</code>
+ * <code>getPersistenceManager</code> and <code>releasePersistenceManager</code>
  * methods are provided for that usage style.
  *
  * <p>This class will create its own JdoTemplate if only a PersistenceManagerFactory
@@ -52,7 +52,7 @@ import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
  * @see #setPersistenceManagerFactory
  * @see #setJdoTemplate
  * @see #getPersistenceManager
- * @see #closePersistenceManagerIfNecessary
+ * @see #releasePersistenceManager
  * @see org.springframework.orm.jdo.JdoTemplate
  * @see org.springframework.orm.jdo.JdoInterceptor
  */
@@ -167,13 +167,23 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	}
 
 	/**
-	 * Close the given JDO PersistenceManager if necessary, created via this bean's
+	 * Close the given JDO PersistenceManager, created via this DAO's
 	 * PersistenceManagerFactory, if it isn't bound to the thread.
-	 * @param pm PersistenceManager to close
-	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#closePersistenceManagerIfNecessary
+	 * @deprecated in favor of releasePersistenceManager
+	 * @see #releasePersistenceManager
 	 */
 	protected final void closePersistenceManagerIfNecessary(PersistenceManager pm) {
-		PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
+		releasePersistenceManager(pm);
+	}
+
+	/**
+	 * Close the given JDO PersistenceManager, created via this DAO's
+	 * PersistenceManagerFactory, if it isn't bound to the thread.
+	 * @param pm PersistenceManager to close
+	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#releasePersistenceManager
+	 */
+	protected final void releasePersistenceManager(PersistenceManager pm) {
+		PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 	}
 
 }

@@ -98,7 +98,7 @@ public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 			}
 			else {
 				TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
-				PersistenceManagerFactoryUtils.closePersistenceManagerIfNecessary(pm, getPersistenceManagerFactory());
+				PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
 			}
 		}
 	}
