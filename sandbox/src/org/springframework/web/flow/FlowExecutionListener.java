@@ -41,7 +41,7 @@ public interface FlowExecutionListener {
 	 * Called immediately after a start event is signaled - indicating the flow
 	 * is starting but hasn't yet entered its start state.
 	 * @param context source of the event
-	 * @param startState the startState
+	 * @param startState the start state that will be entered
 	 * @throws EnterStateVetoException the start state transition was not allowed
 	 */
 	public void starting(RequestContext context, State startState) throws EnterStateVetoException;

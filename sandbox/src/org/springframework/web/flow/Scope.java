@@ -57,6 +57,13 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	public Scope(ScopeType scopeType) {
 		this.scopeType = scopeType;
 	}
+	
+	/**
+	 * Returns this scope's scope type.
+	 */
+	public ScopeType getScopeType() {
+		return scopeType;
+	}
 
 	// implementing AttributeAccessor
 
@@ -64,10 +71,17 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 		return this.attributes.containsKey(attributeName);
 	}
 
-	public boolean containsAttribute(String attributeName, Class attributeClazz) {
+	/**
+	 * Does the attribute with the provided name exist in this scope, and is
+	 * it's value of the specified class?
+	 * @param attributeName the attribute name
+	 * @param attributeClass the required class of the attribute value
+	 * @return true if so, false otherwise.
+	 */
+	public boolean containsAttribute(String attributeName, Class attributeClass) {
 		boolean contains = this.attributes.containsKey(attributeName);
-		if (contains && attributeClazz != null) {
-			contains = attributeClazz.isInstance(this.attributes.get(attributeName));
+		if (contains && attributeClass != null) {
+			contains = attributeClass.isInstance(this.attributes.get(attributeName));
 		}
 		return contains;
 	}
