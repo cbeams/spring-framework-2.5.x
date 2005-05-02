@@ -54,7 +54,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @see SchedulerFactoryBean#setDataSource
  * @see SchedulerFactoryBean#setNonTransactionalDataSource
  * @see org.springframework.jdbc.datasource.DataSourceUtils#doGetConnection
- * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  */
 public class LocalDataSourceJobStore extends JobStoreCMT {
 
@@ -133,7 +133,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 
 	protected void closeConnection(Connection con) {
 		// Will work for transactional and non-transactional connections.
-		DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+		DataSourceUtils.releaseConnection(con, this.dataSource);
 	}
 
 }

@@ -70,7 +70,7 @@ import org.springframework.util.Assert;
  * @see javax.sql.DataSource#getConnection
  * @see java.sql.Connection#close
  * @see DataSourceUtils#doGetConnection
- * @see DataSourceUtils#doCloseConnectionIfNecessary
+ * @see DataSourceUtils#doReleaseConnection
  * @see DataSourceUtils#applyTransactionTimeout
  * @see ConnectionProxy
  * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
@@ -114,7 +114,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * @param target the original Connection to wrap
 	 * @param dataSource DataSource that the Connection came from
 	 * @return the wrapped Connection
-	 * @see DataSourceUtils#doCloseConnectionIfNecessary
+	 * @see DataSourceUtils#doReleaseConnection
 	 */
 	protected Connection getTransactionAwareConnectionProxy(Connection target, DataSource dataSource) {
 		return (Connection) Proxy.newProxyInstance(
@@ -130,10 +130,6 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 */
 	private static class TransactionAwareInvocationHandler implements InvocationHandler {
 
-		private static final String GET_TARGET_CONNECTION_METHOD_NAME = "getTargetConnection";
-
-		private static final String CONNECTION_CLOSE_METHOD_NAME = "close";
-
 		private final Connection target;
 
 		private final DataSource dataSource;
@@ -146,7 +142,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals(GET_TARGET_CONNECTION_METHOD_NAME)) {
+			if (method.getName().equals("getTargetConnection")) {
 				// Handle getTargetConnection method: return underlying connection.
 				return this.target;
 			}
@@ -158,10 +154,10 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				// Use hashCode of Connection proxy.
 				return new Integer(hashCode());
 			}
-			else if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
+			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.
 				if (this.dataSource != null) {
-					DataSourceUtils.doCloseConnectionIfNecessary(this.target, this.dataSource);
+					DataSourceUtils.doReleaseConnection(this.target, this.dataSource);
 				}
 				return null;
 			}

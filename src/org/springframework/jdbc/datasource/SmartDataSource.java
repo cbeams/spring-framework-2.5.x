@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
@@ -31,7 +30,7 @@ import javax.sql.DataSource;
  *
  * @author Rod Johnson
  * @see SingleConnectionDataSource#shouldClose
- * @see DataSourceUtils#closeConnectionIfNecessary
+ * @see DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public interface SmartDataSource extends DataSource {

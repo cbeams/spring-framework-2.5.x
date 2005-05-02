@@ -58,7 +58,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Juergen Hoeller
  * @since 1.2
  * @see ConnectionFactoryUtils#getConnection(javax.resource.cci.ConnectionFactory)
- * @see ConnectionFactoryUtils#closeConnectionIfNecessary
+ * @see ConnectionFactoryUtils#releaseConnection
  * @see TransactionAwareConnectionFactoryProxy
  * @see org.springframework.jca.cci.core.CciTemplate
  * @see org.springframework.jca.cci.object.MappingRecordOperation
@@ -140,15 +140,15 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 			TransactionSynchronizationManager.bindResource(getConnectionFactory(), txObject.getConnectionHolder());
 		}
 		catch (NotSupportedException ex) {
-			ConnectionFactoryUtils.closeConnectionIfNecessary(con, this.connectionFactory);
+			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory);
 			throw new CannotCreateTransactionException("CCI connection does not support local transactions", ex);
 		}
 		catch (LocalTransactionException ex) {
-			ConnectionFactoryUtils.closeConnectionIfNecessary(con, this.connectionFactory);
+			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory);
 			throw new CannotCreateTransactionException("Could not begin local CCI transaction", ex);
 		}
 		catch (ResourceException ex) {
-			ConnectionFactoryUtils.closeConnectionIfNecessary(con, this.connectionFactory);
+			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory);
 			throw new TransactionSystemException("Unexpected failure on begin of CCI local transaction", ex);
 		}
 	}
@@ -223,7 +223,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing CCI connection [" + con + "] after transaction");
 		}
-		ConnectionFactoryUtils.closeConnectionIfNecessary(con, this.connectionFactory);
+		ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory);
 	}
 
 

@@ -121,13 +121,13 @@ public abstract class CciDaoSupport implements InitializingBean {
 	}
 
 	/**
-	 * Close the given CCI Connection if necessary, created via this bean's
-	 * ConnectionFactory, if it isn't bound to the thread.
+	 * Close the given CCI Connection, created via this bean's ConnectionFactory,
+	 * if it isn't bound to the thread.
 	 * @param con Connection to close
-	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#closeConnectionIfNecessary
+	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#releaseConnection
 	 */
-	protected final void closeConnectionIfNecessary(Connection con) {
-		ConnectionFactoryUtils.closeConnectionIfNecessary(con, getConnectionFactory());
+	protected final void releaseConnection(Connection con) {
+		ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 	}
 
 }

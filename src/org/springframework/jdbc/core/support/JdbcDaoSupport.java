@@ -130,13 +130,23 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	}
 
 	/**
-	 * Close the given JDBC Connection if necessary, created via this bean's
-	 * DataSource, if it isn't bound to the thread.
-	 * @param con Connection to close
-	 * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
+	 * Close the given JDBC Connection, created via this DAO's DataSource,
+	 * if it isn't bound to the thread.
+	 * @deprecated in favor of releaseConnection
+	 * @see #releaseConnection
 	 */
 	protected final void closeConnectionIfNecessary(Connection con) {
-		DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+		releaseConnection(con);
+	}
+
+	/**
+	 * Close the given JDBC Connection, created via this DAO's DataSource,
+	 * if it isn't bound to the thread.
+	 * @param con Connection to close
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
+	 */
+	protected final void releaseConnection(Connection con) {
+		DataSourceUtils.releaseConnection(con, getDataSource());
 	}
 
 }

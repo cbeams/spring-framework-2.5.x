@@ -118,7 +118,7 @@ public class SqlMapTemplate extends JdbcAccessor implements SqlMapOperations {
 			throw getExceptionTranslator().translate("SqlMap operation", null, ex);
 		}
 		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
 

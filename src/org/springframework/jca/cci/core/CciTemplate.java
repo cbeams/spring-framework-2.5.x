@@ -165,7 +165,7 @@ public class CciTemplate implements CciOperations {
 			throw new InvalidResultSetAccessException("Parsing of CCI ResultSet failed", ex);
 		}
 		finally {
-			ConnectionFactoryUtils.closeConnectionIfNecessary(connection, getConnectionFactory());
+			ConnectionFactoryUtils.releaseConnection(connection, getConnectionFactory());
 		}
 	}
 

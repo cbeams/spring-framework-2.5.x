@@ -39,7 +39,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Juergen Hoeller
  * @since 1.2
  * @see #getConnection
- * @see #closeConnectionIfNecessary
+ * @see #releaseConnection
  * @see CciLocalTransactionManager
  * @see org.springframework.jca.cci.core.CciTemplate
  * @see org.springframework.jca.cci.object.MappingRecordOperation
@@ -130,8 +130,9 @@ public abstract class ConnectionFactoryUtils {
 		if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for CCI connection");
 			conHolder = new ConnectionHolder(con);
-			TransactionSynchronizationManager.bindResource(cf, conHolder);
+			conHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, cf));
+			TransactionSynchronizationManager.bindResource(cf, conHolder);
 		}
 		return con;
 	}
@@ -143,9 +144,9 @@ public abstract class ConnectionFactoryUtils {
 	 * (if this is null, the call will be ignored)
 	 * @param cf ConnectionFactory that the Connection came from
 	 */
-	public static void closeConnectionIfNecessary(Connection con, ConnectionFactory cf) {
+	public static void releaseConnection(Connection con, ConnectionFactory cf) {
 		try {
-			doCloseConnectionIfNecessary(con, cf);
+			doReleaseConnection(con, cf);
 		}
 		catch (ResourceException ex) {
 			logger.error("Could not close CCI connection", ex);
@@ -154,12 +155,12 @@ public abstract class ConnectionFactoryUtils {
 
 	/**
 	 * Actually close a JCA CCI Connection for the given DataSource.
-	 * Same as closeConnectionIfNecessary, but throwing the original SQLException.
+	 * Same as releaseConnection, but throwing the original SQLException.
 	 * <p>Directly accessed by TransactionAwareConnectionFactoryProxy.
 	 * @throws ResourceException if thrown by JCA CCI methods
-	 * @see #closeConnectionIfNecessary
+	 * @see #releaseConnection
 	 */
-	public static void doCloseConnectionIfNecessary(Connection con, ConnectionFactory cf) throws ResourceException {
+	public static void doReleaseConnection(Connection con, ConnectionFactory cf) throws ResourceException {
 		if (con == null || TransactionSynchronizationManager.hasResource(cf)) {
 			return;
 		}
@@ -192,7 +193,7 @@ public abstract class ConnectionFactoryUtils {
 
 		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.connectionFactory);
-			closeConnectionIfNecessary(this.connectionHolder.getConnection(), this.connectionFactory);
+			releaseConnection(this.connectionHolder.getConnection(), this.connectionFactory);
 		}
 	}
 

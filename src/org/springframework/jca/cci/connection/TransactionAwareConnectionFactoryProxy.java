@@ -61,7 +61,7 @@ import javax.resource.cci.ConnectionFactory;
  * @see javax.resource.cci.ConnectionFactory#getConnection
  * @see javax.resource.cci.Connection#close
  * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doGetConnection
- * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doCloseConnectionIfNecessary
+ * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doReleaseConnection
  */
 public class TransactionAwareConnectionFactoryProxy extends DelegatingConnectionFactory {
 
@@ -98,7 +98,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	 * @param target the original Connection to wrap
 	 * @param cf ConnectionFactory that the Connection came from
 	 * @return the wrapped Connection
-	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doCloseConnectionIfNecessary
+	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doReleaseConnection
 	 */
 	protected Connection getTransactionAwareConnectionProxy(Connection target, ConnectionFactory cf) {
 		return (Connection) Proxy.newProxyInstance(
@@ -139,7 +139,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 			else if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
 				// Handle close method: only close if not within a transaction.
 				if (this.connectionFactory != null) {
-					ConnectionFactoryUtils.doCloseConnectionIfNecessary(this.target, this.connectionFactory);
+					ConnectionFactoryUtils.doReleaseConnection(this.target, this.connectionFactory);
 				}
 				return null;
 			}

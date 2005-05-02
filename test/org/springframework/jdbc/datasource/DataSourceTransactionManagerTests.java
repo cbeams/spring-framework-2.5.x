@@ -871,11 +871,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 				Connection con = DataSourceUtils.getConnection(ds);
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-				DataSourceUtils.closeConnectionIfNecessary(con, ds);
+				DataSourceUtils.releaseConnection(con, ds);
 
 				con = DataSourceUtils.getConnection(ds);
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-				DataSourceUtils.closeConnectionIfNecessary(con, ds);			}
+				DataSourceUtils.releaseConnection(con, ds);			}
 		});
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));

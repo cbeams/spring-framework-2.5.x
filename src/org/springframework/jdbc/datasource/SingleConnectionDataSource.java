@@ -34,7 +34,7 @@ import org.springframework.util.ObjectUtils;
  * <p>Note that at shutdown, someone should close the underlying connection via the
  * <code>close()</code> method. Client code will never call close on the Connection
  * handle if it is SmartDataSource-aware (e.g. uses
- * <code>DataSourceUtils.closeConnectionIfNecessary</code>).
+ * <code>DataSourceUtils.releaseConnection</code>).
  *
  * <p>If client code will call <code>close()</code> in the assumption of a pooled
  * Connection, like when using persistence tools, set "suppressClose" to "true".
@@ -50,7 +50,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see java.sql.Connection#close()
- * @see DataSourceUtils#closeConnectionIfNecessary
+ * @see DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
  */
 public class SingleConnectionDataSource extends DriverManagerDataSource

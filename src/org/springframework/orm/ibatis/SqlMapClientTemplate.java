@@ -184,7 +184,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 					throw getExceptionTranslator().translate("SqlMapClient operation", null, ex);
 				}
 				finally {
-					DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+					DataSourceUtils.releaseConnection(con, getDataSource());
 				}
 			}
 			finally {

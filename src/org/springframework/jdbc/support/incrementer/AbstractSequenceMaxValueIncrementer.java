@@ -56,7 +56,7 @@ public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFi
 		finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeStatement(stmt);
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
 

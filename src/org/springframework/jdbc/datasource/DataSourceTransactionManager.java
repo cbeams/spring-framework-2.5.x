@@ -73,7 +73,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see java.sql.Savepoint
  * @see DataSourceUtils#getConnection(javax.sql.DataSource)
  * @see DataSourceUtils#applyTransactionTimeout
- * @see DataSourceUtils#closeConnectionIfNecessary
+ * @see DataSourceUtils#releaseConnection
  * @see TransactionAwareDataSourceProxy
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.object
@@ -194,7 +194,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 
 		catch (SQLException ex) {
-			DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+			DataSourceUtils.releaseConnection(con, this.dataSource);
 			throw new CannotCreateTransactionException("Could not configure JDBC connection for transaction", ex);
 		}
 	}
@@ -202,7 +202,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected Object doSuspend(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 		txObject.setConnectionHolder(null);
-		return TransactionSynchronizationManager.unbindResource(this.dataSource);
+		ConnectionHolder conHolder = (ConnectionHolder)
+				TransactionSynchronizationManager.unbindResource(this.dataSource);
+		return conHolder;
 	}
 
 	protected void doResume(Object transaction, Object suspendedResources) {
@@ -269,7 +271,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing JDBC connection [" + con + "] after transaction");
 		}
-		DataSourceUtils.closeConnectionIfNecessary(con, this.dataSource);
+		DataSourceUtils.releaseConnection(con, this.dataSource);
 	}
 
 

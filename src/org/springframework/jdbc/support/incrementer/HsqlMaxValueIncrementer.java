@@ -156,7 +156,7 @@ public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncremente
 			}
 			finally {
 				JdbcUtils.closeStatement(stmt);
-				DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+				DataSourceUtils.releaseConnection(con, getDataSource());
 			}
 		}
 		return this.valueCache[this.nextValueIndex++];

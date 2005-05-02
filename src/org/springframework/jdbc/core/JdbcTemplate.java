@@ -229,7 +229,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			throw getExceptionTranslator().translate("executing ConnectionCallback", getSql(action), ex);
 		}
 		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
 
@@ -263,7 +263,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 		finally {
 			JdbcUtils.closeStatement(stmt);
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
 
@@ -461,7 +461,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				((ParameterDisposer) psc).cleanupParameters();
 			}
 			JdbcUtils.closeStatement(ps);
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
 
@@ -800,7 +800,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				((ParameterDisposer) csc).cleanupParameters();
 			}
 			JdbcUtils.closeStatement(cs);
-			DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
 

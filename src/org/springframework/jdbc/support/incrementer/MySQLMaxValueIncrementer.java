@@ -161,7 +161,7 @@ public class MySQLMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 			}
 			finally {
 				JdbcUtils.closeStatement(stmt);
-				DataSourceUtils.closeConnectionIfNecessary(con, getDataSource());
+				DataSourceUtils.releaseConnection(con, getDataSource());
 			}
 		}
 		else {
