@@ -171,7 +171,7 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 			}
 			else {
 				TransactionSynchronizationManager.unbindResource(getSessionFactory());
-				SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
+				SessionFactoryUtils.releaseSession(session, getSessionFactory());
 			}
 		}
 	}

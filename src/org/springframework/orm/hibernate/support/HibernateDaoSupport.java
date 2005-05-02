@@ -39,7 +39,7 @@ import org.springframework.orm.hibernate.SessionFactoryUtils;
  * <p>This base class is mainly intended for HibernateTemplate usage
  * but can also be used when working with SessionFactoryUtils directly,
  * e.g. in combination with HibernateInterceptor-managed Sessions.
- * Convenience <code>getSession</code> and <code>closeSessionIfNecessary</code>
+ * Convenience <code>getSession</code> and <code>releaseSession</code>
  * methods are provided for that usage style.
  * 
  * <p>This class will create its own HibernateTemplate if only a SessionFactory
@@ -53,7 +53,7 @@ import org.springframework.orm.hibernate.SessionFactoryUtils;
  * @see #setHibernateTemplate
  * @see #createHibernateTemplate
  * @see #getSession
- * @see #closeSessionIfNecessary
+ * @see #releaseSession
  * @see org.springframework.orm.hibernate.HibernateTemplate
  * @see org.springframework.orm.hibernate.HibernateInterceptor
  */
@@ -134,7 +134,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 * <p><b>Note that this is not meant to be invoked from HibernateTemplate code
 	 * but rather just in plain Hibernate code.</b> Either rely on a thread-bound
 	 * Session (via HibernateInterceptor), or use it in combination with
-	 * <code>closeSessionIfNecessary</code>.
+	 * <code>releaseSession</code>.
 	 * <p>In general, it is recommended to use HibernateTemplate, either with
 	 * the provided convenience operations or with a custom HibernateCallback
 	 * that provides you with a Session to work on. HibernateTemplate will care
@@ -142,14 +142,15 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
-	 * @see #closeSessionIfNecessary
+	 * @see #releaseSession
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 * @see org.springframework.orm.hibernate.HibernateInterceptor
 	 * @see org.springframework.orm.hibernate.HibernateTemplate
 	 * @see org.springframework.orm.hibernate.HibernateCallback
 	 */
 	protected final Session getSession()
-	    throws DataAccessResourceFailureException, IllegalStateException {
+			throws DataAccessResourceFailureException, IllegalStateException {
+
 		return getSession(this.hibernateTemplate.isAllowCreate());
 	}
 
@@ -159,7 +160,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 * <p><b>Note that this is not meant to be invoked from HibernateTemplate code
 	 * but rather just in plain Hibernate code.</b> Either rely on a thread-bound
 	 * Session (via HibernateInterceptor), or use it in combination with
-	 * <code>closeSessionIfNecessary</code>.
+	 * <code>releaseSession</code>.
 	 * <p>In general, it is recommended to use HibernateTemplate, either with
 	 * the provided convenience operations or with a custom HibernateCallback
 	 * that provides you with a Session to work on. HibernateTemplate will care
@@ -168,7 +169,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
-	 * @see #closeSessionIfNecessary
+	 * @see #releaseSession
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 * @see org.springframework.orm.hibernate.HibernateInterceptor
 	 * @see org.springframework.orm.hibernate.HibernateTemplate
@@ -176,6 +177,7 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 */
 	protected final Session getSession(boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
+
 		return (!allowCreate ?
 		    SessionFactoryUtils.getSession(getSessionFactory(), false) :
 				SessionFactoryUtils.getSession(
@@ -185,18 +187,18 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	}
 
 	/**
-	 * Convert the given HibernateException to an appropriate exception from
-	 * the org.springframework.dao hierarchy. Will automatically detect
+	 * Convert the given HibernateException to an appropriate exception from the
+	 * <code>org.springframework.dao</code> hierarchy. Will automatically detect
 	 * wrapped SQLExceptions and convert them accordingly.
 	 * <p>Delegates to the <code>convertHibernateAccessException</code>
 	 * method of this DAO's HibernateTemplate.
 	 * <p>Typically used in plain Hibernate code, in combination with
-	 * <code>getSession</code> and <code>closeSessionIfNecessary</code>.
+	 * <code>getSession</code> and <code>releaseSession</code>.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see #setHibernateTemplate
 	 * @see #getSession
-	 * @see #closeSessionIfNecessary
+	 * @see #releaseSession
 	 * @see org.springframework.orm.hibernate.HibernateTemplate#convertHibernateAccessException
 	 */
 	protected final DataAccessException convertHibernateAccessException(HibernateException ex) {
@@ -204,15 +206,25 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	}
 
 	/**
-	 * Close the given Hibernate Session if necessary, created via this bean's
-	 * SessionFactory, if it isn't bound to the thread.
+	 * Close the given Hibernate Session, created via this DAO's SessionFactory,
+	 * if it isn't bound to the thread.
+	 * @deprecated in favor of releaseSession
+	 * @see #releaseSession
+	 */
+	protected final void closeSessionIfNecessary(Session session) {
+		releaseSession(session);
+	}
+
+	/**
+	 * Close the given Hibernate Session, created via this DAO's SessionFactory,
+	 * if it isn't bound to the thread.
 	 * <p>Typically used in plain Hibernate code, in combination with
 	 * <code>getSession</code> and <code>convertHibernateAccessException</code>.
 	 * @param session Session to close
-	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#closeSessionIfNecessary
+	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#releaseSession
 	 */
-	protected final void closeSessionIfNecessary(Session session) {
-		SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
+	protected final void releaseSession(Session session) {
+		SessionFactoryUtils.releaseSession(session, getSessionFactory());
 	}
 
 }

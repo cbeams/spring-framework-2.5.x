@@ -261,7 +261,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.replay();
 		interceptor.preHandle(request, response, "handler");
 		Session sess = SessionFactoryUtils.getSession(sf, true);
-		SessionFactoryUtils.closeSessionIfNecessary(sess, sf);
+		SessionFactoryUtils.releaseSession(sess, sf);
 
 		// check that further invocations simply participate
 		interceptor.preHandle(request, response, "handler");
@@ -508,7 +508,7 @@ public class OpenSessionInViewTests extends TestCase {
 				TransactionStatus ts = tm.getTransaction(
 						new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
 				Session sess = SessionFactoryUtils.getSession(sf, true);
-				SessionFactoryUtils.closeSessionIfNecessary(sess, sf);
+				SessionFactoryUtils.releaseSession(sess, sf);
 				tm.commit(ts);
 
 				sessionControl.verify();
@@ -613,7 +613,7 @@ public class OpenSessionInViewTests extends TestCase {
 				TransactionStatus ts = tm.getTransaction(
 						new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
 				Session sess = SessionFactoryUtils.getSession(sf, true);
-				SessionFactoryUtils.closeSessionIfNecessary(sess, sf);
+				SessionFactoryUtils.releaseSession(sess, sf);
 				tm.commit(ts);
 
 				sessionControl.verify();

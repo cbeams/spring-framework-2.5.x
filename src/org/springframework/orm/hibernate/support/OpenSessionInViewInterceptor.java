@@ -192,7 +192,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * Unbind the Hibernate Session from the thread and closes it (in single session
 	 * mode), or process deferred close for all sessions that have been opened
 	 * during the current request (in deferred close mode).
-	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#closeSessionIfNecessary
+	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#releaseSession
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public void afterCompletion(
@@ -217,7 +217,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 				SessionHolder sessionHolder =
 						(SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
 				logger.debug("Closing single Hibernate session in OpenSessionInViewInterceptor");
-				SessionFactoryUtils.closeSessionIfNecessary(sessionHolder.getSession(), getSessionFactory());
+				SessionFactoryUtils.releaseSession(sessionHolder.getSession(), getSessionFactory());
 			}
 			else {
 				// deferred close mode

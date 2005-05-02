@@ -107,11 +107,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see LocalSessionFactoryBean
  * @see SessionFactoryUtils#getSession
  * @see SessionFactoryUtils#applyTransactionTimeout
- * @see SessionFactoryUtils#closeSessionIfNecessary
+ * @see SessionFactoryUtils#releaseSession
  * @see HibernateTemplate#execute
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
- * @see org.springframework.jdbc.datasource.DataSourceUtils#closeConnectionIfNecessary
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -287,7 +287,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * thrown by flushing on commit.
 	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
 	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
-	 * @param jdbcExceptionTranslator exception translator
+	 * @param jdbcExceptionTranslator the exception translator
 	 * @see java.sql.SQLException
 	 * @see org.hibernate.JDBCException
 	 * @see SessionFactoryUtils#newJdbcExceptionTranslator
@@ -444,7 +444,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		catch (Exception ex) {
-			SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
+			SessionFactoryUtils.releaseSession(session, getSessionFactory());
 			throw new CannotCreateTransactionException("Could not create Hibernate transaction", ex);
 		}
 	}
@@ -561,7 +561,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing Hibernate session [" + session + "] after transaction");
 			}
-			SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
+			SessionFactoryUtils.releaseSession(session, getSessionFactory());
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -586,19 +586,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Convert the given SQLException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Uses a JDBC exception translater if set,
-	 * and a generic HibernateJdbcException else. Can be overridden in subclasses.
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * Uses a JDBC exception translator. Can be overridden in subclasses.
 	 * @param ex SQLException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see #setJdbcExceptionTranslator
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
-		if (getJdbcExceptionTranslator() != null) {
-			return getJdbcExceptionTranslator().translate("HibernateTemplate", null, ex);
-		}
-		else {
-			return new HibernateJdbcException(ex);
-		}
+		return getJdbcExceptionTranslator().translate("HibernateTransactionManager", null, ex);
 	}
 
 

@@ -64,7 +64,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Helper class featuring methods for Hibernate session handling,
+ * Helper class featuring methods for Hibernate Session handling,
  * allowing for reuse of Hibernate Session instances within transactions.
  *
  * <p>Supports synchronization with both Spring-managed JTA transactions
@@ -171,7 +171,7 @@ public abstract class SessionFactoryUtils {
 	 * example when using HibernateTransactionManager. Will create a new Session
 	 * otherwise, if allowCreate is true.
 	 * <p>This is the <code>getSession</code> method used by typical data access code,
-	 * in combination with <code>closeSessionIfNecessary</code> called when done with
+	 * in combination with <code>releaseSession</code> called when done with
 	 * the Session. Note that HibernateTemplate allows to write data access code
 	 * without caring about such resource handling.
 	 * <p>Supports synchronization with both Spring-managed JTA transactions
@@ -184,7 +184,7 @@ public abstract class SessionFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
 	 * @see #getSession(SessionFactory, Interceptor, SQLExceptionTranslator, boolean)
-	 * @see #closeSessionIfNecessary
+	 * @see #releaseSession
 	 * @see HibernateTemplate
 	 */
 	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate)
@@ -292,7 +292,7 @@ public abstract class SessionFactoryUtils {
 				// Spring transaction management is active ->
 				// register pre-bound Session with it for transactional flushing.
 				if (allowSynchronization && !sessionHolder.isSynchronizedWithTransaction()) {
-					logger.debug("Registering Spring transaction synchronization for existing Hibernate session");
+					logger.debug("Registering Spring transaction synchronization for existing Hibernate Session");
 					TransactionSynchronizationManager.registerSynchronization(
 							new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, false));
 					sessionHolder.setSynchronizedWithTransaction(true);
@@ -318,12 +318,12 @@ public abstract class SessionFactoryUtils {
 		}
 
 		if (!allowCreate) {
-			throw new IllegalStateException("No Hibernate session bound to thread, " +
+			throw new IllegalStateException("No Hibernate Session bound to thread, " +
 			    "and configuration does not allow creation of new one here");
 		}
 
-		logger.debug("Opening Hibernate session");
 		try {
+			logger.debug("Opening Hibernate Session");
 			Session session = (entityInterceptor != null ?
 			    sessionFactory.openSession(entityInterceptor) : sessionFactory.openSession());
 
@@ -332,7 +332,7 @@ public abstract class SessionFactoryUtils {
 				// Thread object will get removed by synchronization at transaction completion.
 				if (TransactionSynchronizationManager.isSynchronizationActive()) {
 					// We're within a Spring-managed transaction, possibly from JtaTransactionManager.
-					logger.debug("Registering Spring transaction synchronization for new Hibernate session");
+					logger.debug("Registering Spring transaction synchronization for new Hibernate Session");
 					sessionHolder = new SessionHolder(session);
 					if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
 						session.setFlushMode(FlushMode.NEVER);
@@ -349,12 +349,8 @@ public abstract class SessionFactoryUtils {
 			}
 			return session;
 		}
-		catch (JDBCException ex) {
-			// SQLException underneath
-			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex.getSQLException());
-		}
 		catch (HibernateException ex) {
-			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex);
+			throw new DataAccessResourceFailureException("Could not open Hibernate Session", ex);
 		}
 	}
 
@@ -392,7 +388,7 @@ public abstract class SessionFactoryUtils {
 						// In that case, we'll return null to trigger opening of a new Session.
 						session = sessionHolder.getSession();
 						if (session != null) {
-							logger.debug("Registering JTA transaction synchronization for existing Hibernate session");
+							logger.debug("Registering JTA transaction synchronization for existing Hibernate Session");
 							sessionHolder.addSession(jtaTx, session);
 							jtaTx.registerSynchronization(
 									new JtaSessionSynchronization(
@@ -447,7 +443,7 @@ public abstract class SessionFactoryUtils {
 			try {
 				int jtaStatus = jtaTm.getStatus();
 				if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
-					logger.debug("Registering JTA transaction synchronization for new Hibernate session");
+					logger.debug("Registering JTA transaction synchronization for new Hibernate Session");
 					javax.transaction.Transaction jtaTx = jtaTm.getTransaction();
 					SessionHolder holderToUse = sessionHolder;
 					// Register JTA Transaction with existing SessionHolder.
@@ -524,12 +520,8 @@ public abstract class SessionFactoryUtils {
 				}
 			}
 		}
-		catch (JDBCException ex) {
-			// SQLException underneath
-			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex.getSQLException());
-		}
 		catch (HibernateException ex) {
-			throw new DataAccessResourceFailureException("Could not open Hibernate session", ex);
+			throw new DataAccessResourceFailureException("Could not open Hibernate Session", ex);
 		}
 	}
 
@@ -581,8 +573,8 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Note that it is advisable to handle
-	 * JDBCException specifically by using an SQLExceptionTranslator for the
+	 * <code>org.springframework.dao</code> hierarchy. Note that it is advisable to
+	 * handle JDBCException specifically by using a SQLExceptionTranslator for the
 	 * underlying SQLException.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
@@ -647,13 +639,13 @@ public abstract class SessionFactoryUtils {
 	 * when not configured for a single session.
 	 * @param sessionFactory Hibernate SessionFactory
 	 * @see #processDeferredClose
-	 * @see #closeSessionIfNecessary
+	 * @see #releaseSession
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter#setSingleSession
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor#setSingleSession
 	 */
 	public static void initDeferredClose(SessionFactory sessionFactory) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
-		logger.debug("Initializing deferred close of Hibernate sessions");
+		logger.debug("Initializing deferred close of Hibernate Sessions");
 		Map holderMap = (Map) deferredCloseHolder.get();
 		if (holderMap == null) {
 			holderMap = new HashMap();
@@ -667,7 +659,7 @@ public abstract class SessionFactoryUtils {
 	 * for the given SessionFactory.
 	 * @param sessionFactory Hibernate SessionFactory
 	 * @see #initDeferredClose
-	 * @see #closeSessionIfNecessary
+	 * @see #releaseSession
 	 */
 	public static void processDeferredClose(SessionFactory sessionFactory) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
@@ -677,7 +669,7 @@ public abstract class SessionFactoryUtils {
 			throw new IllegalStateException("Deferred close not active for SessionFactory [" + sessionFactory + "]");
 		}
 
-		logger.debug("Processing deferred close of Hibernate sessions");
+		logger.debug("Processing deferred close of Hibernate Sessions");
 		Set sessions = (Set) holderMap.remove(sessionFactory);
 		for (Iterator it = sessions.iterator(); it.hasNext();) {
 			doClose((Session) it.next());
@@ -691,10 +683,20 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Close the given Session, created via the given factory,
 	 * if it isn't bound to the thread.
-	 * @param session Session to close
-	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
+	 * @deprecated in favor of releaseSession
+	 * @see #releaseSession
 	 */
 	public static void closeSessionIfNecessary(Session session, SessionFactory sessionFactory) {
+		releaseSession(session, sessionFactory);
+	}
+
+	/**
+	 * Close the given Session, created via the given factory,
+	 * if it is not managed externally (i.e. not bound to the thread).
+	 * @param session the Hibernate Session to close
+	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
+	 */
+	public static void releaseSession(Session session, SessionFactory sessionFactory) {
 		if (session == null) {
 			return;
 		}
@@ -707,7 +709,7 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Close the given Session or register it for deferred close.
-	 * @param session Session to close
+	 * @param session the Hibernate Session to close
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
 	 * @see #initDeferredClose
 	 * @see #processDeferredClose
@@ -715,7 +717,7 @@ public abstract class SessionFactoryUtils {
 	private static void closeSessionOrRegisterDeferredClose(Session session, SessionFactory sessionFactory) {
 		Map holderMap = (Map) deferredCloseHolder.get();
 		if (holderMap != null && holderMap.containsKey(sessionFactory)) {
-			logger.debug("Registering Hibernate session for deferred close");
+			logger.debug("Registering Hibernate Session for deferred close");
 			Set sessions = (Set) holderMap.get(sessionFactory);
 			sessions.add(session);
 		}
@@ -729,16 +731,19 @@ public abstract class SessionFactoryUtils {
 	 * @param session Session to close
 	 */
 	private static void doClose(Session session) {
-		logger.debug("Closing Hibernate session");
+		logger.debug("Closing Hibernate Session");
 		try {
 			session.close();
 		}
 		catch (JDBCException ex) {
 			// SQLException underneath
-			logger.error("Could not close Hibernate session", ex.getSQLException());
+			logger.error("Could not close Hibernate Session", ex.getSQLException());
 		}
 		catch (HibernateException ex) {
-			logger.error("Could not close Hibernate session", ex);
+			logger.error("Could not close Hibernate Session", ex);
+		}
+		catch (RuntimeException ex) {
+			logger.error("Unexpected exception on closing Hibernate Session", ex);
 		}
 	}
 
@@ -820,7 +825,7 @@ public abstract class SessionFactoryUtils {
 				// Read-write transaction -> flush the Hibernate Session.
 				// Further check: only flush when not FlushMode.NEVER.
 				if (!FlushMode.NEVER.equals(session.getFlushMode())) {
-					logger.debug("Flushing Hibernate session on transaction synchronization");
+					logger.debug("Flushing Hibernate Session on transaction synchronization");
 					try {
 						session.flush();
 					}

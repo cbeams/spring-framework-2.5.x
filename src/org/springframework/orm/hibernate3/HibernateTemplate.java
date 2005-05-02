@@ -321,7 +321,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throw ex;
 		}
 		finally {
-			SessionFactoryUtils.closeSessionIfNecessary(session, getSessionFactory());
+			SessionFactoryUtils.releaseSession(session, getSessionFactory());
 		}
 	}
 

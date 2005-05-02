@@ -178,7 +178,12 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 					// single session mode
 					TransactionSynchronizationManager.unbindResource(sessionFactory);
 					logger.debug("Closing single Hibernate session in OpenSessionInViewFilter");
-					closeSession(session, sessionFactory);
+					try {
+						closeSession(session, sessionFactory);
+					}
+					catch (RuntimeException ex) {
+						logger.error("Unexpected exception on closing Hibernate Session", ex);
+					}
 				}
 				else {
 					// deferred close mode
@@ -228,8 +233,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 * @see org.hibernate.FlushMode#NEVER
 	 */
-	protected Session getSession(SessionFactory sessionFactory)
-			throws DataAccessResourceFailureException {
+	protected Session getSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
 		Session session = SessionFactoryUtils.getSession(sessionFactory, true);
 		session.setFlushMode(FlushMode.NEVER);
 		return session;
@@ -239,7 +243,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * Close the given Session.
 	 * Note that this just applies in single session mode!
 	 * <p>The default implementation delegates to SessionFactoryUtils'
-	 * closeSessionIfNecessary method.
+	 * releaseSession method.
 	 * <p>Can be overridden in subclasses, e.g. for flushing the Session before
 	 * closing it. See class-level javadoc for a discussion of flush handling.
 	 * Note that you should also override getSession accordingly, to set
@@ -248,7 +252,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 */
 	protected void closeSession(Session session, SessionFactory sessionFactory) {
-		SessionFactoryUtils.closeSessionIfNecessary(session, sessionFactory);
+		SessionFactoryUtils.releaseSession(session, sessionFactory);
 	}
 
 }
