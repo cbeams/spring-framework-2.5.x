@@ -293,24 +293,20 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * remaining transaction timeouts to all created JDBC Statements.
 	 * This means that all operations performed by the SessionFactory will
 	 * automatically participate in Spring-managed transaction timeouts.
-	 * <p><b>Note that this option does not add any value for JtaTransactionManager,
-	 * or for HibernateTransactionManager in combination with HibernateTemplate.</b>
-	 * Transaction participation and transaction timeouts are already fully handled
-	 * by that infrastructure combination. Just use it to let Hibernate participate
-	 * in any other local transaction strategy, like DataSourceTransactionManager.
-	 * <p><b>WARNING: Do <i>not</i> use a transaction-aware DataSource in
-	 * combination with OpenSessionInViewFilter or OpenSessionInViewInterceptor.</b>
-	 * These Open Session In View providers are only properly supported in
-	 * combination with HibernateTransactionManager or JtaTransactionManager,
-	 * as stated in their javadoc.
+	 * <p><b>WARNING: Be aware of side effects when using a transaction-aware
+	 * DataSource in combination with OpenSessionInViewFilter/Interceptor.</b>
+	 * This combination is only properly supported with HibernateTransactionManager
+	 * transactions. PROPAGATION_SUPPORTS with HibernateTransactionManager and
+	 * JtaTransactionManager in general are only supported on Hibernate3, which
+	 * introduces (optional) aggressive release of Connections.
 	 * @see #setDataSource
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
-	 * @see HibernateTransactionManager
-	 * @see HibernateTemplate
 	 * @see org.springframework.orm.hibernate.support.OpenSessionInViewFilter
 	 * @see org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor
-	 * @see net.sf.hibernate.SessionFactory#openSession
+	 * @see HibernateTransactionManager
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setUseTransactionAwareDataSource
 	 */
 	public void setUseTransactionAwareDataSource(boolean useTransactionAwareDataSource) {
 		this.useTransactionAwareDataSource = useTransactionAwareDataSource;
