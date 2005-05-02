@@ -25,6 +25,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
+import org.springframework.util.Assert;
 
 /**
  * Session holder, wrapping a Hibernate Session and a Hibernate Transaction.
@@ -80,6 +81,8 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public void addSession(Object key, Session session) {
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(session, "Session must not be null");
 		this.sessionMap.put(key, session);
 	}
 

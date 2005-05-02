@@ -19,6 +19,7 @@ package org.springframework.orm.ojb;
 import org.apache.ojb.broker.PersistenceBroker;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
+import org.springframework.util.Assert;
 
 /**
  * Holder wrapping an OJB PersistenceBroker.
@@ -37,6 +38,7 @@ public class PersistenceBrokerHolder extends ResourceHolderSupport {
 	private final PersistenceBroker persistenceBroker;
 
 	public PersistenceBrokerHolder(PersistenceBroker persistenceBroker) {
+		Assert.notNull(persistenceBroker, "PersistenceBroker must not be null");
 		this.persistenceBroker = persistenceBroker;
 	}
 

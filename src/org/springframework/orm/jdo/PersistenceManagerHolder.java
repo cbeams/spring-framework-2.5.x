@@ -19,6 +19,7 @@ package org.springframework.orm.jdo;
 import javax.jdo.PersistenceManager;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
+import org.springframework.util.Assert;
 
 /**
  * Holder wrapping a JDO PersistenceManager.
@@ -34,9 +35,10 @@ import org.springframework.transaction.support.ResourceHolderSupport;
  */
 public class PersistenceManagerHolder extends ResourceHolderSupport {
 
-	private PersistenceManager persistenceManager;
+	private final PersistenceManager persistenceManager;
 
 	public PersistenceManagerHolder(PersistenceManager persistenceManager) {
+		Assert.notNull(persistenceManager, "PersistenceManager must not be null");
 		this.persistenceManager = persistenceManager;
 	}
 
