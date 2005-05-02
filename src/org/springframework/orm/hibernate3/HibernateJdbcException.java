@@ -16,8 +16,6 @@
 
 package org.springframework.orm.hibernate3;
 
-import java.sql.SQLException;
-
 import org.hibernate.JDBCException;
 
 import org.springframework.dao.UncategorizedDataAccessException;
@@ -28,16 +26,11 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * @author Juergen Hoeller
  * @since 1.2
  * @see SessionFactoryUtils#convertHibernateAccessException
- * @see HibernateTemplate#convertHibernateAccessException
  */
 public class HibernateJdbcException extends UncategorizedDataAccessException {
 
 	public HibernateJdbcException(JDBCException ex) {
 		super("JDBC exception on Hibernate data access: " + ex.getMessage(), ex.getSQLException());
-	}
-
-	public HibernateJdbcException(SQLException ex) {
-		super("Exception on direct JDBC access: " + ex.getMessage(), ex);
 	}
 
 }
