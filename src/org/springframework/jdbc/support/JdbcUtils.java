@@ -54,7 +54,10 @@ public abstract class JdbcUtils {
 				con.close();
 			}
 			catch (SQLException ex) {
-				logger.warn("Could not close JDBC Connection", ex);
+				logger.error("Could not close JDBC Connection", ex);
+			}
+			catch (RuntimeException ex) {
+				logger.error("Unexpected exception on closing JDBC Connection", ex);
 			}
 		}
 	}
@@ -72,6 +75,9 @@ public abstract class JdbcUtils {
 			catch (SQLException ex) {
 				logger.warn("Could not close JDBC Statement", ex);
 			}
+			catch (RuntimeException ex) {
+				logger.error("Unexpected exception on closing JDBC Statement", ex);
+			}
 		}
 	}
 
@@ -87,6 +93,9 @@ public abstract class JdbcUtils {
 			}
 			catch (SQLException ex) {
 				logger.warn("Could not close JDBC ResultSet", ex);
+			}
+			catch (RuntimeException ex) {
+				logger.error("Unexpected exception on closing JDBC ResultSet", ex);
 			}
 		}
 	}
@@ -153,7 +162,7 @@ public abstract class JdbcUtils {
 					"JDBC DatabaseMetaData method not implemented by JDBC driver - upgrade your driver", err);
 		}
 		finally {
-			DataSourceUtils.closeConnectionIfNecessary(con, dataSource);
+			DataSourceUtils.releaseConnection(con, dataSource);
 		}
 	}
 
@@ -238,12 +247,12 @@ public abstract class JdbcUtils {
 	 * <code>str</code>. The character <code>placeholder</code> is not counted if it
 	 * appears within a literal as determined by the <code>delim</code> that is passed in.
 	 * Delegates to the overloaded method that takes a String with multiple delimiters.
-	 * @param str string to search in. Returns 0 if this is null
-	 * @param placeholder the character to search for and count.
-	 * @param delim the delimiter for character literals.
+	 * @param str string to search in. Returns 0 if this is null.
+	 * @param placeholder the character to search for and count
+	 * @param delim the delimiter for character literals
 	 */
 	public static int countParameterPlaceholders(String str, char placeholder, char delim) {
-		return countParameterPlaceholders(str, placeholder, ""+delim);
+		return countParameterPlaceholders(str, placeholder, "" + delim);
 	}
 
 	/**
