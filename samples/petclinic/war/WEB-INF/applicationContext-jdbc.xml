@@ -14,13 +14,39 @@
 		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
 	</bean>
 
-	<!-- Local DataSource that works in any environment -->
+	<!-- 
+		Simple local DataSource that works in any environment.
+		This uses the JDBC DriverManager to obtain connections, and does NOT perform connection
+		pooling. Connection pooling is essential to all real-world applications.
+		This definition is good for getting started, as it introduces no dependencies beyond
+		the JDK, but DriverManagerDataSource is not intended for production usage.
+	 -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
 		<property name="url"><value>${jdbc.url}</value></property>
 		<property name="username"><value>${jdbc.username}</value></property>
 		<property name="password"><value>${jdbc.password}</value></property>
 	</bean>
+	
+	<!-- 
+		Alternative local DataSource that works in any environment, and offers much better performance.
+		Uses Apache Commons DBCP for connection pooling. See Commons DBCP documentation
+		for the required JAR files. See the PetStore sample application also shipped with
+		Spring, for an example of Commons DBCP usage and the necessary build script.
+		Alternatively you can use another connection pool such as C3P0, similarly configured
+		using Spring.
+		A standalone connection pool such as Commons DBCP is a good choice for use outside an
+		application server environment, including web applications running in a web container without
+		JTA, or integration testing using the org.springframework.test package.
+	 -->
+	<!--
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName"><value>${jdbc.driverClassName}</value></property>
+		<property name="url"><value>${jdbc.url}</value></property>
+		<property name="username"><value>${jdbc.username}</value></property>
+		<property name="password"><value>${jdbc.password}</value></property>
+	</bean>
+	-->
 
 	<!-- JNDI DataSource for J2EE environments -->
 	<!--
