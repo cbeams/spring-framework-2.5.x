@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.2 RC2 (April 2005)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 1.2 (May 2005)
+--------------------------------------------
 http://www.springframework.org
 
 
@@ -23,10 +23,10 @@ SQLException), simplifies error handling, and greatly reduces the amount of code
 You'll never need to write another finally block to use JDBC again. The JDBC-oriented exceptions comply to
 Spring's generic DAO exception hierarchy.
 
-* Integration with Hibernate, JDO, Apache OJB, and iBATIS SQL Maps: in terms of resource holders, DAO
-implementation support, and transaction strategies. First-class Hibernate support with lots of IoC
-convenience features, addressing many typical Hibernate integration issues. All of these comply to
-Spring's generic transaction and DAO exception hierarchies.
+* Integration with Hibernate, JDO, TopLink, Apache OJB, and iBATIS SQL Maps: in terms of resource holders,
+DAO implementation support, and transaction strategies. First-class Hibernate and JDO support with many
+IoC convenience features, addressing many typical Hibernate/JDO integration issues. All of these comply
+to Spring's generic transaction and DAO exception hierarchies.
 
 * AOP functionality, fully integrated into Spring configuration management. You can AOP-enable any object
 managed by Spring, adding aspects such as declarative transaction management. With Spring, you can have
@@ -55,10 +55,10 @@ The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1
 required for building the framework; for the full build including Tiger support, J2SE 5.0 is required.
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2, JCA 1.0,
-Hibernate 2.1/3.0, JDO 1.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0, Caucho's Hessian & Burlap 2.1/3.0,
-JAX-RPC 1.1, Quartz 1.4, EHCache 1.1, JSTL 1.0, Velocity 1.4, FreeMarker 2.3, JasperReports 0.6,
-Struts/Tiles 1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, Jason Hunter's COS, etc.
+Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2,
+JCA 1.0, Hibernate 2.1/3.0, TopLink 9.0.4, JDO 1.0, Apache OJB 1.0, iBATIS SQL Maps 1.3/2.0,
+Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.4, EHCache 1.1, JSTL 1.0, Velocity 1.4,
+FreeMarker 2.3, JasperReports 0.6, Struts/Tiles 1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, etc.
 
 Release contents:
 * "src" contains the Java source files for the framework
@@ -88,7 +88,7 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-* "spring-core" (~70 KB)
+* "spring-core" (~75 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -108,15 +108,15 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-beans, spring-aop, spring-context, JTA)
 
-* "spring-jdbc" (~175 KB)
+* "spring-jdbc" (~180 KB)
 - Contents: JDBC support
 - Dependencies: spring-dao, spring-beans
 
-* "spring-support" (~145 KB)
+* "spring-support" (~150 KB)
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-dao, spring-context, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~115 KB)
+* "spring-web" (~120 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
@@ -128,15 +128,15 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: remoting support, EJB support, JMS support
 - Dependencies: spring-aop, spring-beans, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMS)
 
-* "spring-orm" (~105 KB)
-- Contents: iBATIS SQL Maps support, JDO support, Apache OJB support
-- Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, JDO, Apache OJB)
+* "spring-orm" (~150 KB)
+- Contents: iBATIS SQL Maps support, Apache OJB support, TopLink support, JDO support
+- Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, Apache OJB, TopLink, JDO)
 
-* "spring-hibernate" (~170 KB)
+* "spring-hibernate" (~175 KB)
 - Contents: Hibernate 2.1 support, Hibernate 3.0 support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1630 KB)
+* "spring" (~1685 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 

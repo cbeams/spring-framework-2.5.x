@@ -7,20 +7,42 @@ Changes in version 1.2 final (6.5.2005)
 ---------------------------------------
 
 Package org.springframework.beans
+* factored out BeanDefinitionVisitor from PropertyPlaceholderConfigurer, making the bean definition traversal reusable
 * ConstructorArgumentValues holds generic ValueHolders in a List instead of a Set now, keeping their definition order
 * ConstructorArgumentValues offers "get(Generic)ArgumentValue" variant that excludes already used ValueHolders
 * AbstractAutowireCapableBeanFactory applies generic constructor argument values of the same type in definition order
-* BeanWrapperImpl registers CustomNumberEditors for all number types now including primitives
+* factored out BeanDefinitionValueResolver helper class from AbstractAutowireCapableBeanFactory
+* AbstractAutowireCapableBeanFactory excludes CGLIB-defined bean properties (-> method injection) from dependency checks
 
-Package org.springframework.jmx.support
-* Added WebLogicMBeanServerFactoryBean to allow for declarative access to the WebLogic MBeanServer
+Package org.springframework.dao
+* reworked IncorrectResultSizeDataAccessException into subclass of DataRetrievalFailureException
 
-Package org.springframework.web
-* WebContentGenerator sets "no-store" value for "Cache-Control" header too, to prevent caching on FireFox
+Package org.springframework.jmx
+* changed MBeanServerNotFoundException to unchecked and added constructor with root cause argument
+* added WebLogicMBeanServerFactoryBean, obtaining the WebLogic MBeanServer through WebLogic's proprietary JMX Helper
+* reworked MBeanInfoAssembler interface to take a managed bean instance as argument instead of just the bean class
+* reworked AbstractMBeanInfoAssembler and subclasses to expose proper class/interface for CGLIB/JDK proxies
+* added "exposeClassDescriptor" field to AbstractReflectiveMBeanInfoAssembler, to expose the "class" field for WebLogic
+* marked JDK 1.5+ annotations (ManagedResource, ManagedAttribute, ManagedOperation, etc) as @Documented
+
+Package org.springframework.jdbc
+* deprecated "closeConnectionIfNecessary" method in favor of "releaseConnection" (in DataSourceUtils and JdbcDaoSupport)
+
+Package org.springframework.orm
+* deprecated "closePersistenceManager/BrokerIfNecessary" methods in favor of "releasePersistenceManager/Broker"
+* deprecated "closeSessionIfNecessary" methods in favor of "releaseSession" (for both Hibernate2 and Hibernate3)
+* added TypeDefinitionBean, representing a Hibernate3 type definition (TypeDef / <typedef>) in bean-style format
+* added "typeDefinitions" property to LocalSessionFactoryBean for Hibernate3, accepting TypeDefinitionBean objects
+* Hibernate3 SessionFactoryUtils doesn't call "setReadOnly(true)" anymore, to avoid Open Session in View side effects
+* added Oracle-donated support for TopLink as data access strategy, in package "org.springframework.orm.toplink"
 
 Package org.springframework.util
-* NumberUtils.parseNumber now trims Strings before attempting to parse them
-* NumberUtils now correctly supports operations on Byte
+* added "split" and "splitArrayElementsIntoProperties" convenience methods to StringUtils (moved over from Acegi)
+* NumberUtils' "parseNumber" method now trims Strings before parsing them, and works correctly for the Byte type
+
+Package org.springframework.web
+* added DelegatingFilterProxy, delegating to a Spring-managed Filter bean (successor of Acegi's FilterToBeanProxy)
+* WebContentGenerator sets "no-store" value for "Cache-Control" header too, to prevent caching on FireFox
 
 
 Changes in version 1.2 RC2 (18.4.2005)
