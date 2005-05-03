@@ -452,7 +452,7 @@
 		<attributes>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/toplink/toplink.jar">
+	<classpathentry kind="lib" path="lib/toplink/toplink-api.jar">
 		<attributes>
 		</attributes>
 	</classpathentry>
