@@ -1,7 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <project>
    <name>toplink-project</name>
-   <productVersion>9.0.4.5</productVersion>
+   <productVersion>9.0.4.7</productVersion>
    <schemaVersion>5.0</schemaVersion>
    <project-database>
       <database>
@@ -70,7 +70,7 @@
    <repository>
       <class-repository>
          <classpath-entries>
-            <entry>..\.classes</entry>
+            <entry>../.classes</entry>
          </classpath-entries>
          <types>
             <type>
@@ -369,10 +369,10 @@
          </project-identity-policy>
       </project-defaults-policy>
    </defaults-policy>
-   <project-source-root-directory>..\src</project-source-root-directory>
+   <project-source-root-directory>../src</project-source-root-directory>
    <project-deployment-xml-file-name>toplink-mappings</project-deployment-xml-file-name>
-   <project-deployment-xml-directory>..\src</project-deployment-xml-directory>
-   <model-source-root-directory>..\src</model-source-root-directory>
+   <project-deployment-xml-directory>../src</project-deployment-xml-directory>
+   <model-source-root-directory>../src</model-source-root-directory>
    <project-table-generation-policy>
       <table-generation-policy>
          <default-primary-key-name>ID</default-primary-key-name>

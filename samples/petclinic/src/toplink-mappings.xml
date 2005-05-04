@@ -63,6 +63,60 @@
          <query-manager>
             <descriptor-query-manager>
                <existence-check>Check database</existence-check>
+               <descriptor-named-queries>
+                  <database-query>
+                     <query-name>findOwnersQuery</query-name>
+                     <query-should-maintain-cache>true</query-should-maintain-cache>
+                     <cascade-policy>1</cascade-policy>
+                     <should-bind-all-parameters>undefined</should-bind-all-parameters>
+                     <should-cache-statement>undefined</should-cache-statement>
+                     <should-use-wrapper-policy>true</should-use-wrapper-policy>
+                     <query-timeout>0</query-timeout>
+                     <query-arguments>
+                        <string>LastName</string>
+                     </query-arguments>
+                     <query-argument-types>
+                        <values>java.lang.String</values>
+                     </query-argument-types>
+                     <reference-class>org.springframework.samples.petclinic.Owner</reference-class>
+                     <refresh-identity-map>false</refresh-identity-map>
+                     <cache-usage>5</cache-usage>
+                     <lock-mode>0</lock-mode>
+                     <distinct-state>0</distinct-state>
+                     <query-indirection>
+                        <in-memory-query-indirection>
+                           <policy>0</policy>
+                        </in-memory-query-indirection>
+                     </query-indirection>
+                     <main-expression>
+                        <expression>
+                           <operator-type>AND</operator-type>
+                           <expression-list>
+                              <expression>
+                                 <operator-type>Like</operator-type>
+                                 <first-argument>
+                                    <argument>
+                                       <query-key-name>lastName</query-key-name>
+                                       <outer-join>false</outer-join>
+                                       <to-many>false</to-many>
+                                       <argument-class>oracle.toplink.tools.workbench.expressions.QueryableArgumentRepresentation</argument-class>
+                                    </argument>
+                                 </first-argument>
+                                 <second-argument>
+                                    <argument>
+                                       <parameter-name>LastName</parameter-name>
+                                       <argument-class>oracle.toplink.tools.workbench.expressions.ParameterArgumentRepresentation</argument-class>
+                                    </argument>
+                                 </second-argument>
+                                 <expression-class>oracle.toplink.tools.workbench.expressions.BinaryExpressionRepresentation</expression-class>
+                              </expression>
+                           </expression-list>
+                           <expression-class>oracle.toplink.tools.workbench.expressions.CompoundExpressionRepresentation</expression-class>
+                        </expression>
+                     </main-expression>
+                     <type>oracle.toplink.queryframework.ReadAllQuery</type>
+                  </database-query>
+               </descriptor-named-queries>
             </descriptor-query-manager>
          </query-manager>
          <event-manager>
