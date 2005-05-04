@@ -23,10 +23,12 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.ConfigurableBeanFactoryUtils;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.ResourceEntityResolver;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceEditor;
 import org.springframework.web.servlet.View;
 
 /**
@@ -107,7 +109,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 	}
 
 	/**
-	 * Initialize the BeanFactory from the XML file.
+	 * Initialize the view bean factory from the XML file.
 	 * Synchronized because of access by parallel threads.
 	 * @throws BeansException in case of initialization errors
 	 */
@@ -121,8 +123,14 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 			actualLocation = getApplicationContext().getResource(DEFAULT_LOCATION);
 		}
 
-		XmlBeanFactory factory = new XmlBeanFactory(actualLocation, getApplicationContext());
-		factory.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));
+		// Create BeanFactory with context-aware resource editors.
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory(getApplicationContext());
+		ConfigurableBeanFactoryUtils.registerResourceEditors(factory, getApplicationContext());
+
+		// Load XML resource with context-aware entity resolver.
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		reader.setEntityResolver(new ResourceEntityResolver(getApplicationContext()));
+		reader.loadBeanDefinitions(actualLocation);
 
 		if (isCache()) {
 			factory.preInstantiateSingletons();
