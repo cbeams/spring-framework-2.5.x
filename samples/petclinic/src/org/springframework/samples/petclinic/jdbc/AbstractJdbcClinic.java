@@ -71,13 +71,13 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	// START of Clinic implementation section *******************************
 
 	public Collection getVets() throws DataAccessException {
-		// establish the Map of all vets
+		// Retrieve the list of all vets
 		List vets = this.vetsQuery.execute();
 
-		// establish the map of all the possible specialties
+		// Retrieve the list of all possible specialties
 		List specialties = this.specialtiesQuery.execute();
 
-		// establish each vet's List of specialties
+		// Build each vet's list of specialties
 		Iterator vi = vets.iterator();
 		while (vi.hasNext()) {
 			Vet vet = (Vet) vi.next();
@@ -105,7 +105,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	}
 
 	/** Method loads an owner plus pets and visits if not already loaded */
-	public Owner loadOwner(int id)  throws DataAccessException {
+	public Owner loadOwner(int id) throws DataAccessException {
 		Owner owner = (Owner) this.ownerQuery.findObject(id);
 		if (owner == null) {
 			throw new ObjectRetrievalFailureException(Owner.class, new Integer(id));
@@ -392,8 +392,9 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 
 		protected void insert(Owner owner) {
-			Object[] objs = new Object[] {null, owner.getFirstName(), owner.getLastName(),
-																		owner.getAddress(), owner.getCity(), owner.getTelephone()};
+			Object[] objs = new Object[] {
+				null, owner.getFirstName(), owner.getLastName(),
+				owner.getAddress(), owner.getCity(), owner.getTelephone()};
 			super.update(objs);
 			retrieveIdentity(owner);
 		}
@@ -426,8 +427,9 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		 * @return the number of rows affected by the update
 		 */
 		protected int update(Owner owner) {
-			return this.update(new Object[] {owner.getFirstName(), owner.getLastName(), owner.getAddress(),
-																			 owner.getCity(), owner.getTelephone(), new Integer(owner.getId())});
+			return this.update(new Object[] {
+				owner.getFirstName(), owner.getLastName(), owner.getAddress(),
+				owner.getCity(), owner.getTelephone(), new Integer(owner.getId())});
 		}
 	}
 
@@ -516,8 +518,9 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		 * @param pet to insert
 		 */
 		protected void insert(Pet pet) {
-			Object[] objs = new Object[] {null, pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
-																		new Integer(pet.getType().getId()), new Integer(pet.getOwner().getId())};
+			Object[] objs = new Object[] {
+				null, pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
+				new Integer(pet.getType().getId()), new Integer(pet.getOwner().getId())};
 			super.update(objs);
 			retrieveIdentity(pet);
 		}
@@ -549,9 +552,10 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		 * @return the number of rows affected by the update
 		 */
 		protected int update(Pet pet) {
-			return this.update(new Object[] {pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
-																			 new Integer(pet.getType().getId()), new Integer(pet.getOwner().getId()),
-																			 new Integer(pet.getId())});
+			return this.update(new Object[] {
+				pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
+				new Integer(pet.getType().getId()), new Integer(pet.getOwner().getId()),
+				new Integer(pet.getId())});
 		}
 	}
 
