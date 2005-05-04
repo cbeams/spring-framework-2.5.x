@@ -17,8 +17,6 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,8 +36,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.propertyeditors.InputStreamEditor;
-import org.springframework.beans.propertyeditors.URLEditor;
+import org.springframework.beans.factory.support.ConfigurableBeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -56,10 +53,8 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
@@ -264,15 +259,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		refreshBeanFactory();
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
-		// Configure the bean factory with context-specific editors.
-		beanFactory.registerCustomEditor(Resource.class,
-		    new ResourceEditor(this));
-		beanFactory.registerCustomEditor(URL.class,
-		    new URLEditor(new ResourceEditor(this)));
-		beanFactory.registerCustomEditor(InputStream.class,
-		    new InputStreamEditor(new ResourceEditor(this)));
-		beanFactory.registerCustomEditor(Resource[].class,
-		    new ResourceArrayPropertyEditor(this.resourcePatternResolver));
+		// Populate the bean factory with context-specific resource editors.
+		ConfigurableBeanFactoryUtils.registerResourceEditors(beanFactory, this);
 
 		// Configure the bean factory with context semantics.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
