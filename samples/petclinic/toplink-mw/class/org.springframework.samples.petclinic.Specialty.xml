@@ -1,0 +1,16 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<class>
+   <name>org.springframework.samples.petclinic.Specialty</name>
+   <modifier>1</modifier>
+   <superclass>org.springframework.samples.petclinic.NamedEntity</superclass>
+   <methods>
+      <method>
+         <name>Specialty</name>
+         <constructor>true</constructor>
+         <modifier>1</modifier>
+         <accessed-attribute-handle>
+            <attribute-handle empty-aggregate="true"/>
+         </accessed-attribute-handle>
+      </method>
+   </methods>
+</class>
