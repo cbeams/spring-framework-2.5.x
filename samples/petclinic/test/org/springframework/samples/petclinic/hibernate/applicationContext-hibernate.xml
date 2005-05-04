@@ -27,10 +27,9 @@
 	</bean>
 
 	<!--
-		Note use of "inner bean" for target property.
-		This ensures that there is only one instance of this
-		bean in the factory, allowing us to use autowire by
-		type if necessary.
+		Note the use of an inner bean for the "target" property.
+		This ensures that there is only one instance of this bean in the
+		factory, allowing us to use autowire by type if necessary.
 	-->
 	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="transactionManager"/></property>
