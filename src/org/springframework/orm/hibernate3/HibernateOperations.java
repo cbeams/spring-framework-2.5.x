@@ -331,7 +331,8 @@ public interface HibernateOperations {
 	void save(String entityName, Object entity, Serializable id) throws DataAccessException;
 
 	/**
-	 * Update the given persistent instance.
+	 * Update the given persistent instance,
+	 * associating it with the current Hibernate Session.
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#update(Object)
@@ -339,7 +340,8 @@ public interface HibernateOperations {
 	void update(Object entity) throws DataAccessException;
 
 	/**
-	 * Update the given persistent instance.
+	 * Update the given persistent instance,
+	 * associating it with the current Hibernate Session.
 	 * <p>Obtains the specified lock mode if the instance exists, implicitly
 	 * checking whether the corresponding database entry still exists
 	 * (throwing an OptimisticLockingFailureException if not found).
@@ -352,7 +354,8 @@ public interface HibernateOperations {
 	void update(Object entity, LockMode lockMode) throws DataAccessException;
 
 	/**
-	 * Update the given persistent instance.
+	 * Update the given persistent instance,
+	 * associating it with the current Hibernate Session.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -361,7 +364,8 @@ public interface HibernateOperations {
 	void update(String entityName, Object entity) throws DataAccessException;
 
 	/**
-	 * Update the given persistent instance.
+	 * Update the given persistent instance,
+	 * associating it with the current Hibernate Session.
 	 * <p>Obtains the specified lock mode if the instance exists, implicitly
 	 * checking whether the corresponding database entry still exists
 	 * (throwing an OptimisticLockingFailureException if not found).
@@ -377,6 +381,7 @@ public interface HibernateOperations {
 	/**
 	 * Save or update the given persistent instance,
 	 * according to its id (matching the configured "unsaved-value"?).
+	 * Associates the instance with the current Hibernate Session.
 	 * @param entity the persistent instance to save or update
 	 * (to be associated with the Hibernate Session)
 	 * @throws DataAccessException in case of Hibernate errors
@@ -387,6 +392,7 @@ public interface HibernateOperations {
 	/**
 	 * Save or update the given persistent instance,
 	 * according to its id (matching the configured "unsaved-value"?).
+	 * Associates the instance with the current Hibernate Session.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to save or update
 	 * (to be associated with the Hibernate Session)
@@ -398,6 +404,7 @@ public interface HibernateOperations {
 	/**
 	 * Save or update all given persistent instances,
 	 * according to its id (matching the configured "unsaved-value"?).
+	 * Associates the instances with the current Hibernate Session.
 	 * @param entities the persistent instances to save or update
 	 * (to be associated with the Hibernate Session)
 	 * @throws DataAccessException in case of Hibernate errors
@@ -407,7 +414,8 @@ public interface HibernateOperations {
 
 	/**
 	 * Persist the given transient instance. Follows JSR-220 semantics.
-	 * <p>Similar to save, but not following the exact same semantics.
+	 * <p>Similar to <code>save</code>, associating the given object
+	 * with the current Hibernate Session.
 	 * @param entity the persistent instance to persist
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#persist(Object)
@@ -417,7 +425,8 @@ public interface HibernateOperations {
 
 	/**
 	 * Persist the given transient instance. Follows JSR-220 semantics.
-	 * <p>Similar to save, but not following the exact same semantics.
+	 * <p>Similar to <code>save</code>, associating the given object
+	 * with the current Hibernate Session.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to persist
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -429,25 +438,38 @@ public interface HibernateOperations {
 	/**
 	 * Copy the state of the given object onto the persistent object
 	 * with the same identifier. Follows JSR-220 semantics.
-	 * <p>Similar to update, but not following the exact same semantics.
+	 * <p>Similar to <code>saveOrUpdate</code>, but never associates the given
+	 * object with the current Hibernate Session. In case of a new entity,
+	 * the state will be copied over as well.
+	 * <p>Note that <code>merge</code> will <i>not</i> update the identifiers in
+	 * the passed-in object graph (in contrast to TopLink)! Consider registering
+	 * Spring's IdTransferringMergeEventListener if you'd like to have newly
+	 * assigned ids transferred to the original object graph too.
 	 * @param entity the object to merge with the corresponding persistence instance
-	 * @return the updated persistent instance
+	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#merge(Object)
-	 * @see #update
+	 * @see #saveOrUpdate
+	 * @see org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener
 	 */
 	Object merge(Object entity) throws DataAccessException;
 
 	/**
 	 * Copy the state of the given object onto the persistent object
 	 * with the same identifier. Follows JSR-220 semantics.
-	 * <p>Similar to update, but not following the exact same semantics.
+	 * <p>Similar to <code>saveOrUpdate</code>, but never associates the given
+	 * object with the current Hibernate Session. In case of a new entity,
+	 * the state will be copied over as well.
+	 * <p>Note that <code>merge</code> will <i>not</i> update the identifiers in
+	 * the passed-in object graph (in contrast to TopLink)! Consider registering
+	 * Spring's IdTransferringMergeEventListener if you'd like to have newly
+	 * assigned ids transferred to the original object graph too.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the object to merge with the corresponding persistence instance
-	 * @return the updated persistent instance
+	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#merge(Object)
-	 * @see #update
+	 * @see #saveOrUpdate
 	 */
 	Object merge(String entityName, Object entity) throws DataAccessException;
 
