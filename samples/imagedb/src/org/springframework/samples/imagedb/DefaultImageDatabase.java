@@ -78,6 +78,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 	public void storeImage(
 	    final String name, final InputStream contentStream, final int contentLength, final String description)
 	    throws DataAccessException {
+
 		getJdbcTemplate().execute(
 				"INSERT INTO imagedb (image_name, content, description) VALUES (?, ?, ?)",
 				new AbstractLobCreatingPreparedStatementCallback(this.lobHandler) {
@@ -91,7 +92,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 	}
 
 	public void checkImages() {
-		// could implement consistency check here
+		// Could implement consistency check here...
 		logger.info("Checking images: not implemented but invoked by scheduling");
 	}
 
