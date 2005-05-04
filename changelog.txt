@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 final (6.5.2005)
+Changes in version 1.2 final (8.5.2005)
 ---------------------------------------
 
 Package org.springframework.beans
@@ -34,7 +34,12 @@ Package org.springframework.orm
 * added TypeDefinitionBean, representing a Hibernate3 type definition (TypeDef / <typedef>) in bean-style format
 * added "typeDefinitions" property to LocalSessionFactoryBean for Hibernate3, accepting TypeDefinitionBean objects
 * Hibernate3 SessionFactoryUtils doesn't call "setReadOnly(true)" anymore, to avoid Open Session in View side effects
+* added IdTransferringMergeEventListener for Hibernate3, setting newly assigned ids on the original objects too
 * added Oracle-donated support for TopLink as data access strategy, in package "org.springframework.orm.toplink"
+
+Package org.springframework.samples
+* reworked PetClinic's Hibernate DAO to use "merge" (plus IdTransferringMergeEventListener) instead of "saveOrUpdate"
+* added TopLink persistence layer to PetClinic, as alternative to the existing Hibernate3, OJB and JDBC layers
 
 Package org.springframework.util
 * added "split" and "splitArrayElementsIntoProperties" convenience methods to StringUtils (moved over from Acegi)
