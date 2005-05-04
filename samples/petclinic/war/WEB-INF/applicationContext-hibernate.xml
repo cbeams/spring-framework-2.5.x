@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
-  - Application context definition for Petclinic on Hibernate.
+  - Application context definition for PetClinic on Hibernate.
 	-->
 <beans>
 
@@ -44,6 +44,13 @@
 				<prop key="hibernate.show_sql">true</prop>
 			</props>
 		</property>
+		<property name="eventListeners">
+			<map>
+				<entry key="merge">
+					<bean class="org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener"/>
+				</entry>
+			</map>
+		</property>
 	</bean>
 
 	<!-- Transaction manager for a single Hibernate SessionFactory (alternative to JTA) -->
@@ -60,14 +67,14 @@
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
 	<!--
-	  - Petclinic's central data access object: Hibernate implementation.
+	  - PetClinic's central data access object: Hibernate implementation.
     -->
 	<bean id="clinicTarget" class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
 		<property name="sessionFactory"><ref local="sessionFactory"/></property>
 	</bean>
 
 	<!--
-		- Transactional proxy for Petclinic's central data access object.
+		- Transactional proxy for PetClinic's central data access object.
 		-
 		- Defines specific transaction attributes with "readOnly" markers,
 		- which is an optimization that is particularly valuable with Hibernate
