@@ -1,0 +1,13 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<!DOCTYPE toplink-configuration PUBLIC "-//Oracle Corp.//DTD TopLink Sessions 9.0.4//EN" "sessions_9_0_4.dtd">
+<toplink-configuration>
+   <session>
+      <name>Session</name>
+      <project-xml>toplink-mappings.xml</project-xml>
+      <session-type>
+         <server-session/>
+      </session-type>
+      <enable-logging>true</enable-logging>
+      <logging-options/>
+   </session>
+</toplink-configuration>

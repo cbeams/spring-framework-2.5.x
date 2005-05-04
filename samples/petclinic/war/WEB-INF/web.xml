@@ -6,9 +6,9 @@
 
 <web-app>
 
-	<display-name>Spring Petclinic</display-name>
+	<display-name>Spring PetClinic</display-name>
 
-	<description>Spring Petclinic sample application</description>
+	<description>Spring PetClinic sample application</description>
 
 	<!--
 	  - Key of the system property that should specify the root directory of this
@@ -34,16 +34,16 @@
 		-
 		- Can be set to "/WEB-INF/applicationContext-hibernate.xml" for the Hibernate
 		- implementation, "/WEB-INF/applicationContext-ojb.xml" for the Apache OJB one,
+		- "/WEB-INF/applicationContext-toplink.xml" for the Oracle TopLink one,
 		- or "/WEB-INF/applicationContext-jdbc.xml" for the JDBC one.
 	  -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>/WEB-INF/applicationContext-hibernate.xml</param-value>
 		<!--
-		<param-value>/WEB-INF/applicationContext-ojb.xml</param-value>
-		-->
-		<!--
 		<param-value>/WEB-INF/applicationContext-jdbc.xml</param-value>
+		<param-value>/WEB-INF/applicationContext-ojb.xml</param-value>
+		<param-value>/WEB-INF/applicationContext-toplink.xml</param-value>
 		-->
 	</context-param>
 
@@ -129,7 +129,7 @@
 	</error-page>
 
 	<!--
-		- Reference to Petclinic database.
+		- Reference to PetClinic database.
 		- Only needed if not using a local DataSource but a JNDI one instead.
 		-->
 	<!--

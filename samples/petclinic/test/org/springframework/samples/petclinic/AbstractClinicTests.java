@@ -16,12 +16,10 @@ import org.springframework.test.AbstractTransactionalDataSourceSpringContextTest
  * The AbstractTransactionalDataSourceSpringContextTests superclass provides the
  * following services:
  * <li>Injects test dependencies, meaning that we don't need to perform application
- * context lookups. See the setClinic() method. Injection uses autowiring by
- * type.
+ * context lookups. See the setClinic() method. Injection uses autowiring by type.
  * <li>Executes each test method in its own transaction, which is automatically
- * rolled back by default. This means that even if tests
- * insert or otherwise change database state, there is no need for a teardown
- * or cleanup script.
+ * rolled back by default. This means that even if tests insert or otherwise
+ * change database state, there is no need for a teardown or cleanup script.
  * <li>Provides useful inherited protected fields, such as a JdbcTemplate that can be
  * used to verify database state after test operations, or verify the results of queries
  * performed by application code. An ApplicationContext is also inherited, and can be
@@ -33,6 +31,7 @@ import org.springframework.test.AbstractTransactionalDataSourceSpringContextTest
  * @see org.springframework.test.AbstractTransactionalDataSourceSpringContextTests
  * @author Ken Krebs
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public abstract class AbstractClinicTests extends AbstractTransactionalDataSourceSpringContextTests {
 
@@ -40,7 +39,7 @@ public abstract class AbstractClinicTests extends AbstractTransactionalDataSourc
 
 	/**
 	 * This method is provided to set the Clinic instance being tested by the Dependency Injection
-	 * injection behaviour of the superclass from the org.springframework.test package.
+	 * injection behaviour of the superclass from the <code>org.springframework.test</code> package.
 	 * @param clinic clinic to test
 	 */
 	public void setClinic(Clinic clinic) {
@@ -104,7 +103,7 @@ public abstract class AbstractClinicTests extends AbstractTransactionalDataSourc
 		Owner owner = new Owner();
 		owner.setLastName("Schultz");
 		this.clinic.storeOwner(owner);
-		assertTrue(!owner.isNew());
+		// assertTrue(!owner.isNew());  -- NOT TRUE FOR TOPLINK (before commit)
 		owners = this.clinic.findOwners("Schultz");
 		assertEquals(found + 1, owners.size());
 	}
@@ -140,8 +139,10 @@ public abstract class AbstractClinicTests extends AbstractTransactionalDataSourc
 		pet.setType((PetType) EntityUtils.getById(types, PetType.class, 2));
 		pet.setBirthDate(new Date());
 		assertEquals(found + 1, o6.getPets().size());
+		// both storePet and storeOwner are necessary to cover all ORM tools
 		this.clinic.storePet(pet);
-		assertTrue(!pet.isNew());
+		this.clinic.storeOwner(o6);
+		// assertTrue(!pet.isNew());  -- NOT TRUE FOR TOPLINK (before commit)
 		o6 = this.clinic.loadOwner(6);
 		assertEquals(found + 1, o6.getPets().size());
 	}
@@ -161,8 +162,11 @@ public abstract class AbstractClinicTests extends AbstractTransactionalDataSourc
 		Visit visit = new Visit();
 		p7.addVisit(visit);
 		visit.setDescription("test");
+		// both storeVisit and storePet are necessary to cover all ORM tools
 		this.clinic.storeVisit(visit);
-		assertTrue(!visit.isNew());
+		this.clinic.storePet(p7);
+		// assertTrue(!visit.isNew());  -- NOT TRUE FOR TOPLINK (before commit)
+		p7 = this.clinic.loadPet(7);
 		assertEquals(found + 1, p7.getVisits().size());
 	}
 

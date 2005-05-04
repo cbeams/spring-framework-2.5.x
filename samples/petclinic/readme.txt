@@ -1,5 +1,5 @@
 =========================================
-== Spring Petclinic sample application ==
+== Spring PetClinic sample application ==
 =========================================
 
 @author Ken Krebs
@@ -8,19 +8,25 @@
 
 1. DATA ACCESS STRATEGIES
 
-Petclinic features alternative DAO implementations and application configurations
-for Hibernate, Apache OJB and JDBC, with HSQL and MySQL as target databases.
-The default Petclinic configuration is Hibernate on HSQL; to be able to build
-and run it, the Spring distribution comes with all required Hibernate jar files.
+PetClinic features alternative DAO implementations and application configurations
+for Hibernate, Apache OJB, Oracle TopLink and JDBC, with HSQL and MySQL as
+target databases. The default PetClinic configuration is Hibernate on HSQL.
 See "WEB-INF/web.xml" and "WEB-INF/applicationContext-*.xml" for details;
 a simple comment change in web.xml switches between the data access strategies.
+
+The Spring distribution comes with all required Hibernate and OJB jar files
+to be able to build and run PetClinic on those two ORM tools. For TopLink,
+only a minimal toplink-api.jar is included in the Spring distribution.
+To run PetClinic with TopLink, download TopLink 9.0.4 from the Oracle website
+(http://www.oracle.com/technology/products/ias/toplink), install it and copy
+toplink.jar and xmlparserv2.jar into Spring's "lib/toplink" directory.
 
 All data access strategies can work with JTA for transaction management,
 by activating the JtaTransactionManager and a JndiObjectFactoryBean that
 refers to a transactional container DataSource. The default for Hibernate
 is HibernateTransactionManager; for OJB, PersistenceBrokerTransactionManager;
-for JDBC, DataSourceTransactionManager. Those local transaction strategies
-allow to work with any locally defined DataSource.
+for TopLink TopLinkTransactionManager; for JDBC, DataSourceTransactionManager.
+Those local strategies allow for working with any locally defined DataSource.
 
 Note that in the default case, the sample configurations specify Spring's
 non-pooling DriverManagerDataSource as local DataSource. You can change
@@ -57,6 +63,8 @@ Note on enabling Log4J:
 - rename "WEB-INF/classes/log4j.properties.rename" to "log4j.properties"
 - uncomment the Log4J listener in "WEB-INF/web.xml"
 
-3. Additional documentation can be found in the file "petclinic.html" which is
-in the "war/html" directory. This file is available in the running application through
-the "Tutorial" link.
+
+Additional documentation can be found in the file "petclinic.html" which is
+in the "war/html" directory. This file is available in the running application
+through the "Tutorial" link.
+
