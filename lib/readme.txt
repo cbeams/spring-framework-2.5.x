@@ -17,7 +17,7 @@ distribution/website before using any of them in your own applications.
 - included in spring.jar and spring-aop.jar
 
 * axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
-- Apache Axis 1.2 RC3 (http://ws.apache.org/axis)
+- Apache Axis 1.2 (http://ws.apache.org/axis)
 - required for running JPetStore
 
 * c3p0/c3p0-0.8.5.2.jar
