@@ -403,6 +403,8 @@ public interface TopLinkOperations {
 	 * throwing an exception if not found. A detached copy of the entity object
 	 * will be returned, allowing for modifications outside the current transaction,
 	 * with the changes to be merged into a later transaction.
+	 * <p>Retrieves read-write objects from the TopLink UnitOfWork in case of a
+	 * non-read-only transaction, and read-only objects else.
 	 * @param entityClass the entity class
 	 * @param id the id of the desired object
 	 * @return a copy of the entity instance
@@ -414,10 +416,30 @@ public interface TopLinkOperations {
 	Object readAndCopy(Class entityClass, Object id) throws DataAccessException;
 
 	/**
+	 * Read the entity instance of the given class with the given id,
+	 * throwing an exception if not found. A detached copy of the entity object
+	 * will be returned, allowing for modifications outside the current transaction,
+	 * with the changes to be merged into a later transaction.
+	 * @param entityClass the entity class
+	 * @param id the id of the desired object
+	 * @param enforceReadOnly whether to always retrieve read-only objects from
+	 * the plain TopLink Session (else, read-write objects will be retrieved
+	 * from the TopLink UnitOfWork in case of a non-read-only transaction)
+	 * @return a copy of the entity instance
+	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
+	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
+	 * @see oracle.toplink.queryframework.ReadObjectQuery#setSelectionKey(java.util.Vector)
+	 * @see oracle.toplink.sessions.Session#copyObject(Object)
+	 */
+	Object readAndCopy(Class entityClass, Object id, boolean enforceReadOnly) throws DataAccessException;
+
+	/**
 	 * Read the entity instance of the given class with the given composite id,
 	 * throwing an exception if not found. A detached copy of the entity object
 	 * will be returned, allowing for modifications outside the current transaction,
 	 * with the changes to be merged into a later transaction.
+	 * <p>Retrieves read-write objects from the TopLink UnitOfWork in case of a
+	 * non-read-only transaction, and read-only objects else.
 	 * @param entityClass the entity class
 	 * @param keys the composite id elements of the desired object
 	 * @return a copy of the entity instance
@@ -427,6 +449,24 @@ public interface TopLinkOperations {
 	 * @see oracle.toplink.sessions.Session#copyObject(Object)
 	 */
 	Object readAndCopy(Class entityClass, Object[] keys) throws DataAccessException;
+
+	/**
+	 * Read the entity instance of the given class with the given composite id,
+	 * throwing an exception if not found. A detached copy of the entity object
+	 * will be returned, allowing for modifications outside the current transaction,
+	 * with the changes to be merged into a later transaction.
+	 * @param entityClass the entity class
+	 * @param keys the composite id elements of the desired object
+	 * @param enforceReadOnly whether to always retrieve read-only objects from
+	 * the plain TopLink Session (else, read-write objects will be retrieved
+	 * from the TopLink UnitOfWork in case of a non-read-only transaction)
+	 * @return a copy of the entity instance
+	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
+	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
+	 * @see oracle.toplink.queryframework.ReadObjectQuery#setSelectionKey(java.util.Vector)
+	 * @see oracle.toplink.sessions.Session#copyObject(Object)
+	 */
+	Object readAndCopy(Class entityClass, Object[] keys, boolean enforceReadOnly) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -587,36 +627,56 @@ public interface TopLinkOperations {
 	Object registerExisting(Object entity);
 
 	/**
-	 * Re-associate the given entity copy with the current UnitOfWork,
+	 * Reassociate the given entity copy with the current UnitOfWork,
 	 * using simple merging.
-	 * @param entity the clone to merge
+	 * <p>The given object will not be reassociated itself: instead, the state
+	 * will be copied onto the persistent object with the same identifier.
+	 * In case of a new entity, merge will copy to a registered object as well,
+	 * but will also update the identifier of the passed-in object.
+	 * @param entity the updated copy to merge
+	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see oracle.toplink.sessions.UnitOfWork#mergeClone(Object)
 	 */
 	Object merge(Object entity) throws DataAccessException;
 
 	/**
-	 * Re-associate the given entity copy with the current UnitOfWork,
+	 * Reassociate the given entity copy with the current UnitOfWork,
 	 * using deep merging of all contained entities.
-	 * @param entity the clone to merge
+	 * <p>The given object will not be reassociated itself: instead, the state
+	 * will be copied onto the persistent object with the same identifier.
+	 * In case of a new entity, merge will register a copy as well,
+	 * but will also update the identifier of the passed-in object.
+	 * @param entity the updated copy to merge
+	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see oracle.toplink.sessions.UnitOfWork#deepMergeClone(Object)
 	 */
 	Object deepMerge(Object entity) throws DataAccessException;
 
 	/**
-	 * Re-associate the given entity copy with the current UnitOfWork,
+	 * Reassociate the given entity copy with the current UnitOfWork,
 	 * using shallow merging of the entity instance.
-	 * @param entity the clone to merge
+	 * <p>The given object will not be reassociated itself: instead, the state
+	 * will be copied onto the persistent object with the same identifier.
+	 * In case of a new entity, merge will register a copy as well,
+	 * but will also update the identifier of the passed-in object.
+	 * @param entity the updated copy to merge
+	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see oracle.toplink.sessions.UnitOfWork#shallowMergeClone(Object)
 	 */
 	Object shallowMerge(Object entity) throws DataAccessException;
 
 	/**
-	 * Re-associate the given entity copy with the current UnitOfWork,
+	 * Reassociate the given entity copy with the current UnitOfWork,
 	 * using merging with all references from this clone.
-	 * @param entity the clone to merge
+	 * <p>The given object will not be reassociated itself: instead, the state
+	 * will be copied onto the persistent object with the same identifier.
+	 * In case of a new entity, merge will register a copy as well,
+	 * but will also update the identifier of the passed-in object.
+	 * @param entity the updated copy to merge
+	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of TopLink errors
 	 * @see oracle.toplink.sessions.UnitOfWork#mergeCloneWithReferences(Object)
 	 */

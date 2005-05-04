@@ -334,12 +334,24 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 	}
 
 	public Object readAndCopy(Class entityClass, Object id) throws DataAccessException {
-		Object entity = readById(entityClass, id, true);
+		return readAndCopy(entityClass, id, false);
+	}
+
+	public Object readAndCopy(Class entityClass, Object id, boolean enforceReadOnly)
+			throws DataAccessException {
+
+		Object entity = readById(entityClass, id, enforceReadOnly);
 		return copy(entity);
 	}
 
 	public Object readAndCopy(Class entityClass, Object[] keys) throws DataAccessException {
-		Object entity = readById(entityClass, keys, true);
+		return readAndCopy(entityClass, keys, false);
+	}
+
+	public Object readAndCopy(Class entityClass, Object[] keys, boolean enforceReadOnly)
+			throws DataAccessException {
+
+		Object entity = readById(entityClass, keys, enforceReadOnly);
 		return copy(entity);
 	}
 
