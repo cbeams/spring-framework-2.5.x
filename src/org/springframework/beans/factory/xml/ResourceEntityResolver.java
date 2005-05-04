@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.support;
+package org.springframework.beans.factory.xml;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,14 +24,14 @@ import java.net.URLDecoder;
 
 import org.xml.sax.InputSource;
 
-import org.springframework.beans.factory.xml.BeansDtdResolver;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * EntityResolver implementation that tries to resolve entity references
- * relative to the resource base of the application context, if applicable.
- * Extends BeansDtdResolver to also provide DTD lookup in the class path.
+ * through a ResourceLoader (usually, relative to the resource base of an
+ * ApplicationContext), if applicable. Extends BeansDtdResolver to also
+ * provide DTD lookup in the class path.
  *
  * <p>Allows to use standard XML entities to include XML snippets into an
  * application context definition, for example to split a large XML file
@@ -45,14 +45,21 @@ import org.springframework.core.io.Resource;
  *
  * @author Juergen Hoeller
  * @since 31.07.2003
- * @see org.springframework.context.ApplicationContext#getResource
+ * @see org.springframework.core.io.ResourceLoader
+ * @see org.springframework.context.ApplicationContext
  */
 public class ResourceEntityResolver extends BeansDtdResolver {
 
-	private final ApplicationContext applicationContext;
+	private final ResourceLoader resourceLoader;
 
-	public ResourceEntityResolver(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
+	/**
+	 * Creae a ResourceEntityResolver for the specified ResourceLoader
+	 * (usually, an ApplicationContext).
+	 * @param resourceLoader the ResourceLoader (or ApplicationContext)
+	 * to load XML entity includes with
+	 */
+	public ResourceEntityResolver(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
 	}
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
@@ -74,12 +81,11 @@ public class ResourceEntityResolver extends BeansDtdResolver {
 			}
 			if (resourcePath != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Trying to locate entity [" + systemId + "] as application context resource [" +
-											 resourcePath + "]");
+					logger.debug("Trying to locate XML entity [" + systemId + "] as resource [" + resourcePath + "]");
 				}
-				Resource resource = this.applicationContext.getResource(resourcePath);
-				if (logger.isInfoEnabled()) {
-					logger.info("Found entity [" + systemId + "] as application context resource [" + resourcePath + "]");
+				Resource resource = this.resourceLoader.getResource(resourcePath);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found XML entity [" + systemId + "] as resource [" + resourcePath + "]");
 				}
 				source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);

@@ -20,8 +20,8 @@ import java.io.IOException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.ResourceEntityResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.context.support.ResourceEntityResolver;
 
 /**
  * WebApplicationContext implementation that takes configuration from an XML document,
