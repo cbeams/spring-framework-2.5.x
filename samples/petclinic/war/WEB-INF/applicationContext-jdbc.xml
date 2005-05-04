@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
-  - Application context definition for Petclinic on JDBC.
+  - Application context definition for PetClinic on JDBC.
 	-->
 <beans>
 
@@ -68,20 +68,20 @@
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
-	<!-- Petclinic's central data access object: HSQL JDBC implementation -->
+	<!-- PetClinic's central data access object: HSQL JDBC implementation -->
 	<!-- (only initialized when referenced by the "clinic" proxy) -->
 	<bean id="hsqlClinic" class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic" lazy-init="true">
 		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 
-	<!-- Petclinic's central data access object: MySQL JDBC implementation -->
+	<!-- PetClinic's central data access object: MySQL JDBC implementation -->
 	<!-- (only initialized when referenced by the "clinic" proxy) -->
 	<bean id="mysqlClinic" class="org.springframework.samples.petclinic.jdbc.MySQLJdbcClinic" lazy-init="true">
 		<property name="dataSource"><ref local="dataSource"/></property>
 	</bean>
 
 	<!--
-		- Transactional proxy for Petclinic's central data access facade.
+		- Transactional proxy for PetClinic's central data access facade.
 		-
 		- Note that in a real-life app with multiple transaction proxies,
 		- you will probably want to use parent and child bean definitions

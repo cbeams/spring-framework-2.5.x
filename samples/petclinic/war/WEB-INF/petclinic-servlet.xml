@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
-  - DispatcherServlet application context for Petclinic's web tier.
+  - DispatcherServlet application context for PetClinic's web tier.
 	-->
 <beans>
 
@@ -11,7 +11,7 @@
 	<!--
 		- Message source for this context, loaded from localized "messages_xx" files.
 		- Could also reside in the root application context, as it is generic,
-		- but is currently just used within Petclinic's web tier.
+		- but is currently just used within PetClinic's web tier.
     -->
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basename"><value>messages</value></property>
@@ -130,7 +130,7 @@
 	<!--
 		- Validator for owner forms, implementing Spring's Validator interface.
 		- Could also reside in the root application context, as it is generic,
-		- but is currently just used within Petclinic's web tier.
+		- but is currently just used within PetClinic's web tier.
 	  -->
 	<bean id="ownerValidator" class="org.springframework.samples.petclinic.validation.OwnerValidator"/>
 
@@ -159,7 +159,7 @@
 	<!--
 		- Validator for pet forms, implementing Spring's Validator interface.
 		- Could also reside in the root application context, as it is generic,
-		- but is currently just used within Petclinic's web tier.
+		- but is currently just used within PetClinic's web tier.
  		-->
 	<bean id="petValidator" class="org.springframework.samples.petclinic.validation.PetValidator"/>
 
@@ -177,7 +177,7 @@
 	<!--
 		- Validator for visit forms, implementing Spring's Validator interface.
 		- Could also reside in the root application context, as it is generic,
-		- but is currently just used within Petclinic's web tier.
+		- but is currently just used within PetClinic's web tier.
  		-->
 	<bean id="visitValidator" class="org.springframework.samples.petclinic.validation.VisitValidator"/>
 

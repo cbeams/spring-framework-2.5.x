@@ -1,12 +1,12 @@
 <!--
 
-	Petclinic :: a Spring Framework demonstration
+	PetClinic :: a Spring Framework demonstration
 
 -->
 
 <html>
 	<head>
-		<title>Petclinic :: a Spring Framework demonstration</title>
+		<title>PetClinic :: a Spring Framework demonstration</title>
 		<style type="text/css">
 		<!--
 			td { padding:3px; }

@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
-  - Application context definition for Petclinic on Apache OJB.
+  - Application context definition for PetClinic on Apache OJB.
 	-->
 <beans>
 
@@ -44,12 +44,12 @@
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
 	<!--
-	  - Petclinic's central data access object: OJB implementation.
+	  - PetClinic's central data access object: OJB implementation.
     -->
 	<bean id="clinicTarget" class="org.springframework.samples.petclinic.ojb.PersistenceBrokerClinic"/>
 
 	<!--
-		- Transactional proxy for Petclinic's central data access object.
+		- Transactional proxy for PetClinic's central data access object.
 		-
 		- Note that in a real-life app with multiple transaction proxies,
 		- you will probably want to use parent and child bean definitions

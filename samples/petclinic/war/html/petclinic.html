@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-<h1 style="text-align: center;">The Spring Petclinic Application</h1>
+<h1 style="text-align: center;">The Spring PetClinic Application</h1>
 <big><span style="font-weight: bold;">Updated : <br>
 &nbsp;&nbsp;&nbsp; </span>01-DEC-2004 - Ken Krebs<span
  style="font-weight: bold;"><br>
@@ -12,7 +12,7 @@
 <h2>Introduction</h2>
 Spring is a collection of small, well-focused, loosely coupled Java
 frameworks that can be used independently or collectively to build
-industrial strength applications of many different types. The Petclinic
+industrial strength applications of many different types. The PetClinic
 sample application is designed to show how the Spring
 application frameworks can be used to build simple, but powerful
 database-oriented applications. It will demonstrate the use
@@ -51,7 +51,7 @@ of application or live database servers.</li>
   <li><span style="font-weight: bold; text-decoration: underline;">maintainable</span>
 by facilitating a clean separation of the application layers. It most
 importantly helps maintain the independence of the Business Layer
-from the Presentation layer. Petclinic demonstrates the use of a
+from the Presentation layer. PetClinic demonstrates the use of a
 Model-View-Controller
 based web presentation framework that can work seamlessly with many
 different types of view technologies. The Spring web application
@@ -68,9 +68,9 @@ Since the purpose of the sample application is tutorial in nature, the
 implementation presented here will of course provide only a small
 subset
 of the functionality that would be needed by a real world version of a
-Petclinic application.<br>
+PetClinic application.<br>
 <br>
-<h2>Petclinic Sample Application Requirements</h2>
+<h2>PetClinic Sample Application Requirements</h2>
 The application requirement is for an information system that is
 accessible through a web browser. The users of the application are
 employees of the clinic who in the course of their work need to view
@@ -99,7 +99,7 @@ case-insensitive name.</li>
 <br>
 <ul>
 </ul>
-<h2>Petclinic Sample Application Design &amp; Implementation</h2>
+<h2>PetClinic Sample Application Design &amp; Implementation</h2>
 <span style="font-weight: bold; text-decoration: underline;">Server
 Technology</span><br>
 The sample application should be usable with any J2EE web application
@@ -137,15 +137,15 @@ which are freely available:<br>
 </ul>
 <span style="font-weight: bold;">NOTE:</span> The version numbers
 listed
-are those that were used in the development of the Petclinic
+are those that were used in the development of the PetClinic
 application. Other versions of the same tools may or may not work.<br>
 <br>
 Download links for the various tools needed are provided in the
 Developer Instructions section.<br>
 <br>
-<span style="font-weight: bold; text-decoration: underline;">Petclinic
+<span style="font-weight: bold; text-decoration: underline;">PetClinic
 Database</span><br>
-The following is an overview of the database schema used in Petclinic.
+The following is an overview of the database schema used in PetClinic.
 Detailed field descriptions can be found in the <span
  style="font-weight: bold; font-style: italic;">"initDB.txt"</span> SQL
 script
@@ -255,7 +255,7 @@ contains generated html-formatted test reports<br>
  style="font-weight: bold; font-style: italic;">dist </span>: contains
 packaged archives of files<br>
 <br>
-<h2>Petclinic Application Design</h2>
+<h2>PetClinic Application Design</h2>
 <h3><span style="font-weight: bold; text-decoration: underline;"><span
  style="font-weight: bold; text-decoration: underline;"><span
  style="font-weight: bold; text-decoration: underline;">Logging</span></span></span></h3>
@@ -264,7 +264,7 @@ packaged archives of files<br>
 Spring supports the use of the Apache
 Commons Logging API.This API provides the ability to use Java 1.4
 loggers, the simple Commons loggers, and&nbsp;Apache Log4J loggers.
-Petclinic uses&nbsp;Log4J
+PetClinic uses&nbsp;Log4J
 to provide sophisticated and configurable logging capabilities. The
 file, <span style="font-weight: bold; font-style: italic;">war/WEB-INF/log4j.properties</span>
 configures the definition of <span style="font-weight: bold;">Log4j </span>loggers.
@@ -277,7 +277,7 @@ configures the definition of <span style="font-weight: bold;">Log4j </span>logge
 Business Layer consists of a number of basic JavaBean classes
 representing the application domain objects and associated validation
 objects that are used by the
-Presentation Layer.The&nbsp; validation objects used in Petclinic are
+Presentation Layer.The&nbsp; validation objects used in PetClinic are
 all implementations of&nbsp; the <span style="font-weight: bold;">org.springframework.validation.Validator
 </span>interface.
 <ul>
@@ -390,7 +390,7 @@ verifies correct data entry for the AddVisit form.</li>
 Layer</span></h3>
 <h3><span style="font-weight: bold; text-decoration: underline;"></span></h3>
 <span style="font-weight: bold; text-decoration: underline;"> </span>Since
-the Petclinic application is all about database access and there is
+the PetClinic application is all about database access and there is
 very little business logic in the application outside of that, there is
 no separation of the primary Business and Persistence Layer API's.
 While
@@ -415,7 +415,7 @@ provided by Spring:<br>
 infrastructure for using other <span style="font-weight: bold;">O</span>bject-<span
  style="font-weight: bold;">R</span>elational-<span
  style="font-weight: bold;">M</span>apping frameworks such as&nbsp; JDO
-and iBATIS SqlMaps but these are not demonstrated in Petclinic.<br>
+and iBATIS SqlMaps but these are not demonstrated in PetClinic.<br>
 <br>
 One of the key elements provided by Spring is the use of a common set
 of meaningful data access exceptions that can be used regardless of
@@ -430,16 +430,16 @@ recoverable errors when it makes sense to do so. This greatly
 simplifies application code&nbsp; compared to, for example, code
 using&nbsp; JDBC directly where <span style="font-weight: bold;">SqlExceptions
 </span>must be caught and database specific error codes must be
-decoded. Examination of the Petclinic source code will show that the
+decoded. Examination of the PetClinic source code will show that the
 persistence-oriented code is completely focused on the relevant
 transfer of data to/from the referenced objects without extraneous
 error handling.<br>
 <br>
-The high-level business/persistence API for Petclinic is the&nbsp; <span
+The high-level business/persistence API for PetClinic is the&nbsp; <span
  style="font-weight: bold;">org.springframework.samples.petclinic.Clinic
 </span>interface. Spring provides several convenient abstract
 DaoSupport classes for each of the persistence strategies. Each
-persistence strategy in Petclinic is a different implementation of the <span
+persistence strategy in PetClinic is a different implementation of the <span
  style="font-weight: bold;">Clinic </span>interface that extends the
 respective DaoSupport class. In each case, the <span
  style="font-weight: bold;">Clinic </span>implementation is fronted by
@@ -450,7 +450,7 @@ Java dynamic proxies which are created by an instance of&nbsp; <span
 These proxies are configured in the respective application context file
 and specify that all <span style="font-weight: bold;">Clinic </span>methods
 are run in a transactional context.The transaction managers used in
-Petclinic are all implementations of&nbsp; the <span
+PetClinic are all implementations of&nbsp; the <span
  style="font-weight: bold;">org.springframework.transaction.PlatformTransactionManager
 </span>interface. All of the implementations are by default configured
 to use a local <span style="font-weight: bold;">DataSource </span>that
@@ -492,7 +492,7 @@ are
 lightweight, reusable, and threadsafe.
 <br>
 <br>
-All of these objects in Petclinic initialize the SQL in their
+All of these objects in PetClinic initialize the SQL in their
 constructors. SQL "Select" type
 queries are implemented by subclassing <span style="font-weight: bold;">org.springframework.jdcb.object.MappingSqlQuery</span>.
 These subclasses override the <span style="font-style: italic;">mapRow(ResultSet,
@@ -646,9 +646,9 @@ A Spring <span style="font-weight: bold;"><span
 provides a map of user-defined JavaBeans that specify either a
 singleton object or the initial construction of prototype instances.
 These beans constitute the <span style="font-weight: bold;">Business/Persistence
-Layer</span> of Petclinic.The
+Layer</span> of PetClinic.The
 following&nbsp; beans are defined in all of the 3 versions (1 per
-access strategy) of the Petclinic <span style="font-style: italic;">applicationContext-???.xml</span>
+access strategy) of the PetClinic <span style="font-style: italic;">applicationContext-???.xml</span>
 file:<span style="font-weight: bold; text-decoration: underline;"><br>
 </span>
 <ol>
@@ -692,7 +692,7 @@ Presentation Layer is implemented as a J2EE Web Application and
 provides a very thin and concise Model-View-Controller type user
 interface to the Business and Persistence Layers. <br>
 <br>
-The Petclinic web application is configured via the following files:<br>
+The PetClinic web application is configured via the following files:<br>
 <ul>
   <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/web.xml</span>
 is the web application configuration file.</li>
@@ -729,7 +729,7 @@ Note that it is preferable to use <span style="font-weight: bold;">org.springfra
 initialization order (many Servlet 2.3 containers do). The
 root <span style="font-weight: bold;">org.springframework.web.context.WebApplicationContext
     </span>of
-Petclinic is an instance of <span style="font-weight: bold;">org.springframework.web.context.support.XmlWebApplicationContext</span>
+PetClinic is an instance of <span style="font-weight: bold;">org.springframework.web.context.support.XmlWebApplicationContext</span>
 and
 is the parent of all servlet-specific <span style="font-weight: bold;">ApplicationContexts</span>.
 The Spring root <span style="font-weight: bold;">ApplicationContext </span>object
@@ -809,7 +809,7 @@ correctly.<br>
 The following beans are accessible to the <span
  style="font-weight: bold;"></span><span style="font-weight: bold;">DispatcherServlet
 </span>and are defined
-in the Petclinic <span style="font-weight: bold; font-style: italic;">petclinic-servlet.xml</span>
+in the PetClinic <span style="font-weight: bold; font-style: italic;">petclinic-servlet.xml</span>
 file. This dispatcher uses these defintions to delegate actual display
 and form processing tasks to implementations of the Spring <span
  style="font-weight: bold;">org.springframework.web.servlet.mvc.Controller
@@ -882,7 +882,7 @@ is a singleton bean that defines a mapping of URL's to method names for
 the <span style="font-weight: bold; font-style: italic;">clinicController</span>
 bean.</li>
   <li>6&nbsp;singleton Form beans are defined that are extensions of
-the Petclinic class <span style="font-weight: bold;">AbstractClinicForm
+the PetClinic class <span style="font-weight: bold;">AbstractClinicForm
     </span>which
 is itself an extension of the Spring class <span
  style="font-weight: bold;">SimpleFormController</span>. These beans
@@ -914,7 +914,7 @@ are <span style="font-weight: bold;">MultiActionController,</span> <span
  style="font-weight: bold;">SimpleFormController</span>, and <span
  style="font-weight: bold;">AbstractWizardFormController</span>. <span
  style="font-weight: bold;">AbstractWizardFormController </span>is not
-used in Petclinic and is not discussed here. A <span
+used in PetClinic and is not discussed here. A <span
  style="font-weight: bold;">MultiActionController </span>is used to
 define a <span style="font-weight: bold;">Controller </span>with
 multiple handling methods the selection of which can be configured
@@ -1026,7 +1026,7 @@ session attribute doesn't exist when using session form </span><span
 new form by <span style="font-style: italic;">handleRequestInternal()</span>.</span><span
  style="font-weight: normal;"> Subclasses can override this to
 implement
-a custom strategy. Petclinic uses the default implementation.</span></li>
+a custom strategy. PetClinic uses the default implementation.</span></li>
     <li style="font-weight: bold;"><span style="font-weight: normal;"></span><span
  style="font-weight: normal;">It provides a</span> final <span
  style="font-weight: normal;">method <span style="font-style: italic;">showNewForm(HttpServletRequest,
@@ -1100,7 +1100,7 @@ views: JSP, XSLT, PDF, Velocity templates, Excel files, and others. By
 using a <span style="font-weight: bold;">View </span>mapping
 strategy,
 Spring supplies the developer with a great deal of flexibility in
-supporting easily configurable view substitution. Petclinic defines a
+supporting easily configurable view substitution. PetClinic defines a
 number of
 View beans in the file, <span
  style="font-weight: bold; font-style: italic;">views.properties</span>.
@@ -1114,7 +1114,7 @@ that use JSTL.<br>
 <span style="font-weight: bold; text-decoration: underline;">Messages</span><br>
 The <span style="font-weight: bold; font-style: italic;">messages*.properties</span>
 files are loaded from the classpath to provide localized messages for
-the supported languages. Petclinic supplies only a single localized
+the supported languages. PetClinic supplies only a single localized
 message, <span style="font-weight: bold;">"welcome"</span> in the
 default, English, and German properties files respectively. See the
 "countries" sample application for a more detailed example of Spring's
@@ -1136,7 +1136,7 @@ that is used to handle simple display oriented URLs.</li>
  style="font-weight: bold;">org.springframework.</span></span></span><span
  style="font-weight: bold; font-style: italic;">petclinic.web.AbstractClinicForm</span>
 is an extension of <span style="font-weight: bold;">SimpleFormController</span>
-that is the superclass of Petclinic's form objects. It provides its
+that is the superclass of PetClinic's form objects. It provides its
 subclasses with a some commonly needed form behavior:</li>
   <ul>
     <li>It provides a <span style="font-style: italic;">clinic </span>property
@@ -1314,7 +1314,7 @@ and <span style="font-style: italic; font-weight: bold;">footer.jsp</span>
 display info common to virtually all pages. Spring also supplies
 support for the integration of <a
  href="http://www.lifl.fr/%7Edumoulin/tiles">Tiles</a>
-(included in Struts) but this is not used in Petclinic.</li>
+(included in Struts) but this is not used in PetClinic.</li>
 </ul>
 <br>
 The following JSP's each display a form field and the bound error data
@@ -1397,7 +1397,7 @@ run<span style="font-weight: bold;"><span style="font-weight: bold;"><span
 <ul>
   <li>Download and install the <a
  href="http://sourceforge.net/projects/springframework/">Spring
-Framework</a> (examples, including Petclinic are provided)</li>
+Framework</a> (examples, including PetClinic are provided)</li>
   <li>Download and install a <a href="http://java.sun.com/">Java</a>
 Software Developer Kit, preferably version 1.4 or later</li>
   <li>Download and install <a href="http://ant.apache.org">Apache Ant</a>,
@@ -1413,7 +1413,7 @@ preferably version 4.1.18 or later</li>
  href="http://hibernate.org/">Hibernate</a>, and <a
  href="http://db.apache.org/ojb/">Apache OJB</a> are provided with the
 application.</li>
-  <li>Petclinic and Spring use the <a href="http://www.apache.org/">Apache</a>
+  <li>PetClinic and Spring use the <a href="http://www.apache.org/">Apache</a>
     <a href="http://jakarta.apache.org/commons/logging/">Commons Logging</a>
 and <a href="http://jakarta.apache.org/log4j/docs/index.html">Log4J</a>
 packages</li>
@@ -1447,7 +1447,7 @@ When the application opens, connect to the "HSQL Database Engine
 Server" using the default parameters. This tool can also be used to
 manage other databases. To use a different port, it will be necessary
 to
-change the Petclinic Database Setup. It may also be necessary to
+change the PetClinic Database Setup. It may also be necessary to
 consult
 the HSQL documentation for instructions on to change the port the
 server
@@ -1455,13 +1455,13 @@ uses.<br>
 <br>
 <span style="font-weight: bold; text-decoration: underline;">MYSQL
 Setup (optional)</span><br>
-Add the Petclinic database to a running server by running the SQL
+Add the PetClinic database to a running server by running the SQL
 script <span style="font-weight: bold; font-style: italic;">db/mysql/initDB.txt</span>.
-Petclinic expects, by default to be able to access the server via the
+PetClinic expects, by default to be able to access the server via the
 standard port 3306. To use a different port, it will be necessary to
-change the Petclinic Database Setup.<br>
+change the PetClinic Database Setup.<br>
 <br>
-<span style="font-weight: bold; text-decoration: underline;">Petclinic
+<span style="font-weight: bold; text-decoration: underline;">PetClinic
 Database Setup</span><br>
 To use a J2EE server supplied connection-pooled data source with
 Tomcat, it will be
@@ -1469,7 +1469,7 @@ necessary to use and possibly edit the appropriate context definition
 file for the petclinic webapp. To use it, deploy a copy of the
 appropriate context definition file in Tomcat's webapps directory and
 restart the server. Consult the Tomcat log files if something goes
-wrong when starting either Tomcat or the Petclinic application. The
+wrong when starting either Tomcat or the PetClinic application. The
 context files are named <span
  style="font-weight: bold; font-style: italic;">petclinic_tomcat_*.xml</span>,
 where <span style="font-weight: bold; font-style: italic;">*</span> is
@@ -1512,9 +1512,9 @@ you will need to edit the files:<br>
  style="font-weight: normal;"> (for testing)</span></li>
 </ul>
 <span style="font-weight: bold; text-decoration: underline;">Building
-the Petclinic Application</span><br>
+the PetClinic Application</span><br>
 Open a command line shell and navigate to the directory containing
-Petclinic and execute "ant". This will display a list of the Ant
+PetClinic and execute "ant". This will display a list of the Ant
 targets
 that are available. Make sure the database is running and execute "ant
 all". This will run the Ant "all" target which will clean and compile
@@ -1523,7 +1523,7 @@ live test using the database. The other Ant targets provide subsets of
 this functionality.<br>
 <br>
 <span style="font-weight: bold; text-decoration: underline;">Deploying
-the Petclinic Application</span><br>
+the PetClinic Application</span><br>
 Deploy the web application to the server in the usual way (see <a
  href="#dbNotes">notes</a> regarding database setup). If you need
 instructions for web application deployment, see the Tomcat
@@ -1534,8 +1534,8 @@ can be found in the <span
  style="font-weight: bold; font-style: italic;">dist</span> directory.<br>
 <br>
 <span style="font-weight: bold; text-decoration: underline;">Using the
-Petclinic Application</span><br>
-Make sure the Petclinic web application is running and browse to <a
+PetClinic Application</span><br>
+Make sure the PetClinic web application is running and browse to <a
  href="http://localhost:8080/petclinic">http://localhost:8080/petclinic</a>
 or <a href="http://www.springframework.org/webapps/petclinic">check it
 out online</a>.<br>
