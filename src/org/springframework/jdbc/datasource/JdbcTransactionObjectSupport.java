@@ -81,6 +81,10 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		return connectionHolder;
 	}
 
+	public boolean hasConnectionHolder() {
+		return (this.connectionHolder != null);
+	}
+
 	public void setPreviousIsolationLevel(Integer previousIsolationLevel) {
 		this.previousIsolationLevel = previousIsolationLevel;
 	}
