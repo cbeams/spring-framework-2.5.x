@@ -24,8 +24,8 @@ import org.springframework.aop.support.AopUtils;
  * Factory for AOP proxies for programmatic use, rather than via a bean
  * factory. This class provides a simple way of obtaining and configuring
  * AOP proxies in code.
- * @since 14-Mar-2003
  * @author Rod Johnson
+ * @since 14.03.2003
  */
 public class ProxyFactory extends AdvisedSupport {
 
