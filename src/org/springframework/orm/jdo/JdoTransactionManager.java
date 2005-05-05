@@ -60,7 +60,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource (see "dataSource" property).
  * The given DataSource should obviously match the one used by the given
- * PersistenceManagerFactory. This transaction manager will auto-detect the DataSource
+ * PersistenceManagerFactory. This transaction manager will autodetect the DataSource
  * that acts as "connectionFactory" of the PersistenceManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
@@ -83,8 +83,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
- * @see org.springframework.orm.hibernate.HibernateTransactionManager
  */
 public class JdoTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -133,7 +133,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
    * The DataSource should match the one used by the JDO PersistenceManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the PersistenceManagerFactory uses a DataSource as connection factory,
-	 * the DataSource will be auto-detected: You can still explictly specify the
+	 * the DataSource will be autodetected: You can still explictly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
@@ -150,6 +150,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * @see #setJdoDialect
 	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils
+	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(DataSource dataSource) {
 		if (dataSource instanceof TransactionAwareDataSourceProxy) {
@@ -395,8 +397,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 		txObject.getPersistenceManagerHolder().clear();
 
-		// Remove the JDBC connection holder from the thread, if set.
-		if (txObject.getConnectionHolder() != null) {
+		// Remove the JDBC connection holder from the thread, if exposed.
+		if (txObject.hasConnectionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 			try {
 				getJdoDialect().releaseJdbcConnection(txObject.getConnectionHolder().getConnectionHandle(),

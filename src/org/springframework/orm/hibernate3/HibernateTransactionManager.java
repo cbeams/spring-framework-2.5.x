@@ -74,7 +74,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * The given DataSource should obviously match the one used by the given
  * SessionFactory. To achieve this, configure both to the same JNDI DataSource,
  * or preferably create the SessionFactory with LocalSessionFactoryBean and
- * a local DataSource (which will be auto-detected by this transaction manager).
+ * a local DataSource (which will be autodetected by this transaction manager).
  *
  * <p>JTA (usually through JtaTransactionManager) is necessary for accessing multiple
  * transactional resources. The DataSource that Hibernate uses needs to be JTA-enabled
@@ -113,8 +113,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements BeanFactoryAware, InitializingBean {
@@ -188,6 +188,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see LocalDataSourceConnectionProvider
 	 * @see LocalSessionFactoryBean#setDataSource
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils
+	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(DataSource dataSource) {
 		if (dataSource instanceof TransactionAwareDataSourceProxy) {
@@ -430,8 +432,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					conHolder.setTimeoutInSeconds(definition.getTimeout());
 				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("Exposing Hibernate transaction as JDBC transaction [" +
-							conHolder.getConnection() + "]");
+					logger.debug("Exposing Hibernate transaction as JDBC transaction [" + con + "]");
 				}
 				TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 				txObject.setConnectionHolder(conHolder);
@@ -543,7 +544,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		}
 
-		// Remove the JDBC connection holder from the thread, if set.
+		// Remove the JDBC connection holder from the thread, if exposed.
 		if (getDataSource() != null) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
