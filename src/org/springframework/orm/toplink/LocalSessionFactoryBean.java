@@ -16,6 +16,10 @@
 
 package org.springframework.orm.toplink;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import javax.sql.DataSource;
 
 import oracle.toplink.internal.databaseaccess.DatabasePlatform;
@@ -30,6 +34,7 @@ import oracle.toplink.tools.sessionmanagement.SessionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -47,7 +52,7 @@ import org.springframework.beans.factory.InitializingBean;
  * <p>LocalSessionFactoryBean loads the <code>sessions.xml</code> file during
  * initialization in order to bootstrap the specified TopLink (Server)Session.
  * The name of the actual config resource and the name of the Session to be loaded,
- * if different from <code>sessions.xml</code> and "Session, respectively, can be
+ * if different from <code>sessions.xml</code> and "Session", respectively, can be
  * configured through bean properties.
  *
  * <p>All resources (<code>sessions.xml</code> and Mapping Workbench metadata) are
@@ -63,14 +68,25 @@ import org.springframework.beans.factory.InitializingBean;
  * uses it's own DefaultSessionLog, whose levels are configured in the
  * <code>sessions.xml</code> file.
  *
+ * <p>This class has been tested against both TopLink 9.0.4 and TopLink 10.1.3.
+ * It will automatically adapt to the TopLink version encountered: for example,
+ * using an XMLSessionConfigLoader on 10.1.3, but an XMLLoader on 9.0.4.
+ *
  * @author Juergen Hoeller
  * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
  * @since 1.2
+ * @see TopLinkTemplate#setSessionFactory
+ * @see TopLinkTransactionManager#setSessionFactory
+ * @see SingleSessionFactory
+ * @see ServerSessionFactory
+ * @see oracle.toplink.threetier.ServerSession
+ * @see oracle.toplink.tools.sessionconfiguration.XMLLoader
+ * @see oracle.toplink.tools.sessionconfiguration.XMLSessionConfigLoader
  */
 public class LocalSessionFactoryBean implements SessionFactory, InitializingBean, DisposableBean {
 
 	/**
-	 * The default location of the sessions.xml TopLink configuration file:
+	 * The default location of the <code>sessions.xml</code> TopLink configuration file:
 	 * "sessions.xml" in the class path.
 	 */
 	public static final String DEFAULT_SESSIONS_XML = "sessions.xml";
@@ -189,7 +205,7 @@ public class LocalSessionFactoryBean implements SessionFactory, InitializingBean
 	 * Specify the TopLink DatabasePlatform instance that the Session should use:
 	 * for example, HSQLPlatform. This is an alternative to specifying the platform
 	 * in a &lt;login&gt; tag in the <code>sessions.xml</code> configuration file.
-	 * <p>A passed-in DatabasePlatofrm will be registered with the TopLink
+	 * <p>A passed-in DatabasePlatform will be registered with the TopLink
 	 * DatabaseLogin instance (either the default instance or one passed in
 	 * through the "databaseLogin" property).
 	 * @see oracle.toplink.internal.databaseaccess.HSQLPlatform
@@ -227,13 +243,9 @@ public class LocalSessionFactoryBean implements SessionFactory, InitializingBean
 			}
 		}
 
-		// Load the configuration file from the given location.
-		XMLLoader loader = new XMLLoader(this.configLocation);
-
 		// Initialize the TopLink Session, using the configuration file
 		// and the session name.
-		SessionManager sm = SessionManager.getManager();
-		this.session = (DatabaseSession) sm.getSession(loader, this.sessionName, classLoader, false, false);
+		this.session = loadDatabaseSession(this.configLocation, this.sessionName, classLoader);
 
 		// Override default DatabaseLogin instance with specified one, if any.
 		if (this.databaseLogin != null) {
@@ -248,7 +260,7 @@ public class LocalSessionFactoryBean implements SessionFactory, InitializingBean
 
 		// Override default DatabasePlatform with specified one, if any.
 		if (this.databasePlatform != null) {
-			this.session.getLogin().setPlatform(this.databasePlatform);
+			this.session.getLogin().usePlatform(this.databasePlatform);
 		}
 
 		// Override default SessionLog with specified one, if any.
@@ -260,6 +272,57 @@ public class LocalSessionFactoryBean implements SessionFactory, InitializingBean
 		// Log in and create corresponding SessionFactory.
 		this.session.login();
 		this.sessionFactory = createSessionFactory(this.session);
+	}
+
+	/**
+	 * Load the specified DatabaseSession from the TopLink <code>sessions.xml</code>
+	 * configuration file.
+	 * @param configLocation the class path location of the <code>sessions.xml</code> file
+	 * @param sessionName the name of the TopLink Session in the configuration file
+	 * @param sessionClassLoader the class loader to use
+	 * @return the DatabaseSession instance
+	 */
+	protected DatabaseSession loadDatabaseSession(
+			String configLocation, String sessionName, ClassLoader sessionClassLoader) {
+
+		SessionManager manager = SessionManager.getManager();
+
+		// Try to find TopLink 10.1.3 XMLSessionConfigLoader.
+		Class loaderClass = null;
+		Method getSessionMethod = null;
+		try {
+			loaderClass = Class.forName("oracle.toplink.tools.sessionconfiguration.XMLSessionConfigLoader");
+			getSessionMethod = SessionManager.class.getMethod("getSession",
+					new Class[] {loaderClass, String.class, ClassLoader.class, boolean.class, boolean.class});
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using TopLink 10.1.3 XMLSessionConfigLoader");
+			}
+		}
+		catch (Exception ex) {
+			// TopLink 10.1.3 XMLSessionConfigLoader not found ->
+			// fall back to TopLink 9.0.4 XMLLoader.
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using TopLink 9.0.4 XMLLoader");
+			}
+			XMLLoader loader = new XMLLoader(configLocation);
+			return (DatabaseSession) manager.getSession(loader, sessionName, sessionClassLoader, false, false);
+		}
+
+		// TopLink 10.1.3 XMLSessionConfigLoader found -> create loader instance
+		// through reflection and fetch specified Session from SessionManager.
+		try {
+			Constructor ctor = loaderClass.getConstructor(new Class[] {String.class});
+			Object loader = ctor.newInstance(new Object[] {configLocation});
+			return (DatabaseSession) getSessionMethod.invoke(manager,
+					new Object[] {loader, sessionName, sessionClassLoader, Boolean.FALSE, Boolean.FALSE});
+		}
+		catch (InvocationTargetException ex) {
+			throw new BeanInitializationException(
+					"TopLink SessionManager.getSession method threw exception", ex.getTargetException());
+		}
+		catch (Exception ex) {
+			throw new BeanInitializationException("TopLink SessionManager.getSession access failed", ex);
+		}
 	}
 
 	/**
