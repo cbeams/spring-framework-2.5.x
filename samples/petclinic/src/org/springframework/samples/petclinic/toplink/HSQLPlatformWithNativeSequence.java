@@ -23,7 +23,7 @@ import oracle.toplink.queryframework.ValueReadQuery;
 public class HSQLPlatformWithNativeSequence extends HSQLPlatform {
 
 	public HSQLPlatformWithNativeSequence() {
-		// TODO: setUsesNativeSequencing(true);
+		setUsesNativeSequencing(true);
 	}
 
 	public boolean shouldRetrieveSequenceAfterInsert() {
@@ -31,8 +31,7 @@ public class HSQLPlatformWithNativeSequence extends HSQLPlatform {
 	}
 
 	protected ValueReadQuery buildSelectSequenceQuery() {
-		// TODO: return new ValueReadQuery("CALL IDENTITY()");
-		return null;
+		return new ValueReadQuery("CALL IDENTITY()");
 	}
 
 }
