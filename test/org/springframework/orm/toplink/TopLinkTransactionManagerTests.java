@@ -18,7 +18,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * @author James Clark
+ * @author Juergen Hoeller
+ * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
+ * @since 28.04.2005
  */
 public class TopLinkTransactionManagerTests extends TestCase {
 
@@ -32,7 +34,9 @@ public class TopLinkTransactionManagerTests extends TestCase {
 
 		// during commit, TM must get the active UnitOfWork
 		session.getActiveUnitOfWork();
-		sessionControl.setReturnValue(uow, 1);
+		sessionControl.setReturnValue(uow, 2);
+		uow.beginEarlyTransaction();
+		uowControl.setVoidCallable(1);
 		uow.commit();
 		uowControl.setVoidCallable();
 		// session should be released when it was bound explicitly by the TM
@@ -76,6 +80,10 @@ public class TopLinkTransactionManagerTests extends TestCase {
 
 		final SessionFactory sf = new MockSessionFactory(session);
 
+		session.getActiveUnitOfWork();
+		sessionControl.setReturnValue(uow, 1);
+		uow.beginEarlyTransaction();
+		uowControl.setVoidCallable(1);
 		session.release();
 		sessionControl.setVoidCallable(1);
 
@@ -83,21 +91,18 @@ public class TopLinkTransactionManagerTests extends TestCase {
 		uowControl.replay();
 
 		TopLinkTransactionManager tm = new TopLinkTransactionManager();
-		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		tm.setSessionFactory(sf);
+		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 		tt.setTimeout(10);
-		assertTrue("Hasn't thread session", !TransactionSynchronizationManager
-				.hasResource(sf));
-		assertTrue("JTA synchronizations not active",
-				!TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
 			Object result = tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has thread session",
-							TransactionSynchronizationManager.hasResource(sf));
+					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					TopLinkTemplate template = new TopLinkTemplate(sf);
 					return template.execute(new TopLinkCallback() {
 						public Object doInTopLink(Session session) {
@@ -106,15 +111,13 @@ public class TopLinkTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail();
+			fail("Should have propagated RuntimeException");
 		}
-		catch (Throwable t) {
-			assertTrue(t.getMessage().equals("failure"));
+		catch (RuntimeException ex) {
+			assertTrue(ex.getMessage().equals("failure"));
 		}
-		assertTrue("Hasn't thread session", !TransactionSynchronizationManager
-				.hasResource(sf));
-		assertTrue("JTA synchronizations not active",
-				!TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		sessionControl.verify();
 		uowControl.verify();
@@ -123,27 +126,21 @@ public class TopLinkTransactionManagerTests extends TestCase {
 	public void testTransactionRollbackOnly() {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		MockControl uowControl = MockControl.createControl(UnitOfWork.class);
-		UnitOfWork uow = (UnitOfWork) uowControl.getMock();
 
 		final SessionFactory sf = new MockSessionFactory(session);
-
 		session.release();
 		sessionControl.setVoidCallable();
-
 		sessionControl.replay();
-		uowControl.replay();
 
 		TopLinkTransactionManager tm = new TopLinkTransactionManager();
-		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		tm.setSessionFactory(sf);
+		tm.setLazyDatabaseTransaction(true);
+		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 		tt.setTimeout(10);
-		assertTrue("Hasn't thread session", !TransactionSynchronizationManager
-				.hasResource(sf));
-		assertTrue("JTA synchronizations not active",
-				!TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
@@ -159,12 +156,9 @@ public class TopLinkTransactionManagerTests extends TestCase {
 				return null;
 			}
 		});
-		assertTrue("Hasn't thread session", !TransactionSynchronizationManager
-				.hasResource(sf));
-		assertTrue("JTA synchronizations not active",
-				!TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		sessionControl.verify();
-		uowControl.verify();
 	}
 
 	public void testParticipatingTransactionWithCommit() {
@@ -176,7 +170,9 @@ public class TopLinkTransactionManagerTests extends TestCase {
 		final SessionFactory sf = new MockSessionFactory(session);
 
 		session.getActiveUnitOfWork();
-		sessionControl.setReturnValue(uow, 1);
+		sessionControl.setReturnValue(uow, 2);
+		uow.beginEarlyTransaction();
+		uowControl.setVoidCallable(1);
 		uow.commit();
 		uowControl.setVoidCallable();
 		session.release();
@@ -211,8 +207,6 @@ public class TopLinkTransactionManagerTests extends TestCase {
 	public void testParticipatingTransactionWithRollback() {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		MockControl uowControl = MockControl.createControl(UnitOfWork.class);
-		UnitOfWork uow = (UnitOfWork) uowControl.getMock();
 
 		final SessionFactory sf = new MockSessionFactory(session);
 
@@ -220,9 +214,9 @@ public class TopLinkTransactionManagerTests extends TestCase {
 		sessionControl.setVoidCallable();
 
 		sessionControl.replay();
-		uowControl.replay();
 
-		PlatformTransactionManager tm = new TopLinkTransactionManager(sf);
+		TopLinkTransactionManager tm = new TopLinkTransactionManager(sf);
+		tm.setLazyDatabaseTransaction(true);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		try {
 			tt.execute(new TransactionCallback() {
@@ -245,14 +239,11 @@ public class TopLinkTransactionManagerTests extends TestCase {
 			assertTrue(ex.getMessage().equals("application exception"));
 		}
 		sessionControl.verify();
-		uowControl.verify();
 	}
 
 	public void testParticipatingTransactionWithRollbackOnly() {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		MockControl uowControl = MockControl.createControl(UnitOfWork.class);
-		UnitOfWork uow = (UnitOfWork) uowControl.getMock();
 
 		final SessionFactory sf = new MockSessionFactory(session);
 
@@ -260,9 +251,9 @@ public class TopLinkTransactionManagerTests extends TestCase {
 		sessionControl.setVoidCallable();
 
 		sessionControl.replay();
-		uowControl.replay();
 
-		PlatformTransactionManager tm = new TopLinkTransactionManager(sf);
+		TopLinkTransactionManager tm = new TopLinkTransactionManager(sf);
+		tm.setLazyDatabaseTransaction(true);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 
 		tt.execute(new TransactionCallback() {
@@ -284,7 +275,6 @@ public class TopLinkTransactionManagerTests extends TestCase {
 		});
 
 		sessionControl.verify();
-		uowControl.verify();
 	}
 
 	public void testParticipatingTransactionWithWithRequiresNew() {
@@ -301,14 +291,18 @@ public class TopLinkTransactionManagerTests extends TestCase {
 		final MockSessionFactory sf = new MockSessionFactory(session1);
 
 		session2.getActiveUnitOfWork();
-		session2Control.setReturnValue(uow2, 1);
+		session2Control.setReturnValue(uow2, 2);
+		uow2.beginEarlyTransaction();
+		uow2Control.setVoidCallable(1);
 		uow2.commit();
 		uow2Control.setVoidCallable();
 		session2.release();
 		session2Control.setVoidCallable();
 
 		session1.getActiveUnitOfWork();
-		session1Control.setReturnValue(uow1, 1);
+		session1Control.setReturnValue(uow1, 2);
+		uow1.beginEarlyTransaction();
+		uow1Control.setVoidCallable(1);
 		uow1.commit();
 		uow1Control.setVoidCallable();
 		session1.release();
@@ -362,7 +356,9 @@ public class TopLinkTransactionManagerTests extends TestCase {
 		final SessionFactory sf = new MockSessionFactory(session);
 
 		session.getActiveUnitOfWork();
-		sessionControl.setReturnValue(uow, 1);
+		sessionControl.setReturnValue(uow, 2);
+		uow.beginEarlyTransaction();
+		uowControl.setVoidCallable(1);
 		uow.commit();
 		uowControl.setVoidCallable();
 		session.release();

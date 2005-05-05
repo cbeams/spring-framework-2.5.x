@@ -16,27 +16,35 @@
 
 package org.springframework.orm.toplink;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 import oracle.toplink.exceptions.DatabaseException;
 import oracle.toplink.exceptions.TopLinkException;
+import oracle.toplink.internal.databaseaccess.Accessor;
+import oracle.toplink.internal.databaseaccess.DatabaseAccessor;
 import oracle.toplink.sessions.Session;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.ConnectionHolder;
+import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * <p>PlatformTransactionManager implementation for a single TopLink SessionFactory.
  * Binds a TopLink Session from the specified factory to the thread, potentially
- * allowing for one thread Session per factory. SessionFactoryUtils and * TopLinkTemplate
+ * allowing for one thread Session per factory. SessionFactoryUtils and TopLinkTemplate
  * are aware of thread-bound Sessions and participate in such transactions automatically.
  * Using either is required for TopLink access code that needs to support this
  * transaction handling mechanism.
@@ -48,15 +56,51 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * In contrast to Hibernate, this cannot be transparently provided by the Spring transaction
  * manager implementation.
  *
+ * <p>This implementation also supports direct DataSource access within a transaction
+ * (i.e. plain JDBC code working with the same DataSource), but only for transactions that
+ * are <i>not</i> marked as read-only. This allows for mixing services that access TopLink
+ * (including transactional caching) and services that use plain JDBC (without being aware
+ * of TopLink)! Application code needs to stick to the same simple Connection lookup pattern
+ * as with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>).
+ *
+ * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
+ * this instance needs to be aware of the DataSource (see "dataSource" property).
+ * The given DataSource should obviously match the one used by the given TopLink
+ * SessionFactory.
+ *
+ * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
+ * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to false, though,
+ * as nested transactions will just apply to the JDBC Connection, not to the
+ * TopLink Session and its cached objects. You can manually set the flag to true
+ * if you want to use nested transactions for JDBC access code that participates
+ * in TopLink transactions (provided that your JDBC driver supports Savepoints).
+ *
  * <p>Thanks to Slavik Markovich for implementing the initial TopLink support prototype!
  *
  * @author Juergen Hoeller
  * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
  * @since 1.2
+ * @see #setSessionFactory
+ * @see #setDataSource
+ * @see LocalSessionFactoryBean
+ * @see SessionFactoryUtils#getSession
+ * @see SessionFactoryUtils#applyTransactionTimeout
+ * @see SessionFactoryUtils#releaseSession
+ * @see TopLinkTemplate#execute
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
+ * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
+ * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public class TopLinkTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
 	private SessionFactory sessionFactory;
+
+	private DataSource dataSource;
+
+	private boolean lazyDatabaseTransaction = false;
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
 
@@ -101,26 +145,101 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	}
 
 	/**
+	 * Set the JDBC DataSource that this instance should manage transactions for.
+   * The DataSource should match the one used by the TopLink SessionFactory:
+	 * for example, you could specify the same JNDI DataSource for both.
+	 * <p>A transactional JDBC Connection for this DataSource will be provided to
+	 * application code accessing this DataSource directly via DataSourceUtils
+	 * or JdbcTemplate. The Connection will be taken from the TopLink Session.
+	 * <b>This will only happen for transactions that are <i>not</i> marked
+	 * as read-only.</b> TopLink does not support database transactions for pure
+	 * read-only operations on a Session (that is, without a UnitOfWork).
+	 * <p>Note that you need to use a TopLink Session with a DatabaseAccessor
+	 * to allow for exposing TopLink transactions as JDBC transactions. This is
+	 * the case of all standard TopLink configurations.
+	 * <p>The DataSource specified here should be the target DataSource to manage
+	 * transactions for, not a TransactionAwareDataSourceProxy. Only data access
+	 * code may work with TransactionAwareDataSourceProxy, while the transaction
+	 * manager needs to work on the underlying target DataSource. If there's
+	 * nevertheless a TransactionAwareDataSourceProxy passed in, it will be
+	 * unwrapped to extract its target DataSource.
+	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils
+	 * @see org.springframework.jdbc.core.JdbcTemplate
+	 */
+	public void setDataSource(DataSource dataSource) {
+		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
+			// for its underlying target DataSource, else data access code won't see
+			// properly exposed transactions (i.e. transactions for the target DataSource).
+			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
+		}
+		else {
+			this.dataSource = dataSource;
+		}
+	}
+
+	/**
+	 * Return the JDBC DataSource that this instance manages transactions for.
+	 */
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+
+	/**
+	 * Set whether to lazily start a database transaction within a TopLink
+	 * transaction.
+	 * <p>By default, database transactions are started early. This allows
+	 * for reusing the same JDBC Connection throughout an entire transaction,
+	 * including read operations, and also for exposing TopLink transactions
+	 * to JDBC access code (working on the same DataSource).
+	 * <p>It is only recommended to switch this flag to "true" when no JDBC access
+	 * code is involved in any of the transactions, and when it is acceptable to
+	 * perform read operations outside of the transactional JDBC Connection.
+	 * @see #setDataSource(javax.sql.DataSource)
+	 * @see oracle.toplink.sessions.UnitOfWork#beginEarlyTransaction()
+	 */
+	public void setLazyDatabaseTransaction(boolean lazyDatabaseTransaction) {
+		this.lazyDatabaseTransaction = lazyDatabaseTransaction;
+	}
+
+	/**
+	 * Return whether to lazily start a database transaction within a TopLink
+	 * transaction.
+	 */
+	public boolean isLazyDatabaseTransaction() {
+		return lazyDatabaseTransaction;
+	}
+
+	/**
 	 * Set the JDBC exception translator for this instance.
 	 * Applied to TopLink DatabaseExceptions thrown on commit.
-	 * <p>The default exception translator is a SQLStateSQLExceptionTranslator.
+	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
+	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
 	 * @param jdbcExceptionTranslator the exception translator
 	 * @see oracle.toplink.exceptions.DatabaseException
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 * @see #setDataSource(javax.sql.DataSource)
 	 */
 	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
 		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 	}
 
 	/**
-	 * Return the JDBC exception translator for this instance.
-	 * <p>Creates a default SQLStateSQLExceptionTranslator,
-	 * if no exception translator explicitly specified.
+	 * Return the JDBC exception translator for this transaction manager.
+	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator or SQLStateSQLExceptionTranslator
+	 * for the specified SessionFactory, if no exception translator explicitly specified.
+	 * @see #setJdbcExceptionTranslator
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
 		if (this.jdbcExceptionTranslator == null) {
-			this.jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+			if (getDataSource() != null) {
+				this.jdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
+			}
+			else {
+				this.jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
+			}
 		}
 		return this.jdbcExceptionTranslator;
 	}
@@ -150,11 +269,11 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 			Session session = null;
 			if (!definition.isReadOnly()) {
 				logger.debug("Creating managed TopLink Session with active UnitOfWork for read-write transaction");
-				session = this.sessionFactory.createManagedSession();
+				session = getSessionFactory().createManagedSession();
 			}
 			else {
 				logger.debug("Creating plain TopLink Session without active UnitOfWork for read-only transaction");
-				session = this.sessionFactory.createSession();
+				session = getSessionFactory().createSession();
 			}
 
 			if (logger.isDebugEnabled()) {
@@ -183,28 +302,84 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 				txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
 
-			// Bind the session broker holder to the thread.
-			TransactionSynchronizationManager.bindResource(this.sessionFactory, txObject.getSessionHolder());
+			// Enforce early database transaction for TopLink read-write transaction,
+			// unless we are explicitly told to use lazy transactions.
+			if (!definition.isReadOnly() && !isLazyDatabaseTransaction()) {
+				session.getActiveUnitOfWork().beginEarlyTransaction();
+			}
+
+			// Register the TopLink Session's JDBC Connection for the DataSource, if set.
+			if (getDataSource() != null) {
+				Connection con = getJdbcConnection(session);
+				if (con != null) {
+					ConnectionHolder conHolder = new ConnectionHolder(con);
+					if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+						conHolder.setTimeoutInSeconds(definition.getTimeout());
+					}
+					if (logger.isDebugEnabled()) {
+						logger.debug("Exposing TopLink transaction as JDBC transaction [" + con + "]");
+					}
+					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
+					txObject.setConnectionHolder(conHolder);
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Not exposing TopLink transaction [" + session +
+								"] as JDBC transaction because no JDBC connection could be retrieved from it");
+					}
+				}
+			}
+
+			// Bind the session holder to the thread.
+			TransactionSynchronizationManager.bindResource(getSessionFactory(), txObject.getSessionHolder());
 		}
 		catch (TopLinkException ex) {
 			throw new CannotCreateTransactionException("Could not create TopLink transaction", ex);
 		}
 	}
 
+	/**
+	 * Extract the underlying JDBC Connection from the given TopLink Session.
+	 * <p>Default implementation casts to <code>oracle.toplink.publicinterface.Session</code>
+	 * and fetches the Connection from the DatabaseAccessor exposed there.
+	 * @param session the current TopLink Session
+	 * @return the underlying JDBC Connection, or null if none found
+	 * @see oracle.toplink.publicinterface.Session#getAccessor()
+	 * @see oracle.toplink.internal.databaseaccess.DatabaseAccessor#getConnection()
+	 */
+	protected Connection getJdbcConnection(Session session) {
+		if (!(session instanceof oracle.toplink.publicinterface.Session)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("TopLink Session [" + session +
+						"] does not derive from [oracle.toplink.publicinterface.Session]");
+			}
+			return null;
+		}
+		Accessor accessor = ((oracle.toplink.publicinterface.Session) session).getAccessor();
+		if (!(accessor instanceof DatabaseAccessor)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("TopLink Accessor [" + accessor +
+						"] does not derive from [oracle.toplink.internal.databaseaccess.DatabaseAccessor]");
+			}
+			return null;
+		}
+		return ((DatabaseAccessor) accessor).getConnection();
+	}
+
 	protected Object doSuspend(Object transaction) {
 		TopLinkTransactionObject txObject = (TopLinkTransactionObject) transaction;
 		txObject.setSessionHolder(null);
-		return TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+		return TransactionSynchronizationManager.unbindResource(getSessionFactory());
 	}
 
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SessionHolder sessionHolder = (SessionHolder) suspendedResources;
-		if (TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
+		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
 			// From non-transactional code running in active transaction synchronization
 			// -> can be safely removed, will be closed on transaction completion.
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+			TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		}
-		TransactionSynchronizationManager.bindResource(this.sessionFactory, sessionHolder);
+		TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
 	}
 
 	protected void doCommit(DefaultTransactionStatus status) {
@@ -249,7 +424,12 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		TopLinkTransactionObject txObject = (TopLinkTransactionObject) transaction;
 
 		// Remove the session holder from the thread.
-		TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+		TransactionSynchronizationManager.unbindResource(getSessionFactory());
+
+		// Remove the JDBC connection holder from the thread, if exposed.
+		if (txObject.hasConnectionHolder()) {
+			TransactionSynchronizationManager.unbindResource(getDataSource());
+		}
 
 		Session session = txObject.getSessionHolder().getSession();
 		if (logger.isDebugEnabled()) {
@@ -291,7 +471,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	 * TopLink transaction object, representing a SessionHolder.
 	 * Used as transaction object by TopLinkTransactionManager.
 	 */
-	private static class TopLinkTransactionObject implements SmartTransactionObject {
+	private static class TopLinkTransactionObject extends JdbcTransactionObjectSupport {
 
 		private SessionHolder sessionHolder;
 
