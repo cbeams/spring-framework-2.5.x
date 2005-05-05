@@ -13,7 +13,9 @@ import org.easymock.MockControl;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * @author jclark
+ * @author Juergen Hoeller
+ * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
+ * @since 28.04.2005
  */
 public class TopLinkTemplateTests extends TestCase {
 

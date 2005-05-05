@@ -14,7 +14,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import oracle.toplink.sessions.Session;
 
 /**
- * @author jclark
+ * @author Juergen Hoeller
+ * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
+ * @since 28.04.2005
  */
 public class TopLinkInterceptorTests extends TestCase {
 

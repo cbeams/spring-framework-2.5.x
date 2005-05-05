@@ -38,7 +38,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author Juergen Hoeller
- * @since 08.07.2004
+ * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
+ * @since 28.04.2005
  */
 public class TopLinkJtaTransactionTests extends TestCase {
 
