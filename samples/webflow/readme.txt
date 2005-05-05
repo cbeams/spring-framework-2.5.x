@@ -9,7 +9,7 @@
  *
  * @author Keith Donald
  * @since Mar 2005
- * @version $Id: readme.txt,v 1.3 2005-05-05 13:28:09 kdonald Exp $
+ * @version $Id: readme.txt,v 1.4 2005-05-05 13:48:51 kdonald Exp $
  */
 
 HOW TO BUILD WEBFLOW SAMPLES - FROM RELEASED DISTRIBUTION
@@ -42,7 +42,18 @@ From the spring root directory, execute from the command line:
 
 4. Proceed with the RELEASED DISTRIBUTION instructions above, customizing your local
 build.properties for each sample as necessary.  Note: If all wish to do is build the
-sample .war file for manual deployment, you shouldn't have to do any build.properties
-customization--the default properties will suffice.  Property customization is only
-necessary if you have custom paths to dependent jar files or wish to automate deployment
+sample .war file for manual deployment, you shouldn't have to do any build.properties or
+build.bat customization--the default properties and paths will suffice.  Property customization
+is only necessary if you have custom paths to dependent jar files or wish to automate deployment
 with a local tomcat installation.
+
+SAMPLE DEPENDENCIES
+
+To see exactly what dependencies each sample depends on to build, review the
+'build.webapp.libs' target in the build.xml file for each project.  At a minimum,
+this includes:
+
+commons-logging.jar
+spring.jar
+spring-webflow.jar
+spring-webflow-support.jar
