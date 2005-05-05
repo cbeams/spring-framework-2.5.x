@@ -1,15 +1,17 @@
 /*
  * webflow-samples
  *
- * phonebook - central sample demonstrating most webflow features
- * itemlist - demonstrates application transaction tokens and expired flow cleanup
- * fileupload - demonstrates multipart file upload with webflow
  * birthdate - demonstrates Struts integration and the MultiAction
+ * fileupload - demonstrates multipart file upload with webflow
+ * flowlauncher - demonstrates the different ways to launch flows from web pages
+ * itemlist - demonstrates application transaction tokens and expired flow cleanup
+ * numberguess - demonstrates how to play a game with spring web flow
+ * phonebook - central sample demonstrating most webflow features
  * sellitem - demonstrates a wizard with conditional transitions and continuations
  *
  * @author Keith Donald
  * @since Mar 2005
- * @version $Id: readme.txt,v 1.4 2005-05-05 13:48:51 kdonald Exp $
+ * @version $Id: readme.txt,v 1.5 2005-05-05 14:05:39 kdonald Exp $
  */
 
 HOW TO BUILD WEBFLOW SAMPLES - FROM RELEASED DISTRIBUTION
