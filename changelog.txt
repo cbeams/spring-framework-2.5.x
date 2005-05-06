@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 final (8.5.2005)
+Changes in version 1.2 final (9.5.2005)
 ---------------------------------------
 
 Package org.springframework.beans
@@ -13,9 +13,14 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory applies generic constructor argument values of the same type in definition order
 * factored out BeanDefinitionValueResolver helper class from AbstractAutowireCapableBeanFactory
 * AbstractAutowireCapableBeanFactory excludes CGLIB-defined bean properties (-> method injection) from dependency checks
+* reworked ResourceEntityResolver to depend on ResourceLoader only and moved it to package "beans.factory.xml"
+* factored out resource editor registration from AbstractApplicationContext into ConfigurableBeanFactoryUtils helper
 
 Package org.springframework.dao
 * reworked IncorrectResultSizeDataAccessException into subclass of DataRetrievalFailureException
+
+Package org.springframework.jms
+* added UserCredentialsConnectionFactoryAdapter for JMS, analogous to the UserCredentialsDataSourceAdapter for JDBC
 
 Package org.springframework.jmx
 * changed MBeanServerNotFoundException to unchecked and added constructor with root cause argument
@@ -31,11 +36,13 @@ Package org.springframework.jdbc
 Package org.springframework.orm
 * deprecated "closePersistenceManager/BrokerIfNecessary" methods in favor of "releasePersistenceManager/Broker"
 * deprecated "closeSessionIfNecessary" methods in favor of "releaseSession" (for both Hibernate2 and Hibernate3)
-* added TypeDefinitionBean, representing a Hibernate3 type definition (TypeDef / <typedef>) in bean-style format
+* added TypeDefinitionBean, representing a Hibernate3 type definition (TypeDef / typedef XMl tag) in bean-style format
 * added "typeDefinitions" property to LocalSessionFactoryBean for Hibernate3, accepting TypeDefinitionBean objects
 * Hibernate3 SessionFactoryUtils doesn't call "setReadOnly(true)" anymore, to avoid Open Session in View side effects
 * added IdTransferringMergeEventListener for Hibernate3, setting newly assigned ids on the original objects too
-* added Oracle-donated support for TopLink as data access strategy, in package "org.springframework.orm.toplink"
+* added Oracle-donated support for TopLink as Spring-style data access option: TopLinkTemplate, TopLinkCallback, etc
+* added TopLinkTransactionManager, a Spring PlatformTransactionManager implementation for TopLink's native transactions
+* added TopLink SessionFactory abstraction for creating TopLink Sessions, including a convenient LocalSessionFactoryBean
 
 Package org.springframework.samples
 * reworked PetClinic's Hibernate DAO to use "merge" (plus IdTransferringMergeEventListener) instead of "saveOrUpdate"
@@ -47,7 +54,9 @@ Package org.springframework.util
 
 Package org.springframework.web
 * added DelegatingFilterProxy, delegating to a Spring-managed Filter bean (successor of Acegi's FilterToBeanProxy)
+* changed visibility of ServletContextResource's "getServletContext" and "getPath" methods to public
 * WebContentGenerator sets "no-store" value for "Cache-Control" header too, to prevent caching on FireFox
+* reworked XmlViewResolver to register a ResourceEntityResolver and and all available resource editors for its factory
 
 
 Changes in version 1.2 RC2 (18.4.2005)
