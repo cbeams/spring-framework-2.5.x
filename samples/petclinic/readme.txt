@@ -17,9 +17,9 @@ a simple comment change in web.xml switches between the data access strategies.
 The Spring distribution comes with all required Hibernate and OJB jar files
 to be able to build and run PetClinic on those two ORM tools. For TopLink,
 only a minimal toplink-api.jar is included in the Spring distribution.
-To run PetClinic with TopLink, download TopLink 9.0.4 from the Oracle website
-(http://www.oracle.com/technology/products/ias/toplink), install it and copy
-toplink.jar and xmlparserv2.jar into Spring's "lib/toplink" directory.
+To run PetClinic with TopLink, download TopLink 9.0.4 or 10.1.3 from the Oracle
+website (http://www.oracle.com/technology/products/ias/toplink), install it and
+copy toplink.jar and xmlparserv2.jar into Spring's "lib/toplink" directory.
 
 All data access strategies can work with JTA for transaction management,
 by activating the JtaTransactionManager and a JndiObjectFactoryBean that
