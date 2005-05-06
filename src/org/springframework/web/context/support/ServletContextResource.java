@@ -26,8 +26,8 @@ import javax.servlet.ServletContext;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
-import org.springframework.util.StringUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -68,16 +68,16 @@ public class ServletContextResource extends AbstractResource {
 	}
 
 	/**
-	 * Return the ServletContext for this resource. Only for internal use.
+	 * Return the ServletContext for this resource.
 	 */
-	protected ServletContext getServletContext() {
+	public ServletContext getServletContext() {
 		return servletContext;
 	}
 
 	/**
-	 * Return the path for this resource. Only for internal use.
+	 * Return the path for this resource.
 	 */
-	protected String getPath() {
+	public String getPath() {
 		return path;
 	}
 
