@@ -64,9 +64,13 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 
 	private ConnectionSpec connectionSpec;
 
-	private final ThreadLocal threadBoundCredentials = new ThreadLocal();
+	private final ThreadLocal threadBoundSpec = new ThreadLocal();
 
 
+	/**
+	 * Set the ConnectionSpec that this adapter should use for retrieving Connections.
+	 * Default is none.
+	 */
 	public void setConnectionSpec(ConnectionSpec connectionSpec) {
 		this.connectionSpec = connectionSpec;
 	}
@@ -80,7 +84,7 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 	 * @see #removeConnectionSpecFromCurrentThread
 	 */
 	public void setConnectionSpecForCurrentThread(ConnectionSpec spec) {
-		this.threadBoundCredentials.set(spec);
+		this.threadBoundSpec.set(spec);
 	}
 
 	/**
@@ -89,7 +93,7 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 	 * @see #setConnectionSpecForCurrentThread
 	 */
 	public void removeConnectionSpecFromCurrentThread() {
-		this.threadBoundCredentials.set(null);
+		this.threadBoundSpec.set(null);
 	}
 
 
@@ -100,7 +104,7 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 	 * @see #doGetConnection
 	 */
 	public final Connection getConnection() throws ResourceException {
-		ConnectionSpec threadSpec = (ConnectionSpec) this.threadBoundCredentials.get();
+		ConnectionSpec threadSpec = (ConnectionSpec) this.threadBoundSpec.get();
 		if (threadSpec != null) {
 			return doGetConnection(threadSpec);
 		}

@@ -40,16 +40,14 @@ public abstract class DelegatingConnectionFactory implements ConnectionFactory, 
 
 
 	/**
-	 * Set the target ConnectionFactory which will be used to lazily
-	 * create a single Connection.
+	 * Set the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
 	public void setTargetConnectionFactory(ConnectionFactory targetConnectionFactory) {
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 
 	/**
-	 * Return the target ConnectionFactory which will be used to lazily
-	 * create a single Connection, if any.
+	 * Return the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
 	public ConnectionFactory getTargetConnectionFactory() {
 		return targetConnectionFactory;
