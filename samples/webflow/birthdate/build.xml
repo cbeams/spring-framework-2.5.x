@@ -17,18 +17,18 @@
 
 	<target name="build.webapp.libs">
 		<copy todir="${target.weblib.dir}">
+			<fileset file="${commons.beanutils.jar}" />
+			<fileset file="${commons.collections.jar}" />
+			<fileset file="${commons.digester.jar}" />
 			<fileset file="${commons.logging.jar}" />
+			<fileset file="${commons.validator.jar}" />
 			<fileset file="${log4j.jar}" />
 			<fileset file="${jakarta.taglibs.jar}" />
+			<fileset file="${jakarta.oro.jar}" />
 			<fileset file="${jstl.jar}" />
 			<fileset file="${spring.jar}" />
 			<fileset file="${spring.webflow.jar}" />
 			<fileset file="${spring.webflow.support.jar}" />
-			<fileset file="${commons.beanutils.jar}" />
-			<fileset file="${commons.collections.jar}" />
-			<fileset file="${commons.digester.jar}" />
-			<fileset file="${commons.validator}" />
-			<fileset file="${jakarta.oro.jar}" />
 			<fileset file="${struts.jar}" />
 		</copy>
 	</target>

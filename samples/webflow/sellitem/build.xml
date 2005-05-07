@@ -22,10 +22,10 @@
 			<fileset file="${log4j.jar}" />
 			<fileset file="${jakarta.taglibs.jar}" />
 			<fileset file="${jstl.jar}" />
+			<fileset file="${ognl.jar}" />
 			<fileset file="${spring.jar}" />
 			<fileset file="${spring.webflow.jar}" />
 			<fileset file="${spring.webflow.support.jar}" />
-			<fileset file="${ognl.jar}" />
 		</copy>
 	</target>
 </project>

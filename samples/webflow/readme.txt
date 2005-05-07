@@ -11,11 +11,11 @@
  *
  * @author Keith Donald
  * @since Mar 2005
- * @version $Id: readme.txt,v 1.5 2005-05-05 14:05:39 kdonald Exp $
+ * @version $Id: readme.txt,v 1.6 2005-05-07 09:00:13 kdonald Exp $
  */
 
 HOW TO BUILD WEBFLOW SAMPLES - FROM RELEASED DISTRIBUTION
-
+---------------------------------------------------------
 1. copy in the template 'build.properties' file in the same directory as this file to the
 root directory of the sample you wish to run.
 
@@ -33,7 +33,7 @@ deploy the sample application in one step.
 7. access the sample at the appropriate URL, e.g http://localhost:8080/phonebook
 
 HOW TO BUILD WEBFLOW SAMPLES - FROM CVS
-
+---------------------------------------------------------
 From the spring root directory, execute from the command line:
 
 1. build alljars
@@ -50,7 +50,7 @@ is only necessary if you have custom paths to dependent jar files or wish to aut
 with a local tomcat installation.
 
 SAMPLE DEPENDENCIES
-
+------------------------------------------------------------
 To see exactly what dependencies each sample depends on to build, review the
 'build.webapp.libs' target in the build.xml file for each project.  At a minimum,
 this includes:
