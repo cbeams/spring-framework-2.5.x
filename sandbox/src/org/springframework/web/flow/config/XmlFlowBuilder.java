@@ -179,8 +179,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String VALUE_ELEMENT = "value";
 	
-
-	private Resource resource;
+	private Resource location;
 
 	private boolean validating = true;
 
@@ -202,31 +201,31 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * @param resource resource to read XML flow definitions from
 	 */
 	public XmlFlowBuilder(Resource resource) {
-		this.resource = resource;
+		this.location = resource;
 	}
 
 	/**
 	 * Create a new XML flow builder.
-	 * @param resource resource to read XML flow definitions from
+	 * @param location resource to read XML flow definitions from
 	 * @param flowServiceLocator the flow service location strategy to use
 	 */
-	public XmlFlowBuilder(Resource resource, FlowServiceLocator flowServiceLocator) {
-		this.resource = resource;
+	public XmlFlowBuilder(Resource location, FlowServiceLocator flowServiceLocator) {
+		this.location = location;
 		setFlowServiceLocator(flowServiceLocator);
 	}
 
 	/**
 	 * Returns the XML resource from which the flow definition is read.
 	 */
-	public Resource getResource() {
-		return resource;
+	public Resource getLocation() {
+		return location;
 	}
 
 	/**
 	 * Set the resource from which an XML flow definition will be read.
 	 */
-	public void setResource(Resource resource) {
-		this.resource = resource;
+	public void setLocation(Resource location) {
+		this.location = location;
 	}
 
 	/**
@@ -263,7 +262,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 
 	public Flow init() throws FlowBuilderException {
-		Assert.notNull(resource, "resource is a required property");
+		Assert.notNull(location, "location is a required property");
 		Assert.notNull(getFlowServiceLocator(), "flowServiceLocator is a required property");
 		Assert.notNull(getFlowCreator(), "flowCreator is a required property");
 		Assert.notNull(getTransitionCriteriaCreator(), "transitionCriteriaCreator is a required property");
@@ -271,13 +270,13 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			loadFlowDefinition();
 		}
 		catch (IOException e) {
-			throw new FlowBuilderException("Cannot load the XML flow definition resource '" + resource + "'", e);
+			throw new FlowBuilderException("Cannot load the XML flow definition resource '" + location + "'", e);
 		}
 		catch (ParserConfigurationException e) {
 			throw new FlowBuilderException("Cannot configure parser to parse the XML flow definition", e);
 		}
 		catch (SAXException e) {
-			throw new FlowBuilderException("Cannot parse the flow definition XML document '" + resource + "'", e);
+			throw new FlowBuilderException("Cannot parse the flow definition XML document '" + location + "'", e);
 		}
 		parseFlowDefinition();
 		return getFlow();
@@ -316,7 +315,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				}
 			});
 			docBuilder.setEntityResolver(this.entityResolver);
-			is = resource.getInputStream();
+			is = location.getInputStream();
 			doc = docBuilder.parse(is);
 		}
 		finally {
