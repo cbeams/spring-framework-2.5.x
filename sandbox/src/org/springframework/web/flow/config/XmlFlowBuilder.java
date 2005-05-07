@@ -639,7 +639,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 					List outputMappings = new ArrayList(outputElements.size());
 					Iterator it = outputElements.iterator();
 					while (it.hasNext()) {
-						Mapping output = parseMapping((Element)it.next());
+						outputMappings.add(parseMapping((Element)it.next()));
 					}
 					attributeMapper.setOutputMappings(outputMappings);
 				}
