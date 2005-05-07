@@ -659,8 +659,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				return new Mapping(name);
 			}
 		} else if (StringUtils.hasText(value)) {
-			//@TODO input/output value expressions
-			throw new UnsupportedOperationException("Value expressions not yet supported here");
+			Assert.hasText(as, "The 'as' attribute is required with the 'value' attribute");
+			return new Mapping(value, as);
 		} else {
 			throw new FlowBuilderException("Name or value is required");
 		}
