@@ -72,20 +72,12 @@
 	<!-- detail flow beans -->
 
 	<bean id="detailFrontController" name="/detail.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flowExecutionManager">
-			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow" ref="person.Detail"/>
-			</bean>
-		</property>
+		<property name="flow" ref="person.Detail"/>
 	</bean>
 
 	<!-- xml FlowBuilder definition for the detail flow -->
-	<bean id="person.Detail" class="org.springframework.web.flow.config.FlowFactoryBean">
-		<property name="flowBuilder">
-			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource" value="classpath:org/springframework/samples/phonebook/web/flow/detail-flow.xml"/>
-			</bean>
-		</property>
+	<bean id="person.Detail" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
+		<property name="location" value="classpath:org/springframework/samples/phonebook/web/flow/detail-flow.xml"/>
 	</bean>
 	
 	<!-- Java flow builder definition for the detail flow.

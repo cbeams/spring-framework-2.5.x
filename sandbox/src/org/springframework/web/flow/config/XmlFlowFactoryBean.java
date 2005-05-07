@@ -1,5 +1,7 @@
 package org.springframework.web.flow.config;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -23,7 +25,7 @@ import org.springframework.util.Assert;
  * </table>
  * @author Keith Donald
  */
-public class XmlFlowFactoryBean extends FlowFactoryBean {
+public class XmlFlowFactoryBean extends FlowFactoryBean implements BeanFactoryAware {
 
 	/**
 	 * Creates a XML flow factory bean.
@@ -40,14 +42,15 @@ public class XmlFlowFactoryBean extends FlowFactoryBean {
 		getXmlFlowBuilder().setLocation(location);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.springframework.web.flow.config.FlowFactoryBean#setFlowBuilder(org.springframework.web.flow.config.FlowBuilder)
-	 */
 	public void setFlowBuilder(FlowBuilder flowBuilder) {
 		Assert.isInstanceOf(XmlFlowBuilder.class, flowBuilder);
 		super.setFlowBuilder(flowBuilder);
 	}
 
+	public void setBeanFactory(BeanFactory beanFactory) {
+		getXmlFlowBuilder().setBeanFactory(beanFactory);
+	}
+	
 	/**
 	 * @return the XML flow builder
 	 */
