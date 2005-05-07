@@ -240,17 +240,23 @@
 
 <!--
 	The name of the attribute in this flow to map into the subflow.
+	Use this OR the value attribute, not both.
 -->
 <!ATTLIST input name CDATA #IMPLIED>
 
 <!--
 	An expression for the attribute value in this flow's request context to
-	map to the subflow.
+	map to the subflow.  Use this OR the name attribute, not both.
 -->
 <!ATTLIST input value CDATA #IMPLIED>
 
 <!--
-	The name of the target attribute in the subflow.
+	The name of the target attribute in the subflow.  This is optional when used in
+	conjunction with the 'name' attribute; by default, the same attribute name will be
+	used between this flow and the subflow.
+	
+	Note: this is required when used in conjunction with the 'value' attribute: you must
+	assign a name to the value returned by the expression for storage in the subflow.
 -->
 <!ATTLIST input as CDATA #IMPLIED>
 
@@ -262,17 +268,23 @@
 
 <!--
 	The name of the attribute in the subflow to map to this flow.
+	Use this OR the value attribute, not both.
 -->
 <!ATTLIST output name CDATA #IMPLIED>
 
 <!--
 	An expression for the attribute value in the subflow's request context to
-	map to this flow.
+	map to this flow.  Use this OR the name attribute, not both.
 -->
 <!ATTLIST output value CDATA #IMPLIED>
 
 <!--
-	The name of the target attribute in this flow.
+	The name of the target attribute in this flow.  This is optional when used in
+	conjunction with the 'name' attribute; by default, the same name will be used between
+	the subflow and this flow.
+
+	Note: this is required when used in conjunction with the 'value' attribute: you must
+	assign a name to the value returned by the expression for storage in this flow.
 -->
 <!ATTLIST output as CDATA #IMPLIED>
 
