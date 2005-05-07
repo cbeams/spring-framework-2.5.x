@@ -101,57 +101,64 @@ import org.springframework.web.flow.ScopeType;
  * <tr>
  * <td>formObjectName</td>
  * <td>"formObject"</td>
- * <td> The name of the form object in the scope. The form object will be
- * included in the scope using this name. </td>
+ * <td>The name of the form object. The form object will be
+ * set in the configured scope using this name. </td>
  * </tr>
  * <tr>
  * <td>formObjectClass</td>
  * <td>null</td>
- * <td> The form object class for this action. An instance of this class will
+ * <td>The form object class for this action. An instance of this class will
  * get populated and validated. </td>
  * </tr>
  * <tr>
  * <td>formObjectScope</td>
  * <td>{@link org.springframework.web.flow.ScopeType#REQUEST request}</td>
- * <td> The scope in which the form object will be put. </td>
+ * <td>The scope in which the form object will be put. If put in flow scope the
+ * object will be cached and reused over the life of the flow, preserving previous
+ * values.  Request scope will cause a new fresh form object instance to be created
+ * each execution.</td>
  * </tr>
  * <tr>
  * <td>errorsScope</td>
  * <td>{@link org.springframework.web.flow.ScopeType#REQUEST request}</td>
- * <td> The scope in which the form object errors instance will be put. </td>
+ * <td>The scope in which the form object errors instance will be put.
+ * If put in flow scope the errors will be cached and reused over the life
+ * of the flow.  Request scope will cause a new errors instance to be created
+ * each execution.</td>
  * </tr>
  * <tr>
  * <td>propertyEditorRegistrar</td>
  * <td>null</td>
- * <td> The strategy used to register custom property editors with the data
+ * <td>The strategy used to register custom property editors with the data
  * binder. This is an alternative to overriding the
  * {@link #initBinder(RequestContext, DataBinder) initBinder} hook method. </td>
  * </tr>
  * <tr>
  * <td>validator</td>
  * <td>null</td>
- * <td> The validator for this action. The validator must support the
+ * <td>The validator for this action. The validator must support the
  * specified form object class. </td>
  * </tr>
  * <tr>
  * <td>bindOnSetupForm</td>
  * <td>false</td>
- * <td> Set if request parameters should be bound to the form object during the
+ * <td>Set if request parameters should be bound to the form object during the
  * {@link #setupForm(RequestContext) setupForm} action. </td>
  * </tr>
  * <tr>
  * <td>validateOnBinding</td>
  * <td>true</td>
- * <td> Indicates if the validator should get applied when binding. </td>
+ * <td>Indicates if the validator should get applied when binding. </td>
  * </tr>
  * <tr>
  * <td>messageCodesResolver</td>
  * <td>null</td>
- * <td> Set the strategy to use for resolving errors into message codes. </td>
+ * <td>Set the strategy to use for resolving errors into message codes. </td>
  * </tr>
  * </table>
  * 
  * @author Erwin Vervaet
+ * @author Keith Donald
  */
 public class FormAction extends MultiAction implements InitializingBean {
 
