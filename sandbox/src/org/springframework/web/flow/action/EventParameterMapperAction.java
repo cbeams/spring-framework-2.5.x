@@ -148,7 +148,7 @@ public class EventParameterMapperAction extends AbstractAction {
 		this.targetScope = (ScopeType)new LabeledEnumFormatter(ScopeType.class).parseValue(encodedScopeType);
 	}
 
-	protected Event doExecuteAction(RequestContext context) throws Exception {
+	protected Event doExecute(RequestContext context) throws Exception {
 		if (eventParameterMapper != null) {
 			Scope scope = (targetScope == ScopeType.REQUEST ? context.getRequestScope() : context.getFlowScope());
 			this.eventParameterMapper.map(context.getLastEvent(), scope);

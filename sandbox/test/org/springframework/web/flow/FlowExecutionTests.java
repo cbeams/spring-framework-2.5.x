@@ -87,7 +87,7 @@ public class FlowExecutionTests extends TestCase {
 				addActionState("doOtherStuff", new AbstractAction() {
 					private int executionCount = 0;
 
-					protected Event doExecuteAction(RequestContext context) throws Exception {
+					protected Event doExecute(RequestContext context) throws Exception {
 						executionCount++;
 						if (executionCount < 2) {
 							return success();
@@ -107,7 +107,7 @@ public class FlowExecutionTests extends TestCase {
 
 			public void buildStates() throws FlowBuilderException {
 				addActionState("doStuff", new AbstractAction() {
-					protected Event doExecuteAction(RequestContext context) throws Exception {
+					protected Event doExecute(RequestContext context) throws Exception {
 						return success();
 					}
 				}, on(success(), "startSubFlow"));

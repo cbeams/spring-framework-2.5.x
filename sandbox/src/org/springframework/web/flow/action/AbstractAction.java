@@ -150,7 +150,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		}
 		Event result = doPreExecute(context);
 		if (result == null) {
-			result = doExecuteAction(context);
+			result = doExecute(context);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Action '" + getClass().getName() + "' completed execution; result event is " + result);
 			}
@@ -202,7 +202,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @throws Exception an <b>unrecoverable</b> exception occured, either
 	 *         checked or unchecked
 	 */
-	protected abstract Event doExecuteAction(RequestContext context) throws Exception;
+	protected abstract Event doExecute(RequestContext context) throws Exception;
 
 	/**
 	 * Post-action execution hook, subclasses may override.

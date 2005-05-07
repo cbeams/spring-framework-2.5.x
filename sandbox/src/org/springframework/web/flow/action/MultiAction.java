@@ -134,7 +134,7 @@ public class MultiAction extends AbstractAction {
 		this.executeMethodNameResolver = methodNameResolver;
 	}
 
-	protected Event doExecuteAction(RequestContext context) throws Exception {
+	protected Event doExecute(RequestContext context) throws Exception {
 		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context, this);
 		return (Event)this.executeMethodDispatcher.dispatch(actionExecuteMethodName, new Object[] { context });
 	}

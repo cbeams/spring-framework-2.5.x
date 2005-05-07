@@ -29,7 +29,7 @@ public class GetPersonAction extends AbstractAction {
 		this.phoneBook = phoneBook;
 	}
 
-	protected Event doExecuteAction(RequestContext context) throws Exception {
+	protected Event doExecute(RequestContext context) throws Exception {
 		Long id = (Long)context.getFlowScope().getRequiredAttribute("id", Long.class);
 		Person person = phoneBook.getPerson(id);
 		if (person != null) {

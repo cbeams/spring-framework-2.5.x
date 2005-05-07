@@ -82,7 +82,7 @@ public class SetPortletModeAction extends AbstractAction {
 	 * @throws Exception an <b>unrecoverable </b> exception occured, either checked or
 	 *         unchecked
 	 */
-	protected Event doExecuteAction(RequestContext context) throws Exception {
+	protected Event doExecute(RequestContext context) throws Exception {
 		Assert.isInstanceOf(PortletRequestEvent.class, context.getOriginatingEvent(), "'"
 				+ ClassUtils.getShortName(this.getClass())
 				+ "' can only work with 'PortletRequestEvent'");

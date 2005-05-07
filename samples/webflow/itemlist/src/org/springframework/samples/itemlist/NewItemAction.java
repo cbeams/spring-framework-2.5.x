@@ -21,7 +21,7 @@ import org.springframework.web.flow.action.AbstractAction;
 
 public class NewItemAction extends AbstractAction {
 
-	protected Event doExecuteAction(RequestContext context) throws Exception {
+	protected Event doExecute(RequestContext context) throws Exception {
 		// begin transactional processing
 		context.getTransactionSynchronizer().beginTransaction();
 		return success();

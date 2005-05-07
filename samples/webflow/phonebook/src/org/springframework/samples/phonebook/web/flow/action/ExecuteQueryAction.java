@@ -29,7 +29,7 @@ public class ExecuteQueryAction extends AbstractAction {
 		this.phoneBook = phoneBook;
 	}
 
-	protected Event doExecuteAction(RequestContext context) throws Exception {
+	protected Event doExecute(RequestContext context) throws Exception {
 		PhoneBookQuery query = (PhoneBookQuery)context.getFlowScope().getRequiredAttribute("query",
 				PhoneBookQuery.class);
 		context.getRequestScope().setAttribute("persons", phoneBook.query(query));

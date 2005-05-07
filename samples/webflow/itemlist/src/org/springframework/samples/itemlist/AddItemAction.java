@@ -24,7 +24,7 @@ import org.springframework.web.flow.action.AbstractAction;
 
 public class AddItemAction extends AbstractAction {
 
-	protected Event doExecuteAction(RequestContext context) throws Exception {
+	protected Event doExecute(RequestContext context) throws Exception {
 		// check to ensure the incoming request is within the active transaction
 		// note that we're also ending the transaction using end==true
 		if (!context.getTransactionSynchronizer().inTransaction(true)) {
