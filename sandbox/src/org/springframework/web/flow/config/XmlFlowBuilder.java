@@ -17,7 +17,9 @@ package org.springframework.web.flow.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ import org.springframework.binding.convert.support.TextToClassConverter;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.binding.support.MapAttributeSource;
+import org.springframework.binding.support.Mapping;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -48,6 +51,7 @@ import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
+import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
 import org.springframework.web.flow.support.TransitionCriteriaChain;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -166,6 +170,12 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	private static final String FLOW_ATTRIBUTE = "flow";
 
 	private static final String ATTRIBUTE_MAPPER_ELEMENT = "attribute-mapper";
+
+	private static final String INPUT_ELEMENT = "input";
+
+	private static final String OUTPUT_ELEMENT = "output";
+
+	private static final String AS_ATTRIBUTE = "as";
 
 	private static final String END_STATE_ELEMENT = "end-state";
 
@@ -447,8 +457,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected AnnotatedAction[] parseActions(Element element) {
 		List actions = new LinkedList();
 		List actionElements = DomUtils.getChildElementsByTagName(element, ACTION_ELEMENT);
-		for (int i = 0; i < actionElements.size(); i++) {
-			actions.add(parseAction((Element)actionElements.get(i)));
+		Iterator it = actionElements.iterator();
+		while (it.hasNext()) {
+			actions.add(parseAction((Element)it.next()));
 		}
 		return (AnnotatedAction[])actions.toArray(new AnnotatedAction[actions.size()]);
 	}
@@ -568,8 +579,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected Transition[] parseIfs(Element element) {
 		List transitions = new LinkedList();
 		List transitionElements = DomUtils.getChildElementsByTagName(element, IF_ELEMENT);
-		for (int i = 0; i < transitionElements.size(); i++) {
-			transitions.addAll(Arrays.asList(parseIf((Element)transitionElements.get(i))));
+		Iterator it = transitionElements.iterator();
+		while (it.hasNext()) {
+			transitions.addAll(Arrays.asList(parseIf((Element)it.next())));
 		}
 		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
 	}
@@ -612,12 +624,48 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			} else if (StringUtils.hasText(attributeMapperElement.getAttribute(CLASSREF_ATTRIBUTE))) {
 				return (FlowAttributeMapper)getFlowServiceLocator().getFlowAttributeMapper(toClass(attributeMapperElement.getAttribute(CLASSREF_ATTRIBUTE)));
 			} else {
-				//@TODO input/output
-				return null;
+				ParameterizableFlowAttributeMapper attributeMapper = new ParameterizableFlowAttributeMapper();
+				List inputElements = DomUtils.getChildElementsByTagName(element, INPUT_ELEMENT);
+				if (inputElements.size() > 0) {
+					List inputMappings = new ArrayList(inputElements.size());
+					Iterator it = inputElements.iterator();
+					while (it.hasNext()) {
+						inputMappings.add(parseMapping((Element)it.next()));
+					}
+					attributeMapper.setInputMappings(inputMappings);
+				}
+				List outputElements = DomUtils.getChildElementsByTagName(element, OUTPUT_ELEMENT);
+				if (outputElements.size() > 0) {
+					List outputMappings = new ArrayList(outputElements.size());
+					Iterator it = outputElements.iterator();
+					while (it.hasNext()) {
+						Mapping output = parseMapping((Element)it.next());
+					}
+					attributeMapper.setOutputMappings(outputMappings);
+				}
+				return attributeMapper;
 			}
 		}
 	}
 
+	protected Mapping parseMapping(Element element) {
+		String name = element.getAttribute(NAME_ATTRIBUTE);
+		String value = element.getAttribute(VALUE_ATTRIBUTE);
+		String as = element.getAttribute(AS_ATTRIBUTE);
+		if (StringUtils.hasText(name)) {
+			if (StringUtils.hasText(as)) {
+				return new Mapping(name, as);
+			} else {
+				return new Mapping(name);
+			}
+		} else if (StringUtils.hasText(value)) {
+			//@TODO input/output value expressions
+			throw new UnsupportedOperationException("Value expressions not yet supported here");
+		} else {
+			throw new FlowBuilderException("Name or value is required");
+		}
+	}
+	
 	private AutowireMode parseAutowireMode(Element element) {
 		try {
 			return (AutowireMode)new LabeledEnumFormatter(AutowireMode.class).parseValue(element.getAttribute(AUTOWIRE_ATTRIBUTE));
