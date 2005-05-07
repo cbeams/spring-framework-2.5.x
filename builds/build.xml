@@ -26,7 +26,7 @@
 
 	<!-- Catch all 3rd-party lib classpath -->
 	<path id="all.libs.classpath">
-		<fileset dir="${devtools.lib.dir}">
+		<fileset dir="${lib.dir}">
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
