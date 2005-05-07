@@ -16,7 +16,7 @@
 package org.springframework.web.flow;
 
 /**
- * Represents a <i>client instance</i> of an executing flow.  This is the central
+ * Represents a <i>client instance</i> of an executing flow.  This is the central facade
  * interface for managing an execution of a flow.
  * <p>
  * Typically, when the browser requests to execute a new flow, an instance of an object
