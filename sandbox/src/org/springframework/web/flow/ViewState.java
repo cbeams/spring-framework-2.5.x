@@ -106,6 +106,13 @@ public class ViewState extends TransitionableState {
 		setViewName(viewName);
 	}
 
+	/* 
+	 * @see org.springframework.web.flow.State#isInteractive()
+	 */
+	public boolean isInteractive() {
+		return true;
+	}
+	
 	/**
 	 * Returns the logical name of the view to render in this view state.
 	 */
@@ -139,7 +146,7 @@ public class ViewState extends TransitionableState {
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */
-	protected ViewDescriptor doEnterState(StateContext context) {
+	protected ViewDescriptor doEnter(StateContext context) {
 		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning a view descriptor null object; no view to render");

@@ -128,7 +128,7 @@ public class EndState extends State {
 	 * @return ViewDescriptor a view descriptor signaling that control should be
 	 *         returned to the client and a view rendered
 	 */
-	protected ViewDescriptor doEnterState(StateContext context) {
+	protected ViewDescriptor doEnter(StateContext context) {
 		if (context.isRootFlowActive()) {
 			// entire flow execution is ending, return ending view if applicable
 			if (logger.isDebugEnabled()) {

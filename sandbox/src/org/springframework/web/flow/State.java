@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * Subclasses of this class capture all the configuration information needed for
  * a specific type of state.
  * <p>
- * Subclasses should implement the <code>doEnterState</code> method to execute
+ * Subclasses should implement the <code>doEnter</code> method to execute
  * the processing that should occur when this state is entered, acting on its
  * configuration information. The ability to plugin custom state types that
  * execute different behaviour polymorphically is the classic GoF state pattern.
@@ -155,7 +155,7 @@ public abstract class State {
 	 * Is this state transitionable? That is, is this state capable of executing
 	 * a transition to another state on the occurence of an event? All
 	 * subclasses of <code>TransitionableState</code> are transitionable.
-	 * @return true when this is a <code>TransitionableState</code>, false
+	 * @return true when this state is a <code>TransitionableState</code>, false
 	 *         otherwise
 	 */
 	public boolean isTransitionable() {
@@ -163,9 +163,17 @@ public abstract class State {
 	}
 
 	/**
+	 * Is this state interactive? That is, when this state is entered, is
+	 * the flow paused and control returned to the client for interaction? 
+	 * @return true when this state is an interactive state, false otherwise
+	 */
+	public boolean isInteractive() {
+		return false;
+	}
+
+	/**
 	 * Enter this state in the provided flow execution request.
-	 * @param context the flow execution request, tracking an ongoing flow
-	 *        execution (client instance of a flow)
+	 * @param context the state context in an executing flow (a client instance of a flow)
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state processing
 	 */
@@ -174,17 +182,16 @@ public abstract class State {
 			logger.debug("Entering state '" + getId() + "' in flow '" + getFlow() + "'");
 		}
 		context.setCurrentState(this);
-		return doEnterState(context);
+		return doEnter(context);
 	}
 
 	/**
-	 * Hook method to do any processing as a result of entering this state.
-	 * @param context the flow execution request, tracking an ongoing flow
-	 *        execution (client instance of a flow)
+	 * Hook method to execute custom behaivior as a result of entering this state.
+	 * @param context the state context in an executing flow (a client instance of a flow)
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state processing
 	 */
-	protected abstract ViewDescriptor doEnterState(StateContext context);
+	protected abstract ViewDescriptor doEnter(StateContext context);
 
 	public String toString() {
 		ToStringCreator creator = new ToStringCreator(this).append("id", getId()).append("flow", flow.getId());

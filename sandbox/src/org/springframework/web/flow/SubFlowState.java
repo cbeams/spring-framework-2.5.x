@@ -178,7 +178,7 @@ public class SubFlowState extends TransitionableState implements FlowAttributeMa
 	 * Enter this state, creating the sub flow input map and spawning the sub
 	 * flow in the current flow execution.
 	 */
-	protected ViewDescriptor doEnterState(StateContext context) {
+	protected ViewDescriptor doEnter(StateContext context) {
 		Flow subFlow = getSubFlow();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subFlow.getId() + "' within this flow '" + getFlow() + "'");
