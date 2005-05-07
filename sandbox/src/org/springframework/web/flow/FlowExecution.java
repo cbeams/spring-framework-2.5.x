@@ -16,8 +16,19 @@
 package org.springframework.web.flow;
 
 /**
- * Central interface used by clients to interact with the flow system and an
- * ongoing flow execution.
+ * Represents a <i>client instance</i> of an executing flow.  This is the central
+ * interface for managing an execution of a flow.
+ * <p>
+ * Typically, when the browser requests to execute a new flow, an instance of an object
+ * implementing this interface is created by a controlling FlowExecutionManager.  After creation,
+ * the start operation is called, which causes this execution to activate the requested flow
+ * as the "root flow" and enter that flow's start state.  After starting, when control
+ * is returned back to the caller, this execution is saved in some form of storage, for example
+ * in the HttpSession or a client-side hidden form field for later restoration and manipulation. 
+ * <p>
+ * Subsequent requests into the web flow system to manipulate an existing executing flow trigger restoration
+ * and rehydration of this object, followed by an invocation of the signalEvent operation.  This continues
+ * until an event causes this flow execution to end, at which it is removed from storage and discarded.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -25,15 +36,9 @@ package org.springframework.web.flow;
 public interface FlowExecution extends FlowExecutionMBean {
 
 	/**
-	 * Returns a mutable list of listeners attached to this flow execution.
-	 * @return the flow execution listener list
-	 */
-	public FlowExecutionListenerList getListenerList();
-
-	/**
-	 * Start this flow execution, transitioning it to the start state and
+	 * Start executing this flow, transitioning it to the start state and
 	 * returning the starting model and view descriptor. Typically called by a
-	 * flow controller, but also in test code.
+	 * flow controller, but also from test code.
 	 * @param originatingEvent the event that occured that triggered flow
 	 *        execution creation
 	 * @return the starting view descriptor, which returns control to the client
@@ -44,7 +49,8 @@ public interface FlowExecution extends FlowExecutionMBean {
 	public ViewDescriptor start(Event originatingEvent) throws IllegalStateException;
 
 	/**
-	 * Signal an occurence of the specified event in this flow execution.
+	 * Signal an occurence of the specified event in the current state of this
+	 * executing flow.
 	 * @param event the event that occured within the current state of this flow
 	 *        execution.
 	 * @return the next model and view descriptor to display for this flow
@@ -65,4 +71,11 @@ public interface FlowExecution extends FlowExecutionMBean {
 	 *        lifecycle events in this flow execution
 	 */
 	public void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners);
+	
+	/**
+	 * Returns a mutable list of listeners attached to this flow execution.
+	 * @return the flow execution listener list
+	 */
+	public FlowExecutionListenerList getListenerList();
+
 }
