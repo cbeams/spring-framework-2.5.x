@@ -29,9 +29,9 @@ package org.springframework.beans.factory.config;
  *
  * @author Juergen Hoeller
  * @since 1.0.2
- * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#resolveValueIfNecessary
- * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser#parseBeanDefinitionElement(org.w3c.dom.Element)
  * @see org.springframework.beans.factory.BeanNameAware
+ * @see org.springframework.beans.factory.support.RootBeanDefinition
+ * @see org.springframework.beans.factory.support.ChildBeanDefinition
  */
 public class BeanDefinitionHolder {
 
