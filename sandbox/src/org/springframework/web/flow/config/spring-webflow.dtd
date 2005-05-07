@@ -204,7 +204,7 @@
 <!--
 	An optional mapper that will map attributes from the parent flow to/from the spawned subflow. 
 -->
-<!ELEMENT attribute-mapper EMPTY>
+<!ELEMENT attribute-mapper ( input*, output* )>
 
 <!--
 	Identifier of the flow attribute mapper implementation exported in the
@@ -232,6 +232,49 @@
 	be exactly one mapper implementation exported of that type.
 -->
 <!ATTLIST attribute-mapper classref CDATA #IMPLIED>
+
+<!--
+	A single input mapping that maps an attribute from this flow to the subflow.
+-->
+<!ELEMENT input EMPTY>
+
+<!--
+	The name of the attribute in this flow to map into the subflow.
+-->
+<!ATTLIST input name CDATA #IMPLIED>
+
+<!--
+	An expression for the attribute value in this flow's request context to
+	map to the subflow.
+-->
+<!ATTLIST input value CDATA #IMPLIED>
+
+<!--
+	The name of the target attribute in the subflow.
+-->
+<!ATTLIST input as CDATA #IMPLIED>
+
+<!--
+	A single output mapping that maps data from the subflow back up to this flow 
+	when it resumes.
+-->
+<!ELEMENT output EMPTY>
+
+<!--
+	The name of the attribute in the subflow to map to this flow.
+-->
+<!ATTLIST output name CDATA #IMPLIED>
+
+<!--
+	An expression for the attribute value in the subflow's request context to
+	map to this flow.
+-->
+<!ATTLIST output value CDATA #IMPLIED>
+
+<!--
+	The name of the target attribute in this flow.
+-->
+<!ATTLIST output as CDATA #IMPLIED>
 
 <!--
 	Defines an end state: a state that terminates the flow.
