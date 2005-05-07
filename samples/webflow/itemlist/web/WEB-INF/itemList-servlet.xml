@@ -3,22 +3,14 @@
 
 <beans>
 
-	<bean id="frontController" name="/itemList.htm" class="org.springframework.web.flow.mvc.FlowController">
+	<bean name="/itemList.htm" class="org.springframework.web.flow.mvc.FlowController">
 		 <!-- serialize all operations within a session -->
 		<property name="synchronizeOnSession" value="true"/>
-		<property name="flowExecutionManager">
-			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow" ref="itemList"/>
-			</bean>
-		</property>
+		<property name="flow" ref="itemList"/>
 	</bean>
 	
-	<bean id="itemList" class="org.springframework.web.flow.config.FlowFactoryBean">
-		<property name="flowBuilder">
-			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource" value="/WEB-INF/itemList-flow.xml"/>
-			</bean>
-		</property>
+	<bean id="itemList" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
+		<property name="location" value="/WEB-INF/itemList-flow.xml"/>
 	</bean>
 
 	<bean id="item.create" class="org.springframework.samples.itemlist.NewItemAction"/>

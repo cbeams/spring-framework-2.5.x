@@ -42,6 +42,13 @@ public class XmlFlowFactoryBean extends FlowFactoryBean implements BeanFactoryAw
 		getXmlFlowBuilder().setLocation(location);
 	}
 	
+	/**
+	 * Set the factory used to create transition criteria.
+	 */
+	public void setTransitionCriteriaCreator(TransitionCriteriaCreator creator) {
+		getXmlFlowBuilder().setTransitionCriteriaCreator(creator);
+	}
+
 	public void setFlowBuilder(FlowBuilder flowBuilder) {
 		Assert.isInstanceOf(XmlFlowBuilder.class, flowBuilder);
 		super.setFlowBuilder(flowBuilder);

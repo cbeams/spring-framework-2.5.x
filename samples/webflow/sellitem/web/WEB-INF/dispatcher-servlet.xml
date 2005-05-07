@@ -8,7 +8,7 @@
 		Note that there is no default top-level flow configured.
 		The flow id of the flow to start should be passed in using the "_flowId" request parameter.
 	-->
-	<bean id="frontController" name="/pos.htm" class="org.springframework.web.flow.mvc.FlowController">
+	<bean name="/pos.htm" class="org.springframework.web.flow.mvc.FlowController">
 		<!--
 			Set cacheSeconds to a small, non 0, value so you can do ctrl-N to open an new
 			window and experiment with the continuations stuff.
@@ -43,15 +43,11 @@
 		-->
 	</bean>
 	
-	<bean id="sellItem" class="org.springframework.web.flow.config.FlowFactoryBean">
-		<property name="flowBuilder">
-			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="location" value="/WEB-INF/sellItem-flow.xml"/>
-				<property name="transitionCriteriaCreator">
-					<!-- Enable transition criteria expressed as OGNL expressions. -->
-					<bean class="org.springframework.web.flow.support.OgnlTransitionCriteriaCreator"/>
-				</property>
-			</bean>
+	<bean id="sellItem" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
+		<property name="location" value="/WEB-INF/sellItem-flow.xml"/>
+		<property name="transitionCriteriaCreator">
+			<!-- Enable transition criteria expressed as OGNL expressions. -->
+			<bean class="org.springframework.web.flow.support.OgnlTransitionCriteriaCreator"/>
 		</property>
 	</bean>
 	

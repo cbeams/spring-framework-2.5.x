@@ -4,19 +4,11 @@
 <beans>
 
 	<bean id="frontController" name="/upload.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flowExecutionManager">
-			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow" ref="upload"/>
-			</bean>
-		</property>
+		<property name="flow" ref="upload"/>
 	</bean>
 	
-	<bean id="upload" class="org.springframework.web.flow.config.FlowFactoryBean">
-		<property name="flowBuilder">
-			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource" value="/WEB-INF/upload-flow.xml"/>
-			</bean>
-		</property>
+	<bean id="upload" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
+		<property name="location" value="/WEB-INF/upload-flow.xml"/>
 	</bean>
 	
 	<bean id="upload.process" class="org.springframework.samples.fileupload.ProcessUploadAction"/>

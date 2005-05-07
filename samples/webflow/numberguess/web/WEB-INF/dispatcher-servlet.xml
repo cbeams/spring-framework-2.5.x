@@ -14,7 +14,7 @@
 		<property name="location" value="/WEB-INF/numberGuess-flow.xml"/>
 	</bean>
 
-	<bean id="fourDigitNumberGuess" class="org.springframework.web.flow.config.FlowFactoryBean">
+	<bean id="fourDigitNumberGuess" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
 		<property name="location" value="/WEB-INF/fourDigitNumberGuess-flow.xml"/>
 	</bean>
 	
