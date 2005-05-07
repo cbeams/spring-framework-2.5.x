@@ -29,6 +29,7 @@ import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.TransactionSynchronizer;
+import org.springframework.web.flow.Transition;
 
 /**
  * Mock implementation of the <code>RequestContext</code> interface to
@@ -61,6 +62,8 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 
 	private Event lastEvent;
 
+	private Transition lastTransition;
+	
 	private MutableAttributeSource actionExecutionProperties = new MapAttributeSource();
 
 	private Scope requestScope = new Scope(ScopeType.REQUEST);
@@ -144,6 +147,15 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	}
 
 	/**
+	 * Set the last transition that executed in this request context.
+	 * 
+	 * @param lastTransition the last transition to set
+	 */
+	public void setLastTransition(Transition lastTransition) {
+		this.lastTransition = lastTransition;
+	}
+
+	/**
 	 * Set an action execution attribute that may be used by the action to effect 
 	 * its behavior during execution.
 	 * 
@@ -176,6 +188,10 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 
 	public Event getLastEvent() {
 		return lastEvent;
+	}
+	
+	public Transition getLastTransition() {
+		return lastTransition;
 	}
 
 	public AttributeSource getActionProperties() {
