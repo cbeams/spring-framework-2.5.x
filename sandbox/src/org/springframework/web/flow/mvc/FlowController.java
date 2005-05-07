@@ -20,20 +20,26 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
+import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
- * Web controller for the Spring web MVC framework that handles requests using a web
- * flow. Requests are managed using an {@link HttpServletFlowExecutionManager}.
- * Consult the JavaDoc of that class for more information on how requests are
- * processed.
+ * Web controller for the Spring web MVC framework that routes incoming requests to one or more
+ * managed web flows.  Requests into the web flow system are managed using a configurable 
+ * {@link HttpServletFlowExecutionManager}.  Consult the JavaDoc of that class for more
+ * information on how requests are processed.
  * <p>
- * Configuration note: you can configure the flow controller by passing in a properly
- * configured flow execution manager. To avoid unnecessary top-level bean definitions
- * in the application context, you can use the Spring nested bean definition syntax.
+ * Note that a single FlowController may manage executions for all flows of your application--simply
+ * parameterize this controller from view code with the <code>_flowId</code> to execute.  See the flowLauncher
+ * sample application for an example of this.
+ * <p>
+ * Configuration note: you may achieve fine-grained control over flow execution management by 
+ * passing in a configured flow execution manager instance.  Alternatively, if this
+ * controller should manage executions in the default manner for a single flow definition,
+ * simply configure the flow property.
  * <p>
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
@@ -46,6 +52,12 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * <td>flowExecutionManager</td>
  * <td>{@link org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager default}</td>
  * <td>Configures the HTTP servlet flow execution manager implementation to use.</td>
+ * </tr>
+ * <tr>
+ * <td>flow</td>
+ * <td>nulls</td>
+ * <td>Configures a single Flow definition to manage.  Note this property should only be set as a
+ * convenience if fine-grained configuration of the flowExecutionManager is not neccessary.</td>
  * </tr>
  * </table>
  * 
@@ -72,14 +84,22 @@ public class FlowController extends AbstractController implements InitializingBe
 	}
 
 	/**
-	 * Create a new FlowController.
-	 * <p>
-	 * The "cacheSeconds" property is by default set to 0 (so no caching for
-	 * web flow controllers).
+	 * Configures the flow execution manager implementation to use.
+	 * Note: do not call both this method and setFlow(Flow) -- call one or the other. 
+	 * @param manager the flow execution manager.
 	 */
-	public FlowController(HttpServletFlowExecutionManager manager) {
-		setFlowExecutionManager(manager);
-		initDefaults();
+	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
+		this.flowExecutionManager = manager;
+	}
+
+	/**
+	 * Convenience setter that configures a single flow definition for this controller to
+	 * manage.  Note: do not call both this method and setFlowExecutionManager(..) -- call one
+	 * or the other.
+	 * @param flow the flow that this controller will manage
+	 */
+	public void setFlow(Flow flow) {
+		this.flowExecutionManager.setFlow(flow);
 	}
 
 	/**
@@ -101,14 +121,6 @@ public class FlowController extends AbstractController implements InitializingBe
 	 */
 	protected HttpServletFlowExecutionManager getFlowExecutionManager() {
 		return flowExecutionManager;
-	}
-
-	/**
-	 * Configures the flow execution manager implementation to use.
-	 * @param manager the flow execution manager.
-	 */
-	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
-		this.flowExecutionManager = manager;
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
