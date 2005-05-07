@@ -80,9 +80,9 @@ import org.xml.sax.SAXParseException;
  * <td><b>description </b></td>
  * </tr>
  * <tr>
- * <td>resource</td>
+ * <td>location</td>
  * <td><i>null</i></td>
- * <td>Specifies the XML resource from which the flow definition is loaded.
+ * <td>Specifies the XML file location from which the flow definition is loaded.
  * This is a required property.</td>
  * </tr>
  * <tr>
