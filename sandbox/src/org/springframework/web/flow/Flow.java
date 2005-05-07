@@ -16,13 +16,18 @@
 package org.springframework.web.flow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.binding.AttributeSource;
+import org.springframework.binding.support.EmptyAttributeSource;
+import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.core.Styler;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
@@ -110,12 +115,29 @@ public class Flow {
 	private FlowExecutionListenerList flowExecutionListenerList = new FlowExecutionListenerList();
 
 	/**
+	 * Additional properties further describing this flow. 
+	 */
+	private AttributeSource properties = EmptyAttributeSource.INSTANCE;
+
+	/**
 	 * Construct a new flow definition with the given id. The id should be
 	 * unique among all flows.
 	 * @param id the flow identifier.
 	 */
 	public Flow(String id) {
+		this(id, null);
+	}
+
+	/**
+	 * Construct a new flow definition with the given id. The id should be
+	 * unique among all flows.
+	 * @param id the flow identifier.
+	 */
+	public Flow(String id, Map properties) {
 		setId(id);
+		if (properties != null) {
+			this.properties = new MapAttributeSource(new HashMap(properties));
+		}
 	}
 
 	/**
@@ -147,6 +169,21 @@ public class Flow {
 	 */
 	public FlowExecutionListenerList getFlowExecutionListenerList() {
 		return this.flowExecutionListenerList;
+	}
+
+	/**
+	 * Returns the additional properties describing this flow.
+	 */
+	public AttributeSource getProperties() {
+		return this.properties;
+	}
+
+	/**
+	 * Returns the value of given additional flow property, or null if
+	 * if not found.
+	 */
+	public Object getProperty(String propertyName) {
+		return this.properties.getAttribute(propertyName);
 	}
 
 	/**

@@ -196,6 +196,13 @@ public class Transition {
 	}
 
 	/**
+	 * Returns the additional properties describing this transition.
+	 */
+	public AttributeSource getProperties() {
+		return this.properties;
+	}
+
+	/**
 	 * Returns the value of given additional state property, or null if
 	 * if not found.
 	 */
