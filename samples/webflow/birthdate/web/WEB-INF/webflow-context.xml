@@ -3,12 +3,8 @@
 
 <beans>
 	
-	<bean id="birthDate" class="org.springframework.web.flow.config.FlowFactoryBean">
-		<property name="flowBuilder">
-			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource" value="/WEB-INF/birthDate-flow.xml"/>
-			</bean>
-		</property>
+	<bean id="birthDate" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
+		<property name="location" value="/WEB-INF/birthDate-flow.xml"/>
 	</bean>
 	
 	<bean id="birthDateFormAction" class="org.springframework.samples.birthdate.BirthDateFormAction"/>
