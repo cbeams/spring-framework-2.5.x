@@ -15,6 +15,8 @@
  */
 package org.springframework.web.flow.config;
 
+import java.util.Map;
+
 import org.springframework.web.flow.Flow;
 
 /**
@@ -37,8 +39,9 @@ public interface FlowCreator {
 	/**
 	 * Creates the <code>Flow</code> instance with the specified id.
 	 * @param id The flow identifier
+	 * @param properties optional additional properties about the flow
 	 * @return The <code>Flow</code> (or a custom specialization of
 	 *         <code>Flow</code>)
 	 */
-	public Flow createFlow(String id);
+	public Flow createFlow(String id, Map properties);
 }

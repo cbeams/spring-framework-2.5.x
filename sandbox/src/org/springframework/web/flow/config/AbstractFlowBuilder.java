@@ -166,20 +166,29 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	public final Flow init() throws FlowBuilderException {
-		setFlow(createFlow(flowId()));
+		setFlow(createFlow(flowId(), flowProperties()));
 		return getFlow();
 	}
-
-	public void dispose() {
-		setFlow(null);
-	}
-
+	
 	/**
 	 * Returns the id (name) of the flow built by this builder. Subclasses
 	 * should override to return the unique flowId.
 	 * @return the unique flow id
 	 */
 	protected abstract String flowId();
+
+	/**
+	 * Hook subclasses may override to provide additional properties about the flow built by
+	 * this builder.  Returns <code>null</code> by default.
+	 * @return additional properties describing the flow being built.
+	 */
+	protected Map flowProperties() {
+		return null;
+	}
+
+	public void dispose() {
+		setFlow(null);
+	}
 
 	/**
 	 * Adds a <code>ViewState</code> to the flow built by this builder. A view

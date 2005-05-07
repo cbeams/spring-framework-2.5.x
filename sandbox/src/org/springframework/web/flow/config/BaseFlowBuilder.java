@@ -18,6 +18,7 @@ package org.springframework.web.flow.config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -188,11 +189,12 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 	 * override to return a custom Flow implementation, or simply pass in a
 	 * custom FlowCreator implementation.
 	 * 
-	 * @param id the flow identifier.
-	 * @return the flow built by this builder.
+	 * @param id the flow identifier
+	 * @param properties optional, additional flow properties
+	 * @return the flow built by this builder
 	 */
-	protected Flow createFlow(String id) {
-		return this.flowCreator.createFlow(id);
+	protected Flow createFlow(String id, Map properties) {
+		return this.flowCreator.createFlow(id, properties);
 	}
 
 	/**
@@ -204,8 +206,8 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 	 * @see org.springframework.web.flow.Flow
 	 */
 	public static class DefaultFlowCreator implements FlowCreator {
-		public Flow createFlow(String flowId) {
-			return new Flow(flowId);
+		public Flow createFlow(String flowId, Map properties) {
+			return new Flow(flowId, properties);
 		}
 	}
 }

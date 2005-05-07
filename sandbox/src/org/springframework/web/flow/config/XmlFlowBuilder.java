@@ -339,7 +339,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Element root = doc.getDocumentElement();
 		String id = root.getAttribute(ID_ATTRIBUTE);
 		// set the flow under construction
-		setFlow(createFlow(id));
+		setFlow(createFlow(id, parseProperties(root)));
 	}
 
 	/**
@@ -530,7 +530,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		for (int i = 0; i < actions.length; i++) {
 			executionCriteria.add(new ActionTransitionCriteria(actions[i]));
 		}
-		return new Transition(getTransitionCriteriaCreator().create(on), to, executionCriteria);
+		return new Transition(getTransitionCriteriaCreator().create(on), to, executionCriteria, parseProperties(element));
 	}
 
 	/**
