@@ -25,6 +25,7 @@ import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
+import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.SubFlowState;
 import org.springframework.web.flow.Transition;
@@ -659,6 +660,21 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
+	 * <li>On the occurence of an event that matches the criteria defined by
+	 * ${criteria}, transition to state ${stateId}.
+	 * </ul>
+	 * @param criteria the transition criteria
+	 * @param stateId the state Id
+	 * @param properties additional properties about the transition
+	 * @return the transition (event matching criteria->stateId)
+	 */
+	protected Transition on(TransitionCriteria criteria, String stateId, Map properties) {
+		return new Transition(criteria, stateId, properties);
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
 	 * <li>On the occurence of event ${eventId}, transition to state
 	 * ${stateId}.
 	 * </ul>
@@ -673,17 +689,49 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Creates a transition stating:
 	 * <ul>
+	 * <li>On the occurence of event ${eventId}, transition to state
+	 * ${stateId}.
+	 * </ul>
+	 * @param eventId the event id
+	 * @param stateId the state Id
+	 * @param properties additional properties about the transition
+	 * @return the transition (eventId->stateId)
+	 */
+	protected Transition on(String eventId, String stateId, Map properties) {
+		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId, properties);
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
 	 * <li>On the occurence of an event that matches the criteria defined by
-	 * ${criteria}, transition to state ${stateId} if and only if the ${precondition}
+	 * ${criteria}, transition to state ${stateId} if and only if the ${executionCriteria}
 	 * is met.
 	 * </ul>
 	 * @param eventId the event id
 	 * @param stateId the state Id
-	 * @param precondition the precondition
-	 * @return the transition (eventId+precondition->stateId)
+	 * @param executionCriteria the executionCriteria
+	 * @return the transition (eventId+executionCriteria->stateId)
 	 */
-	protected Transition on(String eventId, String stateId, TransitionCriteria precondition) {
+	protected Transition on(String eventId, String stateId, TransitionCriteria executionCriteria) {
 		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId);
+	}
+
+	/**
+	 * Creates a transition stating:
+	 * <ul>
+	 * <li>On the occurence of an event that matches the criteria defined by
+	 * ${criteria}, transition to state ${stateId} if and only if the ${executionCriteria}
+	 * is met.
+	 * </ul>
+	 * @param eventId the event id
+	 * @param stateId the state Id
+	 * @param executionCriteria the executionCriteria
+	 * @param properties additional properties about the transition
+	 * @return the transition (eventId+executionCriteria->stateId)
+	 */
+	protected Transition on(String eventId, String stateId, TransitionCriteria executionCriteria, Map properties) {
+		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId, properties);
 	}
 
 	/**
@@ -826,6 +874,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state id ("customer.Detail.view"). Detaults to a dot (".").
 	 */
 	protected String getQualifierDelimiter() {
-		return SEPARATOR;
+		return FlowConstants.SEPARATOR;
 	}
 }

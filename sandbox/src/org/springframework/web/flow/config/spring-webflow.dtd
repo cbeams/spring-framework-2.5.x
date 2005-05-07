@@ -17,7 +17,7 @@
 	Defines the root element for a web flow definition. Web flows
 	are composed of one or more states.
 -->
-<!ELEMENT webflow ( ( action-state | view-state | decision-state | subflow-state | end-state )+ )>
+<!ELEMENT webflow ( ( action-state | view-state | decision-state | subflow-state | end-state )+, property* )>
 
 <!--
 	Unique identifier of the web flow; should be unique to all other web flows.
@@ -114,7 +114,7 @@
 	Defines a transition from one state to another. Transitions define the supported 
 	paths through the flow.
 -->
-<!ELEMENT transition ( action* )>
+<!ELEMENT transition ( action*, property* )>
 
 <!--
 	The identifier of the event that can trigger this transition. An event describes something

@@ -25,7 +25,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowExecutionListener;
 
 /**
@@ -35,7 +34,7 @@ import org.springframework.web.flow.FlowExecutionListener;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class BaseFlowBuilder extends FlowConstants implements FlowBuilder, BeanFactoryAware {
+public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
