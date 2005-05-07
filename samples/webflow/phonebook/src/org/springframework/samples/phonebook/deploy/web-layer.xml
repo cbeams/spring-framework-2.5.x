@@ -16,20 +16,12 @@
          we wish to create a new execution for (or an existing _flowExecutionId if participating in an
          existing flow execution.)  -->
 	<bean id="searchFrontController" name="/search.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flowExecutionManager">
-			<bean class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-				<property name="flow" ref="person.Search"/>
-			</bean>
-		</property>
+		<property name="flow" ref="person.Search"/>
 	</bean>
 
 	<!-- Xml FlowBuilder definition for the search flow -->
-	<bean id="person.Search" class="org.springframework.web.flow.config.FlowFactoryBean">
-		<property name="flowBuilder">
-			<bean class="org.springframework.web.flow.config.XmlFlowBuilder">
-				<property name="resource" value="classpath:org/springframework/samples/phonebook/web/flow/search-flow.xml"/>
-			</bean>
-		</property>
+	<bean id="person.Search" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
+		<property name="location" value="classpath:org/springframework/samples/phonebook/web/flow/search-flow.xml"/>
 	</bean>
 	
 	<!-- Java FlowBuilder definition for the search flow.
