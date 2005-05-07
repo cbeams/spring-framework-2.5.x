@@ -47,6 +47,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private Event lastEvent;
 
+	private Transition lastTransition;
+	
 	private AttributeSource actionProperties = EmptyAttributeSource.INSTANCE;
 
 	private FlowExecutionStack flowExecution;
@@ -103,6 +105,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 			return originatingEvent;
 		}
 	}
+	
+	public Transition getLastTransition() {
+		return lastTransition;
+	}
 
 	public AttributeSource getActionProperties() {
 		return actionProperties;
@@ -141,6 +147,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		this.lastEvent = lastEvent;
 		this.flowExecution.setLastEvent(lastEvent);
 		fireEventSignaled();
+	}
+	
+	public void setLastTransition(Transition lastTransition) {
+		this.lastTransition = lastTransition;
 	}
 
 	public void setActionProperties(AttributeSource properties) {

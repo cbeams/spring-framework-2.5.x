@@ -137,14 +137,14 @@ public abstract class TransitionableState extends State {
 	 * objects) used to fire transitions in this state.
 	 * @return the collection of transitional conditions
 	 */
-	public Collection getTransitionalCriteria() {
+	public Collection getTransitionMatchingCriteria() {
 		if (transitions.isEmpty()) {
 			return Collections.EMPTY_SET;
 		}
 		Set criteria = new LinkedHashSet(transitions.size());
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
-			criteria.add(((Transition)it.next()).getCriteria());
+			criteria.add(((Transition)it.next()).getMatchingCriteria());
 		}
 		return Collections.unmodifiableSet(criteria);
 	}

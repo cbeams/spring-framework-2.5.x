@@ -15,8 +15,14 @@
  */
 package org.springframework.web.flow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.binding.AttributeSource;
+import org.springframework.binding.support.EmptyAttributeSource;
+import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
@@ -66,6 +72,11 @@ public class Transition {
 	private String targetStateId;
 
 	/**
+	 * Additional properties further describing this transition. 
+	 */
+	private AttributeSource properties = EmptyAttributeSource.INSTANCE;
+
+	/**
 	 * Create a new transition.
 	 * @param criteria strategy object used to determine if this transition should be
 	 *        matched eligible for execution
@@ -73,10 +84,19 @@ public class Transition {
 	 *        executed
 	 */
 	public Transition(TransitionCriteria criteria, String targetStateId) {
-		Assert.notNull(criteria, "The transition criteria property is required");
-		Assert.notNull(targetStateId, "The targetStateId property is required");
-		this.matchingCriteria = criteria;
-		this.targetStateId = targetStateId;
+		this(criteria, targetStateId, null, null);
+	}
+
+	/**
+	 * Create a new transition.
+	 * @param criteria strategy object used to determine if this transition should be
+	 *        matched eligible for execution
+	 * @param targetStateId the id of the state to transition to when this transition is
+	 *        executed
+	 * @param properties additional properties describing this transition
+	 */
+	public Transition(TransitionCriteria criteria, String targetStateId, Map properties) {
+		this(criteria, targetStateId, null, properties);
 	}
 
 	/**
@@ -89,11 +109,28 @@ public class Transition {
 	 *        matched for execution, is allowed to complete execution or should roll back
 	 */
 	public Transition(TransitionCriteria criteria, String targetStateId, TransitionCriteria executionCriteria) {
+		this(criteria, targetStateId, executionCriteria, null);
+	}
+
+	/**
+	 * Create a new transition.
+	 * @param criteria strategy object used to determine if this transition should be
+	 *        matched eligible for execution
+	 * @param targetStateId the id of the state to transition to when this transition is
+	 *        executed
+	 * @param executionCriteria strategy object used to determine if this transition, once
+	 *        matched for execution, is allowed to complete execution or should roll back
+	 * @param properties additional properties describing this transition
+	 */
+	public Transition(TransitionCriteria criteria, String targetStateId, TransitionCriteria executionCriteria, Map properties) {
 		Assert.notNull(criteria, "The transition criteria property is required");
 		Assert.notNull(targetStateId, "The targetStateId property is required");
 		this.matchingCriteria = criteria;
 		this.targetStateId = targetStateId;
 		this.executionCriteria = executionCriteria;
+		if (properties != null) {
+			this.properties = new MapAttributeSource(new HashMap(properties));
+		}
 	}
 
 	/**
@@ -114,6 +151,24 @@ public class Transition {
 		this.sourceState = owningState;
 	}
 
+	/**
+	 * Returns the criteria that determine whether or not this transition matches as
+	 * eligible for execution.
+	 * @return the transition matching criteria
+	 */
+	public TransitionCriteria getMatchingCriteria() {
+		return matchingCriteria;
+	}
+	
+	/**
+	 * Returns the criteria that determine whether or not this transition, once matched,
+	 * should complete execution or should <i>roll back</i>.
+	 * @return the transition execution criteria
+	 */
+	public TransitionCriteria getExecutionCriteria() {
+		return executionCriteria;
+	}
+	
 	/**
 	 * Returns the id of the target (<i>to</i>) state of this transition.
 	 * @return the target state id
@@ -141,14 +196,13 @@ public class Transition {
 	}
 
 	/**
-	 * Returns the strategy used to determine if this transition should execute
-	 * given an execution context.
-	 * @return the matching criteria
+	 * Returns the value of given additional state property, or null if
+	 * if not found.
 	 */
-	public TransitionCriteria getCriteria() {
-		return this.matchingCriteria;
+	public Object getProperty(String propertyName) {
+		return this.properties.getAttribute(propertyName);
 	}
-
+	
 	/**
 	 * Checks if this transition is eligible for execution given the state of the
 	 * provided flow execution request context.
@@ -175,6 +229,7 @@ public class Transition {
 		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteStateTransitionException(this, e);
 		}
+		context.setLastTransition(this);
 		ViewDescriptor viewDescriptor;
 		if (this.executionCriteria != null && !this.executionCriteria.test(context)) {
 			// 'roll back' and re-enter the source state
@@ -199,6 +254,6 @@ public class Transition {
 
 	public String toString() {
 		return new ToStringCreator(this).append("on", matchingCriteria).append("to", targetStateId).append(
-				"executionCriteria", executionCriteria).toString();
+				"executionCriteria", executionCriteria).append("properties", properties).toString();
 	}
 }

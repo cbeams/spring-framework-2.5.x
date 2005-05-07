@@ -104,6 +104,12 @@ public interface RequestContext {
 	public Event getLastEvent();
 
 	/**
+	 * Returns the last state transition executed in this request.
+	 * @return the last transition, or <code>null</code> if none has occured yet.
+	 */
+	public Transition getLastTransition();
+	
+	/**
 	 * Returns a holder for properties about the currently executing
 	 * <code>Action</code> in the context of the current request.
 	 * <p>
@@ -141,5 +147,4 @@ public interface RequestContext {
 	 * @return the transaction synchronizer
 	 */
 	public TransactionSynchronizer getTransactionSynchronizer();
-
 }

@@ -36,10 +36,16 @@ public interface StateContext extends RequestContext {
 	public void setCurrentState(State state) throws IllegalStateException;
 
 	/**
-	 * Update the last event that occured in the ongoing flow execution.
+	 * Update the last event that occured in the executing flow.
 	 * @param lastEvent the last event that occured
 	 */
 	public void setLastEvent(Event lastEvent);
+
+	/**
+	 * Update the last transition that occured in the executing flow.
+	 * @param lastTransition the last transition that occured
+	 */
+	public void setLastTransition(Transition lastTransition);
 
 	/**
 	 * Update contextual properties about the action that is about to execute in
