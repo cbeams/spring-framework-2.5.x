@@ -28,7 +28,9 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Proxy for a standard Servlet 2.3 Filter, delegating to a Spring-managed
- * bean that implements the Filter interface.
+ * bean that implements the Filter interface. Supports a "targetBeanName"
+ * filter init-param in <code>web.xml</code>, specifying the name of the
+ * target bean in the Spring application context.
  *
  * <p><code>web.xml</code> will usually contain a DelegatingFilterProxy definition,
  * with the specified <code>filter-name</code> corresponding to a bean name in
@@ -41,15 +43,29 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * Filter instances. Alternatively, consider standard Filter setup in combination
  * with looking up service beans from the Spring root application context.
  *
+ * <p><b>NOTE:</b> The lifecycle methods defined by the Servlet Filter interface
+ * will by default <i>not</i> be delegated to the target bean, relying on the
+ * Spring application context to manage the lifecycle of that bean. Specifying
+ * the "targetFilterLifecycle" filter init-param as "true" will enforce invocation
+ * of the <code>Filter.init</code> and <code>Filter.destroy</code> lifecycle methods
+ * on the target bean, letting the servlet container manage the filter lifecycle.
+ *
  * <p>This class is inspired by Acegi Security's FilterToBeanProxy class,
  * written by Ben Alex.
  *
  * @author Juergen Hoeller
  * @since 1.2
+ * @see #setTargetBeanName
+ * @see #setTargetFilterLifecycle
+ * @see javax.servlet.Filter#doFilter
+ * @see javax.servlet.Filter#init
+ * @see javax.servlet.Filter#destroy
  */
 public class DelegatingFilterProxy extends GenericFilterBean {
 
 	private String targetBeanName;
+
+	private boolean targetFilterLifecycle = false;
 
 	private Filter delegate;
 
@@ -65,10 +81,30 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	}
 
 	/**
-	 * Set the name of the target bean in the Spring application context.
+	 * Return the name of the target bean in the Spring application context.
 	 */
 	protected String getTargetBeanName() {
 		return targetBeanName;
+	}
+
+	/**
+	 * Set whether to invoke the <code>Filter.init</code> and
+	 * <code>Filter.destroy</code> lifecycle methods on the target bean.
+	 * <p>Default is false; target beans usually rely on the Spring application
+	 * context for managing their lifecycle. Setting this flag to true means
+	 * that the servlet container will control the lifecycle of the target
+	 * Filter, with this proxy delegating the corresponding calls.
+	 */
+	public void setTargetFilterLifecycle(boolean targetFilterLifecycle) {
+		this.targetFilterLifecycle = targetFilterLifecycle;
+	}
+
+	/**
+	 * Return whether to invoke the <code>Filter.init</code> and
+	 * <code>Filter.destroy</code> lifecycle methods on the target bean.
+	 */
+	protected boolean isTargetFilterLifecycle() {
+		return targetFilterLifecycle;
 	}
 
 
@@ -118,12 +154,15 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * @return the initialized delegate Filter
 	 * @throws ServletException if thrown by the Filter
 	 * @see #getTargetBeanName()
+	 * @see #isTargetFilterLifecycle()
 	 * @see #getFilterConfig()
 	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
 	 */
 	protected Filter initDelegate(WebApplicationContext wac) throws ServletException {
 		Filter delegate = (Filter) wac.getBean(getTargetBeanName(), Filter.class);
-		delegate.init(getFilterConfig());
+		if (isTargetFilterLifecycle()) {
+			delegate.init(getFilterConfig());
+		}
 		return delegate;
 	}
 
@@ -131,10 +170,13 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * Destroy the Filter delegate.
 	 * Default implementation simply calls <code>Filter.destroy</code> on it.
 	 * @param delegate the Filter delegate (never null)
+	 * @see #isTargetFilterLifecycle()
 	 * @see javax.servlet.Filter#destroy()
 	 */
 	protected void destroyDelegate(Filter delegate) {
-		this.delegate.destroy();
+		if (isTargetFilterLifecycle()) {
+			this.delegate.destroy();
+		}
 	}
 
 }
