@@ -13,15 +13,16 @@
     <literal><ulink
     url="http://www.springframework.org/docs/api/org/springframework/beans/factory/BeanFactory.html">BeanFactory</ulink></literal>
     provides an advanced configuration mechanism capable of managing beans
-    (objects) of any nature, using potentially any kind of storage facility.
+    (objects) of any nature, using potentially any kind of storage facility. 
     The <ulink
     url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html">ApplicationContext</ulink>
-    builds on top of the BeanFactory and adds other functionality such as
-    easier integration with Springs AOP features, message resource handling
-    (for use in internationalization), event propagation, declarative
-    mechanisms to create the ApplicationContext and optional parent contexts,
-    and application-layer specific contexts such as the <literal>WebApplicationContext</literal>,
-    among other enhancements.</para>
+    builds on top of the BeanFactory (it's a subclass) and adds other
+    functionality such as easier integration with Springs AOP features,
+    message resource handling (for use in internationalization), event
+    propagation, declarative mechanisms to create the ApplicationContext and
+    optional parent contexts, and application-layer specific contexts such as
+    the <literal>WebApplicationContext</literal>, among other
+    enhancements.</para>
 
     <para>In short, the <literal>BeanFactory</literal> provides the
     configuration framework and basic functionality, while the
@@ -31,21 +32,23 @@
     description of BeanFactory capabilities and behavior should be considered
     to apply to ApplicationContexts as well.</para>
 
-    <para>Users are sometimes unsure whether BeanFactory or ApplicationContext
-    are best suited for use in a particular situation. Normally when building
-    most applications in a J2EE-environment, <emphasis>the best option is to
-    use the ApplicationContext</emphasis>, since it offers all the features of
-    the BeanFactory and adds on to it in terms of features, while also
-    allowing a more declarative approach to use of some functionality, which
-    is generally desirable. The main usage scenario when you might prefer to
-    use the BeanFactory is when memory usage is the greatest concern (such as
-    in an applet where every last kilobyte counts), and you don&#39;t need all
-    the features of the ApplicationContext.</para>
+    <para>Users are sometimes unsure whether a BeanFactory or an
+    ApplicationContext are best suited for use in a particular situation.
+    Normally when building most applications in a J2EE-environment,
+    <emphasis>the best option is to use the ApplicationContext</emphasis>,
+    since it offers all the features of the BeanFactory and adds on to it in
+    terms of features, while also allowing a more declarative approach to use
+    of some functionality, which is generally desirable. The main usage
+    scenario when you might prefer to use the BeanFactory is when memory usage
+    is the greatest concern (such as in an applet where every last kilobyte
+    counts), and you don't need all the features of the
+    ApplicationContext.</para>
 
-    <para>This chapter is roughly divided into two parts, the first part
-    covering the basic principles that apply to both the BeanFactory and the
-    ApplicationContext. The second part will cover some of the features that
-    only apply to the ApplicationContext.</para>
+    <para>This chapter covers material related to both the BeanFactory and the
+    ApplicationContext. When mention is made only of the BeanFactory, you may
+    always assume the text also applies to the ApplicaitonContext. When
+    functionality is only available in the ApplicationContext, explicit
+    mention is made of this.</para>
   </sect1>
 
   <sect1 id="beans-basics">
