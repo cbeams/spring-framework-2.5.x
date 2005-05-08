@@ -43,7 +43,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * <p>This filter works similar to the AOP HibernateInterceptor: It just makes
  * Hibernate Sessions available via the thread. It is suitable for non-transactional
- * execution but also for middle tier transactions via HibernateTransactionManager
+ * execution but also for business layer transactions via HibernateTransactionManager
  * or JtaTransactionManager. In the latter case, Sessions pre-bound by this filter
  * will automatically be used for the transactions and flushed accordingly.
  *
@@ -66,10 +66,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * in views (but not providing a first-level cache for the entire request).
  * 
  * <p>Looks up the SessionFactory in Spring's root web application context.
- * Supports a "sessionFactoryBeanName" filter init-param; the default bean name is
- * "sessionFactory". Looks up the SessionFactory on each request, to avoid
- * initialization order issues (when using ContextLoaderServlet, the root
- * application context will get initialized <i>after</i> this filter).
+ * Supports a "sessionFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * the default bean name is "sessionFactory". Looks up the SessionFactory on each
+ * request, to avoid initialization order issues (when using ContextLoaderServlet,
+ * the root application context will get initialized <i>after</i> this filter).
  *
  * <p><b>NOTE</b>: This filter will by default not flush the Hibernate session, as
  * it assumes to be used in combination with business layer transactions that care for
@@ -148,7 +148,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		if (isSingleSession()) {
 			// single session mode
 			if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
-				// do not modify the Session: just set the participate flag
+				// Do not modify the Session: just set the participate flag.
 				participate = true;
 			}
 			else {
@@ -160,7 +160,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		else {
 			// deferred close mode
 			if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
-				// do not modify deferred close: just set the participate flag
+				// Do not modify deferred close: just set the participate flag.
 				participate = true;
 			}
 			else {
@@ -217,7 +217,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			logger.debug("Using session factory '" + getSessionFactoryBeanName() + "' for OpenSessionInViewFilter");
 		}
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		return (SessionFactory) wac.getBean(getSessionFactoryBeanName());
+		return (SessionFactory) wac.getBean(getSessionFactoryBeanName(), SessionFactory.class);
 	}
 
 	/**

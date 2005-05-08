@@ -40,16 +40,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * <p>This filter works similar to the AOP JdoInterceptor: It just makes JDO
  * PersistenceManagers available via the thread. It is suitable for
- * non-transactional execution but also for middle tier transactions via
+ * non-transactional execution but also for business layer transactions via
  * JdoTransactionManager or JtaTransactionManager. In the latter case,
  * PersistenceManagers pre-bound by this filter will automatically be used
  * for the transactions.
  *
  * <p>Looks up the PersistenceManagerFactory in Spring's root web application context.
- * Supports a "persistenceManagerFactoryBeanName" filter init-param; the default bean
- * name is "persistenceManagerFactory". Looks up the PersistenceManagerFactory on each
- * request, to avoid initialization order issues (when using ContextLoaderServlet, the
- * root application context will get initialized <i>after</i> this filter).
+ * Supports a "persistenceManagerFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * the default bean name is "persistenceManagerFactory". Looks up the PersistenceManagerFactory
+ * on each request, to avoid initialization order issues (when using ContextLoaderServlet,
+ * the root application context will get initialized <i>after</i> this filter).
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -88,12 +88,12 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		PersistenceManagerFactory pmf = lookupPersistenceManagerFactory();
+		PersistenceManagerFactory pmf = lookupPersistenceManagerFactory(request);
 		PersistenceManager pm = null;
 		boolean participate = false;
 
 		if (TransactionSynchronizationManager.hasResource(pmf)) {
-			// do not modify the Session: just set the participate flag
+			// Do not modify the PersistenceManager: just set the participate flag.
 			participate = true;
 		}
 		else {
@@ -116,17 +116,33 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
+	 * Look up the PersistenceManagerFactory that this filter should use,
+	 * taking the current HTTP request as argument.
+	 * <p>Default implementation delegates to the <code>lookupPersistenceManagerFactory</code>
+	 * without arguments.
+	 * @return the PersistenceManagerFactory to use
+	 * @see #lookupPersistenceManagerFactory()
+	 */
+	protected PersistenceManagerFactory lookupPersistenceManagerFactory(HttpServletRequest request) {
+		return lookupPersistenceManagerFactory();
+	}
+
+	/**
 	 * Look up the PersistenceManagerFactory that this filter should use.
 	 * The default implementation looks for a bean with the specified name
 	 * in Spring's root application context.
-	 * @return the SessionFactory to use
+	 * @return the PersistenceManagerFactory to use
 	 * @see #getPersistenceManagerFactoryBeanName
 	 */
 	protected PersistenceManagerFactory lookupPersistenceManagerFactory() {
-		logger.info("Using persistence manager factory '" + getPersistenceManagerFactoryBeanName() +
-				"' for OpenPersistenceManagerInViewFilter");
-		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		return (PersistenceManagerFactory) wac.getBean(getPersistenceManagerFactoryBeanName());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Using persistence manager factory '" + getPersistenceManagerFactoryBeanName() +
+					"' for OpenPersistenceManagerInViewFilter");
+		}
+		WebApplicationContext wac =
+				WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+		return (PersistenceManagerFactory)
+				wac.getBean(getPersistenceManagerFactoryBeanName(), PersistenceManagerFactory.class);
 	}
 
 }
