@@ -20,7 +20,8 @@ import java.util.Locale;
 
 /**
  * Simple holder class that associates a LocaleContext instance
- * with the current thread.
+ * with the current thread. The LocaleContext will be inherited
+ * by any child threads spawned by the current thread.
  *
  * <p>Used as a central holder for the current Locale in Spring,
  * wherever necessary: for example, in MessageSourceAccessor.
@@ -36,7 +37,7 @@ import java.util.Locale;
  */
 public abstract class LocaleContextHolder {
 
-	private static ThreadLocal localeContextHolder = new ThreadLocal();
+	private static ThreadLocal localeContextHolder = new InheritableThreadLocal();
 
 	/**
 	 * Associate the given LocaleContext with the current thread.
