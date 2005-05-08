@@ -22,12 +22,12 @@ import java.sql.Connection;
  * Interface for classes that define transaction properties.
  * Base interface for TransactionAttribute.
  *
- * <p>Note that isolation level, timeout and read-only settings will only
- * get applied when starting a new transaction. As only PROPAGATION_REQUIRED
- * and PROPAGATION_REQUIRES_NEW can actually cause that, it doesn't make sense
- * to specify any of those settings else. Furthermore, not all transaction
- * managers will support those features and thus throw respective exceptions
- * when given non-default values.
+ * <p>Note that isolation level, timeout and read-only settings will not get
+ * applied unless a new transaction gets started. As only PROPAGATION_REQUIRED
+ * and PROPAGATION_REQUIRES_NEW can actually cause that, it usually doesn't make
+ * sense to specify those settings in all other cases. Furthermore, be aware
+ * that not all transaction managers will support those advanced features and
+ * thus might throw corresponding exceptions when given non-default values.
  *
  * @author Juergen Hoeller
  * @since 08.05.2003
@@ -61,13 +61,13 @@ public interface TransactionDefinition {
 	int PROPAGATION_MANDATORY = 2;
 
 	/**
-	 * Create a new transaction, suspending the current transaction if one exists.
+	 * Create a new transaction, suspend the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 */
 	int PROPAGATION_REQUIRES_NEW = 3;
 
 	/**
-	 * Execute non-transactionally, suspending the current transaction if one exists.
+	 * Execute non-transactionally, suspend the current transaction if one exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 */
 	int PROPAGATION_NOT_SUPPORTED = 4;
@@ -79,7 +79,7 @@ public interface TransactionDefinition {
 	int PROPAGATION_NEVER = 5;
 
 	/**
-	 * Execute within a nested transaction if a current transaction exists, or
+	 * Execute within a nested transaction if a current transaction exists,
 	 * behave like PROPAGATION_REQUIRED else. There is no analogous feature in EJB.
 	 */
 	int PROPAGATION_NESTED = 6;
@@ -120,8 +120,9 @@ public interface TransactionDefinition {
 	 * Must return one of the ISOLATION constants.
 	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED or
 	 * PROPAGATION_REQUIRES_NEW.
-	 * <p>Note that a transaction manager that does not support custom isolation levels
-	 * will throw an exception when given any other level than ISOLATION_DEFAULT.
+	 * <p>Note that a transaction manager that does not support custom
+	 * isolation levels will throw an exception when given any other level
+	 * than ISOLATION_DEFAULT.
 	 * @see #ISOLATION_DEFAULT
 	 */
 	int getIsolationLevel();
@@ -139,12 +140,15 @@ public interface TransactionDefinition {
 
 	/**
 	 * Return whether to optimize as read-only transaction.
-	 * This just serves as hint for the actual transaction subsystem,
-	 * it will <i>not necessarily</i> cause failure of write accesses.
-	 * <p>Only makes sense in combination with PROPAGATION_REQUIRED or
-	 * PROPAGATION_REQUIRES_NEW.
+	 * This just serves as a hint for the actual transaction subsystem,
+	 * it will <i>not necessarily</i> cause failure of write access attempts.
+	 * <p>Intended to be used in combination with PROPAGATION_REQUIRED or
+	 * PROPAGATION_REQUIRES_NEW. Beyond optimizing such actual transactions
+	 * accordingly, a transaction manager might also pass the read-only flag
+	 * to transaction synchronizations, even outside an actual transaction.
 	 * <p>A transaction manager that cannot interpret the read-only hint
 	 * will <i>not</i> throw an exception when given readOnly=true.
+	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit(boolean)
 	 */
 	boolean isReadOnly();
 
@@ -153,7 +157,7 @@ public interface TransactionDefinition {
 	 * This will be used as transaction name to be shown in a
 	 * transaction monitor, if applicable (for example, WebLogic's).
 	 * <p>In case of Spring's declarative transactions, the exposed name will
-	 * (by default) be the fully-qualified class name + "." + method name.
+	 * be the fully-qualified class name + "." + method name (by default).
 	 */
 	String getName();
 
