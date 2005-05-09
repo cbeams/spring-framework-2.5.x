@@ -50,9 +50,8 @@ import java.util.Map;
 public abstract class Assert {
 
 	/**
-	 * Assert a boolean expression, throwing
-	 * <code>IllegalArgumentException</code> if the test result is
-	 * <code>false</code>.
+	 * Assert a boolean expression, throwing <code>IllegalArgumentException</code>
+	 * if the test result is <code>false</code>.
 	 * <pre>
 	 * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
 	 * @param expression a boolean expression
@@ -66,9 +65,8 @@ public abstract class Assert {
 	}
 
 	/**
-	 * Assert a boolean expression, throwing
-	 * <code>IllegalArgumentException</code> if the test result is
-	 * <code>false</code>.
+	 * Assert a boolean expression, throwing <code>IllegalArgumentException</code>
+	 * if the test result is <code>false</code>.
 	 * <pre>
 	 * Assert.isTrue(i > 0);</pre>
 	 * @param expression a boolean expression
@@ -103,11 +101,13 @@ public abstract class Assert {
 		notNull(object, "[Assertion failed] - this argument is required; it cannot be null");
 	}
 
+
 	/**
 	 * Assert that a string is not empty; that is, it must not be null and not empty.
 	 * <pre>
 	 * Assert.hasLength(name, "Name must not be empty");</pre>
 	 * @param text the string to check
+	 * @param message the exception message to use if the assertion fails
 	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(String text, String message) {
@@ -124,7 +124,7 @@ public abstract class Assert {
 	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(String text) {
-		hasLength(text, "[Assertion failed] - this string argument must have length; it cannot be null or empty");
+		hasLength(text, "[Assertion failed] - this String argument must have length; it cannot be null or empty");
 	}
 
 	/**
@@ -133,6 +133,7 @@ public abstract class Assert {
 	 * <pre>
 	 * Assert.hasText(name, "Name must not be empty");</pre>
 	 * @param text the string to check
+	 * @param message the exception message to use if the assertion fails
 	 * @see StringUtils#hasText
 	 */
 	public static void hasText(String text, String message) {
@@ -151,8 +152,35 @@ public abstract class Assert {
 	 */
 	public static void hasText(String text) {
 		hasText(text,
-				"[Assertion failed] - this string argument must have text; it cannot be null, empty, or blank");
+				"[Assertion failed] - this String argument must have text; it cannot be null, empty, or blank");
 	}
+
+	/**
+	 * Assert that the given text does not contain the given substring.
+	 * <pre>
+	 * Assert.doesNotContain(name, "rod", "Name must not contain 'rod'");</pre>
+	 * @param textToSearch the text to search
+	 * @param substring the substring to find within the text
+	 * @param message the exception message to use if the assertion fails
+	 */
+	public static void doesNotContain(String textToSearch, String substring, String message) {
+		if (textToSearch.indexOf(substring) != -1) {
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	/**
+	 * Assert that the given text does not contain the given substring.
+	 * <pre>
+	 * Assert.doesNotContain(name, "rod");</pre>
+	 * @param textToSearch the text to search
+	 * @param substring the substring to find within the text
+	 */
+	public static void doesNotContain(String textToSearch, String substring) {
+		doesNotContain(textToSearch, substring,
+				"[Assertion failed] - this String argument must not contain the substring [" + substring + "]");
+	}
+
 
 	/**
 	 * Assert that an array has elements; that is, it must not be
@@ -235,6 +263,7 @@ public abstract class Assert {
 	public static void notEmpty(Map map) {
 		notEmpty(map, "[Assertion failed] - this map must not be empty; it must contain at least one entry");
 	}
+
 
 	/**
 	 * Assert that the provided object is an instance of the provided class.
