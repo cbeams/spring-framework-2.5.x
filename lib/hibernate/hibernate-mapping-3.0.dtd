@@ -331,7 +331,7 @@ etc. to an entity). -->
 	<!ATTLIST many-to-one property-ref CDATA #IMPLIED>
 	<!ATTLIST many-to-one formula CDATA #IMPLIED>
 	<!ATTLIST many-to-one index CDATA #IMPLIED>				 	<!-- include the columns spanned by this association in an index -->
-	<!ATTLIST many-to-one lazy (true|false) "false">
+	<!ATTLIST many-to-one lazy (true|false|proxy) #IMPLIED>
 	<!ATTLIST many-to-one not-found (exception|ignore) "exception">
 	<!ATTLIST many-to-one node CDATA #IMPLIED>
 	<!ATTLIST many-to-one embed-xml (true|false) "true">
@@ -351,7 +351,7 @@ component element, etc. to an entity). -->
 	<!ATTLIST one-to-one constrained (true|false) "false">
 	<!ATTLIST one-to-one foreign-key CDATA #IMPLIED>
 	<!ATTLIST one-to-one property-ref CDATA #IMPLIED>
-	<!ATTLIST one-to-one lazy (true|false) "false">
+	<!ATTLIST one-to-one lazy (true|false|proxy) #IMPLIED>
 	<!ATTLIST one-to-one node CDATA #IMPLIED>
 	<!ATTLIST one-to-one embed-xml (true|false) "true">
 	
@@ -363,6 +363,7 @@ component element, etc. to an entity). -->
 	<!ATTLIST key-property type CDATA #IMPLIED>
 	<!ATTLIST key-property column CDATA #IMPLIED>
 	<!ATTLIST key-property length CDATA #IMPLIED>
+	<!ATTLIST key-property node CDATA #IMPLIED>
 
 <!-- A many-to-one association embedded in a composite identifier or map index 
 (always not-null, never cascade). -->
@@ -374,6 +375,7 @@ component element, etc. to an entity). -->
 	<!ATTLIST key-many-to-one entity-name CDATA #IMPLIED>
 	<!ATTLIST key-many-to-one column CDATA #IMPLIED>
 	<!ATTLIST key-many-to-one foreign-key CDATA #IMPLIED>
+	<!ATTLIST key-many-to-one lazy (false|proxy) #IMPLIED>
 
 <!-- An "any" association is a polymorphic association to any table with
 the given identifier type. The first listed column is a VARCHAR column 
@@ -706,6 +708,7 @@ element type of a collection and specifies a many-to-many relational model -->
 	<!ATTLIST many-to-many not-found (exception|ignore) "exception">
 	<!ATTLIST many-to-many outer-join (true|false|auto) #IMPLIED>
 	<!ATTLIST many-to-many fetch (join|select) #IMPLIED>
+	<!ATTLIST many-to-many lazy (false|proxy) #IMPLIED>
 	<!ATTLIST many-to-many foreign-key CDATA #IMPLIED>
 	<!ATTLIST many-to-many unique (true|false) "false">
 	<!ATTLIST many-to-many where CDATA #IMPLIED>
@@ -749,7 +752,6 @@ list index, or key of a map). -->
 <!ELEMENT list-index (column?)>
 	<!ATTLIST list-index column CDATA #IMPLIED>
 	<!ATTLIST list-index base CDATA "0">
-	<!ATTLIST list-index node CDATA #IMPLIED>
 
 <!ELEMENT map-key ((column|formula)*)>
 	<!ATTLIST map-key column CDATA #IMPLIED>
@@ -762,7 +764,6 @@ list index, or key of a map). -->
 	<!ATTLIST index column CDATA #IMPLIED>
 	<!ATTLIST index type CDATA #IMPLIED>			<!-- required for maps -->
 	<!ATTLIST index length CDATA #IMPLIED>
-	<!ATTLIST index node CDATA #IMPLIED>
 
 <!-- Many to many association mapped to the key of a map. ie. a map keyed
 on entities. -->
