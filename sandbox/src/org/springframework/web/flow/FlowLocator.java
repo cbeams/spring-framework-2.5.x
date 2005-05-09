@@ -33,26 +33,4 @@ public interface FlowLocator {
 	 */
 	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException;
 
-	/**
-	 * Lookup a flow build by specified type of flow builder.
-	 * @param flowDefinitionId the flow id
-	 * @param requiredFlowBuilderImplementationClass the required builder type
-	 * @return the flow
-	 * @throws ServiceLookupException when the flow cannot be found
-	 */
-	public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
-			throws ServiceLookupException;
-
-	/**
-	 * Lookup a flow of specified implementation class; there must exactly one
-	 * flow implementation of the specified implementation in the registry this
-	 * locator queries.
-	 * @param flowDefinitionImplementationClass the required implementation
-	 *        class
-	 * @return the flow
-	 * @throws ServiceLookupException when the flow cannot be found, or more
-	 *         than one flow of the specified type exists
-	 */
-	public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException;
-
 }
