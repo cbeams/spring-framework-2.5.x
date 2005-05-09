@@ -59,7 +59,7 @@ import org.springframework.web.flow.State;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class FlowSessionImpl implements Serializable, FlowSession {
+public class FlowSessionImpl implements FlowSession, Serializable {
 
 	private static final long serialVersionUID = 3834024745107862072L;
 
