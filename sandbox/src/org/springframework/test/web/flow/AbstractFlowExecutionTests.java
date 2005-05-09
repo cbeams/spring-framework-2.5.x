@@ -86,7 +86,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 */
 	protected Flow getFlow() throws NoSuchFlowDefinitionException {
 		if (this.flow == null) {
-			setFlow(getFlowLocator().getFlow(flowId(), flowBuilderClass()));
+			setFlow(getFlowLocator().getFlow(flowId()));
 		}
 		return flow;
 	}
@@ -106,15 +106,6 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @return the flow id, whose execution is to be tested.
 	 */
 	protected abstract String flowId();
-
-	/**
-	 * Subclasses may override to return the FlowBuilder implementation that is
-	 * expected to build the flow whose execution is to be tested.
-	 * @return the flow builder implementation (optional)
-	 */
-	protected Class flowBuilderClass() {
-		return null;
-	}
 
 	/**
 	 * Set the flow definition to be tested to the Flow built by the specified
