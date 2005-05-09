@@ -16,44 +16,49 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.Serializable;
-
-import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
- * AOP Alliance MethodInterceptor that can be introduced in a chain to display
- * verbose information about intercepted invocations to the logger.
+ * AOP Alliance <code>MethodInterceptor</code> that can be introduced in a chain
+ * to display verbose information about intercepted invocations to the logger.
+ *
+ * <p>Logs full invocation details on method entry and method exit,
+ * including invocation arguments and invocation count. This is only
+ * intended for debugging purposes; use <code>SimpleTraceInterceptor</code>
+ * or <code>CustomizableTraceInterceptor</code> for pure tracing purposes.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see SimpleTraceInterceptor
+ * @see CustomizableTraceInterceptor
  */
-public class DebugInterceptor implements MethodInterceptor, Serializable {
-
-	/** Static to avoid serializing the logger */
-	protected static final Log logger = LogFactory.getLog(DebugInterceptor.class);
+public class DebugInterceptor extends SimpleTraceInterceptor {
 
 	private int count;
 
+	/**
+	 * Create a new DebugInterceptor with a static logger.
+	 */
+	public DebugInterceptor() {
+	}
+
+	/**
+	 * Create a new DebugInterceptor with dynamic or static logger,
+	 * according to the given flag.
+	 * @param useDynamicLogger whether to use a dynamic logger or a static logger
+	 * @see #setUseDynamicLogger
+	 */
+	public DebugInterceptor(boolean useDynamicLogger) {
+		setUseDynamicLogger(useDynamicLogger);
+	}
+
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		++this.count;
-		if (logger.isDebugEnabled()) {
-			logger.debug("Before invocation (count=" + this.count + "): " + invocation);
-		}
-		try {
-			Object rval = invocation.proceed();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invocation successfully returned (count=" + this.count + "): " + invocation);
-			}
-			return rval;
-		}
-		catch (Throwable ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invocation threw exception (count=" + this.count + "): " + invocation, ex);
-			}
-			throw ex;
-		}
+		this.count++;
+		return super.invoke(invocation);
+	}
+
+	protected String getInvocationDescription(MethodInvocation invocation) {
+		return invocation + "; count=" + this.count;
 	}
 
 	/**

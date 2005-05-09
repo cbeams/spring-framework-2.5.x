@@ -16,40 +16,15 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.Serializable;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
- * Simple AOP Alliance MethodInterceptor that can be introduced in a chain
- * to display verbose trace information about intercepted method invocations
- * with method entry and method exit info using Commons Logging at DEBUG level.
+ * Simple AOP Alliance <code>MethodInterceptor</code> that can be introduced
+ * in a chain to display verbose trace information about intercepted method
+ * invocations, with method entry and method exit info.
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
- * @since 1.0.2
+ * @deprecated in favor of SimpleTraceInterceptor
+ * @see SimpleTraceInterceptor
  */
-public class TraceInterceptor implements MethodInterceptor, Serializable {
-
-	/** Static to avoid serializing the logger */
-	protected static final Log logger = LogFactory.getLog(TraceInterceptor.class);
-
-	public Object invoke(MethodInvocation invocation) throws Throwable {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Entering method '" + invocation.getMethod().getName() +
-			    "' in class [" + invocation.getThis().getClass().getName() + "]");
-		}
-		try {
-			return invocation.proceed();
-		}
-		finally {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Exiting method '" + invocation.getMethod().getName() +
-						"' in class [" + invocation.getThis().getClass().getName() + "]");
-			}
-		}
-	}
+public class TraceInterceptor extends SimpleTraceInterceptor {
 
 }

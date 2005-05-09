@@ -16,42 +16,50 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.Serializable;
-
-import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.StopWatch;
 
 /**
- * Trivial performance monitor interceptor.
+ * Simple AOP Alliance <code>MethodInterceptor</code> for performance monitoring.
  * This interceptor has no effect on the intercepted method call.
  *
- * <p>Presently logs information using Commons Logging, at "info" level.
- * Could make this much more sophisticated, storing information etc.
+ * <p>Uses a <code>StopWatch</code> for the actual performance measuring.
  *
  * @author Rod Johnson
  * @author Dmitriy Kopylenko
+ * @see org.springframework.util.StopWatch
+ * @see JamonPerformanceMonitorInterceptor
  */
-public class PerformanceMonitorInterceptor implements MethodInterceptor, Serializable {
+public class PerformanceMonitorInterceptor extends AbstractTraceInterceptor {
 
-	/** Static to avoid serializing the logger */
-	protected static final Log logger = LogFactory.getLog(PerformanceMonitorInterceptor.class);
+	/**
+	 * Create a new PerformanceMonitorInterceptor with a static logger.
+	 */
+	public PerformanceMonitorInterceptor() {
+	}
 
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	/**
+	 * Create a new PerformanceMonitorInterceptor with a dynamic or static logger,
+	 * according to the given flag.
+	 * @param useDynamicLogger whether to use a dynamic logger or a static logger
+	 * @see #setUseDynamicLogger
+	 */
+	public PerformanceMonitorInterceptor(boolean useDynamicLogger) {
+		setUseDynamicLogger(useDynamicLogger);
+	}
+
+	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
-		StopWatch sw = new StopWatch(name);
-		sw.start(name);
+		StopWatch stopWatch = new StopWatch(name);
+		stopWatch.start(name);
 		try {
 			return invocation.proceed();
 		}
 		finally {
-			sw.stop();
-			if (logger.isInfoEnabled()) {
-				logger.info(sw.shortSummary());
-			}
+			stopWatch.stop();
+			logger.trace(stopWatch.shortSummary());
 		}
 	}
 

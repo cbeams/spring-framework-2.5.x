@@ -16,18 +16,14 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.Serializable;
-
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Performance monitor interceptor that uses <b>JAMon</b> library
- * to perfom the performance mesurment on the intercepted method
+ * to perform the performance measurement on the intercepted method
  * and output the stats.
  *
  * <p>This code is inspired by Thierry Templier's blog.
@@ -35,23 +31,36 @@ import org.apache.commons.logging.LogFactory;
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 1.1.3
+ * @see com.jamonapi.MonitorFactory
+ * @see PerformanceMonitorInterceptor
  */
-public class JamonPerformanceMonitorInterceptor implements MethodInterceptor, Serializable {
+public class JamonPerformanceMonitorInterceptor extends AbstractTraceInterceptor {
 
-	/** Static to avoid serializing the logger */
-	protected static final Log logger = LogFactory.getLog(JamonPerformanceMonitorInterceptor.class);
+	/**
+	 * Create a new JamonPerformanceMonitorInterceptor with a static logger.
+	 */
+	public JamonPerformanceMonitorInterceptor() {
+	}
 
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	/**
+	 * Create a new JamonPerformanceMonitorInterceptor with a dynamic or static logger,
+	 * according to the given flag.
+	 * @param useDynamicLogger whether to use a dynamic logger or a static logger
+	 * @see #setUseDynamicLogger
+	 */
+	public JamonPerformanceMonitorInterceptor(boolean useDynamicLogger) {
+		setUseDynamicLogger(useDynamicLogger);
+	}
+
+	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = invocation.getMethod().getDeclaringClass().getName() + "." + invocation.getMethod().getName();
-		Monitor mon = MonitorFactory.start(name);
+		Monitor monitor = MonitorFactory.start(name);
 		try {
 			return invocation.proceed();
 		}
 		finally {
-			mon.stop();
-			if (logger.isInfoEnabled()) {
-				logger.info("JAMon performance statistics for method [" + name + "]:\n" + mon);
-			}
+			monitor.stop();
+			logger.trace("JAMon performance statistics for method [" + name + "]:\n" + monitor);
 		}
 	}
 
