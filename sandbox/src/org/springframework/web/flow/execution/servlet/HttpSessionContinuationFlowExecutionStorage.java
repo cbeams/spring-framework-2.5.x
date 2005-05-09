@@ -16,10 +16,10 @@
 package org.springframework.web.flow.execution.servlet;
 
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.NoSuchFlowExecutionException;
+import org.springframework.web.flow.execution.FlowExecution;
 import org.springframework.web.flow.execution.FlowExecutionContinuation;
 import org.springframework.web.flow.execution.FlowExecutionStorageException;
+import org.springframework.web.flow.execution.NoSuchFlowExecutionException;
 import org.springframework.web.util.WebUtils;
 
 /**

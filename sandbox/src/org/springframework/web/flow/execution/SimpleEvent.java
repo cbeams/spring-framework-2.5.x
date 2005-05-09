@@ -20,10 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.web.flow.Action;
-import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.State;
 
 /**
  * A simple implementation of the <code>Event</code> base class. Mostly

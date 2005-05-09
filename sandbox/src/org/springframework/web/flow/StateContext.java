@@ -18,7 +18,6 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 import org.springframework.binding.AttributeSource;
-import org.springframework.web.flow.execution.FlowSessionImpl;
 
 /**
  * Mutable control interface for states to use to manipulate the state of an

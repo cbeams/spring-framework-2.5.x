@@ -21,7 +21,7 @@ import ognl.ExpressionSyntaxException;
 
 import org.springframework.mock.web.flow.MockRequestContext;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.SimpleEvent;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Test case for OgnlTransitionCriteriaCreator.

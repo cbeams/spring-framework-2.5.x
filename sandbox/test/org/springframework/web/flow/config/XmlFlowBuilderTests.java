@@ -33,10 +33,10 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ServiceLookupException;
-import org.springframework.web.flow.SimpleEvent;
-import org.springframework.web.flow.SubFlowState;
+import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Test case for XML flow builder.
@@ -105,22 +105,22 @@ public class XmlFlowBuilderTests extends TestCase {
 		transition = viewState2.transitionFor(context);
 		assertEquals("subFlowState2", transition.getTargetStateId());
 
-		SubFlowState subFlowState1 = (SubFlowState) flow.getState("subFlowState1");
+		SubflowState subFlowState1 = (SubflowState) flow.getState("subFlowState1");
 		assertNotNull(subFlowState1);
-		assertNotNull(subFlowState1.getSubFlow());
-		assertEquals("subFlow1", subFlowState1.getSubFlow().getId());
-		assertNotNull(subFlowState1.getFlowAttributeMapper());
+		assertNotNull(subFlowState1.getSubflow());
+		assertEquals("subFlow1", subFlowState1.getSubflow().getId());
+		assertNotNull(subFlowState1.getAttributeMapper());
 		assertEquals(1, subFlowState1.getTransitions().length);
 		context.setLastEvent(createEvent("event1"));
 		assertTrue(subFlowState1.hasTransitionFor(context));
 		transition = subFlowState1.transitionFor(context);
 		assertEquals("endState1", transition.getTargetStateId());
 
-		SubFlowState subFlowState2 = (SubFlowState) flow.getState("subFlowState2");
+		SubflowState subFlowState2 = (SubflowState) flow.getState("subFlowState2");
 		assertNotNull(subFlowState2);
-		assertNotNull(subFlowState2.getSubFlow());
-		assertEquals("subFlow2", subFlowState2.getSubFlow().getId());
-		assertNull(subFlowState2.getFlowAttributeMapper());
+		assertNotNull(subFlowState2.getSubflow());
+		assertEquals("subFlow2", subFlowState2.getSubflow().getId());
+		assertNull(subFlowState2.getAttributeMapper());
 		assertEquals(1, subFlowState2.getTransitions().length);
 		context.setLastEvent(createEvent("event2"));
 		assertTrue(subFlowState2.hasTransitionFor(context));
@@ -174,11 +174,11 @@ public class XmlFlowBuilderTests extends TestCase {
 		public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
 			if ("attributeMapper1".equals(flowModelMapperId)) {
 				return new FlowAttributeMapper() {
-					public Map createSubFlowInputAttributes(AttributeSource parentFlowModel) {
+					public Map createSubflowInput(AttributeSource parentFlowModel) {
 						return new HashMap();
 					}
 
-					public void mapSubFlowOutputAttributes(AttributeSource endingSubFlowModel,
+					public void mapSubflowOutput(AttributeSource endingSubFlowModel,
 							MutableAttributeSource resumingParentFlowModel) {
 					}
 				};

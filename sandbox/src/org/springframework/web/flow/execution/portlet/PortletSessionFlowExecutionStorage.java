@@ -23,10 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.RandomGuid;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.NoSuchFlowExecutionException;
+import org.springframework.web.flow.execution.FlowExecution;
 import org.springframework.web.flow.execution.FlowExecutionStorage;
 import org.springframework.web.flow.execution.FlowExecutionStorageException;
+import org.springframework.web.flow.execution.NoSuchFlowExecutionException;
 import org.springframework.web.portlet.util.PortletUtils;
 
 /**

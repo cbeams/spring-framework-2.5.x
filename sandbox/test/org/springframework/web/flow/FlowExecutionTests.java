@@ -11,6 +11,9 @@ import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
 import org.springframework.web.flow.config.TransitionCriteriaCreator;
+import org.springframework.web.flow.execution.FlowExecution;
+import org.springframework.web.flow.execution.FlowExecutionStack;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * General flow execution tests.
@@ -33,10 +36,10 @@ public class FlowExecutionTests extends TestCase {
 		Flow flow = new Flow("myFlow");
 		new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition(on("success"), "viewState"));
 		new ViewState(flow, "viewState", "myView", new Transition(on("submit"), "subFlowState"));
-		new SubFlowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(on("finish"), "finish"));
+		new SubflowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(on("finish"), "finish"));
 		new EndState(flow, "finish");
 
-		FlowExecution flowExecution = flow.createExecution();
+		FlowExecution flowExecution = new FlowExecutionStack(flow);
 		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
 		flowExecution.getListenerList().add(flowExecutionListener);
 		flowExecution.start(new SimpleEvent(this, "start"));
@@ -62,7 +65,7 @@ public class FlowExecutionTests extends TestCase {
 				addEndState("endState");
 			}
 		};
-		FlowExecution flowExecution = new FlowFactoryBean(builder).getFlow().createExecution();
+		FlowExecution flowExecution = new FlowExecutionStack(new FlowFactoryBean(builder).getFlow());
 		ViewDescriptor vd = flowExecution.start(new SimpleEvent(this, "start"));
 		assertNotNull(vd);
 		assertEquals("viewName", vd.getViewName());
@@ -118,7 +121,7 @@ public class FlowExecutionTests extends TestCase {
 		};
 		Flow parentFlow = new FlowFactoryBean(parentBuilder).getFlow();
 
-		FlowExecution flowExecution = parentFlow.createExecution();
+		FlowExecution flowExecution = new FlowExecutionStack(parentFlow);
 		flowExecution.start(new SimpleEvent(this, "start"));
 		assertFalse(flowExecution.isActive());
 	}

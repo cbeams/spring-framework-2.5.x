@@ -31,10 +31,10 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ServiceLookupException;
-import org.springframework.web.flow.SimpleEvent;
-import org.springframework.web.flow.SubFlowState;
+import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Test Java based flow builder logic (subclasses of AbstractFlowBuilder).
@@ -86,7 +86,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 		assertTrue(flow.containsState("viewPersonList"));
 		assertTrue(flow.getState("viewPersonList") instanceof ViewState);
 		assertTrue(flow.containsState("person.Detail"));
-		assertTrue(flow.getState("person.Detail") instanceof SubFlowState);
+		assertTrue(flow.getState("person.Detail") instanceof SubflowState);
 		assertTrue(flow.containsState("finish"));
 		assertTrue(flow.getState("finish") instanceof EndState);
 	}
@@ -162,13 +162,13 @@ public class AbstractFlowBuilderTests extends TestCase {
 	}
 
 	public static class PersonIdMapper implements FlowAttributeMapper {
-		public Map createSubFlowInputAttributes(AttributeSource parentFlowModel) {
+		public Map createSubflowInput(AttributeSource parentFlowModel) {
 			Map inputMap = new HashMap(1);
 			inputMap.put("personId", parentFlowModel.getAttribute("personId"));
 			return inputMap;
 		}
 
-		public void mapSubFlowOutputAttributes(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
+		public void mapSubflowOutput(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
 		}
 	}
 

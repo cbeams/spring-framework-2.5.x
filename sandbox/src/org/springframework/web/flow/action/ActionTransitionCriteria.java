@@ -17,8 +17,8 @@ package org.springframework.web.flow.action;
 
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Action;
-import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.ActionExecutionException;
+import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.StateContext;

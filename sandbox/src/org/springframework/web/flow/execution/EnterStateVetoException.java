@@ -1,4 +1,7 @@
-package org.springframework.web.flow;
+package org.springframework.web.flow.execution;
+
+import org.springframework.web.flow.FlowNavigationException;
+import org.springframework.web.flow.State;
 
 /**
  * Exception thrown to veto entering of a state in a web flow.

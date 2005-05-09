@@ -30,11 +30,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.XmlFlowBuilder;
 import org.springframework.web.flow.config.XmlFlowBuilderTests;
+import org.springframework.web.flow.execution.FlowExecutionStack;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Test case for FlowExecutionStack.
  * 
- * @see org.springframework.web.flow.FlowExecutionStack
+ * @see org.springframework.web.flow.execution.FlowExecutionStack
  * 
  * @author Erwin Vervaet
  */
@@ -68,7 +70,7 @@ public class FlowExecutionStackTests extends TestCase {
 				return getFlow(flowDefinitionId);
 			}
 		};
-		flowExecution = (FlowExecutionStack)flow.createExecution();
+		flowExecution = new FlowExecutionStack(flow);
 	}
 
 	protected void runFlowExecutionRehydrationTest() throws Exception {

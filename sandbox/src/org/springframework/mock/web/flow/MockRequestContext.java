@@ -23,13 +23,14 @@ import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowExecutionListenerList;
+import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.TransactionSynchronizer;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.execution.FlowExecutionListenerList;
 
 /**
  * Mock implementation of the <code>RequestContext</code> interface to
@@ -52,12 +53,10 @@ import org.springframework.web.flow.Transition;
  */
 public class MockRequestContext implements RequestContext, TransactionSynchronizer {
 
-	private Flow activeFlow;
-
 	private Flow rootFlow;
 
-	private State currentState;
-
+	private MockFlowSession activeSession = new MockFlowSession();
+	
 	private Event originatingEvent;
 
 	private Event lastEvent;
@@ -67,10 +66,6 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	private MutableAttributeSource actionExecutionProperties = new MapAttributeSource();
 
 	private Scope requestScope = new Scope(ScopeType.REQUEST);
-
-	private Scope flowScope = new Scope(ScopeType.FLOW);
-
-	private FlowExecutionListenerList listenerList = new FlowExecutionListenerList();
 
 	private boolean inTransaction;
 
@@ -87,9 +82,8 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	 * @param currentState the current state
 	 * @param originatingEvent the event originating this request context
 	 */
-	public MockRequestContext(Flow activeFlow, State currentState, Event originatingEvent) {
-		setActiveFlow(activeFlow);
-		setCurrentState(currentState);
+	public MockRequestContext(MockFlowSession session, Event originatingEvent) {
+		setActiveSession(session);
 		setOriginatingEvent(originatingEvent);
 		setLastEvent(originatingEvent);
 	}
@@ -101,8 +95,9 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	 */
 	public void setRootFlow(Flow rootFlow) {
 		this.rootFlow = rootFlow;
-		if (this.activeFlow == null) {
-			this.activeFlow = rootFlow;
+		if (this.activeSession.getFlow() == null) {
+			this.activeSession.setFlow(rootFlow);
+			this.activeSession.setState(rootFlow.getStartState());
 		}
 	}
 
@@ -111,10 +106,10 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	 * 
 	 * @param activeFlow the activeFlow to set
 	 */
-	public void setActiveFlow(Flow activeFlow) {
-		this.activeFlow = activeFlow;
+	public void setActiveSession(MockFlowSession session) {
+		this.activeSession = session;
 		if (this.rootFlow == null) {
-			this.rootFlow = activeFlow;
+			this.rootFlow = session.getFlow();
 		}
 	}
 
@@ -123,9 +118,9 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	 * 
 	 * @param currentState the currentState to set
 	 */
-	public void setCurrentState(State currentState) {
-		Assert.state(currentState.getFlow() == this.activeFlow, "The current state must be in the active flow");
-		this.currentState = currentState;
+	public void setCurrentState(State state) {
+		Assert.state(state.getFlow() == getActiveSession().getFlow(), "The current state must be in the active flow");
+		this.activeSession.setState(state);
 	}
 
 	/**
@@ -170,16 +165,19 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		return rootFlow;
 	}
 
-	public Flow getActiveFlow() throws IllegalStateException {
-		return activeFlow;
+	public boolean isRootFlowActive() {
+		return rootFlow != null && rootFlow == activeSession.getFlow();
 	}
 
-	public State getCurrentState() throws IllegalStateException {
-		return currentState;
+	public FlowSession getActiveSession() throws IllegalStateException {
+		if (activeSession == null) {
+			throw new IllegalStateException("No flow session active");
+		}
+		return activeSession;
 	}
 
-	public FlowExecutionListenerList getFlowExecutionListenerList() {
-		return listenerList;
+	public boolean isActive() {
+		return activeSession != null;
 	}
 
 	public Event getOriginatingEvent() {
@@ -194,12 +192,12 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		return lastTransition;
 	}
 
-	public AttributeSource getActionProperties() {
+	public AttributeSource getExecutionProperties() {
 		return actionExecutionProperties;
 	}
 
 	public Scope getFlowScope() {
-		return flowScope;
+		return activeSession.getScope();
 	}
 
 	public Scope getRequestScope() {
@@ -208,14 +206,6 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 
 	public TransactionSynchronizer getTransactionSynchronizer() {
 		return this;
-	}
-
-	public boolean isFlowExecutionActive() {
-		return activeFlow != null;
-	}
-
-	public boolean isRootFlowActive() {
-		return rootFlow != null && rootFlow == activeFlow;
 	}
 
 	/*

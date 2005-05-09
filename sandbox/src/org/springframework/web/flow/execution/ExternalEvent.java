@@ -17,8 +17,6 @@ package org.springframework.web.flow.execution;
 
 import java.util.Iterator;
 
-
-
 /**
  * Abstract superclass for events encapsulating a request coming into a
  * flow execution for an external source (client). This kind of event is typically

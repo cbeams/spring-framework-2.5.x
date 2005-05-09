@@ -20,14 +20,15 @@ import org.springframework.test.JUnitAssertSupport;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowExecution;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
-import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
+import org.springframework.web.flow.execution.FlowExecution;
+import org.springframework.web.flow.execution.FlowExecutionStack;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Base class for tests that verify a flow executes as expected; that is, it
@@ -140,7 +141,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 *         (returned when the first view state is entered)
 	 */
 	protected ViewDescriptor startFlow(Event event) {
-		this.flowExecution = getFlow().createExecution();
+		this.flowExecution = new FlowExecutionStack(getFlow());
 		setupFlowExecution(flowExecution);
 		return this.flowExecution.start(event);
 	}

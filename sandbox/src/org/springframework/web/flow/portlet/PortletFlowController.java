@@ -15,7 +15,10 @@
  */
 package org.springframework.web.flow.portlet;
 
-import javax.portlet.*;
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;

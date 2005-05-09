@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.flow.FlowExecution;
+import org.springframework.web.flow.execution.FlowExecution;
 
 /**
  * Servlet 2.3 filter that cleans up expired web flow executions in the HTTP
@@ -120,23 +120,23 @@ public class ExpiredFlowCleanupFilter extends OncePerRequestFilter {
 			return;
 		}
 		// execute the cleanup process
-		Set namesToBeDeleted = new HashSet();
-		Enumeration names = session.getAttributeNames();
-		while (names.hasMoreElements()) {
-			String name = (String)names.nextElement();
-			Object value = session.getAttribute(name);
-			if (value instanceof FlowExecution) {
-				FlowExecution flowExecution = (FlowExecution)value;
+		Set attributeNamesToRemove = new HashSet();
+		Enumeration attributeNames = session.getAttributeNames();
+		while (attributeNames.hasMoreElements()) {
+			String attributeName = (String)attributeNames.nextElement();
+			Object attributeValue = session.getAttribute(attributeName);
+			if (attributeValue instanceof FlowExecution) {
+				FlowExecution flowExecution = (FlowExecution)attributeValue;
 				if (hasExpired(request, flowExecution)) {
-					namesToBeDeleted.add(name);
+					attributeNamesToRemove.add(attributeName);
 					if (logger.isInfoEnabled()) {
-						logger.info("Flow execution '" + name + "' for flow '" + flowExecution.getActiveFlowId()
+						logger.info("Flow execution '" + attributeName + "' for flow '" + flowExecution.getActiveFlowId()
 								+ "' has expired and will be removed from the HTTP session '" + session.getId() + "'");
 					}
 				}
 			}
 		}
-		Iterator it = namesToBeDeleted.iterator();
+		Iterator it = attributeNamesToRemove.iterator();
 		while (it.hasNext()) {
 			session.removeAttribute((String)it.next());
 		}

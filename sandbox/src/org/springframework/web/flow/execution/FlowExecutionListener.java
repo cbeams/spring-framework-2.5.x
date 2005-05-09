@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow.execution;
 
-import org.springframework.web.flow.EnterStateVetoException;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;

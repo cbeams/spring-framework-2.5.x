@@ -212,7 +212,7 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 		this.outputMapper = mapper;
 	}
 
-	public Map createSubFlowInputAttributes(AttributeSource parentFlowModel) {
+	public Map createSubflowInput(AttributeSource parentFlowModel) {
 		if (this.inputMapper != null) {
 			Map subFlowInputAttributes = new HashMap();
 			this.inputMapper.map(parentFlowModel, new MapAttributeSource(subFlowInputAttributes));
@@ -223,7 +223,7 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 		}
 	}
 
-	public void mapSubFlowOutputAttributes(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
+	public void mapSubflowOutput(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
 		if (this.outputMapper != null) {
 			this.outputMapper.map(subFlowModel, parentFlowModel);
 		}
