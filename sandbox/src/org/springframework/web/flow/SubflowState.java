@@ -183,16 +183,16 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + subflow.getId() + "' within this flow '" + getFlow() + "'");
 		}
-		return context.spawn(getSubflow(), createSubflowInput(context.getFlowScope()));
+		return context.spawn(getSubflow(), createSubflowInput(context));
 	}
 
-	public Map createSubflowInput(AttributeSource parentFlowAttributes) {
+	public Map createSubflowInput(RequestContext context) {
 		if (getAttributeMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attribute mapper to map parent-flow attributes "
 						+ "down to the spawned sub flow for access within the sub flow");
 			}
-			return this.attributeMapper.createSubflowInput(parentFlowAttributes);
+			return this.attributeMapper.createSubflowInput(context);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -205,14 +205,13 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 		}
 	}
 
-	public void mapSubflowOutput(AttributeSource subFlowAttributes,
-			MutableAttributeSource parentFlowAttributes) {
+	public void mapSubflowOutput(RequestContext context) {
 		if (getAttributeMapper() != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Messaging the configured attribute mapper to map sub flow attributes back up to the resuming parent flow -- "
 						+ "the resuming parent flow will now have access to attributes passed up by the completed sub flow");
 			}
-			this.attributeMapper.mapSubflowOutput(subFlowAttributes, parentFlowAttributes);
+			this.attributeMapper.mapSubflowOutput(context);
 		}
 		else {
 			if (logger.isDebugEnabled()) {

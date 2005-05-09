@@ -18,7 +18,6 @@ package org.springframework.web.flow;
 import java.util.Date;
 import java.util.Map;
 
-import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -165,7 +164,7 @@ public class EndState extends State {
 			}
 			Assert.isInstanceOf(FlowAttributeMapper.class, parentSession.getState());
 			FlowAttributeMapper resumingState = (FlowAttributeMapper)parentSession.getState();
-			resumingState.mapSubflowOutput(context.getFlowScope(), (MutableAttributeSource)parentSession.getAttributes());
+			resumingState.mapSubflowOutput(context);
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
 			// actually end the subflow
 			context.endActiveSession();

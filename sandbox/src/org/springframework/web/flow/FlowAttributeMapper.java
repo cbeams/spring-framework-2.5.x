@@ -84,17 +84,19 @@ public interface FlowAttributeMapper {
 	 * Attributes set in the <code>Map</code> returned by this method will be
 	 * added to flow scope of the child sub flow session when the session is
 	 * spawned and activated.
+	 * @param context
 	 * @param parentFlowAttributes the parent's flow scope, containing the set of
 	 *        possible attributes that may be passed down to the child
 	 * @return a map of attributes (name=value pairs) to pass as input to the
 	 *         spawning child subflow.
 	 */
-	public Map createSubflowInput(AttributeSource parentFlowAttributes);
+	public Map createSubflowInput(RequestContext context);
 
 	/**
 	 * Map relavent attributes of an ending sub flow session back up to a
 	 * resuming parent flow session. This maps the <i>output</i> of the child
 	 * as new input to the resuming parent.
+	 * @param context
 	 * @param subFlowAttributes the child's flow scope that should be mapped
 	 *        from, containing the set of possible attributes that may be passed
 	 *        up to the parent.
@@ -102,6 +104,5 @@ public interface FlowAttributeMapper {
 	 *        to, where output attributes of the child sub flow will be set as
 	 *        input.
 	 */
-	public void mapSubflowOutput(AttributeSource subFlowAttributes,
-			MutableAttributeSource parentFlowAttributes);
+	public void mapSubflowOutput(RequestContext context);
 }

@@ -25,12 +25,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeMapper;
-import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
 import org.springframework.web.flow.FlowAttributeMapper;
+import org.springframework.web.flow.RequestContext;
 
 /**
  * Generic flow attribute mapper implementation that allows mappings to be
@@ -212,10 +212,10 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 		this.outputMapper = mapper;
 	}
 
-	public Map createSubflowInput(AttributeSource parentFlowModel) {
+	public Map createSubflowInput(RequestContext context) {
 		if (this.inputMapper != null) {
 			Map subFlowInputAttributes = new HashMap();
-			this.inputMapper.map(parentFlowModel, new MapAttributeSource(subFlowInputAttributes));
+			this.inputMapper.map(context.getActiveSession().getAttributes(), new MapAttributeSource(subFlowInputAttributes));
 			return Collections.unmodifiableMap(subFlowInputAttributes);
 		}
 		else {
@@ -223,9 +223,10 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 		}
 	}
 
-	public void mapSubflowOutput(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
+	public void mapSubflowOutput(RequestContext context) {
 		if (this.outputMapper != null) {
-			this.outputMapper.map(subFlowModel, parentFlowModel);
+			MutableAttributeSource parentAttributes = (MutableAttributeSource)context.getActiveSession().getParent().getAttributes();
+			this.outputMapper.map(context.getActiveSession().getAttributes(), parentAttributes);
 		}
 	}
 }
