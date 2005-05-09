@@ -178,8 +178,7 @@ public class LocalSessionFactoryBean implements SessionFactory, InitializingBean
 	 * @see oracle.toplink.sessions.DatabaseLogin#setDatabaseURL(String)
 	 * @see oracle.toplink.sessions.DatabaseLogin#setConnector(oracle.toplink.sessions.Connector)
 	 * @see oracle.toplink.sessions.DatabaseLogin#setUsesExternalConnectionPooling(boolean)
-	 * @see oracle.toplink.sessions.DatabaseLogin#setPlatform(oracle.toplink.internal.databaseaccess.DatabasePlatform)
-	 * @see oracle.toplink.internal.databaseaccess.HSQLPlatform
+	 * @see oracle.toplink.sessions.DatabaseLogin#usePlatform(oracle.toplink.internal.databaseaccess.DatabasePlatform)
 	 */
 	public void setDatabaseLogin(DatabaseLogin databaseLogin) {
 		this.databaseLogin = databaseLogin;
@@ -209,6 +208,7 @@ public class LocalSessionFactoryBean implements SessionFactory, InitializingBean
 	 * DatabaseLogin instance (either the default instance or one passed in
 	 * through the "databaseLogin" property).
 	 * @see oracle.toplink.internal.databaseaccess.HSQLPlatform
+	 * @see oracle.toplink.platform.database.HSQLPlatform
 	 */
 	public void setDatabasePlatform(DatabasePlatform databasePlatform) {
 		this.databasePlatform = databasePlatform;
@@ -217,12 +217,19 @@ public class LocalSessionFactoryBean implements SessionFactory, InitializingBean
 	/**
 	 * Specify a TopLink SessionLog instance to use for detailed logging of the
 	 * Session's activities: for example, DefaultSessionLog (which logs to the
-	 * console) or CommonsLoggingSessionLog (which logs through Commons Logging.
+	 * console), JavaLog (which logs through JDK 1.4'S <code>java.util.logging</code>,
+	 * available as of TopLink 10.1.3), or CommonsLoggingSessionLog /
+	 * CommonsLoggingSessionLog904 (which logs through Commons Logging,
+	 * on TopLink 10.1.3 and 9.0.4, respectively).
 	 * <p>Note that detailed Session logging is usually only useful for debug
-	 * logging, with adjustable detail level. For standard execution, no
-	 * SessionLog needs to be specified.
+	 * logging, with adjustable detail level. As of TopLink 10.1.3, TopLink also
+	 * uses different log categories, which allows for fine-grained filtering of
+	 * log messages. For standard execution, no SessionLog needs to be specified.
 	 * @see oracle.toplink.sessions.DefaultSessionLog
+	 * @see oracle.toplink.logging.DefaultSessionLog
+	 * @see oracle.toplink.logging.JavaLog
 	 * @see org.springframework.orm.toplink.support.CommonsLoggingSessionLog
+	 * @see org.springframework.orm.toplink.support.CommonsLoggingSessionLog904
 	 */
 	public void setSessionLog(SessionLog sessionLog) {
 		this.sessionLog = sessionLog;
