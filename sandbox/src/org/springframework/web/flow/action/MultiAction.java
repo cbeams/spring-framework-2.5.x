@@ -186,14 +186,14 @@ public class MultiAction extends AbstractAction {
 		public static final String METHOD_PROPERTY = "method";
 
 		public String getMethodName(RequestContext context, MultiAction action) {
-			AttributeSource properties = context.getActionProperties();
+			AttributeSource properties = context.getExecutionProperties();
 			if (properties.containsAttribute(METHOD_PROPERTY)) {
 				// use specified execute method name
 				return (String)properties.getAttribute(METHOD_PROPERTY);
 			}
 			else {
 				// use current state name as method name
-				return context.getCurrentState().getId();
+				return context.getActiveSession().getState().getId();
 			}
 		}
 	}

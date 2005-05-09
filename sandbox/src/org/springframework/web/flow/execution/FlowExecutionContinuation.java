@@ -26,7 +26,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.flow.FlowExecution;
 
 /**
  * Helper class that aides in handling a flow execution as if

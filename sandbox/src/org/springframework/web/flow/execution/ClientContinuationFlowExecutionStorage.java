@@ -17,8 +17,6 @@ package org.springframework.web.flow.execution;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.NoSuchFlowExecutionException;
 
 /**
  * Flow execution storage implementation that will store a flow execution as a

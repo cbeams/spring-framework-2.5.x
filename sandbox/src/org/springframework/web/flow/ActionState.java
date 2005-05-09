@@ -430,14 +430,14 @@ public class ActionState extends TransitionableState {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				context.setActionProperties(action);
+				context.setExecutionProperties(action);
 				return decorateResult(action.getTargetAction().execute(context));
 			}
 			catch (Exception e) {
 				throw new ActionExecutionException(actionState, action, e);
 			}
 			finally {
-				context.setActionProperties(null);
+				context.setExecutionProperties(null);
 			}
 		}
 

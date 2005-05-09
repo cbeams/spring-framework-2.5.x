@@ -16,7 +16,6 @@
 package org.springframework.web.flow.execution;
 
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.web.flow.FlowExecution;
 
 /**
  * Exception signaling a fatal, technical problem while accessing

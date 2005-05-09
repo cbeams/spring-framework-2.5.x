@@ -46,7 +46,7 @@ import org.springframework.web.flow.DecisionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.SubFlowState;
+import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
@@ -434,7 +434,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		FlowAttributeMapper mapper = parseAttributeMapper(element);
 		Transition[] transitions = parseTransitions(element);
 		Map properties = parseProperties(element);
-		new SubFlowState(flow, id, subFlow, mapper, transitions, properties);
+		new SubflowState(flow, id, subFlow, mapper, transitions, properties);
 	}
 
 	/**

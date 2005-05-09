@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.execution;
+
+import org.springframework.web.flow.EnterStateVetoException;
+import org.springframework.web.flow.FlowSession;
+import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.State;
 
 /**
  * Interface to be implemented by objects that wish to listen and respond to the
@@ -22,7 +27,7 @@ package org.springframework.web.flow;
  * An 'observer' that is very aspect like, allowing you to insert 'cross
  * cutting' behavior at well-defined points within a flow execution lifecycle.
  * 
- * @see org.springframework.web.flow.FlowExecution
+ * @see org.springframework.web.flow.execution.FlowExecution
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

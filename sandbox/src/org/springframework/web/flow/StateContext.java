@@ -18,6 +18,7 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 import org.springframework.binding.AttributeSource;
+import org.springframework.web.flow.execution.FlowSessionImpl;
 
 /**
  * Mutable control interface for states to use to manipulate the state of an
@@ -28,6 +29,14 @@ import org.springframework.binding.AttributeSource;
  * @author Erwin Vervaet
  */
 public interface StateContext extends RequestContext {
+
+	/**
+	 * Returns the data model for this context, suitable for exposing to clients
+	 * (e.g. web views). Typically the model will contain the data available in
+	 * request scope and flow scope.
+	 * @return the model that can be exposed to a client
+	 */
+	public Map getModel();
 
 	/**
 	 * Update the current state of the ongoing flow execution.
@@ -52,26 +61,7 @@ public interface StateContext extends RequestContext {
 	 * this request context.
 	 * @param properties the action execution parameters
 	 */
-	public void setActionProperties(AttributeSource properties);
-
-	/**
-	 * Get the flow session currently active in the flow execution.
-	 * @throws IllegalStateException when the flow execution is not active
-	 */
-	public FlowSession getActiveFlowSession() throws IllegalStateException;
-
-	/**
-	 * Get the flow session of the parent flow of the flow currently active in
-	 * the flow execution.
-	 * @throws IllegalStateException when the flow execution is not active
-	 */
-	public FlowSession getParentFlowSession() throws IllegalStateException;
-
-	/**
-	 * End the active flow session.
-	 * @return the ended session
-	 */
-	public FlowSession endActiveFlowSession() throws IllegalStateException;
+	public void setExecutionProperties(AttributeSource properties);
 
 	/**
 	 * Spawn the provided flow definition as a subflow, activating it and
@@ -93,4 +83,11 @@ public interface StateContext extends RequestContext {
 	 *         render the results of the spawned subflow
 	 */
 	public ViewDescriptor spawn(Flow subFlow, String stateId, Map subFlowInput);
+	
+	/**
+	 * End the active flow session.
+	 * @return the ended session
+	 */
+	public FlowSession endActiveSession() throws IllegalStateException;
+
 }

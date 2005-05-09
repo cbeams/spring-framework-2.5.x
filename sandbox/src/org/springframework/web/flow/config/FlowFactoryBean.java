@@ -159,7 +159,6 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 			// e.g where Flow A spawns Flow B, which spawns Flow A again...
 			this.flow = this.flowBuilder.init();
 			this.flowBuilder.buildStates();
-			this.flowBuilder.buildExecutionListeners();
 			this.flow = this.flowBuilder.getResult();
 			this.flowBuilder.dispose();
 		}

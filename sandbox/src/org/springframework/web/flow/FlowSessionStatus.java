@@ -16,11 +16,12 @@
 package org.springframework.web.flow;
 
 import org.springframework.core.enums.support.ShortCodedLabeledEnum;
+import org.springframework.web.flow.execution.FlowSessionImpl;
 
 /**
  * Type-safe enumeration of possible flow session statuses.
  * 
- * @see org.springframework.web.flow.FlowSession
+ * @see org.springframework.web.flow.execution.FlowSessionImpl
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

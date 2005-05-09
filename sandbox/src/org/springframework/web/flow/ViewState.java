@@ -161,7 +161,7 @@ public class ViewState extends TransitionableState {
 		}
 	}
 
-	protected ViewDescriptor createViewDescriptor(RequestContext context) {
+	protected ViewDescriptor createViewDescriptor(StateContext context) {
 		return new ViewDescriptor(this.viewName, context.getModel());
 	}
 

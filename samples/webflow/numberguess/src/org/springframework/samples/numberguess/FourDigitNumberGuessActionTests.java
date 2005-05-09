@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.flow.MockRequestContext;
 import org.springframework.samples.numberguess.FourDigitNumberGuessAction.NumberGuessData;
 import org.springframework.web.flow.Event;
-import org.springframework.web.flow.SimpleEvent;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 public class FourDigitNumberGuessActionTests extends TestCase {
 	public void testGuessNoInputProvided() throws Exception {

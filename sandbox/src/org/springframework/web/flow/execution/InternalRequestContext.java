@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.execution;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +26,17 @@ import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
 import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowConstants;
+import org.springframework.web.flow.FlowSession;
+import org.springframework.web.flow.Scope;
+import org.springframework.web.flow.ScopeType;
+import org.springframework.web.flow.State;
+import org.springframework.web.flow.StateContext;
+import org.springframework.web.flow.TransactionSynchronizer;
+import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.ViewDescriptor;
 
 /**
  * Default request context implementation used internally by the web flow
@@ -49,7 +60,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 
 	private Transition lastTransition;
 	
-	private AttributeSource actionProperties = EmptyAttributeSource.INSTANCE;
+	private AttributeSource executionProperties = EmptyAttributeSource.INSTANCE;
 
 	private FlowExecutionStack flowExecution;
 
@@ -85,7 +96,11 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return this.flowExecution.getListenerList();
 	}
 
-	public boolean isFlowExecutionActive() {
+	public FlowSession getActiveSession() throws IllegalStateException {
+		return this.flowExecution.getActiveFlowSession();
+	}
+
+	public boolean isActive() {
 		return this.flowExecution.isActive();
 	}
 
@@ -110,8 +125,8 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return lastTransition;
 	}
 
-	public AttributeSource getActionProperties() {
-		return actionProperties;
+	public AttributeSource getExecutionProperties() {
+		return executionProperties;
 	}
 
 	public Scope getRequestScope() {
@@ -153,16 +168,16 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		this.lastTransition = lastTransition;
 	}
 
-	public void setActionProperties(AttributeSource properties) {
+	public void setExecutionProperties(AttributeSource properties) {
 		if (properties != null) {
-			this.actionProperties = properties;
+			this.executionProperties = properties;
 		}
 		else {
-			this.actionProperties = EmptyAttributeSource.INSTANCE;
+			this.executionProperties = EmptyAttributeSource.INSTANCE;
 		}
 	}
 
-	public FlowSession getActiveFlowSession() {
+	public FlowSessionImpl getActiveFlowSession() {
 		return this.flowExecution.getActiveFlowSession();
 	}
 
@@ -170,7 +185,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return this.flowExecution.getParentFlowSession();
 	}
 
-	public FlowSession endActiveFlowSession() {
+	public FlowSession endActiveSession() {
 		FlowSession endedSession = this.flowExecution.endActiveFlowSession();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Session for flow '" + endedSession.getFlow().getId() + "' ended, session details = "

@@ -589,7 +589,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * @param errors possible binding errors
 	 */
 	protected void validate(RequestContext context, Object formObject, Errors errors) throws Exception {
-		String validatorMethod = (String)context.getActionProperties().getAttribute(VALIDATOR_METHOD_PROPERTY);
+		String validatorMethod = (String)context.getExecutionProperties().getAttribute(VALIDATOR_METHOD_PROPERTY);
 		if (StringUtils.hasText(validatorMethod)) {
 			invokeValidatorMethod(validatorMethod, formObject, errors);
 		}

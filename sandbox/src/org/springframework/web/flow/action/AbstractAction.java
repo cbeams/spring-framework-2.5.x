@@ -25,7 +25,7 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.SimpleEvent;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Base action implementation that provides a number of helper methods generally
@@ -130,16 +130,6 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 */
 	protected Event result(String resultId, Map parameters) {
 		return new SimpleEvent(this, resultId, parameters);
-	}
-
-	/**
-	 * Returns the calling action state.
-	 * @param context the request context
-	 * @return the current state (the calling action state)
-	 */
-	protected ActionState getActionState(RequestContext context) {
-		Assert.isInstanceOf(ActionState.class, context.getCurrentState());
-		return ((ActionState)context.getCurrentState());
 	}
 
 	// action pre and post execution logic

@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.test.web.flow.AbstractFlowExecutionTests;
-import org.springframework.web.flow.SimpleEvent;
 import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.execution.SimpleEvent;
 
 public class SearchPersonFlowTests extends AbstractFlowExecutionTests {
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.execution;
 
 import java.util.Iterator;
 
@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 /**
  * A strongly typed listener list class for FlowExecutionListeners.
  * 
- * @see org.springframework.web.flow.FlowExecutionListener
+ * @see org.springframework.web.flow.execution.FlowExecutionListener
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

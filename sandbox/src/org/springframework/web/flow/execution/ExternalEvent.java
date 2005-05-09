@@ -17,7 +17,7 @@ package org.springframework.web.flow.execution;
 
 import java.util.Iterator;
 
-import org.springframework.web.flow.SimpleEvent;
+
 
 /**
  * Abstract superclass for events encapsulating a request coming into a

@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.execution;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.web.flow.Action;
+import org.springframework.web.flow.EndState;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.State;
 
 /**
  * A simple implementation of the <code>Event</code> base class. Mostly

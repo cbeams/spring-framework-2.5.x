@@ -26,7 +26,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowExecutionListener;
+import org.springframework.web.flow.execution.FlowExecutionListener;
 
 /**
  * Abstract base implementation of a flow builder defining common functionality
@@ -139,31 +139,6 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 	 */
 	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
 		this.flowServiceLocator = flowServiceLocator;
-	}
-
-	/**
-	 * Set the default listener that will be associated with each execution of
-	 * the flow created by this builder.
-	 */
-	public void setFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners.clear();
-		this.flowExecutionListeners.add(listener);
-	}
-
-	/**
-	 * Set the default listeners that will be associated with each execution of
-	 * the flow created by this builder.
-	 */
-	public void setFlowExecutionListeners(FlowExecutionListener[] listeners) {
-		this.flowExecutionListeners.clear();
-		this.flowExecutionListeners.addAll(Arrays.asList(listeners));
-	}
-
-	public void buildExecutionListeners() throws FlowBuilderException {
-		if (!this.flowExecutionListeners.isEmpty()) {
-			getFlow().getFlowExecutionListenerList().add(
-					(FlowExecutionListener[])flowExecutionListeners.toArray(new FlowExecutionListener[0]));
-		}
 	}
 
 	/**

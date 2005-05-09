@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.execution;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -31,11 +31,20 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.FlowNavigationException;
+import org.springframework.web.flow.FlowSession;
+import org.springframework.web.flow.FlowSessionStatus;
+import org.springframework.web.flow.State;
+import org.springframework.web.flow.TransitionableState;
+import org.springframework.web.flow.ViewDescriptor;
 
 /**
  * Default implementation of FlowExecution that uses a stack-based data
  * structure to manage
- * {@link org.springframework.web.flow.FlowSession flow sessions}.
+ * {@link org.springframework.web.flow.execution.FlowSessionImpl flow sessions}.
  * <p>
  * This implementation of FlowExecution is serializable so it can be safely
  * stored in an HTTP session.
@@ -46,7 +55,7 @@ import org.springframework.util.StringUtils;
  * from being able to signal other events before previously signaled ones have
  * processed in-full, preventing possible race conditions.
  * 
- * @see org.springframework.web.flow.FlowSession
+ * @see org.springframework.web.flow.execution.FlowSessionImpl
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -114,8 +123,6 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		Assert.notNull(rootFlow, "The root flow definition is required");
 		this.creationTimestamp = System.currentTimeMillis();
 		this.rootFlow = rootFlow;
-		// add the list of default execution listeners configured for the flow
-		listenerList.add(rootFlow.getFlowExecutionListenerList());
 		if (logger.isDebugEnabled()) {
 			logger.debug("Created new client execution for flow '" + rootFlow.getId() + "'");
 		}
@@ -199,7 +206,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	}
 
 	public String getCurrentStateId() throws IllegalStateException {
-		return getActiveFlowSession().getCurrentState().getId();
+		return getActiveFlowSession().getState().getId();
 	}
 
 	public String getLastEventId() {
@@ -308,9 +315,9 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * Returns the currently active flow session.
 	 * @throws IllegalStateException this execution is not active
 	 */
-	public FlowSession getActiveFlowSession() throws IllegalStateException {
+	public FlowSessionImpl getActiveFlowSession() throws IllegalStateException {
 		assertActive();
-		return (FlowSession)executingFlowSessions.peek();
+		return (FlowSessionImpl)executingFlowSessions.peek();
 	}
 
 	/**
@@ -346,7 +353,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * Returns the current state of the active flow session.
 	 */
 	public State getCurrentState() {
-		return getActiveFlowSession().getCurrentState();
+		return getActiveFlowSession().getState();
 	}
 
 	/**
@@ -354,18 +361,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * @param newState the new current state
 	 */
 	protected void setCurrentState(State newState) {
-		getActiveFlowSession().setCurrentState(newState);
-	}
-
-	/**
-	 * Create a new flow session object. Subclasses can override this to return
-	 * a special implementation if required.
-	 * @param flow the flow that should be associated with the flow session
-	 * @param input the input parameters used to populate the flow session
-	 * @return the newly created flow session
-	 */
-	protected FlowSession createFlowSession(Flow flow, Map input) {
-		return new FlowSession(flow, input);
+		getActiveFlowSession().setState(newState);
 	}
 
 	/**
@@ -376,14 +372,28 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * @param input the input parameters used to populate the flow session
 	 * @return the created and activated flow session
 	 */
-	protected FlowSession createAndActivateFlowSession(Flow subFlow, Map input) {
-		FlowSession flowSession = createFlowSession(subFlow, input);
+	protected FlowSession createAndActivateFlowSession(Flow subflow, Map input) {
+		FlowSessionImpl session;
 		if (!executingFlowSessions.isEmpty()) {
 			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
+			session = createFlowSession(subflow, input, getActiveFlowSession());
+		} else {
+			session = createFlowSession(subflow, input, null);
 		}
-		executingFlowSessions.push(flowSession);
-		flowSession.setStatus(FlowSessionStatus.ACTIVE);
-		return flowSession;
+		executingFlowSessions.push(session);
+		session.setStatus(FlowSessionStatus.ACTIVE);
+		return session;
+	}
+
+	/**
+	 * Create a new flow session object. Subclasses can override this to return
+	 * a special implementation if required.
+	 * @param flow the flow that should be associated with the flow session
+	 * @param input the input parameters used to populate the flow session
+	 * @return the newly created flow session
+	 */
+	protected FlowSessionImpl createFlowSession(Flow flow, Map input, FlowSession parent) {
+		return new FlowSessionImpl(flow, input, parent);
 	}
 
 	/**
@@ -392,7 +402,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * @return the flow session that ended
 	 */
 	protected FlowSession endActiveFlowSession() {
-		FlowSession endingSession = (FlowSession)executingFlowSessions.pop();
+		FlowSessionImpl endingSession = (FlowSessionImpl)executingFlowSessions.pop();
 		endingSession.setStatus(FlowSessionStatus.ENDED);
 		if (!executingFlowSessions.isEmpty()) {
 			getActiveFlowSession().setStatus(FlowSessionStatus.ACTIVE);
@@ -430,7 +440,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		// rehydrate all flow sessions
 		Iterator it = this.executingFlowSessions.iterator();
 		while (it.hasNext()) {
-			FlowSession session = (FlowSession)it.next();
+			FlowSessionImpl session = (FlowSessionImpl)it.next();
 			session.rehydrate(flowLocator);
 		}
 		if (isActive()) {
@@ -439,7 +449,6 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 					"The root flow of the execution should be the same as the flow in the root flow session");
 		}
 		this.listenerList = new FlowExecutionListenerList();
-		this.listenerList.add(this.rootFlow.getFlowExecutionListenerList());
 		this.listenerList.add(listeners);
 	}
 

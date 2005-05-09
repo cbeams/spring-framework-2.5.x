@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Map;
-
 import org.springframework.binding.AttributeSource;
 
 /**
@@ -27,9 +25,9 @@ import org.springframework.binding.AttributeSource;
  * <p>
  * A new request context is created when one of the entry points on the
  * FlowExecution facade interface is invoked, either
- * ({@link org.springframework.web.flow.FlowExecution#start(Event)}
+ * ({@link org.springframework.web.flow.execution.FlowExecution#start(Event)}
  * to activate a new executing flow, or
- * {@link org.springframework.web.flow.FlowExecution#signalEvent(Event)}) to
+ * {@link org.springframework.web.flow.execution.FlowExecution#signalEvent(Event)}) to
  * manipulate the state of an already executing flow.
  * <p>
  * Once created, this context interface is passed around throughout request
@@ -42,7 +40,7 @@ import org.springframework.binding.AttributeSource;
  * Note that a <i>request</i> context is in no way linked to an HTTP request!
  * It just uses the familiar request naming convention.
  * 
- * @see org.springframework.web.flow.FlowExecution
+ * @see org.springframework.web.flow.execution.FlowExecution
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -67,27 +65,13 @@ public interface RequestContext {
 	 * @return the active flow definition
 	 * @throws IllegalStateException the flow execution is not active
 	 */
-	public Flow getActiveFlow() throws IllegalStateException;
+	public FlowSession getActiveSession() throws IllegalStateException;
 
 	/**
-	 * Returns a mutable list of listeners attached to the flow execution that
-	 * is executing this request.
-	 * @return the flow execution listener list
-	 */
-	public FlowExecutionListenerList getFlowExecutionListenerList();
-
-	/**
-	 * Is the flow execution that is executing this request still active?
+	 * Is a flow actively executing?
 	 * @return true if yes, false otherwise
 	 */
-	public boolean isFlowExecutionActive();
-
-	/**
-	 * Returns the current state of the flow execution executing this request.
-	 * @return the current state
-	 * @throws IllegalStateException the flow execution is not active
-	 */
-	public State getCurrentState() throws IllegalStateException;
+	public boolean isActive();
 
 	/**
 	 * Returns the client event that originated (triggered) this request.
@@ -117,7 +101,7 @@ public interface RequestContext {
 	 * based on the current state of the request context.
 	 * @return the action attributes, or empty if not set
 	 */
-	public AttributeSource getActionProperties();
+	public AttributeSource getExecutionProperties();
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in
@@ -132,14 +116,6 @@ public interface RequestContext {
 	 * @return the flow scope
 	 */
 	public Scope getFlowScope();
-
-	/**
-	 * Returns the data model for this context, suitable for exposing to clients
-	 * (e.g. web views). Typically the model will contain the data available in
-	 * request scope and flow scope.
-	 * @return the model that can be exposed to a client
-	 */
-	public Map getModel();
 
 	/**
 	 * Returns a synchronizer for demarcating application transactions within

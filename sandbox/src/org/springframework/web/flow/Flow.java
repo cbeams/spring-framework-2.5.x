@@ -78,10 +78,10 @@ import org.springframework.util.StringUtils;
  * 
  * @see org.springframework.web.flow.ActionState
  * @see org.springframework.web.flow.ViewState
- * @see org.springframework.web.flow.SubFlowState
+ * @see org.springframework.web.flow.SubflowState
  * @see org.springframework.web.flow.EndState
  * @see org.springframework.web.flow.Transition
- * @see org.springframework.web.flow.FlowExecution
+ * @see org.springframework.web.flow.execution.FlowExecution
  * @see org.springframework.web.flow.config.FlowBuilder
  * @see org.springframework.web.flow.config.AbstractFlowBuilder
  * @see org.springframework.web.flow.config.XmlFlowBuilder
@@ -108,11 +108,6 @@ public class Flow {
 	 * The set of state definitions for this flow.
 	 */
 	private Set states = new LinkedHashSet(6);
-
-	/**
-	 * The default listener list for all flow executions created for this flow.
-	 */
-	private FlowExecutionListenerList flowExecutionListenerList = new FlowExecutionListenerList();
 
 	/**
 	 * Additional properties further describing this flow. 
@@ -153,22 +148,6 @@ public class Flow {
 	protected void setId(String id) {
 		Assert.notNull(id, "The flow id is required");
 		this.id = id;
-	}
-
-	/**
-	 * Returns the <i>default</i> set of flow execution listeners for all
-	 * executions created for this flow. The set returned is a mutable list
-	 * object.
-	 * <p>
-	 * This is really a convenience feature since flow execution listeners are
-	 * managed and notified by a <code>FlowExecution</code> and not by the
-	 * flow itself! You can use this when you want certain listeners to always
-	 * be notified when a flow execution is created for this flow, irrespective
-	 * of the client that is driving the execution.
-	 * @return the set of flow execution listeners
-	 */
-	public FlowExecutionListenerList getFlowExecutionListenerList() {
-		return this.flowExecutionListenerList;
 	}
 
 	/**
@@ -379,18 +358,6 @@ public class Flow {
 			stateIds.add(((State)it.next()).getId());
 		}
 		return (String[])stateIds.toArray(new String[0]);
-	}
-
-	/**
-	 * Factory method that produces a new <code>FlowExecution</code> instance
-	 * for this flow on every invocation. Typically called by controller clients
-	 * that need to manage a new flow execution; might also be called by flow
-	 * execution test code.
-	 * @return a new flow execution, used by the caller to manage a single
-	 *         client instance of an executing flow
-	 */
-	public FlowExecution createExecution() {
-		return new FlowExecutionStack(this);
 	}
 
 	public String toString() {

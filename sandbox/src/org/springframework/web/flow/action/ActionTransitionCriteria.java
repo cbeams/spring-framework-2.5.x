@@ -90,17 +90,17 @@ public class ActionTransitionCriteria implements TransitionCriteria {
 	}
 	
 	public boolean test(RequestContext context) {
-		((StateContext)context).setActionProperties(action);
+		((StateContext)context).setExecutionProperties(action);
 		Event result;
 		try {
 			result = this.action.getTargetAction().execute(context);
 			return getTrueEventId().equals(result.getId());
 		}
 		catch (Exception e) {
-			throw new ActionExecutionException(context.getCurrentState(), action, e);
+			throw new ActionExecutionException(context.getActiveSession().getState(), action, e);
 		}
 		finally {
-			((StateContext)context).setActionProperties(null);
+			((StateContext)context).setExecutionProperties(null);
 		}
 	}
 }

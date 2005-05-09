@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.web.flow.TransitionableState
  * @see org.springframework.web.flow.ActionState
  * @see org.springframework.web.flow.ViewState
- * @see org.springframework.web.flow.SubFlowState
+ * @see org.springframework.web.flow.SubflowState
  * @see org.springframework.web.flow.EndState
  * 
  * @author Keith Donald
@@ -177,7 +177,7 @@ public abstract class State {
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state processing
 	 */
-	protected final ViewDescriptor enter(StateContext context) {
+	public ViewDescriptor enter(StateContext context) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Entering state '" + getId() + "' in flow '" + getFlow() + "'");
 		}

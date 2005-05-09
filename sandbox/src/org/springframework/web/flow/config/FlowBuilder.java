@@ -56,15 +56,6 @@ public interface FlowBuilder {
 	public void buildStates() throws FlowBuilderException;
 
 	/**
-	 * Creates and/or links applicable flow execution listeners up to the flow
-	 * built by this builder. This set of listeners will be treated as the
-	 * <i>default</i> set associated with each execution created for the flow built by
-	 * this builder.
-	 * @throws FlowBuilderException an exception occured building the flow
-	 */
-	public void buildExecutionListeners() throws FlowBuilderException;
-
-	/**
 	 * Get the fully constructed and configured Flow object - called by the
 	 * builder's assembler (director) after assembly. Note that this method will
 	 * return the same Flow object as that returned from the <code>init()</code>

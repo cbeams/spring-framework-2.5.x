@@ -23,8 +23,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowExecution;
-import org.springframework.web.flow.FlowExecutionListener;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
 
@@ -299,7 +297,7 @@ public class FlowExecutionManager {
 	 * @return the created flow execution
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
-		FlowExecution flowExecution = flow.createExecution();
+		FlowExecution flowExecution = new FlowExecutionStack(flow);
 		flowExecution.getListenerList().add(flowExecutionListeners);
 		return flowExecution;
 	}

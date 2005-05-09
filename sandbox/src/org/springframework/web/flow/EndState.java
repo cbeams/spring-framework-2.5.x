@@ -15,8 +15,10 @@
  */
 package org.springframework.web.flow;
 
+import java.util.Date;
 import java.util.Map;
 
+import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -132,7 +134,7 @@ public class EndState extends State {
 		if (context.isRootFlowActive()) {
 			// entire flow execution is ending, return ending view if applicable
 			if (logger.isDebugEnabled()) {
-				logger.debug("Session execution for root flow '" + getFlow().getId() + "' has ended");
+				logger.debug("Executing flow '" + getFlow().getId() + "' has ended");
 			}
 			ViewDescriptor viewDescriptor;
 			if (isMarker()) {
@@ -147,39 +149,61 @@ public class EndState extends State {
 				}
 				viewDescriptor = new ViewDescriptor(viewName, context.getModel());
 			}
-			// actually end the subflow
+			// end the flow
 			// note that we do this at the here to make sure we can call context.getModel()
 			// above without any problems
-			context.endActiveFlowSession();
+			context.endActiveSession();
 			return viewDescriptor;
 		}
 		else {
 			// there is a parent flow that will resume, so map attributes from the
 			// ending sub flow up to the resuming parent flow
-			FlowSession parentFlowSession = context.getParentFlowSession();
+			FlowSession parentSession = context.getActiveSession().getParent();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Resuming parent flow '" + parentFlowSession.getFlow() + "' in state '"
-						+ parentFlowSession.getCurrentState() + "'");
+				logger.debug("Resuming parent flow '" + parentSession.getFlow() + "' in state '"
+						+ parentSession.getState() + "'");
 			}
-			Assert.isInstanceOf(FlowAttributeMapper.class, parentFlowSession.getCurrentState());
-			FlowAttributeMapper resumingState = (FlowAttributeMapper)parentFlowSession.getCurrentState();
-			resumingState.mapSubFlowOutputAttributes(context.getActiveFlowSession().getFlowScope(), parentFlowSession
-					.getFlowScope());
+			Assert.isInstanceOf(FlowAttributeMapper.class, parentSession.getState());
+			FlowAttributeMapper resumingState = (FlowAttributeMapper)parentSession.getState();
+			resumingState.mapSubflowOutput(context.getFlowScope(), (MutableAttributeSource)parentSession.getAttributes());
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
 			// actually end the subflow
-			context.endActiveFlowSession();
-			return ((TransitionableState)resumingState).onEvent(createEndingSubFlowResultEvent(), context);
-		}
+			context.endActiveSession();
+			return ((TransitionableState)resumingState).onEvent(subflowResult(context), context);
+		}		
 	}
 
-	/**
-	 * Factory method to create a internal sub flow ending result event with no
-	 * parameters. Subclasses may override.
-	 */
-	protected Event createEndingSubFlowResultEvent() {
-		// treat this end state id as a transitional event in the
-		// resuming state, this is so cool!
-		return new SimpleEvent(this, getId());
+	protected Event subflowResult(StateContext context) {
+		return new SubflowResult(this);
+	}
+	
+	public static class SubflowResult extends Event {
+		private long timestamp;
+		
+		public SubflowResult(EndState state) {
+			super(state);
+			this.timestamp = new Date().getTime();
+		}
+		
+		public String getId() {
+			return ((EndState)getSource()).getId();
+		}
+		
+		public String getStateId() {
+			return null;
+		}
+		
+		public Map getParameters() {
+			return null;
+		}
+		
+		public Object getParameter(String parameterName) {
+			return null;
+		}
+		
+		public long getTimestamp() {
+			return timestamp;
+		}
 	}
 	
 	protected void createToString(ToStringCreator creator) {

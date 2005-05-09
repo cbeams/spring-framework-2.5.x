@@ -89,7 +89,7 @@ public interface FlowAttributeMapper {
 	 * @return a map of attributes (name=value pairs) to pass as input to the
 	 *         spawning child subflow.
 	 */
-	public Map createSubFlowInputAttributes(AttributeSource parentFlowAttributes);
+	public Map createSubflowInput(AttributeSource parentFlowAttributes);
 
 	/**
 	 * Map relavent attributes of an ending sub flow session back up to a
@@ -102,6 +102,6 @@ public interface FlowAttributeMapper {
 	 *        to, where output attributes of the child sub flow will be set as
 	 *        input.
 	 */
-	public void mapSubFlowOutputAttributes(AttributeSource subFlowAttributes,
+	public void mapSubflowOutput(AttributeSource subFlowAttributes,
 			MutableAttributeSource parentFlowAttributes);
 }

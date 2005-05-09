@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.execution;
+
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.FlowNavigationException;
+import org.springframework.web.flow.ViewDescriptor;
 
 /**
  * Represents a <i>client instance</i> of an executing flow.  This is the central facade

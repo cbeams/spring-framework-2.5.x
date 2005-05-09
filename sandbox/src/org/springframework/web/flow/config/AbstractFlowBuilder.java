@@ -27,7 +27,7 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.NoSuchFlowDefinitionException;
-import org.springframework.web.flow.SubFlowState;
+import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
@@ -498,7 +498,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws IllegalArgumentException the state id is not unique
 	 */
 	protected void addSubFlowState(String id, Flow subFlow, Transition transition) {
-		new SubFlowState(getFlow(), id, subFlow, transition);
+		new SubflowState(getFlow(), id, subFlow, transition);
 	}
 
 	/**
@@ -510,7 +510,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws IllegalArgumentException the state id is not unique
 	 */
 	protected void addSubFlowState(String id, Flow subFlow, Transition[] transitions) {
-		new SubFlowState(getFlow(), id, subFlow, transitions);
+		new SubflowState(getFlow(), id, subFlow, transitions);
 	}
 
 	/**
@@ -524,7 +524,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws IllegalArgumentException the state id is not unique
 	 */
 	protected void addSubFlowState(String id, Flow subFlow, FlowAttributeMapper attributeMapper, Transition transition) {
-		new SubFlowState(getFlow(), id, subFlow, transition);
+		new SubflowState(getFlow(), id, subFlow, transition);
 	}
 
 	/**
@@ -538,7 +538,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected void addSubFlowState(String id, Flow subFlow, FlowAttributeMapper attributeMapper,
 			Transition[] transitions) {
-		new SubFlowState(getFlow(), id, subFlow, attributeMapper, transitions);
+		new SubflowState(getFlow(), id, subFlow, attributeMapper, transitions);
 	}
 
 	/**

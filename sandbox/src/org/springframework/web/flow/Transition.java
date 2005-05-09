@@ -247,9 +247,9 @@ public class Transition {
 			viewDescriptor = state.enter(context);
 		}
 		if (logger.isDebugEnabled()) {
-			if (context.isFlowExecutionActive()) {
+			if (context.isActive()) {
 				logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
-						+ context.getCurrentState().getId() + "' in flow '" + context.getActiveFlow().getId() + "'");
+						+ context.getActiveSession().getState().getId() + "' in flow '" + context.getActiveSession().getFlow().getId() + "'");
 			}
 			else {
 				logger.debug("Transition '" + this + "' executed; as a result, the flow '"
