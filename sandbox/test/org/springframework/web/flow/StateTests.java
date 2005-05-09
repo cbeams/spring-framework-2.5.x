@@ -21,7 +21,6 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.support.Mapping;
 import org.springframework.util.StringUtils;
@@ -179,14 +178,15 @@ public class StateTests extends TestCase {
 	}
 
 	public static class InputOutputMapper implements FlowAttributeMapper {
-		public Map createSubflowInput(AttributeSource parentFlowModel) {
+		public Map createSubflowInput(RequestContext context) {
 			Map inputMap = new HashMap(1);
-			inputMap.put("childInputAttribute", parentFlowModel.getAttribute("parentInputAttribute"));
+			inputMap.put("childInputAttribute", context.getFlowScope().getAttribute("parentInputAttribute"));
 			return inputMap;
 		}
 
-		public void mapSubflowOutput(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
-			parentFlowModel.setAttribute("parentOutputAttribute", subFlowModel.getAttribute("childInputAttribute"));
+		public void mapSubflowOutput(RequestContext context) {
+			MutableAttributeSource parentAttributes = (MutableAttributeSource)context.getActiveSession().getParent().getAttributes();
+			parentAttributes.setAttribute("parentOutputAttribute", context.getFlowScope().getAttribute("childInputAttribute"));
 		}
 	}
 

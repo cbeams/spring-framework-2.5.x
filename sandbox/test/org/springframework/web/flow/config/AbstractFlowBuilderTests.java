@@ -162,13 +162,13 @@ public class AbstractFlowBuilderTests extends TestCase {
 	}
 
 	public static class PersonIdMapper implements FlowAttributeMapper {
-		public Map createSubflowInput(AttributeSource parentFlowModel) {
+		public Map createSubflowInput(RequestContext context) {
 			Map inputMap = new HashMap(1);
-			inputMap.put("personId", parentFlowModel.getAttribute("personId"));
+			inputMap.put("personId", context.getFlowScope().getAttribute("personId"));
 			return inputMap;
 		}
 
-		public void mapSubflowOutput(AttributeSource subFlowModel, MutableAttributeSource parentFlowModel) {
+		public void mapSubflowOutput(RequestContext context) {
 		}
 	}
 

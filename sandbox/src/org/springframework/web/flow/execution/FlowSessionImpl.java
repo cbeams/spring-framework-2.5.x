@@ -99,7 +99,6 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 
 	/**
 	 * The parent session of this session (may be null if this is a root session.) 
-	 * @TODO - deserialization rehydration
 	 */
 	private transient FlowSession parent;
 	
@@ -181,6 +180,10 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	
 	public boolean hasParent() {
 		return parent != null;
+	}
+	
+	public void setParent(FlowSession flowSession) {
+		this.parent = parent;
 	}
 	
 	// custom serialization

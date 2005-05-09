@@ -20,8 +20,6 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.springframework.binding.AttributeSource;
-import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.flow.MockRequestContext;
 import org.springframework.web.flow.Action;
@@ -174,12 +172,11 @@ public class XmlFlowBuilderTests extends TestCase {
 		public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
 			if ("attributeMapper1".equals(flowModelMapperId)) {
 				return new FlowAttributeMapper() {
-					public Map createSubflowInput(AttributeSource parentFlowModel) {
+					public Map createSubflowInput(RequestContext context) {
 						return new HashMap();
 					}
 
-					public void mapSubflowOutput(AttributeSource endingSubFlowModel,
-							MutableAttributeSource resumingParentFlowModel) {
+					public void mapSubflowOutput(RequestContext context) {
 					}
 				};
 			}

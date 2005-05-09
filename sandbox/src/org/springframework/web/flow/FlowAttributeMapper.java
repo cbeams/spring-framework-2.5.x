@@ -17,9 +17,6 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
-import org.springframework.binding.AttributeSource;
-import org.springframework.binding.MutableAttributeSource;
-
 /**
  * A service interface that maps attributes between flow scopes.
  * <p>

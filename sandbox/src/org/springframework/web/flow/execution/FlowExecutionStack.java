@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Stack;
 
@@ -438,10 +439,15 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 		this.rootFlow = flowLocator.getFlow(rootFlowId);
 		this.rootFlowId = null;
 		// rehydrate all flow sessions
-		Iterator it = this.executingFlowSessions.iterator();
+		ListIterator it = this.executingFlowSessions.listIterator();
 		while (it.hasNext()) {
 			FlowSessionImpl session = (FlowSessionImpl)it.next();
 			session.rehydrate(flowLocator);
+			//@TODO could this logic be improved?
+			if (it.hasNext()) {
+				session.setParent((FlowSessionImpl)it.next());
+				it.previous();
+			}
 		}
 		if (isActive()) {
 			// sanity check
