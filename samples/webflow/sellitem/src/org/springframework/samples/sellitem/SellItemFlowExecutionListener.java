@@ -2,7 +2,7 @@ package org.springframework.samples.sellitem;
 
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
-import org.springframework.web.flow.EnterStateVetoException;
+import org.springframework.web.flow.execution.EnterStateVetoException;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 import org.springframework.web.flow.support.StateConditionTester;
 
