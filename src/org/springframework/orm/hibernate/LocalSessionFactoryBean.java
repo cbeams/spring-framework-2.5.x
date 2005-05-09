@@ -261,9 +261,10 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * HibernateTransactionManager). Such lazy fetching is particularly beneficial
 	 * for read-only operations, in particular if the chances of resolving the
 	 * result in the second-level cache are high.
-	 * <p>As JTA and transactional JNDI DataSources already provide lazy enlisting
+	 * <p>As JTA and transactional JNDI DataSources already provide lazy enlistment
 	 * of JDBC Connections, LazyConnectionDataSourceProxy does not add value with
 	 * JTA (i.e. Spring's JtaTransactionManager) as transaction strategy.
+	 * @see #setUseTransactionAwareDataSource
 	 * @see LocalDataSourceConnectionProvider
 	 * @see HibernateTransactionManager
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
@@ -277,22 +278,23 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Set whether to use a transaction-aware DataSource for the SessionFactory,
 	 * i.e. whether to automatically wrap the passed-in DataSource with Spring's
 	 * TransactionAwareDataSourceProxy.
-	 * <p>Default is false: LocalSessionFactoryBean is usually used with Spring's
-	 * HibernateTransactionManager or JtaTransactionManager, which expect the
-	 * SessionFactory to work on the plain DataSource, with Hibernate Sessions
-	 * managed by Spring's transaction infrastructure.
-	 * <p>If you switch this flag to true, Spring's Hibernate access will be able to
-	 * participate in JDBC-based transactions managed outside of Hibernate (for example,
-	 * by Spring's DataSourceTransactionManager). This can be convenient if you need
-	 * a different local transaction strategy for another O/R mapping tool, for example,
-	 * but still want Hibernate access to join into those transactions.
-	 * <p>A further benefit of this option is that plain Sessions (opened directly
-	 * via the SessionFactory, outside of Spring's Hibernate support) will still
+	 * <p>Default is "false": LocalSessionFactoryBean is usually used with Spring's
+	 * HibernateTransactionManager or JtaTransactionManager, both of which work nicely
+	 * on a plain JDBC DataSource. Hibernate Sessions and their JDBC Connections are
+	 * fully managed by the Hibernate/JTA transaction infrastructure in such a scenario.
+	 * <p>If you switch this flag to "true", Spring's Hibernate access will be able to
+	 * <i>participate in JDBC-based transactions managed outside of Hibernate</i>
+	 * (for example, by Spring's DataSourceTransactionManager). This can be convenient
+	 * if you need a different local transaction strategy for another O/R mapping tool,
+	 * for example, but still want Hibernate access to join into those transactions.
+	 * <p>A further benefit of this option is that <i>plain Sessions opened directly
+	 * via the SessionFactory</i>, outside of Spring's Hibernate support, will still
 	 * participate in active Spring-managed transactions.
-	 * <p>As a further effect, using a transaction-aware DataSource will apply
-	 * remaining transaction timeouts to all created JDBC Statements.
-	 * This means that all operations performed by the SessionFactory will
-	 * automatically participate in Spring-managed transaction timeouts.
+	 * <p>As a further effect, using a transaction-aware DataSource will <i>apply
+	 * remaining transaction timeouts to all created JDBC Statements</i>. This means
+	 * that all operations performed by the SessionFactory will automatically
+	 * participate in Spring-managed transaction timeouts, not just queries.
+	 * This adds value even for HibernateTransactionManager.
 	 * <p><b>WARNING: Be aware of side effects when using a transaction-aware
 	 * DataSource in combination with OpenSessionInViewFilter/Interceptor.</b>
 	 * This combination is only properly supported with HibernateTransactionManager
