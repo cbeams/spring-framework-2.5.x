@@ -25,8 +25,13 @@ import org.springframework.util.ResponseTimeMonitorImpl;
 
 /**
  * Listener that logs the response times of web requests.
- * To be registered in a WebApplicationContext.
+ * To be registered as bean in a WebApplicationContext.
+ *
+ * <p>Presently logs performance statistics using Commons Logging,
+ * at "trace" level.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since January 21, 2001
  * @see RequestHandledEvent
  */
@@ -39,12 +44,12 @@ public class PerformanceMonitorListener implements ApplicationListener {
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof RequestHandledEvent) {
 			RequestHandledEvent rhe = (RequestHandledEvent) event;
-			// could use one monitor per URL
+			// Could use one monitor per URL.
 			this.responseTimeMonitor.recordResponseTime(rhe.getProcessingTimeMillis());
-			if (logger.isInfoEnabled()) {
+			if (logger.isTraceEnabled()) {
 				// Stringifying objects is expensive. Don't do it unless it will show.
-				logger.info("PerformanceMonitorListener: last=[" + rhe.getProcessingTimeMillis() + "ms]; " +
-										this.responseTimeMonitor + "; client=[" + rhe.getClientAddress() + "]");
+				logger.trace("PerformanceMonitorListener: last=[" + rhe.getProcessingTimeMillis() + "ms]; " +
+						this.responseTimeMonitor + "; client=[" + rhe.getClientAddress() + "]");
 			}
 		}
 	}
