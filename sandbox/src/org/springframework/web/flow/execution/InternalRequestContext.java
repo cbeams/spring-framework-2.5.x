@@ -72,7 +72,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	
 	private AttributeSource executionProperties = EmptyAttributeSource.INSTANCE;
 
-	private FlowExecutionStack flowExecution;
+	private FlowExecutionImpl flowExecution;
 
 	private Scope requestScope = new Scope(ScopeType.REQUEST);
 
@@ -81,7 +81,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 * @param originatingEvent the event at the origin of this request
 	 * @param flowExecution the owning flow execution
 	 */
-	public InternalRequestContext(Event originatingEvent, FlowExecutionStack flowExecution) {
+	public InternalRequestContext(Event originatingEvent, FlowExecutionImpl flowExecution) {
 		Assert.notNull(originatingEvent, "the originating event is required");
 		Assert.notNull(flowExecution, "the flow execution is required");
 		this.originatingEvent = originatingEvent;

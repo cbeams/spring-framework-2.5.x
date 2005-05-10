@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow;
+package org.springframework.web.flow.execution;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,23 +27,27 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.web.flow.Event;
+import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.XmlFlowBuilder;
 import org.springframework.web.flow.config.XmlFlowBuilderTests;
-import org.springframework.web.flow.execution.FlowExecutionStack;
+import org.springframework.web.flow.execution.FlowExecutionImpl;
 
 /**
  * Test case for FlowExecutionStack.
  * 
- * @see org.springframework.web.flow.execution.FlowExecutionStack
+ * @see org.springframework.web.flow.execution.FlowExecutionImpl
  * 
  * @author Erwin Vervaet
  */
-public class FlowExecutionStackTests extends TestCase {
+public class FlowExecutionImplTests extends TestCase {
 
 	private FlowLocator flowLocator;
 
-	private FlowExecutionStack flowExecution;
+	private FlowExecutionImpl flowExecution;
 
 	protected void setUp() throws Exception {
 		XmlFlowBuilder builder = new XmlFlowBuilder(new ClassPathResource("testFlow.xml", XmlFlowBuilderTests.class));
@@ -69,7 +73,7 @@ public class FlowExecutionStackTests extends TestCase {
 				return getFlow(flowDefinitionId);
 			}
 		};
-		flowExecution = new FlowExecutionStack(flow);
+		flowExecution = new FlowExecutionImpl(flow);
 	}
 
 	protected void runFlowExecutionRehydrationTest() throws Exception {
@@ -82,7 +86,7 @@ public class FlowExecutionStackTests extends TestCase {
 		// deserialize the flowExecution
 		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
 		ObjectInputStream oin = new ObjectInputStream(bin);
-		FlowExecutionStack restoredFlowExecution = (FlowExecutionStack)oin.readObject();
+		FlowExecutionImpl restoredFlowExecution = (FlowExecutionImpl)oin.readObject();
 
 		assertNotNull(restoredFlowExecution);
 

@@ -297,7 +297,7 @@ public class FlowExecutionManager {
 	 * @return the created flow execution
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
-		FlowExecution flowExecution = new FlowExecutionStack(flow);
+		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		flowExecution.getListenerList().add(flowExecutionListeners);
 		return flowExecution;
 	}

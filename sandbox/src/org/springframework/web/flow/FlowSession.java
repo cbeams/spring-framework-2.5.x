@@ -42,11 +42,6 @@ public interface FlowSession {
 	public State getState();
 	
 	/**
-	 * Sets the state that is currently active in this flow session.
-	 */
-	public void setState(State currentState);
-
-	/**
 	 * Returns the current status of this flow session.
 	 */
 	public FlowSessionStatus getStatus();

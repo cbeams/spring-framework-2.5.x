@@ -54,7 +54,7 @@ import org.springframework.web.flow.State;
  * just uses the familiar request/session naming convention.
  * 
  * @see org.springframework.web.flow.execution.FlowExecution
- * @see org.springframework.web.flow.execution.FlowExecutionStack
+ * @see org.springframework.web.flow.execution.FlowExecutionImpl
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -110,7 +110,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	 * @param flow the flow associated with this flow session
 	 * @param input the input parameters used to populate the flow session
 	 */
-	public FlowSessionImpl(FlowExecutionStack flowExecution, Flow flow, Map input, FlowSession parent) {
+	public FlowSessionImpl(FlowExecutionImpl flowExecution, Flow flow, Map input, FlowSession parent) {
 		Assert.notNull(flow, "The flow is required");
 		Assert.notNull(flowExecution, "The flow execution is required");
 		this.flow = flow;

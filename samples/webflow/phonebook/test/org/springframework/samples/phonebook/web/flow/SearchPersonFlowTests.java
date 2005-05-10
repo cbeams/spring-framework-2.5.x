@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.test.web.flow.AbstractFlowExecutionTests;
+import org.springframework.web.flow.Event;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.execution.SimpleEvent;
 
 public class SearchPersonFlowTests extends AbstractFlowExecutionTests {
 
@@ -47,14 +47,14 @@ public class SearchPersonFlowTests extends AbstractFlowExecutionTests {
 		Map properties = new HashMap();
 		properties.put("firstName", "Keith");
 		properties.put("lastName", "Donald");
-		ViewDescriptor view = signalEvent(new SimpleEvent(this, "submit", properties));
+		ViewDescriptor view = signalEvent(new Event(this, "submit", properties));
 		assertCurrentStateEquals("results.view");
 		asserts().assertCollectionAttributeSize(view, "persons", 1);
 	}
 	
 	public void testCriteriaView_Submit_Error() {
 		startFlow();
-		ViewDescriptor view = signalEvent(new SimpleEvent(this, "submit", null));
+		ViewDescriptor view = signalEvent(new Event(this, "submit", null));
 		assertCurrentStateEquals("criteria.view");
 	}
 

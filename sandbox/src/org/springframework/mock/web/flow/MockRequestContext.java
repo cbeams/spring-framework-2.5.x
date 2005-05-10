@@ -30,7 +30,6 @@ import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.TransactionSynchronizer;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.execution.FlowExecutionListenerList;
 
 /**
  * Mock implementation of the <code>RequestContext</code> interface to
@@ -157,18 +156,10 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	 * @param attributeName the attribute name
 	 * @param attributeValue the attribute value
 	 */
-	public void setActionExecutionAttribute(String attributeName, Object attributeValue) {
+	public void setExecutionProperty(String attributeName, Object attributeValue) {
 		this.actionExecutionProperties.setAttribute(attributeName, attributeValue);
 	}
 	
-	public Flow getRootFlow() {
-		return rootFlow;
-	}
-
-	public boolean isRootFlowActive() {
-		return rootFlow != null && rootFlow == activeSession.getFlow();
-	}
-
 	public FlowSession getActiveSession() throws IllegalStateException {
 		if (activeSession == null) {
 			throw new IllegalStateException("No flow session active");
@@ -197,7 +188,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	}
 
 	public Scope getFlowScope() {
-		return activeSession.getScope();
+		return activeSession.getFlowScope();
 	}
 
 	public Scope getRequestScope() {
@@ -239,4 +230,17 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		}
 		return inTransaction;
 	}
+	
+	public FlowSession spawn(Flow subflow, Map subFlowInput) throws IllegalStateException {
+		return null;
+	}
+	
+	public FlowSession endActiveSession() throws IllegalStateException {
+		return null;
+	}
+	
+	public void setExecutionProperties(AttributeSource properties) {
+	}
+	
+	
 }

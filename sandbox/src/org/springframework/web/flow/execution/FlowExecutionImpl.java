@@ -62,13 +62,13 @@ import org.springframework.web.flow.ViewDescriptor;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class FlowExecutionStack implements FlowExecutionInfo, FlowExecution, Serializable {
+public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Serializable {
 
 	private static final long serialVersionUID = 3258688806151469104L;
 
 	// static logger because FlowExecutionStack objects can be serialized
 	// and then restored
-	protected static final Log logger = LogFactory.getLog(FlowExecutionStack.class);
+	protected static final Log logger = LogFactory.getLog(FlowExecutionImpl.class);
 
 	/**
 	 * The time at which this object was created.
@@ -121,7 +121,7 @@ public class FlowExecutionStack implements FlowExecutionInfo, FlowExecution, Ser
 	 * will also be notified of this flow execution.
 	 * @param rootFlow the root flow of this flow execution
 	 */
-	public FlowExecutionStack(Flow rootFlow) {
+	public FlowExecutionImpl(Flow rootFlow) {
 		Assert.notNull(rootFlow, "The root flow definition is required");
 		this.creationTimestamp = System.currentTimeMillis();
 		this.rootFlow = rootFlow;
