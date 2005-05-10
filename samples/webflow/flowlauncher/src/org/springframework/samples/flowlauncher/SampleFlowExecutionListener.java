@@ -30,7 +30,7 @@ public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 		 * You could also do this in a "captureInput" action, but using a flow execution
 		 * listener is more flexible.
 		 */
-		String input = (String)context.getOriginatingEvent().getParameter(INPUT_ATTRIBUTE);
+		String input = (String)context.getSourceEvent().getParameter(INPUT_ATTRIBUTE);
 		if (StringUtils.hasText(input)) {
 			//put the input in the flow scope
 			context.getFlowScope().setAttribute(INPUT_ATTRIBUTE, input);
