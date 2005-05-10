@@ -23,21 +23,21 @@
 		on the views!
 	-->	
 	<bean id="flowExecutionManager" class="org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager">
-		<property name="flowExecutionStorage">
+		<property name="storage">
 			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage"/>
 		</property>
-		<property name="flowExecutionListener">
+		<property name="listener">
 			<bean class="org.springframework.samples.sellitem.SellItemFlowExecutionListener"/>
 		</property>
 		<!-- 
-		<property name="flowExecutionStorage">
+		<property name="storage">
 			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionFlowExecutionStorage"/>
 		</property>
 		-->
 		<!-- 
-		<property name="flowExecutionStorage">
+		<property name="storage">
 			<bean class="org.springframework.web.flow.execution.ClientContinuationFlowExecutionStorage">
-				<property name="compress"><value>true</value></property>
+				<property name="compress" value="true"/>
 			</bean>
 		</property>
 		-->
