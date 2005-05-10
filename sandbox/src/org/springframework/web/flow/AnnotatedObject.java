@@ -81,5 +81,4 @@ public abstract class AnnotatedObject implements MutableAttributeSource {
 	public Object setAttribute(String attributeName, Object attributeValue) {
 		return setProperty(attributeName, attributeValue);
 	}
-
 }

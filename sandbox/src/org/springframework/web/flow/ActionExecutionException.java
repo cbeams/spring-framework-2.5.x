@@ -43,7 +43,7 @@ public class ActionExecutionException extends NestedRuntimeException {
 	/**
 	 * Action usage properties.
 	 */
-	private AttributeSource actionProperties;
+	private AttributeSource executionProperties;
 
 	/**
 	 * Create a new action execution exception.
@@ -59,11 +59,11 @@ public class ActionExecutionException extends NestedRuntimeException {
 	 * Create a new action execution exception.
 	 * @param state the active state
 	 * @param action the action that generated an unrecoverable exception
-	 * @param actionProperties action usage properties
+	 * @param executionProperties action usage properties
 	 * @param cause the underlying cause
 	 */
-	public ActionExecutionException(State state, Action action, AttributeSource actionProperties, Throwable cause) {
-		this(state, action, actionProperties,
+	public ActionExecutionException(State state, Action action, AttributeSource executionProperties, Throwable cause) {
+		this(state, action, executionProperties,
 				"Exception thrown executing action '" + action + "' in state '" + state.getId() + "' of flow '"
 				+ state.getFlow().getId() + "'", cause);
 	}
@@ -72,16 +72,16 @@ public class ActionExecutionException extends NestedRuntimeException {
 	 * Create a new action execution exception.
 	 * @param state the active state
 	 * @param action the action that generated an unrecoverable exception
-	 * @param actionProperties action usage properties
+	 * @param executionProperties action usage properties
 	 * @param message a descriptive message
 	 * @param cause the underlying cause
 	 */
-	public ActionExecutionException(State state, Action action, AttributeSource actionProperties,
+	public ActionExecutionException(State state, Action action, AttributeSource executionProperties,
 			String message, Throwable cause) {
 		super(message, cause);
 		this.state = state;
 		this.action = action;
-		this.actionProperties = actionProperties;
+		this.executionProperties = executionProperties;
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class ActionExecutionException extends NestedRuntimeException {
 	/**
 	 * Returns the properties (attributes) associated with the action during execution.
 	 */
-	public AttributeSource getActionProperties() {
-		return actionProperties;
+	public AttributeSource getExecutionProperties() {
+		return executionProperties;
 	}
 }

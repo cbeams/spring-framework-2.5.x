@@ -60,7 +60,6 @@ public class AnnotatedAction extends AnnotatedObject {
 	 */
 	public static final String METHOD_PROPERTY = "method";
 	
-
 	/**
 	 * The action to execute.
 	 */

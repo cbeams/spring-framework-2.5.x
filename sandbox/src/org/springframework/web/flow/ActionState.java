@@ -272,7 +272,7 @@ public class ActionState extends TransitionableState {
 	 * Add an action instance to this state.
 	 * @param action the state action to add
 	 */
-	protected void addAction(AnnotatedAction action) {
+	public void addAction(AnnotatedAction action) {
 		this.actionExecutors.add(new ActionExecutor(this, action));
 	}
 
