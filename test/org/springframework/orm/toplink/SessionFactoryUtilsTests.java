@@ -63,7 +63,7 @@ public class SessionFactoryUtilsTests extends TestCase {
 
 		sessionControl.replay();
 
-		Session boundSession = SessionFactoryUtils.getSession(factory, true, true);
+		Session boundSession = SessionFactoryUtils.getSession(factory, true);
 		assertTrue(session == boundSession);
 
 		SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(factory);
@@ -71,7 +71,7 @@ public class SessionFactoryUtilsTests extends TestCase {
 
 		TransactionSynchronizationManager.initSynchronization();
 
-		boundSession = SessionFactoryUtils.getSession(factory, true, true);
+		boundSession = SessionFactoryUtils.getSession(factory, true);
 		assertTrue(session == boundSession);
 		assertTrue(TransactionSynchronizationManager.getSynchronizations().size() == 1);
 		assertTrue(TransactionSynchronizationManager.hasResource(factory));
@@ -92,13 +92,13 @@ public class SessionFactoryUtilsTests extends TestCase {
 
 		sessionControl.replay();
 
-		Session boundSession = SessionFactoryUtils.getSession(factory, true, true);
+		Session boundSession = SessionFactoryUtils.getSession(factory, true);
 		assertTrue(session == boundSession);
 
 		SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(factory);
 		assertTrue(holder == null);
 
-		boundSession = SessionFactoryUtils.getSession(factory, true, true);
+		boundSession = SessionFactoryUtils.getSession(factory, true);
 		assertTrue(session == boundSession);
 		assertFalse(TransactionSynchronizationManager.hasResource(factory));
 	}
