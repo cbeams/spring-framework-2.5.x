@@ -443,12 +443,12 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 		ListIterator it = this.executingFlowSessions.listIterator();
 		while (it.hasNext()) {
 			FlowSessionImpl session = (FlowSessionImpl)it.next();
-			session.rehydrate(flowLocator);
-			//@TODO could this logic be improved?
+			FlowSessionImpl parent = null;
 			if (it.hasNext()) {
-				session.setParent((FlowSessionImpl)it.next());
+				parent = (FlowSessionImpl)it.next();
 				it.previous();
 			}
+			session.rehydrate(flowLocator, this, parent);
 		}
 		if (isActive()) {
 			// sanity check

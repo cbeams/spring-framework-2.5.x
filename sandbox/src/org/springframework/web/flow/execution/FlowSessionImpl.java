@@ -163,13 +163,6 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 		return parent;
 	}
 	
-	/**
-	 * Set the parent of this flow session in the owning flow execution.
-	 */
-	public void setParent(FlowSession parent) {
-		this.parent = parent;
-	}
-	
 	public boolean isRoot() {
 		return parent == null;
 	}
@@ -198,7 +191,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	 * Restore this <code>Flow Session</code> for use after deserialization.
 	 * @param flowLocator the flow locator
 	 */
-	protected void rehydrate(FlowLocator flowLocator) {
+	protected void rehydrate(FlowLocator flowLocator, FlowExecutionImpl execution, FlowSessionImpl parent) {
 		// implementation note: we cannot integrate this code into the
 		// readObject() method since we need the flow locator!
 		Assert.state(this.flow == null, "The flow is already set -- already restored");
@@ -211,6 +204,8 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 				"The current state id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
 		this.currentState = this.flow.getRequiredState(this.currentStateId);
 		this.currentStateId = null;
+		this.flowExecutionInfo = execution;
+		this.parent = parent;
 	}
 
 	public String toString() {
