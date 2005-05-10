@@ -2,8 +2,15 @@ package org.springframework.web.flow;
 
 import java.util.Map;
 
+/**
+ * Mutable control interface for states to use to manipulate the state of an
+ * ongoing flow execution request. Used internally by the various state types
+ * when they are entered.
+ * 
+ * @author Keith Donald
+ * @author Erwin Vervaet
+ */
 public interface StateContext extends RequestContext {
-	// context mutable operations - called by states to manipulate the flow
 	
 	/**
 	 * Update the last event that occured in the executing flow.

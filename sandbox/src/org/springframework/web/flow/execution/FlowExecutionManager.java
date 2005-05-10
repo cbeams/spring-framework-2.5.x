@@ -202,20 +202,20 @@ public class FlowExecutionManager {
 	/**
 	 * The main entry point into managed flow executions.
 	 * @param event the incoming event
-	 * @param flowExecutionListener a listener interested in flow execution
+	 * @param listener a listener interested in flow execution
 	 *        lifecycle events that happen <i>while handling this event</i>
 	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
 	 */
-	public ViewDescriptor handle(Event event, FlowExecutionListener flowExecutionListener) throws Exception {
+	public ViewDescriptor handle(Event event, FlowExecutionListener listener) throws Exception {
 		FlowExecution flowExecution;
 		ViewDescriptor viewDescriptor;
 		String id = getFlowExecutionId(event);
 		if (id == null) {
 			// start a new flow execution
 			flowExecution = createFlowExecution(getFlow(event));
-			if (flowExecutionListener != null) {
-				flowExecution.getListeners().add(flowExecutionListener);
+			if (listener != null) {
+				flowExecution.getListeners().add(listener);
 			}
 			viewDescriptor = flowExecution.start(event);
 		}
@@ -225,8 +225,8 @@ public class FlowExecutionManager {
 			flowExecution = getStorage().load(id, event);
 			// rehydrate the execution if neccessary (if it had been serialized out)
 			flowExecution.rehydrate(getFlowLocator(), listeners);
-			if (flowExecutionListener != null) {
-				flowExecution.getListeners().add(flowExecutionListener);
+			if (listener != null) {
+				flowExecution.getListeners().add(listener);
 			}
 			// signal the event within the current state
 			Assert.hasText(event.getId(), "No event id could be obtained -- "
@@ -251,8 +251,8 @@ public class FlowExecutionManager {
 				getStorage().remove(id, event);
 			}
 		}
-		if (flowExecutionListener != null) {
-			flowExecution.getListeners().remove(flowExecutionListener);
+		if (listener != null) {
+			flowExecution.getListeners().remove(listener);
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning selected view descriptor " + viewDescriptor);
