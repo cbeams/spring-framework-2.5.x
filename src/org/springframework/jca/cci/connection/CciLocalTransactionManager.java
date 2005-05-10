@@ -111,7 +111,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected Object doGetTransaction() {
 		CciLocalTransactionObject txObject = new CciLocalTransactionObject();
 		ConnectionHolder conHolder =
-		    (ConnectionHolder) TransactionSynchronizationManager.getResource(this.connectionFactory);
+		    (ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
 		txObject.setConnectionHolder(conHolder);
 		return txObject;
 	}
@@ -125,30 +125,34 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Opening new connection for CCI local transaction");
-		}
-		Connection con = ConnectionFactoryUtils.getConnection(this.connectionFactory, false);
-		txObject.setConnectionHolder(new ConnectionHolder(con));
-		txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
+		Connection con = null;
 
 		try {
+			con = getConnectionFactory().getConnection();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Opened connection [" + con + "] for local CCI transaction");
+			}
+
+			txObject.setConnectionHolder(new ConnectionHolder(con));
+			txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
+
 			con.getLocalTransaction().begin();
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 				txObject.getConnectionHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
 			TransactionSynchronizationManager.bindResource(getConnectionFactory(), txObject.getConnectionHolder());
 		}
+
 		catch (NotSupportedException ex) {
-			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory);
+			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 			throw new CannotCreateTransactionException("CCI connection does not support local transactions", ex);
 		}
 		catch (LocalTransactionException ex) {
-			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory);
+			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 			throw new CannotCreateTransactionException("Could not begin local CCI transaction", ex);
 		}
 		catch (ResourceException ex) {
-			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory);
+			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 			throw new TransactionSystemException("Unexpected failure on begin of CCI local transaction", ex);
 		}
 	}
@@ -156,12 +160,12 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected Object doSuspend(Object transaction) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
 		txObject.setConnectionHolder(null);
-		return TransactionSynchronizationManager.unbindResource(this.connectionFactory);
+		return TransactionSynchronizationManager.unbindResource(getConnectionFactory());
 	}
 
 	protected void doResume(Object transaction, Object suspendedResources) {
 		ConnectionHolder conHolder = (ConnectionHolder) suspendedResources;
-		TransactionSynchronizationManager.bindResource(this.connectionFactory, conHolder);
+		TransactionSynchronizationManager.bindResource(getConnectionFactory(), conHolder);
 	}
 
 	protected boolean isRollbackOnly(Object transaction) throws TransactionException {
@@ -216,14 +220,14 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
 
 		// Remove the connection holder from the thread.
-		TransactionSynchronizationManager.unbindResource(this.connectionFactory);
+		TransactionSynchronizationManager.unbindResource(getConnectionFactory());
 		txObject.getConnectionHolder().clear();
 
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing CCI connection [" + con + "] after transaction");
 		}
-		ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory);
+		ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 	}
 
 

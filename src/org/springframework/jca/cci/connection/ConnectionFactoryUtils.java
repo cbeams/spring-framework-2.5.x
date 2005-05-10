@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jca.cci.CannotGetCciConnectionException;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
  
 /**
  * Helper class that provides static methods to obtain CCI Connections from
@@ -63,31 +64,8 @@ public abstract class ConnectionFactoryUtils {
 	 * @see org.springframework.jca.cci.connection.CciLocalTransactionManager
 	 */
 	public static Connection getConnection(ConnectionFactory cf) throws CannotGetCciConnectionException {
-		return getConnection(cf, true);
-	}
-
-	/**
-	 * Get a Connection from the given DataSource. Changes any CCI exception into
-	 * the Spring hierarchy of unchecked generic data access exceptions, simplifying
-	 * calling code and making any exception that is thrown more meaningful.
-	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
-	 * when using CciLocalTransactionManager. Will bind a Connection to the thread
-	 * if transaction synchronization is active (e.g. if in a JTA transaction).
-	 * @param cf ConnectionFactory to get Connection from
-	 * @param allowSynchronization if a new CCI Connection is supposed to be
-	 * registered with transaction synchronization (if synchronization is active).
-	 * This will always be true for typical data access code.
-	 * @return a CCI Connection from the given ConnectionFactory
-	 * @throws org.springframework.jca.cci.CannotGetCciConnectionException
-	 * if the attempt to get a Connection failed
-	 * @see #doGetConnection
-	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
-	 * @see org.springframework.jca.cci.connection.CciLocalTransactionManager
-	 */
-	public static Connection getConnection(ConnectionFactory cf, boolean allowSynchronization)
-	    throws CannotGetCciConnectionException {
 		try {
-			return doGetConnection(cf, allowSynchronization);
+			return doGetConnection(cf);
 		}
 		catch (ResourceException ex) {
 			throw new CannotGetCciConnectionException("Could not get CCI connection", ex);
@@ -108,32 +86,24 @@ public abstract class ConnectionFactoryUtils {
 	 * @see TransactionAwareConnectionFactoryProxy
 	 */
 	public static Connection doGetConnection(ConnectionFactory cf) throws ResourceException {
-		return doGetConnection(cf, true);
-	}
-
-	/**
-	 * Actually get a JCA CCI Connection for the given DataSource.
-	 * Same as getConnection, but throwing the original CCI ResourceException.
-	 * <p>Directly accessed by TransactionAwareConnectionFactoryProxy.
-	 * @param cf ConnectionFactory to get Connection from
-	 * @return a CCI Connection from the given ConnectionFactory
-	 * @throws ResourceException if thrown by CCI API methods
-	 */
-	public static Connection doGetConnection(ConnectionFactory cf, boolean allowSynchronization)
-			throws ResourceException {
+		Assert.notNull(cf, "No ConnectionFactory specified");
 
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(cf);
 		if (conHolder != null) {
 			return conHolder.getConnection();
 		}
+
+		logger.debug("Opening CCI Connection");
 		Connection con = cf.getConnection();
-		if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
-			logger.debug("Registering transaction synchronization for CCI connection");
+
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			logger.debug("Registering transaction synchronization for CCI Connection");
 			conHolder = new ConnectionHolder(con);
 			conHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, cf));
 			TransactionSynchronizationManager.bindResource(cf, conHolder);
 		}
+
 		return con;
 	}
 
@@ -149,7 +119,7 @@ public abstract class ConnectionFactoryUtils {
 			doReleaseConnection(con, cf);
 		}
 		catch (ResourceException ex) {
-			logger.error("Could not close CCI connection", ex);
+			logger.error("Could not close CCI Connection", ex);
 		}
 	}
 
