@@ -175,7 +175,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	 */
 	protected Object lookupService(Class expectedClass, String id) throws ServiceLookupException {
 		try {
-			return getBeanFactory().getBean(id, Flow.class);
+			return getBeanFactory().getBean(id, expectedClass);
 		}
 		catch (BeansException e) {
 			throw new ServiceLookupException(expectedClass, id, e);
