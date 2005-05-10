@@ -185,8 +185,8 @@ public class FlowExecutionManager {
 	 * Sets the flow execution listeners that will be notified of managed
 	 * flow executions.
 	 */
-	public void setListeners(FlowExecutionListener[] flowExecutionListeners) {
-		this.listeners = flowExecutionListeners;
+	public void setListeners(FlowExecutionListener[] listeners) {
+		this.listeners = listeners;
 	}
 
 	/**
