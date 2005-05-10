@@ -33,6 +33,7 @@ import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.FlowExecutionListener;
 import org.springframework.web.flow.execution.FlowExecutionManager;
 import org.springframework.web.flow.execution.FlowExecutionStorage;
+import org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;

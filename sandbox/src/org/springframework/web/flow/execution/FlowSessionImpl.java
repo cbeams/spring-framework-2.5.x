@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowSessionStatus;
