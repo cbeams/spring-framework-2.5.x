@@ -107,7 +107,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	}
 
 	public FlowSession getActiveSession() throws IllegalStateException {
-		return this.flowExecution.getActiveFlowSession();
+		return this.flowExecution.getActiveSession();
 	}
 
 	public boolean isActive() {
@@ -144,7 +144,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	}
 
 	public Scope getFlowScope() {
-		return getActiveFlowSession().getScope();
+		return getActiveSession().getScope();
 	}
 
 	public Map getModel() {
@@ -158,7 +158,6 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	public TransactionSynchronizer getTransactionSynchronizer() {
 		return this;
 	}
-
 
 	public void setCurrentState(State state) {
 		fireStateEntering(state);
@@ -186,12 +185,8 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 		}
 	}
 
-	public FlowSessionImpl getActiveFlowSession() {
-		return this.flowExecution.getActiveFlowSession();
-	}
-
-	public FlowSession getParentFlowSession() throws IllegalStateException {
-		return this.flowExecution.getParentFlowSession();
+	public FlowSession getParentSession() throws IllegalStateException {
+		return this.flowExecution.getParentSession();
 	}
 
 	public FlowSession endActiveSession() {

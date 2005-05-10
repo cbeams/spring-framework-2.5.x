@@ -167,7 +167,7 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 	}
 
 	public String getActiveFlowId() throws IllegalStateException {
-		return getActiveFlowSession().getFlow().getId();
+		return getActiveSession().getFlow().getId();
 	}
 
 	public String getQualifiedActiveFlowId() throws IllegalStateException {
@@ -208,7 +208,7 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 	}
 
 	public String getCurrentStateId() throws IllegalStateException {
-		return getActiveFlowSession().getState().getId();
+		return getActiveSession().getState().getId();
 	}
 
 	public String getLastEventId() {
@@ -310,14 +310,14 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 	 * Returns the flow of the currently active flow session.
 	 */
 	public Flow getActiveFlow() {
-		return getActiveFlowSession().getFlow();
+		return getActiveSession().getFlow();
 	}
 
 	/**
 	 * Returns the currently active flow session.
 	 * @throws IllegalStateException this execution is not active
 	 */
-	public FlowSessionImpl getActiveFlowSession() throws IllegalStateException {
+	public FlowSessionImpl getActiveSession() throws IllegalStateException {
 		assertActive();
 		return (FlowSessionImpl)executingFlowSessions.peek();
 	}
@@ -329,7 +329,7 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 	 *         when the current flow session has no parent (e.g. is the root
 	 *         flow session)
 	 */
-	public FlowSession getParentFlowSession() throws IllegalArgumentException {
+	public FlowSession getParentSession() throws IllegalArgumentException {
 		assertActive();
 		Assert.state(!isRootFlowActive(), "There is no parent flow session for the currently active flow session");
 		return (FlowSession)executingFlowSessions.get(executingFlowSessions.size() - 2);
@@ -355,7 +355,7 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 	 * Returns the current state of the active flow session.
 	 */
 	public State getCurrentState() {
-		return getActiveFlowSession().getState();
+		return getActiveSession().getState();
 	}
 
 	/**
@@ -363,7 +363,7 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 	 * @param newState the new current state
 	 */
 	protected void setCurrentState(State newState) {
-		getActiveFlowSession().setState(newState);
+		getActiveSession().setState(newState);
 	}
 
 	/**
@@ -377,8 +377,9 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 	protected FlowSession createAndActivateFlowSession(Flow subflow, Map input) {
 		FlowSessionImpl session;
 		if (!executingFlowSessions.isEmpty()) {
-			getActiveFlowSession().setStatus(FlowSessionStatus.SUSPENDED);
-			session = createFlowSession(subflow, input, getActiveFlowSession());
+			FlowSessionImpl parent = getActiveSession();
+			parent.setStatus(FlowSessionStatus.SUSPENDED);
+			session = createFlowSession(subflow, input, parent);
 		} else {
 			session = createFlowSession(subflow, input, null);
 		}
@@ -407,7 +408,7 @@ public class FlowExecutionImpl implements FlowExecutionInfo, FlowExecution, Seri
 		FlowSessionImpl endingSession = (FlowSessionImpl)executingFlowSessions.pop();
 		endingSession.setStatus(FlowSessionStatus.ENDED);
 		if (!executingFlowSessions.isEmpty()) {
-			getActiveFlowSession().setStatus(FlowSessionStatus.ACTIVE);
+			((FlowSessionImpl)executingFlowSessions.peek()).setStatus(FlowSessionStatus.ACTIVE);
 		}
 		return endingSession;
 	}
