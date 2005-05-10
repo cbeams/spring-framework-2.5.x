@@ -165,7 +165,8 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	 * the provided convenience operations or with a custom HibernateCallback
 	 * that provides you with a Session to work on. HibernateTemplate will care
 	 * for all resource management and for proper exception conversion.
-	 * @param allowCreate if a new Session should be created if no thread-bound found
+	 * @param allowCreate if a non-transactional Session should be created when no
+	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
