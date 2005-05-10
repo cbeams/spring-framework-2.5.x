@@ -168,7 +168,7 @@ public class StateTests extends TestCase {
 		assertEquals("mySubFlow", flowExecution.getActiveFlowId());
 		assertEquals("subFlowViewState", flowExecution.getCurrentStateId());
 		assertEquals("mySubFlowViewName", view.getViewName());
-		assertEquals("attributeValue", flowExecution.getActiveFlowSession().getFlowScope().getAttribute(
+		assertEquals("attributeValue", flowExecution.getActiveSession().getScope().getAttribute(
 				"childInputAttribute"));
 		view = flowExecution.signalEvent(new Event(this, "submit"));
 		assertEquals("myParentFlowEndingViewName", view.getViewName());
@@ -184,7 +184,7 @@ public class StateTests extends TestCase {
 		}
 
 		public void mapSubflowOutput(RequestContext context) {
-			MutableAttributeSource parentAttributes = (MutableAttributeSource)context.getActiveSession().getParent().getFlowScope();
+			MutableAttributeSource parentAttributes = (MutableAttributeSource)context.getActiveSession().getParent().getScope();
 			parentAttributes.setAttribute("parentOutputAttribute", context.getFlowScope().getAttribute("childInputAttribute"));
 		}
 	}

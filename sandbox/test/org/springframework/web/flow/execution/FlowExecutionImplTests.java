@@ -96,8 +96,8 @@ public class FlowExecutionImplTests extends TestCase {
 		assertEquals(flowExecution.isActive(), restoredFlowExecution.isActive());
 		if (flowExecution.isActive()) {
 			assertTrue(entriesCollectionsAreEqual(
-					flowExecution.getActiveFlowSession().getFlowScope().getAttributeMap().entrySet(),
-					restoredFlowExecution.getActiveFlowSession().getFlowScope().getAttributeMap().entrySet()));
+					flowExecution.getActiveSession().getScope().getAttributeMap().entrySet(),
+					restoredFlowExecution.getActiveSession().getScope().getAttributeMap().entrySet()));
 			assertEquals(flowExecution.getCurrentStateId(), restoredFlowExecution.getCurrentStateId());
 			assertEquals(flowExecution.getActiveFlowId(), restoredFlowExecution.getActiveFlowId());
 			assertSame(flowExecution.getRootFlow(), restoredFlowExecution.getRootFlow());
