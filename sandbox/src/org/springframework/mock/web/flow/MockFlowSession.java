@@ -1,7 +1,7 @@
 package org.springframework.mock.web.flow;
 
-import org.springframework.binding.AttributeSource;
 import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowSessionStatus;
 import org.springframework.web.flow.Scope;
@@ -9,6 +9,8 @@ import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
 
 public class MockFlowSession implements FlowSession {
+	
+	private FlowExecutionInfo flowExecutionInfo;
 
 	private Flow flow;
 	
@@ -19,6 +21,14 @@ public class MockFlowSession implements FlowSession {
 	private Scope scope = new Scope(ScopeType.FLOW);
 	
 	private FlowSession parent;
+	
+	public FlowExecutionInfo getFlowExecutionInfo() {
+		return flowExecutionInfo;
+	}
+	
+	public void setFlowExecutionInfo(FlowExecutionInfo flowExecutionInfo) {
+		this.flowExecutionInfo = flowExecutionInfo;
+	}
 
 	public Flow getFlow() {
 		return flow;
@@ -32,19 +42,19 @@ public class MockFlowSession implements FlowSession {
 		return parent;
 	}
 
-	public boolean hasParent() {
-		return this.parent != null;
+	public boolean isRoot() {
+		return this.parent == null;
 	}
 	
 	public void setParent(FlowSession parent) {
 		this.parent = parent;
 	}
 
-	public Scope getScope() {
+	public Scope getFlowScope() {
 		return scope;
 	}
 
-	public void setScope(Scope scope) {
+	public void setFlowScope(Scope scope) {
 		this.scope = scope;
 	}
 
@@ -60,10 +70,6 @@ public class MockFlowSession implements FlowSession {
 		return status;
 	}
 
-	public AttributeSource getAttributes() {
-		return scope;
-	}
-	
 	public void setStatus(FlowSessionStatus status) {
 		this.status = status;
 	}	

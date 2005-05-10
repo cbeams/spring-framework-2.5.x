@@ -13,7 +13,6 @@ import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
 import org.springframework.web.flow.config.TransitionCriteriaCreator;
 import org.springframework.web.flow.execution.FlowExecution;
 import org.springframework.web.flow.execution.FlowExecutionStack;
-import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * General flow execution tests.
@@ -42,13 +41,13 @@ public class FlowExecutionTests extends TestCase {
 		FlowExecution flowExecution = new FlowExecutionStack(flow);
 		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
 		flowExecution.getListenerList().add(flowExecutionListener);
-		flowExecution.start(new SimpleEvent(this, "start"));
+		flowExecution.start(new Event(this));
 		assertEquals(0, flowExecutionListener.getFlowNestingLevel());
 		assertEquals(2, flowExecutionListener.countStateTransitions());
-		flowExecution.signalEvent(new SimpleEvent(this, "submit"));
+		flowExecution.signalEvent(new Event(this, "submit"));
 		assertEquals(1, flowExecutionListener.getFlowNestingLevel());
 		assertEquals(4, flowExecutionListener.countStateTransitions());
-		flowExecution.signalEvent(new SimpleEvent(this, "submit"));
+		flowExecution.signalEvent(new Event(this, "submit"));
 		assertEquals(0, flowExecutionListener.getFlowNestingLevel());
 		assertEquals(6, flowExecutionListener.countStateTransitions());
 	}
@@ -66,16 +65,16 @@ public class FlowExecutionTests extends TestCase {
 			}
 		};
 		FlowExecution flowExecution = new FlowExecutionStack(new FlowFactoryBean(builder).getFlow());
-		ViewDescriptor vd = flowExecution.start(new SimpleEvent(this, "start"));
+		ViewDescriptor vd = flowExecution.start(new Event(this, "start"));
 		assertNotNull(vd);
 		assertEquals("viewName", vd.getViewName());
 		for (int i = 0; i < 10; i++) {
-			vd = flowExecution.signalEvent(new SimpleEvent(this, "submit"));
+			vd = flowExecution.signalEvent(new Event(this, "submit"));
 			assertNotNull(vd);
 			assertEquals("viewName", vd.getViewName());
 		}
 		assertTrue(flowExecution.isActive());
-		vd = flowExecution.signalEvent(new SimpleEvent(this, "finish"));
+		vd = flowExecution.signalEvent(new Event(this, "finish"));
 		assertNull(vd);
 		assertFalse(flowExecution.isActive());
 	}
@@ -122,7 +121,7 @@ public class FlowExecutionTests extends TestCase {
 		Flow parentFlow = new FlowFactoryBean(parentBuilder).getFlow();
 
 		FlowExecution flowExecution = new FlowExecutionStack(parentFlow);
-		flowExecution.start(new SimpleEvent(this, "start"));
+		flowExecution.start(new Event(this, "start"));
 		assertFalse(flowExecution.isActive());
 	}
 }

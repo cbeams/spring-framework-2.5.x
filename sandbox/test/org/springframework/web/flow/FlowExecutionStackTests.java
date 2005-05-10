@@ -31,7 +31,6 @@ import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.XmlFlowBuilder;
 import org.springframework.web.flow.config.XmlFlowBuilderTests;
 import org.springframework.web.flow.execution.FlowExecutionStack;
-import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Test case for FlowExecutionStack.
@@ -55,14 +54,14 @@ public class FlowExecutionStackTests extends TestCase {
 				if (flow.getClass().equals(flowDefinitionImplementationClass)) {
 					return flow;
 				}
-				throw new NoSuchFlowDefinitionException(flowDefinitionImplementationClass, null);
+				throw new ServiceLookupException(Flow.class, flowDefinitionImplementationClass, null);
 			}
 
 			public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 				if (flow.getId().equals(flowDefinitionId)) {
 					return flow;
 				}
-				throw new NoSuchFlowDefinitionException(flowDefinitionId, null);
+				throw new ServiceLookupException(Flow.class, flowDefinitionId, null);
 			}
 
 			public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
@@ -109,7 +108,7 @@ public class FlowExecutionStackTests extends TestCase {
 		Map inputData = new HashMap(1);
 		inputData.put("name", "value");
 		// start the flow execution
-		flowExecution.start(new SimpleEvent(this, "start", inputData));
+		flowExecution.start(new Event(this, "start", inputData));
 		runFlowExecutionRehydrationTest();
 	}
 
