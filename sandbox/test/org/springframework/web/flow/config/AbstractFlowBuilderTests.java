@@ -20,21 +20,17 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.springframework.binding.AttributeSource;
-import org.springframework.binding.MutableAttributeSource;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
-import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Test Java based flow builder logic (subclasses of AbstractFlowBuilder).
@@ -65,7 +61,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 					return new FlowFactoryBean(builder).getFlow();
 				}
 				else {
-					throw new NoSuchFlowDefinitionException(flowDefinitionId, null);
+					throw new ServiceLookupException(Flow.class, flowDefinitionId, null);
 				}
 			}
 
@@ -74,7 +70,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 					return new PersonIdMapper();
 				}
 				else {
-					throw new NoSuchFlowAttributeMapperException(id, null);
+					throw new ServiceLookupException(FlowAttributeMapper.class, id, null);
 				}
 			}
 		});
@@ -226,7 +222,7 @@ public class AbstractFlowBuilderTests extends TestCase {
 	 */
 	public static final class NoOpAction implements Action {
 		public Event execute(RequestContext context) throws Exception {
-			return new SimpleEvent(this, "success");
+			return new Event(this, "success");
 		}
 	}
 }

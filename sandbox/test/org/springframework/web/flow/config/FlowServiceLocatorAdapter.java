@@ -19,6 +19,9 @@ import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.State;
+import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * Simple helper adapter for the flow service locator interface. For testing.
@@ -26,42 +29,88 @@ import org.springframework.web.flow.ServiceLookupException;
  * @author Keith Donald
  */
 public class FlowServiceLocatorAdapter implements FlowServiceLocator {
+	
 
-	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
+	public Action createAction(Class implementationClass,
+			AutowireMode autowireMode) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
-
-	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
+	
+	public Flow createFlow(Class implementationClass, AutowireMode autowireMode)
+			throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
-
-	public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
+	
+	public FlowAttributeMapper createFlowAttributeMapper(
+			Class attributeMapperImplementationClass, AutowireMode autowireMode)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public State createState(Class implementationClass,
+			AutowireMode autowireMode) throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public Transition createTransition(Class implementationClass,
+			AutowireMode autowireMode) throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public TransitionCriteria createTransitionCriteria(
+			String encodedCriteria, AutowireMode autowireMode)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public Action getAction(Class implementationClass)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public Action getAction(String id) throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public FlowAttributeMapper getFlowAttributeMapper(Class implementationClass)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public FlowAttributeMapper getFlowAttributeMapper(String id)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public State getState(Class implementationClass)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public State getState(String id) throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public Transition getTransition(Class implementationClass)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public Transition getTransition(String id) throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public Flow getFlow(Class implementationClass)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public Flow getFlow(String id, Class requiredFlowBuilderImplementationClass)
 			throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
 
-	public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException {
-		throw new UnsupportedOperationException();
-	}
-
-	public Action getAction(String actionId) throws ServiceLookupException {
-		throw new UnsupportedOperationException();
-	}
-
-	public Action getAction(Class actionImplementationClass) throws ServiceLookupException {
-		throw new UnsupportedOperationException();
-	}
-
-	public FlowAttributeMapper createFlowAttributeMapper(Class implementationClass, AutowireMode autowireMode) {
-		throw new UnsupportedOperationException();
-	}
-
-	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
-		throw new UnsupportedOperationException();
-	}
-
-	public FlowAttributeMapper getFlowAttributeMapper(Class flowModelMapperImplementationClass)
-			throws ServiceLookupException {
+	public Flow getFlow(String id) throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
 }

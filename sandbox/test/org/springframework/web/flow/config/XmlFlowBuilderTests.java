@@ -28,13 +28,11 @@ import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
-import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Test case for XML flow builder.
@@ -57,7 +55,7 @@ public class XmlFlowBuilderTests extends TestCase {
 	}
 
 	private Event createEvent(String id) {
-		return new SimpleEvent(this, id);
+		return new Event(this, id);
 	}
 
 	public void testBuildResult() {
@@ -74,11 +72,11 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(2, actionState1.getTransitions().length);
 		context.setLastEvent(createEvent("event1"));
 		assertTrue(actionState1.hasTransitionFor(context));
-		Transition transition = actionState1.transitionFor(context);
+		Transition transition = actionState1.getRequiredTransition(context);
 		assertEquals("viewState1", transition.getTargetStateId());
 		context.setLastEvent(createEvent("action2Name.event2"));
 		assertTrue(actionState1.hasTransitionFor(context));
-		transition = actionState1.transitionFor(context);
+		transition = actionState1.getRequiredTransition(context);
 		assertEquals("viewState2", transition.getTargetStateId());
 		assertEquals("prop1Value", actionState1.getActions()[0].getAttribute("prop1"));
 		assertEquals("prop2Value", actionState1.getActions()[0].getAttribute("prop2"));
@@ -90,7 +88,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(1, viewState1.getTransitions().length);
 		context.setLastEvent(createEvent("event1"));
 		assertTrue(viewState1.hasTransitionFor(context));
-		transition = viewState1.transitionFor(context);
+		transition = viewState1.getRequiredTransition(context);
 		assertEquals("subFlowState1", transition.getTargetStateId());
 
 		ViewState viewState2 = (ViewState) flow.getState("viewState2");
@@ -100,7 +98,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(1, viewState2.getTransitions().length);
 		context.setLastEvent(createEvent("event2"));
 		assertTrue(viewState2.hasTransitionFor(context));
-		transition = viewState2.transitionFor(context);
+		transition = viewState2.getRequiredTransition(context);
 		assertEquals("subFlowState2", transition.getTargetStateId());
 
 		SubflowState subFlowState1 = (SubflowState) flow.getState("subFlowState1");
@@ -111,7 +109,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(1, subFlowState1.getTransitions().length);
 		context.setLastEvent(createEvent("event1"));
 		assertTrue(subFlowState1.hasTransitionFor(context));
-		transition = subFlowState1.transitionFor(context);
+		transition = subFlowState1.getRequiredTransition(context);
 		assertEquals("endState1", transition.getTargetStateId());
 
 		SubflowState subFlowState2 = (SubflowState) flow.getState("subFlowState2");
@@ -122,7 +120,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertEquals(1, subFlowState2.getTransitions().length);
 		context.setLastEvent(createEvent("event2"));
 		assertTrue(subFlowState2.hasTransitionFor(context));
-		transition = subFlowState2.transitionFor(context);
+		transition = subFlowState2.getRequiredTransition(context);
 		assertEquals("endState2", transition.getTargetStateId());
 
 		EndState endState1 = (EndState) flow.getState("endState1");
@@ -155,18 +153,18 @@ public class XmlFlowBuilderTests extends TestCase {
 			if ("action1".equals(actionId) || "action2".equals(actionId)) {
 				return new Action() {
 					public Event execute(RequestContext context) throws Exception {
-						return new SimpleEvent(this, "event1");
+						return new Event(this, "event1");
 					}
 				};
 			}
-			throw new NoSuchActionException(actionId, null);
+			throw new ServiceLookupException(Action.class, actionId, null);
 		}
 
 		public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 			if ("subFlow1".equals(flowDefinitionId) || "subFlow2".equals(flowDefinitionId)) {
 				return new Flow(flowDefinitionId);
 			}
-			throw new NoSuchFlowDefinitionException(flowDefinitionId, null);
+			throw new ServiceLookupException(Flow.class, flowDefinitionId, null);
 		}
 
 		public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
@@ -180,13 +178,13 @@ public class XmlFlowBuilderTests extends TestCase {
 					}
 				};
 			}
-			throw new NoSuchFlowAttributeMapperException(flowModelMapperId, null);
+			throw new ServiceLookupException(FlowAttributeMapper.class, flowModelMapperId, null);
 		}
 	};
 
 	public static class TestAction implements Action {
 		public Event execute(RequestContext context) throws Exception {
-			return new SimpleEvent(this, "success");
+			return new Event(this, "success");
 		}
 	}
 }
