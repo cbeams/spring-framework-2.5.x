@@ -80,8 +80,8 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 	/**
 	 * Create a new PersistenceBrokerTemplate,
 	 * using the default connection configured for OJB.
-	 * @param allowCreate if a new PersistenceBroker should be created
-	 * if no thread-bound found
+	 * @param allowCreate if a non-transactional PersistenceBroker should be created
+	 * when no transactional PersistenceBroker can be found for the current thread
 	 */
 	public PersistenceBrokerTemplate(boolean allowCreate) {
 		setAllowCreate(allowCreate);
@@ -110,12 +110,14 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 	}
 
 	/**
-	 * Set if a new PersistenceBroker should be created if no thread-bound found.
-	 * <p>PersistenceBrokerTemplate is aware of a respective PersistenceBroker bound to
-	 * the current thread, for example when using PersistenceBrokerTransactionManager.
-	 * If allowCreate is true, a new PersistenceBroker will be created if none
-	 * found. If false, an IllegalStateException will get thrown in this case.
-	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
+	 * Set if a new PersistenceBroker should be created when no transactional
+	 * PersistenceBroker can be found for the current thread.
+	 * <p>JdoTemplate is aware of a corresponding PersistenceBroker bound to the
+	 * current thread, for example when using PersistenceBrokerTransactionManager.
+	 * If allowCreate is true, a new non-transactional PersistenceManager will be
+	 * created if none found, which needs to be closed at the end of the operation.
+	 * If false, an IllegalStateException will get thrown in this case.
+	 * @see OjbFactoryUtils#getPersistenceBroker(org.apache.ojb.broker.PBKey, boolean)
 	 */
 	public void setAllowCreate(boolean allowCreate) {
 		this.allowCreate = allowCreate;

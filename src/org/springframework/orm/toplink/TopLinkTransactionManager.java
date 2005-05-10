@@ -265,8 +265,9 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
+		Session session = null;
+
 		try {
-			Session session = null;
 			if (!definition.isReadOnly()) {
 				logger.debug("Creating managed TopLink Session with active UnitOfWork for read-write transaction");
 				session = getSessionFactory().createManagedSession();
@@ -333,8 +334,10 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 			// Bind the session holder to the thread.
 			TransactionSynchronizationManager.bindResource(getSessionFactory(), txObject.getSessionHolder());
 		}
-		catch (TopLinkException ex) {
-			throw new CannotCreateTransactionException("Could not create TopLink transaction", ex);
+
+		catch (Exception ex) {
+			SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			throw new CannotCreateTransactionException("Could not open TopLink session for transaction", ex);
 		}
 	}
 

@@ -61,33 +61,13 @@ public abstract class OjbFactoryUtils {
 	 * example when using PersistenceBrokerTransactionManager. Will
 	 * create a new PersistenceBroker else, if allowCreate is true.
 	 * @param pbKey PBKey to create the PersistenceBroker for
-	 * @param allowCreate if a new PersistenceBroker should be created if no thread-bound found
+	 * @param allowCreate if a non-transactional PersistenceBroker should be created
+	 * when no transactional PersistenceBroker can be found for the current thread
 	 * @return the PersistenceBroker
 	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
 	 * @throws IllegalStateException if no thread-bound PersistenceBroker found and allowCreate false
 	 */
 	public static PersistenceBroker getPersistenceBroker(PBKey pbKey, boolean allowCreate)
-	    throws DataAccessResourceFailureException, IllegalStateException {
-
-		return getPersistenceBroker(pbKey, allowCreate, true);
-	}
-
-	/**
-	 * Get an OJB PersistenceBroker for the given PBKey. Is aware of a
-	 * corresponding PersistenceBroker bound to the current thread, for
-	 * example when using PersistenceBrokerTransactionManager. Will
-	 * create a new PersistenceBroker else.
-	 * @param pbKey PBKey to create the PersistenceBroker for
-	 * @param allowCreate if a new PersistenceBroker should be created if no thread-bound found
-	 * @param allowSynchronization if a new OJB PersistenceBroker is supposed to be
-	 * registered with transaction synchronization (if synchronization is active).
-	 * This will always be true for typical data access code.
-	 * @return the PersistenceBroker
-	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
-	 * @throws IllegalStateException if no thread-bound PersistenceBroker found and allowCreate false
-	 */
-	public static PersistenceBroker getPersistenceBroker(
-	    PBKey pbKey, boolean allowCreate, boolean allowSynchronization)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 
 		PersistenceBrokerHolder pbHolder =
@@ -96,16 +76,16 @@ public abstract class OjbFactoryUtils {
 			return pbHolder.getPersistenceBroker();
 		}
 
-		if (!allowCreate) {
-			throw new IllegalStateException(
-			    "No OJB PersistenceBroker bound to thread, and configuration " +
-			    "does not allow creation of new one here");
+		if (!allowCreate && !TransactionSynchronizationManager.isSynchronizationActive()) {
+			throw new IllegalStateException("No OJB PersistenceBroker bound to thread, " +
+					"and configuration does not allow creation of non-transactional one here");
 		}
 
 		try {
 			logger.debug("Opening OJB PersistenceBroker");
 			PersistenceBroker pb = PersistenceBrokerFactory.createPersistenceBroker(pbKey);
-			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
+
+			if (TransactionSynchronizationManager.isSynchronizationActive()) {
 				logger.debug("Registering transaction synchronization for OJB PersistenceBroker");
 				pbHolder = new PersistenceBrokerHolder(pb);
 				pbHolder.setSynchronizedWithTransaction(true);
@@ -113,6 +93,7 @@ public abstract class OjbFactoryUtils {
 				    new PersistenceBrokerSynchronization(pbHolder, pbKey));
 				TransactionSynchronizationManager.bindResource(pbKey, pbHolder);
 			}
+
 			return pb;
 		}
 		catch (OJBRuntimeException ex) {

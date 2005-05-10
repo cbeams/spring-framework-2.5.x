@@ -387,20 +387,23 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					"on a single DataSource, no matter whether Hibernate or JDBC access.");
 		}
 
-		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
-		if (txObject.getSessionHolder() == null) {
-			Session session = SessionFactoryUtils.getSession(
-					getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator(), false);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Opened new session [" + session + "] for Hibernate transaction");
-			}
-			txObject.setSessionHolder(new SessionHolder(session), true);
-		}
-
-		txObject.getSessionHolder().setSynchronizedWithTransaction(true);
-		Session session = txObject.getSessionHolder().getSession();
+		Session session = null;
 
 		try {
+			HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
+			if (txObject.getSessionHolder() == null) {
+				Interceptor entityInterceptor = getEntityInterceptor();
+				Session newSession = (entityInterceptor != null ?
+						getSessionFactory().openSession(entityInterceptor) : getSessionFactory().openSession());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Opened new session [" + newSession + "] for Hibernate transaction");
+				}
+				txObject.setSessionHolder(new SessionHolder(newSession), true);
+			}
+
+			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
+			session = txObject.getSessionHolder().getSession();
+
 			Connection con = session.connection();
 			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
@@ -448,7 +451,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		catch (Exception ex) {
 			SessionFactoryUtils.releaseSession(session, getSessionFactory());
-			throw new CannotCreateTransactionException("Could not create Hibernate transaction", ex);
+			throw new CannotCreateTransactionException("Could not open Hibernate session for transaction", ex);
 		}
 	}
 

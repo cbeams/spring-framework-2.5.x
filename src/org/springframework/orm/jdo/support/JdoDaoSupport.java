@@ -142,7 +142,8 @@ public abstract class JdoDaoSupport implements InitializingBean {
 	/**
 	 * Get a JDO PersistenceManager, either from the current transaction or
 	 * a new one. The latter is only allowed if "allowCreate" is true.
-	 * @param allowCreate if a new PersistenceManager should be created if no thread-bound found
+	 * @param allowCreate if a non-transactional PersistenceManager should be created
+	 * when no transactional PersistenceManager can be found for the current thread
 	 * @return the JDO PersistenceManager
 	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be created
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false

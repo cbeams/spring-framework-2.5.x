@@ -127,6 +127,8 @@ public class PersistenceBrokerDaoSupport {
 	 * PersistenceBroker bound to the current thread, for example when using
 	 * PersistenceBrokerTransactionManager. Will create a new PersistenceBroker
 	 * else, if allowCreate is true.
+	 * @param allowCreate if a non-transactional PersistenceBroker should be created
+	 * when no transactional PersistenceBroker can be found for the current thread
 	 * @return the PersistenceBroker
 	 * @throws DataAccessResourceFailureException if the PersistenceBroker couldn't be created
 	 * @throws IllegalStateException if no thread-bound PersistenceBroker found and allowCreate false

@@ -95,34 +95,14 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * corresponding PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager. Will create a new
 	 * PersistenceManager else, if allowCreate is true.
-	 * @param pmf PersistenceManagerFactory to create the session with
-	 * @param allowCreate if a new PersistenceManager should be created if no thread-bound found
+	 * @param pmf PersistenceManagerFactory to create the PersistenceManager with
+	 * @param allowCreate if a non-transactional PersistenceManager should be created
+	 * when no transactional PersistenceManager can be found for the current thread
 	 * @return the PersistenceManager
 	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be created
 	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
-	    throws DataAccessResourceFailureException, IllegalStateException {
-
-		return getPersistenceManager(pmf, allowCreate, true);
-	}
-
-	/**
-	 * Get a JDO PersistenceManager via the given factory. Is aware of a
-	 * corresponding PersistenceManager bound to the current thread,
-	 * for example when using JdoTransactionManager. Will create a new
-	 * PersistenceManager else, if allowCreate is true.
-	 * @param pmf PersistenceManagerFactory to create the session with
-	 * @param allowCreate if a new PersistenceManager should be created if no thread-bound found
-	 * @param allowSynchronization if a new JDO PersistenceManager is supposed to be
-	 * registered with transaction synchronization (if synchronization is active).
-	 * This will always be true for typical data access code.
-	 * @return the PersistenceManager
-	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be created
-	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
-	 */
-	public static PersistenceManager getPersistenceManager(
-			PersistenceManagerFactory pmf, boolean allowCreate, boolean allowSynchronization)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 
 		Assert.notNull(pmf, "No PersistenceManagerFactory specified");
@@ -133,16 +113,16 @@ public abstract class PersistenceManagerFactoryUtils {
 			return pmHolder.getPersistenceManager();
 		}
 
-		if (!allowCreate) {
+		if (!allowCreate && !TransactionSynchronizationManager.isSynchronizationActive()) {
 			throw new IllegalStateException("No JDO PersistenceManager bound to thread, " +
-					"and configuration does not allow creation of new one here");
+					"and configuration does not allow creation of non-transactional one here");
 		}
 
 		try {
 			logger.debug("Opening JDO PersistenceManager");
 			PersistenceManager pm = pmf.getPersistenceManager();
 
-			if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
+			if (TransactionSynchronizationManager.isSynchronizationActive()) {
 				logger.debug("Registering transaction synchronization for JDO PersistenceManager");
 				// Use same PersistenceManager for further JDO actions within the transaction
 				// thread object will get removed by synchronization at transaction completion.

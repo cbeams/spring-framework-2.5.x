@@ -20,6 +20,7 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
+import org.apache.ojb.broker.OJBRuntimeException;
 import org.apache.ojb.broker.PBKey;
 import org.apache.ojb.broker.PersistenceBroker;
 import org.apache.ojb.broker.PersistenceBrokerFactory;
@@ -175,15 +176,17 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 					"on a single DataSource, no matter whether PersistenceBroker or JDBC access.");
 		}
 
-		PersistenceBroker pb = getPersistenceBroker();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Opened new persistence broker [" + pb + "] for OJB transaction");
-		}
-
-		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) transaction;
-		txObject.setPersistenceBrokerHolder(new PersistenceBrokerHolder(pb));
+		PersistenceBroker pb = null;
 
 		try {
+			pb = getPersistenceBroker();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Opened new persistence broker [" + pb + "] for OJB transaction");
+			}
+
+			PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) transaction;
+			txObject.setPersistenceBrokerHolder(new PersistenceBrokerHolder(pb));
+
 			Connection con = pb.serviceConnectionManager().getConnection();
 			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
@@ -209,7 +212,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 
 		catch (Exception ex) {
 			releasePersistenceBroker(pb);
-			throw new CannotCreateTransactionException("Could not create OJB transaction", ex);
+			throw new CannotCreateTransactionException("Could not open OJB persistence broker for transaction", ex);
 		}
 	}
 
@@ -301,15 +304,16 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 
 	/**
 	 * Get an OJB PersistenceBroker for the PBKey of this transaction manager.
-	 * <p>Default implementation delegates to OjbFactoryUtils.
+	 * <p>Default implementation simply creates a new PersistenceBroker.
 	 * Can be overridden in subclasses, e.g. for testing purposes.
 	 * @return the PersistenceBroker
+	 * @throws OJBRuntimeException if PersistenceBroker cretion failed
 	 * @see #setJcdAlias
 	 * @see #setPbKey
-	 * @see OjbFactoryUtils#getPersistenceBroker
+	 * @see org.apache.ojb.broker.PersistenceBrokerFactory#createPersistenceBroker(org.apache.ojb.broker.PBKey)
 	 */
-	protected PersistenceBroker getPersistenceBroker() {
-		return OjbFactoryUtils.getPersistenceBroker(getPbKey(), true, false);
+	protected PersistenceBroker getPersistenceBroker() throws OJBRuntimeException {
+		return PersistenceBrokerFactory.createPersistenceBroker(getPbKey());
 	}
 
 	/**

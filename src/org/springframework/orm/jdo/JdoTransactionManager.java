@@ -270,20 +270,21 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			logger.info("JdoTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
 		}
 
-		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
-		if (txObject.getPersistenceManagerHolder() == null) {
-			PersistenceManager pm =
-					PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true, false);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Opened new persistence manager [" + pm + "] for JDO transaction");
-			}
-			txObject.setPersistenceManagerHolder(new PersistenceManagerHolder(pm), true);
-		}
-
-		txObject.getPersistenceManagerHolder().setSynchronizedWithTransaction(true);
-		PersistenceManager pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
+		PersistenceManager pm = null;
 
 		try {
+			JdoTransactionObject txObject = (JdoTransactionObject) transaction;
+			if (txObject.getPersistenceManagerHolder() == null) {
+				PersistenceManager newPm = getPersistenceManagerFactory().getPersistenceManager();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Opened new persistence manager [" + newPm + "] for JDO transaction");
+				}
+				txObject.setPersistenceManagerHolder(new PersistenceManagerHolder(newPm), true);
+			}
+
+			txObject.getPersistenceManagerHolder().setSynchronizedWithTransaction(true);
+			pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
+
 			// Delegate to JdoDialect for actual transaction begin.
 			Object transactionData = getJdoDialect().beginTransaction(pm.currentTransaction(), definition);
 			txObject.setTransactionData(transactionData);
@@ -328,7 +329,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 		catch (Exception ex) {
 			PersistenceManagerFactoryUtils.releasePersistenceManager(pm, getPersistenceManagerFactory());
-			throw new CannotCreateTransactionException("Could not create JDO transaction", ex);
+			throw new CannotCreateTransactionException("Could not open JDO persistence manager for transaction", ex);
 		}
 	}
 
