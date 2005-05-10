@@ -29,6 +29,12 @@ import org.springframework.util.StringUtils;
  * @author Keith Donald
  */
 public class DecisionState extends TransitionableState {
+	
+	/**
+	 * Default constructor for bean style usage.
+	 */
+	public DecisionState() {
+	}
 
 	/**
 	 * Create a new decision state with an if/then/else transition set.
@@ -43,7 +49,7 @@ public class DecisionState extends TransitionableState {
 			throws IllegalArgumentException {
 		super(flow, id, new Transition(criteria, ifTrueStateId));
 		if (StringUtils.hasText(elseStateId)) {
-			add(new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, elseStateId));
+			add(new Transition(new WildcardTransitionCriteria(), elseStateId));
 		}
 	}
 
@@ -61,7 +67,7 @@ public class DecisionState extends TransitionableState {
 			Map properties) throws IllegalArgumentException {
 		super(flow, id, new Transition(criteria, ifTrueStateId), properties);
 		if (StringUtils.hasText(elseStateId)) {
-			add(new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, elseStateId));
+			add(new Transition(new WildcardTransitionCriteria(), elseStateId));
 		}
 	}
 
@@ -90,17 +96,17 @@ public class DecisionState extends TransitionableState {
 	}
 
 	/**
-	 * Specialization of State's <code>doEnterState</code> template method
+	 * Specialization of State's <code>doEnter</code> template method
 	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
 	 * Simply looks up the first transition that matches the state of the
 	 * StateContext and executes it.
-	 * @param context the state execution context
+	 * @param context the request execution context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */
-	protected ViewDescriptor doEnter(StateContext context) {
-		return transitionFor(context).execute(context);
+	protected ViewDescriptor doEnter(RequestContext context) {
+		return getRequiredTransition(context).execute(context);
 	}
 }

@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.FlowNavigationException;
 import org.springframework.web.flow.FlowSession;
@@ -61,7 +62,7 @@ import org.springframework.web.flow.ViewDescriptor;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Serializable {
+public class FlowExecutionStack implements FlowExecutionInfo, FlowExecution, Serializable {
 
 	private static final long serialVersionUID = 3258688806151469104L;
 
@@ -394,7 +395,7 @@ public class FlowExecutionStack implements FlowExecutionMBean, FlowExecution, Se
 	 * @return the newly created flow session
 	 */
 	protected FlowSessionImpl createFlowSession(Flow flow, Map input, FlowSession parent) {
-		return new FlowSessionImpl(flow, input, parent);
+		return new FlowSessionImpl(this, flow, input, parent);
 	}
 
 	/**

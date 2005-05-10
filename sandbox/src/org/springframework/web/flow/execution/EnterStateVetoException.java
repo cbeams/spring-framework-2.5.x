@@ -9,7 +9,7 @@ import org.springframework.web.flow.State;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class EnterStateVetoException extends FlowNavigationException {
+public class EnterStateVetoException extends FlowNavigationException {
 
 	private State state;
 	

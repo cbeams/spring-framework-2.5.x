@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Date;
 import java.util.Map;
 
 import org.springframework.core.ToStringCreator;
@@ -49,6 +48,12 @@ public class EndState extends State {
 	 * flow execution.
 	 */
 	private String viewName;
+	
+	/**
+	 * Default constructor for bean style usage.
+	 */
+	public EndState() {
+	}
 
 	/**
 	 * Create a new end state with no associated view.
@@ -91,15 +96,6 @@ public class EndState extends State {
 	}
 
 	/**
-	 * Set the name of the view that should be rendered if this end state
-	 * terminates flow execution.
-	 * @param viewName the logical view name
-	 */
-	protected void setViewName(String viewName) {
-		this.viewName = viewName;
-	}
-
-	/**
 	 * Returns the name of the view that will be rendered if this end state
 	 * terminates flow execution, or null if there is no associated view.
 	 * @return the logical view name
@@ -109,6 +105,15 @@ public class EndState extends State {
 	}
 
 	/**
+	 * Set the name of the view that should be rendered if this end state
+	 * terminates flow execution.
+	 * @param viewName the logical view name
+	 */
+	public void setViewName(String viewName) {
+		this.viewName = viewName;
+	}
+	
+	/**
 	 * Returns true if this end state has no associated view, false otherwise.
 	 * @return true if a view marker, false otherwise
 	 */
@@ -117,20 +122,20 @@ public class EndState extends State {
 	}
 
 	/**
-	 * Specialization of State's <code>doEnterState</code> template method
+	 * Specialization of State's <code>doEnter</code> template method
 	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
 	 * This implementation pops the top (active) flow session off the execution
-	 * stack, ending it, and resumes control in the spawning parent flow (if
-	 * neccessary). If the ended session is the root flow, a ViewDescriptor is
+	 * stack, ending it, and resumes control in the parent flow (if neccessary).
+	 * If the ended session is the root flow, a ViewDescriptor is
 	 * returned (when viewName is not null, else null is returned).
-	 * @param context the state execution context
+	 * @param context the request execution context
 	 * @return ViewDescriptor a view descriptor signaling that control should be
 	 *         returned to the client and a view rendered
 	 */
-	protected ViewDescriptor doEnter(StateContext context) {
-		if (context.isRootFlowActive()) {
+	protected ViewDescriptor doEnter(RequestContext context) {
+		if (context.getActiveSession().isRoot()) {
 			// entire flow execution is ending, return ending view if applicable
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing flow '" + getFlow().getId() + "' has ended");
@@ -149,7 +154,7 @@ public class EndState extends State {
 				viewDescriptor = new ViewDescriptor(viewName, context.getModel());
 			}
 			// end the flow
-			// note that we do this at the here to make sure we can call context.getModel()
+			// note that we do this here to make sure we can call context.getModel()
 			// above without any problems
 			context.endActiveSession();
 			return viewDescriptor;
@@ -172,37 +177,14 @@ public class EndState extends State {
 		}		
 	}
 
-	protected Event subflowResult(StateContext context) {
-		return new SubflowResult(this);
-	}
-	
-	public static class SubflowResult extends Event {
-		private long timestamp;
-		
-		public SubflowResult(EndState state) {
-			super(state);
-			this.timestamp = new Date().getTime();
-		}
-		
-		public String getId() {
-			return ((EndState)getSource()).getId();
-		}
-		
-		public String getStateId() {
-			return null;
-		}
-		
-		public Map getParameters() {
-			return null;
-		}
-		
-		public Object getParameter(String parameterName) {
-			return null;
-		}
-		
-		public long getTimestamp() {
-			return timestamp;
-		}
+	/**
+	 * Hook method to create the subflow result event. Subclasses can override
+	 * this if necessary.
+	 */
+	protected Event subflowResult(RequestContext context) {
+		// treat this end state id as a transitional event in the
+		// resuming state, this is so cool!
+		return new Event(this, getId());
 	}
 	
 	protected void createToString(ToStringCreator creator) {

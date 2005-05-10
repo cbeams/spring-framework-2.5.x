@@ -48,8 +48,8 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.WildcardTransitionCriteria;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
 import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
 import org.springframework.web.flow.support.TransitionCriteriaChain;
@@ -569,7 +569,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		for (int i = 0; i < actions.length; i++) {
 			executionCriteria.add(new ActionTransitionCriteria(actions[i]));
 		}
-		return new Transition(getTransitionCriteriaCreator().create(on), to, executionCriteria, parseProperties(element));
+		Transition transition = new Transition(getTransitionCriteriaCreator().create(on), to, parseProperties(element));
+		transition.setExecutionCriteria(executionCriteria);
+		return transition;
 	}
 
 	/**
@@ -599,7 +601,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			return new Transition[] { thenTransition };
 		}
 		else {
-			Transition elseTransition = new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, falseStateId);
+			Transition elseTransition = new Transition(new WildcardTransitionCriteria(), falseStateId);
 			return new Transition[] { thenTransition, elseTransition };
 		}
 	}

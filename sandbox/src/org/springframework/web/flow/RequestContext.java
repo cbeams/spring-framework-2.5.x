@@ -15,10 +15,12 @@
  */
 package org.springframework.web.flow;
 
+import java.util.Map;
+
 import org.springframework.binding.AttributeSource;
 
 /**
- * Central interface that allows clients to access contextual information about
+ * Central interface that allows clients to manipulate contextual information about
  * an ongoing flow execution within the context of a client request. The term
  * <i>request</i> is used to symbolize a call into the flow system to
  * manipulate a FlowExecution.
@@ -38,34 +40,14 @@ import org.springframework.binding.AttributeSource;
  * flow system--the context object will not be exposed to external client code.
  * <p>
  * Note that a <i>request</i> context is in no way linked to an HTTP request!
- * It just uses the familiar request naming convention.
+ * It just uses the familiar "request" naming convention.
  * 
  * @see org.springframework.web.flow.execution.FlowExecution
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public interface RequestContext {
-
-	/**
-	 * Returns the root flow definition of the flow execution that is executing
-	 * this request.
-	 * @return the root flow definition
-	 */
-	public Flow getRootFlow();
-
-	/**
-	 * Is the root flow of the flow execution executing this request active?
-	 * @return true or false
-	 */
-	public boolean isRootFlowActive();
-
-	/**
-	 * Returns the flow definition of the active flow in the flow execution that
-	 * is executing this request.
-	 * @return the active flow definition
-	 * @throws IllegalStateException the flow execution is not active
-	 */
-	public FlowSession getActiveSession() throws IllegalStateException;
 
 	/**
 	 * Is a flow actively executing?
@@ -88,21 +70,41 @@ public interface RequestContext {
 	public Event getLastEvent();
 
 	/**
+	 * Update the last event that occured in the executing flow.
+	 * @param lastEvent the last event that occured
+	 */
+	public void setLastEvent(Event lastEvent);
+
+	/**
 	 * Returns the last state transition executed in this request.
-	 * @return the last transition, or <code>null</code> if none has occured yet.
+	 * @return the last transition, or <code>null</code> if none has occured yet
 	 */
 	public Transition getLastTransition();
 	
 	/**
-	 * Returns a holder for properties about the currently executing
-	 * <code>Action</code> in the context of the current request.
-	 * <p>
-	 * An <code>Action</code> can use these properties to influence its behavior
-	 * based on the current state of the request context.
-	 * @return the action attributes, or empty if not set
+	 * Update the last transition that executed in the executing flow.
+	 * @param lastTransition the last transition that executed
+	 */
+	public void setLastTransition(Transition lastTransition);
+	
+	/**
+	 * Set the current state of the flow execution linked to this request.
+	 * @param state the current state
+	 */
+	public void setCurrentState(State state);
+
+	/**
+	 * Returns a holder for execution properties for the current request.
+	 * @return the execution properties, or empty if not set
 	 */
 	public AttributeSource getExecutionProperties();
 
+	/**
+	 * Update contextual execution properties for given request context.
+	 * @param properties the execution properties
+	 */
+	public void setExecutionProperties(AttributeSource properties);
+	
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in
 	 * request scope.
@@ -118,9 +120,43 @@ public interface RequestContext {
 	public Scope getFlowScope();
 
 	/**
+	 * Returns the data model for this context, suitable for exposing to clients
+	 * (e.g. web views). Typically the model will contain the data available in
+	 * request scope and flow scope.
+	 * @return the model that can be exposed to a client
+	 */
+	public Map getModel();
+
+	/**
 	 * Returns a synchronizer for demarcating application transactions within
 	 * the flow execution associated with this context.
 	 * @return the transaction synchronizer
 	 */
 	public TransactionSynchronizer getTransactionSynchronizer();
+	
+	/**
+	 * Returns the flow session of the active flow in the flow execution that
+	 * is executing this request.
+	 * @return the active flow session
+	 * @throws IllegalStateException when the flow execution is not active
+	 */
+	public FlowSession getActiveSession() throws IllegalStateException;
+	
+	/**
+	 * Spawn a new flow session and activate it in the currently executing
+	 * flow execution.
+	 * @param subflow the flow for which a new flow session should be created
+	 * @param subFlowInput initial contents of the newly created flow session
+	 * @return the newly created and activated flow session
+	 * @throws IllegalStateException when the flow execution is not active
+	 */
+	public FlowSession spawn(Flow subflow, Map subFlowInput) throws IllegalStateException;
+
+	/**
+	 * End the active flow session.
+	 * @return the ended session
+	 * @throws IllegalStateException when the flow execution is not active
+	 */
+	public FlowSession endActiveSession() throws IllegalStateException;
+	
 }

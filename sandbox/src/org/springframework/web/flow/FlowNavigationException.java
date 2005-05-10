@@ -34,7 +34,7 @@ public abstract class FlowNavigationException extends NestedRuntimeException {
 	private Flow flow;
 
 	/**
-	 * Create a new navigation exception.
+	 * Create a new flow navigation exception.
 	 * @param flow the flow in which the navigation exception occured
 	 * @param message a descriptive message
 	 */
@@ -44,7 +44,7 @@ public abstract class FlowNavigationException extends NestedRuntimeException {
 	}
 
 	/**
-	 * Create a new navigation exception.
+	 * Create a new flow navigation exception.
 	 * @param flow the flow in which the navigation exception occured
 	 * @param message a descriptive message
 	 * @param cause the underlying cause of the exception

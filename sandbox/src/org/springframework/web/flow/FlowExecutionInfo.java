@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution;
+package org.springframework.web.flow;
 
 /**
  * Provides management information about an ongoing flow execution.
@@ -24,8 +24,8 @@ package org.springframework.web.flow.execution;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowExecutionMBean {
-
+public interface FlowExecutionInfo {
+	
 	/**
 	 * Returns the timestamp on which this execution was created.
 	 * @return the creation timestamp
@@ -95,7 +95,7 @@ public interface FlowExecutionMBean {
 
 	/**
 	 * Returns the id of the last event signaled within this flow execution.
-	 * @return the last event ud, or <code>null</code> if no valid event has
+	 * @return the last event id, or <code>null</code> if no valid event has
 	 *         been signaled so far
 	 */
 	public String getLastEventId();

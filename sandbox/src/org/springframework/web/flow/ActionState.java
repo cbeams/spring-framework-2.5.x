@@ -60,6 +60,12 @@ public class ActionState extends TransitionableState {
 	 * The set of actions to be executed when this action state is entered.
 	 */
 	private Set actionExecutors = new LinkedHashSet(1);
+	
+	/**
+	 * Default constructor for bean style usage.
+	 */
+	public ActionState() {
+	}
 
 	/**
 	 * Create a new action state.
@@ -258,7 +264,7 @@ public class ActionState extends TransitionableState {
 	 * Add a target action instance to this state.
 	 * @param action the action to add
 	 */
-	protected void addAction(Action action) {
+	public void addAction(Action action) {
 		this.actionExecutors.add(new ActionExecutor(this, new AnnotatedAction(action)));
 	}
 
@@ -274,7 +280,7 @@ public class ActionState extends TransitionableState {
 	 * Add a collection of target action instances to this state.
 	 * @param actions the actions to add
 	 */
-	protected void addActions(Action[] actions) {
+	public void addActions(Action[] actions) {
 		Assert.notEmpty(actions, "You must add at least one action");
 		for (int i = 0; i < actions.length; i++) {
 			addAction(actions[i]);
@@ -285,7 +291,7 @@ public class ActionState extends TransitionableState {
 	 * Add a collection of actions to this state.
 	 * @param actions the actions to add
 	 */
-	protected void addActions(AnnotatedAction[] actions) {
+	public void addActions(AnnotatedAction[] actions) {
 		Assert.notEmpty(actions, "You must add at least one action");
 		for (int i = 0; i < actions.length; i++) {
 			addAction(actions[i]);
@@ -333,7 +339,7 @@ public class ActionState extends TransitionableState {
 	}
 
 	/**
-	 * Specialization of State's <code>doEnterState</code> template method
+	 * Specialization of State's <code>doEnter</code> template method
 	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
@@ -341,14 +347,14 @@ public class ActionState extends TransitionableState {
 	 * instance and executes it. Execution continues until a <code>Action</code>
 	 * returns a result event that matches a state transition in this request
 	 * context, or the set of all actions is exhausted.
-	 * @param context the state execution context
+	 * @param context the request execution context
 	 * @return ViewDescriptor a view descriptor signaling that control should be
 	 *         returned to the client and a view rendered
-	 * @throws CannotExecuteStateTransitionException when no action execution
+	 * @throws CannotExecuteTransitionException when no action execution
 	 *         resulted in a outcome event that could be mapped to a valid state
 	 *         transition
 	 */
-	protected ViewDescriptor doEnter(StateContext context) {
+	protected ViewDescriptor doEnter(RequestContext context) {
 		Iterator it = actionExecutors();
 		int executionCount = 0;
 		String[] eventIds = new String[actionExecutors.size()];
@@ -380,7 +386,7 @@ public class ActionState extends TransitionableState {
 					+ "'; transitions must be defined to handle action result outcomes -- "
 					+ "possible flow configuration error? Note: the eventIds signaled were: '" + Styler.call(eventIds)
 					+ "', while the supported set of transitional criteria for this action state is '"
-					+ Styler.call(getTransitionMatchingCriteria()) + "'");
+					+ Styler.call(getTransitionCriterias()) + "'");
 		}
 		else {
 			throw new IllegalStateException("No actions were executed, thus I cannot execute any state transition "
@@ -425,7 +431,7 @@ public class ActionState extends TransitionableState {
 		 * @param context the flow execution request context
 		 * @return result of execution
 		 */
-		protected Event execute(StateContext context) {
+		protected Event execute(RequestContext context) {
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
@@ -455,59 +461,16 @@ public class ActionState extends TransitionableState {
 				return null;
 			}
 			if (action.isNamed()) {
-				return new ActionNameQualifiedEvent(action.getName(), resultEvent);
+				resultEvent.setId(action.getName() + "." + resultEvent.getId());
 			}
-			else {
-				return resultEvent;
-			}
-		}
-
-		/**
-		 * Wrapper to wrap an event as an event signaled by a named action.
-		 */
-		private static class ActionNameQualifiedEvent extends Event {
-
-			private String actionName;
-
-			private Event resultEvent;
-
-			/**
-			 * Create a new action name qualified event.
-			 * @param actionName the name of the named action
-			 * @param resultEvent the event to qualify
-			 */
-			public ActionNameQualifiedEvent(String actionName, Event resultEvent) {
-				super(resultEvent.getSource());
-				this.actionName = actionName;
-				this.resultEvent = resultEvent;
-			}
-
-			public String getId() {
-				return actionName + FlowConstants.SEPARATOR + resultEvent.getId();
-			}
-
-			public long getTimestamp() {
-				return resultEvent.getTimestamp();
-			}
-
-			public String getStateId() {
-				return resultEvent.getStateId();
-			}
-
-			public Object getParameter(String parameterName) {
-				return resultEvent.getParameter(parameterName);
-			}
-
-			public Map getParameters() {
-				return resultEvent.getParameters();
-			}
+			return resultEvent;
 		}
 
 		public String toString() {
 			return action.toString();
 		}
 	}
-
+	
 	protected void createToString(ToStringCreator creator) {
 		creator.append("actions", actionExecutors);
 		super.createToString(creator);

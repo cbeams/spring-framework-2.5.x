@@ -25,12 +25,12 @@ import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.FlowConstants;
-import org.springframework.web.flow.NoSuchFlowDefinitionException;
+import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.WildcardTransitionCriteria;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
 
 /**
@@ -386,7 +386,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action
 	 * @throws NoSuchActionException the action could not be resolved
 	 */
-	protected Action action(String actionId) throws NoSuchActionException {
+	protected Action action(String actionId) throws ServiceLookupException {
 		return getFlowServiceLocator().getAction(actionId);
 	}
 
@@ -398,7 +398,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action
 	 * @throws NoSuchActionException the action could not be resolved
 	 */
-	protected AnnotatedAction annotatedAction(String actionId, Map properties) throws NoSuchActionException {
+	protected AnnotatedAction annotatedAction(String actionId, Map properties) throws ServiceLookupException {
 		return new AnnotatedAction(action(actionId), properties);
 	}
 
@@ -434,7 +434,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the action
 	 * @throws NoSuchActionException the action could not be resolved
 	 */
-	protected Action actionRef(Class actionImplementationClass) throws NoSuchActionException {
+	protected Action actionRef(Class actionImplementationClass) throws ServiceLookupException {
 		return getFlowServiceLocator().getAction(actionImplementationClass);
 	}
 
@@ -552,7 +552,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws NoSuchFlowAttributeMapperException no FlowAttributeMapper
 	 *         implementation was exported with the specified id
 	 */
-	protected FlowAttributeMapper attributeMapper(String attributeMapperId) throws NoSuchFlowAttributeMapperException {
+	protected FlowAttributeMapper attributeMapper(String attributeMapperId) throws ServiceLookupException {
 		if (!StringUtils.hasText(attributeMapperId)) {
 			return null;
 		}
@@ -571,7 +571,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 *         more than one existed
 	 */
 	protected FlowAttributeMapper attributeMapperRef(Class flowAttributeMapperImplementationClass)
-			throws NoSuchFlowAttributeMapperException {
+			throws ServiceLookupException {
 		return getFlowServiceLocator().getFlowAttributeMapper(flowAttributeMapperImplementationClass);
 	}
 
@@ -610,7 +610,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the flow to be used as a subflow, this should be passed to a
 	 *         addSubFlowState call
 	 */
-	protected Flow flow(String flowId) throws NoSuchFlowDefinitionException {
+	protected Flow flow(String flowId) throws ServiceLookupException {
 		return getFlowServiceLocator().getFlow(flowId);
 	}
 
@@ -627,7 +627,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the flow to be used as a subflow, this should be passed to a
 	 *         addSubFlowState call
 	 */
-	protected Flow flow(String flowId, Class flowBuilderImplementationClass) throws NoSuchFlowDefinitionException {
+	protected Flow flow(String flowId, Class flowBuilderImplementationClass) throws ServiceLookupException {
 		return getFlowServiceLocator().getFlow(flowId, flowBuilderImplementationClass);
 	}
 
@@ -774,7 +774,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (*->stateId)
 	 */
 	protected Transition onAnyEvent(String stateId) {
-		return new Transition(TransitionCriteria.WILDCARD_TRANSITION_CRITERIA, stateId);
+		return new Transition(new WildcardTransitionCriteria(), stateId);
 	}
 
 	/**
@@ -883,6 +883,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state id ("customer.Detail.view"). Detaults to a dot (".").
 	 */
 	protected String getQualifierDelimiter() {
-		return FlowConstants.SEPARATOR;
+		return ".";
 	}
 }

@@ -22,12 +22,7 @@ package org.springframework.web.flow;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class CannotExecuteStateTransitionException extends FlowNavigationException {
-
-	/**
-	 * The state in which the exception occured.
-	 */
-	private TransitionableState sourceState;
+public class CannotExecuteTransitionException extends FlowNavigationException {
 
 	/**
 	 * The transition that could not be executed.
@@ -36,35 +31,13 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 
 	/**
 	 * Create a new state transition execution exception.
-	 * @param sourceState the source state of the transition
-	 * @param cause the underlying cause of this exception
-	 */
-	public CannotExecuteStateTransitionException(TransitionableState sourceState, Throwable cause) {
-		super(sourceState.getFlow(), "Could not execute a transition from state '" + sourceState
-				+ "' to another state in flow '" + sourceState.getFlow().getId() + "'", cause);
-		this.sourceState = sourceState;
-	}
-
-	/**
-	 * Creates a new state transition execution exception.
-	 * @param sourceState the source state
-	 * @param message the message of what went wrong.
-	 */
-	public CannotExecuteStateTransitionException(TransitionableState sourceState, String message) {
-		super(sourceState.getFlow(), message);
-		this.sourceState = sourceState;
-	}
-
-	/**
-	 * Create a new state transition execution exception.
 	 * @param transition the transition that was executing
 	 * @param cause the underlying cause of this exception
 	 */
-	public CannotExecuteStateTransitionException(Transition transition, Throwable cause) {
+	public CannotExecuteTransitionException(Transition transition, Throwable cause) {
 		super(transition.getSourceState().getFlow(), "Could not execute transition from state '"
-				+ transition.getSourceState().getId() + "' to state '" + transition.getTargetStateId() + "' in flow '"
+				+ transition.getSourceState().getId() + "' in flow '"
 				+ transition.getSourceState().getFlow().getId() + "'", cause);
-		this.sourceState = transition.getSourceState();
 		this.transition = transition;
 	}
 
@@ -73,17 +46,9 @@ public class CannotExecuteStateTransitionException extends FlowNavigationExcepti
 	 * @param transition the transition that was executing
 	 * @param message a descriptive message
 	 */
-	protected CannotExecuteStateTransitionException(Transition transition, String message) {
+	public CannotExecuteTransitionException(Transition transition, String message) {
 		super(transition.getSourceState().getFlow(), message);
-		this.sourceState = transition.getSourceState();
 		this.transition = transition;
-	}
-
-	/**
-	 * Returns the state in which the exception occured.
-	 */
-	public TransitionableState getSourceState() {
-		return sourceState;
 	}
 
 	/**

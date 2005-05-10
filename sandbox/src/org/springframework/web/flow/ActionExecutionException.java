@@ -22,6 +22,9 @@ import org.springframework.core.NestedRuntimeException;
  * Thrown if an unhandled, uncoverable exception is thrown when an action is
  * executed in an action state.
  * 
+ * @see org.springframework.web.flow.Action
+ * @see org.springframework.web.flow.ActionState
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -73,7 +76,8 @@ public class ActionExecutionException extends NestedRuntimeException {
 	 * @param message a descriptive message
 	 * @param cause the underlying cause
 	 */
-	public ActionExecutionException(State state, Action action, AttributeSource actionProperties, String message, Throwable cause) {
+	public ActionExecutionException(State state, Action action, AttributeSource actionProperties,
+			String message, Throwable cause) {
 		super(message, cause);
 		this.state = state;
 		this.action = action;

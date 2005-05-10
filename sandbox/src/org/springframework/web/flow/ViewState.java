@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
  * <code>ViewDescriptor</code>, which contains the logical name of a view
  * template to render and all supporting model data needed to render it
  * correctly. It is expected that some sort of view resolver will map this view
- * name to a physical resource template (like a jsp file.)
+ * name to a physical resource template (like a JSP file.)
  * <p>
  * A view state can also be a <i>marker</i> state with no associated view. In
  * this case it just returns control back to the client. Marker states are
@@ -43,6 +43,12 @@ public class ViewState extends TransitionableState {
 	 * The logical name of the view.
 	 */
 	private String viewName;
+	
+	/**
+	 * Default constructor for bean style usage.
+	 */
+	public ViewState() {
+	}
 
 	/**
 	 * Create a new marker view state.
@@ -105,13 +111,6 @@ public class ViewState extends TransitionableState {
 		super(flow, id, transitions, properties);
 		setViewName(viewName);
 	}
-
-	/* 
-	 * @see org.springframework.web.flow.State#isInteractive()
-	 */
-	public boolean isInteractive() {
-		return true;
-	}
 	
 	/**
 	 * Returns the logical name of the view to render in this view state.
@@ -123,7 +122,7 @@ public class ViewState extends TransitionableState {
 	/**
 	 * Set the logical name of the view to render in this view state.
 	 */
-	protected void setViewName(String viewName) {
+	public void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
@@ -135,7 +134,7 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
-	 * Specialization of State's <code>doEnterState</code> template method
+	 * Specialization of State's <code>doEnter</code> template method
 	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
@@ -146,7 +145,7 @@ public class ViewState extends TransitionableState {
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */
-	protected ViewDescriptor doEnter(StateContext context) {
+	protected ViewDescriptor doEnter(RequestContext context) {
 		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning a view descriptor null object; no view to render");
@@ -161,7 +160,11 @@ public class ViewState extends TransitionableState {
 		}
 	}
 
-	protected ViewDescriptor createViewDescriptor(StateContext context) {
+	/**
+	 * Create a view descriptor for given state context. Subclasses could override
+	 * this method to return a custom view descriptor. 
+	 */
+	protected ViewDescriptor createViewDescriptor(RequestContext context) {
 		return new ViewDescriptor(this.viewName, context.getModel());
 	}
 

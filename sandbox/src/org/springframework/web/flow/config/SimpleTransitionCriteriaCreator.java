@@ -20,6 +20,7 @@ import java.io.Serializable;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.WildcardTransitionCriteria;
 
 /**
  * Simple default implementation of the transition criteria factory.
@@ -54,7 +55,7 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 */
 	protected TransitionCriteria createDefaultTransitionCriteria(String encodedCriteria) {
 		if (WILDCARD_EVENT_ID.equals(encodedCriteria)) {
-			return TransitionCriteria.WILDCARD_TRANSITION_CRITERIA;
+			return new WildcardTransitionCriteria();
 		}
 		else {
 			// implementation note: this inner class is not a class constant

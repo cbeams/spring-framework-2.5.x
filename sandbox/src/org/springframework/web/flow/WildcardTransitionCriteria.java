@@ -16,24 +16,24 @@
 package org.springframework.web.flow;
 
 /**
- * Interface for strategy objects encapsulating criteria that determine
- * whether or not a transition should execute given a flow execution
- * request context.
+ * Transition criteria implementation that always returns true.
  * 
- * @see org.springframework.web.flow.Transition
- * @see org.springframework.web.flow.RequestContext
- * 
- * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface TransitionCriteria {
+public class WildcardTransitionCriteria implements TransitionCriteria {
 
 	/**
-	 * Check if the transition should execute based on the given flow
-	 * execution request context.
-	 * @param context the flow execution request context
-	 * @return true if the transition should fire, false otherwise
+	 * Event id value ("*") that will cause the transition to match
+	 * on any event.
 	 */
-	public boolean test(RequestContext context);
+	public static final String WILDCARD_EVENT_ID = "*";
+	
+	public boolean test(RequestContext context) {
+		return true;
+	}
+	
+	public String toString() {
+		return WILDCARD_EVENT_ID;
+	}
 
 }

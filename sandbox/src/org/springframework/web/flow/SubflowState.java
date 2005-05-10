@@ -18,8 +18,6 @@ package org.springframework.web.flow;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.binding.AttributeSource;
-import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
@@ -47,6 +45,12 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 	 * to the spawned subflow and visa versa.
 	 */
 	private FlowAttributeMapper attributeMapper;
+	
+	/**
+	 * Default constructor for bean style usage.
+	 */
+	public SubflowState() {
+	}
 
 	/**
 	 * Create a new sub flow state.
@@ -84,7 +88,8 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public SubflowState(Flow flow, String id, Flow subflow, Transition[] transitions, Map properties) throws IllegalArgumentException {
+	public SubflowState(Flow flow, String id, Flow subflow, Transition[] transitions, Map properties)
+			throws IllegalArgumentException {
 		this(flow, id, subflow, null, transitions, properties);
 	}
 
@@ -142,7 +147,7 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 	 * Set the sub flow that will be spawned by this state.
 	 * @param subflow the sub flow to spawn
 	 */
-	protected void setSubflow(Flow subflow) {
+	public void setSubflow(Flow subflow) {
 		Assert.notNull(subflow, "A sub flow state must have a sub flow");
 		this.subflow = subflow;
 	}
@@ -158,7 +163,7 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 	 * Set the attribute mapper to use to map model data between parent and sub
 	 * flow model. Can be null if no mapping is needed.
 	 */
-	protected void setAttributeMapper(FlowAttributeMapper attributeMapper) {
+	public void setAttributeMapper(FlowAttributeMapper attributeMapper) {
 		this.attributeMapper = attributeMapper;
 	}
 
@@ -171,19 +176,19 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 	}
 
 	/**
-	 * Specialization of State's <code>doEnterState</code> template
+	 * Specialization of State's <code>doEnter</code> template
 	 * method that executes behaivior specific to this state type in polymorphic
 	 * fashion.
 	 * <p>
 	 * Enter this state, creating the sub flow input map and spawning the sub
 	 * flow in the current flow execution.
 	 */
-	protected ViewDescriptor doEnter(StateContext context) {
-		Flow subflow = getSubflow();
+	protected ViewDescriptor doEnter(RequestContext context) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Spawning child sub flow '" + subflow.getId() + "' within this flow '" + getFlow() + "'");
+			logger.debug("Spawning child sub flow '" + getSubflow().getId() + "' within this flow '" + getFlow() + "'");
 		}
-		return context.spawn(getSubflow(), createSubflowInput(context));
+		FlowSession session = context.spawn(getSubflow(), createSubflowInput(context));
+		return getSubflow().getStartState().enter(context);
 	}
 
 	public Map createSubflowInput(RequestContext context) {
@@ -196,8 +201,7 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No attribute mapper configured for this sub flow state '"
-						+ getId()
+				logger.debug("No attribute mapper configured for this sub flow state '"	+ getId()
 						+ "' -- as a result, no attributes in the parent flow scope will be passed to the spawned sub flow '"
 						+ subflow.getId() + "'");
 			}
@@ -215,8 +219,7 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No attribute mapper is configured for the resuming state '"
-						+ getId()
+				logger.debug("No attribute mapper is configured for the resuming state '" + getId()
 						+ "' -- note: as a result, no attributes in the ending sub flow scope will be passed to the resuming parent flow");
 			}
 		}

@@ -16,6 +16,7 @@
 package org.springframework.web.flow.execution;
 
 import org.springframework.web.flow.Event;
+import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.FlowNavigationException;
 import org.springframework.web.flow.ViewDescriptor;
@@ -38,7 +39,7 @@ import org.springframework.web.flow.ViewDescriptor;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowExecution extends FlowExecutionMBean {
+public interface FlowExecution extends FlowExecutionInfo {
 
 	/**
 	 * Start executing this flow, transitioning it to the start state and

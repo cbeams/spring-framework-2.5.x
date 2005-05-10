@@ -18,7 +18,7 @@ package org.springframework.web.flow;
 import org.springframework.core.Styler;
 
 /**
- * Throw when no transition can be matched given the occurence of an event in
+ * Thrown when no transition can be matched given the occurence of an event in
  * the context of a flow execution request.
  * <p>
  * Typically this happens because there is no "handler" transition for the last
@@ -61,7 +61,7 @@ public class NoMatchingTransitionException extends FlowNavigationException {
 	public NoMatchingTransitionException(TransitionableState state, RequestContext context, Throwable cause) {
 		super(state.getFlow(), "No transition found for event '" + context.getLastEvent().getId() + "' in state '"
 				+ state.getId() + "' of flow '" + state.getFlow().getId() + "' -- valid transitional criteria are "
-				+ Styler.call(state.getTransitionMatchingCriteria())
+				+ Styler.call(state.getTransitionCriterias())
 				+ " -- likely programmer error, check the set of TransitionCriteria for this state", cause);
 		this.state = state;
 		this.context = context;

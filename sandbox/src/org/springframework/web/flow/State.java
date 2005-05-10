@@ -15,19 +15,16 @@
  */
 package org.springframework.web.flow;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.binding.AttributeSource;
-import org.springframework.binding.support.EmptyAttributeSource;
-import org.springframework.binding.support.MapAttributeSource;
+
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * A base super class for state definitions. Each state is associated with
+ * A base superclass for state definitions. Each state is associated with
  * exactly one owning flow definition. Standard types of states include action
  * states, view states, subflow states, and end states.
  * <p>
@@ -49,11 +46,12 @@ import org.springframework.util.Assert;
  * @see org.springframework.web.flow.ViewState
  * @see org.springframework.web.flow.SubflowState
  * @see org.springframework.web.flow.EndState
+ * @see org.springframework.web.flow.DecisionState
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class State {
+public abstract class State extends AnnotatedObject {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -68,9 +66,10 @@ public abstract class State {
 	private String id;
 
 	/**
-	 * Additional properties further describing this state. 
+	 * Default constructor for bean style usage.
 	 */
-	private AttributeSource properties = EmptyAttributeSource.INSTANCE;
+	protected State() {
+	}
 
 	/**
 	 * Creates a state for the provided <code>flow</code> identified by the
@@ -82,7 +81,8 @@ public abstract class State {
 	 *         flow
 	 */
 	protected State(Flow flow, String id) throws IllegalArgumentException {
-		this(flow, id, null);
+		setId(id);
+		setFlow(flow);
 	}
 
 	/**
@@ -98,10 +98,26 @@ public abstract class State {
 	protected State(Flow flow, String id, Map properties) throws IllegalArgumentException {
 		setId(id);
 		setFlow(flow);
+		setProperties(properties);
+	}
+
+	/**
+	 * Returns the owning flow.
+	 */
+	public Flow getFlow() {
+		return flow;
+	}
+
+	/**
+	 * Set the owning flow.
+	 * @throws IllegalArgumentException if this state cannot be added to the
+	 *         flow
+	 */
+	public void setFlow(Flow flow) throws IllegalArgumentException {
+		Assert.hasText(getId(), "The id of the state should be set before adding the state to a flow");
+		Assert.notNull(flow, "The owning flow is required");
 		flow.add(this);
-		if (properties != null) {
-			this.properties = new MapAttributeSource(new HashMap(properties));
-		}
+		this.flow = flow;
 	}
 
 	/**
@@ -116,39 +132,10 @@ public abstract class State {
 	 * Set the state identifier, unique to the owning flow.
 	 * @param id the state identifier.
 	 */
-	private void setId(String id) {
+	public void setId(String id) {
 		Assert.hasText(id, "The state must have a valid identifier");
+		Assert.isTrue(getFlow() == null, "You cannot change the id of a state which has been added to a flow");
 		this.id = id;
-	}
-
-	/**
-	 * Returns the owning flow.
-	 */
-	public Flow getFlow() {
-		return flow;
-	}
-
-	/**
-	 * Set the owning flow.
-	 */
-	protected void setFlow(Flow flow) {
-		Assert.notNull(flow, "The owning flow is required");
-		this.flow = flow;
-	}
-
-	/**
-	 * Returns the additional properties describing this state.
-	 */
-	public AttributeSource getProperties() {
-		return this.properties;
-	}
-
-	/**
-	 * Returns the value of given additional state property, or null if
-	 * if not found.
-	 */
-	public Object getProperty(String propertyName) {
-		return this.properties.getAttribute(propertyName);
 	}
 
 	/**
@@ -163,21 +150,14 @@ public abstract class State {
 	}
 
 	/**
-	 * Is this state interactive? That is, when this state is entered, is
-	 * the flow paused and control returned to the client for interaction? 
-	 * @return true when this state is an interactive state, false otherwise
-	 */
-	public boolean isInteractive() {
-		return false;
-	}
-
-	/**
-	 * Enter this state in the provided flow execution request.
-	 * @param context the state context in an executing flow (a client instance of a flow)
+	 * Enter this state in the provided flow execution request context. This implementation
+	 * just calls the {@link #doEnter(StateContext)} hook method, which should be
+	 * implemented by subclasses.
+	 * @param context the request context in an executing flow (a client instance of a flow)
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state processing
 	 */
-	public ViewDescriptor enter(StateContext context) {
+	public final ViewDescriptor enter(RequestContext context) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Entering state '" + getId() + "' in flow '" + getFlow() + "'");
 		}
@@ -186,15 +166,16 @@ public abstract class State {
 	}
 
 	/**
-	 * Hook method to execute custom behaivior as a result of entering this state.
-	 * @param context the state context in an executing flow (a client instance of a flow)
+	 * Hook method to execute custom behaviour as a result of entering this state.
+	 * @param context the request context in an executing flow (a client instance of a flow)
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state processing
 	 */
-	protected abstract ViewDescriptor doEnter(StateContext context);
+	protected abstract ViewDescriptor doEnter(RequestContext context);
 
 	public String toString() {
-		ToStringCreator creator = new ToStringCreator(this).append("id", getId()).append("flow", flow.getId());
+		ToStringCreator creator =
+			new ToStringCreator(this).append("id", getId()).append("flow", flow == null ? "" : flow.getId());
 		createToString(creator);
 		return creator.toString();
 	}

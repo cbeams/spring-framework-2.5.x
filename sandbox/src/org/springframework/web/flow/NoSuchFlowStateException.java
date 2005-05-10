@@ -29,7 +29,7 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 	private String stateId;
 
 	/**
-	 * Create a new flow state navigation exception.
+	 * Create a new flow state lookup exception.
 	 * @param flow the containing flow
 	 * @param stateId the state id that cannot be found
 	 */
@@ -38,7 +38,7 @@ public class NoSuchFlowStateException extends FlowNavigationException {
 	}
 
 	/**
-	 * Create a new flow state navigation exception.
+	 * Create a new flow state lookup exception.
 	 * @param flow the containing flow
 	 * @param stateId the state id that cannot be found
 	 * @param cause the underlying cause of this exception

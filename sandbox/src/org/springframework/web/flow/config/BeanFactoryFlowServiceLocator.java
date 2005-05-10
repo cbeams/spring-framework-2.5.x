@@ -23,11 +23,14 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.NoSuchFlowDefinitionException;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.State;
+import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * A flow service locator that uses a Spring bean factory to lookup flow-related
@@ -39,7 +42,9 @@ import org.springframework.web.flow.ServiceLookupException;
 public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {
 
 	private AutowireMode defaultAutowireMode = AutowireMode.NONE;
-
+	
+	private TransitionCriteriaCreator transitionCriteriaCreator = new SimpleTransitionCriteriaCreator();
+	
 	/**
 	 * The wrapped bean factory.
 	 */
@@ -68,9 +73,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	 */
 	protected BeanFactory getBeanFactory() {
 		if (this.beanFactory == null) {
-			throw new IllegalStateException(
-					"The bean factory reference has not yet been set for this FlowLocator"
-							+ " -- it must be set before I can load flows -- call setBeanFactory()");
+			throw new IllegalStateException("The bean factory reference has not yet been set -- call setBeanFactory()");
 		}
 		return beanFactory;
 	}
@@ -91,7 +94,21 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		Assert.isTrue(defaultAutowireMode != AutowireMode.DEFAULT, "The default auto wire must not equal 'default'");
 		this.defaultAutowireMode = defaultAutowireMode;
 	}
-
+	
+	/**
+	 * Returns the factory used to create transition criteria.
+	 */
+	public TransitionCriteriaCreator getTransitionCriteriaCreator() {
+		return transitionCriteriaCreator;
+	}
+	
+	/**
+	 * Set the factory used to create transition criteria.
+	 */
+	public void setTransitionCriteriaCreator(TransitionCriteriaCreator transitionCriteriaCreator) {
+		this.transitionCriteriaCreator = transitionCriteriaCreator;
+	}
+	
 	/**
 	 * Returns the bean factory used to lookup services.
 	 */
@@ -100,7 +117,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	/**
-	 * Returns the bean factory used to autowire actions.
+	 * Returns the bean factory used to autowire services.
 	 */
 	protected AutowireCapableBeanFactory getAutowireCapableBeanFactory() {
 		return (AutowireCapableBeanFactory)getBeanFactory();
@@ -109,56 +126,91 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	/**
 	 * Helper to have the application context instantiate a service class
 	 * and wire up any dependencies.
-	 * @param implementationClass the action implementation class
+	 * @param expectedClass the expected service (super) class
+	 * @param implementationClass the implementation class
 	 * @param autowireMode the autowire policy
-	 * @return the instantiated (and possibly autowired) action
+	 * @return the instantiated (and possibly autowired) service
+	 * @throws ServiceLookupException when the services cannot be created
 	 */
-	protected Object createService(Class implementationClass, AutowireMode autowireMode) {
+	protected Object createService(Class expectedClass, Class implementationClass, AutowireMode autowireMode)
+			throws ServiceLookupException {
+		Assert.isTrue(expectedClass.isAssignableFrom(implementationClass),
+				"The service to instantiate must be a '" + ClassUtils.getShortName(expectedClass)
+				+ "', the implementation class '" + implementationClass + "' you provided is not.");
 		if (autowireMode == AutowireMode.DEFAULT) {
-			return createService(implementationClass, getDefaultAutowireMode());
-		}
-		// TODO throw a service creation exception?
-		if (autowireMode == AutowireMode.NONE) {
-			return BeanUtils.instantiateClass(implementationClass);
-		}
-		else {
-			return getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(), false);
-		}
-	}
-
-	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
-		Assert.isTrue(Action.class.isAssignableFrom(implementationClass),
-				"The service to instantiate must implement the Action interface, the implementation class '"
-						+ implementationClass + "' you provided doesn't.");
-		return (Action)createService(implementationClass, autowireMode);
-	}
-
-	public Action getAction(String actionId) throws ServiceLookupException {
-		try {
-			return (Action)getBeanFactory().getBean(actionId, Action.class);
-		} catch (BeansException e) {
-			throw new NoSuchActionException(actionId, e);
-		}
-	}
-
-	public Action getAction(Class actionImplementationClass) throws ServiceLookupException {
-		if (!Action.class.isAssignableFrom(actionImplementationClass)) {
-			throw new IllegalArgumentException("Your action implementation '" + actionImplementationClass
-					+ "' must implement the '" + Action.class.getName() + "' interface");
+			return createService(expectedClass, implementationClass, getDefaultAutowireMode());
 		}
 		try {
-			return (Action)BeanFactoryUtils.beanOfType(getListableBeanFactory(), actionImplementationClass);
-		} catch (BeansException e) {
-			throw new NoSuchActionException(actionImplementationClass, e);
+			if (autowireMode == AutowireMode.NONE) {
+				return BeanUtils.instantiateClass(implementationClass);
+			}
+			else {
+				return getAutowireCapableBeanFactory().autowire(implementationClass, autowireMode.getShortCode(), false);
+			}
+		}
+		catch (BeansException e) {
+			throw new ServiceCreationException(expectedClass, implementationClass,
+					"Cannot create service object with autowire mode '" + autowireMode + "'", e);
+		}
+	}
+	
+	/**
+	 * Autowire given service object.
+	 * @param service the object to wire up
+	 * @param autowireMode the autowire mode to use
+	 */
+	protected void autowireService(Object service, AutowireMode autowireMode) {
+		if (autowireMode == AutowireMode.DEFAULT) {
+			autowireService(service, getDefaultAutowireMode());
+		}
+		getAutowireCapableBeanFactory().autowireBeanProperties(service, autowireMode.getShortCode(), false);
+	}
+	
+	/**
+	 * Lookup a service by id.
+	 * @param expectedClass the expected service (super) class
+	 * @param id the service id
+	 * @return the service object
+	 * @throws ServiceLookupException when the identified service cannot be found
+	 */
+	protected Object lookupService(Class expectedClass, String id) throws ServiceLookupException {
+		try {
+			return getBeanFactory().getBean(id, Flow.class);
+		}
+		catch (BeansException e) {
+			throw new ServiceLookupException(expectedClass, id, e);
 		}
 	}
 
-	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
+	/**
+	 * Lookup a service by implementation class.
+	 * @param expectedClass the expected service (super) class
+	 * @param implementationClass the required implementation class
+	 * @return the service object
+	 * @throws ServiceLookupException when the service object cannot be found
+	 */
+	protected Object lookupService(Class expectedClass, Class implementationClass) throws ServiceLookupException {
 		try {
-			return (Flow)getBeanFactory().getBean(flowDefinitionId, Flow.class);
-		} catch (BeansException e) {
-			throw new NoSuchFlowDefinitionException(flowDefinitionId, e);
+			Assert.isTrue(expectedClass.isAssignableFrom(implementationClass), 
+					"The '" + ClassUtils.getShortName(expectedClass) + "' implementation  '" + implementationClass
+					+ "' you wish to retrieve must be a subclass of '" + ClassUtils.getShortName(expectedClass) + "'");
+			return BeanFactoryUtils.beanOfType(getListableBeanFactory(), implementationClass);
 		}
+		catch (BeansException e) {
+			throw new ServiceLookupException(expectedClass, implementationClass, e);
+		}
+	}
+	
+	public Flow createFlow(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException {
+		return (Flow)createService(Flow.class, implementationClass, autowireMode);
+	}
+	
+	public Flow getFlow(String id) throws ServiceLookupException {
+		return (Flow)lookupService(Flow.class, id);
+	}
+
+	public Flow getFlow(Class implementationClass) throws ServiceLookupException {
+		return (Flow)lookupService(Flow.class, implementationClass);
 	}
 
 	public Flow getFlow(String flowDefinitionId, Class requiredBuilderImplementationClass)
@@ -174,56 +226,70 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 				return factoryBean.getFlow();
 			}
 			else {
-				throw new NoSuchFlowDefinitionException(flowDefinitionId, new IllegalStateException(
+				throw new ServiceLookupException(Flow.class, flowDefinitionId, new IllegalStateException(
 						"The flow factory must produce flows using a FlowBuilder of type '"
 								+ requiredBuilderImplementationClass + "', but it doesn't"));
 			}
-		} catch (BeansException e) {
-			throw new NoSuchFlowDefinitionException(flowDefinitionId, e);
+		}
+		catch (BeansException e) {
+			throw new ServiceLookupException(Flow.class, flowDefinitionId, e);
 		}
 	}
+	
+	public State createState(Class implementationClass,	AutowireMode autowireMode) throws ServiceLookupException {
+		return (State)createService(State.class, implementationClass, autowireMode);
+	}
+	
+	public State getState(String id) throws ServiceLookupException {
+		return (State)lookupService(State.class, id);
+	}
+	
+	public State getState(Class implementationClass) throws ServiceLookupException {
+		return (State)lookupService(State.class, implementationClass);
+	}
+	
+	public Transition createTransition(Class implementationClass, AutowireMode autowireMode)
+			throws ServiceLookupException {
+		return (Transition)createService(Transition.class, implementationClass, autowireMode);
+	}
+	
+	public Transition getTransition(String id) throws ServiceLookupException {
+		return (Transition)lookupService(Transition.class, id);
+	}
+	
+	public Transition getTransition(Class implementationClass) throws ServiceLookupException {
+		return (Transition)lookupService(Transition.class, implementationClass);
+	}
+	
+	public TransitionCriteria createTransitionCriteria(String encodedCriteria,
+			AutowireMode autowireMode) throws ServiceLookupException {
+		TransitionCriteria criteria = getTransitionCriteriaCreator().create(encodedCriteria);
+		autowireService(encodedCriteria, autowireMode);
+		return criteria;
+	}
+	
+	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
+		return (Action)createService(Action.class, implementationClass, autowireMode);
+	}
 
-	public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException {
-		try {
-			if (!Flow.class.isAssignableFrom(flowDefinitionImplementationClass)) {
-				throw new IllegalArgumentException("The flow definition implementation  '"
-						+ flowDefinitionImplementationClass + "' you wish to retrieve must be a subclass of '"
-						+ Flow.class.getName() + "'");
-			}
-			return (Flow)BeanFactoryUtils.beanOfType(getListableBeanFactory(), flowDefinitionImplementationClass);
-		} catch (BeansException e) {
-			throw new NoSuchFlowDefinitionException(flowDefinitionImplementationClass, e);
-		}
+	public Action getAction(String id) throws ServiceLookupException {
+		return (Action)lookupService(Action.class, id);
+	}
+
+	public Action getAction(Class implementationClass) throws ServiceLookupException {
+		return (Action)lookupService(Action.class, implementationClass);
 	}
 
 	public FlowAttributeMapper createFlowAttributeMapper(Class implementationClass, AutowireMode autowireMode) {
-		Assert.isTrue(FlowAttributeMapper.class.isAssignableFrom(implementationClass),
-				"The service to instantiate must be implement the FlowAttributeMapper interface, the implementation class '"
-						+ implementationClass + "' you provided doesn't.");
-		return (FlowAttributeMapper)createService(implementationClass, autowireMode);
+		return (FlowAttributeMapper)createService(FlowAttributeMapper.class, implementationClass, autowireMode);
 	}
 
-	public FlowAttributeMapper getFlowAttributeMapper(String flowModelMapperId) throws ServiceLookupException {
-		try {
-			return (FlowAttributeMapper)getBeanFactory().getBean(flowModelMapperId, FlowAttributeMapper.class);
-		} catch (BeansException e) {
-			throw new NoSuchFlowAttributeMapperException(flowModelMapperId, e);
-		}
+	public FlowAttributeMapper getFlowAttributeMapper(String id) throws ServiceLookupException {
+		return (FlowAttributeMapper)lookupService(FlowAttributeMapper.class, id);
 	}
 
-	public FlowAttributeMapper getFlowAttributeMapper(Class flowModelMapperImplementationClass)
+	public FlowAttributeMapper getFlowAttributeMapper(Class implementationClass)
 			throws ServiceLookupException {
-		if (!FlowAttributeMapper.class.isAssignableFrom(flowModelMapperImplementationClass)) {
-			throw new IllegalArgumentException("Your flow attribute implementation '"
-					+ flowModelMapperImplementationClass + "' must implement the '"
-					+ FlowAttributeMapper.class.getName() + "' interface");
-
-		}
-		try {
-			return (FlowAttributeMapper)BeanFactoryUtils.beanOfType(getListableBeanFactory(),
-					flowModelMapperImplementationClass);
-		} catch (BeansException e) {
-			throw new NoSuchFlowAttributeMapperException(flowModelMapperImplementationClass, e);
-		}
+		return (FlowAttributeMapper)lookupService(FlowAttributeMapper.class, implementationClass);
 	}
 }

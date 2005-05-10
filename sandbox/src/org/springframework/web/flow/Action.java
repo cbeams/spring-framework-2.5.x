@@ -36,10 +36,6 @@ package org.springframework.web.flow;
  * caller-specific state in a unsafe manner. The Action execute() method runs in
  * an independently executing thread on each invocation, so make sure you deal
  * only with local data or internal, thread-safe services.
- * <p>
- * Instances of this class are often referred to as the "target action" when
- * talking about its relationship with an <code>ActionState</code>, through
- * the <code>ActionStateAction</code> associative object.
  * 
  * @see org.springframework.web.flow.ActionState
  * 
@@ -49,7 +45,7 @@ package org.springframework.web.flow;
 public interface Action {
 
 	/**
-	 * Execute this action. Action execution will occur in the context of an
+	 * Execute this action. Action execution will occur in the context of a
 	 * request associated with an active flow execution.
 	 * <p>
 	 * More specifically, Action execution is triggered in a production
@@ -91,8 +87,6 @@ public interface Action {
 	 *         checked or unchecked; note, any <i>recoverable</i> exceptions should be
 	 *         caught within this method and an appropriate result outcome
 	 *         returned instead
-	 * @see org.springframework.web.flow.ViewState
-	 * @see org.springframework.web.flow.Scope
 	 */
 	public Event execute(RequestContext context) throws Exception;
 }

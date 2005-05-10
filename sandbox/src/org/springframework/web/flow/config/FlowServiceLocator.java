@@ -20,6 +20,10 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.State;
+import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
+
 
 /**
  * Service locator interface used by flow builders at configuration time to
@@ -33,28 +37,119 @@ import org.springframework.web.flow.ServiceLookupException;
  * @author Erwin Vervaet
  */
 public interface FlowServiceLocator extends FlowLocator {
-
+	
+	// dealing with flows
+	
 	/**
-	 * Lookup a flow build by specified type of flow builder.
-	 * @param flowDefinitionId the flow id
-	 * @param requiredFlowBuilderImplementationClass the required builder type
-	 * @return the flow
-	 * @throws ServiceLookupException when the flow cannot be found
+	 * Request that the registry backed by this locator instantiate the flow
+	 * of the specified implementation class, using the given autowire policy.
+	 * Note: not all registries may support this advanced feature (Spring does
+	 * though ;-)).
+	 * @param implementationClass the flow implementation class
+	 * @param autowireMode the autowire policy
+	 * @return the instantiated (and possibly autowired) flow
+	 * @throws ServiceLookupException when the flow cannot be created
 	 */
-	public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
-			throws ServiceLookupException;
-
+	public Flow createFlow(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException;
+	
 	/**
 	 * Lookup a flow of specified implementation class; there must exactly one
 	 * flow implementation of the specified implementation in the registry this
 	 * locator queries.
-	 * @param flowDefinitionImplementationClass the required implementation
-	 *        class
+	 * @param implementationClass the required implementation class
 	 * @return the flow
 	 * @throws ServiceLookupException when the flow cannot be found, or more
 	 *         than one flow of the specified type exists
 	 */
-	public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException;
+	public Flow getFlow(Class implementationClass) throws ServiceLookupException;
+
+	/**
+	 * Lookup a flow build by specified type of flow builder.
+	 * @param id the flow id
+	 * @param requiredFlowBuilderImplementationClass the required builder type
+	 * @return the flow
+	 * @throws ServiceLookupException when the flow cannot be found
+	 */
+	public Flow getFlow(String id, Class requiredFlowBuilderImplementationClass) throws ServiceLookupException;
+	
+	// dealing with states
+
+	/**
+	 * Request that the registry backed by this locator instantiate the state
+	 * of the specified implementation class, using the given autowire policy.
+	 * Note: not all registries may support this advanced feature (Spring does
+	 * though ;-)).
+	 * @param implementationClass the state implementation class
+	 * @param autowireMode the autowire policy
+	 * @return the instantiated (and possibly autowired) state
+	 * @throws ServiceLookupException when the state cannot be created
+	 */
+	public State createState(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException;
+
+	/**
+	 * Lookup a state with specified id.
+	 * @param id the state id
+	 * @return the state
+	 * @throws ServiceLookupException when the state cannot be found
+	 */
+	public State getState(String id) throws ServiceLookupException;
+
+	/**
+	 * Lookup a state of specified implementation class.
+	 * @param implementationClass the required implementation class
+	 * @return the state
+	 * @throws ServiceLookupException when the state cannot be found
+	 */
+	public State getState(Class implementationClass) throws ServiceLookupException;
+
+	// dealing with transitions
+
+	/**
+	 * Request that the registry backed by this locator instantiate the transition
+	 * of the specified implementation class, using the given autowire policy.
+	 * Note: not all registries may support this advanced feature (Spring does
+	 * though ;-)).
+	 * @param implementationClass the transition implementation class
+	 * @param autowireMode the autowire policy
+	 * @return the instantiated (and possibly autowired) transition
+	 * @throws ServiceLookupException when the transition object
+	 *         cannot be created
+	 */
+	public Transition createTransition(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException;
+
+	/**
+	 * Lookup a transition with specified id.
+	 * @param id the transition id
+	 * @return the transition
+	 * @throws ServiceLookupException when the transition cannot be found
+	 */
+	public Transition getTransition(String id) throws ServiceLookupException;
+
+	/**
+	 * Lookup a transition of specified implementation class.
+	 * @param implementationClass the required implementation class
+	 * @return the transition
+	 * @throws ServiceLookupException when the transition cannot be found
+	 */
+	public Transition getTransition(Class implementationClass) throws ServiceLookupException;
+
+	// dealing with transition criteria
+
+	/**
+	 * Request that the registry backed by this locator instantiate the transition
+	 * criteria specified in encoded form, using the given autowire policy.
+	 * Note: not all registries may support this advanced feature (Spring does
+	 * though ;-)).
+	 * @param encodedCriteria the encoded representation of the criteria
+	 * @param autowireMode the autowire policy
+	 * @return the instantiated (and possibly autowired) transition criteria
+	 * @throws ServiceLookupException when the transition criteria object
+	 *         cannot be created
+	 */
+	public TransitionCriteria createTransitionCriteria(String encodedCriteria, AutowireMode autowireMode)
+			throws ServiceLookupException;
+
+	// dealing with actions
 
 	/**
 	 * Request that the registry backed by this locator instantiate the action
@@ -66,24 +161,26 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @return the instantiated (and possibly autowired) action
 	 * @throws ServiceLookupException when the action cannot be created
 	 */
-	public Action createAction(Class implementationClass, AutowireMode autowireMode);
+	public Action createAction(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException;
 
 	/**
 	 * Lookup an action with specified id.
-	 * @param actionId the action id
+	 * @param id the action id
 	 * @return the action
 	 * @throws ServiceLookupException when the action cannot be found
 	 */
-	public Action getAction(String actionId) throws ServiceLookupException;
+	public Action getAction(String id) throws ServiceLookupException;
 
 	/**
 	 * Lookup an action of specified implementation class.
-	 * @param actionImplementationClass the required implementation class
+	 * @param implementationClass the required implementation class
 	 * @return the action
 	 * @throws ServiceLookupException when the action cannot be found
 	 */
-	public Action getAction(Class actionImplementationClass) throws ServiceLookupException;
+	public Action getAction(Class implementationClass) throws ServiceLookupException;
 
+	// dealing with attribute mappers
+	
 	/**
 	 * Request that the registry backed by this locator instantiate the flow
 	 * attribute mapper of the specified implementation class, using the given
@@ -94,23 +191,23 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @return the instantiated (and possibly autowired) attribute mapper
 	 */
 	public FlowAttributeMapper createFlowAttributeMapper(Class attributeMapperImplementationClass,
-			AutowireMode autowireMode);
+			AutowireMode autowireMode) throws ServiceLookupException;
 
 	/**
 	 * Lookup a flow model mapper with specified id.
-	 * @param flowAttributeMapperId the flow model mapper id
+	 * @param id the flow model mapper id
 	 * @return the flow model mapper
 	 * @throws ServiceLookupException when the flow model mapper cannot be found
 	 */
-	public FlowAttributeMapper getFlowAttributeMapper(String flowAttributeMapperId) throws ServiceLookupException;
+	public FlowAttributeMapper getFlowAttributeMapper(String id) throws ServiceLookupException;
 
 	/**
 	 * Lookup a flow model mapper of specified implementation class.
-	 * @param flowAttributeMapperImplementationClass the required implementation
-	 *        class
+	 * @param implementationClass the required implementation class
 	 * @return the flow model mapper
 	 * @throws ServiceLookupException when the flow model mapper cannot be found
 	 */
-	public FlowAttributeMapper getFlowAttributeMapper(Class flowAttributeMapperImplementationClass)
+	public FlowAttributeMapper getFlowAttributeMapper(Class implementationClass)
 			throws ServiceLookupException;
+	
 }

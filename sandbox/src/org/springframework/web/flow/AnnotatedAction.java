@@ -18,7 +18,6 @@ package org.springframework.web.flow;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -31,7 +30,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Keith Donald
  */
-public class AnnotatedAction extends MapAttributeSource {
+public class AnnotatedAction extends AnnotatedObject {
 	
 	// well known properties
 
@@ -83,8 +82,8 @@ public class AnnotatedAction extends MapAttributeSource {
 	 * @param properties the properties describing usage of the action
 	 */
 	public AnnotatedAction(Action targetAction, Map properties) {
-		super(properties);
 		setTargetAction(targetAction);
+		setProperties(properties);
 	}
 
 	/**
@@ -101,7 +100,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	 * @param name the action name
 	 */
 	public void setName(String name) {
-		setAttribute(NAME_PROPERTY, name);
+		setProperty(NAME_PROPERTY, name);
 	}
 
 	/**
@@ -109,7 +108,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	 * @param caption the caption
 	 */
 	public void setCaption(String caption) {
-		setAttribute(CAPTION_PROPERTY, caption);
+		setProperty(CAPTION_PROPERTY, caption);
 	}
 
 	/**
@@ -117,7 +116,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	 * @param description the long description
 	 */
 	public void setDescription(String description) {
-		setAttribute(DESCRIPTION_PROPERTY, description);
+		setProperty(DESCRIPTION_PROPERTY, description);
 	}
 
 	/**
@@ -127,7 +126,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	 *        <code>Event ${methodName}(RequestContext context)</code>
 	 */
 	public void setMethod(String methodName) {
-		setAttribute(METHOD_PROPERTY, methodName);
+		setProperty(METHOD_PROPERTY, methodName);
 	}
 
 	/**
@@ -143,7 +142,7 @@ public class AnnotatedAction extends MapAttributeSource {
 	 * is unnamed. Used when mapping action result events to transitions.
 	 */
 	public String getName() {
-		return (String)getAttribute(NAME_PROPERTY);
+		return (String)getProperty(NAME_PROPERTY);
 	}
 
 	/**
@@ -157,14 +156,14 @@ public class AnnotatedAction extends MapAttributeSource {
 	 * Returns the short description of the action.
 	 */
 	public String getCaption() {
-		return (String)getAttribute(CAPTION_PROPERTY);
+		return (String)getProperty(CAPTION_PROPERTY);
 	}
 
 	/**
 	 * Returns the long description of this action.
 	 */
 	public String getDescription() {
-		return (String)getAttribute(DESCRIPTION_PROPERTY);
+		return (String)getProperty(DESCRIPTION_PROPERTY);
 	}
 
 	/**
@@ -173,11 +172,11 @@ public class AnnotatedAction extends MapAttributeSource {
 	 * @return the execute method name
 	 */
 	public String getMethod() {
-		return (String)getAttribute(METHOD_PROPERTY);
+		return (String)getProperty(METHOD_PROPERTY);
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("action", targetAction).append("attributes", getAttributeMap())
+		return new ToStringCreator(this).append("action", targetAction).append("properties", getProperties())
 				.toString();
 	}
 }

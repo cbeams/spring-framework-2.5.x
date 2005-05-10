@@ -65,8 +65,6 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 		return scopeType;
 	}
 
-	// implementing AttributeAccessor
-
 	public boolean containsAttribute(String attributeName) {
 		return this.attributes.containsKey(attributeName);
 	}
@@ -173,8 +171,6 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	public Map getAttributeMap() {
 		return Collections.unmodifiableMap(this.attributes);
 	}
-
-	// implementing AttributeSetter
 
 	public Object setAttribute(String attributeName, Object attributeValue) {
 		return this.attributes.put(attributeName, attributeValue);

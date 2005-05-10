@@ -46,13 +46,13 @@ import java.util.Map;
  * For example:
  * 
  * <pre>
- *      Flow Attribute Mapper 1
- *      -----------------------
+ *      Flow Attribute Mapper
+ *      ---------------------
  *      - inputMappings=(map:attr1-&gt;attr1, attr3-&gt;localAttr1)
  *      - outputMappings=(map:localAttr1-&gt;attr3)
  * </pre>
  * 
- * The above example "Flow Attribute Mapper 1" specifies
+ * The above example "Flow Attribute Mapper" specifies
  * <code>inputMappings</code> that define which parent attributes to map as
  * input to the child. In this case, two attributes in the parent are mapped,
  * "attr1" and "attr3". "attr1" is mapped with the name "attr1" (given the same
@@ -79,27 +79,21 @@ public interface FlowAttributeMapper {
 	 * child flow.
 	 * <p>
 	 * Attributes set in the <code>Map</code> returned by this method will be
-	 * added to flow scope of the child sub flow session when the session is
+	 * added to flow scope of the child subflow session when the session is
 	 * spawned and activated.
-	 * @param context
-	 * @param parentFlowAttributes the parent's flow scope, containing the set of
-	 *        possible attributes that may be passed down to the child
+	 * @param context the request execution context, which gives access to the
+	 *        parent flow scope
 	 * @return a map of attributes (name=value pairs) to pass as input to the
 	 *         spawning child subflow.
 	 */
 	public Map createSubflowInput(RequestContext context);
 
 	/**
-	 * Map relavent attributes of an ending sub flow session back up to a
+	 * Map relavent attributes of an ending subflow session back up to a
 	 * resuming parent flow session. This maps the <i>output</i> of the child
 	 * as new input to the resuming parent.
-	 * @param context
-	 * @param subFlowAttributes the child's flow scope that should be mapped
-	 *        from, containing the set of possible attributes that may be passed
-	 *        up to the parent.
-	 * @param parentFlowAttributes the parent's flow scope that should be mapped
-	 *        to, where output attributes of the child sub flow will be set as
-	 *        input.
+	 * @param context the request execution context, which gives access to the
+	 *        subflow and parent flow scope
 	 */
 	public void mapSubflowOutput(RequestContext context);
 }

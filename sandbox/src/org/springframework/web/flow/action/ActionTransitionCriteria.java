@@ -21,7 +21,6 @@ import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
@@ -90,7 +89,7 @@ public class ActionTransitionCriteria implements TransitionCriteria {
 	}
 	
 	public boolean test(RequestContext context) {
-		((StateContext)context).setExecutionProperties(action);
+		context.setExecutionProperties(action);
 		Event result;
 		try {
 			result = this.action.getTargetAction().execute(context);
@@ -100,7 +99,7 @@ public class ActionTransitionCriteria implements TransitionCriteria {
 			throw new ActionExecutionException(context.getActiveSession().getState(), action, e);
 		}
 		finally {
-			((StateContext)context).setExecutionProperties(null);
+			context.setExecutionProperties(null);
 		}
 	}
 }

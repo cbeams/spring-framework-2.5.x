@@ -28,15 +28,13 @@ import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowConstants;
 import org.springframework.web.flow.FlowSession;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
-import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransactionSynchronizer;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.ViewDescriptor;
 
 /**
  * Default request context implementation used internally by the web flow
@@ -50,9 +48,21 @@ import org.springframework.web.flow.ViewDescriptor;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class InternalRequestContext implements StateContext, TransactionSynchronizer {
+public class InternalRequestContext implements RequestContext, TransactionSynchronizer {
 
 	protected final Log logger = LogFactory.getLog(InternalRequestContext.class);
+
+	/**
+	 * The transaction synchronizer token will be stored in the model using an
+	 * attribute with this name ("txToken").
+	 */
+	public static final String TRANSACTION_TOKEN_ATTRIBUTE_NAME = "txToken";
+
+	/**
+	 * A client can send the transaction synchronizer token to a controller
+	 * using a request parameter with this name ("_txToken").
+	 */
+	public static final String TRANSACTION_TOKEN_PARAMETER_NAME = "_txToken";
 
 	private Event originatingEvent;
 
@@ -149,7 +159,6 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return this;
 	}
 
-	// implementing StateContext
 
 	public void setCurrentState(State state) {
 		fireStateEntering(state);
@@ -200,16 +209,10 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 		return endedSession;
 	}
 
-	public ViewDescriptor spawn(Flow subFlow, Map subFlowInput) {
-		this.flowExecution.createAndActivateFlowSession(subFlow, subFlowInput);
+	public FlowSession spawn(Flow subFlow, Map subFlowInput) {
+		FlowSession session = this.flowExecution.createAndActivateFlowSession(subFlow, subFlowInput);
 		fireSubFlowSpawned();
-		return subFlow.getStartState().enter(this);
-	}
-
-	public ViewDescriptor spawn(Flow subFlow, String stateId, Map subFlowInput) {
-		this.flowExecution.createAndActivateFlowSession(subFlow, subFlowInput);
-		fireSubFlowSpawned();
-		return subFlow.getState(stateId).enter(this);
+		return session;
 	}
 
 	// lifecycle event management
@@ -393,7 +396,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Get the name for the transaction token attribute. Defaults to "txToken".
 	 */
 	protected String getTransactionTokenAttributeName() {
-		return FlowConstants.TRANSACTION_TOKEN_ATTRIBUTE_NAME;
+		return TRANSACTION_TOKEN_ATTRIBUTE_NAME;
 	}
 
 	/**
@@ -401,7 +404,7 @@ public class InternalRequestContext implements StateContext, TransactionSynchron
 	 * Defaults to "_txToken".
 	 */
 	protected String getTransactionTokenParameterName() {
-		return FlowConstants.TRANSACTION_TOKEN_PARAMETER_NAME;
+		return TRANSACTION_TOKEN_PARAMETER_NAME;
 	}
 
 	/**

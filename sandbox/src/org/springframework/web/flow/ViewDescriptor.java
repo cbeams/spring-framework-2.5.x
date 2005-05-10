@@ -38,8 +38,13 @@ import org.springframework.binding.AttributeSource;
 public class ViewDescriptor implements AttributeSource, Serializable {
 
 	private String viewName;
-
 	private Map model;
+	
+	/**
+	 * Default constructor for bean style usage.
+	 */
+	public ViewDescriptor() {
+	}
 
 	/**
 	 * Convenient constructor when there is no model data to expose. Can also be
@@ -53,7 +58,7 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 
 	/**
 	 * Creates new ViewDescriptor given a view name and a model.
-	 * @param viewName name of the View to render
+	 * @param viewName name of the view to render
 	 * @param model Map of model names (Strings) to model objects (Objects).
 	 *        Model entries may not be null, but the model Map may be null if
 	 *        there is no model data.
@@ -65,7 +70,7 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 
 	/**
 	 * Convenient constructor to take a single model object.
-	 * @param viewName name of the View to render
+	 * @param viewName name of the view to render
 	 * @param modelName name of the single entry in the model
 	 * @param modelObject the single model object
 	 */
@@ -103,9 +108,9 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 	/**
 	 * Add an object to the model.
 	 * @param modelName name of the object to add to the model
-	 * @param modelObject object to add to the model. May not be null.
-	 * @return this ViewDescriptor, convenient to allow usages like return
-	 *         modelAndView.addObject("foo", bar);
+	 * @param modelObject object to add to the model, may not be null
+	 * @return this ViewDescriptor, convenient to allow usages like
+	 *         <code>return viewDesc.addObject("foo", bar);</code>
 	 */
 	public ViewDescriptor addObject(String modelName, Object modelObject) {
 		getModel().put(modelName, modelObject);
@@ -115,8 +120,8 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 	/**
 	 * Add all entries contained in the provided map to the model.
 	 * @param modelMap a map of modelName->modelObject pairs
-	 * @return this ViewDescriptor, convenient to allow usages like return
-	 *         modelAndView.addAllObjects(myModelMap);
+	 * @return this ViewDescriptor, convenient to allow usages like
+	 *         <code>return viewDesc.addObject("foo", bar);</code>
 	 */
 	public ViewDescriptor addAllObjects(Map modelMap) {
 		getModel().putAll(modelMap);

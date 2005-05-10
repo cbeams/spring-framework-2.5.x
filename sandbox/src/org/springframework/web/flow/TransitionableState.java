@@ -15,10 +15,7 @@
  */
 package org.springframework.web.flow;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,7 +28,6 @@ import org.springframework.core.ToStringCreator;
  * 
  * @see org.springframework.web.flow.Transition
  * @see org.springframework.web.flow.TransitionCriteria
- * @see org.springframework.web.flow.Flow
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -42,6 +38,12 @@ public abstract class TransitionableState extends State {
 	 * The set of possible transitions out of this state.
 	 */
 	private Set transitions = CollectionFactory.createLinkedSetIfPossible(6);
+	
+	/**
+	 * Default constructor for bean style usage.
+	 */
+	protected TransitionableState() {
+	}
 
 	/**
 	 * Create a new transitionable state.
@@ -50,7 +52,7 @@ public abstract class TransitionableState extends State {
 	 * @param transition the sole transition of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public TransitionableState(Flow flow, String id, Transition transition) throws IllegalArgumentException {
+	protected TransitionableState(Flow flow, String id, Transition transition) throws IllegalArgumentException {
 		super(flow, id);
 		add(transition);
 	}
@@ -63,7 +65,8 @@ public abstract class TransitionableState extends State {
 	 * @param properties additional properties describing this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public TransitionableState(Flow flow, String id, Transition transition, Map properties) throws IllegalArgumentException {
+	protected TransitionableState(Flow flow, String id, Transition transition, Map properties)
+			throws IllegalArgumentException {
 		super(flow, id, properties);
 		add(transition);
 	}
@@ -75,7 +78,7 @@ public abstract class TransitionableState extends State {
 	 * @param transitions the transitions of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public TransitionableState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
+	protected TransitionableState(Flow flow, String id, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id);
 		addAll(transitions);
 	}
@@ -88,7 +91,8 @@ public abstract class TransitionableState extends State {
 	 * @param properties additional properties describing this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public TransitionableState(Flow flow, String id, Transition[] transitions, Map properties) throws IllegalArgumentException {
+	protected TransitionableState(Flow flow, String id, Transition[] transitions, Map properties)
+			throws IllegalArgumentException {
 		super(flow, id, properties);
 		addAll(transitions);
 	}
@@ -97,14 +101,8 @@ public abstract class TransitionableState extends State {
 	 * Add a transition to this state.
 	 * @param transition the transition to add
 	 */
-	protected void add(Transition transition) {
+	public void add(Transition transition) {
 		transition.setSourceState(this);
-		if (transition.getTargetStateId().equals(this.getId())) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loop detected: the source and target state of transition '" + transition
-						+ "' are the same" + " -- make sure this is not a bug!");
-			}
-		}
 		this.transitions.add(transition);
 	}
 
@@ -112,7 +110,7 @@ public abstract class TransitionableState extends State {
 	 * Add given list of transitions to this state.
 	 * @param transitions the transitions to add
 	 */
-	protected void addAll(Transition[] transitions) {
+	public void addAll(Transition[] transitions) {
 		for (int i = 0; i < transitions.length; i++) {
 			add(transitions[i]);
 		}
@@ -133,36 +131,18 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Returns a collection of the supported transitional criteria ({@link TransitionCriteria}
-	 * objects) used to fire transitions in this state.
-	 * @return the collection of transitional conditions
+	 * Returns a list of the supported transitional criteria used to match
+	 * transitions in this state.
+	 * @return the list of transitional criteria
 	 */
-	public Collection getTransitionMatchingCriteria() {
-		if (transitions.isEmpty()) {
-			return Collections.EMPTY_SET;
-		}
-		Set criteria = new LinkedHashSet(transitions.size());
+	public TransitionCriteria[] getTransitionCriterias() {
+		TransitionCriteria[] res = new TransitionCriteria[transitions.size()];
 		Iterator it = transitionsIterator();
+		int i = 0;
 		while (it.hasNext()) {
-			criteria.add(((Transition)it.next()).getMatchingCriteria());
+			res[i++] = ((Transition)it.next()).getMatchingCriteria();
 		}
-		return Collections.unmodifiableSet(criteria);
-	}
-
-	/**
-	 * Get a transition in this state for given flow execution request context.
-	 * Throws and exception when when there is no corresponding transition.
-	 * @throws NoMatchingTransitionException
-	 *             when the transition cannot be found
-	 */
-	public Transition transitionFor(RequestContext context) throws NoMatchingTransitionException {
-		Transition transition = getTransition(context);
-		if (transition != null) {
-			return transition;
-		}
-		else {
-			throw new NoMatchingTransitionException(this, context);
-		}
+		return res;
 	}
 
 	/**
@@ -175,12 +155,11 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Internal helper method that gets a transition for given flow execution
-	 * request context.
+	 * Gets a transition for given flow execution request context.
 	 * @param context a flow execution context
 	 * @return the transition, or null if not found
 	 */
-	protected Transition getTransition(RequestContext context) {
+	public Transition getTransition(RequestContext context) {
 		Iterator it = transitionsIterator();
 		while (it.hasNext()) {
 			Transition transition = (Transition)it.next();
@@ -192,22 +171,42 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
+	 * Get a transition in this state for given flow execution request context.
+	 * Throws and exception when when there is no corresponding transition.
+	 * @throws NoMatchingTransitionException when the transition cannot be found
+	 */
+	public Transition getRequiredTransition(RequestContext context) throws NoMatchingTransitionException {
+		Transition transition = getTransition(context);
+		if (transition == null) {
+			throw new NoMatchingTransitionException(this, context);
+		}
+		return transition;
+	}
+
+	/**
 	 * Notify this state that the specified Event was signaled within it. By
 	 * default, receipt of the event will trigger a search for a matching state
 	 * transition. If a valid transition is matched, its execution will be
 	 * requested. If a transition could not be matched, or the transition
 	 * execution failed, an exception will be thrown.
 	 * @param event the event that occured
-	 * @param context the state context associated with this request
+	 * @param context the context associated with this request
 	 * @return the view descriptor
 	 * @throws NoMatchingTransitionException when no matching transition can be found
-	 * @throws CannotExcuteStateTransitionException when a transition could
+	 * @throws CannotExecuteStateTransitionException when a transition could
 	 *         not be executed on receipt of the event
 	 */
-	public ViewDescriptor onEvent(Event event, StateContext context)
-			throws NoMatchingTransitionException, CannotExecuteStateTransitionException {
+	public ViewDescriptor onEvent(Event event, RequestContext context)
+			throws NoMatchingTransitionException, CannotExecuteTransitionException {
 		context.setLastEvent(event);
-		return transitionFor(context).execute(context);
+		Transition transition = getRequiredTransition(context);
+		if (transition.getTargetState(context).getId().equals(this.getId())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loop detected: the source and target state of transition '" + transition
+						+ "' are the same" + " -- make sure this is not a bug!");
+			}
+		}
+		return transition.execute(context);
 	}
 
 	protected void createToString(ToStringCreator creator) {

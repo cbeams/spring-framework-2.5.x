@@ -20,8 +20,8 @@ import junit.framework.TestCase;
 import ognl.ExpressionSyntaxException;
 
 import org.springframework.mock.web.flow.MockRequestContext;
+import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Test case for OgnlTransitionCriteriaCreator.
@@ -84,7 +84,7 @@ public class OgnlTransitionCriteriaCreatorTests extends TestCase {
 
 	private RequestContext getRequestContext() {
 		MockRequestContext ctx = new MockRequestContext();
-		ctx.setLastEvent(new SimpleEvent(this, "sample"));
+		ctx.setLastEvent(new Event(this, "sample"));
 		ctx.getFlowScope().setAttribute("foo", "bar");
 		return ctx;
 	}

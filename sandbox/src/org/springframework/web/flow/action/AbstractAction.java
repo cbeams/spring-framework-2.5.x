@@ -23,7 +23,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.execution.SimpleEvent;
 
 /**
  * Base action implementation that provides a number of helper methods generally
@@ -99,7 +98,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return the action result event
 	 */
 	protected Event result(String resultId) {
-		return new SimpleEvent(this, resultId);
+		return new Event(this, resultId);
 	}
 
 	/**
@@ -127,7 +126,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * @return the action result event
 	 */
 	protected Event result(String resultId, Map parameters) {
-		return new SimpleEvent(this, resultId, parameters);
+		return new Event(this, resultId, parameters);
 	}
 
 	// action pre and post execution logic

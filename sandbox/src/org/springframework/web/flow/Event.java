@@ -15,17 +15,19 @@
  */
 package org.springframework.web.flow;
 
+import java.util.Collections;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.binding.AttributeSource;
 import org.springframework.core.ToStringCreator;
+import org.springframework.util.Assert;
 
 /**
  * Signals the occurence of an <i>event</i> that is relevant to the web flow
  * system. Each event has a string id. An event may optionally contain
  * information about the state in which it occured. Events may have parameters.
- * Events are immutable.
  * <p>
  * For example, a "submit" event might signal that a Submit button was pressed
  * in a web browser. A "success" event might signal an action executed
@@ -39,14 +41,73 @@ import org.springframework.core.ToStringCreator;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class Event extends EventObject implements AttributeSource {
+public class Event extends EventObject implements AttributeSource {
 
+	/**
+	 * The event identifier.
+	 */
+	private String id;
+
+	/**
+	 * The event timestamp.
+	 */
+	private long timestamp = System.currentTimeMillis();
+
+	/**
+	 * The state id included in the event (optional).
+	 */
+	private String stateId;
+
+	/**
+	 * Event parameters (optional).
+	 */
+	private Map parameters;
+	
 	/**
 	 * Constructs a new event with the specified source.
 	 * @param source the source of the event
 	 */
-	protected Event(Object source) {
+	public Event(Object source) {
 		super(source);
+	}
+
+	/**
+	 * Create a new event with the specified <code>id</code>.
+	 * @param source the source of the event
+	 * @param id the event identifier
+	 */
+	public Event(Object source, String id) {
+		super(source);
+		setRequiredId(id);
+	}
+
+	/**
+	 * Create a new event with the specified <code>id</code> and the
+	 * provided contextual parameters.
+	 * @param source the source of the event
+	 * @param id the event identifier
+	 * @param parameters the event parameters
+	 */
+	public Event(Object source, String id, Map parameters) {
+		super(source);
+		setRequiredId(id);
+		setParameters(parameters);
+	}
+
+	/**
+	 * Create a new event with the specified <code>id</code> occuring in the
+	 * state with the specified <code>stateId</code> and the provided
+	 * contextual parameters.
+	 * @param source the source of the event
+	 * @param id the event identifier
+	 * @param stateId the state in which this event occured
+	 * @param parameters contextual parameters
+	 */
+	public Event(Object source, String id, String stateId, Map parameters) {
+		super(source);
+		setRequiredId(id);
+		setStateId(stateId);
+		setParameters(parameters);
 	}
 
 	/**
@@ -54,19 +115,48 @@ public abstract class Event extends EventObject implements AttributeSource {
 	 * available (e.g. for an event starting a flow).
 	 * @return the event id
 	 */
-	public abstract String getId();
+	public String getId() {
+		return this.id;
+	}
 
+	/**
+	 * Set the event identifier and make sure it is not null.
+	 * @param id the event identifier
+	 */
+	protected void setRequiredId(String id) {
+		Assert.hasText(id, "The event id is required for this use -- please set to a non-blank string identifier");
+		this.id = id;
+	}
+
+	/**
+	 * Set the event identifier.
+	 */
+	protected void setId(String id) {
+		this.id = id;
+	}
+	
 	/**
 	 * Returns the time at which the event occured.
 	 * @return the timestamp
 	 */
-	public abstract long getTimestamp();
+	public long getTimestamp() {
+		return this.timestamp;
+	}
 
 	/**
 	 * Returns the state in which this event occured (optional).
 	 * @return the state id, or <code>null</code> if not specified
 	 */
-	public abstract String getStateId();
+	public String getStateId() {
+		return this.stateId;
+	}
+
+	/**
+	 * Set the state identifier.
+	 */
+	protected void setStateId(String stateId) {
+		this.stateId = stateId;
+	}
 
 	/**
 	 * Returns a parameter value given a parameter name, or <code>null</code>
@@ -75,14 +165,44 @@ public abstract class Event extends EventObject implements AttributeSource {
 	 * @return the parameter value, or <code>null</code> if the parameter is
 	 *         not present in the event
 	 */
-	public abstract Object getParameter(String parameterName);
+	public Object getParameter(String parameterName) {
+		if (parameters != null) {
+			return parameters.get(parameterName);
+		}
+		else {
+			return null;
+		}
+	}
 
 	/**
 	 * Returns an unmodifiable parameter map storing parameters associated with
 	 * this event.
 	 * @return the parameters of the event
 	 */
-	public abstract Map getParameters();
+	public Map getParameters() {
+		if (parameters != null) {
+			return Collections.unmodifiableMap(parameters);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Set the contextual parameters.
+	 */
+	protected void setParameters(Map parameters) {
+		if (parameters != null) {
+			this.parameters = new HashMap(parameters);
+		}
+	}
+
+	/**
+	 * Add given parameters to the set of parameters of this event.
+	 */
+	protected void addParameters(Map parameters) {
+		this.parameters.putAll(parameters);
+	}
 
 	// implementing AttributeAccessor
 

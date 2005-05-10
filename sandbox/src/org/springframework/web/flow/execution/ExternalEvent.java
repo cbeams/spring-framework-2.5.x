@@ -17,6 +17,8 @@ package org.springframework.web.flow.execution;
 
 import java.util.Iterator;
 
+import org.springframework.web.flow.Event;
+
 /**
  * Abstract superclass for events encapsulating a request coming into a
  * flow execution for an external source (client). This kind of event is typically
@@ -26,7 +28,7 @@ import java.util.Iterator;
  * 
  * @author Erwin Vervaet
  */
-public abstract class ExternalEvent extends SimpleEvent {
+public abstract class ExternalEvent extends Event {
 
 	/**
 	 * Clients can send the event to be signaled in an event

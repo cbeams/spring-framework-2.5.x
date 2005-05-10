@@ -16,6 +16,7 @@
 package org.springframework.web.flow;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -26,7 +27,9 @@ import org.springframework.util.StringUtils;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class ServiceLookupException extends NestedRuntimeException {
+public class ServiceLookupException extends NestedRuntimeException {
+	
+	private Class expectedClass;
 
 	private String serviceId;
 
@@ -34,27 +37,55 @@ public abstract class ServiceLookupException extends NestedRuntimeException {
 
 	/**
 	 * Create a new service lookup exception.
+	 * @param expectedClass the expected service type
+	 * @param serviceId the id of the service that cannot be found
+	 * @param cause the underlying cause of this exception
+	 */
+	public ServiceLookupException(Class expectedClass, String serviceId, Throwable cause) {
+		this(expectedClass, serviceId, null, cause);
+	}
+	
+	/**
+	 * Create a new service lookup exception.
+	 * @param expectedClass the expected service type
 	 * @param serviceId the id of the service that cannot be found
 	 * @param message descriptive message
 	 * @param cause the underlying cause of this exception
 	 */
-	public ServiceLookupException(String serviceId, String message, Throwable cause) {
-		super((StringUtils.hasText(message) ? message : "Unable to look up service with id '" + serviceId
-				+ "'; make sure there is at least one service exported in the registry with this id"), cause);
+	public ServiceLookupException(Class expectedClass, String serviceId, String message, Throwable cause) {
+		super((StringUtils.hasText(message) ? message :
+				"Unable to look up '" + ClassUtils.getShortName(expectedClass) + "' with id '" + serviceId
+				+ "'; make sure there is at least one '" + ClassUtils.getShortName(expectedClass)
+				+ "' exported in the registry with this id"), cause);
+		this.expectedClass = expectedClass;
 		this.serviceId = serviceId;
 	}
 
 	/**
 	 * Create a new service lookup exception.
+	 * @param expectedClass the expected service type
+	 * @param serviceImplementationClass the required implementation class of
+	 *        the service that cannot be found
+	 * @param cause the underlying cause of this exception
+	 */
+	public ServiceLookupException(Class expectedClass, Class serviceImplementationClass, Throwable cause) {
+		this(expectedClass, serviceImplementationClass, null, cause);
+	}
+
+	/**
+	 * Create a new service lookup exception.
+	 * @param expectedClass the expected service type
 	 * @param serviceImplementationClass the required implementation class of
 	 *        the service that cannot be found
 	 * @param message descriptive message
 	 * @param cause the underlying cause of this exception
 	 */
-	public ServiceLookupException(Class serviceImplementationClass, String message, Throwable cause) {
-		super((StringUtils.hasText(message) ? message : "Unable to look up service implementation '"
-				+ serviceImplementationClass
-				+ "'; make sure there is a single service exported in the registry of this type"), cause);
+	public ServiceLookupException(Class expectedClass, Class serviceImplementationClass, String message, Throwable cause) {
+		super((StringUtils.hasText(message) ? message :
+				"Unable to look up '" + ClassUtils.getShortName(expectedClass) + "' implementation '" + serviceImplementationClass
+				+ "'; make sure there is a single '" + ClassUtils.getShortName(expectedClass)
+				+ "' exported in the registry of this type"), cause);
+		this.expectedClass = expectedClass;
 		this.serviceImplementationClass = serviceImplementationClass;
 	}
 
@@ -70,6 +101,13 @@ public abstract class ServiceLookupException extends NestedRuntimeException {
 	 */
 	public boolean isServiceTypeLookupFailure() {
 		return serviceImplementationClass != null;
+	}
+	
+	/**
+	 * Returns the expected service type.
+	 */
+	public Class getExpectedClass() {
+		return expectedClass;
 	}
 
 	/**
