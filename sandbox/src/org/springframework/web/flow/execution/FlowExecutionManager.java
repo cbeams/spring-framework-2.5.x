@@ -98,9 +98,9 @@ public class FlowExecutionManager {
 
 	private FlowLocator flowLocator;
 
-	private FlowExecutionListener[] flowExecutionListeners;
+	private FlowExecutionListener[] listeners;
 
-	private FlowExecutionStorage flowExecutionStorage;
+	private FlowExecutionStorage storage;
 
 	/**
 	 * Create a new flow execution manager. Before use, the manager should
@@ -110,10 +110,41 @@ public class FlowExecutionManager {
 	 * @see #setFlow(Flow)
 	 * @see #setFlowLocator(FlowLocator)
 	 * @see #setFlowExecutionListener(FlowExecutionListener)
-	 * @see #setFlowExecutionListeners(FlowExecutionListener[])
-	 * @see #setFlowExecutionStorage(FlowExecutionStorage) 
+	 * @see #setListeners(FlowExecutionListener[])
+	 * @see #setStorage(FlowExecutionStorage) 
 	 */
 	public FlowExecutionManager() {
+	}
+
+	/**
+	 * Set the flow whose executions will be managed if there is no alternate
+	 * flow id specified in a "_flowId" event parameter.
+	 */
+	public void setFlow(Flow flow) {
+		this.flow = flow;
+	}
+
+	/**
+	 * Set the flow locator to use for lookup of flows specified using the
+	 * "_flowId" event parameter.
+	 */
+	public void setFlowLocator(FlowLocator flowLocator) {
+		this.flowLocator = flowLocator;
+	}
+
+	/**
+	 * Set the flow execution listener that will be notified of managed
+	 * flow executions.
+	 */
+	public void setListener(FlowExecutionListener listener) {
+		this.listeners = new FlowExecutionListener[] { listener };
+	}
+
+	/**
+	 * Set the storage strategy used by the flow execution manager.
+	 */
+	public void setStorage(FlowExecutionStorage flowExecutionStorage) {
+		this.storage = flowExecutionStorage;
 	}
 
 	/**
@@ -127,14 +158,6 @@ public class FlowExecutionManager {
 	}
 
 	/**
-	 * Set the flow whose executions will be managed if there is no alternate
-	 * flow id specified in a "_flowId" event parameter.
-	 */
-	public void setFlow(Flow flow) {
-		this.flow = flow;
-	}
-
-	/**
 	 * Returns the flow locator to use for lookup of flows specified using the
 	 * "_flowId" event parameter.
 	 */
@@ -143,50 +166,27 @@ public class FlowExecutionManager {
 	}
 
 	/**
-	 * Set the flow locator to use for lookup of flows specified using the
-	 * "_flowId" event parameter.
-	 */
-	public void setFlowLocator(FlowLocator flowLocator) {
-		this.flowLocator = flowLocator;
-	}
-
-	/**
 	 * Returns the array of flow execution listeners.
 	 * @return the flow execution listeners
 	 */
-	protected FlowExecutionListener[] getFlowExecutionListeners() {
-		return this.flowExecutionListeners;
+	protected FlowExecutionListener[] getListeners() {
+		return this.listeners;
 	}
 
 	/**
-	 * Set the flow execution listener that will be notified of managed
-	 * flow executions.
+	 * Returns the storage strategy used by the flow execution manager.
 	 */
-	public void setFlowExecutionListener(FlowExecutionListener listener) {
-		this.flowExecutionListeners = new FlowExecutionListener[] { listener };
+	public FlowExecutionStorage getStorage() {
+		Assert.notNull(storage, "The flow execution storage strategy was not set -- configuration error?");
+		return storage;
 	}
 
 	/**
 	 * Sets the flow execution listeners that will be notified of managed
 	 * flow executions.
 	 */
-	public void setFlowExecutionListeners(FlowExecutionListener[] flowExecutionListeners) {
-		this.flowExecutionListeners = flowExecutionListeners;
-	}
-
-	/**
-	 * Returns the storage strategy used by the flow execution manager.
-	 */
-	public FlowExecutionStorage getFlowExecutionStorage() {
-		Assert.notNull(flowExecutionStorage, "The flow execution storage strategy was not set -- configuration error?");
-		return flowExecutionStorage;
-	}
-
-	/**
-	 * Set the storage strategy used by the flow execution manager.
-	 */
-	public void setFlowExecutionStorage(FlowExecutionStorage flowExecutionStorage) {
-		this.flowExecutionStorage = flowExecutionStorage;
+	public void setListeners(FlowExecutionListener[] flowExecutionListeners) {
+		this.listeners = flowExecutionListeners;
 	}
 
 	/**
@@ -215,18 +215,18 @@ public class FlowExecutionManager {
 			// start a new flow execution
 			flowExecution = createFlowExecution(getFlow(event));
 			if (flowExecutionListener != null) {
-				flowExecution.getListenerList().add(flowExecutionListener);
+				flowExecution.getListeners().add(flowExecutionListener);
 			}
 			viewDescriptor = flowExecution.start(event);
 		}
 		else {
 			// client is participating in an existing flow execution,
 			// retrieve information about it
-			flowExecution = getFlowExecutionStorage().load(id, event);
+			flowExecution = getStorage().load(id, event);
 			// rehydrate the execution if neccessary (if it had been serialized out)
-			flowExecution.rehydrate(getFlowLocator(), flowExecutionListeners);
+			flowExecution.rehydrate(getFlowLocator(), listeners);
 			if (flowExecutionListener != null) {
-				flowExecution.getListenerList().add(flowExecutionListener);
+				flowExecution.getListeners().add(flowExecutionListener);
 			}
 			// signal the event within the current state
 			Assert.hasText(event.getId(), "No event id could be obtained -- "
@@ -241,18 +241,18 @@ public class FlowExecutionManager {
 			}
 			viewDescriptor = flowExecution.signalEvent(event);
 		}
-		if (flowExecution.isActive()) {
+		if (flowExecution.getContext().isActive()) {
 			// save the flow execution for future use
-			id = getFlowExecutionStorage().save(id, flowExecution, event);
+			id = getStorage().save(id, flowExecution, event);
 		}
 		else {
 			// event execution resulted in the entire flow execution ending, cleanup
 			if (id != null) {
-				getFlowExecutionStorage().remove(id, event);
+				getStorage().remove(id, event);
 			}
 		}
 		if (flowExecutionListener != null) {
-			flowExecution.getListenerList().remove(flowExecutionListener);
+			flowExecution.getListeners().remove(flowExecutionListener);
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning selected view descriptor " + viewDescriptor);
@@ -298,7 +298,7 @@ public class FlowExecutionManager {
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
-		flowExecution.getListenerList().add(flowExecutionListeners);
+		flowExecution.getListeners().add(listeners);
 		return flowExecution;
 	}
 
@@ -345,14 +345,14 @@ public class FlowExecutionManager {
 	 */
 	protected ViewDescriptor prepareViewDescriptor(ViewDescriptor viewDescriptor, String flowExecutionId,
 			FlowExecution flowExecution) {
-		if (flowExecution.isActive()) {
+		if (flowExecution.getContext().isActive()) {
 			Map model = viewDescriptor.getModel();
 			// make the unique flow execution id available in the model
 			model.put(FLOW_EXECUTION_ID_ATTRIBUTE, flowExecutionId);
 			// make the flow execution itself available in the model
-			model.put(FLOW_EXECUTION_ATTRIBUTE, flowExecution);
+			model.put(FLOW_EXECUTION_ATTRIBUTE, flowExecution.getContext());
 			// add some convenience values for views that aren't easily javabean aware
-			model.put(CURRENT_STATE_ID_ATTRIBUTE, flowExecution.getCurrentStateId());
+			model.put(CURRENT_STATE_ID_ATTRIBUTE, flowExecution.getContext().getActiveSession().getCurrentState().getId());
 		}
 		return viewDescriptor;
 	}

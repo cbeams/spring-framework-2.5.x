@@ -75,7 +75,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.web.flow.SubflowState
  * @see org.springframework.web.flow.EndState
  * @see org.springframework.web.flow.DecisionState
- * @see org.springframework.web.flow.execution.FlowExecution
+ * @see org.springframework.web.flow.FlowExecutor
  * @see org.springframework.web.flow.config.FlowBuilder
  * @see org.springframework.web.flow.config.AbstractFlowBuilder
  * @see org.springframework.web.flow.config.XmlFlowBuilder

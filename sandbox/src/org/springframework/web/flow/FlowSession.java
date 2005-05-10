@@ -18,18 +18,12 @@ package org.springframework.web.flow;
  * Note that a flow <i>session</i> is in no way linked to an HTTP session! It
  * just uses the familiar "request/session" naming convention.
  * 
- * @see org.springframework.web.flow.FlowExecution
+ * @see org.springframework.web.flow.FlowExecutor
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public interface FlowSession {
-	
-	/**
-	 * Returns information about the ongoing flow execution that
-	 * contains this flow session.
-	 */
-	public FlowExecutionInfo getExecutionInfo();
 	
 	/**
 	 * Returns the flow associated with this flow session.
@@ -39,7 +33,7 @@ public interface FlowSession {
 	/**
 	 * Returns the state that is currently active in this flow session.
 	 */
-	public State getState();
+	public State getCurrentState();
 	
 	/**
 	 * Returns the current status of this flow session.

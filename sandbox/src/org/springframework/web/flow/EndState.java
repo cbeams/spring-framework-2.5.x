@@ -134,8 +134,8 @@ public class EndState extends State {
 	 * @return ViewDescriptor a view descriptor signaling that control should be
 	 *         returned to the client and a view rendered
 	 */
-	protected ViewDescriptor doEnter(RequestContext context) {
-		if (context.getActiveSession().isRoot()) {
+	protected ViewDescriptor doEnter(StateContext context) {
+		if (context.getFlowContext().getActiveSession().isRoot()) {
 			// entire flow execution is ending, return ending view if applicable
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing flow '" + getFlow().getId() + "' has ended");
@@ -162,13 +162,13 @@ public class EndState extends State {
 		else {
 			// there is a parent flow that will resume, so map attributes from the
 			// ending sub flow up to the resuming parent flow
-			FlowSession parentSession = context.getActiveSession().getParent();
+			FlowSession parentSession = context.getFlowContext().getActiveSession().getParent();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Resuming parent flow '" + parentSession.getFlow() + "' in state '"
-						+ parentSession.getState() + "'");
+						+ parentSession.getCurrentState() + "'");
 			}
-			Assert.isInstanceOf(FlowAttributeMapper.class, parentSession.getState());
-			FlowAttributeMapper resumingState = (FlowAttributeMapper)parentSession.getState();
+			Assert.isInstanceOf(FlowAttributeMapper.class, parentSession.getCurrentState());
+			FlowAttributeMapper resumingState = (FlowAttributeMapper)parentSession.getCurrentState();
 			resumingState.mapSubflowOutput(context);
 			Assert.isInstanceOf(TransitionableState.class, resumingState);
 			// actually end the subflow

@@ -28,11 +28,12 @@ import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowSession;
-import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
+import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransactionSynchronizer;
 import org.springframework.web.flow.Transition;
 
@@ -48,9 +49,9 @@ import org.springframework.web.flow.Transition;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class InternalRequestContext implements RequestContext, TransactionSynchronizer {
+public class InternalStateContext implements StateContext, TransactionSynchronizer {
 
-	protected final Log logger = LogFactory.getLog(InternalRequestContext.class);
+	protected final Log logger = LogFactory.getLog(InternalStateContext.class);
 
 	/**
 	 * The transaction synchronizer token will be stored in the model using an
@@ -81,7 +82,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 * @param originatingEvent the event at the origin of this request
 	 * @param flowExecution the owning flow execution
 	 */
-	public InternalRequestContext(Event originatingEvent, FlowExecutionImpl flowExecution) {
+	public InternalStateContext(Event originatingEvent, FlowExecutionImpl flowExecution) {
 		Assert.notNull(originatingEvent, "the originating event is required");
 		Assert.notNull(flowExecution, "the flow execution is required");
 		this.originatingEvent = originatingEvent;
@@ -90,36 +91,24 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 
 	// implementing RequestContext
 
-	public Flow getRootFlow() {
-		return this.flowExecution.getRootFlow();
-	}
-
-	public boolean isRootFlowActive() {
-		return this.flowExecution.isRootFlowActive();
+	public Event getSourceEvent() {
+		return this.originatingEvent;
 	}
 
 	public Flow getActiveFlow() {
 		return this.flowExecution.getActiveFlow();
 	}
 
-	public FlowExecutionListenerList getFlowExecutionListenerList() {
-		return this.flowExecution.getListenerList();
+	public FlowContext getFlowContext() {
+		return this.flowExecution;
 	}
-
+	
 	public FlowSession getActiveSession() throws IllegalStateException {
 		return this.flowExecution.getActiveSession();
 	}
 
-	public boolean isActive() {
-		return this.flowExecution.isActive();
-	}
-
 	public State getCurrentState() {
 		return this.flowExecution.getCurrentState();
-	}
-
-	public Event getOriginatingEvent() {
-		return this.originatingEvent;
 	}
 
 	public Event getLastEvent() {
@@ -135,7 +124,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 		return lastTransition;
 	}
 
-	public AttributeSource getExecutionProperties() {
+	public AttributeSource getProperties() {
 		return executionProperties;
 	}
 
@@ -176,7 +165,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 		this.lastTransition = lastTransition;
 	}
 
-	public void setExecutionProperties(AttributeSource properties) {
+	public void setProperties(AttributeSource properties) {
 		if (properties != null) {
 			this.executionProperties = properties;
 		}
@@ -205,12 +194,16 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	}
 
 	public FlowSession spawn(Flow subFlow, Map subFlowInput) {
-		FlowSession session = this.flowExecution.createAndActivateFlowSession(subFlow, subFlowInput);
+		FlowSession session = this.flowExecution.activateSession(subFlow, subFlowInput);
 		fireSubFlowSpawned();
 		return session;
 	}
 
 	// lifecycle event management
+
+	public FlowExecutionListenerList getListeners() {
+		return this.flowExecution.getListeners();
+	}
 
 	/**
 	 * Notify all interested listeners that a request was submitted to this flow
@@ -218,12 +211,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireRequestSubmitted() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing request submitted event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestSubmitted(InternalRequestContext.this);
+				((FlowExecutionListener)o).requestSubmitted(InternalStateContext.this);
 			}
 		});
 	}
@@ -233,12 +226,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireStarting(final State startState) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution starting event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing flow session execution starting event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).starting(InternalRequestContext.this, startState);
+				((FlowExecutionListener)o).starting(InternalStateContext.this, startState);
 			}
 		});
 	}
@@ -248,12 +241,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireStarted() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution started event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing flow session execution started event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).started(InternalRequestContext.this);
+				((FlowExecutionListener)o).started(InternalStateContext.this);
 			}
 		});
 	}
@@ -264,12 +257,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireRequestProcessed() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request processed event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing request processed event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestProcessed(InternalRequestContext.this);
+				((FlowExecutionListener)o).requestProcessed(InternalStateContext.this);
 			}
 		});
 	}
@@ -280,12 +273,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireEventSignaled() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event signaled event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing event signaled event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).eventSignaled(InternalRequestContext.this);
+				((FlowExecutionListener)o).eventSignaled(InternalStateContext.this);
 			}
 		});
 	}
@@ -296,12 +289,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireStateEntering(final State nextState) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state entering event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing state entering event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).stateEntering(InternalRequestContext.this, nextState);
+				((FlowExecutionListener)o).stateEntering(InternalStateContext.this, nextState);
 			}
 		});
 	}
@@ -312,12 +305,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireStateEntered(final State previousState) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state entered event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing state entered event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).stateEntered(InternalRequestContext.this, previousState, getCurrentState());
+				((FlowExecutionListener)o).stateEntered(InternalStateContext.this, previousState, getCurrentState());
 			}
 		});
 	}
@@ -328,12 +321,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireSubFlowSpawned() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow execution started event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing sub flow execution started event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).subFlowSpawned(InternalRequestContext.this);
+				((FlowExecutionListener)o).subFlowSpawned(InternalStateContext.this);
 			}
 		});
 	}
@@ -344,12 +337,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireSubFlowEnded(final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow ended event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing sub flow ended event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).subFlowEnded(InternalRequestContext.this, endedSession);
+				((FlowExecutionListener)o).subFlowEnded(InternalStateContext.this, endedSession);
 			}
 		});
 	}
@@ -359,12 +352,12 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	 */
 	protected void fireEnded(final FlowSession endingRootFlowSession) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow execution ended event to " + getFlowExecutionListenerList().size()
+			logger.debug("Publishing flow execution ended event to " + getListeners().size()
 					+ " listener(s)");
 		}
-		getFlowExecutionListenerList().iteratorTemplate().run(new Block() {
+		getListeners().iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).ended(InternalRequestContext.this, endingRootFlowSession);
+				((FlowExecutionListener)o).ended(InternalStateContext.this, endingRootFlowSession);
 			}
 		});
 	}
@@ -440,7 +433,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	protected boolean isEventTokenValid(String tokenName, String tokenParameterName, boolean clear) {
 		// we use the originating event because we want to check that the
 		// client request that came into the system has a transaction token
-		String tokenValue = (String)getOriginatingEvent().getParameter(tokenParameterName);
+		String tokenValue = (String)getSourceEvent().getParameter(tokenParameterName);
 		return isTokenValid(tokenName, tokenValue, clear);
 	}
 

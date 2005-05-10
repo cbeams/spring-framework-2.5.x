@@ -20,6 +20,7 @@ import org.springframework.test.JUnitAssertSupport;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.ViewDescriptor;
@@ -185,7 +186,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 *         state)
 	 */
 	protected ViewDescriptor signalEvent(Event event) {
-		return getFlowExecution().signalEvent(event);
+		return this.flowExecution.signalEvent(event);
 	}
 
 	/**
@@ -193,11 +194,11 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @return the flow execution
 	 * @throws IllegalStateException the execution has not been started
 	 */
-	protected FlowExecution getFlowExecution() throws IllegalStateException {
+	protected FlowContext getFlowContext() throws IllegalStateException {
 		if (flowExecution == null) {
 			throw new IllegalStateException("The flow execution has not been started; call startFlow first");
 		}
-		return flowExecution;
+		return flowExecution.getContext();
 	}
 
 	/**
@@ -206,8 +207,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 *        in the tested flow execution.
 	 */
 	protected void assertActiveFlowEquals(String expectedActiveFlowId) {
-		assertEquals("The active flow id '" + getActiveFlowId() + "' does not equal the expected active flow '"
-				+ expectedActiveFlowId + "'", expectedActiveFlowId, getActiveFlowId());
+		assertEquals("The active flow id '" + getFlowContext().getActiveSession().getFlow() + "' does not equal the expected active flow '"
+				+ expectedActiveFlowId + "'", expectedActiveFlowId, getFlowContext().getActiveSession().getFlow());
 	}
 
 	/**
@@ -216,8 +217,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @param expectedCurrentStateId the expected current state.
 	 */
 	protected void assertCurrentStateEquals(String expectedCurrentStateId) {
-		assertEquals("The current state '" + getCurrentStateId() + "' does not equal the expected state '"
-				+ expectedCurrentStateId + "'", expectedCurrentStateId, getCurrentStateId());
+		assertEquals("The current state '" + getFlowContext().getActiveSession().getCurrentState().getId() + "' does not equal the expected state '"
+				+ expectedCurrentStateId + "'", expectedCurrentStateId, getFlowContext().getActiveSession().getCurrentState());
 	}
 
 	/**
@@ -225,34 +226,9 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * equals the provided event.
 	 * @param expectedEventId the expected event.
 	 */
-	protected void assertEventEquals(String expectedEventId) {
-		assertEquals("The last event '" + getEventId() + "' does not equal the expected event '" + expectedEventId
-				+ "'", expectedEventId, getEventId());
-	}
-
-	/**
-	 * Returns the active flow in the flow execution being tested; specifically,
-	 * a flow is active if it has a session active in the flow execution.
-	 * @return the active flow id.
-	 */
-	protected String getActiveFlowId() {
-		return flowExecution.getActiveFlowId();
-	}
-
-	/**
-	 * Returns the current state of the flow execution being tested.
-	 */
-	protected String getCurrentStateId() {
-		return flowExecution.getCurrentStateId();
-	}
-
-	/**
-	 * Returns the last supported event that occured in the flow execution being
-	 * tested.
-	 * @return the last event id
-	 */
-	protected String getEventId() {
-		return flowExecution.getLastEventId();
+	protected void assertLastEventEquals(String expectedEventId) {
+		assertEquals("The last event '" + getFlowContext().getLastEventId() + "' does not equal the expected event '" + expectedEventId
+				+ "'", expectedEventId, getFlowContext().getLastEventId());
 	}
 
 	/**

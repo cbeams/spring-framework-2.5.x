@@ -23,6 +23,9 @@ import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowContext;
+import org.springframework.web.flow.FlowLocator;
+import org.springframework.web.flow.FlowNavigationException;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.Scope;
@@ -30,6 +33,9 @@ import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.TransactionSynchronizer;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.execution.FlowExecutionListener;
+import org.springframework.web.flow.execution.FlowExecutionListenerList;
 
 /**
  * Mock implementation of the <code>RequestContext</code> interface to
@@ -62,7 +68,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 
 	private Transition lastTransition;
 	
-	private MutableAttributeSource actionExecutionProperties = new MapAttributeSource();
+	private AttributeSource properties = new MapAttributeSource();
 
 	private Scope requestScope = new Scope(ScopeType.REQUEST);
 
@@ -100,6 +106,53 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		}
 	}
 
+	public FlowContext getFlowContext() {
+		return new MockFlowContext();
+	}
+	
+	private class MockFlowContext implements FlowContext {
+
+		public FlowSession getActiveSession() throws IllegalStateException {
+			return activeSession;
+		}
+
+		public Flow getRootFlow() {
+			return rootFlow;
+		}
+
+		public Flow getActiveFlow() throws IllegalStateException {
+			return MockRequestContext.this.getActiveFlow();
+		}
+
+		public State getCurrentState() throws IllegalStateException {
+			return MockRequestContext.this.getCurrentState();
+		}
+		
+		public String getCaption() {
+			return getActiveFlow().getId();
+		}
+		
+		public String getLastEventId() {
+			return lastEvent.getId();
+		}
+
+		public long getLastRequestTimestamp() {
+			return 0;
+		}
+		
+		public long getCreationTimestamp() {
+			return 0;
+		}
+
+		public long getUptime() {
+			return 0;
+		}
+
+		public boolean isActive() {
+			return false;
+		}
+	}
+	
 	/**
 	 * Set the active flow of this request context.
 	 * 
@@ -150,14 +203,14 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	}
 
 	/**
-	 * Set an action execution attribute that may be used by the action to effect 
-	 * its behavior during execution.
+	 * Set an property that may be used by the action to effect its behavior
+	 * during execution.
 	 * 
 	 * @param attributeName the attribute name
 	 * @param attributeValue the attribute value
 	 */
-	public void setExecutionProperty(String attributeName, Object attributeValue) {
-		this.actionExecutionProperties.setAttribute(attributeName, attributeValue);
+	public void setProperty(String attributeName, Object attributeValue) {
+		((MutableAttributeSource)this.properties).setAttribute(attributeName, attributeValue);
 	}
 	
 	public FlowSession getActiveSession() throws IllegalStateException {
@@ -166,12 +219,20 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		}
 		return activeSession;
 	}
+	
+	public Flow getActiveFlow() {
+		return activeSession.getFlow();
+	}
+	
+	public State getCurrentState() {
+		return activeSession.getCurrentState();
+	}
 
 	public boolean isActive() {
 		return activeSession != null;
 	}
 
-	public Event getOriginatingEvent() {
+	public Event getSourceEvent() {
 		return originatingEvent;
 	}
 
@@ -183,8 +244,8 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		return lastTransition;
 	}
 
-	public AttributeSource getExecutionProperties() {
-		return actionExecutionProperties;
+	public AttributeSource getProperties() {
+		return properties;
 	}
 
 	public Scope getFlowScope() {
@@ -231,16 +292,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 		return inTransaction;
 	}
 	
-	public FlowSession spawn(Flow subflow, Map subFlowInput) throws IllegalStateException {
-		return null;
-	}
-	
-	public FlowSession endActiveSession() throws IllegalStateException {
-		return null;
-	}
-	
-	public void setExecutionProperties(AttributeSource properties) {
-	}
-	
-	
+	public void setProperties(AttributeSource properties) {
+		this.properties = properties;
+	}	
 }

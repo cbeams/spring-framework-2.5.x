@@ -154,7 +154,7 @@ public class FlowAction extends TemplateAction {
 		if (StringUtils.hasText(flowId)) {
 			manager.setFlow(getFlowLocator().getFlow(flowId));
 		}
-		manager.setFlowExecutionStorage(getStorage(mapping));
+		manager.setStorage(getStorage(mapping));
 		return manager;
 	}
 	
@@ -200,7 +200,7 @@ public class FlowAction extends TemplateAction {
 	protected FlowExecutionListener createActionFormAdapter(final HttpServletRequest request, final ActionForm form) {
 		return new FlowExecutionListenerAdapter() {
 			public void requestProcessed(RequestContext context) {
-				if (context.isActive()) {
+				if (context.getFlowContext().isActive()) {
 					if (form instanceof BindingActionForm) {
 						BindingActionForm bindingForm = (BindingActionForm)form;
 						bindingForm.setErrors(new FormObjectAccessor(context).getFormErrors());

@@ -67,7 +67,7 @@ public class PortletFlowExecutionManager extends FlowExecutionManager implements
 	 * Set default properties for this manager.
 	 */
 	protected void initDefaults() {
-		setFlowExecutionStorage(new PortletSessionFlowExecutionStorage());
+		setStorage(new PortletSessionFlowExecutionStorage());
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

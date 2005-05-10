@@ -196,7 +196,7 @@ public abstract class TransitionableState extends State {
 	 * @throws CannotExecuteStateTransitionException when a transition could
 	 *         not be executed on receipt of the event
 	 */
-	public ViewDescriptor onEvent(Event event, RequestContext context)
+	public ViewDescriptor onEvent(Event event, StateContext context)
 			throws NoMatchingTransitionException, CannotExecuteTransitionException {
 		context.setLastEvent(event);
 		Transition transition = getRequiredTransition(context);

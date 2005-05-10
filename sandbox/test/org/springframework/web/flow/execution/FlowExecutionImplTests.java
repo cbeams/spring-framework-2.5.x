@@ -91,20 +91,20 @@ public class FlowExecutionImplTests extends TestCase {
 		assertNotNull(restoredFlowExecution);
 
 		// rehydrate the flow execution
-		restoredFlowExecution.rehydrate(flowLocator, flowExecution.getListenerList().toArray());
+		restoredFlowExecution.rehydrate(flowLocator, flowExecution.getListeners().toArray());
 
 		assertEquals(flowExecution.isActive(), restoredFlowExecution.isActive());
 		if (flowExecution.isActive()) {
 			assertTrue(entriesCollectionsAreEqual(
 					flowExecution.getActiveSession().getScope().getAttributeMap().entrySet(),
 					restoredFlowExecution.getActiveSession().getScope().getAttributeMap().entrySet()));
-			assertEquals(flowExecution.getCurrentStateId(), restoredFlowExecution.getCurrentStateId());
-			assertEquals(flowExecution.getActiveFlowId(), restoredFlowExecution.getActiveFlowId());
+			assertEquals(flowExecution.getActiveSession().getCurrentState().getId(), restoredFlowExecution.getCurrentState().getId());
+			assertEquals(flowExecution.getActiveSession().getFlow().getId(), restoredFlowExecution.getActiveSession().getFlow().getId());
 			assertSame(flowExecution.getRootFlow(), restoredFlowExecution.getRootFlow());
 		}
 		assertEquals(flowExecution.getLastEventId(), restoredFlowExecution.getLastEventId());
 		assertEquals(flowExecution.getLastRequestTimestamp(), restoredFlowExecution.getLastRequestTimestamp());
-		assertEquals(flowExecution.getListenerList().size(), restoredFlowExecution.getListenerList().size());
+		assertEquals(flowExecution.getListeners().size(), restoredFlowExecution.getListeners().size());
 	}
 
 	public void testRehydrate() throws Exception {

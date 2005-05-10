@@ -87,7 +87,7 @@ public class FourDigitNumberGuessAction extends MultiAction {
 	}
 
 	private String getGuess(RequestContext context) {
-		return (String)context.getOriginatingEvent().getParameter(GUESS_PARAMETER);
+		return (String)context.getSourceEvent().getParameter(GUESS_PARAMETER);
 	}
 
 	/**

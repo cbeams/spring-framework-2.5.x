@@ -2,7 +2,6 @@ package org.springframework.web.flow.execution;
 
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.flow.MockFlowExecutionListener;
 import org.springframework.web.flow.ActionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Event;
@@ -21,8 +20,6 @@ import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
 import org.springframework.web.flow.config.TransitionCriteriaCreator;
-import org.springframework.web.flow.execution.FlowExecution;
-import org.springframework.web.flow.execution.FlowExecutionImpl;
 
 /**
  * General flow execution tests.
@@ -50,7 +47,7 @@ public class FlowExecutionTests extends TestCase {
 
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		MockFlowExecutionListener flowExecutionListener = new MockFlowExecutionListener();
-		flowExecution.getListenerList().add(flowExecutionListener);
+		flowExecution.getListeners().add(flowExecutionListener);
 		flowExecution.start(new Event(this));
 		assertEquals(0, flowExecutionListener.getFlowNestingLevel());
 		assertEquals(2, flowExecutionListener.countStateTransitions());
@@ -83,10 +80,10 @@ public class FlowExecutionTests extends TestCase {
 			assertNotNull(vd);
 			assertEquals("viewName", vd.getViewName());
 		}
-		assertTrue(flowExecution.isActive());
+		assertTrue(flowExecution.getContext().isActive());
 		vd = flowExecution.signalEvent(new Event(this, "finish"));
 		assertNull(vd);
-		assertFalse(flowExecution.isActive());
+		assertFalse(flowExecution.getContext().isActive());
 	}
 
 	public void testLoopInFlowWithSubFlow() {
@@ -132,6 +129,6 @@ public class FlowExecutionTests extends TestCase {
 
 		FlowExecution flowExecution = new FlowExecutionImpl(parentFlow);
 		flowExecution.start(new Event(this, "start"));
-		assertFalse(flowExecution.isActive());
+		assertFalse(flowExecution.getContext().isActive());
 	}
 }

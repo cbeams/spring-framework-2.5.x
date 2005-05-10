@@ -145,7 +145,7 @@ public class ViewState extends TransitionableState {
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */
-	protected ViewDescriptor doEnter(RequestContext context) {
+	protected ViewDescriptor doEnter(StateContext context) {
 		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning a view descriptor null object; no view to render");
@@ -164,7 +164,7 @@ public class ViewState extends TransitionableState {
 	 * Create a view descriptor for given state context. Subclasses could override
 	 * this method to return a custom view descriptor. 
 	 */
-	protected ViewDescriptor createViewDescriptor(RequestContext context) {
+	protected ViewDescriptor createViewDescriptor(StateContext context) {
 		return new ViewDescriptor(this.viewName, context.getModel());
 	}
 

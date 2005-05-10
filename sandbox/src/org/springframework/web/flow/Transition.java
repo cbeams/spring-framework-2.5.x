@@ -229,7 +229,7 @@ public class Transition extends AnnotatedObject {
 	 * @throws CannotExecuteTransitionException when this transition cannot
 	 *         be executed because the target state is invalid
 	 */
-	public ViewDescriptor execute(RequestContext context) throws CannotExecuteTransitionException {
+	public ViewDescriptor execute(StateContext context) throws CannotExecuteTransitionException {
 		State state = null;
 		try {
 			state = getTargetState();
@@ -248,9 +248,9 @@ public class Transition extends AnnotatedObject {
 			viewDescriptor = state.enter(context);
 		}
 		if (logger.isDebugEnabled()) {
-			if (context.isActive()) {
+			if (context.getFlowContext().isActive()) {
 				logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
-						+ context.getActiveSession().getState().getId() + "' in flow '" + context.getActiveSession().getFlow().getId() + "'");
+						+ context.getFlowContext().getCurrentState().getId() + "' in flow '" + context.getFlowContext().getActiveFlow().getId() + "'");
 			}
 			else {
 				logger.debug("Transition '" + this + "' executed; as a result, the flow execution has ended");

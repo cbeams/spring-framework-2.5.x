@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.flow.execution.FlowExecution;
+import org.springframework.web.flow.FlowContext;
 
 /**
  * Servlet 2.3 filter that cleans up expired web flow executions in the HTTP
@@ -125,12 +125,12 @@ public class ExpiredFlowCleanupFilter extends OncePerRequestFilter {
 		while (attributeNames.hasMoreElements()) {
 			String attributeName = (String)attributeNames.nextElement();
 			Object attributeValue = session.getAttribute(attributeName);
-			if (attributeValue instanceof FlowExecution) {
-				FlowExecution flowExecution = (FlowExecution)attributeValue;
+			if (attributeValue instanceof FlowContext) {
+				FlowContext flowExecution = (FlowContext)attributeValue;
 				if (hasExpired(request, flowExecution)) {
 					attributeNamesToRemove.add(attributeName);
 					if (logger.isInfoEnabled()) {
-						logger.info("Flow execution '" + attributeName + "' for flow '" + flowExecution.getActiveFlowId()
+						logger.info("Flow execution '" + attributeName + "' for flow '" + flowExecution.getActiveSession().getFlow().getId()
 								+ "' has expired and will be removed from the HTTP session '" + session.getId() + "'");
 					}
 				}
@@ -152,7 +152,7 @@ public class ExpiredFlowCleanupFilter extends OncePerRequestFilter {
 	 * @param flowExecution the web flow execution that needs to be checked for
 	 *        expiry
 	 */
-	protected boolean hasExpired(HttpServletRequest request, FlowExecution flowExecution) {
+	protected boolean hasExpired(HttpServletRequest request, FlowContext flowExecution) {
 		return (System.currentTimeMillis() - flowExecution.getLastRequestTimestamp()) > (getTimeout() * 60000);
 	}
 }

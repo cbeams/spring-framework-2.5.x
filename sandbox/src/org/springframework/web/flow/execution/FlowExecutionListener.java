@@ -26,7 +26,7 @@ import org.springframework.web.flow.State;
  * An 'observer' that is very aspect like, allowing you to insert 'cross
  * cutting' behavior at well-defined points within a flow execution lifecycle.
  * 
- * @see org.springframework.web.flow.execution.FlowExecution
+ * @see org.springframework.web.flow.FlowExecutor
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

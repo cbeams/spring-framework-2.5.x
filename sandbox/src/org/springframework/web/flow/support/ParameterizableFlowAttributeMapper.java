@@ -215,7 +215,7 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 	public Map createSubflowInput(RequestContext context) {
 		if (this.inputMapper != null) {
 			Map subFlowInputAttributes = new HashMap();
-			this.inputMapper.map(context.getActiveSession().getScope(), new MapAttributeSource(subFlowInputAttributes));
+			this.inputMapper.map(context.getFlowScope(), new MapAttributeSource(subFlowInputAttributes));
 			return Collections.unmodifiableMap(subFlowInputAttributes);
 		}
 		else {
@@ -225,8 +225,8 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 
 	public void mapSubflowOutput(RequestContext context) {
 		if (this.outputMapper != null) {
-			MutableAttributeSource parentAttributes = (MutableAttributeSource)context.getActiveSession().getParent().getScope();
-			this.outputMapper.map(context.getActiveSession().getScope(), parentAttributes);
+			MutableAttributeSource parentAttributes = (MutableAttributeSource)context.getFlowContext().getActiveSession().getParent().getScope();
+			this.outputMapper.map(context.getFlowScope(), parentAttributes);
 		}
 	}
 }

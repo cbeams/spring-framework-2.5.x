@@ -354,7 +354,7 @@ public class ActionState extends TransitionableState {
 	 *         resulted in a outcome event that could be mapped to a valid state
 	 *         transition
 	 */
-	protected ViewDescriptor doEnter(RequestContext context) {
+	protected ViewDescriptor doEnter(StateContext context) {
 		Iterator it = actionExecutors();
 		int executionCount = 0;
 		String[] eventIds = new String[actionExecutors.size()];
@@ -436,14 +436,14 @@ public class ActionState extends TransitionableState {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing action '" + this + "'");
 				}
-				context.setExecutionProperties(action);
+				context.setProperties(action);
 				return decorateResult(action.getTargetAction().execute(context));
 			}
 			catch (Exception e) {
 				throw new ActionExecutionException(actionState, action, e);
 			}
 			finally {
-				context.setExecutionProperties(null);
+				context.setProperties(null);
 			}
 		}
 

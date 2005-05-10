@@ -70,7 +70,7 @@ public class NumberGuessAction extends MultiAction {
 	private int getGuess(RequestContext context) {
 		try {
 			return ((Integer)new TextToNumberConverter().convert(
-					context.getOriginatingEvent().getParameter(GUESS_PARAMETER), Integer.class)).intValue();
+					context.getSourceEvent().getParameter(GUESS_PARAMETER), Integer.class)).intValue();
 		}
 		catch (Exception e) {
 			return -1;

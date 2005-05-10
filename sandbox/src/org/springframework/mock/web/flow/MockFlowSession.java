@@ -1,7 +1,6 @@
 package org.springframework.mock.web.flow;
 
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowExecutionInfo;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowSessionStatus;
 import org.springframework.web.flow.Scope;
@@ -10,8 +9,6 @@ import org.springframework.web.flow.State;
 
 public class MockFlowSession implements FlowSession {
 	
-	private FlowExecutionInfo flowExecutionInfo;
-
 	private Flow flow;
 	
 	private State state;
@@ -22,14 +19,6 @@ public class MockFlowSession implements FlowSession {
 	
 	private FlowSession parent;
 	
-	public FlowExecutionInfo getExecutionInfo() {
-		return flowExecutionInfo;
-	}
-	
-	public void setFlowExecutionInfo(FlowExecutionInfo flowExecutionInfo) {
-		this.flowExecutionInfo = flowExecutionInfo;
-	}
-
 	public Flow getFlow() {
 		return flow;
 	}
@@ -58,7 +47,7 @@ public class MockFlowSession implements FlowSession {
 		this.scope = scope;
 	}
 
-	public State getState() {
+	public State getCurrentState() {
 		return state;
 	}
 

@@ -24,7 +24,7 @@ import org.springframework.web.flow.Event;
  * Note that the flow execution storage strategy can have an impact
  * on application transaction management for a flow execution. For instance,
  * the default {@link org.springframework.web.flow.TransactionSynchronizer}
- * implementation ({@link org.springframework.web.flow.execution.InternalRequestContext})
+ * implementation ({@link org.springframework.web.flow.execution.InternalStateContext})
  * uses a simple <i>synchronizer token</i> stored in the flow scope, which
  * implies that there is a single flow execution for an application transaction.
  * Some flow execution storage strategies (like

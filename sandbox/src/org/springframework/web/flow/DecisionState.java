@@ -106,7 +106,7 @@ public class DecisionState extends TransitionableState {
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */
-	protected ViewDescriptor doEnter(RequestContext context) {
+	protected ViewDescriptor doEnter(StateContext context) {
 		return getRequiredTransition(context).execute(context);
 	}
 }

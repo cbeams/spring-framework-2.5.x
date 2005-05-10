@@ -37,7 +37,7 @@ public class AddItemAction extends AbstractAction {
 			list = new ArrayList();
 			context.getFlowScope().setAttribute("list", list);
 		}
-		String data = (String)context.getOriginatingEvent().getParameter("data");
+		String data = (String)context.getSourceEvent().getParameter("data");
 		if (data != null && data.length() > 0) {
 			list.add(data);
 		}

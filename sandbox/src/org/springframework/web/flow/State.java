@@ -157,7 +157,7 @@ public abstract class State extends AnnotatedObject {
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state processing
 	 */
-	public final ViewDescriptor enter(RequestContext context) {
+	public final ViewDescriptor enter(StateContext context) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Entering state '" + getId() + "' in flow '" + getFlow() + "'");
 		}
@@ -171,7 +171,7 @@ public abstract class State extends AnnotatedObject {
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state processing
 	 */
-	protected abstract ViewDescriptor doEnter(RequestContext context);
+	protected abstract ViewDescriptor doEnter(StateContext context);
 
 	public String toString() {
 		ToStringCreator creator =

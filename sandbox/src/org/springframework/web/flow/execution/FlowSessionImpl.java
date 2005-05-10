@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowExecutionInfo;
+import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowSessionStatus;
@@ -53,7 +53,7 @@ import org.springframework.web.flow.State;
  * Note that a flow <i>session</i> is in no way linked to an HTTP session! It
  * just uses the familiar request/session naming convention.
  * 
- * @see org.springframework.web.flow.execution.FlowExecution
+ * @see org.springframework.web.flow.FlowExecutor
  * @see org.springframework.web.flow.execution.FlowExecutionImpl
  * 
  * @author Keith Donald
@@ -65,11 +65,6 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	// then restored
 	protected static final Log logger = LogFactory.getLog(FlowSessionImpl.class);
 	
-	/**
-	 * The flow execution containing this flow session.
-	 */
-	private transient FlowExecutionInfo flowExecutionInfo;
-
 	/**
 	 * The flow definition (a singleton).
 	 */
@@ -120,15 +115,11 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 		this.parent = parent;
 	}
 	
-	public FlowExecutionInfo getExecutionInfo() {
-		return flowExecutionInfo;
-	}
-
 	public Flow getFlow() {
 		return flow;
 	}
 
-	public State getState() {
+	public State getCurrentState() {
 		return currentState;
 	}
 
@@ -136,7 +127,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	 * Set the current state of this flow session.
 	 * @param newState the state that is currently active in this flow session
 	 */
-	public void setState(State newState) {
+	public void setCurrentState(State newState) {
 		Assert.notNull(newState, "The newState is required");
 		Assert.isTrue(this.flow == newState.getFlow(),
 				"The newState belongs to the flow associated with this flow session");
@@ -191,7 +182,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	 * Restore this <code>Flow Session</code> for use after deserialization.
 	 * @param flowLocator the flow locator
 	 */
-	protected void rehydrate(FlowLocator flowLocator, FlowExecutionImpl execution, FlowSessionImpl parent) {
+	protected void rehydrate(FlowLocator flowLocator, FlowSessionImpl parent) {
 		// implementation note: we cannot integrate this code into the
 		// readObject() method since we need the flow locator!
 		Assert.state(this.flow == null, "The flow is already set -- already restored");
@@ -204,7 +195,6 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 				"The current state id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
 		this.currentState = this.flow.getRequiredState(this.currentStateId);
 		this.currentStateId = null;
-		this.flowExecutionInfo = execution;
 		this.parent = parent;
 	}
 
