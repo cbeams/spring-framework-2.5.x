@@ -164,15 +164,17 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 
-		Connection con = DataSourceUtils.getConnection(this.dataSource, false);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Opened connection [" + con + "] for JDBC transaction");
-		}
-
-		txObject.setConnectionHolder(new ConnectionHolder(con));
-		txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
+		Connection con = null;
 
 		try {
+			con = this.dataSource.getConnection();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Opened connection [" + con + "] for JDBC transaction");
+			}
+
+			txObject.setConnectionHolder(new ConnectionHolder(con));
+			txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
+
 			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
 
@@ -195,7 +197,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		catch (SQLException ex) {
 			DataSourceUtils.releaseConnection(con, this.dataSource);
-			throw new CannotCreateTransactionException("Could not configure JDBC connection for transaction", ex);
+			throw new CannotCreateTransactionException("Could not open JDBC connection for transaction", ex);
 		}
 	}
 

@@ -73,31 +73,8 @@ public abstract class DataSourceUtils {
 	 * @see DataSourceTransactionManager
 	 */
 	public static Connection getConnection(DataSource dataSource) throws CannotGetJdbcConnectionException {
-		return getConnection(dataSource, true);
-	}
-
-	/**
-	 * Get a Connection from the given DataSource. Changes any SQL exception into
-	 * the Spring hierarchy of unchecked generic data access exceptions, simplifying
-	 * calling code and making any exception that is thrown more meaningful.
-	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
-	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
-	 * if transaction synchronization is active (e.g. if in a JTA transaction).
-	 * @param dataSource DataSource to get Connection from
-	 * @param allowSynchronization if a new JDBC Connection is supposed to be
-	 * registered with transaction synchronization (if synchronization is active).
-	 * This will always be true for typical data access code.
-	 * @return a JDBC Connection from the given DataSource
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
-	 * if the attempt to get a Connection failed
-	 * @see #doGetConnection
-	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
-	 * @see DataSourceTransactionManager
-	 */
-	public static Connection getConnection(DataSource dataSource, boolean allowSynchronization)
-	    throws CannotGetJdbcConnectionException {
 		try {
-			return doGetConnection(dataSource, allowSynchronization);
+			return doGetConnection(dataSource);
 		}
 		catch (SQLException ex) {
 			throw new CannotGetJdbcConnectionException("Could not get JDBC Connection", ex);
@@ -118,23 +95,6 @@ public abstract class DataSourceUtils {
 	 * @see TransactionAwareDataSourceProxy
 	 */
 	public static Connection doGetConnection(DataSource dataSource) throws SQLException {
-		return doGetConnection(dataSource, true);
-	}
-
-	/**
-	 * Actually get a JDBC Connection for the given DataSource.
-	 * Same as getConnection, but throwing the original SQLException.
-	 * @param dataSource DataSource to get Connection from
-	 * @param allowSynchronization if a new JDBC Connection is supposed to be
-	 * registered with transaction synchronization (if synchronization is active).
-	 * This will always be true for typical data access code.
-	 * @return a JDBC Connection from the given DataSource
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see #getConnection(DataSource, boolean)
-	 */
-	public static Connection doGetConnection(DataSource dataSource, boolean allowSynchronization)
-			throws SQLException {
-
 		Assert.notNull(dataSource, "No DataSource specified");
 
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
@@ -145,14 +105,16 @@ public abstract class DataSourceUtils {
 
 		logger.debug("Opening JDBC Connection");
 		Connection con = dataSource.getConnection();
-		if (allowSynchronization && TransactionSynchronizationManager.isSynchronizationActive()) {
+
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JDBC Connection");
 			// Use same Connection for further JDBC actions within the transaction.
 			// Thread-bound object will get removed by synchronization at transaction completion.
 			conHolder = new ConnectionHolder(con);
 			conHolder.setSynchronizedWithTransaction(true);
 			conHolder.requested();
-			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, dataSource));
+			TransactionSynchronizationManager.registerSynchronization(
+					new ConnectionSynchronization(conHolder, dataSource));
 			TransactionSynchronizationManager.bindResource(dataSource, conHolder);
 		}
 
