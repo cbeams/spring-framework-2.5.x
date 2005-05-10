@@ -22,7 +22,7 @@ public class MockFlowSession implements FlowSession {
 	
 	private FlowSession parent;
 	
-	public FlowExecutionInfo getFlowExecutionInfo() {
+	public FlowExecutionInfo getExecutionInfo() {
 		return flowExecutionInfo;
 	}
 	
@@ -50,7 +50,7 @@ public class MockFlowSession implements FlowSession {
 		this.parent = parent;
 	}
 
-	public Scope getFlowScope() {
+	public Scope getScope() {
 		return scope;
 	}
 

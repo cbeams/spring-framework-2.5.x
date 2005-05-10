@@ -144,7 +144,7 @@ public class InternalRequestContext implements RequestContext, TransactionSynchr
 	}
 
 	public Scope getFlowScope() {
-		return getActiveFlowSession().getFlowScope();
+		return getActiveFlowSession().getScope();
 	}
 
 	public Map getModel() {

@@ -120,7 +120,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 		this.parent = parent;
 	}
 	
-	public FlowExecutionInfo getFlowExecutionInfo() {
+	public FlowExecutionInfo getExecutionInfo() {
 		return flowExecutionInfo;
 	}
 
@@ -167,7 +167,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 		return parent == null;
 	}
 
-	public Scope getFlowScope() {
+	public Scope getScope() {
 		return this.flowScope;
 	}
 	

@@ -188,7 +188,7 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 	}
 
 	public Scope getFlowScope() {
-		return activeSession.getFlowScope();
+		return activeSession.getScope();
 	}
 
 	public Scope getRequestScope() {

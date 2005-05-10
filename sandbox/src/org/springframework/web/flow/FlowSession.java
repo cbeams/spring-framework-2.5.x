@@ -29,7 +29,7 @@ public interface FlowSession {
 	 * Returns information about the ongoing flow execution that
 	 * contains this flow session.
 	 */
-	public FlowExecutionInfo getFlowExecutionInfo();
+	public FlowExecutionInfo getExecutionInfo();
 	
 	/**
 	 * Returns the flow associated with this flow session.
@@ -47,6 +47,12 @@ public interface FlowSession {
 	public FlowSessionStatus getStatus();
 
 	/**
+	 * Return the session attributes -- "flow scope".
+	 * @return the flow scope attributes
+	 */
+	public Scope getScope();
+
+	/**
 	 * Returns the parent flow session in the current flow execution,
 	 * or <code>null</code> if there is not parent flow session.
 	 */
@@ -57,11 +63,5 @@ public interface FlowSession {
 	 * the ongoing flow execution. The root flow session does not have
 	 * a parent flow session. 
 	 */
-	public boolean isRoot();
-	
-	/**
-	 * Return the session attributes -- "flow scope".
-	 * @return the flow scope attributes
-	 */
-	public Scope getFlowScope();
+	public boolean isRoot();	
 }
