@@ -232,7 +232,7 @@
 		<attributes>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jdo/jdo.jar">
+	<classpathentry kind="lib" path="lib/jdo/jdo2.jar">
 		<attributes>
 		</attributes>
 	</classpathentry>
