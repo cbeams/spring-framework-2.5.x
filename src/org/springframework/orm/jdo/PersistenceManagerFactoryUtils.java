@@ -212,17 +212,20 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param pm PersistenceManager to close
 	 * @param pmf PersistenceManagerFactory that the PersistenceManager was created with
+	 * (can be null)
 	 */
 	public static void releasePersistenceManager(PersistenceManager pm, PersistenceManagerFactory pmf) {
 		if (pm == null) {
 			return;
 		}
 
-		PersistenceManagerHolder pmHolder =
-		    (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
-		if (pmHolder != null && pm == pmHolder.getPersistenceManager()) {
-			// It's the transactional PersistenceManager: Don't close it.
-			return;
+		if (pmf != null) {
+			PersistenceManagerHolder pmHolder =
+					(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
+			if (pmHolder != null && pm == pmHolder.getPersistenceManager()) {
+				// It's the transactional PersistenceManager: Don't close it.
+				return;
+			}
 		}
 
 		logger.debug("Closing JDO PersistenceManager");

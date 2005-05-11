@@ -225,7 +225,7 @@ public abstract class DataSourceUtils {
 	 * Will never close a Connection from a SmartDataSource returning shouldClose=false.
 	 * @param con Connection to close if necessary
 	 * (if this is null, the call will be ignored)
-	 * @param dataSource DataSource that the Connection came from
+	 * @param dataSource DataSource that the Connection came from (can be null)
 	 * @see SmartDataSource#shouldClose
 	 */
 	public static void releaseConnection(Connection con, DataSource dataSource) {
@@ -246,7 +246,7 @@ public abstract class DataSourceUtils {
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
 	 * @param con Connection to close if necessary
 	 * (if this is null, the call will be ignored)
-	 * @param dataSource DataSource that the Connection came from
+	 * @param dataSource DataSource that the Connection came from (can be null)
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #releaseConnection
 	 * @see TransactionAwareDataSourceProxy
@@ -256,13 +256,15 @@ public abstract class DataSourceUtils {
 			return;
 		}
 
-		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
-		if (conHolder != null && connectionEquals(conHolder.getConnection(), con)) {
-			// It's the transactional Connection: Don't close it.
-			conHolder.released();
-			return;
+		if (dataSource != null) {
+			ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+			if (conHolder != null && connectionEquals(conHolder.getConnection(), con)) {
+				// It's the transactional Connection: Don't close it.
+				conHolder.released();
+				return;
+			}
 		}
-		
+
 		// Leave the Connection open only if the DataSource is our
 		// special data source, and it wants the Connection left open.
 		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {

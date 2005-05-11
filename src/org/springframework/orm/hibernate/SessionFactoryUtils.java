@@ -505,9 +505,13 @@ public abstract class SessionFactoryUtils {
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param session the Hibernate Session to check
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
+	 * (can be null)
 	 * @return whether the Session is transactional
 	 */
 	public static boolean isSessionTransactional(Session session, SessionFactory sessionFactory) {
+		if (sessionFactory == null) {
+			return false;
+		}
 		SessionHolder sessionHolder =
 				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		return (sessionHolder != null && sessionHolder.containsSession(session));
@@ -518,14 +522,17 @@ public abstract class SessionFactoryUtils {
 	 * Hibernate Query object.
 	 * @param query the Hibernate Query object
 	 * @param sessionFactory Hibernate SessionFactory that the Query was created for
+	 * (can be null)
 	 * @see net.sf.hibernate.Query#setTimeout
 	 */
 	public static void applyTransactionTimeout(Query query, SessionFactory sessionFactory) {
 		Assert.notNull(query, "No Query object specified");
-		SessionHolder sessionHolder =
-		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null && sessionHolder.hasTimeout()) {
-			query.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+		if (sessionFactory != null) {
+			SessionHolder sessionHolder =
+					(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+			if (sessionHolder != null && sessionHolder.hasTimeout()) {
+				query.setTimeout(sessionHolder.getTimeToLiveInSeconds());
+			}
 		}
 	}
 
@@ -669,6 +676,7 @@ public abstract class SessionFactoryUtils {
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param session the Hibernate Session to close
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
+	 * (can be null)
 	 */
 	public static void releaseSession(Session session, SessionFactory sessionFactory) {
 		if (session == null) {
@@ -685,12 +693,13 @@ public abstract class SessionFactoryUtils {
 	 * Close the given Session or register it for deferred close.
 	 * @param session the Hibernate Session to close
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
+	 * (can be null)
 	 * @see #initDeferredClose
 	 * @see #processDeferredClose
 	 */
 	private static void closeSessionOrRegisterDeferredClose(Session session, SessionFactory sessionFactory) {
 		Map holderMap = (Map) deferredCloseHolder.get();
-		if (holderMap != null && holderMap.containsKey(sessionFactory)) {
+		if (holderMap != null && sessionFactory != null && holderMap.containsKey(sessionFactory)) {
 			logger.debug("Registering Hibernate Session for deferred close");
 			Set sessions = (Set) holderMap.get(sessionFactory);
 			sessions.add(session);
