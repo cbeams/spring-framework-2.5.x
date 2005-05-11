@@ -22,7 +22,6 @@ import oracle.toplink.exceptions.DatabaseException;
 import oracle.toplink.exceptions.OptimisticLockException;
 import oracle.toplink.exceptions.QueryException;
 import oracle.toplink.exceptions.TopLinkException;
-import oracle.toplink.queryframework.DatabaseQuery;
 import oracle.toplink.sessions.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -116,19 +115,6 @@ public abstract class SessionFactoryUtils {
 	}
 
 	/**
-	 * Apply the current transaction timeout, if any, to the given
-	 * TopLink Query object.
-	 * @param query the TopLink Query object
-	 * @param session TopLink Session that the Query was created for
-	 */
-	public static void applyTransactionTimeout(DatabaseQuery query, Session session) {
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(session);
-		if (sessionHolder != null && sessionHolder.getDeadline() != null) {
-			query.setQueryTimeout(sessionHolder.getTimeToLiveInSeconds());
-		}
-	}
-
-	/**
 	 * Convert the given TopLinkException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy.
 	 * @param ex TopLinkException that occured
@@ -160,15 +146,24 @@ public abstract class SessionFactoryUtils {
 	 * Close the given Session, created via the given factory,
 	 * if it is not managed externally (i.e. not bound to the thread).
 	 * @param session the TopLink Session to close
-	 * @param sessionFactory TOpLink SessionFactory that the Session was created with
+	 * @param sessionFactory TopLink SessionFactory that the Session was created with
+	 * (can be null)
 	 */
 	public static void releaseSession(Session session, SessionFactory sessionFactory) {
-		if (session == null || TransactionSynchronizationManager.hasResource(sessionFactory)) {
+		if (session == null) {
 			return;
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Closing TopLink Session");
+
+		if (sessionFactory != null) {
+			SessionHolder sessionHolder =
+					(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+			if (sessionHolder != null && session == sessionHolder.getSession()) {
+				// It's the transactional Session: Don't close it.
+				return;
+			}
 		}
+
+		logger.debug("Closing TopLink Session");
 		try {
 			session.release();
 		}
