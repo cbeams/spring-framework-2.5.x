@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- ResourceViewResolver -->
+	<bean id="viewResolver"	class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="cache" value="true"/>
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+		<property name="prefix" value="/WEB-INF/jsp/portlet/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+
+	<!-- PortletMode controller Map -->
+	<bean id="portletModeControllerMapping" class="org.springframework.web.portlet.support.PortletModeControllerMapping">
+		<property name="portletModeMap">
+			<map>
+				<entry key="view" value-ref="viewModeFrontController"/>
+			</map>
+		</property>
+	</bean>
+
+	<!--
+		- Front controller for VIEW PortletMode. A view that kicks off a new flow
+		- execution may parameterize this controller with a _flowId parameter.
+		- A view participating in an existing flow execution may simply pass it the
+		- appropriate _flowExecutionId and _eventId.
+	-->
+	<bean id="viewModeFrontController" class="org.springframework.web.flow.portlet.PortletFlowController">
+		<property name="flow" ref="person.Search" />
+	</bean>
+
+</beans>

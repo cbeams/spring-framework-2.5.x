@@ -3,22 +3,8 @@
 
 <beans>
 
-	<!-- A generic front controller for the entire app.  A view that kicks off a new flow execution
-	     may parameterize this controller with a _flowId parameter.  A view participating in an
-	     existing flow execution may simply pass it the appropriate _flowExecutionId and _eventId. -->
-	<bean id="phonebookFrontController" name="/phonebook.htm" class="org.springframework.web.flow.mvc.FlowController"/>
-	
 	<!-- search flow beans -->
-
-	<!-- A specific front controller, managing executions of the search flow.
-         Note: this definition is completely optional, as we can define a generic controller
-         for the entire app as above and have views parameterize it with the top-level flowId
-         we wish to create a new execution for (or an existing _flowExecutionId if participating in an
-         existing flow execution.)  -->
-	<bean id="searchFrontController" name="/search.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flow" ref="person.Search"/>
-	</bean>
-
+	
 	<!-- Xml FlowBuilder definition for the search flow -->
 	<bean id="person.Search" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
 		<property name="location" value="classpath:org/springframework/samples/phonebook/web/flow/search-flow.xml"/>
@@ -71,10 +57,6 @@
 	
 	<!-- detail flow beans -->
 
-	<bean id="detailFrontController" name="/detail.htm" class="org.springframework.web.flow.mvc.FlowController">
-		<property name="flow" ref="person.Detail"/>
-	</bean>
-
 	<!-- xml FlowBuilder definition for the detail flow -->
 	<bean id="person.Detail" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
 		<property name="location" value="classpath:org/springframework/samples/phonebook/web/flow/detail-flow.xml"/>
@@ -121,11 +103,6 @@
 				<entry key="colleagueId"><value>id</value></entry>
 			</map>
 		</property>
-	</bean>
-
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix" value="/WEB-INF/jsp/"/>
-		<property name="suffix" value=".jsp"/>
 	</bean>
 
 </beans>

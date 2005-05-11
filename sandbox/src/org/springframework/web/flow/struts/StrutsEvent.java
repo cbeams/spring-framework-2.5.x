@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
-import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
+import org.springframework.web.flow.execution.servlet.ServletEvent;
 
 /**
  * A client flow event originating from a Struts environment. Provides access
@@ -14,7 +14,7 @@ import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
  * 
  * @author Keith Donald
  */
-public class StrutsEvent extends HttpServletRequestEvent {
+public class StrutsEvent extends ServletEvent {
 
 	/**
 	 * The Struts action mapping.

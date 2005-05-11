@@ -33,7 +33,7 @@ import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.FlowExecutionListener;
 import org.springframework.web.flow.execution.FlowExecutionManager;
 import org.springframework.web.flow.execution.FlowExecutionStorage;
-import org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager;
+import org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 import org.springframework.web.struts.BindingActionForm;
 import org.springframework.web.struts.TemplateAction;
@@ -47,7 +47,7 @@ import org.springframework.web.util.WebUtils;
  * top-level (root) flow definition in the application.
  * <p>
  * Requests are managed by and delegated to a
- * {@link HttpServletFlowExecutionManager}, allowing reuse of common front flow
+ * {@link ServletFlowExecutionManager}, allowing reuse of common front flow
  * controller logic in other environments. Consult the JavaDoc of that class for
  * more information on how requests are processed.
  * <p>
@@ -110,7 +110,7 @@ import org.springframework.web.util.WebUtils;
  * <code>ActionForm</code> classes found in traditional Struts-based apps.
  * 
  * @see org.springframework.web.flow.struts.FlowActionMapping
- * @see org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager
+ * @see org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager
  * @see org.springframework.web.struts.BindingActionForm
  * @see org.springframework.web.struts.BindingRequestProcessor
  * @see org.springframework.web.struts.BindingPlugin
@@ -140,7 +140,7 @@ public class FlowAction extends TemplateAction {
 		FlowExecutionManager flowExecutionManager = createFlowExecutionManager(mapping);
 		FlowExecutionListener actionFormAdapter = createActionFormAdapter(request, form);
 		Event event = createEvent(mapping, form, request, response);
-		ViewDescriptor viewDescriptor =	flowExecutionManager.handle(event, actionFormAdapter);
+		ViewDescriptor viewDescriptor =	flowExecutionManager.onEvent(event, actionFormAdapter);
 		return toActionForward(viewDescriptor, mapping, request);
 	}
 

@@ -17,7 +17,7 @@ package org.springframework.web.flow.execution;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.flow.execution.servlet.HttpServletRequestEvent;
+import org.springframework.web.flow.execution.servlet.ServletEvent;
 
 import junit.framework.TestCase;
 
@@ -32,7 +32,7 @@ public class ExternalEventTests extends TestCase {
 		request.addParameter("page", "1");
 		request.addParameter("_eventId_numbers.x", "12");
 		request.addParameter("_eventId_numbers.y", "0");
-		ExternalEvent event=new HttpServletRequestEvent(request, new MockHttpServletResponse());
+		ExternalEvent event=new ServletEvent(request, new MockHttpServletResponse());
 		assertEquals("numbers", event.getId());
 	}
 
