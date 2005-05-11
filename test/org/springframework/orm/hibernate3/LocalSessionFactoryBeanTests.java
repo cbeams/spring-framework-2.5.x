@@ -53,6 +53,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * @author Juergen Hoeller
+ * @since 05.03.2005
  */
 public class LocalSessionFactoryBeanTests extends TestCase {
 
@@ -288,6 +289,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		};
 		sfb.setMappingResources(new String[0]);
 		sfb.setDataSource(new DriverManagerDataSource());
+		sfb.setExposeTransactionAwareSessionFactory(false);
 		sfb.afterPropertiesSet();
 		assertTrue(sessionFactory.equals(sfb.getObject()));
 		sfb.destroy();

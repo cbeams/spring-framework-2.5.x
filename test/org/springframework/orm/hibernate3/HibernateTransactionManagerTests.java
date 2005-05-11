@@ -36,6 +36,7 @@ import org.hibernate.JDBCException;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.classic.Session;
 import org.hibernate.dialect.HSQLDialect;
 
@@ -56,11 +57,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author Juergen Hoeller
- * @since 02.05.2003
+ * @since 05.03.2005
  */
 public class HibernateTransactionManagerTests extends TestCase {
 
-	public void testTransactionCommit() throws SQLException, HibernateException {
+	public void testTransactionCommit() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -68,7 +69,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
+		final Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 		MockControl queryControl = MockControl.createControl(Query.class);
@@ -108,28 +109,37 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 		queryControl.replay();
 
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
+				return sf;
+			}
+		};
+		lsfb.afterPropertiesSet();
+		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
-		tm.setSessionFactory(sf);
+		tm.setSessionFactory(sfProxy);
 		tm.setDataSource(ds);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 		tt.setTimeout(10);
-		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
-				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-				HibernateTemplate ht = new HibernateTemplate(sf);
+				assertEquals(session, sfProxy.getCurrentSession());
+				HibernateTemplate ht = new HibernateTemplate(sfProxy);
 				return ht.find("some query string");
 			}
 		});
 		assertTrue("Correct result list", result == list);
 
-		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		dsControl.verify();
@@ -140,7 +150,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testTransactionRollback() throws HibernateException, SQLException {
+	public void testTransactionRollback() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -196,7 +206,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testTransactionRollbackOnly() throws HibernateException, SQLException {
+	public void testTransactionRollbackOnly() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -249,13 +259,13 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testParticipatingTransactionWithCommit() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithCommit() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
+		final Session session = (Session) sessionControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 
@@ -277,7 +287,15 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 		txControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
+				return sf;
+			}
+		};
+		lsfb.afterPropertiesSet();
+		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+
+		PlatformTransactionManager tm = new HibernateTransactionManager(sfProxy);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		final List l = new ArrayList();
 		l.add("test");
@@ -286,7 +304,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				return tt.execute(new TransactionCallback() {
 					public Object doInTransaction(TransactionStatus status) {
-						HibernateTemplate ht = new HibernateTemplate(sf);
+						assertEquals(session, sfProxy.getCurrentSession());
+						HibernateTemplate ht = new HibernateTemplate(sfProxy);
 						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 						return ht.executeFind(new HibernateCallback() {
 							public Object doInHibernate(org.hibernate.Session session) {
@@ -304,7 +323,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testParticipatingTransactionWithRollback() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithRollback() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -358,7 +377,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testParticipatingTransactionWithRollbackOnly() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithRollbackOnly() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -411,7 +430,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testParticipatingTransactionWithWithRequiresNew() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithWithRequiresNew() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl session1Control = MockControl.createControl(Session.class);
@@ -486,7 +505,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testParticipatingTransactionWithWithNotSupported() throws HibernateException, SQLException {
+	public void testParticipatingTransactionWithWithNotSupported() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -552,11 +571,11 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.verify();
 		txControl.verify();
 	}
-	public void testTransactionWithPropagationSupports() throws HibernateException, SQLException {
+	public void testTransactionWithPropagationSupports() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
+		final Session session = (Session) sessionControl.getMock();
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
@@ -570,33 +589,42 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.replay();
 		sessionControl.replay();
 
-		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
+				return sf;
+			}
+		};
+		lsfb.afterPropertiesSet();
+		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+
+		PlatformTransactionManager tm = new HibernateTransactionManager(sfProxy);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
-		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 
 		tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
-				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 				assertTrue("Is not new transaction", !status.isNewTransaction());
-				HibernateTemplate ht = new HibernateTemplate(sf);
+				HibernateTemplate ht = new HibernateTemplate(sfProxy);
 				ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 				ht.execute(new HibernateCallback() {
 					public Object doInHibernate(org.hibernate.Session session) {
 						return null;
 					}
 				});
-				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
+				assertEquals(session, sfProxy.getCurrentSession());
 				return null;
 			}
 		});
 
-		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 		sfControl.verify();
 		sessionControl.verify();
 	}
 
-	public void testTransactionCommitWithEntityInterceptor() throws HibernateException, SQLException {
+	public void testTransactionCommitWithEntityInterceptor() throws Exception {
 		MockControl interceptorControl = MockControl.createControl(org.hibernate.Interceptor.class);
 		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
 		interceptorControl.replay();
@@ -657,7 +685,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.verify();
 	}
 
-	public void testTransactionCommitWithEntityInterceptorBeanName() throws HibernateException, SQLException {
+	public void testTransactionCommitWithEntityInterceptorBeanName() throws Exception {
 		MockControl interceptorControl = MockControl.createControl(org.hibernate.Interceptor.class);
 		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
 		interceptorControl.replay();
@@ -735,7 +763,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		beanFactoryControl.verify();
 	}
 
-	public void testTransactionCommitWithReadOnly() throws HibernateException, SQLException {
+	public void testTransactionCommitWithReadOnly() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -803,7 +831,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testTransactionCommitWithFlushingFailure() throws HibernateException, SQLException {
+	public void testTransactionCommitWithFlushingFailure() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -866,7 +894,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.verify();
 	}
 
-	public void testTransactionCommitWithPreBound() throws HibernateException, SQLException {
+	public void testTransactionCommitWithPreBound() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -947,7 +975,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testTransactionRollbackWithPreBound() throws HibernateException, SQLException {
+	public void testTransactionRollbackWithPreBound() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -1057,16 +1085,16 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx2Control.verify();
 	}
 
-	public void testExistingTransactionWithPropagationNestedAndRollback() throws SQLException, HibernateException {
+	public void testExistingTransactionWithPropagationNestedAndRollback() throws Exception {
 		doTestExistingTransactionWithPropagationNestedAndRollback(false);
 	}
 
-	public void testExistingTransactionWithManualSavepointAndRollback() throws SQLException, HibernateException {
+	public void testExistingTransactionWithManualSavepointAndRollback() throws Exception {
 		doTestExistingTransactionWithPropagationNestedAndRollback(true);
 	}
 
 	private void doTestExistingTransactionWithPropagationNestedAndRollback(final boolean manualSavepoint)
-			throws SQLException, HibernateException {
+			throws Exception {
 
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
@@ -1171,7 +1199,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testTransactionCommitWithNonExistingDatabase() throws HibernateException, IOException {
+	public void testTransactionCommitWithNonExistingDatabase() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setDataSource(ds);
@@ -1211,7 +1239,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
-	public void testTransactionCommitWithNonExistingDatabaseAndLazyConnection() throws HibernateException, IOException {
+	public void testTransactionCommitWithNonExistingDatabaseAndLazyConnection() throws Exception {
 		DriverManagerDataSource dsTarget = new DriverManagerDataSource();
 		final LazyConnectionDataSourceProxy ds = new LazyConnectionDataSourceProxy();
 		ds.setTargetDataSource(dsTarget);
