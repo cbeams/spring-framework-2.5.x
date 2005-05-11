@@ -27,29 +27,32 @@ import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
 
 /**
- * Objects of this class can manage flow executions on behalf of
- * a client, typically a web MVC controller. 
+ * A manager for the executing flows of the application.  This object is responsible for
+ * creating new flow executions as requested by the client, as well as signaling events
+ * for processing by existing, paused executions (that are waiting to be resumed in response
+ * to a user event).
  * <p>
- * The {@link #onEvent(Event) handle} method implements the following algorithm:
+ * The {@link #onEvent(Event)} method implements the following algorithm:
  * <ol>
  * <li>Look for a flow execution id in the event (in a parameter named
  * "_flowExecutionId").</li>
- * <li>If no flow execution id is found, a new flow execution will be
- * created. The top-level flow for which the execution is created is determined
+ * <li>If no flow execution id is found, a new flow execution is created.
+ * The top-level flow for which the execution is created is determined
  * by first looking for a flow id specified in the event using the "_flowId"
- * parameter. If this parameter is present, the specified flow will be
+ * parameter. If this parameter is present the specified flow will be
  * used, after lookup using a flow locator. If no "_flowId" parameter is
  * present, the default top-level flow configured for this manager is used.</li>
- * <li>If a flow execution id is found, the corresponding flow execution is
- * obtained from the flow execution storage.</li>
- * <li>If a new flow execution was created in the previous steps, it will be
+ * <li>If a flow execution id is found, the previously saved flow execution
+ * with that id is loaded from the storage.</li>
+ * <li>If a new flow execution was created in the previous steps, it is
  * started.</li>
- * <li>If an existing flow execution is continued, current state id
- * ("_currentStateId") and event id ("_eventId") parameter values will be
- * obtained from the event and will be signaled in the flow execution.</li>
+ * <li>If an existing flow execution is loaded from storage, the current state id
+ * ("_currentStateId") and event id ("_eventId") parameter values are
+ * extracted from the event.  The event is then signaled in that state, and 
+ * the executing flow is resumed in that state.</li>
  * <li>If the flow execution is still active after event processing, it
- * will be saved in the flow execution storage. This will generate a unique
- * flow execution id that will be exposed to the caller.</li>
+ * is saved in storage.  This process generates a unique flow execution
+ * id that will be exposed to the caller for reference on subsequent events.</li>
  * </ol>
  * 
  * @author Erwin Vervaet
@@ -190,8 +193,9 @@ public class FlowExecutionManager {
 	}
 
 	/**
-	 * The main entry point into managed flow executions.
-	 * @param event the incoming event
+	 * Signal the occurence of the specified event - this is the entry point into the 
+	 * webflow system for managing all executing flows.
+	 * @param event the event that occured
 	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
 	 */
@@ -200,8 +204,9 @@ public class FlowExecutionManager {
 	}
 
 	/**
-	 * The main entry point into managed flow executions.
-	 * @param event the incoming event
+	 * Signal the occurence of the specified event - this is the entry point into the 
+	 * webflow system for managing all executing flows.
+	 * @param event the event that occured
 	 * @param listener a listener interested in flow execution
 	 *        lifecycle events that happen <i>while handling this event</i>
 	 * @return the view descriptor of the model and view to render
