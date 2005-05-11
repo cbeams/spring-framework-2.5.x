@@ -272,18 +272,19 @@ public class FlowExecutionImpl implements FlowExecution, FlowContext, Serializab
 		return new InternalStateContext(originatingEvent, this);
 	}
 
-	/**
-	 * Returns the flow of the currently active flow session.
-	 */
 	public Flow getActiveFlow() {
 		return getActiveSession().getFlow();
 	}
 
+	public FlowSession getActiveSession() {
+		return getActiveSessionInternal();
+	}
+	
 	/**
 	 * Returns the currently active flow session.
 	 * @throws IllegalStateException this execution is not active
 	 */
-	public FlowSessionImpl getActiveSession() throws IllegalStateException {
+	protected FlowSessionImpl getActiveSessionInternal() throws IllegalStateException {
 		assertActive();
 		return (FlowSessionImpl)executingFlowSessions.peek();
 	}
@@ -329,7 +330,7 @@ public class FlowExecutionImpl implements FlowExecution, FlowContext, Serializab
 	 * @param newState the new current state
 	 */
 	protected void setCurrentState(State newState) {
-		getActiveSession().setCurrentState(newState);
+		getActiveSessionInternal().setCurrentState(newState);
 	}
 
 	/**
@@ -343,7 +344,7 @@ public class FlowExecutionImpl implements FlowExecution, FlowContext, Serializab
 	protected FlowSession activateSession(Flow subflow, Map input) {
 		FlowSessionImpl session;
 		if (!executingFlowSessions.isEmpty()) {
-			FlowSessionImpl parent = getActiveSession();
+			FlowSessionImpl parent = getActiveSessionInternal();
 			parent.setStatus(FlowSessionStatus.SUSPENDED);
 			session = createFlowSession(subflow, input, parent);
 		} else {
