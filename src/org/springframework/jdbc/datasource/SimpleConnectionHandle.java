@@ -40,4 +40,11 @@ public class SimpleConnectionHandle implements ConnectionHandle {
 		return connection;
 	}
 
+	public void releaseConnection(Connection con) {
+	}
+
+	public String toString() {
+		return "SimpleConnectionHandle: " + this.connection;
+	}
+
 }
