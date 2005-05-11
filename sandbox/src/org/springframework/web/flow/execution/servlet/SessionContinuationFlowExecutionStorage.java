@@ -36,11 +36,11 @@ import org.springframework.web.util.WebUtils;
  * This storage strategy requires a <code>HttpServletRequestEvent</code>.
  * 
  * @see org.springframework.web.flow.support.ExpiredFlowCleanupFilter
- * @see org.springframework.web.flow.execution.servlet.HttpServletRequestEvent
+ * @see org.springframework.web.flow.execution.servlet.ServletEvent
  * 
  * @author Erwin Vervaet
  */
-public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlowExecutionStorage {
+public class SessionContinuationFlowExecutionStorage extends SessionFlowExecutionStorage {
 
 	private boolean compress = false;
 

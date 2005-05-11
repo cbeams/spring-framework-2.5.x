@@ -22,14 +22,14 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager;
+import org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
  * Web controller for the Spring web MVC framework that routes incoming requests to one or more
  * managed web flows.  Requests into the web flow system are managed using a configurable 
- * {@link HttpServletFlowExecutionManager}.  Consult the JavaDoc of that class for more
+ * {@link ServletFlowExecutionManager}.  Consult the JavaDoc of that class for more
  * information on how requests are processed.
  * <p>
  * Note that a single FlowController may manage executions for all flows of your application--simply
@@ -50,7 +50,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * </tr>
  * <tr>
  * <td>flowExecutionManager</td>
- * <td>{@link org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager default}</td>
+ * <td>{@link org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager default}</td>
  * <td>Configures the HTTP servlet flow execution manager implementation to use.</td>
  * </tr>
  * <tr>
@@ -61,7 +61,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * </tr>
  * </table>
  * 
- * @see org.springframework.web.flow.execution.servlet.HttpServletFlowExecutionManager
+ * @see org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager
  * 
  * @author Erwin Vervaet
  * @author Keith Donald
@@ -71,7 +71,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	/**
 	 * The HTTP servlet-based manager for flow executions.
 	 */
-	private HttpServletFlowExecutionManager flowExecutionManager;
+	private ServletFlowExecutionManager flowExecutionManager;
 
 	/**
 	 * Create a new FlowController.
@@ -88,7 +88,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * Note: do not call both this method and setFlow(Flow) -- call one or the other. 
 	 * @param manager the flow execution manager.
 	 */
-	public void setFlowExecutionManager(HttpServletFlowExecutionManager manager) {
+	public void setFlowExecutionManager(ServletFlowExecutionManager manager) {
 		this.flowExecutionManager = manager;
 	}
 
@@ -107,7 +107,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 */
 	protected void initDefaults() {
 		setCacheSeconds(0);
-		setFlowExecutionManager(new HttpServletFlowExecutionManager());
+		setFlowExecutionManager(new ServletFlowExecutionManager());
 	}
 	
 	public void afterPropertiesSet() throws Exception {
@@ -119,7 +119,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * Returns the flow execution manager used by this controller.
 	 * @return the HTTP flow execution manager
 	 */
-	protected HttpServletFlowExecutionManager getFlowExecutionManager() {
+	protected ServletFlowExecutionManager getFlowExecutionManager() {
 		return flowExecutionManager;
 	}
 

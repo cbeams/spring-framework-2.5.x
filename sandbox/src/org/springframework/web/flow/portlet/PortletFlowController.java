@@ -73,15 +73,15 @@ public class PortletFlowController extends AbstractController implements BeanFac
 	public static final String VIEWDESCRIPTOR_ATTRIBUTE = "ActionRequest:ViewDescriptor";
 	
 	/**
-	 * Our bean factory.
-	 */
-	private BeanFactory beanFactory;
-	
-	/**
 	 * The portlet based manager for flow executions.
 	 */
 	private PortletFlowExecutionManager flowExecutionManager;
 
+	/**
+	 * Our bean factory.
+	 */
+	private BeanFactory beanFactory;
+	
 	/**
 	 * Create a new FlowController.
 	 */
@@ -92,8 +92,8 @@ public class PortletFlowController extends AbstractController implements BeanFac
 	/**
 	 * Create a new FlowController.
 	 */
-	public PortletFlowController(PortletFlowExecutionManager manager) {
-		setFlowExecutionManager(manager);
+	public PortletFlowController(PortletFlowExecutionManager flowExecutor) {
+		setFlowExecutionManager(flowExecutor);
 		initDefaults();
 	}
 
@@ -102,19 +102,6 @@ public class PortletFlowController extends AbstractController implements BeanFac
 	 */
 	protected void initDefaults() {
 		setFlowExecutionManager(new PortletFlowExecutionManager());
-	}
-	
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-	
-	protected BeanFactory getBeanFactory() {
-		return this.beanFactory;
-	}
-
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.flowExecutionManager, "The portlet flow execution manager is required");
-		this.flowExecutionManager.setBeanFactory(getBeanFactory());
 	}
 
 	/**
@@ -127,10 +114,23 @@ public class PortletFlowController extends AbstractController implements BeanFac
 
 	/**
 	 * Configures the flow execution manager implementation to use.
-	 * @param manager the flow execution manager.
+	 * @param flowExecutor the flow execution manager.
 	 */
 	public void setFlowExecutionManager(PortletFlowExecutionManager manager) {
 		this.flowExecutionManager = manager;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
+	}
+	
+	protected BeanFactory getBeanFactory() {
+		return this.beanFactory;
+	}
+
+	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(this.flowExecutionManager, "The portlet flow execution manager is required");
+		this.flowExecutionManager.setBeanFactory(getBeanFactory());
 	}
 
 	/**

@@ -25,7 +25,7 @@ import org.springframework.web.flow.ActionExecutionException;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.action.AbstractAction;
-import org.springframework.web.flow.execution.portlet.PortletRequestEvent;
+import org.springframework.web.flow.execution.portlet.PortletEvent;
 
 /**
  * Action implementation that changes a PortletResponse mode.
@@ -83,11 +83,11 @@ public class SetPortletModeAction extends AbstractAction {
 	 *         unchecked
 	 */
 	protected Event doExecute(RequestContext context) throws Exception {
-		Assert.isInstanceOf(PortletRequestEvent.class, context.getSourceEvent(), "'"
+		Assert.isInstanceOf(PortletEvent.class, context.getSourceEvent(), "'"
 				+ ClassUtils.getShortName(this.getClass())
 				+ "' can only work with 'PortletRequestEvent'");
 
-		PortletRequestEvent event = (PortletRequestEvent)context.getSourceEvent();
+		PortletEvent event = (PortletEvent)context.getSourceEvent();
 
 		if (event.getResponse() instanceof ActionResponse) {
 			PortletMode mode = getPortletMode();

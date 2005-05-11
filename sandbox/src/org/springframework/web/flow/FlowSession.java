@@ -18,7 +18,7 @@ package org.springframework.web.flow;
  * Note that a flow <i>session</i> is in no way linked to an HTTP session! It
  * just uses the familiar "request/session" naming convention.
  * 
- * @see org.springframework.web.flow.FlowExecutor
+ * @see org.springframework.web.flow.FlowExecutionManager
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

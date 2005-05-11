@@ -32,7 +32,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  * <p>
  * This storage strategy requires a <code>PortletRequestEvent</code>.
  * 
- * @see org.springframework.web.flow.execution.portlet.PortletRequestEvent
+ * @see org.springframework.web.flow.execution.portlet.PortletEvent
  * 
  * @author J.Enrique Ruiz
  * @author César Ordiñana

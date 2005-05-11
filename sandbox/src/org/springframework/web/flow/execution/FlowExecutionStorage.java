@@ -30,7 +30,7 @@ import org.springframework.web.flow.Event;
  * Some flow execution storage strategies (like
  * {@link org.springframework.web.flow.execution.ClientContinuationFlowExecutionStorage}
  * and
- * {@link org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage})
+ * {@link org.springframework.web.flow.execution.servlet.SessionContinuationFlowExecutionStorage})
  * create copies (clones) of a flow execution to enable <i>free browsing</i>
  * in a flow. Those strategies are not compatible with the default application
  * transaction implementation. Usually this is not a problem since free browing

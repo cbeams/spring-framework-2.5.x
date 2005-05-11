@@ -27,9 +27,9 @@ import org.springframework.binding.AttributeSource;
  * <p>
  * A new request context is created when one of the entry points on the
  * FlowExecution facade interface is invoked, either
- * ({@link org.springframework.web.flow.FlowExecutor#start(Event)}
+ * ({@link org.springframework.web.flow.FlowExecutionManager#start(Event)}
  * to activate a new executing flow, or
- * {@link org.springframework.web.flow.FlowExecutor#signalEvent(Event)}) to
+ * {@link org.springframework.web.flow.FlowExecutionManager#signalEvent(Event)}) to
  * manipulate the state of an already executing flow.
  * <p>
  * Once created, this context interface is passed around throughout request
@@ -42,7 +42,7 @@ import org.springframework.binding.AttributeSource;
  * Note that a <i>request</i> context is in no way linked to an HTTP request!
  * It just uses the familiar "request" naming convention.
  * 
- * @see org.springframework.web.flow.FlowExecutor
+ * @see org.springframework.web.flow.FlowExecutionManager
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

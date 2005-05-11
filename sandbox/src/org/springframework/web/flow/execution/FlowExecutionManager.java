@@ -30,7 +30,7 @@ import org.springframework.web.flow.ViewDescriptor;
  * Objects of this class can manage flow executions on behalf of
  * a client, typically a web MVC controller. 
  * <p>
- * The {@link #handle(Event) handle} method implements the following algorithm:
+ * The {@link #onEvent(Event) handle} method implements the following algorithm:
  * <ol>
  * <li>Look for a flow execution id in the event (in a parameter named
  * "_flowExecutionId").</li>
@@ -109,7 +109,7 @@ public class FlowExecutionManager {
 	 * 
 	 * @see #setFlow(Flow)
 	 * @see #setFlowLocator(FlowLocator)
-	 * @see #setFlowExecutionListener(FlowExecutionListener)
+	 * @see #setListener(FlowExecutionListener)
 	 * @see #setListeners(FlowExecutionListener[])
 	 * @see #setStorage(FlowExecutionStorage) 
 	 */
@@ -195,8 +195,8 @@ public class FlowExecutionManager {
 	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
 	 */
-	public ViewDescriptor handle(Event event) throws Exception {
-		return handle(event, null);
+	public ViewDescriptor onEvent(Event event) throws Exception {
+		return onEvent(event, null);
 	}
 
 	/**
@@ -207,7 +207,7 @@ public class FlowExecutionManager {
 	 * @return the view descriptor of the model and view to render
 	 * @throws Exception in case of errors
 	 */
-	public ViewDescriptor handle(Event event, FlowExecutionListener listener) throws Exception {
+	public ViewDescriptor onEvent(Event event, FlowExecutionListener listener) throws Exception {
 		FlowExecution flowExecution;
 		ViewDescriptor viewDescriptor;
 		String id = getFlowExecutionId(event);

@@ -85,7 +85,7 @@ public class PortletFlowExecutionManager extends FlowExecutionManager implements
 	 * @throws Exception in case of errors
 	 */
 	public ViewDescriptor handle(PortletRequest request, PortletResponse response) throws Exception {
-		return handle(createEvent(request, response));
+		return onEvent(createEvent(request, response));
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class PortletFlowExecutionManager extends FlowExecutionManager implements
 	 */
 	public ViewDescriptor handle(PortletRequest request, PortletResponse response,
 			FlowExecutionListener flowExecutionListener) throws Exception {
-		return handle(createEvent(request, response), flowExecutionListener);
+		return onEvent(createEvent(request, response), flowExecutionListener);
 	}
 
 	// subclassing hooks
@@ -108,6 +108,6 @@ public class PortletFlowExecutionManager extends FlowExecutionManager implements
 	 * Create a flow event wrapping given portlet request and response.
 	 */
 	protected Event createEvent(PortletRequest request, PortletResponse response) {
-		return new PortletRequestEvent(request, response);
+		return new PortletEvent(request, response);
 	}
 }

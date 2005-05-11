@@ -36,12 +36,12 @@ import org.springframework.web.flow.execution.FlowExecutionManager;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public class HttpServletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
+public class ServletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
 
 	/**
 	 * Creates an HTTP-servlet based flow execution manager.
 	 */
-	public HttpServletFlowExecutionManager() {
+	public ServletFlowExecutionManager() {
 		initDefaults();
 	}
 
@@ -49,7 +49,7 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	 * Creates an HTTP-servlet based flow execution manager.
 	 * @param flow the flow to manage
 	 */
-	public HttpServletFlowExecutionManager(Flow flow) {
+	public ServletFlowExecutionManager(Flow flow) {
 		initDefaults();
 		setFlow(flow);
 	}
@@ -58,7 +58,7 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	 * Creates an HTTP-servlet based flow execution manager.
 	 * @param flowLocator the locator to find flows to manage
 	 */
-	public HttpServletFlowExecutionManager(FlowLocator flowLocator) {
+	public ServletFlowExecutionManager(FlowLocator flowLocator) {
 		initDefaults();
 		setFlowLocator(flowLocator);
 	}
@@ -67,7 +67,7 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	 * Set default properties for this manager.
 	 */
 	protected void initDefaults() {
-		setStorage(new HttpSessionFlowExecutionStorage());
+		setStorage(new SessionFlowExecutionStorage());
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -85,7 +85,7 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	 * @throws Exception in case of errors
 	 */
 	public ViewDescriptor handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		return handle(createEvent(request, response));
+		return onEvent(createEvent(request, response));
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	 */
 	public ViewDescriptor handle(HttpServletRequest request, HttpServletResponse response,
 			FlowExecutionListener flowExecutionListener) throws Exception {
-		return handle(createEvent(request, response), flowExecutionListener);
+		return onEvent(createEvent(request, response), flowExecutionListener);
 	}
 
 	// subclassing hooks
@@ -110,7 +110,7 @@ public class HttpServletFlowExecutionManager extends FlowExecutionManager implem
 	 * request parameters.
 	 */
 	protected Event createEvent(HttpServletRequest request, HttpServletResponse response) {
-		return new HttpServletRequestEvent(request, response);
+		return new ServletEvent(request, response);
 	}
 
 }

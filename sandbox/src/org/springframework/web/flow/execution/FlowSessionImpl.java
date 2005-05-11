@@ -52,7 +52,7 @@ import org.springframework.web.flow.State;
  * Note that a flow <i>session</i> is in no way linked to an HTTP session! It
  * just uses the familiar request/session naming convention.
  * 
- * @see org.springframework.web.flow.FlowExecutor
+ * @see org.springframework.web.flow.FlowExecutionManager
  * @see org.springframework.web.flow.execution.FlowExecutionImpl
  * 
  * @author Keith Donald

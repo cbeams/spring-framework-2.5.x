@@ -37,9 +37,9 @@ import org.springframework.web.util.WebUtils;
  * 
  * @author Erwin Vervaet
  */
-public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
+public class SessionFlowExecutionStorage implements FlowExecutionStorage {
 
-	protected final Log logger = LogFactory.getLog(HttpSessionFlowExecutionStorage.class);
+	protected final Log logger = LogFactory.getLog(SessionFlowExecutionStorage.class);
 
 	private boolean createSession = true;
 
@@ -100,9 +100,9 @@ public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 	/**
 	 * Return (cast) given event as an HttpServletRequestEvent.
 	 */
-	protected HttpServletRequestEvent getHttpServletRequestEvent(Event event) {
-		Assert.isInstanceOf(HttpServletRequestEvent.class, event, "Wrong event type: ");
-		return (HttpServletRequestEvent)event;
+	protected ServletEvent getHttpServletRequestEvent(Event event) {
+		Assert.isInstanceOf(ServletEvent.class, event, "Wrong event type: ");
+		return (ServletEvent)event;
 	}
 
 	/**

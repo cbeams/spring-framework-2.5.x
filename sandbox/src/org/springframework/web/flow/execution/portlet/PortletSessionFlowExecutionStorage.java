@@ -101,9 +101,9 @@ public class PortletSessionFlowExecutionStorage implements FlowExecutionStorage 
 	/**
 	 * Return (cast) given event as a PortletRequestEvent.
 	 */
-	protected PortletRequestEvent getPortletRequestEvent(Event event) {
-		Assert.isInstanceOf(PortletRequestEvent.class, event, "Wrong event type: ");
-		return (PortletRequestEvent) event;
+	protected PortletEvent getPortletRequestEvent(Event event) {
+		Assert.isInstanceOf(PortletEvent.class, event, "Wrong event type: ");
+		return (PortletEvent) event;
 	}
 
 	/**

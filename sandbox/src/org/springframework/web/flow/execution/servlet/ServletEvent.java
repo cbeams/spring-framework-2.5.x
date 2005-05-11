@@ -29,7 +29,7 @@ import org.springframework.web.util.WebUtils;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class HttpServletRequestEvent extends ExternalEvent {
+public class ServletEvent extends ExternalEvent {
 
 	/**
 	 * The event to be signaled can also be sent using a request
@@ -51,7 +51,7 @@ public class HttpServletRequestEvent extends ExternalEvent {
 	 * @param request the HTTP servlet request
 	 * @param response the HTTP servlet response associated with the request
 	 */
-	public HttpServletRequestEvent(HttpServletRequest request, HttpServletResponse response) {
+	public ServletEvent(HttpServletRequest request, HttpServletResponse response) {
 		this(request, response, EVENT_ID_PARAMETER, EVENT_ID_REQUEST_ATTRIBUTE, CURRENT_STATE_ID_PARAMETER, PARAMETER_VALUE_DELIMITER);
 	}
 
@@ -67,7 +67,7 @@ public class HttpServletRequestEvent extends ExternalEvent {
 	 *        sent as part of the name of a request parameter
 	 *        (e.g. "_eventId_value=bar")
 	 */
-	public HttpServletRequestEvent(HttpServletRequest request, HttpServletResponse response,
+	public ServletEvent(HttpServletRequest request, HttpServletResponse response,
 			String eventIdParameterName, String eventIdAttributeName, String currentStateIdParameterName,
 			String parameterValueDelimiter) {
 		super(request);
