@@ -23,7 +23,7 @@ import org.springframework.web.flow.ViewDescriptor;
 
 /**
  * Represents a <i>client instance</i> of an executing flow.  This is the central facade
- * interface for managing an execution of a flow.
+ * interface for managing an execution of a single flow.
  * <p>
  * Typically, when the browser requests to execute a new flow, an instance of an object
  * implementing this interface is created by a controlling FlowExecutionManager.  After creation,
