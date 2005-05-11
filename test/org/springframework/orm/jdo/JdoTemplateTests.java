@@ -166,9 +166,7 @@ public class JdoTemplateTests extends TestCase {
 	public void testGetObjectByIdWithClassAndValue() {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
-		pm.newObjectIdInstance(String.class, "0");
-		pmControl.setReturnValue("OID");
-		pm.getObjectById("OID", true);
+		pm.getObjectById(String.class, "0");
 		pmControl.setReturnValue("A");
 		pm.close();
 		pmControl.setVoidCallable(1);
@@ -191,6 +189,22 @@ public class JdoTemplateTests extends TestCase {
 
 		JdoTemplate jt = new JdoTemplate(pmf);
 		jt.evict("0");
+	}
+
+	public void testEvictAllWithCollection() {
+		Collection coll = new HashSet();
+
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.evictAll(coll);
+		pmControl.setVoidCallable(1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		jt.evictAll(coll);
 	}
 
 	public void testEvictAll() {
@@ -221,6 +235,22 @@ public class JdoTemplateTests extends TestCase {
 		jt.refresh("0");
 	}
 
+	public void testRefreshAllWithCollection() {
+		Collection coll = new HashSet();
+
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.refreshAll(coll);
+		pmControl.setVoidCallable(1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		jt.refreshAll(coll);
+	}
+
 	public void testRefreshAll() {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
@@ -249,6 +279,22 @@ public class JdoTemplateTests extends TestCase {
 		jt.makePersistent("0");
 	}
 
+	public void testMakePersistentAll() {
+		Collection coll = new HashSet();
+
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.makePersistentAll(coll);
+		pmControl.setVoidCallable(1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		jt.makePersistentAll(coll);
+	}
+
 	public void testDeletePersistent() {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
@@ -264,9 +310,10 @@ public class JdoTemplateTests extends TestCase {
 	}
 
 	public void testDeletePersistentAll() {
+		Collection coll = new HashSet();
+
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm);
-		Collection coll = new HashSet();
 		pm.deletePersistentAll(coll);
 		pmControl.setVoidCallable(1);
 		pm.close();
@@ -278,7 +325,83 @@ public class JdoTemplateTests extends TestCase {
 		jt.deletePersistentAll(coll);
 	}
 
+	public void testDetachCopy() {
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.detachCopy("0");
+		pmControl.setReturnValue("0x", 1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		assertEquals("0x", jt.detachCopy("0"));
+	}
+
+	public void testDetachCopyAll() {
+		Collection attached = new HashSet();
+		Collection detached = new HashSet();
+
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.detachCopyAll(attached);
+		pmControl.setReturnValue(detached, 1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		assertEquals(detached, jt.detachCopyAll(attached));
+	}
+
+	public void testAttachCopy() {
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.attachCopy("0x", true);
+		pmControl.setReturnValue("0", 1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		assertEquals("0", jt.attachCopy("0x"));
+	}
+
+	public void testAttachCopyAll() {
+		Collection detached = new HashSet();
+		Collection attached = new HashSet();
+
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.attachCopyAll(detached, true);
+		pmControl.setReturnValue(attached, 1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		assertEquals(attached, jt.attachCopyAll(detached));
+	}
+
 	public void testFlush() {
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.flush();
+		pmControl.setVoidCallable(1);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		jt.flush();
+	}
+
+	public void testFlushWithDialect() {
 		MockControl dialectControl = MockControl.createControl(JdoDialect.class);
 		JdoDialect dialect = (JdoDialect) dialectControl.getMock();
 
@@ -467,6 +590,72 @@ public class JdoTemplateTests extends TestCase {
 
 		JdoTemplate jt = new JdoTemplate(pmf);
 		assertEquals(coll, jt.find(String.class, "a == b", "params", values, "c asc"));
+		queryControl.verify();
+	}
+
+	public void testFindWithLanguageAndQueryObject() {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.newQuery(Query.SQL, "some SQL");
+		pmControl.setReturnValue(query);
+		Collection coll = new HashSet();
+		query.execute();
+		queryControl.setReturnValue(coll);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+		queryControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		assertEquals(coll, jt.find(Query.SQL, "some SQL"));
+		queryControl.verify();
+	}
+
+	public void testFindWithQueryString() {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.newQuery("single string query");
+		pmControl.setReturnValue(query);
+		Collection coll = new HashSet();
+		query.execute();
+		queryControl.setReturnValue(coll);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+		queryControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		assertEquals(coll, jt.find("single string query"));
+		queryControl.verify();
+	}
+
+	public void testFindByNamedQuery() {
+		MockControl queryControl = MockControl.createControl(Query.class);
+		Query query = (Query) queryControl.getMock();
+
+		pmf.getPersistenceManager();
+		pmfControl.setReturnValue(pm);
+		pm.newNamedQuery(String.class, "some query name");
+		pmControl.setReturnValue(query);
+		Collection coll = new HashSet();
+		query.execute();
+		queryControl.setReturnValue(coll);
+		pm.close();
+		pmControl.setVoidCallable(1);
+		pmfControl.replay();
+		pmControl.replay();
+		queryControl.replay();
+
+		JdoTemplate jt = new JdoTemplate(pmf);
+		assertEquals(coll, jt.findByNamedQuery(String.class, "some query name"));
 		queryControl.verify();
 	}
 

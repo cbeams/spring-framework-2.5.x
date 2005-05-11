@@ -16,7 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,6 +29,7 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -97,6 +97,21 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
+	private static Method newObjectIdInstanceMethod;
+
+	static {
+		// Determine whether the JDO 1.0 newObjectIdInstance(Class, String) method
+		// is available, for use in JdoTemplate's getObjectById implementation.
+		try {
+			newObjectIdInstanceMethod = PersistenceManager.class.getMethod(
+					"newObjectIdInstance", new Class[] {Class.class, String.class});
+		}
+		catch (NoSuchMethodException ex) {
+			newObjectIdInstanceMethod = null;
+		}
+	}
+
+
 	private boolean allowCreate = true;
 
 	private boolean exposeNativePersistenceManager = true;
@@ -120,8 +135,8 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	/**
 	 * Create a new JdoTemplate instance.
 	 * @param pmf PersistenceManagerFactory to create PersistenceManagers
-	 * @param allowCreate if a new PersistenceManager should be created
-	 * if no thread-bound found
+	 * @param allowCreate if a non-transactional PersistenceManager should be created
+	 * when no transactional PersistenceManager can be found for the current thread
 	 */
 	public JdoTemplate(PersistenceManagerFactory pmf, boolean allowCreate) {
 		setPersistenceManagerFactory(pmf);
@@ -130,12 +145,14 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	}
 
 	/**
-	 * Set if a new PersistenceManager should be created if no thread-bound found.
-	 * <p>JdoTemplate is aware of a respective PersistenceManager bound to the
+	 * Set if a new PersistenceManager should be created when no transactional
+	 * PersistenceManager can be found for the current thread.
+	 * <p>JdoTemplate is aware of a corresponding PersistenceManager bound to the
 	 * current thread, for example when using JdoTransactionManager.
-	 * If allowCreate is true, a new PersistenceManager will be created if none
-	 * found. If false, an IllegalStateException will get thrown in this case.
-	 * @see PersistenceManagerFactoryUtils#getPersistenceManager
+	 * If allowCreate is true, a new non-transactional PersistenceManager will be
+	 * created if none found, which needs to be closed at the end of the operation.
+	 * If false, an IllegalStateException will get thrown in this case.
+	 * @see PersistenceManagerFactoryUtils#getPersistenceManager(javax.jdo.PersistenceManagerFactory, boolean)
 	 */
 	public void setAllowCreate(boolean allowCreate) {
 		this.allowCreate = allowCreate;
@@ -234,7 +251,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	// Convenience methods for load, save, delete
 	//-------------------------------------------------------------------------
 
-	public Object getObjectById(final Serializable objectId) throws DataAccessException {
+	public Object getObjectById(final Object objectId) throws DataAccessException {
 		return execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.getObjectById(objectId, true);
@@ -242,11 +259,27 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		});
 	}
 
-	public Object getObjectById(final Class entityClass, final Serializable idValue) throws DataAccessException {
+	public Object getObjectById(final Class entityClass, final Object idValue) throws DataAccessException {
 		return execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Object oid = pm.newObjectIdInstance(entityClass, idValue.toString());
-				return pm.getObjectById(oid, true);
+				// Use JDO 1.0 newObjectIdInstance(Class, String) method, if available.
+				if (newObjectIdInstanceMethod != null) {
+					Object id = null;
+					try {
+						id = newObjectIdInstanceMethod.invoke(pm, new Object[] {entityClass, idValue.toString()});
+					}
+					catch (InvocationTargetException ex) {
+						throw new InvalidDataAccessResourceUsageException(
+								"Could not invoke JDO 1.0 newObjectIdInstance(Class, String) method", ex.getTargetException());
+					}
+					catch (Exception ex) {
+						throw new InvalidDataAccessResourceUsageException(
+								"Could not invoke JDO 1.0 newObjectIdInstance(Class, String) method", ex);
+					}
+					return pm.getObjectById(id, true);
+				}
+				// Use JDO 2.0 getObjectById(Class, Object) method.
+				return pm.getObjectById(entityClass, idValue);
 			}
 		});
 	}
@@ -255,6 +288,15 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.evict(entity);
+				return null;
+			}
+		});
+	}
+
+	public void evictAll(final Collection entities) throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.evictAll(entities);
 				return null;
 			}
 		});
@@ -278,6 +320,15 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		});
 	}
 
+	public void refreshAll(final Collection entities) throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.refreshAll(entities);
+				return null;
+			}
+		});
+	}
+
 	public void refreshAll() throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
@@ -291,6 +342,15 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.makePersistent(entity);
+				return null;
+			}
+		});
+	}
+
+	public void makePersistentAll(final Collection entities) throws DataAccessException {
+		execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				pm.makePersistentAll(entities);
 				return null;
 			}
 		});
@@ -310,6 +370,38 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				pm.deletePersistentAll(entities);
 				return null;
+			}
+		});
+	}
+
+	public Object detachCopy(final Object entity) {
+		return execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				return pm.detachCopy(entity);
+			}
+		});
+	}
+
+	public Collection detachCopyAll(final Collection entities) {
+		return (Collection) execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				return pm.detachCopyAll(entities);
+			}
+		});
+	}
+
+	public Object attachCopy(final Object detachedEntity) {
+		return execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				return pm.attachCopy(detachedEntity, true);
+			}
+		});
+	}
+
+	public Collection attachCopyAll(final Collection detachedEntities) {
+		return (Collection) execute(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				return pm.attachCopyAll(detachedEntities, true);
 			}
 		});
 	}
@@ -397,6 +489,36 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		});
 	}
 
+	public Collection find(final String language, final Object queryObject) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(language, queryObject);
+				prepareQuery(query);
+				return query.execute();
+			}
+		});
+	}
+
+	public Collection find(final String queryString) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newQuery(queryString);
+				prepareQuery(query);
+				return query.execute();
+			}
+		});
+	}
+
+	public Collection findByNamedQuery(final Class entityClass, final String queryName) throws DataAccessException {
+		return executeFind(new JdoCallback() {
+			public Object doInJdo(PersistenceManager pm) throws JDOException {
+				Query query = pm.newNamedQuery(entityClass, queryName);
+				prepareQuery(query);
+				return query.execute();
+			}
+		});
+	}
+
 
 	/**
 	 * Prepare the given JDO query object. To be used within a JdoCallback.
@@ -440,7 +562,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				return null;
 			}
 
-			// Invoke method on target connection.
+			// Invoke method on target PersistenceManager.
 			try {
 				Object retVal = method.invoke(this.target, args);
 

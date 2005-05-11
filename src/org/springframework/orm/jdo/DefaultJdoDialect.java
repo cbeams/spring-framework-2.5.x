@@ -16,10 +16,10 @@
 
 package org.springframework.orm.jdo;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.jdo.JDOException;
-import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
@@ -37,18 +38,20 @@ import org.springframework.transaction.TransactionException;
 
 /**
  * Default implementation of the JdoDialect interface.
+ * Updated to leverage the JDO 2.0 API, as of Spring 1.2.
  * Used by JdoAccessor and JdoTransactionManager as default.
  *
  * <p>Simply begins a standard JDO transaction in <code>beginTransaction</code>.
- * Returns null on <code>getJdbcConnection</code>.
+ * Returns a handle for a JDO2 DataStoreConnection on <code>getJdbcConnection</code>.
  * Ignores a given query timeout in <code>applyQueryTimeout</code>.
- * Throws a JDOUnsupportedOptionException on <code>flush</code>.
+ * Calls the JDO2 flush operation on <code>flush</code>.
  * Delegates to PersistenceManagerFactoryUtils for exception translation.
  *
- * <p>This class will be adapted to JDO 2.0 as soon as the latter is available.
- * JDBC Connection retrieval and flushing will then default to the respective
- * JDO 2.0 methods. Vendor-specific subclasses will still be necessary for
- * special transaction semantics and more sophisticated exception translation.
+ * <p>Note that, even with JDO2, vendor-specific subclasses are still necessary
+ * for special transaction semantics and more sophisticated exception translation.
+ * Furthermore, vendor-specific subclasses are encouraged to expose the native
+ * JDBC Connection on <code>getJdbcConnection</code>, rather than JDO2's wrapper
+ * handle.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -154,12 +157,30 @@ public class DefaultJdoDialect implements JdoDialect {
 	}
 
 	/**
-	 * This implementation returns null, to indicate that JDBC Connection
-	 * retrieval is not supported.
+	 * This implementation returns a DataStoreConnectionHandle for JDO2,
+	 * which will also work on JDO1 until actually accessing the JDBC Connection.
+	 * <p>For pre-JDO2 implementations, override this method to return the
+	 * Connection through the corresponding vendor-specific mechanism, or null
+	 * if the Connection is not retrievable.
+	 * <p><b>NOTE:</b> A JDO2 DataStoreConnection is always a wrapper,
+	 * never the native JDBC Connection. If you need access to the native JDBC
+	 * Connection (or the connection pool handle, to be unwrapped via a Spring
+	 * NativeJdbcExtractor), override this method to return the native
+	 * Connection through the corresponding vendor-specific mechanism.
+	 * <p>A JDO2 DataStoreConnection is only "borrowed" from the PersistenceManager:
+	 * it needs to be returned as early as possible. Effectively, JDO2 requires the
+	 * fetched Connection to be closed before continuing PersistenceManager work.
+	 * For this reason, the exposed ConnectionHandle eagerly releases its JDBC
+	 * Connection at the end of each JDBC data access operation (that is, on
+	 * <code>DataSourceUtils.releaseConnection</code>).
+	 * @see javax.jdo.PersistenceManager#getDataStoreConnection()
+	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
-	public ConnectionHandle getJdbcConnection(PersistenceManager pm, boolean readOnly)
+	public ConnectionHandle getJdbcConnection(final PersistenceManager pm, boolean readOnly)
 			throws JDOException, SQLException {
-		return null;
+
+		return new DataStoreConnectionHandle(pm);
 	}
 
 	/**
@@ -182,11 +203,13 @@ public class DefaultJdoDialect implements JdoDialect {
 	}
 
 	/**
-	 * This implementation throws a JDOUnsupportedOptionException.
-	 * @see javax.jdo.JDOUnsupportedOptionException
+	 * This implementation delegates to JDO 2.0's <code>flush</code> method.
+	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
+	 * vendor-specific mechanism there.
+	 * @see javax.jdo.PersistenceManager#flush()
 	 */
 	public void flush(PersistenceManager pm) throws JDOException {
-		throw new JDOUnsupportedOptionException("Cannot eagerly flush persistence manager");
+		pm.flush();
 	}
 
 	/**
@@ -199,6 +222,31 @@ public class DefaultJdoDialect implements JdoDialect {
 		}
 		else {
 			return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+		}
+	}
+
+
+	/**
+	 * ConnectionHandle implementation that fetches a new JDO2 DataStoreConnection
+	 * for every <code>getConnection</code> call and closes the Connection on
+	 * <code>releaseConnection</code>. This is necessary because JDO2 requires the
+	 * fetched Connection to be closed before continuing PersistenceManager work.
+	 * @see javax.jdo.PersistenceManager#getDataStoreConnection()
+	 */
+	private static class DataStoreConnectionHandle implements ConnectionHandle {
+
+		private final PersistenceManager persistenceManager;
+
+		public DataStoreConnectionHandle(PersistenceManager persistenceManager) {
+			this.persistenceManager = persistenceManager;
+		}
+
+		public Connection getConnection() {
+			return (Connection) this.persistenceManager.getDataStoreConnection();
+		}
+
+		public void releaseConnection(Connection con) {
+			JdbcUtils.closeConnection(con);
 		}
 	}
 

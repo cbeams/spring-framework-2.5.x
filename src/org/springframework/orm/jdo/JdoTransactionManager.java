@@ -303,7 +303,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 						conHolder.setTimeoutInSeconds(definition.getTimeout());
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JDO transaction as JDBC transaction [" + conHolder.getConnection() + "]");
+						logger.debug("Exposing JDO transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);

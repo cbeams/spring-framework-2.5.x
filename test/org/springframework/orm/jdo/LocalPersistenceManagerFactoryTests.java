@@ -17,14 +17,13 @@
 package org.springframework.orm.jdo;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Properties;
 
 import javax.jdo.JDOFatalUserException;
-import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
 import junit.framework.TestCase;
+import org.easymock.MockControl;
 
 import org.springframework.core.io.ClassPathResource;
 
@@ -34,14 +33,16 @@ import org.springframework.core.io.ClassPathResource;
 public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBean() throws IOException {
+		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
+		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
 			protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
-				return new MockPersistenceManagerFactory();
+				return pmf;
 			}
 		};
 		pmfb.setJdoProperties(new Properties());
 		pmfb.afterPropertiesSet();
-		assertTrue(pmfb.getObject() instanceof MockPersistenceManagerFactory);
+		assertSame(pmf, pmfb.getObject());
 	}
 
 	public void testLocalPersistenceManagerFactoryBeanWithInvalidSettings() throws IOException {
@@ -102,136 +103,6 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		catch (IllegalArgumentException ex) {
 			// expected
 			assertTrue("Correct exception", "myValue".equals(ex.getMessage()));
-		}
-	}
-
-
-	public static class MockPersistenceManagerFactory implements PersistenceManagerFactory {
-
-		private Object connectionFactory;
-
-		private Object connectionFactory2;
-
-		public void close() {
-		}
-
-		public PersistenceManager getPersistenceManager() {
-			return null;
-		}
-
-		public PersistenceManager getPersistenceManager(String beanName, String beanName1) {
-			return null;
-		}
-
-		public void setConnectionUserName(String beanName) {
-		}
-
-		public String getConnectionUserName() {
-			return null;
-		}
-
-		public void setConnectionPassword(String beanName) {
-		}
-
-		public void setConnectionURL(String beanName) {
-		}
-
-		public String getConnectionURL() {
-			return null;
-		}
-
-		public void setConnectionDriverName(String beanName) {
-		}
-
-		public String getConnectionDriverName() {
-			return null;
-		}
-
-		public void setConnectionFactoryName(String beanName) {
-		}
-
-		public String getConnectionFactoryName() {
-			return null;
-		}
-
-		public void setConnectionFactory(Object o) {
-			this.connectionFactory = o;
-		}
-
-		public Object getConnectionFactory() {
-			return connectionFactory;
-		}
-
-		public void setConnectionFactory2Name(String beanName) {
-		}
-
-		public String getConnectionFactory2Name() {
-			return null;
-		}
-
-		public void setConnectionFactory2(Object o) {
-			this.connectionFactory2 = o;
-		}
-
-		public Object getConnectionFactory2() {
-			return connectionFactory2;
-		}
-
-		public void setMultithreaded(boolean b) {
-		}
-
-		public boolean getMultithreaded() {
-			return false;
-		}
-
-		public void setOptimistic(boolean b) {
-		}
-
-		public boolean getOptimistic() {
-			return false;
-		}
-
-		public void setRetainValues(boolean b) {
-		}
-
-		public boolean getRetainValues() {
-			return false;
-		}
-
-		public void setRestoreValues(boolean b) {
-		}
-
-		public boolean getRestoreValues() {
-			return false;
-		}
-
-		public void setNontransactionalRead(boolean b) {
-		}
-
-		public boolean getNontransactionalRead() {
-			return false;
-		}
-
-		public void setNontransactionalWrite(boolean b) {
-		}
-
-		public boolean getNontransactionalWrite() {
-			return false;
-		}
-
-		public void setIgnoreCache(boolean b) {
-		}
-
-		public boolean getIgnoreCache() {
-			return false;
-		}
-
-		public Properties getProperties() {
-			return null;
-		}
-
-		public Collection supportedOptions() {
-			return null;
 		}
 	}
 

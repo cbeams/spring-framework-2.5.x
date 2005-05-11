@@ -16,7 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -36,6 +35,9 @@ import org.springframework.dao.DataAccessException;
  * JtaTransactionManager) or within OpenPersistenceManagerInViewFilter/Interceptor.
  * Furthermore, some operations just make sense within transactions,
  * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
+ *
+ * <p>Updated to expose JDO 2.0 API functionality, as of Spring 1.2:
+ * <code>detachCopy</code>, <code>attachCopy</code>, <code>findByNamedQuery</code>, etc.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -90,9 +92,9 @@ public interface JdoOperations {
 	 * @return the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#getObjectById
+	 * @see javax.jdo.PersistenceManager#getObjectById(Object, boolean)
 	 */
-	Object getObjectById(Serializable objectId) throws DataAccessException;
+	Object getObjectById(Object objectId) throws DataAccessException;
 
 	/**
 	 * Return the persistent instance of the given entity class
@@ -107,23 +109,32 @@ public interface JdoOperations {
 	 * @return the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#getObjectById
-	 * @see javax.jdo.PersistenceManager#newObjectIdInstance
+	 * @see javax.jdo.PersistenceManager#newObjectIdInstance(Class, String)
+	 * @see javax.jdo.PersistenceManager#getObjectById(Object, boolean)
+	 * @see javax.jdo.PersistenceManager#getObjectById(Class, Object)
 	 */
-	Object getObjectById(Class entityClass, Serializable idValue) throws DataAccessException;
+	Object getObjectById(Class entityClass, Object idValue) throws DataAccessException;
 
 	/**
 	 * Remove the given object from the PersistenceManager cache.
 	 * @param entity the persistent instance to evict
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#evict
+	 * @see javax.jdo.PersistenceManager#evict(Object)
 	 */
 	void evict(Object entity) throws DataAccessException;
 
 	/**
+	 * Remove all given objects from the PersistenceManager cache.
+	 * @param entities the persistent instances to evict
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see javax.jdo.PersistenceManager#evictAll(java.util.Collection)
+	 */
+	void evictAll(Collection entities) throws DataAccessException;
+
+	/**
 	 * Remove all objects from the PersistenceManager cache.
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#evictAll
+	 * @see javax.jdo.PersistenceManager#evictAll()
 	 */
 	void evictAll() throws DataAccessException;
 
@@ -131,14 +142,22 @@ public interface JdoOperations {
 	 * Re-read the state of the given persistent instance.
 	 * @param entity the persistent instance to re-read
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#refresh
+	 * @see javax.jdo.PersistenceManager#refresh(Object)
 	 */
 	void refresh(Object entity) throws DataAccessException;
 
 	/**
+	 * Re-read the state of all given persistent instances.
+	 * @param entities the persistent instances to re-read
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see javax.jdo.PersistenceManager#refreshAll(java.util.Collection)
+	 */
+	void refreshAll(Collection entities) throws DataAccessException;
+
+	/**
 	 * Re-read the state of all persistent instances.
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#refreshAll
+	 * @see javax.jdo.PersistenceManager#refreshAll()
 	 */
 	void refreshAll() throws DataAccessException;
 
@@ -146,15 +165,23 @@ public interface JdoOperations {
 	 * Make the given transient instance persistent.
 	 * @param entity the transient instance to make persistent
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#makePersistent
+	 * @see javax.jdo.PersistenceManager#makePersistent(Object)
 	 */
 	void makePersistent(Object entity) throws DataAccessException;
+
+	/**
+	 * Make the given transient instances persistent.
+	 * @param entities the transient instances to make persistent
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
+	 */
+	void makePersistentAll(Collection entities) throws DataAccessException;
 
 	/**
 	 * Delete the given persistent instance.
 	 * @param entity the persistent instance to delete
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#deletePersistent
+	 * @see javax.jdo.PersistenceManager#deletePersistent(Object)
 	 */
 	void deletePersistent(Object entity) throws DataAccessException;
 
@@ -164,17 +191,59 @@ public interface JdoOperations {
 	 * in two lines of code.
 	 * @param entities the persistent instances to delete
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#deletePersistentAll
+	 * @see javax.jdo.PersistenceManager#deletePersistentAll(java.util.Collection)
 	 */
 	void deletePersistentAll(Collection entities) throws DataAccessException;
+
+	/**
+	 * Detach a copy of the given persistent instance from the current JDO transaction,
+	 * for use outside a JDO transaction (for example, as web form object).
+	 * <p>Only available on JDO 2.0 and higher.
+	 * @param entity the persistent instance to detach
+	 * @see javax.jdo.PersistenceManager#detachCopy(Object)
+	 */
+	Object detachCopy(Object entity);
+
+	/**
+	 * Detach copies of the given persistent instances from the current JDO transaction,
+	 * for use outside a JDO transaction (for example, as web form objects).
+	 * <p>Only available on JDO 2.0 and higher.
+	 * @param entities the persistent instances to detach
+	 * @see javax.jdo.PersistenceManager#detachCopyAll(Collection)
+	 */
+	Collection detachCopyAll(Collection entities);
+
+	/**
+	 * Reattach the given detached instance (for example, a web form object) with
+	 * the current JDO transaction, merging its changes into the current persistence
+	 * instance that represents the corresponding entity.
+	 * <p>Only available on JDO 2.0 and higher.
+	 * @param detachedEntity the detached instance to attach
+	 * @return the corresponding persistent instance
+	 * @see javax.jdo.PersistenceManager#attachCopy(Object, boolean)
+	 */
+	Object attachCopy(Object detachedEntity);
+
+	/**
+	 * Reattach the given detached instances (for example, web form objects) with
+	 * the current JDO transaction, merging their changes into the current persistence
+	 * instances that represent the corresponding entities.
+	 * <p>Only available on JDO 2.0 and higher.
+	 * @param detachedEntities the detached instances to reattach
+	 * @return the corresponding persistent instances
+	 * @see javax.jdo.PersistenceManager#attachCopyAll(java.util.Collection, boolean)
+	 */
+	Collection attachCopyAll(Collection detachedEntities);
 
 	/**
 	 * Flush all transactional modifications to the database.
 	 * <p>Only invoke this for selective eager flushing, for example when JDBC code
 	 * needs to see certain changes within the same transaction. Else, it's preferable
 	 * to rely on auto-flushing at transaction completion.
+	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see JdoDialect#flush
+	 * @see javax.jdo.PersistenceManager#flush()
+	 * @see JdoDialect#flush(javax.jdo.PersistenceManager)
 	 */
 	void flush() throws DataAccessException;
 
@@ -184,7 +253,7 @@ public interface JdoOperations {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Return all persistent instances of the given class.
+	 * Find all persistent instances of the given class.
 	 * @param entityClass a persistent class
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
@@ -193,7 +262,7 @@ public interface JdoOperations {
 	Collection find(Class entityClass) throws DataAccessException;
 
 	/**
-	 * Return all persistent instances of the given class that match the given
+	 * Find all persistent instances of the given class that match the given
 	 * JDOQL filter.
 	 * @param entityClass a persistent class
 	 * @param filter the JDOQL filter to match (or null if none)
@@ -204,7 +273,7 @@ public interface JdoOperations {
 	Collection find(Class entityClass, String filter) throws DataAccessException;
 
 	/**
-	 * Return all persistent instances of the given class that match the given
+	 * Find all persistent instances of the given class that match the given
 	 * JDOQL filter, with the given result ordering.
 	 * @param entityClass a persistent class
 	 * @param filter the JDOQL filter to match (or null if none)
@@ -214,11 +283,10 @@ public interface JdoOperations {
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
 	 * @see javax.jdo.Query#setOrdering
 	 */
-	Collection find(Class entityClass, String filter, String ordering)
-			throws DataAccessException;
+	Collection find(Class entityClass, String filter, String ordering) throws DataAccessException;
 
 	/**
-	 * Return all persistent instances of the given class that match the given
+	 * Find all persistent instances of the given class that match the given
 	 * JDOQL filter, using the given parameter declarations and parameter values.
 	 * @param entityClass a persistent class
 	 * @param filter the JDOQL filter to match
@@ -234,7 +302,7 @@ public interface JdoOperations {
 			throws DataAccessException;
 
 	/**
-	 * Return all persistent instances of the given class that match the given
+	 * Find all persistent instances of the given class that match the given
 	 * JDOQL filter, using the given parameter declarations and parameter values,
 	 * with the given result ordering.
 	 * @param entityClass a persistent class
@@ -249,12 +317,11 @@ public interface JdoOperations {
 	 * @see javax.jdo.Query#executeWithArray
 	 * @see javax.jdo.Query#setOrdering
 	 */
-	Collection find(
-			Class entityClass, String filter, String parameters, Object[] values, String ordering)
+	Collection find(Class entityClass, String filter, String parameters, Object[] values, String ordering)
 			throws DataAccessException;
 
 	/**
-	 * Return all persistent instances of the given class that match the given
+	 * Find all persistent instances of the given class that match the given
 	 * JDOQL filter, using the given parameter declarations and parameter values.
 	 * @param entityClass a persistent class
 	 * @param filter the JDOQL filter to match
@@ -270,7 +337,7 @@ public interface JdoOperations {
 			throws DataAccessException;
 
 	/**
-	 * Return all persistent instances of the given class that match the given
+	 * Find all persistent instances of the given class that match the given
 	 * JDOQL filter, using the given parameter declarations and parameter values,
 	 * with the given result ordering.
 	 * @param entityClass a persistent class
@@ -287,5 +354,41 @@ public interface JdoOperations {
 	 */
 	Collection find(Class entityClass, String filter, String parameters, Map values, String ordering)
 			throws DataAccessException;
+
+	/**
+	 * Find persistent instances through the given query object
+	 * in the specified query language.
+	 * <p>Only available on JDO 2.0 and higher.
+	 * @param language the query language (<code>javax.jdo.Query#JDOQL</code>
+	 * or <code>javax.jdo.Query#SQL</code>, for example)
+	 * @param queryObject the query object for the specified language
+	 * @return the persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see javax.jdo.PersistenceManager#newQuery(String, Object)
+	 * @see javax.jdo.Query#JDOQL
+	 * @see javax.jdo.Query#SQL
+	 */
+	Collection find(String language, Object queryObject) throws DataAccessException;
+
+	/**
+	 * Find persistent instances through the given single-string JDOQL query.
+	 * <p>Only available on JDO 2.0 and higher.
+	 * @param queryString the single-string JDOQL query
+	 * @return the persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see javax.jdo.PersistenceManager#newQuery(String)
+	 */
+	Collection find(String queryString) throws DataAccessException;
+
+	/**
+	 * Find persistent instances through the given named query.
+	 * <p>Only available on JDO 2.0 and higher.
+	 * @param entityClass a persistent class
+	 * @param queryName the name of the query
+	 * @return the persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
+	 * @see javax.jdo.PersistenceManager#newNamedQuery(Class, String)
+	 */
+	Collection findByNamedQuery(Class entityClass, String queryName) throws DataAccessException;
 
 }
