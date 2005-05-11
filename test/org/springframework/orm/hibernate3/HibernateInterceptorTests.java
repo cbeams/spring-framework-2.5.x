@@ -37,6 +37,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * @author Juergen Hoeller
+ * @since 05.03.2005
  */
 public class HibernateInterceptorTests extends TestCase {
 

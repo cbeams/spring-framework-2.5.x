@@ -46,7 +46,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author Juergen Hoeller
- * @since 08.07.2004
+ * @since 05.03.2005
  */
 public class HibernateJtaTransactionTests extends TestCase {
 

@@ -27,7 +27,7 @@ import org.springframework.orm.hibernate3.HibernateTemplate;
 
 /**
  * @author Juergen Hoeller
- * @since 30.07.2003
+ * @since 05.03.2005
  */
 public class HibernateDaoSupportTests extends TestCase {
 

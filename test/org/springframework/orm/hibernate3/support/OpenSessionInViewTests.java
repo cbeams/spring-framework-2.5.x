@@ -51,7 +51,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 
 /**
  * @author Juergen Hoeller
- * @since 06.12.2003
+ * @since 05.03.2005
  */
 public class OpenSessionInViewTests extends TestCase {
 

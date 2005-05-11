@@ -46,7 +46,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * @author Juergen Hoeller
- * @since 14.08.2004
+ * @since 05.03.2005
  */
 public class LobTypeTests extends TestCase {
 
