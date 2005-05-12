@@ -121,21 +121,10 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * TransactionAwarePersistenceManagerFactoryProxy. Only data access
 	 * code may work with TransactionAwarePersistenceManagerFactoryProxy, while the
 	 * transaction manager needs to work on the underlying target PersistenceManagerFactory.
-	 * If there's nevertheless a TransactionAwarePersistenceManagerFactoryProxy passed in,
-	 * it will be unwrapped to extract its target PersistenceManagerFactory.
 	 * @see TransactionAwarePersistenceManagerFactoryProxy
 	 */
 	public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
-		if (pmf instanceof TransactionAwarePersistenceManagerFactoryProxy) {
-			// If we got a TransactionAwarePersistenceManagerFactoryProxy, we need to perform
-			// transactions for its underlying target PersistenceManagerFactory, else data access
-			// code won't see properly exposed transactions (i.e. transactions for the target factory).
-			this.persistenceManagerFactory =
-					((TransactionAwarePersistenceManagerFactoryProxy) pmf).getTargetPersistenceManagerFactory();
-		}
-		else {
-			this.persistenceManagerFactory = pmf;
-		}
+		this.persistenceManagerFactory = pmf;
 	}
 
 	/**
