@@ -210,9 +210,6 @@
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/log4j">
-				<include name="log4j-*.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/ojb">
 				<include name="db-ojb-*.jar"/>
 			</fileset>
