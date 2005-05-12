@@ -30,6 +30,7 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.SimpleViewDescriptorCreator;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
@@ -84,7 +85,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		ViewState viewState1 = (ViewState) flow.getState("viewState1");
 		assertNotNull(viewState1);
 		assertFalse(viewState1.isMarker());
-		assertEquals("view1", viewState1.getViewName());
+		assertEquals("view1", ((SimpleViewDescriptorCreator)viewState1.getViewDescriptorCreator()).getViewName());
 		assertEquals(1, viewState1.getTransitions().length);
 		context.setLastEvent(createEvent("event1"));
 		assertTrue(viewState1.hasTransitionFor(context));
@@ -94,7 +95,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		ViewState viewState2 = (ViewState) flow.getState("viewState2");
 		assertNotNull(viewState2);
 		assertTrue(viewState2.isMarker());
-		assertNull(viewState2.getViewName());
+		assertNull(viewState2.getViewDescriptorCreator());
 		assertEquals(1, viewState2.getTransitions().length);
 		context.setLastEvent(createEvent("event2"));
 		assertTrue(viewState2.hasTransitionFor(context));
@@ -126,12 +127,12 @@ public class XmlFlowBuilderTests extends TestCase {
 		EndState endState1 = (EndState) flow.getState("endState1");
 		assertNotNull(endState1);
 		assertFalse(endState1.isMarker());
-		assertEquals("endView1", endState1.getViewName());
+		assertEquals("endView1", ((SimpleViewDescriptorCreator)endState1.getViewDescriptorCreator()).getViewName());
 
 		EndState endState2 = (EndState) flow.getState("endState2");
 		assertNotNull(endState2);
 		assertTrue(endState2.isMarker());
-		assertNull(endState2.getViewName());
+		assertNull(endState2.getViewDescriptorCreator());
 	}
 
 	/**

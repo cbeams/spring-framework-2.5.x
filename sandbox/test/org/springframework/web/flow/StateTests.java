@@ -127,7 +127,7 @@ public class StateTests extends TestCase {
 
 	public void testViewStateMarker() {
 		Flow flow = new Flow("myFlow");
-		ViewState state = new ViewState(flow, "viewState", null, new Transition(on("submit"), "finish"));
+		ViewState state = new ViewState(flow, "viewState", new Transition(on("submit"), "finish"));
 		assertTrue(state.isMarker());
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
