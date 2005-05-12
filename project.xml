@@ -459,6 +459,11 @@
 			<artifactId>standard</artifactId>
 			<version>1.0.6</version>
 		</dependency>
+                <dependency>
+                        <groupId>toplink</groupId>
+                        <artifactId>toplink</artifactId>
+                        <version>1.0</version>
+                </dependency>
 		<dependency>
 			<id>velocity</id>
 			<version>1.4</version>
