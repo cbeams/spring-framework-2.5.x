@@ -11,12 +11,12 @@ public class Entity {
 
 	private Integer id;
 
-	public void setId(int id) {
-		this.id = new Integer(id);
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
-	public int getId() {
-		return (this.id != null ? this.id.intValue() : -1);
+	public Integer getId() {
+		return id;
 	}
 
 	public boolean isNew() {

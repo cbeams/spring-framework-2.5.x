@@ -38,7 +38,9 @@ public class FindOwnersForm	extends AbstractClinicForm {
 		}
 	}
 
-	/** Method used to search for owners renders View depending on how many are found */
+	/**
+	 * Method used to search for owners renders View depending on how many are found.
+	 */
 	protected ModelAndView onSubmit(
 			HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws Exception {
@@ -61,7 +63,7 @@ public class FindOwnersForm	extends AbstractClinicForm {
 
 		// 1 owner found
 		owner = (Owner) results.iterator().next();
-		return new ModelAndView(getSuccessView(), "ownerId", Integer.toString(owner.getId()));
+		return new ModelAndView(getSuccessView(), "ownerId", owner.getId());
 	}
 
 }

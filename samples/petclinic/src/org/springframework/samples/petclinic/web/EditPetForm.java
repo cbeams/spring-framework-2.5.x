@@ -48,7 +48,7 @@ public class EditPetForm extends AbstractClinicForm {
 		Pet pet = (Pet) command;
 		// delegate the update to the business layer
 		getClinic().storePet(pet);
-		return new ModelAndView(getSuccessView(), "ownerId", Integer.toString(pet.getOwner().getId()));
+		return new ModelAndView(getSuccessView(), "ownerId", pet.getOwner().getId());
 	}
 
 }

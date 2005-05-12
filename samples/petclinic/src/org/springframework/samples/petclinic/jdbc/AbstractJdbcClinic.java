@@ -81,7 +81,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		Iterator vi = vets.iterator();
 		while (vi.hasNext()) {
 			Vet vet = (Vet) vi.next();
-			List vetSpecialtiesIds = this.vetSpecialtiesQuery.execute(vet.getId());
+			List vetSpecialtiesIds = this.vetSpecialtiesQuery.execute(vet.getId().intValue());
 			Iterator vsi = vetSpecialtiesIds.iterator();
 			while (vsi.hasNext()) {
 				int specialtyId = ((Integer) vsi.next()).intValue();
@@ -165,7 +165,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		Iterator iterator = list.iterator();
 		while (iterator.hasNext()) {
 			Entity entity = (Entity) iterator.next();
-			map.put(new Integer(entity.getId()), entity);
+			map.put(entity.getId(), entity);
 		}
 		return map;
 	}
@@ -175,7 +175,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	 */
 	protected void loadVisits(JdbcPet pet) {
 		pet.setType((PetType) EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
-		List visits = this.visitsQuery.execute(pet.getId());
+		List visits = this.visitsQuery.execute(pet.getId().intValue());
 		Iterator vi = visits.iterator();
 		while (vi.hasNext()) {
 			Visit visit = (Visit) vi.next();
@@ -188,7 +188,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	 * data for an <code>Owner</code>.
 	 */
 	protected void loadPetsAndVisits(Owner owner) {
-		List pets = this.petsByOwnerQuery.execute(owner.getId());
+		List pets = this.petsByOwnerQuery.execute(owner.getId().intValue());
 		Iterator pi = pets.iterator();
 		while (pi.hasNext()) {
 			JdbcPet pet = (JdbcPet) pi.next();
@@ -219,7 +219,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	 * @see #getIdentityQuery
 	 */
 	protected void retrieveIdentity(Entity entity) {
-		entity.setId(getJdbcTemplate().queryForInt(getIdentityQuery()));
+		entity.setId(new Integer(getJdbcTemplate().queryForInt(getIdentityQuery())));
 	}
 
 	/**
@@ -258,7 +258,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 			Vet vet = new Vet();
-			vet.setId(rs.getInt("id"));
+			vet.setId(new Integer(rs.getInt("id")));
 			vet.setFirstName(rs.getString("first_name"));
 			vet.setLastName(rs.getString("last_name"));
 			return vet;
@@ -282,7 +282,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 			Specialty specialty = new Specialty();
-			specialty.setId(rs.getInt("id"));
+			specialty.setId(new Integer(rs.getInt("id")));
 			specialty.setName(rs.getString("name"));
 			return specialty;
 		}
@@ -326,7 +326,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 			Owner owner = new Owner();
-			owner.setId(rs.getInt("id"));
+			owner.setId(new Integer(rs.getInt("id")));
 			owner.setFirstName(rs.getString("first_name"));
 			owner.setLastName(rs.getString("last_name"));
 			owner.setAddress(rs.getString("address"));
@@ -429,7 +429,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		protected int update(Owner owner) {
 			return this.update(new Object[] {
 				owner.getFirstName(), owner.getLastName(), owner.getAddress(),
-				owner.getCity(), owner.getTelephone(), new Integer(owner.getId())});
+				owner.getCity(), owner.getTelephone(), owner.getId()});
 		}
 	}
 
@@ -450,7 +450,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 			JdbcPet pet = new JdbcPet();
-			pet.setId(rs.getInt("id"));
+			pet.setId(new Integer(rs.getInt("id")));
 			pet.setName(rs.getString("name"));
 			pet.setBirthDate(rs.getDate("birth_date"));
 			pet.setTypeId(rs.getInt("type_id"));
@@ -520,7 +520,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		protected void insert(Pet pet) {
 			Object[] objs = new Object[] {
 				null, pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
-				new Integer(pet.getType().getId()), new Integer(pet.getOwner().getId())};
+				pet.getType().getId(), pet.getOwner().getId()};
 			super.update(objs);
 			retrieveIdentity(pet);
 		}
@@ -554,8 +554,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		protected int update(Pet pet) {
 			return this.update(new Object[] {
 				pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
-				new Integer(pet.getType().getId()), new Integer(pet.getOwner().getId()),
-				new Integer(pet.getId())});
+				pet.getType().getId(), pet.getOwner().getId(), pet.getId()});
 		}
 	}
 
@@ -576,7 +575,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 			PetType type = new PetType();
-			type.setId(rs.getInt("id"));
+			type.setId(new Integer(rs.getInt("id")));
 			type.setName(rs.getString("name"));
 			return type;
 		}
@@ -600,7 +599,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 			Visit visit = new Visit();
-			visit.setId(rs.getInt("id"));
+			visit.setId(new Integer(rs.getInt("id")));
 			visit.setDate(rs.getDate("visit_date"));
 			visit.setDescription(rs.getString("description"));
 			return visit;
@@ -631,14 +630,9 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		 * @param visit to insert
 		 */
 		protected void insert(Visit visit) {
-			Object[] objs =
-					new Object[]{
-						null,
-						new Integer(visit.getPet().getId()),
-						new java.sql.Date(visit.getDate().getTime()),
-						visit.getDescription()
-					};
-			super.update(objs);
+			super.update(new Object[] {
+				null, visit.getPet().getId(), new java.sql.Date(visit.getDate().getTime()),
+				visit.getDescription()});
 			retrieveIdentity(visit);
 		}
 	}

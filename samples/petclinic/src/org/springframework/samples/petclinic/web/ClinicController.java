@@ -7,11 +7,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.samples.petclinic.Clinic;
-import org.springframework.samples.petclinic.Owner;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.samples.petclinic.Clinic;
+import org.springframework.samples.petclinic.Owner;
 import org.springframework.web.bind.RequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
@@ -23,12 +22,8 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  */
 public class ClinicController extends MultiActionController implements InitializingBean {
 
-	/** Holds value of property clinic. */
 	private Clinic clinic;
 
-	/** Setter for property clinic.
-	 * @param clinic New value of property clinic.
-	 */
 	public void setClinic(Clinic clinic) {
 		this.clinic = clinic;
 	}

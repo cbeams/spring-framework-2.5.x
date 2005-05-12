@@ -50,7 +50,7 @@ public class AddPetForm extends AbstractClinicForm {
 		Pet pet = (Pet) command;
 		// delegate the insert to the Business layer
 		getClinic().storePet(pet);
-		return new ModelAndView(getSuccessView(), "ownerId", Integer.toString(pet.getOwner().getId()));
+		return new ModelAndView(getSuccessView(), "ownerId", pet.getOwner().getId());
 	}
 
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)

@@ -28,7 +28,7 @@ public abstract class AbstractClinicForm extends SimpleFormController {
 	}
 
 	protected Clinic getClinic() {
-		return this.clinic;
+		return clinic;
 	}
 
 	public void afterPropertiesSet() {
@@ -53,6 +53,7 @@ public abstract class AbstractClinicForm extends SimpleFormController {
 	 */
 	protected ModelAndView disallowDuplicateFormSubmission(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		BindException errors = getErrorsForNewForm(request);
 		errors.reject("duplicateFormSubmission", "Duplicate form submission");
 		return showForm(request, response, errors);

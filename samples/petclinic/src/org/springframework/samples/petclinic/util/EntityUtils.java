@@ -28,9 +28,10 @@ public abstract class EntityUtils {
 	 */
 	public static Entity getById(Collection entities, Class entityClass, int entityId)
 	    throws ObjectRetrievalFailureException {
+
 		for (Iterator it = entities.iterator(); it.hasNext();) {
 			Entity entity = (Entity) it.next();
-			if (entity.getId() == entityId && entityClass.isInstance(entity)) {
+			if (entity.getId().intValue() == entityId && entityClass.isInstance(entity)) {
 				return entity;
 			}
 		}
