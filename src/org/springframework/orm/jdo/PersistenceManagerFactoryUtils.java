@@ -105,6 +105,30 @@ public abstract class PersistenceManagerFactoryUtils {
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
 
+		try {
+			return doGetPersistenceManager(pmf, allowCreate);
+		}
+		catch (JDOException ex) {
+			throw new DataAccessResourceFailureException("Could not open JDO PersistenceManager", ex);
+		}
+	}
+
+	/**
+	 * Get a JDO PersistenceManager via the given factory. Is aware of a
+	 * corresponding PersistenceManager bound to the current thread,
+	 * for example when using JdoTransactionManager. Will create a new
+	 * PersistenceManager else, if allowCreate is true.
+	 * <p>Same as <code>getPersistenceManager</code>, but throwing the original JDOException.
+	 * @param pmf PersistenceManagerFactory to create the PersistenceManager with
+	 * @param allowCreate if a non-transactional PersistenceManager should be created
+	 * when no transactional PersistenceManager can be found for the current thread
+	 * @return the PersistenceManager
+	 * @throws JDOException if the PersistenceManager couldn't be created
+	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
+	 */
+	public static PersistenceManager doGetPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
+	    throws JDOException, IllegalStateException {
+
 		Assert.notNull(pmf, "No PersistenceManagerFactory specified");
 
 		PersistenceManagerHolder pmHolder =
@@ -118,26 +142,21 @@ public abstract class PersistenceManagerFactoryUtils {
 					"and configuration does not allow creation of non-transactional one here");
 		}
 
-		try {
-			logger.debug("Opening JDO PersistenceManager");
-			PersistenceManager pm = pmf.getPersistenceManager();
+		logger.debug("Opening JDO PersistenceManager");
+		PersistenceManager pm = pmf.getPersistenceManager();
 
-			if (TransactionSynchronizationManager.isSynchronizationActive()) {
-				logger.debug("Registering transaction synchronization for JDO PersistenceManager");
-				// Use same PersistenceManager for further JDO actions within the transaction
-				// thread object will get removed by synchronization at transaction completion.
-				pmHolder = new PersistenceManagerHolder(pm);
-				pmHolder.setSynchronizedWithTransaction(true);
-				TransactionSynchronizationManager.registerSynchronization(
-				    new PersistenceManagerSynchronization(pmHolder, pmf));
-				TransactionSynchronizationManager.bindResource(pmf, pmHolder);
-			}
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			logger.debug("Registering transaction synchronization for JDO PersistenceManager");
+			// Use same PersistenceManager for further JDO actions within the transaction
+			// thread object will get removed by synchronization at transaction completion.
+			pmHolder = new PersistenceManagerHolder(pm);
+			pmHolder.setSynchronizedWithTransaction(true);
+			TransactionSynchronizationManager.registerSynchronization(
+					new PersistenceManagerSynchronization(pmHolder, pmf));
+			TransactionSynchronizationManager.bindResource(pmf, pmHolder);
+		}
 
-			return pm;
-		}
-		catch (JDOException ex) {
-			throw new DataAccessResourceFailureException("Cannot get JDO PersistenceManager", ex);
-		}
+		return pm;
 	}
 
 	/**
@@ -215,6 +234,28 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * (can be null)
 	 */
 	public static void releasePersistenceManager(PersistenceManager pm, PersistenceManagerFactory pmf) {
+		try {
+			doReleasePersistenceManager(pm, pmf);
+		}
+		catch (JDOException ex) {
+			logger.error("Could not close JDO PersistenceManager", ex);
+		}
+		catch (RuntimeException ex) {
+			logger.error("Unexpected exception on closing JDO PersistenceManager", ex);
+		}
+	}
+
+	/**
+	 * Actually release a PersistenceManager for the given factory.
+	 * Same as <code>releasePersistenceManager</code>, but throwing the original JDOException.
+	 * @param pm PersistenceManager to close
+	 * @param pmf PersistenceManagerFactory that the PersistenceManager was created with
+	 * (can be null)
+	 * @throws JDOException if thrown by JDO methods
+	 */
+	public static void doReleasePersistenceManager(PersistenceManager pm, PersistenceManagerFactory pmf)
+			throws JDOException {
+
 		if (pm == null) {
 			return;
 		}
@@ -229,15 +270,7 @@ public abstract class PersistenceManagerFactoryUtils {
 		}
 
 		logger.debug("Closing JDO PersistenceManager");
-		try {
-			pm.close();
-		}
-		catch (JDOException ex) {
-			logger.error("Could not close JDO PersistenceManager", ex);
-		}
-		catch (RuntimeException ex) {
-			logger.error("Unexpected exception on closing JDO PersistenceManager", ex);
-		}
+		pm.close();
 	}
 
 
