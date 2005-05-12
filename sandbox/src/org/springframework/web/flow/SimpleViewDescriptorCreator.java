@@ -36,6 +36,14 @@ public class SimpleViewDescriptorCreator implements ViewDescriptorCreator {
 		this.viewName = viewName;
 	}
 	
+	/**
+	 * Returns the static view name.
+	 * @return the view name
+	 */
+	public String getViewName() {
+		return viewName;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.springframework.web.flow.ViewDescriptorCreator#createViewDescriptor(org.springframework.web.flow.RequestContext)
 	 */

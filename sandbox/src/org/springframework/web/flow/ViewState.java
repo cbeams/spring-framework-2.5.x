@@ -18,6 +18,7 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 import org.springframework.core.ToStringCreator;
+import org.springframework.util.StringUtils;
 
 /**
  * A view state is a state in which a physical view resource should be rendered
@@ -152,20 +153,27 @@ public class ViewState extends TransitionableState {
 	}
 	
 	/**
-	 * Set the logical name of the view to render in this view state.
+	 * Sets the logical name of the view to render in this view state.
 	 */
 	public void setViewName(String viewName) {
-		this.viewDescriptorCreator = new SimpleViewDescriptorCreator(viewName);
+		if (StringUtils.hasText(viewName)) {
+			this.viewDescriptorCreator = new SimpleViewDescriptorCreator(viewName);
+		} else {
+			this.viewDescriptorCreator = null;
+		}
 	}
 
 	/**
-	 * Set the factory that will produce a descriptor about the view to render in this view state.
+	 * Sets the factory to produce a descriptor about the view to render in this view state.
 	 */
 	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
 		this.viewDescriptorCreator = creator;
 	}
 
-	protected ViewDescriptorCreator getViewDescriptorCreator() {
+	/**
+	 * Returns the factory that to produce a descriptor about the view to render in this view state.
+	 */
+	public ViewDescriptorCreator getViewDescriptorCreator() {
 		return viewDescriptorCreator;
 	}
 	

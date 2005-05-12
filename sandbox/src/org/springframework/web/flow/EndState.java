@@ -125,22 +125,29 @@ public class EndState extends State {
 	}
 
 	/**
-	 * Set the logical name of the view to render when this end state is entered and terminates a
+	 * Sets the logical name of the view to render when this end state is entered and terminates a
 	 * root flow.
 	 */
 	public void setViewName(String viewName) {
-		this.viewDescriptorCreator = new SimpleViewDescriptorCreator(viewName);
+		if (StringUtils.hasText(viewName)) {
+			this.viewDescriptorCreator = new SimpleViewDescriptorCreator(viewName);
+		} else {
+			this.viewDescriptorCreator = null;
+		}
 	}
 
 	/**
-	 * Set the factory to produce a view descriptor to render when this end state is entered and
+	 * Sets the factory to produce a view descriptor to render when this end state is entered and
 	 * terminates a root flow.
 	 */
 	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
 		this.viewDescriptorCreator = creator;
 	}
 
-	protected ViewDescriptorCreator getViewDescriptorCreator() {
+	/**
+	 * Returns the factory that to produce a descriptor about the view to render in this view state.
+	 */
+	public ViewDescriptorCreator getViewDescriptorCreator() {
 		return viewDescriptorCreator;
 	}
 	
