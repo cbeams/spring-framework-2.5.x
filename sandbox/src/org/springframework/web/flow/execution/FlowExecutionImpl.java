@@ -209,9 +209,12 @@ public class FlowExecutionImpl implements FlowExecution, FlowContext, Serializab
 		InternalStateContext context = createStateContext(event);
 		getListeners().fireRequestSubmitted(context);
 		ViewDescriptor viewDescriptor = context.spawn(rootFlow.getStartState(), null);
+		if (isActive()) {
+			getActiveSessionInternal().setStatus(FlowSessionStatus.PAUSED);
+			getListeners().firePaused(context);
+		}
 		updateRequestTimestamp();
 		getListeners().fireRequestProcessed(context);
-		updateRequestTimestamp();
 		return viewDescriptor;
 	}
 
@@ -249,8 +252,8 @@ public class FlowExecutionImpl implements FlowExecution, FlowContext, Serializab
 			getActiveSessionInternal().setStatus(FlowSessionStatus.PAUSED);
 			getListeners().firePaused(context);
 		}
-		getListeners().fireRequestProcessed(context);
 		updateRequestTimestamp();
+		getListeners().fireRequestProcessed(context);
 		return viewDescriptor;
 	}
 	
