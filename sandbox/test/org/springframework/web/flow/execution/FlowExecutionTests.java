@@ -50,13 +50,13 @@ public class FlowExecutionTests extends TestCase {
 		flowExecution.getListeners().add(flowExecutionListener);
 		flowExecution.start(new Event(this));
 		assertEquals(0, flowExecutionListener.getFlowNestingLevel());
-		assertEquals(2, flowExecutionListener.countStateTransitions());
+		assertEquals(2, flowExecutionListener.getTransitionCount());
 		flowExecution.signalEvent(new Event(this, "submit"));
 		assertEquals(1, flowExecutionListener.getFlowNestingLevel());
-		assertEquals(4, flowExecutionListener.countStateTransitions());
+		assertEquals(4, flowExecutionListener.getTransitionCount());
 		flowExecution.signalEvent(new Event(this, "submit"));
 		assertEquals(0, flowExecutionListener.getFlowNestingLevel());
-		assertEquals(6, flowExecutionListener.countStateTransitions());
+		assertEquals(6, flowExecutionListener.getTransitionCount());
 	}
 
 	public void testLoopInFlow() {

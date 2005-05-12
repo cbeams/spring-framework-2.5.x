@@ -37,6 +37,7 @@ import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.FlowNavigationException;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowSessionStatus;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.TransitionableState;
 import org.springframework.web.flow.ViewDescriptor;
@@ -204,17 +205,12 @@ public class FlowExecutionImpl implements FlowExecution, FlowContext, Serializab
 	}
 
 	public synchronized ViewDescriptor start(Event event) throws IllegalStateException {
-		Assert.state(!isActive(), "This flow execution is already started");
-		// create a new flow session for the root flow and activate it
-		activateSession(this.rootFlow, null);
-		// execute the event
+		Assert.state(!isActive(), "This flow is already executing -- you cannot call start more than once");
 		InternalStateContext context = createStateContext(event);
-		context.fireRequestSubmitted();
+		getListeners().fireRequestSubmitted(context);
+		ViewDescriptor viewDescriptor = context.spawn(rootFlow.getStartState(), null);
 		updateRequestTimestamp();
-		context.fireStarting(this.rootFlow.getStartState());
-		ViewDescriptor viewDescriptor = this.rootFlow.getStartState().enter(context);
-		context.fireStarted();
-		context.fireRequestProcessed();
+		getListeners().fireRequestProcessed(context);
 		updateRequestTimestamp();
 		return viewDescriptor;
 	}
@@ -245,14 +241,16 @@ public class FlowExecutionImpl implements FlowExecution, FlowContext, Serializab
 		}
 		// execute the event
 		InternalStateContext context = createStateContext(event);
+		getListeners().fireRequestSubmitted(context);
 		getActiveSessionInternal().setStatus(FlowSessionStatus.ACTIVE);
-		context.fireRequestSubmitted();
+		getListeners().fireResumed(context);
 		ViewDescriptor viewDescriptor = state.onEvent(event, context);
-		context.fireRequestProcessed();
-		updateRequestTimestamp();
 		if (isActive()) {
 			getActiveSessionInternal().setStatus(FlowSessionStatus.PAUSED);
+			getListeners().firePaused(context);
 		}
+		getListeners().fireRequestProcessed(context);
+		updateRequestTimestamp();
 		return viewDescriptor;
 	}
 	
@@ -345,7 +343,7 @@ public class FlowExecutionImpl implements FlowExecution, FlowContext, Serializab
 	 * @param input the input parameters used to populate the flow session
 	 * @return the created and activated flow session
 	 */
-	protected FlowSession activateSession(Flow subflow, Map input) {
+	protected FlowSession activateSession(RequestContext context, Flow subflow, Map input) {
 		FlowSessionImpl session;
 		if (!executingFlowSessions.isEmpty()) {
 			FlowSessionImpl parent = getActiveSessionInternal();

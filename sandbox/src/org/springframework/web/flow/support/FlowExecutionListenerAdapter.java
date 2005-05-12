@@ -15,6 +15,9 @@
  */
 package org.springframework.web.flow.support;
 
+import java.util.Map;
+
+import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
@@ -35,7 +38,7 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	public void requestSubmitted(RequestContext context) {
 	}
 
-	public void starting(RequestContext context, State startState) throws EnterStateVetoException {
+	public void starting(RequestContext context, State startState, Map input) throws EnterStateVetoException {
 	}
 
 	public void started(RequestContext context) {
@@ -53,12 +56,19 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	public void stateEntered(RequestContext context, State previousState, State newState) {
 	}
 
-	public void subFlowEnded(RequestContext context, FlowSession endedSession) {
+	public void paused(RequestContext context) {
+		
 	}
 
-	public void subFlowSpawned(RequestContext context) {
+	public void resumed(RequestContext context) {
+		
 	}
 
 	public void ended(RequestContext context, FlowSession endedRootFlowSession) {
+		
+	}
+
+	public void expired(FlowContext flowContext) {
+		
 	}
 }

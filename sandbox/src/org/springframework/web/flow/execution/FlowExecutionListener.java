@@ -15,6 +15,9 @@
  */
 package org.springframework.web.flow.execution;
 
+import java.util.Map;
+
+import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
@@ -48,7 +51,7 @@ public interface FlowExecutionListener {
 	 * @param startState the start state that will be entered
 	 * @throws EnterStateVetoException the start state transition was not allowed
 	 */
-	public void starting(RequestContext context, State startState) throws EnterStateVetoException;
+	public void starting(RequestContext context, State startState, Map input) throws EnterStateVetoException;
 
 	/**
 	 * Called when a new flow execution was started -- the start state has been
@@ -90,22 +93,28 @@ public interface FlowExecutionListener {
 	public void stateEntered(RequestContext context, State previousState, State state);
 
 	/**
-	 * Called when a sub flow is spawned.
+	 * Called when a flow session is activated.
 	 * @param context the source of the event
 	 */
-	public void subFlowSpawned(RequestContext context);
+	public void resumed(RequestContext context);
 
 	/**
-	 * Called when a sub flow has ended.
+	 * Called when a flow session is paused.
 	 * @param context the source of the event
-	 * @param endedSession ending sub flow session
 	 */
-	public void subFlowEnded(RequestContext context, FlowSession endedSession);
+	public void paused(RequestContext context);
 
 	/**
-	 * Called when the flow execution terminates.
+	 * Called when a flow session ends.
 	 * @param context the source of the event
 	 * @param endedRootFlowSession ending root flow session
 	 */
-	public void ended(RequestContext context, FlowSession endedRootFlowSession);
+	public void ended(RequestContext context, FlowSession endedSession);
+
+	/**
+	 * Called when an executing flow expires and is cleaned up.
+	 * @param information about the expired flow.
+	 */
+	public void expired(FlowContext flowContext);
+
 }

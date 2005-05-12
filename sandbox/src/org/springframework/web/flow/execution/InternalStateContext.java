@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.support.EmptyAttributeSource;
-import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
 import org.springframework.util.RandomGuid;
 import org.springframework.util.StringUtils;
@@ -36,6 +35,7 @@ import org.springframework.web.flow.State;
 import org.springframework.web.flow.StateContext;
 import org.springframework.web.flow.TransactionSynchronizer;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.ViewDescriptor;
 
 /**
  * Default request context implementation used internally by the web flow
@@ -149,16 +149,16 @@ public class InternalStateContext implements StateContext, TransactionSynchroniz
 	}
 
 	public void setCurrentState(State state) {
-		fireStateEntering(state);
+		getListeners().fireStateEntering(this, state);
 		State previousState = this.flowExecution.getCurrentState();
 		this.flowExecution.setCurrentState(state);
-		fireStateEntered(previousState);
+		getListeners().fireStateEntered(this, previousState);
 	}
 
 	public void setLastEvent(Event lastEvent) {
 		this.lastEvent = lastEvent;
 		this.flowExecution.setLastEvent(lastEvent);
-		fireEventSignaled();
+		getListeners().fireEventSignaled(this);
 	}
 	
 	public void setLastTransition(Transition lastTransition) {
@@ -184,182 +184,22 @@ public class InternalStateContext implements StateContext, TransactionSynchroniz
 			logger.debug("Session for flow '" + endedSession.getFlow().getId() + "' ended, session details = "
 					+ endedSession);
 		}
-		if (this.flowExecution.isActive()) {
-			fireSubFlowEnded(endedSession);
-		}
-		else {
-			fireEnded(endedSession);
-		}
+		getListeners().fireEnded(this, endedSession);
 		return endedSession;
 	}
 
-	public FlowSession spawn(Flow subFlow, Map subFlowInput) {
-		FlowSession session = this.flowExecution.activateSession(subFlow, subFlowInput);
-		fireSubFlowSpawned();
-		return session;
+	public ViewDescriptor spawn(State startState, Map input) {
+		getListeners().fireStarting(this, startState, input);
+		FlowSession session = this.flowExecution.activateSession(this, startState.getFlow(), input);
+		ViewDescriptor viewDescriptor = startState.enter(this);
+		getListeners().fireStarted(this);
+		return viewDescriptor;
 	}
 
 	// lifecycle event management
 
 	public FlowExecutionListenerList getListeners() {
 		return this.flowExecution.getListeners();
-	}
-
-	/**
-	 * Notify all interested listeners that a request was submitted to this flow
-	 * execution.
-	 */
-	protected void fireRequestSubmitted() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request submitted event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestSubmitted(InternalStateContext.this);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that flow execution is starting.
-	 */
-	protected void fireStarting(final State startState) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution starting event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).starting(InternalStateContext.this, startState);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that flow execution has started.
-	 */
-	protected void fireStarted() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution started event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).started(InternalStateContext.this);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that this flow execution finished
-	 * processing a request.
-	 */
-	protected void fireRequestProcessed() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing request processed event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).requestProcessed(InternalStateContext.this);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that an event was signaled in this flow
-	 * execution.
-	 */
-	protected void fireEventSignaled() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event signaled event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).eventSignaled(InternalStateContext.this);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that a state is being entered in this
-	 * flow execution.
-	 */
-	protected void fireStateEntering(final State nextState) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state entering event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).stateEntering(InternalStateContext.this, nextState);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that a state was entered in this
-	 * flow execution.
-	 */
-	protected void fireStateEntered(final State previousState) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing state entered event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).stateEntered(InternalStateContext.this, previousState, getCurrentState());
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that a sub flow was spawned in this flow
-	 * execution.
-	 */
-	protected void fireSubFlowSpawned() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow execution started event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).subFlowSpawned(InternalStateContext.this);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that a sub flow ended in this flow
-	 * execution.
-	 */
-	protected void fireSubFlowEnded(final FlowSession endedSession) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing sub flow ended event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).subFlowEnded(InternalStateContext.this, endedSession);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that flow execution has ended.
-	 */
-	protected void fireEnded(final FlowSession endingRootFlowSession) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow execution ended event to " + getListeners().size()
-					+ " listener(s)");
-		}
-		getListeners().iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).ended(InternalStateContext.this, endingRootFlowSession);
-			}
-		});
 	}
 
 	// implementing TransactionSynchronizer

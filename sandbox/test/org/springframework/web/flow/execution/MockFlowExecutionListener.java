@@ -15,12 +15,13 @@
  */
 package org.springframework.web.flow.execution;
 
+import java.util.Map;
+
 import org.springframework.util.Assert;
+import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
-import org.springframework.web.flow.execution.EnterStateVetoException;
-import org.springframework.web.flow.execution.FlowExecutionListener;
 
 /**
  * Mock implementation of the <code>FlowExecutionListener</code> interface for
@@ -33,8 +34,12 @@ import org.springframework.web.flow.execution.FlowExecutionListener;
  */
 public class MockFlowExecutionListener implements FlowExecutionListener {
 
-	private boolean started = false;
+	private boolean started;
 
+	private boolean executing;
+	
+	private boolean expired;
+	
 	private int flowNestingLevel;
 
 	private boolean requestInProcess;
@@ -54,21 +59,31 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		Assert.state(started, "The flow execution has not yet been started");
 	}
 
-	public void starting(RequestContext context, State startState) throws EnterStateVetoException {
-		Assert.state(!started, "The flow execution was already started");
-		flowNestingLevel = 0;
-		stateTransitions = 0;
-	}
-
-	public void started(RequestContext context) {
-		Assert.state(!started, "The flow execution was already started");
-		started = true;
-	}
-
 	public void requestSubmitted(RequestContext context) {
 		Assert.state(!requestInProcess, "There is already a request being processed");
 		requestsSubmitted++;
 		requestInProcess = true;
+	}
+
+	public void starting(RequestContext context, State startState, Map input) throws EnterStateVetoException {
+		if (!context.getFlowContext().isActive()) {
+			Assert.state(!started, "The flow execution was already started");
+			flowNestingLevel = 0;
+			eventsSignaled = 0;
+			stateTransitions = 0;
+			executing = true;
+			expired = false;
+		}
+	}
+	
+	public void started(RequestContext context) {
+		if (context.getFlowContext().getActiveSession().isRoot()) {
+			Assert.state(!started, "The flow execution was already started");
+			started = true;
+		} else {
+			assertStarted();
+			flowNestingLevel++;
+		}
 	}
 
 	public void requestProcessed(RequestContext context) {
@@ -88,22 +103,30 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		stateTransitions++;
 	}
 
-	public void subFlowSpawned(RequestContext context) {
-		assertStarted();
-		flowNestingLevel++;
+
+	public void paused(RequestContext context) {
+		executing = false;
 	}
 
-	public void subFlowEnded(RequestContext context, FlowSession endedSession) {
-		assertStarted();
-		flowNestingLevel--;
-		Assert.state(started, "The flow execution prematurely ended");
+	public void resumed(RequestContext context) {
+		executing = true;
 	}
 
-	public void ended(RequestContext context, FlowSession endedRootFlowSession) {
+	public void ended(RequestContext context, FlowSession endedSession) {
 		assertStarted();
-		Assert.state(flowNestingLevel == 0, "The flow execution should have ended");
-		started = false;
+		if (endedSession.isRoot()) {
+			Assert.state(flowNestingLevel == 0, "The flow execution should have ended");
+			started = false;
+		} else {
+			flowNestingLevel--;
+			Assert.state(started, "The flow execution prematurely ended");
+		}
 	}
+
+	public void expired(FlowContext flowContext) {
+		expired = true;
+	}
+
 
 	/**
 	 * Is the flow execution running, e.g. it has started but not yet ended.
@@ -112,6 +135,12 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		return started;
 	}
 
+	/**
+	 * @return
+	 */
+	public boolean isExecuting() {
+		return executing;
+	}
 	/**
 	 * Returns the nesting level of the currently active flow in the flow
 	 * execution. The root flow is at level 0, a sub flow of the root flow
@@ -132,28 +161,35 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 	/**
 	 * Returns the number of requests submitted so far.
 	 */
-	public int countRequestsSubmitted() {
+	public int getRequestsSubmittedCount() {
 		return requestsSubmitted;
 	}
 
 	/**
 	 * Returns the number of requests processed so far.
 	 */
-	public int countRequestsProcessed() {
+	public int getRequestsProcessedCount() {
 		return requestsProcessed;
 	}
 
 	/**
 	 * Returns the number of events signaled so far.
 	 */
-	public int countEventsSignaled() {
+	public int getEventsSignaledCount() {
 		return eventsSignaled;
 	}
 
 	/**
 	 * Returns the number of state transitions executed so far.
 	 */
-	public int countStateTransitions() {
+	public int getTransitionCount() {
 		return stateTransitions;
+	}
+	
+	public void reset() {
+		started = false;
+		executing = false;
+		requestsSubmitted = 0;
+		requestsProcessed = 0;
 	}
 }

@@ -16,10 +16,18 @@
 package org.springframework.web.flow.execution;
 
 import java.util.Iterator;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.EventListenerListHelper;
 import org.springframework.core.closure.ProcessTemplate;
+import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
+import org.springframework.web.flow.FlowContext;
+import org.springframework.web.flow.FlowSession;
+import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.State;
 
 /**
  * A strongly typed listener list class for FlowExecutionListeners.
@@ -31,6 +39,8 @@ import org.springframework.util.Assert;
  */
 public class FlowExecutionListenerList {
 
+	protected static final Log logger = LogFactory.getLog(FlowExecutionListenerList.class);
+	
 	/**
 	 * The list of listeners that should receive event callbacks during managed
 	 * flow executions (client sessions).
@@ -151,4 +161,167 @@ public class FlowExecutionListenerList {
 	public FlowExecutionListener[] toArray() {
 		return (FlowExecutionListener[])flowExecutionListeners.toArray();
 	}
+
+	/**
+	 * Notify all interested listeners that a request was submitted to this flow
+	 * execution.
+	 */
+	public void fireRequestSubmitted(final RequestContext context) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing request submitted event to " + size() + " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).requestSubmitted(context);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that flow execution is starting.
+	 */
+	public void fireStarting(final RequestContext context, final State startState, final Map input) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow session execution starting event to " + size() + " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).starting(context, startState, input);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that flow execution has started.
+	 */
+	public void fireStarted(final RequestContext context) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow session execution started event to " + size()	+ " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).started(context);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that this flow execution finished
+	 * processing a request.
+	 */
+	public void fireRequestProcessed(final RequestContext context) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing request processed event to " + size()	+ " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).requestProcessed(context);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that an event was signaled in this flow
+	 * execution.
+	 */
+	public void fireEventSignaled(final RequestContext context) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing event signaled event to " + size()
+					+ " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).eventSignaled(context);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that a state is being entered in this
+	 * flow execution.
+	 */
+	public void fireStateEntering(final RequestContext context, final State nextState) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing state entering event to " + size()	+ " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).stateEntering(context, nextState);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that a state was entered in this
+	 * flow execution.
+	 */
+	public void fireStateEntered(final RequestContext context, final State previousState) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing state entered event to " + size() + " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).stateEntered(context, previousState, context.getFlowContext().getCurrentState());
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that a sub flow was spawned in this flow
+	 * execution.
+	 */
+	public void fireResumed(final RequestContext context) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow session spawned event to " + size()	+ " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).resumed(context);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that a sub flow was spawned in this flow
+	 * execution.
+	 */
+	public void firePaused(final RequestContext context) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow session spawned event to " + size()	+ " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).paused(context);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that flow execution has ended.
+	 */
+	public void fireEnded(final RequestContext context, final FlowSession endedSession) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow execution ended event to " + size() + " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).ended(context, endedSession);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that flow execution has expired.
+	 */
+	public void fireExpired(final FlowContext context) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow execution expired event to " + size() + " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).expired(context);
+			}
+		});
+	}
+
 }
