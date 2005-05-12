@@ -3,8 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2 final (9.5.2005)
----------------------------------------
+Changes in version 1.2 final (13.5.2005)
+----------------------------------------
+
+Package org.springframework.aop
+* introduced AbstractTraceInterceptor superclass for all trace interceptors, supporting a static or a dynamic logger
+* deprecated TraceInterceptor in favor of SimpleTraceInterceptor, which is a subclass of AbstractTraceInterceptor
+* reworked PerformanceMonitorInterceptor/JamonPerformanceMonitorInterceptor into subclasses of AbstractTraceInterceptor
+* reworked DebugInterceptor into a subclass of SimpleTraceInterceptor
+* added CustomizableTraceInterceptor, supporting pattern-based enter and exit messages with placeholders
+* all trace interceptors log at Commons Logging's "trace" level now, instead of "info" or "debug"
+* moved AopUtils' "getAllInterfaces" and "getAllInterfacesForClass" methods to org.springframework.util.ClassUtils
 
 Package org.springframework.beans
 * factored out BeanDefinitionVisitor from PropertyPlaceholderConfigurer, making the bean definition traversal reusable
@@ -16,8 +25,17 @@ Package org.springframework.beans
 * reworked ResourceEntityResolver to depend on ResourceLoader only and moved it to package "beans.factory.xml"
 * factored out resource editor registration from AbstractApplicationContext into ConfigurableBeanFactoryUtils helper
 
+Package org.springframework.context
+* reworked LocaleContextHolder to use an InheritableThreadLocal, also exposing the thread-bound Locale to child threads
+
 Package org.springframework.dao
 * reworked IncorrectResultSizeDataAccessException into subclass of DataRetrievalFailureException
+
+Package org.springframework.jca
+* removed overloaded "getConnection" method with "allowSynchronization" flag -> moved code into transaction manager impl
+
+Package org.springframework.jdbc
+* removed overloaded "getConnection" method with "allowSynchronization" flag -> moved code into transaction manager impl
 
 Package org.springframework.jms
 * added UserCredentialsConnectionFactoryAdapter for JMS, analogous to the UserCredentialsDataSourceAdapter for JDBC
@@ -32,17 +50,32 @@ Package org.springframework.jmx
 
 Package org.springframework.jdbc
 * deprecated "closeConnectionIfNecessary" method in favor of "releaseConnection" (in DataSourceUtils and JdbcDaoSupport)
+* added "releaseConnection" method to ConnectionHandle interface, allowing for JDO2-style Connection borrowing
+* reworked ConnectionHolder to explicitly fetch a current Connection on demand and release it on receiving "released"
 
 Package org.springframework.orm
+* removed resource acquisition methods with "allowSynchronization" flag -> moved code into transaction manager impls
+* redefined "allowCreate" flag: allowCreate=false does not prevent transaction synchronization (e.g. with JTA)
 * deprecated "closePersistenceManager/BrokerIfNecessary" methods in favor of "releasePersistenceManager/Broker"
-* deprecated "closeSessionIfNecessary" methods in favor of "releaseSession" (for both Hibernate2 and Hibernate3)
-* added TypeDefinitionBean, representing a Hibernate3 type definition (TypeDef / typedef XMl tag) in bean-style format
-* added "typeDefinitions" property to LocalSessionFactoryBean for Hibernate3, accepting TypeDefinitionBean objects
+* deprecated "closeSessionIfNecessary" methods in favor of "releaseSession" (for both Hibernate2, Hibernate3)
+* JTA Session synchronization detects read-only status of Spring-managed transaction (for both Hibernate2, Hibernate3)
 * Hibernate3 SessionFactoryUtils doesn't call "setReadOnly(true)" anymore, to avoid Open Session in View side effects
+* LocalSessionFactoryBean exposes proxy, with Hibernate 3.0.1's "getCurrentSession" returning the Spring-managed Session
+* LocalSessionFactoryBean defaults Hibernate 3.0.3's Connection release mode to "after_statement"/"after_transaction"
+* added TypeDefinitionBean, representing a Hibernate3 type definition (TypeDef / typedef XML tag) in bean-style format
+* added "typeDefinitions" property to LocalSessionFactoryBean for Hibernate3, accepting TypeDefinitionBean objects
 * added IdTransferringMergeEventListener for Hibernate3, setting newly assigned ids on the original objects too
+* added "evictAll", "refreshAll" and "makePersistentAll" convenience methods to JdoOperations and JdoTemplate
+* added support for JDO2 "getObjectById", "detachCopy" and "attachCopy" to JdoOperations and JdoTemplate
+* added support for JDO2 single string queries and named queries to JdoOperations and JdoTemplate
+* updated DefaultJdoDialect for JDO2: exposing a JDO2 DataStoreConnection and calling the JDO2 flush method
+* changed JdoTemplate's "exposeNativePersistenceManager" default to "false": all PM interfaces get proxied now
+* added TransactionAwarePersistenceManagerFactoryProxy, returning Spring-managed PMs from "getPersistenceManager" calls
 * added Oracle-donated support for TopLink as Spring-style data access option: TopLinkTemplate, TopLinkCallback, etc
-* added TopLinkTransactionManager, a Spring PlatformTransactionManager implementation for TopLink's native transactions
 * added TopLink SessionFactory abstraction for creating TopLink Sessions, including a convenient LocalSessionFactoryBean
+* added TopLinkTransactionManager, a Spring PlatformTransactionManager implementation for TopLink's native transactions
+* added TransactionAwareSessionAdapter, providing a Session that exposes the Spring-managed active Session/UnitOfWork
+* added CommonsLoggingSessionLog(904) classes for TopLink, redirecting TopLink's Session logging to Commons Logging
 
 Package org.springframework.samples
 * reworked PetClinic's Hibernate DAO to use "merge" (plus IdTransferringMergeEventListener) instead of "saveOrUpdate"
