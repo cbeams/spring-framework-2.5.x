@@ -17,6 +17,7 @@ package org.springframework.binding.support;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanWrapper;
@@ -164,5 +165,9 @@ public class Mapping implements Serializable {
 
 	protected BeanWrapper createBeanWrapper(Object attribute) {
 		return new BeanWrapperImpl(attribute);
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append(sourceAttributeName + "->" + targetAttributeName).toString();
 	}
 }

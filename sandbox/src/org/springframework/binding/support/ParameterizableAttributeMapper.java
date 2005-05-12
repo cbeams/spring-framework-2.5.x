@@ -23,8 +23,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.binding.AttributeSource;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.springframework.binding.AttributeMapper;
+import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.util.Assert;
 
@@ -189,5 +190,9 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 				mapping.map(source, target, this.mapMissingAttributesToNull);
 			}
 		}
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("mappings", mappings).toString();
 	}
 }
