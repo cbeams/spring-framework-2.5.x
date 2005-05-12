@@ -37,7 +37,14 @@ import org.springframework.binding.AttributeSource;
  */
 public class ViewDescriptor implements AttributeSource, Serializable {
 
+	/**
+	 * The name of the view (or page) to render. 
+	 */
 	private String viewName;
+	
+	/**
+	 * A map of the data available to the view for rendering.
+	 */
 	private Map model;
 	
 	/**

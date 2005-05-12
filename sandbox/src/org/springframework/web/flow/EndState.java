@@ -44,10 +44,10 @@ import org.springframework.util.StringUtils;
 public class EndState extends State {
 
 	/**
-	 * An optional view name to render if this end state terminates an entire
-	 * flow execution.
+	 * An optional view descriptor creator that will produce a view to render if this
+	 * end state terminates an executing root flow.
 	 */
-	private String viewName;
+	private ViewDescriptorCreator viewDescriptorCreator;
 	
 	/**
 	 * Default constructor for bean style usage.
@@ -96,29 +96,59 @@ public class EndState extends State {
 	}
 
 	/**
-	 * Returns the name of the view that will be rendered if this end state
-	 * terminates flow execution, or null if there is no associated view.
-	 * @return the logical view name
+	 * Create a new end state with specified associated view.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the name of the view that should be rendered if this end
+	 *        state terminates flow execution
+	 * @throws IllegalArgumentException when this state cannot be added to given
+	 *         flow
 	 */
-	public String getViewName() {
-		return viewName;
+	public EndState(Flow flow, String id, ViewDescriptorCreator creator) throws IllegalArgumentException {
+		super(flow, id);
+		setViewDescriptorCreator(creator);
 	}
 
 	/**
-	 * Set the name of the view that should be rendered if this end state
-	 * terminates flow execution.
-	 * @param viewName the logical view name
+	 * Create a new end state with specified associated view.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the name of the view that should be rendered if this end
+	 *        state terminates flow execution
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given
+	 *         flow
+	 */
+	public EndState(Flow flow, String id, ViewDescriptorCreator creator, Map properties) throws IllegalArgumentException {
+		super(flow, id, properties);
+		setViewDescriptorCreator(creator);
+	}
+
+	/**
+	 * Set the logical name of the view to render when this end state is entered and terminates a
+	 * root flow.
 	 */
 	public void setViewName(String viewName) {
-		this.viewName = viewName;
+		this.viewDescriptorCreator = new SimpleViewDescriptorCreator(viewName);
+	}
+
+	/**
+	 * Set the factory to produce a view descriptor to render when this end state is entered and
+	 * terminates a root flow.
+	 */
+	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
+		this.viewDescriptorCreator = creator;
+	}
+
+	protected ViewDescriptorCreator getViewDescriptorCreator() {
+		return viewDescriptorCreator;
 	}
 	
 	/**
-	 * Returns true if this end state has no associated view, false otherwise.
-	 * @return true if a view marker, false otherwise
+	 * Returns true if this view state has no associated view, false otherwise.
 	 */
 	public boolean isMarker() {
-		return !StringUtils.hasText(viewName);
+		return viewDescriptorCreator == null;
 	}
 
 	/**
@@ -148,10 +178,7 @@ public class EndState extends State {
 				viewDescriptor = null;
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Returning view descriptor '" + viewName + "' to render");
-				}
-				viewDescriptor = new ViewDescriptor(viewName, context.getModel());
+				viewDescriptor = viewDescriptorCreator.createViewDescriptor(context);
 			}
 			// end the flow
 			// note that we do this here to make sure we can call context.getModel()
@@ -188,6 +215,6 @@ public class EndState extends State {
 	}
 	
 	protected void createToString(ToStringCreator creator) {
-		creator.append("viewName", viewName);
+		creator.append("viewDescriptorCreator", viewDescriptorCreator);
 	}
 }

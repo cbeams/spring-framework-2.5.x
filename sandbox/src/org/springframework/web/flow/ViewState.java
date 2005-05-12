@@ -18,7 +18,6 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 import org.springframework.core.ToStringCreator;
-import org.springframework.util.StringUtils;
 
 /**
  * A view state is a state in which a physical view resource should be rendered
@@ -40,9 +39,9 @@ import org.springframework.util.StringUtils;
 public class ViewState extends TransitionableState {
 
 	/**
-	 * The logical name of the view.
+	 * The factory for the view descriptor to return when this state is entered.
 	 */
-	private String viewName;
+	private ViewDescriptorCreator viewDescriptorCreator;
 	
 	/**
 	 * Default constructor for bean style usage.
@@ -111,26 +110,70 @@ public class ViewState extends TransitionableState {
 		super(flow, id, transitions, properties);
 		setViewName(viewName);
 	}
-	
+
 	/**
-	 * Returns the logical name of the view to render in this view state.
+	 * Create a new view state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the logical name of the view to render
+	 * @param transition the sole transition of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public String getViewName() {
-		return viewName;
+	public ViewState(Flow flow, String id, ViewDescriptorCreator creator, Transition transition) throws IllegalArgumentException {
+		super(flow, id, transition);
+		setViewDescriptorCreator(creator);
 	}
 
+	/**
+	 * Create a new view state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the logical name of the view to render
+	 * @param transitions the transitions of this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
+	 */
+	public ViewState(Flow flow, String id, ViewDescriptorCreator creator, Transition[] transitions) throws IllegalArgumentException {
+		super(flow, id, transitions);
+		setViewDescriptorCreator(creator);
+	}
+
+	/**
+	 * Create a new view state.
+	 * @param flow the owning flow
+	 * @param id the state identifier (must be unique to the flow)
+	 * @param viewName the logical name of the view to render
+	 * @param transitions the transitions of this state
+	 * @param properties additional properties describing this state
+	 * @throws IllegalArgumentException when this state cannot be added to given flow
+	 */
+	public ViewState(Flow flow, String id, ViewDescriptorCreator creator, Transition[] transitions, Map properties) throws IllegalArgumentException {
+		super(flow, id, transitions, properties);
+		setViewDescriptorCreator(creator);
+	}
+	
 	/**
 	 * Set the logical name of the view to render in this view state.
 	 */
 	public void setViewName(String viewName) {
-		this.viewName = viewName;
+		this.viewDescriptorCreator = new SimpleViewDescriptorCreator(viewName);
 	}
 
+	/**
+	 * Set the factory that will produce a descriptor about the view to render in this view state.
+	 */
+	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
+		this.viewDescriptorCreator = creator;
+	}
+
+	protected ViewDescriptorCreator getViewDescriptorCreator() {
+		return viewDescriptorCreator;
+	}
+	
 	/**
 	 * Returns true if this view state has no associated view, false otherwise.
 	 */
 	public boolean isMarker() {
-		return !StringUtils.hasText(getViewName());
+		return viewDescriptorCreator == null;
 	}
 
 	/**
@@ -153,23 +196,12 @@ public class ViewState extends TransitionableState {
 			return null;
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Returning view name '" + viewName + "' to render");
-			}
-			return createViewDescriptor(context);
+			return viewDescriptorCreator.createViewDescriptor(context);
 		}
 	}
 
-	/**
-	 * Create a view descriptor for given state context. Subclasses could override
-	 * this method to return a custom view descriptor. 
-	 */
-	protected ViewDescriptor createViewDescriptor(StateContext context) {
-		return new ViewDescriptor(this.viewName, context.getModel());
-	}
-
 	protected void createToString(ToStringCreator creator) {
-		creator.append("viewName", viewName);
+		creator.append("viewDescriptorCreator", this.viewDescriptorCreator);
 		super.createToString(creator);
 	}
 }
