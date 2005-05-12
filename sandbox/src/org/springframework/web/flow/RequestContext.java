@@ -23,7 +23,7 @@ import org.springframework.binding.AttributeSource;
  * Central interface that allows clients to manipulate contextual information about
  * an ongoing flow execution within the context of a client request. The term
  * <i>request</i> is used to symbolize a call into the flow system to
- * manipulate a FlowExecution.
+ * manipulate an executing flow.
  * <p>
  * A new request context is created when one of the entry points on the
  * FlowExecution facade interface is invoked, either
@@ -66,14 +66,14 @@ public interface RequestContext {
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in
-	 * request scope.
+	 * request scope.  Request scoped attributes exist for the duration of this request.
 	 * @return the request scope
 	 */
 	public Scope getRequestScope();
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in
-	 * flow scope.
+	 * flow scope.  Flow scoped attributes exist for the life of the executing flow.
 	 * @return the flow scope
 	 */
 	public Scope getFlowScope();
@@ -92,7 +92,7 @@ public interface RequestContext {
 	public Transition getLastTransition();
 
 	/**
-	 * Returns a holder for execution properties for the current request.
+	 * Returns a holder for arbitrary execution properties set for the current request.
 	 * @return the execution properties, or empty if not set
 	 */
 	public AttributeSource getProperties();

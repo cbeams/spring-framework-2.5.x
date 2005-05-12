@@ -166,7 +166,7 @@ public abstract class State extends AnnotatedObject {
 
 	/**
 	 * Hook method to execute custom behaviour as a result of entering this state.
-	 * @param context the request context in an executing flow (a client instance of a flow)
+	 * @param context the state context in an executing flow (a client instance of a flow)
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state processing
 	 */

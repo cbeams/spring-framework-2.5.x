@@ -141,7 +141,7 @@ public class ViewState extends TransitionableState {
 	 * Returns a view descriptor pointing callers to a logical view resource to
 	 * be displayed. The descriptor also contains a model map needed when the
 	 * view is rendered, for populating dynamic content.
-	 * @param context the state execution context
+	 * @param context the state context for the executing flow
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */
