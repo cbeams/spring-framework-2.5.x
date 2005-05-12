@@ -11,10 +11,11 @@ import oracle.toplink.queryframework.ValueReadQuery;
 /**
  * Subclass of TopLink's default HSQLPlatform class,
  * using native HSQLDB identity columns for id generation.
+ * <b>Only works on TopLink 10.1.3 and higher.</b>
  *
  * <p>Necessary for PetClinic's default data model, which relies on
  * identity columns: this is uniformly used across all persistence
- * layer implementations (JDBC Hibernate, OJB, and TopLink).
+ * layer implementations (JDBC, Hibernate, OJB, and TopLink).
  *
  * @author Juergen Hoeller
  * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
@@ -26,11 +27,15 @@ public class HSQLPlatformWithNativeSequence extends HSQLPlatform {
 		setUsesNativeSequencing(true);
 	}
 
-	public boolean shouldRetrieveSequenceAfterInsert() {
+	public boolean supportsNativeSequenceNumbers() {
 		return true;
 	}
 
-	protected ValueReadQuery buildSelectSequenceQuery() {
+	public boolean shouldNativeSequenceAcquireValueAfterInsert() {
+		return true;
+	}
+
+	public ValueReadQuery buildSelectQueryForNativeSequence() {
 		return new ValueReadQuery("CALL IDENTITY()");
 	}
 
