@@ -32,13 +32,13 @@ public interface StateContext extends RequestContext {
 	
 	/**
 	 * Spawn a new flow session and activate it in the currently executing
-	 * flow execution.
-	 * @param subflow the flow for which a new flow session should be created
-	 * @param subFlowInput initial contents of the newly created flow session
+	 * flow.  Also transitions the spawned flow to its start state.
+	 * @param startState the state the new flow should start in
+	 * @param input initial contents of the newly created flow session
 	 * @return the newly created and activated flow session
 	 * @throws IllegalStateException when the flow execution is not active
 	 */
-	public FlowSession spawn(Flow subflow, Map subFlowInput) throws IllegalStateException;
+	public ViewDescriptor spawn(State startState, Map input) throws IllegalStateException;
 
 	/**
 	 * End the active flow session.
