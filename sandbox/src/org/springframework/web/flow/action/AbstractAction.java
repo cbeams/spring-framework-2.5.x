@@ -26,7 +26,7 @@ import org.springframework.web.flow.RequestContext;
 
 /**
  * Base action implementation that provides a number of helper methods generally
- * useful to any controller/command action. These include:
+ * useful to any action command. These include:
  * <ul>
  * <li>Creating common action result events
  * <li>Inserting action pre and post execution logic (may also be done with an
