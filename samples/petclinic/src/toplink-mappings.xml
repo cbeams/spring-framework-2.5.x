@@ -1,33 +1,6 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <project>
    <project-name>toplink-project</project-name>
-   <login>
-      <database-login>
-         <platform>oracle.toplink.internal.databaseaccess.HSQLPlatform</platform>
-         <driver-class>org.hsqldb.jdbcDriver</driver-class>
-         <connection-url>jdbc:hsqldb:hsql://localhost:9001</connection-url>
-         <user-name>sa</user-name>
-         <password></password>
-         <uses-native-sequencing>false</uses-native-sequencing>
-         <sequence-preallocation-size>1</sequence-preallocation-size>
-         <sequence-table>SEQUENCE</sequence-table>
-         <sequence-name-field>SEQ_NAME</sequence-name-field>
-         <sequence-counter-field>SEQ_COUNT</sequence-counter-field>
-         <should-bind-all-parameters>false</should-bind-all-parameters>
-         <should-cache-all-statements>false</should-cache-all-statements>
-         <uses-byte-array-binding>true</uses-byte-array-binding>
-         <uses-string-binding>false</uses-string-binding>
-         <uses-streams-for-binding>false</uses-streams-for-binding>
-         <should-force-field-names-to-upper-case>false</should-force-field-names-to-upper-case>
-         <should-optimize-data-conversion>true</should-optimize-data-conversion>
-         <should-trim-strings>true</should-trim-strings>
-         <uses-batch-writing>false</uses-batch-writing>
-         <uses-jdbc-batch-writing>true</uses-jdbc-batch-writing>
-         <uses-external-connection-pooling>false</uses-external-connection-pooling>
-         <uses-external-transaction-controller>false</uses-external-transaction-controller>
-         <type>oracle.toplink.sessions.DatabaseLogin</type>
-      </database-login>
-   </login>
    <descriptors>
       <descriptor>
          <java-class>org.springframework.samples.petclinic.Owner</java-class>
