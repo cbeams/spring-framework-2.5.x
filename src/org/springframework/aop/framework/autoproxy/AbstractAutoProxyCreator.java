@@ -31,13 +31,13 @@ import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.core.Ordered;
+import org.springframework.util.ClassUtils;
 
 /**
  * BeanPostProcessor implementation that wraps a group of beans with AOP proxies
@@ -346,7 +346,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		if (!isProxyTargetClass()) {
 			// Must allow for introductions; can't just set interfaces to
 			// the target's interfaces only.
-			Class[] targetsInterfaces = AopUtils.getAllInterfacesForClass(beanClass);
+			Class[] targetsInterfaces = ClassUtils.getAllInterfacesForClass(beanClass);
 			for (int i = 0; i < targetsInterfaces.length; i++) {
 				proxyFactory.addInterface(targetsInterfaces[i]);
 			}

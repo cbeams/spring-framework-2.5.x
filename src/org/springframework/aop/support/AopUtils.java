@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +31,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.util.ClassUtils;
 
 /**
  * Utility methods used by the AOP framework and by AOP proxy factories.
@@ -176,10 +176,11 @@ public abstract class AopUtils {
 	 * including ones implemented by superclasses.
 	 * @param object the object to analyse for interfaces
 	 * @return all interfaces that the given object implements as array
+	 * @deprecated in favor of <code>ClassUtils.getAllInterfaces</code>
+	 * @see org.springframework.util.ClassUtils#getAllInterfaces(Object)
 	 */
 	public static Class[] getAllInterfaces(Object object) {
-		Set interfaces = getAllInterfacesAsSet(object);
-		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
+		return getAllInterfacesForClass(object.getClass());
 	}
 
 	/**
@@ -187,9 +188,11 @@ public abstract class AopUtils {
 	 * including ones implemented by superclasses.
 	 * @param clazz the class to analyse for interfaces
 	 * @return all interfaces that the given object implements as array
+	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesForClass</code>
+	 * @see org.springframework.util.ClassUtils#getAllInterfacesForClass(Class)
 	 */
 	public static Class[] getAllInterfacesForClass(Class clazz) {
-		Set interfaces = getAllInterfacesForClassAsSet(clazz);
+		Set interfaces = ClassUtils.getAllInterfacesForClassAsSet(clazz);
 		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
 	}
 
@@ -198,21 +201,11 @@ public abstract class AopUtils {
 	 * including ones implemented by superclasses.
 	 * @param object the object to analyse for interfaces
 	 * @return all interfaces that the given object implements as List
-	 * @deprecated in favor of <code>getAllInterfacesForClassAsList</code>
-	 * @see #getAllInterfacesForClassAsList
+	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesAsSet</code>
+	 * @see org.springframework.util.ClassUtils#getAllInterfacesAsSet(Object)
 	 */
 	public static List getAllInterfacesAsList(Object object) {
 		return getAllInterfacesForClassAsList(object.getClass());
-	}
-
-	/**
-	 * Return all interfaces that the given object implements as List,
-	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as List
-	 */
-	public static Set getAllInterfacesAsSet(Object object) {
-		return getAllInterfacesForClassAsSet(object.getClass());
 	}
 
 	/**
@@ -220,31 +213,13 @@ public abstract class AopUtils {
 	 * including ones implemented by superclasses.
 	 * @param clazz the class to analyse for interfaces
 	 * @return all interfaces that the given object implements as List
-	 * @deprecated in favor of <code>getAllInterfacesForClassAsSet</code>
-	 * @see #getAllInterfacesForClassAsSet
+	 * @deprecated in favor of <code>ClassUtils.getAllInterfacesForClassAsSet</code>
+	 * @see org.springframework.util.ClassUtils#getAllInterfacesForClassAsSet(Class)
 	 */
 	public static List getAllInterfacesForClassAsList(Class clazz) {
-		return new ArrayList(getAllInterfacesForClassAsSet(clazz));
+		return new ArrayList(ClassUtils.getAllInterfacesForClassAsSet(clazz));
 	}
 
-	/**
-	 * Return all interfaces that the given class implements as Set,
-	 * including ones implemented by superclasses.
-	 * @param clazz the class to analyse for interfaces
-	 * @return all interfaces that the given object implements as Set
-	 */
-	public static Set getAllInterfacesForClassAsSet(Class clazz) {
-		Set interfaces = new HashSet();
-		while (clazz != null) {
-			for (int i = 0; i < clazz.getInterfaces().length; i++) {
-				Class ifc = clazz.getInterfaces()[i];
-				interfaces.add(ifc);
-			}
-			clazz = clazz.getSuperclass();
-		}
-		return interfaces;
-	}
-	
 	/**
 	 * Can the given pointcut apply at all on the given class?
 	 * This is an important test as it can be used to optimize
@@ -258,7 +233,7 @@ public abstract class AopUtils {
 			return false;
 		}
 		
-		Set classes = getAllInterfacesForClassAsSet(targetClass);
+		Set classes = ClassUtils.getAllInterfacesForClassAsSet(targetClass);
 		classes.add(targetClass);
 		for (Iterator it = classes.iterator(); it.hasNext();) {
 			Class clazz = (Class) it.next();

@@ -18,7 +18,7 @@ package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.Interceptor;
 
-import org.springframework.aop.support.AopUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Factory for AOP proxies for programmatic use, rather than via a bean
@@ -43,7 +43,7 @@ public class ProxyFactory extends AdvisedSupport {
 		if (target == null) {
 			throw new AopConfigException("Can't proxy null object");
 		}
-		setInterfaces(AopUtils.getAllInterfaces(target));
+		setInterfaces(ClassUtils.getAllInterfaces(target));
 		setTarget(target);
 	}
 	

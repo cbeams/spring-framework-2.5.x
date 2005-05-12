@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -198,7 +197,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractReflectiveMBeanInf
 		if (ifaces == null) {
 			ifaces = this.managedInterfaces;
 			if (ifaces == null) {
-				ifaces = AopUtils.getAllInterfacesForClass(method.getDeclaringClass());
+				ifaces = ClassUtils.getAllInterfacesForClass(method.getDeclaringClass());
 			}
 		}
 

@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.IntroductionInfo;
+import org.springframework.util.ClassUtils;
 
 /**
  * Support for implementations of IntroductionAdvice.
@@ -73,7 +74,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	}
 	
 	protected void implementInterfacesOnObject(Object delegate) {
-		this.publishedInterfaces.addAll(AopUtils.getAllInterfacesAsSet(delegate));
+		this.publishedInterfaces.addAll(ClassUtils.getAllInterfacesAsSet(delegate));
 	}
 
 	/**

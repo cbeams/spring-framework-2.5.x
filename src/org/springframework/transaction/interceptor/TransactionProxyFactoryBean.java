@@ -35,6 +35,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.ClassUtils;
 
 /**
  * Proxy factory bean for simplified declarative transaction handling.
@@ -271,7 +272,7 @@ public class TransactionProxyFactoryBean extends ProxyConfig
 		}
 		else if (!isProxyTargetClass()) {
 			// Rely on AOP infrastructure to tell us what interfaces to proxy.
-			proxyFactory.setInterfaces(AopUtils.getAllInterfacesForClass(targetSource.getTargetClass()));
+			proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass()));
 		}
 		
 		this.proxy = proxyFactory.getProxy();

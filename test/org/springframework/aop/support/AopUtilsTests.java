@@ -16,10 +16,7 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
 
 import junit.framework.TestCase;
 import org.aopalliance.aop.Advice;
@@ -30,9 +27,6 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.target.EmptyTargetSource;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.IOther;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
@@ -41,15 +35,6 @@ import org.springframework.util.SerializationTestUtils;
  */
 public class AopUtilsTests extends TestCase {
 
-	public void testGetAllInterfaces() {
-		DerivedTestBean testBean = new DerivedTestBean();
-		List ifcs = Arrays.asList(AopUtils.getAllInterfaces(testBean));
-		assertEquals("Correct number of interfaces", 7, ifcs.size());
-		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
-		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
-		assertTrue("Contains IOther", ifcs.contains(IOther.class));
-	}
-	
 	public void testPointcutCanNeverApply() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			public boolean matches(Method method, Class clazzy) {

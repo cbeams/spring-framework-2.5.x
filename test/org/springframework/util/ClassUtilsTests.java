@@ -1,12 +1,18 @@
 package org.springframework.util;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.DerivedTestBean;
+import org.springframework.beans.IOther;
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
@@ -88,6 +94,15 @@ public class ClassUtilsTests extends TestCase {
 
 		assertEquals("java/lang/reflect/a/b/c/d.xml",
 		    ClassUtils.addResourcePathToPackagePath(Proxy.class, "a/b/c/d.xml"));
+	}
+
+	public void testGetAllInterfaces() {
+		DerivedTestBean testBean = new DerivedTestBean();
+		List ifcs = Arrays.asList(ClassUtils.getAllInterfaces(testBean));
+		assertEquals("Correct number of interfaces", 7, ifcs.size());
+		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
+		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
+		assertTrue("Contains IOther", ifcs.contains(IOther.class));
 	}
 
 
