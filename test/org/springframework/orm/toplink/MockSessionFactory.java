@@ -23,8 +23,15 @@ public class MockSessionFactory implements SessionFactory {
 		return this.session;
 	}
 
-	public Session createManagedSession() {
+	public Session createManagedClientSession() {
 		return this.session;
+	}
+
+	public Session createTransactionAwareSession() {
+		return this.session;
+	}
+
+	public void close() {
 	}
 
 }

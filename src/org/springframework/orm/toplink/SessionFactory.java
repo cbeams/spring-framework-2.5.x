@@ -53,7 +53,7 @@ public interface SessionFactory {
 	Session createSession() throws TopLinkException;
 
 	/**
-	 * Create a new managed TopLink Session for the current application context.
+	 * Create a new managed TopLink client Session for the current context.
 	 * Will usually be a new special ClientSession for the current thread.
 	 * <p>The returned Session will be prepared to be managed within a Spring
 	 * transaction (by TopLinkTransactionManager). It will carry an active
@@ -67,6 +67,29 @@ public interface SessionFactory {
 	 * @throws TopLinkException in case of errors
 	 * @see oracle.toplink.sessions.Session#getActiveUnitOfWork()
 	 */
-	Session createManagedSession() throws TopLinkException;
+	Session createManagedClientSession() throws TopLinkException;
+
+	/**
+	 * Create a new transaction-aware TopLink Session that exposes the currently
+	 * active Session and UnitOfWork via <code>Session.getActiveSession</code>
+	 * and <code>Session.getActiveUnitOfWork</code>, respectively.
+	 * <p>Such a Session reference can be used analogously to a managed TopLink
+	 * Session in a JTA environment, with Spring-managed transactions backing it.
+	 * <p>It is usually preferable to let DAOs work with a full SessionFactory,
+	 * accessing TopLink Sessions via <code>SessionFactoryUtils.getSession</code>.
+	 * However, a transaction-aware TopLink Session reference does not impose any
+	 * Spring dependency, so might be preferable if you'd like to keep your data
+	 * access code tied to TopLink API only.
+	 * @return the new TopLink Session
+	 * @throws TopLinkException in case of errors
+	 * @see oracle.toplink.sessions.Session#getActiveSession()
+	 * @see oracle.toplink.sessions.Session#getActiveUnitOfWork()
+	 */ 
+	Session createTransactionAwareSession() throws TopLinkException;
+
+	/**
+	 * Close this SessionFactory, shutting down all internal resources.
+	 */
+	void close();
 
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.orm.toplink;
 
+import oracle.toplink.exceptions.TopLinkException;
+import oracle.toplink.sessions.DatabaseSession;
 import oracle.toplink.sessions.Session;
 
 /**
@@ -50,10 +52,30 @@ public class SingleSessionFactory implements SessionFactory {
 
 	/**
 	 * Throws an UnsupportedOperationException: SingleSessionFactory does not
-	 * support managed Sessions. Use ServerSessionFactory instead.
+	 * support managed client Sessions. Use ServerSessionFactory instead.
 	 */
-	public Session createManagedSession() {
-		throw new UnsupportedOperationException("SingleSessionFactory does not support managed Sessions");
+	public Session createManagedClientSession() {
+		throw new UnsupportedOperationException("SingleSessionFactory does not support managed client Sessions");
+	}
+
+	/**
+	 * Throws an UnsupportedOperationException: SingleSessionFactory does not
+	 * support transaction-aware Sessions. Use ServerSessionFactory instead.
+	 */
+	public Session createTransactionAwareSession() throws TopLinkException {
+		throw new UnsupportedOperationException("SingleSessionFactory does not support transaction-aware Sessions");
+	}
+
+	/**
+	 * Shut the pre-configured TopLink Session down.
+	 * @see oracle.toplink.sessions.DatabaseSession#logout()
+	 * @see oracle.toplink.sessions.Session#release()
+	 */
+	public void close() {
+		if (this.session instanceof DatabaseSession) {
+			((DatabaseSession) this.session).logout();
+		}
+		this.session.release();
 	}
 
 }

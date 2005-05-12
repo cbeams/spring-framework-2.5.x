@@ -84,7 +84,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see #setDataSource
  * @see LocalSessionFactoryBean
  * @see SessionFactoryUtils#getSession
- * @see SessionFactoryUtils#applyTransactionTimeout
  * @see SessionFactoryUtils#releaseSession
  * @see TopLinkTemplate#execute
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
@@ -131,7 +130,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	 * active UnitOfWork that will be committed by this transaction manager).
 	 * @see ServerSessionFactory
 	 * @see SessionFactory#createSession()
-	 * @see SessionFactory#createManagedSession()
+	 * @see SessionFactory#createManagedClientSession()
 	 */
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -270,7 +269,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		try {
 			if (!definition.isReadOnly()) {
 				logger.debug("Creating managed TopLink Session with active UnitOfWork for read-write transaction");
-				session = getSessionFactory().createManagedSession();
+				session = getSessionFactory().createManagedClientSession();
 			}
 			else {
 				logger.debug("Creating plain TopLink Session without active UnitOfWork for read-only transaction");

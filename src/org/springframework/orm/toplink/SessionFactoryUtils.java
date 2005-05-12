@@ -79,6 +79,32 @@ public abstract class SessionFactoryUtils {
 	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate)
 			throws DataAccessResourceFailureException, IllegalStateException {
 
+		try {
+			return doGetSession(sessionFactory, allowCreate);
+		}
+		catch (TopLinkException ex) {
+			throw new DataAccessResourceFailureException("Could not open TopLink Session", ex);
+		}
+	}
+
+	/**
+	 * Get a TopLink Session for the given SessionFactory. Is aware of and will
+	 * return any existing corresponding Session bound to the current thread, for
+	 * example when using TopLinkTransactionManager. Will create a new Session
+	 * otherwise, if allowCreate is true.
+	 * <p>Same as <code>getSession</code>, but throwing the original TopLinkException.
+	 * @param sessionFactory TopLink SessionFactory to create the session with
+	 * @param allowCreate if a non-transactional Session should be created when no
+	 * transactional Session can be found for the current thread
+	 * @return the TopLink Session
+	 * @throws TopLinkException if the Session couldn't be created
+	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @see #releaseSession
+	 * @see TopLinkTemplate
+	 */
+	public static Session doGetSession(SessionFactory sessionFactory, boolean allowCreate)
+			throws TopLinkException, IllegalStateException {
+
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
 
 		SessionHolder sessionHolder =
@@ -92,26 +118,21 @@ public abstract class SessionFactoryUtils {
 					"and configuration does not allow creation of non-transactional one here");
 		}
 
-		try {
-			logger.debug("Creating TopLink Session");
-			Session session = sessionFactory.createSession();
+		logger.debug("Creating TopLink Session");
+		Session session = sessionFactory.createSession();
 
-			if (TransactionSynchronizationManager.isSynchronizationActive()) {
-				logger.debug("Registering new Spring transaction synchronization for new TopLink Session");
-				// Use same Session for further TopLink actions within the transaction.
-				// Thread object will get removed by synchronization at transaction completion.
-				sessionHolder = new SessionHolder(session);
-				sessionHolder.setSynchronizedWithTransaction(true);
-				TransactionSynchronizationManager.registerSynchronization(
-						new SessionSynchronization(sessionHolder, sessionFactory));
-				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
-			}
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			logger.debug("Registering new Spring transaction synchronization for new TopLink Session");
+			// Use same Session for further TopLink actions within the transaction.
+			// Thread object will get removed by synchronization at transaction completion.
+			sessionHolder = new SessionHolder(session);
+			sessionHolder.setSynchronizedWithTransaction(true);
+			TransactionSynchronizationManager.registerSynchronization(
+					new SessionSynchronization(sessionHolder, sessionFactory));
+			TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+		}
 
-			return session;
-		}
-		catch (TopLinkException ex) {
-			throw new DataAccessResourceFailureException("Could not open TopLink Session", ex);
-		}
+		return session;
 	}
 
 	/**
