@@ -21,27 +21,29 @@ public class PetStoreImpl implements PetStoreFacade, OrderService {</programlist
 
     <para><programlisting>/**
  * Normal comments
- * @@org.springframework.transaction.interceptor.RuleBasedTransactionAttribute ()
- * @@org.springframework.transaction.interceptor.RollbackRuleAttribute (Exception.class)
- * @@org.springframework.transaction.interceptor.NoRollbackRuleAttribute (&#34;ServletException&#34;)
+ * @@org.springframework.transaction.interceptor.RuleBasedTransactionAttribute()
+ * @@org.springframework.transaction.interceptor.RollbackRuleAttribute(Exception.class)
+ * @@org.springframework.transaction.interceptor.NoRollbackRuleAttribute(&#34;ServletException&#34;)
  */
 public void echoException(Exception ex) throws Exception {
     ....
 }</programlisting></para>
 
-    <para>Both these examples use Jakarta Commons Attributes syntax.</para>
+    <para>Both of these examples use Jakarta Commons Attributes syntax.</para>
 
-    <para>Source-level metadata was introduced to the mainstream with the
-    release of Microsoft&#39;s .NET platform, which uses source-level
-    attributes to control transactions, pooling and other behaviour.</para>
+    <para>Source-level metadata was introduced to the mainstream by XDoclet
+    (in the Java world) and by the release of Microsoft&#39;s .NET platform,
+    which uses source-level attributes to control transactions, pooling and
+    other behavior.</para>
 
     <para>The value in this approach has been recognized in the J2EE
     community. For example, it&#39;s much less verbose than the traditional
     XML deployment descriptors exclusively used by EJB. While it is desirable
     to externalize some things from program source code, some important
-    enterprise settings--notably transaction characteristics--belong in
-    program source. Contrary to the assumptions of the EJB spec, it seldom
-    makes sense to modify the transactional characteristics of a method.</para>
+    enterprise settings--notably transaction characteristics--arguably belong
+    in program source. Contrary to the assumptions of the EJB spec, it seldom
+    makes sense to modify the transactional characteristics of a method
+    (although parameters like transaction timeouts might change!).</para>
 
     <para>Although metadata attributes are typically used mainly by framework
     infrastructure to describe the services application classes require, it
@@ -55,7 +57,7 @@ public void echoException(Exception ex) throws Exception {
       <listitem>
         <para><emphasis role="bold">JSR-175</emphasis>: the standard Java
         metadata implementation, available in Java 1.5. But we need a solution
-        now and may always want a facade</para>
+        for Java 1.4 and even 1.3 too.</para>
       </listitem>
 
       <listitem>
@@ -65,9 +67,9 @@ public void echoException(Exception ex) throws Exception {
 
       <listitem>
         <para>Various <emphasis role="bold">open source attribute
-        implementations</emphasis>, pending the release of JSR-175, of which
-        Commons Attributes appears to be the most promising. All these require
-        a special pre- or post-compilation step.</para>
+        implementations</emphasis>, for Java 1.3 and 1.4, of which
+        Commons Attributes appears to be the most promising. All these
+        require a special pre- or post-compilation step.</para>
       </listitem>
     </itemizedlist>
   </sect1>
@@ -99,9 +101,6 @@ public void echoException(Exception ex) throws Exception {
     impossible to mock during test time. Spring provides a simple interface to
     allow this.</para></listitem></itemizedlist></listitem></itemizedlist></para>
 
-    <para>Thus Spring will support JSR-175 before Java 1.5 reaches GA, but
-    will continue to offer an attribute abstraction API.</para>
-
     <para>The Spring <literal>Attributes</literal> interface looks like this:</para>
 
     <para><programlisting>public interface Attributes {
@@ -122,9 +121,9 @@ public void echoException(Exception ex) throws Exception {
     <para>This is a lowest common denominator interface. JSR-175 offers more
     capabilities than this, such as attributes on method arguments. As of
     Spring 1.0, Spring aims to provide the subset of metadata required to
-    provide effective declarative enterprise services a la EJB or .NET. Beyond
-    Spring 1.0, it is likely that Spring will provide further metadata
-    methods.</para>
+    provide effective declarative enterprise services a la EJB or .NET,
+    on Java 1.3+. As of Spring 1.2, analogous JSR-175 annotations are
+    supported on JDK 1.5, as direct alternative to Commons Attributes.</para>
 
     <para>Note that this interface offers <literal>Object</literal>
     attributes, like .NET. This distinguishes it from attribute systems such
@@ -668,9 +667,9 @@ public class FooController extends AbstractController {
     <title>Other uses of metadata attributes</title>
 
     <para>Other uses of metadata attributes appear to be growing in
-    popularity. As of March 2004, an attribute-based validation package for
-    Spring is in development. The one-off setup cost of attribute parsing
-    looks more attractive, when the potential for multiple uses is considered.</para>
+    popularity. As of Spring 1.2, metadata attributes for JMX exposure
+    are supported, through both Commons Attributes (on JDK 1.3+) and
+    JSR-175 annotations (on JDK 1.5).</para>
   </sect1>
 
   <sect1>
@@ -686,8 +685,5 @@ public class FooController extends AbstractController {
     <para>All framework services that use metadata, such as AOP
     metadata-driven autoproxying, will then automatically be able to use your
     new metadata provider.</para>
-
-    <remark>We expect to add support for Java 1.5 attributes--probably as an
-    add-on to the Spring core--in Q2 2004.</remark>
   </sect1>
 </chapter>
