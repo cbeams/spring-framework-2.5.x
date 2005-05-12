@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
@@ -256,6 +258,56 @@ public abstract class ClassUtils {
 			return "";
 		}
 		return clazz.getPackage().getName().replace('.', '/');
+	}
+
+	/**
+	 * Return all interfaces that the given object implements as array,
+	 * including ones implemented by superclasses.
+	 * @param object the object to analyse for interfaces
+	 * @return all interfaces that the given object implements as array
+	 */
+	public static Class[] getAllInterfaces(Object object) {
+		Set interfaces = getAllInterfacesAsSet(object);
+		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
+	}
+
+	/**
+	 * Return all interfaces that the given class implements as array,
+	 * including ones implemented by superclasses.
+	 * @param clazz the class to analyse for interfaces
+	 * @return all interfaces that the given object implements as array
+	 */
+	public static Class[] getAllInterfacesForClass(Class clazz) {
+		Set interfaces = getAllInterfacesForClassAsSet(clazz);
+		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
+	}
+
+	/**
+	 * Return all interfaces that the given object implements as List,
+	 * including ones implemented by superclasses.
+	 * @param object the object to analyse for interfaces
+	 * @return all interfaces that the given object implements as List
+	 */
+	public static Set getAllInterfacesAsSet(Object object) {
+		return getAllInterfacesForClassAsSet(object.getClass());
+	}
+
+	/**
+	 * Return all interfaces that the given class implements as Set,
+	 * including ones implemented by superclasses.
+	 * @param clazz the class to analyse for interfaces
+	 * @return all interfaces that the given object implements as Set
+	 */
+	public static Set getAllInterfacesForClassAsSet(Class clazz) {
+		Set interfaces = new HashSet();
+		while (clazz != null) {
+			for (int i = 0; i < clazz.getInterfaces().length; i++) {
+				Class ifc = clazz.getInterfaces()[i];
+				interfaces.add(ifc);
+			}
+			clazz = clazz.getSuperclass();
+		}
+		return interfaces;
 	}
 
 }
