@@ -36,6 +36,7 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.beans.TestBean;
+import org.springframework.core.JdkVersion;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.SimpleConnectionHandle;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -47,7 +48,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.core.JdkVersion;
 
 /**
  * @author Juergen Hoeller
@@ -68,6 +68,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 2);
+		pm.flush();
+		pmControl.setVoidCallable(2);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		tx.begin();
@@ -88,10 +90,19 @@ public class JdoTransactionManagerTests extends TestCase {
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
+
+				TransactionAwarePersistenceManagerFactoryProxy proxyFactory =
+						new TransactionAwarePersistenceManagerFactoryProxy();
+				proxyFactory.setTargetPersistenceManagerFactory(pmf);
+				PersistenceManagerFactory proxy = (PersistenceManagerFactory) proxyFactory.getObject();
+				assertEquals(pm.toString(), proxy.getPersistenceManager().toString());
+				proxy.getPersistenceManager().flush();
+				proxy.getPersistenceManager().close();
+
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
-						assertSame(pm, pm2);
+						pm2.flush();
 						return l;
 					}
 				});
@@ -174,6 +185,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 2);
+		pm.flush();
+		pmControl.setVoidCallable(1);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		tx.begin();
@@ -194,7 +207,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				JdoTemplate jt = new JdoTemplate(pmf);
 				jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
-						assertSame(pm, pm2);
+						pm2.flush();
 						return null;
 					}
 				});
@@ -223,6 +236,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 3);
+		pm.flush();
+		pmControl.setVoidCallable(1);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		tx.begin();
@@ -250,7 +265,7 @@ public class JdoTransactionManagerTests extends TestCase {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						return jt.execute(new JdoCallback() {
 							public Object doInJdo(PersistenceManager pm2) {
-								assertSame(pm, pm2);
+								pm2.flush();
 								return l;
 							}
 						});
@@ -337,6 +352,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 3);
+		pm.flush();
+		pmControl.setVoidCallable(1);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		tx.begin();
@@ -364,7 +381,7 @@ public class JdoTransactionManagerTests extends TestCase {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						jt.execute(new JdoCallback() {
 							public Object doInJdo(PersistenceManager pm2) {
-								assertSame(pm, pm2);
+								pm2.flush();
 								return l;
 							}
 						});
@@ -396,6 +413,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setReturnValue(tx, 5);
 		tx.begin();
 		txControl.setVoidCallable(1);
+		pm.flush();
+		pmControl.setVoidCallable(1);
 		pm.close();
 		pmControl.setVoidCallable(2);
 		pmfControl.replay();
@@ -424,7 +443,7 @@ public class JdoTransactionManagerTests extends TestCase {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						return jt.execute(new JdoCallback() {
 							public Object doInJdo(PersistenceManager pm2) {
-								assertSame(pm, pm2);
+								pm2.flush();
 								return l;
 							}
 						});
@@ -458,6 +477,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		final PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
+		pm.flush();
+		pmControl.setVoidCallable(2);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -478,14 +499,14 @@ public class JdoTransactionManagerTests extends TestCase {
 				jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
 						assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
-						assertSame(pm, pm2);
+						pm2.flush();
 						return l;
 					}
 				});
 				Object result = jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
 						assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
-						assertSame(pm, pm2);
+						pm2.flush();
 						return l;
 					}
 				});
@@ -790,6 +811,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, 2);
+		pm.flush();
+		pmControl.setVoidCallable(1);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		TransactionTemplate tt = new TransactionTemplate();
@@ -826,7 +849,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				jt.setJdoDialect(dialect);
 				return jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
-						assertSame(pm, pm2);
+						pm2.flush();
 						return l;
 					}
 				});
@@ -880,6 +903,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
 		pmControl.setReturnValue(tx, manualSavepoint ? 2 : 3);
+		pm.flush();
+		pmControl.setVoidCallable(1);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		md.supportsSavepoints();
@@ -946,7 +971,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
-						assertSame(pm, pm2);
+						pm2.flush();
 						return l;
 					}
 				});
@@ -1027,8 +1052,8 @@ public class JdoTransactionManagerTests extends TestCase {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				jt.setJdoDialect(dialect);
-				if (!exposeNativePm) {
-					jt.setExposeNativePersistenceManager(false);
+				if (exposeNativePm) {
+					jt.setExposeNativePersistenceManager(true);
 				}
 				return jt.execute(new JdoCallback() {
 					public Object doInJdo(PersistenceManager pm2) {
