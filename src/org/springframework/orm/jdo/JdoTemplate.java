@@ -31,6 +31,7 @@ import javax.jdo.Query;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper class that simplifies JDO data access code, and converts
@@ -114,7 +115,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	private boolean allowCreate = true;
 
-	private boolean exposeNativePersistenceManager = true;
+	private boolean exposeNativePersistenceManager = false;
 
 
 	/**
@@ -167,13 +168,14 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	/**
 	 * Set whether to expose the native JDO PersistenceManager to JdoCallback
-	 * code. Default is true; if turned off, a PersistenceManager proxy will be
-	 * returned, suppressing <code>close</code> calls and automatically applying
-	 * transaction timeouts (if any).
-	 * <p>The default is "true" for the time being, because there is often a need
-	 * to cast to a vendor-specific PersistenceManager class in DAOs that use the
-	 * JDO 1.0 API, for JDO 2.0 previews and other vendor-specific functionality.
-	 * This is likely to change to "false" in a later Spring version.
+	 * code. Default is "false": a PersistenceManager proxy will be returned,
+	 * suppressing <code>close</code> calls and automatically applying transaction
+	 * timeouts (if any).
+	 * <p>As there is often a need to cast to a vendor-specific PersistenceManager
+	 * class in DAOs that use the JDO 1.0 API, for JDO 2.0 previews and other
+	 * vendor-specific functionality, the exposed proxy implements all interfaces
+	 * implemented by the original PersistenceManager. If this is not sufficient,
+	 * turn this flag to "true".
 	 * @see JdoCallback
 	 * @see javax.jdo.PersistenceManager
 	 * @see #prepareQuery
@@ -235,15 +237,16 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * Create a close-suppressing proxy for the given JDO PersistenceManager.
 	 * The proxy also prepares returned JDO Query objects.
 	 * @param pm the JDO PersistenceManager to create a proxy for
-	 * @return the PersistenceManager proxy
+	 * @return the PersistenceManager proxy, implementing all interfaces
+	 * implemented by the passed-in PersistenceManager object (that is,
+	 * also implementing all vendor-specific extension interfaces)
 	 * @see javax.jdo.PersistenceManager#close
 	 * @see #prepareQuery
 	 */
 	protected PersistenceManager createPersistenceManagerProxy(PersistenceManager pm) {
+		Class[] ifcs = ClassUtils.getAllInterfaces(pm);
 		return (PersistenceManager) Proxy.newProxyInstance(
-				getClass().getClassLoader(),
-				new Class[] {PersistenceManager.class},
-				new CloseSuppressingInvocationHandler(pm));
+				getClass().getClassLoader(), ifcs, new CloseSuppressingInvocationHandler(pm));
 	}
 
 
@@ -256,7 +259,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.getObjectById(objectId, true);
 			}
-		});
+		}, true);
 	}
 
 	public Object getObjectById(final Class entityClass, final Object idValue) throws DataAccessException {
@@ -281,7 +284,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				// Use JDO 2.0 getObjectById(Class, Object) method.
 				return pm.getObjectById(entityClass, idValue);
 			}
-		});
+		}, true);
 	}
 
 	public void evict(final Object entity) throws DataAccessException {
@@ -290,7 +293,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.evict(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void evictAll(final Collection entities) throws DataAccessException {
@@ -299,7 +302,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.evictAll(entities);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void evictAll() throws DataAccessException {
@@ -308,7 +311,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.evictAll();
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void refresh(final Object entity) throws DataAccessException {
@@ -317,7 +320,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.refresh(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void refreshAll(final Collection entities) throws DataAccessException {
@@ -326,7 +329,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.refreshAll(entities);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void refreshAll() throws DataAccessException {
@@ -335,7 +338,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.refreshAll();
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void makePersistent(final Object entity) throws DataAccessException {
@@ -344,7 +347,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.makePersistent(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void makePersistentAll(final Collection entities) throws DataAccessException {
@@ -353,7 +356,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.makePersistentAll(entities);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void deletePersistent(final Object entity) throws DataAccessException {
@@ -362,7 +365,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.deletePersistent(entity);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public void deletePersistentAll(final Collection entities) throws DataAccessException {
@@ -371,7 +374,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				pm.deletePersistentAll(entities);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 	public Object detachCopy(final Object entity) {
@@ -379,7 +382,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.detachCopy(entity);
 			}
-		});
+		}, true);
 	}
 
 	public Collection detachCopyAll(final Collection entities) {
@@ -387,7 +390,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.detachCopyAll(entities);
 			}
-		});
+		}, true);
 	}
 
 	public Object attachCopy(final Object detachedEntity) {
@@ -395,7 +398,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.attachCopy(detachedEntity, true);
 			}
-		});
+		}, true);
 	}
 
 	public Collection attachCopyAll(final Collection detachedEntities) {
@@ -403,7 +406,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				return pm.attachCopyAll(detachedEntities, true);
 			}
-		});
+		}, true);
 	}
 
 	public void flush() throws DataAccessException {
@@ -412,7 +415,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				getJdoDialect().flush(pm);
 				return null;
 			}
-		});
+		}, true);
 	}
 
 
@@ -431,7 +434,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Collection find(final Class entityClass, final String filter, final String ordering)
 			throws DataAccessException {
 
-		return executeFind(new JdoCallback() {
+		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = (filter != null ? pm.newQuery(entityClass, filter) : pm.newQuery(entityClass));
 				prepareQuery(query);
@@ -440,7 +443,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				}
 				return query.execute();
 			}
-		});
+		}, true);
 	}
 
 	public Collection find(Class entityClass, String filter, String parameters, Object[] values)
@@ -453,7 +456,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			final Class entityClass, final String filter, final String parameters, final Object[] values,
 			final String ordering) throws DataAccessException {
 
-		return executeFind(new JdoCallback() {
+		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				prepareQuery(query);
@@ -463,7 +466,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				}
 				return query.executeWithArray(values);
 			}
-		});
+		}, true);
 	}
 
 	public Collection find(Class entityClass, String filter, String parameters, Map values)
@@ -476,7 +479,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			final Class entityClass, final String filter, final String parameters, final Map values,
 			final String ordering) throws DataAccessException {
 
-		return executeFind(new JdoCallback() {
+		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(entityClass, filter);
 				prepareQuery(query);
@@ -486,37 +489,37 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 				}
 				return query.executeWithMap(values);
 			}
-		});
+		}, true);
 	}
 
 	public Collection find(final String language, final Object queryObject) throws DataAccessException {
-		return executeFind(new JdoCallback() {
+		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(language, queryObject);
 				prepareQuery(query);
 				return query.execute();
 			}
-		});
+		}, true);
 	}
 
 	public Collection find(final String queryString) throws DataAccessException {
-		return executeFind(new JdoCallback() {
+		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(queryString);
 				prepareQuery(query);
 				return query.execute();
 			}
-		});
+		}, true);
 	}
 
 	public Collection findByNamedQuery(final Class entityClass, final String queryName) throws DataAccessException {
-		return executeFind(new JdoCallback() {
+		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newNamedQuery(entityClass, queryName);
 				prepareQuery(query);
 				return query.execute();
 			}
-		});
+		}, true);
 	}
 
 
@@ -548,8 +551,6 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 */
 	private class CloseSuppressingInvocationHandler implements InvocationHandler {
 
-		private static final String PERSISTENCE_MANAGER_CLOSE_METHOD_NAME = "close";
-
 		private final PersistenceManager target;
 
 		public CloseSuppressingInvocationHandler(PersistenceManager target) {
@@ -557,8 +558,18 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Handle close method: suppress, not valid.
-			if (method.getName().equals(PERSISTENCE_MANAGER_CLOSE_METHOD_NAME)) {
+			// Invocation on PersistenceManager interface (or vendor-specific extension) coming in...
+
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of PersistenceManager proxy.
+				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("close")) {
+				// Handle close method: suppress, not valid.
 				return null;
 			}
 
