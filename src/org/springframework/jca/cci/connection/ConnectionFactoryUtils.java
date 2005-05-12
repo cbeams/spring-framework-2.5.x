@@ -74,7 +74,7 @@ public abstract class ConnectionFactoryUtils {
 
 	/**
 	 * Actually get a CCI Connection for the given ConnectionFactory.
-	 * Same as getConnection, but throwing the original SQLException.
+	 * Same as <code>getConnection</code>, but throwing the original ResourceException.
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
@@ -125,7 +125,7 @@ public abstract class ConnectionFactoryUtils {
 
 	/**
 	 * Actually close a JCA CCI Connection for the given DataSource.
-	 * Same as releaseConnection, but throwing the original SQLException.
+	 * Same as <code>releaseConnection</code>, but throwing the original ResourceException.
 	 * <p>Directly accessed by TransactionAwareConnectionFactoryProxy.
 	 * @throws ResourceException if thrown by JCA CCI methods
 	 * @see #releaseConnection

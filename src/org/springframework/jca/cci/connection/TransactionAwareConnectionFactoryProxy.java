@@ -114,8 +114,6 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	 */
 	private static class TransactionAwareInvocationHandler implements InvocationHandler {
 
-		private static final String CONNECTION_CLOSE_METHOD_NAME = "close";
-
 		private final Connection target;
 
 		private final ConnectionFactory connectionFactory;
@@ -126,7 +124,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Invocation on ConnectionProxy interface coming in...
+			// Invocation on Connection interface coming in...
 
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
@@ -136,7 +134,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 				// Use hashCode of Connection proxy.
 				return new Integer(hashCode());
 			}
-			else if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
+			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.
 				if (this.connectionFactory != null) {
 					ConnectionFactoryUtils.doReleaseConnection(this.target, this.connectionFactory);
@@ -144,7 +142,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 				return null;
 			}
 
-			// Invoke method on target connection.
+			// Invoke method on target Connection.
 			try {
 				return method.invoke(this.target, args);
 			}

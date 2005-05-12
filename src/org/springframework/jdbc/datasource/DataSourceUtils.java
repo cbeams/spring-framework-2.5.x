@@ -83,7 +83,7 @@ public abstract class DataSourceUtils {
 
 	/**
 	 * Actually get a JDBC Connection for the given DataSource.
-	 * Same as getConnection, but throwing the original SQLException.
+	 * Same as <code>getConnection</code>, but throwing the original SQLException.
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using DataSourceTransactionManager. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
@@ -242,7 +242,7 @@ public abstract class DataSourceUtils {
 
 	/**
 	 * Actually release a JDBC Connection for the given DataSource.
-	 * Same as releaseConnection, but throwing the original SQLException.
+	 * Same as <code>releaseConnection</code>, but throwing the original SQLException.
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
 	 * @param con Connection to close if necessary
 	 * (if this is null, the call will be ignored)

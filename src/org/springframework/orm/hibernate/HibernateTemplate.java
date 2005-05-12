@@ -199,7 +199,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Set whether to expose the native Hibernate Session to HibernateCallback
-	 * code. Default is false; instead, a Session proxy will be returned,
+	 * code. Default is "false": a Session proxy will be returned,
 	 * suppressing <code>close</code> calls and automatically applying
 	 * query cache settings and transaction timeouts.
 	 * @see HibernateCallback
@@ -980,8 +980,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 */
 	private class CloseSuppressingInvocationHandler implements InvocationHandler {
 
-		private static final String SESSION_CLOSE_METHOD_NAME = "close";
-
 		private final Session target;
 
 		public CloseSuppressingInvocationHandler(Session target) {
@@ -989,8 +987,18 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Handle close method: suppress, not valid.
-			if (method.getName().equals(SESSION_CLOSE_METHOD_NAME)) {
+			// Invocation on Session interface coming in...
+
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of Session proxy.
+				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("close")) {
+				// Handle close method: suppress, not valid.
 				return null;
 			}
 

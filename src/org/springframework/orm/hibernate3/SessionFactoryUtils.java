@@ -248,19 +248,16 @@ public abstract class SessionFactoryUtils {
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
 	 * otherwise, if allowCreate is true.
-	 * <p>This is the <code>getSession</code> method used by typical data access code,
-	 * in combination with <code>releaseSession</code> called when done with
-	 * the Session. Note that HibernateTemplate allows to write data access code
-	 * without caring about such resource handling.
 	 * <p>Supports synchronization with both Spring-managed JTA transactions
 	 * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
 	 * or EJB CMT). See the <code>getSession</code> version with all parameters
 	 * for details.
+	 * <p>Throws the original HibernateException, in contrast to <code>getSession</code>.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param allowCreate if a non-transactional Session should be created when no
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
-	 * @throws DataAccessResourceFailureException if the Session couldn't be created
+	 * @throws HibernateException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
 	 * @see #getSession(SessionFactory, Interceptor, SQLExceptionTranslator)
 	 * @see #releaseSession
@@ -277,6 +274,7 @@ public abstract class SessionFactoryUtils {
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
 	 * otherwise, if allowCreate is true.
+	 * <p>Same as <code>getSession</code>, but throwing the original HibernateException.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or null if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
@@ -284,7 +282,7 @@ public abstract class SessionFactoryUtils {
 	 * @param allowCreate if a non-transactional Session should be created when no
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
-	 * @throws DataAccessResourceFailureException if the Session couldn't be created
+	 * @throws HibernateException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
 	 */
 	private static Session doGetSession(

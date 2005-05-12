@@ -143,7 +143,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 			// Invocation on ConnectionProxy interface coming in...
 
 			if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying connection.
+				// Handle getTargetConnection method: return underlying Connection.
 				return this.target;
 			}
 			else if (method.getName().equals("equals")) {
@@ -162,7 +162,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				return null;
 			}
 
-			// Invoke method on target connection.
+			// Invoke method on target Connection.
 			try {
 				Object retVal = method.invoke(this.target, args);
 
