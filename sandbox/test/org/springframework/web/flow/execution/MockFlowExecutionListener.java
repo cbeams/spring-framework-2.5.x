@@ -115,6 +115,7 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		if (endedSession.isRoot()) {
 			Assert.state(flowNestingLevel == 0, "The flow execution should have ended");
 			started = false;
+			executing = false;
 		} else {
 			flowNestingLevel--;
 			Assert.state(started, "The flow execution prematurely ended");
