@@ -19,8 +19,8 @@ import org.springframework.binding.AttributeSource;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Thrown if an unhandled, uncoverable exception is thrown when an action is
- * executed in an action state.
+ * Thrown if an unhandled, uncoverable exception occurs when an action is
+ * executed.
  * 
  * @see org.springframework.web.flow.Action
  * @see org.springframework.web.flow.ActionState

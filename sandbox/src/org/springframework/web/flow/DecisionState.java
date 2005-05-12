@@ -102,7 +102,7 @@ public class DecisionState extends TransitionableState {
 	 * <p>
 	 * Simply looks up the first transition that matches the state of the
 	 * StateContext and executes it.
-	 * @param context the request execution context
+	 * @param context the state context
 	 * @return a view descriptor containing model and view information needed to
 	 *         render the results of the state execution
 	 */

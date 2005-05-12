@@ -130,7 +130,7 @@ public class EndState extends State {
 	 * stack, ending it, and resumes control in the parent flow (if neccessary).
 	 * If the ended session is the root flow, a ViewDescriptor is
 	 * returned (when viewName is not null, else null is returned).
-	 * @param context the request execution context
+	 * @param context the state context
 	 * @return ViewDescriptor a view descriptor signaling that control should be
 	 *         returned to the client and a view rendered
 	 */

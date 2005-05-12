@@ -32,9 +32,9 @@ import org.springframework.util.StringUtils;
  * <p>
  * At a high level, a Flow is a reusable, self-contained module that captures
  * the definition (configuration information) of a logical page flow within a
- * web application. A logical page flow typically fulfills a business process
- * with a clear lifecycle that takes place over a series of steps (modeled as
- * states).
+ * web application. A logical page flow is defined as a controlled navigation
+ * that guides the user through fullfillment of a business process that takes
+ * place over a series of steps (modeled as states).
  * <p>
  * Note: A flow is not a welcome page, a menu, an index page, or even a
  * simple form page: don't use flows for those cases, use simple

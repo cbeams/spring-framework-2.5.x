@@ -35,7 +35,7 @@ public class AnnotatedAction extends AnnotatedObject {
 	// well known properties
 
 	/**
-	 * The name of a named action.
+	 * The name of the action.
 	 */
 	public static final String NAME_PROPERTY = "name";
 

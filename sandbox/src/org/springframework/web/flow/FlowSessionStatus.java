@@ -39,16 +39,22 @@ public class FlowSessionStatus extends ShortCodedLabeledEnum {
 	public static FlowSessionStatus ACTIVE = new FlowSessionStatus(1, "Active");
 
 	/**
+	 * A flow session with PAUSED status is currently waiting on the user to
+	 * signal an event.
+	 */
+	public static FlowSessionStatus PAUSED = new FlowSessionStatus(2, "Paused");
+
+	/**
 	 * A flow session that is SUSPENDED is not actively executing a flow. It is
 	 * waiting for subflow execution to complete before continuing.
 	 */
-	public static FlowSessionStatus SUSPENDED = new FlowSessionStatus(2, "Suspended");
+	public static FlowSessionStatus SUSPENDED = new FlowSessionStatus(3, "Suspended");
 
 	/**
 	 * A flow session that has ENDED is no longer actively executing a flow.
 	 * This is the final status of a flow session.
 	 */
-	public static FlowSessionStatus ENDED = new FlowSessionStatus(3, "Ended");
+	public static FlowSessionStatus ENDED = new FlowSessionStatus(4, "Ended");
 
 	/**
 	 * Private constructor because this is a typesafe enum!

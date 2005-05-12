@@ -35,9 +35,9 @@ import org.springframework.util.Assert;
  * As mentioned, the result of an action's execution is typically treated as a
  * contributing criterion for a state transition. In addition, anything else in
  * the Flow's <code>RequestContext</code> may be tested as part of custom
- * transitional criteria.
+ * transitional criteria, allowing for sophisticated transition expressions.
  * <p>
- * Each action executed by this action state may be qualified with a set of
+ * Each action executed by this action state may be first qualified with a set of
  * arbitrary properties. For example, an identifying name and description.
  * <p>
  * By default, the 'name' property is used as a qualifier for a given action
@@ -347,7 +347,7 @@ public class ActionState extends TransitionableState {
 	 * instance and executes it. Execution continues until a <code>Action</code>
 	 * returns a result event that matches a state transition in this request
 	 * context, or the set of all actions is exhausted.
-	 * @param context the request execution context
+	 * @param context the state context
 	 * @return ViewDescriptor a view descriptor signaling that control should be
 	 *         returned to the client and a view rendered
 	 * @throws CannotExecuteTransitionException when no action execution

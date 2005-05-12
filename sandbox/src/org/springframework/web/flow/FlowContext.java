@@ -16,7 +16,7 @@
 package org.springframework.web.flow;
 
 /**
- * Provides information about an actively executing flow.
+ * Provides contextual information about an actively executing flow.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -24,7 +24,7 @@ package org.springframework.web.flow;
 public interface FlowContext {
 
 	/**
-	 * Returns the timestamp on which this execution was created.
+	 * Returns the time at which this flow started executing.
 	 * @return the creation timestamp
 	 */
 	public long getCreationTimestamp();
@@ -69,7 +69,7 @@ public interface FlowContext {
 	
 	/**
 	 * Returns a display string suitable for logging/printing in a console
-	 * containing info about this flow execution.
+	 * containing info about this executing flow.
 	 * @return the flow execution caption
 	 */
 	public String getCaption();

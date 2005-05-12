@@ -18,7 +18,7 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 /**
- * A service interface that maps attributes between flow scopes.
+ * A service interface that maps attributes between two flows.
  * <p>
  * An attribute mapper may map attributes of a parent flow down to a child flow
  * as <i>input</i> when the child is spawned as a subflow. In addition, a
@@ -84,7 +84,7 @@ public interface FlowAttributeMapper {
 	 * @param context the request execution context, which gives access to the
 	 *        parent flow scope
 	 * @return a map of attributes (name=value pairs) to pass as input to the
-	 *         spawning child subflow.
+	 *         spawning subflow.
 	 */
 	public Map createSubflowInput(RequestContext context);
 

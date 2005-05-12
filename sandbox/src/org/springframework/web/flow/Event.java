@@ -27,7 +27,8 @@ import org.springframework.util.Assert;
 /**
  * Signals the occurence of an <i>event</i> that is relevant to the web flow
  * system. Each event has a string id. An event may optionally contain
- * information about the state in which it occured. Events may have parameters.
+ * information about the state in which it occured. Events may have parameters
+ * that store arbitrary payload data.
  * <p>
  * For example, a "submit" event might signal that a Submit button was pressed
  * in a web browser. A "success" event might signal an action executed
@@ -49,17 +50,17 @@ public class Event extends EventObject implements AttributeSource {
 	private String id;
 
 	/**
-	 * The event timestamp.
+	 * The time the event occured.
 	 */
 	private long timestamp = System.currentTimeMillis();
 
 	/**
-	 * The state id included in the event (optional).
+	 * The state the event occured in (optional).
 	 */
 	private String stateId;
 
 	/**
-	 * Event parameters (optional).
+	 * Event parameters (optional event payload).
 	 */
 	private Map parameters;
 	
