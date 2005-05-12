@@ -16,13 +16,15 @@
 
 package org.springframework.orm.toplink.support;
 
+import java.lang.reflect.Method;
+
 import oracle.toplink.logging.AbstractSessionLog;
 import oracle.toplink.logging.SessionLogEntry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * TopLink 10.1.3 SessionLog implementation that logs through Commons Logging.
+ * TopLink 10.1.3+ SessionLog implementation that logs through Commons Logging.
  *
  * <p>The namespace used is "oracle.toplink.xxx", with the latter part being
  * the TopLink log category ("sql"/"transaction"/etc). In case of no category
@@ -55,6 +57,18 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 	public static final String DEFAULT_SEPARATOR = "--";
 
 
+	private static Method getExceptionMethod;
+
+	static {
+		try {
+			getExceptionMethod = SessionLogEntry.class.getMethod("getException", new Class[0]);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Could not find method SessionLogEntry.getException()");
+		}
+	}
+
+
 	private String separator = DEFAULT_SEPARATOR;
 
 
@@ -80,36 +94,54 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 		switch (entry.getLevel()) {
 			case SEVERE:
 				if (logger.isErrorEnabled()) {
-					logger.error(getMessageString(entry), entry.getException());
+					if (entry.hasException()) {
+						logger.error(getMessageString(entry), getException(entry));
+					}
+					else {
+						logger.error(getMessageString(entry));
+					}
 				}
 				break;
 			case WARNING:
 				if (logger.isWarnEnabled()) {
-					logger.warn(getMessageString(entry), entry.getException());
+					if (entry.hasException()) {
+						logger.warn(getMessageString(entry), getException(entry));
+					}
+					else {
+						logger.warn(getMessageString(entry));
+					}
 				}
 				break;
 			case INFO:
 				if (logger.isInfoEnabled()) {
-					logger.info(getMessageString(entry), entry.getException());
+					if (entry.hasException()) {
+						logger.info(getMessageString(entry), getException(entry));
+					}
+					else {
+						logger.info(getMessageString(entry));
+					}
 				}
 				break;
 			case CONFIG:
-				if (logger.isDebugEnabled()) {
-					logger.debug(getMessageString(entry), entry.getException());
-				}
 			case FINE:
-				if (logger.isDebugEnabled()) {
-					logger.debug(getMessageString(entry), entry.getException());
-				}
-				break;
 			case FINER:
 				if (logger.isDebugEnabled()) {
-					logger.debug(getMessageString(entry), entry.getException());
+					if (entry.hasException()) {
+						logger.debug(getMessageString(entry), getException(entry));
+					}
+					else {
+						logger.debug(getMessageString(entry));
+					}
 				}
 				break;
 			case FINEST:
 				if (logger.isTraceEnabled()) {
-					logger.trace(getMessageString(entry), entry.getException());
+					if (entry.hasException()) {
+						logger.trace(getMessageString(entry), getException(entry));
+					}
+					else {
+						logger.trace(getMessageString(entry));
+					}
 				}
 				break;
 		}
@@ -148,6 +180,24 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 		}
 		buf.append(formatMessage(entry));
 		return buf.toString();
+	}
+
+	/**
+	 * Extract the exception from the given log entry.
+	 * <p>Default implementations calls <code>SessionLogEntry.getException</code>
+	 * via reflection: The return type varies between TopLink 9.0.4 and 10.1.3
+	 * (<code>Exception</code> vs <code>Throwable</code>, respectively),
+	 * which does not allow us to compile both CommonsLoggingSessionLog904 and
+	 * CommonsLoggingSessionLog against the same <code>getException</code> method.
+	 */
+	protected Throwable getException(SessionLogEntry entry) {
+		try {
+			return (Throwable) getExceptionMethod.invoke(entry, new Object[0]);
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException(
+					"Could not invoke method SessionLogEntry.getException(): " + ex.getMessage());
+		}
 	}
 
 
