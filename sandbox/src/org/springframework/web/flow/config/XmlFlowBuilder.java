@@ -627,7 +627,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 				return (FlowAttributeMapper)getFlowServiceLocator().getFlowAttributeMapper(toClass(attributeMapperElement.getAttribute(CLASSREF_ATTRIBUTE)));
 			} else {
 				ParameterizableFlowAttributeMapper attributeMapper = new ParameterizableFlowAttributeMapper();
-				List inputElements = DomUtils.getChildElementsByTagName(element, INPUT_ELEMENT);
+				List inputElements = DomUtils.getChildElementsByTagName(attributeMapperElement, INPUT_ELEMENT);
 				if (inputElements.size() > 0) {
 					List inputMappings = new ArrayList(inputElements.size());
 					Iterator it = inputElements.iterator();
@@ -636,7 +636,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 					}
 					attributeMapper.setInputMappings(inputMappings);
 				}
-				List outputElements = DomUtils.getChildElementsByTagName(element, OUTPUT_ELEMENT);
+				List outputElements = DomUtils.getChildElementsByTagName(attributeMapperElement, OUTPUT_ELEMENT);
 				if (outputElements.size() > 0) {
 					List outputMappings = new ArrayList(outputElements.size());
 					Iterator it = outputElements.iterator();

@@ -32,6 +32,12 @@
 	</subflow-state>
 
 	<subflow-state id="subFlowState2" flow="subFlow2">
+		<attribute-mapper>
+			<input name="attribute1"/>
+			<input name="attribute3" as="attribute2"/>
+			<output name="attribute2"/>
+			<output name="attribute1" as="attribute3"/>
+		</attribute-mapper>
 		<transition on="event2" to="endState2"/>
 	</subflow-state>
 	

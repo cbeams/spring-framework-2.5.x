@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeMapper;
@@ -228,5 +229,10 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 			MutableAttributeSource parentAttributes = (MutableAttributeSource)context.getFlowContext().getActiveSession().getParent().getScope();
 			this.outputMapper.map(context.getFlowScope(), parentAttributes);
 		}
+	}
+	
+	public String toString() {
+		return new ToStringBuilder(this).append("inputMapper", inputMapper).
+			append("outputMapper", outputMapper).toString();
 	}
 }

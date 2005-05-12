@@ -116,7 +116,7 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertNotNull(subFlowState2);
 		assertNotNull(subFlowState2.getSubflow());
 		assertEquals("subFlow2", subFlowState2.getSubflow().getId());
-		assertNull(subFlowState2.getAttributeMapper());
+		assertNotNull(subFlowState2.getAttributeMapper());
 		assertEquals(1, subFlowState2.getTransitions().length);
 		context.setLastEvent(createEvent("event2"));
 		assertTrue(subFlowState2.hasTransitionFor(context));
