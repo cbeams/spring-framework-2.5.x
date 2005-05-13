@@ -260,7 +260,7 @@ public abstract class BeanFactoryUtils {
 			return beansOfType.values().iterator().next();
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(type, "Expected single bean but found " + beansOfType.size());
+			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
 		}
 	}
 
@@ -290,7 +290,7 @@ public abstract class BeanFactoryUtils {
 			return beansOfType.values().iterator().next();
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(type, "Expected single bean but found " + beansOfType.size());
+			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
 		}
 	}
 
@@ -313,7 +313,7 @@ public abstract class BeanFactoryUtils {
 			return beansOfType.values().iterator().next();
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(type, "Expected single bean but found " + beansOfType.size());
+			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
 		}
 	}
 
@@ -342,7 +342,7 @@ public abstract class BeanFactoryUtils {
 			return beansOfType.values().iterator().next();
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(type, "Expected single bean but found " + beansOfType.size());
+			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
 		}
 	}
 
