@@ -24,9 +24,12 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory excludes CGLIB-defined bean properties (-> method injection) from dependency checks
 * reworked ResourceEntityResolver to depend on ResourceLoader only and moved it to package "beans.factory.xml"
 * factored out resource editor registration from AbstractApplicationContext into ConfigurableBeanFactoryUtils helper
+* fixed DefaultXmlBeanDefinitionParser to correctly parse null keys for XML map entries
 
 Package org.springframework.context
 * reworked LocaleContextHolder to use an InheritableThreadLocal, also exposing the thread-bound Locale to child threads
+* fixed GenericApplicationContext to correctly propagate the internal parent BeanFactory in case of a "setParent" call
+* GenericApplicationContext detects a passed-in ResourceLoader that implements ResourcePatternResolver and uses it
 
 Package org.springframework.dao
 * reworked IncorrectResultSizeDataAccessException into subclass of DataRetrievalFailureException
@@ -78,6 +81,7 @@ Package org.springframework.orm
 * added CommonsLoggingSessionLog(904) classes for TopLink, redirecting TopLink's Session logging to Commons Logging
 
 Package org.springframework.samples
+* changed "id" property of PetClinic's persistent entities from type int to Integer
 * reworked PetClinic's Hibernate DAO to use "merge" (plus IdTransferringMergeEventListener) instead of "saveOrUpdate"
 * added TopLink persistence layer to PetClinic, as alternative to the existing Hibernate3, OJB and JDBC layers
 
@@ -88,8 +92,12 @@ Package org.springframework.util
 Package org.springframework.web
 * added DelegatingFilterProxy, delegating to a Spring-managed Filter bean (successor of Acegi's FilterToBeanProxy)
 * changed visibility of ServletContextResource's "getServletContext" and "getPath" methods to public
+* added GenericWebApplicationContext as subclass of GenericApplicationContext for web environments
 * WebContentGenerator sets "no-store" value for "Cache-Control" header too, to prevent caching on FireFox
-* reworked XmlViewResolver to register a ResourceEntityResolver and and all available resource editors for its factory
+* AbstractCachingViewResolver expects fully initialize View instances now, not calling "setApplicationContext" anymore
+* factored out "buildView" method from UrlBasedViewResolver's "loadView", separating View instantiation from lifecycle
+* reworked XmlViewResolver to use a GenericWebApplicationContext for loading the view definitions
+* reworked ResourceBundleViewResolver to use a GenericWebApplicationContext for loading the view definitions
 
 
 Changes in version 1.2 RC2 (18.4.2005)
