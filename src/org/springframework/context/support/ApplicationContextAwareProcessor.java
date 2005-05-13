@@ -28,15 +28,19 @@ import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
 
 /**
- * BeanPostProcessor implementation that passes the application context to
- * beans that implement the ApplicationContextAware or ResourceLoaderAware
- * interfaces. If both are implemented, the latter is satisfied first.
+ * BeanPostProcessor implementation that passes the ApplicationContext to
+ * beans that implement the ResourceLoaderAware, ApplicationEventPublisherAware,
+ * MessageSourceAware and/or ApplicationContextAware interfaces.
+ * If all of them are implemented, they are satisfied in the given order.
  *
  * <p>Application contexts will automatically register this with their
  * underlying bean factory. Applications do not use this directly.
  *
  * @author Juergen Hoeller
  * @since 10.10.2003
+ * @see org.springframework.context.ResourceLoaderAware
+ * @see org.springframework.context.ApplicationEventPublisherAware
+ * @see org.springframework.context.MessageSourceAware
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.support.AbstractApplicationContext#refresh
  */

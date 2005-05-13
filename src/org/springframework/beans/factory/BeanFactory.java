@@ -19,17 +19,19 @@ package org.springframework.beans.factory;
 import org.springframework.beans.BeansException;
 
 /**
- * The root interface for accessing a Spring IoC container.
+ * The root interface for accessing a Spring bean container.
+ * This is the basic client view of a bean container; further interfaces
+ * such as <code>ListableBeanFactory</code> and <code>ConfigurableBeanFactory</code>
+ * are available for specific purposes.
  *
  * <p>This interface is implemented by objects that hold a number of bean definitions,
  * each uniquely identified by a String name. Depending on the bean definition,
- * the factory will return either an independent instance of a
- * contained object (the Prototype design pattern), or a single
- * shared instance (a superior alternative to the Singleton
- * design pattern, in which the instance is a singleton in the scope of
- * the factory). Which type of instance will be returned depends on the bean
- * factory configuration - the API is the same. The Singleton approach is
- * more useful and more common in practice.
+ * the factory will return either an independent instance of a contained object
+ * (the Prototype design pattern), or a single shared instance (a superior
+ * alternative to the Singleton design pattern, in which the instance is a
+ * singleton in the scope of the factory). Which type of instance will be returned
+ * depends on the bean factory configuration: the API is the same. The Singleton
+ * approach is more useful and more common in practice.
  *
  * <p>The point of this approach is that the BeanFactory is a central registry
  * of application components, and centralizes configuration of application
@@ -39,10 +41,9 @@ import org.springframework.beans.BeansException;
  *
  * <p>Note that it is generally better to rely on Dependency Injection
  * ("push" configuration) to configure application objects through setters
- * or constructors, rather than use
- * any form of "pull" configuration like a BeanFactory lookup. Spring's
- * Dependency Injection functionality is implemented using BeanFactory
- * and its subinterfaces.
+ * or constructors, rather than use any form of "pull" configuration like a
+ * BeanFactory lookup. Spring's Dependency Injection functionality is
+ * implemented using BeanFactory and its subinterfaces.
  *
  * <p>Normally a BeanFactory will load bean definitions stored in a configuration
  * source (such as an XML document), and use the org.springframework.beans package
@@ -61,31 +62,45 @@ import org.springframework.beans.BeansException;
  * <p>Bean factory implementations should support the standard bean lifecycle interfaces
  * as far as possible. The maximum set of initialization methods and their standard
  * order is:<br>
- * 1. BeanNameAware's setBeanName<br>
- * 2. BeanFactoryAware's setBeanFactory<br>
- * 3. ApplicationContextAware's setApplicationContext (only applicable if running
- * in an application context)<br>
- * 4. postProcessBeforeInitialization methods of BeanPostProcessors<br>
- * 5. InitializingBean's afterPropertiesSet<br>
- * 6. a custom init-method definition<br>
- * 7. postProcessAfterInitialization methods of BeanPostProcessors
+ * 1. BeanNameAware's <code>setBeanName</code><br>
+ * 2. BeanFactoryAware's <code>setBeanFactory</code><br>
+ * 3. ResourceLoaderAware's <code>setResourceLoader</code>
+ * (only applicable when running in an application context)<br>
+ * 4. ApplicationEventPublisherAware's <code>setApplicationEventPublisher</code>
+ * (only applicable when running in an application context)<br>
+ * 5. MessageSourceAware's <code>setMessageSource</code>
+ * (only applicable when running in an application context)<br>
+ * 6. ApplicationContextAware's <code>setApplicationContext</code>
+ * (only applicable when running in an application context)<br>
+ * 7. ServletContextAware's <code>setServletContext</code>
+ * (only applicable when running in a web application context)<br>
+ * 8. <code>postProcessBeforeInitialization</code> methods of BeanPostProcessors<br>
+ * 9. InitializingBean's <code>afterPropertiesSet</code><br>
+ * 10. a custom init-method definition<br>
+ * 11. <code>postProcessAfterInitialization</code> methods of BeanPostProcessors
  *
  * <p>On shutdown of a bean factory, the following lifecycle methods apply:<br>
- * 1. DisposableBean's destroy<br>
+ * 1. DisposableBean's <code>destroy</code><br>
  * 2. a custom destroy-method definition
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13 April 2001
+ * @see ListableBeanFactory
+ * @see org.springframework.beans.factory.config.ConfigurableBeanFactory
  * @see BeanNameAware#setBeanName
  * @see BeanFactoryAware#setBeanFactory
- * @see InitializingBean#afterPropertiesSet
- * @see DisposableBean#destroy
- * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization
- * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization
- * @see org.springframework.beans.factory.support.RootBeanDefinition#getInitMethodName
- * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
+ * @see org.springframework.context.ResourceLoaderAware#setResourceLoader
+ * @see org.springframework.context.ApplicationEventPublisherAware#setApplicationEventPublisher
+ * @see org.springframework.context.MessageSourceAware#setMessageSource
  * @see org.springframework.context.ApplicationContextAware#setApplicationContext
+ * @see org.springframework.web.context.ServletContextAware#setServletContext
+ * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization
+ * @see InitializingBean#afterPropertiesSet
+ * @see org.springframework.beans.factory.support.RootBeanDefinition#getInitMethodName
+ * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization
+ * @see DisposableBean#destroy
+ * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
  */
 public interface BeanFactory {
 
