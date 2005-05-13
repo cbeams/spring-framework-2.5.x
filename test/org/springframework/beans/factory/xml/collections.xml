@@ -157,7 +157,10 @@
 	<bean id="mixedMapWithList" class="org.springframework.beans.factory.HasMap">
 		<property name="map">
 			<map>
-				<entry key="foo"><value>bar</value></entry>
+				<entry>
+					<key><null/></key>
+					<value>bar</value>
+				</entry>
 				<entry key="jenny"><ref local="jenny"/></entry>
 				<entry key="list">
 					<list>

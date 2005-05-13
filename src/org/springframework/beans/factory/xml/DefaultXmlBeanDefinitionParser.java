@@ -737,33 +737,35 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			// Optionally, there might be a key child element.
 			NodeList entrySubNodes = entryEle.getChildNodes();
 
-			Object key = null;
-			Element subElement = null;
+			Element keyEle = null;
+			Element valueEle = null;
 			for (int j = 0; j < entrySubNodes.getLength(); j++) {
 				if (entrySubNodes.item(j) instanceof Element) {
 					Element candidateEle = (Element) entrySubNodes.item(j);
 					if (candidateEle.getTagName().equals(KEY_ELEMENT)) {
-						if (key != null) {
+						if (keyEle != null) {
 							throw new BeanDefinitionStoreException(
 									this.resource, beanName, "<entry> is only allowed to contain one <key> sub-element");
 						}
-						key = parseKeyElement(candidateEle, beanName);
+						keyEle = candidateEle;
 					}
 					else {
 						// Child element is what we're looking for.
-						if (subElement != null) {
+						if (valueEle != null) {
 							throw new BeanDefinitionStoreException(
 									this.resource, beanName, "<entry> must not contain more than one value sub-element");
 						}
-						subElement = candidateEle;
+						valueEle = candidateEle;
 					}
 				}
 			}
 
+			// Extract key from attribute or sub-element.
+			Object key = null;
 			boolean hasKeyAttribute = entryEle.hasAttribute(KEY_ATTRIBUTE);
 			boolean hasKeyRefAttribute = entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
 			if ((hasKeyAttribute && hasKeyRefAttribute) ||
-					((hasKeyAttribute || hasKeyRefAttribute)) && key != null) {
+					((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
 				throw new BeanDefinitionStoreException(
 						this.resource, beanName, "<entry> is only allowed to contain either " +
 						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element");
@@ -774,32 +776,39 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			else if (hasKeyRefAttribute) {
 				key = new RuntimeBeanReference(entryEle.getAttribute(KEY_REF_ATTRIBUTE));
 			}
+			else if (keyEle != null) {
+				key = parseKeyElement(keyEle, beanName);
+			}
+			else {
+				throw new BeanDefinitionStoreException(
+						this.resource, beanName, "<entry> must specify a key");
+			}
 
+			// Extract value from attribute or sub-element.
+			Object value = null;
 			boolean hasValueAttribute = entryEle.hasAttribute(VALUE_ATTRIBUTE);
 			boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
 			if ((hasValueAttribute && hasValueRefAttribute) ||
-					((hasValueAttribute || hasValueRefAttribute)) && subElement != null) {
+					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
 				throw new BeanDefinitionStoreException(
 						this.resource, beanName, "<entry> is only allowed to contain either " +
 						"a 'value' attribute OR a 'value-ref' attribute OR a value sub-element");
 			}
-
-			if (key == null || !(hasValueAttribute || hasValueRefAttribute || subElement != null)) {
-				throw new BeanDefinitionStoreException(
-						this.resource, beanName, "<entry> must specify a key and a value");
-			}
-
-			Object value = null;
 			if (hasValueAttribute) {
 				value = entryEle.getAttribute(VALUE_ATTRIBUTE);
 			}
 			else if (hasValueRefAttribute) {
 				value = new RuntimeBeanReference(entryEle.getAttribute(VALUE_REF_ATTRIBUTE));
 			}
-			else if (subElement != null) {
-				value = parsePropertySubElement(subElement, beanName);
+			else if (valueEle != null) {
+				value = parsePropertySubElement(valueEle, beanName);
+			}
+			else {
+				throw new BeanDefinitionStoreException(
+						this.resource, beanName, "<entry> must specify a value");
 			}
 
+			// Add final key and value to the Map.
 			map.put(key, value);
 		}
 

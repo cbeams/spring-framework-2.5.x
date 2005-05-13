@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.xml;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -181,7 +180,7 @@ public class XmlBeanCollectionTests extends TestCase {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		HasMap hasMap = (HasMap) xbf.getBean("mixedMapWithList");
 		assertTrue(hasMap.getMap().size() == 4);
-		assertTrue(hasMap.getMap().get("foo").equals("bar"));
+		assertTrue(hasMap.getMap().get(null).equals("bar"));
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		assertTrue(hasMap.getMap().get("jenny").equals(jenny));
 
