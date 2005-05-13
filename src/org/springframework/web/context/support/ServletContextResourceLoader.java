@@ -27,7 +27,7 @@ import org.springframework.core.io.Resource;
  * in a HttpServletBean or GenericFilterBean subclass).
  *
  * <p>Within a WebApplicationContext, resource paths are automatically
- * resolved as ServletContext resources.
+ * resolved as ServletContext resources by the context implementation.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
