@@ -16,6 +16,8 @@
 
 package org.springframework.context.support;
 
+import java.io.IOException;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Generic ApplicationContext implementation that holds a single internal
@@ -94,7 +97,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext() {
-		this.beanFactory = new DefaultListableBeanFactory();
+		this(new DefaultListableBeanFactory());
 	}
 
 	/**
@@ -114,8 +117,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext(ApplicationContext parent) {
-		super(parent);
-		this.beanFactory = new DefaultListableBeanFactory(getInternalParentBeanFactory());
+		this(new DefaultListableBeanFactory(), parent);
 	}
 
 	/**
@@ -126,27 +128,43 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext(DefaultListableBeanFactory beanFactory, ApplicationContext parent) {
-		super(parent);
 		this.beanFactory = beanFactory;
+		setParent(parent);
 	}
 
 
 	/**
-	 * Set a ResourceLoader to use for this context. If set, the context
-	 * will delegate all resource loading to the given ResourceLoader.
+	 * Set the parent of this application context, also setting
+	 * the parent of the internal BeanFactory accordingly.
+	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
+	 */
+	public void setParent(ApplicationContext parent) {
+		super.setParent(parent);
+		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
+	}
+
+	/**
+	 * Set a ResourceLoader to use for this context. If set, the context will
+	 * delegate all <code>getResource</code> calls to the given ResourceLoader.
 	 * If not set, default resource loading will apply.
 	 * <p>The main reason to specify a custom ResourceLoader is to resolve
 	 * resource paths (withour URL prefix) in a specific fashion.
 	 * The default behavior is to resolve such paths as class path locations.
 	 * To resolve resource paths as file system locations, specify a
 	 * FileSystemResourceLoader here.
+	 * <p>You can also pass in a full ResourcePatternResolver, which will
+	 * be autodetected by the context and used for <code>getResources</code>
+	 * calls as well. Else, default resource pattern matching will apply.
 	 * @see #getResource
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 * @see org.springframework.core.io.FileSystemResourceLoader
+	 * @see org.springframework.core.io.support.ResourcePatternResolver
+	 * @see #getResources
 	 */
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
+
 
 	/**
 	 * This implementation delegates to this context's ResourceLoader if set,
@@ -158,6 +176,19 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 			return this.resourceLoader.getResource(location);
 		}
 		return super.getResource(location);
+	}
+
+	/**
+	 * This implementation delegates to this context's ResourceLoader if it
+	 * implements the ResourcePatternResolver interface, falling back to the
+	 * default superclass behavior else.
+	 * @see #setResourceLoader
+	 */
+	public Resource[] getResources(String locationPattern) throws IOException {
+		if (this.resourceLoader instanceof ResourcePatternResolver) {
+			return ((ResourcePatternResolver) this.resourceLoader).getResources(locationPattern);
+		}
+		return super.getResources(locationPattern);
 	}
 
 
@@ -172,7 +203,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	protected void refreshBeanFactory() throws IllegalStateException {
 		if (this.refreshed) {
-			throw new IllegalStateException("Multiple refreshs not supported - just call 'refresh' once");
+			throw new IllegalStateException("Multiple refreshs not supported: just call 'refresh' once");
 		}
 		this.refreshed = true;
 	}
