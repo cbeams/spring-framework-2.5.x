@@ -1058,6 +1058,7 @@
 				<include name="lib/poi/**"/>
 				<include name="lib/quartz/**"/>
 				<include name="lib/struts/**"/>
+				<include name="lib/toplink/**"/>
 				<include name="lib/velocity/**"/>
 				<include name="lib/xdoclet/**"/>
 			</zipfileset>
