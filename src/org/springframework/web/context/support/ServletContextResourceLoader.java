@@ -23,10 +23,17 @@ import org.springframework.core.io.Resource;
 
 /**
  * ResourceLoader implementation that resolves paths as ServletContext
- * resources, for use outside a WebApplicationContext.
+ * resources, for use outside a WebApplicationContext (for example,
+ * in a HttpServletBean or GenericFilterBean subclass).
+ *
+ * <p>Within a WebApplicationContext, resource paths are automatically
+ * resolved as ServletContext resources.
+ *
  * @author Juergen Hoeller
  * @since 1.0.2
  * @see #getResourceByPath
+ * @see ServletContextResource
+ * @see org.springframework.web.context.WebApplicationContext
  * @see org.springframework.web.servlet.HttpServletBean
  * @see org.springframework.web.filter.GenericFilterBean
  */
@@ -36,7 +43,7 @@ public class ServletContextResourceLoader extends DefaultResourceLoader {
 
 	/**
 	 * Create a new ServletContextResourceLoader.
-	 * @param servletContext the ServletContext to resolve resources with.
+	 * @param servletContext the ServletContext to load resources with
 	 */
 	public ServletContextResourceLoader(ServletContext servletContext) {
 		this.servletContext = servletContext;
@@ -44,6 +51,7 @@ public class ServletContextResourceLoader extends DefaultResourceLoader {
 
 	/**
 	 * This implementation supports file paths beneath the root of the web application.
+	 * @see ServletContextResource
 	 */
 	protected Resource getResourceByPath(String path) {
 		return new ServletContextResource(this.servletContext, path);
