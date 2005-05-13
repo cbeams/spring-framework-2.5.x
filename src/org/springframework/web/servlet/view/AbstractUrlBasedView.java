@@ -16,13 +16,15 @@
 
 package org.springframework.web.servlet.view;
 
+import org.springframework.beans.factory.InitializingBean;
+
 /**
  * Abstract base class for URL-based views. Provides a consistent way of
  * holding the URL that a View wraps, in the form of a "url" bean property.
  * @author Juergen Hoeller
  * @since 13.12.2003
  */
-public abstract class AbstractUrlBasedView extends AbstractView {
+public abstract class AbstractUrlBasedView extends AbstractView implements InitializingBean {
 
 	private String url;
 
@@ -41,10 +43,7 @@ public abstract class AbstractUrlBasedView extends AbstractView {
 		return url;
 	}
 
-	/**
-	 * Overridden lifecycle method to check that 'url' property is set.
-	 */
-	protected void initApplicationContext() {
+	public void afterPropertiesSet() throws Exception {
 		if (getUrl() == null) {
 			throw new IllegalArgumentException("url is required");
 		}

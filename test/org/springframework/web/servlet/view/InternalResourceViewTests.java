@@ -41,13 +41,9 @@ public class InternalResourceViewTests extends TestCase {
 	 * Test that if the url property isn't supplied, view initialization fails.
 	 */
 	public void testRejectsNullUrl() throws Exception {
-		MockControl mc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
-		mc.replay();
-	
-		InternalResourceView v = new InternalResourceView();
+		InternalResourceView view = new InternalResourceView();
 		try {
-			v.setApplicationContext(wac);
+			view.afterPropertiesSet();
 			fail("Should be forced to set URL");
 		}
 		catch (IllegalArgumentException ex) {

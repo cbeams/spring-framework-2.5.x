@@ -33,21 +33,22 @@ import org.springframework.mock.web.MockHttpServletResponse;
  * Doesn't test URL encoding, although it does check it's called.
  * Uses mock objects.
  * @author Rod Johnson
- * @since 27-May-2003
+ * @since 27.05.2003
  */
 public class RedirectViewTests extends TestCase {
 
-	private void test(final Map m, String url, boolean contextRelative, String expectedUrlForEncoding)
+	private void test(final Map map, String url, boolean contextRelative, String expectedUrlForEncoding)
 			throws Exception {
+
 		class TestRedirectView extends RedirectView {
 			public boolean valid;
-			
+
 			/**
 			 * Test this callback method is called with correct args
 			 */
 			protected Map queryProperties(Map model) {
 				// They may not be the same model instance, but they're still equal
-				assertTrue(m.equals(model));
+				assertTrue(map.equals(model));
 				valid = true;
 				return super.queryProperties(model);
 			}
@@ -74,7 +75,7 @@ public class RedirectViewTests extends TestCase {
 		mc.setVoidCallable(1);
 		mc.replay();
 		
-		rv.render(m, request, resp);
+		rv.render(map, request, resp);
 		assertTrue(rv.valid);
 		mc.verify();
 	}
@@ -128,7 +129,7 @@ public class RedirectViewTests extends TestCase {
 	public void testNoUrlSet() throws Exception {
 		RedirectView rv = new RedirectView();
 		try {
-			rv.initApplicationContext();
+			rv.afterPropertiesSet();
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {

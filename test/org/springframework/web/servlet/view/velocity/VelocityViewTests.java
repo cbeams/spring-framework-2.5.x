@@ -81,21 +81,14 @@ public class VelocityViewTests extends TestCase {
 
 	public void testNoTemplateName() throws Exception {
 		VelocityView vv = new VelocityView();
-		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		// Expect no calls
-		wmc.replay();
-
 		try {
-			vv.setApplicationContext(wac);
-			fail();
+			vv.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
 			// Check there's a helpful error message
 			assertTrue(ex.getMessage().indexOf("url") != -1);
 		}
-
-		wmc.verify();
 	}
 
 	public void testCannotResolveTemplateNameResourceNotFoundException() throws Exception {

@@ -68,24 +68,16 @@ public class FreeMarkerViewTests extends TestCase {
 		wmc.verify();
 	}
 
-	public void testNoTemplateName() {
+	public void testNoTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
-
-		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		// Expect no calls
-		wmc.replay();
-
 		try {
-			fv.setApplicationContext(wac);
-			fail();
+			fv.afterPropertiesSet();
+			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
 			// Check there's a helpful error message
 			assertTrue(ex.getMessage().indexOf("url") != -1);
 		}
-
-		wmc.verify();
 	}
 
 	public void testValidTemplateName() throws Exception {
