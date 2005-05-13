@@ -39,6 +39,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.ConfigurableBeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.HierarchicalMessageSource;
@@ -182,7 +183,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Set a friendly name for this context.
 	 * Typically done during initialization of concrete context implementations.
 	 */
-	protected void setDisplayName(String displayName) {
+	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
@@ -265,6 +266,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Configure the bean factory with context semantics.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		beanFactory.ignoreDependencyType(ResourceLoader.class);
+		beanFactory.ignoreDependencyType(ApplicationEventPublisher.class);
+		beanFactory.ignoreDependencyType(MessageSource.class);
 		beanFactory.ignoreDependencyType(ApplicationContext.class);
 
 		// Allows post-processing of the bean factory in context subclasses.
