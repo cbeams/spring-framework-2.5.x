@@ -1904,8 +1904,8 @@ dataSource.url=jdbc:mysql:mydb</programlisting></para>
     and <literal>URLEditor</literal>.</para>
   </sect1>
 
-  <sect1 id="beans-beanfactory-customeditors">
-    <title>Using the alias element to add aliases for existing beans </title>
+  <sect1 id="beans-beanfactory-alias">
+    <title>Using the alias element to add aliases for existing beans</title>
 
     <para>In a bean definition itself, you may supply more than one name for
     the bean, by using a combination of up to one name spcified via the
