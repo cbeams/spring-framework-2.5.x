@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -67,15 +66,15 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!this.cache) {
 			logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This can severely impair performance");
-			return prepareView(viewName, locale);
+			return createView(viewName, locale);
 		}
 		else {
 			String cacheKey = getCacheKey(viewName, locale);
-			// no synchronization, as we can live with occasional double caching
+			// No synchronization, as we can live with occasional double caching.
 			View view = (View) this.viewMap.get(cacheKey);
 			if (view == null) {
-				// ask the subclass to prepare the View object
-				view = prepareView(viewName, locale);
+				// Ask the subclass to create the View object.
+				view = createView(viewName, locale);
 				this.viewMap.put(cacheKey, view);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cached view '" + cacheKey + "'");
@@ -124,29 +123,11 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	/**
-	 * Create and configure the given View. Only invoked once per View.
-	 * Delegates to the <code>createView</code> template method for actual creation.
-	 * <p>Sets the ApplicationContext on the View, if necessary. View objects
-	 * returned by <code>createView</code> are supposed to either be created based
-	 * on the URL (direct instantiation of a specific view class) or based on a
-	 * BeanFactory (managed bean definitions, but without ApplicationContextAware
-	 * callback). Consequently, the ApplicationContext has to be set explicitly here.
-	 * @see #createView
-	 */
-	private View prepareView(String viewName, Locale locale) throws Exception {
-		View view = createView(viewName, locale);
-		if (view instanceof ApplicationContextAware) {
-			((ApplicationContextAware) view).setApplicationContext(getApplicationContext());
-		}
-		return view;
-	}
-
-	/**
 	 * Create the actual View object.
 	 * Default implementation delegates to <code>loadView</code>.
-	 * <p>Can be overridden to resolve certain view names in a
-	 * special fashion, before delegating to the actual loadView
-	 * implementation provided by the subclass.
+	 * <p>Can be overridden to resolve certain view names in a special fashion,
+	 * before delegating to the actual <code>loadView</code> implementation
+	 * provided by the subclass.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
 	 * @return the View instance, or null if not found
@@ -163,9 +144,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * for efficiency, as this class will cache views.
 	 * <p>Not all subclasses may support internationalization:
 	 * A subclass that doesn't can simply ignore the locale parameter.
-	 * <p>This method is not supposed to fully initialize the view (for example,
-	 * ApplicationContextAware methods haven't been called yet). Clients should only
-	 * be using resolveViewName, which does fully initialize the view objects found.
+	 * <p><b>NOTE:</b> As of Spring 1.2, subclasses are supposed to
+	 * fully initialize the View objects before returning them,
+	 * also applying bean container initialization callbacks.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
 	 * @return the View instance, or null if not found

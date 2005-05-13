@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.web.servlet.View;
 
 /**
@@ -288,10 +287,36 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver {
 	}
 
 	/**
-	 * Creates a new instance of the specified view class and configures it.
-	 * Does <i>not</i> perform any lookup for pre-defined View instances.
+	 * Delegates to <code>buildView</code> for creating a new instance of the
+	 * specified view class, and applies the following Spring lifecycle methods
+	 * (as supported by the generic Spring bean factory):
+	 * <ul>
+	 * <li>ApplicationContextAware's <code>setApplicationContext</code>
+	 * <li>InitializingBean's <code>afterPropertiesSet</code>
+	 * </ul>
+	 * @see #buildView(String)
+	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 */
-	protected View loadView(String viewName, Locale locale) throws BeansException {
+	protected View loadView(String viewName, Locale locale) throws Exception {
+		AbstractUrlBasedView view = buildView(viewName);
+		view.setApplicationContext(getApplicationContext());
+		view.afterPropertiesSet();
+		return view;
+	}
+
+	/**
+	 * Creates a new View instance of the specified view class and configures it.
+	 * Does <i>not</i> perform any lookup for pre-defined View instances.
+	 * <p>Spring lifecycle methods as defined by the bean container do not have to
+	 * be called here; those will be applied by the <code>loadView</code> method
+	 * after this method returns.
+	 * <p>Subclasses will typically call <code>super.buildView(viewName)</code>
+	 * first, before setting further properties themselves. <code>loadView</code>
+	 * will then apply Spring lifecycle methods at the end of this process.
+	 * @see #loadView(String, java.util.Locale)
+	 */
+	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(this.viewClass);
 		view.setBeanName(viewName);
 		view.setUrl(this.prefix + viewName + this.suffix);

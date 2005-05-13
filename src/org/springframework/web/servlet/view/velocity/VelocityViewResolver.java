@@ -16,11 +16,8 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.util.Locale;
-
-import org.springframework.beans.BeansException;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
+import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
  * Convenience subclass of UrlBasedViewResolver that supports VelocityView
@@ -120,8 +117,8 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 	}
 
 
-	protected View loadView(String viewName, Locale locale) throws BeansException {
-		VelocityView view = (VelocityView) super.loadView(viewName, locale);
+	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
+		VelocityView view = (VelocityView) super.buildView(viewName);
 		view.setVelocityFormatterAttribute(this.velocityFormatterAttribute);
 		view.setDateToolAttribute(this.dateToolAttribute);
 		view.setNumberToolAttribute(this.numberToolAttribute);

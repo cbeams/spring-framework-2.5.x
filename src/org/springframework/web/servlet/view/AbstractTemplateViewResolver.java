@@ -16,10 +16,7 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Locale;
 
-import org.springframework.beans.BeansException;
-import org.springframework.web.servlet.View;
 
 /**
  * Abstract base class for template view resolvers like
@@ -76,8 +73,8 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 	}
 
 
-	protected View loadView(String viewName, Locale locale) throws BeansException {
-		AbstractTemplateView view = (AbstractTemplateView) super.loadView(viewName, locale);
+	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
+		AbstractTemplateView view = (AbstractTemplateView) super.buildView(viewName);
 		view.setExposeRequestAttributes(this.exposeRequestAttributes);
 		view.setExposeSessionAttributes(this.exposeSessionAttributes);
 		view.setExposeSpringMacroHelpers(this.exposeSpringMacroHelpers);
