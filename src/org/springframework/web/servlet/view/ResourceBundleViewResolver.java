@@ -20,19 +20,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceEditor;
+import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 
 /**
@@ -120,7 +117,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 
-	protected View loadView(String viewName, Locale locale) throws MissingResourceException, BeansException {
+	protected View loadView(String viewName, Locale locale) throws Exception {
 		try {
 			return (View) initFactory(locale).getBean(viewName, View.class);
 		}
@@ -134,13 +131,18 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	 * Initialize the BeanFactory from the ResourceBundle, for the given locale.
 	 * Synchronized because of access by parallel threads.
 	 */
-	protected synchronized BeanFactory initFactory(Locale locale) throws MissingResourceException, BeansException {
+	protected synchronized BeanFactory initFactory(Locale locale) throws Exception {
 		BeanFactory parsedBundle = isCache() ? (BeanFactory) this.cachedFactories.get(locale) : null;
 		if (parsedBundle != null) {
 			return parsedBundle;
 		}
 
-		DefaultListableBeanFactory factory = new DefaultListableBeanFactory(getApplicationContext());
+		// Create child ApplicationContext for views.
+		GenericWebApplicationContext factory = new GenericWebApplicationContext();
+		factory.setParent(getApplicationContext());
+		factory.setServletContext(getServletContext());
+
+		// Load bean definitions from resource bundle.
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(factory);
 		reader.setDefaultParentBean(this.defaultParentView);
 		for (int i = 0; i < this.basenames.length; i++) {
@@ -148,10 +150,10 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 					this.basenames[i], locale, Thread.currentThread().getContextClassLoader());
 			reader.registerBeanDefinitions(bundle);
 		}
-		factory.registerCustomEditor(Resource.class, new ResourceEditor(getApplicationContext()));
+
+		factory.refresh();
 
 		if (isCache()) {
-			factory.preInstantiateSingletons();
 			this.cachedFactories.put(locale, factory);
 		}
 		return factory;
@@ -159,8 +161,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 
 	public void destroy() throws BeansException {
 		for (Iterator it = this.cachedFactories.values().iterator(); it.hasNext();) {
-			ConfigurableBeanFactory factory = (ConfigurableBeanFactory) it.next();
-			factory.destroySingletons();
+			ConfigurableApplicationContext factory = (ConfigurableApplicationContext) it.next();
+			factory.close();
 		}
 		this.cachedFactories.clear();
 	}

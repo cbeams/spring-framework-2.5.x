@@ -97,7 +97,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 
 		assertTrue("Correct default content type", jv.getContentType().equals("text/html; charset=ISO-8859-1"));
 		assertTrue("WebAppContext was set on view", jv.getApplicationContext() != null);
-		assertTrue("WebAppContext was sticky", jv.getApplicationContext().equals(wac));
+		assertTrue("WebAppContext was correct", jv.getApplicationContext().getParent().equals(wac));
 	}
 
 	public void testDebugViewFrench() throws Exception {
@@ -141,7 +141,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 
 		public void setLocation(Resource location) {
 			if (!(location instanceof ServletContextResource)) {
-				throw new IllegalArgumentException("Expecting ClassPathResource, not " + location.getClass().getName());
+				throw new IllegalArgumentException("Expecting ServletContextResource, not " + location.getClass().getName());
 			}
 		}
 

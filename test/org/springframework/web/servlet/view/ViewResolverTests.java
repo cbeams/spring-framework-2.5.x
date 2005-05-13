@@ -309,7 +309,7 @@ public class ViewResolverTests extends TestCase {
 
 	public void testXmlViewResolver() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.registerSingleton("testBean", TestBean.class, null);
+		wac.registerSingleton("testBean", TestBean.class);
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
 		TestBean testBean = (TestBean) wac.getBean("testBean");
