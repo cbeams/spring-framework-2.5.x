@@ -59,7 +59,11 @@ public class ServletContextResource extends AbstractResource {
 	 * @param path the path of the resource
 	 */
 	public ServletContextResource(ServletContext servletContext, String path) {
+		// check ServletContext
+		Assert.notNull(servletContext, "Cannot resolve ServletContextResource without ServletContext");
 		this.servletContext = servletContext;
+
+		// check path
 		Assert.notNull(path, "path is required");
 		if (!path.startsWith("/")) {
 			path = "/" + path;
