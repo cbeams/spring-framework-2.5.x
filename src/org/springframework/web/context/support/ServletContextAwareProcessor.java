@@ -27,8 +27,7 @@ import org.springframework.web.context.ServletContextAware;
 
 /**
  * BeanPostProcessor implementation that passes the ServletContext to
- * beans that implement the ApplicationContextAware or ResourceLoaderAware
- * interfaces. If both are implemented, the latter is satisfied first.
+ * beans that implement the ServletContextAware interface.
  *
  * <p>Web application contexts will automatically register this with their
  * underlying bean factory. Applications do not use this directly.
@@ -55,7 +54,7 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 		if (bean instanceof ServletContextAware) {
 			if (this.servletContext == null) {
 				throw new IllegalStateException("Cannot satisfy ServletContextAware for bean '" +
-						beanName + "' because there is no ServletContext");
+						beanName + "' without ServletContext");
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking setServletContext on ServletContextAware bean '" + beanName + "'");
