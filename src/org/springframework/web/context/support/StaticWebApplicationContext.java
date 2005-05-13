@@ -31,6 +31,10 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  * Static WebApplicationContext implementation for testing.
  * Not for use in production applications.
  *
+ * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
+ * the web application root. Absolute paths, e.g. for files outside the web app root,
+ * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
+ *
  * <p>In addition to the special beans detected by AbstractApplicationContext,
  * this class detects a ThemeSource bean in the context, with the name
  * "themeSource".
@@ -49,6 +53,13 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	private ThemeSource themeSource;
 
 
+	public StaticWebApplicationContext() {
+		setDisplayName("Root WebApplicationContext");
+	}
+
+	/**
+	 * Set the ServletContext that this WebApplicationContext runs in.
+	 */
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
@@ -59,11 +70,8 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
-		if (this.namespace != null) {
-			setDisplayName("WebApplicationContext for namespace '" + this.namespace + "'");
-		}
-		else {
-			setDisplayName("Root WebApplicationContext");
+		if (namespace != null) {
+			setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
 		}
 	}
 
@@ -87,15 +95,14 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 
 	/**
 	 * This implementation supports file paths beneath the root of the ServletContext.
+	 * @see ServletContextResource
 	 */
 	protected Resource getResourceByPath(String path) {
 		return new ServletContextResource(this.servletContext, path);
 	}
 
 	/**
-	 * Use a ServletContextResourcePatternResolver, to be able to find
-	 * matching resources below the web application root directory
-	 * even in a WAR file which has not been expanded.
+	 * This implementation supports pattern matching in unexpanded WARs too.
 	 * @see ServletContextResourcePatternResolver
 	 */
 	protected ResourcePatternResolver getResourcePatternResolver() {

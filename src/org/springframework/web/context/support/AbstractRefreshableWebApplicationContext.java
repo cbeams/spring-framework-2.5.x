@@ -63,9 +63,9 @@ import org.springframework.web.context.ConfigurableWebApplicationContext;
  *
  * @author Juergen Hoeller
  * @since 1.1.3
- * @see org.springframework.web.context.ConfigurableWebApplicationContext#setConfigLocations
- * @see #getConfigLocations
  * @see #loadBeanDefinitions
+ * @see #getConfigLocations
+ * @see org.springframework.web.context.ConfigurableWebApplicationContext#setConfigLocations
  * @see ServletContextResourcePatternResolver
  * @see org.springframework.context.support.AbstractApplicationContext
  * @see org.springframework.ui.context.ThemeSource
@@ -88,6 +88,11 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	private ThemeSource themeSource;
 
 
+	public AbstractRefreshableWebApplicationContext() {
+		setDisplayName("Root WebApplicationContext");
+	}
+
+
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
@@ -98,11 +103,8 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
-		if (this.namespace != null) {
-			setDisplayName("WebApplicationContext for namespace '" + this.namespace + "'");
-		}
-		else {
-			setDisplayName("Root WebApplicationContext");
+		if (namespace != null) {
+			setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
 		}
 	}
 
@@ -151,10 +153,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	/**
-	 * Resolve file paths beneath the root of the web application.
-	 * <p>Note: Even if a given path starts with a slash, it will get
-	 * interpreted as relative to the web application root directory
-	 * (which is the way most servlet containers handle such paths).
+	 * This implementation supports file paths beneath the root of the ServletContext.
 	 * @see ServletContextResource
 	 */
 	protected Resource getResourceByPath(String path) {
@@ -162,9 +161,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	/**
-	 * Use a ServletContextResourcePatternResolver, to be able to find
-	 * matching resources below the web application root directory
-	 * even in a WAR file which has not been expanded.
+	 * This implementation supports pattern matching in unexpanded WARs too.
 	 * @see ServletContextResourcePatternResolver
 	 */
 	protected ResourcePatternResolver getResourcePatternResolver() {
