@@ -3,9 +3,10 @@ package org.springframework.web.flow;
 import java.util.Map;
 
 /**
- * Mutable control interface for states to use to manipulate the state of an
- * ongoing flow execution. Used internally by the various state types
- * when they are entered.
+ * Mutable control interface for states to use to manipulate an ongoing
+ * flow execution. Used internally by the various state types when they are entered.
+ * 
+ * @see org.springframework.web.flow.State
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -32,10 +33,11 @@ public interface StateContext extends RequestContext {
 	
 	/**
 	 * Spawn a new flow session and activate it in the currently executing
-	 * flow.  Also transitions the spawned flow to its start state.
+	 * flow. Also transitions the spawned flow to its start state.
 	 * @param startState the state the new flow should start in
 	 * @param input initial contents of the newly created flow session
-	 * @return the newly created and activated flow session
+	 * @return the starting view descriptor, which returns control to the client
+	 *         and requests that a view be rendered with model data
 	 * @throws IllegalStateException when the flow execution is not active
 	 */
 	public ViewDescriptor spawn(State startState, Map input) throws IllegalStateException;

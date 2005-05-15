@@ -74,7 +74,7 @@ public class Scope implements MutableAttributeSource, Map, Serializable {
 	 * it's value of the specified class?
 	 * @param attributeName the attribute name
 	 * @param attributeClass the required class of the attribute value
-	 * @return true if so, false otherwise.
+	 * @return true if so, false otherwise
 	 */
 	public boolean containsAttribute(String attributeName, Class attributeClass) {
 		boolean contains = this.attributes.containsKey(attributeName);

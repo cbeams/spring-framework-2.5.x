@@ -26,7 +26,7 @@ import org.springframework.binding.AttributeSource;
  * manipulate an executing flow.
  * <p>
  * A new request context is created when one of the entry points on the
- * FlowExecution facade interface is invoked, either
+ * <code>FlowExecution</code> facade interface is invoked, either
  * ({@link org.springframework.web.flow.execution.FlowExecution#start(Event)}
  * to activate a new executing flow, or
  * {@link org.springframework.web.flow.execution.FlowExecution#signalEvent(Event)}) to
@@ -37,19 +37,19 @@ import org.springframework.binding.AttributeSource;
  * user-implemented action code and state transition criteria. The request
  * context is disposed when a entry-point call into a flow execution returns.
  * This fact means the request context is an internal artifact used within the
- * flow system--the context object will not be exposed to external client code.
+ * flow system -- the context object will not be exposed to external client code.
  * <p>
  * Note that a <i>request</i> context is in no way linked to an HTTP request!
  * It just uses the familiar "request" naming convention.
  * 
  * @see org.springframework.web.flow.execution.FlowExecution
+ * @see org.springframework.web.flow.Action
+ * @see org.springframework.web.flow.TransitionCriteria
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public interface RequestContext {
-
-	// context query operations
 
 	/**
 	 * Returns the client event that originated (triggered) this request.
@@ -60,20 +60,20 @@ public interface RequestContext {
 
 	/**
 	 * Returns additional information about the executing flow.
-	 * @return the flow context
+	 * @return the flow execution context
 	 */
 	public FlowContext getFlowContext();
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in
-	 * request scope.  Request scoped attributes exist for the duration of this request.
+	 * request scope. Request scoped attributes exist for the duration of this request.
 	 * @return the request scope
 	 */
 	public Scope getRequestScope();
 
 	/**
 	 * Returns a mutable accessor for accessing and/or setting attributes in
-	 * flow scope.  Flow scoped attributes exist for the life of the executing flow.
+	 * flow scope. Flow scoped attributes exist for the life of the executing flow.
 	 * @return the flow scope
 	 */
 	public Scope getFlowScope();
@@ -104,18 +104,43 @@ public interface RequestContext {
 	public void setProperties(AttributeSource properties);
 	
 	/**
-	 * Returns a synchronizer for demarcating application transactions within
-	 * the flow execution associated with this context.
-	 * @return the transaction synchronizer
-	 */
-	public TransactionSynchronizer getTransactionSynchronizer();
-	
-	/**
 	 * Returns the data model for this context, suitable for exposing to clients
 	 * (e.g. web views). Typically the model will contain the data available in
 	 * request scope and flow scope.
 	 * @return the model that can be exposed to a client
 	 */
 	public Map getModel();
+	
+	// application transaction demarcation
+
+	/**
+	 * Is the caller participating in the application transaction currently
+	 * active in the flow execution?
+	 * @param end indicates whether or not the transaction should end after
+	 *        checking it
+	 * @return true if it is participating in the active transaction, false
+	 *         otherwise
+	 */
+	public boolean inTransaction(boolean end);
+
+	/**
+	 * Assert that there is an active application transaction in the flow
+	 * execution and that the caller is participating in it.
+	 * @param end indicates whether or not the transaction should end after
+	 *        checking it
+	 * @throws IllegalStateException there is no active transaction in the
+	 *         flow execution
+	 */
+	public void assertInTransaction(boolean end) throws IllegalStateException;
+
+	/**
+	 * Start a new transaction in the flow execution.
+	 */
+	public void beginTransaction();
+
+	/**
+	 * End the active transaction in the flow execution.
+	 */
+	public void endTransaction();
 
 }

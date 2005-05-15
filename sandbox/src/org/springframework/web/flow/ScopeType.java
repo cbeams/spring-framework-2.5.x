@@ -33,7 +33,7 @@ public class ScopeType extends ShortCodedLabeledEnum {
 
 	/**
 	 * Constant indicating flow scope. The flow scope is shared by all
-	 * artifacts of a flow: actions, view, states, ...
+	 * artifacts of a flow during a flow execution: actions, view, states, ...
 	 */
 	public static final ScopeType FLOW = new ScopeType(1, "flow");
 

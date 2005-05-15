@@ -24,10 +24,23 @@ package org.springframework.web.flow;
 public interface FlowContext {
 
 	/**
+	 * Returns a display string suitable for logging/printing in a console
+	 * containing info about this executing flow.
+	 * @return the flow execution caption
+	 */
+	public String getCaption();
+
+	/**
 	 * Returns the time at which this flow started executing.
 	 * @return the creation timestamp
 	 */
 	public long getCreationTimestamp();
+
+	/**
+	 * Returns the time in milliseconds this flow execution has been active.
+	 * @return the flow execution up time
+	 */
+	public long getUptime();
 
 	/**
 	 * Returns the root flow definition associated with this executing flow.
@@ -37,26 +50,21 @@ public interface FlowContext {
 
 	/**
 	 * Returns the definition for the flow that is currently executing.
-	 * @return the flow definition for the active session.
+	 * @return the flow definition for the active session
+	 * @throws IllegalStateException when this flow is no longer actively executing
 	 */
-	public Flow getActiveFlow();
+	public Flow getActiveFlow() throws IllegalStateException;
 
 	/**
 	 * Returns the current state of the executing flow.
 	 * @return the current state
+	 * @throws IllegalStateException when this flow is no longer actively executing
 	 */
-	public State getCurrentState();
-
-	/**
-	 * Returns the time in milliseconds this flow execution has been active, or
-	 * 0 if not active.
-	 * @return the flow execution up time
-	 */
-	public long getUptime();
+	public State getCurrentState() throws IllegalStateException;
 
 	/**
 	 * Returns the timestamp noting when the last request to manipulate this
-	 * executing flow was processed.
+	 * executing flow was received.
 	 * @return the timestamp of the last client request
 	 */
 	public long getLastRequestTimestamp();
@@ -68,22 +76,15 @@ public interface FlowContext {
 	public String getLastEventId();
 	
 	/**
-	 * Returns a display string suitable for logging/printing in a console
-	 * containing info about this executing flow.
-	 * @return the flow execution caption
-	 */
-	public String getCaption();
-
-	/**
 	 * Returns the active flow session.
 	 * @return the active flow session
-	 * @throws IllegalStateException when this flow is not active
+	 * @throws IllegalStateException when this flow is no longer actively executing
 	 */
 	public FlowSession getActiveSession() throws IllegalStateException;
 
 	/**
 	 * Is the flow execution active?
-	 * @return true if active, false if terminated or not yet started
+	 * @return true if active, false if flow execution has terminated
 	 */
 	public boolean isActive();
 
