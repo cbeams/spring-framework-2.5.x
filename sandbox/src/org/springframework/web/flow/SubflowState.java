@@ -176,11 +176,10 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 	}
 
 	/**
-	 * Specialization of State's <code>doEnter</code> template
-	 * method that executes behaivior specific to this state type in polymorphic
-	 * fashion.
+	 * Specialization of State's <code>doEnter</code> template method that executes
+	 * behaivior specific to this state type in polymorphic fashion.
 	 * <p>
-	 * Enter this state, creating the sub flow input map and spawning the sub
+	 * Entering this state, creates the sub flow input map and spawns the sub
 	 * flow in the current flow execution.
 	 * @param context the state context for the executing flow
 	 * @return a view descriptor containing model and view information needed to
@@ -190,7 +189,18 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 		if (logger.isDebugEnabled()) {
 			logger.debug("Spawning child sub flow '" + getSubflow().getId() + "' within this flow '" + getFlow() + "'");
 		}
-		return context.spawn(getSubflow().getStartState(), createSubflowInput(context));
+		return context.spawn(getSubflowStartState(context), createSubflowInput(context));
+	}
+	
+	/**
+	 * Hook method to determine the state in which the spawned subflow should
+	 * start. Subclasses can override this is needed.
+	 * @param context the flow execution request context
+	 * @return the start state of the subflow
+	 */
+	protected State getSubflowStartState(RequestContext context) {
+		// just use the preconfigured start state
+		return getSubflow().getStartState();
 	}
 
 	public Map createSubflowInput(RequestContext context) {

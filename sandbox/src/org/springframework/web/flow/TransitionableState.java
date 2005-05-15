@@ -199,14 +199,7 @@ public abstract class TransitionableState extends State {
 	public ViewDescriptor onEvent(Event event, StateContext context)
 			throws NoMatchingTransitionException, CannotExecuteTransitionException {
 		context.setLastEvent(event);
-		Transition transition = getRequiredTransition(context);
-		if (transition.getTargetState(context).getId().equals(this.getId())) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loop detected: the source and target state of transition '" + transition
-						+ "' are the same" + " -- make sure this is not a bug!");
-			}
-		}
-		return transition.execute(context);
+		return getRequiredTransition(context).execute(context);
 	}
 
 	protected void createToString(ToStringCreator creator) {

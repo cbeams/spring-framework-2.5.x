@@ -15,21 +15,21 @@
  */
 package org.springframework.web.flow;
 
-
 /**
  * Factory that produces a new, configured <code>ViewDescriptor</code> on each invocation,
  * taking into account the information in the provided flow execution request context.
  * <p>
  * This allows easy insertion of dynamic view descriptor configuration logic, for example to
  * vary the view to render or the available model for rendering based on some context.
+ * 
  * @author Keith Donald
  */
 public interface ViewDescriptorCreator {
 	
 	/**
 	 * Create the view descriptor.
-	 * @param context the current request context of the executing flow.
-	 * @return the view descriptor.
+	 * @param context the current request context of the executing flow
+	 * @return the view descriptor
 	 */
 	public ViewDescriptor createViewDescriptor(RequestContext context);
 }

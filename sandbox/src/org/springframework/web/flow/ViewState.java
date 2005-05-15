@@ -129,7 +129,7 @@ public class ViewState extends TransitionableState {
 	 * Create a new view state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the logical name of the view to render
+	 * @param creator the factory used to create the view to render
 	 * @param transitions the transitions of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
@@ -142,7 +142,7 @@ public class ViewState extends TransitionableState {
 	 * Create a new view state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the logical name of the view to render
+	 * @param creator the factory used to create the view to render
 	 * @param transitions the transitions of this state
 	 * @param properties additional properties describing this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
@@ -158,20 +158,23 @@ public class ViewState extends TransitionableState {
 	public void setViewName(String viewName) {
 		if (StringUtils.hasText(viewName)) {
 			this.viewDescriptorCreator = new SimpleViewDescriptorCreator(viewName);
-		} else {
+		}
+		else {
 			this.viewDescriptorCreator = null;
 		}
 	}
 
 	/**
-	 * Sets the factory to produce a descriptor about the view to render in this view state.
+	 * Sets the factory to produce a descriptor about the view to render in
+	 * this view state.
 	 */
 	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
 		this.viewDescriptorCreator = creator;
 	}
 
 	/**
-	 * Returns the factory that to produce a descriptor about the view to render in this view state.
+	 * Returns the factory to produce a descriptor about the view to render in
+	 * this view state.
 	 */
 	public ViewDescriptorCreator getViewDescriptorCreator() {
 		return viewDescriptorCreator;

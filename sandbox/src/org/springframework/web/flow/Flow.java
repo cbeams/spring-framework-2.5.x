@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.Styler;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
@@ -80,8 +81,8 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.web.flow.config.XmlFlowBuilder
  * 
  * @author Keith Donald
- * @author Colin Sampaleanu
  * @author Erwin Vervaet
+ * @author Colin Sampaleanu
  */
 public class Flow extends AnnotatedObject {
 
@@ -95,7 +96,7 @@ public class Flow extends AnnotatedObject {
 	/**
 	 * The default start state for this flow.
 	 */
-	private TransitionableState startState;
+	private State startState;
 
 	/**
 	 * The set of state definitions for this flow.
@@ -163,12 +164,12 @@ public class Flow extends AnnotatedObject {
 		if (containsState(state.getId())) {
 			throw new IllegalArgumentException("This flow '" + getId() + "' already contains a state with id '"
 					+ state.getId() + "' -- state ids must be locally unique to the flow definition; "
-					+ "existing stateIds of this flow include: " + Styler.call(getStateIds()));
+					+ "existing state-ids of this flow include: " + Styler.call(getStateIds()));
 		}
 		boolean firstAdd = states.isEmpty();
 		this.states.add(state);
-		if (firstAdd && state.isTransitionable()) {
-			setStartState((TransitionableState)state);
+		if (firstAdd) {
+			setStartState(state);
 		}
 	}
 
@@ -201,10 +202,10 @@ public class Flow extends AnnotatedObject {
 	 * @return the start state
 	 * @throws IllegalStateException when no start state has been marked
 	 */
-	public TransitionableState getStartState() throws IllegalStateException {
+	public State getStartState() throws IllegalStateException {
 		if (startState == null) {
 			throw new IllegalStateException(
-					"No start state has been set for this Flow -- flow builder configuration error?");
+					"No start state has been set for this flow -- flow builder configuration error?");
 		}
 		return startState;
 	}
@@ -220,16 +221,16 @@ public class Flow extends AnnotatedObject {
 	 *         provided
 	 */
 	public void setStartState(String stateId) throws IllegalStateException, NoSuchFlowStateException {
-		setStartState(getRequiredTransitionableState(stateId));
+		setStartState(getRequiredState(stateId));
 	}
 
 	/**
 	 * Set the start state for this flow to the state provided; any
-	 * transitionable state may be the start state.
+	 * state may be the start state.
 	 * @param state the new start state
 	 * @throws NoSuchFlowStateException given state has not been added to this flow
 	 */
-	public void setStartState(TransitionableState state) throws NoSuchFlowStateException {
+	public void setStartState(State state) throws NoSuchFlowStateException {
 		if (!containsStateInstance(state)) {
 			throw new NoSuchFlowStateException(this, state.getId());
 		}
@@ -308,7 +309,7 @@ public class Flow extends AnnotatedObject {
 	 */
 	public TransitionableState getTransitionableState(String stateId) throws IllegalStateException {
 		State state = getState(stateId);
-		Assert.state(state.isTransitionable(), "This state '" + stateId + "' of flow '" + getId()
+		Assert.state(state.isTransitionable(), "The state '" + stateId + "' of flow '" + getId()
 				+ "' must be transitionable");
 		return (TransitionableState)state;
 	}	

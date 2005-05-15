@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.Styler;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
@@ -361,23 +362,22 @@ public class ActionState extends TransitionableState {
 		while (it.hasNext()) {
 			ActionExecutor actionExecutor = (ActionExecutor)it.next();
 			Event event = actionExecutor.execute(context);
-			executionCount++;
 			if (event != null) {
-				eventIds[executionCount - 1] = event.getId();
+				eventIds[executionCount] = event.getId();
 				try {
 					return onEvent(event, context);
 				}
 				catch (NoMatchingTransitionException e) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Action execution #" + executionCount + " resulted in no transition on event '"
-								+ eventIds[executionCount] + "' -- "
-								+ "I will proceed to the next action in the chain");
+						logger.debug("Action execution #" + (executionCount + 1) + " resulted in no transition on event '"
+								+ eventIds[executionCount] + "' -- I will proceed to the next action in the chain");
 					}
 				}
 			}
 			else {
 				eventIds[executionCount] = null;
 			}
+			executionCount++;
 		}
 		if (executionCount > 0) {
 			throw new NoMatchingTransitionException(this, context, "No transition was matched to the event(s) "
@@ -390,7 +390,7 @@ public class ActionState extends TransitionableState {
 		}
 		else {
 			throw new IllegalStateException("No actions were executed, thus I cannot execute any state transition "
-					+ "-- programmer configuration error; " + "make sure you add at least one action to this state");
+					+ "-- programmer configuration error; make sure you add at least one action to this state");
 		}
 	}
 

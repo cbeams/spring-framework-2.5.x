@@ -19,14 +19,28 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
  * A transition takes a flow from one state to another when executed. A
  * transition is associated with exactly one source <code>TransitionableState</code>.
- * Execution of a transition is guarded by a <code>TransitionCriteria</code> object,
- * which, when matched, makes the transition elligible for execution.
+ * <p>
+ * This class provides a simple implementation of a Transition that offers
+ * the following functionality:
+ * <ul>
+ * <li>Execution of a transition is guarded by a <code>TransitionCriteria</code> object,
+ * the so called "matching criteria", which, when matched, makes the transition
+ * elligible for execution.</li>
+ * <li>Optionally, completion of transition execution is guarded by a
+ * <code>TransitionCriteria</code> object, the so called "execution criteria". When the
+ * execution criteria test fails, the transition will <i>roll back</i>, transitioning
+ * back into its source state. When the execution criteria test succeeds, the transition
+ * continues onto the target state.</li>
+ * <li>The target state of the transition is specified at configuration time using the
+ * target state id.</li>
+ * </ul>
  * 
  * @see org.springframework.web.flow.TransitionableState
  * @see org.springframework.web.flow.TransitionCriteria
@@ -56,13 +70,7 @@ public class Transition extends AnnotatedObject {
 	private TransitionCriteria executionCriteria;
 	
 	/**
-	 * The target state that this transition should transition to when executed.
-	 */
-	private State targetState;
-
-	/**
-	 * The state id for the target state; needed to lazily resolve the target
-	 * state once on first execution (after configuration).
+	 * The state id for the target state.
 	 */
 	private String targetStateId;
 
@@ -151,6 +159,16 @@ public class Transition extends AnnotatedObject {
 	}
 
 	/**
+	 * Checks if this transition is elligible for execution given the state of the
+	 * provided flow execution request context.
+	 * @param context the flow execution request context
+	 * @return true if this transition should execute, false otherwise
+	 */
+	public boolean matches(RequestContext context) {
+		return this.matchingCriteria.test(context);
+	}
+
+	/**
 	 * Returns the criteria that determine whether or not this transition, once matched,
 	 * should complete execution or should <i>roll back</i>.
 	 * @return the transition execution criteria
@@ -168,15 +186,16 @@ public class Transition extends AnnotatedObject {
 	}
 	
 	/**
-	 * Checks if this transition is elligible for execution given the state of the
-	 * provided flow execution request context.
+	 * Checks if this transition can complete its execution or should be rolled back,
+	 * given the state of the flow execution request context.
 	 * @param context the flow execution request context
-	 * @return true if this transition should execute, false otherwise
+	 * @return true if this transition can complete execution, false if it should
+	 *         roll back
 	 */
-	public boolean matches(RequestContext context) {
-		return this.matchingCriteria.test(context);
+	public boolean canCompleteExecution(RequestContext context) {
+		return this.executionCriteria!=null ? this.executionCriteria.test(context) : true;
 	}
-
+	
 	/**
 	 * Returns the id of the target (<i>to</i>) state of this transition.
 	 * @return the target state id
@@ -189,35 +208,22 @@ public class Transition extends AnnotatedObject {
 	 * Set the id of the target (<i>to</i>) state of this transtion.
 	 */
 	public void setTargetStateId(String targetStateId) {
+		Assert.hasText(targetStateId, "The id of the target state of the transition is required");
 		this.targetStateId = targetStateId;
 	}
 
 	/**
 	 * Returns the state this transition will transition <i>to</i> when executed
-	 * with given request context. 
-	 */
-	public State getTargetState(RequestContext context) {
-		// this implementation does not take the request context into
-		// consideration when determining the target state
-		return getTargetState();
-	}
-
-	/**
-	 * Returns the target (<i>to</i>) state of this transition.
-	 * @return the target state
+	 * with given request context. Subclasses can override this to implement
+	 * specialize behaviour, e.g. with a transition with a "variable" target state. 
+	 * @param context the flow execution request context
+	 * @return the target state of the transition
 	 * @throws NoSuchFlowStateException when the target state cannot be found
 	 */
-	protected State getTargetState() throws NoSuchFlowStateException {
-		synchronized (this) {
-			if (this.targetState != null) {
-				return this.targetState;
-			}
-		}
-		State targetState = getSourceState().getFlow().getRequiredState(getTargetStateId());
-		synchronized (this) {
-			this.targetState = targetState;
-		}
-		return this.targetState;
+	public State getTargetState(RequestContext context) throws NoSuchFlowStateException {
+		// this implementation does not take the request context into
+		// consideration when determining the target state
+		return getSourceState().getFlow().getRequiredState(getTargetStateId());
 	}
 
 	/**
@@ -230,9 +236,15 @@ public class Transition extends AnnotatedObject {
 	 *         be executed because the target state is invalid
 	 */
 	public ViewDescriptor execute(StateContext context) throws CannotExecuteTransitionException {
-		State state = null;
+		State targetState = null;
 		try {
-			state = getTargetState();
+			targetState = getTargetState(context);
+			if (targetState.getId().equals(sourceState.getId())) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Loop detected: the source and target state of transition '" + this
+							+ "' are the same -- make sure this is not a bug!");
+				}
+			}
 		}
 		catch (NoSuchFlowStateException e) {
 			throw new CannotExecuteTransitionException(this, e);
@@ -245,12 +257,13 @@ public class Transition extends AnnotatedObject {
 		}
 		else {
 			// enter the target state (note: any exceptions are propagated)
-			viewDescriptor = state.enter(context);
+			viewDescriptor = targetState.enter(context);
 		}
 		if (logger.isDebugEnabled()) {
 			if (context.getFlowContext().isActive()) {
 				logger.debug("Transition '" + this + "' executed; as a result, the new state is '"
-						+ context.getFlowContext().getCurrentState().getId() + "' in flow '" + context.getFlowContext().getActiveFlow().getId() + "'");
+						+ context.getFlowContext().getCurrentState().getId() + "' in flow '"
+						+ context.getFlowContext().getActiveFlow().getId() + "'");
 			}
 			else {
 				logger.debug("Transition '" + this + "' executed; as a result, the flow execution has ended");

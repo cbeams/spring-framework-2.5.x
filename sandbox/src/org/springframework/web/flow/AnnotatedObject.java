@@ -24,7 +24,8 @@ import org.springframework.binding.support.MapAttributeSource;
 
 /**
  * Superclass of all objects in the web flow system that support annotation
- * using arbitrary properties.
+ * using arbitrary properties. Mainly used to ensure consistent configuration
+ * of properties for all annotated objects.
  * 
  * @author Erwin Vervaet
  */

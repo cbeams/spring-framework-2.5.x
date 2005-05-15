@@ -37,6 +37,8 @@ import org.springframework.util.StringUtils;
  * this EndState reliniquishes control back to a parent flow, view rendering
  * responsibility falls on the parent flow.
  * 
+ * @see org.springframework.web.flow.ViewDescriptorCreator
+ * 
  * @author Keith Donald
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
@@ -125,27 +127,29 @@ public class EndState extends State {
 	}
 
 	/**
-	 * Sets the logical name of the view to render when this end state is entered and terminates a
-	 * root flow.
+	 * Sets the logical name of the view to render when this end state is entered
+	 * and terminates a root flow.
 	 */
 	public void setViewName(String viewName) {
 		if (StringUtils.hasText(viewName)) {
 			this.viewDescriptorCreator = new SimpleViewDescriptorCreator(viewName);
-		} else {
+		}
+		else {
 			this.viewDescriptorCreator = null;
 		}
 	}
 
 	/**
-	 * Sets the factory to produce a view descriptor to render when this end state is entered and
-	 * terminates a root flow.
+	 * Sets the factory to produce a view descriptor to render when this end
+	 * state is entered and terminates a root flow.
 	 */
 	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
 		this.viewDescriptorCreator = creator;
 	}
 
 	/**
-	 * Returns the factory that to produce a descriptor about the view to render in this view state.
+	 * Returns the factory to produce a descriptor for the view to render in
+	 * this end state if it terminates a root flow.
 	 */
 	public ViewDescriptorCreator getViewDescriptorCreator() {
 		return viewDescriptorCreator;
@@ -189,7 +193,7 @@ public class EndState extends State {
 			}
 			// end the flow
 			// note that we do this here to make sure we can call context.getModel()
-			// above without any problems
+			// above (in the view descriptor creator) without any problems
 			context.endActiveSession();
 			return viewDescriptor;
 		}

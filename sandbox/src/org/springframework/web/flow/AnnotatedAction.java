@@ -86,11 +86,27 @@ public class AnnotatedAction extends AnnotatedObject {
 	}
 
 	/**
+	 * Returns the wrapped target action.
+	 * @return the action
+	 */
+	public Action getTargetAction() {
+		return targetAction;
+	}
+
+	/**
 	 * Set the target action wrapped by this object.
 	 */
 	private void setTargetAction(Action targetAction) {
 		Assert.notNull(targetAction, "The target Action instance is required");
 		this.targetAction = targetAction;
+	}
+
+	/**
+	 * Returns the name of a named action, or <code>null</code> if the action
+	 * is unnamed. Used when mapping action result events to transitions.
+	 */
+	public String getName() {
+		return (String)getProperty(NAME_PROPERTY);
 	}
 
 	/**
@@ -100,48 +116,6 @@ public class AnnotatedAction extends AnnotatedObject {
 	 */
 	public void setName(String name) {
 		setProperty(NAME_PROPERTY, name);
-	}
-
-	/**
-	 * Sets the short description for the action.
-	 * @param caption the caption
-	 */
-	public void setCaption(String caption) {
-		setProperty(CAPTION_PROPERTY, caption);
-	}
-
-	/**
-	 * Sets the long description for the action.
-	 * @param description the long description
-	 */
-	public void setDescription(String description) {
-		setProperty(DESCRIPTION_PROPERTY, description);
-	}
-
-	/**
-	 * Sets the name of the handler method on the target action instance to
-	 * invoke when this action is executed. Only used by multi-actions.
-	 * @param methodName the method name, with the signature
-	 *        <code>Event ${methodName}(RequestContext context)</code>
-	 */
-	public void setMethod(String methodName) {
-		setProperty(METHOD_PROPERTY, methodName);
-	}
-
-	/**
-	 * Returns the wrapped target action.
-	 * @return the action
-	 */
-	public Action getTargetAction() {
-		return targetAction;
-	}
-
-	/**
-	 * Returns the name of a named action, or <code>null</code> if the action
-	 * is unnamed. Used when mapping action result events to transitions.
-	 */
-	public String getName() {
-		return (String)getProperty(NAME_PROPERTY);
 	}
 
 	/**
@@ -159,10 +133,26 @@ public class AnnotatedAction extends AnnotatedObject {
 	}
 
 	/**
+	 * Sets the short description for the action.
+	 * @param caption the caption
+	 */
+	public void setCaption(String caption) {
+		setProperty(CAPTION_PROPERTY, caption);
+	}
+
+	/**
 	 * Returns the long description of this action.
 	 */
 	public String getDescription() {
 		return (String)getProperty(DESCRIPTION_PROPERTY);
+	}
+
+	/**
+	 * Sets the long description for the action.
+	 * @param description the long description
+	 */
+	public void setDescription(String description) {
+		setProperty(DESCRIPTION_PROPERTY, description);
 	}
 
 	/**
@@ -172,6 +162,16 @@ public class AnnotatedAction extends AnnotatedObject {
 	 */
 	public String getMethod() {
 		return (String)getProperty(METHOD_PROPERTY);
+	}
+
+	/**
+	 * Sets the name of the handler method on the target action instance to
+	 * invoke when this action is executed. Only used by multi-actions.
+	 * @param methodName the method name, with the signature
+	 *        <code>Event ${methodName}(RequestContext context)</code>
+	 */
+	public void setMethod(String methodName) {
+		setProperty(METHOD_PROPERTY, methodName);
 	}
 
 	public String toString() {
