@@ -50,7 +50,7 @@ public interface Action {
 	 * <p>
 	 * More specifically, Action execution is triggered in a production
 	 * environment when an <code>ActionState</code> is entered as part of an
-	 * ongoing <code>FlowExecution</code> for a specific <code>Flow</code>
+	 * ongoing flow execution for a specific <code>Flow</code>
 	 * definition. The result of Action execution, a logical outcome event, is
 	 * used as grounds for a transition in the calling action state.
 	 * <p>

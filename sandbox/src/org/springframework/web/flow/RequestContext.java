@@ -20,16 +20,16 @@ import java.util.Map;
 import org.springframework.binding.AttributeSource;
 
 /**
- * Central interface that allows clients to manipulate contextual information about
+ * Central interface that allows clients to access contextual information about
  * an ongoing flow execution within the context of a client request. The term
  * <i>request</i> is used to symbolize a call into the flow system to
  * manipulate an executing flow.
  * <p>
  * A new request context is created when one of the entry points on the
  * FlowExecution facade interface is invoked, either
- * ({@link org.springframework.web.flow.FlowExecutionManager#start(Event)}
+ * ({@link org.springframework.web.flow.execution.FlowExecution#start(Event)}
  * to activate a new executing flow, or
- * {@link org.springframework.web.flow.FlowExecutionManager#signalEvent(Event)}) to
+ * {@link org.springframework.web.flow.execution.FlowExecution#signalEvent(Event)}) to
  * manipulate the state of an already executing flow.
  * <p>
  * Once created, this context interface is passed around throughout request
@@ -42,7 +42,7 @@ import org.springframework.binding.AttributeSource;
  * Note that a <i>request</i> context is in no way linked to an HTTP request!
  * It just uses the familiar "request" naming convention.
  * 
- * @see org.springframework.web.flow.FlowExecutionManager
+ * @see org.springframework.web.flow.execution.FlowExecution
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -60,7 +60,7 @@ public interface RequestContext {
 
 	/**
 	 * Returns additional information about the executing flow.
-	 * @return the flow execution.
+	 * @return the flow context
 	 */
 	public FlowContext getFlowContext();
 
@@ -98,6 +98,12 @@ public interface RequestContext {
 	public AttributeSource getProperties();
 	
 	/**
+	 * Update contextual execution properties for given request context.
+	 * @param properties the execution properties
+	 */
+	public void setProperties(AttributeSource properties);
+	
+	/**
 	 * Returns a synchronizer for demarcating application transactions within
 	 * the flow execution associated with this context.
 	 * @return the transaction synchronizer
@@ -112,12 +118,4 @@ public interface RequestContext {
 	 */
 	public Map getModel();
 
-	// context mutable operations
-
-	/**
-	 * Update contextual execution properties for given request context.
-	 * @param properties the execution properties
-	 */
-	public void setProperties(AttributeSource properties);
-	
 }

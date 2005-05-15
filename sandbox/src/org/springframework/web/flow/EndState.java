@@ -101,8 +101,8 @@ public class EndState extends State {
 	 * Create a new end state with specified associated view.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the name of the view that should be rendered if this end
-	 *        state terminates flow execution
+	 * @param creator factory used to create the view that should be rendered
+	 *        if this end state terminates flow execution
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
@@ -115,8 +115,8 @@ public class EndState extends State {
 	 * Create a new end state with specified associated view.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the name of the view that should be rendered if this end
-	 *        state terminates flow execution
+	 * @param creator factory used to create the view that should be rendered
+	 *        if this end state terminates flow execution
 	 * @param properties additional properties describing this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow

@@ -4,7 +4,7 @@ import java.util.Map;
 
 /**
  * Mutable control interface for states to use to manipulate the state of an
- * ongoing flow execution request. Used internally by the various state types
+ * ongoing flow execution. Used internally by the various state types
  * when they are entered.
  * 
  * @author Keith Donald

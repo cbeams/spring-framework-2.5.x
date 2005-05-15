@@ -1,25 +1,29 @@
 <html>
 <body>
 <p>
-Contains core interfaces and classes for executing web flows.
+Contains core interfaces and classes for dealing with web flows.
+</p>
+
+<p>The core concepts used at configuration time to define a flow are covered
+by this package. A {@link org.springframework.web.flow.Flow web flow} is composed of a
+set of {@link org.springframework.web.flow.State states}. A state is a point in the
+flow where something happens; for instance,
+{@link org.springframework.web.flow.ViewState displaying a view} or
+{@link org.springframework.web.flow.ActionState executing an action}.
+Each state has one or more {@link org.springframework.web.flow.Transition transitions}
+that are used to move to another state.
 </p>
 
 <p>
-This is the central package of the Spring web flow system. It
-contains the following key classes and interfaces of interest to
-most users of the web flow system:
+Furthermore, this package also defines a number of interfaces related to flow execution.
+The central concept in this regard is the {@link org.springframework.web.flow.RequestContext},
+which is used by all artifacts of a web flow to gain access to information about an
+ongoing flow execution.
+</p>
+
+<p>
+To the end user of the system, the following extension points are of importance:
 <ul>
-<li>
-{@link org.springframework.web.flow.FlowExecution} - The central interface
-used by a client of the web flow system to drive flow execution.
-</li>
-<li>
-{@link org.springframework.web.flow.FlowExecutionListener} - The
-listener interface to be implemented by objects that are interested in
-flow execution lifecycle events. The class
-{@link org.springframework.web.flow.support.FlowExecutionListenerAdapter}
-provides an adapter to ease subclassing.
-</li>
 <li>
 {@link org.springframework.web.flow.Action} - The interface implemented
 by actions executed by a web flow in an action state. Ready to use
@@ -27,14 +31,20 @@ implementations and convenience superclasses are provided in
 the {@link org.springframework.web.flow.action} package.
 </li>
 <li>
-{@link org.springframework.web.flow.RequestContext} - Actions gain access
-to contextual information for a flow execution request using this interface.
-</li>
-<li>
 {@link org.springframework.web.flow.FlowAttributeMapper} - The interface
 implemented by strategy objects used to map attributes between flow
 scopes. An out-of-the-box implementation is provided by the class
 {@link org.springframework.web.flow.support.ParameterizableFlowAttributeMapper}.
+</li>
+<li>
+{@link org.springframework.web.flow.ViewDescriptorCreator} -  A factory that
+produces a new, configured <code>ViewDescriptor</code> on each invocation,
+taking into account the information in the ongoing flow execution.
+</li>
+<li>
+{@link org.springframework.web.flow.TransitionCriteria} - The interface for
+strategy objects encapsulating criteria that determine whether or not a
+transition should execute given the current state of a flow execution.
 </li>
 </ul>
 </p>
@@ -62,7 +72,7 @@ into the Spring web MVC framework.
 {@link org.springframework.web.flow.portlet portlet} - Integration of the Spring web flow system
 into the Spring portlet MVC framework.
 </li>
-	<li>
+<li>
 {@link org.springframework.web.flow.struts struts} - Integration of the Spring web flow
 system with Struts 1.x.
 </li>

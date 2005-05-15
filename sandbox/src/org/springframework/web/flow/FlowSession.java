@@ -2,7 +2,7 @@ package org.springframework.web.flow;
 
 /**
  * An instance of a single executing <code>Flow</code> participating in a
- * <code>FlowExecution</code>. Also acts as a "flow-scope" data model.
+ * flow execution. Also acts as a "flow-scope" data model.
  * <p>
  * The stack of executing flow sessions represents the complete state of an
  * ongoing flow execution.
@@ -10,8 +10,8 @@ package org.springframework.web.flow;
  * A flow session will go through several states during its lifecycle.
  * Initially it will be {@link FlowSessionStatus#CREATED}. Once the flow
  * session is activated in a flow execution, it becomes
- * {@link FlowSessionStatus#ACTIVE}.  When control returns to the client for
- * user think time, the status becomes {@link FlowSessionStatus#PAUSED.}
+ * {@link FlowSessionStatus#ACTIVE}. When control returns to the client for
+ * user think time, the status becomes {@link FlowSessionStatus#PAUSED}.
  * If the flow session is deactivated because a subflow was spawned, it will become
  * {@link FlowSessionStatus#SUSPENDED} until the subflow returns (ends).
  * When the flow session is terminated by the flow execution, its status becomes
