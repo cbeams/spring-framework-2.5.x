@@ -35,7 +35,7 @@ import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewDescriptor;
 
 /**
- * Default request context implementation used internally by the web flow
+ * Default state context implementation used internally by the web flow
  * system.
  * 
  * @author Keith Donald
@@ -82,7 +82,7 @@ public class StateContextImpl implements StateContext {
 	 */
 	public StateContextImpl(Event sourceEvent, FlowExecutionImpl flowExecution) {
 		Assert.notNull(sourceEvent, "the source event is required");
-		Assert.notNull(flowExecution, "the flow execution is required");
+		Assert.notNull(flowExecution, "the owning flow execution is required");
 		this.sourceEvent = sourceEvent;
 		this.flowExecution = flowExecution;
 	}
