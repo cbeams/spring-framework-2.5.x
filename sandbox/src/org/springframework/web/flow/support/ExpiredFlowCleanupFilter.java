@@ -128,10 +128,10 @@ public class ExpiredFlowCleanupFilter extends OncePerRequestFilter {
 			if (attributeValue instanceof FlowExecution) {
 				FlowExecution flowExecution = (FlowExecution)attributeValue;
 				if (hasExpired(request, flowExecution)) {
-					flowExecution.getListeners().fireExpired(flowExecution.getContext());
+					flowExecution.getListeners().fireExpired(flowExecution);
 					attributeNamesToRemove.add(attributeName);
 					if (logger.isInfoEnabled()) {
-						logger.info("Flow execution '" + attributeName + "' for flow '" + flowExecution.getContext().getActiveSession().getFlow().getId()
+						logger.info("Flow execution '" + attributeName + "' for flow '" + flowExecution.getActiveSession().getFlow().getId()
 								+ "' has expired and will be removed from the HTTP session '" + session.getId() + "'");
 					}
 				}
@@ -154,6 +154,6 @@ public class ExpiredFlowCleanupFilter extends OncePerRequestFilter {
 	 *        expiry
 	 */
 	protected boolean hasExpired(HttpServletRequest request, FlowExecution flowExecution) {
-		return (System.currentTimeMillis() - flowExecution.getContext().getLastRequestTimestamp()) > (getTimeout() * 60000);
+		return (System.currentTimeMillis() - flowExecution.getLastRequestTimestamp()) > (getTimeout() * 60000);
 	}
 }

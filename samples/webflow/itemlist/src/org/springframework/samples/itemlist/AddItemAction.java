@@ -27,7 +27,7 @@ public class AddItemAction extends AbstractAction {
 	protected Event doExecute(RequestContext context) throws Exception {
 		// check to ensure the incoming request is within the active transaction
 		// note that we're also ending the transaction using end==true
-		if (!context.getTransactionSynchronizer().inTransaction(true)) {
+		if (!context.inTransaction(true)) {
 			// the transaction was not valid so cannot continue normal
 			// processing
 			return result("txError");

@@ -16,6 +16,7 @@
 package org.springframework.web.flow.execution;
 
 import org.apache.commons.codec.binary.Base64;
+
 import org.springframework.web.flow.Event;
 
 /**

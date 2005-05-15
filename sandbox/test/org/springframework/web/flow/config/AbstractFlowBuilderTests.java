@@ -27,10 +27,10 @@ import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
  * Test Java based flow builder logic (subclasses of AbstractFlowBuilder).

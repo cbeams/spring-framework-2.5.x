@@ -15,19 +15,18 @@
  */
 package org.springframework.web.flow.execution;
 
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
- * A manager for the executing flows of the application.  This object is responsible for
+ * A manager for the executing flows of the application. This object is responsible for
  * creating new flow executions as requested by the client, as well as signaling events
  * for processing by existing, paused executions (that are waiting to be resumed in response
  * to a user event).
@@ -48,12 +47,15 @@ import org.springframework.web.flow.ViewDescriptor;
  * started.</li>
  * <li>If an existing flow execution is loaded from storage, the current state id
  * ("_currentStateId") and event id ("_eventId") parameter values are
- * extracted from the event.  The event is then signaled in that state, and 
+ * extracted from the event. The event is then signaled in that state, and 
  * the executing flow is resumed in that state.</li>
  * <li>If the flow execution is still active after event processing, it
- * is saved in storage.  This process generates a unique flow execution
+ * is saved in storage. This process generates a unique flow execution
  * id that will be exposed to the caller for reference on subsequent events.</li>
  * </ol>
+ * 
+ * @see org.springframework.web.flow.execution.FlowExecution
+ * @see org.springframework.web.flow.execution.FlowExecutionStorage
  * 
  * @author Erwin Vervaet
  * @author Keith Donald
@@ -94,6 +96,7 @@ public class FlowExecutionManager {
 	 * Event id value indicating that the event has not been set ("@NOT_SET@").
 	 */
 	public static final String NOT_SET_EVENT_ID = "@NOT_SET@";
+	
 
 	protected final Log logger = LogFactory.getLog(FlowExecutionManager.class);
 
@@ -104,6 +107,8 @@ public class FlowExecutionManager {
 	private FlowExecutionListener[] listeners;
 
 	private FlowExecutionStorage storage;
+	
+	private TransactionSynchronizer transactionSynchronizer = new SynchronizerTokenTransactionSynchronizer();
 
 	/**
 	 * Create a new flow execution manager. Before use, the manager should
@@ -120,37 +125,6 @@ public class FlowExecutionManager {
 	}
 
 	/**
-	 * Set the flow whose executions will be managed if there is no alternate
-	 * flow id specified in a "_flowId" event parameter.
-	 */
-	public void setFlow(Flow flow) {
-		this.flow = flow;
-	}
-
-	/**
-	 * Set the flow locator to use for lookup of flows specified using the
-	 * "_flowId" event parameter.
-	 */
-	public void setFlowLocator(FlowLocator flowLocator) {
-		this.flowLocator = flowLocator;
-	}
-
-	/**
-	 * Set the flow execution listener that will be notified of managed
-	 * flow executions.
-	 */
-	public void setListener(FlowExecutionListener listener) {
-		this.listeners = new FlowExecutionListener[] { listener };
-	}
-
-	/**
-	 * Set the storage strategy used by the flow execution manager.
-	 */
-	public void setStorage(FlowExecutionStorage flowExecutionStorage) {
-		this.storage = flowExecutionStorage;
-	}
-
-	/**
 	 * Returns the flow whose executions are managed by this manager.
 	 * Could be <code>null</code> if there is no preconfigured flow and
 	 * the id of the flow for which executions will be managed is sent
@@ -158,6 +132,14 @@ public class FlowExecutionManager {
 	 */
 	protected Flow getFlow() {
 		return flow;
+	}
+
+	/**
+	 * Set the flow whose executions will be managed if there is no alternate
+	 * flow id specified in a "_flowId" event parameter.
+	 */
+	public void setFlow(Flow flow) {
+		this.flow = flow;
 	}
 
 	/**
@@ -169,6 +151,14 @@ public class FlowExecutionManager {
 	}
 
 	/**
+	 * Set the flow locator to use for lookup of flows specified using the
+	 * "_flowId" event parameter.
+	 */
+	public void setFlowLocator(FlowLocator flowLocator) {
+		this.flowLocator = flowLocator;
+	}
+
+	/**
 	 * Returns the array of flow execution listeners.
 	 * @return the flow execution listeners
 	 */
@@ -177,11 +167,11 @@ public class FlowExecutionManager {
 	}
 
 	/**
-	 * Returns the storage strategy used by the flow execution manager.
+	 * Set the flow execution listener that will be notified of managed
+	 * flow executions.
 	 */
-	public FlowExecutionStorage getStorage() {
-		Assert.notNull(storage, "The flow execution storage strategy was not set -- configuration error?");
-		return storage;
+	public void setListener(FlowExecutionListener listener) {
+		this.listeners = new FlowExecutionListener[] { listener };
 	}
 
 	/**
@@ -191,6 +181,40 @@ public class FlowExecutionManager {
 	public void setListeners(FlowExecutionListener[] listeners) {
 		this.listeners = listeners;
 	}
+	
+	/**
+	 * Returns the storage strategy used by the flow execution manager.
+	 */
+	public FlowExecutionStorage getStorage() {
+		Assert.notNull(storage, "The flow execution storage strategy was not set -- configuration error?");
+		return storage;
+	}
+
+	/**
+	 * Set the storage strategy used by the flow execution manager.
+	 */
+	public void setStorage(FlowExecutionStorage flowExecutionStorage) {
+		Assert.notNull(storage, "The flow execution storage strategy is required");
+		this.storage = flowExecutionStorage;
+	}
+	
+	/**
+	 * Return the application transaction synchronization strategy to use.
+	 * This defaults to a <i>synchronizer token</i> based transaction management
+	 * system.
+	 */
+	public TransactionSynchronizer getTransactionSynchronizer() {
+		return transactionSynchronizer;
+	}
+	
+	/**
+	 * Set the application transaction synchronization strategy to use.
+	 */
+	public void setTransactionSynchronizer(TransactionSynchronizer transactionSynchronizer) {
+		this.transactionSynchronizer = transactionSynchronizer;
+	}
+	
+	// event management
 
 	/**
 	 * Signal the occurence of the specified event - this is the entry point into the 
@@ -229,7 +253,7 @@ public class FlowExecutionManager {
 			// retrieve information about it
 			flowExecution = getStorage().load(id, event);
 			// rehydrate the execution if neccessary (if it had been serialized out)
-			flowExecution.rehydrate(getFlowLocator(), listeners);
+			flowExecution.rehydrate(getFlowLocator(), getListeners(), getTransactionSynchronizer());
 			if (listener != null) {
 				flowExecution.getListeners().add(listener);
 			}
@@ -246,7 +270,7 @@ public class FlowExecutionManager {
 			}
 			viewDescriptor = flowExecution.signalEvent(event);
 		}
-		if (flowExecution.getContext().isActive()) {
+		if (flowExecution.isActive()) {
 			// save the flow execution for future use
 			id = getStorage().save(id, flowExecution, event);
 		}
@@ -266,6 +290,16 @@ public class FlowExecutionManager {
 	}
 
 	// subclassing hooks
+
+	/**
+	 * Create a new flow execution for given flow. Subclasses could redefine this
+	 * if they which to use a specialized FlowExecution implementation class.
+	 * @param flow the flow
+	 * @return the created flow execution
+	 */
+	protected FlowExecution createFlowExecution(Flow flow) {
+		return new FlowExecutionImpl(getFlow(), getListeners(), getTransactionSynchronizer());
+	}
 
 	/**
 	 * Obtain a flow to use from given event. If there is a "_flowId" parameter
@@ -294,17 +328,6 @@ public class FlowExecutionManager {
 	 */
 	protected String getFlowIdParameterName() {
 		return FLOW_ID_PARAMETER;
-	}
-
-	/**
-	 * Create a new flow execution for given flow.
-	 * @param flow the flow
-	 * @return the created flow execution
-	 */
-	protected FlowExecution createFlowExecution(Flow flow) {
-		FlowExecution flowExecution = new FlowExecutionImpl(flow);
-		flowExecution.getListeners().add(listeners);
-		return flowExecution;
 	}
 
 	/**
@@ -350,14 +373,13 @@ public class FlowExecutionManager {
 	 */
 	protected ViewDescriptor prepareViewDescriptor(ViewDescriptor viewDescriptor, String flowExecutionId,
 			FlowExecution flowExecution) {
-		if (flowExecution.getContext().isActive()) {
-			Map model = viewDescriptor.getModel();
+		if (flowExecution.isActive()) {
 			// make the unique flow execution id available in the model
-			model.put(FLOW_EXECUTION_ID_ATTRIBUTE, flowExecutionId);
+			viewDescriptor.addObject(FLOW_EXECUTION_ID_ATTRIBUTE, flowExecutionId);
 			// make the flow execution itself available in the model
-			model.put(FLOW_EXECUTION_ATTRIBUTE, flowExecution.getContext());
-			// add some convenience values for views that aren't easily javabean aware
-			model.put(CURRENT_STATE_ID_ATTRIBUTE, flowExecution.getContext().getActiveSession().getCurrentState().getId());
+			viewDescriptor.addObject(FLOW_EXECUTION_ATTRIBUTE, flowExecution);
+			// add some convenience values for views that aren't easily JavaBean aware
+			viewDescriptor.addObject(CURRENT_STATE_ID_ATTRIBUTE, flowExecution.getActiveSession().getCurrentState().getId());
 		}
 		return viewDescriptor;
 	}

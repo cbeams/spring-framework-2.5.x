@@ -17,32 +17,35 @@ package org.springframework.web.flow.execution;
 
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.FlowContext;
-import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.FlowNavigationException;
 import org.springframework.web.flow.ViewDescriptor;
 
 /**
- * Represents a <i>client instance</i> of an executing flow.  This is the central facade
+ * Represents a <i>client instance</i> of an executing flow. This is the central facade
  * interface for managing an execution of a single flow.
  * <p>
  * Typically, when the browser requests to execute a new flow, an instance of an object
  * implementing this interface is created by a controlling FlowExecutionManager.  After creation,
  * the start operation is called, which causes this execution to activate the requested flow
- * as the "root flow" and enter that flow's start state.  After starting, when control
+ * as the "root flow" and enter that flow's start state. After starting, when control
  * is returned back to the caller, this execution is saved in some form of storage, for example
  * in the HttpSession or a client-side hidden form field for later restoration and manipulation. 
  * <p>
- * Subsequent requests into the web flow system to manipulate an existing executing flow trigger restoration
- * and rehydration of this object, followed by an invocation of the signalEvent operation.  This continues
- * until an event causes this flow execution to end, at which it is removed from storage and discarded.
+ * Subsequent requests into the web flow system to manipulate an existing executing flow
+ * trigger restoration and rehydration of this object, followed by an invocation of the
+ * signalEvent operation. This continues until an event causes this flow execution to end, at
+ * which time it is removed from storage and discarded.
+ * 
+ * @see org.springframework.web.flow.execution.FlowExecutionManager
+ * @see org.springframework.web.flow.execution.FlowExecutionStorage
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface FlowExecution {
+public interface FlowExecution extends FlowContext {
 	
 	/**
-	 * Start executing this flow, transitioning it to the start state and
+	 * Start a flow execution, transitioning the flow to the start state and
 	 * returning the starting model and view descriptor. Typically called by a
 	 * flow controller, but also from test code.
 	 * @param originatingEvent the event that occured that triggered flow
@@ -72,16 +75,13 @@ public interface FlowExecution {
 	/**
 	 * Rehydrate this flow execution after deserialization.
 	 * @param flowLocator the flow locator
-	 * @param listeners the flow execution listeners.
+	 * @param listeners the flow execution listeners
+	 * @param transactionSynchronizer application transaction synchronization
+	 *        strategy to use
 	 */
-	public void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners);
+	public void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners,
+			TransactionSynchronizer transactionSynchronizer);
 
-	/**
-	 * Returns a context object providing information about this executing flow
-	 * @return the flow execution context
-	 */
-	public FlowContext getContext();
-	
 	/**
 	 * Return a list of listeners monitoring the lifecycle of this flow execution.
 	 * @return the flow execution listeners

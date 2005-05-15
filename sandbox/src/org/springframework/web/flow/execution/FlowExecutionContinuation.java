@@ -31,6 +31,8 @@ import org.springframework.util.FileCopyUtils;
  * Helper class that aides in handling a flow execution as if
  * it was a continuation.
  * 
+ * @see org.springframework.web.flow.execution.FlowExecution
+ * 
  * @author Erwin Vervaet
  */
 public class FlowExecutionContinuation implements Serializable {
@@ -74,12 +76,14 @@ public class FlowExecutionContinuation implements Serializable {
 				this.data = baos.toByteArray();
 			}
 			this.compressed = compress;
-		} catch (NotSerializableException e) {
-			throw new FlowExecutionStorageException(
+		}
+		catch (NotSerializableException e) {
+			throw new FlowExecutionStorageException( 
 					"Could not serialize flow execution -- make sure all objects stored in flow scope are serializable!",
 					e);
-		} catch (IOException e) {
-			throw new FlowExecutionStorageException(
+		}
+		catch (IOException e) {
+			throw new FlowExecutionStorageException( 
 					"IOException creating a flow execution continuation -- this should not happen!", e);
 		}
 	}
@@ -93,10 +97,12 @@ public class FlowExecutionContinuation implements Serializable {
 		try {
 			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(getData(true)));
 			return (FlowExecution)ois.readObject();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new FlowExecutionStorageException(
 					"IOException loading the flow execution continuation -- this should not happen!", e);
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			throw new FlowExecutionStorageException(
 					"ClassNotFoundException loading the flow execution continuation -- this should not happen!", e);
 		}
@@ -115,7 +121,8 @@ public class FlowExecutionContinuation implements Serializable {
 		if (isCompressed() && decompress) {
 			try {
 				return decompress(data);
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new FlowExecutionStorageException(
 						"Cannot decompress flow execution continuation data -- this should not happen!", e);
 			}

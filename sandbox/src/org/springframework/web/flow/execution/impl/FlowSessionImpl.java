@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.execution;
+package org.springframework.web.flow.execution.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -23,44 +23,27 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.FlowSessionStatus;
 import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
+import org.springframework.web.flow.execution.FlowLocator;
 
 /**
- * A single client session instance for a <code>Flow</code> participating in a
- * <code>FlowExecution</code>. Also acts as a "flow-scope" data model.
- * <p>
- * The stack of executing flow sessions (managed within a
- * <code>FlowExecutionStack</code>) represents the complete state of an
- * ongoing flow execution.
- * <p>
- * A flow session will go through several statuses during its lifecycle.
- * Initially it will be {@link FlowSessionStatus#CREATED}. Once the flow
- * session is activated in a flow execution, it becomes
- * {@link FlowSessionStatus#ACTIVE}. If the flow session would spawn a sub flow
- * session, it will become {@link FlowSessionStatus#SUSPENDED} until the sub
- * flow returns (ends). When the flow session is ended by the flow execution,
- * its status becomes {@link FlowSessionStatus#ENDED}, ending its lifecycle.
- * <p>
- * Note that a flow <i>session</i> is in no way linked to an HTTP session! It
- * just uses the familiar request/session naming convention.
- * 
- * @see org.springframework.web.flow.FlowExecutionManager
- * @see org.springframework.web.flow.execution.FlowExecutionImpl
+ * Implementation of the FlowSession interfaced used internally by
+ * the FlowSessionImpl.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class FlowSessionImpl implements FlowSession, Serializable {
 
-	// static logger because FlowSession objects can be serialized and
+	// static logger because FlowSessionImpl objects can be serialized and
 	// then restored
 	protected static final Log logger = LogFactory.getLog(FlowSessionImpl.class);
 	
@@ -70,9 +53,19 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	private transient Flow flow;
 
 	/**
+	 * Set only on deserialization so this object can be fully reconstructed.
+	 */
+	private String flowId;
+
+	/**
 	 * The current state of this flow session.
 	 */
 	private transient State currentState;
+
+	/**
+	 * Set only on deserialization so this object can be fully reconstructed.
+	 */
+	private String currentStateId;
 
 	/**
 	 * The session status; may be CREATED, ACTIVE, SUSPENDED, or ENDED.
@@ -85,16 +78,6 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	private Scope flowScope = new Scope(ScopeType.FLOW);
 
 	/**
-	 * Set only on deserialization so this object can be fully reconstructed.
-	 */
-	private String flowId;
-
-	/**
-	 * Set only on deserialization so this object can be fully reconstructed.
-	 */
-	private String currentStateId;
-
-	/**
 	 * The parent session of this session (may be null if this is a root session.) 
 	 */
 	private transient FlowSession parent;
@@ -103,10 +86,11 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	 * Create a new flow session.
 	 * @param flow the flow associated with this flow session
 	 * @param input the input parameters used to populate the flow session
+	 * @param parent the parent flow session of the created flow session in the
+	 *        owning flow execution
 	 */
-	public FlowSessionImpl(FlowExecutionImpl flowExecution, Flow flow, Map input, FlowSession parent) {
+	public FlowSessionImpl(Flow flow, Map input, FlowSession parent) {
 		Assert.notNull(flow, "The flow is required");
-		Assert.notNull(flowExecution, "The flow execution is required");
 		this.flow = flow;
 		if (input != null) {
 			this.flowScope.setAttributes(input);
@@ -149,6 +133,10 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 		this.status = status;
 	}
 
+	public Scope getScope() {
+		return this.flowScope;
+	}
+
 	public FlowSession getParent() {
 		return parent;
 	}
@@ -157,10 +145,6 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 		return parent == null;
 	}
 
-	public Scope getScope() {
-		return this.flowScope;
-	}
-	
 	// custom serialization
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
@@ -180,6 +164,8 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	/**
 	 * Restore this <code>Flow Session</code> for use after deserialization.
 	 * @param flowLocator the flow locator
+	 * @param parent the parent flow session of this flow session in the owning
+	 *        flow execution
 	 */
 	protected void rehydrate(FlowLocator flowLocator, FlowSessionImpl parent) {
 		// implementation note: we cannot integrate this code into the
@@ -199,7 +185,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 
 	public String toString() {
 		return new ToStringCreator(this).append("flow", flow).append("currentState", currentState).append(
-				"attributesCount", (flowScope != null ? flowScope.size() : 0)).append("attributes", flowScope)
+				"attributesCount", flowScope.size()).append("attributes", flowScope)
 				.toString();
 	}
 }

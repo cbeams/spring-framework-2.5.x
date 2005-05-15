@@ -20,6 +20,7 @@ import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
 import org.springframework.web.flow.config.TransitionCriteriaCreator;
+import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
  * General flow execution tests.
@@ -83,10 +84,10 @@ public class FlowExecutionTests extends TestCase {
 			assertNotNull(vd);
 			assertEquals("viewName", vd.getViewName());
 		}
-		assertTrue(flowExecution.getContext().isActive());
+		assertTrue(flowExecution.isActive());
 		vd = flowExecution.signalEvent(new Event(this, "finish"));
 		assertNull(vd);
-		assertFalse(flowExecution.getContext().isActive());
+		assertFalse(flowExecution.isActive());
 	}
 
 	public void testLoopInFlowWithSubFlow() {
@@ -132,6 +133,6 @@ public class FlowExecutionTests extends TestCase {
 
 		FlowExecution flowExecution = new FlowExecutionImpl(parentFlow);
 		flowExecution.start(new Event(this, "start"));
-		assertFalse(flowExecution.getContext().isActive());
+		assertFalse(flowExecution.isActive());
 	}
 }

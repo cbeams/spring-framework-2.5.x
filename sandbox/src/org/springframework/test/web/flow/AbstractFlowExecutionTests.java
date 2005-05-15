@@ -21,14 +21,16 @@ import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowContext;
-import org.springframework.web.flow.FlowLocator;
-import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.config.FlowBuilder;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.execution.FlowExecution;
-import org.springframework.web.flow.execution.FlowExecutionImpl;
+import org.springframework.web.flow.execution.FlowExecutionListener;
+import org.springframework.web.flow.execution.FlowLocator;
+import org.springframework.web.flow.execution.ServiceLookupException;
+import org.springframework.web.flow.execution.SynchronizerTokenTransactionSynchronizer;
+import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
  * Base class for tests that verify a flow executes as expected; that is, it
@@ -132,7 +134,8 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 *         (returned when the first view state is entered)
 	 */
 	protected ViewDescriptor startFlow(Event event) {
-		this.flowExecution = new FlowExecutionImpl(getFlow());
+		this.flowExecution = new FlowExecutionImpl(getFlow(), new FlowExecutionListener[0],
+				new SynchronizerTokenTransactionSynchronizer());
 		setupFlowExecution(flowExecution);
 		return this.flowExecution.start(event);
 	}
@@ -198,7 +201,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 		if (flowExecution == null) {
 			throw new IllegalStateException("The flow execution has not been started; call startFlow first");
 		}
-		return flowExecution.getContext();
+		return flowExecution;
 	}
 
 	/**
@@ -218,7 +221,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 */
 	protected void assertCurrentStateEquals(String expectedCurrentStateId) {
 		assertEquals("The current state '" + getFlowContext().getActiveSession().getCurrentState().getId() + "' does not equal the expected state '"
-				+ expectedCurrentStateId + "'", expectedCurrentStateId, getFlowContext().getActiveSession().getCurrentState());
+				+ expectedCurrentStateId + "'", expectedCurrentStateId, getFlowContext().getActiveSession().getCurrentState().getId());
 	}
 
 	/**

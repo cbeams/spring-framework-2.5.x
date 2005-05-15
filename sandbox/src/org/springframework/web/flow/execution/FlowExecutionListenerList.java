@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.EventListenerListHelper;
 import org.springframework.core.closure.ProcessTemplate;
 import org.springframework.core.closure.support.Block;
@@ -30,7 +31,8 @@ import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
 
 /**
- * A strongly typed listener list class for FlowExecutionListeners.
+ * A strongly typed listener list class for FlowExecutionListeners. It helps
+ * in managing a list of <code>FlowExecutionListener</code>s.
  * 
  * @see org.springframework.web.flow.execution.FlowExecutionListener
  * 
@@ -39,7 +41,7 @@ import org.springframework.web.flow.State;
  */
 public class FlowExecutionListenerList {
 
-	protected static final Log logger = LogFactory.getLog(FlowExecutionListenerList.class);
+	protected final Log logger = LogFactory.getLog(FlowExecutionListenerList.class);
 	
 	/**
 	 * The list of listeners that should receive event callbacks during managed
@@ -161,9 +163,11 @@ public class FlowExecutionListenerList {
 	public FlowExecutionListener[] toArray() {
 		return (FlowExecutionListener[])flowExecutionListeners.toArray();
 	}
+	
+	// methods to fire events to all listeners
 
 	/**
-	 * Notify all interested listeners that a request was submitted to this flow
+	 * Notify all interested listeners that a request was submitted to the flow
 	 * execution.
 	 */
 	public void fireRequestSubmitted(final RequestContext context) {
@@ -178,35 +182,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Notify all interested listeners that flow execution is starting.
-	 */
-	public void fireStarting(final RequestContext context, final State startState, final Map input) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution starting event to " + size() + " listener(s)");
-		}
-		iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).starting(context, startState, input);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that flow execution has started.
-	 */
-	public void fireStarted(final RequestContext context) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session execution started event to " + size()	+ " listener(s)");
-		}
-		iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).started(context);
-			}
-		});
-	}
-
-	/**
-	 * Notify all interested listeners that this flow execution finished
+	 * Notify all interested listeners that the flow execution finished
 	 * processing a request.
 	 */
 	public void fireRequestProcessed(final RequestContext context) {
@@ -219,15 +195,42 @@ public class FlowExecutionListenerList {
 			}
 		});
 	}
+	
+	/**
+	 * Notify all interested listeners that the flow execution is starting.
+	 */
+	public void fireStarting(final RequestContext context, final State startState, final Map input) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow execution starting event to " + size() + " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).starting(context, startState, input);
+			}
+		});
+	}
 
 	/**
-	 * Notify all interested listeners that an event was signaled in this flow
+	 * Notify all interested listeners that the flow execution has started.
+	 */
+	public void fireStarted(final RequestContext context) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Publishing flow execution started event to " + size()	+ " listener(s)");
+		}
+		iteratorTemplate().run(new Block() {
+			protected void handle(Object o) {
+				((FlowExecutionListener)o).started(context);
+			}
+		});
+	}
+
+	/**
+	 * Notify all interested listeners that an event was signaled in the flow
 	 * execution.
 	 */
 	public void fireEventSignaled(final RequestContext context) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event signaled event to " + size()
-					+ " listener(s)");
+			logger.debug("Publishing event signaled event to " + size()	+ " listener(s)");
 		}
 		iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -237,7 +240,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Notify all interested listeners that a state is being entered in this
+	 * Notify all interested listeners that a state is being entered in the
 	 * flow execution.
 	 */
 	public void fireStateEntering(final RequestContext context, final State nextState) {
@@ -252,7 +255,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Notify all interested listeners that a state was entered in this
+	 * Notify all interested listeners that a state was entered in the
 	 * flow execution.
 	 */
 	public void fireStateEntered(final RequestContext context, final State previousState) {
@@ -267,12 +270,12 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Notify all interested listeners that a sub flow was spawned in this flow
-	 * execution.
+	 * Notify all interested listeners that a flow session was activated in the
+	 * flow execution.
 	 */
 	public void fireResumed(final RequestContext context) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session spawned event to " + size()	+ " listener(s)");
+			logger.debug("Publishing resumed event to " + size() + " listener(s)");
 		}
 		iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -282,12 +285,12 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Notify all interested listeners that a sub flow was spawned in this flow
-	 * execution.
+	 * Notify all interested listeners that a flow session was paused in the
+	 * flow execution.
 	 */
 	public void firePaused(final RequestContext context) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow session spawned event to " + size()	+ " listener(s)");
+			logger.debug("Publishing paused event to " + size()	+ " listener(s)");
 		}
 		iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
@@ -297,7 +300,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Notify all interested listeners that flow execution has ended.
+	 * Notify all interested listeners that the flow execution has ended.
 	 */
 	public void fireEnded(final RequestContext context, final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
@@ -311,7 +314,7 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Notify all interested listeners that flow execution has expired.
+	 * Notify all interested listeners that the flow execution has expired.
 	 */
 	public void fireExpired(final FlowContext context) {
 		if (logger.isDebugEnabled()) {

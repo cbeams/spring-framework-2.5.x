@@ -23,7 +23,7 @@ public class NewItemAction extends AbstractAction {
 
 	protected Event doExecute(RequestContext context) throws Exception {
 		// begin transactional processing
-		context.getTransactionSynchronizer().beginTransaction();
+		context.beginTransaction();
 		return success();
 	}
 }

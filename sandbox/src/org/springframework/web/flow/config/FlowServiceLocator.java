@@ -18,11 +18,11 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.FlowLocator;
-import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.execution.FlowLocator;
+import org.springframework.web.flow.execution.ServiceLookupException;
 
 
 /**

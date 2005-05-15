@@ -15,7 +15,7 @@
  */
 package org.springframework.web.flow.config;
 
-import org.springframework.web.flow.ServiceLookupException;
+import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
  * Exception thrown when a flow service cannot be created.

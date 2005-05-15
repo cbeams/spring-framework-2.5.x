@@ -28,7 +28,7 @@ import org.springframework.web.flow.action.EventParameterMapperAction;
 import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
 import org.springframework.web.flow.config.TransitionCriteriaCreator;
 import org.springframework.web.flow.execution.FlowExecution;
-import org.springframework.web.flow.execution.FlowExecutionImpl;
+import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
  * Tests that each of the Flow state types execute as expected when entered.
@@ -50,7 +50,7 @@ public class StateTests extends TestCase {
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		ViewDescriptor view = flowExecution.start(new Event(this, "start"));
 		assertNull(view);
-		assertEquals("success", flowExecution.getContext().getLastEventId());
+		assertEquals("success", flowExecution.getLastEventId());
 		assertEquals(1, ((ExecutionCounterAction)state.getAction().getTargetAction()).getExecutionCount());
 	}
 
@@ -64,7 +64,7 @@ public class StateTests extends TestCase {
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		ViewDescriptor view = flowExecution.start(new Event(this, "start"));
 		assertNull(view);
-		assertEquals("success", flowExecution.getContext().getLastEventId());
+		assertEquals("success", flowExecution.getLastEventId());
 		AnnotatedAction[] actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
 			AnnotatedAction action = actions[i];
@@ -104,7 +104,7 @@ public class StateTests extends TestCase {
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		ViewDescriptor view = flowExecution.start(new Event(this, "start"));
 		assertNull(view);
-		assertEquals("action4.success", flowExecution.getContext().getLastEventId());
+		assertEquals("action4.success", flowExecution.getLastEventId());
 		actions = state.getActions();
 		for (int i = 0; i < actions.length; i++) {
 			AnnotatedAction action = actions[i];
@@ -120,7 +120,7 @@ public class StateTests extends TestCase {
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		ViewDescriptor view = flowExecution.start(new Event(this, "start"));
-		assertEquals("viewState", flowExecution.getContext().getActiveSession().getCurrentState().getId());
+		assertEquals("viewState", flowExecution.getActiveSession().getCurrentState().getId());
 		assertNotNull(view);
 		assertEquals("myViewName", view.getViewName());
 	}
@@ -132,7 +132,7 @@ public class StateTests extends TestCase {
 		new EndState(flow, "finish");
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		ViewDescriptor view = flowExecution.start(new Event(this, "start"));
-		assertEquals("viewState", flowExecution.getContext().getActiveSession().getCurrentState().getId());
+		assertEquals("viewState", flowExecution.getActiveSession().getCurrentState().getId());
 		assertNull(view);
 	}
 
@@ -145,12 +145,12 @@ public class StateTests extends TestCase {
 		new EndState(flow, "finish", "myParentFlowEndingViewName");
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		ViewDescriptor view = flowExecution.start(new Event(this, "start"));
-		assertEquals("mySubFlow", flowExecution.getContext().getActiveSession().getFlow().getId());
-		assertEquals("subFlowViewState", flowExecution.getContext().getActiveSession().getCurrentState().getId());
+		assertEquals("mySubFlow", flowExecution.getActiveSession().getFlow().getId());
+		assertEquals("subFlowViewState", flowExecution.getActiveSession().getCurrentState().getId());
 		assertEquals("mySubFlowViewName", view.getViewName());
 		view = flowExecution.signalEvent(new Event(this, "submit"));
 		assertEquals("myParentFlowEndingViewName", view.getViewName());
-		assertTrue(!flowExecution.getContext().isActive());
+		assertTrue(!flowExecution.isActive());
 	}
 
 	public void testSubFlowStateModelMapping() {
@@ -165,14 +165,14 @@ public class StateTests extends TestCase {
 		Map input = new HashMap();
 		input.put("parentInputAttribute", "attributeValue");
 		ViewDescriptor view = flowExecution.start(new Event(this, "start", input));
-		assertEquals("mySubFlow", flowExecution.getContext().getActiveSession().getFlow().getId());
-		assertEquals("subFlowViewState", flowExecution.getContext().getActiveSession().getCurrentState().getId());
+		assertEquals("mySubFlow", flowExecution.getActiveSession().getFlow().getId());
+		assertEquals("subFlowViewState", flowExecution.getActiveSession().getCurrentState().getId());
 		assertEquals("mySubFlowViewName", view.getViewName());
-		assertEquals("attributeValue", flowExecution.getContext().getActiveSession().getScope().getAttribute(
+		assertEquals("attributeValue", flowExecution.getActiveSession().getScope().getAttribute(
 				"childInputAttribute"));
 		view = flowExecution.signalEvent(new Event(this, "submit"));
 		assertEquals("myParentFlowEndingViewName", view.getViewName());
-		assertTrue(!flowExecution.getContext().isActive());
+		assertTrue(!flowExecution.isActive());
 		assertEquals("attributeValue", view.getModel().get("parentOutputAttribute"));
 	}
 

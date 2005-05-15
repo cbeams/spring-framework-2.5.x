@@ -21,8 +21,10 @@ import ognl.ExpressionSyntaxException;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.RequestContext;
-import org.springframework.web.flow.execution.FlowExecutionImpl;
-import org.springframework.web.flow.execution.InternalStateContext;
+import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.ViewState;
+import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
+import org.springframework.web.flow.execution.impl.StateContextImpl;
 
 /**
  * Test case for OgnlTransitionCriteriaCreator.
@@ -37,7 +39,6 @@ public class OgnlTransitionCriteriaCreatorTests extends TestCase {
 				expression);
 		RequestContext ctx = getRequestContext();
 		assertTrue("Criterion should evaluate to true", criterion.test(ctx));
-
 	}
 
 	public void testFalseEvaluation() throws Exception {
@@ -84,7 +85,11 @@ public class OgnlTransitionCriteriaCreatorTests extends TestCase {
 	}
 
 	private RequestContext getRequestContext() {
-		RequestContext ctx = new InternalStateContext(new Event(this, "sample"), new FlowExecutionImpl(new Flow("myFlow")));
+		Flow flow = new Flow("flow");
+		new ViewState(flow, "end", new Transition());
+		FlowExecutionImpl flowExecution = new FlowExecutionImpl(flow);
+		flowExecution.start(new Event(this));
+		RequestContext ctx = new StateContextImpl(new Event(this, "sample"), flowExecution);
 		ctx.getFlowScope().setAttribute("foo", "bar");
 		return ctx;
 	}

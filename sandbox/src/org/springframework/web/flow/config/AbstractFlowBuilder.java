@@ -25,7 +25,6 @@ import org.springframework.web.flow.AnnotatedAction;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
@@ -33,6 +32,7 @@ import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.WildcardTransitionCriteria;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
+import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
  * Base class for flow builders that programmatically build flows in Java

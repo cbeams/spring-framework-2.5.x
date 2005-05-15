@@ -24,12 +24,12 @@ import org.springframework.web.flow.State;
 
 /**
  * Interface to be implemented by objects that wish to listen and respond to the
- * lifecycle of a FlowExecution.
+ * lifecycle of a <code>FlowExecution</code>.
  * <p>
  * An 'observer' that is very aspect like, allowing you to insert 'cross
  * cutting' behavior at well-defined points within a flow execution lifecycle.
  * 
- * @see org.springframework.web.flow.FlowExecutionManager
+ * @see org.springframework.web.flow.execution.FlowExecution
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -39,13 +39,20 @@ public interface FlowExecutionListener {
 	/**
 	 * Called when any client request is submitted to manipulate this
 	 * flow execution.
-	 * @param context the source of the event, with an 'orignatingEvent'
+	 * @param context the source of the event, with an 'sourceEvent'
 	 *        property for access to the request event
 	 */
 	public void requestSubmitted(RequestContext context);
 
 	/**
-	 * Called immediately after a start event is signaled - indicating the flow
+	 * Called when a client request has completed processing.
+	 * @param context the source of the event, with an 'sourceEvent'
+	 *        property for access to the request event
+	 */
+	public void requestProcessed(RequestContext context);
+	
+	/**
+	 * Called immediately after a start event is signaled -- indicating the flow
 	 * is starting but hasn't yet entered its start state.
 	 * @param context source of the event
 	 * @param startState the start state that will be entered
@@ -59,13 +66,6 @@ public interface FlowExecutionListener {
 	 * @param context source of the event
 	 */
 	public void started(RequestContext context);
-
-	/**
-	 * Called when a client request has completed processing.
-	 * @param context the source of the event, with an 'orignatingEvent'
-	 *        property for access to the request event
-	 */
-	public void requestProcessed(RequestContext context);
 
 	/**
 	 * Called when an event is signaled in a state, but prior to a state
@@ -93,27 +93,28 @@ public interface FlowExecutionListener {
 	public void stateEntered(RequestContext context, State previousState, State state);
 
 	/**
-	 * Called when a flow session is activated.
+	 * Called when a flow execution is re-activated, i.e. it resumes as a result
+	 * of user input. 
 	 * @param context the source of the event
 	 */
 	public void resumed(RequestContext context);
 
 	/**
-	 * Called when a flow session is paused.
+	 * Called when a flow execution is paused, i.e. it is waiting for user input.
 	 * @param context the source of the event
 	 */
 	public void paused(RequestContext context);
 
 	/**
-	 * Called when a flow session ends.
+	 * Called when a flow execution ends.
 	 * @param context the source of the event
-	 * @param endedRootFlowSession ending root flow session
+	 * @param endedSession ending root flow session
 	 */
 	public void ended(RequestContext context, FlowSession endedSession);
 
 	/**
 	 * Called when an executing flow expires and is cleaned up.
-	 * @param information about the expired flow.
+	 * @param flowContext information about the expired flow
 	 */
 	public void expired(FlowContext flowContext);
 

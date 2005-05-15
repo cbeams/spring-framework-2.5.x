@@ -18,10 +18,10 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
-import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
  * Simple helper adapter for the flow service locator interface. For testing.

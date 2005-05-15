@@ -24,18 +24,12 @@ import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowContext;
-import org.springframework.web.flow.FlowLocator;
-import org.springframework.web.flow.FlowNavigationException;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.State;
-import org.springframework.web.flow.TransactionSynchronizer;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.execution.FlowExecutionListener;
-import org.springframework.web.flow.execution.FlowExecutionListenerList;
 
 /**
  * Mock implementation of the <code>RequestContext</code> interface to
@@ -56,7 +50,7 @@ import org.springframework.web.flow.execution.FlowExecutionListenerList;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class MockRequestContext implements RequestContext, TransactionSynchronizer {
+public class MockRequestContext implements RequestContext {
 
 	private Flow rootFlow;
 
@@ -254,10 +248,6 @@ public class MockRequestContext implements RequestContext, TransactionSynchroniz
 
 	public Scope getRequestScope() {
 		return requestScope;
-	}
-
-	public TransactionSynchronizer getTransactionSynchronizer() {
-		return this;
 	}
 
 	/*

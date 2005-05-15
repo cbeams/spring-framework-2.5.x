@@ -23,11 +23,11 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowLocator;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.FlowExecutionListener;
 import org.springframework.web.flow.execution.FlowExecutionManager;
+import org.springframework.web.flow.execution.FlowLocator;
 
 /**
  * Flow execution manager to manage flow executions using portlet requests and

@@ -21,10 +21,11 @@ import org.springframework.web.flow.Event;
 
 /**
  * Abstract superclass for events encapsulating a request coming into a
- * flow execution for an external source (client). This kind of event is typically
- * the originating event of a <code>RequestContext</code> in a flow execution.
+ * flow execution from an external source (client). This kind of event is typically
+ * the source event of a <code>RequestContext</code> in a flow execution.
  * 
  * @see org.springframework.web.flow.RequestContext
+ * @see org.springframework.web.flow.execution.FlowExecution
  * 
  * @author Erwin Vervaet
  */

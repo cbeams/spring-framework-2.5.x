@@ -29,17 +29,15 @@ import junit.framework.TestCase;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
-import org.springframework.web.flow.FlowLocator;
-import org.springframework.web.flow.ServiceLookupException;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.XmlFlowBuilder;
 import org.springframework.web.flow.config.XmlFlowBuilderTests;
-import org.springframework.web.flow.execution.FlowExecutionImpl;
+import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
  * Test case for FlowExecutionStack.
  * 
- * @see org.springframework.web.flow.execution.FlowExecutionImpl
+ * @see org.springframework.web.flow.execution.impl.FlowExecutionImpl
  * 
  * @author Erwin Vervaet
  */
@@ -91,7 +89,7 @@ public class FlowExecutionImplTests extends TestCase {
 		assertNotNull(restoredFlowExecution);
 
 		// rehydrate the flow execution
-		restoredFlowExecution.rehydrate(flowLocator, flowExecution.getListeners().toArray());
+		restoredFlowExecution.rehydrate(flowLocator, flowExecution.getListeners().toArray(), flowExecution.getTransactionSynchronizer());
 
 		assertEquals(flowExecution.isActive(), restoredFlowExecution.isActive());
 		if (flowExecution.isActive()) {
