@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.binding.MutableAttributeSource;
-import org.springframework.binding.support.MapAttributeSource;
 
 /**
  * Superclass of all objects in the web flow system that support annotation
@@ -68,15 +67,25 @@ public abstract class AnnotatedObject implements MutableAttributeSource {
 	public Object setProperty(String propertyName, Object value) {
 		return this.properties.put(propertyName, value);
 	}
+	
+	/**
+	 * Returns whether or not this annotated object contains a
+	 * property with specified name
+	 * @param propertyName the name of the property
+	 * @return true or false
+	 */
+	public boolean containsProperty(String propertyName) {
+		return this.properties.containsKey(propertyName);
+	}
 
 	// implementing MutableAttributeSource
 	
 	public boolean containsAttribute(String attributeName) {
-		return new MapAttributeSource(this.properties).containsAttribute(attributeName);
+		return containsProperty(attributeName);
 	}
 	
 	public Object getAttribute(String attributeName) {
-		return new MapAttributeSource(this.properties).getAttribute(attributeName);
+		return getProperty(attributeName);
 	}
 	
 	public Object setAttribute(String attributeName, Object attributeValue) {

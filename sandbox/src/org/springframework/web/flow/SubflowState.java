@@ -34,6 +34,12 @@ import org.springframework.util.Assert;
  * @author Erwin Vervaet
  */
 public class SubflowState extends TransitionableState implements FlowAttributeMapper {
+	
+	/**
+	 * Name of the property used to indicate the start state in which
+	 * to start the sub flow.
+	 */
+	public static final String START_STATE_PROPERTY = "startState";
 
 	/**
 	 * The subflow that should be spawned when this subflow state is entered.
@@ -193,14 +199,20 @@ public class SubflowState extends TransitionableState implements FlowAttributeMa
 	}
 	
 	/**
-	 * Hook method to determine the state in which the spawned subflow should
-	 * start. Subclasses can override this is needed.
+	 * Helper method to determine the state in which the spawned subflow should
+	 * start.
 	 * @param context the flow execution request context
 	 * @return the start state of the subflow
 	 */
 	protected State getSubflowStartState(RequestContext context) {
-		// just use the preconfigured start state
-		return getSubflow().getStartState();
+		if (containsProperty(START_STATE_PROPERTY)) {
+			// use specified start state
+			return getSubflow().getRequiredState((String)getProperty(START_STATE_PROPERTY));
+		}
+		else {
+			// just use the preconfigured start state
+			return getSubflow().getStartState();
+		}
 	}
 
 	public Map createSubflowInput(RequestContext context) {
