@@ -63,7 +63,7 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		requestInProcess = true;
 	}
 
-	public void starting(RequestContext context, State startState, Map input) throws EnterStateVetoException {
+	public void sessionStarting(RequestContext context, State startState, Map input) throws EnterStateVetoException {
 		if (!context.getFlowContext().isActive()) {
 			Assert.state(!started, "The flow execution was already started");
 			flowNestingLevel = 0;
@@ -74,7 +74,7 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		}
 	}
 	
-	public void started(RequestContext context) {
+	public void sessionStarted(RequestContext context) {
 		if (context.getFlowContext().getActiveSession().isRoot()) {
 			Assert.state(!started, "The flow execution was already started");
 			started = true;
@@ -110,7 +110,7 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		executing = true;
 	}
 
-	public void ended(RequestContext context, FlowSession endedSession) {
+	public void sessionEnded(RequestContext context, FlowSession endedSession) {
 		assertStarted();
 		if (endedSession.isRoot()) {
 			Assert.state(flowNestingLevel == 0, "The flow execution should have ended");

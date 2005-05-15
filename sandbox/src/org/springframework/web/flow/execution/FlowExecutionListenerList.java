@@ -197,29 +197,29 @@ public class FlowExecutionListenerList {
 	}
 	
 	/**
-	 * Notify all interested listeners that the flow execution is starting.
+	 * Notify all interested listeners that a flow execution session is starting.
 	 */
-	public void fireStarting(final RequestContext context, final State startState, final Map input) {
+	public void fireSessionStarting(final RequestContext context, final State startState, final Map input) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow execution starting event to " + size() + " listener(s)");
 		}
 		iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).starting(context, startState, input);
+				((FlowExecutionListener)o).sessionStarting(context, startState, input);
 			}
 		});
 	}
 
 	/**
-	 * Notify all interested listeners that the flow execution has started.
+	 * Notify all interested listeners that a flow execution session has started.
 	 */
-	public void fireStarted(final RequestContext context) {
+	public void fireSessionStarted(final RequestContext context) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow execution started event to " + size()	+ " listener(s)");
 		}
 		iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).started(context);
+				((FlowExecutionListener)o).sessionStarted(context);
 			}
 		});
 	}
@@ -300,15 +300,15 @@ public class FlowExecutionListenerList {
 	}
 
 	/**
-	 * Notify all interested listeners that the flow execution has ended.
+	 * Notify all interested listeners that a flow execution session has ended.
 	 */
-	public void fireEnded(final RequestContext context, final FlowSession endedSession) {
+	public void fireSessionEnded(final RequestContext context, final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow execution ended event to " + size() + " listener(s)");
 		}
 		iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).ended(context, endedSession);
+				((FlowExecutionListener)o).sessionEnded(context, endedSession);
 			}
 		});
 	}

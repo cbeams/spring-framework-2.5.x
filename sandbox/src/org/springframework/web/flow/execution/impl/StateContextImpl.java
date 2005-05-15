@@ -175,10 +175,10 @@ public class StateContextImpl implements StateContext {
 	}
 	
 	public ViewDescriptor spawn(State startState, Map input) throws IllegalStateException {
-		this.flowExecution.getListeners().fireStarting(this, startState, input);
+		this.flowExecution.getListeners().fireSessionStarting(this, startState, input);
 		FlowSession session = this.flowExecution.activateSession(this, startState.getFlow(), input);
 		ViewDescriptor viewDescriptor = startState.enter(this);
-		this.flowExecution.getListeners().fireStarted(this);
+		this.flowExecution.getListeners().fireSessionStarted(this);
 		return viewDescriptor;
 	}
 
@@ -188,7 +188,7 @@ public class StateContextImpl implements StateContext {
 			logger.debug("Session for flow '" + endedSession.getFlow().getId() + "' ended, session details = "
 					+ endedSession);
 		}
-		this.flowExecution.getListeners().fireEnded(this, endedSession);
+		this.flowExecution.getListeners().fireSessionEnded(this, endedSession);
 		return endedSession;
 	}
 }

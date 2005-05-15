@@ -38,10 +38,10 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	public void requestSubmitted(RequestContext context) {
 	}
 
-	public void starting(RequestContext context, State startState, Map input) throws EnterStateVetoException {
+	public void sessionStarting(RequestContext context, State startState, Map input) throws EnterStateVetoException {
 	}
 
-	public void started(RequestContext context) {
+	public void sessionStarted(RequestContext context) {
 	}
 
 	public void requestProcessed(RequestContext context) {
@@ -57,18 +57,14 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	}
 
 	public void paused(RequestContext context) {
-		
 	}
 
 	public void resumed(RequestContext context) {
-		
 	}
 
-	public void ended(RequestContext context, FlowSession endedRootFlowSession) {
-		
+	public void sessionEnded(RequestContext context, FlowSession endedRootFlowSession) {
 	}
 
 	public void expired(FlowContext flowContext) {
-		
 	}
 }

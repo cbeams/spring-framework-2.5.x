@@ -53,19 +53,19 @@ public interface FlowExecutionListener {
 	
 	/**
 	 * Called immediately after a start event is signaled -- indicating the flow
-	 * is starting but hasn't yet entered its start state.
+	 * execution session is starting but hasn't yet entered its start state.
 	 * @param context source of the event
 	 * @param startState the start state that will be entered
 	 * @throws EnterStateVetoException the start state transition was not allowed
 	 */
-	public void starting(RequestContext context, State startState, Map input) throws EnterStateVetoException;
+	public void sessionStarting(RequestContext context, State startState, Map input) throws EnterStateVetoException;
 
 	/**
-	 * Called when a new flow execution was started -- the start state has been
-	 * entered.
+	 * Called when a new flow execution session was started -- the start state
+	 * has been entered.
 	 * @param context source of the event
 	 */
-	public void started(RequestContext context);
+	public void sessionStarted(RequestContext context);
 
 	/**
 	 * Called when an event is signaled in a state, but prior to a state
@@ -106,11 +106,11 @@ public interface FlowExecutionListener {
 	public void paused(RequestContext context);
 
 	/**
-	 * Called when a flow execution ends.
+	 * Called when a flow execution session ends.
 	 * @param context the source of the event
-	 * @param endedSession ending root flow session
+	 * @param endedSession ending flow session
 	 */
-	public void ended(RequestContext context, FlowSession endedSession);
+	public void sessionEnded(RequestContext context, FlowSession endedSession);
 
 	/**
 	 * Called when an executing flow expires and is cleaned up.

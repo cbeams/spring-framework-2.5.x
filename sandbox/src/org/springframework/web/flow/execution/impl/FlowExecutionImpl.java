@@ -156,6 +156,13 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 		return transactionSynchronizer;
 	}
 	
+	/**
+	 * Set the transaction synchronization strategy to use.
+	 */
+	protected void setTransactionSynchronizer(TransactionSynchronizer transactionSynchronizer) {
+		this.transactionSynchronizer = transactionSynchronizer;
+	}
+	
 	// implementing FlowContext
 
 	public String getCaption() {
@@ -433,7 +440,7 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 	public synchronized void rehydrate(FlowLocator flowLocator, FlowExecutionListener[] listeners,
 			TransactionSynchronizer transactionSynchronizer) {
 		// implementation note: we cannot integrate this code into the
-		// readObject() method since we need the flow locator and listener list!
+		// readObject() method since we need the flow locator, listener list and tx synchronizer!
 		if (this.rootFlow != null) {
 			// nothing to do, we're already hydrated
 			return;
