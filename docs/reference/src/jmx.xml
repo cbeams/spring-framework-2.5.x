@@ -1093,7 +1093,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 
       <programlisting>&lt;bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean"&gt;
     &lt;property name="serviceUrl"&gt;
-      &lt;value&gt;service:jmx:rmi://localhost:9876&lt;/value&gt;
+      &lt;value&gt;service:jmx:rmi://localhost:9875&lt;/value&gt;
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
     </section>
@@ -1162,7 +1162,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 
     <programlisting>&lt;bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean"&gt;
     &lt;property name="serviceUrl"&gt;
-      &lt;value&gt;service:jmx:rmi://remotehost:9876&lt;/value&gt;
+      &lt;value&gt;service:jmx:rmi://remotehost:9875&lt;/value&gt;
     &lt;/property&gt;
 &lt;/bean&gt;
 
