@@ -37,9 +37,9 @@ import org.springframework.web.util.WebUtils;
  * 
  * @author Erwin Vervaet
  */
-public class SessionFlowExecutionStorage implements FlowExecutionStorage {
+public class HttpSessionFlowExecutionStorage implements FlowExecutionStorage {
 
-	protected final Log logger = LogFactory.getLog(SessionFlowExecutionStorage.class);
+	protected final Log logger = LogFactory.getLog(HttpSessionFlowExecutionStorage.class);
 
 	private boolean createSession = true;
 

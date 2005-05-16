@@ -67,7 +67,7 @@ public class ServletFlowExecutionManager extends FlowExecutionManager implements
 	 * Set default properties for this manager.
 	 */
 	protected void initDefaults() {
-		setStorage(new SessionFlowExecutionStorage());
+		setStorage(new HttpSessionFlowExecutionStorage());
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

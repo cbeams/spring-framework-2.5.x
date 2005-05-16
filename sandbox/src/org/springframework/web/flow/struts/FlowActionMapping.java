@@ -19,8 +19,8 @@ import org.apache.struts.action.ActionMapping;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.execution.ClientContinuationFlowExecutionStorage;
 import org.springframework.web.flow.execution.FlowExecutionStorage;
-import org.springframework.web.flow.execution.servlet.SessionContinuationFlowExecutionStorage;
-import org.springframework.web.flow.execution.servlet.SessionFlowExecutionStorage;
+import org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage;
+import org.springframework.web.flow.execution.servlet.HttpSessionFlowExecutionStorage;
 
 /**
  * A flow action mapping object that allows FlowActions to be configured with a
@@ -36,19 +36,19 @@ public class FlowActionMapping extends ActionMapping {
 	
 	/**
 	 * Constant indicating use of the default flow execution storage strategy:
-	 * {@link SessionFlowExecutionStorage}.
+	 * {@link HttpSessionFlowExecutionStorage}.
 	 */
 	public static final String STORAGE_DEFAULT = "default";
 	
 	/**
 	 * Constant indicating use of the HTTP session flow execution storage
-	 * strategy: {@link SessionFlowExecutionStorage}.
+	 * strategy: {@link HttpSessionFlowExecutionStorage}.
 	 */
 	public static final String STORAGE_SESSION = "session";
 	
 	/**
 	 * Constant indicating use of the HTTP session continuations based flow
-	 * execution storage strategy: {@link SessionContinuationFlowExecutionStorage}.
+	 * execution storage strategy: {@link HttpSessionContinuationFlowExecutionStorage}.
 	 */
 	public static final String STORAGE_SESSION_CONTINUATION = "sessionContinuation";
 	
@@ -107,10 +107,10 @@ public class FlowActionMapping extends ActionMapping {
 	public FlowExecutionStorage getFlowExecutionStorage() throws IllegalArgumentException {
 		if (!StringUtils.hasText(storage) || storage.equalsIgnoreCase(STORAGE_DEFAULT)
 				|| storage.equalsIgnoreCase(STORAGE_SESSION)) {
-			return new SessionFlowExecutionStorage();
+			return new HttpSessionFlowExecutionStorage();
 		}
 		else if (storage.equalsIgnoreCase(STORAGE_SESSION_CONTINUATION)) {
-			return new SessionContinuationFlowExecutionStorage();
+			return new HttpSessionContinuationFlowExecutionStorage();
 		}
 		else if (storage.equalsIgnoreCase(STORAGE_CLIENT_CONTINUATION)) {
 			return new ClientContinuationFlowExecutionStorage();

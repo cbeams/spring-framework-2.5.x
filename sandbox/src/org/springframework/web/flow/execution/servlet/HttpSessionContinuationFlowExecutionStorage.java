@@ -40,7 +40,7 @@ import org.springframework.web.util.WebUtils;
  * 
  * @author Erwin Vervaet
  */
-public class SessionContinuationFlowExecutionStorage extends SessionFlowExecutionStorage {
+public class HttpSessionContinuationFlowExecutionStorage extends HttpSessionFlowExecutionStorage {
 
 	private boolean compress = false;
 
