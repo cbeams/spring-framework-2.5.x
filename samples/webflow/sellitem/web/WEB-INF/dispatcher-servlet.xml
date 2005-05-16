@@ -24,14 +24,14 @@
 	-->	
 	<bean id="flowExecutionManager" class="org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager">
 		<property name="storage">
-			<bean class="org.springframework.web.flow.execution.servlet.SessionContinuationFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage"/>
 		</property>
 		<property name="listener">
 			<bean class="org.springframework.samples.sellitem.SellItemFlowExecutionListener"/>
 		</property>
 		<!-- 
 		<property name="storage">
-			<bean class="org.springframework.web.flow.execution.servlet.SessionFlowExecutionStorage"/>
+			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionFlowExecutionStorage"/>
 		</property>
 		-->
 		<!-- 
