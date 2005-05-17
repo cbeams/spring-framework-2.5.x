@@ -101,7 +101,13 @@
 <!ATTLIST property name CDATA #REQUIRED>
 
 <!--
-	A short-cut alternative to an explicit child 'value' element.
+	The target type of the property value; to facilitate from-string type conversion.  This type
+	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
+-->
+<!ATTLIST property type CDATA #IMPLIED>
+
+<!--
+	Thev value of the property; a short-cut alternative to an explicit child 'value' element.
 -->
 <!ATTLIST property value CDATA #IMPLIED>
 
@@ -245,6 +251,12 @@
 <!ATTLIST input name CDATA #IMPLIED>
 
 <!--
+	The source type of the attribute in this flow to map into the subflow.  This type
+	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
+-->
+<!ATTLIST input source-type CDATA #IMPLIED>
+
+<!--
 	An expression for the attribute value in this flow's request context to
 	map to the subflow.  Use this OR the name attribute, not both.
 -->
@@ -261,6 +273,12 @@
 <!ATTLIST input as CDATA #IMPLIED>
 
 <!--
+	The target type of the attribute in the subflow.  This type
+	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
+-->
+<!ATTLIST input target-type CDATA #IMPLIED>
+
+<!--
 	A single output mapping that maps data from the subflow back up to this flow 
 	when it resumes.
 -->
@@ -271,6 +289,12 @@
 	Use this OR the value attribute, not both.
 -->
 <!ATTLIST output name CDATA #IMPLIED>
+
+<!--
+	The source type of the attribute in the subflow to map to this flow.  This type
+	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
+-->
+<!ATTLIST output source-type CDATA #IMPLIED>
 
 <!--
 	An expression for the attribute value in the subflow's request context to
@@ -289,6 +313,12 @@
 <!ATTLIST output as CDATA #IMPLIED>
 
 <!--
+	The target type of the attribute in this flow.  This type
+	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
+-->
+<!ATTLIST input target-type CDATA #IMPLIED>
+
+<!--
 	Defines an end state: a state that terminates the flow.
 -->
 <!ELEMENT end-state ( property* )>
@@ -299,9 +329,9 @@
 <!ATTLIST end-state id ID #REQUIRED>
 
 <!--
-	Optional name of the view that will be rendered when this state is reached
-	and when there is no parent flow to continue. When not present, this state will be a marker end state.
-	A marker end state does not actually render a view, but just returns control to the client.
+	Optional name of the view that will be rendered when this state is reached 
+	when there is no parent flow to resume.  When not present, this state will be a marker end state.
+	A marker end state does not render a view, it only returns control to the client.
 	Use a marker end state when another object is expected to generate the response.
 -->
 <!ATTLIST end-state view CDATA #IMPLIED>
