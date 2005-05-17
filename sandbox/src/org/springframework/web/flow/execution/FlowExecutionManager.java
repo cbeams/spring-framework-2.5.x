@@ -186,16 +186,15 @@ public class FlowExecutionManager {
 	 * Returns the storage strategy used by the flow execution manager.
 	 */
 	public FlowExecutionStorage getStorage() {
-		Assert.notNull(storage, "The flow execution storage strategy was not set -- configuration error?");
 		return storage;
 	}
 
 	/**
 	 * Set the storage strategy used by the flow execution manager.
 	 */
-	public void setStorage(FlowExecutionStorage flowExecutionStorage) {
+	public void setStorage(FlowExecutionStorage storage) {
 		Assert.notNull(storage, "The flow execution storage strategy is required");
-		this.storage = flowExecutionStorage;
+		this.storage = storage;
 	}
 	
 	/**
