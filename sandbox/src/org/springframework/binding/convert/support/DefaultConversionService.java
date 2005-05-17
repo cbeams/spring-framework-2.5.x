@@ -97,6 +97,10 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 		return formatterLocator;
 	}
 
+	public Class withAlias(String alias) throws IllegalArgumentException {
+		throw new UnsupportedOperationException("Not implemented yet - @TODO");
+	}
+	
 	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) {
 		if (this.sourceClassConverters == null || this.sourceClassConverters.isEmpty()) {
 			throw new IllegalStateException("No converters have been added to this service's registry");
