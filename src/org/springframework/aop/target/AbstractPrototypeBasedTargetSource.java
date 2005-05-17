@@ -43,7 +43,8 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 		// Check whether the target bean is defined as prototype.
 		if (beanFactory.isSingleton(getTargetBeanName())) {
 			throw new BeanDefinitionStoreException(
-				"Cannot use PrototypeBasedTargetSource against a singleton bean: instances would not be independent");
+				"Cannot use PrototypeBasedTargetSource against singleton bean with name '" + getTargetBeanName() + "': " +
+                "instances would not be independent");
 		}
 	}
 
