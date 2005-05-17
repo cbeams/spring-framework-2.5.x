@@ -106,15 +106,18 @@ public interface FlowExecutionListener {
 	public void paused(RequestContext context);
 
 	/**
-	 * Called when a flow execution session ends.
+	 * Called when a flow execution session ends. If the ended session was the
+	 * root session of the flow execution, the entire flow execute also ends.
 	 * @param context the source of the event
-	 * @param session ending flow session
+	 * @param endedSession ending flow session
 	 */
-	public void ended(RequestContext context, FlowSession session);
+	public void sessionEnded(RequestContext context, FlowSession endedSession);
 
 	/**
 	 * Called when an executing flow expires and is cleaned up.
 	 * @param flowContext information about the expired flow
+	 * 
+	 * TODO make behaviour more deterministic
 	 */
 	public void expired(FlowContext flowContext);
 

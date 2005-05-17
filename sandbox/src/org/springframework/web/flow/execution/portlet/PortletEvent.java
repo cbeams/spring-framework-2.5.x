@@ -45,7 +45,8 @@ public class PortletEvent extends ExternalEvent {
 	 */
 	public PortletEvent(PortletRequest request, PortletResponse response) {
 		this(request, response,
-				EVENT_ID_PARAMETER, ServletEvent.EVENT_ID_REQUEST_ATTRIBUTE, CURRENT_STATE_ID_PARAMETER, PARAMETER_VALUE_DELIMITER);
+				EVENT_ID_PARAMETER, ServletEvent.EVENT_ID_REQUEST_ATTRIBUTE,
+				CURRENT_STATE_ID_PARAMETER, PARAMETER_VALUE_DELIMITER);
 	}
 
 	/**
@@ -69,8 +70,7 @@ public class PortletEvent extends ExternalEvent {
 		// TODO multipart portlet request support -- not yet supported by Spring Portlet MVC
 		String eventId = (String)searchForParameter(eventIdParameterName, parameterValueDelimiter);
 		if (!StringUtils.hasText(eventId)) {
-			// see if the eventId is set as a request attribute (put there by a
-			// servlet filter)
+			// see if the eventId is set as a request attribute
 			eventId = (String) getRequest().getAttribute(eventIdAttributeName);
 		}
 		setId(eventId);

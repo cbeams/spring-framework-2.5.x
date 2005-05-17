@@ -18,11 +18,15 @@ package org.springframework.web.flow.execution;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
@@ -60,7 +64,7 @@ import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public class FlowExecutionManager {
+public class FlowExecutionManager implements BeanFactoryAware {
 
 	/**
 	 * Clients can send the id (name) of the flow to be started
@@ -99,10 +103,12 @@ public class FlowExecutionManager {
 	
 
 	protected final Log logger = LogFactory.getLog(FlowExecutionManager.class);
+	
+	private BeanFactory beanFactory;
 
 	private Flow flow;
 
-	private FlowLocator flowLocator;
+	private FlowLocator flowLocator = new BeanFactoryFlowServiceLocator();
 
 	private FlowExecutionListener[] listeners;
 
@@ -122,6 +128,20 @@ public class FlowExecutionManager {
 	 * @see #setStorage(FlowExecutionStorage) 
 	 */
 	public FlowExecutionManager() {
+	}
+	
+	/**
+	 * Returns this flow execution manager's bean factory.
+	 */
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+	
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (getFlowLocator() instanceof BeanFactoryAware) {
+			// make the BeanFactoryFlowServiceLocator work
+			((BeanFactoryAware)getFlowLocator()).setBeanFactory(beanFactory);
+		}
 	}
 
 	/**

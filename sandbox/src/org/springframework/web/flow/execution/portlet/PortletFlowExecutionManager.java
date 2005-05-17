@@ -18,13 +18,9 @@ package org.springframework.web.flow.execution.portlet;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.FlowExecutionListener;
 import org.springframework.web.flow.execution.FlowExecutionManager;
 import org.springframework.web.flow.execution.FlowLocator;
@@ -36,7 +32,7 @@ import org.springframework.web.flow.execution.FlowLocator;
  * @author J.Enrique Ruiz
  * @author César Ordiñana
  */
-public class PortletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
+public class PortletFlowExecutionManager extends FlowExecutionManager {
 
 	/**
 	 * Creates a portlet based flow execution manager.
@@ -68,13 +64,6 @@ public class PortletFlowExecutionManager extends FlowExecutionManager implements
 	 */
 	protected void initDefaults() {
 		setStorage(new PortletSessionFlowExecutionStorage());
-	}
-
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (getFlowLocator() == null) {
-			// a convenience default for use with Spring bean factories
-			setFlowLocator(new BeanFactoryFlowServiceLocator(beanFactory));
-		}
 	}
 
 	/**

@@ -52,7 +52,9 @@ public class ServletEvent extends ExternalEvent {
 	 * @param response the HTTP servlet response associated with the request
 	 */
 	public ServletEvent(HttpServletRequest request, HttpServletResponse response) {
-		this(request, response, EVENT_ID_PARAMETER, EVENT_ID_REQUEST_ATTRIBUTE, CURRENT_STATE_ID_PARAMETER, PARAMETER_VALUE_DELIMITER);
+		this(request, response,
+				EVENT_ID_PARAMETER, EVENT_ID_REQUEST_ATTRIBUTE,
+				CURRENT_STATE_ID_PARAMETER, PARAMETER_VALUE_DELIMITER);
 	}
 
 	/**

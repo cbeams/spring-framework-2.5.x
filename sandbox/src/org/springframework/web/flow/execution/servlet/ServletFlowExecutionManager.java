@@ -18,13 +18,9 @@ package org.springframework.web.flow.execution.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.ViewDescriptor;
-import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.FlowExecutionListener;
 import org.springframework.web.flow.execution.FlowExecutionManager;
 import org.springframework.web.flow.execution.FlowLocator;
@@ -36,7 +32,7 @@ import org.springframework.web.flow.execution.FlowLocator;
  * @author Erwin Vervaet
  * @author Keith Donald
  */
-public class ServletFlowExecutionManager extends FlowExecutionManager implements BeanFactoryAware {
+public class ServletFlowExecutionManager extends FlowExecutionManager {
 
 	/**
 	 * Creates an HTTP-servlet based flow execution manager.
@@ -68,13 +64,6 @@ public class ServletFlowExecutionManager extends FlowExecutionManager implements
 	 */
 	protected void initDefaults() {
 		setStorage(new HttpSessionFlowExecutionStorage());
-	}
-
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (getFlowLocator() == null) {
-			// a convenience default for use with Spring bean factories
-			setFlowLocator(new BeanFactoryFlowServiceLocator(beanFactory));
-		}
 	}
 
 	/**

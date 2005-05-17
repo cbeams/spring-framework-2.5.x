@@ -103,7 +103,7 @@ public class PortletSessionFlowExecutionStorage implements FlowExecutionStorage 
 	 */
 	protected PortletEvent getPortletRequestEvent(Event event) {
 		Assert.isInstanceOf(PortletEvent.class, event, "Wrong event type: ");
-		return (PortletEvent) event;
+		return (PortletEvent)event;
 	}
 
 	/**

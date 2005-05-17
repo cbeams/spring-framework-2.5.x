@@ -59,7 +59,8 @@ public class PortletSessionContinuationFlowExecutionStorage extends PortletSessi
 			throws NoSuchFlowExecutionException, FlowExecutionStorageException {
 		try {
 			FlowExecutionContinuation continuation =
-				(FlowExecutionContinuation)PortletUtils.getRequiredSessionAttribute(getPortletRequest(requestingEvent), id);
+				(FlowExecutionContinuation)
+					PortletUtils.getRequiredSessionAttribute(getPortletRequest(requestingEvent), id);
 			return continuation.getFlowExecution();
 		}
 		catch (IllegalStateException e) {
