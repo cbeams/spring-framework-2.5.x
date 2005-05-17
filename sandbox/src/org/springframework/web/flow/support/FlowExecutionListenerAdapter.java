@@ -62,7 +62,7 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	public void resumed(RequestContext context) {
 	}
 
-	public void sessionEnded(RequestContext context, FlowSession endedRootFlowSession) {
+	public void ended(RequestContext context, FlowSession endedRootFlowSession) {
 	}
 
 	public void expired(FlowContext flowContext) {

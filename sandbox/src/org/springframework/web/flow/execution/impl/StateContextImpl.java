@@ -188,7 +188,7 @@ public class StateContextImpl implements StateContext {
 			logger.debug("Session for flow '" + endedSession.getFlow().getId() + "' ended, session details = "
 					+ endedSession);
 		}
-		this.flowExecution.getListeners().fireSessionEnded(this, endedSession);
+		this.flowExecution.getListeners().fireEnded(this, endedSession);
 		return endedSession;
 	}
 }

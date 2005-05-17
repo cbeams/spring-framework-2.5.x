@@ -302,13 +302,13 @@ public class FlowExecutionListenerList {
 	/**
 	 * Notify all interested listeners that a flow execution session has ended.
 	 */
-	public void fireSessionEnded(final RequestContext context, final FlowSession endedSession) {
+	public void fireEnded(final RequestContext context, final FlowSession endedSession) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Publishing flow execution ended event to " + size() + " listener(s)");
 		}
 		iteratorTemplate().run(new Block() {
 			protected void handle(Object o) {
-				((FlowExecutionListener)o).sessionEnded(context, endedSession);
+				((FlowExecutionListener)o).ended(context, endedSession);
 			}
 		});
 	}

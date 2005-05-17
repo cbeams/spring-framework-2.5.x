@@ -110,7 +110,7 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 		executing = true;
 	}
 
-	public void sessionEnded(RequestContext context, FlowSession endedSession) {
+	public void ended(RequestContext context, FlowSession endedSession) {
 		assertStarted();
 		if (endedSession.isRoot()) {
 			Assert.state(flowNestingLevel == 0, "The flow execution should have ended");
