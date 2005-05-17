@@ -45,7 +45,7 @@ import org.springframework.web.flow.execution.FlowExecution;
 import org.springframework.web.flow.execution.FlowExecutionListener;
 import org.springframework.web.flow.execution.FlowExecutionListenerList;
 import org.springframework.web.flow.execution.FlowLocator;
-import org.springframework.web.flow.execution.TokenBasedTransactionSynchronizer;
+import org.springframework.web.flow.execution.TokenTransactionSynchronizer;
 import org.springframework.web.flow.execution.TransactionSynchronizer;
 
 /**
@@ -126,7 +126,7 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 	 * @param rootFlow the root flow of this flow execution
 	 */
 	public FlowExecutionImpl(Flow rootFlow) {
-		this(rootFlow, null, new TokenBasedTransactionSynchronizer());
+		this(rootFlow, null, new TokenTransactionSynchronizer());
 	}
 	
 	/**

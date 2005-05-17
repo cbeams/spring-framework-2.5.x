@@ -31,7 +31,7 @@ import org.springframework.web.flow.Scope;
  * 
  * @author Erwin Vervaet
  */
-public class TokenBasedTransactionSynchronizer implements TransactionSynchronizer {
+public class TokenTransactionSynchronizer implements TransactionSynchronizer {
 	
 	/**
 	 * The transaction synchronizer token will be stored in the model using an
