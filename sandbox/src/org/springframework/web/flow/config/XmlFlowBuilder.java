@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.binding.MutableAttributeSource;
+import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.support.TextToClassConverter;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
@@ -151,6 +152,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String VALUE_ATTRIBUTE = "value";
 
+	private static final String TYPE_ATTRIBUTE = "type";
+
 	private static final String VIEW_STATE_ELEMENT = "view-state";
 
 	private static final String VIEW_ATTRIBUTE = "view";
@@ -195,6 +198,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private EntityResolver entityResolver = new FlowDtdResolver();
 
+	private ConversionService conversionService;
+	
 	/**
 	 * The DOM document object for the XML loaded from the resource.
 	 */
@@ -208,10 +213,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Create a new XML flow builder.
-	 * @param resource resource to read XML flow definitions from
+	 * @param location resource to read XML flow definitions from
 	 */
-	public XmlFlowBuilder(Resource resource) {
-		this.location = resource;
+	public XmlFlowBuilder(Resource location) {
+		this.location = location;
 	}
 
 	/**
@@ -236,6 +241,14 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	public void setLocation(Resource location) {
 		this.location = location;
+	}
+	
+	/**
+	 * Sets the from-text property type conversion service to use for this builder.
+	 * @param conversionService the type conversion service
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
 	}
 
 	/**
@@ -534,13 +547,25 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected void parseAndAddProperty(Element element, MutableAttributeSource properties) {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
+		Object value = null;
 		if (element.hasAttribute(VALUE_ATTRIBUTE)) {
-			properties.setAttribute(name, element.getAttribute(VALUE_ATTRIBUTE));
+			value = element.getAttribute(VALUE_ATTRIBUTE);
 		}
 		else {
 			List valueElements = DomUtils.getChildElementsByTagName(element, VALUE_ELEMENT);
 			Assert.state(valueElements.size() == 1, "A property value should be specified for property '" + name + "'");
-			properties.setAttribute(name, DomUtils.getTextValue((Element)valueElements.get(0)));
+			value = DomUtils.getTextValue((Element)valueElements.get(0));
+		}
+		properties.setAttribute(name, convert(element, value));
+	}
+	
+	private Object convert(Element element, Object value) {
+		if (element.hasAttribute(TYPE_ATTRIBUTE)) {
+			// do value type conversion
+			Class targetClass = conversionService.withAlias(element.getAttribute(TYPE_ATTRIBUTE));
+			return conversionService.getConversionExecutor(String.class, targetClass).execute(value);
+		} else {
+			return value;
 		}
 	}
 
