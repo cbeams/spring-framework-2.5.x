@@ -938,7 +938,76 @@ public class ExampleBean {
       this bean reference variant is when there is a need to wrap an existing
       bean in a parent context with some sort of proxy (which may have the
       same name as the parent), and needs the original object so it may wrap
-      it. <programlisting>    &lt;ref parent="someBean"/&gt;</programlisting></para>
+      it. </para>
+
+      <para><programlisting>    &lt;ref parent="someBean"/&gt;</programlisting></para>
+
+      <sect3>
+        <title id="beans-value-ref-shortcuts">Value and Ref shortcut
+        forms</title>
+
+        <para>It is so common to need to configure a value or a bean
+        reference, that there exist some shortcut forms which are less verbose
+        than using the full <literal>value</literal> and
+        <literal>ref</literal> elements. The <literal>property</literal>,
+        <literal>constructor-arg</literal>, and <literal>entry</literal>
+        elements all support a <literal>value</literal> attribute which may be
+        used instead of embedding a full <literal>value</literal> element.
+        Therefore, the following:</para>
+
+        <para><programlisting>&lt;property name="myProperty"&gt;
+    &lt;value&gt;hello&lt;/value&gt;
+&lt;/property</programlisting><programlisting>&lt;constructor-arg&gt;
+    &lt;value&gt;hello&lt;/value&gt;
+&lt;/constructor-arg&gt;</programlisting><programlisting>&lt;entry key="myKey"&gt;
+    &lt;value&gt;hello&lt;/value&gt;
+&lt;/entry&gt;</programlisting></para>
+
+        <para>are equivalent to:</para>
+
+        <para><programlisting>&lt;property name="myProperty" value="hello"/&gt;</programlisting><programlisting>&lt;constructor-arg value="hello"/&gt;</programlisting><programlisting>&lt;entry key="myKey" value="hello"/&gt;</programlisting>In
+        general, when typing definitions by hand, you will probably prefer to
+        use the less verbose shortcut form.</para>
+
+        <para>The <literal>property</literal> and
+        <literal>constructor-arg</literal> elements support a similar shortcut
+        <literal>ref</literal> attribute which may be used instead of a full
+        nested <literal>ref</literal> element. Therefore, the
+        following:</para>
+
+        <para><programlisting>&lt;property name="myProperty"&gt;
+    &lt;ref bean="myBean"&gt;
+&lt;/property</programlisting><programlisting>&lt;constructor-arg&gt;
+    &lt;ref bean="myBean"&gt;
+&lt;/constructor-arg&gt;</programlisting></para>
+
+        <para>is equivalent to:</para>
+
+        <para><programlisting>&lt;property name="myProperty" ref="myBean"/&gt;</programlisting><programlisting>&lt;constructor-arg value="myBean"/&gt;</programlisting></para>
+
+        <para>Note however that the shortcut form is equivalent to a
+        <literal>&lt;ref bean="xxx"&gt;</literal> element, there is no
+        shortcut for <literal>&lt;ref local="xxx"</literal>&gt;. For a local
+        ref you must use the long form.</para>
+
+        <para>Finally, the entry element allows a shortcut form to specify the
+        key and/or value of the map, in the form of the
+        <literal>key-ref</literal> and <literal>value-ref</literal>
+        attributes. Therefore, the following:</para>
+
+        <para><programlisting>&lt;entry&gt;
+  &lt;key&gt;&lt;ref bean="myKeyBean"/&gt;&lt;/key&gt;
+  &lt;ref bean="myValueBean"/&gt;
+&lt;/entry&gt;
+</programlisting></para>
+
+        <para>is equivalent to:</para>
+
+        <para><programlisting>&lt;entry key-ref="myKeyBean" value-ref="myValueBean"/&gt;
+</programlisting>Again, the shortcut form is equivalent to a <literal>&lt;ref
+        bean="xxx"&gt;</literal> element, there is no shortcut for
+        <literal>&lt;ref local="xxx"</literal>&gt;.</para>
+      </sect3>
     </sect2>
 
     <sect2 id="beans-factory-method-injection">
