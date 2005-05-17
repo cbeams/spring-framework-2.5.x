@@ -24,6 +24,12 @@ package org.springframework.binding.convert;
 public interface ConversionService {
 
 	/**
+	 * @param alias
+	 * @return the class with the given alias
+	 */
+	public Class withAlias(String alias) throws IllegalArgumentException;
+	
+	/**
 	 * Return a conversion executor command object capable of converting source
 	 * objects of the specified <code>sourceClass</code> to instances of the
 	 * <code>targetClass</code>.
