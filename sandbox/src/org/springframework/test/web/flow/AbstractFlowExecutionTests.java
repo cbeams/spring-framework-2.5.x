@@ -29,7 +29,7 @@ import org.springframework.web.flow.execution.FlowExecution;
 import org.springframework.web.flow.execution.FlowExecutionListener;
 import org.springframework.web.flow.execution.FlowLocator;
 import org.springframework.web.flow.execution.ServiceLookupException;
-import org.springframework.web.flow.execution.SynchronizerTokenTransactionSynchronizer;
+import org.springframework.web.flow.execution.TokenBasedTransactionSynchronizer;
 import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
@@ -135,7 +135,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 */
 	protected ViewDescriptor startFlow(Event event) {
 		this.flowExecution = new FlowExecutionImpl(getFlow(), new FlowExecutionListener[0],
-				new SynchronizerTokenTransactionSynchronizer());
+				new TokenBasedTransactionSynchronizer());
 		setupFlowExecution(flowExecution);
 		return this.flowExecution.start(event);
 	}

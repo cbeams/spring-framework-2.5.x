@@ -108,7 +108,7 @@ public class FlowExecutionManager {
 
 	private FlowExecutionStorage storage;
 	
-	private TransactionSynchronizer transactionSynchronizer = new SynchronizerTokenTransactionSynchronizer();
+	private TransactionSynchronizer transactionSynchronizer = new TokenBasedTransactionSynchronizer();
 
 	/**
 	 * Create a new flow execution manager. Before use, the manager should
