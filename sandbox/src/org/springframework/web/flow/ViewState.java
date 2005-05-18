@@ -19,7 +19,6 @@ import java.util.Map;
 
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.action.ActionTransitionCriteria;
 
 /**
  * A view state is a state in which a physical view resource should be rendered
@@ -46,14 +45,14 @@ public class ViewState extends TransitionableState {
 	private ViewDescriptorCreator viewDescriptorCreator;
 	
 	/**
-	 * A view pre-render setup action.
+	 * A view pre-render criteria object.
 	 */
-	private AnnotatedAction setupAction;
+	private TransitionCriteria displayCriteria;
 	
 	/**
-	 * The state to transition to if the setup action fails 
+	 * The state to transition to if the the view state criteria fails.
 	 */
-	private Transition toSetupActionErrorState;
+	private Transition toDisplayCriteriaFailedState;
 	
 	/**
 	 * Default constructor for bean style usage.
@@ -211,10 +210,10 @@ public class ViewState extends TransitionableState {
 	 *         render the results of the state execution
 	 */
 	protected ViewDescriptor doEnter(StateContext context) {
-		if (setupAction != null) {
-			boolean result = new ActionTransitionCriteria(this.setupAction).test(context);
+		if (displayCriteria != null) {
+			boolean result = displayCriteria.test(context);
 			if (!result) {
-				toSetupActionErrorState.execute(context);
+				toDisplayCriteriaFailedState.execute(context);
 			}
 		}
 		if (isMarker()) {
