@@ -1,6 +1,6 @@
 <%@ page session="false" %>
 
-<%@ page import="org.springframework.samples.fileupload.web.flow.FileUploadBean"%>
+<%@ page import="org.springframework.samples.fileupload.FileUploadBean" %>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
