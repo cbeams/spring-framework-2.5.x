@@ -3,6 +3,11 @@
 
 <beans>
 
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+
 	<!--
 		A general purpose FlowController for the entire "Point of Sale (POS)" application.
 		Note that there is no default top-level flow configured.
@@ -23,11 +28,11 @@
 		on the views!
 	-->	
 	<bean id="flowExecutionManager" class="org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager">
-		<property name="storage">
-			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage"/>
-		</property>
 		<property name="listener">
 			<bean class="org.springframework.samples.sellitem.SellItemFlowExecutionListener"/>
+		</property>
+		<property name="storage">
+			<bean class="org.springframework.web.flow.execution.servlet.HttpSessionContinuationFlowExecutionStorage"/>
 		</property>
 		<!-- 
 		<property name="storage">
@@ -55,11 +60,6 @@
 		<property name="validator">
 			<bean class="org.springframework.samples.sellitem.SaleValidator"/>
 		</property>
-	</bean>
-
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix" value="/WEB-INF/jsp/"/>
-		<property name="suffix" value=".jsp"/>
 	</bean>
 
 </beans>
