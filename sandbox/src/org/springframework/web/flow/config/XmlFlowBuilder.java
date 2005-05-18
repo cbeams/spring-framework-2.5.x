@@ -47,6 +47,7 @@ import org.springframework.web.flow.DecisionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
+import org.springframework.web.flow.State;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
@@ -55,6 +56,7 @@ import org.springframework.web.flow.action.ActionTransitionCriteria;
 import org.springframework.web.flow.action.MultiAction;
 import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
 import org.springframework.web.flow.support.TransitionCriteriaChain;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -76,7 +78,6 @@ import org.xml.sax.SAXParseException;
  * Consult the web flow DTD for more information on the XML definition format.
  * An object of this class is normally configured in the Spring application
  * context.
- * 
  * <p>
  * <b>Exposed configuration properties: </b> <br>
  * <table border="1">
@@ -98,6 +99,11 @@ import org.xml.sax.SAXParseException;
  * DTD.</td>
  * </tr>
  * <tr>
+ * <td>conversionService</td>
+ * <td><i>null</i></td>
+ * <td>The from-text property type conversion service to use for this builder.</td>
+ * </tr>
+ * <tr>
  * <td>entityResolver</td>
  * <td><i>{@link FlowDtdResolver}</i></td>
  * <td>Set a SAX entity resolver to be used for parsing.</td>
@@ -106,17 +112,6 @@ import org.xml.sax.SAXParseException;
  * <td>flowServiceLocator</td>
  * <td><i>{@link BeanFactoryFlowServiceLocator}</i></td>
  * <td>Set the flow service location strategy to use.</td>
- * </tr>
- * <tr>
- * <td>flowExecutionListeners</td>
- * <td><i>empty</i></td>
- * <td>Set the default listeners that will be associated with each execution of
- * the flow created by this builder.</td>
- * </tr>
- * <tr>
- * <td>flowCreator</td>
- * <td><i>{@link BaseFlowBuilder.DefaultFlowCreator DefaultFlowCreator}</i></td>
- * <td>Set the flow creation strategy to use.</td>
  * </tr>
  * <tr>
  * <td>transitionCriteriaCreator</td>
@@ -128,8 +123,11 @@ import org.xml.sax.SAXParseException;
  * @see org.springframework.web.flow.config.FlowFactoryBean
  * 
  * @author Erwin Vervaet
+ * @author Keith Donald
  */
 public class XmlFlowBuilder extends BaseFlowBuilder {
+	
+	// recognized XML elements and attributes
 
 	private static final String ID_ATTRIBUTE = "id";
 
@@ -193,6 +191,34 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String VALUE_ELEMENT = "value";
 	
+	
+	/**
+	 * Internal helper class capturing flow artifact definition info.
+	 * 
+	 * @author Erwin Vervaet
+	 */
+	private static class FlowArtifact {
+		
+		public String bean;
+		public Class classRef;
+		public Class clazz;
+		public AutowireMode autowire = AutowireMode.DEFAULT;
+
+		public boolean isBeanRef() {
+			return StringUtils.hasText(bean);
+		}
+		
+		public boolean isClassRef() {
+			return classRef != null;
+		}
+		
+		public boolean shouldCreate() {
+			return clazz != null;
+		}
+		
+	}
+	
+	
 	private Resource location;
 
 	private boolean validating = true;
@@ -245,6 +271,29 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 	
 	/**
+	 * Set the transition criteria creator to use. This is a convenience feature to
+	 * make it easy configure the transition criteria factory for a builder which
+	 * just uses the default flow service locator (@link BeanFactoryFlowServiceLocator).
+	 * Note: do not call both this method and <code>setFlowServiceLocator()</code>
+	 * -- call one or the other. 
+	 * @param creator the transition criteria factory
+	 * 
+	 * @see BaseFlowBuilder#setFlowServiceLocator(FlowServiceLocator)
+	 */
+	public void setTransitionCriteriaCreator(TransitionCriteriaCreator creator) {
+		Assert.isInstanceOf(BeanFactoryFlowServiceLocator.class, getFlowServiceLocator(),
+				"You configured a flow service locator different from the default BeanFactoryFlowServiceLocator");
+		((BeanFactoryFlowServiceLocator)getFlowServiceLocator()).setTransitionCriteriaCreator(creator);
+	}
+	
+	/**
+	 * Returns the from-text property type conversion service used.
+	 */
+	public ConversionService getConversionService() {
+		return conversionService;
+	}
+	
+	/**
 	 * Sets the from-text property type conversion service to use for this builder.
 	 * @param conversionService the type conversion service
 	 */
@@ -288,8 +337,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	public Flow init() throws FlowBuilderException {
 		Assert.notNull(location, "location is a required property");
 		Assert.notNull(getFlowServiceLocator(), "flowServiceLocator is a required property");
-		Assert.notNull(getFlowCreator(), "flowCreator is a required property");
-		Assert.notNull(getTransitionCriteriaCreator(), "transitionCriteriaCreator is a required property");
 		try {
 			loadFlowDefinition();
 		}
@@ -323,7 +370,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		InputStream is = null;
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setValidating(this.validating);
+			factory.setValidating(isValidating());
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			docBuilder.setErrorHandler(new ErrorHandler() {
 				public void error(SAXParseException ex) throws SAXException {
@@ -338,7 +385,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 					logger.warn("Ignored XML validation warning: " + ex.getMessage(), ex);
 				}
 			});
-			docBuilder.setEntityResolver(this.entityResolver);
+			docBuilder.setEntityResolver(getEntityResolver());
 			is = location.getInputStream();
 			doc = docBuilder.parse(is);
 		}
@@ -353,16 +400,55 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			}
 		}
 	}
+	
+	/**
+	 * Parse a flow artifact definition contained in given XML element.
+	 */
+	protected FlowArtifact parseFlowArtifactDefinition(Element element) {
+		FlowArtifact res = new FlowArtifact();
+		res.bean = element.getAttribute(BEAN_ATTRIBUTE);
+		if (element.hasAttribute(CLASSREF_ATTRIBUTE)) {
+			res.classRef = (Class)new TextToClassConverter().convert(element.getAttribute(CLASSREF_ATTRIBUTE));
+		}
+		if (element.hasAttribute(CLASS_ATTRIBUTE)) {
+			res.clazz = (Class)new TextToClassConverter().convert(element.getAttribute(CLASS_ATTRIBUTE));
+		}
+		if (element.hasAttribute(AUTOWIRE_ATTRIBUTE)) {
+			try {
+				res.autowire = (AutowireMode)
+					new LabeledEnumFormatter(AutowireMode.class).parseValue(element.getAttribute(AUTOWIRE_ATTRIBUTE));
+			}
+			catch (InvalidFormatException e) {
+				throw new FlowBuilderException("Unsupported autowire mode '" + element.getAttribute(AUTOWIRE_ATTRIBUTE) + "'", e);
+			}
+		}
+		return res;
+	}
 
 	/**
 	 * Parse the XML flow definitions and construct a Flow object.
 	 * This helper method will set the "flow" property.
 	 */
 	protected void parseFlowDefinition() {
-		Element root = doc.getDocumentElement();
-		String id = root.getAttribute(ID_ATTRIBUTE);
+		Element element = doc.getDocumentElement();
+		FlowArtifact flowDef = parseFlowArtifactDefinition(element);
+		Flow flow;
+		if (flowDef.isBeanRef()) {
+			flow = getFlowServiceLocator().getFlow(flowDef.bean);
+		}
+		else if (flowDef.isClassRef()) {
+			flow = getFlowServiceLocator().getFlow(flowDef.classRef);
+		}
+		else if (flowDef.shouldCreate()) {
+			flow = getFlowServiceLocator().createFlow(flowDef.clazz, flowDef.autowire);
+		}
+		else {
+			flow = getFlowServiceLocator().createFlow(flowDef.autowire);
+		}
+		flow.setId(element.getAttribute(ID_ATTRIBUTE));
+		flow.setProperties(parseProperties(element));
 		// set the flow under construction
-		setFlow(createFlow(id, parseProperties(root)));
+		setFlow(flow);
 	}
 
 	/**
@@ -398,17 +484,43 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 		flow.setStartState(startStateId);
 	}
+	
+	/**
+	 * Parse a state definition from given element, returning given fallback state
+	 * in case no other state object is identified.
+	 */
+	protected State parseStateDefinition(Element element, Class requiredStateType, State fallbackInstance) {
+		FlowArtifact stateDef = parseFlowArtifactDefinition(element);
+		State state;
+		if (stateDef.isBeanRef()) {
+			state = getFlowServiceLocator().getState(stateDef.bean);
+		}
+		else if (stateDef.isClassRef()) {
+			state = getFlowServiceLocator().getState(stateDef.classRef);
+		}
+		else if (stateDef.shouldCreate()) {
+			state = getFlowServiceLocator().createState(stateDef.clazz, stateDef.autowire);
+		}
+		else {
+			state = fallbackInstance;
+		}
+		Assert.isInstanceOf(requiredStateType, state,
+				"The state object for the '" + element.getAttribute(ID_ATTRIBUTE)
+				+ "' state definition should subclass '" + ClassUtils.getShortName(requiredStateType) + "'");
+		return state;
+	}
 
 	/**
 	 * Parse given action state definition and add a corresponding state to
 	 * given flow.
 	 */
 	protected void parseAndAddActionState(Flow flow, Element element) {
-		String id = element.getAttribute(ID_ATTRIBUTE);
-		AnnotatedAction[] actions = parseActions(element);
-		Transition[] transitions = parseTransitions(element);
-		Map properties = parseProperties(element);
-		new ActionState(flow, id, actions, transitions, properties);
+		ActionState actionState = (ActionState)parseStateDefinition(element, ActionState.class, new ActionState());
+		actionState.setId(element.getAttribute(ID_ATTRIBUTE));
+		actionState.setFlow(flow);
+		actionState.addActions(parseAnnotatedActions(element));
+		actionState.addAll(parseTransitions(element));
+		actionState.setProperties(parseProperties(element));
 	}
 
 	/**
@@ -416,14 +528,14 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * flow.
 	 */
 	protected void parseAndAddViewState(Flow flow, Element element) {
-		String id = element.getAttribute(ID_ATTRIBUTE);
-		String viewName = null;
+		ViewState viewState = (ViewState)parseStateDefinition(element, ViewState.class, new ViewState());
+		viewState.setId(element.getAttribute(ID_ATTRIBUTE));
+		viewState.setFlow(flow);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			viewName = element.getAttribute(VIEW_ATTRIBUTE);
+			viewState.setViewName(element.getAttribute(VIEW_ATTRIBUTE));
 		}
-		Transition[] transitions = parseTransitions(element);
-		Map properties = parseProperties(element);
-		new ViewState(flow, id, viewName, transitions, properties);
+		viewState.addAll(parseTransitions(element));
+		viewState.setProperties(parseProperties(element));
 	}
 
 	/**
@@ -431,10 +543,11 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * flow.
 	 */
 	protected void parseAndAddDecisionState(Flow flow, Element element) {
-		String id = element.getAttribute(ID_ATTRIBUTE);
-		Transition[] transitions = parseIfs(element);
-		Map properties = parseProperties(element);
-		new DecisionState(flow, id, transitions, properties);
+		DecisionState decisionState = (DecisionState)parseStateDefinition(element, DecisionState.class, new DecisionState());
+		decisionState.setId(element.getAttribute(ID_ATTRIBUTE));
+		decisionState.setFlow(flow);
+		decisionState.addAll(parseIfs(element));
+		decisionState.setProperties(parseProperties(element));
 	}
 
 	/**
@@ -442,13 +555,13 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * given flow.
 	 */
 	protected void parseAndAddSubFlowState(Flow flow, Element element) {
-		String id = element.getAttribute(ID_ATTRIBUTE);
-		String flowName = element.getAttribute(FLOW_ATTRIBUTE);
-		Flow subFlow = getFlowServiceLocator().getFlow(flowName);
-		FlowAttributeMapper mapper = parseAttributeMapper(element);
-		Transition[] transitions = parseTransitions(element);
-		Map properties = parseProperties(element);
-		new SubflowState(flow, id, subFlow, mapper, transitions, properties);
+		SubflowState subflowState = (SubflowState)parseStateDefinition(element, SubflowState.class, new SubflowState());
+		subflowState.setId(element.getAttribute(ID_ATTRIBUTE));
+		subflowState.setFlow(flow);
+		subflowState.setSubflow(getFlowServiceLocator().getFlow(element.getAttribute(FLOW_ATTRIBUTE)));
+		subflowState.setAttributeMapper(parseAttributeMapper(element));
+		subflowState.addAll(parseTransitions(element));
+		subflowState.setProperties(parseProperties(element));
 	}
 
 	/**
@@ -456,70 +569,60 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * flow.
 	 */
 	protected void parseAndAddEndState(Flow flow, Element element) {
-		String id = element.getAttribute(ID_ATTRIBUTE);
-		String viewName = null;
+		EndState endState = (EndState)parseStateDefinition(element, EndState.class, new EndState());
+		endState.setId(element.getAttribute(ID_ATTRIBUTE));
+		endState.setFlow(flow);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			viewName = element.getAttribute(VIEW_ATTRIBUTE);
+			endState.setViewName(element.getAttribute(VIEW_ATTRIBUTE));
 		}
-		Map properties = parseProperties(element);
-		new EndState(flow, id, viewName, properties);
+		endState.setProperties(parseProperties(element));
 	}
 
 	/**
-	 * Parse all action definitions contained in given element.
+	 * Parse all annotated action definitions contained in given element.
 	 */
-	protected AnnotatedAction[] parseActions(Element element) {
+	protected AnnotatedAction[] parseAnnotatedActions(Element element) {
 		List actions = new LinkedList();
 		List actionElements = DomUtils.getChildElementsByTagName(element, ACTION_ELEMENT);
 		Iterator it = actionElements.iterator();
 		while (it.hasNext()) {
-			actions.add(parseAction((Element)it.next()));
+			actions.add(parseAnnotatedAction((Element)it.next()));
 		}
 		return (AnnotatedAction[])actions.toArray(new AnnotatedAction[actions.size()]);
 	}
 
 	/**
-	 * Parse an action definition and return the corresponding object.
+	 * Parse an annotated action definition and return the corresponding object.
 	 */
-	protected AnnotatedAction parseAction(Element element) {
-		AnnotatedAction action = new AnnotatedAction((Action)getAction(element));
+	protected AnnotatedAction parseAnnotatedAction(Element element) {
+		AnnotatedAction action = new AnnotatedAction((Action)parseAction(element));
 		if (element.hasAttribute(NAME_ATTRIBUTE)) {
 			action.setName(element.getAttribute(NAME_ATTRIBUTE));
 		}
 		if (element.hasAttribute(METHOD_ATTRIBUTE)) {
+			// direct support for multi-actions
 			action.setProperty(MultiAction.DefaultActionExecuteMethodNameResolver.METHOD_PROPERTY,
 					element.getAttribute(METHOD_ATTRIBUTE));
 		}
-		parseProperties(element, action);
+		parseAndAddProperties(element, action);
 		return action;
 	}
 
 	/**
-	 * Parse a flow service definition contained in given element.
-	 * @param element the definition element
-	 * @return the flow service
-	 * @throws FlowBuilderException when the service definition cannot be parsed
+	 * Parse an action definition and return the corresponding object.
 	 */
-	protected Action getAction(Element element) throws FlowBuilderException {
-		String actionId = element.getAttribute(BEAN_ATTRIBUTE);
-		if (StringUtils.hasText(actionId)) {
-			return getFlowServiceLocator().getAction(actionId);
+	protected Action parseAction(Element element) throws FlowBuilderException {
+		FlowArtifact actionDef = parseFlowArtifactDefinition(element);
+		if (actionDef.isBeanRef()) {
+			return getFlowServiceLocator().getAction(actionDef.bean);
 		}
-		else {
-			String actionClassName = element.getAttribute(CLASS_ATTRIBUTE);
-			if (StringUtils.hasText(actionClassName)) {
-				return getFlowServiceLocator().createAction(toClass(actionClassName), parseAutowireMode(element));
-			}
-			else {
-				// try service lookup by type
-				actionClassName = element.getAttribute(CLASSREF_ATTRIBUTE);
-				if (StringUtils.hasText(actionClassName)) {
-					return getFlowServiceLocator().getAction(toClass(actionClassName));
-				}
-			}
+		else if (actionDef.isClassRef()) {
+			return getFlowServiceLocator().getAction(actionDef.classRef);
 		}
-		throw new FlowBuilderException("Illegal action definition with id '" + actionId + "' of type '"
-				+ ClassUtils.getShortName(Action.class) + "'");
+		else if (actionDef.shouldCreate()) {
+			return getFlowServiceLocator().createAction(actionDef.clazz, actionDef.autowire);
+		}
+		throw new FlowBuilderException(this, "Illegal action definition: '" + element + "'");
 	}
 	
 	/**
@@ -527,7 +630,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Map parseProperties(Element element) {
 		MapAttributeSource properties = new MapAttributeSource();
-		parseProperties(element, properties);
+		parseAndAddProperties(element, properties);
 		return properties.getAttributeMap();
 	}
 
@@ -535,7 +638,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * Parse all properties defined as nested elements of given element
 	 * and add them to given set of properties.
 	 */
-	protected void parseProperties(Element element, MutableAttributeSource properties) {
+	protected void parseAndAddProperties(Element element, MutableAttributeSource properties) {
 		List propertyElements = DomUtils.getChildElementsByTagName(element, PROPERTY_ELEMENT);
 		for (int i = 0; i < propertyElements.size(); i++) {
 			parseAndAddProperty((Element)propertyElements.get(i), properties);
@@ -560,12 +663,16 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		properties.setAttribute(name, convert(element, value));
 	}
 	
-	private Object convert(Element element, Object value) {
-		if (element.hasAttribute(TYPE_ATTRIBUTE)) {
+	/**
+	 * Do type conversion for given property value.
+	 */
+	protected Object convert(Element element, Object value) {
+		if (conversionService != null && element.hasAttribute(TYPE_ATTRIBUTE)) {
 			// do value type conversion
 			Class targetClass = conversionService.withAlias(element.getAttribute(TYPE_ATTRIBUTE));
 			return conversionService.getConversionExecutor(String.class, targetClass).execute(value);
-		} else {
+		}
+		else {
 			return value;
 		}
 	}
@@ -582,21 +689,36 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 		return (Transition[])transitions.toArray(new Transition[transitions.size()]);
 	}
-
+	
 	/**
 	 * Parse a transition definition and return a corresponding Transition
 	 * object.
 	 */
 	protected Transition parseTransition(Element element) {
-		String on = element.getAttribute(ON_ATTRIBUTE);
-		String to = element.getAttribute(TO_ATTRIBUTE);
+		FlowArtifact transitionDef = parseFlowArtifactDefinition(element);
+		Transition transition;
+		if (transitionDef.isBeanRef()) {
+			transition = getFlowServiceLocator().getTransition(transitionDef.bean);
+		}
+		else if (transitionDef.isClassRef()) {
+			transition = getFlowServiceLocator().getTransition(transitionDef.classRef);
+		}
+		else if (transitionDef.shouldCreate()) {
+			transition = getFlowServiceLocator().createTransition(transitionDef.clazz, transitionDef.autowire);
+		}
+		else {
+			transition = new Transition();
+		}
+		transition.setMatchingCriteria(getFlowServiceLocator().createTransitionCriteria(
+				element.getAttribute(ON_ATTRIBUTE), transitionDef.autowire));
+		transition.setTargetStateId(element.getAttribute(TO_ATTRIBUTE));
 		TransitionCriteriaChain executionCriteria = new TransitionCriteriaChain();
-		AnnotatedAction[] actions = parseActions(element);
+		AnnotatedAction[] actions = parseAnnotatedActions(element);
 		for (int i = 0; i < actions.length; i++) {
 			executionCriteria.add(new ActionTransitionCriteria(actions[i]));
 		}
-		Transition transition = new Transition(getTransitionCriteriaCreator().create(on), to, parseProperties(element));
 		transition.setExecutionCriteria(executionCriteria);
+		transition.setProperties(parseProperties(element));
 		return transition;
 	}
 
@@ -619,16 +741,18 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * object.
 	 */
 	protected Transition[] parseIf(Element element) {
+		FlowArtifact ifDef = parseFlowArtifactDefinition(element);
 		String criteria = element.getAttribute(TEST_ATTRIBUTE);
 		String trueStateId = element.getAttribute(THEN_ATTRIBUTE);
 		String falseStateId = element.getAttribute(ELSE_ATTRIBUTE);
-		Transition thenTransition = new Transition(getTransitionCriteriaCreator().create(criteria), trueStateId);
-		if (!StringUtils.hasText(falseStateId)) {
-			return new Transition[] { thenTransition };
-		}
-		else {
+		Transition thenTransition = new Transition(
+				getFlowServiceLocator().createTransitionCriteria(criteria, ifDef.autowire), trueStateId);
+		if (StringUtils.hasText(falseStateId)) {
 			Transition elseTransition = new Transition(new WildcardTransitionCriteria(), falseStateId);
 			return new Transition[] { thenTransition, elseTransition };
+		}
+		else {
+			return new Transition[] { thenTransition };
 		}
 	}
 
@@ -643,15 +767,18 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 		else {
 			Element attributeMapperElement = (Element)attributeMapperElements.get(0);
-			if (StringUtils.hasText(attributeMapperElement.getAttribute(BEAN_ATTRIBUTE))) {
-				return (FlowAttributeMapper)getFlowServiceLocator().
-					getFlowAttributeMapper(attributeMapperElement.getAttribute(BEAN_ATTRIBUTE));
-			} else if (StringUtils.hasText(attributeMapperElement.getAttribute(CLASS_ATTRIBUTE))) {
-				return (FlowAttributeMapper)getFlowServiceLocator().createFlowAttributeMapper(toClass(attributeMapperElement.getAttribute(CLASS_ATTRIBUTE)),
-						parseAutowireMode(element));
-			} else if (StringUtils.hasText(attributeMapperElement.getAttribute(CLASSREF_ATTRIBUTE))) {
-				return (FlowAttributeMapper)getFlowServiceLocator().getFlowAttributeMapper(toClass(attributeMapperElement.getAttribute(CLASSREF_ATTRIBUTE)));
-			} else {
+			FlowArtifact mapperDef = parseFlowArtifactDefinition(attributeMapperElement);
+			if (mapperDef.isBeanRef()) {
+				return getFlowServiceLocator().getFlowAttributeMapper(mapperDef.bean);
+			}
+			else if (mapperDef.isClassRef()) {
+				return getFlowServiceLocator().getFlowAttributeMapper(mapperDef.classRef);
+			}
+			else if (mapperDef.shouldCreate()) {
+				return getFlowServiceLocator().createFlowAttributeMapper(mapperDef.clazz, mapperDef.autowire);
+			}
+			else {
+				// inline definition of an mappings
 				ParameterizableFlowAttributeMapper attributeMapper = new ParameterizableFlowAttributeMapper();
 				List inputElements = DomUtils.getChildElementsByTagName(attributeMapperElement, INPUT_ELEMENT);
 				if (inputElements.size() > 0) {
@@ -676,6 +803,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 	}
 
+	/**
+	 * Parse a single inline attribute mapping definition.
+	 */
 	protected Mapping parseMapping(Element element) {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		String value = element.getAttribute(VALUE_ATTRIBUTE);
@@ -683,27 +813,17 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		if (StringUtils.hasText(name)) {
 			if (StringUtils.hasText(as)) {
 				return new Mapping(name, as);
-			} else {
+			}
+			else {
 				return new Mapping(name);
 			}
-		} else if (StringUtils.hasText(value)) {
+		}
+		else if (StringUtils.hasText(value)) {
 			Assert.hasText(as, "The 'as' attribute is required with the 'value' attribute");
 			return new Mapping(value, as);
-		} else {
-			throw new FlowBuilderException("Name or value is required");
 		}
-	}
-	
-	private AutowireMode parseAutowireMode(Element element) {
-		try {
-			return (AutowireMode)new LabeledEnumFormatter(AutowireMode.class).parseValue(element.getAttribute(AUTOWIRE_ATTRIBUTE));
+		else {
+			throw new FlowBuilderException(this, "Name or value is required in a mapping definition");
 		}
-		catch (InvalidFormatException e) {
-			throw new FlowBuilderException("Unsupported autowire mode '" + element.getAttribute(AUTOWIRE_ATTRIBUTE) + "'", e);
-		}
-	}
-
-	private Class toClass(String className) {
-		return (Class)new TextToClassConverter().convert(className);
 	}
 }

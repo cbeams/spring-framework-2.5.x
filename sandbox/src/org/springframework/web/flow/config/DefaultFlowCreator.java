@@ -18,26 +18,18 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.Flow;
 
 /**
- * Abstract factory that encapsulates the creation of a <code>Flow</code>
- * instance. The instance may be <code>Flow</code>, in the default case, or a
- * custom extension.
- * <p>
- * This interface is useful when you require specific <code>Flow</code>
- * specializations that are shared between different <code>FlowBuilder</code>
- * implementations.
+ * The default FlowCreator implementation. This just instantiates the
+ * <code>Flow</code> class. If you need a custom <code>Flow</code>
+ * implementation, configure the BaseFlowBuilder with a custom
+ * <code>FlowCreator</code> factory.
  * 
  * @see org.springframework.web.flow.Flow
- * @see org.springframework.web.flow.config.FlowBuilder
  * 
  * @author Keith Donald
- * @author Erwin Vervaet
  */
-public interface FlowCreator {
-
-	/**
-	 * Creates a new <code>Flow</code> instance.
-	 * @return The <code>Flow</code> (or a custom specialization of
-	 *         <code>Flow</code>)
-	 */
-	public Flow createFlow();
+public class DefaultFlowCreator implements FlowCreator {
+	
+	public Flow createFlow() {
+		return new Flow();
+	}
 }

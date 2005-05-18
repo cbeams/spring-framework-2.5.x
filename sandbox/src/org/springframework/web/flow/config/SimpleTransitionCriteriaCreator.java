@@ -35,12 +35,6 @@ import org.springframework.web.flow.WildcardTransitionCriteria;
  */
 public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreator {
 
-	/**
-	 * Event id value ("*") that will cause the transition to match
-	 * on any event.
-	 */
-	public static final String WILDCARD_EVENT_ID = "*";
-
 	public TransitionCriteria create(String encodedCriteria) {
 		return createDefaultTransitionCriteria(encodedCriteria);
 	}
@@ -54,7 +48,7 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 * matches given event id exactly.
 	 */
 	protected TransitionCriteria createDefaultTransitionCriteria(String encodedCriteria) {
-		if (WILDCARD_EVENT_ID.equals(encodedCriteria)) {
+		if (WildcardTransitionCriteria.WILDCARD_EVENT_ID.equals(encodedCriteria)) {
 			return new WildcardTransitionCriteria();
 		}
 		else {
@@ -68,6 +62,9 @@ public class SimpleTransitionCriteriaCreator implements TransitionCriteriaCreato
 	 * Simple, default transition criteria that matches on an eventId and
 	 * nothing else. Specifically, if the last event that occured has id
 	 * ${eventId}, this criteria will return true.
+	 * 
+	 * @author Erwin Vervaet
+	 * @author Keith Donald
 	 */
 	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
 

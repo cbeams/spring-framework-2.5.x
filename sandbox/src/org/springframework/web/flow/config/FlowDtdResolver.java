@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -27,6 +28,8 @@ import org.xml.sax.SAXException;
  * EntityResolver implementation for the Spring web flow DTD, to load the DTD
  * from the classpath. The implementation is similar to that of the
  * <code>org.springframework.beans.factory.xml.BeansDtdResolver</code>.
+ * 
+ * @see org.springframework.web.flow.config.XmlFlowBuilder
  * 
  * @author Erwin Vervaet
  */
@@ -45,7 +48,8 @@ public class FlowDtdResolver implements EntityResolver {
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
 				return source;
-			} catch (IOException ex) {
+			}
+			catch (IOException ex) {
 				// fall trough below
 			}
 		}

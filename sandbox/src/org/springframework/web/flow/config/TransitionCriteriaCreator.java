@@ -19,14 +19,16 @@ import org.springframework.web.flow.TransitionCriteria;
 
 /**
  * Interface for factories that can create <code>TransitionCriteria</code>
- * objects. This is typically used by a flow builder to create the transition
- * criteria objects that guard transition execution.
+ * objects. This is typically used by a flow builder (via its service locator)
+ * to create the transition criteria objects that guard transition execution.
  * <p>
  * The factory is completely free in deciding how the result objects are
  * created: e.g. by parsing an expression, looking up an object in a bean
  * factory, etc.
  * 
  * @see org.springframework.web.flow.TransitionCriteria
+ * @see org.springframework.web.flow.config.FlowBuilder
+ * @see org.springframework.web.flow.config.FlowServiceLocator
  * 
  * @author Rob Harraop
  * @author Erwin Vervaet

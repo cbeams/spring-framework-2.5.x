@@ -15,20 +15,23 @@
  */
 package org.springframework.web.flow.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
 
 /**
  * Abstract base implementation of a flow builder defining common functionality
  * needed by most concrete flow builder implementations.
+ * <p>
+ * The builder will use a <code>FlowServiceLocator</code> to locate and create
+ * any required flow related artifacts.
+ * 
+ * @see org.springframework.web.flow.config.FlowServiceLocator
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -38,26 +41,10 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * The service locator that locates flow related artifacts by identifier or
-	 * implementation class, as needed by this builder.
+	 * The service locator that locates and creates flow related artifacts by
+	 * identifier or implementation class, as needed by this builder.
 	 */
 	private FlowServiceLocator flowServiceLocator = new BeanFactoryFlowServiceLocator();
-
-	/**
-	 * The collection of default flow execution listeners to attach the flow
-	 * produced by this builder.
-	 */
-	private Collection flowExecutionListeners = new ArrayList(3);
-
-	/**
-	 * An abstract factory for flow creation.
-	 */
-	private FlowCreator flowCreator = new DefaultFlowCreator();
-
-	/**
-	 * Factory that creates transition criteria.
-	 */
-	private TransitionCriteriaCreator transitionCriteriaCreator = new SimpleTransitionCriteriaCreator();
 
 	/**
 	 * The <code>Flow</code> produced by this builder.
@@ -72,57 +59,17 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 
 	/**
 	 * Create a base flow builder which will pull services (other flow defs,
-	 * actions, model mappers, etc.) from the service locator.
+	 * actions, model mappers, etc.) from given service locator.
 	 * @param flowServiceLocator the locator
 	 */
 	protected BaseFlowBuilder(FlowServiceLocator flowServiceLocator) {
 		setFlowServiceLocator(flowServiceLocator);
 	}
 
-	/**
-	 * Create a base flow builder which will pull services from the service
-	 * locator, and delegate construction of the Flow instance to the specified
-	 * <code>FlowCreator</code>
-	 * @param flowServiceLocator the locator
-	 * @param flowCreator the flow creator
-	 */
-	protected BaseFlowBuilder(FlowServiceLocator flowServiceLocator, FlowCreator flowCreator) {
-		setFlowServiceLocator(flowServiceLocator);
-		setFlowCreator(flowCreator);
-	}
-
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (flowServiceLocator instanceof BeanFactoryFlowServiceLocator) {
-			((BeanFactoryFlowServiceLocator)flowServiceLocator).setBeanFactory(beanFactory);
+		if (flowServiceLocator instanceof BeanFactoryAware) {
+			((BeanFactoryAware)flowServiceLocator).setBeanFactory(beanFactory);
 		}
-	}
-
-	/**
-	 * Returns the flow creation strategy to use.
-	 */
-	protected FlowCreator getFlowCreator() {
-		return flowCreator;
-	}
-
-	/**
-	 * Set the flow creation strategy to use.
-	 */
-	public void setFlowCreator(FlowCreator flowCreator) {
-		this.flowCreator = flowCreator;
-	}
-
-	/**
-	 * Returns the factory used to create transition criteria.
-	 */
-	public TransitionCriteriaCreator getTransitionCriteriaCreator() {
-		return transitionCriteriaCreator;
-	}
-
-	/**
-	 * Set the factory used to create transition criteria.
-	 */
-	public void setTransitionCriteriaCreator(TransitionCriteriaCreator transitionCriteriaCreator) {
-		this.transitionCriteriaCreator = transitionCriteriaCreator;
 	}
 
 	/**
@@ -136,6 +83,7 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 	 * Set the flow service location strategy to use.
 	 */
 	public void setFlowServiceLocator(FlowServiceLocator flowServiceLocator) {
+		Assert.notNull(flowServiceLocator, "The flow service locator is required");
 		this.flowServiceLocator = flowServiceLocator;
 	}
 
@@ -155,32 +103,5 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 
 	public Flow getResult() {
 		return getFlow();
-	}
-
-	/**
-	 * Create the instance of the Flow built by this builder. Subclasses may
-	 * override to return a custom Flow implementation, or simply pass in a
-	 * custom FlowCreator implementation.
-	 * 
-	 * @param id the flow identifier
-	 * @param properties optional, additional flow properties
-	 * @return the flow built by this builder
-	 */
-	protected Flow createFlow(String id, Map properties) {
-		return this.flowCreator.createFlow(id, properties);
-	}
-
-	/**
-	 * The default FlowCreator implementation. This just instantiates the
-	 * <code>Flow</code> class. If you need a custom <code>Flow</code>
-	 * implementation, configure the BaseFlowBuilder with a custom
-	 * <code>FlowCreator</code> factory.
-	 * 
-	 * @see org.springframework.web.flow.Flow
-	 */
-	public static class DefaultFlowCreator implements FlowCreator {
-		public Flow createFlow(String flowId, Map properties) {
-			return new Flow(flowId, properties);
-		}
 	}
 }

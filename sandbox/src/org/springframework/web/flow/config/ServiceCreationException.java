@@ -18,7 +18,7 @@ package org.springframework.web.flow.config;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
- * Exception thrown when a flow service cannot be created.
+ * Exception thrown when a flow artifact cannot be created.
  *  
  * @author Erwin Vervaet
  */

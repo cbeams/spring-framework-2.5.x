@@ -25,7 +25,6 @@ import org.springframework.web.flow.Flow;
  * <code>FlowBuilder</code> builder to construct the Flow. This is the core
  * top level class for assembling a <code>Flow</code> from configuration
  * information.
- * 
  * <p>
  * As an example, a Spring-managed FlowFactoryBean definition might look like
  * this:
@@ -53,7 +52,7 @@ import org.springframework.web.flow.Flow;
  *    &lt;/bean&gt;
  * </pre>
  * 
- * </p>
+ * <p>
  * Flow factory beans, as POJOs, can also be used outside of a Spring bean
  * factory, in a standalone, programmatic fashion:
  * 
@@ -119,6 +118,7 @@ public class FlowFactoryBean implements FactoryBean, InitializingBean {
 	 * Set the builder the factory will use to build flows.
 	 */
 	public void setFlowBuilder(FlowBuilder flowBuilder) {
+		Assert.notNull(flowBuilder, "The flow builder is required");
 		this.flowBuilder = flowBuilder;
 	}
 

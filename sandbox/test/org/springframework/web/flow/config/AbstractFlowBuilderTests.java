@@ -29,6 +29,7 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
@@ -53,6 +54,10 @@ public class AbstractFlowBuilderTests extends TestCase {
 			public Action getAction(String actionId) throws ServiceLookupException {
 				return new NoOpAction();
 			}
+			
+			public Flow createFlow(AutowireMode autowireMode) throws ServiceLookupException {
+				return new Flow();
+			}
 
 			public Flow getFlow(String flowDefinitionId, Class flowBuilderImplementation) throws ServiceLookupException {
 				if (flowDefinitionId.equals(PERSON_DETAILS)) {
@@ -72,6 +77,11 @@ public class AbstractFlowBuilderTests extends TestCase {
 				else {
 					throw new ServiceLookupException(FlowAttributeMapper.class, id, null);
 				}
+			}
+			
+			public TransitionCriteria createTransitionCriteria(String encodedCriteria, AutowireMode autowireMode)
+					throws ServiceLookupException {
+				return new SimpleTransitionCriteriaCreator().create(encodedCriteria);
 			}
 		});
 		Flow flow = new FlowFactoryBean(master).getFlow();

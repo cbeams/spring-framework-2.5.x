@@ -24,7 +24,6 @@ import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.execution.FlowLocator;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
-
 /**
  * Service locator interface used by flow builders at configuration time to
  * retrieve needed artifacts.
@@ -39,6 +38,17 @@ import org.springframework.web.flow.execution.ServiceLookupException;
 public interface FlowServiceLocator extends FlowLocator {
 	
 	// dealing with flows
+	
+	/**
+	 * Request that the registry backed by this locator instantiate the default
+	 * flow implementation class, using the given autowire policy.
+	 * Note: not all registries may support this advanced feature (Spring does
+	 * though ;-)).
+	 * @param autowireMode the autowire policy
+	 * @return the instantiated (and possibly autowired) flow
+	 * @throws ServiceLookupException when the flow cannot be created
+	 */
+	public Flow createFlow(AutowireMode autowireMode) throws ServiceLookupException;
 	
 	/**
 	 * Request that the registry backed by this locator instantiate the flow

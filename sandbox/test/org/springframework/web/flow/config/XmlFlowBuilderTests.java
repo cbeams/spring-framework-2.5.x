@@ -32,6 +32,7 @@ import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.SimpleViewDescriptorCreator;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
@@ -160,6 +161,10 @@ public class XmlFlowBuilderTests extends TestCase {
 			}
 			throw new ServiceLookupException(Action.class, actionId, null);
 		}
+		
+		public Flow createFlow(AutowireMode autowireMode) throws ServiceLookupException {
+			return new Flow();
+		}
 
 		public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 			if ("subFlow1".equals(flowDefinitionId) || "subFlow2".equals(flowDefinitionId)) {
@@ -180,6 +185,11 @@ public class XmlFlowBuilderTests extends TestCase {
 				};
 			}
 			throw new ServiceLookupException(FlowAttributeMapper.class, flowModelMapperId, null);
+		}
+		
+		public TransitionCriteria createTransitionCriteria(String encodedCriteria, AutowireMode autowireMode)
+				throws ServiceLookupException {
+			return new SimpleTransitionCriteriaCreator().create(encodedCriteria);
 		}
 	};
 

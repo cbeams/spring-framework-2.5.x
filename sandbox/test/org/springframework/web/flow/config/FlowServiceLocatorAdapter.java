@@ -36,6 +36,11 @@ public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 		throw new UnsupportedOperationException();
 	}
 	
+	public Flow createFlow(AutowireMode autowireMode)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
 	public Flow createFlow(Class implementationClass, AutowireMode autowireMode)
 			throws ServiceLookupException {
 		throw new UnsupportedOperationException();

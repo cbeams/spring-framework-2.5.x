@@ -157,19 +157,12 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		super(flowServiceLocator);
 	}
 
-	/**
-	 * Create an instance of an abstract flow builder, using the specified
-	 * service locator and flow creator strategy.
-	 * @param flowServiceLocator the service locator
-	 * @param flowCreator the flow creation strategy
-	 */
-	protected AbstractFlowBuilder(FlowServiceLocator flowServiceLocator, FlowCreator flowCreator) {
-		super(flowServiceLocator, flowCreator);
-	}
-
 	public final Flow init() throws FlowBuilderException {
-		setFlow(createFlow(flowId(), flowProperties()));
-		return getFlow();
+		Flow flow = getFlowServiceLocator().createFlow(AutowireMode.DEFAULT);
+		flow.setId(flowId());
+		flow.setProperties(flowProperties());
+		setFlow(flow);
+		return flow;
 	}
 	
 	/**
@@ -903,7 +896,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (eventId->stateId)
 	 */
 	protected Transition on(String eventId, String stateId) {
-		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId);
+		return new Transition(
+				getFlowServiceLocator().createTransitionCriteria(eventId, AutowireMode.DEFAULT), stateId);
 	}
 
 	/**
@@ -918,7 +912,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (eventId->stateId)
 	 */
 	protected Transition on(String eventId, String stateId, Map properties) {
-		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId, properties);
+		return new Transition(
+				getFlowServiceLocator().createTransitionCriteria(eventId, AutowireMode.DEFAULT), stateId, properties);
 	}
 
 	/**
@@ -934,7 +929,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (eventId+executionCriteria->stateId)
 	 */
 	protected Transition on(String eventId, String stateId, TransitionCriteria executionCriteria) {
-		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId);
+		Transition res = new Transition(
+				getFlowServiceLocator().createTransitionCriteria(eventId, AutowireMode.DEFAULT), stateId);
+		res.setExecutionCriteria(executionCriteria);
+		return res;
 	}
 
 	/**
@@ -951,7 +949,10 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (eventId+executionCriteria->stateId)
 	 */
 	protected Transition on(String eventId, String stateId, TransitionCriteria executionCriteria, Map properties) {
-		return new Transition(getTransitionCriteriaCreator().create(eventId), stateId, properties);
+		Transition res = new Transition(
+				getFlowServiceLocator().createTransitionCriteria(eventId, AutowireMode.DEFAULT), stateId, properties);
+		res.setExecutionCriteria(executionCriteria);
+		return res;
 	}
 
 	/**

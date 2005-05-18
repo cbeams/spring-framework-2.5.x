@@ -22,6 +22,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.binding.format.InvalidFormatException;
+import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.flow.Action;
@@ -42,6 +44,8 @@ import org.springframework.web.flow.execution.ServiceLookupException;
 public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {
 
 	private AutowireMode defaultAutowireMode = AutowireMode.NONE;
+	
+	private FlowCreator flowCreator = new DefaultFlowCreator();
 	
 	private TransitionCriteriaCreator transitionCriteriaCreator = new SimpleTransitionCriteriaCreator();
 	
@@ -64,10 +68,6 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		setBeanFactory(beanFactory);
 	}
 
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-
 	/**
 	 * Returns the bean factory used to lookup services.
 	 */
@@ -76,6 +76,10 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			throw new IllegalStateException("The bean factory reference has not yet been set -- call setBeanFactory()");
 		}
 		return beanFactory;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
 	}
 
 	/**
@@ -96,6 +100,31 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 	
 	/**
+	 * Convenience setter that performs a string to AutowireMode conversion for you.
+	 * @param encodedAutowireMode the encoded autowire mode string
+	 * @throws InvalidFormatException the encoded value was invalid
+	 */
+	public void setDefaultAutowireModeAsString(String encodedAutowireMode) throws InvalidFormatException {
+		this.defaultAutowireMode =
+			(AutowireMode)new LabeledEnumFormatter(AutowireMode.class).parseValue(encodedAutowireMode);
+	}
+	
+	/**
+	 * Returns the factory used to create Flow objects.
+	 */
+	public FlowCreator getFlowCreator() {
+		return flowCreator;
+	}
+	
+	/**
+	 * Set the factory used to create flow objects.
+	 */
+	public void setFlowCreator(FlowCreator flowCreator) {
+		Assert.notNull(flowCreator, "The flow creator is required");
+		this.flowCreator = flowCreator;
+	}
+	
+	/**
 	 * Returns the factory used to create transition criteria.
 	 */
 	public TransitionCriteriaCreator getTransitionCriteriaCreator() {
@@ -106,8 +135,11 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	 * Set the factory used to create transition criteria.
 	 */
 	public void setTransitionCriteriaCreator(TransitionCriteriaCreator transitionCriteriaCreator) {
+		Assert.notNull(transitionCriteriaCreator, "The transition criteria creator is required");
 		this.transitionCriteriaCreator = transitionCriteriaCreator;
 	}
+	
+	// helper methods
 	
 	/**
 	 * Returns the bean factory used to lookup services.
@@ -163,7 +195,9 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		if (autowireMode == AutowireMode.DEFAULT) {
 			autowireService(service, getDefaultAutowireMode());
 		}
-		getAutowireCapableBeanFactory().autowireBeanProperties(service, autowireMode.getShortCode(), false);
+		else if (autowireMode != AutowireMode.NONE) {
+			getAutowireCapableBeanFactory().autowireBeanProperties(service, autowireMode.getShortCode(), false);
+		}
 	}
 	
 	/**
@@ -199,6 +233,14 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		catch (BeansException e) {
 			throw new ServiceLookupException(expectedClass, implementationClass, e);
 		}
+	}
+	
+	// implementing FlowServiceLocator
+	
+	public Flow createFlow(AutowireMode autowireMode) throws ServiceLookupException {
+		Flow flow = getFlowCreator().createFlow();
+		autowireService(flow, autowireMode);
+		return flow;
 	}
 	
 	public Flow createFlow(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException {
