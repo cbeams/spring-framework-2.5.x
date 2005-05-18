@@ -77,6 +77,7 @@ public class ActionTransitionCriteria implements TransitionCriteria {
 	 * @param trueEventId the true result event ID
 	 */
 	public void setTrueEventId(String trueEventId) {
+		Assert.hasText(trueEventId, "the trueEventId is required");
 		this.trueEventId = trueEventId;
 	}
 
@@ -90,10 +91,9 @@ public class ActionTransitionCriteria implements TransitionCriteria {
 	
 	public boolean test(RequestContext context) {
 		context.setProperties(action);
-		Event result;
 		try {
-			result = this.action.getTargetAction().execute(context);
-			return getTrueEventId().equals(result.getId());
+			Event result = this.action.getTargetAction().execute(context);
+			return result != null && getTrueEventId().equals(result.getId());
 		}
 		catch (Exception e) {
 			throw new ActionExecutionException(context.getFlowContext().getCurrentState(), action, e);

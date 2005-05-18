@@ -50,17 +50,6 @@ public class AnnotatedAction extends AnnotatedObject {
 	public static final String DESCRIPTION_PROPERTY = "description";
 
 	/**
-	 * Property storing the name of the method that should handle action
-	 * execution when using a multi-action. A multi-action is an action that
-	 * groups several action execute methods together on a single class. The
-	 * methods follow the following signature:
-	 * <pre>
-	 *    public Event ${method}(RequestContext context)
-	 * </pre>
-	 */
-	public static final String METHOD_PROPERTY = "method";
-	
-	/**
 	 * The action to execute.
 	 */
 	private Action targetAction;
@@ -153,25 +142,6 @@ public class AnnotatedAction extends AnnotatedObject {
 	 */
 	public void setDescription(String description) {
 		setProperty(DESCRIPTION_PROPERTY, description);
-	}
-
-	/**
-	 * Returns the name of the handler method to invoke on the target action
-	 * instance to handle action execution. Only used by multi-actions.
-	 * @return the execute method name
-	 */
-	public String getMethod() {
-		return (String)getProperty(METHOD_PROPERTY);
-	}
-
-	/**
-	 * Sets the name of the handler method on the target action instance to
-	 * invoke when this action is executed. Only used by multi-actions.
-	 * @param methodName the method name, with the signature
-	 *        <code>Event ${methodName}(RequestContext context)</code>
-	 */
-	public void setMethod(String methodName) {
-		setProperty(METHOD_PROPERTY, methodName);
 	}
 
 	public String toString() {

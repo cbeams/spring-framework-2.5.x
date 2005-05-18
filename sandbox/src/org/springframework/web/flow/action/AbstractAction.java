@@ -48,6 +48,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 */
 	public static final String ERROR_RESULT_EVENT_ID = "error";
 	
+	
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	public void afterPropertiesSet() {
@@ -82,7 +83,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * Typically called as part of return, for example:
 	 * 
 	 * <pre>
-	 *    protected Event doExecuteAction(RequestContext context) {
+	 *    protected Event doExecute(RequestContext context) {
 	 *      // do some work
 	 *      if (some condition) {
 	 *        return result(&quot;success&quot;);
@@ -107,7 +108,7 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	 * return, for example:
 	 * 
 	 * <pre>
-	 *    protected Event doExecuteAction(RequestContext context) {
+	 *    protected Event doExecute(RequestContext context) {
 	 *      // do some work
 	 *      Map resultParameters = new HashMap();
 	 *      resultParameters.put("parameterName", "parameterValue");
@@ -160,18 +161,18 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	/**
 	 * Pre-action-execution hook, subclasses may override. If this method
 	 * returns a non-<code>null</code> event, the
-	 * <code>doExecuteAction()</code> method will <b>not</b> be called and
+	 * <code>doExecute()</code> method will <b>not</b> be called and
 	 * the returned event will be used to select a transition to trigger in the
 	 * calling action state. If this method returns <code>null</code>,
-	 * <code>doExecuteAction()</code> will be called to obtain an action
+	 * <code>doExecute()</code> will be called to obtain an action
 	 * result event.
 	 * <p>
 	 * This implementation just returns <code>null</code>.
 	 * @param context the action execution context, for accessing and setting
 	 *        data in "flow scope" or "request scope"
 	 * @return the non-<code>null</code> action result, in which case the
-	 *         <code>doExecuteAction()</code> will not be called, or
-	 *         <code>null</code> if the <code>doExecuteAction()</code>
+	 *         <code>doExecute()</code> will not be called, or
+	 *         <code>null</code> if the <code>doExecute()</code>
 	 *         method should be called to obtain the action result
 	 * @throws Exception an <b>unrecoverable</b> exception occured, either
 	 *         checked or unchecked

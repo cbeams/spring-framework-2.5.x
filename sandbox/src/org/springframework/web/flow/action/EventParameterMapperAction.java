@@ -20,13 +20,14 @@ import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
+import org.springframework.util.Assert;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 
 /**
- * Maps parameters in an event to attributes <i>set</i> in flow scope.
+ * Maps parameters in an event to attributes <i>set</i> in flow or request scope.
  * This action always returns the
  * {@link org.springframework.web.flow.action.AbstractAction#success() success}
  * event.
@@ -135,6 +136,7 @@ public class EventParameterMapperAction extends AbstractAction {
 	 * request scope.
 	 */
 	public void setTargetScope(ScopeType targetScope) {
+		Assert.notNull(targetScope, "The targetScope is required");
 		this.targetScope = targetScope;
 	}
 

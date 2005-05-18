@@ -37,7 +37,7 @@ import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
  * is not an expression this class delegates to the super class to get an
  * instance of the default <code>TransitionCriteria</code> for the event name.
  *
- * @see org.springframework.web.flow.TransitionCriteria 
+ * @see OgnlTransitionCriteriaCreator.OgnlTransitionCriteria
  * @see org.springframework.web.flow.config.SimpleTransitionCriteriaCreator
  * 
  * @author Rob Harrop

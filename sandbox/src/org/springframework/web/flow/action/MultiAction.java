@@ -15,8 +15,6 @@
  */
 package org.springframework.web.flow.action;
 
-import java.lang.reflect.Method;
-
 import org.springframework.binding.AttributeSource;
 import org.springframework.util.DispatchMethodInvoker;
 import org.springframework.web.flow.Event;
@@ -135,16 +133,8 @@ public class MultiAction extends AbstractAction {
 	}
 
 	protected Event doExecute(RequestContext context) throws Exception {
-		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context, this);
+		String actionExecuteMethodName = this.executeMethodNameResolver.getMethodName(context);
 		return (Event)this.executeMethodDispatcher.dispatch(actionExecuteMethodName, new Object[] { context });
-	}
-
-	/**
-	 * Find the action execution method with given name on the delegate object
-	 * using reflection.
-	 */
-	protected Method getActionExecuteMethod(String actionExecuteMethodName) {
-		return (Method)this.executeMethodDispatcher.getDispatchMethod(actionExecuteMethodName);
 	}
 
 	/**
@@ -159,10 +149,9 @@ public class MultiAction extends AbstractAction {
 		/**
 		 * Resolve a method name from given flow execution request context.
 		 * @param context the flow execution request context
-		 * @param action the multi-action requesting method name resolution
 		 * @return the name of the method that should handle action execution
 		 */
-		public String getMethodName(RequestContext context, MultiAction action);
+		public String getMethodName(RequestContext context);
 	}
 
 	/**
@@ -185,7 +174,7 @@ public class MultiAction extends AbstractAction {
 		 */
 		public static final String METHOD_PROPERTY = "method";
 
-		public String getMethodName(RequestContext context, MultiAction action) {
+		public String getMethodName(RequestContext context) {
 			AttributeSource properties = context.getProperties();
 			if (properties.containsAttribute(METHOD_PROPERTY)) {
 				// use specified execute method name

@@ -21,6 +21,8 @@ import org.springframework.core.NestedRuntimeException;
  * Exception thrown if a form object could not be retrieved via its identifier.
  * Provides information about the form object class and the identifier.
  * 
+ * @see org.springframework.web.flow.action.FormAction
+ * 
  * @author Keith Donald 
  * @author Juergen Hoeller
  * @author Erwin Vervaet
@@ -95,8 +97,8 @@ public class FormObjectRetrievalFailureException extends NestedRuntimeException 
 	 * Will work for both Class objects and String names.
 	 */
 	public String getFormObjectClassName() {
-		return (this.formObjectClass instanceof Class ? ((Class)this.formObjectClass).getName() : this.formObjectClass
-				.toString());
+		return (this.formObjectClass instanceof Class ?
+				((Class)this.formObjectClass).getName() : this.formObjectClass.toString());
 	}
 
 	/**

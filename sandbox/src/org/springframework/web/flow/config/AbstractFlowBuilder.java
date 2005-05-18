@@ -32,6 +32,7 @@ import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.WildcardTransitionCriteria;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
+import org.springframework.web.flow.action.MultiAction;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
@@ -629,7 +630,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected AnnotatedAction method(String methodName, Action action) {
 		Map properties = new HashMap(1);
-		properties.put(AnnotatedAction.METHOD_PROPERTY, methodName);
+		properties.put(MultiAction.DefaultActionExecuteMethodNameResolver.METHOD_PROPERTY, methodName);
 		AnnotatedAction stateAction = new AnnotatedAction(action, properties);
 		return stateAction;
 	}

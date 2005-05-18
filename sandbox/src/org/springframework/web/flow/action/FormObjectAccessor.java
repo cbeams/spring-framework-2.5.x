@@ -22,8 +22,11 @@ import org.springframework.web.flow.Scope;
 import org.springframework.web.flow.ScopeType;
 
 /**
- * Convenience wrapper that encapsulates logic on how to retrieve and expose
+ * Convenience helper that encapsulates logic on how to retrieve and expose
  * form objects and associated errors to and from a flow execution context.
+ * 
+ * @see org.springframework.web.flow.RequestContext
+ * @see org.springframework.validation.Errors
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
@@ -35,6 +38,7 @@ public class FormObjectAccessor {
 	 * flow context by the default form setup and bind and validate actions.
 	 */
 	public static final String FORM_OBJECT_ALIAS = "#formObject";
+	
 
 	private RequestContext context;
 

@@ -52,6 +52,7 @@ import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.WildcardTransitionCriteria;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
+import org.springframework.web.flow.action.MultiAction;
 import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
 import org.springframework.web.flow.support.TransitionCriteriaChain;
 import org.w3c.dom.Document;
@@ -486,7 +487,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			action.setName(element.getAttribute(NAME_ATTRIBUTE));
 		}
 		if (element.hasAttribute(METHOD_ATTRIBUTE)) {
-			action.setMethod(element.getAttribute(METHOD_ATTRIBUTE));
+			action.setProperty(MultiAction.DefaultActionExecuteMethodNameResolver.METHOD_PROPERTY,
+					element.getAttribute(METHOD_ATTRIBUTE));
 		}
 		parseProperties(element, action);
 		return action;

@@ -167,6 +167,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 * configured validator instance, to support piecemeal wizard page validation.
 	 */
 	public static final String VALIDATOR_METHOD_PROPERTY = "validatorMethod";
+	
 
 	/**
 	 * The name the form object should be exposed under.
