@@ -136,10 +136,11 @@
 <!ATTLIST transition to IDREF #REQUIRED>
 
 <!--
-	Defines a view state: a state where a view will be rendered.
-	Transitions triggered by the view lead on to other states.
+	Defines a view state: a state where a view will be rendered and control will be 
+	returned to the user.
+	Transitions triggered by user input from the view lead on to other states.
 -->
-<!ELEMENT view-state ( transition+, property* )>
+<!ELEMENT view-state ( transition+, property*, action* )>
 
 <!--
 	Unique identifier of an view state; must be unique to this flow.
@@ -147,13 +148,33 @@
 <!ATTLIST view-state id ID #REQUIRED>
 
 <!--
-	Optional name of the view that will be rendered when the view state is entered.
-	When not present, this view state will be a marker view state.
-	A marker view state does not actually render a view, but just returns
-	control to the client. Use a marker view state when an action has
-	already generated the response.
+	Name of the view to render when the view state is entered.
+	When no view name is provided, this view state will act as a marker view state.  A marker
+	view state does not render a view, it only pauses the flow and returns control 
+	the client. Use a marker end state when another	object is expected to generate the response.
 -->
 <!ATTLIST view-state view CDATA #IMPLIED>
+
+<!--
+	The fully qualified class name of a custom ViewDescriptor creator strategy.  Use this when
+	when you want full, dynamic control over the selection of the view and the population of
+	its supporting data model.
+-->
+<!ATTLIST view-state view-creator CDATA #IMPLIED>
+
+<!--
+	Name of the view to redirect to when the view state is entered.  The view may be passed
+	anything in the executing flow's RequestContext by using expressions like:
+	'myView?fooId=${requestContext.flowScope.foo.id}'.
+-->
+<!ATTLIST view-state redirect CDATA #IMPLIED>
+
+<!--
+	The fully qualified class name of a custom ViewDescriptor creator strategy.  Use this when
+	when you want full, dynamic control over the selection of the view and the population of
+	the data model.
+-->
+<!ATTLIST view-state view-creator CDATA #IMPLIED>
 
 <!--
 	Defines a decision state: a state that will evaluate one or more expressions to
