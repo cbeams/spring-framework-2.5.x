@@ -15,27 +15,30 @@
  */
 package org.springframework.samples.flowlauncher;
 
+import java.util.Map;
+
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.State;
+import org.springframework.web.flow.execution.EnterStateVetoException;
 import org.springframework.web.flow.support.FlowExecutionListenerAdapter;
 
 public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 	
 	public static final String INPUT_ATTRIBUTE = "input";
-
-	public void requestSubmitted(RequestContext context) {
+	
+	public void sessionStarting(RequestContext context, State startState, Map input) throws EnterStateVetoException {
 		/*
-		 * On each request coming into the flow, check if there is input data in the
+		 * Each time a flow is starting, check if there is input data in the
 		 * request and if so, put it in flow scope.
 		 * You could also do this in a "captureInput" action, but using a flow execution
 		 * listener is more flexible.
 		 */
-		String input = (String)context.getSourceEvent().getParameter(INPUT_ATTRIBUTE);
-		if (StringUtils.hasText(input)) {
+		String inputParam = (String)context.getSourceEvent().getParameter(INPUT_ATTRIBUTE);
+		if (StringUtils.hasText(inputParam)) {
 			//put the input in the flow scope
-			context.getFlowScope().setAttribute(INPUT_ATTRIBUTE, input);
+			input.put(INPUT_ATTRIBUTE, inputParam);
 		}
-		context.getFlowScope().assertAttributePresent(INPUT_ATTRIBUTE);
 	}
 
 }

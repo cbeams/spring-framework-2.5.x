@@ -392,7 +392,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 */
 	protected ViewDescriptor prepareViewDescriptor(ViewDescriptor viewDescriptor, String flowExecutionId,
 			FlowExecution flowExecution) {
-		if (flowExecution.isActive()) {
+		if (flowExecution.isActive() && viewDescriptor!=null) {
 			// make the unique flow execution id available in the model
 			viewDescriptor.addObject(FLOW_EXECUTION_ID_ATTRIBUTE, flowExecutionId);
 			// make the flow execution itself available in the model

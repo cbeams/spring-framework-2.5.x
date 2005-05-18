@@ -20,6 +20,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map;
@@ -250,6 +251,15 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 	public boolean isActive() {
 		return !executingFlowSessions.isEmpty();
 	}
+	
+	public boolean isRootFlowActive() {
+		if (isActive()) {
+			return getActiveSession().isRoot();
+		}
+		else {
+			return false;
+		}
+	}
 
 	/**
 	 * Check that this flow execution is active and throw an exception if it's not.
@@ -268,7 +278,7 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 		updateLastRequestTimestamp();
 		StateContext context = createStateContext(event);
 		getListeners().fireRequestSubmitted(context);
-		ViewDescriptor viewDescriptor = context.spawn(rootFlow.getStartState(), null);
+		ViewDescriptor viewDescriptor = context.spawn(rootFlow.getStartState(), new HashMap());
 		if (isActive()) {
 			getActiveSessionInternal().setStatus(FlowSessionStatus.PAUSED);
 			getListeners().firePaused(context);

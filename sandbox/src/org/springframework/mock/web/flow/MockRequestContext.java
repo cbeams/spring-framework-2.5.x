@@ -145,6 +145,10 @@ public class MockRequestContext implements RequestContext {
 		public boolean isActive() {
 			return false;
 		}
+		
+		public boolean isRootFlowActive() {
+			return false;
+		}
 	}
 	
 	/**

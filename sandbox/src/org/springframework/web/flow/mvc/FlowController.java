@@ -146,6 +146,6 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * @return a new ModelAndView object
 	 */
 	protected ModelAndView toModelAndView(ViewDescriptor viewDescriptor) {
-		return new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
+		return viewDescriptor==null ? null : new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
 	}
 }
