@@ -52,7 +52,7 @@ public class ViewState extends TransitionableState {
 	/**
 	 * The state to transition to if the the view state criteria fails.
 	 */
-	private Transition toDisplayCriteriaFailedState;
+	private Transition onDisplayCriteriaFailed;
 	
 	/**
 	 * Default constructor for bean style usage.
@@ -213,7 +213,7 @@ public class ViewState extends TransitionableState {
 		if (displayCriteria != null) {
 			boolean result = displayCriteria.test(context);
 			if (!result) {
-				toDisplayCriteriaFailedState.execute(context);
+				onDisplayCriteriaFailed.execute(context);
 			}
 		}
 		if (isMarker()) {
@@ -228,7 +228,8 @@ public class ViewState extends TransitionableState {
 	}
 
 	protected void createToString(ToStringCreator creator) {
-		creator.append("viewDescriptorCreator", this.viewDescriptorCreator);
+		creator.append("viewDescriptorCreator", this.viewDescriptorCreator).append("displayCriteria", this.displayCriteria).
+			append("onDisplayCriteriaFailed", this.onDisplayCriteriaFailed);
 		super.createToString(creator);
 	}
 }
