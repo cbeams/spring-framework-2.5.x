@@ -27,17 +27,17 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
- * Web controller for the Spring web MVC framework that routes incoming requests to one or more
- * managed web flows.  Requests into the web flow system are managed using a configurable 
- * {@link ServletFlowExecutionManager}.  Consult the JavaDoc of that class for more
- * information on how requests are processed.
+ * Web controller for the Spring web MVC framework that routes incoming requests to one
+ * or more managed web flows. Requests into the web flow system are managed using a
+ * configurable {@link ServletFlowExecutionManager}. Consult the JavaDoc of that class
+ * for more information on how requests are processed.
  * <p>
- * Note that a single FlowController may manage executions for all flows of your application--simply
- * parameterize this controller from view code with the <code>_flowId</code> to execute.  See the flowLauncher
- * sample application for an example of this.
+ * Note that a single FlowController may manage executions for all flows of your application
+ * -- simply parameterize this controller from view code with the <code>_flowId</code> to
+ * execute. See the flowLauncher sample application for an example of this.
  * <p>
  * Configuration note: you may achieve fine-grained control over flow execution management by 
- * passing in a configured flow execution manager instance.  Alternatively, if this
+ * passing in a configured flow execution manager instance. Alternatively, if this
  * controller should manage executions in the default manner for a single flow definition,
  * simply configure the flow property.
  * <p>
@@ -56,11 +56,12 @@ import org.springframework.web.servlet.mvc.AbstractController;
  * <tr>
  * <td>flow</td>
  * <td>nulls</td>
- * <td>Configures a single Flow definition to manage.  Note this property should only be set as a
+ * <td>Configures a single Flow definition to manage. Note this property should only be set as a
  * convenience if fine-grained configuration of the flowExecutionManager is not neccessary.</td>
  * </tr>
  * </table>
  * 
+ * @see org.springframework.web.flow.Flow
  * @see org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager
  * 
  * @author Erwin Vervaet
@@ -84,9 +85,19 @@ public class FlowController extends AbstractController implements InitializingBe
 	}
 
 	/**
+	 * Returns the flow execution manager used by this controller.
+	 * @return the HTTP flow execution manager
+	 */
+	protected ServletFlowExecutionManager getFlowExecutionManager() {
+		return flowExecutionManager;
+	}
+
+	/**
 	 * Configures the flow execution manager implementation to use.
-	 * Note: do not call both this method and setFlow(Flow) -- call one or the other. 
+	 * Note: do not call both this method and <code>setFlow()</code> -- call one or the other. 
 	 * @param manager the flow execution manager.
+	 * 
+	 * @see #setFlow(Flow)
 	 */
 	public void setFlowExecutionManager(ServletFlowExecutionManager manager) {
 		this.flowExecutionManager = manager;
@@ -94,9 +105,13 @@ public class FlowController extends AbstractController implements InitializingBe
 
 	/**
 	 * Convenience setter that configures a single flow definition for this controller to
-	 * manage.  Note: do not call both this method and setFlowExecutionManager(..) -- call one
+	 * manage. This is a convenience feature to make it easy configure the flow for
+	 * a controller which just uses the default flow execution manager.
+	 * Note: do not call both this method and <code>setFlowExecutionManager()</code> -- call one
 	 * or the other.
 	 * @param flow the flow that this controller will manage
+	 * 
+	 * @see #setFlowExecutionManager(ServletFlowExecutionManager)
 	 */
 	public void setFlow(Flow flow) {
 		this.flowExecutionManager.setFlow(flow);
@@ -106,21 +121,13 @@ public class FlowController extends AbstractController implements InitializingBe
 	 * Set default properties for this controller.
 	 */
 	protected void initDefaults() {
-		setCacheSeconds(0);
+		setCacheSeconds(0); // no caching
 		setFlowExecutionManager(new ServletFlowExecutionManager());
 	}
 	
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(this.flowExecutionManager, "The http servlet flow execution manager is required");
 		this.flowExecutionManager.setBeanFactory(getApplicationContext());
-	}
-
-	/**
-	 * Returns the flow execution manager used by this controller.
-	 * @return the HTTP flow execution manager
-	 */
-	protected ServletFlowExecutionManager getFlowExecutionManager() {
-		return flowExecutionManager;
 	}
 
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
