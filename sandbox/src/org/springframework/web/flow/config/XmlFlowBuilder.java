@@ -495,7 +495,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Parse a flow service definition contained in given element.
 	 * @param element the definition element
-	 * @param serviceType type of the flow service to parse (Action, FlowAttributeMapper)
 	 * @return the flow service
 	 * @throws FlowBuilderException when the service definition cannot be parsed
 	 */

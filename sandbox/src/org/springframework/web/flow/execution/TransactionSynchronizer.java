@@ -30,7 +30,7 @@ public interface TransactionSynchronizer {
 	/**
 	 * Is the caller participating in the application transaction currently
 	 * active in the flow execution.
-	 * @param the flow execution request context
+	 * @param context the flow execution request context
 	 * @param end indicates whether or not the transaction should end after
 	 *        checking it
 	 * @return true if it is participating in the active transaction, false
@@ -41,7 +41,7 @@ public interface TransactionSynchronizer {
 	/**
 	 * Assert that there is an active application transaction in the flow
 	 * execution and that the caller is participating in it.
-	 * @param the flow execution request context
+	 * @param context the flow execution request context
 	 * @param end indicates whether or not the transaction should end after
 	 *        checking it
 	 * @throws IllegalStateException there is no active transaction in the
@@ -51,13 +51,13 @@ public interface TransactionSynchronizer {
 
 	/**
 	 * Start a new transaction in the flow execution.
-	 * @param the flow execution request context
+	 * @param context the flow execution request context
 	 */
 	public void beginTransaction(RequestContext context);
 
 	/**
 	 * End the active transaction in the flow execution.
-	 * @param the flow execution request context
+	 * @param context the flow execution request context
 	 */
 	public void endTransaction(RequestContext context);
 

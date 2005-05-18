@@ -259,7 +259,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state triggers the rendering of a view template when entered.
 	 * @param stateId the <code>ViewState</code> id; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param viewDescriptor the factory to produce a descriptor noting the name 
+	 * @param creator the factory to produce a descriptor noting the name 
 	 *        of the logical view to render; this name will be mapped to a physical
 	 *        resource template such as a JSP when the ViewState is entered and control
 	 *        returns to the front controller
@@ -832,7 +832,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * view descriptor creator to produce a view to display when entered as part of a 
 	 * root flow termination.
 	 * @param endStateId the end state id
-	 * @param viewName the view descriptor creator
+	 * @param creator the view descriptor creator
 	 * @return the end state
 	 */
 	protected EndState addEndState(String endStateId, ViewDescriptorCreator creator) throws IllegalArgumentException {
@@ -844,7 +844,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * view descriptor creator to produce a view to display when entered as part of a 
 	 * root flow termination.
 	 * @param endStateId the end state id
-	 * @param viewName the view descriptor creator
+	 * @param creator the view descriptor creator
 	 * @param properties additional properties describing the state
 	 * @return the end state
 	 */

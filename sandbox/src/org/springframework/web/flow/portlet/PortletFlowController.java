@@ -114,7 +114,7 @@ public class PortletFlowController extends AbstractController implements BeanFac
 
 	/**
 	 * Configures the flow execution manager implementation to use.
-	 * @param flowExecutor the flow execution manager.
+	 * @param manager the flow execution manager.
 	 */
 	public void setFlowExecutionManager(PortletFlowExecutionManager manager) {
 		this.flowExecutionManager = manager;
