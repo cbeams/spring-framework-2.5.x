@@ -25,16 +25,17 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
+import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.execution.portlet.PortletFlowExecutionManager;
+import org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager;
 import org.springframework.web.portlet.support.AbstractController;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Portlet controller for the Spring Portlet MVC framework that handles requests
- * using a web flow. Requests are managed using an
- * {@link PortletFlowExecutionManager}. Consult the JavaDoc of that class for
- * more information on how requests are processed.
+ * using a web flow. Requests are managed using a {@link PortletFlowExecutionManager}.
+ * Consult the JavaDoc of that class for more information on how requests are processed.
  * <p>
  * Configuration note: you can configure the flow controller by passing in a
  * properly configured flow execution manager. To avoid unnecessary top-level
@@ -56,6 +57,12 @@ import org.springframework.web.servlet.ModelAndView;
  * <td>flowExecutionManager</td>
  * <td>{@link org.springframework.web.flow.execution.portlet.PortletFlowExecutionManager default}</td>
  * <td>Configures the portlet flow execution manager implementation to use.</td>
+ * </tr>
+ * <tr>
+ * <td>flow</td>
+ * <td>nulls</td>
+ * <td>Configures a single Flow definition to manage. Note this property should only be set as a
+ * convenience if fine-grained configuration of the flowExecutionManager is not neccessary.</td>
  * </tr>
  * </table>
  * 
@@ -92,9 +99,9 @@ public class PortletFlowController extends AbstractController implements BeanFac
 	/**
 	 * Create a new FlowController.
 	 */
-	public PortletFlowController(PortletFlowExecutionManager flowExecutor) {
-		setFlowExecutionManager(flowExecutor);
+	public PortletFlowController(PortletFlowExecutionManager manager) {
 		initDefaults();
+		setFlowExecutionManager(manager);
 	}
 
 	/**
@@ -114,20 +121,40 @@ public class PortletFlowController extends AbstractController implements BeanFac
 
 	/**
 	 * Configures the flow execution manager implementation to use.
-	 * @param manager the flow execution manager.
+	 * Note: do not call both this method and <code>setFlow()</code> -- call one or the other. 
+	 * @param manager the flow execution manager
+	 * 
+	 * @see #setFlow(Flow)
 	 */
 	public void setFlowExecutionManager(PortletFlowExecutionManager manager) {
 		this.flowExecutionManager = manager;
+	}
+
+	/**
+	 * Convenience setter that configures a single flow definition for this controller to
+	 * manage. This is a convenience feature to make it easy configure the flow for
+	 * a controller which just uses the default flow execution manager.
+	 * Note: do not call both this method and <code>setFlowExecutionManager()</code> -- call one
+	 * or the other.
+	 * @param flow the flow that this controller will manage
+	 * 
+	 * @see #setFlowExecutionManager(ServletFlowExecutionManager)
+	 */
+	public void setFlow(Flow flow) {
+		this.flowExecutionManager.setFlow(flow);
+	}
+	
+	/**
+	 * Returns this controller's bean factory.
+	 */
+	protected BeanFactory getBeanFactory() {
+		return this.beanFactory;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 	}
 	
-	protected BeanFactory getBeanFactory() {
-		return this.beanFactory;
-	}
-
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(this.flowExecutionManager, "The portlet flow execution manager is required");
 		this.flowExecutionManager.setBeanFactory(getBeanFactory());

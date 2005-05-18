@@ -10,7 +10,7 @@ import org.springframework.web.flow.execution.servlet.ServletEvent;
 /**
  * A client flow event originating from a Struts environment. Provides access
  * to the Struts ActionMapping and ActionForm objects, as well as all
- * HttpServlet information.
+ * HttpServletRequest and HttpServletResponse information.
  * 
  * @author Keith Donald
  */

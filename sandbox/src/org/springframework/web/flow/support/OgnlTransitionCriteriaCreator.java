@@ -36,8 +36,8 @@ import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
  * <code>encodedCriteria</code> value passed to <code>create(String)</code>
  * is not an expression this class delegates to the super class to get an
  * instance of the default <code>TransitionCriteria</code> for the event name.
- * 
- * @see OgnlTransitionCriteriaCreator
+ *
+ * @see org.springframework.web.flow.TransitionCriteria 
  * @see org.springframework.web.flow.config.SimpleTransitionCriteriaCreator
  * 
  * @author Rob Harrop

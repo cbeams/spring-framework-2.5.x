@@ -64,7 +64,7 @@ public class FlowActionMapping extends ActionMapping {
 	private String flowId;
 
 	/**
-	 * The encoded flow storage strategy to use - supported values:
+	 * The encoded flow storage strategy to use -- supported values:
 	 * ("default", "session", "sessionContinuation", "clientContinuation")
 	 */
 	private String storage = STORAGE_DEFAULT;

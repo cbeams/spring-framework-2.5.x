@@ -23,7 +23,8 @@ import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.TransitionCriteria;
 
 /**
- * An ordered chain of <code>TransitionCriteria</code>.
+ * An ordered chain of <code>TransitionCriteria</code>. Iterates over each element
+ * in the chain, continues until one returns false or the list is exhausted.
  * 
  * @author Keith Donald
  */
@@ -55,10 +56,6 @@ public class TransitionCriteriaChain implements TransitionCriteria {
 		this.chain.add(criteria);
 	}
 
-	/* Iterates over each element in the chain, continues until one returns false or the
-	 * list is exhausted.
-	 * @see org.springframework.web.flow.TransitionCriteria#test(org.springframework.web.flow.RequestContext)
-	 */
 	public boolean test(RequestContext context) {
 		Iterator it = chain.iterator();
 		while (it.hasNext()) {

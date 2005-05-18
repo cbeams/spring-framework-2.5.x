@@ -85,6 +85,14 @@ public class FlowController extends AbstractController implements InitializingBe
 	}
 
 	/**
+	 * Set default properties for this controller.
+	 */
+	protected void initDefaults() {
+		setCacheSeconds(0); // no caching
+		setFlowExecutionManager(new ServletFlowExecutionManager());
+	}
+
+	/**
 	 * Returns the flow execution manager used by this controller.
 	 * @return the HTTP flow execution manager
 	 */
@@ -95,7 +103,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	/**
 	 * Configures the flow execution manager implementation to use.
 	 * Note: do not call both this method and <code>setFlow()</code> -- call one or the other. 
-	 * @param manager the flow execution manager.
+	 * @param manager the flow execution manager
 	 * 
 	 * @see #setFlow(Flow)
 	 */
@@ -117,14 +125,6 @@ public class FlowController extends AbstractController implements InitializingBe
 		this.flowExecutionManager.setFlow(flow);
 	}
 
-	/**
-	 * Set default properties for this controller.
-	 */
-	protected void initDefaults() {
-		setCacheSeconds(0); // no caching
-		setFlowExecutionManager(new ServletFlowExecutionManager());
-	}
-	
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(this.flowExecutionManager, "The http servlet flow execution manager is required");
 		this.flowExecutionManager.setBeanFactory(getApplicationContext());
