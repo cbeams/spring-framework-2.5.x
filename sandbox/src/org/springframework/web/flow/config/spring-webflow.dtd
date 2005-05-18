@@ -31,6 +31,33 @@
 <!ATTLIST webflow start-state IDREF #REQUIRED>
 
 <!--
+	Identifier of the flow implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
+-->
+<!ATTLIST webflow bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified implementation class of the flow exported in the configured registry.
+	For this "by type" flow lookup to work, there must be exactly one Flow implementation
+	exported of that type.
+-->
+<!ATTLIST webflow classref CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the flow implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
+-->
+<!ATTLIST webflow class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the flow 
+	implementation with the class attribute.
+-->
+<!ATTLIST webflow autowire (no | byName | byType | constructor | autodetect | default) "default">
+
+<!--
 	Defines an action state: a state where an action is executed.
 	Transitions triggered by the action(s) lead on to other states.
 -->
@@ -40,6 +67,33 @@
 	Unique identifier of an action state; must be unique to this flow.
 -->
 <!ATTLIST action-state id ID #REQUIRED>
+
+<!--
+	Identifier of the action state implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
+-->
+<!ATTLIST action-state bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified implementation class of the action state exported in the configured registry.
+	For this "by type" flow lookup to work, there must be exactly one ActionState implementation
+	exported of that type.
+-->
+<!ATTLIST action-state classref CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the action state implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
+-->
+<!ATTLIST action-state class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the action state 
+	implementation with the class attribute.
+-->
+<!ATTLIST action-state autowire (no | byName | byType | constructor | autodetect | default) "default">
 
 <!--
 	Defines a single action to be executed.
@@ -54,7 +108,14 @@
 <!ATTLIST action bean CDATA #IMPLIED>
 
 <!--
-	Fully qualified class of the Action implementation. An instance of the
+	Fully qualified implementation class of the action exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one Action implementation
+	exported of that type.
+-->
+<!ATTLIST action classref CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the action implementation. An instance of the
 	class will be instantiated and possibly autowired depending on the value of the
 	autowire attribute.
 -->
@@ -65,13 +126,6 @@
 	implementation with the class attribute.
 -->
 <!ATTLIST action autowire (no | byName | byType | constructor | autodetect | default) "default">
-
-<!--
-	Fully qualified implementation class of the Action exported in the configured registry.
-	For this "by type" action lookup to work, there must be exactly one Action implementation
-	exported of that type.
--->
-<!ATTLIST action classref CDATA #IMPLIED>
 
 <!--
 	Optional name qualifier for the action. When specified, the action will
@@ -136,11 +190,38 @@
 <!ATTLIST transition to IDREF #REQUIRED>
 
 <!--
+	Identifier of the transition implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
+-->
+<!ATTLIST transition bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified implementation class of the transition exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one Transition implementation
+	exported of that type.
+-->
+<!ATTLIST transition classref CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the transition implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
+-->
+<!ATTLIST transition class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the transition 
+	implementation with the class attribute.
+-->
+<!ATTLIST transition autowire (no | byName | byType | constructor | autodetect | default) "default">
+
+<!--
 	Defines a view state: a state where a view will be rendered and control will be 
 	returned to the user.
 	Transitions triggered by user input from the view lead on to other states.
 -->
-<!ELEMENT view-state ( transition+, property*, action* )>
+<!ELEMENT view-state ( transition+, property* )>
 
 <!--
 	Unique identifier of an view state; must be unique to this flow.
@@ -156,25 +237,31 @@
 <!ATTLIST view-state view CDATA #IMPLIED>
 
 <!--
-	The fully qualified class name of a custom ViewDescriptor creator strategy.  Use this when
-	when you want full, dynamic control over the selection of the view and the population of
-	its supporting data model.
+	Identifier of the view state implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
 -->
-<!ATTLIST view-state view-creator CDATA #IMPLIED>
+<!ATTLIST view-state bean CDATA #IMPLIED>
 
 <!--
-	Name of the view to redirect to when the view state is entered.  The view may be passed
-	anything in the executing flow's RequestContext by using expressions like:
-	'myView?fooId=${requestContext.flowScope.foo.id}'.
+	Fully qualified implementation class of the view state exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one ViewState implementation
+	exported of that type.
 -->
-<!ATTLIST view-state redirect CDATA #IMPLIED>
+<!ATTLIST view-state classref CDATA #IMPLIED>
 
 <!--
-	The fully qualified class name of a custom ViewDescriptor creator strategy.  Use this when
-	when you want full, dynamic control over the selection of the view and the population of
-	the data model.
+	Fully qualified class of the view state implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
 -->
-<!ATTLIST view-state view-creator CDATA #IMPLIED>
+<!ATTLIST view-state class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the view state 
+	implementation with the class attribute.
+-->
+<!ATTLIST view-state autowire (no | byName | byType | constructor | autodetect | default) "default">
 
 <!--
 	Defines a decision state: a state that will evaluate one or more expressions to
@@ -186,6 +273,33 @@
 	Unique identifier of this decision state; must be unique to this flow.
 -->
 <!ATTLIST decision-state id ID #REQUIRED>
+
+<!--
+	Identifier of the decision state implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
+-->
+<!ATTLIST decision-state bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified implementation class of the decision state exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one DecisionState implementation
+	exported of that type.
+-->
+<!ATTLIST decision-state classref CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the decision state implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
+-->
+<!ATTLIST decision-state class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the decision state 
+	implementation with the class attribute.
+-->
+<!ATTLIST decision-state autowire (no | byName | byType | constructor | autodetect | default) "default">
 
 <!--
 	A transition specification that defines a criteria expression and a state to
@@ -229,6 +343,33 @@
 <!ATTLIST subflow-state flow CDATA #REQUIRED>
 
 <!--
+	Identifier of the subflow state implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
+-->
+<!ATTLIST subflow-state bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified implementation class of the subflow state exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one SubflowState implementation
+	exported of that type.
+-->
+<!ATTLIST subflow-state classref CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the subflow state implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
+-->
+<!ATTLIST subflow-state class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the subflow state 
+	implementation with the class attribute.
+-->
+<!ATTLIST subflow-state autowire (no | byName | byType | constructor | autodetect | default) "default">
+
+<!--
 	An optional mapper that will map attributes from the parent flow to/from the spawned subflow. 
 -->
 <!ELEMENT attribute-mapper ( input*, output* )>
@@ -239,6 +380,13 @@
 	to the <ref bean="myBean"/> notation of the Spring beans DTD.
 -->
 <!ATTLIST attribute-mapper bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified implementation class of the flow attribute mapper exported
+	in the configured registry. For this "by type" mapper lookup to work, there must
+	be exactly one mapper implementation exported of that type.
+-->
+<!ATTLIST attribute-mapper classref CDATA #IMPLIED>
 
 <!--
 	Fully qualified class of the flow attribute mapper implementation. An
@@ -254,13 +402,6 @@
 <!ATTLIST attribute-mapper autowire (no | byName | byType | constructor | autodetect | default) "default">
 
 <!--
-	Fully qualified implementation class of the flow attribute mapper exported
-	in the configured registry. For this "by type" mapper lookup to work, there must
-	be exactly one mapper implementation exported of that type.
--->
-<!ATTLIST attribute-mapper classref CDATA #IMPLIED>
-
-<!--
 	A single input mapping that maps an attribute from this flow to the subflow.
 -->
 <!ELEMENT input EMPTY>
@@ -270,12 +411,6 @@
 	Use this OR the value attribute, not both.
 -->
 <!ATTLIST input name CDATA #IMPLIED>
-
-<!--
-	The source type of the attribute in this flow to map into the subflow.  This type
-	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
--->
-<!ATTLIST input source-type CDATA #IMPLIED>
 
 <!--
 	An expression for the attribute value in this flow's request context to
@@ -294,12 +429,6 @@
 <!ATTLIST input as CDATA #IMPLIED>
 
 <!--
-	The target type of the attribute in the subflow.  This type
-	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
--->
-<!ATTLIST input target-type CDATA #IMPLIED>
-
-<!--
 	A single output mapping that maps data from the subflow back up to this flow 
 	when it resumes.
 -->
@@ -310,12 +439,6 @@
 	Use this OR the value attribute, not both.
 -->
 <!ATTLIST output name CDATA #IMPLIED>
-
-<!--
-	The source type of the attribute in the subflow to map to this flow.  This type
-	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
--->
-<!ATTLIST output source-type CDATA #IMPLIED>
 
 <!--
 	An expression for the attribute value in the subflow's request context to
@@ -334,12 +457,6 @@
 <!ATTLIST output as CDATA #IMPLIED>
 
 <!--
-	The target type of the attribute in this flow.  This type
-	string may be an alias (e.g 'int') or a fully-qualified class (e.g. 'java.lang.Integer')
--->
-<!ATTLIST input target-type CDATA #IMPLIED>
-
-<!--
 	Defines an end state: a state that terminates the flow.
 -->
 <!ELEMENT end-state ( property* )>
@@ -356,3 +473,30 @@
 	Use a marker end state when another object is expected to generate the response.
 -->
 <!ATTLIST end-state view CDATA #IMPLIED>
+
+<!--
+	Identifier of the end state implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
+-->
+<!ATTLIST end-state bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified implementation class of the end state exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one EndState implementation
+	exported of that type.
+-->
+<!ATTLIST end-state classref CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the end state implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
+-->
+<!ATTLIST end-state class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the end state 
+	implementation with the class attribute.
+-->
+<!ATTLIST end-state autowire (no | byName | byType | constructor | autodetect | default) "default">
