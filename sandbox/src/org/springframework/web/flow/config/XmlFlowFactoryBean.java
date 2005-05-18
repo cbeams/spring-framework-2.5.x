@@ -37,6 +37,11 @@ import org.springframework.util.Assert;
  * <td>Specifies the XML file location from which the flow definition is loaded.
  * This is a required property.</td>
  * </tr>
+ * <tr>
+ * <td>transitionCriteriaCreator</td>
+ * <td><i>{@link org.springframework.web.flow.config.SimpleTransitionCriteriaCreator}</i></td>
+ * <td>Set the factory that creates transition criteria.</td>
+ * </tr>
  * </table>
  * 
  * @see org.springframework.web.flow.config.XmlFlowBuilder
@@ -69,7 +74,14 @@ public class XmlFlowFactoryBean extends FlowFactoryBean implements BeanFactoryAw
 	public void setBeanFactory(BeanFactory beanFactory) {
 		getXmlFlowBuilder().setBeanFactory(beanFactory);
 	}
-	
+
+	/**
+	 * Set the transition criteria creator to use.
+	 */
+	public void setTransitionCriteriaCreator(TransitionCriteriaCreator creator) {
+		getXmlFlowBuilder().setTransitionCriteriaCreator(creator);
+	}
+
 	/**
 	 * Returns the XML based flow builder used by this factory bean.
 	 */
