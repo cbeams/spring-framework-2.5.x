@@ -181,6 +181,21 @@ public class ViewState extends TransitionableState {
 	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
 		this.viewDescriptorCreator = creator;
 	}
+	
+	/**
+	 * Returns the factory to produce a descriptor about the view to render in
+	 * this view state.
+	 */
+	public ViewDescriptorCreator getViewDescriptorCreator() {
+		return viewDescriptorCreator;
+	}
+	
+	/**
+	 * Returns true if this view state has no associated view, false otherwise.
+	 */
+	public boolean isMarker() {
+		return viewDescriptorCreator == null;
+	}
 
 	/**
 	 * Sets the display criteria to determine if this view state should pause 
@@ -201,21 +216,6 @@ public class ViewState extends TransitionableState {
 	}
 	
 	/**
-	 * Returns the factory to produce a descriptor about the view to render in
-	 * this view state.
-	 */
-	public ViewDescriptorCreator getViewDescriptorCreator() {
-		return viewDescriptorCreator;
-	}
-	
-	/**
-	 * Returns true if this view state has no associated view, false otherwise.
-	 */
-	public boolean isMarker() {
-		return viewDescriptorCreator == null;
-	}
-
-	/**
 	 * Specialization of State's <code>doEnter</code> template method
 	 * that executes behaviour specific to this state type in polymorphic
 	 * fashion.
@@ -228,16 +228,19 @@ public class ViewState extends TransitionableState {
 	 *         render the results of the state execution
 	 */
 	protected ViewDescriptor doEnter(StateContext context) {
+		// handle display criteria
 		if (displayCriteria != null) {
 			boolean result = displayCriteria.test(context);
 			if (!result) {
 				if (onDisplayCriteriaFailed != null) {
-					onDisplayCriteriaFailed.execute(context);
-				} else {
+					return onDisplayCriteriaFailed.execute(context);
+				}
+				else {
 					throw new IllegalStateException("Display criteria failed but no handler transition set");
 				}
 			}
 		}
+		
 		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning a view descriptor null object; no view to render");
