@@ -183,6 +183,24 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
+	 * Sets the display criteria to determine if this view state should pause 
+	 * the flow and request that a view be rendered.
+	 * @param displayCriteria the display criteria
+	 */
+	public void setDisplayCriteria(TransitionCriteria displayCriteria) {
+		this.displayCriteria = displayCriteria;
+	}
+	
+	/**
+	 * Set the transition to execute if the display criteria fails.
+	 * @param transition the transition
+	 */
+	public void setOnDisplayCriteriaFailed(Transition transition) {
+		transition.setSourceState(this);
+		this.onDisplayCriteriaFailed = transition;
+	}
+	
+	/**
 	 * Returns the factory to produce a descriptor about the view to render in
 	 * this view state.
 	 */
@@ -213,7 +231,11 @@ public class ViewState extends TransitionableState {
 		if (displayCriteria != null) {
 			boolean result = displayCriteria.test(context);
 			if (!result) {
-				onDisplayCriteriaFailed.execute(context);
+				if (onDisplayCriteriaFailed != null) {
+					onDisplayCriteriaFailed.execute(context);
+				} else {
+					throw new IllegalStateException("Display criteria failed but no handler transition set");
+				}
 			}
 		}
 		if (isMarker()) {
