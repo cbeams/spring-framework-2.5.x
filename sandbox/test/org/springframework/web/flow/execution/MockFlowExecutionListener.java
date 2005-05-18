@@ -18,7 +18,6 @@ package org.springframework.web.flow.execution;
 import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
@@ -35,8 +34,6 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 	private boolean started;
 
 	private boolean executing;
-	
-	private boolean expired;
 	
 	private int flowNestingLevel;
 
@@ -70,7 +67,6 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 			eventsSignaled = 0;
 			stateTransitions = 0;
 			executing = true;
-			expired = false;
 		}
 	}
 	
@@ -121,11 +117,6 @@ public class MockFlowExecutionListener implements FlowExecutionListener {
 			Assert.state(started, "The flow execution prematurely ended");
 		}
 	}
-
-	public void expired(FlowContext flowContext) {
-		expired = true;
-	}
-
 
 	/**
 	 * Is the flow execution running, e.g. it has started but not yet ended.

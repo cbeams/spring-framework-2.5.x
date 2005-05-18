@@ -25,7 +25,6 @@ import org.springframework.core.EventListenerListHelper;
 import org.springframework.core.closure.ProcessTemplate;
 import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
-import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
@@ -312,19 +311,4 @@ public class FlowExecutionListenerList {
 			}
 		});
 	}
-
-	/**
-	 * Notify all interested listeners that the flow execution has expired.
-	 */
-	public void fireExpired(final FlowContext context) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing flow execution expired event to " + size() + " listener(s)");
-		}
-		iteratorTemplate().run(new Block() {
-			protected void handle(Object o) {
-				((FlowExecutionListener)o).expired(context);
-			}
-		});
-	}
-
 }

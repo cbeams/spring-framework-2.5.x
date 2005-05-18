@@ -17,7 +17,6 @@ package org.springframework.web.flow.support;
 
 import java.util.Map;
 
-import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
@@ -63,8 +62,5 @@ public abstract class FlowExecutionListenerAdapter implements FlowExecutionListe
 	}
 
 	public void sessionEnded(RequestContext context, FlowSession endedRootFlowSession) {
-	}
-
-	public void expired(FlowContext flowContext) {
 	}
 }

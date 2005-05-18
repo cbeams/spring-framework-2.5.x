@@ -17,7 +17,6 @@ package org.springframework.web.flow.execution;
 
 import java.util.Map;
 
-import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.FlowSession;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
@@ -112,13 +111,4 @@ public interface FlowExecutionListener {
 	 * @param endedSession ending flow session
 	 */
 	public void sessionEnded(RequestContext context, FlowSession endedSession);
-
-	/**
-	 * Called when an executing flow expires and is cleaned up.
-	 * @param flowContext information about the expired flow
-	 * 
-	 * TODO make behaviour more deterministic
-	 */
-	public void expired(FlowContext flowContext);
-
 }

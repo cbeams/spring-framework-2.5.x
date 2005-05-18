@@ -127,7 +127,6 @@ public class ExpiredFlowCleanupFilter extends OncePerRequestFilter {
 			if (attributeValue instanceof FlowExecution) {
 				FlowExecution flowExecution = (FlowExecution)attributeValue;
 				if (hasExpired(request, flowExecution)) {
-					flowExecution.getListeners().fireExpired(flowExecution);
 					if (logger.isInfoEnabled()) {
 						logger.info("Flow execution '" + attributeName
 								+ "' for flow '" + flowExecution.getActiveSession().getFlow().getId()
