@@ -317,7 +317,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * @return the created flow execution
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
-		return new FlowExecutionImpl(getFlow(), getListeners(), getTransactionSynchronizer());
+		return new FlowExecutionImpl(flow, getListeners(), getTransactionSynchronizer());
 	}
 
 	/**
