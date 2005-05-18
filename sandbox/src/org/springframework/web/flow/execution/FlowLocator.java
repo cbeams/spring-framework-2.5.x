@@ -28,11 +28,11 @@ import org.springframework.web.flow.Flow;
 public interface FlowLocator {
 
 	/**
-	 * Lookup a flow with specified id.
-	 * @param flowDefinitionId the flow id
+	 * Lookup a flow definition with specified id.
+	 * @param id the flow definition id
 	 * @return the flow
 	 * @throws ServiceLookupException when the flow cannot be found
 	 */
-	public Flow getFlow(String flowDefinitionId) throws ServiceLookupException;
+	public Flow getFlow(String id) throws ServiceLookupException;
 
 }
