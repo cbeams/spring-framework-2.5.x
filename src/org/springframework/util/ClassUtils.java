@@ -156,6 +156,23 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine whether the given class has a method with the given signature.
+	 * Essentially translates <code>NoSuchMethodException</code> to "false".
+	 * @param clazz the clazz to analyze
+	 * @param methodName the name of the method
+	 * @param paramTypes the parameter types of the method
+	 */
+	public static boolean hasMethod(Class clazz, String methodName, Class[] paramTypes) {
+		try {
+			clazz.getMethod(methodName, paramTypes);
+			return true;
+		}
+		catch (NoSuchMethodException ex) {
+			return false;
+		}
+	}
+
+	/**
 	 * Return the number of methods with a given name (with any argument types),
 	 * for the given class and/or its superclasses. Includes non-public methods.
 	 * @param clazz the clazz to check
