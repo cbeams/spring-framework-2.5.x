@@ -301,12 +301,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * If set, this will override corresponding settings in Hibernate properties.
 	 * <p>If this is set, the Hibernate settings should not define
 	 * a connection provider to avoid meaningless double configuration.
-	 * <p><b>Note:</b> The default Hibernate Connection release mode will be
-	 * "after_statement" or "after_transaction" (the former in case of a
-	 * transaction-aware DataSource, else the latter), not "on_close", in contrast
-	 * to Hibernate's own defaults. This can be explicitly overridden with a
-	 * corresponding "hibernate.connection.release_mode" property value.
-	 * (This only applies to Hibernate 3.0.3 and higher.)
 	 * <p>If using HibernateTransactionManager as transaction strategy, consider
 	 * proxying your target DataSource with a LazyConnectionDataSourceProxy.
 	 * This defers fetching of an actual JDBC Connection until the first JDBC
@@ -591,12 +585,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 						actuallyTransactionAware ?
 						TransactionAwareDataSourceConnectionProvider.class.getName() :
 						LocalDataSourceConnectionProvider.class.getName());
-				// Set Hibernate 3.0.3's Connection release mode to "after_statement"
-				// or "after_transaction", according to transaction awareness.
-				if (config.getProperty(Environment.RELEASE_CONNECTIONS) == null) {
-					config.setProperty(Environment.RELEASE_CONNECTIONS,
-							actuallyTransactionAware ? "after_statement" : "after_transaction");
-				}
 			}
 
 			if (this.jtaTransactionManager != null) {
