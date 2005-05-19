@@ -95,6 +95,10 @@
 				<prop key="*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
+		<property name="preInterceptors">
+			<ref bean="callMonitor"/>
+		</property>
 	</bean>
 
+		<bean id="callMonitor" class="org.springframework.samples.petclinic.jmx.CallMonitoringInterceptor"/>
 </beans>

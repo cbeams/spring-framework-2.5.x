@@ -39,10 +39,10 @@
 	  -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/applicationContext-hibernate.xml</param-value>
-		<!--
-		<param-value>/WEB-INF/applicationContext-jdbc.xml</param-value>
-		<param-value>/WEB-INF/applicationContext-ojb.xml</param-value>
+		<!--<param-value>/WEB-INF/applicationContext-hibernate.xml</param-value>-->
+
+		<param-value>/WEB-INF/applicationContext-jdbc.xml, /WEB-INF/applicationContext-jmx.xml</param-value>
+		<!--<param-value>/WEB-INF/applicationContext-ojb.xml</param-value>
 		<param-value>/WEB-INF/applicationContext-toplink.xml</param-value>
 		-->
 	</context-param>

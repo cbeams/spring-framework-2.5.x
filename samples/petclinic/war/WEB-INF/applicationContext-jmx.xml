@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="mbeanExporter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="petclinic:service=clinic">
+					<ref bean="clinic"/>
+				</entry>
+				<entry key="petclinic:service=callMonitor">
+					<ref bean="callMonitor"/>
+				</entry>
+			</map>
+		</property>
+		<property name="assembler">
+			<ref local="assembler"/>
+		</property>
+	</bean>
+
+	<bean id="assembler" class="org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler">
+		<property name="interfaceMappings">
+			<props>
+				<prop key="petclinic:service=clinic">org.springframework.samples.petclinic.jdbc.CachingClinic</prop>
+			</props>
+		</property>
+	</bean>
+</beans>
