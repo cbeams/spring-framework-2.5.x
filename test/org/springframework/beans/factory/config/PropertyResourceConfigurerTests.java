@@ -76,6 +76,18 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+	public void testPropertyOverrideConfigurerWithConvertProperties() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb", IndexedTestBean.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "tb.array[0].name=99\ntb.list[1].name=test");
+		ac.registerSingleton("configurer", ConvertingOverrideConfigurer.class, pvs);
+		ac.refresh();
+		IndexedTestBean tb = (IndexedTestBean) ac.getBean("tb");
+		assertEquals("X99", tb.getArray()[0].getName());
+		assertEquals("Xtest", ((TestBean) tb.getList().get(1)).getName());
+	}
+
 	public void testPropertyOverrideConfigurerWithInvalidKey() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb1", TestBean.class);
@@ -459,6 +471,14 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		Preferences.userRoot().node("myUserPath").remove("myTouchy");
 		Preferences.systemRoot().node("mySystemPath").remove("myTouchy");
 		Preferences.systemRoot().node("mySystemPath").remove("myName");
+	}
+
+
+	private static class ConvertingOverrideConfigurer extends PropertyOverrideConfigurer {
+
+		protected String convertPropertyValue(String originalValue) {
+			return "X" + originalValue;
+		}
 	}
 
 }
