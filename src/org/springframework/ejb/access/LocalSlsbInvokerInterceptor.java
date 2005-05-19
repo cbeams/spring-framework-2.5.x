@@ -17,6 +17,7 @@
 package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalObject;
@@ -59,7 +60,16 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 		EJBLocalObject ejb = null;
 		try {
 			ejb = getSessionBeanInstance();
-			return invocation.getMethod().invoke(ejb, invocation.getArguments());
+			Method method = invocation.getMethod();
+			if (method.getDeclaringClass().isInstance(ejb)) {
+				// directly implemented
+				return method.invoke(ejb, invocation.getArguments());
+			}
+			else {
+				// not directly implemented
+				Method ejbMethod = ejb.getClass().getMethod(method.getName(), method.getParameterTypes());
+				return ejbMethod.invoke(ejb, invocation.getArguments());
+			}
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
