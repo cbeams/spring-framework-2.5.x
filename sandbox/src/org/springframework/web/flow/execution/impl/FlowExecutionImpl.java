@@ -20,14 +20,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -277,7 +276,7 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 		updateLastRequestTimestamp();
 		StateContext context = createStateContext(event);
 		getListeners().fireRequestSubmitted(context);
-		ViewDescriptor viewDescriptor = context.spawn(rootFlow.getStartState(), new HashMap());
+		ViewDescriptor viewDescriptor = context.spawn(rootFlow.getStartState(), Collections.EMPTY_MAP);
 		if (isActive()) {
 			getActiveSessionInternal().setStatus(FlowSessionStatus.PAUSED);
 			getListeners().firePaused(context);
