@@ -28,16 +28,6 @@ public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 	
 	public static final String INPUT_ATTRIBUTE = "input";
 	
-	public void requestSubmitted(RequestContext context) {
-		if (context.getFlowContext().isActive()) {
-			// the flow is up & running, map input in the request into it
-			addInput(context.getSourceEvent(), context.getFlowScope());
-		}
-		else {
-			// sessionStarting() will handle it
-		}
-	}
-	
 	public void sessionStarting(RequestContext context, State startState, Map input) throws EnterStateVetoException {
 		/*
 		 * Each time a flow is starting, check if there is input data in the
@@ -46,6 +36,11 @@ public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 		 * listener is more flexible.
 		 */
 		addInput(context.getSourceEvent(), input);
+	}
+	
+	public void resumed(RequestContext context) {
+		// the flow is up & running, map input in the request into it
+		addInput(context.getSourceEvent(), context.getFlowScope());
 	}
 	
 	private void addInput(Event sourceEvent, Map targetMap) {

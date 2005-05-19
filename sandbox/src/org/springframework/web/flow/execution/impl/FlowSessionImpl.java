@@ -80,7 +80,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	/**
 	 * The parent session of this session (may be null if this is a root session.) 
 	 */
-	private transient FlowSession parent;
+	private FlowSessionImpl parent;
 	
 	/**
 	 * Create a new flow session.
@@ -89,7 +89,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 	 * @param parent the parent flow session of the created flow session in the
 	 *        owning flow execution
 	 */
-	public FlowSessionImpl(Flow flow, Map input, FlowSession parent) {
+	public FlowSessionImpl(Flow flow, Map input, FlowSessionImpl parent) {
 		Assert.notNull(flow, "The flow is required");
 		this.flow = flow;
 		if (input != null) {
@@ -152,6 +152,7 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 		out.writeObject(this.currentState.getId());
 		out.writeObject(this.status);
 		out.writeObject(this.flowScope);
+		out.writeObject(this.parent);
 	}
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -159,15 +160,14 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 		this.currentStateId = (String)in.readObject();
 		this.status = (FlowSessionStatus)in.readObject();
 		this.flowScope = (Scope)in.readObject();
+		this.parent = (FlowSessionImpl)in.readObject();
 	}
 
 	/**
 	 * Restore this <code>Flow Session</code> for use after deserialization.
 	 * @param flowLocator the flow locator
-	 * @param parent the parent flow session of this flow session in the owning
-	 *        flow execution
 	 */
-	protected void rehydrate(FlowLocator flowLocator, FlowSessionImpl parent) {
+	protected void rehydrate(FlowLocator flowLocator) {
 		// implementation note: we cannot integrate this code into the
 		// readObject() method since we need the flow locator!
 		Assert.state(this.flow == null, "The flow is already set -- already restored");
@@ -180,7 +180,6 @@ public class FlowSessionImpl implements FlowSession, Serializable {
 				"The current state id was not set during deserialization: cannot restore -- was this flow session deserialized properly?");
 		this.currentState = this.flow.getRequiredState(this.currentStateId);
 		this.currentStateId = null;
-		this.parent = parent;
 	}
 
 	public String toString() {

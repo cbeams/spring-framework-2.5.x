@@ -20,13 +20,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -276,7 +277,7 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 		updateLastRequestTimestamp();
 		StateContext context = createStateContext(event);
 		getListeners().fireRequestSubmitted(context);
-		ViewDescriptor viewDescriptor = context.spawn(rootFlow.getStartState(), Collections.EMPTY_MAP);
+		ViewDescriptor viewDescriptor = context.spawn(rootFlow.getStartState(), new HashMap());
 		if (isActive()) {
 			getActiveSessionInternal().setStatus(FlowSessionStatus.PAUSED);
 			getListeners().firePaused(context);
@@ -409,7 +410,7 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 	 * @param input the input parameters used to populate the flow session
 	 * @return the newly created flow session
 	 */
-	protected FlowSessionImpl createFlowSession(Flow flow, Map input, FlowSession parent) {
+	protected FlowSessionImpl createFlowSession(Flow flow, Map input, FlowSessionImpl parent) {
 		return new FlowSessionImpl(flow, input, parent);
 	}
 
@@ -462,7 +463,7 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 		FlowSessionImpl parent = null;
 		while (it.hasNext()) {
 			FlowSessionImpl session = (FlowSessionImpl)it.next();
-			session.rehydrate(flowLocator, parent);
+			session.rehydrate(flowLocator);
 			parent = session;
 		}
 		if (isActive()) {
