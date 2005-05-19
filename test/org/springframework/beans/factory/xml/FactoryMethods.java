@@ -41,9 +41,19 @@ public class FactoryMethods {
 	}
 	
 	public static FactoryMethods newInstance(TestBean tb, int num, String name) {
+		if (name == null) {
+			throw new IllegalStateException("Should never be called with null value");
+		}
 		return new FactoryMethods(tb, name, num);
 	}
 	
+	public static FactoryMethods newInstance(TestBean tb, int num, Integer something) {
+		if (something != null) {
+			throw new IllegalStateException("Should never be called with non-null value");
+		}
+		return new FactoryMethods(tb, null, num);
+	}
+
 	private int num = 0;
 	private String name = "default";
 	private TestBean tb;

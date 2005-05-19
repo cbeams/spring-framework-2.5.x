@@ -153,6 +153,7 @@ public class ConstructorArgumentValues {
 			ValueHolder valueHolder = (ValueHolder) it.next();
 			if (usedValueHolders == null || !usedValueHolders.contains(valueHolder)) {
 				if (requiredType != null) {
+					// Check matching type.
 					if (valueHolder.getType() != null) {
 						if (valueHolder.getType().equals(requiredType.getName())) {
 							return valueHolder;
@@ -163,7 +164,10 @@ public class ConstructorArgumentValues {
 					}
 				}
 				else {
-					return valueHolder;
+					// No required type specified -> consider untyped values only.
+					if (valueHolder.getType() == null) {
+						return valueHolder;
+					}
 				}
 			}
 		}

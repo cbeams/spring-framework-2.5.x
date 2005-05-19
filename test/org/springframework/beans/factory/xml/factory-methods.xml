@@ -23,6 +23,20 @@
 		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
 	</bean>
 	
+	<bean id="fullWithNull" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance">
+		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
+		<constructor-arg index="1"><value>27</value></constructor-arg>
+		<constructor-arg index="2" type="java.lang.Integer"><null/></constructor-arg>
+	</bean>
+
+	<bean id="fullWithGenericNull" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="newInstance">
+		<constructor-arg><ref local="juergen"/></constructor-arg>
+		<constructor-arg type="int"><value>27</value></constructor-arg>
+		<constructor-arg type="java.lang.Integer"><null/></constructor-arg>
+	</bean>
+
 	<bean id="fullWithAutowire" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance" autowire="constructor">
 		<constructor-arg index="0" ref="juergen"/>

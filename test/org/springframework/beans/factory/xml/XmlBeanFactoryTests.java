@@ -1054,6 +1054,23 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertSame(fm, fm2);
 	}
 
+	public void testFactoryMethodsWithNull() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidating(true);
+		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
+
+		FactoryMethods fm = (FactoryMethods) xbf.getBean("fullWithNull");
+		assertEquals(27, fm.getNum());
+		assertEquals(null, fm.getName());
+		assertEquals("Juergen", fm.getTestBean().getName());
+
+		fm = (FactoryMethods) xbf.getBean("fullWithGenericNull");
+		assertEquals(27, fm.getNum());
+		assertEquals(null, fm.getName());
+		assertEquals("Juergen", fm.getTestBean().getName());
+	}
+
 	public void testFactoryMethodsWithAutowire() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
