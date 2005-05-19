@@ -289,11 +289,6 @@ public abstract class SessionFactoryUtils {
 			}
 		}
 
-		if (!allowCreate) {
-			throw new IllegalStateException("No Hibernate Session bound to thread, " +
-			    "and configuration does not allow creation of new one here");
-		}
-
 		try {
 			logger.debug("Opening Hibernate Session");
 			Session session = (entityInterceptor != null ?
@@ -305,18 +300,33 @@ public abstract class SessionFactoryUtils {
 			if (TransactionSynchronizationManager.isSynchronizationActive()) {
 				// We're within a Spring-managed transaction, possibly from JtaTransactionManager.
 				logger.debug("Registering Spring transaction synchronization for new Hibernate Session");
-				sessionHolder = new SessionHolder(session);
+				SessionHolder holderToUse = sessionHolder;
+				if (holderToUse == null) {
+					holderToUse = new SessionHolder(session);
+				}
+				else {
+					holderToUse.addSession(session);
+				}
 				if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
 					session.setFlushMode(FlushMode.NEVER);
 				}
 				TransactionSynchronizationManager.registerSynchronization(
-						new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, true));
-				sessionHolder.setSynchronizedWithTransaction(true);
-				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+						new SpringSessionSynchronization(holderToUse, sessionFactory, jdbcExceptionTranslator, true));
+				holderToUse.setSynchronizedWithTransaction(true);
+				if (holderToUse != sessionHolder) {
+					TransactionSynchronizationManager.bindResource(sessionFactory, holderToUse);
+				}
 			}
 			else {
 				// No Spring transaction management active -> try JTA transaction synchronization.
 				registerJtaSynchronization(session, sessionFactory, jdbcExceptionTranslator, sessionHolder);
+			}
+
+			// Check whether we are allowed to return the Session.
+			if (!allowCreate && !isSessionTransactional(session, sessionFactory)) {
+				doClose(session);
+				throw new IllegalStateException("No Hibernate Session bound to thread, " +
+						"and configuration does not allow creation of non-transactional one here");
 			}
 
 			return session;
@@ -763,13 +773,13 @@ public abstract class SessionFactoryUtils {
 			this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 			this.newSession = newSession;
 
-			// check whether the SessionFactory has a JTA TransactionManager
+			// Check whether the SessionFactory has a JTA TransactionManager.
 			TransactionManager jtaTm = getJtaTransactionManager(sessionFactory, sessionHolder.getAnySession());
 			if (jtaTm != null) {
 				this.hibernateTransactionCompletion = true;
-				// fetch current JTA Transaction object
+				// Fetch current JTA Transaction object
 				// (just necessary for JTA transaction suspension, with an individual
-				// Hibernate Session per currently active/suspended transaction)
+				// Hibernate Session per currently active/suspended transaction).
 				try {
 					int jtaStatus = jtaTm.getStatus();
 					if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
