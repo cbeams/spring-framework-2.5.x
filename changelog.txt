@@ -3,6 +3,27 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2.1 (27.5.2005)
+------------------------------------
+
+Package org.springframework.beans
+* added "ignoreDependencyInterface" method to AbstractAutowireCapableBeanFactory and ConfigurableListableBeanFactory
+* reworked AbstractAutowireCapableBeanFactory's dependency exclusion check to support ignored dependency interfaces
+* AbstractAutowireCapableBeanFactory registers BeanFactoryAware as default ignored dependency interface
+
+Package org.springframework.context
+* AbstractApplicationContext registers MessageSourceAware/ApplicationContextAware/etc as ignored dependency interfaces
+* fixed AbstractApplicationContext to not exclude dependencies of type MessageSource/ApplicationContext/etc by default
+
+Package org.springframework.ejb
+* adapted LocalSlsbInvokerInterceptor to support a local EJB that does not directly implement the business interface
+
+Package org.springframework.orm
+* fixed SessionFactoryUtils for Hibernate 2.1 to not prevent transaction synchronization when allowCreate=false
+* fixed Hibernate SessionFactoryUtils to correctly handle asynchronous timeouts in case of mixed JTA/Spring transactions
+* fixed LocalSessionFactoryBean for Hibernate3 to use connection release mode "on_close" as default (-> safe tx cleanup)
+
+
 Changes in version 1.2 final (13.5.2005)
 ----------------------------------------
 
