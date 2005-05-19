@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -94,7 +95,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 
 	private boolean singleton = true;
 
-	/** method call result in the singleton case */
+	/** Method call result in the singleton case */
 	private Object singletonObject;
 
 
@@ -108,6 +109,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 
 	public void afterPropertiesSet()
 			throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
 		prepare();
 		if (this.singleton) {
 			Object obj = invoke();
@@ -124,18 +126,24 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 */
 	public Object getObject() throws InvocationTargetException, IllegalAccessException {
 		if (this.singleton) {
+			// Singleton: return shared object.
 			return this.singletonObject;
 		}
 		else {
-			// prototype: new object on each call
+			// Prototype: new object on each call.
 			Object retval = invoke();
 			return (retval != null ? retval : MethodInvoker.VOID);
 		}
 	}
 
-	
 	public Class getObjectType() {
-		Class type = getPreparedMethod().getReturnType();
+		Method preparedMethod = getPreparedMethod();
+		if (preparedMethod == null) {
+			// Not fully initialized yet ->
+			// return null to indicate "not known yet".
+			return null;
+		}
+		Class type = preparedMethod.getReturnType();
 		if (type.equals(void.class)) {
 			type = VoidType.class;
 		}
