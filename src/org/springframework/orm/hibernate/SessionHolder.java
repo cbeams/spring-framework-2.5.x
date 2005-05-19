@@ -55,7 +55,7 @@ public class SessionHolder extends ResourceHolderSupport {
 
 
 	public SessionHolder(Session session) {
-		addSession(DEFAULT_KEY, session);
+		addSession(session);
 	}
 
 	public SessionHolder(Object key, Session session) {
@@ -78,6 +78,10 @@ public class SessionHolder extends ResourceHolderSupport {
 			}
 			return null;
 		}
+	}
+
+	public void addSession(Session session) {
+		addSession(DEFAULT_KEY, session);
 	}
 
 	public void addSession(Object key, Session session) {
