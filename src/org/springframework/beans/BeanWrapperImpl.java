@@ -811,16 +811,10 @@ public class BeanWrapperImpl implements BeanWrapper {
 					logger.debug("About to invoke write method [" + writeMethod + "] on object of class [" +
 							this.object.getClass().getName() + "]");
 				}
-				writeMethod.invoke(this.object, new Object[]{newValue});
+				writeMethod.invoke(this.object, new Object[] {newValue});
 				if (logger.isDebugEnabled()) {
-					String msg = "Invoked write method [" + writeMethod + "] with value ";
-					// only cause toString invocation of new value in case of simple property
-					if (newValue == null || BeanUtils.isSimpleProperty(pd.getPropertyType())) {
-						logger.debug(msg + PROPERTY_KEY_PREFIX + newValue + PROPERTY_KEY_SUFFIX);
-					}
-					else {
-						logger.debug(msg + "of type [" + pd.getPropertyType().getName() + "]");
-					}
+					logger.debug("Invoked write method [" + writeMethod + "] with value of type [" +
+							pd.getPropertyType().getName() + "]");
 				}
 			}
 			catch (InvocationTargetException ex) {

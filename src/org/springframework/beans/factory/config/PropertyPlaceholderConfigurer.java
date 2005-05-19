@@ -259,7 +259,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 					originalPlaceholderToUse = originalPlaceholder;
 					if (placeholder.equals(originalPlaceholder)) {
 						throw new BeanDefinitionStoreException(
-						    "Circular placeholder reference '" + placeholder + "' in property definitions [" + props + "]");
+								"Circular placeholder reference '" + placeholder + "' in property definitions");
 					}
 				}
 				else {
@@ -271,9 +271,6 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 					// Recursive invocation, parsing placeholders contained in the
 					// previously resolved placeholder value.
 					propVal = parseStringValue(propVal, props, originalPlaceholderToUse);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Resolving placeholder '" + placeholder + "' to [" + propVal + "]");
-					}
 					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
 					startIndex = buf.toString().indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
