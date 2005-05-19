@@ -181,6 +181,10 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 			}
 		}
 
+		// Convert the merged properties, if necessary.
+		convertProperties(mergedProps);
+
+		// Let the subclass process the properties.
 		processProperties(beanFactory, mergedProps);
 	}
 
