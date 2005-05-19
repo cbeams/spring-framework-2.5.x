@@ -22,7 +22,6 @@ import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Stack;
 
@@ -460,15 +459,12 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 		this.rootFlow = flowLocator.getFlow(rootFlowId);
 		this.rootFlowId = null;
 		// rehydrate all flow sessions
-		ListIterator it = this.executingFlowSessions.listIterator();
+		Iterator it = this.executingFlowSessions.iterator();
+		FlowSessionImpl parent = null;
 		while (it.hasNext()) {
 			FlowSessionImpl session = (FlowSessionImpl)it.next();
-			FlowSessionImpl parent = null;
-			if (it.hasNext()) {
-				parent = (FlowSessionImpl)it.next();
-				it.previous();
-			}
 			session.rehydrate(flowLocator, parent);
+			parent = session;
 		}
 		if (isActive()) {
 			// sanity check
