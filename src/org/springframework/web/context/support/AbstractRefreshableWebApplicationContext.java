@@ -28,6 +28,7 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * AbstractRefreshableApplicationContext subclass that implements the
@@ -149,7 +150,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
-		beanFactory.ignoreDependencyType(ServletContext.class);
+		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 	}
 
 	/**

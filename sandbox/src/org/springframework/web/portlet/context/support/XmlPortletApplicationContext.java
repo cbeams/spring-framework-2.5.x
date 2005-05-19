@@ -27,6 +27,7 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
+import org.springframework.web.portlet.context.PortletContextAware;
 
 
 /**
@@ -56,9 +57,10 @@ import org.springframework.web.portlet.context.ConfigurablePortletApplicationCon
  * @author Nick Lothian
  * @see #setNamespace
  * @see #setConfigLocations
+ * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
+ * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+ * @see org.springframework.context.support.AbstractXmlApplicationContext
  * @see org.springframework.web.portlet.FrameworkPortlet#initPortletApplicationContext
- * @see org.springframework.util.PathMatcher#retrieveMatchingFiles
- * @see org.springframework.context.support.AbstractApplicationContext#getResource
  */
 
 public class XmlPortletApplicationContext extends AbstractXmlApplicationContext implements
@@ -134,7 +136,7 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new PortletContextAwareProcessor(this.portletContext));
-		beanFactory.ignoreDependencyType(PortletContext.class);
+		beanFactory.ignoreDependencyInterface(PortletContextAware.class);
 	}
 
 	/**
@@ -162,7 +164,6 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 	/**
 	 * <p>This is required to use the Spring Tag Libraries. Should be used with
 	 * caution as a Portal will normally supply equivalent functionality</p>
-	 *
 	 * @see org.springframework.ui.context.ThemeSource#getTheme(java.lang.String)
 	 */
 	public Theme getTheme(String themeName) {
@@ -171,7 +172,6 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 	
 	/**
 	 * <p>Required by Spring Tag Libraries</p>
-	 *
 	 * @see org.springframework.web.context.WebApplicationContext#getServletContext()
 	 */
 	public ServletContext getServletContext() {
@@ -185,7 +185,8 @@ public class XmlPortletApplicationContext extends AbstractXmlApplicationContext 
 	/**
 	 * @see org.springframework.context.support.AbstractApplicationContext#onRefresh()
 	 */
-	   protected void onRefresh() throws BeansException {
-	       this.themeSource = UiApplicationContextUtils.initThemeSource(this);
-	   }
+	 protected void onRefresh() throws BeansException {
+		 this.themeSource = UiApplicationContextUtils.initThemeSource(this);
+	 }
+
 }

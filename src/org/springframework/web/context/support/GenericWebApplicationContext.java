@@ -26,6 +26,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -96,7 +97,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext impl
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
-		beanFactory.ignoreDependencyType(ServletContext.class);
+		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 	}
 
 	/**

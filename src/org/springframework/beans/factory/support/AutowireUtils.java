@@ -18,11 +18,15 @@ package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Utility class that contains various methods useful for
@@ -102,6 +106,28 @@ public abstract class AutowireUtils {
 	 */
 	public static boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
 		return (pd.getWriteMethod().getDeclaringClass().getName().indexOf("$$") != -1);
+	}
+
+	/**
+	 * Return whether the setter method of the given bean property is defined
+	 * in any of the given interfaces.
+	 * @param pd the PropertyDescriptor of the bean property
+	 * @param interfaces the Set of interfaces (Class objects)
+	 * @return whether the setter method is defined by an interface
+	 */
+	public static boolean isSetterDefinedInInterface(PropertyDescriptor pd, Set interfaces) {
+		Method setter = pd.getWriteMethod();
+		if (setter != null) {
+			Class targetClass = setter.getDeclaringClass();
+			for (Iterator it = interfaces.iterator(); it.hasNext();) {
+				Class ifc = (Class) it.next();
+				if (ifc.isAssignableFrom(targetClass) &&
+						ClassUtils.hasMethod(ifc, setter.getName(), setter.getParameterTypes())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

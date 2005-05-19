@@ -26,6 +26,7 @@ import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * Static WebApplicationContext implementation for testing.
@@ -90,7 +91,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
-		beanFactory.ignoreDependencyType(ServletContext.class);
+		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 	}
 
 	/**

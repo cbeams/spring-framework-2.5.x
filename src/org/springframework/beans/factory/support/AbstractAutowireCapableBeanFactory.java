@@ -85,9 +85,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Dependency types to ignore on dependency check and autowire, as Set of
+	 * Class objects: for example, String. Default is none.
+	 */
+	private final Set ignoredDependencyTypes = new HashSet();
+
+	/**
+	 * Dependency interfaces to ignore on dependency check and autowire, as Set of
 	 * Class objects. By default, only the BeanFactory interface is ignored.
 	 */
-	private final Set ignoreDependencyTypes = new HashSet();
+	private final Set ignoredDependencyInterfaces = new HashSet();
 
 
 	/**
@@ -95,7 +101,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public AbstractAutowireCapableBeanFactory() {
 		super();
-		ignoreDependencyType(BeanFactory.class);
+		ignoreDependencyInterface(BeanFactoryAware.class);
 	}
 
 	/**
@@ -117,26 +123,39 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Ignore the given dependency type for autowiring.
-	 * <p>This will typically be used by application contexts to register
-	 * dependencies that are resolved in other ways, like BeanFactory through
-	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
-	 * <p>By default, just the BeanFactory interface is ignored.
-	 * For further types to ignore, invoke this method for each type.
-	 * @see org.springframework.beans.factory.BeanFactory
-	 * @see org.springframework.beans.factory.BeanFactoryAware
-	 * @see org.springframework.context.ApplicationContext
-	 * @see org.springframework.context.ApplicationContextAware
+	 * Ignore the given dependency type for autowiring:
+	 * for example, String. Default is none.
 	 */
 	public void ignoreDependencyType(Class type) {
-		this.ignoreDependencyTypes.add(type);
+		this.ignoredDependencyTypes.add(type);
 	}
 
 	/**
-	 * Return the set of classes that will get ignored for autowiring.
+	 * Return the set of dependency types that will get ignored for autowiring.
 	 */
 	public Set getIgnoredDependencyTypes() {
-		return ignoreDependencyTypes;
+		return ignoredDependencyTypes;
+	}
+
+	/**
+	 * Ignore the given dependency interface for autowiring.
+	 * <p>This will typically be used by application contexts to register
+	 * dependencies that are resolved in other ways, like BeanFactory through
+	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
+	 * <p>By default, only the BeanFactory interface is ignored.
+	 * For further types to ignore, invoke this method for each type.
+	 * @see org.springframework.beans.factory.BeanFactoryAware
+	 * @see org.springframework.context.ApplicationContextAware
+	 */
+	public void ignoreDependencyInterface(Class ifc) {
+		this.ignoredDependencyInterfaces.add(ifc);
+	}
+
+	/**
+	 * Return the set of dependency interfaces that will get ignored for autowiring.
+	 */
+	public Set getIgnoredDependencyInterfaces() {
+		return ignoredDependencyInterfaces;
 	}
 
 
@@ -853,15 +872,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Determine whether the given bean property is excluded from dependency checks.
 	 * <p>This implementation excludes properties defined by CGLIB and
-	 * properties whose type matches an excluded dependency type.
+	 * properties whose type matches an ignored dependency type or which
+	 * are defined by an ignored dependency interface.
 	 * @param pd the PropertyDescriptor of the bean property
 	 * @return whether the bean property is excluded
 	 * @see AutowireUtils#isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
 	 * @see #ignoreDependencyType(Class)
+	 * @see #ignoreDependencyInterface(Class)
+	 * @see AutowireUtils#isExcludedFromDependencyCheck
+	 * @see AutowireUtils#isSetterDefinedInInterface
 	 */
 	protected boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
 		return (AutowireUtils.isExcludedFromDependencyCheck(pd) ||
-				getIgnoredDependencyTypes().contains(pd.getPropertyType()));
+				getIgnoredDependencyTypes().contains(pd.getPropertyType()) ||
+				AutowireUtils.isSetterDefinedInInterface(pd, getIgnoredDependencyInterfaces()));
 	}
 
 	/**

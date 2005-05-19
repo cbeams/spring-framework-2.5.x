@@ -38,14 +38,17 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.ConfigurableBeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -54,7 +57,6 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
@@ -265,10 +267,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Configure the bean factory with context semantics.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-		beanFactory.ignoreDependencyType(ResourceLoader.class);
-		beanFactory.ignoreDependencyType(ApplicationEventPublisher.class);
-		beanFactory.ignoreDependencyType(MessageSource.class);
-		beanFactory.ignoreDependencyType(ApplicationContext.class);
+		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
 
 		// Allows post-processing of the bean factory in context subclasses.
 		postProcessBeanFactory(beanFactory);

@@ -6,11 +6,21 @@
 	<import resource="import1.xml"/>
 	<import resource="classpath:org/springframework/context/support/import2.xml"/>
 
+	<bean id="messageSource" class="org.springframework.context.support.StaticMessageSource"/>
+
 	<bean class="org.springframework.context.support.FactoryBeanAndApplicationListener"/>
 
-	<bean name="service" class="org.springframework.context.support.Service">
+	<bean name="service" class="org.springframework.context.support.Service" dependency-check="objects">
 		<property name="resources"><value>/org/springframework/context/support/context*.xml</value></property>
   </bean>
+
+	<bean name="service2" class="org.springframework.context.support.Service" autowire="byName">
+		<property name="resources"><value>/org/springframework/context/support/context*.xml</value></property>
+  </bean>
+
+	<bean name="autowiredService" class="org.springframework.context.support.AutowiredService" autowire="byName"/>
+
+	<bean name="autowiredService2" class="org.springframework.context.support.AutowiredService" autowire="byType"/>
 
 	<bean name="transactionManager" class="org.springframework.transaction.CountingTxManager"/>
 

@@ -50,11 +50,12 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
  * @author Juergen Hoeller
  * @see #setNamespace
  * @see #setConfigLocations
+ * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  * @see org.springframework.context.support.AbstractXmlApplicationContext
  * @see org.springframework.web.context.ContextLoader#initWebApplicationContext
- * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
  * @see org.springframework.web.context.ContextLoader#CONTEXT_CLASS_PARAM
+ * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
  * @see org.springframework.web.servlet.FrameworkServlet#setContextClass
  */
 public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationContext {

@@ -17,65 +17,55 @@
 package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 
 /**
- * Simple bean used to check dependency checking
+ * Simple bean used to test dependency checking.
  * @author Rod Johnson
- * @since 04-Sep-2003
+ * @since 04.09.2003
  */
-public class DependenciesBean {
+public class DependenciesBean implements BeanFactoryAware {
 	
 	private int age;
 	
 	private String name;
 	
 	private TestBean spouse;
-	
-	//private Dependencies recursive;
 
-	/**
-	 * @return int
-	 */
-	public int getAge() {
-		return age;
-	}
+	private BeanFactory beanFactory;
 
-	/**
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
 
-	/**
-	 * @return TestBean
-	 */
-	public TestBean getSpouse() {
-		return spouse;
-	}
-
-	/**
-	 * Sets the age.
-	 * @param age The age to set
-	 */
 	public void setAge(int age) {
 		this.age = age;
 	}
 
-	/**
-	 * Sets the name.
-	 * @param name The name to set
-	 */
+	public int getAge() {
+		return age;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	/**
-	 * Sets the spouse.
-	 * @param spouse The spouse to set
-	 */
+	public String getName() {
+		return name;
+	}
+
 	public void setSpouse(TestBean spouse) {
 		this.spouse = spouse;
+	}
+
+	public TestBean getSpouse() {
+		return spouse;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+	public BeanFactory getBeanFactory() {
+		return beanFactory;
 	}
 
 }

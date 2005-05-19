@@ -38,17 +38,22 @@ public interface ConfigurableListableBeanFactory
 		extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory {
 
 	/**
-	 * Ignore the given dependency type for autowiring.
-	 * To be invoked during factory configuration.
+	 * Ignore the given dependency type for autowiring:
+	 * for example, String. Default is none.
+	 */
+	void ignoreDependencyType(Class type);
+
+	/**
+	 * Ignore the given dependency interface for autowiring.
 	 * <p>This will typically be used by application contexts to register
 	 * dependencies that are resolved in other ways, like BeanFactory through
-	 * BeanFactoryAware (which bean factories are supposed to provide by default),
-	 * or ApplicationContext through ApplicationContextAware.
-	 * @param type the dependency type to ignore
+	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
+	 * <p>By default, only the BeanFactory interface is ignored.
+	 * For further types to ignore, invoke this method for each type.
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
 	 */
-	void ignoreDependencyType(Class type);
+	void ignoreDependencyInterface(Class ifc);
 
 	/**
 	 * Return the registered BeanDefinition for the given bean, allowing access

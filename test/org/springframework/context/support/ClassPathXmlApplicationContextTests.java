@@ -33,6 +33,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -72,8 +73,15 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 	public void testMessageSourceAware() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/context/support/context*.xml");
-		Service service = (Service) ctx.getBean("service");
-		assertEquals(ctx, service.getMessageSource());
+		MessageSource messageSource = (MessageSource) ctx.getBean("messageSource");
+		Service service1 = (Service) ctx.getBean("service");
+		assertEquals(ctx, service1.getMessageSource());
+		Service service2 = (Service) ctx.getBean("service2");
+		assertEquals(ctx, service2.getMessageSource());
+		AutowiredService autowiredService1 = (AutowiredService) ctx.getBean("autowiredService");
+		assertEquals(messageSource, autowiredService1.getMessageSource());
+		AutowiredService autowiredService2 = (AutowiredService) ctx.getBean("autowiredService2");
+		assertEquals(messageSource, autowiredService2.getMessageSource());
 	}
 
 	public void testResourceArrayPropertyEditor() throws IOException {

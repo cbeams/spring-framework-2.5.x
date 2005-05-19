@@ -466,6 +466,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("satisfiedObjectDependencyCheck.xml", getClass()));
 		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
 		assertNotNull(a.getSpouse());
+		assertEquals(xbf, a.getBeanFactory());
 	}
 
 	public void testSatisfiedSimpleDependencyCheck() throws Exception {
