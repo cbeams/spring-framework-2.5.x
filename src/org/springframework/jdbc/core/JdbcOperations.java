@@ -249,9 +249,12 @@ public interface JdbcOperations {
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to execute
 	 * a static query with a PreparedStatement, use the overloaded queryForRowSet
 	 * method with null as argument array.
-	 * <p>This method is useful for running static SQL with a known outcome.
-	 * The results will be mapped to an SqlRowSet which is a wrapper class for
-	 * javax.sql.RowSet.  This wrapper will translate any SQLExceptions thrown.
+	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
+	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
+	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
+	 * be available at runtime: by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code>
+	 * class is used, which is part of JDK 1.5+ and also available separately as part of
+	 * Sun's JDBC RowSet Implementations download (rowset.jar).
 	 * @param sql SQL query to execute
 	 * @return a SqlRowSet representation (possibly a wrapper around a
 	 * <code>javax.sql.rowset.CachedRowSet</code>)
@@ -744,7 +747,11 @@ public interface JdbcOperations {
 	 * Query given SQL to create a prepared statement from SQL and a
 	 * list of arguments to bind to the query, expecting a SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
-	 * disconnection fashion. This wrapper will translate any SQLExceptions thrown.
+	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
+	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
+	 * be available at runtime: by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code>
+	 * class is used, which is part of JDK 1.5+ and also available separately as part of
+	 * Sun's JDBC RowSet Implementations download (rowset.jar).
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * @param argTypes SQL types of the arguments
@@ -763,7 +770,11 @@ public interface JdbcOperations {
 	 * Query given SQL to create a prepared statement from SQL and a
 	 * list of arguments to bind to the query, expecting a SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
-	 * disconnection fashion. This wrapper will translate any SQLExceptions thrown.
+	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
+	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
+	 * be available at runtime: by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code>
+	 * class is used, which is part of JDK 1.5+ and also available separately as part of
+	 * Sun's JDBC RowSet Implementations download (rowset.jar).
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)

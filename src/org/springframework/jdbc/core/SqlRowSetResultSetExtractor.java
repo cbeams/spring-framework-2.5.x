@@ -34,7 +34,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * This means that JDBC RowSet support needs to be available at runtime:
  * by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code> class is
  * used, which is part of JDK 1.5+ and also available separately as part of
- * Sun's JDBC RowSet Implementations download.
+ * Sun's JDBC RowSet Implementations download (rowset.jar).
  *
  * @author Juergen Hoeller
  * @since 1.2
