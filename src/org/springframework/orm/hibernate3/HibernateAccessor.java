@@ -92,6 +92,8 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 	private int flushMode = FLUSH_AUTO;
 
+	private String[] filterNames;
+
 
 	/**
 	 * Set the Hibernate SessionFactory that should be used to create
@@ -191,6 +193,43 @@ public abstract class HibernateAccessor implements InitializingBean {
 		return flushMode;
 	}
 
+	/**
+	 * Set the name of a Hibernate filter to be activated for all
+	 * Sessions that this accessor works with.
+	 * <p>This filter will be enabled at the beginning of each operation
+	 * and correspondingly disabled at the end of the operation.
+	 * This will work for newly opened Sessions as well as for existing
+	 * Sessions (for example, within a transaction).
+	 * @see #enableFilters(org.hibernate.Session)
+	 * @see org.hibernate.Session#enableFilter(String)
+	 * @see LocalSessionFactoryBean#setFilterDefinitions
+	 */
+	public void setFilterName(String filter) {
+		this.filterNames = new String[] {filter};
+	}
+
+	/**
+	 * Set one or more names of Hibernate filters to be activated for all
+	 * Sessions that this accessor works with.
+	 * <p>Each of those filters will be enabled at the beginning of each
+	 * operation and correspondingly disabled at the end of the operation.
+	 * This will work for newly opened Sessions as well as for existing
+	 * Sessions (for example, within a transaction).
+	 * @see #enableFilters(org.hibernate.Session)
+	 * @see org.hibernate.Session#enableFilter(String)
+	 * @see LocalSessionFactoryBean#setFilterDefinitions
+	 */
+	public void setFilterNames(String[] filterNames) {
+		this.filterNames = filterNames;
+	}
+
+	/**
+	 * Return the names of Hibernate filters to be activated, if any.
+	 */
+	public String[] getFilterNames() {
+		return filterNames;
+	}
+
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("sessionFactory is required");
@@ -199,12 +238,12 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 
 	/**
-	 * Flush the given Hibernate session if necessary.
-	 * @param session the current Hibernate session
+	 * Flush the given Hibernate Session if necessary.
+	 * @param session the current Hibernate Session
 	 * @param existingTransaction if executing within an existing transaction
 	 * @throws HibernateException in case of Hibernate flushing errors
 	 */
-	public void flushIfNecessary(Session session, boolean existingTransaction) throws HibernateException {
+	protected void flushIfNecessary(Session session, boolean existingTransaction) throws HibernateException {
 		if (getFlushMode() == FLUSH_EAGER || (!existingTransaction && getFlushMode() == FLUSH_AUTO)) {
 			logger.debug("Eagerly flushing Hibernate session");
 			session.flush();
@@ -253,6 +292,36 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
 		return getJdbcExceptionTranslator().translate("Hibernate operation", null, ex);
+	}
+
+	/**
+	 * Enable the specified filters on the given Session.
+	 * @param session the current Hibernate Session
+	 * @see #setFilterNames
+	 * @see org.hibernate.Session#enableFilter(String)
+	 */
+	protected void enableFilters(Session session) {
+		String[] filterNames = getFilterNames();
+		if (filterNames != null) {
+			for (int i = 0; i < filterNames.length; i++) {
+				session.enableFilter(filterNames[i]);
+			}
+		}
+	}
+
+	/**
+	 * Disable the specified filters on the given Session.
+	 * @param session the current Hibernate Session
+	 * @see #setFilterNames
+	 * @see org.hibernate.Session#disableFilter(String)
+	 */
+	protected void disableFilters(Session session) {
+		String[] filterNames = getFilterNames();
+		if (filterNames != null) {
+			for (int i = 0; i < filterNames.length; i++) {
+				session.disableFilter(filterNames[i]);
+			}
+		}
 	}
 
 }

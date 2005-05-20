@@ -307,6 +307,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			session.setFlushMode(FlushMode.NEVER);
 		}
 		try {
+			enableFilters(session);
 			Session sessionToExpose = (exposeNativeSession ? session : createSessionProxy(session));
 			Object result = action.doInHibernate(sessionToExpose);
 			flushIfNecessary(session, existingTransaction);
@@ -323,6 +324,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throw ex;
 		}
 		finally {
+			disableFilters(session);
 			SessionFactoryUtils.releaseSession(session, getSessionFactory());
 		}
 	}

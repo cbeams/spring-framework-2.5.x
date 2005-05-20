@@ -115,6 +115,66 @@ public class HibernateTemplateTests extends TestCase {
 		assertTrue("Correct result list", result == l);
 	}
 
+	public void testExecuteWithNewSessionAndFilter() throws HibernateException {
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.enableFilter("myFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.disableFilter("myFilter");
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setFilterName("myFilter");
+		final List l = new ArrayList();
+		l.add("test");
+		List result = ht.executeFind(new HibernateCallback() {
+			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+				return l;
+			}
+		});
+		assertTrue("Correct result list", result == l);
+	}
+
+	public void testExecuteWithNewSessionAndFilters() throws HibernateException {
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.enableFilter("myFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.enableFilter("yourFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.disableFilter("myFilter");
+		sessionControl.setVoidCallable(1);
+		session.disableFilter("yourFilter");
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setFilterNames(new String[] {"myFilter", "yourFilter"});
+		final List l = new ArrayList();
+		l.add("test");
+		List result = ht.executeFind(new HibernateCallback() {
+			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+				return l;
+			}
+		});
+		assertTrue("Correct result list", result == l);
+	}
+
 	public void testExecuteWithNotAllowCreate() {
 		HibernateTemplate ht = new HibernateTemplate();
 		ht.setSessionFactory(sf);
@@ -168,6 +228,36 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setFlushModeName("FLUSH_EAGER");
 		ht.setAllowCreate(false);
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		try {
+			final List l = new ArrayList();
+			l.add("test");
+			List result = ht.executeFind(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					return l;
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+	}
+
+	public void testExecuteWithThreadBoundAndFilter() {
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.enableFilter("myFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.disableFilter("myFilter");
+		sessionControl.setVoidCallable(1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateTemplate ht = new HibernateTemplate(sf);
+		ht.setAllowCreate(false);
+		ht.setFilterName("myFilter");
 
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		try {

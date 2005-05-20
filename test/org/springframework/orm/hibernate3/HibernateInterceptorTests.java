@@ -100,7 +100,41 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testInterceptorWithPrebound() {
+	public void testInterceptorWithNewSessionAndFilter() throws HibernateException {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf);
+		session.enableFilter("myFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.disableFilter("myFilter");
+		sessionControl.setVoidCallable(1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		HibernateInterceptor interceptor = new HibernateInterceptor();
+		interceptor.setSessionFactory(sf);
+		interceptor.setFilterName("myFilter");
+		try {
+			interceptor.invoke(new TestInvocation(sf));
+		}
+		catch (Throwable t) {
+			fail("Should not have thrown Throwable: " + t.getMessage());
+		}
+
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testInterceptorWithThreadBound() {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -127,7 +161,7 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testInterceptorWithPreboundAndFlushEager() throws HibernateException {
+	public void testInterceptorWithThreadBoundAndFlushEager() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -157,7 +191,39 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testInterceptorWithFlushingFailure() throws Throwable {
+	public void testInterceptorWithThreadBoundAndFilter() {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.enableFilter("myFilter");
+		sessionControl.setReturnValue(null, 1);
+		session.disableFilter("myFilter");
+		sessionControl.setVoidCallable(1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		HibernateInterceptor interceptor = new HibernateInterceptor();
+		interceptor.setSessionFactory(sf);
+		interceptor.setFilterName("myFilter");
+		try {
+			interceptor.invoke(new TestInvocation(sf));
+		}
+		catch (Throwable t) {
+			fail("Should not have thrown Throwable: " + t.getMessage());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+		}
+
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testInterceptorWithFlushFailure() throws Throwable {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);

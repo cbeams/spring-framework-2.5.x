@@ -159,6 +159,7 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 			TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
 		}
 		try {
+			enableFilters(session);
 			Object retVal = methodInvocation.proceed();
 			flushIfNecessary(session, existingTransaction);
 			return retVal;
@@ -167,6 +168,7 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 			throw convertHibernateAccessException(ex);
 		}
 		finally {
+			disableFilters(session);
 			if (existingTransaction) {
 				logger.debug("Not closing pre-bound Hibernate Session after interceptor");
 			}
