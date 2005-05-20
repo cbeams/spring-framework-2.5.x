@@ -74,10 +74,14 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 
 	protected final void onSetUpInTransaction() throws Exception {
 		this.flowLocator = new BeanFactoryFlowServiceLocator(this.applicationContext);
-		onSetupInTransactionalFlowTest();
+		onSetUpInTransactionalFlowTest();
 	}
 	
-	protected void onSetupInTransactionalFlowTest() {
+	/**
+	 * Hook method subclasses can implement to do additional setup. Called
+	 * after the transition has been activated and the flow locator has been set.
+	 */
+	protected void onSetUpInTransactionalFlowTest() {
 	}
 	
 	/**
@@ -90,7 +94,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 		if (this.flow == null) {
 			setFlow(getFlowLocator().getFlow(flowId()));
 		}
-		return flow;
+		return this.flow;
 	}
 
 	/**
@@ -98,7 +102,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * @param flow the singleton flow definition
 	 */
 	protected void setFlow(Flow flow) {
-		Assert.notNull(flow, "The flow definition whose execution to test is required");
+		Assert.notNull(flow, "The flow definition whose execution will be tested is required");
 		this.flow = flow;
 	}
 
@@ -124,7 +128,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 *         (returned when the first view state is entered)
 	 */
 	protected ViewDescriptor startFlow() {
-		return startFlow(new Event(this, "start"));
+		return startFlow(new Event(this));
 	}
 
 	/**
@@ -136,7 +140,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	protected ViewDescriptor startFlow(Event event) {
 		this.flowExecution = new FlowExecutionImpl(getFlow(), new FlowExecutionListener[0],
 				new TokenTransactionSynchronizer());
-		setupFlowExecution(flowExecution);
+		onSetupFlowExecution(flowExecution);
 		return this.flowExecution.start(event);
 	}
 
@@ -145,7 +149,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 * it is started, like register an execution listener.
 	 * @param flowExecution the flow execution
 	 */
-	protected void setupFlowExecution(FlowExecution flowExecution) {
+	protected void onSetupFlowExecution(FlowExecution flowExecution) {
 	}
 
 	/**
@@ -211,7 +215,7 @@ public abstract class AbstractFlowExecutionTests extends AbstractTransactionalSp
 	 */
 	protected void assertActiveFlowEquals(String expectedActiveFlowId) {
 		assertEquals("The active flow id '" + getFlowContext().getActiveSession().getFlow() + "' does not equal the expected active flow '"
-				+ expectedActiveFlowId + "'", expectedActiveFlowId, getFlowContext().getActiveSession().getFlow());
+				+ expectedActiveFlowId + "'", expectedActiveFlowId, getFlowContext().getActiveSession().getFlow().getId());
 	}
 
 	/**
