@@ -34,13 +34,13 @@ public abstract class DataAccessUtils {
 	 * Return a unique result object from the given Collection.
 	 * Returns null if 0 result objects found; throws an exception
 	 * if more than 1 found.
-	 * @param results the result Collection
+	 * @param results the result Collection (can be null)
 	 * @return the unique result object, or null if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
 	 */
 	public static Object uniqueResult(Collection results) throws IncorrectResultSizeDataAccessException {
-		int size = results.size();
+		int size = (results != null ? results.size() : 0);
 		if (size == 0) {
 			return null;
 		}
@@ -53,14 +53,14 @@ public abstract class DataAccessUtils {
 	/**
 	 * Return a unique result object from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found.
-	 * @param results the result Collection
+	 * @param results the result Collection (can be null)
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object or none at all has been found in the given Collection
 	 */
 	public static Object requiredUniqueResult(Collection results) throws IncorrectResultSizeDataAccessException {
-		int size = results.size();
-		if (size != 1) {
+		int size = (results != null ? results.size() : 0);
+		if (results.size() != 1) {
 			throw new IncorrectResultSizeDataAccessException(1, size);
 		}
 		return results.iterator().next();
@@ -71,7 +71,7 @@ public abstract class DataAccessUtils {
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to the
 	 * specified required type.
-	 * @param results the result Collection
+	 * @param results the result Collection (can be null)
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object or none at all has been found in the given Collection
@@ -107,7 +107,7 @@ public abstract class DataAccessUtils {
 	 * Return a unique int result from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to an int.
-	 * @param results the result Collection
+	 * @param results the result Collection (can be null)
 	 * @return the unique int result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object or none at all has been found in the given Collection
@@ -116,6 +116,7 @@ public abstract class DataAccessUtils {
 	 */
 	public static int intResult(Collection results)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
+
 		return ((Number) objectResult(results, Number.class)).intValue();
 	}
 
@@ -123,7 +124,7 @@ public abstract class DataAccessUtils {
 	 * Return a unique long result from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to a long.
-	 * @param results the result Collection
+	 * @param results the result Collection (can be null)
 	 * @return the unique long result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object or none at all has been found in the given Collection
@@ -132,6 +133,7 @@ public abstract class DataAccessUtils {
 	 */
 	public static long longResult(Collection results)
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
+
 		return ((Number) objectResult(results, Number.class)).longValue();
 	}
 
