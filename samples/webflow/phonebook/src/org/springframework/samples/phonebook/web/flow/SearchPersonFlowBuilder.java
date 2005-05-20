@@ -25,6 +25,7 @@ import org.springframework.web.flow.action.EventParameterMapperAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.AutowireMode;
 import org.springframework.web.flow.config.FlowBuilderException;
+import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
 
 /**
  * Java-based flow builder that searches for people in the phonebook. The flow
@@ -73,8 +74,10 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 		addActionState("setId", setAction, new Transition[] { on(error(), "error"), on(success(), "person.Detail") });
 
 		// view details for selected user id
+		ParameterizableFlowAttributeMapper idMapper = new ParameterizableFlowAttributeMapper();
+		idMapper.setInputMapping(new Mapping("id"));
 		addSubFlowState("person.Detail", flow("person.Detail", PersonDetailFlowBuilder.class),
-				attributeMapper("id.attributeMapper"), new Transition[] { on(finish(), "executeQuery"),
+				idMapper, new Transition[] { on(finish(), "executeQuery"),
 						on(error(), "error") });
 
 		// end - an error occured

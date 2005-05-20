@@ -25,6 +25,7 @@ import org.springframework.web.flow.action.EventParameterMapperAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.AutowireMode;
 import org.springframework.web.flow.config.FlowBuilderException;
+import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
 
 /**
  * Java-based flow builder that builds the person details flow, exactly like it
@@ -68,8 +69,10 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 		addActionState("setCollegueId", setAction, on(success(), "person.Detail"));
 
 		// view details for selected collegue
+		ParameterizableFlowAttributeMapper idMapper = new ParameterizableFlowAttributeMapper();
+		idMapper.setInputMapping(new Mapping("colleagueId", "id"));
 		addSubFlowState("person.Detail", flow("person.Detail", PersonDetailFlowBuilder.class),
-				attributeMapper("colleagueId.attributeMapper"), new Transition[] { on(finish(), "getPerson"),
+				idMapper, new Transition[] { on(finish(), "getPerson"),
 						on(error(), "error") });
 
 		// end
