@@ -131,11 +131,11 @@ public abstract class TransitionableState extends State {
 	}
 
 	/**
-	 * Returns a set of the supported transitional criteria used to match
+	 * Returns a list of the supported transitional criteria used to match
 	 * transitions in this state.
-	 * @return the set of transitional criteria
+	 * @return the list of transitional criteria
 	 */
-	public TransitionCriteria[] getTransitionCriteriaSet() {
+	public TransitionCriteria[] getTransitionCriterias() {
 		TransitionCriteria[] res = new TransitionCriteria[transitions.size()];
 		Iterator it = transitionsIterator();
 		int i = 0;
