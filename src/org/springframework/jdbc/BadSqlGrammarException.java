@@ -37,12 +37,12 @@ public class BadSqlGrammarException extends InvalidDataAccessResourceUsageExcept
 
 	/**
 	 * Constructor for BadSqlGrammarException.
-	 * @param task name of current task (may be null)
+	 * @param task name of current task
 	 * @param sql the offending SQL statement
 	 * @param ex the root cause
 	 */
 	public BadSqlGrammarException(String task, String sql, SQLException ex) {
-		super("Bad SQL grammar [" + sql + "]" + (task != null ? " in task '" + task + "'" : ""), ex);
+		super(task + "; bad SQL grammar [" + sql + "]", ex);
 		this.sql = sql;
 	}
 	

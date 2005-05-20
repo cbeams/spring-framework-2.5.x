@@ -38,12 +38,12 @@ public class InvalidResultSetAccessException extends InvalidDataAccessResourceUs
 
 	/**
 	 * Constructor for InvalidResultSetAccessException.
-	 * @param task name of current task (may be null)
+	 * @param task name of current task
 	 * @param sql the offending SQL statement
 	 * @param ex the root cause
 	 */
 	public InvalidResultSetAccessException(String task, String sql, SQLException ex) {
-		super("Invalid ResultSet access for SQL [" + sql + "]" + (task != null ? " in task '" + task + "'" : ""), ex);
+		super(task + "; invalid ResultSet access for SQL [" + sql + "]", ex);
 		this.sql = sql;
 	}
 	

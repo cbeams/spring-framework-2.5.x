@@ -228,23 +228,23 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new DataAccessResourceFailureException(task + ": " + sqlEx.getMessage(), sqlEx);
+					return new DataAccessResourceFailureException(task + "; " + sqlEx.getMessage(), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataIntegrityViolationCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new DataIntegrityViolationException(task + ": " + sqlEx.getMessage(), sqlEx);
+					return new DataIntegrityViolationException(task + "; " + sqlEx.getMessage(), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotAcquireLockCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new CannotAcquireLockException(task + ": " + sqlEx.getMessage(), sqlEx);
+					return new CannotAcquireLockException(task + "; " + sqlEx.getMessage(), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDeadlockLoserCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new DeadlockLoserDataAccessException(task + ": " + sqlEx.getMessage(), sqlEx);
+					return new DeadlockLoserDataAccessException(task + "; " + sqlEx.getMessage(), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotSerializeTransactionCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new CannotSerializeTransactionException(task + ": " + sqlEx.getMessage(), sqlEx);
+					return new CannotSerializeTransactionException(task + "; " + sqlEx.getMessage(), sqlEx);
 				}
 			}
 		}
