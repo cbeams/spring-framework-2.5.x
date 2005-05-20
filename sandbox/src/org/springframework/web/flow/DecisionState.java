@@ -49,7 +49,7 @@ public class DecisionState extends TransitionableState {
 			throws IllegalArgumentException {
 		super(flow, id, new Transition(criteria, ifTrueStateId));
 		if (StringUtils.hasText(elseStateId)) {
-			add(new Transition(new WildcardTransitionCriteria(), elseStateId));
+			add(new Transition(TransitionCriteriaFactory.any(), elseStateId));
 		}
 	}
 
@@ -67,7 +67,7 @@ public class DecisionState extends TransitionableState {
 			Map properties) throws IllegalArgumentException {
 		super(flow, id, new Transition(criteria, ifTrueStateId), properties);
 		if (StringUtils.hasText(elseStateId)) {
-			add(new Transition(new WildcardTransitionCriteria(), elseStateId));
+			add(new Transition(TransitionCriteriaFactory.any(), elseStateId));
 		}
 	}
 

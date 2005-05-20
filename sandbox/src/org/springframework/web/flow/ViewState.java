@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+sta * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,12 @@ public class ViewState extends TransitionableState {
 	/**
 	 * A view pre-render criteria object.
 	 */
-	private TransitionCriteria displayCriteria;
+	private TransitionCriteria setupCriteria;
 	
 	/**
 	 * The state to transition to if the the view state criteria fails.
 	 */
-	private Transition onDisplayCriteriaFailed;
+	private String setupErrorStateId;
 	
 	/**
 	 * Default constructor for bean style usage.
@@ -198,21 +198,20 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
-	 * Sets the display criteria to determine if this view state should pause 
-	 * the flow and request that a view be rendered.
-	 * @param displayCriteria the display criteria
+	 * Sets the setup criteria to determine if this view state should pause 
+	 * the flow and request that a view be rendered when entered.
+	 * @param setupCriteria the display criteria
 	 */
-	public void setDisplayCriteria(TransitionCriteria displayCriteria) {
-		this.displayCriteria = displayCriteria;
+	public void setSetupCriteria(TransitionCriteria setupCriteria) {
+		this.setupCriteria = setupCriteria;
 	}
 	
 	/**
-	 * Set the transition to execute if the display criteria fails.
-	 * @param transition the transition
+	 * Set the state to transition to if the setup criteria fails.
+	 * @param errorStateId the state id
 	 */
-	public void setOnDisplayCriteriaFailed(Transition transition) {
-		transition.setSourceState(this);
-		this.onDisplayCriteriaFailed = transition;
+	public void setSetupErrorStateId(String errorStateId) {
+		this.setupErrorStateId = errorStateId;
 	}
 	
 	/**
@@ -228,16 +227,12 @@ public class ViewState extends TransitionableState {
 	 *         render the results of the state execution
 	 */
 	protected ViewDescriptor doEnter(StateContext context) {
-		// handle display criteria
-		if (displayCriteria != null) {
-			boolean result = displayCriteria.test(context);
-			if (!result) {
-				if (onDisplayCriteriaFailed != null) {
-					return onDisplayCriteriaFailed.execute(context);
-				}
-				else {
-					throw new IllegalStateException("Display criteria failed but no handler transition set");
-				}
+		// test setup criteria and transition to error state if setup fails
+		if (setupCriteria != null) {
+			Transition toSetupError = new Transition(not(setupCriteria), setupErrorStateId);
+			toSetupError.setSourceState(this);
+			if (toSetupError.matches(context)) {
+				toSetupError.execute(context);
 			}
 		}
 		
@@ -252,9 +247,13 @@ public class ViewState extends TransitionableState {
 		}
 	}
 
+	protected TransitionCriteria not(TransitionCriteria criteria) {
+		return TransitionCriteriaFactory.not(criteria);
+	}
+	
 	protected void createToString(ToStringCreator creator) {
-		creator.append("viewDescriptorCreator", this.viewDescriptorCreator).append("displayCriteria", this.displayCriteria).
-			append("onDisplayCriteriaFailed", this.onDisplayCriteriaFailed);
+		creator.append("viewDescriptorCreator", this.viewDescriptorCreator).append("setupCriteria", this.setupCriteria).
+			append("setupErrorStateId", this.setupErrorStateId);
 		super.createToString(creator);
 	}
 }

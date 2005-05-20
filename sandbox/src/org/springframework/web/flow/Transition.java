@@ -154,7 +154,7 @@ public class Transition extends AnnotatedObject {
 	 * elligible for execution.
 	 */
 	public void setMatchingCriteria(TransitionCriteria matchingCriteria) {
-		Assert.notNull(matchingCriteria, "The transition matching criteria are required");
+		Assert.notNull(matchingCriteria, "The transition matching criteria is required");
 		this.matchingCriteria = matchingCriteria;
 	}
 
@@ -193,7 +193,7 @@ public class Transition extends AnnotatedObject {
 	 *         roll back
 	 */
 	public boolean canCompleteExecution(RequestContext context) {
-		return this.executionCriteria!=null ? this.executionCriteria.test(context) : true;
+		return this.executionCriteria != null ? this.executionCriteria.test(context) : true;
 	}
 	
 	/**
@@ -208,7 +208,6 @@ public class Transition extends AnnotatedObject {
 	 * Set the id of the target (<i>to</i>) state of this transtion.
 	 */
 	public void setTargetStateId(String targetStateId) {
-		Assert.hasText(targetStateId, "The id of the target state of the transition is required");
 		this.targetStateId = targetStateId;
 	}
 
