@@ -181,6 +181,23 @@ public class ViewState extends TransitionableState {
 	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
 		this.viewDescriptorCreator = creator;
 	}
+
+	/**
+	 * Sets the setup criteria to determine if this view state should pause 
+	 * the flow and request that a view be rendered when entered.
+	 * @param setupCriteria the display criteria
+	 */
+	public void setSetupCriteria(TransitionCriteria setupCriteria) {
+		this.setupCriteria = setupCriteria;
+	}
+	
+	/**
+	 * Set the state to transition to if the setup criteria fails.
+	 * @param errorStateId the state id
+	 */
+	public void setSetupErrorStateId(String errorStateId) {
+		this.setupErrorStateId = errorStateId;
+	}
 	
 	/**
 	 * Returns the factory to produce a descriptor about the view to render in
@@ -198,20 +215,17 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
-	 * Sets the setup criteria to determine if this view state should pause 
-	 * the flow and request that a view be rendered when entered.
-	 * @param setupCriteria the display criteria
+	 * Returns the setup criteria.
 	 */
-	public void setSetupCriteria(TransitionCriteria setupCriteria) {
-		this.setupCriteria = setupCriteria;
+	public TransitionCriteria getSetupCriteria() {
+		return setupCriteria;
 	}
-	
+
 	/**
-	 * Set the state to transition to if the setup criteria fails.
-	 * @param errorStateId the state id
+	 * Returns the setup criteria failure state id.
 	 */
-	public void setSetupErrorStateId(String errorStateId) {
-		this.setupErrorStateId = errorStateId;
+	public String getSetupErrorStateId() {
+		return setupErrorStateId;
 	}
 	
 	/**
