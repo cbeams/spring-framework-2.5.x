@@ -199,12 +199,12 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 
 	/**
-	 * Flush the given Hibernate session if necessary.
-	 * @param session the current Hibernate session
+	 * Flush the given Hibernate Session if necessary.
+	 * @param session the current Hibernate Session
 	 * @param existingTransaction if executing within an existing transaction
 	 * @throws HibernateException in case of Hibernate flushing errors
 	 */
-	public void flushIfNecessary(Session session, boolean existingTransaction) throws HibernateException {
+	protected void flushIfNecessary(Session session, boolean existingTransaction) throws HibernateException {
 		if (getFlushMode() == FLUSH_EAGER || (!existingTransaction && getFlushMode() == FLUSH_AUTO)) {
 			logger.debug("Eagerly flushing Hibernate session");
 			session.flush();

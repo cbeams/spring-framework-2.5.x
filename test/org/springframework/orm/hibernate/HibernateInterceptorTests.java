@@ -99,7 +99,7 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testInterceptorWithPrebound() {
+	public void testInterceptorWithThreadBound() {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -126,7 +126,7 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testInterceptorWithPreboundAndFlushEager() throws HibernateException {
+	public void testInterceptorWithThreadBoundAndFlushEager() throws HibernateException {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -156,7 +156,7 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testInterceptorWithFlushingFailure() throws Throwable {
+	public void testInterceptorWithFlushFailure() throws Throwable {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
