@@ -40,21 +40,9 @@
 	     to a java.lang.Long in the target flow model!  -->
 	<bean id="person.Search.id.set" class="org.springframework.web.flow.action.EventParameterMapperAction">
 		<property name="mapping" value="id,java.lang.Long"/>
-		<property name="targetScopeAsString"><value>flow</value></property>
+		<property name="targetScopeAsString" value="flow"/>
 	</bean>
 
-	<!-- The model mapper maps attributes in a parent flow down to a spawning child subflow
-	     as input.  The mapper may also map output attributes up to the parent flow when the child
-	     subflow ends.  In this case the "id" attribute will be mapped to the "id" attribute,
-	     as the person.Detail flow expects that a person ID be provided as as input when spawned. -->
-	<bean id="id.attributeMapper" class="org.springframework.web.flow.support.ParameterizableFlowAttributeMapper">
-		<property name="inputMappings">
-			<list>
-				<value>id</value>
-			</list>
-		</property>
-	</bean>
-	
 	<!-- detail flow beans -->
 
 	<!-- xml FlowBuilder definition for the detail flow -->
@@ -75,15 +63,6 @@
 	</bean>
 	-->
 	
-	<!-- A type conversion service, a more flexible/threadsafe/lightweight alternative to the PropertyEditor! -->
-	<bean id="conversion.service" class="org.springframework.binding.convert.support.DefaultConversionService" autowire="byType"/>
-
-	<!-- A formatter registry, a thread-safe cache for Formatters: a thread-safe, lighter weight alt. to PropertyEditors! -->
-	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterLocator" autowire="byType"/>
-
-	<!-- A broadcaster that will notify the formatter registry to cleanup all thread locals on app shutdown -->
-	<bean id="thread.cleanupBroadcaster" class="org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster"/>
-
 	<!-- The event parameter mapper action sets request parameters as attributes in flow scope.
 	     The exact mapping(s) policies are fully configurable; in this case, the
 	     "id" request parameter is mapped to the "colleagueId" attribute and converted
@@ -92,17 +71,14 @@
 		<property name="mapping" value="id->colleagueId,java.lang.Long"/>
 		<property name="targetScopeAsString" value="flow"/>
 	</bean>
+		
+	<!-- A type conversion service, a more flexible/threadsafe/lightweight alternative to the PropertyEditor! -->
+	<bean id="conversion.service" class="org.springframework.binding.convert.support.DefaultConversionService" autowire="byType"/>
 
-	<!-- The model mapper maps attributes in a parent flow down to a spawning child subflow
-	     as input.  The mapper may also map output attributes up to the parent flow when the child
-	     subflow ends.  In this case the "colleagueId" attribute will be mapped to the "id" attribute,
-	     as the person.Detail flow expects that a person ID be provided as as input when spawned. -->
-	<bean id="colleagueId.attributeMapper" class="org.springframework.web.flow.support.ParameterizableFlowAttributeMapper">
-		<property name="inputMappings">
-			<map>
-				<entry key="colleagueId"><value>id</value></entry>
-			</map>
-		</property>
-	</bean>
+	<!-- A formatter registry, a thread-safe cache for Formatters: a thread-safe, lighter weight alt. to PropertyEditors! -->
+	<bean id="formatter.locator" class="org.springframework.binding.format.support.ThreadLocalFormatterLocator" autowire="byType"/>
+
+	<!-- A broadcaster that will notify the formatter registry to cleanup all thread locals on app shutdown -->
+	<bean id="thread.cleanupBroadcaster" class="org.springframework.binding.thread.support.DefaultThreadCleanupBroadcaster"/>
 
 </beans>

@@ -28,7 +28,9 @@
 	</action-state>
 	
 	<subflow-state id="person.Detail" flow="person.Detail">
-		<attribute-mapper bean="id.attributeMapper"/>
+		<attribute-mapper>
+			<input name="id"/>
+		</attribute-mapper>
 		<transition on="finish" to="executeQuery"/>
 		<transition on="error" to="error"/>
 	</subflow-state>
