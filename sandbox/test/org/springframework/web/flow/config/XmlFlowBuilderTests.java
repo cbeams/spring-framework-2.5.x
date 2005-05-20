@@ -92,6 +92,8 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertTrue(viewState1.hasTransitionFor(context));
 		transition = viewState1.getRequiredTransition(context);
 		assertEquals("subFlowState1", transition.getTargetStateId());
+		assertNull(viewState1.getSetupCriteria());
+		assertNull(viewState1.getSetupErrorStateId());
 
 		ViewState viewState2 = (ViewState) flow.getState("viewState2");
 		assertNotNull(viewState2);
@@ -102,6 +104,8 @@ public class XmlFlowBuilderTests extends TestCase {
 		assertTrue(viewState2.hasTransitionFor(context));
 		transition = viewState2.getRequiredTransition(context);
 		assertEquals("subFlowState2", transition.getTargetStateId());
+		assertNotNull(viewState2.getSetupCriteria());
+		assertEquals("viewState1", viewState2.getSetupErrorStateId());
 
 		SubflowState subFlowState1 = (SubflowState) flow.getState("subFlowState1");
 		assertNotNull(subFlowState1);

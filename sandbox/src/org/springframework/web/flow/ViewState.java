@@ -164,6 +164,9 @@ public class ViewState extends TransitionableState {
 	
 	/**
 	 * Sets the logical name of the view to render in this view state.
+	 * This is a convenient way to set the view descriptor creator by just
+	 * specifying the view name. Internally a {@link SimpleViewDescriptorCreator}
+	 * will be created.
 	 */
 	public void setViewName(String viewName) {
 		if (StringUtils.hasText(viewName)) {
@@ -175,6 +178,14 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
+	 * Returns the factory to produce a descriptor about the view to render in
+	 * this view state.
+	 */
+	public ViewDescriptorCreator getViewDescriptorCreator() {
+		return viewDescriptorCreator;
+	}
+
+	/**
 	 * Sets the factory to produce a descriptor about the view to render in
 	 * this view state.
 	 */
@@ -182,31 +193,6 @@ public class ViewState extends TransitionableState {
 		this.viewDescriptorCreator = creator;
 	}
 
-	/**
-	 * Sets the setup criteria to determine if this view state should pause 
-	 * the flow and request that a view be rendered when entered.
-	 * @param setupCriteria the setup criteria
-	 */
-	public void setSetupCriteria(TransitionCriteria setupCriteria) {
-		this.setupCriteria = setupCriteria;
-	}
-	
-	/**
-	 * Set the state to transition to if the setup criteria fails.
-	 * @param errorStateId the state id
-	 */
-	public void setSetupErrorStateId(String errorStateId) {
-		this.setupErrorStateId = errorStateId;
-	}
-	
-	/**
-	 * Returns the factory to produce a descriptor about the view to render in
-	 * this view state.
-	 */
-	public ViewDescriptorCreator getViewDescriptorCreator() {
-		return viewDescriptorCreator;
-	}
-	
 	/**
 	 * Returns true if this view state has no associated view, false otherwise.
 	 */
@@ -222,10 +208,27 @@ public class ViewState extends TransitionableState {
 	}
 
 	/**
+	 * Sets the setup criteria to determine if this view state should pause 
+	 * the flow and request that a view be rendered when entered.
+	 * @param setupCriteria the setup criteria
+	 */
+	public void setSetupCriteria(TransitionCriteria setupCriteria) {
+		this.setupCriteria = setupCriteria;
+	}
+	
+	/**
 	 * Returns the setup criteria failure state id.
 	 */
 	public String getSetupErrorStateId() {
 		return setupErrorStateId;
+	}
+
+	/**
+	 * Set the state to transition to if the setup criteria fails.
+	 * @param errorStateId the state id
+	 */
+	public void setSetupErrorStateId(String errorStateId) {
+		this.setupErrorStateId = errorStateId;
 	}
 	
 	/**

@@ -221,7 +221,7 @@
 	returned to the user.
 	Transitions triggered by user input from the view lead on to other states.
 -->
-<!ELEMENT view-state ( transition+, property* )>
+<!ELEMENT view-state ( setup?, transition+, property* )>
 
 <!--
 	Unique identifier of an view state; must be unique to this flow.
@@ -262,6 +262,50 @@
 	implementation with the class attribute.
 -->
 <!ATTLIST view-state autowire (no | byName | byType | constructor | autodetect | default) "default">
+
+<!--
+	Defines a single view state setup action to be executed.
+-->
+<!ELEMENT setup ( property* )>
+
+<!--
+	Identifier of the setup action implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
+-->
+<!ATTLIST setup bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified implementation class of the setup action exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one Action implementation
+	exported of that type.
+-->
+<!ATTLIST setup classref CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the setup action implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
+-->
+<!ATTLIST setup class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the setup action 
+	implementation with the class attribute.
+-->
+<!ATTLIST setup autowire (no | byName | byType | constructor | autodetect | default) "default">
+
+<!--
+	Name of the target method to be invoked to execute this setup action. The method's signature must
+	be of the form: 'public Event ${method}(RequestContext) throws Exception'
+-->
+<!ATTLIST setup method CDATA #IMPLIED>
+
+<!--
+	State to transition to if the setup action fails. When not specified, the results of the
+	setup action will not be evaluated.
+-->
+<!ATTLIST setup on-error IDREF #IMPLIED>
 
 <!--
 	Defines a decision state: a state that will evaluate one or more expressions to
@@ -318,12 +362,12 @@
 <!--
 	The state to transition to if the expression is true.
 -->
-<!ATTLIST if then CDATA #REQUIRED>
+<!ATTLIST if then IDREF #REQUIRED>
 
 <!--
 	The state to transition to if the expression is false (optional).
 -->
-<!ATTLIST if else CDATA #IMPLIED>
+<!ATTLIST if else IDREF #IMPLIED>
 
 <!--
 	Defines a sub flow state: a state that spawns a sub flow when entered. When the

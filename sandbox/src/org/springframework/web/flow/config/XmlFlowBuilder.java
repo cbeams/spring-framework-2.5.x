@@ -190,6 +190,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private static final String VALUE_ELEMENT = "value";
 	
+	private static final String SETUP_ELEMENT = "setup";
+	
+	private static final String ON_ERROR_ATTRIBUTE = "on-error";
+	
 	
 	/**
 	 * Internal helper class capturing flow artifact definition info.
@@ -535,6 +539,16 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 		viewState.addAll(parseTransitions(element));
 		viewState.setProperties(parseProperties(element));
+		
+		// setup action support
+		List setupElements = DomUtils.getChildElementsByTagName(element, SETUP_ELEMENT);
+		if (!setupElements.isEmpty()) {
+			Element setupElement = (Element)setupElements.get(0);
+			viewState.setSetupCriteria(new ActionTransitionCriteria(parseAction(setupElement)));
+			if (setupElement.hasAttribute(ON_ERROR_ATTRIBUTE)) {
+				viewState.setSetupErrorStateId(setupElement.getAttribute(ON_ERROR_ATTRIBUTE));
+			}
+		}
 	}
 
 	/**
