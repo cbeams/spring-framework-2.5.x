@@ -1,18 +1,15 @@
 package org.springframework.web.flow;
 
 /**
- * A factory producing transition criteria.
+ * A factory producing commonly used transition criteria objects.
+ * 
  * @author Keith Donald
  */
 public class TransitionCriteriaFactory {
 
 	/**
-	 * Shared instance.
-	 */
-	public static final TransitionCriteria wildcardCriteria = new WildcardTransitionCriteria();
-	
-	/**
-	 * Always returns true.
+	 * Transition criteria that always returns true.
+	 * 
 	 * @author Keith Donald
 	 */
 	public static class WildcardTransitionCriteria implements TransitionCriteria {
@@ -34,13 +31,20 @@ public class TransitionCriteriaFactory {
 	}
 
 	/**
-	 * Negates the result of a criteria evaluation.
+	 * Transition criteria that negates the result of the evaluation of
+	 * another criteria object.
+	 * 
 	 * @author Keith Donald
 	 */
 	public static class NotTransitionCriteria implements TransitionCriteria {
 
 		private TransitionCriteria criteria;
 		
+		/**
+		 * Create a new transition criteria object that will negate
+		 * the result of given criteria object.
+		 * @param criteria the criteria to negate 
+		 */
 		public NotTransitionCriteria(TransitionCriteria criteria) {
 			this.criteria = criteria;
 		}
@@ -55,17 +59,18 @@ public class TransitionCriteriaFactory {
 	}
 	
 	/**
-	 * Return a criteria that always returns 'true'.
+	 * Returns a transition criteria object that always returns 'true'.
 	 * @return the wildcard criteria
 	 */
 	public static TransitionCriteria any() {
-		return wildcardCriteria;
+		return new WildcardTransitionCriteria();
 	}
 	
 	/**
-	 * Not the specified criteria
-	 * @param criteria the criteria
-	 * @return the negation
+	 * Returns a transtion criteria object that negates the result of the
+	 * specified criteria.
+	 * @param criteria the criteria to negate
+	 * @return the negating criteria
 	 */
 	public static TransitionCriteria not(TransitionCriteria criteria) {
 		return new NotTransitionCriteria(criteria);
