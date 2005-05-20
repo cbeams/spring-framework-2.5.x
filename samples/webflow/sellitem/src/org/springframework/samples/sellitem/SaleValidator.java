@@ -27,8 +27,6 @@ public class SaleValidator implements Validator {
 	public void validate(Object obj, Errors errors) {
 		Sale sale = (Sale)obj;
 		validatePriceAndItemCount(sale, errors);
-		
-		throw new UnsupportedOperationException();
 	}
 	
 	public void validatePriceAndItemCount(Sale sale, Errors errors) {
