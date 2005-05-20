@@ -1913,7 +1913,7 @@ public class HibernateTemplateTests extends TestCase {
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					throw new JDBCException("", sqlex);
+					throw new JDBCException("mymsg", sqlex);
 				}
 			});
 			fail("Should have thrown DataIntegrityViolationException");
@@ -1921,18 +1921,21 @@ public class HibernateTemplateTests extends TestCase {
 		catch (DataIntegrityViolationException ex) {
 			// expected
 			assertEquals(sqlex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
+		final ObjectDeletedException odex = new ObjectDeletedException("msg", "id", TestBean.class.getName());
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					throw new ObjectDeletedException("msg", "id", TestBean.class.getName());
+					throw odex;
 				}
 			});
 			fail("Should have thrown HibernateObjectRetrievalFailureException");
 		}
 		catch (HibernateObjectRetrievalFailureException ex) {
 			// expected
+			assertEquals(odex, ex.getCause());
 		}
 
 		final WrongClassException wcex = new WrongClassException("msg", "id", TestBean.class.getName());

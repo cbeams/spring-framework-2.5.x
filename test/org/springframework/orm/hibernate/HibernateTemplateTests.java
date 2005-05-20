@@ -20,10 +20,10 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Arrays;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.Criteria;
@@ -44,8 +44,8 @@ import net.sf.hibernate.StaleObjectStateException;
 import net.sf.hibernate.TransientObjectException;
 import net.sf.hibernate.WrongClassException;
 import net.sf.hibernate.type.Type;
-import org.easymock.MockControl;
 import org.easymock.ArgumentsMatcher;
+import org.easymock.MockControl;
 
 import org.springframework.beans.TestBean;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -2023,7 +2023,7 @@ public class HibernateTemplateTests extends TestCase {
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new JDBCException(sqlex);
+					throw new JDBCException("mymsg", sqlex);
 				}
 			});
 			fail("Should have thrown DataIntegrityViolationException");
@@ -2031,18 +2031,21 @@ public class HibernateTemplateTests extends TestCase {
 		catch (DataIntegrityViolationException ex) {
 			// expected
 			assertEquals(sqlex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
+		final ObjectDeletedException odex = new ObjectDeletedException("msg", "id", TestBean.class);
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException {
-					throw new ObjectDeletedException("msg", "id", TestBean.class);
+					throw odex;
 				}
 			});
 			fail("Should have thrown HibernateObjectRetrievalFailureException");
 		}
 		catch (HibernateObjectRetrievalFailureException ex) {
 			// expected
+			assertEquals(odex, ex.getCause());
 		}
 
 		final WrongClassException wcex = new WrongClassException("msg", "id", TestBean.class);

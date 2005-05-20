@@ -38,6 +38,7 @@ import net.sf.hibernate.Transaction;
 import org.easymock.MockControl;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
@@ -50,7 +51,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.core.JdkVersion;
 
 /**
  * @author Juergen Hoeller
@@ -794,7 +794,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.verify();
 	}
 
-	public void testTransactionCommitWithFlushingFailure() throws HibernateException, SQLException {
+	public void testTransactionCommitWithFlushFailure() throws HibernateException, SQLException {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -809,7 +809,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		tx.commit();
-		txControl.setThrowable(new JDBCException(new SQLException("argh", "27")), 1);
+		SQLException sqlEx = new SQLException("argh", "27");
+		txControl.setThrowable(new JDBCException("mymsg", sqlEx), 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -847,6 +848,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		}
 		catch (DataIntegrityViolationException ex) {
 			// expected
+			assertEquals(sqlEx, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));

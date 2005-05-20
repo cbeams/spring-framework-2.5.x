@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
@@ -493,10 +492,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// assumably from commit call to the underlying JDBC connection
 			throw new TransactionSystemException("Could not commit Hibernate transaction", ex);
 		}
-		catch (JDBCException ex) {
-			// assumably failed to flush changes to database
-			throw convertJdbcAccessException(ex.getSQLException());
-		}
 		catch (HibernateException ex) {
 			// assumably failed to flush changes to database
 			throw convertHibernateAccessException(ex);
@@ -514,10 +509,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		catch (net.sf.hibernate.TransactionException ex) {
 			throw new TransactionSystemException("Could not roll back Hibernate transaction", ex);
-		}
-		catch (JDBCException ex) {
-			// Shouldn't really happen, as a rollback doesn't cause a flush.
-			throw convertJdbcAccessException(ex.getSQLException());
 		}
 		catch (HibernateException ex) {
 			// Shouldn't really happen, as a rollback doesn't cause a flush.
@@ -585,21 +576,26 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * the org.springframework.dao hierarchy. Can be overridden in subclasses.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
+	 * @see #convertJdbcAccessException(net.sf.hibernate.JDBCException)
 	 */
 	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
+		if (ex instanceof JDBCException) {
+			return convertJdbcAccessException((JDBCException) ex);
+		}
 		return SessionFactoryUtils.convertHibernateAccessException(ex);
 	}
 
 	/**
-	 * Convert the given SQLException to an appropriate exception from the
+	 * Convert the given JDBCException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy.
 	 * Uses a JDBC exception translator. Can be overridden in subclasses.
-	 * @param ex SQLException that occured
+	 * @param ex JDBCException that occured, wrapping a SQLException
 	 * @return the corresponding DataAccessException instance
 	 * @see #setJdbcExceptionTranslator
 	 */
-	protected DataAccessException convertJdbcAccessException(SQLException ex) {
-		return getJdbcExceptionTranslator().translate("HibernateTransactionManager", null, ex);
+	protected DataAccessException convertJdbcAccessException(JDBCException ex) {
+		return getJdbcExceptionTranslator().translate(
+				"Hibernate operation: " + ex.getMessage(), null, ex.getSQLException());
 	}
 
 

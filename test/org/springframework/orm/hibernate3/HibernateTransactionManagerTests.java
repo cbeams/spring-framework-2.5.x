@@ -16,7 +16,6 @@
 
 package org.springframework.orm.hibernate3;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -831,7 +830,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.verify();
 	}
 
-	public void testTransactionCommitWithFlushingFailure() throws Exception {
+	public void testTransactionCommitWithFlushFailure() throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -846,7 +845,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		tx.commit();
-		txControl.setThrowable(new JDBCException("", new SQLException("argh", "27")), 1);
+		SQLException sqlEx = new SQLException("argh", "27");
+		txControl.setThrowable(new JDBCException("mymsg", sqlEx), 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -884,6 +884,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		}
 		catch (DataIntegrityViolationException ex) {
 			// expected
+			assertEquals(sqlEx, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
