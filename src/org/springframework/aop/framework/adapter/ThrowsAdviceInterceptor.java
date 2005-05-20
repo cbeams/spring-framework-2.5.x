@@ -50,16 +50,23 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 	
 	protected static Log logger = LogFactory.getLog(ThrowsAdviceInterceptor.class);
 
-	private Object throwsAdvice;
+
+	private final Object throwsAdvice;
 
 	/** Methods on throws advice, keyed by exception class */
-	private Map exceptionHandlerHash;
+	private final Map exceptionHandlerMap = new HashMap();
 
+
+	/**
+	 * Create a new ThrowsAdviceInterceptor for the given ThrowsAdvice.
+	 * @param throwsAdvice the advice object that defines the exception
+	 * handler methods (usually a ThrowsAdvice implementation)
+	 * @see org.springframework.aop.ThrowsAdvice
+	 */
 	public ThrowsAdviceInterceptor(Object throwsAdvice) {
 		this.throwsAdvice = throwsAdvice;
 
 		Method[] methods = throwsAdvice.getClass().getMethods();
-		exceptionHandlerHash = new HashMap();
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
 			if (method.getName().equals(AFTER_THROWING) &&
@@ -68,36 +75,37 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterTypes().length - 1])
 				) {
 				// Have an exception handler
-				exceptionHandlerHash.put(method.getParameterTypes()[method.getParameterTypes().length - 1], method);
-				logger.info("Found exception handler method [" + method + "]");
+				this.exceptionHandlerMap.put(method.getParameterTypes()[method.getParameterTypes().length - 1], method);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found exception handler method: " + method);
+				}
 			}
 		}
 		
-		if (exceptionHandlerHash.isEmpty()) {
-			throw new IllegalArgumentException("At least one handler method must be found in class " +
-			                                   throwsAdvice.getClass());
+		if (this.exceptionHandlerMap.isEmpty()) {
+			throw new IllegalArgumentException(
+					"At least one handler method must be found in class [" + throwsAdvice.getClass() + "]");
 		}
 	}
 	
 	public int getHandlerMethodCount() {
-		return exceptionHandlerHash.size();
+		return this.exceptionHandlerMap.size();
 	}
 
 	/**
-	 * Can return null if not found.
-	 * 
+	 * Determine the exception handle method. Can return null if not found.
+	 * @param exception the exception thrown
 	 * @return a handler for the given exception type
-	 * @param exception
-	 *            Won't be a ServletException or IOException
 	 */
 	private Method getExceptionHandler(Throwable exception) {
 		Class exceptionClass = exception.getClass();
-		logger.info("Trying to find handler for exception of " + exceptionClass);
-		Method handler = (Method) this.exceptionHandlerHash.get(exceptionClass);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Trying to find handler for exception of type [" + exceptionClass.getName() + "]");
+		}
+		Method handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
 		while (handler == null && !exceptionClass.equals(Throwable.class)) {
-			logger.info("Looking at superclass " + exceptionClass);
 			exceptionClass = exceptionClass.getSuperclass();
-			handler = (Method) this.exceptionHandlerHash.get(exceptionClass);
+			handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
 		}
 		return handler;
 	}

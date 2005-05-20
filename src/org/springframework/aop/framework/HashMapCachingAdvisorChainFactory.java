@@ -40,6 +40,7 @@ public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFact
 	
 	public List getInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Object proxy, Method method, Class targetClass) {
+
 		List cached = (List) this.methodCache.get(method);
 		if (cached == null) {
 			// recalculate

@@ -49,7 +49,7 @@ public final class MethodBeforeAdviceInterceptor implements MethodInterceptor, S
 	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
 	 */
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		advice.before(mi.getMethod(), mi.getArguments(), mi.getThis() );
+		this.advice.before(mi.getMethod(), mi.getArguments(), mi.getThis() );
 		return mi.proceed();
 	}
 	
