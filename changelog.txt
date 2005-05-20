@@ -6,7 +6,15 @@ http://www.springframework.org
 Changes in version 1.2.1 (27.5.2005)
 ------------------------------------
 
+Package org.springframework.aop
+* fixed ThrowsAdviceInterceptor to log at DEBUG level rather than INFO level
+
 Package org.springframework.beans
+* reworked ArgumentConvertingMethodInvoker to determine an appropriate overloaded method (with assignable arguments)
+* refined BeanWrapperImpl and PropertyPlaceholderConfigurer to never log property values (which might be sensitive data)
+* fixed PropertyResourceConfigurer to actually call "convertProperties" and "convertPropertyValue" for merged properties
+* fixed MethodInvokingFactoryBean's "getObjectType" implementation to return null if not fully initialized yet
+* fixed AbstractAutowireCapableBeanFactory to only match untyped argument values as fallback (avoid unintended matches)
 * added "ignoreDependencyInterface" method to AbstractAutowireCapableBeanFactory and ConfigurableListableBeanFactory
 * reworked AbstractAutowireCapableBeanFactory's dependency exclusion check to support ignored dependency interfaces
 * AbstractAutowireCapableBeanFactory registers BeanFactoryAware as default ignored dependency interface
@@ -15,13 +23,21 @@ Package org.springframework.context
 * AbstractApplicationContext registers MessageSourceAware/ApplicationContextAware/etc as ignored dependency interfaces
 * fixed AbstractApplicationContext to not exclude dependencies of type MessageSource/ApplicationContext/etc by default
 
+Package org.springframework.dao
+* fixed DataAccessUtils' "(required)UniqueResult" methods to treat a passed-in null value as empty Collection
+
 Package org.springframework.ejb
 * adapted LocalSlsbInvokerInterceptor to support a local EJB that does not directly implement the business interface
 
 Package org.springframework.orm
-* fixed SessionFactoryUtils for Hibernate 2.1 to not prevent transaction synchronization when allowCreate=false
+* HibernateAccessor and HibernateTransactionManager integrate JDBCException message into Spring DataAccessException
+* SessionFactoryUtils keeps nested exception even case in case of TransientObjectException/PersistentObjectException
 * fixed Hibernate SessionFactoryUtils to correctly handle asynchronous timeouts in case of mixed JTA/Spring transactions
+* fixed SessionFactoryUtils for Hibernate 2.1 to not prevent transaction synchronization when allowCreate=false
 * fixed LocalSessionFactoryBean for Hibernate3 to use connection release mode "on_close" as default (-> safe tx cleanup)
+
+Package org.springframework.util
+* refined MethodInvoker to find matching method with assignable parameters if no direct match found for given arguments
 
 
 Changes in version 1.2 final (13.5.2005)
