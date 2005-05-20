@@ -899,11 +899,13 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		final Synchronization synchronization = transaction.getSynchronization();
 		assertTrue("JTA synchronization registered", synchronization != null);
-		new Thread() {
+		Thread thread = new Thread() {
 			public void run() {
 				synchronization.afterCompletion(Status.STATUS_ROLLEDBACK);
 			}
-		}.start();
+		};
+		thread.start();
+		thread.join();
 
 		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
@@ -925,7 +927,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 				}
 			}
 		});
-
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
