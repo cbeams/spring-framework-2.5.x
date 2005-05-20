@@ -386,7 +386,7 @@ public class ActionState extends TransitionableState {
 					+ "'; transitions must be defined to handle action result outcomes -- "
 					+ "possible flow configuration error? Note: the eventIds signaled were: '" + Styler.call(eventIds)
 					+ "', while the supported set of transitional criteria for this action state is '"
-					+ Styler.call(getTransitionCriterias()) + "'");
+					+ Styler.call(getTransitionCriteriaSet()) + "'");
 		}
 		else {
 			throw new IllegalStateException("No actions were executed, thus I cannot execute any state transition "

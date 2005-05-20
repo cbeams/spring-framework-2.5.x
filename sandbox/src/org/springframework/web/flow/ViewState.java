@@ -229,10 +229,16 @@ public class ViewState extends TransitionableState {
 	protected ViewDescriptor doEnter(StateContext context) {
 		// test setup criteria and transition to error state if setup fails
 		if (setupCriteria != null) {
-			Transition toSetupError = new Transition(not(setupCriteria), setupErrorStateId);
-			toSetupError.setSourceState(this);
-			if (toSetupError.matches(context)) {
-				toSetupError.execute(context);
+			if (StringUtils.hasText(setupErrorStateId)) {
+				// test the criteria and if false, transition to the setup error state
+				Transition toSetupError = new Transition(not(setupCriteria), setupErrorStateId);
+				toSetupError.setSourceState(this);
+				if (toSetupError.matches(context)) {
+					toSetupError.execute(context);
+				}
+			} else {
+				// just test the criteria but don't evaluate it's result
+				this.setupCriteria.test(context);
 			}
 		}
 		

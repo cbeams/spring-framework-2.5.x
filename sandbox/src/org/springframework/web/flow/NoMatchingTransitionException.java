@@ -61,7 +61,7 @@ public class NoMatchingTransitionException extends FlowNavigationException {
 	public NoMatchingTransitionException(TransitionableState state, RequestContext context, Throwable cause) {
 		super(state.getFlow(), "No transition found for event '" + context.getLastEvent().getId() + "' in state '"
 				+ state.getId() + "' of flow '" + state.getFlow().getId() + "' -- valid transitional criteria are "
-				+ Styler.call(state.getTransitionCriterias())
+				+ Styler.call(state.getTransitionCriteriaSet())
 				+ " -- likely programmer error, check the set of TransitionCriteria for this state", cause);
 		this.state = state;
 		this.context = context;

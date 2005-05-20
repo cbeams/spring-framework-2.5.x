@@ -135,9 +135,10 @@ public class Transition extends AnnotatedObject {
 	/**
 	 * Set the owning source (<i>from</i>) state of this transition.
 	 */
-	public void setSourceState(TransitionableState owningState) {
+	public void setSourceState(TransitionableState sourceState) {
 		Assert.isTrue(getSourceState() == null, "This transition was already added to a source state");
-		this.sourceState = owningState;
+		Assert.notNull(sourceState, "The source state of this transition is required");		
+		this.sourceState = sourceState;
 	}
 
 	/**
@@ -208,6 +209,7 @@ public class Transition extends AnnotatedObject {
 	 * Set the id of the target (<i>to</i>) state of this transtion.
 	 */
 	public void setTargetStateId(String targetStateId) {
+		Assert.hasText(targetStateId, "The id of the target state of the transition is required");		
 		this.targetStateId = targetStateId;
 	}
 
