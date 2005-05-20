@@ -42,10 +42,11 @@ import java.lang.reflect.Modifier;
  */
 public class MethodInvoker {
 
-    /**
-     * Marker now used only by MethodInvokingFactoryBean, but left here for compatibility
-     */
+	/**
+	 * Marker now used only by MethodInvokingFactoryBean, but left here for compatibility
+	 */
 	public static final VoidType VOID = new VoidType();
+
 
 	private Class targetClass;
 
@@ -86,6 +87,9 @@ public class MethodInvoker {
 	 */
 	public void setTargetObject(Object targetObject) {
 		this.targetObject = targetObject;
+		if (targetObject != null) {
+			this.targetClass = targetObject.getClass();
+		}
 	}
 
 	/**
@@ -124,7 +128,7 @@ public class MethodInvoker {
 		int lastDotIndex = staticMethod.lastIndexOf('.');
 		if (lastDotIndex == -1 || lastDotIndex == staticMethod.length()) {
 			throw new IllegalArgumentException("staticMethod must be a fully qualified class plus method name: " +
-																				 "e.g. 'example.MyExampleClass.myExampleMethod'");
+					"e.g. 'example.MyExampleClass.myExampleMethod'");
 		}
 		String className = staticMethod.substring(0, lastDotIndex);
 		String methodName = staticMethod.substring(lastDotIndex + 1);
@@ -140,9 +144,13 @@ public class MethodInvoker {
 		this.arguments = arguments;
 	}
 
+	/**
+	 * Retrun the arguments for the method invocation.
+	 */
 	public Object[] getArguments() {
 		return arguments;
 	}
+
 
 	/**
 	 * Prepare the specified method.
@@ -151,7 +159,7 @@ public class MethodInvoker {
 	 * @see #invoke
 	 */
 	public void prepare() throws ClassNotFoundException, NoSuchMethodException {
-		if (this.targetClass == null && this.targetObject == null) {
+		if (this.targetClass == null) {
 			throw new IllegalArgumentException("Either targetClass or targetObject is required");
 		}
 		if (this.targetMethod == null) {
@@ -162,38 +170,56 @@ public class MethodInvoker {
 			this.arguments = new Object[0];
 		}
 
-		Class[] types = new Class[this.arguments.length];
+		Class[] argTypes = new Class[this.arguments.length];
 		for (int i = 0; i < this.arguments.length; ++i) {
-			if (this.arguments[i] != null) {
-				types[i] = this.arguments[i].getClass();
-			}
+			argTypes[i] = (this.arguments[i] != null ? this.arguments[i].getClass() : Object.class);
 		}
 
-		// try to get the exact method first
-		Class targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
+		// Try to get the exact method first.
 		try {
-			this.methodObject = targetClass.getMethod(this.targetMethod, types);
+			this.methodObject = this.targetClass.getMethod(this.targetMethod, argTypes);
 		}
 		catch (NoSuchMethodException ex) {
-			int matches = 0;
-			// Then try to get a method with the same number of arguments.
-			// We'll fail at runtime if in fact the arguments are not assignment compatible.
-			Method[] methods = targetClass.getMethods();
-			for (int i = 0; i < methods.length; ++i) {
-				Method method = methods[i];
-				if (method.getName().equals(this.targetMethod) && method.getParameterTypes().length == types.length) {
-					this.methodObject = method;
-					++matches;
-				}
-			}
-			// just rethrow exception if we can't get a match
-			if (this.methodObject == null || matches > 1) {
+			// Just rethrow exception if we can't get any match.
+			this.methodObject = findMatchingMethod();
+			if (this.methodObject == null) {
 				throw ex;
 			}
 		}
 
 		if (this.targetObject == null && !Modifier.isStatic(this.methodObject.getModifiers())) {
 			throw new IllegalArgumentException("Target method must not be non-static without a target");
+		}
+	}
+
+	/**
+	 * Find a matching method with the specified name for the specified arguments.
+	 * @return a matching method, or null if none
+	 * @see #getTargetClass()
+	 * @see #getTargetMethod()
+	 * @see #getArguments()
+	 */
+	protected Method findMatchingMethod() {
+		Method[] candidates = getTargetClass().getMethods();
+		int argCount = getArguments().length;
+		Method matchingMethod = null;
+		int numberOfMatchingMethods = 0;
+
+		for (int i = 0; i < candidates.length; i++) {
+			// Check if the inspected method has the correct name and number of parameters.
+			if (candidates[i].getName().equals(getTargetMethod()) &&
+					candidates[i].getParameterTypes().length == argCount) {
+				matchingMethod = candidates[i];
+				numberOfMatchingMethods++;
+			}
+		}
+
+		// Only return matching method if exactly one found.
+		if (numberOfMatchingMethods == 1) {
+			return matchingMethod;
+		}
+		else {
+			return null;
 		}
 	}
 
@@ -211,16 +237,17 @@ public class MethodInvoker {
 	 * Invoke the specified method.
 	 * The invoker needs to have been prepared before.
 	 * @return the object (possibly null) returned by the method invocation,
-	 * or null if the method has a void return type
+	 *         or null if the method has a void return type
 	 * @see #prepare
 	 */
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
 		if (this.methodObject == null) {
-			throw new IllegalStateException( "prepare() must be called prior to invoke() on MethodInvoker");
+			throw new IllegalStateException("prepare() must be called prior to invoke() on MethodInvoker");
 		}
 		// in the static case, target will just be null
 		return this.methodObject.invoke(this.targetObject, this.arguments);
 	}
+
 
 	/**
 	 * Special marker class used for a void return value,

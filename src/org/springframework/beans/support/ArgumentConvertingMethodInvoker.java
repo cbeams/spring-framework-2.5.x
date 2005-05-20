@@ -17,13 +17,20 @@
 package org.springframework.beans.support;
 
 import java.beans.PropertyEditor;
+import java.lang.reflect.Method;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.util.MethodInvoker;
 
 /**
  * Subclass of MethodInvoker that tries to convert the given arguments
  * for the actual target method via BeanWrapperImpl.
+ *
+ * <p>Supports flexible argument conversions, in particular for
+ * invoking a specific overloaded method.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see org.springframework.beans.BeanWrapperImpl#doTypeConversionIfNecessary
@@ -43,17 +50,62 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 		this.beanWrapper.registerCustomEditor(requiredType, propertyEditor);
 	}
 
-	public void prepare() throws ClassNotFoundException, NoSuchMethodException {
-		super.prepare();
-
-		// try to convert the arguments for the chosen method
-		Class[] requiredTypes = getPreparedMethod().getParameterTypes();
+	/**
+	 * This implementation looks for a method with matching parameter types:
+	 * that is, where each argument value is assignable to the corresponding parameter type.
+	 */
+	protected Method findMatchingMethod() {
+		Method[] candidates = getTargetClass().getMethods();
 		Object[] arguments = getArguments();
-		Object[] convertedArguments = new Object[arguments.length];
-		for (int i = 0; i < arguments.length; i++) {
-			convertedArguments[i] = this.beanWrapper.doTypeConversionIfNecessary(arguments[i], requiredTypes[i]);
+		int argCount = arguments.length;
+
+		// First pass: look for method with directly assignable arguments.
+		for (int i = 0; i < candidates.length; i++) {
+			if (candidates[i].getName().equals(getTargetMethod())) {
+				// Check if the inspected method has the correct number of parameters.
+				Class[] paramTypes = candidates[i].getParameterTypes();
+				if (paramTypes.length == argCount) {
+					int numberOfCorrectArguments = 0;
+					for (int j = 0; j < argCount; j++) {
+						// Verify that the supplied argument is assignable to the method parameter.
+						if (BeanUtils.isAssignable(paramTypes[j], arguments[j])) {
+							numberOfCorrectArguments++;
+						}
+					}
+					if (numberOfCorrectArguments == argCount) {
+						return candidates[i];
+					}
+				}
+			}
 		}
-		setArguments(convertedArguments);
+
+		// Second pass: look for method where arguments can be converted to parameter types.
+		for (int i = 0; i < candidates.length; i++) {
+			if (candidates[i].getName().equals(getTargetMethod())) {
+				// Check if the inspected method has the correct number of parameters.
+				Class[] paramTypes = candidates[i].getParameterTypes();
+				if (paramTypes.length == argCount) {
+					Object[] argumentsToUse = arguments;
+					int numberOfCorrectArguments = 0;
+					for (int j = 0; j < argCount; j++) {
+						// Verify that the supplied argument is assignable to the method parameter.
+						try {
+							argumentsToUse[j] = this.beanWrapper.doTypeConversionIfNecessary(arguments[j], paramTypes[j]);
+							numberOfCorrectArguments++;
+						}
+						catch (TypeMismatchException ex) {
+							// Ignore -> simply doesn't match.
+						}
+					}
+					if (numberOfCorrectArguments == argumentsToUse.length) {
+						setArguments(argumentsToUse);
+						return candidates[i];
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 
 }
