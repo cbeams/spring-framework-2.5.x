@@ -453,8 +453,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate(
-					"executing PreparedStatementCallback [" + psc + "]", getSql(psc), ex);
+			throw getExceptionTranslator().translate("executing PreparedStatementCallback", getSql(psc), ex);
 		}
 		finally {
 			if (psc instanceof ParameterDisposer) {
@@ -792,8 +791,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			return result;
 		}
 		catch (SQLException ex) {
-			throw getExceptionTranslator().translate(
-					"executing CallableStatementCallback [" + csc + "]", getSql(csc), ex);
+			throw getExceptionTranslator().translate("executing CallableStatementCallback", getSql(csc), ex);
 		}
 		finally {
 			if (csc instanceof ParameterDisposer) {
