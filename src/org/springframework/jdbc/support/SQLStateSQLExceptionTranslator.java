@@ -70,14 +70,8 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 			sql = "";
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Translating SQLException with SQLState '" + sqlEx.getSQLState() +
-					"' and errorCode '" + sqlEx.getErrorCode() + "' and message [" +
-					sqlEx.getMessage() + "]; SQL was [" + sql + "] for task [" + task + "]");
-		}
-
 		String sqlState = sqlEx.getSQLState();
-		// Some JDBC drivers nest the actual exception from a batched update - need to get the nested one.
+		// Some JDBC drivers nest the actual exception from a batched update: need to get the nested one.
 		if (sqlState == null) {
 			SQLException nestedEx = sqlEx.getNextException();
 			if (nestedEx != null) {
@@ -97,7 +91,7 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 		
 		// We couldn't identify it more precisely.
 		return new UncategorizedSQLException(
-				"(" + task + "): encountered SQLException [" + sqlEx.getMessage() + "]", sql, sqlEx);
+				task + ": encountered SQLException [" + sqlEx.getMessage() + "]", sql, sqlEx);
 	}
 
 }
