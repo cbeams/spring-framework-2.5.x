@@ -117,6 +117,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		}
 	}
 
+
 	/**
 	 * Returns the same value each time if the singleton property is set
 	 * to true, otherwise returns the value returned from invoking the
@@ -131,8 +132,8 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		}
 		else {
 			// Prototype: new object on each call.
-			Object retval = invoke();
-			return (retval != null ? retval : MethodInvoker.VOID);
+			Object retVal = invoke();
+			return (retVal != null ? retVal : MethodInvoker.VOID);
 		}
 	}
 

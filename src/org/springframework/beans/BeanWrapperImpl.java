@@ -897,15 +897,16 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	/**
 	 * Convert the value to the required type (if necessary from a String).
-	 * Conversions from String to any type use the <code>setAsText</code> method
+	 * <p>Conversions from String to any type use the <code>setAsText</code> method
 	 * of the PropertyEditor class. Note that a PropertyEditor must be registered
-	 * for the given class for this to work. This is a standard Java Beans API.
-	 * A number of property editors are automatically registered by this class.
+	 * for the given class for this to work; this is a standard JavaBeans API.
+	 * A number of PropertyEditors are automatically registered by BeanWrapperImpl.
 	 * @param newValue proposed change value
 	 * @param requiredType the type we must convert to
 	 * @return the new value, possibly the result of type conversion
 	 * @throws TypeMismatchException if type conversion failed
 	 * @see java.beans.PropertyEditor#setAsText(String)
+	 * @see java.beans.PropertyEditor#getValue()
 	 */
 	public Object doTypeConversionIfNecessary(Object newValue, Class requiredType) throws TypeMismatchException {
 		return doTypeConversionIfNecessary(null, null, null, newValue, requiredType);
