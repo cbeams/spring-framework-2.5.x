@@ -1352,6 +1352,44 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(26, proxied.getAge());
 	}
 	
+	public void testMultiAdvice() throws Throwable {
+		CountingMultiAdvice cca = new CountingMultiAdvice();
+		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cca) {
+			public boolean matches(Method m, Class targetClass) {
+				return m.getParameterTypes().length == 0 || "exceptional".equals(m.getName());
+			}
+		};
+		TestBean target = new TestBean();
+		target.setAge(80);
+		ProxyFactory pf = new ProxyFactory(target);
+		pf.addAdvice(new NopInterceptor());
+		pf.addAdvisor(matchesNoArgs);
+		assertEquals("Advisor was added", matchesNoArgs, pf.getAdvisors()[1]);
+		ITestBean proxied = (ITestBean) createProxy(pf);
+
+		/* TODO: support multiple Advice interfaces for same object
+		assertEquals(0, cca.getCalls());
+		assertEquals(0, cca.getCalls("getAge"));
+		assertEquals(target.getAge(), proxied.getAge());
+		assertEquals(2, cca.getCalls());
+		assertEquals(2, cca.getCalls("getAge"));
+		assertEquals(0, cca.getCalls("setAge"));
+		// Won't be advised
+		proxied.setAge(26);
+		assertEquals(2, cca.getCalls());
+		assertEquals(26, proxied.getAge());
+		assertEquals(4, cca.getCalls());
+		try {
+			proxied.exceptional(new IllegalStateException());
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+		assertEquals(6, cca.getCalls());
+		*/
+	}
+
 	public void testBeforeAdviceThrowsException() {
 		final RuntimeException rex = new RuntimeException();
 		CountingBeforeAdvice ba = new CountingBeforeAdvice() {
@@ -1361,7 +1399,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 					throw rex;
 			}
 		};
-		
+
 		TestBean target = new TestBean();
 		target.setAge(80);
 		NopInterceptor nop1 = new NopInterceptor();
@@ -1392,8 +1430,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		// Shouldn't have changed value in joinpoint
 		assertEquals(target.getAge(), proxied.getAge());
 	}
-	
-	
+
+
 	public void testAfterReturningAdvisorIsInvoked() {
 		class SummingAfterAdvice implements AfterReturningAdvice {
 			public int sum;
@@ -1416,7 +1454,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(0, aa.sum);
 		int i1 = 12;
 		int i2 = 13;
-		
+
 		// Won't be advised
 		proxied.setAge(i1);
 		assertEquals(i1, proxied.getAge());
@@ -1426,7 +1464,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(i1 + i2, aa.sum);
 		assertEquals(i2, proxied.getAge());
 	}
-	
+
 	public void testAfterReturningAdvisorIsNotInvokedOnException() {
 		CountingAfterReturningAdvice car = new CountingAfterReturningAdvice();
 		TestBean target = new TestBean();
@@ -1451,8 +1489,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 		assertEquals(2, car.getCalls());
 	}
-	
-	
+
+
 	public void testThrowsAdvisorIsInvoked() throws Throwable {
 		// Reacts to ServletException and RemoteException
 		ThrowsAdviceInterceptorTests.MyThrowsHandler th = new ThrowsAdviceInterceptorTests.MyThrowsHandler();
@@ -1461,7 +1499,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				return m.getName().startsWith("echo");
 			}
 		};
-		
+
 		ThrowsAdviceInterceptorTests.Echo target = new ThrowsAdviceInterceptorTests.Echo();
 		target.setA(16);
 		ProxyFactory pf = new ProxyFactory(target);
@@ -1492,11 +1530,11 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 		assertEquals(1, th.getCalls("servletException"));
 	}
-	
+
 	public void testAddThrowsAdviceWithoutAdvisor() throws Throwable {
 		// Reacts to ServletException and RemoteException
 		ThrowsAdviceInterceptorTests.MyThrowsHandler th = new ThrowsAdviceInterceptorTests.MyThrowsHandler();
-	
+
 		ThrowsAdviceInterceptorTests.Echo target = new ThrowsAdviceInterceptorTests.Echo();
 		target.setA(16);
 		ProxyFactory pf = new ProxyFactory(target);
