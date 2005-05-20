@@ -609,7 +609,7 @@ public abstract class SessionFactoryUtils {
 	public static DataAccessException convertHibernateAccessException(HibernateException ex) {
 		if (ex instanceof JDBCException) {
 			// SQLException during Hibernate access: only passed in here from custom code,
-			// as HibernateTemplate etc will use SQLExceptionTranslator-based handling
+			// as HibernateTemplate etc will use SQLExceptionTranslator-based handling.
 			return new HibernateJdbcException((JDBCException) ex);
 		}
 		if (ex instanceof UnresolvableObjectException) {
@@ -631,10 +631,10 @@ public abstract class SessionFactoryUtils {
 			return new HibernateQueryException((QueryException) ex);
 		}
 		if (ex instanceof PersistentObjectException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage());
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof TransientObjectException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage());
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		// fallback
 		return new HibernateSystemException(ex);
