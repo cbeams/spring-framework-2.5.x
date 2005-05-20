@@ -28,9 +28,9 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.TransitionCriteriaFactory;
 import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.ViewState;
-import org.springframework.web.flow.WildcardTransitionCriteria;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
 import org.springframework.web.flow.action.MultiAction;
 import org.springframework.web.flow.execution.ServiceLookupException;
@@ -986,7 +986,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @return the transition (*->stateId)
 	 */
 	protected Transition onAnyEvent(String stateId) {
-		return new Transition(new WildcardTransitionCriteria(), stateId);
+		return new Transition(TransitionCriteriaFactory.any(), stateId);
 	}
 
 	/**

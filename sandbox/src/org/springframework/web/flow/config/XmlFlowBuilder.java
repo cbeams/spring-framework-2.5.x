@@ -50,13 +50,12 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteriaFactory;
 import org.springframework.web.flow.ViewState;
-import org.springframework.web.flow.WildcardTransitionCriteria;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
 import org.springframework.web.flow.action.MultiAction;
 import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
 import org.springframework.web.flow.support.TransitionCriteriaChain;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -748,7 +747,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		Transition thenTransition = new Transition(
 				getFlowServiceLocator().createTransitionCriteria(criteria, ifDef.autowire), trueStateId);
 		if (StringUtils.hasText(falseStateId)) {
-			Transition elseTransition = new Transition(new WildcardTransitionCriteria(), falseStateId);
+			Transition elseTransition = new Transition(TransitionCriteriaFactory.any(), falseStateId);
 			return new Transition[] { thenTransition, elseTransition };
 		}
 		else {
