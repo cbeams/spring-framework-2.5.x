@@ -1,5 +1,5 @@
 /*
-sta * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,12 +45,12 @@ public class ViewState extends TransitionableState {
 	private ViewDescriptorCreator viewDescriptorCreator;
 	
 	/**
-	 * A view pre-render criteria object.
+	 * A view pre-render setup criteria object.
 	 */
 	private TransitionCriteria setupCriteria;
 	
 	/**
-	 * The state to transition to if the the view state criteria fails.
+	 * The state to transition to if the view state setup criteria fails.
 	 */
 	private String setupErrorStateId;
 	
@@ -185,7 +185,7 @@ public class ViewState extends TransitionableState {
 	/**
 	 * Sets the setup criteria to determine if this view state should pause 
 	 * the flow and request that a view be rendered when entered.
-	 * @param setupCriteria the display criteria
+	 * @param setupCriteria the setup criteria
 	 */
 	public void setSetupCriteria(TransitionCriteria setupCriteria) {
 		this.setupCriteria = setupCriteria;
@@ -245,12 +245,18 @@ public class ViewState extends TransitionableState {
 		if (setupCriteria != null) {
 			if (StringUtils.hasText(setupErrorStateId)) {
 				// test the criteria and if false, transition to the setup error state
+				// implementation note: we're using a short lived Transition object
+				// to execute the setup logic, evaluate the result and, if necessary, make
+				// transition to the error state
+				// also note that we're not adding this temporary transition to this
+				// state because that would result in a memory leak!
 				Transition toSetupError = new Transition(not(setupCriteria), setupErrorStateId);
 				toSetupError.setSourceState(this);
 				if (toSetupError.matches(context)) {
 					toSetupError.execute(context);
 				}
-			} else {
+			}
+			else {
 				// just test the criteria but don't evaluate it's result
 				this.setupCriteria.test(context);
 			}
