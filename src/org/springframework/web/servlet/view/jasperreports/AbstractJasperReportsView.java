@@ -479,6 +479,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		response.reset();
 		response.setContentType(getContentType());
 
 		if (this.subReports != null) {
