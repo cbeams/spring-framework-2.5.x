@@ -24,8 +24,10 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,6 +37,7 @@ import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRDataSourceProvider;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -45,10 +48,12 @@ import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.core.io.Resource;
 import org.springframework.ui.jasperreports.JasperReportsUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
@@ -311,8 +316,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * configuration. Compiles the report file is necessary.
 	 */
 	protected void initApplicationContext() throws ApplicationContextException {
-		super.initApplicationContext();
-
 		Resource mainReport = getApplicationContext().getResource(getUrl());
 		this.report = loadReport(mainReport);
 
@@ -470,7 +473,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Finds the report data to use for rendering the report and then invokes the
 	 * <code>renderReport</code> method that should be implemented by the subclass.
-	 *
 	 * @param model the model map, as passed in for view rendering. Must contain
 	 * a report data value that can be converted to a <code>JRDataSource</code>,
 	 * acccording to the <code>getReportData</code> method.
@@ -481,6 +483,9 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 		response.reset();
 		response.setContentType(getContentType());
+
+		// Populate HTTP headers.
+		populateHeaders(response);
 
 		if (this.subReports != null) {
 			// Expose sub-reports as model attributes.
@@ -495,9 +500,35 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 		}
 
-		populateHeaders(response);
+		// Expose Spring-managed Locale and MessageSource.
+		exposeLocalizationContext(model, request);
+
+		// Fill and render the report.
 		JasperPrint filledReport = fillReport(model);
 		renderReport(filledReport, model, response);
+	}
+
+	/**
+	 * Expose current Spring-managed Locale and MessageSource to JasperReports i18n
+	 * ($R expressions etc). The MessageSource should only be exposed as JasperReports
+	 * resource bundle if no such bundle is defined in the report itself.
+	 * <p>Default implementation exposes the Spring RequestContext Locale and a
+	 * MessageSourceResourceBundle adapter for the Spring ApplicationContext,
+	 * analogous to the <code>JstlUtils.exposeLocalizationContext</code> method.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 * @see org.springframework.context.support.MessageSourceResourceBundle
+	 * @see #getApplicationContext()
+	 * @see net.sf.jasperreports.engine.JRParameter#REPORT_LOCALE
+	 * @see net.sf.jasperreports.engine.JRParameter#REPORT_RESOURCE_BUNDLE
+	 * @see org.springframework.web.servlet.support.JstlUtils#exposeLocalizationContext
+	 */
+	protected void exposeLocalizationContext(Map model, HttpServletRequest request) {
+		Locale locale = RequestContextUtils.getLocale(request);
+		model.put(JRParameter.REPORT_LOCALE, locale);
+		if (this.report.getResourceBundle() == null) {
+			ResourceBundle bundle = new MessageSourceResourceBundle(getApplicationContext(), locale);
+			model.put(JRParameter.REPORT_RESOURCE_BUNDLE, bundle);
+		}
 	}
 
 	/**

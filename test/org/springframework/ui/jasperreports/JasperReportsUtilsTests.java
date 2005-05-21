@@ -22,10 +22,13 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import junit.framework.TestCase;
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -42,6 +45,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 18.11.2004
  */
 public class JasperReportsUtilsTests extends TestCase {
@@ -121,11 +125,13 @@ public class JasperReportsUtilsTests extends TestCase {
 	private void assertCsvOutputCorrect(String output) {
 		assertTrue("Output length should be greater than 0", (output.length()  > 0));
 		assertTrue("Output should start with Dear Lord!", output.startsWith("Dear Lord!"));
+		assertTrue("Output should contain 'MeineSeite'", output.indexOf("MeineSeite") > -1);
 	}
 	
 	private void assertHtmlOutputCorrect(String output) {
 		assertTrue("Output length should be greater than 0", (output.length()  > 0));
 		assertTrue("Output should contain <html>", output.indexOf("<html>") > -1);
+		assertTrue("Output should contain 'MeineSeite'", output.indexOf("MeineSeite") > -1);
 	}
 	
 	private void assertPdfOutputCorrect(byte[] output) throws Exception {
@@ -153,6 +159,9 @@ public class JasperReportsUtilsTests extends TestCase {
 	private Map getParameters() {
 		Map model = new HashMap();
 		model.put("ReportTitle", "Dear Lord!");
+		model.put(JRParameter.REPORT_LOCALE, Locale.GERMAN);
+		model.put(JRParameter.REPORT_RESOURCE_BUNDLE,
+				ResourceBundle.getBundle("org/springframework/ui/jasperreports/messages", Locale.GERMAN));
 		return model;
 	}
 

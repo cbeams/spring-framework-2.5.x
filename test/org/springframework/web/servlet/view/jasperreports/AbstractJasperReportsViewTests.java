@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -36,6 +37,7 @@ import org.springframework.ui.jasperreports.PersonBean;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public abstract class AbstractJasperReportsViewTests extends AbstractJasperReportsTests {
 
@@ -43,10 +45,14 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	protected abstract String getDesiredContentType();
 
+
 	protected AbstractJasperReportsView getView(String url) throws Exception {
 		AbstractJasperReportsView view = getViewImplementation();
 		view.setUrl(url);
-		view.setApplicationContext(new StaticApplicationContext());
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.addMessage("page", Locale.GERMAN, "MeineSeite");
+		ac.refresh();
+		view.setApplicationContext(ac);
 		return view;
 	}
 
@@ -57,6 +63,11 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
 		view.render(getModel(), request, response);
 		assertTrue(response.getContentAsByteArray().length > 0);
+		if (view instanceof AbstractJasperReportsSingleFormatView &&
+				((AbstractJasperReportsSingleFormatView) view).useWriter()) {
+			String output = response.getContentAsString();
+			assertTrue("Output should contain 'MeineSeite'", output.indexOf("MeineSeite") > -1);
+		}
 	}
 
 	public void testUncompiledReport() throws Exception {

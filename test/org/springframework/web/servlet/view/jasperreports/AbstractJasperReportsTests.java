@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.jasperreports;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -28,6 +29,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.jasperreports.PersonBean;
 import org.springframework.ui.jasperreports.ProductBean;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
  * @author Rob Harrop
@@ -65,6 +68,9 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	public void setUp() {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
+
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		request.addPreferredLocale(Locale.GERMAN);
 	}
 
 

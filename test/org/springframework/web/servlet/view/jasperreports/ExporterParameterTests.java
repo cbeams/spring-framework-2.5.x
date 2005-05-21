@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view.jasperreports;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,8 +27,6 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  * @author Rob Harrop
@@ -53,10 +52,9 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 			}
 		};
 
-		setViewProperties(view);
 		view.setExporterParameters(params);
-		view.initApplicationContext();
-		view.render(getModel(), new MockHttpServletRequest(), new MockHttpServletResponse());
+		setViewProperties(view);
+		view.render(getModel(), request, response);
 	}
 
 	public void testInvalidClass() throws Exception {
@@ -112,7 +110,10 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	private void setViewProperties(AbstractJasperReportsView view) {
 		view.setUrl("org/springframework/ui/jasperreports/DataSourceReport.jasper");
-		view.setApplicationContext(new StaticApplicationContext());
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.addMessage("page", Locale.GERMAN, "MeineSeite");
+		ac.refresh();
+		view.setApplicationContext(ac);
 	}
 
 }
