@@ -28,7 +28,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.execution.portlet.PortletFlowExecutionManager;
-import org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager;
 import org.springframework.web.portlet.support.AbstractController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -138,7 +137,7 @@ public class PortletFlowController extends AbstractController implements BeanFac
 	 * or the other.
 	 * @param flow the flow that this controller will manage
 	 * 
-	 * @see #setFlowExecutionManager(ServletFlowExecutionManager)
+	 * @see #setFlowExecutionManager(PortletFlowExecutionManager)
 	 */
 	public void setFlow(Flow flow) {
 		this.flowExecutionManager.setFlow(flow);
