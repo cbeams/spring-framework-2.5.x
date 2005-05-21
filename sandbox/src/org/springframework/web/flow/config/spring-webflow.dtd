@@ -237,12 +237,6 @@
 <!ATTLIST view-state view CDATA #IMPLIED>
 
 <!--
-	Fully qualified class name of a ViewDescriptorCreator strategy to produce the ViewDescriptor
-    needed to render the view when this state is entered.
--->
-<!ATTLIST view-state view-creator CDATA #IMPLIED>
-
-<!--
 	Identifier of the view state implementation exported in the configured registry, typically
 	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
 	the Spring beans DTD.

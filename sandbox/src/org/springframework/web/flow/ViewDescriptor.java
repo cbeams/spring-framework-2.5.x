@@ -30,7 +30,7 @@ import org.springframework.binding.AttributeSource;
  * <code>ModelAndView</code> construct. This class is provided to prevent a
  * web flow dependency on Spring MVC.
  * 
- * @see org.springframework.web.flow.ViewDescriptorCreator
+ * @see org.springframework.web.flow.ViewDescriptorProducer
  * 
  * @author Keith Donald
  * @author Rod Johnson

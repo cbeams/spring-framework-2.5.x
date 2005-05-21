@@ -32,6 +32,7 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.ViewDescriptorProducer;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
@@ -48,6 +49,8 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	private FlowCreator flowCreator = new DefaultFlowCreator();
 	
 	private TransitionCriteriaCreator transitionCriteriaCreator = new SimpleTransitionCriteriaCreator();
+	
+	private ViewDescriptorProducerCreator viewDescriptorProducerCreator = new SimpleViewDescriptorProducerCreator();
 	
 	/**
 	 * The wrapped bean factory.
@@ -137,6 +140,21 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public void setTransitionCriteriaCreator(TransitionCriteriaCreator transitionCriteriaCreator) {
 		Assert.notNull(transitionCriteriaCreator, "The transition criteria creator is required");
 		this.transitionCriteriaCreator = transitionCriteriaCreator;
+	}
+	
+	/**
+	 * Returns the factory used to create view descriptor producers.
+	 */
+	public ViewDescriptorProducerCreator getViewDescriptorProducerCreator() {
+		return viewDescriptorProducerCreator;
+	}
+	
+	/**
+	 * Set the factory used to create view descriptor producers.
+	 */
+	public void setViewDescriptorProducerCreator(ViewDescriptorProducerCreator viewDescriptorProducerCreator) {
+		Assert.notNull(viewDescriptorProducerCreator, "The view descriptor producer creator is required");
+		this.viewDescriptorProducerCreator = viewDescriptorProducerCreator;
 	}
 	
 	// helper methods
@@ -306,8 +324,15 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public TransitionCriteria createTransitionCriteria(String encodedCriteria,
 			AutowireMode autowireMode) throws ServiceLookupException {
 		TransitionCriteria criteria = getTransitionCriteriaCreator().create(encodedCriteria);
-		autowireService(encodedCriteria, autowireMode);
+		autowireService(criteria, autowireMode);
 		return criteria;
+	}
+	
+	public ViewDescriptorProducer createViewDescriptorProducer(
+			String encodedView, AutowireMode autowireMode) throws ServiceLookupException {
+		ViewDescriptorProducer producer = getViewDescriptorProducerCreator().create(encodedView);
+		autowireService(producer, autowireMode);
+		return producer;
 	}
 	
 	public Action createAction(Class implementationClass, AutowireMode autowireMode) {

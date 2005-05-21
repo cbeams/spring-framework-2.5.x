@@ -29,7 +29,7 @@ import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.TransitionCriteriaFactory;
-import org.springframework.web.flow.ViewDescriptorCreator;
+import org.springframework.web.flow.ViewDescriptorProducer;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
 import org.springframework.web.flow.action.MultiAction;
@@ -253,7 +253,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * state triggers the rendering of a view template when entered.
 	 * @param stateId the <code>ViewState</code> id; must be unique in the
 	 *        context of the flow built by this builder
-	 * @param creator the factory to produce a descriptor noting the name 
+	 * @param producer the factory to produce a descriptor noting the name 
 	 *        of the logical view to render; this name will be mapped to a physical
 	 *        resource template such as a JSP when the ViewState is entered and control
 	 *        returns to the front controller
@@ -265,9 +265,9 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * @throws IllegalArgumentException the stateId was not unique after
 	 *         qualificaion
 	 */
-	protected ViewState addViewState(String stateId, ViewDescriptorCreator creator, Transition[] transitions, Map properties)
+	protected ViewState addViewState(String stateId, ViewDescriptorProducer producer, Transition[] transitions, Map properties)
 			throws IllegalArgumentException {
-		return new ViewState(getFlow(), stateId, creator, transitions, properties);
+		return new ViewState(getFlow(), stateId, producer, transitions, properties);
 	}
 
 	/**
@@ -823,27 +823,27 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 
 	/**
 	 * Adds an end state with the specified id that will message the specified 
-	 * view descriptor creator to produce a view to display when entered as part of a 
+	 * view descriptor producer to produce a view to display when entered as part of a 
 	 * root flow termination.
 	 * @param endStateId the end state id
-	 * @param creator the view descriptor creator
+	 * @param producer the view descriptor producer
 	 * @return the end state
 	 */
-	protected EndState addEndState(String endStateId, ViewDescriptorCreator creator) throws IllegalArgumentException {
-		return new EndState(getFlow(), endStateId, creator);
+	protected EndState addEndState(String endStateId, ViewDescriptorProducer producer) throws IllegalArgumentException {
+		return new EndState(getFlow(), endStateId, producer);
 	}
 
 	/**
 	 * Adds an end state with the specified id that will message the specified 
-	 * view descriptor creator to produce a view to display when entered as part of a 
+	 * view descriptor producer to produce a view to display when entered as part of a 
 	 * root flow termination.
 	 * @param endStateId the end state id
-	 * @param creator the view descriptor creator
+	 * @param producer the view descriptor producer
 	 * @param properties additional properties describing the state
 	 * @return the end state
 	 */
-	protected EndState addEndState(String endStateId, ViewDescriptorCreator creator, Map properties) throws IllegalArgumentException {
-		return new EndState(getFlow(), endStateId, creator, properties);
+	protected EndState addEndState(String endStateId, ViewDescriptorProducer producer, Map properties) throws IllegalArgumentException {
+		return new EndState(getFlow(), endStateId, producer, properties);
 	}
 
 	/**

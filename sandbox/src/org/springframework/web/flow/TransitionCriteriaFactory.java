@@ -1,9 +1,14 @@
 package org.springframework.web.flow;
 
+import java.io.Serializable;
+
+import org.springframework.util.Assert;
+
 /**
  * A factory producing commonly used transition criteria objects.
  * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public class TransitionCriteriaFactory {
 
@@ -57,7 +62,37 @@ public class TransitionCriteriaFactory {
 			return "not(" + criteria + ")";
 		}
 	}
-	
+
+	/**
+	 * Simple transition criteria that matches on an eventId and
+	 * nothing else. Specifically, if the last event that occured has id
+	 * ${eventId}, this criteria will return true.
+	 * 
+	 * @author Erwin Vervaet
+	 * @author Keith Donald
+	 */
+	public static class EventIdTransitionCriteria implements TransitionCriteria, Serializable {
+
+		private String eventId;
+
+		/**
+		 * Create a new event id matching criteria object.
+		 * @param eventId the event id
+		 */
+		public EventIdTransitionCriteria(String eventId) {
+			Assert.notNull(eventId);
+			this.eventId = eventId;
+		}
+
+		public boolean test(RequestContext context) {
+			return eventId.equals(context.getLastEvent().getId());
+		}
+
+		public String toString() {
+			return "'" + eventId + "'";
+		}
+	}
+
 	/**
 	 * Returns a transition criteria object that always returns 'true'.
 	 * @return the wildcard criteria
@@ -74,5 +109,15 @@ public class TransitionCriteriaFactory {
 	 */
 	public static TransitionCriteria not(TransitionCriteria criteria) {
 		return new NotTransitionCriteria(criteria);
+	}
+	
+	/**
+	 * Returns the transition criteria object that matches given event id
+	 * as the last event that occured in the request context.
+	 * @param eventId the event id to match
+	 * @return the event id matching transition criteria
+	 */
+	public static TransitionCriteria eventId(String eventId) {
+		return new EventIdTransitionCriteria(eventId);
 	}
 }

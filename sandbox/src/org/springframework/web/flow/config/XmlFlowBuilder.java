@@ -205,7 +205,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		public String bean;
 		public Class classRef;
 		public Class clazz;
-		public AutowireMode autowire = AutowireMode.DEFAULT;
+		public AutowireMode autowire;
 
 		public boolean isBeanRef() {
 			return StringUtils.hasText(bean);
@@ -274,6 +274,15 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 	
 	/**
+	 * Make sure the flow service locator currently configured for this builder
+	 * is the default BeanFactoryFlowServiceLocator.
+	 */
+	protected void assertDefaultFlowServiceLocator() {
+		Assert.isInstanceOf(BeanFactoryFlowServiceLocator.class, getFlowServiceLocator(),
+			"You configured a flow service locator different from the default BeanFactoryFlowServiceLocator");
+	}
+	
+	/**
 	 * Set the transition criteria creator to use. This is a convenience feature to
 	 * make it easy configure the transition criteria factory for a builder which
 	 * just uses the default flow service locator (@link BeanFactoryFlowServiceLocator).
@@ -284,9 +293,23 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * @see BaseFlowBuilder#setFlowServiceLocator(FlowServiceLocator)
 	 */
 	public void setTransitionCriteriaCreator(TransitionCriteriaCreator creator) {
-		Assert.isInstanceOf(BeanFactoryFlowServiceLocator.class, getFlowServiceLocator(),
-				"You configured a flow service locator different from the default BeanFactoryFlowServiceLocator");
+		assertDefaultFlowServiceLocator();
 		((BeanFactoryFlowServiceLocator)getFlowServiceLocator()).setTransitionCriteriaCreator(creator);
+	}
+	
+	/**
+	 * Set the view descriptor producer creator to use. This is a convenience feature to
+	 * make it easy configure the view descriptor producer for a builder which
+	 * just uses the default flow service locator (@link BeanFactoryFlowServiceLocator).
+	 * Note: do not call both this method and <code>setFlowServiceLocator()</code>
+	 * -- call one or the other. 
+	 * @param creator the view descriptor producer factory
+	 * 
+	 * @see BaseFlowBuilder#setFlowServiceLocator(FlowServiceLocator)
+	 */
+	public void setViewDescriptorProducerCreator(ViewDescriptorProducerCreator creator) {
+		assertDefaultFlowServiceLocator();
+		((BeanFactoryFlowServiceLocator)getFlowServiceLocator()).setViewDescriptorProducerCreator(creator);
 	}
 	
 	/**
@@ -405,26 +428,43 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 	
 	/**
-	 * Parse a flow artifact definition contained in given XML element.
+	 * Parse a class reference from named attribute of given element.
 	 */
-	protected FlowArtifact parseFlowArtifactDefinition(Element element) {
-		FlowArtifact res = new FlowArtifact();
-		res.bean = element.getAttribute(BEAN_ATTRIBUTE);
-		if (element.hasAttribute(CLASSREF_ATTRIBUTE)) {
-			res.classRef = (Class)new TextToClassConverter().convert(element.getAttribute(CLASSREF_ATTRIBUTE));
-		}
-		if (element.hasAttribute(CLASS_ATTRIBUTE)) {
-			res.clazz = (Class)new TextToClassConverter().convert(element.getAttribute(CLASS_ATTRIBUTE));
-		}
+	protected Class parseClass(Element element, String attributeName) {
+		return (Class)new TextToClassConverter().convert(element.getAttribute(attributeName));
+	}
+	
+	/**
+	 * Parse and return the autowire mode specified in given element.
+	 */
+	protected AutowireMode parseAutowireMode(Element element) {
 		if (element.hasAttribute(AUTOWIRE_ATTRIBUTE)) {
 			try {
-				res.autowire = (AutowireMode)
+				return (AutowireMode)
 					new LabeledEnumFormatter(AutowireMode.class).parseValue(element.getAttribute(AUTOWIRE_ATTRIBUTE));
 			}
 			catch (InvalidFormatException e) {
 				throw new FlowBuilderException("Unsupported autowire mode '" + element.getAttribute(AUTOWIRE_ATTRIBUTE) + "'", e);
 			}
 		}
+		else {
+			return AutowireMode.DEFAULT;
+		}
+	}
+	
+	/**
+	 * Parse a flow artifact definition contained in given XML element.
+	 */
+	protected FlowArtifact parseFlowArtifactDefinition(Element element) {
+		FlowArtifact res = new FlowArtifact();
+		res.bean = element.getAttribute(BEAN_ATTRIBUTE);
+		if (element.hasAttribute(CLASSREF_ATTRIBUTE)) {
+			res.classRef = parseClass(element, CLASSREF_ATTRIBUTE);
+		}
+		if (element.hasAttribute(CLASS_ATTRIBUTE)) {
+			res.clazz = parseClass(element, CLASS_ATTRIBUTE);
+		}
+		res.autowire = parseAutowireMode(element);
 		return res;
 	}
 
@@ -535,7 +575,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		viewState.setId(element.getAttribute(ID_ATTRIBUTE));
 		viewState.setFlow(flow);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			viewState.setViewName(element.getAttribute(VIEW_ATTRIBUTE));
+			AutowireMode autowireMode = parseAutowireMode(element);
+			viewState.setViewDescriptorProducer(
+					getFlowServiceLocator().createViewDescriptorProducer(element.getAttribute(VIEW_ATTRIBUTE), autowireMode));
 		}
 		viewState.addAll(parseTransitions(element));
 		viewState.setProperties(parseProperties(element));
@@ -586,7 +628,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		endState.setId(element.getAttribute(ID_ATTRIBUTE));
 		endState.setFlow(flow);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			endState.setViewName(element.getAttribute(VIEW_ATTRIBUTE));
+			AutowireMode autowireMode = parseAutowireMode(element);
+			endState.setViewDescriptorProducer(
+					getFlowServiceLocator().createViewDescriptorProducer(element.getAttribute(VIEW_ATTRIBUTE), autowireMode));
 		}
 		endState.setProperties(parseProperties(element));
 	}

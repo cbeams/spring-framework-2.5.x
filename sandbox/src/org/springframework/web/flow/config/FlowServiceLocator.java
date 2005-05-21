@@ -21,6 +21,7 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.ViewDescriptorProducer;
 import org.springframework.web.flow.execution.FlowLocator;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
@@ -157,6 +158,22 @@ public interface FlowServiceLocator extends FlowLocator {
 	 *         cannot be created
 	 */
 	public TransitionCriteria createTransitionCriteria(String encodedCriteria, AutowireMode autowireMode)
+			throws ServiceLookupException;
+	
+	// dealing with view descriptor producers
+
+	/**
+	 * Request that the registry backed by this locator instantiate the view
+	 * descriptor producer specified in encoded form, using the given autowire policy.
+	 * Note: not all registries may support this advanced feature (Spring does
+	 * though ;-)).
+	 * @param encodedView the encoded representation of the view descriptor producer
+	 * @param autowireMode the autowire policy
+	 * @return the instantiated (and possibly autowired) view descriptor producer
+	 * @throws ServiceLookupException when the view descriptor producer object
+	 *         cannot be created
+	 */
+	public ViewDescriptorProducer createViewDescriptorProducer(String encodedView, AutowireMode autowireMode)
 			throws ServiceLookupException;
 
 	// dealing with actions

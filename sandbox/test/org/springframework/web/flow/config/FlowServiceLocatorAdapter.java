@@ -21,6 +21,7 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.ViewDescriptorProducer;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
@@ -64,6 +65,12 @@ public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 	
 	public TransitionCriteria createTransitionCriteria(
 			String encodedCriteria, AutowireMode autowireMode)
+			throws ServiceLookupException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public ViewDescriptorProducer createViewDescriptorProducer(
+			String encodedView, AutowireMode autowireMode)
 			throws ServiceLookupException {
 		throw new UnsupportedOperationException();
 	}
