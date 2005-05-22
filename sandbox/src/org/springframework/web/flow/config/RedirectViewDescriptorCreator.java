@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.springframework.binding.expression.ExpressionEvaluator;
 import org.springframework.binding.expression.ExpressionParser;
-import org.springframework.binding.expression.support.OgnlExpressionParser;
+import org.springframework.binding.expression.support.ExpressionParserUtils;
 import org.springframework.binding.expression.support.StaticEvaluator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -46,7 +46,7 @@ public class RedirectViewDescriptorCreator extends SimpleViewDescriptorCreator {
 	 * @param encodedView the encoded view
 	 */
 	public RedirectViewDescriptorCreator(String encodedView) {
-		parseEncodedView(encodedView, new OgnlExpressionParser());
+		parseEncodedView(encodedView, ExpressionParserUtils.getDefaultExpressionParser());
 	}
 
 	/**

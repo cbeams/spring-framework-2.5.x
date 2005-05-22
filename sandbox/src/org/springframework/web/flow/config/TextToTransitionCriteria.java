@@ -23,7 +23,7 @@ import org.springframework.binding.convert.support.AbstractConverter;
 import org.springframework.binding.expression.ExpressionEvaluator;
 import org.springframework.binding.expression.ExpressionParser;
 import org.springframework.binding.expression.ParseException;
-import org.springframework.binding.expression.support.OgnlExpressionParser;
+import org.springframework.binding.expression.support.ExpressionParserUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.TransitionCriteria;
@@ -51,7 +51,7 @@ import org.springframework.web.flow.TransitionCriteriaFactory;
  */
 public class TextToTransitionCriteria extends AbstractConverter {
 
-	private ExpressionParser expressionParser = new OgnlExpressionParser();
+	private ExpressionParser expressionParser = ExpressionParserUtils.getDefaultExpressionParser();
 	
 	/**
 	 * Returns the expression parser used by this converter.
