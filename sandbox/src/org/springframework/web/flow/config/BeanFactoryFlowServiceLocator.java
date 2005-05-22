@@ -60,8 +60,7 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	/**
 	 * The webflow data type conversion service.
 	 */
-	private ConversionService conversionService =
-		new DefaultConversionService(new Converter[] { new TextToTransitionCriteria(), new TextToViewDescriptorCreator() });
+	private ConversionService conversionService = new FlowConversionService();
 	
 	/**
 	 * The wrapped bean factory.

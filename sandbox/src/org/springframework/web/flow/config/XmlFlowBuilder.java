@@ -53,7 +53,6 @@ import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.TransitionCriteriaFactory;
-import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
@@ -285,21 +284,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			"You configured a flow service locator different from the default BeanFactoryFlowServiceLocator");
 	}
 	
-	/**
-	 * Returns the from-text property type conversion service used.
-	 */
-	public ConversionService getConversionService() {
-		return conversionService;
-	}
-	
-	/**
-	 * Sets the from-text property type conversion service to use for this builder.
-	 * @param conversionService the type conversion service
-	 */
-	public void setConversionService(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
-
 	/**
 	 * Returns whether or not the XML parser will validate the document.
 	 */
@@ -566,7 +550,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	}
 
 	protected ConversionExecutor converterFor(Class targetType) {
-		return getConversionService().getConversionExecutor(String.class, targetType);
+		return getFlowServiceLocator().getConversionService().getConversionExecutor(String.class, targetType);
 	}
 	
 	/**
