@@ -31,6 +31,20 @@ import org.springframework.web.flow.config.TextToTransitionCriteria;
  */
 public class TextToTransitionCriteriaTests extends TestCase {
 
+	public void testAny() {
+		String expression = "*";
+		TransitionCriteria criterion = (TransitionCriteria)new TextToTransitionCriteria().convert(expression);
+		RequestContext ctx = getRequestContext();
+		assertTrue("Criterion should evaluate to true", criterion.test(ctx));
+	}
+	
+	public void testStaticEventId() {
+		String expression = "sample";
+		TransitionCriteria criterion = (TransitionCriteria)new TextToTransitionCriteria().convert(expression);
+		RequestContext ctx = getRequestContext();
+		assertTrue("Criterion should evaluate to true", criterion.test(ctx));
+	}
+	
 	public void testTrueEvaluation() throws Exception {
 		String expression = "${flowScope.foo == 'bar'}";
 		TransitionCriteria criterion = (TransitionCriteria)new TextToTransitionCriteria().convert(expression);
