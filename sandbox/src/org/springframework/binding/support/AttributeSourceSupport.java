@@ -11,8 +11,8 @@ import java.util.Set;
 
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.Styler;
-import org.springframework.core.closure.ProcessTemplate;
-import org.springframework.core.closure.support.IteratorProcessTemplate;
+import org.springframework.core.closure.ElementClosureTemplate;
+import org.springframework.core.closure.support.IteratorElementTemplate;
 import org.springframework.util.Assert;
 
 /**
@@ -128,8 +128,8 @@ public abstract class AttributeSourceSupport implements MutableAttributeSource {
 	 * Returns a template for iterating over elements in this source.
 	 * @return the template
 	 */
-	public ProcessTemplate iteratorTemplate() {
-		return new IteratorProcessTemplate(attributeEntries().iterator());
+	public ElementClosureTemplate iteratorTemplate() {
+		return new IteratorElementTemplate(attributeEntries().iterator());
 	}
 
 	/**
