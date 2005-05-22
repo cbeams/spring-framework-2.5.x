@@ -248,8 +248,13 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return new ViewState(getFlow(), stateId, view(viewName), transitions, properties);
 	}
 
+	/**
+	 * Turn given view name into a corresponding view descriptor creator.
+	 * @param viewName the view name (might be encoded)
+	 * @return the corresponding view descriptor creator
+	 */
 	protected ViewDescriptorCreator view(String viewName) {
-		return (ViewDescriptorCreator)new TextToViewDescriptorCreator().convert(viewName);
+		return (ViewDescriptorCreator)converterFor(ViewDescriptorCreator.class).execute(viewName);
 	}
 	
 	/**
