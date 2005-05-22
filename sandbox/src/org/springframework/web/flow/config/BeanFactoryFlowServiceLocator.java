@@ -78,6 +78,15 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	/**
+	 * Create a new service locator locating services in the bean factory that
+	 * will be passed in using the <code>setBeanFactory()</code> method.
+	 * @param beanFactory the bean factory
+	 */
+	public BeanFactoryFlowServiceLocator(BeanFactory beanFactory) {
+		setBeanFactory(beanFactory);
+	}
+
+	/**
 	 * Set the factory used to create flow objects.
 	 */
 	public void setFlowCreator(FlowCreator flowCreator) {

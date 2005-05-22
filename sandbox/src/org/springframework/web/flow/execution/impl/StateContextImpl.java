@@ -146,10 +146,6 @@ public class StateContextImpl implements StateContext {
 		this.flowExecution.getTransactionSynchronizer().endTransaction(this);
 	}
 
-	public Object evaluate(Object expression) {
-		throw new UnsupportedOperationException("TODO");
-	}
-	
 	public Map getModel() {
 		// merge request and flow scope
 		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
