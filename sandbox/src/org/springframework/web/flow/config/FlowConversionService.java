@@ -16,6 +16,8 @@
 package org.springframework.web.flow.config;
 
 import org.springframework.binding.convert.support.DefaultConversionService;
+import org.springframework.web.flow.TransitionCriteria;
+import org.springframework.web.flow.ViewDescriptorCreator;
 
 /**
  * Conversion service used by the web flow system. This service
@@ -34,9 +36,10 @@ public class FlowConversionService extends DefaultConversionService {
 	 */
 	public FlowConversionService() {
 		addDefaultConverters();
-		
 		// register web flow specific converters
 		addConverter(new TextToTransitionCriteria());
 		addConverter(new TextToViewDescriptorCreator());
+		addDefaultAlias(TransitionCriteria.class);
+		addDefaultAlias(ViewDescriptorCreator.class);
 	}
 }

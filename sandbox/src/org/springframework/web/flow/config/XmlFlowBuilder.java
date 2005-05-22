@@ -517,7 +517,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		List setupElements = DomUtils.getChildElementsByTagName(element, SETUP_ELEMENT);
 		if (!setupElements.isEmpty()) {
 			Element setupElement = (Element)setupElements.get(0);
-			viewState.setSetupCriteria(new ActionTransitionCriteria(parseAction(setupElement)));
+			viewState.setSetupCriteria(new ActionTransitionCriteria(parseAnnotatedAction(setupElement)));
 			if (setupElement.hasAttribute(ON_ERROR_ATTRIBUTE)) {
 				viewState.setSetupErrorStateId(setupElement.getAttribute(ON_ERROR_ATTRIBUTE));
 			}
