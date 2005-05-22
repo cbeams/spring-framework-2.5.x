@@ -36,7 +36,7 @@ import org.springframework.web.flow.Transition;
  * Mock implementation of the <code>RequestContext</code> interface to
  * facilitate standalone Action unit tests.
  * <p>
- * NOT intended to be used for anything but standalone action unit tests. This
+ * NOT intended to be used for anything but standalone unit tests. This
  * is a simple state holder, a stub implementation.
  * <p>
  * Note that this is really a <i>stub</i> implementation of the RequestContext
@@ -51,23 +51,27 @@ import org.springframework.web.flow.Transition;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class MockRequestContext implements RequestContext {
+public class MockRequestContext implements RequestContext, FlowContext {
 
-	private Flow rootFlow;
+	private Event sourceEvent;
+
+	private Scope requestScope = new Scope(ScopeType.REQUEST);
 
 	private MockFlowSession activeSession = new MockFlowSession();
-	
-	private Event originatingEvent;
 
 	private Event lastEvent;
 
 	private Transition lastTransition;
-	
+
 	private AttributeSource properties = new MapAttributeSource();
 
-	private Scope requestScope = new Scope(ScopeType.REQUEST);
-
 	private boolean inTransaction;
+	
+	private long creationTimestamp = System.currentTimeMillis();
+	
+	private Flow rootFlow;
+	
+	private long lastRequestTimestamp = System.currentTimeMillis();
 
 	/**
 	 * Create a new stub request context.
@@ -77,181 +81,82 @@ public class MockRequestContext implements RequestContext {
 
 	/**
 	 * Create a new stub request context.
-	 * 
 	 * @param session the active flow session
-	 * @param originatingEvent the event originating this request context
+	 * @param sourceEvent the event originating this request context
 	 */
-	public MockRequestContext(MockFlowSession session, Event originatingEvent) {
+	public MockRequestContext(MockFlowSession session, Event sourceEvent) {
 		setActiveSession(session);
-		setOriginatingEvent(originatingEvent);
-		setLastEvent(originatingEvent);
-	}
-
-	/**
-	 * Set the root flow of this request context.
-	 * 
-	 * @param rootFlow the rootFlow to set
-	 */
-	public void setRootFlow(Flow rootFlow) {
-		this.rootFlow = rootFlow;
-		if (this.activeSession.getFlow() == null) {
-			this.activeSession.setFlow(rootFlow);
-			this.activeSession.setCurrentState(rootFlow.getStartState());
-		}
-	}
-
-	public FlowContext getFlowContext() {
-		return new MockFlowContext();
+		setSourceEvent(sourceEvent);
+		setLastEvent(sourceEvent);
 	}
 	
-	private class MockFlowContext implements FlowContext {
-
-		public FlowSession getActiveSession() throws IllegalStateException {
-			return activeSession;
-		}
-
-		public Flow getRootFlow() {
-			return rootFlow;
-		}
-
-		public Flow getActiveFlow() throws IllegalStateException {
-			return MockRequestContext.this.getActiveFlow();
-		}
-
-		public State getCurrentState() throws IllegalStateException {
-			return MockRequestContext.this.getCurrentState();
-		}
-		
-		public String getCaption() {
-			return getActiveFlow().getId();
-		}
-		
-		public String getLastEventId() {
-			return lastEvent.getId();
-		}
-
-		public long getLastRequestTimestamp() {
-			return 0;
-		}
-		
-		public long getCreationTimestamp() {
-			return 0;
-		}
-
-		public long getUptime() {
-			return 0;
-		}
-
-		public boolean isActive() {
-			return false;
-		}
-		
-		public boolean isRootFlowActive() {
-			return false;
-		}
-	}
+	// implementing RequestContext
 	
-	/**
-	 * Set the active flow of this request context.
-	 * 
-	 * @param session the active flow session to set
-	 */
-	public void setActiveSession(MockFlowSession session) {
-		this.activeSession = session;
-		if (this.rootFlow == null) {
-			this.rootFlow = session.getFlow();
-		}
-	}
-
-	/**
-	 * Set the current state of this request context.
-	 * 
-	 * @param state the current state to set
-	 */
-	public void setCurrentState(State state) {
-		Assert.state(state.getFlow() == getActiveSession().getFlow(), "The current state must be in the active flow");
-		this.activeSession.setCurrentState(state);
+	public Event getSourceEvent() {
+		return sourceEvent;
 	}
 
 	/**
 	 * Set the event originating this request context.
-	 * 
-	 * @param originatingEvent the originatingEvent to set
+	 * @param sourceEvent the source event to set
 	 */
-	public void setOriginatingEvent(Event originatingEvent) {
-		this.originatingEvent = originatingEvent;
+	public void setSourceEvent(Event sourceEvent) {
+		this.sourceEvent = sourceEvent;
 	}
 
-	/**
-	 * Set the last event that occured in this request context.
-	 * 
-	 * @param lastEvent the lastEvent to set
-	 */
-	public void setLastEvent(Event lastEvent) {
-		this.lastEvent = lastEvent;
+
+	public FlowContext getFlowContext() {
+		return this;
 	}
 
-	/**
-	 * Set the last transition that executed in this request context.
-	 * 
-	 * @param lastTransition the last transition to set
-	 */
-	public void setLastTransition(Transition lastTransition) {
-		this.lastTransition = lastTransition;
-	}
-
-	/**
-	 * Set an property that may be used by the action to effect its behavior
-	 * during execution.
-	 * 
-	 * @param attributeName the attribute name
-	 * @param attributeValue the attribute value
-	 */
-	public void setProperty(String attributeName, Object attributeValue) {
-		((MutableAttributeSource)this.properties).setAttribute(attributeName, attributeValue);
-	}
-	
-	public FlowSession getActiveSession() throws IllegalStateException {
-		if (activeSession == null) {
-			throw new IllegalStateException("No flow session active");
-		}
-		return activeSession;
-	}
-	
-	public Flow getActiveFlow() {
-		return activeSession.getFlow();
-	}
-	
-	public State getCurrentState() {
-		return activeSession.getCurrentState();
-	}
-
-	public boolean isActive() {
-		return activeSession != null;
-	}
-
-	public Event getSourceEvent() {
-		return originatingEvent;
-	}
-
-	public Event getLastEvent() {
-		return lastEvent;
-	}
-	
-	public Transition getLastTransition() {
-		return lastTransition;
-	}
-
-	public AttributeSource getProperties() {
-		return properties;
+	public Scope getRequestScope() {
+		return requestScope;
 	}
 
 	public Scope getFlowScope() {
 		return activeSession.getScope();
 	}
 
-	public Scope getRequestScope() {
-		return requestScope;
+	public Event getLastEvent() {
+		return lastEvent;
+	}
+
+	/**
+	 * Set the last event that occured in this request context.
+	 * @param lastEvent the lastEvent to set
+	 */
+	public void setLastEvent(Event lastEvent) {
+		this.lastRequestTimestamp = System.currentTimeMillis();
+		this.lastEvent = lastEvent;
+	}
+
+	public Transition getLastTransition() {
+		return lastTransition;
+	}
+
+	/**
+	 * Set the last transition that executed in this request context.
+	 * @param lastTransition the last transition to set
+	 */
+	public void setLastTransition(Transition lastTransition) {
+		this.lastTransition = lastTransition;
+	}
+
+	public AttributeSource getProperties() {
+		return properties;
+	}
+
+	public void setProperties(AttributeSource properties) {
+		this.properties = properties;
+	}
+
+	/**
+	 * Set an execution property.
+	 * @param attributeName the attribute name
+	 * @param attributeValue the attribute value
+	 */
+	public void setProperty(String attributeName, Object attributeValue) {
+		((MutableAttributeSource)this.properties).setAttribute(attributeName, attributeValue);
 	}
 
 	public Map getModel() {
@@ -262,13 +167,16 @@ public class MockRequestContext implements RequestContext {
 		return model;
 	}
 
-	// transaction synchronizer stub methods
+	public boolean inTransaction(boolean end) {
+		boolean res = this.inTransaction;
+		if (end) {
+			endTransaction();
+		}
+		return res;
+	}
 
 	public void assertInTransaction(boolean end) throws IllegalStateException {
-		Assert.state(inTransaction, "Not in application transaction but is expected to be");
-		if (end) {
-			inTransaction = false;
-		}
+		Assert.state(inTransaction(end), "Not in application transaction but is expected to be");
 	}
 
 	public void beginTransaction() {
@@ -279,15 +187,85 @@ public class MockRequestContext implements RequestContext {
 		inTransaction = false;
 	}
 
-	public boolean inTransaction(boolean end) {
-		boolean inTransaction = this.inTransaction;
-		if (end) {
-			this.inTransaction = false;
-		}
-		return inTransaction;
+	// implementing FlowContext
+
+	public String getCaption() {
+		return getActiveFlow().getId();
+	}
+
+	public long getCreationTimestamp() {
+		return creationTimestamp;
+	}
+
+	public long getUptime() {
+		return System.currentTimeMillis() - getCreationTimestamp();
+	}
+
+	public Flow getRootFlow() {
+		return rootFlow;
 	}
 	
-	public void setProperties(AttributeSource properties) {
-		this.properties = properties;
-	}	
+	/**
+	 * Set the root flow of this request context.
+	 * @param rootFlow the root flow to set
+	 */
+	public void setRootFlow(Flow rootFlow) {
+		this.rootFlow = rootFlow;
+		if (this.activeSession.getFlow() == null) {
+			this.activeSession.setFlow(rootFlow);
+			this.activeSession.setCurrentState(rootFlow.getStartState());
+		}
+	}
+
+	public Flow getActiveFlow() {
+		return activeSession.getFlow();
+	}
+	
+	public State getCurrentState() {
+		return activeSession.getCurrentState();
+	}
+
+	/**
+	 * Set the current state of this request context.
+	 * @param state the current state to set
+	 */
+	public void setCurrentState(State state) {
+		Assert.state(state.getFlow() == getActiveSession().getFlow(), "The current state must be in the active flow");
+		this.activeSession.setCurrentState(state);
+	}
+
+	public long getLastRequestTimestamp() {
+		return lastRequestTimestamp;
+	}
+
+	public String getLastEventId() {
+		return lastEvent.getId();
+	}
+	
+	public FlowSession getActiveSession() throws IllegalStateException {
+		if (activeSession == null) {
+			throw new IllegalStateException("No flow session active");
+		}
+		return activeSession;
+	}
+
+	/**
+	 * Set the active flow session of this request context.
+	 * @param session the active flow session to set
+	 */
+	public void setActiveSession(MockFlowSession session) {
+		Assert.notNull(session);
+		this.activeSession = session;
+		if (this.rootFlow == null) {
+			this.rootFlow = session.getFlow();
+		}
+	}
+
+	public boolean isActive() {
+		return activeSession != null;
+	}
+
+	public boolean isRootFlowActive() {
+		return activeSession != null && activeSession.isRoot();
+	}
 }
