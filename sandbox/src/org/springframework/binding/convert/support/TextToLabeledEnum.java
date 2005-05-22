@@ -23,19 +23,19 @@ import org.springframework.core.enums.LabeledEnum;
  * instances to a specific instance of <code>LabeledEnum</code>
  * @author Keith Donald
  */
-public class TextToLabeledEnumConverter extends AbstractFormattingConverter {
+public class TextToLabeledEnum extends AbstractFormattingConverter {
 
 	private Class[] labeledEnumClasses;
 
-	public TextToLabeledEnumConverter(FormatterLocator formatterLocator) {
+	public TextToLabeledEnum(FormatterLocator formatterLocator) {
 		super(formatterLocator);
 	}
 
-	public TextToLabeledEnumConverter(Class labeledEnumClasses, FormatterLocator formatterLocator) {
+	public TextToLabeledEnum(Class labeledEnumClasses, FormatterLocator formatterLocator) {
 		this(new Class[] { labeledEnumClasses }, formatterLocator);
 	}
 
-	public TextToLabeledEnumConverter(Class[] labeledEnumClasses, FormatterLocator formatterLocator) {
+	public TextToLabeledEnum(Class[] labeledEnumClasses, FormatterLocator formatterLocator) {
 		super(formatterLocator);
 		this.labeledEnumClasses = labeledEnumClasses;
 	}

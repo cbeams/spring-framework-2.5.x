@@ -4,7 +4,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.support.AbstractConverter;
-import org.springframework.binding.convert.support.TextToClassConverter;
+import org.springframework.binding.convert.support.TextToClass;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.SimpleViewDescriptorCreator;
 import org.springframework.web.flow.ViewDescriptorCreator;
@@ -39,7 +39,7 @@ public class TextToViewDescriptorCreator extends AbstractConverter {
 		if (StringUtils.hasText(encodedView)) {
 			if (encodedView.startsWith(CLASS_PREFIX)) {
 				String className = encodedView.substring(CLASS_PREFIX.length());
-				Class clazz = (Class)new TextToClassConverter().convert(className);
+				Class clazz = (Class)new TextToClass().convert(className);
 				return (ViewDescriptorCreator)BeanUtils.instantiateClass(clazz);
 			} else if (encodedView.startsWith(REDIRECT_PREFIX)) {
 				String viewInfo = encodedView.substring(REDIRECT_PREFIX.length());

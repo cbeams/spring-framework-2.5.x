@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * instance.
  * @author Keith Donald
  */
-public class TextToClassConverter extends AbstractConverter {
+public class TextToClass extends AbstractConverter {
 
 	public Class[] getSourceClasses() {
 		return new Class[] { String.class };

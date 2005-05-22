@@ -210,12 +210,4 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @return the web flow system type conversion service
 	 */
 	public ConversionService getConversionService();
-
-	/**
-	 * Parse the specified expression string
-	 * @param expressionString the expression string
-	 * @return the parsed expression
-	 */
-	public Object parseExpression(String expressionString);
-	
 }

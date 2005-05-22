@@ -11,15 +11,17 @@ import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.StateTests.ExecutionCounterAction;
 import org.springframework.web.flow.StateTests.InputOutputMapper;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
+import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.FlowFactoryBean;
-import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
-import org.springframework.web.flow.config.TransitionCriteriaCreator;
+import org.springframework.web.flow.config.TextToTransitionCriteria;
+import org.springframework.web.flow.config.TextToViewDescriptorCreator;
 import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
@@ -30,19 +32,13 @@ import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
  */
 public class FlowExecutionTests extends TestCase {
 
-	private static TransitionCriteriaCreator factory = new SimpleTransitionCriteriaCreator();
-
-	public static TransitionCriteria on(String event) {
-		return factory.create(event);
-	}
-	
 	public void testFlowExecutionListener() {
 		Flow subFlow = new Flow("mySubFlow");
-		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(on("submit"), "finish"));
+		new ViewState(subFlow, "subFlowViewState", view("mySubFlowViewName"), new Transition(on("submit"), "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
 		new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition(on("success"), "viewState"));
-		new ViewState(flow, "viewState", "myView", new Transition(on("submit"), "subFlowState"));
+		new ViewState(flow, "viewState", view("myView"), new Transition(on("submit"), "subFlowState"));
 		new SubflowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(on("finish"), "finish"));
 		new EndState(flow, "finish");
 
@@ -63,8 +59,10 @@ public class FlowExecutionTests extends TestCase {
 		assertEquals(6, flowExecutionListener.getTransitionCount());
 	}
 
-	public void testLoopInFlow() {
-		AbstractFlowBuilder builder = new AbstractFlowBuilder() {
+	public void testLoopInFlow() throws Exception {
+		BeanFactoryFlowServiceLocator locator = new BeanFactoryFlowServiceLocator();
+		locator.afterPropertiesSet();
+		AbstractFlowBuilder builder = new AbstractFlowBuilder(locator) {
 			protected String flowId() {
 				return "flow";
 			}
@@ -75,6 +73,7 @@ public class FlowExecutionTests extends TestCase {
 				addEndState("endState");
 			}
 		};
+		builder.afterPropertiesSet();
 		FlowExecution flowExecution = new FlowExecutionImpl(new FlowFactoryBean(builder).getFlow());
 		ViewDescriptor vd = flowExecution.start(new Event(this, "start"));
 		assertNotNull(vd);
@@ -90,8 +89,10 @@ public class FlowExecutionTests extends TestCase {
 		assertFalse(flowExecution.isActive());
 	}
 
-	public void testLoopInFlowWithSubFlow() {
-		AbstractFlowBuilder childBuilder = new AbstractFlowBuilder() {
+	public void testLoopInFlowWithSubFlow() throws Exception {
+		BeanFactoryFlowServiceLocator locator = new BeanFactoryFlowServiceLocator();
+		locator.afterPropertiesSet();
+		AbstractFlowBuilder childBuilder = new AbstractFlowBuilder(locator) {
 			protected String flowId() {
 				return "childFlow";
 			}
@@ -112,8 +113,10 @@ public class FlowExecutionTests extends TestCase {
 				addEndState("stopTest");
 			}
 		};
+		childBuilder.afterPropertiesSet();
+		
 		final Flow childFlow = new FlowFactoryBean(childBuilder).getFlow();
-		AbstractFlowBuilder parentBuilder = new AbstractFlowBuilder() {
+		AbstractFlowBuilder parentBuilder = new AbstractFlowBuilder(locator) {
 			protected String flowId() {
 				return "parentFlow";
 			}
@@ -129,10 +132,20 @@ public class FlowExecutionTests extends TestCase {
 				addEndState("stopTest");
 			}
 		};
+		parentBuilder.afterPropertiesSet();
+		
 		Flow parentFlow = new FlowFactoryBean(parentBuilder).getFlow();
 
 		FlowExecution flowExecution = new FlowExecutionImpl(parentFlow);
 		flowExecution.start(new Event(this, "start"));
 		assertFalse(flowExecution.isActive());
+	}
+	
+	public static TransitionCriteria on(String event) {
+		return (TransitionCriteria)new TextToTransitionCriteria().convert(event);
+	}
+	
+	public static ViewDescriptorCreator view(String viewName) {
+		return (ViewDescriptorCreator)new TextToViewDescriptorCreator().convert(viewName);
 	}
 }

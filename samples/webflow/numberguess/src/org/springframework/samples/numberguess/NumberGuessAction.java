@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Random;
 
-import org.springframework.binding.convert.support.TextToNumberConverter;
+import org.springframework.binding.convert.support.TextToNumber;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.action.MultiAction;
@@ -69,7 +69,7 @@ public class NumberGuessAction extends MultiAction {
 
 	private int getGuess(RequestContext context) {
 		try {
-			return ((Integer)new TextToNumberConverter().convert(
+			return ((Integer)new TextToNumber().convert(
 					context.getSourceEvent().getParameter(GUESS_PARAMETER), Integer.class)).intValue();
 		}
 		catch (Exception e) {

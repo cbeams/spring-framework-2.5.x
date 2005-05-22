@@ -26,13 +26,13 @@ import org.springframework.binding.format.support.DefaultFormatterLocator;
  * specialization. Delegates to a synchronized formatter to parse text strings.
  * @author Keith Donald
  */
-public class TextToNumberConverter extends AbstractFormattingConverter {
+public class TextToNumber extends AbstractFormattingConverter {
 
-	public TextToNumberConverter() {
+	public TextToNumber() {
 		super(new DefaultFormatterLocator());
 	}
 	
-	public TextToNumberConverter(FormatterLocator locator) {
+	public TextToNumber(FormatterLocator locator) {
 		super(locator);
 	}
 

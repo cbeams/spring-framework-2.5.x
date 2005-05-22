@@ -27,7 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.binding.convert.ConversionService;
-import org.springframework.binding.convert.support.ConversionServiceImpl;
+import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.util.Assert;
@@ -145,10 +145,10 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	
 	protected void initConversionService() {
 		ConversionService parent = null;
-		if (this.beanFactory.containsBean(CONVERSION_SERVICE)) {
+		if (this.beanFactory != null && this.beanFactory.containsBean(CONVERSION_SERVICE)) {
 			parent = (ConversionService)this.beanFactory.getBean(CONVERSION_SERVICE, ConversionService.class);
 		}
-		ConversionServiceImpl service = new ConversionServiceImpl(parent);
+		DefaultConversionService service = new DefaultConversionService(parent);
 		// install default webflow converters
 		service.addConverter(new TextToTransitionCriteria());
 		service.addConverter(new TextToViewDescriptorCreator());

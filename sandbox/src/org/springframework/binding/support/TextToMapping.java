@@ -24,11 +24,11 @@ import org.springframework.util.StringUtils;
  * Converts a text-encoded representation of a <code>Mapping</code> object to a valid instance.
  * @author Keith Donald
  */
-public class TextToMappingConverter extends AbstractConverter {
+public class TextToMapping extends AbstractConverter {
 
 	private ConversionService conversionService;
 
-	public TextToMappingConverter(ConversionService conversionService) {
+	public TextToMapping(ConversionService conversionService) {
 		setConversionService(conversionService);
 	}
 

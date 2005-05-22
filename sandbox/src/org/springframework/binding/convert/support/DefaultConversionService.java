@@ -15,16 +15,23 @@
  */
 package org.springframework.binding.convert.support;
 
+import java.beans.PropertyEditor;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.Converter;
 import org.springframework.binding.format.FormatterLocator;
 import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
+import org.springframework.binding.support.TextToMapping;
 
 /**
  * Default, local implementation of a conversion service.
@@ -34,7 +41,7 @@ import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
  * This makes for very convenient use with the Spring container.
  * @author Keith Donald
  */
-public class ConversionServiceImpl implements ConversionService {
+public class DefaultConversionService implements ConversionService, InitializingBean, BeanFactoryPostProcessor {
 
 	private ConversionService parent;
 	
@@ -42,11 +49,11 @@ public class ConversionServiceImpl implements ConversionService {
 
 	private FormatterLocator formatterLocator = new ThreadLocalFormatterLocator();
 
-	public ConversionServiceImpl(ConversionService parent) {
+	public DefaultConversionService(ConversionService parent) {
 		setParent(parent);
 	}
 	
-	public ConversionServiceImpl() {
+	public DefaultConversionService() {
 
 	}
 
@@ -63,6 +70,16 @@ public class ConversionServiceImpl implements ConversionService {
 		addConverters(converters);
 	}
 
+	public void afterPropertiesSet() {
+		addDefaultConverters();
+	}
+
+	protected void addDefaultConverters() {
+		addConverter(new TextToClass());
+		addConverter(new TextToNumber(getFormatterLocator()));
+		addConverter(new TextToMapping(this));
+	}
+	
 	public void addConverters(Converter[] converters) {
 		for (int i = 0; i < converters.length; i++) {
 			addConverter(converters[i]);
@@ -136,5 +153,21 @@ public class ConversionServiceImpl implements ConversionService {
 			}
 		}
 		return Collections.EMPTY_MAP;
+	}
+
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		if (this.sourceClassConverters != null) {
+			Map sourceStringConverters = (Map)this.sourceClassConverters.get(String.class);
+			if (sourceStringConverters != null) {
+				Iterator it = sourceStringConverters.entrySet().iterator();
+				while (it.hasNext()) {
+					Map.Entry entry = (Map.Entry)it.next();
+					Class targetClass = (Class)entry.getKey();
+					PropertyEditor editor = new ConverterPropertyEditorAdapter(new ConversionExecutor((Converter)entry
+							.getValue(), targetClass));
+					beanFactory.registerCustomEditor(targetClass, editor);
+				}
+			}
+		}
 	}
 }
