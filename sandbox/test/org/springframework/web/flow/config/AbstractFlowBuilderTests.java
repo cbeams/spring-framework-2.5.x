@@ -29,7 +29,6 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.execution.ServiceLookupException;
 

@@ -12,7 +12,7 @@ import org.springframework.web.flow.Event;
 public class FourDigitNumberGuessActionTests extends TestCase {
 	public void testGuessNoInputProvided() throws Exception {
 		MockRequestContext context = new MockRequestContext();
-		context.setOriginatingEvent(new Event(this, "submit"));
+		context.setSourceEvent(new Event(this, "submit"));
 		FourDigitNumberGuessAction action = new FourDigitNumberGuessAction();
 		Event result = action.guess(context);
 		assertEquals("invalidInput", result.getId());
@@ -22,7 +22,7 @@ public class FourDigitNumberGuessActionTests extends TestCase {
 		MockRequestContext context = new MockRequestContext();
 		Map parameters = new HashMap();
 		parameters.put("guess", "123");
-		context.setOriginatingEvent(new Event(this, "submit", parameters));
+		context.setSourceEvent(new Event(this, "submit", parameters));
 		FourDigitNumberGuessAction action = new FourDigitNumberGuessAction();
 		Event result = action.guess(context);
 		assertEquals("invalidInput", result.getId());
@@ -32,7 +32,7 @@ public class FourDigitNumberGuessActionTests extends TestCase {
 		MockRequestContext context = new MockRequestContext();
 		Map parameters = new HashMap();
 		parameters.put("guess", "12AB");
-		context.setOriginatingEvent(new Event(this, "submit", parameters));
+		context.setSourceEvent(new Event(this, "submit", parameters));
 		FourDigitNumberGuessAction action = new FourDigitNumberGuessAction();
 		Event result = action.guess(context);
 		assertEquals("invalidInput", result.getId());
@@ -42,7 +42,7 @@ public class FourDigitNumberGuessActionTests extends TestCase {
 		MockRequestContext context = new MockRequestContext();
 		Map parameters = new HashMap();
 		parameters.put("guess", "1111");
-		context.setOriginatingEvent(new Event(this, "submit", parameters));
+		context.setSourceEvent(new Event(this, "submit", parameters));
 		FourDigitNumberGuessAction action = new FourDigitNumberGuessAction();
 		Event result = action.guess(context);
 		assertEquals("invalidInput", result.getId());
@@ -52,7 +52,7 @@ public class FourDigitNumberGuessActionTests extends TestCase {
 		MockRequestContext context = new MockRequestContext();
 		Map parameters = new HashMap();
 		parameters.put("guess", "1234");
-		context.setOriginatingEvent(new Event(this, "submit", parameters));
+		context.setSourceEvent(new Event(this, "submit", parameters));
 		FourDigitNumberGuessAction action = new FourDigitNumberGuessAction();
 		Event result = action.guess(context);
 		assertEquals("retry", result.getId());
@@ -61,13 +61,13 @@ public class FourDigitNumberGuessActionTests extends TestCase {
 	public void testGuessCorrect() throws Exception {
 		MockRequestContext context = new MockRequestContext();
 		Map parameters = new HashMap();
-		context.setOriginatingEvent(new Event(this, "submit", parameters));
+		context.setSourceEvent(new Event(this, "submit", parameters));
 		FourDigitNumberGuessAction action = new FourDigitNumberGuessAction();
 		Event result = action.guess(context);
 		NumberGuessData data = (NumberGuessData)context.getFlowScope().getAttribute("data");
 		String answer = data.getAnswer();
 		parameters.put("guess", answer);
-		context.setOriginatingEvent(new Event(this, "submit", parameters));
+		context.setSourceEvent(new Event(this, "submit", parameters));
 		result = action.guess(context);
 		assertEquals("correct", result.getId());
 	}

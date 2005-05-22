@@ -17,7 +17,6 @@ import org.springframework.web.flow.StateTests.ExecutionCounterAction;
 import org.springframework.web.flow.StateTests.InputOutputMapper;
 import org.springframework.web.flow.action.AbstractAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
-import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.config.FlowBuilderException;
 import org.springframework.web.flow.config.FlowFactoryBean;
 import org.springframework.web.flow.config.TextToTransitionCriteria;
