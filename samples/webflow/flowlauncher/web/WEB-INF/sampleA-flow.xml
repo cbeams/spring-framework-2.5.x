@@ -14,6 +14,6 @@
 		<transition on="end" to="aPage"/>
 	</subflow-state>
 
-	<end-state id="endLaunchB" view="redirect:/flow.htm?_flowId=sampleB"/>
+	<end-state id="endLaunchB" view="redirect:/flow.htm?_flowId=sampleB&amp;input=${flowScope.input}"/>
 
 </webflow>
