@@ -73,6 +73,6 @@ public class RedirectViewDescriptorCreator extends SimpleViewDescriptorCreator {
 	}
 
 	protected Map getEvaluationContext(RequestContext context) {
-		return null;
+		return Collections.EMPTY_MAP;
 	}
 }
