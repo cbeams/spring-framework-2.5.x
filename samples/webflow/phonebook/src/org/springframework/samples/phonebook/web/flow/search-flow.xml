@@ -3,33 +3,29 @@
 <!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
 	"http://www.springframework.org/dtd/spring-webflow.dtd">
 
-<webflow id="person.Search" start-state="criteria.view">
+<webflow id="search" start-state="displayCriteria">
 
-	<view-state id="criteria.view" view="person.Search.criteria.view">
+	<view-state id="displayCriteria" view="person.Search.criteria.view">
+		<setup bean="person.Search.criteria.formAction" method="setupForm"/>
 		<transition on="submit" to="executeQuery">
 			<action bean="person.Search.criteria.formAction" method="bindAndValidate"/>
+			<property name="submitPressed" value="true" type="boolean"/>
 		</transition>
 	</view-state>
 	
 	<action-state id="executeQuery">
 		<action bean="person.Search.executeQuery"/>
-		<transition on="success" to="results.view"/>
+		<transition on="success" to="displayResults"/>
 	</action-state>
 	
-	<view-state id="results.view" view="person.Search.results.view">
-		<transition on="newSearch" to="criteria.view"/>
-		<transition on="select" to="personId.set"/>
+	<view-state id="displayResults" view="person.Search.results.view">
+		<transition on="newSearch" to="displayCriteria"/>
+		<transition on="select" to="showDetails"/>
 	</view-state>
 
-	<action-state id="personId.set">
-		<action bean="person.Search.id.set"/>
-		<transition on="success" to="person.Detail"/>
-		<transition on="error" to="error"/>
-	</action-state>
-	
-	<subflow-state id="person.Detail" flow="person.Detail">
+	<subflow-state id="showDetails" flow="person.Detail">
 		<attribute-mapper>
-			<input name="id"/>
+			<input value="${originatingEvent.id}" as="id"/>
 		</attribute-mapper>
 		<transition on="finish" to="executeQuery"/>
 		<transition on="error" to="error"/>
