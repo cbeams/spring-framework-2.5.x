@@ -15,6 +15,7 @@
  */
 package org.springframework.binding.expression.support;
 
+import java.util.Collections;
 import java.util.Map;
 
 import ognl.Ognl;
@@ -83,6 +84,9 @@ public class OgnlExpressionParser implements ExpressionParser {
 		public Object evaluate(Object object, Map context) throws EvaluationException {
 			try {
 				Assert.notNull(object, "The object is required");
+				if (context == null) {
+					context = Collections.EMPTY_MAP;
+				}
 				return Ognl.getValue(expression, context, object);
 			} catch (OgnlException e) {
 				throw new EvaluationException(expression, e);
