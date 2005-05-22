@@ -27,6 +27,14 @@ public class UnexpectedRollbackException extends TransactionException {
 	/**
 	 * Constructor for UnexpectedRollbackException.
 	 * @param msg message
+	 */
+	public UnexpectedRollbackException(String msg) {
+		super(msg);
+	}
+
+	/**
+	 * Constructor for UnexpectedRollbackException.
+	 * @param msg message
 	 * @param ex root cause from transaction API in use
 	 */
 	public UnexpectedRollbackException(String msg, Throwable ex) {

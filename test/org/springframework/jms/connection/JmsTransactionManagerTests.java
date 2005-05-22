@@ -34,6 +34,7 @@ import org.springframework.jms.core.JmsTemplate102;
 import org.springframework.jms.core.SessionCallback;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -173,7 +174,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.verify();
 	}
 
-	public void testParticipatingTransactionWithRollback() throws JMSException {
+	public void testParticipatingTransactionWithRollbackOnly() throws JMSException {
 		MockControl cfControl = MockControl.createControl(ConnectionFactory.class);
 		final ConnectionFactory cf = (ConnectionFactory) cfControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -217,7 +218,13 @@ public class JmsTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		tm.commit(ts);
+		try {
+			tm.commit(ts);
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+		}
 
 		sessionControl.verify();
 		conControl.verify();

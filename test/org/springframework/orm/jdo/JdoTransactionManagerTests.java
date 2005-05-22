@@ -43,6 +43,7 @@ import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -328,11 +329,12 @@ public class JdoTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail("Should not thrown RuntimeException");
+			fail("Should have thrown RuntimeException");
 		}
 		catch (RuntimeException ex) {
 			// expected
 		}
+
 		pmfControl.verify();
 		pmControl.verify();
 		txControl.verify();
@@ -367,30 +369,36 @@ public class JdoTransactionManagerTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 
-		tt.execute(new TransactionCallback() {
-			public Object doInTransaction(TransactionStatus status) {
-				txControl.reset();
-				tx.isActive();
-				txControl.setReturnValue(true, 1);
-				tx.rollback();
-				txControl.setVoidCallable(1);
-				txControl.replay();
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					txControl.reset();
+					tx.isActive();
+					txControl.setReturnValue(true, 1);
+					tx.rollback();
+					txControl.setVoidCallable(1);
+					txControl.replay();
 
-				return tt.execute(new TransactionCallback() {
-					public Object doInTransaction(TransactionStatus status) {
-						JdoTemplate jt = new JdoTemplate(pmf);
-						jt.execute(new JdoCallback() {
-							public Object doInJdo(PersistenceManager pm2) {
-								pm2.flush();
-								return l;
-							}
-						});
-						status.setRollbackOnly();
-						return null;
-					}
-				});
-			}
-		});
+					return tt.execute(new TransactionCallback() {
+						public Object doInTransaction(TransactionStatus status) {
+							JdoTemplate jt = new JdoTemplate(pmf);
+							jt.execute(new JdoCallback() {
+								public Object doInJdo(PersistenceManager pm2) {
+									pm2.flush();
+									return l;
+								}
+							});
+							status.setRollbackOnly();
+							return null;
+						}
+					});
+				}
+			});
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+		}
 
 		pmfControl.verify();
 		pmControl.verify();

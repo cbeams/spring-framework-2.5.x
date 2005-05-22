@@ -1,3 +1,7 @@
+/*
+ * Created on Mar 20, 2005
+ *
+ */
 
 package org.springframework.orm.toplink;
 
@@ -13,6 +17,7 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -244,7 +249,6 @@ public class TopLinkTransactionManagerTests extends TestCase {
 	public void testParticipatingTransactionWithRollbackOnly() {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-
 		final SessionFactory sf = new MockSessionFactory(session);
 
 		session.release();
@@ -256,23 +260,29 @@ public class TopLinkTransactionManagerTests extends TestCase {
 		tm.setLazyDatabaseTransaction(true);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 
-		tt.execute(new TransactionCallback() {
-			public Object doInTransaction(TransactionStatus status) {
-				tt.execute(new TransactionCallback() {
-					public Object doInTransaction(TransactionStatus status) {
-						TopLinkTemplate ht = new TopLinkTemplate(sf);
-						ht.execute(new TopLinkCallback() {
-							public Object doInTopLink(Session session) {
-								return null;
-							}
-						});
-						status.setRollbackOnly();
-						return null;
-					}
-				});
-				return null;
-			}
-		});
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					tt.execute(new TransactionCallback() {
+						public Object doInTransaction(TransactionStatus status) {
+							TopLinkTemplate ht = new TopLinkTemplate(sf);
+							ht.execute(new TopLinkCallback() {
+								public Object doInTopLink(Session session) {
+									return null;
+								}
+							});
+							status.setRollbackOnly();
+							return null;
+						}
+					});
+					return null;
+				}
+			});
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+		}
 
 		sessionControl.verify();
 	}

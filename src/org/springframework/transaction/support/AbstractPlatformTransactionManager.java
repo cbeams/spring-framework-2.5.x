@@ -189,8 +189,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	//---------------------------------------------------------------------
 
 	/**
-	 * This implementation of getTransaction handles propagation behavior.
-	 * Delegates to doGetTransaction, isExistingTransaction, doBegin.
+	 * This implementation handles propagation behavior. Delegates to
+	 * <code>doGetTransaction</code>, <code>isExistingTransaction</code>
+	 * and <code>doBegin</code>.
 	 * @see #doGetTransaction
 	 * @see #isExistingTransaction
 	 * @see #doBegin
@@ -319,7 +320,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * Suspend the given transaction. Suspends transaction synchronization first,
-	 * then delegates to the doSuspend template method.
+	 * then delegates to the <code>doSuspend</code> template method.
 	 * @param transaction the current transaction object
 	 * @return an object that holds suspended resources
 	 * @see #doSuspend
@@ -341,8 +342,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Resume the given transaction. Delegates to the doResume template method
-	 * first, then resuming transaction synchronization.
+	 * Resume the given transaction. Delegates to the <code>doResume</code>
+	 * template method first, then resuming transaction synchronization.
 	 * @param transaction the current transaction object
 	 * @param suspendedResources the object that holds suspended resources,
 	 * as returned by suspend
@@ -366,81 +367,93 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * This implementation of commit handles participating in existing
 	 * transactions and programmatic rollback requests.
-	 * Delegates to isRollbackOnly, doCommit and rollback.
+	 * Delegates to <code>isRollbackOnly</code>, <code>doCommit</code>
+	 * and <code>rollback</code>.
 	 * @see org.springframework.transaction.TransactionStatus#isRollbackOnly
 	 * @see #doCommit
 	 * @see #rollback
 	 */
 	public final void commit(TransactionStatus status) throws TransactionException {
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
+
 		if (defStatus.isCompleted()) {
 			throw new IllegalTransactionStateException(
 					"Transaction is already completed - do not call commit or rollback more than once per transaction");
 		}
-		if (status.isRollbackOnly()) {
+		if (defStatus.isLocalRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Transactional code has requested rollback");
 			}
 			rollback(status);
+			return;
 		}
-		else {
+		if (defStatus.isGlobalRollbackOnly() && !shouldCommitOnGlobalRollbackOnly()) {
+			if (defStatus.isDebug()) {
+				logger.debug("Global transaction is marked as rollback-only but transactional code requested commit");
+			}
+			rollback(status);
+			throw new UnexpectedRollbackException(
+					"Transaction has been rolled back because it has been marked as rollback-only");
+		}
+
+		// Process actual commit.
+		try {
+			boolean beforeCompletionInvoked = false;
 			try {
-				boolean beforeCompletionInvoked = false;
-				try {
-					triggerBeforeCommit(defStatus);
-					triggerBeforeCompletion(defStatus, null);
-					beforeCompletionInvoked = true;
-					if (defStatus.hasSavepoint()) {
-						if (defStatus.isDebug()) {
-							logger.debug("Releasing transaction savepoint");
-						}
-						defStatus.releaseHeldSavepoint();
+				triggerBeforeCommit(defStatus);
+				triggerBeforeCompletion(defStatus, null);
+				beforeCompletionInvoked = true;
+				if (defStatus.hasSavepoint()) {
+					if (defStatus.isDebug()) {
+						logger.debug("Releasing transaction savepoint");
 					}
-					else if (status.isNewTransaction()) {
-						logger.debug("Initiating transaction commit");
-						doCommit(defStatus);
-					}
+					defStatus.releaseHeldSavepoint();
 				}
-				catch (UnexpectedRollbackException ex) {
-					// can only be caused by doCommit
-					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
-					throw ex;
+				else if (status.isNewTransaction()) {
+					logger.debug("Initiating transaction commit");
+					doCommit(defStatus);
 				}
-				catch (TransactionException ex) {
-					// can only be caused by doCommit
-					if (isRollbackOnCommitFailure()) {
-						doRollbackOnCommitException(defStatus, ex);
-					}
-					else {
-						triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, ex);
-					}
-					throw ex;
-				}
-				catch (RuntimeException ex) {
-					if (!beforeCompletionInvoked) {
-						triggerBeforeCompletion(defStatus, ex);
-					}
+			}
+			catch (UnexpectedRollbackException ex) {
+				// can only be caused by doCommit
+				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
+				throw ex;
+			}
+			catch (TransactionException ex) {
+				// can only be caused by doCommit
+				if (isRollbackOnCommitFailure()) {
 					doRollbackOnCommitException(defStatus, ex);
-					throw ex;
 				}
-				catch (Error err) {
-					if (!beforeCompletionInvoked) {
-						triggerBeforeCompletion(defStatus, err);
-					}
-					doRollbackOnCommitException(defStatus, err);
-					throw err;
+				else {
+					triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_UNKNOWN, ex);
 				}
-				triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_COMMITTED, null);
+				throw ex;
 			}
-			finally {
-				cleanupAfterCompletion(defStatus);
+			catch (RuntimeException ex) {
+				if (!beforeCompletionInvoked) {
+					triggerBeforeCompletion(defStatus, ex);
+				}
+				doRollbackOnCommitException(defStatus, ex);
+				throw ex;
 			}
+			catch (Error err) {
+				if (!beforeCompletionInvoked) {
+					triggerBeforeCompletion(defStatus, err);
+				}
+				doRollbackOnCommitException(defStatus, err);
+				throw err;
+			}
+			triggerAfterCompletion(defStatus, TransactionSynchronization.STATUS_COMMITTED, null);
+		}
+		finally {
+			cleanupAfterCompletion(defStatus);
 		}
 	}
 
 	/**
 	 * This implementation of rollback handles participating in existing
-	 * transactions. Delegates to doRollback and doSetRollbackOnly.
+	 * transactions. Delegates to <code>doRollback</code> and
+	 * <code>doSetRollbackOnly</code>.
 	 * @see #doRollback
 	 * @see #doSetRollbackOnly
 	 */
@@ -741,6 +754,35 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	protected void doResume(Object transaction, Object suspendedResources) throws TransactionException {
 		throw new TransactionSuspensionNotSupportedException(
 				"Transaction manager [" + getClass().getName() + "] does not support transaction suspension");
+	}
+
+	/**
+	 * Return whether to call <code>doCommit</code> on a transaction
+	 * that has been marked as rollback-only in a global fashion.
+	 * <p>Does not apply if an application locally sets the transaction to
+	 * rollback-only via the TransactionStatus, but only to the transaction
+	 * itself being marked as rollback-only by the transaction coordinator.
+	 * <p>Default is "false": Local transaction strategies usually don't
+	 * hold the rollback-only marker in the transaction itself, therefore
+	 * they can't handle rollback-only transactions in a special manner.
+	 * Hence, AbstractPlatformTransactionManager will trigger a rollback
+	 * in that case, throwing an UnexpectedRollbackException afterwards.
+	 * <p>Override this to return "true" if the concrete transaction manager
+	 * expects a <code>doCommit</code> call even for a rollback-only transaction,
+	 * allowing for special handling there. This will, for example, be the case
+	 * for JTA, where <code>UserTransaction.commit</code> will check the read-only
+	 * flag itself and throw a corresponding RollbackException, which might
+	 * include the specific reason (such as a transaction timeout).
+	 * @see #doCommit
+	 * @see DefaultTransactionStatus#isGlobalRollbackOnly()
+	 * @see DefaultTransactionStatus#isLocalRollbackOnly()
+	 * @see org.springframework.transaction.TransactionStatus#setRollbackOnly()
+	 * @see org.springframework.transaction.UnexpectedRollbackException
+	 * @see javax.transaction.UserTransaction#commit()
+	 * @see javax.transaction.RollbackException
+	 */
+	protected boolean shouldCommitOnGlobalRollbackOnly() {
+		return false;
 	}
 
 	/**

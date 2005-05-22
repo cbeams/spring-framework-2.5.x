@@ -71,9 +71,12 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	 * else participating in an existing transaction
 	 * @param newSynchronization if a new transaction synchronization
 	 * has been opened for the given transaction
+	 * @param readOnly whether the transaction is read-only
 	 * @param debug should debug logging be enabled for the handling of this transaction?
 	 * Caching it in here can prevent repeated calls to ask the logging system whether
 	 * debug logging should be enabled.
+	 * @param suspendedResources a holder for resources that have been suspended
+	 * for this transaction, if any
 	 */
 	public DefaultTransactionStatus(
 	    Object transaction, boolean newTransaction, boolean newSynchronization,
@@ -122,6 +125,10 @@ public class DefaultTransactionStatus implements TransactionStatus {
 		return debug;
 	}
 
+	/**
+	 * Return the holder for resources that have been suspended for this transaction,
+	 * if any.
+	 */
 	public Object getSuspendedResources() {
 		return suspendedResources;
 	}
@@ -131,15 +138,34 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	}
 
 	/**
-	 * Determine the rollbackOnly flag via checking both this TransactionStatus
+	 * Determine the rollback-only flag via checking both this TransactionStatus
 	 * and the transaction object, provided that the latter implements the
 	 * SmartTransactionObject interface.
 	 * @see SmartTransactionObject#isRollbackOnly
 	 */
 	public boolean isRollbackOnly() {
-		return (this.rollbackOnly ||
-		    ((this.transaction instanceof SmartTransactionObject) &&
-		     ((SmartTransactionObject) this.transaction).isRollbackOnly()));
+		return (isLocalRollbackOnly() || isGlobalRollbackOnly());
+	}
+
+	/**
+	 * Determine the rollback-only flag via checking this TransactionStatus.
+	 * <p>Will only return "true" if the application called <code>setRollbackOnly</code>
+	 * on this TransactionStatus object.
+	 */
+	public boolean isLocalRollbackOnly() {
+		return this.rollbackOnly;
+	}
+
+	/**
+	 * Determine the rollback-only flag via checking both the transaction object,
+	 * provided that the latter implements the SmartTransactionObject interface.
+	 * <p>Will return "true" if the transaction itself has been marked rollback-only
+	 * by the transaction coordinator, for example in case of a timeout.
+	 * @see SmartTransactionObject#isRollbackOnly
+	 */
+	public boolean isGlobalRollbackOnly() {
+		return ((this.transaction instanceof SmartTransactionObject) &&
+		 ((SmartTransactionObject) this.transaction).isRollbackOnly());
 	}
 
 	/**

@@ -49,6 +49,7 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -366,11 +367,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail("Should not thrown RuntimeException");
+			fail("Should have thrown RuntimeException");
 		}
 		catch (RuntimeException ex) {
 			// expected
 		}
+
 		sfControl.verify();
 		sessionControl.verify();
 		txControl.verify();
@@ -407,22 +409,28 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 
-		tt.execute(new TransactionCallback() {
-			public Object doInTransaction(TransactionStatus status) {
-				return tt.execute(new TransactionCallback() {
-					public Object doInTransaction(TransactionStatus status) {
-						HibernateTemplate ht = new HibernateTemplate(sf);
-						ht.execute(new HibernateCallback() {
-							public Object doInHibernate(org.hibernate.Session session) {
-								return l;
-							}
-						});
-						status.setRollbackOnly();
-						return null;
-					}
-				});
-			}
-		});
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					return tt.execute(new TransactionCallback() {
+						public Object doInTransaction(TransactionStatus status) {
+							HibernateTemplate ht = new HibernateTemplate(sf);
+							ht.execute(new HibernateCallback() {
+								public Object doInHibernate(org.hibernate.Session session) {
+									return l;
+								}
+							});
+							status.setRollbackOnly();
+							return null;
+						}
+					});
+				}
+			});
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+		}
 
 		sfControl.verify();
 		sessionControl.verify();
@@ -1029,27 +1037,33 @@ public class HibernateTransactionManagerTests extends TestCase {
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 
-		tt.execute(new TransactionCallbackWithoutResult() {
-			public void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-				SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
-				assertEquals(tx1, sessionHolder.getTransaction());
-				tt.execute(new TransactionCallbackWithoutResult() {
-					public void doInTransactionWithoutResult(TransactionStatus status) {
-						status.setRollbackOnly();
-						HibernateTemplate ht = new HibernateTemplate(sf);
-						ht.setExposeNativeSession(true);
-						ht.execute(new HibernateCallback() {
-							public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
-								assertEquals(session, sess);
-								return null;
-							}
-						});
-					}
-				});
-			}
-		});
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				public void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+					SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+					assertEquals(tx1, sessionHolder.getTransaction());
+					tt.execute(new TransactionCallbackWithoutResult() {
+						public void doInTransactionWithoutResult(TransactionStatus status) {
+							status.setRollbackOnly();
+							HibernateTemplate ht = new HibernateTemplate(sf);
+							ht.setExposeNativeSession(true);
+							ht.execute(new HibernateCallback() {
+								public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
+									assertEquals(session, sess);
+									return null;
+								}
+							});
+						}
+					});
+				}
+			});
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+		}
 
 		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);

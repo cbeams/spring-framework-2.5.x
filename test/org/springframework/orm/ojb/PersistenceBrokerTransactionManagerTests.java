@@ -29,6 +29,7 @@ import org.easymock.MockControl;
 
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -207,7 +208,7 @@ public class PersistenceBrokerTransactionManagerTests extends TestCase {
 		conControl.verify();
 	}
 
-	public void testParticipatingTransactionWithRollback() throws LookupException, SQLException {
+	public void testParticipatingTransactionWithRollbackOnly() throws LookupException, SQLException {
 		MockControl pbControl = MockControl.createControl(PersistenceBroker.class);
 		final PersistenceBroker pb = (PersistenceBroker) pbControl.getMock();
 		MockControl cmControl = MockControl.createControl(ConnectionManagerIF.class);
@@ -243,19 +244,25 @@ public class PersistenceBrokerTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread broker", !TransactionSynchronizationManager.hasResource(tm.getPbKey()));
 		final TransactionTemplate tt = new TransactionTemplate(tm);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue("Has thread broker", TransactionSynchronizationManager.hasResource(tm.getPbKey()));
-				tt.execute(new TransactionCallbackWithoutResult() {
-					protected void doInTransactionWithoutResult(TransactionStatus status) {
-						assertTrue("Has thread broker", TransactionSynchronizationManager.hasResource(tm.getPbKey()));
-						PersistenceBrokerTemplate pbt = new PersistenceBrokerTemplate();
-						pbt.delete(entity);
-						status.setRollbackOnly();
-					}
-				});
-			}
-		});
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue("Has thread broker", TransactionSynchronizationManager.hasResource(tm.getPbKey()));
+					tt.execute(new TransactionCallbackWithoutResult() {
+						protected void doInTransactionWithoutResult(TransactionStatus status) {
+							assertTrue("Has thread broker", TransactionSynchronizationManager.hasResource(tm.getPbKey()));
+							PersistenceBrokerTemplate pbt = new PersistenceBrokerTemplate();
+							pbt.delete(entity);
+							status.setRollbackOnly();
+						}
+					});
+				}
+			});
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+		}
 		assertTrue("Hasn't thread broker", !TransactionSynchronizationManager.hasResource(tm.getPbKey()));
 
 		pbControl.verify();
