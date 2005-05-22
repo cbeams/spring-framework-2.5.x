@@ -20,6 +20,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.springframework.binding.convert.ConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.flow.MockRequestContext;
 import org.springframework.web.flow.Action;
@@ -32,8 +33,6 @@ import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.SimpleViewDescriptorCreator;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.TransitionCriteria;
-import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
@@ -148,6 +147,11 @@ public class XmlFlowBuilderTests extends TestCase {
 	 * @author Erwin Vervaet
 	 */
 	public static class TestFlowServiceLocator extends FlowServiceLocatorAdapter {
+
+		public ConversionService getConversionService() {
+			return new FlowConversionService();
+		}
+
 		public Action createAction(Class implementationClass, AutowireMode autowire) {
 			return new TestAction();
 		}

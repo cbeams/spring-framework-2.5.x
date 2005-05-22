@@ -52,23 +52,11 @@ public class FlowExecutionImplTests extends TestCase {
 		builder.setFlowServiceLocator(new XmlFlowBuilderTests.TestFlowServiceLocator());
 		final Flow flow = new FlowFactoryBean(builder).getFlow();
 		flowLocator = new FlowLocator() {
-			public Flow getFlow(Class flowDefinitionImplementationClass) throws ServiceLookupException {
-				if (flow.getClass().equals(flowDefinitionImplementationClass)) {
-					return flow;
-				}
-				throw new ServiceLookupException(Flow.class, flowDefinitionImplementationClass, null);
-			}
-
 			public Flow getFlow(String flowDefinitionId) throws ServiceLookupException {
 				if (flow.getId().equals(flowDefinitionId)) {
 					return flow;
 				}
 				throw new ServiceLookupException(Flow.class, flowDefinitionId, null);
-			}
-
-			public Flow getFlow(String flowDefinitionId, Class requiredFlowBuilderImplementationClass)
-					throws ServiceLookupException {
-				return getFlow(flowDefinitionId);
 			}
 		};
 		flowExecution = new FlowExecutionImpl(flow);

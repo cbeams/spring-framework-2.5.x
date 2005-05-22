@@ -165,5 +165,4 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 	public Object getAttribute(String attributeName) {
 		return model.get(attributeName);
 	}
-
 }
