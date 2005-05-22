@@ -19,6 +19,7 @@ package org.springframework.orm.hibernate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.TransactionManager;
@@ -37,6 +38,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.MockJtaTransaction;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -680,8 +682,9 @@ public class HibernateJtaTransactionTests extends TestCase {
 		utControl.setVoidCallable(1);
 		ut.setRollbackOnly();
 		utControl.setVoidCallable(1);
-		ut.rollback();
-		utControl.setVoidCallable(1);
+		RollbackException rex = new RollbackException();
+		ut.commit();
+		utControl.setThrowable(rex, 1);
 		utControl.replay();
 
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -724,9 +727,16 @@ public class HibernateJtaTransactionTests extends TestCase {
 								}
 								sessionControl.verify();
 								sessionControl.reset();
+								session.getFlushMode();
+								sessionControl.setReturnValue(FlushMode.AUTO, 1);
+								session.flush();
+								sessionControl.setVoidCallable(1);
 								session.clear();
 								sessionControl.setVoidCallable(1);
 								sessionControl.replay();
+							}
+							catch (Exception ex) {
+								ex.printStackTrace();
 							}
 							catch (Error err) {
 								err.printStackTrace();
@@ -736,9 +746,11 @@ public class HibernateJtaTransactionTests extends TestCase {
 					});
 				}
 			});
-
-			assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
-			assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+			assertEquals(rex, ex.getCause());
 		}
 		finally {
 			TransactionSynchronizationManager.unbindResource(sf);

@@ -696,13 +696,22 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	/**
+	 * This implementation returns "true": a JTA commit will properly handle
+	 * transactions that have been marked rollback-only at a global level.
+	 */
+	protected boolean shouldCommitOnGlobalRollbackOnly() {
+		return true;
+	}
+
 	protected void doCommit(DefaultTransactionStatus status) {
 		logger.debug("Committing JTA transaction");
 		try {
 			getUserTransaction().commit();
 		}
 		catch (RollbackException ex) {
-			throw new UnexpectedRollbackException("JTA transaction rolled back", ex);
+			throw new UnexpectedRollbackException(
+					"JTA transaction unexpectedly rolled back (maybe due to a timeout)", ex);
 		}
 		catch (HeuristicMixedException ex) {
 			throw new HeuristicCompletionException(HeuristicCompletionException.STATE_MIXED, ex);
