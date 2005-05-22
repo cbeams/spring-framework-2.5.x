@@ -34,7 +34,7 @@ package org.springframework.web.flow;
 public interface ViewDescriptorCreator {
 	
 	/**
-	 * Produce a new view descriptor for given request context.
+	 * Create a new view descriptor for given request context.
 	 * @param context the current request context of the executing flow
 	 * @return the view descriptor
 	 */

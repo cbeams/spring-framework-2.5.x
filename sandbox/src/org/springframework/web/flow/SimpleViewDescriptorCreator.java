@@ -16,7 +16,7 @@
 package org.springframework.web.flow;
 
 /**
- * Simple view descriptor producer that produces a ViewDescriptor with the same
+ * Simple view descriptor creator that produces a ViewDescriptor with the same
  * view name each time. This producer will make all model data from both
  * flow and request scope available to the view.
  * 
@@ -30,8 +30,10 @@ public class SimpleViewDescriptorCreator implements ViewDescriptorCreator {
 	 */
 	private String viewName;
 
-	protected SimpleViewDescriptorCreator() {
-		
+	/**
+	 * Default constructor for bean style usage.
+	 */
+	public SimpleViewDescriptorCreator() {
 	}
 	
 	/**
@@ -40,23 +42,24 @@ public class SimpleViewDescriptorCreator implements ViewDescriptorCreator {
 	 * @param viewName the view name
 	 */
 	public SimpleViewDescriptorCreator(String viewName) {
-		this.viewName = viewName;
+		setViewName(viewName);
 	}
 	
-	protected void setViewName(String viewName) {
+	/**
+	 * Returns the name of the view that should be rendered.
+	 */
+	public String getViewName() {
+		return this.viewName;
+	}
+	
+	/**
+	 * Set the name of the view that should be rendered.
+	 */
+	public void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 	
 	public ViewDescriptor createViewDescriptor(RequestContext context) {
 		return new ViewDescriptor(getViewName(), context.getModel());
 	}
-
-	/**
-	 * Returns the static view name.
-	 * @return the view name
-	 */
-	public String getViewName() {
-		return viewName;
-	}
-
 }

@@ -19,7 +19,6 @@ import java.util.Map;
 
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Terminates an active web flow session when entered. If the terminated session
@@ -46,7 +45,7 @@ import org.springframework.util.StringUtils;
 public class EndState extends State {
 
 	/**
-	 * An optional view descriptor producer that will produce a view to render
+	 * An optional view descriptor creator that will produce a view to render
 	 * if this end state terminates an executing root flow.
 	 */
 	private ViewDescriptorCreator viewDescriptorCreator;

@@ -34,6 +34,8 @@ import org.springframework.util.StringUtils;
  * this case it just returns control back to the client. Marker states are
  * useful for situations where an action has already generated the response.
  * 
+ * @see org.springframework.web.flow.ViewDescriptorCreator
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -123,11 +125,26 @@ public class ViewState extends TransitionableState {
 	}
 	
 	/**
-	 * Sets the factory to produce a descriptor about the view to render in
+	 * Returns the factory to produce a descriptor for the view to render in
+	 * this view state.
+	 */
+	public ViewDescriptorCreator getViewDescriptorCreator() {
+		return viewDescriptorCreator;
+	}
+
+	/**
+	 * Sets the factory to produce a descriptor for the view to render in
 	 * this view state.
 	 */
 	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
 		this.viewDescriptorCreator = creator;
+	}
+
+	/**
+	 * Returns the setup criteria.
+	 */
+	public TransitionCriteria getSetupCriteria() {
+		return setupCriteria;
 	}
 
 	/**
@@ -140,13 +157,27 @@ public class ViewState extends TransitionableState {
 	}
 	
 	/**
+	 * Returns the setup criteria failure state id.
+	 */
+	public String getSetupErrorStateId() {
+		return setupErrorStateId;
+	}
+
+	/**
 	 * Set the state to transition to if the setup criteria fails.
 	 * @param errorStateId the state id
 	 */
 	public void setSetupErrorStateId(String errorStateId) {
 		this.setupErrorStateId = errorStateId;
 	}
-	
+
+	/**
+	 * Returns true if this view state has no associated view, false otherwise.
+	 */
+	public boolean isMarker() {
+		return viewDescriptorCreator == null;
+	}
+
 	/**
 	 * Specialization of State's <code>doEnter</code> template method
 	 * that executes behaviour specific to this state type in polymorphic
@@ -169,7 +200,7 @@ public class ViewState extends TransitionableState {
 				// transition to the error state
 				// also note that we're not adding this temporary transition to this
 				// state because that would result in a memory leak!
-				Transition toSetupError = new Transition(this, not(setupCriteria), setupErrorStateId);
+				Transition toSetupError = new Transition(this, TransitionCriteriaFactory.not(setupCriteria), setupErrorStateId);
 				if (toSetupError.matches(context)) {
 					toSetupError.execute(context);
 				}
@@ -189,39 +220,6 @@ public class ViewState extends TransitionableState {
 		else {
 			return viewDescriptorCreator.createViewDescriptor(context);
 		}
-	}
-
-	protected TransitionCriteria not(TransitionCriteria criteria) {
-		return TransitionCriteriaFactory.not(criteria);
-	}
-
-	/**
-	 * Returns true if this view state has no associated view, false otherwise.
-	 */
-	public boolean isMarker() {
-		return viewDescriptorCreator == null;
-	}
-
-	/**
-	 * Returns the factory to produce a descriptor about the view to render in
-	 * this view state.
-	 */
-	public ViewDescriptorCreator getViewDescriptorCreator() {
-		return viewDescriptorCreator;
-	}
-
-	/**
-	 * Returns the setup criteria failure state id.
-	 */
-	public String getSetupErrorStateId() {
-		return setupErrorStateId;
-	}
-
-	/**
-	 * Returns the setup criteria.
-	 */
-	public TransitionCriteria getSetupCriteria() {
-		return setupCriteria;
 	}
 
 	protected void createToString(ToStringCreator creator) {

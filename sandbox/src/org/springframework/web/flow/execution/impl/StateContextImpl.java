@@ -129,6 +129,14 @@ public class StateContextImpl implements StateContext {
 			this.executionProperties = EmptyAttributeSource.INSTANCE;
 		}
 	}
+	
+	public Map getModel() {
+		// merge request and flow scope
+		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
+		model.putAll(getFlowScope().getAttributeMap());
+		model.putAll(getRequestScope().getAttributeMap());
+		return model;
+	}
 
 	public boolean inTransaction(boolean end) {
 		return this.flowExecution.getTransactionSynchronizer().inTransaction(this, end);
@@ -144,14 +152,6 @@ public class StateContextImpl implements StateContext {
 
 	public void endTransaction() {
 		this.flowExecution.getTransactionSynchronizer().endTransaction(this);
-	}
-
-	public Map getModel() {
-		// merge request and flow scope
-		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
-		model.putAll(getFlowScope().getAttributeMap());
-		model.putAll(getRequestScope().getAttributeMap());
-		return model;
 	}
 
 	// implementing StateContext

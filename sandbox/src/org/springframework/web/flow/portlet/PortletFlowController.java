@@ -208,6 +208,7 @@ public class PortletFlowController extends AbstractController implements BeanFac
 	 * @return a new ModelAndView object
 	 */
 	protected ModelAndView toModelAndView(ViewDescriptor viewDescriptor) {
+		// TODO what about dealing with the redirect property?
 		return viewDescriptor==null ? null : new ModelAndView(viewDescriptor.getViewName(), viewDescriptor.getModel());
 	}
 }

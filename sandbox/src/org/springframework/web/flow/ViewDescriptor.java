@@ -50,6 +50,12 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 	private Map model;
 	
 	/**
+	 * Indicates whether or not the view should be rendered after
+	 * a redirect.
+	 */
+	private boolean redirect = false;
+	
+	/**
 	 * Default constructor for bean style usage.
 	 */
 	public ViewDescriptor() {
@@ -104,6 +110,20 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 	}
 
 	/**
+	 * Returns whether or not a redirect is necessary when rendering this view.
+	 */
+	public boolean isRedirect() {
+		return this.redirect;
+	}
+	
+	/**
+	 * Set whether or not a redirect is necessary when rendering this view.
+	 */
+	public void setRedirect(boolean redirect) {
+		this.redirect = redirect;
+	}
+	
+	/**
 	 * Return the model map. Never returns null. To be called by application
 	 * code for modifying the model.
 	 */
@@ -154,10 +174,6 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 	 */
 	public boolean isEmpty() {
 		return (this.viewName == null && this.model == null);
-	}
-	
-	public boolean isRedirect() {
-		return false;
 	}
 	
 	// attribute source implementation

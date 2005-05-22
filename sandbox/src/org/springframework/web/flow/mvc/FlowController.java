@@ -25,6 +25,7 @@ import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.execution.servlet.ServletFlowExecutionManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 /**
  * Web controller for the Spring web MVC framework that routes incoming requests to one
@@ -148,7 +149,7 @@ public class FlowController extends AbstractController implements InitializingBe
 	protected ModelAndView toModelAndView(ViewDescriptor viewDescriptor) {
 		String viewName = viewDescriptor.getViewName();
 		if (viewDescriptor.isRedirect()) {
-			viewName = "redirect:/" + viewName;
+			viewName = UrlBasedViewResolver.REDIRECT_URL_PREFIX + viewName;
 		}
 		return viewDescriptor == null ? null : new ModelAndView(viewName, viewDescriptor.getModel());
 	}
