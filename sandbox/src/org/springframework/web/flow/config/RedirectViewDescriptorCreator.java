@@ -51,7 +51,6 @@ public class RedirectViewDescriptorCreator extends SimpleViewDescriptorCreator {
 		}
 	}
 
-
 	public ViewDescriptor createViewDescriptor(RequestContext context) {
 		Map model = null;
 		if (!expressions.isEmpty()) {
@@ -60,10 +59,18 @@ public class RedirectViewDescriptorCreator extends SimpleViewDescriptorCreator {
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry)it.next();
 				String attributeName = (String)entry.getKey();
-				ExpressionEvaluator eval = (ExpressionEvaluator)entry.getValue();
-				model.put(attributeName, eval.evaluate(context, null));
+				ExpressionEvaluator evaluator = (ExpressionEvaluator)entry.getValue();
+				model.put(attributeName, evaluator.evaluate(context, getEvaluationContext(context)));
 			}
 		}
-		return new ViewDescriptor(getViewName(), model);
+		return new ViewDescriptor(getViewName(), model) {
+			public boolean isRedirect() {
+				return true;
+			}
+		};
+	}
+
+	protected Map getEvaluationContext(RequestContext context) {
+		return null;
 	}
 }
