@@ -16,6 +16,7 @@
 package org.springframework.binding.convert.support;
 
 import java.beans.PropertyEditor;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,7 +32,10 @@ import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.Converter;
 import org.springframework.binding.format.FormatterLocator;
 import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
+import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.TextToMapping;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Default, local implementation of a conversion service.
@@ -43,6 +47,8 @@ import org.springframework.binding.support.TextToMapping;
  */
 public class DefaultConversionService implements ConversionService, InitializingBean, BeanFactoryPostProcessor {
 
+	private Map aliasMap = new HashMap();
+	
 	private ConversionService parent;
 	
 	private Map sourceClassConverters = new HashMap();
@@ -82,9 +88,37 @@ public class DefaultConversionService implements ConversionService, Initializing
 	protected void addDefaultConverters() {
 		addConverter(new TextToClass());
 		addConverter(new TextToNumber(getFormatterLocator()));
+		addConverter(new TextToBoolean());
 		addConverter(new TextToMapping(this));
+		addDefaultAlias(Short.class);
+		addDefaultAlias(Integer.class);
+		addDefaultAlias(Long.class);
+		addDefaultAlias(Float.class);
+		addDefaultAlias(Double.class);
+		addDefaultAlias(BigInteger.class);
+		addDefaultAlias(Boolean.class);
+		addDefaultAlias(Mapping.class);
+		addDefaultAlias(Class.class);
+	}
+
+	public void addAlias(String alias, Class targetType) {
+		aliasMap.put(alias, targetType);
 	}
 	
+	public void addDefaultAlias(Class targetType) {
+		addAlias(StringUtils.uncapitalize(ClassUtils.getShortName(targetType)), targetType);
+	}
+
+	public Class withAlias(String alias) throws IllegalArgumentException {
+		Class targetType = (Class)aliasMap.get(alias);
+		if (targetType == null) {
+			ConversionExecutor executor = getConversionExecutor(String.class, Class.class);
+			targetType = (Class)executor.execute(alias);
+		}
+		return targetType;
+	}
+	
+
 	public void addConverters(Converter[] converters) {
 		for (int i = 0; i < converters.length; i++) {
 			addConverter(converters[i]);
@@ -112,10 +146,6 @@ public class DefaultConversionService implements ConversionService, Initializing
 		return formatterLocator;
 	}
 
-	public Class withAlias(String alias) throws IllegalArgumentException {
-		throw new UnsupportedOperationException("Not implemented yet - @TODO");
-	}
-	
 	public ConversionExecutor getConversionExecutor(Class sourceClass, Class targetClass) {
 		if (this.sourceClassConverters == null || this.sourceClassConverters.isEmpty()) {
 			throw new IllegalStateException("No converters have been added to this service's registry");
