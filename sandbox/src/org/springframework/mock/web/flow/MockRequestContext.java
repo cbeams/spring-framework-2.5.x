@@ -78,8 +78,7 @@ public class MockRequestContext implements RequestContext {
 	/**
 	 * Create a new stub request context.
 	 * 
-	 * @param activeFlow the active flow
-	 * @param currentState the current state
+	 * @param session the active flow session
 	 * @param originatingEvent the event originating this request context
 	 */
 	public MockRequestContext(MockFlowSession session, Event originatingEvent) {
@@ -97,7 +96,7 @@ public class MockRequestContext implements RequestContext {
 		this.rootFlow = rootFlow;
 		if (this.activeSession.getFlow() == null) {
 			this.activeSession.setFlow(rootFlow);
-			this.activeSession.setState(rootFlow.getStartState());
+			this.activeSession.setCurrentState(rootFlow.getStartState());
 		}
 	}
 
@@ -155,7 +154,7 @@ public class MockRequestContext implements RequestContext {
 	/**
 	 * Set the active flow of this request context.
 	 * 
-	 * @param activeFlow the activeFlow to set
+	 * @param session the active flow session to set
 	 */
 	public void setActiveSession(MockFlowSession session) {
 		this.activeSession = session;
@@ -167,11 +166,11 @@ public class MockRequestContext implements RequestContext {
 	/**
 	 * Set the current state of this request context.
 	 * 
-	 * @param currentState the currentState to set
+	 * @param state the current state to set
 	 */
 	public void setCurrentState(State state) {
 		Assert.state(state.getFlow() == getActiveSession().getFlow(), "The current state must be in the active flow");
-		this.activeSession.setState(state);
+		this.activeSession.setCurrentState(state);
 	}
 
 	/**
