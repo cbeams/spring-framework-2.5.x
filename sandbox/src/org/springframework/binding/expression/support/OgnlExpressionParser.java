@@ -9,6 +9,7 @@ import org.springframework.binding.expression.EvaluationException;
 import org.springframework.binding.expression.ExpressionEvaluator;
 import org.springframework.binding.expression.ExpressionParser;
 import org.springframework.binding.expression.ParseException;
+import org.springframework.util.Assert;
 
 public class OgnlExpressionParser implements ExpressionParser {
 
@@ -49,10 +50,15 @@ public class OgnlExpressionParser implements ExpressionParser {
 		
 		public Object evaluate(Object object, Map context) throws EvaluationException {
 			try {
+				Assert.notNull(object, "The object is required");
 				return Ognl.getValue(expression, context, object);
 			} catch (OgnlException e) {
 				throw new EvaluationException(expression, e);
 			}
+		}
+		
+		public String toString() {
+			return String.valueOf(expression);
 		}
 	}
 }

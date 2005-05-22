@@ -15,4 +15,8 @@ public class StaticEvaluator implements ExpressionEvaluator {
 	public Object evaluate(Object object, Map context) throws EvaluationException {
 		return value;
 	}
+	
+	public String toString() {
+		return String.valueOf(value);
+	}
 }

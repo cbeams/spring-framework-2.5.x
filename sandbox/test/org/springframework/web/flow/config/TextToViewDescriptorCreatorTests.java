@@ -19,7 +19,12 @@ public class TextToViewDescriptorCreatorTests extends TestCase {
 	}
 	
 	public void testRedirectView() {
-		
+		TextToViewDescriptorCreator converter = new TextToViewDescriptorCreator();
+		ViewDescriptorCreator creator = (ViewDescriptorCreator)converter.convert("redirect:myView?foo=${flowScope.foo}&bar=${requestScope.oven}");
+		RequestContext context = getRequestContext();
+		ViewDescriptor view = creator.createViewDescriptor(context);
+		assertEquals("myView", view.getViewName());
+		assertEquals(2, view.getModel().size());
 	}
 	
 	public void testCustom() {

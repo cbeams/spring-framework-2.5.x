@@ -17,7 +17,7 @@ import org.springframework.web.flow.ViewDescriptor;
 
 public class RedirectViewDescriptorCreator extends SimpleViewDescriptorCreator {
 
-	private Map expressions = Collections.EMPTY_MAP;
+	private Map expressions = new HashMap();
 
 	public RedirectViewDescriptorCreator(String encodedView) {
 		super();
@@ -38,7 +38,9 @@ public class RedirectViewDescriptorCreator extends SimpleViewDescriptorCreator {
 			array = StringUtils.delimitedListToStringArray(array[1], "&");
 			for (int i = 0; i < array.length; i++) {
 				String[] nameValue = StringUtils.delimitedListToStringArray(array[i], "=");
-				expressions.put(nameValue[0], getValue((String)nameValue[1], parser));
+				String name = nameValue[0];
+				ExpressionEvaluator value = getValue((String)nameValue[1], parser);
+				expressions.put(name, value);
 			}
 		}
 	}
