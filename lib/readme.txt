@@ -86,7 +86,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's iBATIS SQL Maps 1.3 support
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.0.10 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.1.0 (http://www.ibatis.com)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.0 support
 
@@ -249,12 +249,12 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using the JMXMP connector (even on JDK 1.5)
 
 * jotm/jotm.jar
-- JOTM 2.0.8 (http://jotm.objectweb.org)
+- JOTM 2.0.10 (http://jotm.objectweb.org)
 - required for building the framework
 - required at runtime when using Spring's JotmFactoryBean
 
 * jotm/xapool.jar
-- XAPool 1.4.2 (http://xapool.experlog.com, also included in JOTM)
+- XAPool 1.5.0 (http://xapool.experlog.com, also included in JOTM)
 - required for building the framework
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
