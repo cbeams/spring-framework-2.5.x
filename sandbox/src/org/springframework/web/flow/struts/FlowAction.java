@@ -220,11 +220,13 @@ public class FlowAction extends TemplateAction {
 		if (viewDescriptor != null) {
 			WebUtils.exposeRequestAttributes(request, viewDescriptor.getModel());
 			ActionForward forward = mapping.findForward(viewDescriptor.getViewName());
-			if (forward == null) {
+			if (forward != null) {
+				forward = new ActionForward(forward);
+			} else {
 				forward = new ActionForward(viewDescriptor.getViewName());
 			}
-			// TODO fix me -- doing this throws a IllegalStateException: Configuration is frozen
-			// forward.setRedirect(viewDescriptor.isRedirect());
+			forward.setRedirect(viewDescriptor.isRedirect());
+			forward.freeze();
 			return forward;
 		}
 		else {
