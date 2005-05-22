@@ -29,7 +29,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.binding.MutableAttributeSource;
-import org.springframework.binding.convert.support.TextToClass;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.binding.support.MapAttributeSource;
@@ -364,7 +363,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * Parse a class reference from named attribute of given element.
 	 */
 	protected Class parseClass(Element element, String attributeName) {
-		return (Class)new TextToClass().convert(element.getAttribute(attributeName));
+		return (Class)converterFor(Class.class).execute(element.getAttribute(attributeName));
 	}
 	
 	/**
