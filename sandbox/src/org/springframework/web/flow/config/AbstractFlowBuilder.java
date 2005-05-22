@@ -898,7 +898,8 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 * </ul>
 	 * @param criteria the transition criteria
 	 * @param stateId the state Id
-	 * @param properties additional properties about the transition
+	 * @param executionCriteria criteria that decide whether or not the transition
+	 *        can complete execution
 	 * @return the transition (event matching criteria->stateId)
 	 */
 	protected Transition on(TransitionCriteria criteria, String stateId, TransitionCriteria executionCriteria) {

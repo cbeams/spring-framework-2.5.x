@@ -126,7 +126,7 @@ public class Transition extends AnnotatedObject {
 
 	/**
 	 * Create a new local transition programatically
-	 * @param the source state of the transition
+	 * @param sourceState the source state of the transition
 	 * @param matchingCriteria strategy object used to determine if this transition should be
 	 *        matched as elligible for execution
 	 * @param targetStateId the target state id
