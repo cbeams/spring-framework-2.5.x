@@ -25,8 +25,8 @@ import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.support.Mapping;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.action.EventParameterMapperAction;
-import org.springframework.web.flow.config.SimpleTransitionCriteriaCreator;
-import org.springframework.web.flow.config.TransitionCriteriaCreator;
+import org.springframework.web.flow.config.TextToTransitionCriteria;
+import org.springframework.web.flow.config.TextToViewDescriptorCreator;
 import org.springframework.web.flow.execution.FlowExecution;
 import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
@@ -37,11 +37,6 @@ import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
  */
 public class StateTests extends TestCase {
 
-	private static TransitionCriteriaCreator factory = new SimpleTransitionCriteriaCreator();
-
-	public static TransitionCriteria on(String event) {
-		return factory.create(event);
-	}
 	public void testActionStateSingleAction() {
 		Flow flow = new Flow("myFlow");
 		ActionState state = new ActionState(flow, "actionState", new ExecutionCounterAction(), new Transition(
@@ -114,7 +109,7 @@ public class StateTests extends TestCase {
 
 	public void testViewState() {
 		Flow flow = new Flow("myFlow");
-		ViewState state = new ViewState(flow, "viewState", "myViewName", new Transition(on("submit"), "finish"));
+		ViewState state = new ViewState(flow, "viewState", view("myViewName"), new Transition(on("submit"), "finish"));
 		assertTrue(state.isTransitionable());
 		assertTrue(!state.isMarker());
 		new EndState(flow, "finish");
@@ -138,11 +133,11 @@ public class StateTests extends TestCase {
 
 	public void testSubFlowState() {
 		Flow subFlow = new Flow("mySubFlow");
-		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(on("submit"), "finish"));
+		new ViewState(subFlow, "subFlowViewState", view("mySubFlowViewName"), new Transition(on("submit"), "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
 		new SubflowState(flow, "subFlowState", subFlow, new Transition(on("finish"), "finish"));
-		new EndState(flow, "finish", "myParentFlowEndingViewName");
+		new EndState(flow, "finish", view("myParentFlowEndingViewName"));
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		ViewDescriptor view = flowExecution.start(new Event(this, "start"));
 		assertEquals("mySubFlow", flowExecution.getActiveSession().getFlow().getId());
@@ -155,12 +150,12 @@ public class StateTests extends TestCase {
 
 	public void testSubFlowStateModelMapping() {
 		Flow subFlow = new Flow("mySubFlow");
-		new ViewState(subFlow, "subFlowViewState", "mySubFlowViewName", new Transition(on("submit"), "finish"));
+		new ViewState(subFlow, "subFlowViewState", view("mySubFlowViewName"), new Transition(on("submit"), "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
 		new ActionState(flow, "mapperState", new EventParameterMapperAction(new Mapping("parentInputAttribute"), ScopeType.FLOW), new Transition(on("success"), "subFlowState"));
 		new SubflowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(on("finish"), "finish"));
-		new EndState(flow, "finish", "myParentFlowEndingViewName");
+		new EndState(flow, "finish", view("myParentFlowEndingViewName"));
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);
 		Map input = new HashMap();
 		input.put("parentInputAttribute", "attributeValue");
@@ -176,6 +171,14 @@ public class StateTests extends TestCase {
 		assertEquals("attributeValue", view.getModel().get("parentOutputAttribute"));
 	}
 
+	public static TransitionCriteria on(String event) {
+		return (TransitionCriteria)new TextToTransitionCriteria().convert(event);
+	}
+	
+	public static ViewDescriptorCreator view(String viewName) {
+		return (ViewDescriptorCreator)new TextToViewDescriptorCreator().convert(viewName);
+	}
+	
 	public static class InputOutputMapper implements FlowAttributeMapper {
 		public Map createSubflowInput(RequestContext context) {
 			Map inputMap = new HashMap(1);

@@ -15,13 +15,14 @@
  */
 package org.springframework.web.flow.config;
 
+import org.springframework.binding.convert.ConversionService;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
 import org.springframework.web.flow.TransitionCriteria;
-import org.springframework.web.flow.ViewDescriptorProducer;
+import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
@@ -31,6 +32,9 @@ import org.springframework.web.flow.execution.ServiceLookupException;
  */
 public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 	
+	public ConversionService getConversionService() {
+		throw new UnsupportedOperationException();
+	}
 
 	public Action createAction(Class implementationClass,
 			AutowireMode autowireMode) throws ServiceLookupException {
@@ -69,7 +73,7 @@ public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 		throw new UnsupportedOperationException();
 	}
 	
-	public ViewDescriptorProducer createViewDescriptorProducer(
+	public ViewDescriptorCreator createViewDescriptorCreator(
 			String encodedView, AutowireMode autowireMode)
 			throws ServiceLookupException {
 		throw new UnsupportedOperationException();

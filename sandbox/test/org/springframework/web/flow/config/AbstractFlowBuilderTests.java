@@ -78,11 +78,6 @@ public class AbstractFlowBuilderTests extends TestCase {
 					throw new ServiceLookupException(FlowAttributeMapper.class, id, null);
 				}
 			}
-			
-			public TransitionCriteria createTransitionCriteria(String encodedCriteria, AutowireMode autowireMode)
-					throws ServiceLookupException {
-				return new SimpleTransitionCriteriaCreator().create(encodedCriteria);
-			}
 		});
 		Flow flow = new FlowFactoryBean(master).getFlow();
 		assertEquals("person.List", flow.getId());

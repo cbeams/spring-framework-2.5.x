@@ -24,7 +24,7 @@ public class TextToViewDescriptorCreator extends AbstractConverter {
 	public static final String REDIRECT_PREFIX = "redirect:";
 
 	protected Object doConvert(Object source, Class targetClass) throws ConversionException {
-		return createDefaultViewDescriptorCreator((String)source);
+		return createViewDescriptorCreator((String)source);
 	}
 
 	/**
@@ -34,7 +34,7 @@ public class TextToViewDescriptorCreator extends AbstractConverter {
 	 * @throws ConversionException when there are problems decoding the view name
 	 * @throws BeansException when there are problems instantiating the producer
 	 */
-	protected ViewDescriptorCreator createDefaultViewDescriptorCreator(String encodedView)
+	protected ViewDescriptorCreator createViewDescriptorCreator(String encodedView)
 			throws ConversionException, BeansException {
 		if (StringUtils.hasText(encodedView)) {
 			if (encodedView.startsWith(CLASS_PREFIX)) {
