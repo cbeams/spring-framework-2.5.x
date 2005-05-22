@@ -156,6 +156,10 @@ public class ViewDescriptor implements AttributeSource, Serializable {
 		return (this.viewName == null && this.model == null);
 	}
 	
+	public boolean isRedirect() {
+		return false;
+	}
+	
 	// attribute source implementation
 	
 	public boolean containsAttribute(String attributeName) {
