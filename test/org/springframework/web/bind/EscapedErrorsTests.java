@@ -47,7 +47,7 @@ public class EscapedErrorsTests extends TestCase {
 		assertTrue("Correct global errors flag", errors.hasGlobalErrors());
 		assertTrue("Correct number of global errors", errors.getGlobalErrorCount() == 1);
 		ObjectError globalError = errors.getGlobalError();
-		assertTrue("Global error message escaped", "message: &#34; '".equals(globalError.getDefaultMessage()));
+		assertTrue("Global error message escaped", "message: &quot; '".equals(globalError.getDefaultMessage()));
 		assertTrue("Global error code not escaped", "GENERAL_ERROR \" '".equals(globalError.getCode()));
 		ObjectError globalErrorInList = (ObjectError) errors.getGlobalErrors().get(0);
 		assertTrue("Same global error in list", globalError.getDefaultMessage().equals(globalErrorInList.getDefaultMessage()));
@@ -57,22 +57,22 @@ public class EscapedErrorsTests extends TestCase {
 		assertTrue("Correct name errors flag", errors.hasFieldErrors("name"));
 		assertTrue("Correct number of name errors", errors.getFieldErrorCount("name") == 1);
 		FieldError nameError = errors.getFieldError("name");
-		assertTrue("Name error message escaped", "message: &#38;".equals(nameError.getDefaultMessage()));
+		assertTrue("Name error message escaped", "message: &amp;".equals(nameError.getDefaultMessage()));
 		assertTrue("Name error code not escaped", "NAME_EMPTY &".equals(nameError.getCode()));
-		assertTrue("Name value escaped", "empty &#38;".equals(errors.getFieldValue("name")));
+		assertTrue("Name value escaped", "empty &amp;".equals(errors.getFieldValue("name")));
 		FieldError nameErrorInList = (FieldError) errors.getFieldErrors("name").get(0);
 		assertTrue("Same name error in list", nameError.getDefaultMessage().equals(nameErrorInList.getDefaultMessage()));
 
 		assertTrue("Correct age errors flag", errors.hasFieldErrors("age"));
 		assertTrue("Correct number of age errors", errors.getFieldErrorCount("age") == 2);
 		FieldError ageError = errors.getFieldError("age");
-		assertTrue("Age error message escaped", "message: &#60;tag&#62;".equals(ageError.getDefaultMessage()));
+		assertTrue("Age error message escaped", "message: &lt;tag&gt;".equals(ageError.getDefaultMessage()));
 		assertTrue("Age error code not escaped", "AGE_NOT_SET <tag>".equals(ageError.getCode()));
 		assertTrue("Age value escaped", "0".equals(errors.getFieldValue("age")));
 		FieldError ageErrorInList = (FieldError) errors.getFieldErrors("age").get(0);
 		assertTrue("Same name error in list", ageError.getDefaultMessage().equals(ageErrorInList.getDefaultMessage()));
 		FieldError ageError2 = (FieldError) errors.getFieldErrors("age").get(1);
-		assertTrue("Age error 2 message escaped", "message: &#60;tag&#62;".equals(ageError2.getDefaultMessage()));
+		assertTrue("Age error 2 message escaped", "message: &lt;tag&gt;".equals(ageError2.getDefaultMessage()));
 		assertTrue("Age error 2 code not escaped", "AGE_NOT_32 <tag>".equals(ageError2.getCode()));
 	}
 

@@ -139,7 +139,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		tag.setHtmlEscape("true");
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
 		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
-		assertEquals("test &#38; text", result.toString());
+		assertEquals("test &amp; text", result.toString());
 	}
 
 	public void testEscapeBodyWithJavaScriptEscape() throws JspException {
@@ -176,7 +176,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		tag.setJavaScriptEscape("true");
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
 		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
-		assertEquals("Correct content", "\\' test &#38; text \\\\", result.toString());
+		assertEquals("Correct content", "\\' test &amp; text \\\\", result.toString());
 	}
 
 }

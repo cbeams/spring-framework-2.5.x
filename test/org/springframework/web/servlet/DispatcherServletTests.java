@@ -155,15 +155,15 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
 		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
 		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
-		assertTrue("Correct message", "Canadian &#38; test message".equals(rc.getMessage("test", null, true)));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable)));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
-		assertTrue("Correct message", "Canadian &#38; test message".equals(rc.getMessage(resolvable, true)));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", "default")));
-		assertTrue("Correct message", "default".equals(rc.getMessage("testa", "default")));
-		assertTrue("Correct message", "default &#38;".equals(rc.getMessage("testa", null, "default &", true)));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage("test"));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage("test", null, false));
+		assertEquals("Correct message", "Canadian &amp; test message", rc.getMessage("test", null, true));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage(resolvable));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage(resolvable, false));
+		assertEquals("Correct message", "Canadian &amp; test message", rc.getMessage(resolvable, true));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage("test", "default"));
+		assertEquals("Correct message", "default", rc.getMessage("testa", "default"));
+		assertEquals("Correct message", "default &amp;", rc.getMessage("testa", null, "default &", true));
 	}
 
 	public void testParameterizableViewController() throws Exception {
@@ -218,24 +218,24 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors));
 		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
 		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test")));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
-		assertTrue("Correct message", "Canadian &#38; test message".equals(rc.getMessage("test", null, true)));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable)));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
-		assertTrue("Correct message", "Canadian &#38; test message".equals(rc.getMessage(resolvable, true)));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage("test"));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage("test", null, false));
+		assertEquals("Correct message", "Canadian &amp; test message", rc.getMessage("test", null, true));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage(resolvable));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage(resolvable, false));
+		assertEquals("Correct message", "Canadian &amp; test message", rc.getMessage(resolvable, true));
 
 		rc.setDefaultHtmlEscape(true);
 		assertTrue("Is in HTML escaping mode", rc.isDefaultHtmlEscape());
 		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME) instanceof EscapedErrors);
 		assertTrue("Correct Errors", !(rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, false) instanceof EscapedErrors));
 		assertTrue("Correct Errors", rc.getErrors(BaseCommandController.DEFAULT_COMMAND_NAME, true) instanceof EscapedErrors);
-		assertTrue("Correct message", "Canadian &#38; test message".equals(rc.getMessage("test")));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage("test", null, false)));
-		assertTrue("Correct message", "Canadian &#38; test message".equals(rc.getMessage("test", null, true)));
-		assertTrue("Correct message", "Canadian &#38; test message".equals(rc.getMessage(resolvable)));
-		assertTrue("Correct message", "Canadian & test message".equals(rc.getMessage(resolvable, false)));
-		assertTrue("Correct message", "Canadian &#38; test message".equals(rc.getMessage(resolvable, true)));
+		assertEquals("Correct message", "Canadian &amp; test message", rc.getMessage("test"));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage("test", null, false));
+		assertEquals("Correct message", "Canadian &amp; test message", rc.getMessage("test", null, true));
+		assertEquals("Correct message", "Canadian &amp; test message", rc.getMessage(resolvable));
+		assertEquals("Correct message", "Canadian & test message", rc.getMessage(resolvable, false));
+		assertEquals("Correct message", "Canadian &amp; test message", rc.getMessage(resolvable, true));
 	}
 
 	public void testAnotherLocaleRequest() throws Exception {

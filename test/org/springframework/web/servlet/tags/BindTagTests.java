@@ -165,11 +165,11 @@ public class BindTagTests extends AbstractTagTests {
 		assertTrue("Correct errorCode", "code1".equals(status.getErrorCode()));
 		assertTrue("Correct errorCode", "code1".equals(status.getErrorCodes()[0]));
 		assertTrue("Correct errorCode", "code2".equals(status.getErrorCodes()[1]));
-		assertTrue("Correct errorMessage", "message &#38; 1".equals(status.getErrorMessage()));
-		assertTrue("Correct errorMessage", "message &#38; 1".equals(status.getErrorMessages()[0]));
+		assertTrue("Correct errorMessage", "message &amp; 1".equals(status.getErrorMessage()));
+		assertTrue("Correct errorMessage", "message &amp; 1".equals(status.getErrorMessages()[0]));
 		assertTrue("Correct errorMessage", "message2".equals(status.getErrorMessages()[1]));
 		assertTrue("Correct errorMessagesAsString",
-				"message &#38; 1 - message2".equals(status.getErrorMessagesAsString(" - ")));
+				"message &amp; 1 - message2".equals(status.getErrorMessagesAsString(" - ")));
 
 		tag = new BindTag();
 		tag.setPageContext(pc);
@@ -361,7 +361,7 @@ public class BindTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
 		assertEquals("name", status.getExpression());
-		assertEquals("juergen&#38;eva", status.getValue());
+		assertEquals("juergen&amp;eva", status.getValue());
 	}
 
 	public void testBindTagWithBeanButWithoutErrorsInstance() throws JspException {
@@ -630,7 +630,7 @@ public class BindTagTests extends AbstractTagTests {
 		transform.doStartTag();
 
 		assertNotNull(pc.getAttribute("theString"));
-		assertEquals(pc.getAttribute("theString"), "na&#60;me");
+		assertEquals(pc.getAttribute("theString"), "na&lt;me");
 	}
 
 	public void testTransformTagOutsideBindTag() throws JspException {
