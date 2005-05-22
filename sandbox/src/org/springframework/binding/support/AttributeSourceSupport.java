@@ -12,7 +12,7 @@ import java.util.Set;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.Styler;
 import org.springframework.core.closure.ElementClosureTemplate;
-import org.springframework.core.closure.support.IteratorElementTemplate;
+import org.springframework.core.closure.support.IteratorTemplate;
 import org.springframework.util.Assert;
 
 /**
@@ -129,7 +129,7 @@ public abstract class AttributeSourceSupport implements MutableAttributeSource {
 	 * @return the template
 	 */
 	public ElementClosureTemplate iteratorTemplate() {
-		return new IteratorElementTemplate(attributeEntries().iterator());
+		return new IteratorTemplate(attributeEntries().iterator());
 	}
 
 	/**

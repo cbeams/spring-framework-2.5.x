@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 import org.springframework.binding.value.ValueModel;
 import org.springframework.binding.value.support.ValueHolder;
 import org.springframework.core.closure.support.Block;
-import org.springframework.core.closure.support.IteratorProcessTemplate;
+import org.springframework.core.closure.support.IteratorTemplate;
 
 /**
  * @author Keith Donald
@@ -48,7 +48,7 @@ public class ClosureTests extends TestCase {
 		collection.add("Item 3");
 		collection.add("Item 4");
 		collection.add("Item 5");
-		IteratorProcessTemplate template = new IteratorProcessTemplate(collection.iterator());
+		IteratorTemplate template = new IteratorTemplate(collection.iterator());
 		assertTrue(template.allTrue(new Constraint() {
 			public boolean test(Object o) {
 				return ((String)o).startsWith("Item");
@@ -74,7 +74,7 @@ public class ClosureTests extends TestCase {
 		collection.add("Item 3");
 		collection.add("Item 4");
 		collection.add("Item 5");
-		IteratorProcessTemplate template = new IteratorProcessTemplate(collection);
+		IteratorTemplate template = new IteratorTemplate(collection);
 		assertTrue(template.allTrue(new Constraint() {
 			public boolean test(Object o) {
 				return ((String)o).startsWith("Item");
@@ -94,7 +94,7 @@ public class ClosureTests extends TestCase {
 		collection.add("Item 3");
 		collection.add("Item 4");
 		collection.add("Item 5");
-		IteratorProcessTemplate template = new IteratorProcessTemplate(collection);
+		IteratorTemplate template = new IteratorTemplate(collection);
 		assertTrue(template.anyTrue(new Constraint() {
 			public boolean test(Object o) {
 				return ((String)o).startsWith("Item 5");
@@ -114,7 +114,7 @@ public class ClosureTests extends TestCase {
 		collection.add("Item 3");
 		collection.add("Item 4");
 		collection.add("Item 5");
-		IteratorProcessTemplate template = new IteratorProcessTemplate(collection);
+		IteratorTemplate template = new IteratorTemplate(collection);
 		assertEquals("Item 4", template.findFirst(new Constraint() {
 			public boolean test(Object o) {
 				return ((String)o).startsWith("Item 4");
@@ -134,8 +134,8 @@ public class ClosureTests extends TestCase {
 		collection.add("Item 3");
 		collection.add("Item 4");
 		collection.add("Item 5");
-		IteratorProcessTemplate template = new IteratorProcessTemplate(collection);
-		ProcessTemplate finder = template.findAll(new Constraint() {
+		IteratorTemplate template = new IteratorTemplate(collection);
+		ElementClosureTemplate finder = template.findAll(new Constraint() {
 			public boolean test(Object o) {
 				return ((String)o).startsWith("Item 4");
 			}
@@ -164,7 +164,7 @@ public class ClosureTests extends TestCase {
 		collection.add("Item 3");
 		collection.add("Item 4");
 		collection.add("Item 5");
-		IteratorProcessTemplate template = new IteratorProcessTemplate(collection);
+		IteratorTemplate template = new IteratorTemplate(collection);
 		final ValueModel countHolder = new ValueHolder(new Integer(0));
 		template.runUntil(new Block() {
 			protected void handle(Object o) {

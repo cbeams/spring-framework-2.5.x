@@ -47,7 +47,7 @@ package org.springframework.core.closure;
  * support a template callback approach is overkill.
  * @author Keith Donald
  */
-public interface ProcessTemplate {
+public interface ElementClosureTemplate extends ClosureTemplate {
 
 	/**
 	 * Does this process produce an element maching the given criteria?
@@ -85,7 +85,7 @@ public interface ProcessTemplate {
 	 * @param constraint the criteria
 	 * @return the elements
 	 */
-	public ProcessTemplate findAll(Constraint constraint);
+	public ElementClosureTemplate findAll(Constraint constraint);
 
 	/**
 	 * Execute the template with the specific closure callback for the insertion

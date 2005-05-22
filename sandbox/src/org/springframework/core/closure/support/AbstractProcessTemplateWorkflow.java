@@ -8,7 +8,7 @@ import org.springframework.core.closure.Closure;
 /**
  * @author Keith Donald
  */
-public abstract class AbstractProcessTemplateWorkflow extends AbstractProcessTemplate {
+public abstract class AbstractProcessTemplateWorkflow extends AbstractElementTemplate {
 
 	protected AbstractProcessTemplateWorkflow() {
 		super();

@@ -24,8 +24,8 @@ import java.util.Map;
 
 import org.springframework.core.closure.Closure;
 import org.springframework.core.closure.Constraint;
-import org.springframework.core.closure.ProcessTemplate;
-import org.springframework.core.closure.support.IteratorProcessTemplate;
+import org.springframework.core.closure.ElementClosureTemplate;
+import org.springframework.core.closure.support.IteratorTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.CachingMapTemplate;
 
@@ -166,36 +166,8 @@ public class EventListenerListHelper implements Serializable {
 		}
 	}
 
-	public ProcessTemplate iteratorTemplate() {
-		return new IteratorProcessTemplate(iterator());
-	}
-
-	public void run(Closure closure) {
-		forEach(closure);
-	}
-
-	public boolean anyTrue(Constraint constraint) {
-		if (listeners != EMPTY_OBJECT_ARRAY) {
-			Object[] listenersCopy = listeners;
-			for (int i = 0; i < listenersCopy.length; i++) {
-				if (constraint.test(listenersCopy[i])) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public boolean allTrue(Constraint constraint) {
-		if (listeners != EMPTY_OBJECT_ARRAY) {
-			Object[] listenersCopy = listeners;
-			for (int i = 0; i < listenersCopy.length; i++) {
-				if (!constraint.test(listenersCopy[i])) {
-					return false;
-				}
-			}
-		}
-		return true;
+	public ElementClosureTemplate iteratorTemplate() {
+		return new IteratorTemplate(iterator());
 	}
 
 	/**
@@ -203,12 +175,7 @@ public class EventListenerListHelper implements Serializable {
 	 * this list.
 	 */
 	public void forEach(Closure closure) {
-		if (listeners != EMPTY_OBJECT_ARRAY) {
-			Object[] listenersCopy = listeners;
-			for (int i = 0; i < listenersCopy.length; i++) {
-				closure.call(listenersCopy[i]);
-			}
-		}
+		iteratorTemplate().run(closure);
 	}
 
 	/**
@@ -357,7 +324,7 @@ public class EventListenerListHelper implements Serializable {
 	}
 
 	public boolean isAdded(final Class listenerClass) {
-		return anyTrue(new Constraint() {
+		return iteratorTemplate().anyTrue(new Constraint() {
 			public boolean test(Object o) {
 				return o.getClass().equals(listenerClass);
 			}
@@ -365,7 +332,7 @@ public class EventListenerListHelper implements Serializable {
 	}
 
 	public boolean isAdded(final Object listener) {
-		return anyTrue(new Constraint() {
+		return iteratorTemplate().anyTrue(new Constraint() {
 			public boolean test(Object o) {
 				return o == listener;
 			}

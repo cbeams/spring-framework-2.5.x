@@ -17,33 +17,33 @@ package org.springframework.core.closure.support;
 
 import org.springframework.core.closure.Closure;
 import org.springframework.core.closure.Constraint;
-import org.springframework.core.closure.ProcessTemplate;
+import org.springframework.core.closure.ElementClosureTemplate;
 
 /**
  * Base superclass for process templates.
  * @author Keith Donald
  */
-public abstract class AbstractProcessTemplate implements ProcessTemplate {
+public abstract class AbstractElementTemplate implements ElementClosureTemplate {
 
-	private ProcessTemplate wrappedTemplate;
+	private ElementClosureTemplate wrappedTemplate;
 
 	private boolean runOnce = false;
 
 	private volatile ProcessStatus status = ProcessStatus.CREATED;
 
-	protected AbstractProcessTemplate() {
+	protected AbstractElementTemplate() {
 
 	}
 
-	protected AbstractProcessTemplate(boolean runOnce) {
+	protected AbstractElementTemplate(boolean runOnce) {
 		this.runOnce = runOnce;
 	}
 
-	private AbstractProcessTemplate(ProcessTemplate wrappedTemplate) {
+	private AbstractElementTemplate(ElementClosureTemplate wrappedTemplate) {
 		this.wrappedTemplate = wrappedTemplate;
 	}
 
-	protected ProcessTemplate getWrappedTemplate() {
+	protected ElementClosureTemplate getWrappedTemplate() {
 		return wrappedTemplate;
 	}
 
@@ -57,8 +57,8 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 		return findFirst(constraint, null) != null;
 	}
 
-	public ProcessTemplate findAll(final Constraint constraint) {
-		return new AbstractProcessTemplate(this) {
+	public ElementClosureTemplate findAll(final Constraint constraint) {
+		return new AbstractElementTemplate(this) {
 			public void run(final Closure closure) {
 				getWrappedTemplate().run(new ConstrainedBlock(closure, constraint));
 			}
@@ -94,6 +94,11 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 		this.status = ProcessStatus.STOPPED;
 	}
 
+	public Object doWithClosure(Closure closure) {
+		run(closure);
+		return null;
+	}
+
 	public void runUntil(Closure templateCallback, final Constraint constraint) {
 		run(new UntilTrueController(this, templateCallback, constraint));
 	}
@@ -121,13 +126,13 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 	public abstract void run(Closure templateCallback);
 
 	private static class WhileTrueController extends Block {
-		private ProcessTemplate template;
+		private ElementClosureTemplate template;
 
 		private Constraint constraint;
 
 		private boolean allTrue = true;
 
-		public WhileTrueController(ProcessTemplate template, Constraint constraint) {
+		public WhileTrueController(ElementClosureTemplate template, Constraint constraint) {
 			this.template = template;
 			this.constraint = constraint;
 		}
@@ -145,7 +150,7 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 	}
 
 	private static class UntilTrueController extends Block {
-		private ProcessTemplate template;
+		private ElementClosureTemplate template;
 
 		private Closure templateCallback;
 
@@ -153,7 +158,7 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 
 		private boolean allTrue = true;
 
-		public UntilTrueController(ProcessTemplate template, Closure templateCallback, Constraint constraint) {
+		public UntilTrueController(ElementClosureTemplate template, Closure templateCallback, Constraint constraint) {
 			this.template = template;
 			this.templateCallback = templateCallback;
 			this.constraint = constraint;
@@ -170,13 +175,13 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 	}
 
 	private static class ObjectFinder extends Block {
-		private ProcessTemplate template;
+		private ElementClosureTemplate template;
 
 		private Constraint constraint;
 
 		private Object foundObject;
 
-		public ObjectFinder(ProcessTemplate template, Constraint constraint) {
+		public ObjectFinder(ElementClosureTemplate template, Constraint constraint) {
 			this.template = template;
 			this.constraint = constraint;
 		}
@@ -196,4 +201,5 @@ public abstract class AbstractProcessTemplate implements ProcessTemplate {
 			return foundObject;
 		}
 	}
+
 }

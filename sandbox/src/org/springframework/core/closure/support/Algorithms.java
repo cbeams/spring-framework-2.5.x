@@ -21,7 +21,7 @@ import java.util.Iterator;
 
 import org.springframework.core.closure.Closure;
 import org.springframework.core.closure.Constraint;
-import org.springframework.core.closure.ProcessTemplate;
+import org.springframework.core.closure.ElementClosureTemplate;
 
 /**
  * Convenience utility class which provides a number of algorithms involving
@@ -74,7 +74,7 @@ public class Algorithms {
 	 * @return true or false
 	 */
 	public boolean anyTrue(Iterator it, Constraint constraint) {
-		return new IteratorProcessTemplate(it).anyTrue(constraint);
+		return new IteratorTemplate(it).anyTrue(constraint);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class Algorithms {
 	 * @return true if all true, false otherwise
 	 */
 	public boolean allTrue(Iterator it, Constraint constraint) {
-		return new IteratorProcessTemplate(it).allTrue(constraint);
+		return new IteratorTemplate(it).allTrue(constraint);
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class Algorithms {
 	 * @return The first object match, or null if no match
 	 */
 	public Object findFirst(Iterator it, Constraint constraint) {
-		return new IteratorProcessTemplate(it).findFirst(constraint);
+		return new IteratorTemplate(it).findFirst(constraint);
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class Algorithms {
 	 * @return The objects that match, or a empty collection if none match
 	 */
 	public Collection findAll(Iterator it, Constraint constraint) {
-		ProcessTemplate finder = new IteratorProcessTemplate(it).findAll(constraint);
+		ElementClosureTemplate finder = new IteratorTemplate(it).findAll(constraint);
 		final Collection results = new ArrayList();
 		finder.run(new Block() {
 			protected void handle(Object element) {
@@ -173,6 +173,6 @@ public class Algorithms {
 	 * @param closure the callback
 	 */
 	public void forEach(Iterator it, Closure closure) {
-		new IteratorProcessTemplate(it).run(closure);
+		new IteratorTemplate(it).run(closure);
 	}
 }
