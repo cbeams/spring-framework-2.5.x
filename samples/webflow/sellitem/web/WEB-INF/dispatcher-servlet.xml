@@ -50,10 +50,6 @@
 	
 	<bean id="sellItem" class="org.springframework.web.flow.config.XmlFlowFactoryBean">
 		<property name="location" value="/WEB-INF/sellItem-flow.xml"/>
-		<property name="transitionCriteriaCreator">
-			<!-- Enable transition criteria expressed as OGNL expressions. -->
-			<bean class="org.springframework.web.flow.support.OgnlTransitionCriteriaCreator"/>
-		</property>
 	</bean>
 	
 	<bean id="sellItemAction" class="org.springframework.samples.sellitem.SellItemAction">
