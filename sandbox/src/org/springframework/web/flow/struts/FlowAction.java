@@ -223,7 +223,8 @@ public class FlowAction extends TemplateAction {
 			if (forward == null) {
 				forward = new ActionForward(viewDescriptor.getViewName());
 			}
-			forward.setRedirect(viewDescriptor.isRedirect());
+			// TODO fix me -- doing this throws a IllegalStateException: Configuration is frozen
+			// forward.setRedirect(viewDescriptor.isRedirect());
 			return forward;
 		}
 		else {
