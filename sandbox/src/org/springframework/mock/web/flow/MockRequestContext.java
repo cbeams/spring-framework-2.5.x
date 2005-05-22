@@ -15,6 +15,7 @@
  */
 package org.springframework.mock.web.flow;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.binding.AttributeSource;
@@ -254,11 +255,12 @@ public class MockRequestContext implements RequestContext {
 		return requestScope;
 	}
 
-	/*
-	 * Not supported, actions should really never call this
-	 */
 	public Map getModel() {
-		throw new UnsupportedOperationException();
+		// merge request and flow scope
+		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
+		model.putAll(getFlowScope().getAttributeMap());
+		model.putAll(getRequestScope().getAttributeMap());
+		return model;
 	}
 
 	// transaction synchronizer stub methods
