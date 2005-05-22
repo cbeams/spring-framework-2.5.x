@@ -16,7 +16,7 @@
 package org.springframework.binding.expression;
 
 /**
- * Base class for exceptions thrown by expression parsing system.
+ * Indicates an expression evaluation failed.
  * @author Keith Donald
  */
 public class EvaluationException extends RuntimeException {
