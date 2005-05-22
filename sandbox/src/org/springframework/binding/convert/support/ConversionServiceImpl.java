@@ -15,23 +15,16 @@
  */
 package org.springframework.binding.convert.support;
 
-import java.beans.PropertyEditor;
-import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.Converter;
 import org.springframework.binding.format.FormatterLocator;
 import org.springframework.binding.format.support.ThreadLocalFormatterLocator;
-import org.springframework.binding.support.TextToMappingConverter;
 
 /**
  * Default, local implementation of a conversion service.
@@ -41,16 +34,26 @@ import org.springframework.binding.support.TextToMappingConverter;
  * This makes for very convenient use with the Spring container.
  * @author Keith Donald
  */
-public class DefaultConversionService implements ConversionService, BeanFactoryPostProcessor, InitializingBean {
+public class ConversionServiceImpl implements ConversionService {
 
+	private ConversionService parent;
+	
 	private Map sourceClassConverters = new HashMap();
 
 	private FormatterLocator formatterLocator = new ThreadLocalFormatterLocator();
 
-	public DefaultConversionService() {
+	public ConversionServiceImpl(ConversionService parent) {
+		setParent(parent);
+	}
+	
+	public ConversionServiceImpl() {
 
 	}
 
+	public void setParent(ConversionService parent) {
+		this.parent = parent;
+	}
+	
 	public void setFormatterLocator(FormatterLocator formatterLocator) {
 		this.formatterLocator = formatterLocator;
 	}
@@ -83,16 +86,6 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 		}
 	}
 
-	public void afterPropertiesSet() {
-		addDefaultConverters();
-	}
-
-	protected void addDefaultConverters() {
-		addConverter(new TextToClassConverter());
-		addConverter(new TextToNumberConverter(getFormatterLocator()));
-		addConverter(new TextToMappingConverter(this));
-	}
-
 	protected FormatterLocator getFormatterLocator() {
 		return formatterLocator;
 	}
@@ -105,29 +98,22 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 		if (this.sourceClassConverters == null || this.sourceClassConverters.isEmpty()) {
 			throw new IllegalStateException("No converters have been added to this service's registry");
 		}
-		int modifiers = targetClass.getModifiers();
-		if (Modifier.isAbstract(modifiers)) {
-			throw new IllegalArgumentException("Target class for conversion must not be abstract");
-		}
-		if (Modifier.isInterface(modifiers)) {
-			throw new IllegalArgumentException("Target class for conversion must not be an interface");
-		}
 		if (sourceClass.equals(targetClass)) {
 			throw new IllegalArgumentException("Source class '" + sourceClass
 					+ "' already equals target class; no conversion to perform");
 		}
 		Map sourceTargetConverters = (Map)findConvertersForSource(sourceClass);
-		if (sourceTargetConverters == null) {
-			throw new IllegalArgumentException("No converters registered to convert from sourceClass '" + sourceClass
-					+ "' (including any of its superclasses or interfaces)");
-		}
 		Converter converter = (Converter)sourceTargetConverters.get(targetClass);
 		if (converter != null) {
 			return new ConversionExecutor(converter, targetClass);
 		}
 		else {
-			throw new IllegalArgumentException("No converter registered to convert from sourceClass '" + sourceClass
-					+ "' to target class '" + targetClass + "'");
+			if (this.parent != null) {
+				return this.parent.getConversionExecutor(sourceClass, targetClass);
+			} else {
+				throw new IllegalArgumentException("No converter registered to convert from sourceClass '" + sourceClass
+						+ "' to target class '" + targetClass + "'");
+			}
 		}
 	}
 
@@ -149,22 +135,6 @@ public class DefaultConversionService implements ConversionService, BeanFactoryP
 				classQueue.addFirst(interfaces[i]);
 			}
 		}
-		return null;
-	}
-
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		if (this.sourceClassConverters != null) {
-			Map sourceStringConverters = (Map)this.sourceClassConverters.get(String.class);
-			if (sourceStringConverters != null) {
-				Iterator it = sourceStringConverters.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry)it.next();
-					Class targetClass = (Class)entry.getKey();
-					PropertyEditor editor = new ConverterPropertyEditorAdapter(new ConversionExecutor((Converter)entry
-							.getValue(), targetClass));
-					beanFactory.registerCustomEditor(targetClass, editor);
-				}
-			}
-		}
+		return Collections.EMPTY_MAP;
 	}
 }

@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
  * </tr>
  * <tr>
  * <td>viewDescriptorProducerCreator</td>
- * <td><i>{@link org.springframework.web.flow.config.SimpleViewDescriptorProducerCreator default}</i></td>
+ * <td><i>{@link org.springframework.web.flow.config.SimpleViewDescriptorCreatorParser default}</i></td>
  * <td>Set the factory that creates view descriptor producers.</td>
  * </tr>
  * </table>
@@ -79,20 +79,6 @@ public class XmlFlowFactoryBean extends FlowFactoryBean implements BeanFactoryAw
 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		getXmlFlowBuilder().setBeanFactory(beanFactory);
-	}
-
-	/**
-	 * Set the transition criteria creator to use.
-	 */
-	public void setTransitionCriteriaCreator(TransitionCriteriaCreator creator) {
-		getXmlFlowBuilder().setTransitionCriteriaCreator(creator);
-	}
-	
-	/**
-	 * Set the view descriptor producer creator to use.
-	 */
-	public void setViewDescriptorProducerCreator(ViewDescriptorProducerCreator creator) {
-		getXmlFlowBuilder().setViewDescriptorProducerCreator(creator);
 	}
 
 	/**

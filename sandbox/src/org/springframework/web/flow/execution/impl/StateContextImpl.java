@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.support.EmptyAttributeSource;
 import org.springframework.util.Assert;
@@ -131,14 +130,6 @@ public class StateContextImpl implements StateContext {
 		}
 	}
 
-	public Map getModel() {
-		// merge request and flow scope
-		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
-		model.putAll(getFlowScope().getAttributeMap());
-		model.putAll(getRequestScope().getAttributeMap());
-		return model;
-	}
-
 	public boolean inTransaction(boolean end) {
 		return this.flowExecution.getTransactionSynchronizer().inTransaction(this, end);
 	}
@@ -154,7 +145,19 @@ public class StateContextImpl implements StateContext {
 	public void endTransaction() {
 		this.flowExecution.getTransactionSynchronizer().endTransaction(this);
 	}
+
+	public Object evaluate(Object expression) {
+		throw new UnsupportedOperationException("TODO");
+	}
 	
+	public Map getModel() {
+		// merge request and flow scope
+		Map model = new HashMap(getFlowScope().size() + getRequestScope().size());
+		model.putAll(getFlowScope().getAttributeMap());
+		model.putAll(getRequestScope().getAttributeMap());
+		return model;
+	}
+
 	// implementing StateContext
 
 	public void setLastEvent(Event lastEvent) {

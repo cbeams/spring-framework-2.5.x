@@ -42,7 +42,7 @@ public class ViewState extends TransitionableState {
 	/**
 	 * The factory for the view descriptor to return when this state is entered.
 	 */
-	private ViewDescriptorProducer viewDescriptorProducer;
+	private ViewDescriptorCreator viewDescriptorCreator;
 	
 	/**
 	 * A view pre-render setup criteria object.
@@ -86,125 +86,48 @@ public class ViewState extends TransitionableState {
 	 * Create a new view state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the logical name of the view to render
+	 * @param creator the factory used to produce the view to render
 	 * @param transition the sole transition of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public ViewState(Flow flow, String id, String viewName, Transition transition) throws IllegalArgumentException {
+	public ViewState(Flow flow, String id, ViewDescriptorCreator creator, Transition transition) throws IllegalArgumentException {
 		super(flow, id, transition);
-		setViewName(viewName);
+		setViewDescriptorCreator(creator);
 	}
 
 	/**
 	 * Create a new view state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the logical name of the view to render
+	 * @param creator the factory used to produce the view to render
 	 * @param transitions the transitions of this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public ViewState(Flow flow, String id, String viewName, Transition[] transitions) throws IllegalArgumentException {
+	public ViewState(Flow flow, String id, ViewDescriptorCreator creator, Transition[] transitions) throws IllegalArgumentException {
 		super(flow, id, transitions);
-		setViewName(viewName);
+		setViewDescriptorCreator(creator);
 	}
 
 	/**
 	 * Create a new view state.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the logical name of the view to render
+	 * @param creator the factory used to produce the view to render
 	 * @param transitions the transitions of this state
 	 * @param properties additional properties describing this state
 	 * @throws IllegalArgumentException when this state cannot be added to given flow
 	 */
-	public ViewState(Flow flow, String id, String viewName, Transition[] transitions, Map properties) throws IllegalArgumentException {
+	public ViewState(Flow flow, String id, ViewDescriptorCreator creator, Transition[] transitions, Map properties) throws IllegalArgumentException {
 		super(flow, id, transitions, properties);
-		setViewName(viewName);
-	}
-
-	/**
-	 * Create a new view state.
-	 * @param flow the owning flow
-	 * @param id the state identifier (must be unique to the flow)
-	 * @param producer the factory used to produce the view to render
-	 * @param transition the sole transition of this state
-	 * @throws IllegalArgumentException when this state cannot be added to given flow
-	 */
-	public ViewState(Flow flow, String id, ViewDescriptorProducer producer, Transition transition) throws IllegalArgumentException {
-		super(flow, id, transition);
-		setViewDescriptorProducer(producer);
-	}
-
-	/**
-	 * Create a new view state.
-	 * @param flow the owning flow
-	 * @param id the state identifier (must be unique to the flow)
-	 * @param producer the factory used to produce the view to render
-	 * @param transitions the transitions of this state
-	 * @throws IllegalArgumentException when this state cannot be added to given flow
-	 */
-	public ViewState(Flow flow, String id, ViewDescriptorProducer producer, Transition[] transitions) throws IllegalArgumentException {
-		super(flow, id, transitions);
-		setViewDescriptorProducer(producer);
-	}
-
-	/**
-	 * Create a new view state.
-	 * @param flow the owning flow
-	 * @param id the state identifier (must be unique to the flow)
-	 * @param producer the factory used to produce the view to render
-	 * @param transitions the transitions of this state
-	 * @param properties additional properties describing this state
-	 * @throws IllegalArgumentException when this state cannot be added to given flow
-	 */
-	public ViewState(Flow flow, String id, ViewDescriptorProducer producer, Transition[] transitions, Map properties) throws IllegalArgumentException {
-		super(flow, id, transitions, properties);
-		setViewDescriptorProducer(producer);
+		setViewDescriptorCreator(creator);
 	}
 	
-	/**
-	 * Sets the logical name of the view to render in this view state.
-	 * This is a convenient way to set the view descriptor producer by just
-	 * specifying the view name. Internally a {@link SimpleViewDescriptorProducer}
-	 * will be created.
-	 */
-	public void setViewName(String viewName) {
-		if (StringUtils.hasText(viewName)) {
-			this.viewDescriptorProducer = new SimpleViewDescriptorProducer(viewName);
-		}
-		else {
-			this.viewDescriptorProducer = null;
-		}
-	}
-
-	/**
-	 * Returns the factory to produce a descriptor about the view to render in
-	 * this view state.
-	 */
-	public ViewDescriptorProducer getViewDescriptorProducer() {
-		return viewDescriptorProducer;
-	}
-
 	/**
 	 * Sets the factory to produce a descriptor about the view to render in
 	 * this view state.
 	 */
-	public void setViewDescriptorProducer(ViewDescriptorProducer producer) {
-		this.viewDescriptorProducer = producer;
-	}
-
-	/**
-	 * Returns true if this view state has no associated view, false otherwise.
-	 */
-	public boolean isMarker() {
-		return viewDescriptorProducer == null;
-	}
-
-	/**
-	 * Returns the setup criteria.
-	 */
-	public TransitionCriteria getSetupCriteria() {
-		return setupCriteria;
+	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
+		this.viewDescriptorCreator = creator;
 	}
 
 	/**
@@ -216,13 +139,6 @@ public class ViewState extends TransitionableState {
 		this.setupCriteria = setupCriteria;
 	}
 	
-	/**
-	 * Returns the setup criteria failure state id.
-	 */
-	public String getSetupErrorStateId() {
-		return setupErrorStateId;
-	}
-
 	/**
 	 * Set the state to transition to if the setup criteria fails.
 	 * @param errorStateId the state id
@@ -253,8 +169,7 @@ public class ViewState extends TransitionableState {
 				// transition to the error state
 				// also note that we're not adding this temporary transition to this
 				// state because that would result in a memory leak!
-				Transition toSetupError = new Transition(not(setupCriteria), setupErrorStateId);
-				toSetupError.setSourceState(this);
+				Transition toSetupError = new Transition(this, not(setupCriteria), setupErrorStateId);
 				if (toSetupError.matches(context)) {
 					toSetupError.execute(context);
 				}
@@ -272,16 +187,45 @@ public class ViewState extends TransitionableState {
 			return null;
 		}
 		else {
-			return viewDescriptorProducer.produceViewDescriptor(context);
+			return viewDescriptorCreator.createViewDescriptor(context);
 		}
 	}
 
 	protected TransitionCriteria not(TransitionCriteria criteria) {
 		return TransitionCriteriaFactory.not(criteria);
 	}
-	
+
+	/**
+	 * Returns true if this view state has no associated view, false otherwise.
+	 */
+	public boolean isMarker() {
+		return viewDescriptorCreator == null;
+	}
+
+	/**
+	 * Returns the factory to produce a descriptor about the view to render in
+	 * this view state.
+	 */
+	public ViewDescriptorCreator getViewDescriptorCreator() {
+		return viewDescriptorCreator;
+	}
+
+	/**
+	 * Returns the setup criteria failure state id.
+	 */
+	public String getSetupErrorStateId() {
+		return setupErrorStateId;
+	}
+
+	/**
+	 * Returns the setup criteria.
+	 */
+	public TransitionCriteria getSetupCriteria() {
+		return setupCriteria;
+	}
+
 	protected void createToString(ToStringCreator creator) {
-		creator.append("viewDescriptorProducer", this.viewDescriptorProducer).append("setupCriteria", this.setupCriteria).
+		creator.append("viewDescriptorProducer", this.viewDescriptorCreator).append("setupCriteria", this.setupCriteria).
 			append("setupErrorStateId", this.setupErrorStateId);
 		super.createToString(creator);
 	}

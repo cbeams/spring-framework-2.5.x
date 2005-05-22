@@ -15,13 +15,12 @@
  */
 package org.springframework.web.flow.config;
 
+import org.springframework.binding.convert.ConversionService;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.TransitionCriteria;
-import org.springframework.web.flow.ViewDescriptorProducer;
 import org.springframework.web.flow.execution.FlowLocator;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
@@ -144,38 +143,6 @@ public interface FlowServiceLocator extends FlowLocator {
 	 */
 	public Transition getTransition(Class implementationClass) throws ServiceLookupException;
 
-	// dealing with transition criteria
-
-	/**
-	 * Request that the registry backed by this locator instantiate the transition
-	 * criteria specified in encoded form, using the given autowire policy.
-	 * Note: not all registries may support this advanced feature (Spring does
-	 * though ;-)).
-	 * @param encodedCriteria the encoded representation of the criteria
-	 * @param autowireMode the autowire policy
-	 * @return the instantiated (and possibly autowired) transition criteria
-	 * @throws ServiceLookupException when the transition criteria object
-	 *         cannot be created
-	 */
-	public TransitionCriteria createTransitionCriteria(String encodedCriteria, AutowireMode autowireMode)
-			throws ServiceLookupException;
-	
-	// dealing with view descriptor producers
-
-	/**
-	 * Request that the registry backed by this locator instantiate the view
-	 * descriptor producer specified in encoded form, using the given autowire policy.
-	 * Note: not all registries may support this advanced feature (Spring does
-	 * though ;-)).
-	 * @param encodedView the encoded representation of the view descriptor producer
-	 * @param autowireMode the autowire policy
-	 * @return the instantiated (and possibly autowired) view descriptor producer
-	 * @throws ServiceLookupException when the view descriptor producer object
-	 *         cannot be created
-	 */
-	public ViewDescriptorProducer createViewDescriptorProducer(String encodedView, AutowireMode autowireMode)
-			throws ServiceLookupException;
-
 	// dealing with actions
 
 	/**
@@ -236,5 +203,19 @@ public interface FlowServiceLocator extends FlowLocator {
 	 */
 	public FlowAttributeMapper getFlowAttributeMapper(Class implementationClass)
 			throws ServiceLookupException;
+	
+	/**
+	 * Returns the service responsible for performing from-string type conversion.
+	 * 
+	 * @return the web flow system type conversion service
+	 */
+	public ConversionService getConversionService();
+
+	/**
+	 * Parse the specified expression string
+	 * @param expressionString the expression string
+	 * @return the parsed expression
+	 */
+	public Object parseExpression(String expressionString);
 	
 }

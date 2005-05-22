@@ -15,13 +15,19 @@
  */
 package org.springframework.web.flow.config;
 
+import ognl.Ognl;
+import ognl.OgnlException;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.binding.convert.ConversionService;
+import org.springframework.binding.convert.support.ConversionServiceImpl;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.util.Assert;
@@ -31,8 +37,6 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.TransitionCriteria;
-import org.springframework.web.flow.ViewDescriptorProducer;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
 /**
@@ -42,15 +46,24 @@ import org.springframework.web.flow.execution.ServiceLookupException;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {
+public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware, InitializingBean {
 
+	public static final String CONVERSION_SERVICE = "conversionService";
+	
+	/**
+	 * The default autowire mode for services creating by this locator.
+	 */
 	private AutowireMode defaultAutowireMode = AutowireMode.NONE;
 	
+	/**
+	 * The flow creation strategy.
+	 */
 	private FlowCreator flowCreator = new DefaultFlowCreator();
 	
-	private TransitionCriteriaCreator transitionCriteriaCreator = new SimpleTransitionCriteriaCreator();
-	
-	private ViewDescriptorProducerCreator viewDescriptorProducerCreator = new SimpleViewDescriptorProducerCreator();
+	/**
+	 * The webflow data type conversion service.
+	 */
+	private ConversionService conversionService;
 	
 	/**
 	 * The wrapped bean factory.
@@ -65,32 +78,20 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	/**
-	 * Create a new service locator locating services in given bean factory.
+	 * Set the factory used to create flow objects.
 	 */
-	public BeanFactoryFlowServiceLocator(BeanFactory beanFactory) {
-		setBeanFactory(beanFactory);
+	public void setFlowCreator(FlowCreator flowCreator) {
+		Assert.notNull(flowCreator, "The flow creator is required");
+		this.flowCreator = flowCreator;
 	}
 
 	/**
-	 * Returns the bean factory used to lookup services.
+	 * Set the conversion service to provide type converters for use by 
+	 * the webflow system artifacts.
 	 */
-	protected BeanFactory getBeanFactory() {
-		if (this.beanFactory == null) {
-			throw new IllegalStateException("The bean factory reference has not yet been set -- call setBeanFactory()");
-		}
-		return beanFactory;
-	}
-
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-
-	/**
-	 * Returns the default autowire mode. This defaults to
-	 * {@link AutowireMode#NONE}.
-	 */
-	public AutowireMode getDefaultAutowireMode() {
-		return defaultAutowireMode;
+	public void setConversionService(ConversionService conversionService) {
+		Assert.notNull(conversionService, "The flow conversion service is required");
+		this.conversionService = conversionService;
 	}
 
 	/**
@@ -112,6 +113,10 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			(AutowireMode)new LabeledEnumFormatter(AutowireMode.class).parseValue(encodedAutowireMode);
 	}
 	
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
+	}
+
 	/**
 	 * Returns the factory used to create Flow objects.
 	 */
@@ -119,42 +124,26 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return flowCreator;
 	}
 	
-	/**
-	 * Set the factory used to create flow objects.
-	 */
-	public void setFlowCreator(FlowCreator flowCreator) {
-		Assert.notNull(flowCreator, "The flow creator is required");
-		this.flowCreator = flowCreator;
+	public ConversionService getConversionService() {
+		return conversionService;
 	}
 	
-	/**
-	 * Returns the factory used to create transition criteria.
-	 */
-	public TransitionCriteriaCreator getTransitionCriteriaCreator() {
-		return transitionCriteriaCreator;
+	public void afterPropertiesSet() throws Exception {
+		if (this.conversionService == null) {
+			initConversionService();
+		}
 	}
 	
-	/**
-	 * Set the factory used to create transition criteria.
-	 */
-	public void setTransitionCriteriaCreator(TransitionCriteriaCreator transitionCriteriaCreator) {
-		Assert.notNull(transitionCriteriaCreator, "The transition criteria creator is required");
-		this.transitionCriteriaCreator = transitionCriteriaCreator;
-	}
-	
-	/**
-	 * Returns the factory used to create view descriptor producers.
-	 */
-	public ViewDescriptorProducerCreator getViewDescriptorProducerCreator() {
-		return viewDescriptorProducerCreator;
-	}
-	
-	/**
-	 * Set the factory used to create view descriptor producers.
-	 */
-	public void setViewDescriptorProducerCreator(ViewDescriptorProducerCreator viewDescriptorProducerCreator) {
-		Assert.notNull(viewDescriptorProducerCreator, "The view descriptor producer creator is required");
-		this.viewDescriptorProducerCreator = viewDescriptorProducerCreator;
+	protected void initConversionService() {
+		ConversionService parent = null;
+		if (this.beanFactory.containsBean(CONVERSION_SERVICE)) {
+			parent = (ConversionService)this.beanFactory.getBean(CONVERSION_SERVICE, ConversionService.class);
+		}
+		ConversionServiceImpl service = new ConversionServiceImpl(parent);
+		// install default webflow converters
+		service.addConverter(new TextToTransitionCriteria());
+		service.addConverter(new TextToViewDescriptorCreator());
+		this.conversionService = service;
 	}
 	
 	// helper methods
@@ -171,6 +160,24 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	 */
 	protected AutowireCapableBeanFactory getAutowireCapableBeanFactory() {
 		return (AutowireCapableBeanFactory)getBeanFactory();
+	}
+
+	/**
+	 * Returns the bean factory used to lookup services.
+	 */
+	protected BeanFactory getBeanFactory() {
+		if (this.beanFactory == null) {
+			throw new IllegalStateException("The bean factory reference has not yet been set -- call setBeanFactory()");
+		}
+		return beanFactory;
+	}
+
+	/**
+	 * Returns the default autowire mode. This defaults to
+	 * {@link AutowireMode#NONE}.
+	 */
+	public AutowireMode getDefaultAutowireMode() {
+		return defaultAutowireMode;
 	}
 
 	/**
@@ -321,20 +328,6 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (Transition)lookupService(Transition.class, implementationClass);
 	}
 	
-	public TransitionCriteria createTransitionCriteria(String encodedCriteria,
-			AutowireMode autowireMode) throws ServiceLookupException {
-		TransitionCriteria criteria = getTransitionCriteriaCreator().create(encodedCriteria);
-		autowireService(criteria, autowireMode);
-		return criteria;
-	}
-	
-	public ViewDescriptorProducer createViewDescriptorProducer(
-			String encodedView, AutowireMode autowireMode) throws ServiceLookupException {
-		ViewDescriptorProducer producer = getViewDescriptorProducerCreator().create(encodedView);
-		autowireService(producer, autowireMode);
-		return producer;
-	}
-	
 	public Action createAction(Class implementationClass, AutowireMode autowireMode) {
 		return (Action)createService(Action.class, implementationClass, autowireMode);
 	}
@@ -358,5 +351,13 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public FlowAttributeMapper getFlowAttributeMapper(Class implementationClass)
 			throws ServiceLookupException {
 		return (FlowAttributeMapper)lookupService(FlowAttributeMapper.class, implementationClass);
+	}
+
+	public Object parseExpression(String expressionString) {
+		try {
+			return Ognl.parseExpression(expressionString);
+		} catch (OgnlException e) {
+			throw new ServiceLookupException(String.class, Object.class, e);
+		}
 	}
 }

@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.binding.MutableAttributeSource;
+import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.support.TextToClassConverter;
 import org.springframework.binding.format.InvalidFormatException;
@@ -50,7 +51,10 @@ import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.TransitionCriteriaFactory;
+import org.springframework.web.flow.ViewDescriptor;
+import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
 import org.springframework.web.flow.action.MultiAction;
@@ -221,7 +225,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		
 	}
 	
-	
 	private Resource location;
 
 	private boolean validating = true;
@@ -280,36 +283,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	protected void assertDefaultFlowServiceLocator() {
 		Assert.isInstanceOf(BeanFactoryFlowServiceLocator.class, getFlowServiceLocator(),
 			"You configured a flow service locator different from the default BeanFactoryFlowServiceLocator");
-	}
-	
-	/**
-	 * Set the transition criteria creator to use. This is a convenience feature to
-	 * make it easy configure the transition criteria factory for a builder which
-	 * just uses the default flow service locator (@link BeanFactoryFlowServiceLocator).
-	 * Note: do not call both this method and <code>setFlowServiceLocator()</code>
-	 * -- call one or the other. 
-	 * @param creator the transition criteria factory
-	 * 
-	 * @see BaseFlowBuilder#setFlowServiceLocator(FlowServiceLocator)
-	 */
-	public void setTransitionCriteriaCreator(TransitionCriteriaCreator creator) {
-		assertDefaultFlowServiceLocator();
-		((BeanFactoryFlowServiceLocator)getFlowServiceLocator()).setTransitionCriteriaCreator(creator);
-	}
-	
-	/**
-	 * Set the view descriptor producer creator to use. This is a convenience feature to
-	 * make it easy configure the view descriptor producer for a builder which
-	 * just uses the default flow service locator (@link BeanFactoryFlowServiceLocator).
-	 * Note: do not call both this method and <code>setFlowServiceLocator()</code>
-	 * -- call one or the other. 
-	 * @param creator the view descriptor producer factory
-	 * 
-	 * @see BaseFlowBuilder#setFlowServiceLocator(FlowServiceLocator)
-	 */
-	public void setViewDescriptorProducerCreator(ViewDescriptorProducerCreator creator) {
-		assertDefaultFlowServiceLocator();
-		((BeanFactoryFlowServiceLocator)getFlowServiceLocator()).setViewDescriptorProducerCreator(creator);
 	}
 	
 	/**
@@ -575,13 +548,12 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		viewState.setId(element.getAttribute(ID_ATTRIBUTE));
 		viewState.setFlow(flow);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			AutowireMode autowireMode = parseAutowireMode(element);
-			viewState.setViewDescriptorProducer(
-					getFlowServiceLocator().createViewDescriptorProducer(element.getAttribute(VIEW_ATTRIBUTE), autowireMode));
+			ViewDescriptorCreator creator = (ViewDescriptorCreator)converterFor(ViewDescriptorCreator.class).
+				execute(element.getAttribute(VIEW_ATTRIBUTE));
+			viewState.setViewDescriptorCreator(creator);
 		}
 		viewState.addAll(parseTransitions(element));
 		viewState.setProperties(parseProperties(element));
-		
 		// setup action support
 		List setupElements = DomUtils.getChildElementsByTagName(element, SETUP_ELEMENT);
 		if (!setupElements.isEmpty()) {
@@ -593,6 +565,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 	}
 
+	protected ConversionExecutor converterFor(Class targetType) {
+		return getConversionService().getConversionExecutor(String.class, targetType);
+	}
+	
 	/**
 	 * Parse given decision state definition and add a corresponding state to given
 	 * flow.
@@ -628,9 +604,9 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		endState.setId(element.getAttribute(ID_ATTRIBUTE));
 		endState.setFlow(flow);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			AutowireMode autowireMode = parseAutowireMode(element);
-			endState.setViewDescriptorProducer(
-					getFlowServiceLocator().createViewDescriptorProducer(element.getAttribute(VIEW_ATTRIBUTE), autowireMode));
+			ViewDescriptorCreator creator = (ViewDescriptorCreator)converterFor(ViewDescriptorCreator.class).
+				execute(element.getAttribute(VIEW_ATTRIBUTE));
+			endState.setViewDescriptorCreator(creator);
 		}
 		endState.setProperties(parseProperties(element));
 	}
@@ -724,10 +700,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 * Do type conversion for given property value.
 	 */
 	protected Object convert(Element element, Object value) {
-		if (conversionService != null && element.hasAttribute(TYPE_ATTRIBUTE)) {
+		if (element.hasAttribute(TYPE_ATTRIBUTE)) {
 			// do value type conversion
 			Class targetClass = conversionService.withAlias(element.getAttribute(TYPE_ATTRIBUTE));
-			return conversionService.getConversionExecutor(String.class, targetClass).execute(value);
+			return converterFor(targetClass).execute(value);
 		}
 		else {
 			return value;
@@ -766,8 +742,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		else {
 			transition = new Transition();
 		}
-		transition.setMatchingCriteria(getFlowServiceLocator().createTransitionCriteria(
-				element.getAttribute(ON_ATTRIBUTE), transitionDef.autowire));
+		TransitionCriteria matchingCriteria = (TransitionCriteria)converterFor(TransitionCriteria.class).execute(element.getAttribute(ON_ATTRIBUTE));
+		transition.setMatchingCriteria(matchingCriteria);
 		transition.setTargetStateId(element.getAttribute(TO_ATTRIBUTE));
 		TransitionCriteriaChain executionCriteria = new TransitionCriteriaChain();
 		AnnotatedAction[] actions = parseAnnotatedActions(element);
@@ -799,11 +775,10 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Transition[] parseIf(Element element) {
 		FlowArtifact ifDef = parseFlowArtifactDefinition(element);
-		String criteria = element.getAttribute(TEST_ATTRIBUTE);
+		TransitionCriteria criteria = (TransitionCriteria)converterFor(TransitionCriteria.class).execute(element.getAttribute(TEST_ATTRIBUTE));
 		String trueStateId = element.getAttribute(THEN_ATTRIBUTE);
+		Transition thenTransition = new Transition(criteria, trueStateId);
 		String falseStateId = element.getAttribute(ELSE_ATTRIBUTE);
-		Transition thenTransition = new Transition(
-				getFlowServiceLocator().createTransitionCriteria(criteria, ifDef.autowire), trueStateId);
 		if (StringUtils.hasText(falseStateId)) {
 			Transition elseTransition = new Transition(TransitionCriteriaFactory.any(), falseStateId);
 			return new Transition[] { thenTransition, elseTransition };

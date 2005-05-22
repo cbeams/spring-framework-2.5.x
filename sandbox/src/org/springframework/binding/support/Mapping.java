@@ -20,8 +20,6 @@ import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.convert.ConversionExecutor;
@@ -103,71 +101,31 @@ public class Mapping implements Serializable {
 	 * if neccessary.
 	 * @param source The source map accessor
 	 * @param target The target map accessor
-	 * @param mapMissingAttributesToNull map attributes that aren't present to a
-	 *        null value?
 	 */
-	public void map(AttributeSource source, MutableAttributeSource target, boolean mapMissingAttributesToNull) {
-		Object value;
-		BeanWrapper beanAccessor = null;
-		int propertyDelimiterIndex = sourceAttributeName.indexOf('.');
-		if (propertyDelimiterIndex != -1) {
-			// sourceAttributeName is in the form "beanName.propertyPath"
-			String beanName = sourceAttributeName.substring(0, propertyDelimiterIndex);
-			String propertyPath = sourceAttributeName.substring(propertyDelimiterIndex + 1);
-			beanAccessor = createBeanWrapper(source.getAttribute(beanName));
-			value = beanAccessor.getPropertyValue(propertyPath);
-		}
-		else {
-			value = source.getAttribute(sourceAttributeName);
-		}
-		// convert value to a expected target type if neccessary
-		if (valueConversionExecutor != null) {
-			value = valueConversionExecutor.call(value);
-		}
-		// set target value
-		propertyDelimiterIndex = targetAttributeName.indexOf('.');
-		if (propertyDelimiterIndex != -1) {
-			// targetName is of the form "beanName.propertyPath"
-			String beanName = targetAttributeName.substring(0, propertyDelimiterIndex);
-			String propertyPath = targetAttributeName.substring(propertyDelimiterIndex + 1);
-			beanAccessor.setWrappedInstance(target.getAttribute(beanName));
+	public void map(AttributeSource source, MutableAttributeSource target) {
+		// get source value
+		if (source.containsAttribute(sourceAttributeName)) {
+			Object sourceValue = source.getAttribute(sourceAttributeName);
+			Object targetValue = sourceValue;
+			// convert source value to a expected target type if neccessary
+			if (valueConversionExecutor != null) {
+				targetValue = valueConversionExecutor.call(sourceValue);
+			}
+			// set target value
 			if (logger.isDebugEnabled()) {
-				logger.debug("Mapping bean property attribute from path '" + sourceAttributeName + "' to path '"
-						+ targetAttributeName + "' with value '" + value + "'");
+				logger.debug("Mapping source attribute '" + sourceAttributeName + "' with value " + sourceValue + " to" +
+						"target attribute '" + targetAttributeName + "' with value " + targetValue);
 			}
-			beanAccessor.setPropertyValue(propertyPath, value);
-		}
-		else {
-			if (value == null && !source.containsAttribute(sourceAttributeName)) {
-				if (mapMissingAttributesToNull) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("No value exists for attribute '" + sourceAttributeName
-								+ "' in the from model - thus, I will map a null value");
-					}
-					target.setAttribute(targetAttributeName, null);
-				}
-				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("No value exists for attribute '" + sourceAttributeName
-								+ "' in the from model - thus, I will NOT map a value");
-					}
-				}
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Mapping attribute from name '" + sourceAttributeName + "' to name '"
-							+ targetAttributeName + "' with value '" + value + "'");
-				}
-				target.setAttribute(targetAttributeName, value);
+			target.setAttribute(targetAttributeName, targetValue);
+		} else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No source attribute '" + sourceAttributeName + "' found in source '" + source + "' -- not mapping to perform");
 			}
 		}
 	}
 
-	protected BeanWrapper createBeanWrapper(Object attribute) {
-		return new BeanWrapperImpl(attribute);
-	}
-	
 	public String toString() {
-		return new ToStringBuilder(this).append(sourceAttributeName + "->" + targetAttributeName).toString();
+		return new ToStringBuilder(this).append(sourceAttributeName + "->" + targetAttributeName).
+			append("valueConversionExecutor", valueConversionExecutor).toString();
 	}
 }

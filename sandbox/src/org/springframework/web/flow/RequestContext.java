@@ -143,4 +143,10 @@ public interface RequestContext {
 	 */
 	public void endTransaction();
 
+	/**
+	 * Evaluate the given expression against this request context.
+	 * @param expression the expression to evaluate
+	 * @return the result of expression evaluation
+	 */
+	public Object evaluate(Object expression);
 }

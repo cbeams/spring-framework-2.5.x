@@ -66,8 +66,6 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 
 	private Collection mappings = Collections.EMPTY_SET;
 
-	private boolean mapMissingAttributesToNull = false;
-
 	public ParameterizableAttributeMapper() {
 
 	}
@@ -98,14 +96,18 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 
 	/**
 	 * Set the mappings that will be executed when mapping model data from one
-	 * attributes collection to another. Each list item must be a String, a
-	 * Mapping object, a List, or a Map. If the list item is a simple String
-	 * value, the attribute will be mapped as having the same name in the parent
-	 * flow and in the sub flow. If the list item is a Map, each map entry must
-	 * be a String key naming the attribute in the source model, and a String
-	 * value naming the attribute in the target model. If the list item is
-	 * itself a List, then that list is itself evaluated recursively, and must
-	 * itself contain Strings, Mapping objects, Lists, or Maps.
+	 * attributes source to another. Each list item must be a String, a
+	 * Mapping object, a List, or a Map.
+	 * <p>
+	 * If the list item is a simple String value, the attribute will be mapped with
+	 * the same name and type.
+	 * <p>
+	 * If the list item is a Map, each map entry must be a String key naming the
+	 * attribute in the source model, and a String value naming the attribute in
+	 * the target model.
+	 * <p>
+	 * If the list item is another List, then that list is itself evaluated recursively,
+	 * and must itself contain Strings, Mapping objects, other Lists, or Maps.
 	 * @param mappings The mappings
 	 */
 	public void setMappingsCollection(Collection mappings) {
@@ -164,22 +166,6 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 	}
 
 	/**
-	 * Set whether or not missing attributes in the model should be mapped to a
-	 * null value or shouldn't be mapped at all.
-	 */
-	public void setMapMissingAttributesToNull(boolean toNull) {
-		this.mapMissingAttributesToNull = toNull;
-	}
-
-	/**
-	 * Get whether or not missing attributes in the model should be mapped to a
-	 * null value or shouldn't be mapped at all.
-	 */
-	public boolean isMapMissingAttributesToNull() {
-		return this.mapMissingAttributesToNull;
-	}
-
-	/**
 	 * Map data from one map to another map using specified mappings.
 	 */
 	public void map(AttributeSource source, MutableAttributeSource target) {
@@ -187,7 +173,7 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 			Iterator it = this.mappings.iterator();
 			while (it.hasNext()) {
 				Mapping mapping = (Mapping)it.next();
-				mapping.map(source, target, this.mapMissingAttributesToNull);
+				mapping.map(source, target);
 			}
 		}
 	}

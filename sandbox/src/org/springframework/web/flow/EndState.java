@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  * this EndState reliniquishes control back to a parent flow, view rendering
  * responsibility falls on the parent flow.
  * 
- * @see org.springframework.web.flow.ViewDescriptorProducer
+ * @see org.springframework.web.flow.ViewDescriptorCreator
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
@@ -49,7 +49,7 @@ public class EndState extends State {
 	 * An optional view descriptor producer that will produce a view to render
 	 * if this end state terminates an executing root flow.
 	 */
-	private ViewDescriptorProducer viewDescriptorProducer;
+	private ViewDescriptorCreator viewDescriptorCreator;
 	
 	/**
 	 * Default constructor for bean style usage.
@@ -72,94 +72,52 @@ public class EndState extends State {
 	 * Create a new end state with specified associated view.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the name of the view that should be rendered if this end
-	 *        state terminates flow execution
-	 * @throws IllegalArgumentException when this state cannot be added to given
-	 *         flow
-	 */
-	public EndState(Flow flow, String id, String viewName) throws IllegalArgumentException {
-		super(flow, id);
-		setViewName(viewName);
-	}
-
-	/**
-	 * Create a new end state with specified associated view.
-	 * @param flow the owning flow
-	 * @param id the state identifier (must be unique to the flow)
-	 * @param viewName the name of the view that should be rendered if this end
-	 *        state terminates flow execution
-	 * @param properties additional properties describing this state
-	 * @throws IllegalArgumentException when this state cannot be added to given
-	 *         flow
-	 */
-	public EndState(Flow flow, String id, String viewName, Map properties) throws IllegalArgumentException {
-		super(flow, id, properties);
-		setViewName(viewName);
-	}
-
-	/**
-	 * Create a new end state with specified associated view.
-	 * @param flow the owning flow
-	 * @param id the state identifier (must be unique to the flow)
-	 * @param producer factory used to create the view that should be rendered
+	 * @param creator factory used to create the view that should be rendered
 	 *        if this end state terminates flow execution
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public EndState(Flow flow, String id, ViewDescriptorProducer producer) throws IllegalArgumentException {
+	public EndState(Flow flow, String id, ViewDescriptorCreator creator) throws IllegalArgumentException {
 		super(flow, id);
-		setViewDescriptorProducer(producer);
+		setViewDescriptorCreator(creator);
 	}
 
 	/**
 	 * Create a new end state with specified associated view.
 	 * @param flow the owning flow
 	 * @param id the state identifier (must be unique to the flow)
-	 * @param producer factory used to create the view that should be rendered
+	 * @param creator factory used to create the view that should be rendered
 	 *        if this end state terminates flow execution
 	 * @param properties additional properties describing this state
 	 * @throws IllegalArgumentException when this state cannot be added to given
 	 *         flow
 	 */
-	public EndState(Flow flow, String id, ViewDescriptorProducer producer, Map properties) throws IllegalArgumentException {
+	public EndState(Flow flow, String id, ViewDescriptorCreator creator, Map properties) throws IllegalArgumentException {
 		super(flow, id, properties);
-		setViewDescriptorProducer(producer);
-	}
-
-	/**
-	 * Sets the logical name of the view to render when this end state is entered
-	 * and terminates a root flow.
-	 */
-	public void setViewName(String viewName) {
-		if (StringUtils.hasText(viewName)) {
-			this.viewDescriptorProducer = new SimpleViewDescriptorProducer(viewName);
-		}
-		else {
-			this.viewDescriptorProducer = null;
-		}
+		setViewDescriptorCreator(creator);
 	}
 
 	/**
 	 * Returns the factory to produce a descriptor for the view to render in
 	 * this end state if it terminates a root flow.
 	 */
-	public ViewDescriptorProducer getViewDescriptorProducer() {
-		return viewDescriptorProducer;
+	public ViewDescriptorCreator getViewDescriptorCreator() {
+		return viewDescriptorCreator;
 	}
 
 	/**
 	 * Sets the factory to produce a view descriptor to render when this end
 	 * state is entered and terminates a root flow.
 	 */
-	public void setViewDescriptorProducer(ViewDescriptorProducer producer) {
-		this.viewDescriptorProducer = producer;
+	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
+		this.viewDescriptorCreator = creator;
 	}
 
 	/**
 	 * Returns true if this view state has no associated view, false otherwise.
 	 */
 	public boolean isMarker() {
-		return viewDescriptorProducer == null;
+		return viewDescriptorCreator == null;
 	}
 
 	/**
@@ -189,11 +147,11 @@ public class EndState extends State {
 				viewDescriptor = null;
 			}
 			else {
-				viewDescriptor = viewDescriptorProducer.produceViewDescriptor(context);
+				viewDescriptor = viewDescriptorCreator.createViewDescriptor(context);
 			}
 			// end the flow
 			// note that we do this here to make sure we can call context.getModel()
-			// above (in the view descriptor producer) without any problems
+			// above (in the view descriptor creator) without any problems
 			context.endActiveSession();
 			return viewDescriptor;
 		}
@@ -226,6 +184,6 @@ public class EndState extends State {
 	}
 	
 	protected void createToString(ToStringCreator creator) {
-		creator.append("viewDescriptorProducer", viewDescriptorProducer);
+		creator.append("viewDescriptorProducer", viewDescriptorCreator);
 	}
 }

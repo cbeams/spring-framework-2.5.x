@@ -23,32 +23,40 @@ package org.springframework.web.flow;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class SimpleViewDescriptorProducer implements ViewDescriptorProducer {
+public class SimpleViewDescriptorCreator implements ViewDescriptorCreator {
 
 	/**
 	 * The static view name to render.
 	 */
 	private String viewName;
 
+	protected SimpleViewDescriptorCreator() {
+		
+	}
+	
 	/**
 	 * Creates a producer that will produce view descriptors requesting that the
 	 * specified view is rendered.
 	 * @param viewName the view name
 	 */
-	public SimpleViewDescriptorProducer(String viewName) {
+	public SimpleViewDescriptorCreator(String viewName) {
 		this.viewName = viewName;
 	}
 	
+	protected void setViewName(String viewName) {
+		this.viewName = viewName;
+	}
+	
+	public ViewDescriptor createViewDescriptor(RequestContext context) {
+		return new ViewDescriptor(getViewName(), context.getModel());
+	}
+
 	/**
 	 * Returns the static view name.
 	 * @return the view name
 	 */
 	public String getViewName() {
 		return viewName;
-	}
-	
-	public ViewDescriptor produceViewDescriptor(RequestContext context) {
-		return new ViewDescriptor(viewName, context.getModel());
 	}
 
 }

@@ -31,12 +31,12 @@ package org.springframework.web.flow;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public interface ViewDescriptorProducer {
+public interface ViewDescriptorCreator {
 	
 	/**
 	 * Produce a new view descriptor for given request context.
 	 * @param context the current request context of the executing flow
 	 * @return the view descriptor
 	 */
-	public ViewDescriptor produceViewDescriptor(RequestContext context);
+	public ViewDescriptor createViewDescriptor(RequestContext context);
 }

@@ -125,11 +125,16 @@ public class Transition extends AnnotatedObject {
 	}
 
 	/**
-	 * Returns the owning source (<i>from</i>) state of this transition.
-	 * @return the source state
+	 * Create a new local transition programatically
+	 * @param the source state of the transition
+	 * @param matchingCriteria strategy object used to determine if this transition should be
+	 *        matched as elligible for execution
+	 * @param targetStateId the target state id
 	 */
-	public TransitionableState getSourceState() {
-		return sourceState;
+	public Transition(TransitionableState sourceState, TransitionCriteria matchingCriteria, String targetStateId) {
+		setSourceState(sourceState);
+		setMatchingCriteria(matchingCriteria);
+		setTargetStateId(targetStateId);
 	}
 
 	/**
@@ -142,12 +147,11 @@ public class Transition extends AnnotatedObject {
 	}
 
 	/**
-	 * Returns the criteria that determine whether or not this transition matches as
-	 * elligible for execution.
-	 * @return the transition matching criteria
+	 * Returns the owning source (<i>from</i>) state of this transition.
+	 * @return the source state
 	 */
-	public TransitionCriteria getMatchingCriteria() {
-		return matchingCriteria;
+	public TransitionableState getSourceState() {
+		return sourceState;
 	}
 	
 	/**
@@ -157,6 +161,22 @@ public class Transition extends AnnotatedObject {
 	public void setMatchingCriteria(TransitionCriteria matchingCriteria) {
 		Assert.notNull(matchingCriteria, "The transition matching criteria is required");
 		this.matchingCriteria = matchingCriteria;
+	}
+
+	/**
+	 * Set the criteria that determine whether or not this transition, once matched,
+	 * should complete execution or should <i>roll back</i>.
+	 */
+	public void setExecutionCriteria(TransitionCriteria executionCriteria) {
+		this.executionCriteria = executionCriteria;
+	}
+	
+	/**
+	 * Set the id of the target (<i>to</i>) state of this transtion.
+	 */
+	public void setTargetStateId(String targetStateId) {
+		Assert.hasText(targetStateId, "The id of the target state of the transition is required");		
+		this.targetStateId = targetStateId;
 	}
 
 	/**
@@ -170,63 +190,14 @@ public class Transition extends AnnotatedObject {
 	}
 
 	/**
-	 * Returns the criteria that determine whether or not this transition, once matched,
-	 * should complete execution or should <i>roll back</i>.
-	 * @return the transition execution criteria
+	 * Returns the criteria that determine whether or not this transition matches as
+	 * elligible for execution.
+	 * @return the transition matching criteria
 	 */
-	public TransitionCriteria getExecutionCriteria() {
-		return executionCriteria;
+	public TransitionCriteria getMatchingCriteria() {
+		return matchingCriteria;
 	}
 	
-	/**
-	 * Set the criteria that determine whether or not this transition, once matched,
-	 * should complete execution or should <i>roll back</i>.
-	 */
-	public void setExecutionCriteria(TransitionCriteria executionCriteria) {
-		this.executionCriteria = executionCriteria;
-	}
-	
-	/**
-	 * Checks if this transition can complete its execution or should be rolled back,
-	 * given the state of the flow execution request context.
-	 * @param context the flow execution request context
-	 * @return true if this transition can complete execution, false if it should
-	 *         roll back
-	 */
-	public boolean canCompleteExecution(RequestContext context) {
-		return this.executionCriteria != null ? this.executionCriteria.test(context) : true;
-	}
-	
-	/**
-	 * Returns the id of the target (<i>to</i>) state of this transition.
-	 * @return the target state id
-	 */
-	public String getTargetStateId() {
-		return targetStateId;
-	}
-	
-	/**
-	 * Set the id of the target (<i>to</i>) state of this transtion.
-	 */
-	public void setTargetStateId(String targetStateId) {
-		Assert.hasText(targetStateId, "The id of the target state of the transition is required");		
-		this.targetStateId = targetStateId;
-	}
-
-	/**
-	 * Returns the state this transition will transition <i>to</i> when executed
-	 * with given request context. Subclasses can override this to implement
-	 * specialize behaviour, e.g. with a transition with a "variable" target state. 
-	 * @param context the flow execution request context
-	 * @return the target state of the transition
-	 * @throws NoSuchFlowStateException when the target state cannot be found
-	 */
-	public State getTargetState(RequestContext context) throws NoSuchFlowStateException {
-		// this implementation does not take the request context into
-		// consideration when determining the target state
-		return getSourceState().getFlow().getRequiredState(getTargetStateId());
-	}
-
 	/**
 	 * Execute this state transition. Will only be called if the {@link #matches(RequestContext)}
 	 * method returns true for given context.
@@ -252,13 +223,13 @@ public class Transition extends AnnotatedObject {
 		}
 		context.setLastTransition(this);
 		ViewDescriptor viewDescriptor;
-		if (this.executionCriteria != null && !this.executionCriteria.test(context)) {
-			// 'roll back' and re-enter the source state
-			viewDescriptor = getSourceState().enter(context);
-		}
-		else {
+		if (canExecute(context)) {
 			// enter the target state (note: any exceptions are propagated)
 			viewDescriptor = targetState.enter(context);
+		}
+		else {
+			// 'roll back' and re-enter the source state
+			viewDescriptor = getSourceState().enter(context);
 		}
 		if (logger.isDebugEnabled()) {
 			if (context.getFlowContext().isActive()) {
@@ -273,6 +244,48 @@ public class Transition extends AnnotatedObject {
 		return viewDescriptor;
 	}
 
+	/**
+	 * Returns the state this transition will transition <i>to</i> when executed
+	 * with given request context. Subclasses can override this to implement
+	 * specialize behaviour, e.g. with a transition with a "variable" target state. 
+	 * @param context the flow execution request context
+	 * @return the target state of the transition
+	 * @throws NoSuchFlowStateException when the target state cannot be found
+	 */
+	public State getTargetState(RequestContext context) throws NoSuchFlowStateException {
+		// this implementation does not take the request context into
+		// consideration when determining the target state
+		return getSourceState().getFlow().getRequiredState(getTargetStateId());
+	}
+
+	/**
+	 * Returns the id of the target (<i>to</i>) state of this transition.
+	 * @return the target state id
+	 */
+	public String getTargetStateId() {
+		return targetStateId;
+	}
+	
+	/**
+	 * Checks if this transition can complete its execution or should be rolled back,
+	 * given the state of the flow execution request context.
+	 * @param context the flow execution request context
+	 * @return true if this transition can complete execution, false if it should
+	 *         roll back
+	 */
+	public boolean canExecute(RequestContext context) {
+		return this.executionCriteria != null ? this.executionCriteria.test(context) : true;
+	}
+	
+	/**
+	 * Returns the criteria that determine whether or not this transition, once matched,
+	 * should complete execution or should <i>roll back</i>.
+	 * @return the transition execution criteria
+	 */
+	public TransitionCriteria getExecutionCriteria() {
+		return executionCriteria;
+	}
+	
 	public String toString() {
 		return new ToStringCreator(this).append("on", matchingCriteria).append("properties", getProperties()).toString();
 	}
