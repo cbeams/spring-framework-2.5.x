@@ -17,7 +17,6 @@
 package org.springframework.samples.jca.service;
 
 import org.springframework.samples.jca.dao.PersonDao;
-import org.springframework.samples.jca.dao.PersonDaoImpl;
 import org.springframework.samples.jca.exception.PersonException;
 import org.springframework.samples.jca.model.Person;
 

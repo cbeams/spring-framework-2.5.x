@@ -4,34 +4,7 @@
  */
 package org.springframework.metadata.bcel;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLClassLoader;
-
-//import org.apache.bcel.classfile.Attribute;
-//import org.apache.bcel.classfile.ClassParser;
-//import org.apache.bcel.classfile.ConstantPool;
-//import org.apache.bcel.classfile.Field;
-//import org.apache.bcel.classfile.JavaClass;
-//import org.apache.bcel.classfile.Method;
-//import org.apache.bcel.classfile.Unknown;
-//import org.apache.bcel.classfile.Utility;
-//import org.apache.bcel.generic.ClassGen;
-//import org.apache.bcel.generic.ConstantPoolGen;
-//import org.apache.bcel.generic.FieldGen;
-//import org.apache.bcel.generic.MethodGen;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.metadata.AttributeException;
-import org.springframework.metadata.AttributeParser;
 import org.springframework.metadata.AttributeWriter;
-import org.springframework.metadata.support.AttributeCreator;
-import org.springframework.metadata.support.AttributeDefinition;
-import org.springframework.metadata.support.DotNetAttributeParser;
-import org.springframework.metadata.support.JavaDocTags;
 
 /**
  * The Spring implementation for adding metadata to classes.  This uses

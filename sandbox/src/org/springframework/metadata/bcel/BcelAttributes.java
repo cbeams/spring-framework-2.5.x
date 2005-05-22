@@ -4,25 +4,7 @@
  */
 package org.springframework.metadata.bcel;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-//import org.apache.bcel.classfile.ClassParser;
-//import org.apache.bcel.classfile.JavaClass;
-//import org.apache.bcel.classfile.Unknown;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.metadata.AttributeException;
-import org.springframework.metadata.AttributeParser;
 import org.springframework.metadata.Attributes;
-import org.springframework.metadata.support.AttributeCreator;
-import org.springframework.metadata.support.DotNetAttributeParser;
 
 /**
  * Retrieve attributes stored in the .class file using the BCEL library

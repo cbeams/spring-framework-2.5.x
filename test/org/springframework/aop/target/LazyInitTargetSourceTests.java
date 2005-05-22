@@ -16,8 +16,6 @@
 
 package org.springframework.aop.target;
 
-import java.util.Arrays;
-
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;

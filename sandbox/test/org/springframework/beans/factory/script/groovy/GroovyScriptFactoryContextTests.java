@@ -18,10 +18,8 @@ package org.springframework.beans.factory.script.groovy;
 
 import groovy.lang.GroovyObject;
 
-import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.dynamic.DynamicObject;
 import org.springframework.beans.factory.script.AbstractScriptFactoryTests;
-import org.springframework.beans.factory.script.DynamicScript;
 import org.springframework.beans.factory.script.Hello;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

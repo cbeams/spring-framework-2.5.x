@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework.aspectwerkz;
 
-import org.springframework.aop.framework.AbstractAopProxyTests;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
 import junit.framework.TestCase;

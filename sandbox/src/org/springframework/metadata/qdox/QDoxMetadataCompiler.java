@@ -17,7 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.metadata.AttributeException;
 import org.springframework.metadata.AttributeParser;
-import org.springframework.metadata.bcel.BcelAttributeWriter;
 import org.springframework.metadata.support.AbstractMetadataCompiler;
 import org.springframework.metadata.support.AttributeCreator;
 import org.springframework.metadata.support.DotNetAttributeParser;

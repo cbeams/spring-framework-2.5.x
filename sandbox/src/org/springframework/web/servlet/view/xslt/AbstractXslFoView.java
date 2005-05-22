@@ -16,14 +16,12 @@
  
 package org.springframework.web.servlet.view.xslt;
 
-import java.io.BufferedOutputStream;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Result;
 import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.fop.apps.Driver;
 import org.w3c.dom.Node;

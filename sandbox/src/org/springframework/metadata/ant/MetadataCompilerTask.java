@@ -19,7 +19,6 @@ import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
 import org.springframework.metadata.MetadataCompiler;
-import org.springframework.metadata.bcel.BcelAttributeWriter;
 import org.springframework.metadata.qdox.QDoxMetadataCompiler;
 
 /**

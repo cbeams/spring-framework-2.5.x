@@ -70,7 +70,7 @@ public class TestServiceManager extends TestCase
         mgr.dispose();
 
         FirstService service = (FirstService) CTX.getBean("myFirstService");
-        String calledString = service.getCalledString();
+        String calledString = BaseService.getCalledString();
         //System.out.println(calledString);
         assertEquals(
             "Calling lifecycle sequence is not correct",

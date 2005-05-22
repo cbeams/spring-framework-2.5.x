@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.metadata.Attributes;
-import org.springframework.metadata.bcel.BcelAttributes;
 
 /**
  * A simple program that looks for metadata on the AnnotatedClass

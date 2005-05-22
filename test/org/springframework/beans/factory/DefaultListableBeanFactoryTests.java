@@ -833,7 +833,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		private static boolean closed;
 
 		public void destroy() {
-			this.closed = true;
+			closed = true;
 		}
 	}
 
@@ -843,7 +843,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		private static boolean closed;
 
 		public void close() {
-			this.closed = true;
+			closed = true;
 		}
 	}
 

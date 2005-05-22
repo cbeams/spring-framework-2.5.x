@@ -18,7 +18,6 @@ package org.springframework.rules.reporting;
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
-import org.springframework.core.ToStringCreator;
 import org.springframework.core.closure.Constraint;
 
 /**

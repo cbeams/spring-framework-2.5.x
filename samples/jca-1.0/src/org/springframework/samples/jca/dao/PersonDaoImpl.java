@@ -23,7 +23,6 @@ import java.util.List;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
-import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
 import javax.resource.cci.ResultSet;
