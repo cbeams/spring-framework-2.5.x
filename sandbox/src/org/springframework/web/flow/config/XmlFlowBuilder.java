@@ -29,8 +29,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.binding.MutableAttributeSource;
-import org.springframework.binding.convert.ConversionExecutor;
-import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.support.TextToClass;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
@@ -101,11 +99,6 @@ import org.xml.sax.SAXParseException;
  * DTD.</td>
  * </tr>
  * <tr>
- * <td>conversionService</td>
- * <td><i>null</i></td>
- * <td>The from-text property type conversion service to use for this builder.</td>
- * </tr>
- * <tr>
  * <td>entityResolver</td>
  * <td><i>{@link FlowDtdResolver}</i></td>
  * <td>Set a SAX entity resolver to be used for parsing.</td>
@@ -114,11 +107,6 @@ import org.xml.sax.SAXParseException;
  * <td>flowServiceLocator</td>
  * <td><i>{@link BeanFactoryFlowServiceLocator}</i></td>
  * <td>Set the flow service location strategy to use.</td>
- * </tr>
- * <tr>
- * <td>transitionCriteriaCreator</td>
- * <td><i>{@link org.springframework.web.flow.config.SimpleTransitionCriteriaCreator}</i></td>
- * <td>Set the factory that creates transition criteria.</td>
  * </tr>
  * </table>
  * 
@@ -221,7 +209,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		public boolean shouldCreate() {
 			return clazz != null;
 		}
-		
 	}
 	
 	private Resource location;
@@ -230,8 +217,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 
 	private EntityResolver entityResolver = new FlowDtdResolver();
 
-	private ConversionService conversionService;
-	
 	/**
 	 * The DOM document object for the XML loaded from the resource.
 	 */
@@ -273,15 +258,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	public void setLocation(Resource location) {
 		this.location = location;
-	}
-	
-	/**
-	 * Make sure the flow service locator currently configured for this builder
-	 * is the default BeanFactoryFlowServiceLocator.
-	 */
-	protected void assertDefaultFlowServiceLocator() {
-		Assert.isInstanceOf(BeanFactoryFlowServiceLocator.class, getFlowServiceLocator(),
-			"You configured a flow service locator different from the default BeanFactoryFlowServiceLocator");
 	}
 	
 	/**
@@ -532,8 +508,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		viewState.setId(element.getAttribute(ID_ATTRIBUTE));
 		viewState.setFlow(flow);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			ViewDescriptorCreator creator = (ViewDescriptorCreator)converterFor(ViewDescriptorCreator.class).
-				execute(element.getAttribute(VIEW_ATTRIBUTE));
+			ViewDescriptorCreator creator = (ViewDescriptorCreator)
+				converterFor(ViewDescriptorCreator.class).execute(element.getAttribute(VIEW_ATTRIBUTE));
 			viewState.setViewDescriptorCreator(creator);
 		}
 		viewState.addAll(parseTransitions(element));
@@ -549,10 +525,6 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 	}
 
-	protected ConversionExecutor converterFor(Class targetType) {
-		return getFlowServiceLocator().getConversionService().getConversionExecutor(String.class, targetType);
-	}
-	
 	/**
 	 * Parse given decision state definition and add a corresponding state to given
 	 * flow.
@@ -588,8 +560,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		endState.setId(element.getAttribute(ID_ATTRIBUTE));
 		endState.setFlow(flow);
 		if (element.hasAttribute(VIEW_ATTRIBUTE)) {
-			ViewDescriptorCreator creator = (ViewDescriptorCreator)converterFor(ViewDescriptorCreator.class).
-				execute(element.getAttribute(VIEW_ATTRIBUTE));
+			ViewDescriptorCreator creator = (ViewDescriptorCreator)
+				converterFor(ViewDescriptorCreator.class).execute(element.getAttribute(VIEW_ATTRIBUTE));
 			endState.setViewDescriptorCreator(creator);
 		}
 		endState.setProperties(parseProperties(element));
@@ -677,16 +649,16 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 			Assert.state(valueElements.size() == 1, "A property value should be specified for property '" + name + "'");
 			value = DomUtils.getTextValue((Element)valueElements.get(0));
 		}
-		properties.setAttribute(name, convert(element, value));
+		properties.setAttribute(name, convertPropertyValue(element, value));
 	}
 	
 	/**
 	 * Do type conversion for given property value.
 	 */
-	protected Object convert(Element element, Object value) {
+	protected Object convertPropertyValue(Element element, Object value) {
 		if (element.hasAttribute(TYPE_ATTRIBUTE)) {
 			// do value type conversion
-			Class targetClass = conversionService.withAlias(element.getAttribute(TYPE_ATTRIBUTE));
+			Class targetClass = getConversionService().withAlias(element.getAttribute(TYPE_ATTRIBUTE));
 			return converterFor(targetClass).execute(value);
 		}
 		else {
@@ -726,7 +698,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		else {
 			transition = new Transition();
 		}
-		TransitionCriteria matchingCriteria = (TransitionCriteria)converterFor(TransitionCriteria.class).execute(element.getAttribute(ON_ATTRIBUTE));
+		TransitionCriteria matchingCriteria = (TransitionCriteria)
+			converterFor(TransitionCriteria.class).execute(element.getAttribute(ON_ATTRIBUTE));
 		transition.setMatchingCriteria(matchingCriteria);
 		transition.setTargetStateId(element.getAttribute(TO_ATTRIBUTE));
 		TransitionCriteriaChain executionCriteria = new TransitionCriteriaChain();
@@ -759,7 +732,8 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected Transition[] parseIf(Element element) {
 		FlowArtifact ifDef = parseFlowArtifactDefinition(element);
-		TransitionCriteria criteria = (TransitionCriteria)converterFor(TransitionCriteria.class).execute(element.getAttribute(TEST_ATTRIBUTE));
+		TransitionCriteria criteria = (TransitionCriteria)
+			converterFor(TransitionCriteria.class).execute(element.getAttribute(TEST_ATTRIBUTE));
 		String trueStateId = element.getAttribute(THEN_ATTRIBUTE);
 		Transition thenTransition = new Transition(criteria, trueStateId);
 		String falseStateId = element.getAttribute(ELSE_ATTRIBUTE);

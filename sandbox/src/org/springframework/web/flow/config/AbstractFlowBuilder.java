@@ -18,8 +18,6 @@ package org.springframework.web.flow.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.binding.convert.ConversionExecutor;
-import org.springframework.binding.convert.ConversionService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Action;
 import org.springframework.web.flow.ActionState;
@@ -991,14 +989,6 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 		return on(criteria, stateId, executionCriteria, properties);
 	}
 
-	protected ConversionService getConversionService() {
-		return getFlowServiceLocator().getConversionService();
-	}
-	
-	protected ConversionExecutor converterFor(Class targetType) {
-		return getConversionService().getConversionExecutor(String.class, targetType);
-	}
-	
 	/**
 	 * Produces a <code>TransitionCriteria</code> that will execute the specified action when the 
 	 * Transition is executed but before the transition's target state is entered.

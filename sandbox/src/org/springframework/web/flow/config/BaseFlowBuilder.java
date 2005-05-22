@@ -20,6 +20,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.binding.convert.ConversionException;
+import org.springframework.binding.convert.ConversionExecutor;
+import org.springframework.binding.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
 
@@ -103,4 +106,22 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 	public Flow getResult() {
 		return getFlow();
 	}
+	
+	/**
+	 * Returns the type conversion service used by this builder.
+	 */
+	protected ConversionService getConversionService() {
+		return getFlowServiceLocator().getConversionService();
+	}
+
+	/**
+	 * Returns the converter for given type.
+	 * @param targetType the type for which to lookup the converter
+	 * @return the converter
+	 * @throws ConversionException when the converter cannot be found
+	 */
+	protected ConversionExecutor converterFor(Class targetType) throws ConversionException {
+		return getConversionService().getConversionExecutor(String.class, targetType);
+	}
+
 }

@@ -23,8 +23,6 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.binding.convert.ConversionService;
-import org.springframework.binding.convert.Converter;
-import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.util.Assert;
@@ -45,8 +43,6 @@ import org.springframework.web.flow.execution.ServiceLookupException;
  */
 public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {
 
-	public static final String CONVERSION_SERVICE = "conversionService";
-	
 	/**
 	 * The default autowire mode for services creating by this locator.
 	 */
@@ -84,11 +80,22 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	}
 
 	/**
+	 * Returns the factory used to create Flow objects.
+	 */
+	public FlowCreator getFlowCreator() {
+		return flowCreator;
+	}
+
+	/**
 	 * Set the factory used to create flow objects.
 	 */
 	public void setFlowCreator(FlowCreator flowCreator) {
 		Assert.notNull(flowCreator, "The flow creator is required");
 		this.flowCreator = flowCreator;
+	}
+
+	public ConversionService getConversionService() {
+		return conversionService;
 	}
 
 	/**
@@ -98,6 +105,14 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public void setConversionService(ConversionService conversionService) {
 		Assert.notNull(conversionService, "The flow conversion service is required");
 		this.conversionService = conversionService;
+	}
+
+	/**
+	 * Returns the default autowire mode. This defaults to
+	 * {@link AutowireMode#NONE}.
+	 */
+	public AutowireMode getDefaultAutowireMode() {
+		return defaultAutowireMode;
 	}
 
 	/**
@@ -119,23 +134,16 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 			(AutowireMode)new LabeledEnumFormatter(AutowireMode.class).parseValue(encodedAutowireMode);
 	}
 	
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
+	/**
+	 * Returns the bean factory used to lookup services.
+	 */
+	protected BeanFactory getBeanFactory() {
+		if (this.beanFactory == null) {
+			throw new IllegalStateException("The bean factory reference has not yet been set -- call setBeanFactory()");
+		}
+		return beanFactory;
 	}
 
-	/**
-	 * Returns the factory used to create Flow objects.
-	 */
-	public FlowCreator getFlowCreator() {
-		return flowCreator;
-	}
-	
-	public ConversionService getConversionService() {
-		return conversionService;
-	}
-	
-	// helper methods
-	
 	/**
 	 * Returns the bean factory used to lookup services.
 	 */
@@ -150,24 +158,12 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 		return (AutowireCapableBeanFactory)getBeanFactory();
 	}
 
-	/**
-	 * Returns the bean factory used to lookup services.
-	 */
-	protected BeanFactory getBeanFactory() {
-		if (this.beanFactory == null) {
-			throw new IllegalStateException("The bean factory reference has not yet been set -- call setBeanFactory()");
-		}
-		return beanFactory;
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
 	}
-
-	/**
-	 * Returns the default autowire mode. This defaults to
-	 * {@link AutowireMode#NONE}.
-	 */
-	public AutowireMode getDefaultAutowireMode() {
-		return defaultAutowireMode;
-	}
-
+	
+	// helper methods
+	
 	/**
 	 * Helper to have the application context instantiate a service class
 	 * and wire up any dependencies.

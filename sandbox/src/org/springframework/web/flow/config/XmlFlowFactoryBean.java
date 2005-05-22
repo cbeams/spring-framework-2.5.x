@@ -37,16 +37,6 @@ import org.springframework.util.Assert;
  * <td>Specifies the XML file location from which the flow definition is loaded.
  * This is a required property.</td>
  * </tr>
- * <tr>
- * <td>transitionCriteriaCreator</td>
- * <td><i>{@link org.springframework.web.flow.config.SimpleTransitionCriteriaCreator default}</i></td>
- * <td>Set the factory that creates transition criteria.</td>
- * </tr>
- * <tr>
- * <td>viewDescriptorProducerCreator</td>
- * <td><i>{@link org.springframework.web.flow.config.SimpleViewDescriptorCreatorParser default}</i></td>
- * <td>Set the factory that creates view descriptor producers.</td>
- * </tr>
  * </table>
  * 
  * @see org.springframework.web.flow.config.XmlFlowBuilder

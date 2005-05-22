@@ -204,9 +204,10 @@ public interface FlowServiceLocator extends FlowLocator {
 	public FlowAttributeMapper getFlowAttributeMapper(Class implementationClass)
 			throws ServiceLookupException;
 	
+	// the conversion service
+	
 	/**
 	 * Returns the service responsible for performing from-string type conversion.
-	 * 
 	 * @return the web flow system type conversion service
 	 */
 	public ConversionService getConversionService();
