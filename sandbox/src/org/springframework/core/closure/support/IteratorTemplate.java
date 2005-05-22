@@ -22,7 +22,7 @@ import java.util.Iterator;
  * Simple process template that iterates over elements.
  * @author Keith Donald
  */
-public class IteratorTemplate extends AbstractProcessTemplateWorkflow {
+public class IteratorTemplate extends AbstractElementTemplateWorkflow {
 	private Collection collection;
 
 	private Iterator it;
