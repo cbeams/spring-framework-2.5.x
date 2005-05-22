@@ -60,9 +60,7 @@ public class FlowExecutionTests extends TestCase {
 	}
 
 	public void testLoopInFlow() throws Exception {
-		BeanFactoryFlowServiceLocator locator = new BeanFactoryFlowServiceLocator();
-		locator.afterPropertiesSet();
-		AbstractFlowBuilder builder = new AbstractFlowBuilder(locator) {
+		AbstractFlowBuilder builder = new AbstractFlowBuilder() {
 			protected String flowId() {
 				return "flow";
 			}
@@ -73,7 +71,6 @@ public class FlowExecutionTests extends TestCase {
 				addEndState("endState");
 			}
 		};
-		builder.afterPropertiesSet();
 		FlowExecution flowExecution = new FlowExecutionImpl(new FlowFactoryBean(builder).getFlow());
 		ViewDescriptor vd = flowExecution.start(new Event(this, "start"));
 		assertNotNull(vd);
@@ -90,9 +87,7 @@ public class FlowExecutionTests extends TestCase {
 	}
 
 	public void testLoopInFlowWithSubFlow() throws Exception {
-		BeanFactoryFlowServiceLocator locator = new BeanFactoryFlowServiceLocator();
-		locator.afterPropertiesSet();
-		AbstractFlowBuilder childBuilder = new AbstractFlowBuilder(locator) {
+		AbstractFlowBuilder childBuilder = new AbstractFlowBuilder() {
 			protected String flowId() {
 				return "childFlow";
 			}
@@ -113,10 +108,8 @@ public class FlowExecutionTests extends TestCase {
 				addEndState("stopTest");
 			}
 		};
-		childBuilder.afterPropertiesSet();
-		
 		final Flow childFlow = new FlowFactoryBean(childBuilder).getFlow();
-		AbstractFlowBuilder parentBuilder = new AbstractFlowBuilder(locator) {
+		AbstractFlowBuilder parentBuilder = new AbstractFlowBuilder() {
 			protected String flowId() {
 				return "parentFlow";
 			}
@@ -132,8 +125,6 @@ public class FlowExecutionTests extends TestCase {
 				addEndState("stopTest");
 			}
 		};
-		parentBuilder.afterPropertiesSet();
-		
 		Flow parentFlow = new FlowFactoryBean(parentBuilder).getFlow();
 
 		FlowExecution flowExecution = new FlowExecutionImpl(parentFlow);

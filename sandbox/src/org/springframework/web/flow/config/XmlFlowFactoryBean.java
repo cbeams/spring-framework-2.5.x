@@ -80,7 +80,7 @@ public class XmlFlowFactoryBean extends FlowFactoryBean implements BeanFactoryAw
 	public void setBeanFactory(BeanFactory beanFactory) {
 		getXmlFlowBuilder().setBeanFactory(beanFactory);
 	}
-
+	
 	/**
 	 * Returns the XML based flow builder used by this factory bean.
 	 */

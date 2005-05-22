@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.Flow;
 
@@ -36,7 +35,7 @@ import org.springframework.web.flow.Flow;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware, InitializingBean {
+public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -44,10 +43,8 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware, 
 	 * The service locator that locates and creates flow related artifacts by
 	 * identifier or implementation class, as needed by this builder.
 	 */
-	private FlowServiceLocator flowServiceLocator;
+	private FlowServiceLocator flowServiceLocator = new BeanFactoryFlowServiceLocator();
 
-	private BeanFactory beanFactory;
-	
 	/**
 	 * The <code>Flow</code> produced by this builder.
 	 */
@@ -69,21 +66,11 @@ public abstract class BaseFlowBuilder implements FlowBuilder, BeanFactoryAware, 
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-	
-	public void afterPropertiesSet() throws Exception {
-		if (flowServiceLocator == null) {
-			if (beanFactory != null) {
-				BeanFactoryFlowServiceLocator locator = new BeanFactoryFlowServiceLocator(beanFactory);
-				locator.afterPropertiesSet();
-				this.flowServiceLocator = locator;
-			} else {
-				throw new IllegalStateException("flowServiceLocator is not settable on init callback - the bean factory property is null");
-			}
+		if (flowServiceLocator instanceof BeanFactoryFlowServiceLocator) {
+			((BeanFactoryFlowServiceLocator)flowServiceLocator).setBeanFactory(beanFactory);
 		}
 	}
-
+	
 	/**
 	 * Returns the flow service location strategy in use.
 	 */

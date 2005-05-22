@@ -49,12 +49,17 @@ public class DefaultConversionService implements ConversionService, Initializing
 
 	private FormatterLocator formatterLocator = new ThreadLocalFormatterLocator();
 
+	public DefaultConversionService() {
+
+	}
+
 	public DefaultConversionService(ConversionService parent) {
 		setParent(parent);
 	}
-	
-	public DefaultConversionService() {
 
+	public DefaultConversionService(Converter[] converters) {
+		addDefaultConverters();
+		addConverters(converters);
 	}
 
 	public void setParent(ConversionService parent) {

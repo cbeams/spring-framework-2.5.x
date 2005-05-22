@@ -15,18 +15,15 @@
  */
 package org.springframework.web.flow.config;
 
-import ognl.Ognl;
-import ognl.OgnlException;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.binding.convert.ConversionService;
+import org.springframework.binding.convert.Converter;
 import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
@@ -46,7 +43,7 @@ import org.springframework.web.flow.execution.ServiceLookupException;
  * @author Keith Donald
  * @author Erwin Vervaet
  */
-public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware, InitializingBean {
+public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFactoryAware {
 
 	public static final String CONVERSION_SERVICE = "conversionService";
 	
@@ -63,7 +60,8 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	/**
 	 * The webflow data type conversion service.
 	 */
-	private ConversionService conversionService;
+	private ConversionService conversionService =
+		new DefaultConversionService(new Converter[] { new TextToTransitionCriteria(), new TextToViewDescriptorCreator() });
 	
 	/**
 	 * The wrapped bean factory.
@@ -135,24 +133,6 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	
 	public ConversionService getConversionService() {
 		return conversionService;
-	}
-	
-	public void afterPropertiesSet() throws Exception {
-		if (this.conversionService == null) {
-			initConversionService();
-		}
-	}
-	
-	protected void initConversionService() {
-		ConversionService parent = null;
-		if (this.beanFactory != null && this.beanFactory.containsBean(CONVERSION_SERVICE)) {
-			parent = (ConversionService)this.beanFactory.getBean(CONVERSION_SERVICE, ConversionService.class);
-		}
-		DefaultConversionService service = new DefaultConversionService(parent);
-		// install default webflow converters
-		service.addConverter(new TextToTransitionCriteria());
-		service.addConverter(new TextToViewDescriptorCreator());
-		this.conversionService = service;
 	}
 	
 	// helper methods
@@ -360,13 +340,5 @@ public class BeanFactoryFlowServiceLocator implements FlowServiceLocator, BeanFa
 	public FlowAttributeMapper getFlowAttributeMapper(Class implementationClass)
 			throws ServiceLookupException {
 		return (FlowAttributeMapper)lookupService(FlowAttributeMapper.class, implementationClass);
-	}
-
-	public Object parseExpression(String expressionString) {
-		try {
-			return Ognl.parseExpression(expressionString);
-		} catch (OgnlException e) {
-			throw new ServiceLookupException(String.class, Object.class, e);
-		}
 	}
 }
