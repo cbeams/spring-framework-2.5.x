@@ -35,9 +35,24 @@ Package org.springframework.orm
 * fixed Hibernate SessionFactoryUtils to correctly handle asynchronous timeouts in case of mixed JTA/Spring transactions
 * fixed SessionFactoryUtils for Hibernate 2.1 to not prevent transaction synchronization when allowCreate=false
 * fixed LocalSessionFactoryBean for Hibernate3 to use connection release mode "on_close" as default (-> safe tx cleanup)
+* added "filterNames" property to HibernateTemplate/Interceptor, allowing to enable a list of filters for all operations
+
+Package org.springframework.transaction
+* added specific "isLocalRollbackOnly" and "isGlobalRollbackOnly" methods to DefaultTransactionStatus
+* added "shouldCommitOnGlobalRollbackOnly" callback method to AbstractPlatformTransactionManager, with default "false"
+* AbstractPlatformTransactionManager throws UnexpectedRollbackException if attempting commit with rollback-only tx
+* JtaTransactionManager expects "doCommit" call for global rollback-only tx, letting JTA handle it (e.g. for tx timeout)
 
 Package org.springframework.util
 * refined MethodInvoker to find matching method with assignable parameters if no direct match found for given arguments
+
+Package org.springframework.web
+* refactored HtmlUtils implementation, reading character entity references from a properties file in the classpath
+* changed HtmlUtils' "htmlEscape" method to return standard entity references by default (named, not decimal or hex)
+* added "htmlEscapeDecimal" and "htmlEscapeHex" methods to HtmlUtils, for escaping in decimal or hex style, respectively
+* reimplemented HtmlUtils' "htmlUnescape" to correctly handle any entity references, including decimal and hex style
+* AbstractJasperReportsView exposes current Spring-managed Locale and MessageSource to JasperReports i18n ($R expr etc)
+* refined AbstractJasperReportsView to properly handle Internet Explorer HTTPS through resetting the response first
 
 
 Changes in version 1.2 final (13.5.2005)
