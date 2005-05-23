@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

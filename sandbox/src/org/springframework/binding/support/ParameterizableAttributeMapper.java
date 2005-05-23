@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.springframework.binding.AttributeMapper;
-import org.springframework.binding.expression.ExpressionEvaluatorFactory;
 import org.springframework.util.Assert;
 
 /**
