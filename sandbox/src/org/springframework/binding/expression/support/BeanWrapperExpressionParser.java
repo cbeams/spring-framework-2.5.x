@@ -15,23 +15,15 @@
  */
 package org.springframework.binding.expression.support;
 
-
-import ognl.Ognl;
-import ognl.OgnlException;
-
 import org.springframework.binding.expression.ExpressionEvaluator;
 import org.springframework.binding.expression.ParseException;
 
 /**
- * An expression parser that parses Ognl expressions.
+ * An expression parser that parses bean wrapper expressions.
  * @author Keith
  */
-public class OgnlExpressionParser extends AbstractExpressionParser {
+public class BeanWrapperExpressionParser extends AbstractExpressionParser {
 	public ExpressionEvaluator parseExpression(String expressionString) throws ParseException {
-		try {
-			return new OgnlExpressionEvaluator(Ognl.parseExpression(cutExpression(expressionString)));
-		} catch (OgnlException e) {
-			throw new ParseException(expressionString, e);
-		}
+		return new BeanWrapperEvaluator(expressionString);
 	}
 }

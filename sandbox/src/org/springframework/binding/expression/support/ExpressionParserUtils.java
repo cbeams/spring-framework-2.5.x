@@ -15,9 +15,7 @@
  */
 package org.springframework.binding.expression.support;
 
-import org.springframework.binding.expression.ExpressionEvaluator;
 import org.springframework.binding.expression.ExpressionParser;
-import org.springframework.binding.expression.ParseException;
 
 /**
  * Static utilities dealing with <code>ExpressionParser</code>s.
@@ -41,15 +39,7 @@ public class ExpressionParserUtils {
 		}
 		catch (ClassNotFoundException e) {
 			// just use spring's own bean wrapper
-			return new ExpressionParser() {
-				public boolean isExpression(String expressionString) {
-					return true;
-				}
-				
-				public ExpressionEvaluator parseExpression(String expressionString) throws ParseException {
-					return new BeanWrapperEvaluator(expressionString);
-				}
-			};
+			return new BeanWrapperExpressionParser();
 		}
-	}
+	}	
 }
