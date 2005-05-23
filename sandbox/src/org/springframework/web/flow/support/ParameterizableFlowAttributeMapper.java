@@ -26,6 +26,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeMapper;
+import org.springframework.binding.AttributeSource;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.support.MapAttributeSource;
 import org.springframework.binding.support.Mapping;
@@ -215,9 +216,9 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 
 	public Map createSubflowInput(RequestContext context) {
 		if (this.inputMapper != null) {
-			Map subFlowInputAttributes = new HashMap();
-			this.inputMapper.map(context.getFlowScope(), new MapAttributeSource(subFlowInputAttributes));
-			return subFlowInputAttributes;
+			Map input = new HashMap();
+			this.inputMapper.map(context, input, getMappingContext(context));
+			return input;
 		}
 		else {
 			return Collections.EMPTY_MAP;
@@ -228,8 +229,12 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 		if (this.outputMapper != null) {
 			MutableAttributeSource parentFlowScope = 
 				(MutableAttributeSource)context.getFlowContext().getActiveSession().getParent().getScope();
-			this.outputMapper.map(context.getFlowScope(), parentFlowScope);
+			this.outputMapper.map(context.getFlowScope(), parentFlowScope, getMappingContext(context));
 		}
+	}
+	
+	protected Map getMappingContext(RequestContext context) {
+		return Collections.EMPTY_MAP;
 	}
 	
 	public String toString() {

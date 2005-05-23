@@ -21,7 +21,7 @@ import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.GetPersonAction;
 import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.action.EventParameterMapperAction;
+import org.springframework.web.flow.action.AttributeMapperAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.AutowireMode;
 import org.springframework.web.flow.config.FlowBuilderException;
@@ -38,42 +38,31 @@ import org.springframework.web.flow.support.ParameterizableFlowAttributeMapper;
  */
 public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
+	private static final String GET_PERSON = "getPerson";
+
+	private static final String DISPLAY_DETAILS = "displayDetails";
+
+	private static final String SHOW_DETAILS = "showDetails";
+
 	private static final String PERSON_DETAIL = "person.Detail";
-
-	private ConversionService conversionService;
-
-	public void setConversionService(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
 
 	protected String flowId() {
 		return PERSON_DETAIL;
 	}
 
-	protected ConversionExecutor getConversionExecutor(Class targetClass) {
-		return conversionService.getConversionExecutor(String.class, targetClass);
-	}
-
 	public void buildStates() throws FlowBuilderException {
 		// get the person given a userid as input
-		addActionState("getPerson", action(GetPersonAction.class, AutowireMode.BY_TYPE), on(success(), "viewDetails"));
+		addActionState(GET_PERSON, action(GetPersonAction.class, AutowireMode.BY_TYPE), on(success(), DISPLAY_DETAILS));
 
 		// view the person details
-		addViewState("viewDetails", "person.Detail.view", new Transition[] { on(back(), "finish"),
-				on(select(), "setCollegueId") });
-
-		// set the selected colleague (chosen from the person's colleague list)
-		EventParameterMapperAction setAction = new EventParameterMapperAction(new Mapping("id", "colleagueId",
-				getConversionExecutor(Long.class)));
-		setAction.setTargetScope(ScopeType.FLOW);
-		addActionState("setCollegueId", setAction, on(success(), "person.Detail"));
+		addViewState(DISPLAY_DETAILS, "person.Detail.view", new Transition[] { on(back(), "finish"),
+				on(select(), SHOW_DETAILS) });
 
 		// view details for selected collegue
 		ParameterizableFlowAttributeMapper idMapper = new ParameterizableFlowAttributeMapper();
-		idMapper.setInputMapping(new Mapping("colleagueId", "id"));
-		addSubFlowState("person.Detail", flow("person.Detail", PersonDetailFlowBuilder.class),
-				idMapper, new Transition[] { on(finish(), "getPerson"),
-						on(error(), "error") });
+		idMapper.setInputMapping(new Mapping("sourceEvent.parameters.colleagueId", "id", converterFor(Long.class)));
+		addSubFlowState(SHOW_DETAILS, flow(PERSON_DETAIL), idMapper,
+				new Transition[] { on(finish(), GET_PERSON), on(error(), "error") });
 
 		// end
 		addEndState("finish");

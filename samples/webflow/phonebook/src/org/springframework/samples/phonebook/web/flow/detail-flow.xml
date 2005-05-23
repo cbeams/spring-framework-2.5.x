@@ -3,30 +3,24 @@
 <!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
 	"http://www.springframework.org/dtd/spring-webflow.dtd">
 
-<webflow id="person.Detail" start-state="detail.get">
+<webflow id="person.Detail" start-state="getDetails">
 
-	<action-state id="detail.get">
+	<action-state id="getDetails">
 		<action class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction" autowire="byType"/>
 		<transition on="success" to="detail.view"/>
 		<transition on="error" to="error"/>
 	</action-state>
 
-	<view-state id="detail.view" view="person.Detail.view">
+	<view-state id="displayDetails" view="person.Detail.view">
 		<transition on="back" to="finish"/>
-		<transition on="select" to="colleagueId.set"/>
+		<transition on="select" to="showColleagueDetails"/>
 	</view-state>
 
-	<action-state id="colleagueId.set">
-		<action bean="person.Detail.colleagueId.set"/>
-		<transition on="success" to="colleague.Detail"/>
-		<transition on="error" to="error"/>
-	</action-state>
-	
-	<subflow-state id="colleague.Detail" flow="person.Detail">
+	<subflow-state id="showColleagueDetails" flow="person.Detail">
 		<attribute-mapper>
-			<input name="colleagueId" as="id"/>
+			<input value="${sourceEvent.parameter.colleagueId}" as="id" type="long"/>
 		</attribute-mapper>
-		<transition on="finish" to="detail.get"/>
+		<transition on="finish" to="getDetails"/>
 		<transition on="error" to="error"/>
 	</subflow-state>
 	

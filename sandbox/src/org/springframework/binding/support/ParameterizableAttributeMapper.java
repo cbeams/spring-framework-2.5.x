@@ -25,8 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.springframework.binding.AttributeMapper;
-import org.springframework.binding.AttributeSource;
-import org.springframework.binding.MutableAttributeSource;
+import org.springframework.binding.expression.ExpressionEvaluatorFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -148,7 +147,7 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 			}
 			else {
 				Assert.isInstanceOf(String.class, element, "ParameterizableFlowModelMapper key or value: ");
-				mappings.add(new Mapping((String)element));
+				mappings.add(new Mapping((String)element)); 
 			}
 		}
 	}
@@ -168,12 +167,12 @@ public class ParameterizableAttributeMapper implements AttributeMapper, Serializ
 	/**
 	 * Map data from one map to another map using specified mappings.
 	 */
-	public void map(AttributeSource source, MutableAttributeSource target) {
+	public void map(Object source, Object target, Map context) {
 		if (mappings != null) {
 			Iterator it = this.mappings.iterator();
 			while (it.hasNext()) {
 				Mapping mapping = (Mapping)it.next();
-				mapping.map(source, target);
+				mapping.map(source, target, context);
 			}
 		}
 	}

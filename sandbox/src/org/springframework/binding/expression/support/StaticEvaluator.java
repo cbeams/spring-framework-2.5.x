@@ -40,7 +40,7 @@ public class StaticEvaluator implements ExpressionEvaluator {
 		this.value = value;
 	}
 
-	public Object evaluate(Object object, Map context) throws EvaluationException {
+	public Object evaluate(Object target, Map context) throws EvaluationException {
 		return value;
 	}
 	

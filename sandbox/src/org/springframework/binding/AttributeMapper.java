@@ -15,6 +15,8 @@
  */
 package org.springframework.binding;
 
+import java.util.Map;
+
 /**
  * A lightweight service interface for mapping between two attribute maps.
  * <p>
@@ -29,7 +31,8 @@ public interface AttributeMapper {
 	 * Map data from one map to another map.
 	 * @param source The accessor to the source map
 	 * @param target The setter to the target map
+	 * @param context the context
 	 */
-	public void map(AttributeSource source, MutableAttributeSource target);
+	public void map(Object source, Object target, Map context);
 
 }

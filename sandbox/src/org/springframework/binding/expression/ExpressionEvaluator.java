@@ -27,10 +27,10 @@ public interface ExpressionEvaluator {
 	
 	/**
 	 * Evaluate the expression encapsulated by this evaluator, returning the result.
-	 * @param object The expression input object
+	 * @param target The expression target object
 	 * @param context The expression evaluation context
 	 * @return the evaluation result
 	 * @throws EvaluationException an exception occured during evaluation.
 	 */
-	public Object evaluate(Object object, Map context) throws EvaluationException;
+	public Object evaluate(Object target, Map context) throws EvaluationException;
 }

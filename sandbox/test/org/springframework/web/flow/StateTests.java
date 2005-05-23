@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.support.Mapping;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.action.EventParameterMapperAction;
+import org.springframework.web.flow.action.AttributeMapperAction;
 import org.springframework.web.flow.config.TextToTransitionCriteria;
 import org.springframework.web.flow.config.TextToViewDescriptorCreator;
 import org.springframework.web.flow.execution.FlowExecution;
@@ -153,7 +153,7 @@ public class StateTests extends TestCase {
 		new ViewState(subFlow, "subFlowViewState", view("mySubFlowViewName"), new Transition(on("submit"), "finish"));
 		new EndState(subFlow, "finish");
 		Flow flow = new Flow("myFlow");
-		new ActionState(flow, "mapperState", new EventParameterMapperAction(new Mapping("parentInputAttribute"), ScopeType.FLOW), new Transition(on("success"), "subFlowState"));
+		new ActionState(flow, "mapperState", new AttributeMapperAction(new Mapping("sourceEvent.parameters.parentInputAttribute", "flowScope.parentInputAttribute")), new Transition(on("success"), "subFlowState"));
 		new SubflowState(flow, "subFlowState", subFlow, new InputOutputMapper(), new Transition(on("finish"), "finish"));
 		new EndState(flow, "finish", view("myParentFlowEndingViewName"));
 		FlowExecution flowExecution = new FlowExecutionImpl(flow);

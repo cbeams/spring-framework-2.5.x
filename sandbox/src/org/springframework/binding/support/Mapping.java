@@ -16,14 +16,15 @@
 package org.springframework.binding.support;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.binding.AttributeSource;
-import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.convert.ConversionExecutor;
-import org.springframework.util.Assert;
+import org.springframework.binding.expression.ExpressionEvaluator;
+import org.springframework.binding.expression.ExpressionEvaluatorFactory;
+import org.springframework.binding.expression.ExpressionEvaluatorSetter;
 
 /**
  * A single mapping definition, encapulating the information neccessary to map a
@@ -33,99 +34,75 @@ import org.springframework.util.Assert;
 public class Mapping implements Serializable {
 	protected static final Log logger = LogFactory.getLog(Mapping.class);
 
-	private String sourceAttributeName;
+	private ExpressionEvaluator sourceAttribute;
 
-	private String targetAttributeName;
+	private ExpressionEvaluatorSetter targetAttribute;
 
-	private ConversionExecutor valueConversionExecutor;
+	private ConversionExecutor valueConverter;
 
-	/**
-	 * Creates a mapping definition that will map the specified attribute name
-	 * from a source attribute map to a target map with the same name and data
-	 * type.
-	 * @param sourceAttributeName The source attribute name
-	 */
-	public Mapping(String sourceAttributeName) {
-		setSourceAttributeName(sourceAttributeName);
-		this.targetAttributeName = sourceAttributeName;
+	public Mapping(String sourceTargetAttributeExpressionString) {
+		this(ExpressionEvaluatorFactory.evaluatorFor(sourceTargetAttributeExpressionString),
+			 ExpressionEvaluatorFactory.setterFor(sourceTargetAttributeExpressionString));
+	}
+
+	public Mapping(String sourceTargetAttributeExpressionString, ConversionExecutor valueConverter) {
+		this(ExpressionEvaluatorFactory.evaluatorFor(sourceTargetAttributeExpressionString),
+			 ExpressionEvaluatorFactory.setterFor(sourceTargetAttributeExpressionString));
+		this.valueConverter = valueConverter;
+	}
+
+	public Mapping(String sourceAttributeExpressionString, String targetAttributeExpressionString) {
+		this(ExpressionEvaluatorFactory.evaluatorFor(sourceAttributeExpressionString),
+			 ExpressionEvaluatorFactory.setterFor(targetAttributeExpressionString));
+	}
+
+	public Mapping(String sourceAttributeExpressionString, String targetAttributeExpressionString,
+			ConversionExecutor valueConverter) {
+		this(ExpressionEvaluatorFactory.evaluatorFor(sourceAttributeExpressionString),
+			 ExpressionEvaluatorFactory.setterFor(targetAttributeExpressionString), valueConverter);
+	}
+
+	public Mapping(ExpressionEvaluatorSetter sourceTargetAttribute) {
+		this.sourceAttribute = sourceTargetAttribute;
+		this.targetAttribute = sourceTargetAttribute;
+	}
+
+	public Mapping(ExpressionEvaluator sourceAttribute, ExpressionEvaluatorSetter targetAttribute) {
+		this.sourceAttribute = sourceAttribute;
+		this.targetAttribute = targetAttribute;
+	}
+
+	public Mapping(ExpressionEvaluator sourceAttribute, ExpressionEvaluatorSetter targetAttribute,
+			ConversionExecutor valueConverter) {
+		this.sourceAttribute = sourceAttribute;
+		this.targetAttribute = targetAttribute;
+		this.valueConverter = valueConverter;
 	}
 
 	/**
-	 * Creates a mapping definition that will map the specified attribute name
-	 * from a source attribute map to a target map with the same name. The type
-	 * converter will be applied to the target value during the conversion.
-	 * @param sourceAttributeName The source attribute name
-	 * @param valueConversionExecutor the type converter
+	 * Map the <code>sourceAttribute</code> in to the
+	 * <code>targetAttribute</code> target map, performing type conversion
+	 * if necessary.
+	 * @param source The source
+	 * @param target The target
 	 */
-	public Mapping(String sourceAttributeName, ConversionExecutor valueConversionExecutor) {
-		setSourceAttributeName(sourceAttributeName);
-		this.targetAttributeName = sourceAttributeName;
-		this.valueConversionExecutor = valueConversionExecutor;
-	}
-
-	/**
-	 * Creates a mapping definition that will map the specified attribute name
-	 * from a source attribute map to a target map with the specified target
-	 * name.
-	 * @param sourceAttributeName The source attribute name
-	 * @param targetAttributeName The target attribute name
-	 */
-	public Mapping(String sourceAttributeName, String targetAttributeName) {
-		setSourceAttributeName(sourceAttributeName);
-		this.targetAttributeName = targetAttributeName;
-	}
-
-	/**
-	 * Creates a mapping definition that will map the specified attribute name
-	 * from a source attribute map to a target map with the specified target
-	 * name. The type converter will be applied to the target value during the
-	 * conversion.
-	 * @param sourceAttributeName The source attribute name
-	 * @param targetAttributeName The target attribute name
-	 * @param valueConversionExecutor the type converter
-	 */
-	public Mapping(String sourceAttributeName, String targetAttributeName, ConversionExecutor valueConversionExecutor) {
-		setSourceAttributeName(sourceAttributeName);
-		this.targetAttributeName = targetAttributeName;
-		this.valueConversionExecutor = valueConversionExecutor;
-	}
-
-	private void setSourceAttributeName(String sourceAttributeName) {
-		Assert.notNull(sourceAttributeName, "The source attribute name is required");
-		this.sourceAttributeName = sourceAttributeName;
-	}
-
-	/**
-	 * Map the <code>sourceAttributeName</code> in the source map to the
-	 * <code>targetAttributeName</code> target map, performing type conversion
-	 * if neccessary.
-	 * @param source The source map accessor
-	 * @param target The target map accessor
-	 */
-	public void map(AttributeSource source, MutableAttributeSource target) {
+	public void map(Object source, Object target, Map mappingContext) {
 		// get source value
-		if (source.containsAttribute(sourceAttributeName)) {
-			Object sourceValue = source.getAttribute(sourceAttributeName);
-			Object targetValue = sourceValue;
-			// convert source value to a expected target type if neccessary
-			if (valueConversionExecutor != null) {
-				targetValue = valueConversionExecutor.call(sourceValue);
-			}
-			// set target value
-			if (logger.isDebugEnabled()) {
-				logger.debug("Mapping source attribute '" + sourceAttributeName + "' with value " + sourceValue + " to" +
-						"target attribute '" + targetAttributeName + "' with value " + targetValue);
-			}
-			target.setAttribute(targetAttributeName, targetValue);
-		} else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No source attribute '" + sourceAttributeName + "' found in source '" + source + "' -- not mapping to perform");
-			}
+		Object sourceValue = sourceAttribute.evaluate(source, mappingContext);
+		Object targetValue = sourceValue;
+		if (valueConverter != null) {
+			targetValue = valueConverter.call(sourceValue);
 		}
+		// set target value
+		if (logger.isDebugEnabled()) {
+			logger.debug("Mapping source attribute '" + sourceAttribute + "' with value " + sourceValue + " to" +
+					"target attribute '" + targetAttribute + "' with value " + targetValue);
+		}
+		targetAttribute.set(target, targetValue, mappingContext);
 	}
 
 	public String toString() {
-		return new ToStringBuilder(this).append(sourceAttributeName + "->" + targetAttributeName).
-			append("valueConversionExecutor", valueConversionExecutor).toString();
+		return new ToStringBuilder(this).append(sourceAttribute + "->" + targetAttribute).
+			append("valueConversionExecutor", valueConverter).toString();
 	}
 }

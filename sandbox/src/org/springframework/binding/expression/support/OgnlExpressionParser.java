@@ -22,6 +22,7 @@ import ognl.Ognl;
 import ognl.OgnlException;
 
 import org.springframework.binding.expression.EvaluationException;
+import org.springframework.binding.expression.ExpressionEvaluatorSetter;
 import org.springframework.binding.expression.ExpressionEvaluator;
 import org.springframework.binding.expression.ExpressionParser;
 import org.springframework.binding.expression.ParseException;
@@ -65,33 +66,50 @@ public class OgnlExpressionParser implements ExpressionParser {
 	 * Cut the expression from given criteria string and return it.
 	 */
 	private String cutExpression(String encodedCriteria) {
-		return encodedCriteria.substring(
+		if (isExpression(encodedCriteria)) {
+			return encodedCriteria.substring(
 				EXPRESSION_PREFIX.length(),
 				encodedCriteria.length() - EXPRESSION_SUFFIX.length());
+		} else {
+			return encodedCriteria;
+		}
 	}
 	
 	/**
 	 * Evaluates parsed ognl expressions.
 	 * @author Keith Donald
 	 */
-	private static class OgnlExpressionEvaluator implements ExpressionEvaluator {
+	private static class OgnlExpressionEvaluator implements ExpressionEvaluatorSetter {
 		private Object expression;
 		
 		public OgnlExpressionEvaluator(Object expression) {
 			this.expression = expression;
 		}
 		
-		public Object evaluate(Object object, Map context) throws EvaluationException {
+		public Object evaluate(Object target, Map context) throws EvaluationException {
 			try {
-				Assert.notNull(object, "The object is required");
+				Assert.notNull(target, "The target object is required");
 				if (context == null) {
 					context = Collections.EMPTY_MAP;
 				}
-				return Ognl.getValue(expression, context, object);
+				return Ognl.getValue(expression, context, target);
 			} catch (OgnlException e) {
 				throw new EvaluationException(expression, e);
 			}
 		}
+		
+		public void set(Object target, Object value, Map context) {
+			try {
+				Assert.notNull(target, "The target object is required");
+				if (context == null) {
+					context = Collections.EMPTY_MAP;
+				}
+				Ognl.setValue(expression, context, target, value);
+			} catch (OgnlException e) {
+				throw new EvaluationException(expression, e);
+			}
+		}
+
 		
 		public String toString() {
 			return String.valueOf(expression);
