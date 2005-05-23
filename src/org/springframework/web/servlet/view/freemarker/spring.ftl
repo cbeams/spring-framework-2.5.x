@@ -175,8 +175,7 @@
 	<@bind path/>
 	<select name="${status.expression}" ${attributes}>
 		<#list options?keys as value>
-		<option value="${value}"
-		<#if stringStatusValue == value>selected="selected"</#if>>${options[value]}</option>
+		<option value="${value}"<@checkSelected value/>>${options[value]}</option>
 		</#list>
 	</select>
 </#macro>
@@ -272,15 +271,30 @@
 </#macro>
 
 <#--
- * listContains
+ * checkSelected
+ *
+ * Check a value in a list to see if it is the currently selected value.
+ * If so, add the 'selected="selected"' text to the output.
+ * Handles values of numeric and string types.
+ * This function is used internally but can be accessed by user code if required.
+ *
+ * @param value the current value in a list iteration
+-->
+<#macro checkSelected value>
+	<#if stringStatusValue?is_number && stringStatusValue == value?number>selected="selected"</#if>
+	<#if stringStatusValue?is_string && stringStatusValue == value>selected="selected"</#if>
+</#macro>
+
+<#--
+ * contains
  *
  * Macro to return true if the list contains the scalar, false if not.
- * Surprisingly not a FreeMarker builtin. This function is used internally but
- * can be accessed by user code if required.
+ * Surprisingly not a FreeMarker builtin.
+ * This function is used internally but can be accessed by user code if required.
  *
  * @param list the list to search for the item
  * @param item the item to search for in the list
- * @return true if item is found in the list, false otherwise.
+ * @return true if item is found in the list, false otherwise
 -->
 <#function contains list item>
 	<#list list as nextInList>
