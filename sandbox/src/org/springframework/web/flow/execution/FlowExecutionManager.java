@@ -397,7 +397,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 			// make the flow execution itself available in the model
 			viewDescriptor.addObject(FLOW_EXECUTION_ATTRIBUTE, flowExecution);
 			// add some convenience values for views that aren't easily JavaBean aware
-			viewDescriptor.addObject(CURRENT_STATE_ID_ATTRIBUTE, flowExecution.getActiveSession().getCurrentState().getId());
+			viewDescriptor.addObject(CURRENT_STATE_ID_ATTRIBUTE, flowExecution.getCurrentState().getId());
 		}
 		return viewDescriptor;
 	}
