@@ -7,7 +7,7 @@
 
 	<action-state id="getDetails">
 		<action class="org.springframework.samples.phonebook.web.flow.action.GetPersonAction" autowire="byType"/>
-		<transition on="success" to="detail.view"/>
+		<transition on="success" to="displayDetails"/>
 		<transition on="error" to="error"/>
 	</action-state>
 

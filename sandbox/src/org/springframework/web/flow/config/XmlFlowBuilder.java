@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.binding.MutableAttributeSource;
+import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.expression.EvaluationException;
 import org.springframework.binding.expression.ExpressionEvaluator;
 import org.springframework.binding.expression.ExpressionEvaluatorFactory;
@@ -804,17 +805,23 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		String value = element.getAttribute(VALUE_ATTRIBUTE);
 		String as = element.getAttribute(AS_ATTRIBUTE);
+		String type = element.getAttribute(TYPE_ATTRIBUTE);
+		ConversionExecutor valueConverter = null;
+		if (StringUtils.hasText(type)) {
+			Class targetType = getConversionService().withAlias(type);
+			valueConverter = converterFor(targetType);
+		}
 		if (StringUtils.hasText(name)) {
 			if (StringUtils.hasText(as)) {
-				return new Mapping(flowScope(name, inputMapping), setterFor(as));
+				return new Mapping(flowScope(name, inputMapping), setterFor(as), valueConverter);
 			}
 			else {
-				return new Mapping(flowScope(name, inputMapping), setterFor(name));
+				return new Mapping(flowScope(name, inputMapping), setterFor(name), valueConverter);
 			}
 		}
 		else if (StringUtils.hasText(value)) {
 			Assert.hasText(as, "The 'as' attribute is required with the 'value' attribute");
-			return new Mapping(evaluatorFor(value), setterFor(as));
+			return new Mapping(evaluatorFor(value), setterFor(as), valueConverter);
 		}
 		else {
 			throw new FlowBuilderException(this, "Name or value is required in a mapping definition");
