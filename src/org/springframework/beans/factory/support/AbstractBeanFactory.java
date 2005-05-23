@@ -107,6 +107,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** BeanPostProcessors to apply in createBean */
 	private final List beanPostProcessors = new ArrayList();
 
+	/** Indicates whether any DestructionAwareBeanPostProcessors have been registered */
 	private boolean hasDestructionAwareBeanPostProcessors;
 
 	/** Map from alias to canonical bean name */
@@ -413,6 +414,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
 			this.hasDestructionAwareBeanPostProcessors = true;
 		}
+	}
+
+	public int getBeanPostProcessorCount() {
+		return this.beanPostProcessors.size();
 	}
 
 	/**
