@@ -29,6 +29,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.binding.MutableAttributeSource;
+import org.springframework.binding.expression.EvaluationException;
+import org.springframework.binding.expression.ExpressionEvaluator;
+import org.springframework.binding.expression.ExpressionEvaluatorFactory;
+import org.springframework.binding.expression.ExpressionEvaluatorSetter;
 import org.springframework.binding.format.InvalidFormatException;
 import org.springframework.binding.format.support.LabeledEnumFormatter;
 import org.springframework.binding.support.MapAttributeSource;
@@ -45,6 +49,7 @@ import org.springframework.web.flow.DecisionState;
 import org.springframework.web.flow.EndState;
 import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
+import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.SubflowState;
 import org.springframework.web.flow.Transition;
@@ -774,7 +779,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 					List inputMappings = new ArrayList(inputElements.size());
 					Iterator it = inputElements.iterator();
 					while (it.hasNext()) {
-						inputMappings.add(parseMapping((Element)it.next()));
+						inputMappings.add(parseMapping((Element)it.next(), true));
 					}
 					attributeMapper.setInputMappings(inputMappings);
 				}
@@ -783,7 +788,7 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 					List outputMappings = new ArrayList(outputElements.size());
 					Iterator it = outputElements.iterator();
 					while (it.hasNext()) {
-						outputMappings.add(parseMapping((Element)it.next()));
+						outputMappings.add(parseMapping((Element)it.next(), false));
 					}
 					attributeMapper.setOutputMappings(outputMappings);
 				}
@@ -795,24 +800,53 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 	/**
 	 * Parse a single inline attribute mapping definition.
 	 */
-	protected Mapping parseMapping(Element element) {
+	protected Mapping parseMapping(Element element, boolean inputMapping) {
 		String name = element.getAttribute(NAME_ATTRIBUTE);
 		String value = element.getAttribute(VALUE_ATTRIBUTE);
 		String as = element.getAttribute(AS_ATTRIBUTE);
 		if (StringUtils.hasText(name)) {
 			if (StringUtils.hasText(as)) {
-				return new Mapping(name, as);
+				return new Mapping(flowScope(name, inputMapping), setterFor(as));
 			}
 			else {
-				return new Mapping(name);
+				return new Mapping(flowScope(name, inputMapping), setterFor(name));
 			}
 		}
 		else if (StringUtils.hasText(value)) {
 			Assert.hasText(as, "The 'as' attribute is required with the 'value' attribute");
-			return new Mapping(value, as);
+			return new Mapping(evaluatorFor(value), setterFor(as));
 		}
 		else {
 			throw new FlowBuilderException(this, "Name or value is required in a mapping definition");
+		}
+	}
+	
+	protected ExpressionEvaluator flowScope(String name, boolean inputMapping) {
+		if (inputMapping) {
+			return new FlowScopeExpressionEvaluator(evaluatorFor(name));
+		} else {
+			return evaluatorFor(name);
+		}
+	}
+	
+	protected ExpressionEvaluator evaluatorFor(String expressionString) {
+		return ExpressionEvaluatorFactory.evaluatorFor(expressionString);
+	}
+	
+	protected ExpressionEvaluatorSetter setterFor(String expressionString) {
+		return ExpressionEvaluatorFactory.setterFor(expressionString);
+	}
+	
+	private static class FlowScopeExpressionEvaluator implements ExpressionEvaluator {
+		private ExpressionEvaluator evaluator;
+		
+		public FlowScopeExpressionEvaluator(ExpressionEvaluator evaluator) {
+			this.evaluator = evaluator;
+		}
+		
+		public Object evaluate(Object target, Map context) throws EvaluationException {
+			RequestContext requestContext = (RequestContext)target;
+			return evaluator.evaluate(requestContext.getFlowScope(), context);
 		}
 	}
 }
