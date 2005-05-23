@@ -64,6 +64,11 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 
 	/**
+	 * Return the current number of registered BeanPostProcessors.
+	 */
+	int getBeanPostProcessorCount();
+
+	/**
 	 * Given a bean name, create an alias. We typically use this method to
 	 * support names that are illegal within XML ids (used for bean names).
 	 * <p>Typically invoked during factory configuration, but can also be
