@@ -15,7 +15,6 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
-import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction;
 import org.springframework.web.flow.Transition;
@@ -64,7 +63,7 @@ public class SearchPersonFlowBuilder extends AbstractFlowBuilder {
 
 		// view details for selected user id
 		ParameterizableFlowAttributeMapper idMapper = new ParameterizableFlowAttributeMapper();
-		idMapper.setInputMapping(new Mapping("sourceEvent.parameters.id", "flowScope.id", converterFor(Long.class)));
+		idMapper.setInputMapping(new Mapping("sourceEvent.parameters.id", "id", converterFor(Long.class)));
 		addSubFlowState(SHOW_DETAILS, flow("person.Detail", PersonDetailFlowBuilder.class), idMapper,
 				new Transition[] { on(finish(), EXECUTE_QUERY), on(error(), "error") });
 

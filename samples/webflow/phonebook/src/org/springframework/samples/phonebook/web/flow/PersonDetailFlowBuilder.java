@@ -15,13 +15,9 @@
  */
 package org.springframework.samples.phonebook.web.flow;
 
-import org.springframework.binding.convert.ConversionExecutor;
-import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.support.Mapping;
 import org.springframework.samples.phonebook.web.flow.action.GetPersonAction;
-import org.springframework.web.flow.ScopeType;
 import org.springframework.web.flow.Transition;
-import org.springframework.web.flow.action.AttributeMapperAction;
 import org.springframework.web.flow.config.AbstractFlowBuilder;
 import org.springframework.web.flow.config.AutowireMode;
 import org.springframework.web.flow.config.FlowBuilderException;
@@ -42,7 +38,7 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 	private static final String DISPLAY_DETAILS = "displayDetails";
 
-	private static final String SHOW_DETAILS = "showDetails";
+	private static final String SHOW_COLLEAGUE_DETAILS = "showColleagueDetails";
 
 	private static final String PERSON_DETAIL = "person.Detail";
 
@@ -56,12 +52,12 @@ public class PersonDetailFlowBuilder extends AbstractFlowBuilder {
 
 		// view the person details
 		addViewState(DISPLAY_DETAILS, "person.Detail.view", new Transition[] { on(back(), "finish"),
-				on(select(), SHOW_DETAILS) });
+				on(select(), SHOW_COLLEAGUE_DETAILS) });
 
 		// view details for selected collegue
 		ParameterizableFlowAttributeMapper idMapper = new ParameterizableFlowAttributeMapper();
-		idMapper.setInputMapping(new Mapping("sourceEvent.parameters.colleagueId", "id", converterFor(Long.class)));
-		addSubFlowState(SHOW_DETAILS, flow(PERSON_DETAIL), idMapper,
+		idMapper.setInputMapping(new Mapping("sourceEvent.parameters.id", "id", converterFor(Long.class)));
+		addSubFlowState(SHOW_COLLEAGUE_DETAILS, flow(PERSON_DETAIL), idMapper,
 				new Transition[] { on(finish(), GET_PERSON), on(error(), "error") });
 
 		// end
