@@ -34,15 +34,6 @@
 
 	<bean id="person.Search.executeQuery" class="org.springframework.samples.phonebook.web.flow.action.ExecuteQueryAction" autowire="byType"/>
 
-	<!-- The event parameter mapper action sets request parameters as attributes in the flow model.
-	     The exact mapping(s) policies are fully configurable; in this case, the
-	     "id" request parameter is mapped to the "id" attribute and converted
-	     to a java.lang.Long in the target flow model!  -->
-	<bean id="person.Search.id.set" class="org.springframework.web.flow.action.EventParameterMapperAction">
-		<property name="mapping" value="id,java.lang.Long"/>
-		<property name="targetScopeAsString" value="flow"/>
-	</bean>
-
 	<!-- detail flow beans -->
 
 	<!-- xml FlowBuilder definition for the detail flow -->
@@ -63,15 +54,6 @@
 	</bean>
 	-->
 	
-	<!-- The event parameter mapper action sets request parameters as attributes in flow scope.
-	     The exact mapping(s) policies are fully configurable; in this case, the
-	     "id" request parameter is mapped to the "colleagueId" attribute and converted
-	     to a java.lang.Long in the target flow scope!  -->
-	<bean id="person.Detail.colleagueId.set" class="org.springframework.web.flow.action.EventParameterMapperAction">
-		<property name="mapping" value="id->colleagueId,java.lang.Long"/>
-		<property name="targetScopeAsString" value="flow"/>
-	</bean>
-		
 	<!-- A type conversion service, a more flexible/threadsafe/lightweight alternative to the PropertyEditor! -->
 	<bean id="conversion.service" class="org.springframework.binding.convert.support.DefaultConversionService" autowire="byType"/>
 
