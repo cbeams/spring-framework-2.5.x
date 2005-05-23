@@ -90,6 +90,8 @@ import org.springframework.util.Assert;
  */
 public class MimeMessageHelper {
 
+	private static final String MULTIPART_SUBTYPE_MIXED = "mixed";
+
 	private static final String MULTIPART_SUBTYPE_RELATED = "related";
 
 	private static final String MULTIPART_SUBTYPE_ALTERNATIVE = "alternative";
@@ -104,6 +106,8 @@ public class MimeMessageHelper {
 
 
 	private final MimeMessage mimeMessage;
+
+	private MimeMultipart rootMimeMultipart;
 
 	private MimeMultipart mimeMultipart;
 
@@ -175,8 +179,12 @@ public class MimeMessageHelper {
 
 		this.mimeMessage = mimeMessage;
 		if (multipart) {
+			this.rootMimeMultipart = new MimeMultipart(MULTIPART_SUBTYPE_MIXED);
 			this.mimeMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);
-			this.mimeMessage.setContent(this.mimeMultipart);
+			MimeBodyPart rootBodyPart = new MimeBodyPart();
+			rootBodyPart.setContent(this.mimeMultipart);
+			this.rootMimeMultipart.addBodyPart(rootBodyPart);
+			this.mimeMessage.setContent(this.rootMimeMultipart);
 		}
 		this.encoding = (encoding != null ? encoding : getDefaultEncoding(mimeMessage));
 		this.fileTypeMap = getDefaultFileTypeMap(mimeMessage);
@@ -196,22 +204,47 @@ public class MimeMessageHelper {
 	 * @see #MimeMessageHelper(MimeMessage, boolean)
 	 */
 	public final boolean isMultipart() {
-		return (this.mimeMultipart != null);
+		return (this.rootMimeMultipart != null);
 	}
 
 	/**
-	 * Return the underlying MIME multipart object, if any.
-	 * Cam be used to manually add body parts etc.
-	 * @throws IllegalStateException if this helper is not in multipart mode
-	 * @see #isMultipart
-	 * @see javax.mail.internet.MimeMultipart#addBodyPart
+	 * Throw an IllegalStateException if this helper is not in multipart mode.
 	 */
-	public final MimeMultipart getMimeMultipart() throws IllegalStateException {
-		if (this.mimeMultipart == null) {
+	private void checkMultipart() throws IllegalStateException {
+		if (!isMultipart()) {
 			throw new IllegalStateException("Not in multipart mode - " +
 			    "create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
 			    "if you need to set alternative texts or add inline elements or attachments.");
 		}
+	}
+
+	/**
+	 * Return the root MIME "multipart/mixed" object, if any.
+	 * Can be used to manually add attachments.
+	 * <p>This will be the direct content of the MimeMessage,
+	 * in case of a multipart mail.
+	 * @throws IllegalStateException if this helper is not in multipart mode
+	 * @see #isMultipart
+	 * @see #getMimeMessage
+	 * @see javax.mail.internet.MimeMultipart#addBodyPart
+	 */
+	public final MimeMultipart getRootMimeMultipart() throws IllegalStateException {
+		checkMultipart();
+		return this.rootMimeMultipart;
+	}
+
+	/**
+	 * Return the underlying MIME "multipart/related" object, if any.
+	 * Can be used to manually add body parts, inline elements, etc.
+	 * <p>This will be nested within the root MimeMultipart,
+	 * in case of a multipart mail.
+	 * @throws IllegalStateException if this helper is not in multipart mode
+	 * @see #isMultipart
+	 * @see #getRootMimeMultipart
+	 * @see javax.mail.internet.MimeMultipart#addBodyPart
+	 */
+	public final MimeMultipart getMimeMultipart() throws IllegalStateException {
+		checkMultipart();
 		return this.mimeMultipart;
 	}
 
@@ -762,7 +795,7 @@ public class MimeMessageHelper {
 		MimeBodyPart mimeBodyPart = new MimeBodyPart();
 		mimeBodyPart.setFileName(attachmentFilename);
 		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
-		getMimeMultipart().addBodyPart(mimeBodyPart);
+		getRootMimeMultipart().addBodyPart(mimeBodyPart);
 	}
 
 	/**
