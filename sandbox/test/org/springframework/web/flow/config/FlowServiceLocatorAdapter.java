@@ -33,7 +33,7 @@ import org.springframework.web.flow.execution.ServiceLookupException;
 public class FlowServiceLocatorAdapter implements FlowServiceLocator {
 	
 	public ConversionService getConversionService() {
-		throw new UnsupportedOperationException();
+		return new FlowConversionService();
 	}
 
 	public Action createAction(Class implementationClass,
