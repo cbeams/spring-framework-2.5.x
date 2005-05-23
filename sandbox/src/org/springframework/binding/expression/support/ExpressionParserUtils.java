@@ -25,6 +25,7 @@ import org.springframework.binding.expression.ParseException;
  * @see org.springframework.binding.expression.ExpressionParser
  * 
  * @author Erwin Vervaet
+ * @author Keith Donald
  */
 public class ExpressionParserUtils {
 
@@ -39,17 +40,16 @@ public class ExpressionParserUtils {
 			return new OgnlExpressionParser();
 		}
 		catch (ClassNotFoundException e) {
-			// no expression parsing available
+			// just use spring's own bean wrapper
 			return new ExpressionParser() {
 				public boolean isExpression(String expressionString) {
-					return false;
+					return true;
 				}
 				
 				public ExpressionEvaluator parseExpression(String expressionString) throws ParseException {
-					return new StaticEvaluator(expressionString);
+					return new BeanWrapperEvaluator(expressionString);
 				}
 			};
 		}
 	}
-
 }
