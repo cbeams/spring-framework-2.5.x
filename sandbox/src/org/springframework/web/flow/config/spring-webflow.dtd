@@ -473,6 +473,12 @@
 <!ATTLIST input as CDATA #IMPLIED>
 
 <!--
+    The type of the target attribute in the subflow.  This is useful when you wish
+    to perform type conversion on the input value to adapt it to the type the subflow expects.
+-->
+<!ATTLIST input type CDATA #IMPLIED>
+
+<!--
 	A single output mapping that maps data from the subflow back up to this flow 
 	when it resumes.
 -->
@@ -499,6 +505,12 @@
 	assign a name to the value returned by the expression for storage in this flow.
 -->
 <!ATTLIST output as CDATA #IMPLIED>
+
+<!--
+    The type of the target attribute in this flow.  This is useful when you wish
+    to perform type conversion on the output value to adapt it to the type this flow expects.
+-->
+<!ATTLIST output type CDATA #IMPLIED>
 
 <!--
 	Defines an end state: a state that terminates the flow.
