@@ -49,8 +49,8 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 /**
  * Abstract BeanFactory superclass that implements default bean creation,
  * with the full capabilities specified by the RootBeanDefinition class.
- * Implements the AutowireCapableBeanFactory interface. Like the base class
- * AbstractBeanFactory, this superclass does not assume a listable bean factory.
+ * Implements the AutowireCapableBeanFactory interface in addition to
+ * AbstractBeanFactory's <code>createBean</code> method.
  *
  * <p>Provides bean creation (with constructor resolution), property population,
  * wiring (including autowiring), and initialization. Handles runtime bean
@@ -66,14 +66,15 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
  * <p>Note that this class does <i>not</i> assume or implement bean definition
  * registry capabilities. See DefaultListableBeanFactory for an implementation
  * of the ListableBeanFactory and BeanDefinitionRegistry interfaces, which
- * represent the API (or SPI) view on such a factory.
+ * represent the API (or SPI) view of such a factory.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13.02.2004
- * @see #findMatchingBeans
+ * @see AutowireCapableBeanFactory
  * @see AbstractBeanFactory#createBean
  * @see RootBeanDefinition
+ * @see #findMatchingBeans(Class)
  * @see DefaultListableBeanFactory
  * @see org.springframework.beans.factory.ListableBeanFactory
  * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
@@ -208,7 +209,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors before instantiaion of bean '" + beanName + "'");
+			logger.debug("Invoking BeanPostProcessors before instantiation of bean '" + beanName + "'");
 		}
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
@@ -1001,7 +1002,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	//---------------------------------------------------------------------
-	// Abstract method to be implemented by concrete subclasses
+	// Abstract methods to be implemented by concrete subclasses
 	//---------------------------------------------------------------------
 
 	/**
