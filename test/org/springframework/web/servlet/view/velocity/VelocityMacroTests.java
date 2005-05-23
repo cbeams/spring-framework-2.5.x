@@ -50,7 +50,8 @@ import org.springframework.web.servlet.view.DummyMacroRequestContext;
  */
 public class VelocityMacroTests extends TestCase {
 
-	private final String templateName = "test.vm";
+	private static final String TEMPLATE_FILE = "test.vm";
+
 
 	private StaticWebApplicationContext wac;
 
@@ -66,7 +67,7 @@ public class VelocityMacroTests extends TestCase {
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
-				return new TestVelocityEngine(templateName, expectedTemplate);
+				return new TestVelocityEngine(TEMPLATE_FILE, expectedTemplate);
 			}
 		};
 		wac.getDefaultListableBeanFactory().registerSingleton("velocityConfigurer", vc);
@@ -89,7 +90,7 @@ public class VelocityMacroTests extends TestCase {
 				assertEquals("juergen", status.getValue());
 			}
 		};
-		vv.setUrl(templateName);
+		vv.setUrl(TEMPLATE_FILE);
 		vv.setApplicationContext(wac);
 		vv.setExposeSpringMacroHelpers(true);
 
@@ -106,7 +107,7 @@ public class VelocityMacroTests extends TestCase {
 				fail();
 			}
 		};
-		vv.setUrl(templateName);
+		vv.setUrl(TEMPLATE_FILE);
 		vv.setApplicationContext(wac);
 		vv.setExposeSpringMacroHelpers(true);
 

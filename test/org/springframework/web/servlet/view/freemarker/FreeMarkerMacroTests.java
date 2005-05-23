@@ -47,7 +47,8 @@ import org.springframework.web.servlet.view.DummyMacroRequestContext;
  */
 public class FreeMarkerMacroTests extends TestCase {
 
-	private final String templateName = "test.ftl";
+	private static final String TEMPLATE_FILE = "test.ftl";
+
 
 	private StaticWebApplicationContext wac;
 
@@ -56,6 +57,7 @@ public class FreeMarkerMacroTests extends TestCase {
 	private HttpServletResponse expectedResponse;
 
 	private FreeMarkerConfigurer fc;
+
 
 	public void setUp() throws Exception {
 		wac = new StaticWebApplicationContext();
@@ -86,7 +88,7 @@ public class FreeMarkerMacroTests extends TestCase {
 				assertEquals("juergen", status.getValue());
 			}
 		};
-		fv.setUrl(templateName);
+		fv.setUrl(TEMPLATE_FILE);
 		fv.setApplicationContext(wac);
 		fv.setExposeSpringMacroHelpers(true);
 
@@ -103,7 +105,7 @@ public class FreeMarkerMacroTests extends TestCase {
 				fail();
 			}
 		};
-		fv.setUrl(templateName);
+		fv.setUrl(TEMPLATE_FILE);
 		fv.setApplicationContext(wac);
 		fv.setExposeSpringMacroHelpers(true);
 
