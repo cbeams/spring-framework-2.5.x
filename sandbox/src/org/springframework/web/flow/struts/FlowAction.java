@@ -222,7 +222,8 @@ public class FlowAction extends TemplateAction {
 			ActionForward forward = mapping.findForward(viewDescriptor.getViewName());
 			if (forward != null) {
 				forward = new ActionForward(forward);
-			} else {
+			}
+			else {
 				forward = new ActionForward(viewDescriptor.getViewName());
 			}
 			forward.setRedirect(viewDescriptor.isRedirect());

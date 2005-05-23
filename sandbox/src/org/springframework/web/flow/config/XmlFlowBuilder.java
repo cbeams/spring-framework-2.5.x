@@ -828,25 +828,46 @@ public class XmlFlowBuilder extends BaseFlowBuilder {
 		}
 	}
 	
+	/**
+	 * Returns an evaluator to get named attribute from the flow scope.
+	 */
 	protected ExpressionEvaluator flowScope(String name, boolean inputMapping) {
 		if (inputMapping) {
 			return new FlowScopeExpressionEvaluator(evaluatorFor(name));
-		} else {
+		}
+		else {
 			return evaluatorFor(name);
 		}
 	}
 	
+	/**
+	 * Helper that returns an expression evaluator to get a value as indicated
+	 * by given expression string.
+	 */
 	protected ExpressionEvaluator evaluatorFor(String expressionString) {
 		return ExpressionEvaluatorFactory.evaluatorFor(expressionString);
 	}
 	
+	/**
+	 * Helper that returns an expression evaluator to set a value as indicated
+	 * by given expression string.
+	 */
 	protected ExpressionEvaluatorSetter setterFor(String expressionString) {
 		return ExpressionEvaluatorFactory.setterFor(expressionString);
 	}
 	
+	/**
+	 * Expression evaluator that evaluates an expression in flow scope.
+	 */
 	private static class FlowScopeExpressionEvaluator implements ExpressionEvaluator {
+		
 		private ExpressionEvaluator evaluator;
 		
+		/**
+		 * Create a new expression evaluator that executes given evaluator
+		 * 'in flow scope'.
+		 * @param evaluator the nested evaluator to execute
+		 */
 		public FlowScopeExpressionEvaluator(ExpressionEvaluator evaluator) {
 			this.evaluator = evaluator;
 		}
