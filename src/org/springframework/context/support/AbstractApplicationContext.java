@@ -348,9 +348,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Must be called before singleton instantiation.
 	 */
 	private void invokeBeanFactoryPostProcessors() throws BeansException {
-		String[] factoryProcessorNames = getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 		// Separate between BeanFactoryPostProcessor that implement the Ordered
 		// interface and those that do not.
+		String[] factoryProcessorNames = getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 		List orderedFactoryProcessors = new ArrayList();
 		List nonOrderedFactoryProcessorNames = new ArrayList();
 		for (int i = 0; i < factoryProcessorNames.length; i++) {
@@ -361,6 +361,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				nonOrderedFactoryProcessorNames.add(factoryProcessorNames[i]);
 			}
 		}
+
 		// First, invoke the BeanFactoryPostProcessors that implement Ordered.
 		Collections.sort(orderedFactoryProcessors, new OrderComparator());
 		for (Iterator it = orderedFactoryProcessors.iterator(); it.hasNext();) {
@@ -380,6 +381,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before any instantiation of application beans.
 	 */
 	private void registerBeanPostProcessors() throws BeansException {
+		// Register BeanPostProcessorChecker that logs an info message when
+		// a bean is created during BeanPostProcessor instantiation, i.e. when
+		// a bean is not eligible for getting processed by all BeanPostProcessors.
+		final int beanProcessorTargetCount = getBeanFactory().getBeanPostProcessorCount() + 1 +
+				getBeanNamesForType(BeanPostProcessor.class, true, false).length;
+		getBeanFactory().addBeanPostProcessor(new BeanPostProcessorChecker(beanProcessorTargetCount));
+
+		// Actually fetch and register the BeanPostProcessor beans.
 		Map beanProcessorMap = getBeansOfType(BeanPostProcessor.class, true, false);
 		List beanProcessors = new ArrayList(beanProcessorMap.values());
 		Collections.sort(beanProcessors, new OrderComparator());
@@ -697,6 +706,35 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			sb.append("child of [").append(this.parent).append(']');
 		}
 		return sb.toString();
+	}
+
+
+	/**
+	 * BeanPostProcessor that logs an info message when a bean is created during
+	 * BeanPostProcessor instantiation, i.e. when a bean is not eligible for
+	 * getting processed by all BeanPostProcessors.
+	 */
+	private class BeanPostProcessorChecker implements BeanPostProcessor {
+
+		private final int beanPostProcessorTargetCount;
+
+		public BeanPostProcessorChecker(int beanPostProcessorTargetCount) {
+			this.beanPostProcessorTargetCount = beanPostProcessorTargetCount;
+		}
+
+		public Object postProcessBeforeInitialization(Object bean, String beanName) {
+			return bean;
+		}
+
+		public Object postProcessAfterInitialization(Object bean, String beanName) {
+			if (getBeanFactory().getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Bean '" + beanName + "' is not eligible for getting processed by all " +
+							"BeanPostProcessors (for example: not eligible for auto-proxying");
+				}
+			}
+			return bean;
+		}
 	}
 
 }
