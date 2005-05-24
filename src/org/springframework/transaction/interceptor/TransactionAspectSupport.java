@@ -44,10 +44,6 @@ import org.springframework.util.ClassUtils;
  * <p>Uses the <b>Strategy</b> design pattern. A PlatformTransactionManager
  * implementation will perform the actual transaction management.
  *
- * <p>This class could set JTA as default transaction manager as that
- * implementation does not need any specific configuration. JTA is
- * <i>not</i> the default though to avoid unnecessary dependencies.
- * 
  * <p>A transaction aspect is serializable if its PlatformTransactionManager
  * and TransactionAttributeSource are serializable.
  *
@@ -66,12 +62,11 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	private static ThreadLocal currentTransactionInfo = new ThreadLocal();
 
 	/**
-	 * Return the transaction transactionStatus of the current method invocation.
+	 * Return the transaction status of the current method invocation.
 	 * Mainly intended for code that wants to set the current transaction
 	 * rollback-only but not throw an application exception.
-	 * @throws NoTransactionException
-	 * if the transaction info cannot be found, because the method was invoked
-	 * outside an AOP invocation context
+	 * @throws NoTransactionException if the transaction info cannot be found,
+	 * because the method was invoked outside an AOP invocation context
 	 */
 	public static TransactionStatus currentTransactionStatus() throws NoTransactionException {
 		return currentTransactionInfo().transactionStatus;
@@ -80,17 +75,20 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.
 	 * Only subclasses that cannot handle all operations in one method,
-	 * such as an AspectJ aspect involving distinct before and after
-	 * advice, need to use this mechanism to get at the current
-	 * TransactionInfo. An around advice such as an AOP Alliance
-	 * MethodInterceptor can hold a reference to the TransactionInfo
-	 * throughout the aspect method.
-	 * A TransactionInfo will be returned even if no transaction was
-	 * created. The TransactionInfo.hasTransaction() method can be used
-	 * to query this.
+	 * such as an AspectJ aspect involving distinct before and after advice,
+	 * need to use this mechanism to get at the current TransactionInfo.
+	 * An around advice such as an AOP Alliance MethodInterceptor can hold a
+	 * reference to the TransactionInfo throughout the aspect method.
+	 * <p>A TransactionInfo will be returned even if no transaction was created.
+	 * The <code>TransactionInfo.hasTransaction()</code> method can be used to query this.
+	 * <p>To find out about specific transaction characteristics, consider using
+	 * TransactionSynchronizationManager's <code>isSynchronizationActive()</code>
+	 * and/or <code>isActualTransactionActive()</code> methods.
 	 * @return TransactionInfo bound to this thread
-	 * @throws NoTransactionException if no transaction has been created
-	 * by an aspect
+	 * @throws NoTransactionException if no transaction has been created by an aspect
+	 * @see TransactionInfo#hasTransaction()
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isSynchronizationActive()
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive()
 	 */
 	protected static TransactionInfo currentTransactionInfo() throws NoTransactionException {
 		TransactionInfo info = (TransactionInfo) currentTransactionInfo.get();
