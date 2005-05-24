@@ -66,6 +66,7 @@ arbitrary number of queries, and import declarations of arbitrary classes.
 	subselect?,
 	cache?,
 	synchronize*,
+	comment?,
 	(id|composite-id),
 	discriminator?,
 	(version|timestamp)?,
@@ -125,6 +126,7 @@ arbitrary number of queries, and import declarations of arbitrary classes.
 
 <!ELEMENT join ( 
 	subselect?,
+	comment?,
 	key,
 	(property|many-to-one|component|dynamic-component|any)*,
 	sql-insert?,sql-update?,sql-delete?
@@ -230,6 +232,7 @@ application through a property of the Java class. -->
 	meta*,
 	subselect?,
 	synchronize*,
+	comment?,
 	key,
 	(property|many-to-one|one-to-one|component|dynamic-component|any|map|set|list|bag|idbag|array|primitive-array|query-list)*, 
 	joined-subclass*,
@@ -262,6 +265,7 @@ application through a property of the Java class. -->
  	meta*,
 	subselect?,
 	synchronize*,
+	comment?,
 	(property|many-to-one|one-to-one|component|dynamic-component|any|map|set|list|bag|idbag|array|primitive-array|query-list)*,
 	union-subclass*,
 	loader?,sql-insert?,sql-update?,sql-delete?
@@ -460,6 +464,7 @@ relationship from the collection table to the enclosing class. -->
 	subselect?,
 	cache?,
 	synchronize*,
+	comment?,
 	key, 
 	(map-key|composite-map-key|map-key-many-to-many|index|composite-index|index-many-to-many|index-many-to-any), 
 	(element|one-to-many|many-to-many|composite-element|many-to-any),
@@ -493,6 +498,7 @@ relationship from the collection table to the enclosing class. -->
 	subselect?,
 	cache?,
 	synchronize*,
+	comment?,
 	key, 
 	(element|one-to-many|many-to-many|composite-element|many-to-any),
 	loader?,sql-insert?,sql-update?,sql-delete?,sql-delete-all?,
@@ -525,6 +531,7 @@ relationship from the collection table to the enclosing class. -->
 	subselect?,
 	cache?,
 	synchronize*,
+	comment?,
 	key, 
 	(element|one-to-many|many-to-many|composite-element|many-to-any),
 	loader?,sql-insert?,sql-update?,sql-delete?,sql-delete-all?,
@@ -556,6 +563,7 @@ relationship from the collection table to the enclosing class. -->
 	subselect?,
 	cache?,
 	synchronize*,
+	comment?,
 	collection-id,
 	key, 
 	(element|many-to-many|composite-element|many-to-any),
@@ -587,6 +595,7 @@ relationship from the collection table to the enclosing class. -->
 	subselect?,
 	cache?,
 	synchronize*,
+	comment?,
 	key, 
 	(index|list-index), 
 	(element|one-to-many|many-to-many|composite-element|many-to-any),
@@ -618,6 +627,7 @@ relationship from the collection table to the enclosing class. -->
 	subselect?,
 	cache?,
 	synchronize*,
+	comment?,
 	key, 
 	(index|list-index), 
 	(element|one-to-many|many-to-many|composite-element|many-to-any),
@@ -648,6 +658,7 @@ relationship from the collection table to the enclosing class. -->
 	subselect?,
 	cache?, 
 	synchronize*,
+	comment?,
 	key, 
 	(index|list-index), 
 	element,
@@ -817,7 +828,7 @@ class implementing an id generation algorithm. -->
 <!-- The column element is an alternative to column attributes and required for 
 mapping associations to classes with composite ids. -->
 
-<!ELEMENT column EMPTY>
+<!ELEMENT column (comment?)>
 	<!ATTLIST column name CDATA #REQUIRED>
 	<!ATTLIST column length CDATA #IMPLIED>						<!-- default: 255 -->
 	<!ATTLIST column precision CDATA #IMPLIED>
@@ -840,8 +851,12 @@ entities. -->
 	<!ATTLIST cache usage (read-only|read-write|nonstrict-read-write|transactional) #REQUIRED>				
 	<!ATTLIST cache region CDATA #IMPLIED>						<!-- default: class or collection role name -->
 
-<!-- A mapped query-list allows a named query to be attached to
-a property of the domain model -->
+<!-- The comment element allows definition of a database table or column comment. -->
+
+<!ELEMENT comment (#PCDATA)>
+
+<!-- A mapped query-list allows a named query to be attached to a property of the 
+domain model -->
 
 <!ELEMENT query-list EMPTY>
 	<!ATTLIST query-list name CDATA #REQUIRED>
@@ -883,7 +898,7 @@ a property of the domain model -->
 	and takes the form "owningAlias.propertyName"
 -->
 <!ELEMENT return (return-discriminator?,return-property)*>
-	<!ATTLIST return alias CDATA #REQUIRED>
+	<!ATTLIST return alias CDATA #IMPLIED>
 	<!ATTLIST return entity-name CDATA #IMPLIED>
 	<!ATTLIST return class CDATA #IMPLIED>
 	<!ATTLIST return lock-mode (none|read|upgrade|upgrade-nowait|write) "read">	
