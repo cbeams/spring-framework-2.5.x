@@ -68,12 +68,11 @@ public class PetStoreImpl implements PetStoreFacade, OrderService {
 
 	private OrderDao orderDao;
 
-	/**
-	 * Example of Setter method for Setter Dependency Injection
-	 * 
-	 * @param accountDao
-	 *            the AccountDao instance to use
-	 */
+
+	//-------------------------------------------------------------------------
+	// Setter methods for dependency injection
+	//-------------------------------------------------------------------------
+
 	public void setAccountDao(AccountDao accountDao) {
 		this.accountDao = accountDao;
 	}
@@ -93,6 +92,11 @@ public class PetStoreImpl implements PetStoreFacade, OrderService {
 	public void setOrderDao(OrderDao orderDao) {
 		this.orderDao = orderDao;
 	}
+
+
+	//-------------------------------------------------------------------------
+	// Operation methods, implementing the PetStoreFacade interface
+	//-------------------------------------------------------------------------
 
 	public Account getAccount(String username) {
 		return this.accountDao.getAccount(username);
