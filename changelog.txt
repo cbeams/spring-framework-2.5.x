@@ -14,6 +14,7 @@ Package org.springframework.beans
 * refined BeanWrapperImpl and PropertyPlaceholderConfigurer to never log property values (which might be sensitive data)
 * fixed PropertyResourceConfigurer to actually call "convertProperties" and "convertPropertyValue" for merged properties
 * fixed MethodInvokingFactoryBean's "getObjectType" implementation to return null if not fully initialized yet
+* added "getBeanPostProcessorCount" method to ConfigurableBeanFactory interface
 * fixed AbstractAutowireCapableBeanFactory to only match untyped argument values as fallback (avoid unintended matches)
 * added "ignoreDependencyInterface" method to AbstractAutowireCapableBeanFactory and ConfigurableListableBeanFactory
 * reworked AbstractAutowireCapableBeanFactory's dependency exclusion check to support ignored dependency interfaces
@@ -22,12 +23,16 @@ Package org.springframework.beans
 Package org.springframework.context
 * AbstractApplicationContext registers MessageSourceAware/ApplicationContextAware/etc as ignored dependency interfaces
 * fixed AbstractApplicationContext to not exclude dependencies of type MessageSource/ApplicationContext/etc by default
+* AbstractApplicationContext logs message when a bean is not eligible for getting processed by all BeanPostProcessors
 
 Package org.springframework.dao
 * fixed DataAccessUtils' "(required)UniqueResult" methods to treat a passed-in null value as empty Collection
 
 Package org.springframework.ejb
 * adapted LocalSlsbInvokerInterceptor to support a local EJB that does not directly implement the business interface
+
+Package org.springframework.mail
+* fixed MimeMessageHelper to use a "multipart/mixed" root with nested "multipart/related", for Lotus Notes compatibility
 
 Package org.springframework.orm
 * HibernateAccessor and HibernateTransactionManager integrate JDBCException message into Spring DataAccessException
@@ -38,6 +43,8 @@ Package org.springframework.orm
 * added "filterNames" property to HibernateTemplate/Interceptor, allowing to enable a list of filters for all operations
 
 Package org.springframework.transaction
+* added "isActualTransactionActive" flag to TransactionSynchronizationManager (different from "isSynchronizationActive")
+* fixed AbstractPlatformTransactionManager to set the "isCurrentTransactionReadOnly" flag correctly in any case
 * added specific "isLocalRollbackOnly" and "isGlobalRollbackOnly" methods to DefaultTransactionStatus
 * added "shouldCommitOnGlobalRollbackOnly" callback method to AbstractPlatformTransactionManager, with default "false"
 * AbstractPlatformTransactionManager throws UnexpectedRollbackException if attempting commit with rollback-only tx
@@ -51,6 +58,7 @@ Package org.springframework.web
 * changed HtmlUtils' "htmlEscape" method to return standard entity references by default (named, not decimal or hex)
 * added "htmlEscapeDecimal" and "htmlEscapeHex" methods to HtmlUtils, for escaping in decimal or hex style, respectively
 * reimplemented HtmlUtils' "htmlUnescape" to correctly handle any entity references, including decimal and hex style
+* fixed FreeMarker macro "formSingleSelect" (in spring.ftl) to correctly compare selected numerical values
 * AbstractJasperReportsView exposes current Spring-managed Locale and MessageSource to JasperReports i18n ($R expr etc)
 * refined AbstractJasperReportsView to properly handle Internet Explorer HTTPS through resetting the response first
 
