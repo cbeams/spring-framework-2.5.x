@@ -80,7 +80,6 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
- * @see #getSession(SessionFactory, Interceptor, SQLExceptionTranslator, boolean)
  * @see HibernateTemplate
  * @see HibernateInterceptor
  * @see HibernateTransactionManager
@@ -186,7 +185,6 @@ public abstract class SessionFactoryUtils {
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
-	 * @see #getSession(SessionFactory, Interceptor, SQLExceptionTranslator, boolean)
 	 * @see #releaseSession
 	 * @see HibernateTemplate
 	 */

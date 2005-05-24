@@ -283,7 +283,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		}
 	}
 
-
 	/**
 	 * Replace the placeholders in the given message with the supplied values,
 	 * or values derived from those supplied.
@@ -299,8 +298,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @param invocationTime the value to write in place of the
 	 * <code>${invocationTime}</code> placeholder
 	 * @return the formatted output to write to the log
-	 * @see #appendArgumentTypes
-	 * @see #appendReturnValue
 	 */
 	protected String replacePlaceholders(String message, MethodInvocation methodInvocation,
 			Object returnValue, Throwable throwable, long invocationTime) {

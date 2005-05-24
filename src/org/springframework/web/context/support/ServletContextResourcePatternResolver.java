@@ -48,7 +48,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	/**
 	 * Create a new ServletContextResourcePatternResolver.
 	 * @param servletContext the ServletContext to load resources with
-	 * @see ServletContextResourceLoader(javax.servlet.ServletContext)
+	 * @see ServletContextResourceLoader#ServletContextResourceLoader(javax.servlet.ServletContext)
 	 */
 	public ServletContextResourcePatternResolver(ServletContext servletContext) {
 		super(new ServletContextResourceLoader(servletContext));
