@@ -91,14 +91,21 @@ public class DefaultTransactionStatus implements TransactionStatus {
 	}
 
 	/**
-	 * Return the underlying transaction object, e.g. a JTA UserTransaction.
+	 * Return the underlying transaction object.
 	 */
 	public Object getTransaction() {
 		return transaction;
 	}
 
+	/**
+	 * Return whether there is actual transaction active.
+	 */
+	public boolean hasTransaction() {
+		return (this.transaction != null);
+	}
+
 	public boolean isNewTransaction() {
-		return (transaction != null && newTransaction);
+		return (hasTransaction() && this.newTransaction);
 	}
 
 	/**

@@ -231,6 +231,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 				Object suspendedResources = suspend(transaction);
 				doBegin(transaction, definition);
+				TransactionSynchronizationManager.setActualTransactionActive(true);
+				TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
 				return newTransactionStatus(
 						transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, suspendedResources);
@@ -288,6 +290,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Creating new transaction");
 			}
 			doBegin(transaction, definition);
+			TransactionSynchronizationManager.setActualTransactionActive(true);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(
@@ -295,6 +298,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		else {
 			// "empty" (-> no) transaction
+			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
 			return newTransactionStatus(
 					null, false, newSynchronization, definition.isReadOnly(), debugEnabled, null);
@@ -338,6 +342,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 		TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+		TransactionSynchronizationManager.setActualTransactionActive(false);
 		return new SuspendedResourcesHolder(readOnly, suspendedSynchronizations, holder);
 	}
 
@@ -352,6 +357,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	private void resume(Object transaction, Object suspendedResources) throws TransactionException {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
+		TransactionSynchronizationManager.setActualTransactionActive(true);
 		TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.isReadOnly());
 		if (resourcesHolder.getSuspendedSynchronizations() != null) {
 			TransactionSynchronizationManager.initSynchronization();
@@ -615,8 +621,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (status.isNewSynchronization()) {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
-		if (status.isNewTransaction() && !status.hasSavepoint()) {
+		if (!status.hasTransaction()) {
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+		}
+		else if (status.isNewTransaction() && !status.hasSavepoint()) {
+			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+			TransactionSynchronizationManager.setActualTransactionActive(false);
 			doCleanupAfterCompletion(status.getTransaction());
 		}
 		if (status.getSuspendedResources() != null) {

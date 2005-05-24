@@ -1091,6 +1091,8 @@ public class JdoTransactionManagerTests extends TestCase {
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
 }

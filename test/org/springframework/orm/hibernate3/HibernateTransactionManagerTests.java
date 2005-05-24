@@ -132,6 +132,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				assertEquals(session, sfProxy.getCurrentSession());
 				HibernateTemplate ht = new HibernateTemplate(sfProxy);
 				return ht.find("some query string");
@@ -486,6 +488,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				final SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
 				assertTrue("Has thread session", holder != null);
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				tt.execute(new TransactionCallback() {
 					public Object doInTransaction(TransactionStatus status) {
 						HibernateTemplate ht = new HibernateTemplate(sf);
@@ -493,13 +497,17 @@ public class HibernateTransactionManagerTests extends TestCase {
 						return ht.executeFind(new HibernateCallback() {
 							public Object doInHibernate(org.hibernate.Session session) {
 								assertTrue("Not enclosing session", session != holder.getSession());
+								assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+								assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 								return null;
 							}
 						});
 					}
 				});
 				assertTrue("Same thread session as before",
-				           holder.getSession() == SessionFactoryUtils.getSession(sf, false));
+						holder.getSession() == SessionFactoryUtils.getSession(sf, false));
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				return null;
 			}
 		});
@@ -554,10 +562,14 @@ public class HibernateTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
 				assertTrue("Has thread session", holder != null);
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 				tt.execute(new TransactionCallback() {
 					public Object doInTransaction(TransactionStatus status) {
 						assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+						assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+						assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 						HibernateTemplate ht = new HibernateTemplate(sf);
 						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 						return ht.executeFind(new HibernateCallback() {
@@ -568,7 +580,9 @@ public class HibernateTransactionManagerTests extends TestCase {
 					}
 				});
 				assertTrue("Same thread session as before",
-				           holder.getSession() == SessionFactoryUtils.getSession(sf, false));
+						holder.getSession() == SessionFactoryUtils.getSession(sf, false));
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				return null;
 			}
 		});
@@ -578,6 +592,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.verify();
 		txControl.verify();
 	}
+
 	public void testTransactionWithPropagationSupports() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
@@ -613,6 +628,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 				assertTrue("Is not new transaction", !status.isNewTransaction());
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 				HibernateTemplate ht = new HibernateTemplate(sfProxy);
 				ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 				ht.execute(new HibernateCallback() {
@@ -822,6 +839,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+				assertTrue(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				return ht.find("some query string");
 			}
@@ -1297,6 +1316,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
 }

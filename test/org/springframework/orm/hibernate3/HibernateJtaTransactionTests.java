@@ -895,6 +895,8 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sfControl.setReturnValue(session, 2);
 		sf.getTransactionManager();
 		sfControl.setReturnValue(tm, 7);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
 		session.close();
 		sessionControl.setReturnValue(null, 2);
 
@@ -1401,6 +1403,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
 }

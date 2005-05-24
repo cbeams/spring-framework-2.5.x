@@ -83,6 +83,8 @@ public abstract class TransactionSynchronizationManager {
 
 	private static final ThreadLocal currentTransactionReadOnly = new ThreadLocal();
 
+	private static final ThreadLocal actualTransactionActive = new ThreadLocal();
+
 
 	//-------------------------------------------------------------------------
 	// Management of transaction-associated resource handles
@@ -254,6 +256,10 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Exposure of transaction characteristics
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Expose a read-only flag for the current transaction.
 	 * Called by transaction manager on transaction begin and on cleanup.
@@ -281,6 +287,31 @@ public abstract class TransactionSynchronizationManager {
 	 */
 	public static boolean isCurrentTransactionReadOnly() {
 		return (currentTransactionReadOnly.get() != null);
+	}
+
+	/**
+	 * Expose whether there currently is an actual transaction active.
+	 * Called by transaction manager on transaction begin and on cleanup.
+	 * @param active true to mark the current thread as being associated
+	 * with an actual transaction; false to reset that marker
+	 */
+	public static void setActualTransactionActive(boolean active) {
+		actualTransactionActive.set(active ? Boolean.TRUE : null);
+	}
+
+	/**
+	 * Return whether there currently is an actual transaction active.
+	 * This indicates whether the current thread is associated with an actual
+	 * transaction rather than just with active transaction synchronization.
+	 * <p>To be called by resource management code that wants to discriminate
+	 * between active transaction synchronization (with or without backing
+	 * resource transaction; also on PROPAGATION_SUPPORTS) and an actual
+	 * transaction being active (with backing resource transaction;
+	 * on PROPAGATION_REQUIRES, PROPAGATION_REQUIRES_NEW, etc).
+	 * @see #isSynchronizationActive()
+	 */
+	public static boolean isActualTransactionActive() {
+		return (actualTransactionActive.get() != null);
 	}
 
 }
