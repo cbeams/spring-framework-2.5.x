@@ -182,7 +182,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
-		if (status == Status.STATUS_NO_TRANSACTION && readOnly) {
+		if (readOnly) {
 			session.setFlushMode(FlushMode.NEVER);
 			sessionControl.setVoidCallable(1);
 		}
@@ -1394,12 +1394,10 @@ public class HibernateJtaTransactionTests extends TestCase {
 	}
 
 	protected void tearDown() {
-		/*
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-		*/
 	}
 
 }

@@ -189,7 +189,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sessionControl.setReturnValue(sf, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
-		if (status == Status.STATUS_NO_TRANSACTION && readOnly) {
+		if (readOnly) {
 			session.setFlushMode(FlushMode.NEVER);
 			sessionControl.setVoidCallable(1);
 		}

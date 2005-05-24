@@ -199,110 +199,120 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	public final TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 		Object transaction = doGetTransaction();
 
-		// cache to avoid repeated checks
+		// Cache debug flag to avoid repeated checks.
 		boolean debugEnabled = logger.isDebugEnabled();
-
 		if (debugEnabled) {
 			logger.debug("Using transaction object [" + transaction + "]");
 		}
 
 		if (definition == null) {
-			// use defaults
+			// Use defaults if no transaction definition given.
 			definition = new DefaultTransactionDefinition();
 		}
 
 		if (isExistingTransaction(transaction)) {
-			if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
-				throw new IllegalTransactionStateException(
-						"Transaction propagation 'never' but existing transaction found");
-			}
-			if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
-				if (debugEnabled) {
-					logger.debug("Suspending current transaction");
-				}
-				Object suspendedResources = suspend(transaction);
-				boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
-				return newTransactionStatus(
-						null, false, newSynchronization, definition.isReadOnly(), debugEnabled, suspendedResources);
-			}
-			else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
-				if (debugEnabled) {
-					logger.debug("Creating new transaction, suspending current one");
-				}
-				Object suspendedResources = suspend(transaction);
-				doBegin(transaction, definition);
-				TransactionSynchronizationManager.setActualTransactionActive(true);
-				TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
-				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
-				return newTransactionStatus(
-						transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, suspendedResources);
-			}
-			else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
-				if (!isNestedTransactionAllowed()) {
-					throw new NestedTransactionNotSupportedException(
-							"Transaction manager does not allow nested transactions by default - " +
-							"specify 'nestedTransactionAllowed' property with value 'true'");
-				}
-				if (debugEnabled) {
-					logger.debug("Creating nested transaction");
-				}
-				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
-				DefaultTransactionStatus status = newTransactionStatus(
-						transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, null);
-				try {
-					if (useSavepointForNestedTransaction()) {
-						status.createAndHoldSavepoint();
-					}
-					else {
-						doBegin(transaction, definition);
-					}
-					return status;
-				}
-				catch (NestedTransactionNotSupportedException ex) {
-					if (status.isNewSynchronization()) {
-						TransactionSynchronizationManager.clearSynchronization();
-					}
-					throw ex;
-				}
-			}
-			else {
-				if (debugEnabled) {
-					logger.debug("Participating in existing transaction");
-				}
-				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
-				return newTransactionStatus(
-						transaction, false, newSynchronization, definition.isReadOnly(), debugEnabled, null);
-			}
+			// Existing transaction found -> check propagation behavior to find out how to behave.
+			return getExistingTransaction(definition, transaction, debugEnabled);
 		}
 
+		// Check definition settings for new transaction.
 		if (definition.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
 			throw new InvalidTimeoutException("Invalid transaction timeout", definition.getTimeout());
 		}
+
+		// No existing transaction found -> check propagation behavior to find out how to behave.
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 			throw new IllegalTransactionStateException(
 					"Transaction propagation 'mandatory' but no existing transaction found");
 		}
-
-		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
+		else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
 				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
 		    definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			if (debugEnabled) {
 				logger.debug("Creating new transaction");
 			}
 			doBegin(transaction, definition);
-			TransactionSynchronizationManager.setActualTransactionActive(true);
-			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(
 					transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, null);
 		}
 		else {
-			// "empty" (-> no) transaction
-			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
+			// Create "empty" transaction: no actual transaction, but potentially synchronization.
 			boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
 			return newTransactionStatus(
 					null, false, newSynchronization, definition.isReadOnly(), debugEnabled, null);
 		}
+	}
+
+	/**
+	 * Create a TransactionStatus for an existing transaction.
+	 */
+	private TransactionStatus getExistingTransaction(
+			TransactionDefinition definition, Object transaction, boolean debugEnabled)
+			throws TransactionException {
+
+		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
+			throw new IllegalTransactionStateException(
+					"Transaction propagation 'never' but existing transaction found");
+		}
+
+		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
+			if (debugEnabled) {
+				logger.debug("Suspending current transaction");
+			}
+			Object suspendedResources = suspend(transaction);
+			boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
+			return newTransactionStatus(
+					null, false, newSynchronization, definition.isReadOnly(), debugEnabled, suspendedResources);
+		}
+
+		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
+			if (debugEnabled) {
+				logger.debug("Creating new transaction, suspending current one");
+			}
+			Object suspendedResources = suspend(transaction);
+			doBegin(transaction, definition);
+			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+			return newTransactionStatus(
+					transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, suspendedResources);
+		}
+
+		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+			if (!isNestedTransactionAllowed()) {
+				throw new NestedTransactionNotSupportedException(
+						"Transaction manager does not allow nested transactions by default - " +
+						"specify 'nestedTransactionAllowed' property with value 'true'");
+			}
+			if (debugEnabled) {
+				logger.debug("Creating nested transaction");
+			}
+			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+			DefaultTransactionStatus status = newTransactionStatus(
+					transaction, true, newSynchronization, definition.isReadOnly(), debugEnabled, null);
+			try {
+				if (useSavepointForNestedTransaction()) {
+					status.createAndHoldSavepoint();
+				}
+				else {
+					doBegin(transaction, definition);
+				}
+				return status;
+			}
+			catch (NestedTransactionNotSupportedException ex) {
+				if (status.isNewSynchronization()) {
+					TransactionSynchronizationManager.clearSynchronization();
+				}
+				throw ex;
+			}
+		}
+
+		// Assumably PROPAGATION_SUPPORTS.
+		if (debugEnabled) {
+			logger.debug("Participating in existing transaction");
+		}
+		boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+		return newTransactionStatus(
+				transaction, false, newSynchronization, definition.isReadOnly(), debugEnabled, null);
 	}
 
 	/**
@@ -316,6 +326,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		boolean actualNewSynchronization = newSynchronization &&
 				!TransactionSynchronizationManager.isSynchronizationActive();
 		if (actualNewSynchronization) {
+			if (newTransaction) {
+				TransactionSynchronizationManager.setActualTransactionActive(true);
+			}
+			TransactionSynchronizationManager.setCurrentTransactionReadOnly(readOnly);
 			TransactionSynchronizationManager.initSynchronization();
 		}
 		return new DefaultTransactionStatus(
@@ -369,6 +383,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		doResume(transaction, resourcesHolder.getSuspendedResources());
 	}
+
 
 	/**
 	 * This implementation of commit handles participating in existing
@@ -620,13 +635,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		status.setCompleted();
 		if (status.isNewSynchronization()) {
 			TransactionSynchronizationManager.clearSynchronization();
-		}
-		if (!status.hasTransaction()) {
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+			if (status.isNewTransaction()) {
+				TransactionSynchronizationManager.setActualTransactionActive(false);
+			}
 		}
-		else if (status.isNewTransaction() && !status.hasSavepoint()) {
-			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-			TransactionSynchronizationManager.setActualTransactionActive(false);
+		if (status.isNewTransaction() && !status.hasSavepoint()) {
 			doCleanupAfterCompletion(status.getTransaction());
 		}
 		if (status.getSuspendedResources() != null) {
@@ -846,7 +860,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * Holder for suspended resources.
-	 * Used internally by suspend and resume.
+	 * Used internally by <code>suspend</code> and <code>resume</code>.
 	 */
 	private static class SuspendedResourcesHolder {
 
@@ -856,7 +870,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		private final Object suspendedResources;
 
-		public SuspendedResourcesHolder(boolean readOnly, List suspendedSynchronizations, Object suspendedResources) {
+		public SuspendedResourcesHolder(
+				boolean readOnly, List suspendedSynchronizations, Object suspendedResources) {
+
 			this.readOnly = readOnly;
 			this.suspendedSynchronizations = suspendedSynchronizations;
 			this.suspendedResources = suspendedResources;
