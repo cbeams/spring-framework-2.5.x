@@ -140,6 +140,30 @@ public class DefaultTransactionStatus implements TransactionStatus {
 		return suspendedResources;
 	}
 
+
+	//---------------------------------------------------------------------
+	// Handling of current transaction state
+	//---------------------------------------------------------------------
+
+	/**
+	 * Set a savepoint for this transaction. Used for PROPAGATION_NESTED.
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NESTED
+	 */
+	protected void setSavepoint(Object savepoint) {
+		this.savepoint = savepoint;
+	}
+
+	/**
+	 * Get the savepoint for this transaction, if any.
+	 */
+	public Object getSavepoint() {
+		return savepoint;
+	}
+
+	public boolean hasSavepoint() {
+		return (savepoint != null);
+	}
+
 	public void setRollbackOnly() {
 		this.rollbackOnly = true;
 	}
@@ -182,34 +206,8 @@ public class DefaultTransactionStatus implements TransactionStatus {
 		this.completed = true;
 	}
 
-	/**
-	 * Return whether this transaction is completed, that is, committed or rolled back.
-	 */
 	public boolean isCompleted() {
 		return completed;
-	}
-
-
-	/**
-	 * Set a savepoint for this transaction. Used for PROPAGATION_NESTED.
-	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NESTED
-	 */
-	protected void setSavepoint(Object savepoint) {
-		this.savepoint = savepoint;
-	}
-
-	/**
-	 * Get the savepoint for this transaction, if any.
-	 */
-	public Object getSavepoint() {
-		return savepoint;
-	}
-
-	/**
-	 * Return whether this transaction carries a savepoint.
-	 */
-	public boolean hasSavepoint() {
-		return (savepoint != null);
 	}
 
 

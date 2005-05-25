@@ -44,6 +44,19 @@ public interface TransactionStatus extends SavepointManager {
 	boolean isNewTransaction();
 
 	/**
+	 * Return whether this transaction internally carries a savepoint,
+	 * i.e. has been created as nested transaction based on a savepoint.
+	 * <p>This method is mainly here for diagnostic purposes, alongside
+	 * <code>isNewTransaction</code>. For programmatic handling of custom
+	 * savepoints, use SavepointManager's operations.
+	 * @see #isNewTransaction()
+	 * @see #createSavepoint
+	 * @see #rollbackToSavepoint(Object)
+	 * @see #releaseSavepoint(Object)
+	 */
+	boolean hasSavepoint();
+
+	/**
 	 * Set the transaction rollback-only. This instructs the transaction manager
 	 * that the only possible outcome of the transaction may be a rollback,
 	 * proceeding with the normal applicaiton workflow though (i.e. no exception). 
@@ -57,6 +70,12 @@ public interface TransactionStatus extends SavepointManager {
 	/**
 	 * Return if the transaction has been set rollback-only.
 	 */
-	public boolean isRollbackOnly();
+	boolean isRollbackOnly();
+
+	/**
+	 * Return whether this transaction is completed, that is,
+	 * has already been committed or rolled back.
+	 */
+	boolean isCompleted();
 
 }
