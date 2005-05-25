@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-	<!--
+<!--
   Build file for the Spring Framework.
 
   This script requires a "lib" directory containing the necessary third party JAR files.
@@ -21,7 +21,7 @@
 	<property file="project.properties"/>
 
 
-<!--
+	<!--
 		Set up properties that indicate whether we're building on JDK 1.5.
 		Currently simply checks whether the Java version is not 1.3 or 1.4,
 		due to the lack of a greater-than comparator in Ant.
@@ -102,7 +102,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Use Jakarta Commons Attributes to compile the attributes for the main source tree.
 	-->
 	<target name="compileattr">
@@ -114,7 +114,7 @@
 
 		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.src}">
-<!--
+		<!--
 	 	 	Only the PathMap attribute in the org.springframework.web.servlet.handler.metadata
 	 	 	package currently needs to be shipped with an attribute, to support indexing.
 	 	  -->
@@ -124,7 +124,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Compile the main source tree.
 		This task depends on the Commons Attributes compile step,
 		as some classes must ship with attributes.
@@ -164,7 +164,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Compile the JDK 1.5 source tree.
 	-->
 	<target name="buildtiger" depends="buildmain" if="tiger.available"
@@ -179,7 +179,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Compile the main and the JDK 1.5 source tree.
 	-->
 	<target name="build" depends="buildmain,buildtiger" if="tiger.available"
@@ -455,14 +455,14 @@
 	<target name="alljars" depends="modulejars,fulljar,mockjar,srczip" description="Create all JAR files"/>
 
 
-<!--
+	<!--
 		Convenience targets, needed for the automated build process. Convenience targets are
 		made up of the individual targets called, separated by an underscore.
 	-->
 	<target name="clean_alljars" depends="clean, alljars"/>
 
 
-<!--
+	<!--
 		Generate javadoc on JDK 1.4, excluding the JDK 1.5 source tree.
 	-->
 	<target name="javadoc14" description="Generate framework Javadocs on JDK 1.4" if="tiger.unavailable">
@@ -525,7 +525,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Generate javadoc on JDK 1.5, including the JDK 1.5 source tree.
 	-->
 	<target name="javadoc15" description="Generate framework Javadocs on JDK 1.5" if="tiger.available">
@@ -591,7 +591,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Generate javadoc on either JDK 1.4 or JDK 1.5.
 	-->
 	<target name="javadoc" depends="javadoc14,javadoc15" description="Generate framework Javadocs"/>
@@ -612,7 +612,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Compile the main test tree.
 		This task depends on the Commons Attributes compile step,
 		as some tests require source-level attribute support.
@@ -648,7 +648,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Compile the JDK 1.5 test tree.
 	-->
 	<target name="buildtigertests" depends="buildmaintests" if="tiger.available"
@@ -665,14 +665,14 @@
 	</target>
 
 
-<!--
+	<!--
 		Compile the main and the JDK 1.5 test source tree.
 	-->
 	<target name="buildtests" depends="buildmaintests,buildtigertests"
 					description="Compile main and JDK 1.5 test source tree"/>
 
 
-<!--
+	<!--
 		Run test suite. This and clover.tests take their includes and excludes from
 		build.properties. However it's possible to run specific tests by passing in
 		the test.includes and (optionally) test.excludes properties through the
@@ -711,7 +711,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Run test suite and generate test summary.
 		Does not halt on failure or error, in contrast to the "tests" target above.
 	-->
@@ -816,7 +816,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Run test suite under Clover coverage analysis, and bring up
 		Clover's Swing browser to display the results.
 	-->
@@ -832,7 +832,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Run test suite under Clover coverage analysis, and use Clover
 		to generate Javadoc/style HTML results that may be browsed later.
 	-->
@@ -865,7 +865,8 @@
 			</condition>
 		</fail>
 
-<!-- For now, no dynamic inclusion of the DTD since it looks ugly because of
+	<!--
+		 For now, no dynamic inclusion of the DTD since it looks ugly because of
 		     all the extra newlines the replace is mysteriously adding.
 		     I'll figure something out for that later on
 		<delete file="${basedir}/${doc.ref.dir}/src/dtd.xml"/>
@@ -884,7 +885,7 @@
 			file="${basedir}/${doc.ref.dir}/src/dtd.xml"
 			token="\\n"
 			value=""/>
-		-->
+	-->
 	</target>
 
 
@@ -1144,7 +1145,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Use Jakarta Commons Attributes to compile the attributes for the sandbox test tree.
 	-->
 	<target name="sandbox.compiletestattr">
@@ -1191,7 +1192,7 @@
 	</target>
 
 
-<!--
+	<!--
 		Run test suite. This and Clover test target take their includes and excludes
 		from build.properties. However it's possible to run specific tests by passing in
 		the test.includes and (optionally) test.excludes properties through the command line, as below:
@@ -1332,7 +1333,7 @@
 
 	</target>
 
-<!--
+	<!--
       - TARGETS FOR WEBFLOW RELEASE GENERATION
     -->
 
@@ -1503,7 +1504,7 @@
 
 	</target>
 
-<!--
+	<!--
 		 Targets for the automated build.
 		 @author Alef Arendsen
 
