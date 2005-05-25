@@ -29,9 +29,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.OrderComparator;
 
 /**
- * Internal class that manages resources and transaction synchronizations per thread.
- * Supports one resource per key without overwriting, i.e. a resource needs to
- * be removed before a new one can be set for the same key.
+ * Central helper that manages resources and transaction synchronizations per thread.
+ * To be used by resource management code but not by typical application code.
+ *
+ * <p>Supports one resource per key without overwriting, i.e. a resource needs
+ * to be removed before a new one can be set for the same key.
  * Supports a list of transaction synchronizations if synchronization is active.
  *
  * <p>Resource management code should check for thread-bound resources, e.g. JDBC
@@ -75,11 +77,14 @@ public abstract class TransactionSynchronizationManager {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
+
 	private static final ThreadLocal resources = new ThreadLocal();
 
 	private static final ThreadLocal synchronizations = new ThreadLocal();
 
 	private static final Comparator synchronizationComparator = new OrderComparator();
+
+	private static final ThreadLocal currentTransactionName = new ThreadLocal();
 
 	private static final ThreadLocal currentTransactionReadOnly = new ThreadLocal();
 
@@ -259,6 +264,24 @@ public abstract class TransactionSynchronizationManager {
 	//-------------------------------------------------------------------------
 	// Exposure of transaction characteristics
 	//-------------------------------------------------------------------------
+
+	/**
+	 * Expose the name of the current transaction, if any.
+	 * Called by transaction manager on transaction begin and on cleanup.
+	 * @param name the name of the transaction, or null to reset it
+	 */
+	public static void setCurrentTransactionName(String name) {
+		currentTransactionName.set(name);
+	}
+
+	/**
+	 * Return the name of the current transaction, or null if none set.
+	 * To be called by resource management code for optimizations per use case,
+	 * for example to optimize fetch strategies for specific named transactions.
+	 */
+	public static String getCurrentTransactionName() {
+		return (String) currentTransactionName.get();
+	}
 
 	/**
 	 * Expose a read-only flag for the current transaction.
