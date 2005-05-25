@@ -69,6 +69,7 @@ arbitrary number of queries, and import declarations of arbitrary classes.
 	comment?,
 	(id|composite-id),
 	discriminator?,
+	natural-id?,
 	(version|timestamp)?,
 	(property|many-to-one|one-to-one|component|dynamic-component|properties|any|map|set|list|bag|idbag|array|primitive-array|query-list)*,
 	((join*,subclass*)|joined-subclass*|union-subclass*),
@@ -138,6 +139,11 @@ arbitrary number of queries, and import declarations of arbitrary classes.
 	<!ATTLIST join fetch (join|select) "join">
 	<!ATTLIST join inverse (true|false) "false">
 	<!ATTLIST join optional (true|false) "false">
+
+<!-- A natural-id element allows declaration of the unique business key -->
+
+<!ELEMENT natural-id ( (property|many-to-one|component|dynamic-component|any)* )>
+	<!ATTLIST natural-id mutable (true|false) "false">
 
 <!-- Declares the id type, column and generation algorithm for an entity class.
 If a name attribut is given, the id is exposed to the application through the 
@@ -300,13 +306,14 @@ JavaBeans style properties are mapped to table columns. -->
 	<!ATTLIST property length CDATA #IMPLIED>
 	<!ATTLIST property precision CDATA #IMPLIED>
 	<!ATTLIST property scale CDATA #IMPLIED>
-	<!ATTLIST property not-null (true|false) "false">
+	<!ATTLIST property not-null (true|false) #IMPLIED>
 	<!ATTLIST property unique (true|false) "false">
+	<!ATTLIST property unique-key CDATA #IMPLIED>
+	<!ATTLIST property index CDATA #IMPLIED>				<!-- include the columns spanned by this property in an index -->
 	<!ATTLIST property update (true|false) "true">
 	<!ATTLIST property insert (true|false) "true">
 	<!ATTLIST property optimistic-lock (true|false) "true">	<!-- only supported for properties of a class (not component) -->
 	<!ATTLIST property formula CDATA #IMPLIED>
-	<!ATTLIST property index CDATA #IMPLIED>				<!-- include the columns spanned by this property in an index -->
 	<!ATTLIST property lazy (true|false) "false">
 
 <!-- Declares the type of the containing property (overrides an eventually existing type
@@ -323,8 +330,10 @@ etc. to an entity). -->
 	<!ATTLIST many-to-one class CDATA #IMPLIED>
 	<!ATTLIST many-to-one entity-name CDATA #IMPLIED>
 	<!ATTLIST many-to-one column CDATA #IMPLIED>
-	<!ATTLIST many-to-one not-null (true|false) "false">
+	<!ATTLIST many-to-one not-null (true|false) #IMPLIED>
 	<!ATTLIST many-to-one unique (true|false) "false">
+	<!ATTLIST many-to-one unique-key CDATA #IMPLIED>
+	<!ATTLIST many-to-one index CDATA #IMPLIED>
 	<!ATTLIST many-to-one cascade CDATA #IMPLIED>
 	<!ATTLIST many-to-one outer-join (true|false|auto) #IMPLIED>
 	<!ATTLIST many-to-one fetch (join|select) #IMPLIED>
@@ -334,7 +343,6 @@ etc. to an entity). -->
 	<!ATTLIST many-to-one foreign-key CDATA #IMPLIED>
 	<!ATTLIST many-to-one property-ref CDATA #IMPLIED>
 	<!ATTLIST many-to-one formula CDATA #IMPLIED>
-	<!ATTLIST many-to-one index CDATA #IMPLIED>				 	<!-- include the columns spanned by this association in an index -->
 	<!ATTLIST many-to-one lazy (true|false|proxy) #IMPLIED>
 	<!ATTLIST many-to-one not-found (exception|ignore) "exception">
 	<!ATTLIST many-to-one node CDATA #IMPLIED>
