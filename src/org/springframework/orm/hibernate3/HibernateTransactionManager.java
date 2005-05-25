@@ -357,8 +357,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
 			if (logger.isDebugEnabled()) {
-				logger.debug("Found thread-bound session [" + sessionHolder.getSession() +
-						"] for Hibernate transaction");
+				logger.debug("Found thread-bound session [" +
+						SessionFactoryUtils.toString(sessionHolder.getSession()) + "] for Hibernate transaction");
 			}
 			txObject.setSessionHolder(sessionHolder, false);
 			if (getDataSource() != null) {
@@ -393,7 +393,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				Session newSession = (entityInterceptor != null ?
 						getSessionFactory().openSession(entityInterceptor) : getSessionFactory().openSession());
 				if (logger.isDebugEnabled()) {
-					logger.debug("Opened new session [" + newSession + "] for Hibernate transaction");
+					logger.debug("Opened new session [" + SessionFactoryUtils.toString(newSession) +
+							"] for Hibernate transaction");
 				}
 				txObject.setSessionHolder(new SessionHolder(newSession), true);
 			}
@@ -481,7 +482,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Committing Hibernate transaction on session [" +
-					txObject.getSessionHolder().getSession() + "]");
+					SessionFactoryUtils.toString(txObject.getSessionHolder().getSession()) + "]");
 		}
 		try {
 			txObject.getSessionHolder().getTransaction().commit();
@@ -500,7 +501,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Rolling back Hibernate transaction on session [" +
-					txObject.getSessionHolder().getSession() + "]");
+					SessionFactoryUtils.toString(txObject.getSessionHolder().getSession()) + "]");
 		}
 		try {
 			txObject.getSessionHolder().getTransaction().rollback();
@@ -525,7 +526,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Setting Hibernate transaction on session [" +
-					txObject.getSessionHolder().getSession() + "] rollback-only");
+					SessionFactoryUtils.toString(txObject.getSessionHolder().getSession()) + "] rollback-only");
 		}
 		txObject.setRollbackOnly();
 	}
@@ -554,13 +555,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		Session session = txObject.getSessionHolder().getSession();
 		if (txObject.isNewSessionHolder()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Closing Hibernate session [" + session + "] after transaction");
+				logger.debug("Closing Hibernate session [" + SessionFactoryUtils.toString(session) +
+						"] after transaction");
 			}
 			SessionFactoryUtils.releaseSession(session, getSessionFactory());
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Not closing pre-bound Hibernate session [" + session + "] after transaction");
+				logger.debug("Not closing pre-bound Hibernate session [" +
+						SessionFactoryUtils.toString(session) + "] after transaction");
 			}
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());

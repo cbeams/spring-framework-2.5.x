@@ -541,6 +541,22 @@ public abstract class SessionFactoryUtils {
 
 
 	/**
+	 * Stringify the given Session for debug logging.
+	 * Returns output equivalent to <code>Object.toString()</code>:
+	 * the fully qualified class name + "@" + the identity hash code.
+	 * <p>The only reason why this is necessary is because Hibernate3's
+	 * <code>Session.toString()</code> implementation is broken (and won't be fixed):
+	 * it logs the toString representation of all persistent objects in the Session,
+	 * which might lead to ConcurrentModificationExceptions if the persistent objects
+	 * in turn refer to the Session (for example, for lazy loading).
+	 * @param session the Hibernate Session to stringify
+	 * @return the String representation of the given Session
+	 */
+	public static String toString(Session session) {
+		return session.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(session));
+	}
+
+	/**
 	 * Return whether the given Hibernate Session is transactional, that is,
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param session the Hibernate Session to check
