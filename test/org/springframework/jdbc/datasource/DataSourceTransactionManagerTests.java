@@ -1019,14 +1019,17 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
+				assertTrue("Isn't nested transaction", !status.hasSavepoint());
 				tt.execute(new TransactionCallbackWithoutResult() {
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
-						assertTrue("Is nested transaction", status.isNewTransaction());
+						assertTrue("Isn't new transaction", !status.isNewTransaction());
+						assertTrue("Is nested transaction", status.hasSavepoint());
 					}
 				});
 				assertTrue("Is new transaction", status.isNewTransaction());
+				assertTrue("Isn't nested transaction", !status.hasSavepoint());
 			}
 		});
 
@@ -1084,15 +1087,18 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
+				assertTrue("Isn't nested transaction", !status.hasSavepoint());
 				tt.execute(new TransactionCallbackWithoutResult() {
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
-						assertTrue("Is nested transaction", status.isNewTransaction());
+						assertTrue("Isn't new transaction", !status.isNewTransaction());
+						assertTrue("Is nested transaction", status.hasSavepoint());
 						status.setRollbackOnly();
 					}
 				});
 				assertTrue("Is new transaction", status.isNewTransaction());
+				assertTrue("Isn't nested transaction", !status.hasSavepoint());
 			}
 		});
 
