@@ -38,8 +38,8 @@ import org.springframework.transaction.TransactionException;
 
 /**
  * Default implementation of the JdoDialect interface.
- * Updated to leverage the JDO 2.0 API, as of Spring 1.2.
- * Used by JdoAccessor and JdoTransactionManager as default.
+ * Updated to leverage the JDO 2.0 API when available, as of Spring 1.2.
+ * Used as default dialect by JdoAccessor and JdoTransactionManager.
  *
  * <p>Simply begins a standard JDO transaction in <code>beginTransaction</code>.
  * Returns a handle for a JDO2 DataStoreConnection on <code>getJdbcConnection</code>.
@@ -218,11 +218,21 @@ public class DefaultJdoDialect implements JdoDialect {
 	 */
 	public DataAccessException translateException(JDOException ex) {
 		if (ex.getCause() instanceof SQLException) {
-			return getJdbcExceptionTranslator().translate("JDO operation", null, (SQLException) ex.getCause());
+			return getJdbcExceptionTranslator().translate("JDO operation: " + ex.getMessage(),
+					extractSqlStringFromException(ex), (SQLException) ex.getCause());
 		}
-		else {
-			return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
-		}
+		return PersistenceManagerFactoryUtils.convertJdoAccessException(ex);
+	}
+
+	/**
+	 * Template method for extracting a SQL String from the given exception.
+	 * <p>Default implementation always returns null. Can be overridden in
+	 * subclasses to extract SQL Strings for vendor-specific exception classes.
+	 * @param ex the JDOException, containing a SQLException
+	 * @return the SQL String, or null if none found
+	 */
+	protected String extractSqlStringFromException(JDOException ex) {
+		return null;
 	}
 
 
