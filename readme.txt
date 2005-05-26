@@ -132,11 +132,11 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: iBATIS SQL Maps support, Apache OJB support, TopLink support, JDO support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, iBATIS SQL Maps, Apache OJB, TopLink, JDO)
 
-* "spring-hibernate" (~175 KB)
+* "spring-hibernate" (~180 KB)
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1720 KB)
+* "spring" (~1725 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 

@@ -15,6 +15,7 @@ Package org.springframework.beans
 * fixed PropertyResourceConfigurer to actually call "convertProperties" and "convertPropertyValue" for merged properties
 * fixed MethodInvokingFactoryBean's "getObjectType" implementation to return null if not fully initialized yet
 * added "getBeanPostProcessorCount" method to ConfigurableBeanFactory interface
+* fixed AbstractBeanFactory to destroy chains of beans in correct order even with non-disposable beans in the middle
 * fixed AbstractAutowireCapableBeanFactory to only match untyped argument values as fallback (avoid unintended matches)
 * added "ignoreDependencyInterface" method to AbstractAutowireCapableBeanFactory and ConfigurableListableBeanFactory
 * reworked AbstractAutowireCapableBeanFactory's dependency exclusion check to support ignored dependency interfaces
@@ -31,18 +32,25 @@ Package org.springframework.dao
 Package org.springframework.ejb
 * adapted LocalSlsbInvokerInterceptor to support a local EJB that does not directly implement the business interface
 
+Package org.springframework.jms
+* moved "sessionTransacted" and "sessionAcknowledgeMode(Name)" bean properties from JmsTemplate up to JmsAccessor
+
 Package org.springframework.mail
 * fixed MimeMessageHelper to use a "multipart/mixed" root with nested "multipart/related", for Lotus Notes compatibility
 
 Package org.springframework.orm
+* DefaultJdoDialect integrates JDOException message into translated DataAccessException even with nested SQLException
 * HibernateAccessor and HibernateTransactionManager integrate JDBCException message into Spring DataAccessException
 * SessionFactoryUtils keeps nested exception even case in case of TransientObjectException/PersistentObjectException
 * fixed Hibernate SessionFactoryUtils to correctly handle asynchronous timeouts in case of mixed JTA/Spring transactions
 * fixed SessionFactoryUtils for Hibernate 2.1 to not prevent transaction synchronization when allowCreate=false
 * fixed LocalSessionFactoryBean for Hibernate3 to use connection release mode "on_close" as default (-> safe tx cleanup)
+* refined HibernateTransactionManager for Hibernate3 to not call "Session.toString" (which is broken in Hibernate3)
 * added "filterNames" property to HibernateTemplate/Interceptor, allowing to enable a list of filters for all operations
 
 Package org.springframework.transaction
+* exposed "hasSavepoint" and "isCompleted" methods on TransactionStatus interface (not just on DefaultTransactionStatus)
+* added "getCurrentTransactionName" method to TransactionSynchronizationManager, exposing the transaction name (if any)
 * added "isActualTransactionActive" flag to TransactionSynchronizationManager (different from "isSynchronizationActive")
 * fixed AbstractPlatformTransactionManager to set the "isCurrentTransactionReadOnly" flag correctly in any case
 * added specific "isLocalRollbackOnly" and "isGlobalRollbackOnly" methods to DefaultTransactionStatus
