@@ -17,33 +17,33 @@ package org.springframework.core.closure.support;
 
 import org.springframework.core.closure.Closure;
 import org.springframework.core.closure.Constraint;
-import org.springframework.core.closure.ElementClosureTemplate;
+import org.springframework.core.closure.ElementGenerator;
 
 /**
  * Base superclass for process templates.
  * @author Keith Donald
  */
-public abstract class AbstractElementTemplate implements ElementClosureTemplate {
+public abstract class AbstractElementGenerator implements ElementGenerator {
 
-	private ElementClosureTemplate wrappedTemplate;
+	private ElementGenerator wrappedTemplate;
 
 	private boolean runOnce = false;
 
 	private volatile ProcessStatus status = ProcessStatus.CREATED;
 
-	protected AbstractElementTemplate() {
+	protected AbstractElementGenerator() {
 
 	}
 
-	protected AbstractElementTemplate(boolean runOnce) {
+	protected AbstractElementGenerator(boolean runOnce) {
 		this.runOnce = runOnce;
 	}
 
-	private AbstractElementTemplate(ElementClosureTemplate wrappedTemplate) {
+	private AbstractElementGenerator(ElementGenerator wrappedTemplate) {
 		this.wrappedTemplate = wrappedTemplate;
 	}
 
-	protected ElementClosureTemplate getWrappedTemplate() {
+	protected ElementGenerator getWrappedTemplate() {
 		return wrappedTemplate;
 	}
 
@@ -57,8 +57,8 @@ public abstract class AbstractElementTemplate implements ElementClosureTemplate 
 		return findFirst(constraint, null) != null;
 	}
 
-	public ElementClosureTemplate findAll(final Constraint constraint) {
-		return new AbstractElementTemplate(this) {
+	public ElementGenerator findAll(final Constraint constraint) {
+		return new AbstractElementGenerator(this) {
 			public void run(final Closure closure) {
 				getWrappedTemplate().run(new ConstrainedBlock(closure, constraint));
 			}
@@ -94,11 +94,6 @@ public abstract class AbstractElementTemplate implements ElementClosureTemplate 
 		this.status = ProcessStatus.STOPPED;
 	}
 
-	public Object doWithClosure(Closure closure) {
-		run(closure);
-		return null;
-	}
-
 	public void runUntil(Closure templateCallback, final Constraint constraint) {
 		run(new UntilTrueController(this, templateCallback, constraint));
 	}
@@ -126,13 +121,13 @@ public abstract class AbstractElementTemplate implements ElementClosureTemplate 
 	public abstract void run(Closure templateCallback);
 
 	private static class WhileTrueController extends Block {
-		private ElementClosureTemplate template;
+		private ElementGenerator template;
 
 		private Constraint constraint;
 
 		private boolean allTrue = true;
 
-		public WhileTrueController(ElementClosureTemplate template, Constraint constraint) {
+		public WhileTrueController(ElementGenerator template, Constraint constraint) {
 			this.template = template;
 			this.constraint = constraint;
 		}
@@ -150,7 +145,7 @@ public abstract class AbstractElementTemplate implements ElementClosureTemplate 
 	}
 
 	private static class UntilTrueController extends Block {
-		private ElementClosureTemplate template;
+		private ElementGenerator template;
 
 		private Closure templateCallback;
 
@@ -158,7 +153,7 @@ public abstract class AbstractElementTemplate implements ElementClosureTemplate 
 
 		private boolean allTrue = true;
 
-		public UntilTrueController(ElementClosureTemplate template, Closure templateCallback, Constraint constraint) {
+		public UntilTrueController(ElementGenerator template, Closure templateCallback, Constraint constraint) {
 			this.template = template;
 			this.templateCallback = templateCallback;
 			this.constraint = constraint;
@@ -175,13 +170,13 @@ public abstract class AbstractElementTemplate implements ElementClosureTemplate 
 	}
 
 	private static class ObjectFinder extends Block {
-		private ElementClosureTemplate template;
+		private ElementGenerator template;
 
 		private Constraint constraint;
 
 		private Object foundObject;
 
-		public ObjectFinder(ElementClosureTemplate template, Constraint constraint) {
+		public ObjectFinder(ElementGenerator template, Constraint constraint) {
 			this.template = template;
 			this.constraint = constraint;
 		}

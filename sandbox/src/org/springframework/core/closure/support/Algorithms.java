@@ -21,7 +21,7 @@ import java.util.Iterator;
 
 import org.springframework.core.closure.Closure;
 import org.springframework.core.closure.Constraint;
-import org.springframework.core.closure.ElementClosureTemplate;
+import org.springframework.core.closure.ElementGenerator;
 
 /**
  * Convenience utility class which provides a number of algorithms involving
@@ -146,7 +146,7 @@ public class Algorithms {
 	 * @return The objects that match, or a empty collection if none match
 	 */
 	public Collection findAll(Iterator it, Constraint constraint) {
-		ElementClosureTemplate finder = new IteratorTemplate(it).findAll(constraint);
+		ElementGenerator finder = new IteratorTemplate(it).findAll(constraint);
 		final Collection results = new ArrayList();
 		finder.run(new Block() {
 			protected void handle(Object element) {

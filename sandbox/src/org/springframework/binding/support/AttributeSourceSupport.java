@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.core.Styler;
-import org.springframework.core.closure.ElementGeneratorTemplate;
+import org.springframework.core.closure.ElementGenerator;
 import org.springframework.core.closure.support.IteratorTemplate;
 import org.springframework.util.Assert;
 
@@ -128,7 +128,7 @@ public abstract class AttributeSourceSupport implements MutableAttributeSource {
 	 * Returns a template for iterating over elements in this source.
 	 * @return the template
 	 */
-	public ElementGeneratorTemplate iteratorTemplate() {
+	public ElementGenerator iteratorTemplate() {
 		return new IteratorTemplate(attributeEntries().iterator());
 	}
 

@@ -47,7 +47,7 @@ package org.springframework.core.closure;
  * support a template callback approach is overkill.
  * @author Keith Donald
  */
-public interface ElementGeneratorTemplate extends ClosureTemplate {
+public interface ElementGenerator extends ClosureTemplate {
 
 	/**
 	 * Does this process produce an element maching the given criteria?
@@ -85,7 +85,7 @@ public interface ElementGeneratorTemplate extends ClosureTemplate {
 	 * @param constraint the criteria
 	 * @return the elements
 	 */
-	public ElementGeneratorTemplate findAll(Constraint constraint);
+	public ElementGenerator findAll(Constraint constraint);
 
 	/**
 	 * Execute the template until the specified condition is true
