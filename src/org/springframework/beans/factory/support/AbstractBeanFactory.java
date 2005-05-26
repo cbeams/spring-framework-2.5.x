@@ -923,9 +923,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	private void destroyDisposableBean(String beanName) {
 		Object disposableBean = this.disposableBeans.remove(beanName);
-		if (disposableBean != null) {
-			destroyBean(beanName, disposableBean);
-		}
+		destroyBean(beanName, disposableBean);
 	}
 
 

@@ -741,6 +741,10 @@ public class XmlBeanFactoryTests extends TestCase {
 		doTestDependencies("dependencies-prop.xml");
 	}
 
+	public void testDependenciesThroughPropertiesWithInTheMiddle() {
+		doTestDependencies("dependencies-prop-inTheMiddle.xml");
+	}
+
 	public void testDependenciesThroughPropertyAutowiringByName() {
 		doTestDependencies("dependencies-prop-autowireByName.xml");
 	}
@@ -1312,21 +1316,24 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 
 		public void afterPropertiesSet() {
-			if (this.initMethodInvoked)
+			if (this.initMethodInvoked) {
 				fail();
+			}
 			this.afterPropertiesSetInvoked = true;
 		}
 
 		/** Init method */
 		public void customInit() throws ServletException {
-			if (!this.afterPropertiesSetInvoked)
+			if (!this.afterPropertiesSetInvoked) {
 				fail();
+			}
 			this.initMethodInvoked = true;
 		}
 
 		public void destroy() {
-			if (this.customDestroyed)
+			if (this.customDestroyed) {
 				fail();
+			}
 			if (this.destroyed) {
 				throw new IllegalStateException("Already destroyed");
 			}
@@ -1334,8 +1341,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 
 		public void customDestroy() {
-			if (!this.destroyed)
+			if (!this.destroyed) {
 				fail();
+			}
 			if (this.customDestroyed) {
 				throw new IllegalStateException("Already customDestroyed");
 			}
@@ -1392,6 +1400,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		public void setBean2(PreparingBean2 bean2) {
 		}
 
+		public void setInTheMiddleBean(InTheMiddleBean bean) {
+		}
+
 		public void afterPropertiesSet() {
 			if (!(PreparingBean1.prepared && PreparingBean2.prepared)) {
 				throw new IllegalStateException("Need prepared PreparedBeans!");
@@ -1403,6 +1414,16 @@ public class XmlBeanFactoryTests extends TestCase {
 				throw new IllegalStateException("Should not be destroyed before PreparedBeans");
 			}
 			destroyed = true;
+		}
+	}
+
+
+	public static class InTheMiddleBean {
+
+		public void setBean1(PreparingBean1 bean1) {
+		}
+
+		public void setBean2(PreparingBean2 bean2) {
 		}
 	}
 
