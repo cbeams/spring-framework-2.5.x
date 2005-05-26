@@ -20,8 +20,7 @@ package org.springframework.core.closure;
  * template that generates elements for processing. For example, a template process might 
  * produce records from a file for processing.
  * <p>
- * Process templates encapsulate the work and logic common to a specific
- * workflow. A user-provided closure call back is passed in on process execution
+ * A user-provided closure call back is passed in on process execution
  * and is called to insert custom processing within the template.
  * <p>
  * For example, the following code snippet demonstrates a generator that
@@ -32,7 +31,7 @@ package org.springframework.core.closure;
  * processing.
  * 
  * <pre>
- * ElementGeneratorTempalte recordGenerator = new CsvRecordGenerator(new FileSystemResource(file));
+ * ElementGenerator recordGenerator = new CsvRecordGenerator(new FileSystemResource(file));
  * recordGenerator.run(new Block() {
  * 	protected void handle(Object csvRecord) {
  * 		// process each record
