@@ -18,10 +18,6 @@ package org.springframework.core.closure.support;
 public abstract class NoArgBlock extends AbstractClosure {
 
 	public final Object call(Object argument) {
-		return call();
-	}
-
-	public Object call() {
 		handle();
 		return null;
 	}

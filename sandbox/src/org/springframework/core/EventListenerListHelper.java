@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.springframework.core.closure.Closure;
 import org.springframework.core.closure.Constraint;
-import org.springframework.core.closure.ElementGeneratorTemplate;
+import org.springframework.core.closure.ElementGenerator;
 import org.springframework.core.closure.support.IteratorTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.CachingMapTemplate;
@@ -166,7 +166,7 @@ public class EventListenerListHelper implements Serializable {
 		}
 	}
 
-	public ElementGeneratorTemplate iteratorTemplate() {
+	public ElementGenerator iteratorTemplate() {
 		return new IteratorTemplate(iterator());
 	}
 

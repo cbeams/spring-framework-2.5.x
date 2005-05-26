@@ -23,7 +23,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.closure.Closure;
-import org.springframework.core.closure.support.AbstractElementTemplate;
+import org.springframework.core.closure.support.AbstractElementGenerator;
 import org.springframework.core.closure.support.Block;
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.util.Assert;
@@ -57,7 +57,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 	 * processed.
 	 * @author Keith Donald
 	 */
-	private static class LabeledEnumFieldValueGenerator extends AbstractElementTemplate {
+	private static class LabeledEnumFieldValueGenerator extends AbstractElementGenerator {
 		private static final Log logger = LogFactory.getLog(LabeledEnumFieldValueGenerator.class);
 
 		private Class clazz;
