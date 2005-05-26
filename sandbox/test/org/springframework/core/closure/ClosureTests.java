@@ -17,30 +17,6 @@ import org.springframework.core.closure.support.IteratorTemplate;
  * @author Keith Donald
  */
 public class ClosureTests extends TestCase {
-	public void testBlockNotOverrriddenCorrectly() {
-		Block block = new Block() {
-			protected void typo() {
-
-			}
-		};
-		try {
-			block.call(this);
-			fail("should have failed");
-		}
-		catch (IllegalStateException e) {
-
-		}
-	}
-
-	public void testBlockOverrridden() {
-		Block block = new Block() {
-			protected void handle(Object arg) {
-				assertEquals(ClosureTests.this, arg);
-			}
-		};
-		block.call(this);
-	}
-
 	public void testIteratorProcessTemplateRunOnce() {
 		List collection = new ArrayList();
 		collection.add("Item 1");
@@ -135,7 +111,7 @@ public class ClosureTests extends TestCase {
 		collection.add("Item 4");
 		collection.add("Item 5");
 		IteratorTemplate template = new IteratorTemplate(collection);
-		ElementClosureTemplate finder = template.findAll(new Constraint() {
+		ElementGenerator finder = template.findAll(new Constraint() {
 			public boolean test(Object o) {
 				return ((String)o).startsWith("Item 4");
 			}

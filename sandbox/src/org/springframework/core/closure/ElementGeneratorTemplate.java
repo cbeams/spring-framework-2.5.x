@@ -17,8 +17,8 @@ package org.springframework.core.closure;
 
 /**
  * A interface to be implemented by objects which encapsulate a workflow process
- * template. For example, a template process might produce elements from a data
- * source for processing.
+ * template that generates elements for processing. For example, a template process might 
+ * produce records from a file for processing.
  * <p>
  * Process templates encapsulate the work and logic common to a specific
  * workflow. A user-provided closure call back is passed in on process execution
@@ -32,7 +32,7 @@ package org.springframework.core.closure;
  * processing.
  * 
  * <pre>
- * ProcessTemplate recordGenerator = new CsvRecordGenerator(new FileSystemResource(file));
+ * ElementGeneratorTempalte recordGenerator = new CsvRecordGenerator(new FileSystemResource(file));
  * recordGenerator.run(new Block() {
  * 	protected void handle(Object csvRecord) {
  * 		// process each record
@@ -47,7 +47,7 @@ package org.springframework.core.closure;
  * support a template callback approach is overkill.
  * @author Keith Donald
  */
-public interface ElementClosureTemplate extends ClosureTemplate {
+public interface ElementGeneratorTemplate extends ClosureTemplate {
 
 	/**
 	 * Does this process produce an element maching the given criteria?
@@ -85,14 +85,7 @@ public interface ElementClosureTemplate extends ClosureTemplate {
 	 * @param constraint the criteria
 	 * @return the elements
 	 */
-	public ElementClosureTemplate findAll(Constraint constraint);
-
-	/**
-	 * Execute the template with the specific closure callback for the insertion
-	 * of custom processing code.
-	 * @param templateCallback The procedure callback.
-	 */
-	public void run(Closure templateCallback);
+	public ElementGeneratorTemplate findAll(Constraint constraint);
 
 	/**
 	 * Execute the template until the specified condition is true

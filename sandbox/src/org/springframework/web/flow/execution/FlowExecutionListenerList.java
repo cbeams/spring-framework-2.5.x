@@ -21,7 +21,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.EventListenerListHelper;
-import org.springframework.core.closure.ElementClosureTemplate;
+import org.springframework.core.closure.ElementGenerator;
 import org.springframework.core.closure.support.Block;
 import org.springframework.util.Assert;
 import org.springframework.web.flow.FlowSession;
@@ -135,7 +135,7 @@ public class FlowExecutionListenerList {
 	 * processing.
 	 * @return the iterator process template.
 	 */
-	public ElementClosureTemplate iteratorTemplate() {
+	public ElementGenerator iteratorTemplate() {
 		return flowExecutionListeners.iteratorTemplate();
 	}
 

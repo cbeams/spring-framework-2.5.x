@@ -21,7 +21,10 @@ package org.springframework.core.closure;
 public interface ClosureTemplate {
 
 	/**
-	 * Execute this template with the specified closure callback.
+	 * Execute the template with the specific closure callback for the insertion
+	 * of custom processing code.
+	 * @param templateCallback The procedure callback.
 	 */
-	public Object doWithClosure(Closure closure);
+	public void run(Closure templateCallback);
+
 }
