@@ -19,7 +19,7 @@ import org.springframework.core.closure.Closure;
 import org.springframework.core.closure.Constraint;
 import org.springframework.core.closure.support.AlgorithmsAccessor;
 import org.springframework.core.closure.support.ClosureChain;
-import org.springframework.core.closure.support.ConstrainedBlock;
+import org.springframework.core.closure.support.IfBlock;
 import org.springframework.util.Assert;
 
 /**
@@ -52,8 +52,8 @@ public class Closures extends AlgorithmsAccessor {
 		return new ClosureChain(functionsToChain);
 	}
 
-	public Closure constrain(Closure closure, Constraint predicate) {
-		return new ConstrainedBlock(closure, predicate);
+	public Closure ifTrue(Constraint constraint, Closure closure) {
+		return new IfBlock(constraint, closure);
 	}
 
 }
