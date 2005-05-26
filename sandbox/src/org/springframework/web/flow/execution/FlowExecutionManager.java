@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.Flow;
+import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
 import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
@@ -84,10 +85,10 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	public static final String FLOW_EXECUTION_ID_ATTRIBUTE = "flowExecutionId";
 
 	/**
-	 * The flow execution itself will be exposed to the view in a model
-	 * attribute with this name ("flowExecution").
+	 * The flow context itself will be exposed to the view in a model
+	 * attribute with this name ("flowContext").
 	 */
-	public static final String FLOW_EXECUTION_ATTRIBUTE = "flowExecution";
+	public static final String FLOW_CONTEXT_ATTRIBUTE = "flowContext";
 
 	/**
 	 * The current state of the flow execution will be exposed to the view in a
@@ -390,14 +391,14 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * @return the processed view descriptor
 	 */
 	protected ViewDescriptor prepareViewDescriptor(ViewDescriptor viewDescriptor, String flowExecutionId,
-			FlowExecution flowExecution) {
-		if (flowExecution.isActive() && viewDescriptor!=null) {
+			FlowContext flowContext) {
+		if (flowContext.isActive() && viewDescriptor!=null) {
 			// make the unique flow execution id available in the model
 			viewDescriptor.addObject(FLOW_EXECUTION_ID_ATTRIBUTE, flowExecutionId);
 			// make the flow execution itself available in the model
-			viewDescriptor.addObject(FLOW_EXECUTION_ATTRIBUTE, flowExecution);
+			viewDescriptor.addObject(FLOW_CONTEXT_ATTRIBUTE, flowContext);
 			// add some convenience values for views that aren't easily JavaBean aware
-			viewDescriptor.addObject(CURRENT_STATE_ID_ATTRIBUTE, flowExecution.getCurrentState().getId());
+			viewDescriptor.addObject(CURRENT_STATE_ID_ATTRIBUTE, flowContext.getCurrentState().getId());
 		}
 		return viewDescriptor;
 	}
