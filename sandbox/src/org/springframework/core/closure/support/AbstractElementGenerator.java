@@ -25,7 +25,7 @@ import org.springframework.core.closure.ElementGenerator;
  */
 public abstract class AbstractElementGenerator implements ElementGenerator {
 
-	private ElementGenerator wrappedTemplate;
+	private ElementGenerator wrappedGenerator;
 
 	private boolean runOnce = false;
 
@@ -40,11 +40,11 @@ public abstract class AbstractElementGenerator implements ElementGenerator {
 	}
 
 	private AbstractElementGenerator(ElementGenerator wrappedTemplate) {
-		this.wrappedTemplate = wrappedTemplate;
+		this.wrappedGenerator = wrappedTemplate;
 	}
 
 	protected ElementGenerator getWrappedTemplate() {
-		return wrappedTemplate;
+		return wrappedGenerator;
 	}
 
 	public boolean allTrue(Constraint constraint) {
@@ -60,7 +60,7 @@ public abstract class AbstractElementGenerator implements ElementGenerator {
 	public ElementGenerator findAll(final Constraint constraint) {
 		return new AbstractElementGenerator(this) {
 			public void run(final Closure closure) {
-				getWrappedTemplate().run(new ConstrainedBlock(closure, constraint));
+				getWrappedTemplate().run(new IfBlock(constraint, closure));
 			}
 		};
 	}
@@ -88,8 +88,8 @@ public abstract class AbstractElementGenerator implements ElementGenerator {
 	}
 
 	public void stop() throws IllegalStateException {
-		if (this.wrappedTemplate != null) {
-			wrappedTemplate.stop();
+		if (this.wrappedGenerator != null) {
+			wrappedGenerator.stop();
 		}
 		this.status = ProcessStatus.STOPPED;
 	}
@@ -170,21 +170,21 @@ public abstract class AbstractElementGenerator implements ElementGenerator {
 	}
 
 	private static class ObjectFinder extends Block {
-		private ElementGenerator template;
+		private ElementGenerator generator;
 
 		private Constraint constraint;
 
 		private Object foundObject;
 
-		public ObjectFinder(ElementGenerator template, Constraint constraint) {
-			this.template = template;
+		public ObjectFinder(ElementGenerator generator, Constraint constraint) {
+			this.generator = generator;
 			this.constraint = constraint;
 		}
 
 		protected void handle(Object o) {
 			if (this.constraint.test(o)) {
 				foundObject = o;
-				template.stop();
+				generator.stop();
 			}
 		}
 

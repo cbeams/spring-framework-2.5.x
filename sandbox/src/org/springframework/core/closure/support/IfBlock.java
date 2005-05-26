@@ -23,14 +23,14 @@ import org.springframework.core.closure.Constraint;
  * 
  * @author Keith Donald
  */
-public class ConstrainedBlock extends Block {
+public class IfBlock extends Block {
 	private Closure closure;
 
 	private Constraint constraint;
 
-	public ConstrainedBlock(Closure closure, Constraint constraint) {
-		this.closure = closure;
+	public IfBlock(Constraint constraint, Closure closure) {
 		this.constraint = constraint;
+		this.closure = closure;
 	}
 
 	/**
