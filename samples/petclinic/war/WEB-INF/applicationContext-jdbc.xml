@@ -103,7 +103,19 @@
 	<!-- Implements the CallMonitor management interface -->
 	<bean id="callMonitor" class="org.springframework.samples.petclinic.jmx.CallMonitoringInterceptor"/>
 
-	<!-- Exporter that exposes both the CachingClinic and the CallMonitor via JMX -->
+
+	<!-- ========================= JMX EXPORTER DEFINITION ========================= -->
+
+	<!--
+	  - Exporter that exposes both the CachingClinic and the CallMonitor via JMX.
+		-
+		- By default, the standard MBeanServerFactory.findMBeanServer method will be used
+		- to determine the MBeanServer. Unfortunately, this does not work on WebLogic <= 8.1:
+		- you need to comment in the WebLogicMBeanServerFactoryBean definition on WebLogic,
+		- specifying appropriate configuration values there.
+		-
+		- Note that you need to comment in the "defaultCurrencyTimeLimit" value on JBoss.
+    -->
 	<bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
 			<map>
@@ -119,8 +131,25 @@
 						<prop key="petclinic:service=callMonitor">org.springframework.samples.petclinic.jmx.CallMonitor</prop>
 					</props>
 				</property>
+				<!-- Comment the following in on JBoss, which doesn't follow -->
+				<!-- the JMX 1.2 recommendation for currencyTimeLimit behavior. -->
+				<!--
+				<property name="defaultCurrencyTimeLimit" value="0"/>
+				-->
 			</bean>
 		</property>
+		<!-- Comment the following in on WebLogic <= 8.1, which doesn't support -->
+		<!-- the standard MBeanServerFactory.findMBeanServer lookup mechanism. -->
+		<!--
+		<property name="server">
+			<bean class="org.springframework.jmx.support.WebLogicMBeanServerFactoryBean">
+				<property name="username" value="weblogic"/>
+				<property name="password" value="weblogic"/>
+				<property name="serverUrl" value="t3://localhost:7001"/>
+				<property name="serverName" value="server"/>
+			</bean>
+		</property>
+		-->
 	</bean>
 
 </beans>

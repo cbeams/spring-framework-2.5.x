@@ -4,6 +4,7 @@
 
 @author Ken Krebs
 @author Juergen Hoeller
+@author Rob Harrop
 
 
 1. DATA ACCESS STRATEGIES
@@ -18,6 +19,8 @@ The JDBC version of PetClinic also demonstrates JMX support: it exposes the
 CachingClinic management interface (implemented by its Clinic object) via JMX.
 On JDK 1.5, you can start up the JDK's JConsole to see and use the exported bean.
 On JDK < 1.5, your application server's JMX infrastructure needs to be used.
+Note that special setup is necessary on WebLogic <= 8.1 and on JBoss:
+see "jmxExporter" definition in "applicationContext-jdbc.xml" for details!
 
 The Spring distribution comes with all required Hibernate and OJB jar files
 to be able to build and run PetClinic on those two ORM tools. For TopLink,
