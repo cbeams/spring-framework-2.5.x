@@ -9,10 +9,15 @@
 1. DATA ACCESS STRATEGIES
 
 PetClinic features alternative DAO implementations and application configurations
-for Hibernate, Apache OJB, Oracle TopLink and JDBC, with HSQL and MySQL as
-target databases. The default PetClinic configuration is Hibernate on HSQL.
+for JDBC, Hibernate, Apache OJB and Oracle TopLink, with HSQLDB and MySQL as target
+databases. The default PetClinic configuration is JDBC on HSQL (as of Spring 1.2.1).
 See "WEB-INF/web.xml" and "WEB-INF/applicationContext-*.xml" for details;
 a simple comment change in web.xml switches between the data access strategies.
+
+The JDBC version of PetClinic also demonstrates JMX support: it exposes the
+CachingClinic management interface (implemented by its Clinic object) via JMX.
+On JDK 1.5, you can start up the JDK's JConsole to see and use the exported bean.
+On JDK < 1.5, your application server's JMX infrastructure needs to be used.
 
 The Spring distribution comes with all required Hibernate and OJB jar files
 to be able to build and run PetClinic on those two ORM tools. For TopLink,

@@ -167,9 +167,11 @@ Documented sample applications and skeletons can be found in "samples":
 * webapp-minimal
 * webapp-typical
 
-Petclinic features alternative DAO implementations and application configurations for Hibernate, Apache OJB
-and JDBC, with HSQL and MySQL as target databases. The default Petclinic configuration is Hibernate on HSQL;
-to be able to build and run it, the Spring distribution comes with all required Hibernate jar files.
+PetClinic features alternative DAO implementations and application configurations for JDBC, Hibernate,
+Apache OJB and Oracle TopLink, with HSQLDB and MySQL as target databases. The default PetClinic configuration
+is JDBC on HSQL, which also demonstrates Spring's JMX export through exposing the CachingClinic management
+interface. To to be able to build and run the Hibernate and OJB versions, the Spring distribution comes with
+all required Hibernate jar files; for TopLink, the full jars need to be downloaded (see PetClinic's readme.txt).
 
 The Spring JPetStore is an adapted version of Clinton Begin's JPetStore (available from http://www.ibatis.com).
 It leverages Spring's support for the iBATIS SQL Maps to improve the original JPetStore in terms of

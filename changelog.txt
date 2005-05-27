@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.1 (27.5.2005)
+Changes in version 1.2.1 (28.5.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -45,8 +45,15 @@ Package org.springframework.orm
 * fixed Hibernate SessionFactoryUtils to correctly handle asynchronous timeouts in case of mixed JTA/Spring transactions
 * fixed SessionFactoryUtils for Hibernate 2.1 to not prevent transaction synchronization when allowCreate=false
 * fixed LocalSessionFactoryBean for Hibernate3 to use connection release mode "on_close" as default (-> safe tx cleanup)
+* fixed LocalSessionFactoryBean for Hibernate3 to register type definitions before any Hibernate configuration loading
+* fixed TypeDefinitionBean for Hibernate3 to use empty Properties as parameters and to check "typeName" and "typeClass"
 * refined HibernateTransactionManager for Hibernate3 to not call "Session.toString" (which is broken in Hibernate3)
 * added "filterNames" property to HibernateTemplate/Interceptor, allowing to enable a list of filters for all operations
+
+Package org.springframework.samples
+* added demonstration of JMX export to PetClinic's JDBC version: exposure of the CachingClinic management interface
+* added demonstration of JMX export to PetClinic's JDBC version: exposure of a CallMonitor that monitors the Clinic
+* switched PetClinic's default data access strategy to JDBC, to highlight the JMX export
 
 Package org.springframework.transaction
 * exposed "hasSavepoint" and "isCompleted" methods on TransactionStatus interface (not just on DefaultTransactionStatus)
