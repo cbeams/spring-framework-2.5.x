@@ -19,6 +19,7 @@ package org.springframework.orm.hibernate3;
 import java.util.Properties;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Bean that encapsulates a Hibernate type definition.
@@ -48,13 +49,13 @@ import org.springframework.beans.factory.BeanNameAware;
  * @since 1.2
  * @see LocalSessionFactoryBean#setTypeDefinitions(TypeDefinitionBean[])
  */
-public class TypeDefinitionBean implements BeanNameAware {
+public class TypeDefinitionBean implements BeanNameAware, InitializingBean {
 
 	private String typeName;
 
 	private String typeClass;
 
-	private Properties parameters;
+	private Properties parameters = new Properties();
 
 
 	/**
@@ -104,6 +105,7 @@ public class TypeDefinitionBean implements BeanNameAware {
 		return parameters;
 	}
 
+
 	/**
 	 * If no explicit type name has been specified, the bean name of
 	 * the TypeDefinitionBean will be used.
@@ -112,6 +114,15 @@ public class TypeDefinitionBean implements BeanNameAware {
 	public void setBeanName(String name) {
 		if (this.typeName == null) {
 			this.typeName = name;
+		}
+	}
+
+	public void afterPropertiesSet() {
+		if (this.typeName == null) {
+			throw new IllegalArgumentException("typeName is required");
+		}
+		if (this.typeClass == null) {
+			throw new IllegalArgumentException("typeClass is required");
 		}
 	}
 
