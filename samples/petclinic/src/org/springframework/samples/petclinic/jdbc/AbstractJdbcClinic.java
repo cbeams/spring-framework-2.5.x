@@ -52,7 +52,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	private VisitsQuery visitsQuery;
 	private VisitInsert visitInsert;
 
-	private List vets = new ArrayList();
+	private final List vets = new ArrayList();
 
 
 	protected void initDao() {
@@ -70,11 +70,9 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		this.petUpdate = new PetUpdate(getDataSource());
 		this.visitsQuery = new VisitsQuery(getDataSource());
 		this.visitInsert = new VisitInsert(getDataSource());
-
-		refreshVetsCache();
 	}
 
-	public void refreshVetsCache() {
+	public void refreshVetsCache() throws DataAccessException {
 		synchronized (this.vets) {
 			logger.info("Refreshing vets cache");
 			
@@ -104,7 +102,12 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	// START of Clinic implementation section *******************************
 
 	public Collection getVets() throws DataAccessException {
-		return this.vets;
+		synchronized (this.vets) {
+			if (this.vets.isEmpty()) {
+				refreshVetsCache();
+			}
+			return this.vets;
+		}
 	}
 
 	public Collection getPetTypes() throws DataAccessException {
