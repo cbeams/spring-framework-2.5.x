@@ -3,7 +3,12 @@ package org.springframework.samples.petclinic.jdbc;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -28,6 +33,7 @@ import org.springframework.samples.petclinic.util.EntityUtils;
  *
  * @author Ken Krebs
  * @author Juergen Hoeller
+ * @author Rob Harrop
  */
 public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clinic, CachingClinic {
 
@@ -47,6 +53,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	private VisitInsert visitInsert;
 
 	private List vets = new ArrayList();
+
 
 	protected void initDao() {
 		this.vetsQuery = new VetsQuery(getDataSource());
@@ -69,17 +76,20 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 	public void refreshVetsCache() {
 		synchronized (this.vets) {
-			// Retrieve the list of all vets
-			this.vets = this.vetsQuery.execute();
+			logger.info("Refreshing vets cache");
+			
+			// Retrieve the list of all vets.
+			this.vets.clear();
+			this.vets.addAll(this.vetsQuery.execute());
 
-			// Retrieve the list of all possible specialties
+			// Retrieve the list of all possible specialties.
 			List specialties = this.specialtiesQuery.execute();
 
-				// Build each vet's list of specialties
+				// Build each vet's list of specialties.
 			Iterator vi = this.vets.iterator();
 			while (vi.hasNext()) {
 				Vet vet = (Vet) vi.next();
-				List vetSpecialtiesIds = this.vetSpecialtiesQuery.execute(vet.getId());
+				List vetSpecialtiesIds = this.vetSpecialtiesQuery.execute(vet.getId().intValue());
 				Iterator vsi = vetSpecialtiesIds.iterator();
 				while (vsi.hasNext()) {
 					int specialtyId = ((Integer) vsi.next()).intValue();
