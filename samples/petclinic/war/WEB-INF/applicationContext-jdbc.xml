@@ -82,6 +82,7 @@
 
 	<!--
 		- Transactional proxy for PetClinic's central data access facade.
+		- Implements the CachingClinic management interface.
 		-
 		- Note that in a real-life app with multiple transaction proxies,
 		- you will probably want to use parent and child bean definitions
@@ -95,10 +96,31 @@
 				<prop key="*">PROPAGATION_REQUIRED</prop>
 			</props>
 		</property>
-		<property name="preInterceptors">
-			<ref bean="callMonitor"/>
+		<property name="preInterceptors"><ref bean="callMonitor"/></property>
+	</bean>
+
+	<!-- Call monitoring interceptor that monitors call count and call invocation time -->
+	<!-- Implements the CallMonitor management interface -->
+	<bean id="callMonitor" class="org.springframework.samples.petclinic.jmx.CallMonitoringInterceptor"/>
+
+	<!-- Exporter that exposes both the CachingClinic and the CallMonitor via JMX -->
+	<bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="beans">
+			<map>
+				<entry key="petclinic:service=clinic"><ref bean="clinic"/></entry>
+				<entry key="petclinic:service=callMonitor"><ref bean="callMonitor"/></entry>
+			</map>
+		</property>
+		<property name="assembler">
+			<bean class="org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler">
+				<property name="interfaceMappings">
+					<props>
+						<prop key="petclinic:service=clinic">org.springframework.samples.petclinic.jdbc.CachingClinic</prop>
+						<prop key="petclinic:service=callMonitor">org.springframework.samples.petclinic.jmx.CallMonitor</prop>
+					</props>
+				</property>
+			</bean>
 		</property>
 	</bean>
 
-		<bean id="callMonitor" class="org.springframework.samples.petclinic.jmx.CallMonitoringInterceptor"/>
 </beans>
