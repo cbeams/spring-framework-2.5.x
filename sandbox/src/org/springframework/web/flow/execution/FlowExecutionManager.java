@@ -387,7 +387,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * exposed to the view.
 	 * @param viewDescriptor the view descriptor to be processed
 	 * @param flowExecutionId the unique id of the flow execution
-	 * @param flowExecution the flow execution
+	 * @param flowContext the flow context providing info about the flow execution
 	 * @return the processed view descriptor
 	 */
 	protected ViewDescriptor prepareViewDescriptor(ViewDescriptor viewDescriptor, String flowExecutionId,
@@ -395,8 +395,9 @@ public class FlowExecutionManager implements BeanFactoryAware {
 		if (flowContext.isActive() && viewDescriptor!=null) {
 			// make the unique flow execution id available in the model
 			viewDescriptor.addObject(FLOW_EXECUTION_ID_ATTRIBUTE, flowExecutionId);
-			// make the flow execution itself available in the model
+			// make the flow execution context available in the model
 			viewDescriptor.addObject(FLOW_CONTEXT_ATTRIBUTE, flowContext);
+			viewDescriptor.addObject("flowExecution", flowContext); // for backwards compatibility
 			// add some convenience values for views that aren't easily JavaBean aware
 			viewDescriptor.addObject(CURRENT_STATE_ID_ATTRIBUTE, flowContext.getCurrentState().getId());
 		}
