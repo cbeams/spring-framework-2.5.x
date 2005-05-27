@@ -3,7 +3,11 @@ package org.springframework.samples.petclinic.jdbc;
 import org.springframework.samples.petclinic.Pet;
 
 /**
+ * Subclass of Pet that carries temporary id properties
+ * which are only relevant for AbstractJdbcClinic.
+ *
  * @author Juergen Hoeller
+ * @see AbstractJdbcClinic
  */
 public class JdbcPet extends Pet {
 
