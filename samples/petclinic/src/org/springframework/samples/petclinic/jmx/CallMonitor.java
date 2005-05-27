@@ -1,16 +1,21 @@
-
 package org.springframework.samples.petclinic.jmx;
 
 /**
- * 
- * @author robh
+ * Simple interface for a call monitor.
+ * To be exposed for management via JMX.
+ * @author Rob Harrop
+ * @since 1.2
  */
 public interface CallMonitor {
 
-    int getCallCount();
-    long getCallTime();
+	void setEnabled(boolean isEnabled);
 
-    boolean isEnabled();
-    void setEnabled(boolean isEnabled);
+	boolean isEnabled();
+
+	void reset();
+
+	int getCallCount();
+
+	long getCallTime();
+
 }
-
