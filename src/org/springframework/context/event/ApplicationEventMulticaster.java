@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationListener;
 /**
  * Interface to be implemented by objects that can manage a number
  * of ApplicationListeners, and publish events to them.
+ *
  * @author Rod Johnson
  */
 public interface ApplicationEventMulticaster {

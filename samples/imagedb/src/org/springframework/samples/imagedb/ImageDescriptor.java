@@ -4,6 +4,7 @@ import org.springframework.util.Assert;
 
 /**
  * Simple data holder for image descriptions.
+ *
  * @author Juergen Hoeller
  * @since 07.01.2004
  */

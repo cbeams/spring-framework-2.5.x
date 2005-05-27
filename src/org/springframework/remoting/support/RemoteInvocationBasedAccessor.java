@@ -22,6 +22,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * Abstract base class for remote service accessors that are based on
  * serialization of RemoteInvocation objects. Provides a "remoteInvocationFactory"
  * property, with a DefaultRemoteInvocationFactory as default.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

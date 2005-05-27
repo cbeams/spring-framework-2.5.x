@@ -10,6 +10,7 @@ import org.springframework.samples.jpetstore.domain.Product;
 
 /**
  * JPetStore primary business interface.
+ *
  * @author Juergen Hoeller
  * @since 30.11.2003
  */

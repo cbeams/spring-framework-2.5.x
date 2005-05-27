@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 /**
  * Class to retrieve the next value of a given PostgreSQL Sequence.
+ *
  * @author Tomislav Urban
  * @author Juergen Hoeller
  */

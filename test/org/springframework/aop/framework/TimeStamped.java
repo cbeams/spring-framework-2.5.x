@@ -19,6 +19,7 @@ package org.springframework.aop.framework;
 /**
  * This interface can be implemented by cacheable objects or cache entries,
  * to enable the freshness of objects to be checked.
+ *
  * @author Rod Johnson
  */
 public interface TimeStamped {

@@ -19,6 +19,7 @@ package org.springframework.core;
 /**
  * Exception thrown when the Constants class is asked for an invalid
  * constant name.
+ *
  * @author Rod Johnson
  * @since 28-Apr-2003
  * @see org.springframework.core.Constants

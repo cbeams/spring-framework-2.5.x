@@ -26,6 +26,7 @@ import org.springframework.metadata.Attributes;
 /**
  * PrototypeTargetSourceCreator driven by metadata. Creates a ThreadLocalTargetSource
  * only if there's a ThreadLocalAttribute associated with the class.
+ *
  * @author Rod Johnson
  * @see org.springframework.aop.target.ThreadLocalTargetSource
  */

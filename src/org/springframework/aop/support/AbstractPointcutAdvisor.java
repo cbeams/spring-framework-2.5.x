@@ -28,6 +28,7 @@ import org.springframework.util.ObjectUtils;
  * Abstract base class for PointcutAdvisor implementations.
  * Can be subclassed for returning a specific pointcut
  * or a freely configurable pointcut.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1.2

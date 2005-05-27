@@ -33,6 +33,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * Helper class that can efficiently create multiple PreparedStatementCreator
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

@@ -40,6 +40,7 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 /**
  * Most of the value of the tests here is in being forced
  * to implement ejbCreate() methods.
+ *
  * @author Rod Johnson
  * @since 21-May-2003
  */

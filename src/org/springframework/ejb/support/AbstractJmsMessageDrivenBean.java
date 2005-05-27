@@ -21,6 +21,7 @@ import javax.jms.MessageListener;
 /** 
  * Convenient superclass for JMS MDBs.
  * Requires subclasses to implement the JMS interface MessageListener.
+ *
  * @author Rod Johnson
  */
 public abstract class AbstractJmsMessageDrivenBean 

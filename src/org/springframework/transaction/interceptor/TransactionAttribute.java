@@ -22,6 +22,7 @@ import org.springframework.transaction.TransactionDefinition;
  * This interface adds a <code>rollbackOn</code> specification to TransactionDefinition.
  * As custom <code>rollbackOn</code> is only possible with AOP, this class resides
  * in the AOP transaction package.
+ *
  * @author Rod Johnson
  * @since 16.03.2003
  * @see DefaultTransactionAttribute

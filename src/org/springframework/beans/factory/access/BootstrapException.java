@@ -20,6 +20,7 @@ import org.springframework.beans.FatalBeanException;
 
 /**
  * Exception thrown if a bean factory could not be loaded by a bootstrap class.
+ *
  * @author Rod Johnson
  * @since 02.12.2002
  */

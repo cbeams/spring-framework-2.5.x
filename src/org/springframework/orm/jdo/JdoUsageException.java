@@ -24,6 +24,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 /**
  * JDO-specific subclass of InvalidDataAccessApiUsageException.
  * Converts JDO's JDOUserException and JDOFatalUserException.
+ *
  * @author Juergen Hoeller
  * @since 03.06.2003
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException

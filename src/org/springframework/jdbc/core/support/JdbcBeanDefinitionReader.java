@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
  * Expects columns for bean name, property name and value as string.
  * Formats for each are identical to the properties format recognized by
  * PropertiesBeanDefinitionReader.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader

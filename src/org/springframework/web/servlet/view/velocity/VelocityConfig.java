@@ -22,6 +22,7 @@ import org.apache.velocity.app.VelocityEngine;
  * Interface to be implemented by objects that configure and manage a
  * VelocityEngine for automatic lookup in a web environment. Detected
  * and used by VelocityView.
+ *
  * @author Rod Johnson
  * @see VelocityConfigurer
  * @see VelocityView

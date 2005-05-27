@@ -23,6 +23,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
 /**
  * Hibernate-specific subclass of UncategorizedDataAccessException,
  * for JDBC exceptions that Hibernate rethrew.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see SessionFactoryUtils#convertHibernateAccessException

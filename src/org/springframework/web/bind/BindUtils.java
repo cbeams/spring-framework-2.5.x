@@ -26,6 +26,7 @@ import org.springframework.validation.Validator;
 /**
  * Offers convenience methods for binding servlet request parameters
  * to objects, including optional validation.
+ *
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 10.03.2003

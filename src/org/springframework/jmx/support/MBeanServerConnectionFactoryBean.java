@@ -31,6 +31,7 @@ import org.springframework.beans.factory.InitializingBean;
  * <code>FactoryBean</code> implementation that creates an <code>MBeanServerConnection</code>
  * to a remote <code>MBeanServer</code> exposed via a <code>JMXServerConnector</code>.
  * Exposes the <code>MBeanServer</code> for bean references.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2

@@ -18,6 +18,7 @@ package org.springframework.jmx.export.metadata;
 
 /**
  * Base class for all JMX metadata classes.
+ *
  * @author Rob Harrop
  * @since 1.2
  */

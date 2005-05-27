@@ -21,6 +21,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Default implementation of the RemoteInvocationFactory interface.
  * Simply creates a new standard RemoteInvocation object.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

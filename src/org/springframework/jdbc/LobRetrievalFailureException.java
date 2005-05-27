@@ -22,6 +22,7 @@ import org.springframework.dao.DataRetrievalFailureException;
 
 /**
  * Exception to be thrown when a LOB could not be retrieved.
+ *
  * @author Juergen Hoeller
  * @since 1.0.2
  */

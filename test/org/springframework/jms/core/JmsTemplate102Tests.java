@@ -48,6 +48,7 @@ import org.springframework.jndi.JndiTemplate;
 
 /**
  * Unit tests for the JmsTemplate implemented using JMS 1.0.2.
+ *
  * @author Andre Biryukov
  * @author Mark Pollack
  */

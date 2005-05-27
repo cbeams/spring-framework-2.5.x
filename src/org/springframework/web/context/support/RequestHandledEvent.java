@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationEvent;
  * Event raised when a request is handled within a WebApplicationContext.
  * Supported by Spring's own FrameworkServlet, but can also be raised
  * by any other web component.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 17, 2001

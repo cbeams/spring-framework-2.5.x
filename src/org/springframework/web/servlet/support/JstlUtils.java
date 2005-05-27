@@ -31,6 +31,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 /**
  * Helper class for preparing JSTL views,
  * in particular for exposing a JSTL localization context.
+ *
  * @author Juergen Hoeller
  * @since 20.08.2003
  */

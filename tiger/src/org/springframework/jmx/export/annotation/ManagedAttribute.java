@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
  * JDK 1.5+ method-level annotation that indicates to expose a given bean
  * property as JMX attribute, corresponding to the ManagedAttribute attribute.
  * Only valid when used on a JavaBean getter or setter.
+ *
  * @author Rob Harrop
  * @since 1.2
  * @see org.springframework.jmx.export.metadata.ManagedAttribute

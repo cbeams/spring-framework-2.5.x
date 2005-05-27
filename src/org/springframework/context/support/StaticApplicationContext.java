@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext;
  * ApplicationContext that allows concrete registration of beans and
  * messages in code, rather than from external configuration sources.
  * Mainly useful for testing.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #registerSingleton

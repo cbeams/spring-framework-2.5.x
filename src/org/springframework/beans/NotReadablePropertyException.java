@@ -19,6 +19,7 @@ package org.springframework.beans;
 /**
  * Exception thrown on an attempt to get the value of a property
  * that isn't readable, because there's no getter method.
+ *
  * @author Juergen Hoeller
  * @since 1.0.2
  */

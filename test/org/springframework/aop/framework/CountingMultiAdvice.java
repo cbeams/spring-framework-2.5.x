@@ -27,6 +27,7 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * Advice object that implements <i>multiple</i> Advice interfaces.
+ *
  * @author Juergen Hoeller
  * @since 19.05.2005
  */

@@ -8,6 +8,7 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * Central business interface for the image database.
+ *
  * @author Juergen Hoeller
  * @since 08.01.2004
  */

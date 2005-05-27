@@ -32,6 +32,7 @@ import org.springframework.ui.context.ThemeSource;
  * ThemeSource implementation that looks up an individual ResourceBundle
  * per theme. The theme name gets interpreted as ResourceBundle basename,
  * supporting a common basename prefix for all themes.
+ *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @see #setBasenamePrefix

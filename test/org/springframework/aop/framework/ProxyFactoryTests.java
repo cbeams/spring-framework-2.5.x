@@ -31,6 +31,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 /**
  * Also tests AdvisedSupport superclass.
+ *
  * @author Rod Johnson
  * @since 14.05.2003
  */

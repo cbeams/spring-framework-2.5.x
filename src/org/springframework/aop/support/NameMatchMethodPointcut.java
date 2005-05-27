@@ -24,6 +24,7 @@ import java.util.List;
 /**
  * Pointcut bean for simple method name matches, as alternative to regexp patterns.
  * Does not handle overloaded methods: all methods *with a given name will be eligible.
+ *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 11.02.2004

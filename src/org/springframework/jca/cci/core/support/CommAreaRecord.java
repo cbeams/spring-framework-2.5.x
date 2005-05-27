@@ -27,6 +27,7 @@ import org.springframework.util.FileCopyUtils;
 
 /**
  * CCI Record implementation for a COMMAREA, holding a byte array.
+ *
  * @author Thierry Templier
  * @author Juergen Hoeller
  * @since 1.2

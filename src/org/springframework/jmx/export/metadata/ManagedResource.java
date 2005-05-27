@@ -19,6 +19,7 @@ package org.springframework.jmx.export.metadata;
 /**
  * Metadata that indicates to register instances of a given class
  * with a JMX server. Only valid when used on a <code>Class</code>.
+ *
  * @author Rob Harrop
  * @since 1.2
  * @see org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler

@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
 /**
  * Resource implementation for java.io.File handles.
  * Obviously supports resolution as File, and also as URL.
+ *
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see java.io.File

@@ -21,6 +21,7 @@ import org.springframework.core.NestedRuntimeException;
 /**
  * Thrown if an exception is encountered when trying to retrieve
  * MBean metadata.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2

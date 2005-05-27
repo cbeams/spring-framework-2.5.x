@@ -19,6 +19,7 @@ package org.springframework.transaction;
 /**
  * Exception thrown when a general transaction system error is encountered,
  * like on commit or rollback.
+ *
  * @author Juergen Hoeller
  * @since 24.03.2003
  */

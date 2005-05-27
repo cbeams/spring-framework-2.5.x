@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
  * JDK 1.5+ method-level annotation used to provide metadata about
  * operation parameters, corresponding to an array of
  * <code>ManagedOperationParameter</code> attributes.
+ *
  * @author Rob Harrop
  * @since 1.2
  * @see org.springframework.jmx.export.metadata.ManagedOperationParameter

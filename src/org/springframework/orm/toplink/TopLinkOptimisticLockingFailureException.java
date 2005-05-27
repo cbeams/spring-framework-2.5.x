@@ -23,6 +23,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 /**
  * TopLink-specific subclass of ObjectOptimisticLockingFailureException.
  * Converts TopLink's OptimisticLockException.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  */

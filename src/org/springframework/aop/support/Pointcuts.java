@@ -27,6 +27,7 @@ import org.springframework.aop.Pointcut;
  * and static methods useful for manipulating and evaluating pointcuts.
  * These methods are particularly useful for composing pointcuts
  * using the union and intersection methods.
+ *
  * @author Rod Johnson
  */
 public abstract class Pointcuts {

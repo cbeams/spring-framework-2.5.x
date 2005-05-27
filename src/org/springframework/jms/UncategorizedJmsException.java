@@ -18,6 +18,7 @@ package org.springframework.jms;
 
 /**
  * JmsException to be thrown when no other matching subclass found.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

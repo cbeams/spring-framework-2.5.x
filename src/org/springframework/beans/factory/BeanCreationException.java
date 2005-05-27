@@ -21,6 +21,7 @@ import org.springframework.beans.FatalBeanException;
 /**
  * Exception thrown when a BeanFactory encounters an error when
  * attempting to create a bean from a bean definition.
+ *
  * @author Juergen Hoeller
  */
 public class BeanCreationException extends FatalBeanException {

@@ -23,6 +23,7 @@ import org.springframework.core.NestedRuntimeException;
 /**
  * Base class for exception thrown by the framework whenever it
  * encounters a problem related to JMS.
+ *
  * @author Les Hazlewood
  * @author Juergen Hoeller
  * @since 1.1

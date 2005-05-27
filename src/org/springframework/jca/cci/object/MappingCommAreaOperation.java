@@ -29,6 +29,7 @@ import org.springframework.jca.cci.core.support.CommAreaRecord;
 
 /**
  * Query specific for COMMAREA based record.
+ *
  * @author Thierry Templier
  */
 public abstract class MappingCommAreaOperation extends MappingRecordOperation {

@@ -31,6 +31,7 @@ import org.springframework.aop.Pointcut;
  * </code>
  * There is no union() method on this class. Use the Pointcuts.union()
  * method for this.
+ *
  * @author Rod Johnson
  * @since 11-Nov-2003
  */

@@ -28,6 +28,7 @@ import junit.framework.TestCase;
 /**
  * Tests for the KeyHolder and GeneratedKeyHolder
  * and it appears that JdbcUtils doesn't work exactly as documented.
+ *
  * @author trisberg
  * @since Jul 18, 2004
  */

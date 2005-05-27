@@ -22,6 +22,7 @@ import freemarker.template.Configuration;
  * Interface to be implemented by objects that configure and manage a
  * FreeMarker Configuration object in a web environment. Detected and
  * used by FreeMarkerView.
+ *
  * @author Darren Davison
  * @since 3/3/2004
  * @see FreeMarkerConfigurer

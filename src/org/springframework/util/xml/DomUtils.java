@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
 /**
  * Convenience methods for working with the DOM API,
  * in particular for working with DOM Nodes and DOM Elements.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.w3c.dom.Node

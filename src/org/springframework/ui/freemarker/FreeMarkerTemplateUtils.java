@@ -25,6 +25,7 @@ import freemarker.template.TemplateException;
 /**
  * Utility class for working with FreeMarker.
  * Provides convenience methods to process a FreeMarker template with a model.
+ *
  * @author Juergen Hoeller
  * @since 14.03.2004
  */

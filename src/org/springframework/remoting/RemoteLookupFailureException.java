@@ -19,6 +19,7 @@ package org.springframework.remoting;
 /**
  * RemoteAccessException subclass to be thrown in case of a lookup failure,
  * typically if the lookup happens on demand for each method invocation.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

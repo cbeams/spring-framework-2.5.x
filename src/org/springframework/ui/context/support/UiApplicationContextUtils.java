@@ -28,6 +28,7 @@ import org.springframework.ui.context.ThemeSource;
 
 /**
  * Utilities common to all UI application context implementations.
+ *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @since 17.06.2003

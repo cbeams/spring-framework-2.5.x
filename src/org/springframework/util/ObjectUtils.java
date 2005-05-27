@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
  * Miscellaneous object utility methods. Mainly for internal use within the
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
  * of object utilities.
+ *
  * @author Juergen Hoeller
  * @author Keith Donald
  * @author Rod Johnson

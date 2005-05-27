@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 
 /**
  * Miscellaneous utilities for AOP proxy implementations.
+ *
  * @author Rod Johnson
  */
 public abstract class AopProxyUtils {

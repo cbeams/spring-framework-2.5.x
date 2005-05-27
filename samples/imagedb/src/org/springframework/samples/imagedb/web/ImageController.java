@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
 /**
  * MultiActionController for the image list/upload UI.
+ *
  * @author Juergen Hoeller
  * @since 07.01.2004
  */

@@ -23,6 +23,7 @@ import org.springframework.core.io.Resource;
  * Exception thrown when a BeanFactory encounters an internal error, and
  * its definitions are invalid: for example, if an XML document containing
  * bean definitions isn't well-formed.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

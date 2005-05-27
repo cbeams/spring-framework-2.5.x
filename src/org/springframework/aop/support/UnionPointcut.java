@@ -27,6 +27,7 @@ import org.springframework.aop.Pointcut;
  * Pointcut unions are tricky, because we can't just
  * OR the MethodMatchers: we need to check that each MethodMatcher's
  * ClassFilter was happy as well.
+ *
  * @author Rod Johnson
  */
 class UnionPointcut implements Pointcut, Serializable {

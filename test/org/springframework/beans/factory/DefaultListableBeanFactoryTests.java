@@ -43,6 +43,7 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 
 /**
  * This largely tests properties population.
+ *
  * @author Rod Johnson
  */
 public class DefaultListableBeanFactoryTests extends TestCase {

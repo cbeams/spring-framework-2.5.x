@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Abstract base class for Spring's DataSource implementations,
  * taking care of the "uninteresting" glue.
+ *
  * @author Juergen Hoeller
  * @since 07.05.2003
  * @see DriverManagerDataSource

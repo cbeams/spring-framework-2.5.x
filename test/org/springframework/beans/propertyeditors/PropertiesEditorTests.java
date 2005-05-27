@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 /**
  * Test the conversion of Strings to java.util.Properties objects,
  * and other property editors.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 /**
  * Tag subclass used to hold managed List elements, which may
  * include runtime bean references.
+ *
  * @author Rod Johnson
  * @since 27-May-2003
  */

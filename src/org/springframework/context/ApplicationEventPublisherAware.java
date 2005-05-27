@@ -20,6 +20,7 @@ package org.springframework.context;
  * Interface to be implemented by any object that wishes to be notified
  * of the ApplicationEventPublisher (typically the ApplicationContext)
  * that it runs in.
+ *
  * @author Juergen Hoeller
  * @since 1.1.1
  * @see ApplicationContextAware

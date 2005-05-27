@@ -31,6 +31,7 @@ import org.springframework.beans.BeanUtils;
 /**
  * Factory for locally defined JAX-RPC Service references.
  * Uses a JAX-RPC ServiceFactory underneath.
+ *
  * @author Juergen Hoeller
  * @since 15.12.2003
  * @see javax.xml.rpc.ServiceFactory

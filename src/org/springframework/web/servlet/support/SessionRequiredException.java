@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 
 /**
  * Exception thrown when a web content generator requires a pre-existing session.
+ *
  * @author Rod Johnson
  * @see WebContentGenerator
  */

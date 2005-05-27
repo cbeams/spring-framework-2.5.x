@@ -38,6 +38,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Tests for AbstractView. Not called AbstractViewTests as
  * would otherwise be excluded by Ant build script wildcard.
+ *
  * @author Rod Johnson
  */
 public class BaseViewTests extends TestCase {

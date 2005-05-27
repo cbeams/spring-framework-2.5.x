@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 /**
  * Exception thrown in case of a reference to a bean that's currently in creation.
  * Typically happens when constructor autowiring matches the currently constructed bean.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

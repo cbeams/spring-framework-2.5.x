@@ -20,6 +20,7 @@ package org.springframework.core;
  * Interface to be implemented by objects that can return information about
  * the current call stack. Useful in AOP (as in AspectJ cflow concept)
  * but not AOP-specific.
+ *
  * @author Rod Johnson
  * @since 02.02.2004
  */

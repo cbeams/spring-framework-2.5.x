@@ -42,6 +42,7 @@ import java.util.Map;
  *
  * Mainly for internal use within the framework; consider Jakarta's Commons Lang
  * >= 2.0 for a more comprehensive suite of assertion utilities.
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Colin Sampaleanu

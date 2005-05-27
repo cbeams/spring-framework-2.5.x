@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Exception thrown when there's no request handling method for a request.
+ *
  * @author Rod Johnson
  */
 public class NoSuchRequestHandlingMethodException extends ServletException {

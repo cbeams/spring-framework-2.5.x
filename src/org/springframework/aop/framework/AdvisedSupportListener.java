@@ -19,6 +19,7 @@ package org.springframework.aop.framework;
 /**
  * Listener to be registered on AdvisedSupport objects.
  * Allows to receive callbacks on activation and change of advice.
+ *
  * @author Rod Johnson
  */
 public interface AdvisedSupportListener {

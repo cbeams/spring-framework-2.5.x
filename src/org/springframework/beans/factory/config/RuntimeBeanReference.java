@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
  * Immutable placeholder class used for the value of a PropertyValue
  * object when it's a reference to another bean in this factory
  * to be resolved at runtime.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

@@ -24,6 +24,7 @@ import org.springframework.transaction.interceptor.*;
 
 /**
  * The attribute syntax is that of Commons Attributes.
+ *
  * @author Rod Johnson
  */
 public class TxClassImpl implements TxClass {

@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 
 /**
  * Canonical MethodMatcher instance that matches all methods.
+ *
  * @author Rod Johnson
  */
 class TrueMethodMatcher implements MethodMatcher, Serializable {

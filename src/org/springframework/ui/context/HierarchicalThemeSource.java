@@ -19,6 +19,7 @@ package org.springframework.ui.context;
 /**
  * Sub-interface of ThemeSource to be implemented by objects that
  * can resolve theme messages hierarchically.
+ *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  */

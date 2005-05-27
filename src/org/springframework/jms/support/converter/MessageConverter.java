@@ -23,6 +23,7 @@ import javax.jms.Session;
 /**
  * Strategy interface that specifies a MessageConverter
  * between Java objects and JMS messages.
+ *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1

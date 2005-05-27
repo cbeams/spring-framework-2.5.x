@@ -30,6 +30,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Additional and overridden tests for the CGLIB proxy.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop

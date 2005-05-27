@@ -28,6 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
  * DataSource implementation that delegates all calls to a given target DataSource.
  * Abstract because it is meant to be to be subclasses, overriding specific methods
  * that should not simply delegate to the target.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

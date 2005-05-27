@@ -5,6 +5,7 @@ import java.util.Set;
 
 /**
  * News feed configurator. See tiles-servlet.xml for more info.
+ *
  * @author Alef Arendsen.
  */
 public class NewsFeedConfigurer {

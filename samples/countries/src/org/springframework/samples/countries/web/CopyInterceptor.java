@@ -13,6 +13,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 /**
  * An interceptor that tell the views about the possibility of a copy
  * of the countries to a database.
+ *
  * @author Jean-Pierre Pawlak
  */
 public class CopyInterceptor extends HandlerInterceptorAdapter {

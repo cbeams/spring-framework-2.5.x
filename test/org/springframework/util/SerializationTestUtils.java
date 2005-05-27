@@ -23,6 +23,7 @@ import org.springframework.beans.TestBean;
  * Utilities for testing serializability of objects.
  * Exposes static methods for use in other test cases.
  * Extends TestCase only to test itself.
+ *
  * @author Rod Johnson
  */
 public class SerializationTestUtils extends TestCase {

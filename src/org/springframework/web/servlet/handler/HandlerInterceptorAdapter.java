@@ -25,6 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * Abstract adapter class for the HandlerInterceptor interface,
  * for simplified implementation of pre-only/post-only interceptors.
+ *
  * @author Juergen Hoeller
  * @since 05.12.2003
  */

@@ -21,6 +21,7 @@ import org.springframework.aop.framework.autoproxy.target.PoolingAttribute;
 
 /**
  * Simple PoolingTargetSourceCreator that pools everything.
+ *
  * @author Rod Johnson
  */
 public class TestPoolingTargetSourceCreator extends AbstractPoolingTargetSourceCreator {

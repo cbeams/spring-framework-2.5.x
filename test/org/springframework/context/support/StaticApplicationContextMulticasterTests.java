@@ -33,6 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * Tests for static application context with custom application event multicaster.
+ *
  * @author Juergen Hoeller
  */
 public class StaticApplicationContextMulticasterTests extends AbstractApplicationContextTests {

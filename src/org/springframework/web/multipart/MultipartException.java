@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 
 /**
  * Exception thrown on multipart resolution.
+ *
  * @author Trevor D. Cook
  * @since 29.09.2003
  * @see MultipartResolver#resolveMultipart

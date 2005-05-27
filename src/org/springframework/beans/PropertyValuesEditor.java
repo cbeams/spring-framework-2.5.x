@@ -32,6 +32,7 @@ import org.springframework.beans.propertyeditors.PropertiesEditor;
  * Each property must be on a new line.
  * <br>
  * The present implementation relies on a PropertiesEditor.
+ *
  * @author Rod Johnson
  */
 public class PropertyValuesEditor extends PropertyEditorSupport {

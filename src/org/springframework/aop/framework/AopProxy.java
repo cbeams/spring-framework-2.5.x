@@ -20,6 +20,7 @@ package org.springframework.aop.framework;
  * Strategy interface for proxy creation.
  * Out-of-the-box implementations are available
  * for JDK dynamic proxies and CGLIB.
+ *
  * @author Rod Johnson
  * @see JdkDynamicAopProxy
  * @see Cglib2AopProxy

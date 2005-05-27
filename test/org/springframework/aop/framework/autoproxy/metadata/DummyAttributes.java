@@ -25,6 +25,7 @@ import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
 
 /**
  * Hardcoded to return the same attributes as are on the TxClass and TxClassWithClassAttribute.
+ *
  * @author Rod Johnson
  */
 public class DummyAttributes extends MapAttributes {

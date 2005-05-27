@@ -36,6 +36,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Utility methods used by the AOP framework and by AOP proxy factories.
  * Not intended to be used directly by applications.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

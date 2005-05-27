@@ -23,6 +23,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 /**
  * TopLink-specific subclass of InvalidDataAccessResourceUsageException,
  * thrown on invalid TopLik query syntax or behavior.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  */

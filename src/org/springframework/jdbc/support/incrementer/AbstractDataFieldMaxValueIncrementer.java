@@ -25,6 +25,7 @@ import org.springframework.dao.DataAccessException;
  * Implementation of DataFieldMaxValueIncrementer that delegates
  * to a single getNextKey template method that returns a long.
  * Uses longs for String values, padding with zeroes if required.
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak

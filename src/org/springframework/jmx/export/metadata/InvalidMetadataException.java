@@ -21,6 +21,7 @@ import javax.management.JMRuntimeException;
 /**
  * Thrown by the <code>JmxAttributeSource</code> when it encounters
  * incorrect metadata on a managed resource or one of its methods.
+ *
  * @author Rob Harrop
  * @since 1.2
  * @see JmxAttributeSource

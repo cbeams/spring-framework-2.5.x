@@ -23,6 +23,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
 /**
  * TopLink-specific subclass of DataAccessException, for JDBC exceptions
  * that TopLink rethrew.
+ *
  * @author Juergen Hoeller
  * @see SessionFactoryUtils#convertTopLinkAccessException
  * @since 1.2

@@ -17,6 +17,7 @@ import org.springframework.beans.TestBean;
 
 /**
  * Tests the various functionality of the ClassUtils class.
+ *
  * @author Colin Sampaleanu
  */
 public class ClassUtilsTests extends TestCase {

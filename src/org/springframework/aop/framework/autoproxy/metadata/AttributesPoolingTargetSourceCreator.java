@@ -25,6 +25,7 @@ import org.springframework.metadata.Attributes;
 
 /**
  * PoolingTargetSourceCreator driven by metadata.
+ *
  * @author Rod Johnson
  */
 public class AttributesPoolingTargetSourceCreator extends AbstractPoolingTargetSourceCreator {

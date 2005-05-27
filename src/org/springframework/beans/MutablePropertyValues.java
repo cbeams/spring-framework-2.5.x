@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
  * Default implementation of the PropertyValues interface.
  * Allows simple manipulation of properties, and provides constructors
  * to support deep copy and construction from a Map.
+ *
  * @author Rod Johnson
  * @since 13 May 2001
  */

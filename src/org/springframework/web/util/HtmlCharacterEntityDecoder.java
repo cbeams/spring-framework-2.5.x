@@ -19,6 +19,7 @@ package org.springframework.web.util;
 /**
  * Helper for decoding HTML Strings by replacing character
  * entity references with the referred character.
+ *
  * @author Juergen Hoeller
  * @author Martin Kersten
  * @since 1.2.1

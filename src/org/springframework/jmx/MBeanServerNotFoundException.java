@@ -21,6 +21,7 @@ import org.springframework.core.NestedRuntimeException;
 /**
  * Thrown when we cannot locate an instance of an <code>MBeanServer</code>,
  * or when more than one instance is found.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2

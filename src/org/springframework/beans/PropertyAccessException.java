@@ -23,6 +23,7 @@ import org.springframework.core.ErrorCoded;
 /**
  * Superclass for exceptions related to a property access,
  * such as type mismatch or invocation target exception.
+ *
  * @author Rod Johnson
  */
 public abstract class PropertyAccessException extends BeansException implements ErrorCoded {

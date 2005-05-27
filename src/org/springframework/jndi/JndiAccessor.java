@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Convenient superclass for JNDI accessors that provides "jndiTemplate"
  * and "jndiEnvironment" bean properties.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setJndiTemplate

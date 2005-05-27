@@ -29,6 +29,7 @@ import org.apache.velocity.exception.VelocityException;
 /**
  * Utility class for working with a VelocityEngine.
  * Provides convenience methods to merge a Velocity template with a model.
+ *
  * @author Juergen Hoeller
  * @since 22.01.2004
  */

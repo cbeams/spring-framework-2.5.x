@@ -28,6 +28,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Convenient superclass for application objects running in a WebApplicationContext.
  * Provides getWebApplicationContext, getServletContext, and getTempDir methods.
+ *
  * @author Juergen Hoeller
  * @since 28.08.2003
  */

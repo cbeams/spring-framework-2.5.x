@@ -24,6 +24,7 @@ import java.util.Map;
  * Implement this interface when parameters need to be customized based
  * on the connection. We might need to do this to make use of proprietary
  * features, available only with a specific Connection type.
+ *
  * @author Rod Johnson
  * @author Thomas Risberg
  * @see CallableStatementCreatorFactory#newCallableStatementCreator(ParameterMapper)

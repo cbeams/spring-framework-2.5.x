@@ -18,6 +18,7 @@ package org.springframework.aop.framework.autoproxy.metadata;
 
 /**
  * Used as a mixin.
+ *
  * @author Rod Johnson
  */
 public interface Modifiable {

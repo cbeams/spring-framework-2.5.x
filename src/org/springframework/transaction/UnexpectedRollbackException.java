@@ -19,6 +19,7 @@ package org.springframework.transaction;
 /**
  * Thrown when an attempt to commit a transaction resulted
  * in an unexpected rollback.
+ *
  * @author Rod Johnson
  * @since 17.03.2003
  */

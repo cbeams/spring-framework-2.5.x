@@ -22,6 +22,7 @@ import java.util.EventListener;
 /**
  * Interface to be implemented by application event listeners.
  * Based on standard java.util base interface for Observer design pattern.
+ *
  * @author Rod Johnson
  * @see org.springframework.context.event.ApplicationEventMulticaster
  */

@@ -19,6 +19,7 @@ package org.springframework.dao;
 /**
  * Exception thrown on failure to complete a transaction in serialized mode
  * due to update conflicts.
+ *
  * @author Rod Johnson
  */
 public class CannotSerializeTransactionException extends PessimisticLockingFailureException {

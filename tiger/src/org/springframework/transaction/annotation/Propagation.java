@@ -22,6 +22,7 @@ import org.springframework.transaction.TransactionDefinition;
  * Enumeration that represents transaction propagation behaviors
  * for use with the JDK 1.5+ transaction annotation, corresponding
  * to the TransactionDefinition interface.
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 1.2

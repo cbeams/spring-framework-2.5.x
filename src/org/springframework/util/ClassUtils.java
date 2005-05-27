@@ -26,6 +26,7 @@ import java.util.Set;
  * Miscellaneous class utility methods. Mainly for internal use within the
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
  * of utilities.
+ *
  * @author Keith Donald
  * @author Rob Harrop
  * @author Juergen Hoeller

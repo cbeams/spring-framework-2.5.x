@@ -22,6 +22,7 @@ import javax.servlet.ServletRequest;
 /**
  * Callback that allows for initialization of a binder with
  * custom editors before the binding. Used by BindUtils.
+ *
  * @author Jean-Pierre PAWLAK
  * @since 08.05.2003
  * @see BindUtils#bind(ServletRequest,Object,String,BindInitializer)

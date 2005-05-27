@@ -23,6 +23,7 @@ import org.springframework.jndi.JndiTemplate;
 /**
  * Simple implementation of JndiTemplate interface that always returns
  * a given object. Very useful for testing. Effectively a mock object.
+ *
  * @author Rod Johnson
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
  */

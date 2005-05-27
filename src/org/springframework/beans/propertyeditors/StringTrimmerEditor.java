@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
  * Property editor that trims Strings.
  * Optionally allows transforming an empty string into a null value.
  * Needs to be explictly registered, e.g. for command binding.
+ *
  * @author Juergen Hoeller
  * @see org.springframework.validation.DataBinder#registerCustomEditor
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder

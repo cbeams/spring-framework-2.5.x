@@ -19,6 +19,7 @@ package org.springframework.jmx.export.metadata;
 /**
  * Metadata about JMX operation parameters.
  * Used in conjuction with a ManagedOperation attribute.
+ *
  * @author Rob Harrop
  * @since 1.2
  * @see ManagedOperation

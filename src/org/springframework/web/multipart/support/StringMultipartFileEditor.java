@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * Custom PropertyEditor for converting MultipartFiles to Strings.
  * Allows to specify the charset to use.
+ *
  * @author Juergen Hoeller
  * @since 13.10.2003
  */

@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.19 2005-04-19 10:24:52 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.20 2005-05-27 19:50:44 jhoeller Exp $
  */
 
 /*
@@ -36,6 +36,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * Simple test bean used for testing bean factories,
  * AOP framework etc.
+ *
  * @author  Rod Johnson
  * @since 15 April 2001
  */

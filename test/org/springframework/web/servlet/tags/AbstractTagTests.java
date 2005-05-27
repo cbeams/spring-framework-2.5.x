@@ -31,6 +31,7 @@ import org.springframework.web.servlet.theme.FixedThemeResolver;
 
 /**
  * Abstract base class for testing tags: provides createPageContext.
+ *
  * @author Alef Arendsen
  */
 public abstract class AbstractTagTests extends TestCase {

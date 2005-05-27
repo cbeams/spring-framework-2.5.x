@@ -24,6 +24,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 /**
  * JDO-specific subclass of ObjectOptimisticLockingFailureException.
  * Converts JDO's JDOOptimisticVerificationException.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException

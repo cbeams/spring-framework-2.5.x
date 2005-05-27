@@ -20,6 +20,7 @@ package org.springframework.web.servlet;
  * Handler execution chain, consisting of handler object and any
  * preprocessing interceptors. Returned by HandlerMapping's
  * getHandler method.
+ *
  * @author Juergen Hoeller
  * @since 20.06.2003
  * @see HandlerMapping#getHandler

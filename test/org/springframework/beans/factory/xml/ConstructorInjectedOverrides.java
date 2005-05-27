@@ -23,6 +23,7 @@ import org.springframework.beans.ITestBean;
  * and constructor injection.
  * There is also a property ("setterString") to be set via
  * Setter Injection.
+ *
  * @author Rod Johnson
  */
 public abstract class ConstructorInjectedOverrides {

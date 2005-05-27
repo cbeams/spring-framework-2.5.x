@@ -18,6 +18,7 @@ package org.springframework.jms;
 
 /**
  * Runtime exception mirroring the JMS IllegalStateException.
+ *
  * @author Les Hazlewood
  * @since 1.1
  * @see javax.jms.IllegalStateException

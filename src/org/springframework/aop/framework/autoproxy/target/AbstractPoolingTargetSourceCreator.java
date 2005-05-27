@@ -22,6 +22,7 @@ import org.springframework.aop.target.CommonsPoolTargetSource;
 
 /**
  * Convenient superclass for TargetSource creators that create pooling TargetSources.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.aop.target.AbstractPoolingTargetSource

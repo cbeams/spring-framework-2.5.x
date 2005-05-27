@@ -20,6 +20,7 @@ package org.springframework.context;
  * Interface for objects that are suitable for message resolution in a
  * MessageSource. Spring's own validation error classes implement this
  * interface.
+ *
  * @author Juergen Hoeller
  * @see MessageSource#getMessage(MessageSourceResolvable, java.util.Locale)
  * @see org.springframework.validation.ObjectError

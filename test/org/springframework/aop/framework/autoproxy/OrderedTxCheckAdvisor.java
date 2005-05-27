@@ -30,6 +30,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * It doesn't actually <i>do</i> anything except count
  * method invocations and check for presence of transaction context.
  * <br>Matches setters.
+ *
  * @author Rod Johnson
  */
 public class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implements InitializingBean {

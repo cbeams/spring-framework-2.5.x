@@ -20,6 +20,7 @@ package org.springframework.aop.interceptor;
  * Simple AOP Alliance <code>MethodInterceptor</code> that can be introduced
  * in a chain to display verbose trace information about intercepted method
  * invocations, with method entry and method exit info.
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @deprecated in favor of SimpleTraceInterceptor

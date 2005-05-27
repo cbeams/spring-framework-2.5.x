@@ -27,9 +27,10 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * or a prototype instance.
  * Implements InitializingBean interface, so we can check that
  * factories get this lifecycle callback if they want.
+ *
  * @author Rod Johnson
  * @since 10-Mar-2003
- * version $Id: DummyFactory.java,v 1.11 2005-03-25 09:28:20 jhoeller Exp $
+ * version $Id: DummyFactory.java,v 1.12 2005-05-27 19:50:43 jhoeller Exp $
  */
 public class DummyFactory implements FactoryBean, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
 	

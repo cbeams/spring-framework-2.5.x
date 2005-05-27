@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 /**
  * An implementation of the <code>ObjectNamingStrategy</code> interface
  * that reads the <code>ObjectName</code> from the source-level metadata.
+ *
  * @author Rob Harrop
  * @since 1.2
  * @see ObjectNamingStrategy

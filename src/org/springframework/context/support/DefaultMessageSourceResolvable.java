@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
  * Default implementation of the MessageSourceResolvable interface.
  * Offers an easy way to store all the necessary values needed to
  * resolve a message via a MessageSource.
+ *
  * @author Juergen Hoeller
  * @since 13.02.2004
  * @see org.springframework.context.MessageSource#getMessage(MessageSourceResolvable, java.util.Locale)

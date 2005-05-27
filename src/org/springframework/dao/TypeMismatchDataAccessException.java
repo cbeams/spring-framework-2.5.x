@@ -20,6 +20,7 @@ package org.springframework.dao;
  * Exception thrown on mismatch between Java type and database type:
  * for example on an attempt to set an object of the wrong type
  * in an RDBMS column.
+ *
  * @author Rod Johnson
  */
 public class TypeMismatchDataAccessException extends InvalidDataAccessResourceUsageException {

@@ -21,6 +21,7 @@ import java.beans.PropertyEditorSupport;
 /**
  * Editor for byte arrays. Strings will simply be converted to
  * their corresponding byte representations.
+ *
  * @author Juergen Hoeller
  * @since 1.0.1
  * @see java.lang.String#getBytes

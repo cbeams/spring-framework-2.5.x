@@ -19,6 +19,7 @@ package org.springframework.util;
 /**
  * Utility class for diagnostic purposes, to analyze the
  * ClassLoader hierarchy for any object.
+ *
  * @author Rod Johnson
  * @since 02 April 2001
  * @see java.lang.ClassLoader

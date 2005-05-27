@@ -24,6 +24,7 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 /**
  * Common base class for Hessian/Burlap accessors (HessianClientInterceptor
  * and BurlapClientInterceptor), factoring out common properties.
+ *
  * @author Juergen Hoeller
  * @since 1.1.4
  * @see HessianClientInterceptor

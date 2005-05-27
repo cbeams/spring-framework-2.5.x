@@ -28,6 +28,7 @@ import org.springframework.beans.TestBean;
 /**
  * We have to override some methods here, as the superclass ones use dynamic
  * TargetSources or do other things that this proxy can't do.
+ *
  * @author Rod Johnson
  * @since 13-Mar-2003
  */

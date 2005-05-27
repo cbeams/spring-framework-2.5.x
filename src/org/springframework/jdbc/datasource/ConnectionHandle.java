@@ -21,6 +21,7 @@ import java.sql.Connection;
 /**
  * Simple interface to be implemented by handles for a JDBC Connection.
  * Used by JdoDialect, for example.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see SimpleConnectionHandle

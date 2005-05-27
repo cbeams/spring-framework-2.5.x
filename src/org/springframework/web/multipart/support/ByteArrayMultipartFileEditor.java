@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Custom PropertyEditor for converting MultipartFiles to byte arrays.
+ *
  * @author Juergen Hoeller
  * @since 13.10.2003
  */

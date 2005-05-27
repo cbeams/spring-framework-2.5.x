@@ -21,6 +21,7 @@ import org.springframework.beans.BeansException;
 /**
  * TargetSource that creates a new instance of the target bean for each request.
  * Can only be used in a bean factory.
+ *
  * @author Rod Johnson
  */
 public final class PrototypeTargetSource extends AbstractPrototypeBasedTargetSource {

@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * MultipartFile implementation for Jakarta Commons FileUpload.
+ *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
  * @since 29.09.2003

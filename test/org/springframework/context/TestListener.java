@@ -20,6 +20,7 @@ package org.springframework.context;
 /**
  * Listener that maintains a global count
  * of events.
+ *
  * @author  Rod Johnson
  * @since January 21, 2001
  */

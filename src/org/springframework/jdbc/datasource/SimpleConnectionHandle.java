@@ -21,6 +21,7 @@ import java.sql.Connection;
 /**
  * Simple implementation of the ConnectionHandle interface,
  * containing a given JDBC Connection.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

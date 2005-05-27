@@ -25,6 +25,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
 /**
  * Evaluates content if there are bind errors for a certain bean.
  * Exports an "errors" variable of type Errors for the given bean.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see BindTag

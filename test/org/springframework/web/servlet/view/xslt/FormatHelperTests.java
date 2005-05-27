@@ -24,6 +24,7 @@ import org.w3c.dom.Element;
 
 /**
  * Test the FormatHelper methods.
+ *
  * @author Rod Johnson
  * @author Darren Davison
  * @since 26-Jul-2003

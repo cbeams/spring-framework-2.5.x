@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Simple implementation of TransactionAttributeSource that
  * allows attributes to be matched by registered name.
+ *
  * @author Juergen Hoeller
  * @since 21.08.2003
  * @see #isMatch

@@ -56,6 +56,7 @@ import org.springframework.util.SerializationTestUtils;
 /**
  * Test cases for AOP FactoryBean, using XML bean factory.
  * Note that this FactoryBean will work in any bean factory implementation.
+ *
  * @author Rod Johnson
  * @since 13.03.2003
  */

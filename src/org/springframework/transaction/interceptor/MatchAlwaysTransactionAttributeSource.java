@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
  * may be specified, but will otherwise default to PROPAGATION_REQUIRED. This may be
  * used in the cases where you want to use the same transaction attribute with all
  * methods being handled by a transaction interceptor.
+ *
  * @author Colin Sampaleanu
  * @since 15.10.2003
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean

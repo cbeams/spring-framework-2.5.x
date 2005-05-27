@@ -18,6 +18,7 @@ package org.springframework.beans.support;
 
 /**
  * Definition for sorting bean instances by a property.
+ *
  * @author Juergen Hoeller
  * @since 26.05.2003
  */

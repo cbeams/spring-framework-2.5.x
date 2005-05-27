@@ -20,6 +20,7 @@ import java.util.Locale;
 
 /**
  * Exception thrown when a message can't be resolved.
+ *
  * @author Rod Johnson
  */
 public class NoSuchMessageException extends RuntimeException {

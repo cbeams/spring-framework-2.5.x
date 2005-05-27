@@ -38,6 +38,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * Tests for collections in XML bean definitions.
+ *
  * @author Juergen Hoeller
  * @since 19.12.2004
  */

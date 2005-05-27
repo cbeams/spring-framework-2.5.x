@@ -25,6 +25,7 @@ import org.apache.velocity.runtime.log.LogSystem;
 /**
  * Velocity LogSystem implementation for Jakarta Commons Logging.
  * Used by VelocityConfigurer to redirect log output.
+ *
  * @author Juergen Hoeller
  * @since 07.08.2003
  * @see VelocityEngineFactoryBean

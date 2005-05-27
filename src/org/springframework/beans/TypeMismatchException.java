@@ -20,6 +20,7 @@ import java.beans.PropertyChangeEvent;
 
 /**
  * Exception thrown on a type mismatch when trying to set a bean property.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

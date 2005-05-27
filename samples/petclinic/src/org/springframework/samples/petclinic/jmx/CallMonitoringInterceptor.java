@@ -8,6 +8,7 @@ import org.springframework.util.StopWatch;
 /**
  * Simple interceptor that monitors call count and call invocation time.
  * Implements the CallMonitor management interface.
+ * 
  * @author Rob Harrop
  * @since 1.2
  */

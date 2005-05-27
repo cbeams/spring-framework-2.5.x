@@ -20,6 +20,7 @@ package org.springframework.beans.factory;
  * Exception thrown when a bean depends on other beans or simple properties
  * that were not specified in the bean factory definition, although
  * dependency checking was enabled.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 03.09.2003

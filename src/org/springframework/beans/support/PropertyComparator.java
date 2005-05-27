@@ -33,6 +33,7 @@ import org.springframework.beans.BeansException;
 /**
  * PropertyComparator performs a comparison of two beans,
  * using the specified bean property via a BeanWrapper.
+ *
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 19.05.2003

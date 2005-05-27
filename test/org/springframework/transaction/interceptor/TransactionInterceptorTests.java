@@ -28,6 +28,7 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * Mock object based tests for TransactionInterceptor.
+ *
  * @author Rod Johnson
  * @since 16.03.2003
  */

@@ -20,6 +20,7 @@ import org.springframework.core.NestedRuntimeException;
 
 /**
  * Superclass for all transaction exceptions.
+ *
  * @author Rod Johnson
  * @since 17.03.2003
  */

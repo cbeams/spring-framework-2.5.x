@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
  * JDK 1.5+ class-level annotation that indicates to register
  * instances of a class with a JMX server, corresponding to
  * the ManagedResource attribute.
+ *
  * @author Rob Harrop
  * @since 1.2
  * @see org.springframework.jmx.export.metadata.ManagedResource

@@ -31,6 +31,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 /**
  * Helper methods to populate a ConfigurableBeanFactory with resource editors.
  * Used by AbstractApplicationContext and XmlViewResolver.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.context.support.AbstractApplicationContext#refresh

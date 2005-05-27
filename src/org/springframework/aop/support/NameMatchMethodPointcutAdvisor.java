@@ -25,6 +25,7 @@ import org.springframework.core.Ordered;
 /**
  * Convenient class for name-match method pointcuts that hold an Interceptor,
  * making them an Advisor.
+ *
  * @author Juergen Hoeller
  */
 public class NameMatchMethodPointcutAdvisor extends NameMatchMethodPointcut

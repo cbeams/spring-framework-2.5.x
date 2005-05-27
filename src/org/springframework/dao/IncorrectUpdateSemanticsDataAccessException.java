@@ -21,6 +21,7 @@ package org.springframework.dao;
  * happened with an update, but the transaction hasn't already been rolled back.
  * Thrown, for example, when we wanted to update 1 row in an RDBMS but actually
  * updated 3.
+ *
  * @author Rod Johnson
  */
 public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAccessResourceUsageException {

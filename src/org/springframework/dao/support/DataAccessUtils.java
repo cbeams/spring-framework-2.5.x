@@ -25,6 +25,7 @@ import org.springframework.util.NumberUtils;
 /**
  * Miscellaneous utility methods for DAO implementations.
  * Useful with any data access technology.
+ *
  * @author Juergen Hoeller
  * @since 1.0.2
  */

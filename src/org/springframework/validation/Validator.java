@@ -20,6 +20,7 @@ package org.springframework.validation;
  * Interface to be implemented by objects that can validate
  * application-specific objects. This enables validation to
  * be decoupled from the interface and placed in business objects.
+ *
  * @author Rod Johnson
  */
 public interface Validator {

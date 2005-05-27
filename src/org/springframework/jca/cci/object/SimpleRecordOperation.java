@@ -25,6 +25,7 @@ import org.springframework.dao.DataAccessException;
 /**
  * EIS operation object that accepts a passed-in CCI input Record
  * and returns a corresponding CCI output Record.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  */

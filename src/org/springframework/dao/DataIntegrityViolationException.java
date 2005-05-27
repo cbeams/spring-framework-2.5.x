@@ -21,6 +21,7 @@ package org.springframework.dao;
  * results in violation of an integrity constraint. Note that this
  * is not purely a relational concept; unique primary keys are
  * required by most database types.
+ *
  * @author Rod Johnson
  */
 public class DataIntegrityViolationException extends DataAccessException {

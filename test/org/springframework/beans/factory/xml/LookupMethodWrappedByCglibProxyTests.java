@@ -22,6 +22,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * Tests lookup methods wrapped by a CGLIB proxy (see SPR-391).
+ *
  * @author Rod Johnson
  */
 public class LookupMethodWrappedByCglibProxyTests extends AbstractDependencyInjectionSpringContextTests {

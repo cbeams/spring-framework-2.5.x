@@ -30,6 +30,7 @@ import org.springframework.web.servlet.HandlerMapping;
 /**
  * Abstract base class for HandlerMapping implementations.
  * Supports ordering, a default handler, and handler interceptors.
+ *
  * @author Juergen Hoeller
  * @since 07.04.2003
  * @see #getHandlerInternal

@@ -21,6 +21,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Strategy interface for creating a RemoteInvocation from an AOP MethodInvocation.
  * Used by RmiClientInterceptor (for RMI invokers) and HttpInvokerServiceExporter.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see DefaultRemoteInvocationFactory

@@ -20,6 +20,7 @@ import org.springframework.beans.FatalBeanException;
 
 /**
  * Exception thrown during application context initialization.
+ *
  * @author Rod Johnson
  */
 public class ApplicationContextException extends FatalBeanException {

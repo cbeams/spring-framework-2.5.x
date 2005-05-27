@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 /**
  * Interface used by the <code>MetadataMBeanInfoAssembler</code> to
  * read source-level metadata from a managed resource's class.
+ *
  * @author Rob Harrop
  * @since 1.2
  * @see org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler#setAttributeSource

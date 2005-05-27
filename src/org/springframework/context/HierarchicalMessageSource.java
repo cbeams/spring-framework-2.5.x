@@ -19,6 +19,7 @@ package org.springframework.context;
 /**
  * Sub-interface of MessageSource to be implemented by objects that
  * can resolve messages hierarchically.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

@@ -27,6 +27,7 @@ import org.springframework.transaction.TransactionDefinition;
 
 /**
  * Tests for various TransactionAttributeSource implementations.
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 15.10.2003

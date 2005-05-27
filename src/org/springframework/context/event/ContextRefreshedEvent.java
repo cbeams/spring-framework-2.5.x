@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationEvent;
 
 /**
  * Event raised when an ApplicationContext gets initialized or refreshed.
+ *
  * @author Juergen Hoeller
  * @since 04.03.2003
  */

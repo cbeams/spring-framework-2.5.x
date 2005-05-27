@@ -19,6 +19,7 @@ package org.springframework.remoting.support;
 /**
  * Abstract base class for classes that access remote services via URLs.
  * Provides a "serviceUrl" bean property.
+ *
  * @author Juergen Hoeller
  * @since 15.12.2003
  */

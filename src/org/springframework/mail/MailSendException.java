@@ -25,6 +25,7 @@ import java.util.Map;
 /**
  * Exception thrown when a mail sending error is encountered.
  * Can register failed messages with their exceptions.
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  */

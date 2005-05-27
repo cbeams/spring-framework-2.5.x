@@ -19,6 +19,7 @@ package org.springframework.jdbc.core;
 /**
  * Common base class for ResultSet-supporting SqlParameters like
  * SqlOutParameter and SqlReturnResultSet.
+ *
  * @author Juergen Hoeller
  * @since 1.0.2
  * @see SqlOutParameter

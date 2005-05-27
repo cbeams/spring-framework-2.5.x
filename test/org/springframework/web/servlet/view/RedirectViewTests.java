@@ -32,6 +32,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
  * Tests for redirect view, and query string construction.
  * Doesn't test URL encoding, although it does check it's called.
  * Uses mock objects.
+ *
  * @author Rod Johnson
  * @since 27.05.2003
  */

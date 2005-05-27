@@ -21,6 +21,7 @@ import java.util.Map;
 /**
  * Common interface for classes that can access bean properties.
  * Serves as base interface for BeanWrapper.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see BeanWrapper

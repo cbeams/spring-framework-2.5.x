@@ -21,6 +21,7 @@ import org.springframework.beans.factory.access.BeanFactoryLocator;
 
 /**
  * A factory class to get a default ContextSingletonBeanFactoryLocator instance.
+ *
  * @author Colin Sampaleanu
  * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  */

@@ -19,6 +19,7 @@ package org.springframework.core;
 /**
  * Class that exposes the Spring version. Fetches the
  * "Implementation-Version" manifest attribute from the jar file.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

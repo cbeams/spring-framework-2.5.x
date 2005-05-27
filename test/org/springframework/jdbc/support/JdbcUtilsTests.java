@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 /**
  * TODO this test case needs attention: I wrote it based on Isabelle's documentation
  * and it appears that JdbcUtils doesn't work exactly as documented.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

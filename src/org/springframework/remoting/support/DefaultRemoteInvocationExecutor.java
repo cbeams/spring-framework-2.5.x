@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Default implementation of the RemoteInvocationExecutor interface.
  * Simply delegates to RemoteInvocation's invoke.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see RemoteInvocation#invoke

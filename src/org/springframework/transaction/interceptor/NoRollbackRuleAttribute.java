@@ -19,6 +19,7 @@ package org.springframework.transaction.interceptor;
 /**
  * Tag subclass of RollbackRule. Its class name means that it has the
  * opposite behavior to the RollbackRule superclass.
+ *
  * @author Rod Johnson
  * @since 09-Apr-2003
  */

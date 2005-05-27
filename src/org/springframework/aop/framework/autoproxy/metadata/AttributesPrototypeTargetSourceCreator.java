@@ -26,6 +26,7 @@ import org.springframework.metadata.Attributes;
 /**
  * PrototypeTargetSourceCreator driven by metadata. Creates a prototype
  * only if there's a PrototypeAttribute associated with the class.
+ *
  * @author Rod Johnson
  * @see org.springframework.aop.target.PrototypeTargetSource
  */

@@ -30,6 +30,7 @@ import net.sf.hibernate.util.JDBCExceptionReporter;
  * Hibernate connection provider for local DataSource instances
  * in an application context. This provider will be used if
  * LocalSessionFactoryBean's "dataSource" property is set.
+ *
  * @author Juergen Hoeller
  * @since 11.07.2003
  * @see LocalSessionFactoryBean#setDataSource

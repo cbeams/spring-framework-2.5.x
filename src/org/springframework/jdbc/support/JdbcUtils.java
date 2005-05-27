@@ -36,6 +36,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
  * within the framework, but also useful for custom JDBC access code.
+ *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */

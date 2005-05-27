@@ -20,6 +20,7 @@ package org.springframework.ui.context;
  * Interface to be implemented by objects that can resolve Themes.
  * This enables parameterization and internationalization of messages
  * for a given theme.
+ *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @see Theme

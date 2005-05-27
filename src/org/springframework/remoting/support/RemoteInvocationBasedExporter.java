@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
  * Abstract base class for remote service exporters that are based on
  * deserialization of RemoteInvocation objects. Provides a "remoteInvocationExecutor"
  * property, with a DefaultRemoteInvocationExecutor as default.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */

@@ -25,6 +25,7 @@ import org.springframework.transaction.TransactionStatus;
  * behaviour of a PlatformTransactionManager bean we don't have access to).
  * Allows behaviour of an entire class to change with static delegate change.
  * Not multithreaded.
+ *
  * @author Rod Johnson
  * @since 26-Apr-2003
  */

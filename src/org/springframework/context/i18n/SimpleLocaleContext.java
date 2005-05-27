@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
 /**
  * Simple implementation of the LocaleContext interface,
  * always returning a specified Locale.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  */

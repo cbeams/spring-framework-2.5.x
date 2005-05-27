@@ -20,6 +20,7 @@ package org.springframework.aop.framework.autoproxy.metadata;
  * Tag attribute to indicate that a method does not
  * modify state. We choose to use this rather than a
  * Modifier attribute as it's less error-prone for developers.
+ *
  * @author Rod Johnson
  */
 public class ModifiableAttribute {

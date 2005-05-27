@@ -32,6 +32,7 @@ import org.springframework.jdbc.datasource.AbstractDataSource;
 
 /**
  * Tests for SQLErrorCodes loading.
+ *
  * @author Rod Johnson
  * @author Thomas Risberg
  */

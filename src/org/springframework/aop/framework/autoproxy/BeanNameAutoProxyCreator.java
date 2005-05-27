@@ -25,6 +25,7 @@ import org.springframework.aop.TargetSource;
 /**
  * Auto proxy creator that identifies beans to proxy via a list of names.
  * Checks for direct, "xxx*", and "*xxx" matches.
+ *
  * @author Juergen Hoeller
  * @since 10.10.2003
  * @see #setBeanNames

@@ -24,6 +24,7 @@ import org.springframework.beans.BeanUtils;
 /**
  * Simple factory for shared Set instances. Allows for central setup
  * of Sets via the "set" element in XML bean definitions.
+ *
  * @author Juergen Hoeller
  * @since 21.01.2003
  */

@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Strategy interface for executing a RemoteInvocation on a target object.
  * Used by RmiServiceExporter (for RMI invokers) and HttpInvokerServiceExporter.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see DefaultRemoteInvocationFactory

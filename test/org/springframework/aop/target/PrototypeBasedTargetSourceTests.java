@@ -29,6 +29,7 @@ import junit.framework.TestCase;
 /**
  * Unit tests relating to the abstract AbstractPrototypeBasedTargetSource
  * and not subclasses.
+ *
  * @author Rod Johnson
  *          16:20:14 trisberg Exp $
  */

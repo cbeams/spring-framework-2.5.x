@@ -22,6 +22,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Fatal exception thrown when we can't connect to an RDBMS using JDBC.
+ *
  * @author Rod Johnson
  */
 public class CannotGetJdbcConnectionException extends DataAccessResourceFailureException {

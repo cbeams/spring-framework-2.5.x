@@ -22,6 +22,7 @@ import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
  * Exception thrown when a JDBC update affects an unexpected
  * number of rows. Typically we expect an update to affect a
  * single row, meaning it's an error if it affects multiple rows.
+ *
  * @author Rod Johnson
  */
 public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectUpdateSemanticsDataAccessException {

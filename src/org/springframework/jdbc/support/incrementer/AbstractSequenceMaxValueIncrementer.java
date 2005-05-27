@@ -29,6 +29,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 /**
  * Abstract base class for incrementers that use a database sequence.
  * Subclasses need to provide the database-specific SQL to use.
+ *
  * @author Juergen Hoeller
  * @since 26.02.2004
  * @see #getSequenceQuery

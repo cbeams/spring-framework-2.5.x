@@ -24,6 +24,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * TopLink-specific subclass of UncategorizedDataAccessException,
  * for TopLink system errors that do not match any concrete
  * <code>org.springframework.dao</code> exceptions.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see SessionFactoryUtils#convertTopLinkAccessException

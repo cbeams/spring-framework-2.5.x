@@ -22,6 +22,7 @@ import org.springframework.ui.context.Theme;
 /**
  * Default Theme implementation, wrapping a name and an
  * underlying MessageSource.
+ *
  * @author Juergen Hoeller
  * @since 17.06.2003
  */

@@ -21,6 +21,7 @@ import org.springframework.core.NestedRuntimeException;
 /**
  * Thrown when trying to invoke an operation on a proxy that is not exposed
  * by the proxied resource's management interface.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see MBeanClientInterceptor

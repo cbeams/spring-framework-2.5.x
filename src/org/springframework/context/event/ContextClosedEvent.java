@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationEvent;
 
 /**
  * Event raised when an ApplicationContext gets closed.
+ *
  * @author Juergen Hoeller
  * @since 12.08.2003
  */

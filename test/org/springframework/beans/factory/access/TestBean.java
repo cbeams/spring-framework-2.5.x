@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * Scrap bean for use in tests.
+ *
  * @author Colin Sampaleanu
  */
 public class TestBean {

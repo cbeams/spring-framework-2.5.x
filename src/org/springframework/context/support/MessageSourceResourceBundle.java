@@ -26,6 +26,7 @@ import org.springframework.context.NoSuchMessageException;
 /**
  * Helper class that allows for accessing a MessageSource as a ResourceBundle.
  * Used for example to expose a Spring MessageSource to JSTL web views.
+ *
  * @author Juergen Hoeller
  * @since 27.02.2003
  * @see org.springframework.context.MessageSource

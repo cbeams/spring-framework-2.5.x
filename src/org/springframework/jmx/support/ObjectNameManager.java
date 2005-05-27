@@ -26,6 +26,7 @@ import javax.management.ObjectName;
 /**
  * Wraps the creation of <code>ObjectName</code> instances and caches instances
  * for reuse. Provides <code>ObjectName</code> caching to older JMX clients.
+ *
  * @author Rob Harrop
  * @since 1.2
  */

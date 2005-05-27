@@ -22,6 +22,7 @@ import org.springframework.web.servlet.view.tiles.ComponentControllerSupport;
 /**
  * Controller for the news tile that retrieves a feed
  * mentioned in the definitions file.
+ *
  * @author Alef Arendsen
  */
 public class NewsFeedController extends ComponentControllerSupport {

@@ -24,6 +24,7 @@ import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
  * Subclass of LocalDataSourceConnectionProvider that returns a
  * transaction-aware proxy for the exposed DataSource. Used if
  * LocalSessionFactoryBean's "useTransactionAwareDataSource" flag is on.
+ *
  * @author Juergen Hoeller
  * @since 1.1.4
  * @see LocalSessionFactoryBean#setUseTransactionAwareDataSource

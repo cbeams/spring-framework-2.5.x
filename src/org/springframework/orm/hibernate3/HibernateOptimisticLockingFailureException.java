@@ -23,6 +23,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 /**
  * Hibernate-specific subclass of ObjectOptimisticLockingFailureException.
  * Converts Hibernate's StaleObjectStateException.
+ *
  * @author Juergen Hoeller
  * @since 1.2
  * @see SessionFactoryUtils#convertHibernateAccessException

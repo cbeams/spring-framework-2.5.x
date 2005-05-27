@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
  * Simple subclass of <code>AbstractReflectiveMBeanInfoAssembler</code>
  * that always votes yes for method and property inclusion, effectively exposing
  * all public methods and properties as operations and attributes.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2

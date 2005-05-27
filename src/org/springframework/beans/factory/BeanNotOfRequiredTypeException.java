@@ -20,6 +20,7 @@ import org.springframework.beans.BeansException;
 
 /**
  * Thrown when a bean doesn't match the required type.
+ *
  * @author Rod Johnson
  */
 public class BeanNotOfRequiredTypeException extends BeansException {

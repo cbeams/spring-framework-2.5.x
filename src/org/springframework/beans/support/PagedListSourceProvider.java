@@ -22,6 +22,7 @@ import java.util.Locale;
 /**
  * Callback that provides the source for a reloadable List.
  * Used by RefreshablePagedListHolder.
+ *
  * @author Jean-Pierre PAWLAK
  * @author Juergen Hoeller
  * @see org.springframework.beans.support.RefreshablePagedListHolder#setSourceProvider

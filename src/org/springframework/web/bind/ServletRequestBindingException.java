@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 /**
  * Fatal binding exception, thrown when we want to
  * treat binding exceptions as unrecoverable.
+ *
  * @author Rod Johnson
  */
 public class ServletRequestBindingException extends ServletException {

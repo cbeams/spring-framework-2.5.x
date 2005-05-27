@@ -21,6 +21,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 /**
  * Transaction attribute that takes the EJB approach to rolling
  * back on runtime, but not checked, exceptions.
+ *
  * @author Rod Johnson
  * @since 16-Mar-2003
  */

@@ -58,6 +58,7 @@ import org.springframework.util.StopWatch;
 
 /**
  * Miscellaneous tests for XML bean definitions.
+ *
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
