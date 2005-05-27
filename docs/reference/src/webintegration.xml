@@ -210,7 +210,7 @@
 	        looked up in Spring's context file, no matter what the type. In fact, 
 	        you don't even need to specify a type. Both of the following snippets 
 	        will work: <programlisting>&lt;action path="/user" type="com.whatever.struts.UserAction"/&gt;		
-	&lt;action path="/user" type="com.whatever.struts.UserAction"/&gt;</programlisting></para>
+	&lt;action path="/user"/&gt;</programlisting></para>
 				<para>If you're using Struts' <emphasis>modules</emphasis> feature, 
 	        your bean names must contain the module prefix. For example, an action 
 	        defined as <literal>&lt;action path="/user"/&gt;</literal> with module 
@@ -234,11 +234,12 @@
 				<para>The bean definition in <emphasis>action-servlet.xml</emphasis> 
 	        remains the same, whether you use a custom <literal>RequestProcessor</literal>
 	        or the <literal>DelegatingActionProxy</literal>.</para>
-				<para>Defining your Action in a context file enables you to use 
-	        Spring's IoC features, as well as instantiate new Actions for 
-	        ach request. To use this feature, add <emphasis>singleton="false"</emphasis> 
-			to your action's bean definition. <programlisting>&lt;bean name="/user" <emphasis>singleton="false"</emphasis> autowire="byName" 
-	    class="org.appfuse.web.UserAction"/&gt;</programlisting></para>
+				<para>If you define your Action in a context file, the full feature set of Spring's
+          bean container will be available for it: dependency injection as well as the option
+          to instantiate a new Action instance for each request. To activate the latter,
+          add <emphasis>singleton="false"</emphasis> to your Action's bean definition.
+		<programlisting>&lt;bean name="/user" <emphasis>singleton="false"</emphasis> autowire="byName"
+	    class="org.example.web.UserAction"/&gt;</programlisting></para>
 			</sect3>
 		</sect2>
 		<sect2 id="struts-actionsupport">
