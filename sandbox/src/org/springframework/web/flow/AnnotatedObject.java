@@ -36,7 +36,8 @@ public abstract class AnnotatedObject implements MutableAttributeSource {
 	private Map properties = new HashMap();
 
 	/**
-	 * Returns the additional properties describing this object.
+	 * Returns the additional properties describing this object
+	 * in an unmodifiable map.
 	 */
 	public Map getProperties() {
 		return Collections.unmodifiableMap(properties);
