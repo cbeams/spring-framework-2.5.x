@@ -77,7 +77,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Hibernate 3.x support
 
 * hsqldb/hsqldb.jar
-- HSQLDB 1.7.2.7 (http://hsqldb.sourceforge.net)
+- HSQLDB 1.7.3.3 (http://hsqldb.sourceforge.net)
 - required for running JPetStore and Petclinic
 
 * ibatis/ibatis-sqlmap.jar
