@@ -40,19 +40,19 @@ import org.springframework.util.StringUtils;
  * messages. The placeholders available are:
  *
  * <p><ul>
- * <li><code>${methodName}</code> - replaced with the name of the method being invoked</li>
- * <li><code>${targetClassName}</code> - replaced with the name of the class that is
+ * <li><code>$[methodName]</code> - replaced with the name of the method being invoked</li>
+ * <li><code>$[targetClassName]</code> - replaced with the name of the class that is
  * the target of the invocation</li>
- * <li><code>${targetClassShortName}</code> - replaced with the short name of the class
+ * <li><code>$[targetClassShortName]</code> - replaced with the short name of the class
  * that is the target of the invocation</li>
- * <li><code>${returnValue}</code> - replaced with the value returned by the invocation</li>
- * <li><code>${argumentTypes}</code> - replaced with a comma-separated list of the
+ * <li><code>$[returnValue]</code> - replaced with the value returned by the invocation</li>
+ * <li><code>$[argumentTypes]</code> - replaced with a comma-separated list of the
  * short class names of the method arguments</li>
- * <li><code>${arguments}</code> - replaced with a comma-separated list of the
+ * <li><code>$[arguments]</code> - replaced with a comma-separated list of the
  * <code>String</code> representation of the method arguments</li>
- * <li><code>${exception}</code> - replaced with the <code>String</code> representation
+ * <li><code>$[exception]</code> - replaced with the <code>String</code> representation
  * of any <code>Throwable</code> raised during the invocation</li>
- * <li><code>${invocationTime}</code> - replaced with the time, in milliseconds,
+ * <li><code>$[invocationTime]</code> - replaced with the time, in milliseconds,
  * taken by the method invocation</li>
  * </ul>
  *
@@ -73,59 +73,59 @@ import org.springframework.util.StringUtils;
 public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
-	 * The <code>${methodName}</code> placeholder.
+	 * The <code>$[methodName]</code> placeholder.
 	 * Replaced with the name of the method being invoked.
 	 */
-	public static final String PLACEHOLDER_METHOD_NAME = "${methodName}";
+	public static final String PLACEHOLDER_METHOD_NAME = "$[methodName]";
 
 	/**
-	 * The <code>${targetClassName}</code> placeholder.
+	 * The <code>$[targetClassName]</code> placeholder.
 	 * Replaced with the fully-qualifed name of the <code>Class</code>
 	 * of the method invocation target.
 	 */
-	public static final String PLACEHOLDER_TARGET_CLASS_NAME = "${targetClassName}";
+	public static final String PLACEHOLDER_TARGET_CLASS_NAME = "$[targetClassName]";
 
 	/**
-	 * The <code>${targetClassShortName}</code> placeholder.
+	 * The <code>$[targetClassShortName]</code> placeholder.
 	 * Replaced with the short name of the <code>Class</code> of the
 	 * method invocation target.
 	 */
-	public static final String PLACEHOLDER_TARGET_CLASS_SHORT_NAME = "${targetClassShortName}";
+	public static final String PLACEHOLDER_TARGET_CLASS_SHORT_NAME = "$[targetClassShortName]";
 
 	/**
-	 * The <code>${returnValue}</code> placeholder.
+	 * The <code>$[returnValue]</code> placeholder.
 	 * Replaced with the <code>String</code> representation of the value
 	 * returned by the method invocation.
 	 */
-	public static final String PLACEHOLDER_RETURN_VALUE = "${returnValue}";
+	public static final String PLACEHOLDER_RETURN_VALUE = "$[returnValue]";
 
 	/**
-	 * The <code>${argumentTypes}</code> placeholder.
+	 * The <code>$[argumentTypes]</code> placeholder.
 	 * Replaced with a comma seperated list of the argument types for the
 	 * method invocation. Argument types are written as short class names.
 	 */
-	public static final String PLACEHOLDER_ARGUMENT_TYPES = "${argumentTypes}";
+	public static final String PLACEHOLDER_ARGUMENT_TYPES = "$[argumentTypes]";
 
 	/**
-	 * The <code>${arguments}</code> placeholder.
+	 * The <code>$[arguments]</code> placeholder.
 	 * Replaced with a comma separated list of the argument values for the
 	 * method invocation. Relies on the <code>toString()</code> method of
 	 * each argument type.
 	 */
-	public static final String PLACEHOLDER_ARGUMENTS = "${arguments}";
+	public static final String PLACEHOLDER_ARGUMENTS = "$[arguments]";
 
 	/**
-	 * The <code>${exception}</code> placeholder.
+	 * The <code>$[exception]</code> placeholder.
 	 * Replaced with the <code>String</code> representation of any
 	 * <code>Throwable</code> raised during method invocation.
 	 */
-	public static final String PLACEHOLDER_EXCEPTION = "${exception}";
+	public static final String PLACEHOLDER_EXCEPTION = "$[exception]";
 
 	/**
-	 * The <code>${invocationTime}</code> placeholder.
+	 * The <code>$[invocationTime]</code> placeholder.
 	 * Replaced with the time taken by the invocation (in milliseconds).
 	 */
-	public static final String PLACEHOLDER_INVOCATION_TIME = "${invocationTime}";
+	public static final String PLACEHOLDER_INVOCATION_TIME = "$[invocationTime]";
 
 	/**
 	 * The default message used for writing method entry messages.
@@ -148,7 +148,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	/**
 	 * The <code>Pattern</code> used to match placeholders.
 	 */
-	private static final Pattern PATTERN = Pattern.compile("\\$\\{\\p{Alpha}+\\}");
+	private static final Pattern PATTERN = Pattern.compile("\\$\\[\\p{Alpha}+\\]");
 
 	/**
 	 * The <code>Pattern</code> used to escape regex values in class names -
@@ -183,10 +183,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * Ses the template used for method entry log messages.
 	 * This template can contain any of the following placeholders:
 	 * <ul>
-	 * <li><code>${targetClassName}</code></li>
-	 * <li><code>${targetClassShortName}</code></li>
-	 * <li><code>${argumentTypes}</code></li>
-	 * <li><code>${arguments}</code></li>
+	 * <li><code>$[targetClassName]</code></li>
+	 * <li><code>$[targetClassShortName]</code></li>
+	 * <li><code>$[argumentTypes]</code></li>
+	 * <li><code>$[arguments]</code></li>
 	 * </ul>
 	 * @throws IllegalArgumentException if the message template is empty
 	 * or contains any invalid placeholders
@@ -207,12 +207,12 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * Set the template used for method exit log messages.
 	 * This template can contain any of the following placeholders:
 	 * <ul>
-	 * <li><code>${targetClassName}</code></li>
-	 * <li><code>${targetClassShortName}</code></li>
-	 * <li><code>${argumentTypes}</code></li>
-	 * <li><code>${arguments}</code></li>
-	 * <li><code>${returnValue}</code></li>
-	 * <li><code>${invocationTime}</code></li>
+	 * <li><code>$[targetClassName]</code></li>
+	 * <li><code>$[targetClassShortName]</code></li>
+	 * <li><code>$[argumentTypes]</code></li>
+	 * <li><code>$[arguments]</code></li>
+	 * <li><code>$[returnValue]</code></li>
+	 * <li><code>$[invocationTime]</code></li>
 	 * </ul>
 	 * @throws IllegalArgumentException if the message template is empty
 	 * or contains any invalid placeholders
@@ -229,11 +229,11 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * Set the template used for method exception log messages.
 	 * This template can contain any of the following placeholders:
 	 * <ul>
-	 * <li><code>${targetClassName}</code></li>
-	 * <li><code>${targetClassShortName}</code></li>
-	 * <li><code>${argumentTypes}</code></li>
-	 * <li><code>${arguments}</code></li>
-	 * <li><code>${exception}</code></li>
+	 * <li><code>$[targetClassName]</code></li>
+	 * <li><code>$[targetClassShortName]</code></li>
+	 * <li><code>$[argumentTypes]</code></li>
+	 * <li><code>$[arguments]</code></li>
+	 * <li><code>$[exception]</code></li>
 	 * </ul>
 	 * @throws IllegalArgumentException if the message template is empty
 	 * or contains any invalid placeholders
@@ -288,15 +288,15 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * or values derived from those supplied.
 	 * @param message the message template containing the placeholders to be replaced
 	 * @param methodInvocation the <code>MethodInvocation</code> being logged.
-	 * Used to derive values for all placeholders except <code>${exception}</code>
-	 * and <code>${returnValue}</code>.
+	 * Used to derive values for all placeholders except <code>$[exception]</code>
+	 * and <code>$[returnValue]</code>.
 	 * @param returnValue any value returned by the invocation.
-	 * Used to replace the <code>${returnValue}</code> placeholder. May be null.
+	 * Used to replace the <code>$[returnValue]</code> placeholder. May be null.
 	 * @param throwable any <code>Throwable</code> raised during the invocation.
 	 * The value of <code>Throwable.toString()</code> is replaced for the
-	 * <code>${exception}</code> placeholder. May be null.
+	 * <code>$[exception]</code> placeholder. May be null.
 	 * @param invocationTime the value to write in place of the
-	 * <code>${invocationTime}</code> placeholder
+	 * <code>$[invocationTime]</code> placeholder
 	 * @return the formatted output to write to the log
 	 */
 	protected String replacePlaceholders(String message, MethodInvocation methodInvocation,
