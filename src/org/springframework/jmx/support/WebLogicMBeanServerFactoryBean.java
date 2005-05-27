@@ -54,9 +54,9 @@ public class WebLogicMBeanServerFactoryBean implements FactoryBean, Initializing
 
 	private String password = "weblogic";
 
-	private String serverUrl;
+	private String serverUrl = "t3://localhost:7001";
 
-	private String serverName;
+	private String serverName = "server";
 
 	private MBeanServer mbeanServer;
 
@@ -79,6 +79,7 @@ public class WebLogicMBeanServerFactoryBean implements FactoryBean, Initializing
 
 	/**
 	 * Set the server URL to use for retrieving the WebLogic MBeanServer.
+	 * Default is "t3://localhost:7001".
 	 */
 	public void setServerUrl(String serverUrl) {
 		this.serverUrl = serverUrl;
@@ -86,6 +87,7 @@ public class WebLogicMBeanServerFactoryBean implements FactoryBean, Initializing
 
 	/**
 	 * Set the server name to use for retrieving the WebLogic MBeanServer.
+	 * Default is "server".
 	 */
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
