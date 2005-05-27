@@ -180,11 +180,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	private NamingStrategy namingStrategy;
 
+	private TypeDefinitionBean[] typeDefinitions;
+
 	private Properties entityCacheStrategies;
 
 	private Properties collectionCacheStrategies;
-
-	private TypeDefinitionBean[] typeDefinitions;
 
 	private FilterDefinition[] filterDefinitions;
 
@@ -439,6 +439,19 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	}
 
 	/**
+	 * Specify the Hibernate type definitions to register with the SessionFactory,
+	 * as Spring TypeDefinitionBean instances. This is an alternative to specifying
+	 * <&lt;typedef&gt; elements in Hibernate mapping files.
+	 * <p>Unfortunately, Hibernate itself does not define a complete object that
+	 * represents a type definition, hence the need for Spring's TypeDefinitionBean.
+	 * @see TypeDefinitionBean
+	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
+	 */
+	public void setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
+		this.typeDefinitions = typeDefinitions;
+	}
+
+	/**
 	 * Specify the cache strategies for entities (persistent classes or named entities).
 	 * This configuration setting corresponds to the &lt;class-cache> entry
 	 * in the "hibernate.cfg.xml" configuration format.
@@ -489,19 +502,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 */
 	public void setFilterDefinitions(FilterDefinition[] filterDefinitions) {
 		this.filterDefinitions = filterDefinitions;
-	}
-
-	/**
-	 * Specify the Hibernate type definitions to register with the SessionFactory,
-	 * as Spring TypeDefinitionBean instances. This is an alternative to specifying
-	 * <&lt;typedef&gt; elements in Hibernate mapping files.
-	 * <p>Unfortunately, Hibernate itself does not define a complete object that
-	 * represents a type definition, hence the need for Spring's TypeDefinitionBean.
-	 * @see TypeDefinitionBean
-	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
-	 */
-	public void setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
-		this.typeDefinitions = typeDefinitions;
 	}
 
 	/**
@@ -565,6 +565,15 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			if (this.namingStrategy != null) {
 				// Pass given naming strategy to Hibernate Configuration.
 				config.setNamingStrategy(this.namingStrategy);
+			}
+
+			if (this.typeDefinitions != null) {
+				// Register specified Hibernate type definitions.
+				Mappings mappings = config.createMappings();
+				for (int i = 0; i < this.typeDefinitions.length; i++) {
+					TypeDefinitionBean typeDef = this.typeDefinitions[i];
+					mappings.addTypeDef(typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
+				}
 			}
 
 			if (this.configLocation != null) {
@@ -635,15 +644,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 					String collRole = (String) collRoles.nextElement();
 					config.setCollectionCacheConcurrencyStrategy(
 							collRole, this.collectionCacheStrategies.getProperty(collRole));
-				}
-			}
-
-			if (this.typeDefinitions != null) {
-				// Register specified Hibernate type definitions.
-				Mappings mappings = config.createMappings();
-				for (int i = 0; i < this.typeDefinitions.length; i++) {
-					TypeDefinitionBean typeDef = this.typeDefinitions[i];
-					mappings.addTypeDef(typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
 				}
 			}
 
