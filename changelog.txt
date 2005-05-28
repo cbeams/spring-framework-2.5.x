@@ -8,6 +8,7 @@ Changes in version 1.2.1 (28.5.2005)
 
 Package org.springframework.aop
 * fixed ThrowsAdviceInterceptor to log at DEBUG level rather than INFO level
+* changed CustomizableTraceInterceptor to use "$[...]" syntax, to avoid conflicts with PropertyPlaceholderConfigurer
 
 Package org.springframework.beans
 * reworked ArgumentConvertingMethodInvoker to determine an appropriate overloaded method (with assignable arguments)
@@ -73,6 +74,8 @@ Package org.springframework.web
 * changed HtmlUtils' "htmlEscape" method to return standard entity references by default (named, not decimal or hex)
 * added "htmlEscapeDecimal" and "htmlEscapeHex" methods to HtmlUtils, for escaping in decimal or hex style, respectively
 * reimplemented HtmlUtils' "htmlUnescape" to correctly handle any entity references, including decimal and hex style
+* changed EscapedErrors to not stringify and HTML-escape non-String values, to keep type even with escaping turned on
+* changed BindStatus to not stringify and HTML-escape non-String values for "value" but only for "displayValue"
 * fixed FreeMarker macro "formSingleSelect" (in spring.ftl) to correctly compare selected numerical values
 * AbstractJasperReportsView exposes current Spring-managed Locale and MessageSource to JasperReports i18n ($R expr etc)
 * refined AbstractJasperReportsView to properly handle Internet Explorer HTTPS through resetting the response first
