@@ -30,7 +30,7 @@ import org.springframework.aop.TargetSource;
  * allow manipulation of its AOP advice.
  *
  * @author Rod Johnson
- * @since 13-Mar-2003
+ * @since 13.03.2003
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {

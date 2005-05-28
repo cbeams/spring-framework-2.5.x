@@ -25,7 +25,7 @@ import org.easymock.MockControl;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 08-Jul-2003
+ * @since 08.07.2003
  */
 public class JndiTemplateTests extends TestCase {
 

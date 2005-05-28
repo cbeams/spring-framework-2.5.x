@@ -39,7 +39,7 @@ import java.lang.reflect.Method;
  * available at the time of evaluation.
  * 
  * @author Rod Johnson
- * @since 11-Nov-2003
+ * @since 11.11.2003
  */
 public interface MethodMatcher {
 	

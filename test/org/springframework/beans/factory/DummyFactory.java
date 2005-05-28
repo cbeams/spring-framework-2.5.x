@@ -21,20 +21,30 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 /**
- * Simple factory to allow testing of FactoryBean 
- * support in AbstractBeanFactory. Depending on whether its
- * singleton property is set, it will return a singleton
+ * Simple factory to allow testing of FactoryBean support in AbstractBeanFactory.
+ * Depending on whether its singleton property is set, it will return a singleton
  * or a prototype instance.
- * Implements InitializingBean interface, so we can check that
+ *
+ * <p>Implements InitializingBean interface, so we can check that
  * factories get this lifecycle callback if they want.
  *
  * @author Rod Johnson
- * @since 10-Mar-2003
- * version $Id: DummyFactory.java,v 1.12 2005-05-27 19:50:43 jhoeller Exp $
+ * @since 10.03.2003
  */
-public class DummyFactory implements FactoryBean, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
+public class DummyFactory
+		implements FactoryBean, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
 	
 	public static final String SINGLETON_NAME = "Factory singleton";
+
+	private static boolean prototypeCreated;
+
+	/**
+	 * Clear static state.
+	 */
+	public static void reset() {
+		prototypeCreated = false;
+	}
+
 
 	/**
 	 * Default is for factories to return a singleton instance.
@@ -49,19 +59,10 @@ public class DummyFactory implements FactoryBean, BeanNameAware, BeanFactoryAwar
 
 	private boolean initialized;
 
-	private static boolean prototypeCreated;
-
 	private TestBean testBean;
 
 	private TestBean otherTestBean;
-	
-	/**
-	 * Clear static state
-	 *
-	 */
-	public static void reset() {
-		prototypeCreated = false;
-	}
+
 
 	public DummyFactory() {
 		this.testBean = new TestBean();
@@ -136,6 +137,7 @@ public class DummyFactory implements FactoryBean, BeanNameAware, BeanFactoryAwar
 		return prototypeCreated;
 	}
 
+
 	/**
 	 * Return the managed object, supporting both singleton
 	 * and prototype mode.
@@ -158,6 +160,7 @@ public class DummyFactory implements FactoryBean, BeanNameAware, BeanFactoryAwar
 	public Class getObjectType() {
 		return TestBean.class;
 	}
+
 
 	public void destroy() {
 		if (this.testBean != null) {

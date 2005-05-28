@@ -28,7 +28,7 @@ import org.springframework.beans.BeansException;
  * <p>For a list of all bean lifecycle methods, see the BeanFactory javadocs.
  *
  * @author Rod Johnson
- * @since 11-Mar-2003
+ * @since 11.03.2003
  * @see BeanNameAware
  * @see InitializingBean
  * @see BeanFactory

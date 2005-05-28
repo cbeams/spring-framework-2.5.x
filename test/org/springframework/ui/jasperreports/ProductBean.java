@@ -1,43 +1,64 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.ui.jasperreports;
 
 /**
- * @author robh
+ * @author Rob Harrop
  */
 public class ProductBean {
-    private int id;
-    private String name;
-    private float quantity;
-    private float price;
 
-    public int getId() {
-        return id;
-    }
+	private int id;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	private String name;
 
-    public String getName() {
-        return name;
-    }
+	private float quantity;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	private float price;
 
-    public float getQuantity() {
-        return quantity;
-    }
+	public int getId() {
+		return id;
+	}
 
-    public void setQuantity(float quantity) {
-        this.quantity = quantity;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public float getPrice() {
-        return price;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setPrice(float price) {
-        this.price = price;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public float getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(float quantity) {
+		this.quantity = quantity;
+	}
+
+	public float getPrice() {
+		return price;
+	}
+
+	public void setPrice(float price) {
+		this.price = price;
+	}
+
 }

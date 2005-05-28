@@ -33,7 +33,7 @@ import org.springframework.core.Ordered;
  * Simple IntroductionAdvisor implementation that by default applies to any class.
  *
  * @author Rod Johnson
- * @since 11-Nov-2003
+ * @since 11.11.2003
  */
 public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered, Serializable {
 

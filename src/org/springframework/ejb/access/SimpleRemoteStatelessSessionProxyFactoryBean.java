@@ -48,7 +48,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
- * @since 09-May-2003
+ * @since 09.05.2003
  * @see org.springframework.remoting.RemoteAccessException
  * @see AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup
  * @see AbstractSlsbInvokerInterceptor#setCacheHome

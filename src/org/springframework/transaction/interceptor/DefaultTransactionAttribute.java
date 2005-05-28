@@ -23,7 +23,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * back on runtime, but not checked, exceptions.
  *
  * @author Rod Johnson
- * @since 16-Mar-2003
+ * @since 16.03.2003
  */
 public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
 

@@ -24,8 +24,9 @@ import org.springframework.aop.framework.AopConfigException;
  * Rule determining whether or not a given exception (and any subclasses) should
  * cause a rollback. Multiple such rules can be applied to determine whether a
  * transaction should commit or rollback after an exception has been thrown.
- * @since 09-Apr-2003
+ *
  * @author Rod Johnson
+ * @since 09.04.2003
  * @see NoRollbackRuleAttribute
  */
 public class RollbackRuleAttribute implements Serializable{

@@ -53,7 +53,7 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 09-May-2003
+ * @since 09.05.2003
  * @see org.springframework.remoting.RemoteAccessException
  * @see AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup
  * @see AbstractSlsbInvokerInterceptor#setCacheHome

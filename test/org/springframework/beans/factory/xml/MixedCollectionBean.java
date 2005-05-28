@@ -20,9 +20,10 @@ import java.util.Collection;
 
 /**
  * Bean that exposes a simple property that can be set
- * to a mix of references and individual values
+ * to a mix of references and individual values.
+ *
  * @author Rod Johnson
- * @since 27-May-2003
+ * @since 27.05.2003
  */
 public class MixedCollectionBean {
 

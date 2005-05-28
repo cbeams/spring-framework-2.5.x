@@ -24,8 +24,8 @@ package org.springframework.aop;
  * In this case, the advice is self-describing, providing not only the necessary
  * behavior, but describing the interfaces it introduces.
  *
- * @since 1.1.1
  * @author Rod Johnson
+ * @since 1.1.1
  */
 public interface IntroductionInfo {
 	

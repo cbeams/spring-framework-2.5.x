@@ -27,31 +27,31 @@ import org.w3c.dom.Element;
  *
  * @author Rod Johnson
  * @author Darren Davison
- * @since 26-Jul-2003
+ * @since 26.07.2003
  */
 public class FormatHelperTests extends TestCase {
 
-	static long testTime = 1064359582063L; //appx 00:26 on 24/9/2003 in the UK (GMT +1)
+	private static final long testTime = 1064359582063L; //appx 00:26 on 24/9/2003 in the UK (GMT +1)
 		
 	/**
-	 * test null params for Locale
+	 * Test null params for Locale.
 	 */
 	public void testNullParamsForLocale() {
-		Element e;
-		String s;
 		try {
-			e = (Element) FormatHelper.dateTimeElement(testTime, null, null);
+			Element e = (Element) FormatHelper.dateTimeElement(testTime, null, null);
 			e = (Element) FormatHelper.dateTimeElement(testTime, "", null);
 			e = (Element) FormatHelper.dateTimeElement(testTime, null, "");						
-		} catch (Throwable ex) {
+		}
+		catch (Throwable ex) {
 			fail( "Passing null params to dateTimeElement(long, String, String) throws " + ex.getClass().getName());
 		}
 
 		try {
-			s = FormatHelper.currency(50d, null, null);
+			String s = FormatHelper.currency(50d, null, null);
 			s = FormatHelper.currency(50d, "", null);
 			s = FormatHelper.currency(50d, null, "");
-		} catch (Throwable ex) {
+		}
+		catch (Throwable ex) {
 			fail( "Passing null params to currency(long, String, String) throws " + ex.getClass().getName());
 		}
 	}
@@ -64,8 +64,7 @@ public class FormatHelperTests extends TestCase {
 
 		Element e = (Element) FormatHelper.dateTimeElement(testTime, Locale.UK);
 		assertTrue(e.getTagName().equals("formatted-date"));
-		Element el;
-		el = (Element) e.getElementsByTagName("year").item(0);
+		Element el = (Element) e.getElementsByTagName("year").item(0);
 		assertTrue("2003".equals(el.getFirstChild().getNodeValue()));
 		el = (Element) e.getElementsByTagName("month").item(0);
 		assertTrue("September".equals(el.getFirstChild().getNodeValue()));
@@ -90,8 +89,7 @@ public class FormatHelperTests extends TestCase {
 	}
 	
 	public void testCurrency() {
-		String s;
-		s = FormatHelper.currency( 50.0d, Locale.US);
+		String s = FormatHelper.currency( 50.0d, Locale.US);
 		assertTrue( "$50.00".equals(s));
 		
 		// pound sign (#163)

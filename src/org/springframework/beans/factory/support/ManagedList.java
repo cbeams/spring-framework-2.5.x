@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * include runtime bean references.
  *
  * @author Rod Johnson
- * @since 27-May-2003
+ * @since 27.05.2003
  */
 public class ManagedList extends ArrayList {
 

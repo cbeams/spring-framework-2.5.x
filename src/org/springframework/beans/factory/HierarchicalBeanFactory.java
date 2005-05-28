@@ -25,7 +25,7 @@ package org.springframework.beans.factory;
  * fashion can be found in the ConfigurableBeanFactory interface.
  *
  * @author Rod Johnson
- * @since 07-Jul-2003
+ * @since 07.07.2003
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
  */
 public interface HierarchicalBeanFactory extends BeanFactory {

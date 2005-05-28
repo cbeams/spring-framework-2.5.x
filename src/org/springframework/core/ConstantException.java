@@ -21,7 +21,7 @@ package org.springframework.core;
  * constant name.
  *
  * @author Rod Johnson
- * @since 28-Apr-2003
+ * @since 28.04.2003
  * @see org.springframework.core.Constants
  */
 public class ConstantException extends IllegalArgumentException {

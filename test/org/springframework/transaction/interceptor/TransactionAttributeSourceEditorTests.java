@@ -24,9 +24,10 @@ import org.springframework.transaction.TransactionDefinition;
 
 /**
  * Format is 
- * FQN.Method=tx attribute representation
+ * <code>FQN.Method=tx attribute representation</code>
+ *
  * @author Rod Johnson
- * @since 26-Apr-2003
+ * @since 26.04.2003
  */
 public class TransactionAttributeSourceEditorTests extends TestCase {
 

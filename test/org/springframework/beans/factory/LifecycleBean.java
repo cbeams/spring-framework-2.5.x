@@ -24,7 +24,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * 
  * @author Rod Johnson
  * @author Colin Sampaleanu
- * @since 12-Mar-2003
+ * @since 12.03.2003
  */
 public class LifecycleBean implements BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
 

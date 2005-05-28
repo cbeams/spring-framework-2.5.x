@@ -29,7 +29,7 @@ import org.springframework.beans.TestBean;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 13-Mar-2003
+ * @since 13.03.2003
  */
 public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 

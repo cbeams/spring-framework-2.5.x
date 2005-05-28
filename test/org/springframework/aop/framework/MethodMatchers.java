@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodMatcher;
 
-
 /**
  * Static methods useful for composing Pointcuts.
  * A MethodMatcher may be evaluated statically (based on Method and target class)
@@ -28,11 +27,10 @@ import org.springframework.aop.MethodMatcher;
  * method invocation).
  *
  * @author Rod Johnson
- * @since 11-Nov-2003
+ * @since 11.11.2003
  */
 public abstract class MethodMatchers {
-	
-	
+
 	public static MethodMatcher union(MethodMatcher a, MethodMatcher b) {
 		return new UnionMethodMatcher(a, b);
 	}

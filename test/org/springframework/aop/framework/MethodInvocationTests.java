@@ -27,9 +27,9 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.TestBean;
 
 /**
- * TODO COULD REFACTOR TO BE GENERIC
+ * TODO: could refactor to be generic.
  * @author Rod Johnson
- * @since 14-Mar-2003
+ * @since 14.03.2003
  */
 public class MethodInvocationTests extends TestCase {
 	

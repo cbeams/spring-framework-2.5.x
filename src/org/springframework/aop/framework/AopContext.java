@@ -38,7 +38,7 @@ import org.aopalliance.aop.AspectException;
  * the Spring AOP framework.
  *
  * @author Rod Johnson
- * @since 13-Mar-2003
+ * @since 13.03.2003
  */
 public abstract class AopContext {
 	

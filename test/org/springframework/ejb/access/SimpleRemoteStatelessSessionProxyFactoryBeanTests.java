@@ -30,9 +30,10 @@ import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;
 
 /**
- * Tests Business Methods pattern
+ * Tests Business Methods pattern.
+ *
  * @author Rod Johnson
- * @since 21-May-2003
+ * @since 21.05.2003
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRemoteSlsbInvokerInterceptorTests {
 
@@ -46,7 +47,6 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		fb.afterPropertiesSet();
 		return fb.getObject();
 	}
-
 
 	public void testInvokesMethod() throws Exception {
 		final int value = 11;

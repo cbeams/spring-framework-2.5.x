@@ -16,11 +16,10 @@
 
 package org.springframework.beans.factory;
 
-
 /**
  * Simple test of BeanFactory initialization
  * @author Rod Johnson
- * @since 12-Mar-2003
+ * @since 12.03.2003
  */
 public class MustBeInitialized implements InitializingBean {
 

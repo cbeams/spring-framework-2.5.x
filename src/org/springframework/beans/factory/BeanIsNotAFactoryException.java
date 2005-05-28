@@ -22,7 +22,7 @@ package org.springframework.beans.factory;
  * determined by whether it implements the FactoryBean interface.
  *
  * @author Rod Johnson
- * @since 10-Mar-2003
+ * @since 10.03.2003
  * @see org.springframework.beans.factory.FactoryBean
  */
 public class BeanIsNotAFactoryException extends BeanNotOfRequiredTypeException {

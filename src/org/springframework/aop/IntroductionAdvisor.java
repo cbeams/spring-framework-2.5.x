@@ -26,7 +26,7 @@ package org.springframework.aop;
  * (not implemented by a target) via AOP advice.
  *
  * @author Rod Johnson
- * @since 04-Apr-2003
+ * @since 04.04.2003
  * @see org.springframework.aop.IntroductionInterceptor
  */
 public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
