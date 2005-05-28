@@ -20,12 +20,14 @@ import java.beans.PropertyEditorSupport;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Set;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.beans.IndexedTestBean;
+import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.validation.BindException;
@@ -337,6 +339,36 @@ public class BindTagTests extends AbstractTagTests {
 		// because of the custom editor getValue() should return a String
 		assertTrue("Value is TestBean", status.getValue() instanceof String);
 		assertTrue("Correct value", "something".equals(status.getValue()));
+	}
+
+	public void testBindTagWithToStringAndHtmlEscaping() throws JspException {
+		PageContext pc = createPageContext();
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.doctor");
+		tag.setHtmlEscape("true");
+		TestBean tb = new TestBean("somebody", 99);
+		NestedTestBean ntb = new NestedTestBean("juergen&eva");
+		tb.setDoctor(ntb);
+		pc.getRequest().setAttribute("tb", tb);
+		tag.doStartTag();
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("doctor", status.getExpression());
+		assertTrue(status.getValue() instanceof NestedTestBean);
+		assertTrue(status.getDisplayValue().indexOf("juergen&amp;eva") != -1);
+	}
+
+	public void testBindTagWithSetValueAndHtmlEscaping() throws JspException {
+		PageContext pc = createPageContext();
+		BindTag tag = new BindTag();
+		tag.setPageContext(pc);
+		tag.setPath("tb.someSet");
+		tag.setHtmlEscape("true");
+		pc.getRequest().setAttribute("tb", new TestBean("juergen&eva", 99));
+		tag.doStartTag();
+		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("someSet", status.getExpression());
+		assertTrue(status.getValue() instanceof Set);
 	}
 
 	public void testBindTagWithFieldButWithoutErrorsInstance() throws JspException {

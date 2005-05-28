@@ -145,8 +145,8 @@ public class BindStatus {
 			this.errorMessages = new String[0];
 		}
 
-		if (htmlEscape && this.value != null) {
-			this.value = HtmlUtils.htmlEscape(this.value.toString());
+		if (htmlEscape && this.value instanceof String) {
+			this.value = HtmlUtils.htmlEscape((String) this.value);
 		}
 	}
 
@@ -197,6 +197,8 @@ public class BindStatus {
 	/**
 	 * Return the current value of the field, i.e. either the property value
 	 * or a rejected update, or null if not field-specific.
+	 * <p>This value will be an HTML-escaped String if the original value
+	 * already was a String.
 	 */
 	public Object getValue() {
 		return value;
@@ -205,9 +207,18 @@ public class BindStatus {
 	/**
 	 * Return a suitable display value for the field, i.e. the stringified
 	 * value if not null, and an empty string in case of a null value.
+	 * <p>This value will be an HTML-escaped String if the original value
+	 * was non-null: the <code>toString</code> result of the original value
+	 * will get HTML-escaped.
 	 */
 	public String getDisplayValue() {
-		return (this.value != null ? this.value.toString() : "");
+		if (this.value instanceof String) {
+			return (String) this.value;
+		}
+		if (this.value != null) {
+			return (this.htmlEscape ? HtmlUtils.htmlEscape(this.value.toString()) : this.value.toString());
+		}
+		return "";
 	}
 
 	/**
