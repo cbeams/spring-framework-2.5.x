@@ -47,8 +47,6 @@ public class SampleFlowExecutionListener extends FlowExecutionListenerAdapter {
 		String inputParam = (String)sourceEvent.getParameter(INPUT_ATTRIBUTE);
 		if (StringUtils.hasText(inputParam)) {
 			targetMap.put(INPUT_ATTRIBUTE, inputParam);
-		}
-		
+		}		
 	}
-
 }
