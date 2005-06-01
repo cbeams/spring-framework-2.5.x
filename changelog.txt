@@ -3,6 +3,34 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2.2 (24.6.2005)
+------------------------------------
+
+Package org.springframework.core
+* fixed ClassPathResource to fall back to its ClassLoader if none specified and no thread context ClassLoader available
+
+Package org.springframework.dao
+* added generic DaoSupport base class, defining a logger and "initDao" method and pre-implementing "afterPropertiesSet"
+
+Package org.springframework.jca
+* reworked CciDaoSupport classes to extend the new generic DaoSupport base class
+
+Package org.springframework.jdbc
+* SQLState/SQLErrorCodeSQLExceptionTranslator always include SQL in message, even for generic DataAccessExceptions
+* UncategorizedSQLException includes SQL state and error code in message, to indicate potential exception classification
+* reworked JdbcDaoSupport classes to extend the new generic DaoSupport base class
+
+Package org.springframework.jms
+* reworked JmsGatewaySupport class to follow DaoSupport pattern (afterPropertiesSet not throwing Exception anymore)
+
+Package org.springframework.jndi
+* added "expectedType" bean property to JndiObjectLocator, for eager checking of the type of the located JNDI object
+
+Package org.springframework.orm
+* reworked all XxxDaoSupport classes to extend the new generic DaoSupport base class
+* fixed PersistenceBrokerDaoSupport to be abstract and to actually implement InitializingBean
+
+
 Changes in version 1.2.1 (28.5.2005)
 ------------------------------------
 
