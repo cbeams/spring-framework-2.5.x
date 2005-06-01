@@ -50,6 +50,7 @@ public class ClassPathResource extends AbstractResource {
 
 	private Class clazz;
 
+
 	/**
 	 * Create a new ClassPathResource for ClassLoader usage.
 	 * A leading slash will be removed, as the ClassLoader
@@ -110,18 +111,38 @@ public class ClassPathResource extends AbstractResource {
 		this.clazz = clazz;
 	}
 
+	/**
+	 * Return the ClassLoader to use for loading resources.
+	 * Only called if no Class has been specified.
+	 * <p>Returns the explicitly specified ClassLoader, if any, or the thread context
+	 * ClassLoader else. If no thread context ClassLoader is available, the
+	 * ClassLoader that loaded the ClassPathResource class will be used as fallback.
+	 * @see #ClassPathResource(String, Class)
+	 * @see #ClassPathResource(String, ClassLoader)
+	 * @see java.lang.Thread#getContextClassLoader()
+	 */
+	protected ClassLoader getClassLoader() {
+		// If class loader explicitly specified, use it.
+		if (this.classLoader != null) {
+			return this.classLoader;
+		}
+		// No class loader specified -> use thread context class loader.
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		if (cl == null) {
+			// No thread context class loader -> use class loader of this class.
+			cl = getClass().getClassLoader();
+		}
+		return cl;
+	}
+
+
 	public InputStream getInputStream() throws IOException {
 		InputStream is = null;
 		if (this.clazz != null) {
 			is = this.clazz.getResourceAsStream(this.path);
 		}
 		else {
-			ClassLoader cl = this.classLoader;
-			if (cl == null) {
-				// no class loader specified -> use thread context class loader
-				cl = Thread.currentThread().getContextClassLoader();
-			}
-			is = cl.getResourceAsStream(this.path);
+			is = getClassLoader().getResourceAsStream(this.path);
 		}
 		if (is == null) {
 			throw new FileNotFoundException(
@@ -136,12 +157,7 @@ public class ClassPathResource extends AbstractResource {
 			url = this.clazz.getResource(this.path);
 		}
 		else {
-			ClassLoader cl = this.classLoader;
-			if (cl == null) {
-				// no class loader specified -> use thread context class loader
-				cl = Thread.currentThread().getContextClassLoader();
-			}
-			url = cl.getResource(this.path);
+			url = getClassLoader().getResource(this.path);
 		}
 		if (url == null) {
 			throw new FileNotFoundException(
@@ -166,6 +182,7 @@ public class ClassPathResource extends AbstractResource {
 	public String getDescription() {
 		return "class path resource [" + this.path + "]";
 	}
+
 
 	public boolean equals(Object obj) {
 		if (obj == this) {
