@@ -47,8 +47,7 @@ public class Mapping implements Serializable {
 
 	public Mapping(String sourceTargetAttributeExpressionString, ConversionExecutor valueConverter) {
 		this(ExpressionEvaluatorFactory.evaluatorFor(sourceTargetAttributeExpressionString),
-			 ExpressionEvaluatorFactory.setterFor(sourceTargetAttributeExpressionString));
-		this.valueConverter = valueConverter;
+			 ExpressionEvaluatorFactory.setterFor(sourceTargetAttributeExpressionString), valueConverter);
 	}
 
 	public Mapping(String sourceAttributeExpressionString, String targetAttributeExpressionString) {
