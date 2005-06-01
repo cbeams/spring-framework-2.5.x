@@ -228,23 +228,23 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new DataAccessResourceFailureException(task + "; " + sqlEx.getMessage(), sqlEx);
+					return new DataAccessResourceFailureException(buildMessage(task, sql, sqlEx), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataIntegrityViolationCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new DataIntegrityViolationException(task + "; " + sqlEx.getMessage(), sqlEx);
+					return new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotAcquireLockCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new CannotAcquireLockException(task + "; " + sqlEx.getMessage(), sqlEx);
+					return new CannotAcquireLockException(buildMessage(task, sql, sqlEx), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDeadlockLoserCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new DeadlockLoserDataAccessException(task + "; " + sqlEx.getMessage(), sqlEx);
+					return new DeadlockLoserDataAccessException(buildMessage(task, sql, sqlEx), sqlEx);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotSerializeTransactionCodes(), errorCode) >= 0) {
 					logTranslation(task, sql, sqlEx, false);
-					return new CannotSerializeTransactionException(task + "; " + sqlEx.getMessage(), sqlEx);
+					return new CannotSerializeTransactionException(buildMessage(task, sql, sqlEx), sqlEx);
 				}
 			}
 		}
@@ -255,6 +255,18 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 					"', will now try the fallback translator");
 		}
 		return this.fallbackTranslator.translate(task, sql, sqlEx);
+	}
+
+	/**
+	 * Build a message String for the given SQLException.
+	 * Called when creating an instance of a generic DataAccessException class.
+	 * @param task readable text describing the task being attempted
+	 * @param sql SQL query or update that caused the problem. May be null.
+	 * @param sqlEx the offending SQLException
+	 * @return the message String to use
+	 */
+	protected String buildMessage(String task, String sql, SQLException sqlEx) {
+		return task + "; SQL [" + sql + "]; " + sqlEx.getMessage();
 	}
 
 	/**
@@ -355,7 +367,9 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 				}
 		}
 		catch (Exception ex) {
-			logger.warn("Unable to instantiate custom exception class [" + exceptionClass + "]", ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unable to instantiate custom exception class [" + exceptionClass.getName() + "]", ex);
+			}
 			return null;
 		}
 	}
