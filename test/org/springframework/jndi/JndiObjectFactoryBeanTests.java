@@ -21,6 +21,7 @@ import javax.naming.NamingException;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.jndi.ExpectedLookupTemplate;
@@ -113,6 +114,31 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
 		assertTrue(jof.getObject() == o);
+	}
+
+	public void testLookupWithExpectedTypeAndMatch() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		String s = new String();
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", s));
+		jof.setJndiName("foo");
+		jof.setExpectedType(String.class);
+		jof.afterPropertiesSet();
+		assertTrue(jof.getObject() == s);
+	}
+
+	public void testLookupWithExpectedTypeAndNoMatch() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		Object o = new Object();
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", o));
+		jof.setJndiName("foo");
+		jof.setExpectedType(String.class);
+		try {
+			jof.afterPropertiesSet();
+			fail("Should have thrown NamingException");
+		}
+		catch (NamingException ex) {
+			assertTrue(ex.getMessage().indexOf("java.lang.String") != -1);
+		}
 	}
 
 	public void testLookupWithProxyInterface() throws Exception {
@@ -235,6 +261,37 @@ public class JndiObjectFactoryBeanTests extends TestCase {
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
+		}
+	}
+
+	public void testLookupWithProxyInterfaceAndExpectedTypeAndMatch() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		TestBean tb = new TestBean();
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", tb));
+		jof.setJndiName("foo");
+		jof.setExpectedType(TestBean.class);
+		jof.setProxyInterface(ITestBean.class);
+		jof.afterPropertiesSet();
+		assertTrue(jof.getObject() instanceof ITestBean);
+		ITestBean proxy = (ITestBean) jof.getObject();
+		assertEquals(0, tb.getAge());
+		proxy.setAge(99);
+		assertEquals(99, tb.getAge());
+	}
+
+	public void testLookupWithProxyInterfaceAndExpectedTypeAndNoMatch() throws Exception {
+		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
+		TestBean tb = new TestBean();
+		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", tb));
+		jof.setJndiName("foo");
+		jof.setExpectedType(DerivedTestBean.class);
+		jof.setProxyInterface(ITestBean.class);
+		try {
+			jof.afterPropertiesSet();
+			fail("Should have thrown NamingException");
+		}
+		catch (NamingException ex) {
+			assertTrue(ex.getMessage().indexOf("org.springframework.beans.DerivedTestBean") != -1);
 		}
 	}
 

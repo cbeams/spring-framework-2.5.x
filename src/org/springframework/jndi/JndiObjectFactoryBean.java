@@ -121,6 +121,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 				throw new IllegalArgumentException(
 				    "Cannot deactivate 'lookupOnStartup' or 'cache' without specifying a 'proxyInterface'");
 			}
+			// Locate specified JNDI object.
 			this.jndiObject = lookup();
 		}
 	}
@@ -161,6 +162,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 			JndiObjectTargetSource targetSource = new JndiObjectTargetSource();
 			targetSource.setJndiTemplate(jof.getJndiTemplate());
 			targetSource.setJndiName(jof.getJndiName());
+			targetSource.setExpectedType(jof.getExpectedType());
 			targetSource.setResourceRef(jof.isResourceRef());
 			targetSource.setLookupOnStartup(jof.lookupOnStartup);
 			targetSource.setCache(jof.cache);

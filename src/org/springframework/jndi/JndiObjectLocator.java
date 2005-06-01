@@ -46,6 +46,8 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 
 	private String jndiName;
 
+	private Class expectedType;
+
 	/**
 	 * Set the JNDI name to look up. If it doesn't begin with "java:comp/env/"
 	 * this prefix is added if resourceRef is set to true.
@@ -64,6 +66,22 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	}
 
 	/**
+	 * Set the type that the located JNDI object is supposed
+	 * to be assignable to, if any.
+	 */
+	public void setExpectedType(Class expectedType) {
+		this.expectedType = expectedType;
+	}
+
+	/**
+	 * Return the type that the located JNDI object is supposed
+	 * to be assignable to, if any.
+	 */
+	public Class getExpectedType() {
+		return expectedType;
+	}
+
+	/**
 	 * Check the jndiName property and initiate a lookup.
 	 * <p>The JNDI object will thus be fetched eagerly on initialization.
 	 * For refreshing the JNDI object, subclasses can invoke <code>lookup</code>
@@ -79,10 +97,20 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	/**
 	 * Perform the actual JNDI lookup via the JndiTemplate.
 	 * Invokes the <code>located</code> method after successful lookup.
-	 * @throws NamingException if the JNDI lookup failed
+	 * @throws NamingException if the JNDI lookup failed or if the
+	 * located JNDI object is not assigable to the expected type
+	 * @see #setJndiName
+	 * @see #setExpectedType
 	 */
 	protected Object lookup() throws NamingException {
-		return lookup(getJndiName());
+		Object jndiObject = lookup(getJndiName());
+		// Check expected type, if any.
+		if (getExpectedType() != null && !getExpectedType().isInstance(jndiObject)) {
+			throw new NamingException(
+					"Located JNDI object [" + jndiObject + "] is not assignable to expected type [" +
+					this.expectedType.getName() + "]");
+		}
+		return jndiObject;
 	}
 
 }
