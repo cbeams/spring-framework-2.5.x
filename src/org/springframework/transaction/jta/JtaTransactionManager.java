@@ -92,18 +92,18 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * <p>Transaction suspension (REQUIRES_NEW, NOT_SUPPORTED) is just available with
  * a JTA TransactionManager being registered, via the "transactionManagerName" or
- * "transactionManager" property. The location of this internal JTA object is
- * <i>not</i> specified by J2EE; it is individual for each J2EE server, often kept
- * in JNDI like the UserTransaction. Some well-known JNDI locations are:
+ * "transactionManager" property. The location of this well-defined JTA object is
+ * <i>not</i> specified by J2EE; it is specific to each J2EE server, often kept
+ * in JNDI like the JTA UserTransaction. Some well-known JNDI locations are:
  * <ul>
- * <li>"java:comp/UserTransaction" for Resin, Oracle OC4J (Orion), JOnAS (JOTM),
+ * <li>"java:comp/UserTransaction" for Resin 2.x, Oracle OC4J (Orion), JOnAS (JOTM),
  * BEA WebLogic
- * <li>"java:/TransactionManager" for JBoss, JRun4
+ * <li>"java:/TransactionManager" for Resin 3.x, JBoss, JRun4
  * </ul>
  *
- * <p>Both of these cases are autodetected by JtaTransactionManager, provided that
- * the "autodetectTransactionManager" flag is set to "true" (which it is by default).
- * Consequently, JtaTransactionManager will support transaction suspension
+ * <p>Both of these cases are autodetected by JtaTransactionManager (since Spring 1.2),
+ * provided that the "autodetectTransactionManager" flag is set to "true" (which it is
+ * by default). Consequently, JtaTransactionManager will support transaction suspension
  * out-of-the-box on many J2EE servers.
  *
  * <p>A JNDI lookup can also be factored out into a corresponding JndiObjectFactoryBean,
