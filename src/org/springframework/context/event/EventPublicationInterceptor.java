@@ -20,8 +20,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 
 /**
- * Interceptor that knows how to publish ApplicationEvents to all ApplicationListeners
- * registered with an ApplicationEventPublisher (typically an ApplicationContext).
+ * Interceptor that publishes an ApplicationEvent to all ApplicationListeners
+ * registered with an ApplicationEventPublisher (typically an ApplicationContext),
+ * after each successful method invocation.
  *
  * <p>Note that this interceptor is only capable of publishing <i>stateless</i>
  * events configured statically via the "applicationEventClass" property.
@@ -43,11 +44,13 @@ public class EventPublicationInterceptor
 
 	/**
 	 * Set the application event class to publish.
-	 * <p>
-	 * The event class must have a constructor with a single Object argument for the event source. The interceptor will
-	 * pass in the invoked object.
+	 * <p>The event class must have a constructor with a single Object argument
+	 * for the event source. The interceptor will pass in the invoked object.
 	 */
 	public void setApplicationEventClass(Class applicationEventClass) {
+		if (!ApplicationEvent.class.isAssignableFrom(applicationEventClass)) {
+			throw new IllegalArgumentException("applicationEventClass needs to extend ApplicationEvent");
+		}
 		this.applicationEventClass = applicationEventClass;
 	}
 
@@ -55,17 +58,21 @@ public class EventPublicationInterceptor
 		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
-	public void afterPropertiesSet() throws Exception {
-		if (this.applicationEventClass == null || !ApplicationEvent.class.isAssignableFrom(this.applicationEventClass)) {
-			throw new IllegalStateException("applicationEventClass is required and needs to extend ApplicationEvent");
+	public void afterPropertiesSet() {
+		if (this.applicationEventClass == null) {
+			throw new IllegalArgumentException("applicationEventClass is required");
 		}
 	}
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		// Invoke target method.
 		Object retVal = invocation.proceed();
-		Constructor constructor = this.applicationEventClass.getConstructor(new Class[]{Object.class});
-		ApplicationEvent event = (ApplicationEvent) constructor.newInstance(new Object[]{invocation.getThis()});
+
+		// Publish specified event.
+		Constructor constructor = this.applicationEventClass.getConstructor(new Class[] {Object.class});
+		ApplicationEvent event = (ApplicationEvent) constructor.newInstance(new Object[] {invocation.getThis()});
 		this.applicationEventPublisher.publishEvent(event);
+
 		return retVal;
 	}
 

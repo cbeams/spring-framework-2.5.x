@@ -39,18 +39,18 @@ public class EventPublicationInterceptorTests extends TestCase {
 
 		try {
 			interceptor.afterPropertiesSet();
-			fail("Should have thrown IllegalStateException");
+			fail("Should have thrown IllegalArgumentException");
 		}
-		catch (IllegalStateException ex) {
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 
 		try {
 			interceptor.setApplicationEventClass(getClass());
 			interceptor.afterPropertiesSet();
-			fail("Should have thrown IllegalStatetException");
+			fail("Should have thrown IllegalArgumentException");
 		}
-		catch (IllegalStateException ex) {
+		catch (IllegalArgumentException ex) {
 		    // expected
 		}
 	}
