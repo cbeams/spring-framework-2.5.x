@@ -148,9 +148,6 @@
     require the AspectJ compiler. Only the subset of AspectJ pointcuts
     relating to method invocation will be usable.</para>
 
-    <para>This feature is scheduled for Spring 1.2. It depends on AspectJ
-    enhancements. </para>
-
     <para>This feature replaces our previous plan to create a pointcut
     expression language for Spring.</para>
   </sect1>
@@ -158,11 +155,11 @@
   <sect1>
     <title>Spring aspects for AspectJ</title>
 
-    <para>In a future release of Spring (probably 1.2), we will package some
-    Spring services, such as the declarative transaction management service,
-    as AspectJ aspects. This will enable them to be used by AspectJ users
-    without dependence on the Spring AOP framework--potentially, even without
-    dependence on the Spring IoC container.</para>
+    <para>In a future release of Spring, we will package some Spring services,
+    such as the declarative transaction management service, as AspectJ aspects.
+    This will enable them to be used by AspectJ users without dependence on the
+    Spring AOP framework--potentially, even without dependence on the Spring
+    IoC container.</para>
 
     <para>This feature is probably of more interest to AspectJ users than
     Spring users.</para>
