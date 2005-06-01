@@ -21,6 +21,7 @@ import javax.jms.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.core.JmsTemplate;
 
@@ -93,11 +94,16 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 		return jmsTemplate;
 	}
 	
-	public final void afterPropertiesSet() throws Exception {
+	public final void afterPropertiesSet() throws IllegalArgumentException, BeanInitializationException {
 		if (this.jmsTemplate == null) {
 			throw new IllegalArgumentException("connectionFactory or jmsTemplate is required");
 		}
-		initGateway();
+		try {
+			initGateway();
+		}
+		catch (Exception ex) {
+			throw new BeanInitializationException("Initialization of JMS gateway failed: " + ex.getMessage(), ex);
+		}
 	}
 	
 	/**

@@ -20,10 +20,7 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.support.DaoSupport;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -44,9 +41,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.datasource.DataSourceUtils
  */
-public abstract class JdbcDaoSupport implements InitializingBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class JdbcDaoSupport extends DaoSupport {
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -94,19 +89,10 @@ public abstract class JdbcDaoSupport implements InitializingBean {
 	  return jdbcTemplate;
 	}
 
-	public final void afterPropertiesSet() throws Exception {
+	protected final void checkDaoConfig() {
 		if (this.jdbcTemplate == null) {
 			throw new IllegalArgumentException("dataSource or jdbcTemplate is required");
 		}
-		initDao();
-	}
-
-	/**
-	 * Subclasses can override this for custom initialization behavior.
-	 * Gets called after population of this instance's bean properties.
-	 * @throws Exception if initialization fails
-	 */
-	protected void initDao() throws Exception {
 	}
 
 

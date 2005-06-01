@@ -16,13 +16,12 @@
 
 package org.springframework.orm.ojb.support;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ojb.broker.PersistenceBroker;
 import org.apache.ojb.broker.PersistenceBrokerException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.support.DaoSupport;
 import org.springframework.orm.ojb.OjbFactoryUtils;
 import org.springframework.orm.ojb.PersistenceBrokerTemplate;
 
@@ -53,9 +52,7 @@ import org.springframework.orm.ojb.PersistenceBrokerTemplate;
  * @see #releasePersistenceBroker
  * @see org.springframework.orm.ojb.PersistenceBrokerTemplate
  */
-public class PersistenceBrokerDaoSupport {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class PersistenceBrokerDaoSupport extends DaoSupport {
 
 	private PersistenceBrokerTemplate persistenceBrokerTemplate = createPersistenceBrokerTemplate();
 
@@ -106,19 +103,10 @@ public class PersistenceBrokerDaoSupport {
 		return persistenceBrokerTemplate;
 	}
 
-	public final void afterPropertiesSet() throws Exception {
+	protected final void checkDaoConfig() {
 		if (this.persistenceBrokerTemplate == null) {
 			throw new IllegalArgumentException("jcdAlias or persistenceBrokerTemplate is required");
 		}
-		initDao();
-	}
-
-	/**
-	 * Subclasses can override this for custom initialization behavior.
-	 * Gets called after population of this instance's bean properties.
-	 * @throws Exception if initialization fails
-	 */
-	protected void initDao() throws Exception {
 	}
 
 

@@ -19,10 +19,8 @@ package org.springframework.orm.ibatis.support;
 import javax.sql.DataSource;
 
 import com.ibatis.db.sqlmap.SqlMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.support.DaoSupport;
 import org.springframework.orm.ibatis.SqlMapTemplate;
 
 /**
@@ -42,14 +40,11 @@ import org.springframework.orm.ibatis.SqlMapTemplate;
  * @see org.springframework.orm.ibatis.SqlMapTemplate
  * @see org.springframework.orm.ibatis.SqlMapTemplate#setExceptionTranslator
  */
-public abstract class SqlMapDaoSupport implements InitializingBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class SqlMapDaoSupport extends DaoSupport {
 
 	private SqlMapTemplate sqlMapTemplate = new SqlMapTemplate();
 
 	private boolean externalTemplate = false;
-
 
 	/**
 	 * Set the JDBC DataSource to be used by this DAO.
@@ -104,19 +99,10 @@ public abstract class SqlMapDaoSupport implements InitializingBean {
 	  return sqlMapTemplate;
 	}
 
-	public final void afterPropertiesSet() throws Exception {
+	protected final void checkDaoConfig() {
 		if (!this.externalTemplate) {
 			this.sqlMapTemplate.afterPropertiesSet();
 		}
-		initDao();
-	}
-
-	/**
-	 * Subclasses can override this for custom initialization behavior.
-	 * Gets called after population of this instance's bean properties.
-	 * @throws Exception if initialization fails
-	 */
-	protected void initDao() throws Exception {
 	}
 
 }

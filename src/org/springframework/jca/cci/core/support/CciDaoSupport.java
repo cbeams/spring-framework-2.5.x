@@ -19,10 +19,7 @@ package org.springframework.jca.cci.core.support;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.support.DaoSupport;
 import org.springframework.jca.cci.CannotGetCciConnectionException;
 import org.springframework.jca.cci.connection.ConnectionFactoryUtils;
 import org.springframework.jca.cci.core.CciTemplate;
@@ -43,9 +40,7 @@ import org.springframework.jca.cci.core.CciTemplate;
  * @see org.springframework.jca.cci.core.CciTemplate
  * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils
  */
-public abstract class CciDaoSupport implements InitializingBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class CciDaoSupport extends DaoSupport {
 
 	private CciTemplate cciTemplate;
 
@@ -91,21 +86,6 @@ public abstract class CciDaoSupport implements InitializingBean {
 	 */
 	public final CciTemplate getCciTemplate() {
 	  return cciTemplate;
-	}
-
-	public final void afterPropertiesSet() throws Exception {
-		if (this.cciTemplate == null) {
-			throw new IllegalArgumentException("connectionFactory or cciTemplate is required");
-		}
-		initDao();
-	}
-
-	/**
-	 * Subclasses can override this for custom initialization behavior.
-	 * Gets called after population of this instance's bean properties.
-	 * @throws Exception if initialization fails
-	 */
-	protected void initDao() throws Exception {
 	}
 
 

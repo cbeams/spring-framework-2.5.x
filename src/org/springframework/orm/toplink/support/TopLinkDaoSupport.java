@@ -18,12 +18,10 @@ package org.springframework.orm.toplink.support;
 
 import oracle.toplink.exceptions.TopLinkException;
 import oracle.toplink.sessions.Session;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.support.DaoSupport;
 import org.springframework.orm.toplink.SessionFactory;
 import org.springframework.orm.toplink.SessionFactoryUtils;
 import org.springframework.orm.toplink.TopLinkTemplate;
@@ -41,10 +39,17 @@ import org.springframework.orm.toplink.TopLinkTemplate;
  * e.g. in combination with TopLinkInterceptor-managed Sessions.
  * Convenience <code>getSession</code> and <code>releaseSession</code>
  * methods are provided for that usage style.
+ *
+ * @author Juergen Hoeller
+ * @since 1.2
+ * @see #setSessionFactory
+ * @see #setTopLinkTemplate
+ * @see #getSession
+ * @see #releaseSession
+ * @see org.springframework.orm.toplink.TopLinkTemplate
+ * @see org.springframework.orm.toplink.TopLinkInterceptor
  */
-public abstract class TopLinkDaoSupport implements InitializingBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class TopLinkDaoSupport extends DaoSupport {
 
 	private TopLinkTemplate topLinkTemplate;
 
@@ -96,19 +101,10 @@ public abstract class TopLinkDaoSupport implements InitializingBean {
 		return topLinkTemplate;
 	}
 
-	public final void afterPropertiesSet() throws Exception {
+	protected final void checkDaoConfig() {
 		if (this.topLinkTemplate == null) {
 			throw new IllegalArgumentException("sessionFactory or topLinkTemplate is required");
 		}
-		initDao();
-	}
-
-	/**
-	 * Subclasses can override this for custom initialization behavior.
-	 * Gets called after population of this instance's bean properties.
-	 * @throws Exception if initialization fails
-	 */
-	protected void initDao() throws Exception {
 	}
 
 

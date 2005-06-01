@@ -16,15 +16,13 @@
 
 package org.springframework.orm.hibernate3.support;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.support.DaoSupport;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 
@@ -57,9 +55,7 @@ import org.springframework.orm.hibernate3.SessionFactoryUtils;
  * @see org.springframework.orm.hibernate3.HibernateTemplate
  * @see org.springframework.orm.hibernate3.HibernateInterceptor
  */
-public abstract class HibernateDaoSupport implements InitializingBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class HibernateDaoSupport extends DaoSupport {
 
 	private HibernateTemplate hibernateTemplate;
 
@@ -111,19 +107,10 @@ public abstract class HibernateDaoSupport implements InitializingBean {
 	  return hibernateTemplate;
 	}
 
-	public final void afterPropertiesSet() throws Exception {
+	protected final void checkDaoConfig() {
 		if (this.hibernateTemplate == null) {
 			throw new IllegalArgumentException("sessionFactory or hibernateTemplate is required");
 		}
-		initDao();
-	}
-
-	/**
-	 * Subclasses can override this for custom initialization behavior.
-	 * Gets called after population of this instance's bean properties.
-	 * @throws Exception if initialization fails
-	 */
-	protected void initDao() throws Exception {
 	}
 
 
