@@ -325,7 +325,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 				else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Not exposing TopLink transaction [" + session +
-								"] as JDBC transaction because no JDBC connection could be retrieved from it");
+								"] as JDBC transaction because no JDBC Connection could be retrieved from it");
 					}
 				}
 			}
@@ -336,7 +336,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 
 		catch (Exception ex) {
 			SessionFactoryUtils.releaseSession(session, getSessionFactory());
-			throw new CannotCreateTransactionException("Could not open TopLink session for transaction", ex);
+			throw new CannotCreateTransactionException("Could not open TopLink Session for transaction", ex);
 		}
 	}
 
@@ -435,14 +435,14 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 
 		Session session = txObject.getSessionHolder().getSession();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Closing TopLink session [" + session + "] after transaction");
+			logger.debug("Closing TopLink Session [" + session + "] after transaction");
 		}
 		try {
 			session.release();
 		}
 		catch (RuntimeException ex) {
 			// just log it, to keep a transaction-related exception
-			logger.error("Could not close TopLink session after transaction", ex);
+			logger.error("Could not close TopLink Session after transaction", ex);
 		}
 	}
 

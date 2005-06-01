@@ -170,7 +170,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
 			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC connection found - PersistenceBrokerTransactionManager does not support " +
+					"Pre-bound JDBC Connection found - PersistenceBrokerTransactionManager does not support " +
 					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
 					"It is recommended to use a single PersistenceBrokerTransactionManager for all transactions " +
 					"on a single DataSource, no matter whether PersistenceBroker or JDBC access.");
@@ -181,7 +181,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		try {
 			pb = getPersistenceBroker();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Opened new persistence broker [" + pb + "] for OJB transaction");
+				logger.debug("Opened new PersistenceBroker [" + pb + "] for OJB transaction");
 			}
 
 			PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) transaction;
@@ -212,7 +212,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 
 		catch (Exception ex) {
 			releasePersistenceBroker(pb);
-			throw new CannotCreateTransactionException("Could not open OJB persistence broker for transaction", ex);
+			throw new CannotCreateTransactionException("Could not open OJB PersistenceBroker for transaction", ex);
 		}
 	}
 
@@ -244,7 +244,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	protected void doCommit(DefaultTransactionStatus status) {
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Committing OJB transaction on persistence broker [" +
+			logger.debug("Committing OJB transaction on PersistenceBroker [" +
 					txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "]");
 		}
 		try {
@@ -259,7 +259,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	protected void doRollback(DefaultTransactionStatus status) {
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Rolling back OJB transaction on persistence broker [" +
+			logger.debug("Rolling back OJB transaction on PersistenceBroker [" +
 					txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "]");
 		}
 		txObject.getPersistenceBrokerHolder().getPersistenceBroker().abortTransaction();
@@ -268,7 +268,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		PersistenceBrokerTransactionObject txObject = (PersistenceBrokerTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Setting OJB transaction on persistence broker [" +
+			logger.debug("Setting OJB transaction on PersistenceBroker [" +
 					txObject.getPersistenceBrokerHolder().getPersistenceBroker() + "] rollback-only");
 		}
 		txObject.setRollbackOnly();
@@ -292,11 +292,11 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 		}
 		catch (LookupException ex) {
-			logger.info("Could not look up JDBC connection of OJB persistence broker", ex);
+			logger.info("Could not look up JDBC Connection of OJB PersistenceBroker", ex);
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Closing OJB persistence broker [" + pb + "] after transaction");
+			logger.debug("Closing OJB PersistenceBroker [" + pb + "] after transaction");
 		}
 		releasePersistenceBroker(pb);
 	}

@@ -169,7 +169,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		try {
 			con = this.dataSource.getConnection();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Opened connection [" + con + "] for JDBC transaction");
+				logger.debug("Acquired Connection [" + con + "] for JDBC transaction");
 			}
 
 			txObject.setConnectionHolder(new ConnectionHolder(con));
@@ -184,7 +184,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			if (con.getAutoCommit()) {
 				txObject.setMustRestoreAutoCommit(true);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Switching JDBC connection [" + con + "] to manual commit");
+					logger.debug("Switching JDBC Connection [" + con + "] to manual commit");
 				}
 				con.setAutoCommit(false);
 			}
@@ -197,7 +197,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		catch (SQLException ex) {
 			DataSourceUtils.releaseConnection(con, this.dataSource);
-			throw new CannotCreateTransactionException("Could not open JDBC connection for transaction", ex);
+			throw new CannotCreateTransactionException("Could not open JDBC Connection for transaction", ex);
 		}
 	}
 
@@ -218,7 +218,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
-			logger.debug("Committing JDBC transaction on connection [" + con + "]");
+			logger.debug("Committing JDBC transaction on Connection [" + con + "]");
 		}
 		try {
 			con.commit();
@@ -232,7 +232,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
-			logger.debug("Rolling back JDBC transaction on connection [" + con + "]");
+			logger.debug("Rolling back JDBC transaction on Connection [" + con + "]");
 		}
 		try {
 			con.rollback();
@@ -267,11 +267,11 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 		}
 		catch (SQLException ex) {
-			logger.info("Could not reset JDBC connection after transaction", ex);
+			logger.info("Could not reset JDBC Connection after transaction", ex);
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Closing JDBC connection [" + con + "] after transaction");
+			logger.debug("Releasing JDBC Connection [" + con + "] after transaction");
 		}
 		DataSourceUtils.releaseConnection(con, this.dataSource);
 	}

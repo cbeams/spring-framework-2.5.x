@@ -359,7 +359,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
 			if (logger.isDebugEnabled()) {
-				logger.debug("Found thread-bound session [" + sessionHolder.getSession() +
+				logger.debug("Found thread-bound Session [" + sessionHolder.getSession() +
 						"] for Hibernate transaction");
 			}
 			txObject.setSessionHolder(sessionHolder, false);
@@ -380,7 +380,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
 			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC connection found - HibernateTransactionManager does not support " +
+					"Pre-bound JDBC Connection found - HibernateTransactionManager does not support " +
 					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
 					"It is recommended to use a single HibernateTransactionManager for all transactions " +
 					"on a single DataSource, no matter whether Hibernate or JDBC access.");
@@ -395,7 +395,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				Session newSession = (entityInterceptor != null ?
 						getSessionFactory().openSession(entityInterceptor) : getSessionFactory().openSession());
 				if (logger.isDebugEnabled()) {
-					logger.debug("Opened new session [" + newSession + "] for Hibernate transaction");
+					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
 				}
 				txObject.setSessionHolder(new SessionHolder(newSession), true);
 			}
@@ -450,7 +450,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		catch (Exception ex) {
 			SessionFactoryUtils.releaseSession(session, getSessionFactory());
-			throw new CannotCreateTransactionException("Could not open Hibernate session for transaction", ex);
+			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
 		}
 	}
 
@@ -482,7 +482,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	protected void doCommit(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Committing Hibernate transaction on session [" +
+			logger.debug("Committing Hibernate transaction on Session [" +
 					txObject.getSessionHolder().getSession() + "]");
 		}
 		try {
@@ -501,7 +501,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	protected void doRollback(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Rolling back Hibernate transaction on session [" +
+			logger.debug("Rolling back Hibernate transaction on Session [" +
 					txObject.getSessionHolder().getSession() + "]");
 		}
 		try {
@@ -526,7 +526,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Setting Hibernate transaction on session [" +
+			logger.debug("Setting Hibernate transaction on Session [" +
 					txObject.getSessionHolder().getSession() + "] rollback-only");
 		}
 		txObject.setRollbackOnly();
@@ -550,19 +550,19 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 		}
 		catch (HibernateException ex) {
-			logger.info("Could not access JDBC connection of Hibernate session", ex);
+			logger.info("Could not access JDBC Connection of Hibernate Session", ex);
 		}
 
 		Session session = txObject.getSessionHolder().getSession();
 		if (txObject.isNewSessionHolder()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Closing Hibernate session [" + session + "] after transaction");
+				logger.debug("Closing Hibernate Session [" + session + "] after transaction");
 			}
 			SessionFactoryUtils.releaseSession(session, getSessionFactory());
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Not closing pre-bound Hibernate session [" + session + "] after transaction");
+				logger.debug("Not closing pre-bound Hibernate Session [" + session + "] after transaction");
 			}
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());

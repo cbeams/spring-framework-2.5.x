@@ -130,7 +130,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		try {
 			con = getConnectionFactory().getConnection();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Opened connection [" + con + "] for local CCI transaction");
+				logger.debug("Acquired Connection [" + con + "] for local CCI transaction");
 			}
 
 			txObject.setConnectionHolder(new ConnectionHolder(con));
@@ -145,7 +145,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 		catch (NotSupportedException ex) {
 			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
-			throw new CannotCreateTransactionException("CCI connection does not support local transactions", ex);
+			throw new CannotCreateTransactionException("CCI Connection does not support local transactions", ex);
 		}
 		catch (LocalTransactionException ex) {
 			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
@@ -177,7 +177,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
-			logger.debug("Committing CCI local transaction on connection [" + con + "]");
+			logger.debug("Committing CCI local transaction on Connection [" + con + "]");
 		}
 		try {
 			con.getLocalTransaction().commit();
@@ -194,7 +194,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
-			logger.debug("Rolling back CCI local transaction on connection [" + con + "]");
+			logger.debug("Rolling back CCI local transaction on Connection [" + con + "]");
 		}
 		try {
 			con.getLocalTransaction().rollback();
@@ -225,7 +225,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Closing CCI connection [" + con + "] after transaction");
+			logger.debug("Releasing CCI Connection [" + con + "] after transaction");
 		}
 		ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 	}
