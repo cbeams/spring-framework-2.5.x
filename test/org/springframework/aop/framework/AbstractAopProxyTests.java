@@ -136,15 +136,15 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	 * CGLIB this will be slow or will run out of memory.
 	 */
 	public void testManyProxies() {
-		int howmany = 10000;
+		int howMany = 10000;
 		StopWatch sw = new StopWatch();
-		sw.start(getClass() + "." + getName() + ": create " + howmany + " proxies");
-		testManyProxies(howmany);
+		sw.start(getClass() + "." + getName() + ": create " + howMany + " proxies");
+		testManyProxies(howMany);
 		sw.stop();
 		System.out.println(sw);
 		// Set a performance benchmark.
 		// It's pretty generous so as not to cause failures on slow machines.
-		assertTrue("Proxy creation was too slow",  sw.getTotalTimeSeconds() < 20);
+		assertTrue("Proxy creation was too slow",  sw.getTotalTimeSeconds() < 25);
 	}
 	
 	private void testManyProxies(int howMany) {
