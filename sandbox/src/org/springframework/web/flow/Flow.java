@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.Styler;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
@@ -96,7 +97,7 @@ public class Flow extends AnnotatedObject {
 	/**
 	 * The set of state definitions for this flow.
 	 */
-	private Set states = new LinkedHashSet(6);
+	private Set states = CollectionFactory.createLinkedSetIfPossible(6);
 
 	/**
 	 * Default constructor for bean style usage.

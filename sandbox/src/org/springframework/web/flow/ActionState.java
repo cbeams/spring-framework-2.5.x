@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.Styler;
 import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
@@ -59,7 +60,7 @@ public class ActionState extends TransitionableState {
 	/**
 	 * The set of actions to be executed when this action state is entered.
 	 */
-	private Set actionExecutors = new LinkedHashSet(1);
+	private Set actionExecutors = CollectionFactory.createLinkedSetIfPossible(1);
 	
 	/**
 	 * Default constructor for bean style usage.
