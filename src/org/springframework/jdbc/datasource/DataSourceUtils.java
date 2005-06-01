@@ -103,7 +103,7 @@ public abstract class DataSourceUtils {
 			return conHolder.getConnection();
 		}
 
-		logger.debug("Opening JDBC Connection");
+		logger.debug("Fetching JDBC Connection from DataSource");
 		Connection con = dataSource.getConnection();
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -176,7 +176,8 @@ public abstract class DataSourceUtils {
 			// Reset transaction isolation to previous value, if changed for the transaction.
 			if (previousIsolationLevel != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Resetting isolation level of Connection [" + con + "] to " + previousIsolationLevel);
+					logger.debug("Resetting isolation level of JDBC Connection [" +
+							con + "] to " + previousIsolationLevel);
 				}
 				con.setTransactionIsolation(previousIsolationLevel.intValue());
 			}
@@ -184,7 +185,7 @@ public abstract class DataSourceUtils {
 			// Reset read-only flag.
 			if (con.isReadOnly()) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Resetting read-only flag of Connection [" + con + "]");
+					logger.debug("Resetting read-only flag of JDBC Connection [" + con + "]");
 				}
 				con.setReadOnly(false);
 			}
@@ -268,7 +269,7 @@ public abstract class DataSourceUtils {
 		// Leave the Connection open only if the DataSource is our
 		// special data source, and it wants the Connection left open.
 		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {
-			logger.debug("Closing JDBC Connection");
+			logger.debug("Returning JDBC Connection to DataSource");
 			con.close();
 		}
 	}
