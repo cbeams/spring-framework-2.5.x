@@ -25,23 +25,25 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * one of our generic data access exceptions.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class UncategorizedSQLException extends UncategorizedDataAccessException {
 	
 	/** SQL that led to the problem */
-	private String sql;
+	private final String sql;
 
 	/**
-	 * Constructor for ConnectionFactoryException.
-	 * @param msg message
-	 * @param sql SQL we were tring to execute
-	 * @param ex SQLException
+	 * Constructor for UncategorizedSQLException.
+	 * @param task name of current task
+	 * @param sql the offending SQL statement
+	 * @param ex the root cause
 	 */
-	public UncategorizedSQLException(String msg, String sql, SQLException ex) {
-		super(msg, ex);
+	public UncategorizedSQLException(String task, String sql, SQLException ex) {
+		super(task + "; uncategorized SQLException for SQL [" + sql + "]; SQL state [" +
+				ex.getSQLState() + "]; error code [" + ex.getErrorCode() + "]; " + ex.getMessage(), ex);
 		this.sql = sql;
 	}
-	
+
 	/**
 	 * Return the underlying SQLException.
 	 */
