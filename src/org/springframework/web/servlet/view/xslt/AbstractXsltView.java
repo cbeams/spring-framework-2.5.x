@@ -53,7 +53,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * <code>Source</code> to transform by overriding <code>createXsltSource()</code>.
  *
  * <p>Note that <code>createXsltSource()</code> is the preferred method which all
- * new subclasses should override from Spring 1.2.  <code>createDomNode()</code>
+ * new subclasses should override since Spring 1.2. <code>createDomNode()</code>
  * has been deprecated and may be removed in a future version.
  *
  * <p>Subclasses do not need to concern themselves with XSLT other than providing
@@ -65,48 +65,41 @@ import org.springframework.web.servlet.view.AbstractView;
  * XSLT stylesheet
  * <li>root: name of the root element, defaults to "DocRoot"
  * <li>uriResolver: URIResolver used in the transform
- * <li>cache (optional, default=true): debug setting only
  * <li>errorListener (optional): ErrorListener implementation for custom
- * handling of warnings and errors during TransformerFactory operations.
+ * handling of warnings and errors during TransformerFactory operations
+ * <li>indent (optional, default=true): whether additional whitespace
+ * may be added when outputting the result true
+ * <li>cache (optional, default=true): debug setting only
  * </ul>
  *
- * <p>Setting cache to false will cause the templates object to be reloaded
- * for each rendering. This is useful during development, but will seriously
- * affect performance in production and isn't thread-safe.
+ * <p>Note that setting "cache" to "false" will cause the template objects
+ * to be reloaded for each rendering. This is useful during development,
+ * but will seriously affect performance in production and isn't thread-safe.
  *
  * @author Rod Johnson
  * @author Darren Davison
+ * @author Juergen Hoeller
  */
 public abstract class AbstractXsltView extends AbstractView {
 
 	public static final String DEFAULT_ROOT = "DocRoot";
 
 
-	/**
-	 * URL of stylesheet
-	 */
 	private Resource stylesheetLocation;
 
-	/**
-	 * Document root element name, normally overridden in the view definition config
-	 */
 	private String root = DEFAULT_ROOT;
 
-	/**
-	 * Custom URIResolver, set by subclass or as bean property
-	 */
 	private URIResolver uriResolver;
+
+	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
+
+	private boolean indent = true;
 
 	private boolean cache = true;
 
 	private TransformerFactory transformerFactory;
 
-	/**
-	 * XSLT Template
-	 */
 	private Templates templates;
-
-	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
 
 
 	/**
@@ -116,8 +109,10 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	public void setStylesheetLocation(Resource stylesheetLocation) {
 		this.stylesheetLocation = stylesheetLocation;
-		if (transformerFactory != null)
+		// Re-cache templates if transformer factory already initialized.
+		if (this.transformerFactory != null) {
 			cacheTemplates();
+		}
 	}
 
 	/**
@@ -142,13 +137,6 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Set whether to activate the cache. Default is true.
-	 */
-	public void setCache(boolean cache) {
-		this.cache = cache;
-	}
-
-	/**
 	 * Set an implementation of the <code>javax.xml.transform.ErrorListener</code>
 	 * interface for custom handling of transformation errors and warnings.
 	 * <p>If not set, a default SimpleTransformErrorListener is used that simply
@@ -158,6 +146,23 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	public void setErrorListener(ErrorListener errorListener) {
 		this.errorListener = errorListener;
+	}
+
+	/**
+	 * Set whether the XSLT transformer may add additional whitespace when
+	 * outputting the result tree. Default is on; turn this off to not
+	 * specify an "indent" key, leaving the choice up to the stylesheet.
+	 * @see javax.xml.transform.OutputKeys#INDENT
+	 */
+	public void setIndent(boolean indent) {
+		this.indent = indent;
+	}
+
+	/**
+	 * Set whether to activate the cache. Default is on.
+	 */
+	public void setCache(boolean cache) {
+		this.cache = cache;
 	}
 
 
@@ -216,7 +221,9 @@ public abstract class AbstractXsltView extends AbstractView {
 		}
 	}
 
-	protected final void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected final void renderMergedOutputModel(
+			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
 		if (!this.cache) {
 			logger.warn("DEBUG SETTING: NOT THREADSAFE AND WILL IMPAIR PERFORMANCE: template will be refreshed");
 			cacheTemplates();
@@ -289,13 +296,14 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * create a RequestContext to expose as part of the model.
 	 * @param response HTTP response. Subclasses won't normally use this,
 	 * however there may sometimes be a need to set cookies.
-	 * @return the xslt Source to transform
+	 * @return the XSLT Source to transform
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
 	 */
 	protected Source createXsltSource(
 			Map model, String root, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		return null;
 	}
 
@@ -324,6 +332,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	protected Node createDomNode(Map model, String root, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		return null;
 	}
 
@@ -342,11 +351,12 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @see javax.xml.transform.stream.StreamResult
 	 * @see javax.servlet.ServletResponse#getOutputStream
 	 * @see #doTransform(Map, Source, HttpServletRequest, HttpServletResponse)
-	 * @deprecated the preferred method is doTransform with a Source argument
+	 * @deprecated the preferred method is <code>doTransform</code> with a Source argument
 	 * @see #doTransform(java.util.Map, javax.xml.transform.Source, HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doTransform(Map model, Node dom, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		doTransform(new DOMSource(dom), getParameters(request),
 				new StreamResult(new BufferedOutputStream(response.getOutputStream())),
 				response.getCharacterEncoding());
@@ -369,6 +379,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	protected void doTransform(Map model, Source source, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		doTransform(source, getParameters(request),
 				new StreamResult(new BufferedOutputStream(response.getOutputStream())),
 				response.getCharacterEncoding());
@@ -383,10 +394,12 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @throws Exception we let this method throw any exception; the
 	 * AbstractXlstView superclass will catch exceptions
 	 * @see #doTransform(Source, Map, Result, String)
-	 * @deprecated the preferred method is doTransform(Source source, Map parameters, Result result, String encoding)
+	 * @deprecated the preferred method is
+	 * <code>doTransform(Source source, Map parameters, Result result, String encoding)</code>
 	 */
 	protected void doTransform(Node dom, Map parameters, Result result, String encoding)
 			throws Exception {
+
 		doTransform(new DOMSource(dom), parameters, result, encoding);
 	}
 
@@ -400,6 +413,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	protected void doTransform(Source source, Map parameters, Result result, String encoding)
 			throws Exception {
+
 		try {
 			Transformer trans = (this.templates != null) ?
 					this.templates.newTransformer() : // we have a stylesheet
@@ -417,7 +431,9 @@ public abstract class AbstractXsltView extends AbstractView {
 			}
 
 			trans.setOutputProperty(OutputKeys.ENCODING, encoding);
-			trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			if (this.indent) {
+				trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			}
 
 			// Xalan-specific, but won't do any harm in other XSLT engines
 			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
@@ -428,12 +444,12 @@ public abstract class AbstractXsltView extends AbstractView {
 			}
 		}
 		catch (TransformerConfigurationException ex) {
-			throw new ServletException("Couldn't create XSLT transformer for stylesheet [" + this.stylesheetLocation +
-					"] in XSLT view with name [" + getBeanName() + "]", ex);
+			throw new ServletException("Couldn't create XSLT transformer for stylesheet [" +
+					this.stylesheetLocation + "] in XSLT view with name [" + getBeanName() + "]", ex);
 		}
 		catch (TransformerException ex) {
-			throw new ServletException("Couldn't perform transform with stylesheet [" + this.stylesheetLocation +
-					"] in XSLT view with name [" + getBeanName() + "]", ex);
+			throw new ServletException("Couldn't perform transform with stylesheet [" +
+					this.stylesheetLocation + "] in XSLT view with name [" + getBeanName() + "]", ex);
 		}
 	}
 
