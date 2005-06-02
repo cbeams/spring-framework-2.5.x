@@ -15,6 +15,7 @@
  */
 package org.springframework.web.flow.action;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -130,7 +131,35 @@ public abstract class AbstractAction implements Action, InitializingBean {
 		return new Event(this, resultId, parameters);
 	}
 
-	// action pre and post execution logic
+	/**
+	 * Returns a result event for this action with the specified identifier
+	 * and a single parameter. Typically called as part of return, for example:
+	 * <pre>
+	 *   public Event makeSelection(RequestContext context) throws Exception {
+	 *	    try {
+	 * 		    String selection = (String) context.getSourceEvent().getParameter(
+	 * 				"selection");
+	 * 		    selectionSensorHelper.fireSelectionMade(selection);
+	 * 		    return success();
+	 *	    } catch (NoSuchBinException e) {
+	 *		    return result("noSuchBin", "exception", e);
+	 *	    } catch (BinEmptyException e) {
+	 *		    return result("binEmpty", "exception", e);
+	 *	    } catch (NotEnoughFundsException e) {
+	 *		    return result("notEnoughFunds", "exception", e);
+	 *	    }
+	 *   }
+	 * </pre>
+	 * @param resultId the result id
+	 * @param parameterName the parameter name
+	 * @param parameterValue the parameter value
+	 * @return the action result event
+	 */
+	protected Event result(String resultId, String parameterName, Object parameterValue) {
+		HashMap parameters = new HashMap(1);
+		parameters.put(parameterName, parameterValue);
+		return new Event(this, resultId, parameters);
+	}
 
 	public final Event execute(RequestContext context) throws Exception {
 		if (logger.isDebugEnabled()) {
