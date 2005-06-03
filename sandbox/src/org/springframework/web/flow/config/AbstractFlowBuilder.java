@@ -32,6 +32,7 @@ import org.springframework.web.flow.TransitionCriteriaFactory;
 import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.ViewState;
 import org.springframework.web.flow.action.ActionTransitionCriteria;
+import org.springframework.web.flow.action.DelegatingAction;
 import org.springframework.web.flow.action.MultiAction;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
@@ -548,6 +549,17 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	 */
 	protected AnnotatedAction annotatedAction(String actionId, Map properties) throws ServiceLookupException {
 		return new AnnotatedAction(action(actionId), properties);
+	}
+
+	/**
+	 * Return an delegating action that delegates to an action instance retrieved by
+	 * messaging a flow-scoped action locator. 
+	 * @param actionLocatorAttribute the action locator
+	 * @param actionId the action id
+	 * @return the delegating action
+	 */
+	protected Action delegateAction(String actionLocatorAttribute, String actionId) {
+		return new DelegatingAction(actionLocatorAttribute, actionId);
 	}
 
 	/**
