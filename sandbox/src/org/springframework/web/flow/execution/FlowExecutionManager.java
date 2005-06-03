@@ -35,6 +35,7 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowContext;
 import org.springframework.web.flow.ViewDescriptor;
 import org.springframework.web.flow.config.BeanFactoryFlowServiceLocator;
+import org.springframework.web.flow.config.TextToFlowExecutionListenerCriteria;
 import org.springframework.web.flow.execution.impl.FlowExecutionImpl;
 
 /**
@@ -191,7 +192,13 @@ public class FlowExecutionManager implements BeanFactoryAware {
 		Iterator it = criteriaListenerMap.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry)it.next();
-			FlowExecutionListenerCriteria criteria = (FlowExecutionListenerCriteria)entry.getKey();
+			FlowExecutionListenerCriteria criteria;
+			if (entry.getKey() instanceof FlowExecutionListenerCriteria) {
+				criteria = (FlowExecutionListenerCriteria)entry.getKey();
+			} else {
+				//TODO this introduces cyclical dependency on config package
+				criteria = (FlowExecutionListenerCriteria)new TextToFlowExecutionListenerCriteria().convert(entry.getKey());
+			}
 			if (entry.getValue() instanceof Collection) {
 				setListeners(criteria, (Collection)entry.getValue());
 			} else {
