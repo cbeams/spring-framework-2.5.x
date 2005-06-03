@@ -81,7 +81,7 @@ import org.springframework.web.flow.ScopeType;
  * <p>
  * Note that this action does not provide a <i>referenceData()</i> hook method
  * similar to that of the <code>SimpleFormController</code>. If you need to
- * setup reference data you should create a seperate state in your flow to do
+ * set up reference data you should create a separate state in your flow to do
  * just that and make sure you pass through that state before showing the form
  * view. Note that you can add the method that handles this reference data
  * setup logic to a subclass of this class since this is a multi-action! Typically
