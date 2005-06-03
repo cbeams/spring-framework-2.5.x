@@ -172,11 +172,11 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		ut.getStatus();
 		utControl.setReturnValue(status, 1);
-		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		if (status == Status.STATUS_NO_TRANSACTION) {
 			ut.begin();
 			utControl.setVoidCallable(1);
+			ut.getStatus();
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 			ut.commit();
 			utControl.setVoidCallable(1);
 		}
@@ -276,11 +276,11 @@ public class HibernateJtaTransactionTests extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(status, 1);
-		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		if (status == Status.STATUS_NO_TRANSACTION) {
 			ut.begin();
 			utControl.setVoidCallable(1);
+			ut.getStatus();
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 			ut.commit();
 			utControl.setVoidCallable(1);
 		}
@@ -376,8 +376,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
-		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		ut.begin();
 		utControl.setVoidCallable(1);
 		ut.rollback();
@@ -1163,7 +1161,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getStatus();
 		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
