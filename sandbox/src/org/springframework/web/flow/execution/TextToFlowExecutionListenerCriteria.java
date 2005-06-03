@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.flow.config;
+package org.springframework.web.flow.execution;
 
 import org.springframework.beans.BeansException;
 import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.support.AbstractConverter;
 import org.springframework.util.StringUtils;
-import org.springframework.web.flow.execution.FlowExecutionListenerCriteria;
 
 /**
  * Converter that converts an encoded string representation of a
