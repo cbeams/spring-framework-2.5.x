@@ -21,6 +21,7 @@ import org.springframework.web.flow.Flow;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.State;
 import org.springframework.web.flow.Transition;
+import org.springframework.web.flow.execution.ActionLocator;
 import org.springframework.web.flow.execution.FlowLocator;
 import org.springframework.web.flow.execution.ServiceLookupException;
 
@@ -35,7 +36,7 @@ import org.springframework.web.flow.execution.ServiceLookupException;
  * @author Colin Sampaleanu
  * @author Erwin Vervaet
  */
-public interface FlowServiceLocator extends FlowLocator {
+public interface FlowServiceLocator extends FlowLocator, ActionLocator {
 	
 	// dealing with flows
 	
@@ -156,14 +157,6 @@ public interface FlowServiceLocator extends FlowLocator {
 	 * @throws ServiceLookupException when the action cannot be created
 	 */
 	public Action createAction(Class implementationClass, AutowireMode autowireMode) throws ServiceLookupException;
-
-	/**
-	 * Lookup an action with specified id.
-	 * @param id the action id
-	 * @return the action
-	 * @throws ServiceLookupException when the action cannot be found
-	 */
-	public Action getAction(String id) throws ServiceLookupException;
 
 	/**
 	 * Lookup an action of specified implementation class.
