@@ -440,7 +440,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 				while (it.hasNext()) {
 					Map.Entry entry = (Map.Entry)it.next();
 					FlowExecutionListenerCriteria criteria = (FlowExecutionListenerCriteria)entry.getKey();
-					if (criteria.shouldListenTo(flow)) {
+					if (criteria.matches(flow)) {
 						c.addAll((Collection)entry.getValue());
 					}
 				}
