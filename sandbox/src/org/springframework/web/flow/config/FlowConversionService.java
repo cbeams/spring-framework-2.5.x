@@ -19,7 +19,6 @@ import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.web.flow.TransitionCriteria;
 import org.springframework.web.flow.ViewDescriptorCreator;
 import org.springframework.web.flow.execution.FlowExecutionListenerCriteria;
-import org.springframework.web.flow.execution.TextToFlowExecutionListenerCriteria;
 
 /**
  * Conversion service used by the web flow system. This service
