@@ -15,6 +15,14 @@
  */
 package org.springframework.web.flow.execution;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -100,21 +108,24 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * Event id value indicating that the event has not been set ("@NOT_SET@").
 	 */
 	public static final String NOT_SET_EVENT_ID = "@NOT_SET@";
-	
+
+	private static final FlowExecutionListener[] EMPTY_LISTENER_ARRAY = new FlowExecutionListener[0];
 
 	protected final Log logger = LogFactory.getLog(FlowExecutionManager.class);
-	
-	private BeanFactory beanFactory;
 
 	private Flow flow;
 
 	private FlowLocator flowLocator = new BeanFactoryFlowServiceLocator();
 
-	private FlowExecutionListener[] listeners;
+	private Map flowExecutionListeners = new HashMap();
+
+	private Map flowExecutionListenerCriteriaMap = new HashMap();
 
 	private FlowExecutionStorage storage;
-	
+
 	private TransactionSynchronizer transactionSynchronizer = new TokenTransactionSynchronizer();
+
+	private BeanFactory beanFactory;
 
 	/**
 	 * Create a new flow execution manager. Before use, the manager should
@@ -129,30 +140,6 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 */
 	public FlowExecutionManager() {
 	}
-	
-	/**
-	 * Returns this flow execution manager's bean factory.
-	 */
-	protected BeanFactory getBeanFactory() {
-		return beanFactory;
-	}
-	
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (getFlowLocator() instanceof BeanFactoryAware) {
-			// make the BeanFactoryFlowServiceLocator work
-			((BeanFactoryAware)getFlowLocator()).setBeanFactory(beanFactory);
-		}
-	}
-
-	/**
-	 * Returns the flow whose executions are managed by this manager.
-	 * Could be <code>null</code> if there is no preconfigured flow and
-	 * the id of the flow for which executions will be managed is sent
-	 * in an event parameter "_flowId".
-	 */
-	protected Flow getFlow() {
-		return flow;
-	}
 
 	/**
 	 * Set the flow whose executions will be managed if there is no alternate
@@ -160,14 +147,6 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 */
 	public void setFlow(Flow flow) {
 		this.flow = flow;
-	}
-
-	/**
-	 * Returns the flow locator to use for lookup of flows specified using the
-	 * "_flowId" event parameter.
-	 */
-	protected FlowLocator getFlowLocator() {
-		return flowLocator;
 	}
 
 	/**
@@ -179,34 +158,60 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	}
 
 	/**
-	 * Returns the array of flow execution listeners.
-	 * @return the flow execution listeners
+	 * Set the flow execution listener that will be notified of managed
+	 * flow executions.
 	 */
-	protected FlowExecutionListener[] getListeners() {
-		return this.listeners;
+	public void setListener(FlowExecutionListener listener) {
+		setListener(FlowExecutionListenerCriteria.ALL_FLOWS, listener);
 	}
 
 	/**
 	 * Set the flow execution listener that will be notified of managed
 	 * flow executions.
 	 */
-	public void setListener(FlowExecutionListener listener) {
-		this.listeners = new FlowExecutionListener[] { listener };
+	public void setListener(FlowExecutionListenerCriteria criteria, FlowExecutionListener listener) {
+		List listeners = new ArrayList(1);
+		listeners.add(listener);
+		setListeners(FlowExecutionListenerCriteria.ALL_FLOWS, listeners);
 	}
 
 	/**
 	 * Sets the flow execution listeners that will be notified of managed
 	 * flow executions.
 	 */
-	public void setListeners(FlowExecutionListener[] listeners) {
-		this.listeners = listeners;
+	public void setListeners(Collection listeners) {
+		setListeners(FlowExecutionListenerCriteria.ALL_FLOWS, listeners);
 	}
-	
+
 	/**
-	 * Returns the storage strategy used by the flow execution manager.
+	 * Sets the flow execution listeners that will be notified of managed
+	 * flow executions.
 	 */
-	public FlowExecutionStorage getStorage() {
-		return storage;
+	public void setListeners(Map criteriaListenerMap) {
+		Iterator it = criteriaListenerMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry)it.next();
+			FlowExecutionListenerCriteria criteria = (FlowExecutionListenerCriteria)entry.getKey();
+			if (entry.getValue() instanceof Collection) {
+				setListeners(criteria, (Collection)entry.getValue());
+			} else {
+				setListener(criteria, (FlowExecutionListener)entry.getValue());
+			}
+		}
+	}
+
+	/**
+	 * Sets the flow execution listeners that will be notified of managed
+	 * flow executions.
+	 */
+	public void setListeners(FlowExecutionListenerCriteria criteria, Collection listeners) {
+		Collection c = (Collection)flowExecutionListenerCriteriaMap.get(criteria);
+		if (c == null) {
+			flowExecutionListenerCriteriaMap.put(criteria, new ArrayList(listeners));
+		}
+		else {
+			c.addAll(new ArrayList(listeners));
+		}
 	}
 
 	/**
@@ -216,24 +221,22 @@ public class FlowExecutionManager implements BeanFactoryAware {
 		Assert.notNull(storage, "The flow execution storage strategy is required");
 		this.storage = storage;
 	}
-	
-	/**
-	 * Return the application transaction synchronization strategy to use.
-	 * This defaults to a <i>synchronizer token</i> based transaction management
-	 * system.
-	 */
-	public TransactionSynchronizer getTransactionSynchronizer() {
-		return transactionSynchronizer;
-	}
-	
+
 	/**
 	 * Set the application transaction synchronization strategy to use.
 	 */
 	public void setTransactionSynchronizer(TransactionSynchronizer transactionSynchronizer) {
 		this.transactionSynchronizer = transactionSynchronizer;
 	}
-	
-	// event management
+
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (getFlowLocator() instanceof BeanFactoryAware) {
+			// make the BeanFactoryFlowServiceLocator work
+			((BeanFactoryAware)getFlowLocator()).setBeanFactory(beanFactory);
+		}
+	}
+
+	// event processing
 
 	/**
 	 * Signal the occurence of the specified event - this is the entry point into the 
@@ -272,13 +275,14 @@ public class FlowExecutionManager implements BeanFactoryAware {
 			// retrieve information about it
 			flowExecution = getStorage().load(id, event);
 			// rehydrate the execution if neccessary (if it had been serialized out)
-			flowExecution.rehydrate(getFlowLocator(), getListeners(), getTransactionSynchronizer());
+			flowExecution.rehydrate(getFlowLocator(), getListeners(flowExecution.getRootFlow()),
+					getTransactionSynchronizer());
 			if (listener != null) {
 				flowExecution.getListeners().add(listener);
 			}
 			// signal the event within the current state
-			Assert.hasText(event.getId(), "No event id could be obtained -- "
-					+ "make sure the submitting view or other client provides it as input");
+			Assert.hasText(event.getId(), "No _eventId could be obtained -- "
+					+ "make sure the submitting view or other client provides the _eventId parameter as input");
 			// see if the eventId was set to a static marker placeholder because
 			// of a client configuration error
 			if (event.getId().equals(getNotSetEventIdParameterMarker())) {
@@ -317,7 +321,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * @return the created flow execution
 	 */
 	protected FlowExecution createFlowExecution(Flow flow) {
-		return new FlowExecutionImpl(flow, getListeners(), getTransactionSynchronizer());
+		return new FlowExecutionImpl(flow, getListeners(flow), getTransactionSynchronizer());
 	}
 
 	/**
@@ -392,7 +396,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 */
 	protected ViewDescriptor prepareViewDescriptor(ViewDescriptor viewDescriptor, String flowExecutionId,
 			FlowContext flowContext) {
-		if (flowContext.isActive() && viewDescriptor!=null) {
+		if (flowContext.isActive() && viewDescriptor != null) {
 			// make the unique flow execution id available in the model
 			viewDescriptor.addObject(FLOW_EXECUTION_ID_ATTRIBUTE, flowExecutionId);
 			// make the flow execution context available in the model
@@ -402,5 +406,71 @@ public class FlowExecutionManager implements BeanFactoryAware {
 			viewDescriptor.addObject(CURRENT_STATE_ID_ATTRIBUTE, flowContext.getCurrentState().getId());
 		}
 		return viewDescriptor;
+	}
+
+	/**
+	 * Returns the flow whose executions are managed by this manager.
+	 * Could be <code>null</code> if there is no preconfigured flow and
+	 * the id of the flow for which executions will be managed is sent
+	 * in an event parameter "_flowId".
+	 */
+	protected Flow getFlow() {
+		return flow;
+	}
+
+	/**
+	 * Returns the flow locator to use for lookup of flows specified using the
+	 * "_flowId" event parameter.
+	 */
+	protected FlowLocator getFlowLocator() {
+		return flowLocator;
+	}
+
+	/**
+	 * Returns the array of flow execution listeners.
+	 * @param flow the flow definition associated with the execution to be listened to
+	 * @return the flow execution listeners
+	 */
+	protected FlowExecutionListener[] getListeners(Flow flow) {
+		synchronized (flowExecutionListeners) {
+			FlowExecutionListener[] listeners = (FlowExecutionListener[])flowExecutionListeners.get(flow);
+			if (listeners == null) {
+				Iterator it = flowExecutionListenerCriteriaMap.entrySet().iterator();
+				Collection c = new LinkedList();
+				while (it.hasNext()) {
+					Map.Entry entry = (Map.Entry)it.next();
+					FlowExecutionListenerCriteria criteria = (FlowExecutionListenerCriteria)entry.getKey();
+					if (criteria.shouldListenTo(flow)) {
+						c.addAll((Collection)entry.getValue());
+					}
+				}
+				listeners = (FlowExecutionListener[])c.toArray(EMPTY_LISTENER_ARRAY);
+				flowExecutionListeners.put(flow, listeners); 
+			}
+			return listeners;
+		}
+	}
+
+	/**
+	 * Returns this flow execution manager's bean factory.
+	 */
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+
+	/**
+	 * Returns the storage strategy used by the flow execution manager.
+	 */
+	protected FlowExecutionStorage getStorage() {
+		return storage;
+	}
+
+	/**
+	 * Return the application transaction synchronization strategy to use.
+	 * This defaults to a <i>synchronizer token</i> based transaction management
+	 * system.
+	 */
+	protected TransactionSynchronizer getTransactionSynchronizer() {
+		return transactionSynchronizer;
 	}
 }
