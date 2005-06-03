@@ -28,7 +28,7 @@ import org.springframework.web.flow.execution.TextToFlowExecutionListenerCriteri
  * @see org.springframework.web.flow.config.TextToTransitionCriteria
  * @see org.springframework.web.flow.config.TextToViewDescriptorCreator
  * 
- * @author Kieth Donald
+ * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class FlowConversionService extends DefaultConversionService {
