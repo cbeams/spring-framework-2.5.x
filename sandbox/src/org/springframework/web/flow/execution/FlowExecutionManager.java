@@ -187,7 +187,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * Sets the flow execution listeners that will be notified of managed
 	 * flow executions.
 	 */
-	public void setListeners(Map criteriaListenerMap) {
+	public void setListenerMap(Map criteriaListenerMap) {
 		Iterator it = criteriaListenerMap.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry)it.next();
@@ -205,6 +205,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * flow executions.
 	 */
 	public void setListeners(FlowExecutionListenerCriteria criteria, Collection listeners) {
+		System.out.println("c = " + listeners);
 		Collection c = (Collection)flowExecutionListenerCriteriaMap.get(criteria);
 		if (c == null) {
 			flowExecutionListenerCriteriaMap.put(criteria, new ArrayList(listeners));
@@ -444,6 +445,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 						c.addAll((Collection)entry.getValue());
 					}
 				}
+				System.out.println(c);
 				listeners = (FlowExecutionListener[])c.toArray(EMPTY_LISTENER_ARRAY);
 				flowExecutionListeners.put(flow, listeners); 
 			}
