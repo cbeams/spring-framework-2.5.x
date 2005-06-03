@@ -108,8 +108,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * Event id value indicating that the event has not been set ("@NOT_SET@").
 	 */
 	public static final String NOT_SET_EVENT_ID = "@NOT_SET@";
-
-	private static final FlowExecutionListener[] EMPTY_LISTENER_ARRAY = new FlowExecutionListener[0];
+	
 
 	protected final Log logger = LogFactory.getLog(FlowExecutionManager.class);
 
@@ -137,8 +136,19 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * @see #setListener(FlowExecutionListener)
 	 * @see #setListeners(FlowExecutionListener[])
 	 * @see #setStorage(FlowExecutionStorage) 
+	 * @see #setTransactionSynchronizer(TransactionSynchronizer)
 	 */
 	public FlowExecutionManager() {
+	}
+
+	/**
+	 * Returns the flow whose executions are managed by this manager.
+	 * Could be <code>null</code> if there is no preconfigured flow and
+	 * the id of the flow for which executions will be managed is sent
+	 * in an event parameter "_flowId".
+	 */
+	protected Flow getFlow() {
+		return flow;
 	}
 
 	/**
@@ -150,11 +160,44 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	}
 
 	/**
+	 * Returns the flow locator to use for lookup of flows specified using the
+	 * "_flowId" event parameter.
+	 */
+	protected FlowLocator getFlowLocator() {
+		return flowLocator;
+	}
+
+	/**
 	 * Set the flow locator to use for lookup of flows specified using the
 	 * "_flowId" event parameter.
 	 */
 	public void setFlowLocator(FlowLocator flowLocator) {
 		this.flowLocator = flowLocator;
+	}
+
+	/**
+	 * Returns the array of flow execution listeners.
+	 * @param flow the flow definition associated with the execution to be listened to
+	 * @return the flow execution listeners
+	 */
+	protected FlowExecutionListener[] getListeners(Flow flow) {
+		synchronized (flowExecutionListeners) {
+			FlowExecutionListener[] listeners = (FlowExecutionListener[])flowExecutionListeners.get(flow);
+			if (listeners == null) {
+				Iterator it = flowExecutionListenerCriteriaMap.entrySet().iterator();
+				Collection c = new LinkedList();
+				while (it.hasNext()) {
+					Map.Entry entry = (Map.Entry)it.next();
+					FlowExecutionListenerCriteria criteria = (FlowExecutionListenerCriteria)entry.getKey();
+					if (criteria.matches(flow)) {
+						c.addAll((Collection)entry.getValue());
+					}
+				}
+				listeners = (FlowExecutionListener[])c.toArray(new FlowExecutionListener[0]);
+				flowExecutionListeners.put(flow, listeners); 
+			}
+			return listeners;
+		}
 	}
 
 	/**
@@ -221,6 +264,13 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	}
 
 	/**
+	 * Returns the storage strategy used by the flow execution manager.
+	 */
+	protected FlowExecutionStorage getStorage() {
+		return storage;
+	}
+
+	/**
 	 * Set the storage strategy used by the flow execution manager.
 	 */
 	public void setStorage(FlowExecutionStorage storage) {
@@ -229,10 +279,26 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	}
 
 	/**
+	 * Return the application transaction synchronization strategy to use.
+	 * This defaults to a <i>synchronizer token</i> based transaction management
+	 * system.
+	 */
+	protected TransactionSynchronizer getTransactionSynchronizer() {
+		return transactionSynchronizer;
+	}
+
+	/**
 	 * Set the application transaction synchronization strategy to use.
 	 */
 	public void setTransactionSynchronizer(TransactionSynchronizer transactionSynchronizer) {
 		this.transactionSynchronizer = transactionSynchronizer;
+	}
+
+	/**
+	 * Returns this flow execution manager's bean factory.
+	 */
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -414,69 +480,4 @@ public class FlowExecutionManager implements BeanFactoryAware {
 		return viewDescriptor;
 	}
 
-	/**
-	 * Returns the flow whose executions are managed by this manager.
-	 * Could be <code>null</code> if there is no preconfigured flow and
-	 * the id of the flow for which executions will be managed is sent
-	 * in an event parameter "_flowId".
-	 */
-	protected Flow getFlow() {
-		return flow;
-	}
-
-	/**
-	 * Returns the flow locator to use for lookup of flows specified using the
-	 * "_flowId" event parameter.
-	 */
-	protected FlowLocator getFlowLocator() {
-		return flowLocator;
-	}
-
-	/**
-	 * Returns the array of flow execution listeners.
-	 * @param flow the flow definition associated with the execution to be listened to
-	 * @return the flow execution listeners
-	 */
-	protected FlowExecutionListener[] getListeners(Flow flow) {
-		synchronized (flowExecutionListeners) {
-			FlowExecutionListener[] listeners = (FlowExecutionListener[])flowExecutionListeners.get(flow);
-			if (listeners == null) {
-				Iterator it = flowExecutionListenerCriteriaMap.entrySet().iterator();
-				Collection c = new LinkedList();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry)it.next();
-					FlowExecutionListenerCriteria criteria = (FlowExecutionListenerCriteria)entry.getKey();
-					if (criteria.matches(flow)) {
-						c.addAll((Collection)entry.getValue());
-					}
-				}
-				listeners = (FlowExecutionListener[])c.toArray(EMPTY_LISTENER_ARRAY);
-				flowExecutionListeners.put(flow, listeners); 
-			}
-			return listeners;
-		}
-	}
-
-	/**
-	 * Returns this flow execution manager's bean factory.
-	 */
-	protected BeanFactory getBeanFactory() {
-		return beanFactory;
-	}
-
-	/**
-	 * Returns the storage strategy used by the flow execution manager.
-	 */
-	protected FlowExecutionStorage getStorage() {
-		return storage;
-	}
-
-	/**
-	 * Return the application transaction synchronization strategy to use.
-	 * This defaults to a <i>synchronizer token</i> based transaction management
-	 * system.
-	 */
-	protected TransactionSynchronizer getTransactionSynchronizer() {
-		return transactionSynchronizer;
-	}
 }

@@ -33,6 +33,7 @@ import org.springframework.web.flow.RequestContext;
  * <li>Inserting action pre and post execution logic (may also be done with an
  * interceptor)
  * </ul>
+ * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
@@ -49,14 +50,14 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	public static final String ERROR_RESULT_EVENT_ID = "error";
 
 	/**
-	 * Constant for the error exception error event parameter name.
+	 * Constant for the error exception event parameter name.
 	 */
-	public static final String EXCEPTION_PARAMETER_NAME = "exception";
+	public static final String EXCEPTION_PARAMETER = "exception";
 
 	/**
 	 * Constant for the success result event parameter name.
 	 */
-	public static final String RESULT_PARAMETER_NAME = "result";
+	public static final String RESULT_PARAMETER = "result";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -82,10 +83,11 @@ public abstract class AbstractAction implements Action, InitializingBean {
 
 	/**
 	 * Returns the default error event caused by the provided exception.
-	 * @param e the exception that caused the error event, to be sent as an event parameter
+	 * @param e the exception that caused the error event, to be sent as
+	 *        an event parameter
 	 */
 	protected Event error(Exception e) {
-		return result(ERROR_RESULT_EVENT_ID, EXCEPTION_PARAMETER_NAME, e);
+		return result(ERROR_RESULT_EVENT_ID, EXCEPTION_PARAMETER, e);
 	}
 
 	/**
@@ -96,11 +98,12 @@ public abstract class AbstractAction implements Action, InitializingBean {
 	}
 
 	/**
-	 * Returns the default success event with the provided result object as a parameter.
+	 * Returns the default success event with the provided result object
+	 * as a parameter.
 	 * @param result the action success result;
 	 */
 	protected Event success(Object result) {
-		return result(SUCCESS_RESULT_EVENT_ID, RESULT_PARAMETER_NAME, result);
+		return result(SUCCESS_RESULT_EVENT_ID, RESULT_PARAMETER, result);
 	}
 
 	/**

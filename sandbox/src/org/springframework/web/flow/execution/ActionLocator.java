@@ -20,6 +20,7 @@ import org.springframework.web.flow.Action;
 /**
  * Service locator interface for retrieving a an action by id. The default 
  * backing action registry is typically the Spring application context.
+ * Can be used at execution time to lookup actions by id.
  * 
  * @author Keith Donald
  * @author Erwin Vervaet

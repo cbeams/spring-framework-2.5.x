@@ -31,7 +31,7 @@ import org.springframework.web.flow.execution.ActionLocator;
 public class DelegatingAction implements Action, BeanNameAware {
 
 	/**
-	 * The name of the action locator.
+	 * The name of the action locator in flow scope.
 	 */
 	private String actionLocatorAttributeName = "actionLocator";
 
@@ -40,23 +40,59 @@ public class DelegatingAction implements Action, BeanNameAware {
 	 */
 	private String actionId;
 
+	/**
+	 * Default constructor for bean style usage.
+	 */
 	public DelegatingAction() {
-
 	}
 
+	/**
+	 * Create a new delegating action using the action locator
+	 * stored using given attribute name in the flow scope.
+	 * @param actionLocatorAttribute the name of the action locator
+	 *        in flow scope
+	 */
 	public DelegatingAction(String actionLocatorAttribute) {
 		setActionLocatorAttributeName(actionLocatorAttribute);
 	}
 
+	/**
+	 * Create a new delegating action using the action locator
+	 * stored using given attribute name in the flow scope. The locator
+	 * will be used to lookup identified action bean.
+	 * @param actionLocatorAttribute the name of the action locator
+	 *        in flow scope
+	 * @param actionBeanName the id of the bean to look up
+	 */
 	public DelegatingAction(String actionLocatorAttribute, String actionBeanName) {
 		setActionLocatorAttributeName(actionLocatorAttribute);
 		setActionId(actionBeanName);
 	}
 
+	/**
+	 * Returns the attribute name of the action locator in flow scope.
+	 */
+	public String getActionLocatorAttribute() {
+		return actionLocatorAttributeName;
+	}
+
+	/**
+	 * Set the attribute name of the action locator in flow scope.
+	 */
 	public void setActionLocatorAttributeName(String actionLocatorAttribute) {
 		this.actionLocatorAttributeName = actionLocatorAttribute;
 	}
 
+	/**
+	 * Returns the id of the action to lookup and delegate to.
+	 */
+	public String getActionId() {
+		return actionId;
+	}
+
+	/**
+	 * Set the id of the action to lookup and delegate to.
+	 */
 	public void setActionId(String actionId) {
 		this.actionId = actionId;
 	}
@@ -70,13 +106,12 @@ public class DelegatingAction implements Action, BeanNameAware {
 	/*
 	 * Looks up the action locator in flow scope and resolves the delegate
 	 * action and executes it.
-	 * @see org.springframework.web.flow.Action#execute(org.springframework.web.flow.RequestContext)
 	 */
 	public Event execute(RequestContext context) throws Exception {
 		Object locator = (ApplicationContext)context.getFlowScope().getRequiredAttribute(getActionLocatorAttribute());
 		Action action;
 		if (locator instanceof ActionLocator) {
-			action = (Action)((ActionLocator)locator).getAction(actionId);
+			action = ((ActionLocator)locator).getAction(actionId);
 		}
 		else if (locator instanceof BeanFactory) {
 			action = (Action)((BeanFactory)locator).getBean(actionId, Action.class);
@@ -88,11 +123,4 @@ public class DelegatingAction implements Action, BeanNameAware {
 		return action.execute(context);
 	}
 
-	public String getActionLocatorAttribute() {
-		return actionLocatorAttributeName;
-	}
-
-	public String getActionId() {
-		return actionId;
-	}
 }

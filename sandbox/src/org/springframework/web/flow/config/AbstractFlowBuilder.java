@@ -552,7 +552,7 @@ public abstract class AbstractFlowBuilder extends BaseFlowBuilder {
 	}
 
 	/**
-	 * Return an delegating action that delegates to an action instance retrieved by
+	 * Return a delegating action that delegates to an action instance retrieved by
 	 * messaging a flow-scoped action locator. 
 	 * @param actionLocatorAttribute the action locator
 	 * @param actionId the action id
