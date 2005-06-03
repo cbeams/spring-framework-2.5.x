@@ -162,7 +162,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * flow executions.
 	 */
 	public void setListener(FlowExecutionListener listener) {
-		setListener(FlowExecutionListenerCriteria.ALL_FLOWS, listener);
+		setListener(FlowExecutionListenerCriteria.Factory.allFlows(), listener);
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	public void setListener(FlowExecutionListenerCriteria criteria, FlowExecutionListener listener) {
 		List listeners = new ArrayList(1);
 		listeners.add(listener);
-		setListeners(FlowExecutionListenerCriteria.ALL_FLOWS, listeners);
+		setListeners(FlowExecutionListenerCriteria.Factory.allFlows(), listeners);
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * flow executions.
 	 */
 	public void setListeners(Collection listeners) {
-		setListeners(FlowExecutionListenerCriteria.ALL_FLOWS, listeners);
+		setListeners(FlowExecutionListenerCriteria.Factory.allFlows(), listeners);
 	}
 
 	/**
