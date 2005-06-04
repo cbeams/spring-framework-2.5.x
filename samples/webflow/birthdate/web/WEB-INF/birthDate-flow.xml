@@ -21,13 +21,13 @@
 	-->
 	<action-state id="setupForm">
 		<action bean="birthDateFormAction"/>
-		<transition on="success" to="formView"/>
+		<transition on="success" to="displayForm"/>
 	</action-state>
 	
 	<!--
 		Display the input form view.
 	-->
-	<view-state id="formView" view="enterBirthDate">
+	<view-state id="displayForm" view="enterBirthDate">
 		<transition on="submit" to="bindAndValidateForm"/>
 	</view-state>
 	
@@ -38,7 +38,7 @@
 	<action-state id="bindAndValidateForm">
 		<action bean="birthDateFormAction" method="bindAndValidate"/>
 		<transition on="success" to="calculateAge"/>
-		<transition on="error" to="formView"/>
+		<transition on="error" to="displayForm"/>
 	</action-state>
 	
 	<!--

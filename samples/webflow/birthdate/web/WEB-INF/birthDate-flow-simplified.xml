@@ -15,9 +15,9 @@
 	This is a simplified definition of the BirthDate flow (see birthDate-flow.xml) that
 	uses view state setup actions and transition actions to make the flow definition more compact.
 -->
-<webflow id="BirthDate" start-state="formView">
+<webflow id="BirthDate" start-state="displayForm">
 
-	<view-state id="formView" view="enterBirthDate">
+	<view-state id="displayForm" view="enterBirthDate">
 		<setup bean="birthDateFormAction" method="setupForm"/>
 		<transition on="submit" to="calculateAge">
 			<action bean="birthDateFormAction" method="bindAndValidate"/>
