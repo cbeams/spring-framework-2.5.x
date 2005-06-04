@@ -125,11 +125,26 @@ public class ViewState extends TransitionableState {
 	}
 	
 	/**
+	 * Returns the factory to produce a descriptor for the view to render in
+	 * this view state.
+	 */
+	public ViewDescriptorCreator getViewDescriptorCreator() {
+		return viewDescriptorCreator;
+	}
+
+	/**
 	 * Sets the factory to produce a descriptor for the view to render in
 	 * this view state.
 	 */
 	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
 		this.viewDescriptorCreator = creator;
+	}
+
+	/**
+	 * Returns the setup criteria.
+	 */
+	public TransitionCriteria getSetupCriteria() {
+		return setupCriteria;
 	}
 
 	/**
@@ -141,6 +156,13 @@ public class ViewState extends TransitionableState {
 		this.setupCriteria = setupCriteria;
 	}
 	
+	/**
+	 * Returns the setup criteria failure state id.
+	 */
+	public String getSetupErrorStateId() {
+		return setupErrorStateId;
+	}
+
 	/**
 	 * Set the state to transition to if the setup criteria fails.
 	 * @param errorStateId the state id
@@ -201,28 +223,6 @@ public class ViewState extends TransitionableState {
 		else {
 			return viewDescriptorCreator.createViewDescriptor(context);
 		}
-	}
-
-	/**
-	 * Returns the factory to produce a descriptor for the view to render in
-	 * this view state.
-	 */
-	public ViewDescriptorCreator getViewDescriptorCreator() {
-		return viewDescriptorCreator;
-	}
-
-	/**
-	 * Returns the setup criteria.
-	 */
-	public TransitionCriteria getSetupCriteria() {
-		return setupCriteria;
-	}
-
-	/**
-	 * Returns the setup criteria failure state id.
-	 */
-	public String getSetupErrorStateId() {
-		return setupErrorStateId;
 	}
 
 	protected void createToString(ToStringCreator creator) {
