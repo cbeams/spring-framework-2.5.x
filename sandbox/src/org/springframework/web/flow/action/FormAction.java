@@ -619,8 +619,22 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 */
 	protected void exposeFormObjectAndErrors(RequestContext context, Object formObject, BindException errors) {
 		FormObjectAccessor accessor = new FormObjectAccessor(context);
-		accessor.exposeFormObject(formObject, getFormObjectName(), getFormObjectScope());
-		accessor.exposeErrors(errors, getErrorsScope());
+		try {
+			// check to see if the form object was already exposed
+			accessor.getFormObject(getFormObjectName(), getFormObjectScope());
+		}
+		catch (IllegalStateException e) {
+			// form object was not yet exposed, so expose it
+			accessor.exposeFormObject(formObject, getFormObjectName(), getFormObjectScope());
+		}
+		try {
+			// check to see if the errors instance was already exposed
+			accessor.getFormErrors(getFormObjectName(), getErrorsScope());
+		}
+		catch (IllegalStateException e) {
+			// errors object was not yet exposed, so expose it
+			accessor.exposeErrors(errors, getErrorsScope());
+		}
 	}
 
 	/**
