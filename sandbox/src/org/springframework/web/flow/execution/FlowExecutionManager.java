@@ -15,8 +15,8 @@
  */
 package org.springframework.web.flow.execution;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -116,9 +116,11 @@ public class FlowExecutionManager implements BeanFactoryAware {
 
 	private FlowLocator flowLocator = new BeanFactoryFlowServiceLocator();
 
+	/**
+	 * A map of all know flow execution listeners (the key) and their associated
+	 * flow execution listener criteria object (the value).
+	 */
 	private Map flowExecutionListeners = new HashMap();
-
-	private Map flowExecutionListenerCriteriaMap = new HashMap();
 
 	private FlowExecutionStorage storage;
 
@@ -176,28 +178,19 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	}
 
 	/**
-	 * Returns the array of flow execution listeners.
+	 * Returns the array of flow execution listeners for specified flow.
 	 * @param flow the flow definition associated with the execution to be listened to
 	 * @return the flow execution listeners
 	 */
 	protected FlowExecutionListener[] getListeners(Flow flow) {
-		synchronized (flowExecutionListeners) {
-			FlowExecutionListener[] listeners = (FlowExecutionListener[])flowExecutionListeners.get(flow);
-			if (listeners == null) {
-				Iterator it = flowExecutionListenerCriteriaMap.entrySet().iterator();
-				Collection c = new LinkedList();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry)it.next();
-					FlowExecutionListenerCriteria criteria = (FlowExecutionListenerCriteria)entry.getKey();
-					if (criteria.matches(flow)) {
-						c.addAll((Collection)entry.getValue());
-					}
-				}
-				listeners = (FlowExecutionListener[])c.toArray(new FlowExecutionListener[0]);
-				flowExecutionListeners.put(flow, listeners); 
+		List res = new LinkedList();
+		for (Iterator it=flowExecutionListeners.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry entry = (Map.Entry)it.next();
+			if (((FlowExecutionListenerCriteria)entry.getValue()).matches(flow)) {
+				res.add((FlowExecutionListener)entry.getKey());
 			}
-			return listeners;
 		}
+		return (FlowExecutionListener[])res.toArray(new FlowExecutionListener[res.size()]);
 	}
 
 	/**
@@ -205,17 +198,15 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * flow executions.
 	 */
 	public void setListener(FlowExecutionListener listener) {
-		setListener(FlowExecutionListenerCriteria.Factory.allFlows(), listener);
+		setListeners(Collections.singleton(listener));
 	}
 
 	/**
 	 * Set the flow execution listener that will be notified of managed
-	 * flow executions.
+	 * flow executions for the flows that match given criteria.
 	 */
 	public void setListener(FlowExecutionListenerCriteria criteria, FlowExecutionListener listener) {
-		List listeners = new ArrayList(1);
-		listeners.add(listener);
-		setListeners(FlowExecutionListenerCriteria.Factory.allFlows(), listeners);
+		setListeners(criteria, Collections.singleton(listener));
 	}
 
 	/**
@@ -223,12 +214,27 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * flow executions.
 	 */
 	public void setListeners(Collection listeners) {
-		setListeners(FlowExecutionListenerCriteria.Factory.allFlows(), listeners);
+		setListeners(FlowExecutionListenerCriteriaFactory.allFlows(), listeners);
+	}
+	
+	/**
+	 * Sets the flow execution listeners that will be notified of managed
+	 * flow executions for flows that match given criteria.
+	 */
+	public void setListeners(FlowExecutionListenerCriteria criteria, Collection listeners) {
+		for (Iterator it=listeners.iterator(); it.hasNext(); ) {
+			FlowExecutionListener listener = (FlowExecutionListener)it.next();
+			flowExecutionListeners.put(listener, criteria);
+		}
 	}
 
 	/**
 	 * Sets the flow execution listeners that will be notified of managed
-	 * flow executions.
+	 * flow executions. The map keys can either be string encoded flow
+	 * execution listener matching criteria or direct
+	 * <code>FlowExecutionListenerCriteria</code> objects. The associated
+	 * value is either a single listener, or a list of flow execution
+	 * listeners.
 	 */
 	public void setListenerMap(Map criteriaListenerMap) {
 		Iterator it = criteriaListenerMap.entrySet().iterator();
@@ -237,29 +243,18 @@ public class FlowExecutionManager implements BeanFactoryAware {
 			FlowExecutionListenerCriteria criteria;
 			if (entry.getKey() instanceof FlowExecutionListenerCriteria) {
 				criteria = (FlowExecutionListenerCriteria)entry.getKey();
-			} else {
-				//TODO this introduces cyclical dependency on config package
-				criteria = (FlowExecutionListenerCriteria)new TextToFlowExecutionListenerCriteria().convert(entry.getKey());
+			}
+			else {
+				// string encoded
+				criteria =
+					(FlowExecutionListenerCriteria)new TextToFlowExecutionListenerCriteria().convert(entry.getKey());
 			}
 			if (entry.getValue() instanceof Collection) {
 				setListeners(criteria, (Collection)entry.getValue());
-			} else {
+			}
+			else {
 				setListener(criteria, (FlowExecutionListener)entry.getValue());
 			}
-		}
-	}
-
-	/**
-	 * Sets the flow execution listeners that will be notified of managed
-	 * flow executions.
-	 */
-	public void setListeners(FlowExecutionListenerCriteria criteria, Collection listeners) {
-		Collection c = (Collection)flowExecutionListenerCriteriaMap.get(criteria);
-		if (c == null) {
-			flowExecutionListenerCriteriaMap.put(criteria, new ArrayList(listeners));
-		}
-		else {
-			c.addAll(new ArrayList(listeners));
 		}
 	}
 
@@ -347,8 +342,8 @@ public class FlowExecutionManager implements BeanFactoryAware {
 			// retrieve information about it
 			flowExecution = getStorage().load(id, event);
 			// rehydrate the execution if neccessary (if it had been serialized out)
-			flowExecution.rehydrate(getFlowLocator(), getListeners(flowExecution.getRootFlow()),
-					getTransactionSynchronizer());
+			flowExecution.rehydrate(
+					getFlowLocator(), getListeners(flowExecution.getRootFlow()), getTransactionSynchronizer());
 			if (listener != null) {
 				flowExecution.getListeners().add(listener);
 			}

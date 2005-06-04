@@ -18,73 +18,25 @@ package org.springframework.web.flow.execution;
 import org.springframework.web.flow.Flow;
 
 /**
- * Strategy interface that determines if a set of listeners should be subscribed to
- * the lifecycle of executions of specific flow definition.
+ * Strategy interface that determines if a flow execution listener
+ * should be subscribed to the lifecycle of flow executions of specific
+ * flow definition.
+ * <p>
+ * This selection strategy is used by the flow execution manager.
+ * 
+ * @see org.springframework.web.flow.execution.FlowExecution
+ * @see org.springframework.web.flow.execution.FlowExecutionListener
+ * @see org.springframework.web.flow.execution.FlowExecutionManager
+ * 
  * @author Keith Donald
+ * @author Erwin Vervaet
  */
 public interface FlowExecutionListenerCriteria {
 	
 	/**
 	 * Is this flow eligible for listening?
 	 * @param flow the flow
-	 * @return true if yes, false if no.
+	 * @return true if yes, false if no
 	 */
 	public boolean matches(Flow flow);
-	
-	/**
-	 * Static factory for producing common flow execution listener criteria.
-	 * @author Keith Donald
-	 */
-	public static class Factory {
-		private static final FlowExecutionListenerCriteria ALL_FLOWS = new FlowExecutionListenerCriteria() {
-			public boolean matches(Flow flow) {
-				return true;
-			}
-		};
-
-		/**
-		 * A wild card criteria that matches all flows.
-		 * @return all flows
-		 */
-		public static FlowExecutionListenerCriteria allFlows() {
-			return ALL_FLOWS;
-		}
-		
-		/**
-		 * A criteria that just matches a flow with the specified id.
-		 * @param flowId the flow id
-		 * @return the criteria
-		 */
-		public static FlowExecutionListenerCriteria flow(String flowId) {
-			return new FlowIdFlowExecutionListenerCriteria(flowId);
-		}
-		
-		public static class FlowIdFlowExecutionListenerCriteria implements FlowExecutionListenerCriteria {
-			private String flowId;
-
-			public FlowIdFlowExecutionListenerCriteria(String flowId) {
-				this.flowId = flowId;
-			}
-			
-			public boolean matches(Flow flow) {
-				return flowId.equals(flow.getId());
-			}
-		
-			public boolean equals(Object o) {
-				if (!(o instanceof FlowIdFlowExecutionListenerCriteria)) {
-					return false;
-				}
-				FlowIdFlowExecutionListenerCriteria c = (FlowIdFlowExecutionListenerCriteria)o;
-				return flowId.equals(c.flowId);
-			}
-			
-			public int hashCode() {
-				return flowId.hashCode();
-			}
-			
-			public String toString() {
-				return flowId;
-			}
-		}
-	}
 }

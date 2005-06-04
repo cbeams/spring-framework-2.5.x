@@ -15,7 +15,6 @@
  */
 package org.springframework.web.flow.execution;
 
-import org.springframework.beans.BeansException;
 import org.springframework.binding.convert.ConversionException;
 import org.springframework.binding.convert.support.AbstractConverter;
 import org.springframework.util.StringUtils;
@@ -38,28 +37,16 @@ public class TextToFlowExecutionListenerCriteria extends AbstractConverter {
 	}
 
 	protected Object doConvert(Object source, Class targetClass) throws ConversionException {
-		return createCriteria((String)source);
-	}
-
-	/**
-	 * Create the default view descriptor creator (factory).
-	 * @param encodedView the encoded view name
-	 * @return the newly created creator
-	 * @throws ConversionException when there are problems decoding the view name
-	 * @throws BeansException when there are problems instantiating the creator
-	 */
-	protected FlowExecutionListenerCriteria createCriteria(String encodedCriteria) throws ConversionException,
-			BeansException {
-		if (StringUtils.hasText(encodedCriteria)) {
-			if (encodedCriteria.equals("*")) {
-				return FlowExecutionListenerCriteria.Factory.allFlows();
-			}
-			else {
-				return FlowExecutionListenerCriteria.Factory.flow(encodedCriteria);
-			}
+		String encodedCriteria = (String)source;
+		if (!StringUtils.hasText(encodedCriteria) ||
+				FlowExecutionListenerCriteriaFactory.
+					WildcardFlowExecutionListenerCriteria.WILDCARD_FLOW_ID.equals(encodedCriteria)) {
+			// match all flows
+			return FlowExecutionListenerCriteriaFactory.allFlows();
 		}
 		else {
-			return FlowExecutionListenerCriteria.Factory.allFlows();
+			// match identified flow
+			return FlowExecutionListenerCriteriaFactory.flow(encodedCriteria);
 		}
 	}
 }
