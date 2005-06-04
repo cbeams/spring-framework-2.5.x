@@ -76,6 +76,35 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
 	}
 
+	public void testPropertyOverrideConfigurerWithPropertiesFile() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb", IndexedTestBean.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("location", "classpath:org/springframework/beans/factory/config/test.properties");
+		ac.registerSingleton("configurer", PropertyOverrideConfigurer.class, pvs);
+		ac.refresh();
+		IndexedTestBean tb = (IndexedTestBean) ac.getBean("tb");
+		assertEquals(99, tb.getArray()[0].getAge());
+		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
+	}
+
+	public void testPropertyOverrideConfigurerWithPropertiesXmlFile() {
+		// ignore for JDK < 1.5
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
+
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb", IndexedTestBean.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("location", "classpath:org/springframework/beans/factory/config/test-properties.xml");
+		ac.registerSingleton("configurer", PropertyOverrideConfigurer.class, pvs);
+		ac.refresh();
+		IndexedTestBean tb = (IndexedTestBean) ac.getBean("tb");
+		assertEquals(99, tb.getArray()[0].getAge());
+		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
+	}
+
 	public void testPropertyOverrideConfigurerWithConvertProperties() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("tb", IndexedTestBean.class);

@@ -58,6 +58,9 @@ import org.springframework.util.PropertiesPersister;
  */
 public abstract class PropertyResourceConfigurer implements BeanFactoryPostProcessor, Ordered {
 
+	public static final String XML_FILE_EXTENSION = ".xml";
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
@@ -94,6 +97,8 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 
 	/**
 	 * Set a location of a properties file to be loaded.
+	 * <p>Can point to a classic properties file or to an XML file
+	 * that follows JDK 1.5's properties XML format.
 	 * @see #setLocations
 	 */
 	public void setLocation(Resource location) {
@@ -102,6 +107,8 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 
 	/**
 	 * Set locations of properties files to be loaded.
+	 * <p>Can point to classic properties files or to XML files
+	 * that follow JDK 1.5's properties XML format.
 	 * @see #setLocation
 	 */
 	public void setLocations(Resource[] locations) {
@@ -110,7 +117,9 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 
 	/**
 	 * Set the encoding to use for parsing properties files.
-	 * Default is none, using java.util.Properties' default encoding.
+	 * <p>Default is none, using the <code>java.util.Properties</code>
+	 * default encoding.
+	 * <p>Only applies to classic properties files, not to XML files.
 	 * @see org.springframework.util.PropertiesPersister#load
 	 */
 	public void setFileEncoding(String encoding) {
@@ -156,11 +165,16 @@ public abstract class PropertyResourceConfigurer implements BeanFactoryPostProce
 				try {
 					InputStream is = location.getInputStream();
 					try {
-						if (this.fileEncoding != null) {
-							this.propertiesPersister.load(mergedProps, new InputStreamReader(is, this.fileEncoding));
+						if (location.getFilename().endsWith(XML_FILE_EXTENSION)) {
+							this.propertiesPersister.loadFromXml(mergedProps, is);
 						}
 						else {
-							this.propertiesPersister.load(mergedProps, is);
+							if (this.fileEncoding != null) {
+								this.propertiesPersister.load(mergedProps, new InputStreamReader(is, this.fileEncoding));
+							}
+							else {
+								this.propertiesPersister.load(mergedProps, is);
+							}
 						}
 					}
 					finally {

@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -33,7 +34,20 @@ public class PropertiesFactoryBeanTests extends TestCase {
 		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test.properties"));
 		pfb.afterPropertiesSet();
 		Properties props = (Properties) pfb.getObject();
-		assertEquals("value1", props.getProperty("key1"));
+		assertEquals("99", props.getProperty("tb.array[0].age"));
+	}
+
+	public void testWithPropertiesXmlFile() throws Exception {
+		// ignore for JDK < 1.5
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
+
+		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
+		pfb.setLocation(new ClassPathResource("/org/springframework/beans/factory/config/test-properties.xml"));
+		pfb.afterPropertiesSet();
+		Properties props = (Properties) pfb.getObject();
+		assertEquals("99", props.getProperty("tb.array[0].age"));
 	}
 
 	public void testWithLocalProperties() throws Exception {
@@ -54,7 +68,7 @@ public class PropertiesFactoryBeanTests extends TestCase {
 		pfb.setProperties(localProps);
 		pfb.afterPropertiesSet();
 		Properties props = (Properties) pfb.getObject();
-		assertEquals("value1", props.getProperty("key1"));
+		assertEquals("99", props.getProperty("tb.array[0].age"));
 		assertEquals("value2", props.getProperty("key2"));
 	}
 
@@ -67,11 +81,11 @@ public class PropertiesFactoryBeanTests extends TestCase {
 		pfb.setProperties(localProps);
 		pfb.afterPropertiesSet();
 		Properties props = (Properties) pfb.getObject();
-		assertEquals("value1", props.getProperty("key1"));
+		assertEquals("99", props.getProperty("tb.array[0].age"));
 		assertEquals("value2", props.getProperty("key2"));
 		Properties newProps = (Properties) pfb.getObject();
 		assertTrue(props != newProps);
-		assertEquals("value1", newProps.getProperty("key1"));
+		assertEquals("99", newProps.getProperty("tb.array[0].age"));
 		assertEquals("value2", newProps.getProperty("key2"));
 	}
 

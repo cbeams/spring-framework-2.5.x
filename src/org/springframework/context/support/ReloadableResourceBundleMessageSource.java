@@ -89,6 +89,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	private static final String PROPERTIES_SUFFIX = ".properties";
 
+	private static final String XML_SUFFIX = ".xml";
+
 
 	private String[] basenames;
 
@@ -120,6 +122,10 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * ResourceBundleMessageSource referring to a Spring resource location:
 	 * e.g. "WEB-INF/messages" for "WEB-INF/messages.properties",
 	 * "WEB-INF/messages_en.properties", etc.
+	 * <p>As of Spring 1.2.2, XML properties files are also supported:
+	 * e.g. "WEB-INF/messages" will find and load "WEB-INF/messages.xml",
+	 * "WEB-INF/messages_en.xml", etc as well. Note that this will only
+	 * work on JDK 1.5+.
 	 * @param basename the single basename
 	 * @see #setBasenames
 	 * @see org.springframework.core.io.ResourceEditor
@@ -146,7 +152,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	/**
 	 * Set the default charset to use for parsing properties files.
 	 * Used if no file-specific charset is specified for a file.
-	 * <p>Default is none, using java.util.Properties' default charset.
+	 * <p>Default is none, using the <code>java.util.Properties</code>
+	 * default encoding.
+	 * <p>Only applies to classic properties files, not to XML files.
 	 * @see #setFileEncodings
 	 * @see org.springframework.util.PropertiesPersister#load
 	 */
@@ -156,6 +164,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/**
 	 * Set per-file charsets to use for parsing properties files.
+	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param fileEncodings Properties with filenames as keys and charset
 	 * names as values. Filenames have to match the basename syntax,
 	 * with optional locale-specific appendices: e.g. "WEB-INF/messages"
@@ -402,69 +411,94 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 		long refreshTimestamp = (this.cacheMillis < 0) ? -1 : System.currentTimeMillis();
 
 		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
-		try {
-			long fileTimestamp = -1;
+		if (!resource.exists()) {
+			resource = this.resourceLoader.getResource(filename + XML_SUFFIX);
+		}
 
-			if (this.cacheMillis >= 0) {
-				// last-modified timestamp of file will just be read if caching with timeout
-				File file = null;
-				try {
-					file = resource.getFile();
-				}
-				catch (IOException ex) {
-					// probably a class path resource: cache it forever
-					if (logger.isDebugEnabled()) {
-						logger.debug(
-								resource + " could not be resolved in the file system - assuming that is hasn't changed", ex);
-					}
-					file = null;
-				}
-				if (file != null) {
-					fileTimestamp = file.lastModified();
-					if (fileTimestamp == 0) {
-						throw new IOException("File [" + file.getAbsolutePath() + "] does not exist");
-					}
-					if (propHolder != null && propHolder.getFileTimestamp() == fileTimestamp) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Re-caching properties for filename [" + filename + "] - file hasn't been modified");
-						}
-						propHolder.setRefreshTimestamp(refreshTimestamp);
-						return propHolder;
-					}
-				}
-			}
-
-			InputStream is = resource.getInputStream();
-			Properties props = new Properties();
+		if (resource.exists()) {
 			try {
-				String encoding = null;
-				if (this.fileEncodings != null) {
-					encoding = this.fileEncodings.getProperty(filename);
-				}
-				if (encoding == null) {
-					encoding = this.defaultEncoding;
-				}
-				if (encoding != null) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Loading properties for filename [" + filename + "] with encoding '" + encoding + "'");
+				long fileTimestamp = -1;
+
+				if (this.cacheMillis >= 0) {
+					// last-modified timestamp of file will just be read if caching with timeout
+					File file = null;
+					try {
+						file = resource.getFile();
 					}
-					this.propertiesPersister.load(props, new InputStreamReader(is, encoding));
-				}
-				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Loading properties for filename [" + filename + "]");
+					catch (IOException ex) {
+						// probably a class path resource: cache it forever
+						if (logger.isDebugEnabled()) {
+							logger.debug(
+									resource + " could not be resolved in the file system - assuming that is hasn't changed", ex);
+						}
+						file = null;
 					}
-					this.propertiesPersister.load(props, is);
+					if (file != null) {
+						fileTimestamp = file.lastModified();
+						if (fileTimestamp == 0) {
+							throw new IOException("File [" + file.getAbsolutePath() + "] does not exist");
+						}
+						if (propHolder != null && propHolder.getFileTimestamp() == fileTimestamp) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Re-caching properties for filename [" + filename + "] - file hasn't been modified");
+							}
+							propHolder.setRefreshTimestamp(refreshTimestamp);
+							return propHolder;
+						}
+					}
 				}
-				propHolder = new PropertiesHolder(props, fileTimestamp);
+
+				InputStream is = resource.getInputStream();
+				Properties props = new Properties();
+				try {
+					if (resource.getFilename().endsWith(XML_SUFFIX)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Loading properties [" + resource.getFilename() + "]");
+						}
+						this.propertiesPersister.loadFromXml(props, is);
+					}
+					else {
+						String encoding = null;
+						if (this.fileEncodings != null) {
+							encoding = this.fileEncodings.getProperty(filename);
+						}
+						if (encoding == null) {
+							encoding = this.defaultEncoding;
+						}
+						if (encoding != null) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Loading properties [" + resource.getFilename() + "] with encoding '" + encoding + "'");
+							}
+							this.propertiesPersister.load(props, new InputStreamReader(is, encoding));
+						}
+						else {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Loading properties [" + resource.getFilename() + "]");
+							}
+							this.propertiesPersister.load(props, is);
+						}
+					}
+					propHolder = new PropertiesHolder(props, fileTimestamp);
+				}
+				finally {
+					is.close();
+				}
 			}
-			finally {
-				is.close();
+
+			catch (IOException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn(
+							"Could not parse properties file [" + resource.getFilename() + "]: " + ex.getMessage(), ex);
+				}
+				// empty holder representing "not valid"
+				propHolder = new PropertiesHolder();
 			}
 		}
-		catch (IOException ex) {
+
+		else {
+			// resource does not exist
 			if (logger.isDebugEnabled()) {
-				logger.debug("Properties file [" + filename + "] not found for MessageSource: " + ex.getMessage());
+				logger.debug("No properties file found for [" + filename + "] - neither plain properties nor XML");
 			}
 			// empty holder representing "not found"
 			propHolder = new PropertiesHolder();

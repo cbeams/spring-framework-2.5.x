@@ -44,6 +44,9 @@ import org.springframework.util.PropertiesPersister;
  */
 public class PropertiesFactoryBean extends AbstractFactoryBean {
 
+	public static final String XML_FILE_EXTENSION = ".xml";
+
+
 	private Properties properties;
 
 	private Resource[] locations;
@@ -64,6 +67,8 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 
 	/**
 	 * Set a location of a properties file to be loaded.
+	 * <p>Can point to a classic properties file or to an XML file
+	 * that follows JDK 1.5's properties XML format.
 	 */
 	public void setLocation(Resource location) {
 		this.locations = new Resource[] {location};
@@ -71,6 +76,8 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 
 	/**
 	 * Set locations of properties files to be loaded.
+	 * <p>Can point to classic properties files or to XML files
+	 * that follow JDK 1.5's properties XML format.
 	 */
 	public void setLocations(Resource[] locations) {
 		this.locations = locations;
@@ -78,7 +85,9 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 
 	/**
 	 * Set the encoding to use for parsing properties files.
-	 * Default is none, using java.util.Properties' default encoding.
+	 * <p>Default is none, using the <code>java.util.Properties</code>
+	 * default encoding.
+	 * <p>Only applies to classic properties files, not to XML files.
 	 * @see org.springframework.util.PropertiesPersister#load
 	 */
 	public void setFileEncoding(String encoding) {
@@ -142,11 +151,16 @@ public class PropertiesFactoryBean extends AbstractFactoryBean {
 			}
 			InputStream is = location.getInputStream();
 			try {
-				if (this.fileEncoding != null) {
-					this.propertiesPersister.load(props, new InputStreamReader(is, this.fileEncoding));
+				if (location.getFilename().endsWith(XML_FILE_EXTENSION)) {
+					this.propertiesPersister.loadFromXml(props, is);
 				}
 				else {
-					this.propertiesPersister.load(props, is);
+					if (this.fileEncoding != null) {
+						this.propertiesPersister.load(props, new InputStreamReader(is, this.fileEncoding));
+					}
+					else {
+						this.propertiesPersister.load(props, is);
+					}
 				}
 			}
 			finally {

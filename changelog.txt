@@ -3,11 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.2 (24.6.2005)
+Changes in version 1.2.2 (18.6.2005)
 ------------------------------------
 
 Package org.springframework.beans
 * fixed AbstractAutowireCapableBeanFactory to not track dependencies for passed-in existing beans (avoiding memory leak)
+* PropertiesFactoryBean also supports JDK 1.5's properties XML files, for files with ".xml" filename
+* PropertyResourceConfigurer and subclasses also support JDK 1.5's properties XML files, for files with ".xml" filename
+
+Package org.springframework.context
+* refined AbstractMessageSource to format passed-in default messages as well, resolving arguments when necessary
+* ReloadableResourceBundleMessageSource also supports JDK 1.5's properties XML files, for files with ".xml" filename
 
 Package org.springframework.core
 * fixed ClassPathResource to fall back to its ClassLoader if none specified and no thread context ClassLoader available
@@ -32,12 +38,17 @@ Package org.springframework.jndi
 Package org.springframework.orm
 * reworked all XxxDaoSupport classes to extend the new generic DaoSupport base class
 * fixed PersistenceBrokerDaoSupport to be abstract and to actually implement InitializingBean
+* added dedicated support for Hibernate Annotation 3.0 beta 2: AnnotationSessionFactoryBean in "tiger" source tree
 
 Package org.springframework.transaction
 * JtaTransactionManager throws UnexpectedRollbackException in case of global rollback-only if not thrown by JTA commit
 
+Package org.springframework.util
+* added "loadFromXml" and "storeToXml" methods to PropertiesPersister, by default implemented to delegate to JDK 1.5
+
 Package org.springframework.web
 * added "indent" bean property to AbstractXlstView, to be turned off when the choice should be up to the stylesheet
+* changed "showErrors" macro for FreeMarker to not add a separator after the final error shown
 
 
 Changes in version 1.2.1 (28.5.2005)

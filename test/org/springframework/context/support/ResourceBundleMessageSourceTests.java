@@ -80,6 +80,10 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		assertEquals("nochricht2", ac.getMessage("code2", null, new Locale("DE", "at")));
 		assertEquals("noochricht2", ac.getMessage("code2", null, new Locale("DE", "at", "oo")));
 
+		if (reloadable && JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+			assertEquals("nachricht2xml", ac.getMessage("code2", null, Locale.GERMANY));
+		}
+
 		MessageSourceAccessor accessor = new MessageSourceAccessor(ac);
 		LocaleContextHolder.setLocale(new Locale("DE", "at"));
 		try {

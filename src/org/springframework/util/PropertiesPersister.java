@@ -24,13 +24,17 @@ import java.io.Writer;
 import java.util.Properties;
 
 /**
- * Strategy interface for persisting java.util.Properties,
+ * Strategy interface for persisting <code>java.util.Properties</code>,
  * allowing for pluggable parsing strategies.
  *
  * <p>The default implementation is DefaultPropertiesPersister,
- * providing java.util.Properties' native parsing, but allowing
- * for reading from any Reader and writing to any Writer,
- * for example to specify a charset for a properties file.
+ * providing the native parsing of <code>java.util.Properties</code>,
+ * but allowing for reading from any Reader and writing to any Writer
+ * (which allows to specify an encoding for a properties file).
+ *
+ * <p>As of Spring 1.2.2, this interface also supports properties XML files,
+ * through the <code>loadFromXml</code> and <code>storeToXml</code> methods.
+ * The default implementations delegate to JDK 1.5's corresponding methods.
  *
  * @author Juergen Hoeller
  * @since 10.03.2004
@@ -58,6 +62,7 @@ public interface PropertiesPersister {
 	 */
 	void load(Properties props, Reader reader) throws IOException;
 
+
 	/**
 	 * Write the contents of the given Properties object to the
 	 * given OutputStream.
@@ -78,5 +83,39 @@ public interface PropertiesPersister {
 	 * @throws IOException in case of I/O errors
 	 */
 	void store(Properties props, Writer writer, String header) throws IOException;
+
+
+	/**
+	 * Load properties from the given XML InputStream into the
+	 * given Properties object.
+	 * @param props the Properties object to load into
+	 * @param is the InputStream to load from
+	 * @throws IOException in case of I/O errors
+	 * @see java.util.Properties#loadFromXML(java.io.InputStream)
+	 */
+	void loadFromXml(Properties props, InputStream is) throws IOException;
+
+	/**
+	 * Write the contents of the given Properties object to the
+	 * given XML OutputStream.
+	 * @param props the Properties object to store
+	 * @param os the OutputStream to write to
+	 * @param header the description of the property list
+	 * @throws IOException in case of I/O errors
+	 * @see java.util.Properties#storeToXML(java.io.OutputStream, String)
+	 */
+	void storeToXml(Properties props, OutputStream os, String header) throws IOException;
+
+	/**
+	 * Write the contents of the given Properties object to the
+	 * given XML OutputStream.
+	 * @param props the Properties object to store
+	 * @param os the OutputStream to write to
+	 * @param encoding the encoding to use
+	 * @param header the description of the property list
+	 * @throws IOException in case of I/O errors
+	 * @see java.util.Properties#storeToXML(java.io.OutputStream, String, String)
+	 */
+	void storeToXml(Properties props, OutputStream os, String header, String encoding) throws IOException;
 
 }
