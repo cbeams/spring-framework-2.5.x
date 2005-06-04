@@ -262,11 +262,12 @@
 <#macro showErrors separator classOrStyle="">
 	<#list status.errorMessages as error>
 	<#if classOrStyle == "">
-	<b>${error}</b>
+		<b>${error}</b>
 	<#else>
-	<#if classOrStyle?index_of(":") == -1><#assign attr="class"><#else><#assign attr="style"></#if>
-	<span ${attr}="${classOrStyle}">${error}</span>
-	</#if>${separator}
+		<#if classOrStyle?index_of(":") == -1><#assign attr="class"><#else><#assign attr="style"></#if>
+		<span ${attr}="${classOrStyle}">${error}</span>
+	</#if>
+	<#if error_has_next>${separator}</#if>
 	</#list>
 </#macro>
 
