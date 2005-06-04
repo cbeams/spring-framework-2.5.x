@@ -125,17 +125,21 @@ public class BindingActionForm extends ActionForm {
 			if (arg instanceof MessageSourceResolvable) {
 				MessageSourceResolvable resolvable = (MessageSourceResolvable)arg;
 				String[] codes = resolvable.getCodes();
+				boolean resolved = false;
 				if (messageResources != null) {
 					for (int j = 0; j < codes.length; j++) {
 						String code = codes[j];
 						if (messageResources.isPresent(this.locale, code)) {
 							arguments[i] = messageResources.getMessage(this.locale, code, resolveArgs(resolvable
 									.getArguments()));
+							resolved = true;
 							break;
 						}
 					}
 				}
-				arguments[i] = resolvable.getDefaultMessage();
+				if (!resolved) {
+					arguments[i] = resolvable.getDefaultMessage();
+				}
 			}
 		}
 		return arguments;
