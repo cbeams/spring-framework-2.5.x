@@ -431,7 +431,13 @@ public class FlowExecutionImpl implements FlowExecution, Serializable {
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeLong(this.creationTimestamp);
-		out.writeObject(this.getRootFlow().getId());
+		if (this.getRootFlow() != null) {
+			// avoid bogus NullPointerExceptions
+			out.writeObject(this.getRootFlow().getId());
+		}
+		else {
+			out.writeObject(null);
+		}
 		out.writeObject(this.lastEventId);
 		out.writeLong(this.lastRequestTimestamp);
 		out.writeObject(this.executingFlowSessions);
