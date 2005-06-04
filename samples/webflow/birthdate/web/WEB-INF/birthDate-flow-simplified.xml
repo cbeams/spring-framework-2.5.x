@@ -12,7 +12,7 @@
 	Note that this flow implements the exact flow of the SimpleFormController as an example.
 	If you only need this flow, it is advised that you just use the SimpleFormController.
 	
-	This is a simplefied definition of the BirthDate flow (see birthDate-flow.xml) that
+	This is a simplified definition of the BirthDate flow (see birthDate-flow.xml) that
 	uses view state setup actions and transition actions to make the flow definition more compact.
 -->
 <webflow id="BirthDate" start-state="formView">
