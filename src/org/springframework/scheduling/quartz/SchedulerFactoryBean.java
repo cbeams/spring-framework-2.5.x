@@ -56,6 +56,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * FactoryBean that sets up a Quartz Scheduler and exposes it for bean references.
@@ -650,7 +651,7 @@ public class SchedulerFactoryBean
 	/**
 	 * Register jobs and triggers (within a transaction, if possible).
 	 */
-	private void registerJobsAndTriggers() throws Exception {
+	private void registerJobsAndTriggers() throws SchedulerException {
 		TransactionStatus transactionStatus = null;
 		if (this.transactionManager != null) {
 			transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
@@ -711,7 +712,7 @@ public class SchedulerFactoryBean
 			}
 		}
 
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			if (transactionStatus != null) {
 				try {
 					this.transactionManager.rollback(transactionStatus);
@@ -721,8 +722,16 @@ public class SchedulerFactoryBean
 					throw tex;
 				}
 			}
-			throw ex;
+			if (ex instanceof SchedulerException) {
+				throw (SchedulerException) ex;
+			}
+			if (ex instanceof Exception) {
+				throw new SchedulerException(
+						"Registration of jobs and triggers failed: " + ex.getMessage(), (Exception) ex);
+			}
+			throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage());
 		}
+
 		if (transactionStatus != null) {
 			this.transactionManager.commit(transactionStatus);
 		}
@@ -755,7 +764,7 @@ public class SchedulerFactoryBean
 	 * @param calendar the Calendar object
 	 * @see org.quartz.Scheduler#addCalendar
 	 */
-	private void addCalendarToScheduler(String calendarName, Calendar calendar) throws Exception {
+	private void addCalendarToScheduler(String calendarName, Calendar calendar) throws SchedulerException {
 		try {
 			try {
 				// Try Quartz 1.4 (with "updateTriggers" flag).
@@ -773,15 +782,13 @@ public class SchedulerFactoryBean
 			}
 		}
 		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof Exception) {
-				throw (Exception) ex.getTargetException();
+			if (ex.getTargetException() instanceof SchedulerException) {
+				throw (SchedulerException) ex.getTargetException();
 			}
-			else if (ex.getTargetException() instanceof Error) {
-				throw (Error) ex.getTargetException();
-			}
-			else {
-				throw ex;
-			}
+			ReflectionUtils.handleInvocationTargetException(ex);
+		}
+		catch (Exception ex) {
+			ReflectionUtils.handleReflectionException(ex);
 		}
 	}
 

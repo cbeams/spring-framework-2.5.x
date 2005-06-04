@@ -17,7 +17,6 @@
 package org.springframework.orm.toplink;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.sql.DataSource;
@@ -33,6 +32,8 @@ import oracle.toplink.tools.sessionconfiguration.XMLLoader;
 import oracle.toplink.tools.sessionmanagement.SessionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Convenient JavaBean-style factory for a TopLink SessionFactory instance.
@@ -328,16 +329,9 @@ public class LocalSessionFactory {
 			return (DatabaseSession) getSessionMethod.invoke(manager,
 					new Object[] {loader, sessionName, sessionClassLoader, Boolean.FALSE, Boolean.FALSE});
 		}
-		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof RuntimeException) {
-				throw (RuntimeException) ex.getTargetException();
-			}
-			throw new IllegalStateException(
-					"TopLink SessionManager.getSession method threw exception: " + ex.getTargetException().getMessage());
-		}
 		catch (Exception ex) {
-			throw new IllegalStateException(
-					"TopLink SessionManager.getSession access failed: " + ex.getMessage());
+			ReflectionUtils.handleReflectionException(ex);
+			throw new IllegalStateException("Should never get here");
 		}
 	}
 
