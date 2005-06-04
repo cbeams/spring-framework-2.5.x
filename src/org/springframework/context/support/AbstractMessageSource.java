@@ -18,8 +18,10 @@ package org.springframework.context.support;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,21 +32,28 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 
 /**
- * Abstract implementation of HierarchicalMessageSource interface,
- * making it easy to implement a custom MessageSource.
- * Subclasses must implement the abstract resolveCode method.
+ * Abstract implementation of the HierarchicalMessageSource interface,
+ * implementing common handling of message variants, making it easy
+ * to implement a specific strategy for a concrete MessageSource.
+ *
+ * <p>Subclasses must implement the abstract <code>resolveCode</code>
+ * method. For efficient resolution of messages without arguments, the
+ * <code>resolveCodeWithoutArguments</code> method should be overridden
+ * as well, resolving messages without a MessageFormat being involved.
  *
  * <p>Supports not only MessageSourceResolvables as primary messages
  * but also resolution of message arguments that are in turn
  * MessageSourceResolvables themselves.
  *
- * <p>This class does not implement caching, thus subclasses can
- * dynamically change messages over time. Subclasses are encouraged
- * to cache their messages in a modification-aware fashion.
+ * <p>This class does not implement caching of messages per code, thus
+ * subclasses can dynamically change messages over time. Subclasses are
+ * encouraged to cache their messages in a modification-aware fashion,
+ * allowing for hot deployment of updated messages.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #resolveCode
+ * @see #resolveCode(String, java.util.Locale)
+ * @see #resolveCodeWithoutArguments(String, java.util.Locale)
  */
 public abstract class AbstractMessageSource implements HierarchicalMessageSource {
 
@@ -53,6 +62,13 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	private MessageSource parentMessageSource;
 
 	private boolean useCodeAsDefaultMessage = false;
+
+	/**
+	 * Cache to hold already generated MessageFormats per message.
+	 * Used for passed-in default messages. MessageFormats for resolved
+	 * codes are cached on a specific basis in subclasses.
+	 */
+	private final Map cachedMessageFormats = new HashMap();
 
 
 	public void setParentMessageSource(MessageSource parent) {
@@ -94,11 +110,10 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		if (defaultMessage == null && this.useCodeAsDefaultMessage) {
 			return code;
 		}
-		return defaultMessage;
+		return formatMessage(defaultMessage, args, locale);
 	}
 
-	public final String getMessage(String code, Object[] args, Locale locale)
-	    throws NoSuchMessageException {
+	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
@@ -110,10 +125,11 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	}
 
 	public final String getMessage(MessageSourceResolvable resolvable, Locale locale)
-	    throws NoSuchMessageException {
+			throws NoSuchMessageException {
+
 		String[] codes = resolvable.getCodes();
 		if (codes == null) {
-			throw new NoSuchMessageException(null, locale);
+			codes = new String[0];
 		}
 		for (int i = 0; i < codes.length; i++) {
 			String msg = getMessageInternal(codes[i], resolvable.getArguments(), locale);
@@ -122,13 +138,14 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			}
 		}
 		if (resolvable.getDefaultMessage() != null) {
-			return resolvable.getDefaultMessage();
+			return formatMessage(resolvable.getDefaultMessage(), resolvable.getArguments(), locale);
 		}
 		if (this.useCodeAsDefaultMessage && codes.length > 0) {
 			return codes[0];
 		}
 		throw new NoSuchMessageException(codes.length > 0 ? codes[codes.length - 1] : null, locale);
 	}
+
 
 	/**
 	 * Resolve the given code and arguments as message in the given Locale,
@@ -188,6 +205,32 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		// not found at all
 		return null;
 	}
+
+	/**
+	 * Format the given message String, using cached MessageFormats.
+	 * Invoked for passed-in default messages, to resolve any argument
+	 * placeholders found in them.
+	 * @param msg the message to format
+	 * @param args array of arguments that will be filled in for params within
+	 * the message, or null if none.
+	 * @param locale the Locale used for formatting
+	 * @return the formatted message (with resolved arguments)
+	 */
+	protected String formatMessage(String msg, Object[] args, Locale locale) {
+		if (args == null || args.length == 0) {
+			return msg;
+		}
+		MessageFormat messageFormat = null;
+		synchronized (this.cachedMessageFormats) {
+			messageFormat = (MessageFormat) this.cachedMessageFormats.get(msg);
+			if (messageFormat == null) {
+				messageFormat = createMessageFormat(msg, locale);
+				this.cachedMessageFormats.put(msg, messageFormat);
+			}
+		}
+		return messageFormat.format(resolveArguments(args, locale));
+	}
+
 
 	/**
 	 * Subclasses can override this method to resolve a message without
@@ -271,7 +314,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @param locale the Locale to resolve the code for
 	 * (subclasses are encouraged to support internationalization)
 	 * @return the MessageFormat for the message, or null if not found
-	 * @see #resolveCodeWithoutArguments
+	 * @see #resolveCodeWithoutArguments(String, java.util.Locale)
 	 */
 	protected abstract MessageFormat resolveCode(String code, Locale locale);
 

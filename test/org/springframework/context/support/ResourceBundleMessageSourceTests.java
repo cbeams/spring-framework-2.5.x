@@ -64,7 +64,8 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		if (useCodeAsDefaultMessage) {
 			pvs.addPropertyValue("useCodeAsDefaultMessage", Boolean.TRUE);
 		}
-		Class clazz = reloadable ? ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
+		Class clazz = reloadable ?
+				(Class) ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
 		ac.registerSingleton("messageSource", clazz, pvs);
 		ac.refresh();
 
@@ -89,17 +90,29 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		}
 
 		assertEquals("message3", ac.getMessage("code3", null, Locale.ENGLISH));
-		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[]{"code4", "code3"});
+		MessageSourceResolvable resolvable = new DefaultMessageSourceResolvable(new String[] {"code4", "code3"});
 		assertEquals("message3", ac.getMessage(resolvable, Locale.ENGLISH));
 
 		assertEquals("message3", ac.getMessage("code3", null, Locale.ENGLISH));
-		resolvable = new DefaultMessageSourceResolvable(new String[]{"code4", "code3"});
+		resolvable = new DefaultMessageSourceResolvable(new String[] {"code4", "code3"});
 		assertEquals("message3", ac.getMessage(resolvable, Locale.ENGLISH));
 
-		Object[] args = new Object[]{"Hello", new DefaultMessageSourceResolvable(new String[]{"code1"})};
+		Object[] args = new Object[] {"Hello", new DefaultMessageSourceResolvable(new String[] {"code1"})};
 		assertEquals("Hello, message1", ac.getMessage("hello", args, Locale.ENGLISH));
 
 		assertEquals("default", ac.getMessage(null, null, "default", Locale.ENGLISH));
+		assertEquals("default", ac.getMessage(null, args, "default", Locale.ENGLISH));
+		assertEquals("{0}, default", ac.getMessage(null, null, "{0}, default", Locale.ENGLISH));
+		assertEquals("Hello, default", ac.getMessage(null, args, "{0}, default", Locale.ENGLISH));
+
+		resolvable = new DefaultMessageSourceResolvable(null, null, "default");
+		assertEquals("default", ac.getMessage(resolvable, Locale.ENGLISH));
+		resolvable = new DefaultMessageSourceResolvable(null, args, "default");
+		assertEquals("default", ac.getMessage(resolvable, Locale.ENGLISH));
+		resolvable = new DefaultMessageSourceResolvable(null, null, "{0}, default");
+		assertEquals("{0}, default", ac.getMessage(resolvable, Locale.ENGLISH));
+		resolvable = new DefaultMessageSourceResolvable(null, args, "{0}, default");
+		assertEquals("Hello, default", ac.getMessage(resolvable, Locale.ENGLISH));
 
 		// test null message args
 		assertEquals("{0}, {1}", ac.getMessage("hello", null, Locale.ENGLISH));
