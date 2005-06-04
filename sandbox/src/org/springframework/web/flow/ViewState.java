@@ -136,8 +136,8 @@ public class ViewState extends TransitionableState {
 	 * Sets the factory to produce a descriptor for the view to render in
 	 * this view state.
 	 */
-	public void setViewDescriptorCreator(ViewDescriptorCreator creator) {
-		this.viewDescriptorCreator = creator;
+	public void setViewDescriptorCreator(ViewDescriptorCreator viewDescriptorCreator) {
+		this.viewDescriptorCreator = viewDescriptorCreator;
 	}
 
 	/**
@@ -167,8 +167,8 @@ public class ViewState extends TransitionableState {
 	 * Set the state to transition to if the setup criteria fails.
 	 * @param errorStateId the state id
 	 */
-	public void setSetupErrorStateId(String errorStateId) {
-		this.setupErrorStateId = errorStateId;
+	public void setSetupErrorStateId(String setupErrorStateId) {
+		this.setupErrorStateId = setupErrorStateId;
 	}
 
 	/**
