@@ -202,6 +202,21 @@ public abstract class TransitionableState extends State {
 		return getRequiredTransition(context).execute(context);
 	}
 
+	/**
+	 * Re-enter this state. This is typically called when a transition out
+	 * of this state is selected, but transition execution rolls back and
+	 * as a result the flow reenters the source state.
+	 * <p>
+	 * By default, this just calls <code>enter()</code>.
+	 * @param context the request context in an executing flow (a client instance of a flow)
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the state processing
+	 */
+	public ViewDescriptor reenter(StateContext context) {
+		// just re-enter this state
+		return enter(context);
+	}
+
 	protected void createToString(ToStringCreator creator) {
 		creator.append("transitions", this.transitions);
 	}

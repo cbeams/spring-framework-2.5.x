@@ -270,7 +270,7 @@ public class Transition extends AnnotatedObject {
 		}
 		else {
 			// 'roll back' and re-enter the source state
-			viewDescriptor = getSourceState().enter(context);
+			viewDescriptor = getSourceState().reenter(context);
 		}
 		if (logger.isDebugEnabled()) {
 			if (context.getFlowContext().isActive()) {

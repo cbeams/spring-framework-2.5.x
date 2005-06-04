@@ -171,7 +171,7 @@ public abstract class State extends AnnotatedObject {
 	 *         render the results of the state processing
 	 */
 	protected abstract ViewDescriptor doEnter(StateContext context);
-
+	
 	public String toString() {
 		ToStringCreator creator =
 			new ToStringCreator(this).append("id", getId()).append("flow", flow == null ? "" : flow.getId());
