@@ -27,10 +27,30 @@ import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
  * supporting JDK 1.5+ annotation metadata for mappings.
  * Requires the Hibernate3 Annotation add-on to be present.
  *
- * <p>Note: This class requires Hibernate Annotation 3.0 beta 2 or higher.
+ * <p>Example bean definition:
+ *
+ * <pre>
+ * &lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"&gt;
+ *   &lt;property name="dataSource"&gt;
+ *     &lt;ref bean="dataSource"/&gt;
+ *   &lt;/property&gt;
+ *   &lt;property name="annotatedClasses"&gt;
+ *     &lt;list&gt;
+ *       &lt;value&gt;test.package.Foo&lt;/value&gt;
+ *       &lt;value&gt;test.package.Bar&lt;/value&gt;
+ *     &lt;/list&gt;
+ *   &lt;/property&gt;
+ *   &lt;property name="annotatedPackages"&gt;
+ *     &lt;list&gt;
+ *       &lt;value&gt;test.package&lt;/value&gt;
+ *     &lt;/list&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 1.2.2
+ * @see #setDataSource
+ * @see #setHibernateProperties
  * @see #setAnnotatedClasses
  * @see #setAnnotatedPackages
  */
@@ -80,6 +100,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean {
 	 */
 	protected final void postProcessConfiguration(Configuration config) throws HibernateException {
 		AnnotationConfiguration annConfig = (AnnotationConfiguration) config;
+
 		if (this.annotatedClasses != null) {
 			for (int i = 0; i < this.annotatedClasses.length; i++) {
 				annConfig.addAnnotatedClass(this.annotatedClasses[i]);
@@ -90,6 +111,8 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean {
 				annConfig.addPackage(this.annotatedPackages[i]);
 			}
 		}
+
+		// Perform custom post-processing in subclasses.
 		postProcessAnnotationConfiguration(annConfig);
 	}
 
