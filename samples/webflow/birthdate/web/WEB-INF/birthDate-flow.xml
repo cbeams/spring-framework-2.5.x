@@ -27,7 +27,7 @@
 	<!--
 		Display the input form view.
 	-->
-	<view-state id="displayForm" view="enterBirthDate">
+	<view-state id="displayForm" view="form">
 		<transition on="submit" to="bindAndValidateForm"/>
 	</view-state>
 	
@@ -47,12 +47,12 @@
 	-->
 	<action-state id="calculateAge">
 		<action name="calculateAge" bean="birthDateFormAction"/>
-		<transition on="calculateAge.success" to="successView"/>
+		<transition on="calculateAge.success" to="displaySuccess"/>
 	</action-state>
 	
 	<!--
 		Display the success view.
 	-->
-	<end-state id="successView" view="displayAge"/>
+	<end-state id="displaySuccess" view="success"/>
 
 </webflow>
