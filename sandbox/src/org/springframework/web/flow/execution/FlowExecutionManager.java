@@ -183,14 +183,14 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * @return the flow execution listeners
 	 */
 	protected FlowExecutionListener[] getListeners(Flow flow) {
-		List res = new LinkedList();
-		for (Iterator it=flowExecutionListeners.entrySet().iterator(); it.hasNext(); ) {
+		List listeners = new LinkedList();
+		for (Iterator it = flowExecutionListeners.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry entry = (Map.Entry)it.next();
 			if (((FlowExecutionListenerCriteria)entry.getValue()).matches(flow)) {
-				res.add((FlowExecutionListener)entry.getKey());
+				listeners.add((FlowExecutionListener)entry.getKey());
 			}
 		}
-		return (FlowExecutionListener[])res.toArray(new FlowExecutionListener[res.size()]);
+		return (FlowExecutionListener[])listeners.toArray(new FlowExecutionListener[listeners.size()]);
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * flow executions for flows that match given criteria.
 	 */
 	public void setListeners(FlowExecutionListenerCriteria criteria, Collection listeners) {
-		for (Iterator it=listeners.iterator(); it.hasNext(); ) {
+		for (Iterator it = listeners.iterator(); it.hasNext(); ) {
 			FlowExecutionListener listener = (FlowExecutionListener)it.next();
 			flowExecutionListeners.put(listener, criteria);
 		}
