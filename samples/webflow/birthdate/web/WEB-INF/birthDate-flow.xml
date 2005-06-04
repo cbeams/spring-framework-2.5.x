@@ -11,24 +11,48 @@
 	
 	Note that this flow implements the exact flow of the SimpleFormController as an example.
 	If you only need this flow, it is advised that you just use the SimpleFormController.
-	
-	This example also uses view state setup actions and transition actions to make the
-	flow definition more compact.
 -->
-<webflow id="BirthDate" start-state="displayForm">
+<webflow id="BirthDate" start-state="setupForm">
 
-	<view-state id="displayForm" view="enterBirthDate">
-		<setup bean="birthDateFormAction" method="setupForm"/>
-		<transition on="submit" to="calculateAge">
-			<action bean="birthDateFormAction" method="bindAndValidate"/>
-		</transition>
+	<!--
+		Prepare to display a new form. This is very similar to the showNewForm() method
+		of the SimpleFormController: it basically initializes the binder so that all property
+		editors are available for form display.
+	-->
+	<action-state id="setupForm">
+		<action bean="birthDateFormAction"/>
+		<transition on="success" to="formView"/>
+	</action-state>
+	
+	<!--
+		Display the input form view.
+	-->
+	<view-state id="formView" view="enterBirthDate">
+		<transition on="submit" to="bindAndValidateForm"/>
 	</view-state>
 	
+	<!--
+		Bind and validate input data from the form. This is similar to the bindAndValidate()
+		method of the SimpleFormController.
+	-->
+	<action-state id="bindAndValidateForm">
+		<action bean="birthDateFormAction" method="bindAndValidate"/>
+		<transition on="success" to="calculateAge"/>
+		<transition on="error" to="formView"/>
+	</action-state>
+	
+	<!--
+		Process a successful submit. This is similar to the onSubmit() method of the
+		SimpleFormController.
+	-->
 	<action-state id="calculateAge">
 		<action name="calculateAge" bean="birthDateFormAction"/>
 		<transition on="calculateAge.success" to="successView"/>
 	</action-state>
 	
+	<!--
+		Display the success view.
+	-->
 	<end-state id="successView" view="displayAge"/>
 
 </webflow>
