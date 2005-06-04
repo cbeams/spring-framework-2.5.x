@@ -38,43 +38,6 @@
 
 
    <!--
-    | Build the additional jars. The full spring.jar will be built as the default project target
-    -->
-   <preGoal name="jar:jar">
-
-      <!--
-       | The spring-beans jar.
-       -->
-      <jar jarfile="${maven.build.dir}/spring-beans-${pom.currentVersion}.jar">
-         <fileset dir="${maven.build.dest}">
-            <include name="org/springframework/beans/**"/>
-            <include name="org/springframework/core/**"/>
-            <include name="org/springframework/util/*"/>
-         </fileset>
-      </jar>
-
-      <!--
-       | The spring-jdbc jar.
-       -->
-      <jar jarfile="${maven.build.dir}/spring-jdbc-${pom.currentVersion}.jar">
-         <fileset dir="${maven.build.dest}">
-            <include name="org/springframework/aop/**"/>
-            <include name="org/springframework/beans/**"/>
-            <include name="org/springframework/core/**"/>
-            <include name="org/springframework/dao/**"/>
-            <include name="org/springframework/jdbc/**"/>
-            <include name="org/springframework/jndi/**"/>
-            <include name="org/springframework/orm/**"/>
-            <include name="org/springframework/transaction/**"/>
-            <include name="org/springframework/util/*"/>
-         </fileset>
-      </jar>
-
-
-   </preGoal>
-
-
-   <!--
     | Copy the additional jars to the distribution binary directory
     -->
    <preGoal name="dist:prepare-bin-filesystem">
