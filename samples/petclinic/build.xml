@@ -292,7 +292,7 @@
 
 	<target name="setupDB" depends="setupHSQL,setupMYSQL" description="Initialize the selected database">
 
-		<ant dir="${db.dir}"/>
+		<ant antfile="${db.dir}/build.xml"/>
 
 	</target>
 
@@ -336,7 +336,7 @@
 		</junitreport>
 
 		<!-- restore the database -->
-		<ant dir="${db.dir}"/>
+		<ant antfile="${db.dir}/build.xml"/>
 
 	</target>
 

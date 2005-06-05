@@ -3,6 +3,7 @@
 <project name="setupDB" basedir="." default="all">
 
   <target name="dropHSQLTables">
+
 		<echo message="DROP TABLES USING: ${db.driver} ${db.url}"/>
 
     <sql driver="${db.driver}"
@@ -12,7 +13,7 @@
          onerror="continue">  
 
 			<classpath>
-				<fileset dir="../../../lib">
+				<fileset dir="${spring.root}/lib">
 					<include name="hsqldb/hsqldb.jar"/>
 				</fileset>
 			</classpath>
@@ -25,11 +26,13 @@
 			DROP TABLE specialties;
 			DROP TABLE vets;
 
-    </sql> 
+    </sql>
+
   </target>
 
 
   <target name="createHSQLTables">
+
 		<echo message="CREATE TABLES USING: ${db.driver} ${db.url}"/>
 
     <sql driver="${db.driver}"
@@ -39,7 +42,7 @@
          onerror="continue">  
 
 			<classpath>
-				<fileset dir="../../../lib">
+				<fileset dir="${spring.root}/lib">
 					<include name="hsqldb/hsqldb.jar"/>
 				</fileset>
 			</classpath>
@@ -100,11 +103,13 @@
 			alter table visits add constraint fk_visits_pets foreign key (pet_id) references pets(id);
 			CREATE INDEX visits_pet_id ON visits(pet_id);
 
-    </sql> 
+    </sql>
+
   </target>
 
 
   <target name="emptyTables">
+
 		<echo message="USING: ${db.driver} ${db.url}"/>
 
     <sql driver="${db.driver}"
@@ -113,7 +118,7 @@
          password="${db.pw}">  
 
 			<classpath>
-				<fileset dir="../../../lib">
+				<fileset dir="${spring.root}/lib">
 					<include name="hsqldb/hsqldb.jar"/>
 				</fileset>
 			</classpath>
@@ -126,11 +131,13 @@
 			DELETE FROM pets;
 			DELETE FROM visits;
 
-    </sql> 
+    </sql>
+
   </target>
 
 
   <target name="populateTables">
+
 		<echo message="USING: ${db.driver} ${db.url}"/>
 
     <sql driver="${db.driver}"
@@ -139,7 +146,7 @@
          password="${db.pw}"  >
 
 			<classpath>
-				<fileset dir="../../../lib">
+				<fileset dir="${spring.root}/lib">
 					<include name="hsqldb/hsqldb.jar"/>
 				</fileset>
 			</classpath>
@@ -198,9 +205,11 @@
 			INSERT INTO visits VALUES (3, 8, '1996-06-04', 'neutered');
 			INSERT INTO visits VALUES (4, 7, '1996-09-04', 'spayed');
 
-    </sql> 
+    </sql>
+
   </target>
-    
+
+
   <target name="all" depends="dropHSQLTables,createHSQLTables,emptyTables,populateTables"/>
     
 </project>
