@@ -31,6 +31,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
+import org.hibernate.FlushMode;
 
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
 import org.springframework.util.StringUtils;
@@ -290,6 +291,22 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("Correct double2 value", new Double("6.1").equals(tb.getDouble2()));
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(bw.getPropertyValue("bigDecimal")));
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(tb.getBigDecimal()));
+	}
+
+	public void testEnum() {
+		EnumTest et = new EnumTest();
+		BeanWrapper bw = new BeanWrapperImpl(et);
+
+		bw.setPropertyValue("flushMode", "NEVER");
+		assertEquals(FlushMode.NEVER, et.getFlushMode());
+
+		try {
+			bw.setPropertyValue("flushMode", "EVER");
+			fail("Should have thrown TypeMismatchException");
+		}
+		catch (TypeMismatchException ex) {
+			// expected
+		}
 	}
 
 	public void testPropertiesProperty() throws Exception {
@@ -1075,6 +1092,20 @@ public class BeanWrapperTests extends TestCase {
 	}
 
 
+	private static class EnumTest {
+
+		private FlushMode flushMode;
+
+		public void setFlushMode(FlushMode flushMode) {
+			this.flushMode = flushMode;
+		}
+
+		public FlushMode getFlushMode() {
+			return flushMode;
+		}
+	}
+
+
 	private static class PropsTest {
 
 		private Properties props;
@@ -1141,7 +1172,9 @@ public class BeanWrapperTests extends TestCase {
 		}
 	}
 
+
 	private static class NumberPropertyBean {
+
 		private byte myPrimitiveByte;
 		private Byte myByte;
 

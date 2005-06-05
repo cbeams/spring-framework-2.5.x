@@ -23,6 +23,7 @@ import java.beans.PropertyEditorManager;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -1028,10 +1029,25 @@ public class BeanWrapperImpl implements BeanWrapper {
 						}
 					}
 
-					// Throw explicit TypeMismatchException with full context information
-					// if the resulting value definitely doesn't match the required type.
+					// If the resulting value definitely doesn't match the required type,
+					// try field lookup as fallback. If no matching field found,
+					// throw explicit TypeMismatchException with full context information.
 					if (convertedValue != null && !requiredType.isPrimitive() &&
 							!requiredType.isAssignableFrom(convertedValue.getClass())) {
+
+						// In case of String value, try to find matching field (for JDK 1.5
+						// enum or custom enum with values defined as static fields).
+						if (convertedValue instanceof String) {
+							try {
+								Field enumField = requiredType.getField((String) convertedValue);
+								return enumField.get(null);
+							}
+							catch (Exception ex) {
+								logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
+							}
+						}
+
+						// Definitely doesn't match: throw TypeMismatchException.
 						throw new TypeMismatchException(
 								createPropertyChangeEvent(fullPropertyName, oldValue, newValue), requiredType);
 					}
