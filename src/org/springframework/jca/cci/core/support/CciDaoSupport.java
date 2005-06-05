@@ -44,6 +44,8 @@ public abstract class CciDaoSupport extends DaoSupport {
 
 	private CciTemplate cciTemplate;
 
+	protected final void checkDaoConfig() throws IllegalArgumentException {
+	}
 
 	/**
 	 * Set the ConnectionFactory to be used by this DAO.
