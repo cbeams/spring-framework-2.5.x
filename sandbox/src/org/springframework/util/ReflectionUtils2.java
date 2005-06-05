@@ -25,9 +25,9 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author Rod Johnson
  */
-public abstract class ReflectionUtils {
+public abstract class ReflectionUtils2 {
 	
-	private static Log log = LogFactory.getLog(ReflectionUtils.class);
+	private static Log log = LogFactory.getLog(ReflectionUtils2.class);
 	
 	/**
 	 * Given the source object and the destination, which must be the same class or a subclass,

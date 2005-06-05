@@ -13,9 +13,9 @@ import junit.framework.TestCase;
  * 
  * @author Rod Johnson
  */
-public class ReflectionUtilsTests extends TestCase {
+public class ReflectionUtils2Tests extends TestCase {
 	
-	public ReflectionUtilsTests(String s) {
+	public ReflectionUtils2Tests(String s) {
 		super(s);
 	}
 	
@@ -23,7 +23,7 @@ public class ReflectionUtilsTests extends TestCase {
 		TestBean src = new TestBean();
 		String dest = new String();
 		try {
-			ReflectionUtils.shallowCopyFieldState(src, dest);
+			ReflectionUtils2.shallowCopyFieldState(src, dest);
 			fail();
 		}
 		catch (IllegalArgumentException ex) {
@@ -36,7 +36,7 @@ public class ReflectionUtilsTests extends TestCase {
 		TestBean src = null;
 		String dest = new String();
 		try {
-			ReflectionUtils.shallowCopyFieldState(src, dest);
+			ReflectionUtils2.shallowCopyFieldState(src, dest);
 			fail();
 		}
 		catch (IllegalArgumentException ex) {
@@ -48,7 +48,7 @@ public class ReflectionUtilsTests extends TestCase {
 		TestBean src = new TestBean();
 		String dest = null;
 		try {
-			ReflectionUtils.shallowCopyFieldState(src, dest);
+			ReflectionUtils2.shallowCopyFieldState(src, dest);
 			fail();
 		}
 		catch (IllegalArgumentException ex) {
@@ -108,7 +108,7 @@ public class ReflectionUtilsTests extends TestCase {
 		src.setSpouse(new TestBean());
 		assertFalse(src.getAge() == dest.getAge());
 		
-		ReflectionUtils.shallowCopyFieldState(src, dest);
+		ReflectionUtils2.shallowCopyFieldState(src, dest);
 		assertEquals(src.getAge(), dest.getAge());
 		assertEquals(src.getSpouse(), dest.getSpouse());
 		assertEquals(src.getDoctor(), dest.getDoctor());
