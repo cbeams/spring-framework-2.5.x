@@ -18,13 +18,14 @@ package org.springframework.binding.support;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.binding.convert.ConversionExecutor;
 import org.springframework.binding.expression.ExpressionEvaluator;
 import org.springframework.binding.expression.ExpressionEvaluatorFactory;
 import org.springframework.binding.expression.ExpressionEvaluatorSetter;
+import org.springframework.core.ToStringCreator;
 
 /**
  * A single mapping definition, encapulating the information neccessary to map a
@@ -101,7 +102,7 @@ public class Mapping implements Serializable {
 	}
 
 	public String toString() {
-		return new ToStringBuilder(this).append(sourceAttribute + "->" + targetAttribute).
+		return new ToStringCreator(this).append(sourceAttribute + "->" + targetAttribute).
 			append("valueConversionExecutor", valueConverter).toString();
 	}
 }
