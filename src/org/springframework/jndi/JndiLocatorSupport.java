@@ -37,7 +37,7 @@ import javax.naming.NamingException;
 public abstract class JndiLocatorSupport extends JndiAccessor {
 
 	/** JNDI prefix used in a J2EE container */
-	public static String CONTAINER_PREFIX = "java:comp/env/";
+	public static final String CONTAINER_PREFIX = "java:comp/env/";
 
 	private boolean resourceRef = false;
 
