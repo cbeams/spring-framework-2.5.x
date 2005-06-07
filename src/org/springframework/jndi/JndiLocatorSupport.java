@@ -42,9 +42,9 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	private boolean resourceRef = false;
 
 	/**
-	 * Set if the lookup occurs in a J2EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a J2EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
-	 * contain it. Default is false.
+	 * contain it. Default is "false".
 	 * <p>Note: Will only get applied if no other scheme like "java:" is given.
 	 */
 	public void setResourceRef(boolean resourceRef) {
@@ -52,7 +52,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	}
 
 	/**
-	 * Return if the lookup occurs in a J2EE container.
+	 * Return whether the lookup occurs in a J2EE container.
 	 */
 	public boolean isResourceRef() {
 		return resourceRef;
