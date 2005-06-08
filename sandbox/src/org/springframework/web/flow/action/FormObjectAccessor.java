@@ -56,13 +56,12 @@ public class FormObjectAccessor {
 	 * @return the form object
 	 * @throws IllegalStateException if the form object is not found in the context
 	 */
-	public Object getFormObject() throws IllegalStateException {
-		try {
-			return getFormObject(ScopeType.REQUEST);
+	public Object getFormObject() {
+		Object formObject = getFormObject(ScopeType.REQUEST);
+		if (formObject != null) {
+			return formObject;
 		}
-		catch (IllegalStateException e) {
-			return getFormObject(ScopeType.FLOW);
-		}
+		return getFormObject(ScopeType.FLOW);
 	}
 
 	/**
@@ -72,7 +71,7 @@ public class FormObjectAccessor {
 	 * @return the form object
 	 * @throws IllegalStateException if the form object is not found in the context
 	 */
-	public Object getFormObject(ScopeType scope) throws IllegalStateException {
+	public Object getFormObject(ScopeType scope) {
 		return getFormObject(FORM_OBJECT_ALIAS, scope);
 	}
 
@@ -84,8 +83,8 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the form object is not found in
 	 *         the context
 	 */
-	public Object getFormObject(String formObjectName, ScopeType scope) throws IllegalStateException {
-		return getScope(scope).getRequiredAttribute(formObjectName);
+	public Object getFormObject(String formObjectName, ScopeType scope) {
+		return getScope(scope).getAttribute(formObjectName);
 	}
 
 	/**
@@ -97,9 +96,8 @@ public class FormObjectAccessor {
 	 * @throws IllegalStateException if the form object is not found in the context
 	 *         or is not of the required type
 	 */
-	public Object getFormObject(String formObjectName, Class formObjectClass, ScopeType scope)
-			throws IllegalStateException {
-		return getScope(scope).getRequiredAttribute(formObjectName, formObjectClass);
+	public Object getFormObject(String formObjectName, Class formObjectClass, ScopeType scope) {
+		return getScope(scope).getAttribute(formObjectName, formObjectClass);
 	}
 
 	/**
@@ -130,13 +128,12 @@ public class FormObjectAccessor {
 	 * @return the form object Errors tracker
 	 * @throws IllegalStateException if the Errors instance is not found in the context
 	 */
-	public Errors getFormErrors() throws IllegalStateException {
-		try {
-			return (Errors)getFormErrors(ScopeType.REQUEST);
+	public Errors getFormErrors() {
+		Errors errors = getFormErrors(ScopeType.REQUEST);
+		if (errors != null) {
+			return errors;
 		}
-		catch (IllegalStateException e) {
-			return (Errors)getFormErrors(ScopeType.FLOW);
-		}
+		return (Errors)getFormErrors(ScopeType.FLOW);
 	}
 
 	/**
@@ -159,8 +156,8 @@ public class FormObjectAccessor {
 	 * @return the form object errors instance
 	 * @throws IllegalStateException if the Errors instance is not found in the context
 	 */
-	public Errors getFormErrors(String formObjectName, ScopeType scope) throws IllegalStateException {
-		return (Errors)getScope(scope).getRequiredAttribute(BindException.ERROR_KEY_PREFIX + formObjectName,
+	public Errors getFormErrors(String formObjectName, ScopeType scope) {
+		return (Errors)getScope(scope).getAttribute(BindException.ERROR_KEY_PREFIX + formObjectName,
 				Errors.class);
 	}
 

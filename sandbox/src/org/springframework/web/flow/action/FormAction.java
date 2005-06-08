@@ -336,14 +336,6 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	/**
-	 * Returns if request parameters should be bound to the form object during
-	 * the {@link #setupForm(RequestContext)} action. Defaults to false.
-	 */
-	public boolean isBindOnSetupForm() {
-		return bindOnSetupForm;
-	}
-
-	/**
 	 * Set if request parameters should be bound to the form object during the
 	 * {@link #setupForm(RequestContext)} action.
 	 */
@@ -411,7 +403,32 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *         checked or unchecked
 	 */
 	public Event setupForm(RequestContext context) throws Exception {
-		return doFormObjectProcessing(context, false);
+		FormObjectAccessor accessor = new FormObjectAccessor(context);
+		Object formObject = accessor.getFormObject();
+		if (formObject == null) {
+			formObject = createFormObject(context);
+			accessor.exposeFormObject(formObject, getFormObjectName(), getFormObjectScope());
+			if (bindOnSetupForm(context)) {
+				return doBindAndValidate(context, formObject);
+			} else {
+				accessor.exposeErrors(formObject, getFormObjectName(), getErrorsScope());
+				return success();
+			}
+		} else {
+			if (bindOnSetupForm(context)) {
+				return doBindAndValidate(context, formObject);
+			} else {
+				return success();
+			}	
+		}
+	}
+
+	/**
+	 * Returns if request parameters should be bound to the form object during
+	 * the {@link #setupForm(RequestContext)} action. Defaults to false.
+	 */
+	protected boolean bindOnSetupForm(RequestContext context) {
+		return bindOnSetupForm;
 	}
 
 	/**
@@ -425,32 +442,16 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *         checked or unchecked
 	 */
 	public Event bindAndValidate(RequestContext context) throws Exception {
-		return doFormObjectProcessing(context, true);
+		return doBindAndValidate(context, loadFormObject(context));
 	}
 
-	// internal methods
-
-	/**
-	 * Helper method to do form related processing.
-	 * @param context the action execution context, for accessing and setting
-	 *        data in "flow scope" or "request scope"
-	 * @param forceBindAndValidate force binding and validation if true
-	 * @return "success" when binding and validation is successful, "error"
-	 *         otherwise
-	 * @throws Exception an <b>unrecoverable</b> exception occured, either
-	 *         checked or unchecked
-	 */
-	protected Event doFormObjectProcessing(RequestContext context, boolean forceBindAndValidate) throws Exception {
-		Object formObject = loadFormObject(context);
+	private Event doBindAndValidate(RequestContext context, Object formObject) throws Exception {
 		DataBinder binder = createBinder(context, formObject);
-		Event result = null;
-		if (forceBindAndValidate || isBindOnSetupForm()) {
-			result = bindAndValidateInternal(context, binder);
-		}
+		Event result = bindAndValidateInternal(context, binder);
 		exposeFormObjectAndErrors(context, formObject, binder.getErrors());
 		return result != null ? result : calculateResult(context, formObject, binder.getErrors());
 	}
-
+	
 	/**
 	 * Load the backing form object that should be updated from incoming event
 	 * parameters and validated. Throws an exception if the object could not be
@@ -486,14 +487,10 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *         loaded
 	 */
 	protected Object loadFormObject(RequestContext context) throws FormObjectRetrievalFailureException {
-		if (getFormObjectScope() == ScopeType.FLOW && context.getFlowScope().containsAttribute(getFormObjectName())) {
-			Object formObject = context.getFlowScope().getAttribute(getFormObjectName(), getFormObjectClass());
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using previously loaded form object '" + getFormObjectName() + "' cached in flow scope");
-			}
+		Object formObject = findFormObject(context);
+		if (formObject != null) {
 			return formObject;
-		}
-		else {
+		} else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new form object '" + getFormObjectName() + "'");
 			}
@@ -511,6 +508,30 @@ public class FormAction extends MultiAction implements InitializingBean {
 		}
 	}
 
+	/**
+	 * Search for an existing form object in the possible scopes. 
+	 * @param context the flow request context
+	 * @return the form object
+	 */
+	protected Object findFormObject(RequestContext context) {
+		if (getFormObjectScope() == ScopeType.FLOW && context.getFlowScope().containsAttribute(getFormObjectName())) {
+			Object formObject = context.getFlowScope().getAttribute(getFormObjectName(), getFormObjectClass());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading previously loaded form object '" + getFormObjectName() + "' cached in flow scope");
+			}
+			return formObject;
+		}
+		else if (getFormObjectScope() == ScopeType.REQUEST && context.getRequestScope().containsAttribute(getFormObjectName())) {
+			Object formObject = context.getRequestScope().getAttribute(getFormObjectName(), getFormObjectClass());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading previously loaded form object '" + getFormObjectName() + "' cached in request scope");
+			}
+			return formObject;
+		} else {
+			return null;
+		}
+	}
+	
 	/**
 	 * Create a new form object instance of the configured class.
 	 * @param context the action execution context, for accessing and setting
