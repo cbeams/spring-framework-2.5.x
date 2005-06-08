@@ -210,10 +210,10 @@ public class ViewState extends TransitionableState {
 				this.setupCriteria.test(context);
 			}
 		}
-		return reenter(context);
+		return viewDescriptor(context);
 	}
 	
-	public ViewDescriptor reenter(StateContext context) {
+	public ViewDescriptor viewDescriptor(StateContext context) {
 		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Returning a view descriptor null object; no view to render");
