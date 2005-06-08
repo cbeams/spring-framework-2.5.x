@@ -487,7 +487,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 *         loaded
 	 */
 	protected Object loadFormObject(RequestContext context) throws FormObjectRetrievalFailureException {
-		Object formObject = findFormObject(context);
+		Object formObject = new FormObjectAccessor(context).getFormObject();
 		if (formObject != null) {
 			return formObject;
 		} else {
@@ -505,30 +505,6 @@ public class FormAction extends MultiAction implements InitializingBean {
 				throw new FormObjectRetrievalFailureException(getFormObjectClass(), getFormObjectName(),
 						"Unable to access form object class constructor", e);
 			}
-		}
-	}
-
-	/**
-	 * Search for an existing form object in the possible scopes. 
-	 * @param context the flow request context
-	 * @return the form object
-	 */
-	protected Object findFormObject(RequestContext context) {
-		if (getFormObjectScope() == ScopeType.FLOW && context.getFlowScope().containsAttribute(getFormObjectName())) {
-			Object formObject = context.getFlowScope().getAttribute(getFormObjectName(), getFormObjectClass());
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loading previously loaded form object '" + getFormObjectName() + "' cached in flow scope");
-			}
-			return formObject;
-		}
-		else if (getFormObjectScope() == ScopeType.REQUEST && context.getRequestScope().containsAttribute(getFormObjectName())) {
-			Object formObject = context.getRequestScope().getAttribute(getFormObjectName(), getFormObjectClass());
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loading previously loaded form object '" + getFormObjectName() + "' cached in request scope");
-			}
-			return formObject;
-		} else {
-			return null;
 		}
 	}
 	
