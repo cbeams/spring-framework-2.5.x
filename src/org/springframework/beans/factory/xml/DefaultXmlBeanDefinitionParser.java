@@ -17,6 +17,9 @@
 package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -24,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Collections;
+import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -149,6 +154,17 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String PROPS_ELEMENT = "props";
 	public static final String PROP_ELEMENT = "prop";
 
+    /**
+     * All the reserved Spring XML element names which cannot be overloaded by an XML extension
+     */
+    protected static final String[] RESERVED_ELEMENT_NAMES = { DESCRIPTION_ELEMENT, IMPORT_ELEMENT, ALIAS_ELEMENT,
+                                                               BEAN_ELEMENT,
+                                                               CONSTRUCTOR_ARG_ELEMENT, PROPERTY_ELEMENT,
+                                                               LOOKUP_METHOD_ELEMENT, REPLACED_METHOD_ELEMENT,
+                                                               ARG_TYPE_ELEMENT, REF_ELEMENT, IDREF_ELEMENT,
+                                                               VALUE_ELEMENT, NULL_ELEMENT, LIST_ELEMENT,
+                                                               SET_ELEMENT, MAP_ELEMENT, ENTRY_ELEMENT, KEY_ELEMENT,
+                                                               PROPS_ELEMENT, PROP_ELEMENT };
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -162,6 +178,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	private String defaultAutowire;
 
+    private Set reservedElementNames = new HashSet(Arrays.asList(RESERVED_ELEMENT_NAMES));
+
 
 	public int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
 			throws BeanDefinitionStoreException {
@@ -170,7 +188,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		this.resource = resource;
 
 		logger.debug("Loading bean definitions");
+
 		Element root = doc.getDocumentElement();
+        preprocessXml(reader, root, resource);
 
 		this.defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
 		this.defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
@@ -188,7 +208,118 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return beanDefinitionCount;
 	}
 
-	protected final BeanDefinitionReader getBeanDefinitionReader() {
+    /**
+     * Allow the XML to be extensible by processing any custom element types first before we start to
+     * process the XML. This method is also a natural extension point for any other custom pre processing
+     * of the XML.
+     */
+    protected void preprocessXml(BeanDefinitionReader reader, Element root, Resource resource) throws BeanDefinitionStoreException {
+        NodeList nl = root.getChildNodes();
+        for (int i = 0; i < nl.getLength(); i++) {
+            Node node = nl.item(i);
+            if (node instanceof Element) {
+                Element element = (Element) node;
+                String localName = node.getNodeName();
+                String uri = node.getNamespaceURI();
+                boolean extensible = true;
+                if (uri == null || uri.length() == 0) {
+                    if (reservedElementNames.contains(localName)) {
+                        extensible = false;
+                    }
+                }
+                if (extensible) {
+                    // lets see if we have a custom XML processor
+                    ElementProcessor handler = findElementProcessor(uri, localName);
+                    if (handler != null) {
+                        handler.processElement(element, reader, resource);
+                    }
+                }
+                // lets recurse into any children
+                preprocessXml(reader, element, resource);
+            }
+        }
+    }
+
+    /**
+     * Uses META-INF/services discovery to find an {@link ElementProcessor} for the given
+     * namespace and localName
+     *
+     * @param namespaceURI the namespace URI of the element
+     * @param localName the local name of the element
+     * @return the custom processor for the given element name if it could be found, otherwise return null
+     */
+    protected ElementProcessor findElementProcessor(String namespaceURI, String localName) throws BeanDefinitionStoreException  {
+        String uri = "META-INF/services/org/springframework/config/" + createDiscoveryPathName(namespaceURI, localName);
+                            // lets try the thread context class loader first
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(uri);
+        if (in == null) {
+            in = getClass().getClassLoader().getResourceAsStream(uri);
+            if (in == null) {
+                throw new BeanDefinitionStoreException("Could not find resource: " + uri);
+            }
+        }
+
+        // lets load the file
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(in));
+            String line = reader.readLine();
+            if (line == null) {
+                throw new BeanDefinitionStoreException("Empty file found for: " + uri);
+            }
+            line = line.trim();
+            Class answer = null;
+            try {
+                answer = loadClass(line);
+            }
+            catch (ClassNotFoundException e) {
+                throw new BeanDefinitionStoreException("Could not find class: " + line, e);
+            }
+            try {
+                return (ElementProcessor) answer.newInstance();
+            }
+            catch (Exception e) {
+                throw new BeanDefinitionStoreException("Failed to instantiate bean of type: " + answer.getName() + ". Reason: " + e, e);
+            }
+        }
+        catch (IOException e) {
+            throw new BeanDefinitionStoreException("Failed to load file for URI: " + uri + ". Reason: " + e, e);
+        }
+        finally {
+            try {
+                reader.close();
+            }
+            catch (Exception e) {
+                // ignore
+            }
+        }
+    }
+
+    /**
+     * Converts the namespace and localName into a valid path name we can use on the classpath to discover a text file
+     */
+    protected String createDiscoveryPathName(String uri, String localName) {
+        if (uri == null || uri.length() == 0) {
+            return localName;
+        }
+        // TODO proper encoding required
+        // lets replace any dodgy characters
+        return uri.replace(':', '_').replace(' ', '_') + "/" + localName;
+    }
+
+    /**
+     * Attempts to load the class on the current thread context class loader or the class loader which loaded us
+     */
+    protected Class loadClass(String name) throws ClassNotFoundException {
+        try {
+            return Thread.currentThread().getContextClassLoader().loadClass(name);
+        }
+        catch (ClassNotFoundException e) {
+            return getClass().getClassLoader().loadClass(name);
+        }
+    }
+
+    protected final BeanDefinitionReader getBeanDefinitionReader() {
 		return beanDefinitionReader;
 	}
 
