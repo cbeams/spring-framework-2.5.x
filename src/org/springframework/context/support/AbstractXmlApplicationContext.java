@@ -43,6 +43,8 @@ import org.springframework.context.ApplicationContext;
  */
 public abstract class AbstractXmlApplicationContext extends AbstractRefreshableApplicationContext  {
 
+    private boolean xmlValidating;
+
 	/**
 	 * Create a new AbstractXmlApplicationContext with no parent.
 	 */
@@ -56,6 +58,23 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 	public AbstractXmlApplicationContext(ApplicationContext parent) {
 		super(parent);
 	}
+
+    /**
+     * Returns whether or not XML validation mode is enabled when parsing the configuration file
+     * @return whether or not XML validation mode is enabled when parsing the configuration file
+     */
+    public boolean isXmlValidating() {
+        return xmlValidating;
+    }
+
+    /**
+     * Enables or disables XML validation mode when parsing the configuration file
+     *
+     * @param xmlValidating the XML validation mode, true = validating.
+     */
+    public void setXmlValidating(boolean xmlValidating) {
+        this.xmlValidating = xmlValidating;
+    }
 
 	/**
 	 * Loads the bean definitions via an XmlBeanDefinitionReader.
@@ -81,6 +100,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setParserClass
 	 */
 	protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
+        beanDefinitionReader.setValidating(xmlValidating);
 	}
 
 	/**

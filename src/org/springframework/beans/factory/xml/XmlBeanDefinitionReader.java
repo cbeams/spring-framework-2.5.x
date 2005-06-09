@@ -56,9 +56,7 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
  */
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
-    private static boolean defaultValidationMode = true;
-
-	private boolean validating = defaultValidationMode;
+	private boolean validating = true;
 
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
 
@@ -189,21 +187,4 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
 		return parser.registerBeanDefinitions(this, doc, resource);
 	}
-
-    /**
-     * Is validation enabled by default on new instances of this class
-     * @return
-     */
-    public static boolean isDefaultValidationMode() {
-        return defaultValidationMode;
-    }
-
-    /**
-     * Provides a way to configure the default validation mode.
-     * Not very clean at all! But we can maybe reduce this when we use XSDs instead for the validation?
-     * @param defaultValidationMode
-     */
-    public static void setDefaultValidationMode(boolean defaultValidationMode) {
-        XmlBeanDefinitionReader.defaultValidationMode = defaultValidationMode;
-    }
 }
