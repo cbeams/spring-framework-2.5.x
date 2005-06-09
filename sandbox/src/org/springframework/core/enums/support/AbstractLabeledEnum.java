@@ -17,7 +17,6 @@ package org.springframework.core.enums.support;
 
 import java.io.Serializable;
 
-import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.core.enums.LabeledEnumResolver;
 import org.springframework.util.Assert;
@@ -26,7 +25,7 @@ import org.springframework.util.Assert;
  * Abstract base superclass for LabeledEnum implementations.
  * @author Keith Donald
  */
-public abstract class AbstractLabeledEnum implements LabeledEnum, MessageSourceResolvable, Serializable {
+public abstract class AbstractLabeledEnum implements LabeledEnum, Serializable {
 
 	private String label;
 
@@ -73,34 +72,12 @@ public abstract class AbstractLabeledEnum implements LabeledEnum, MessageSourceR
 		return getType().hashCode() + getCode().hashCode();
 	}
 
-	/**
-	 * The enumeration key is used as the message key for internationalizing
-	 * enums.
-	 * @see org.springframework.context.MessageSourceResolvable#getCodes()
-	 */
-	public String[] getCodes() {
-		return new String[] { getKey() };
-	}
-
-	public Object[] getArguments() {
-		return null;
-	}
-
-	public String getDefaultMessage() {
-		if (label != null) {
-			return getLabel();
-		}
-		else {
-			return String.valueOf(getCode());
-		}
+	protected LabeledEnumResolver getEnumResolver() {
+		return getStaticEnumResolver();
 	}
 
 	protected final StaticLabeledEnumResolver getStaticEnumResolver() {
 		return StaticLabeledEnumResolver.instance();
-	}
-
-	protected LabeledEnumResolver getEnumResolver() {
-		return getStaticEnumResolver();
 	}
 
 	/*
