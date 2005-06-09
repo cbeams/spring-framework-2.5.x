@@ -83,7 +83,6 @@ public class BindingActionForm extends ActionForm {
 	}
 
 	public ActionErrors getActionErrors() {
-		assertErrorsSet();
 		ActionErrors actionErrors = new ActionErrors();
 		if (!hasErrors()) {
 			return actionErrors;
@@ -109,11 +108,6 @@ public class BindingActionForm extends ActionForm {
 			logger.debug("Final ActionErrors: " + actionErrors);
 		}
 		return actionErrors;
-	}
-
-	private void assertErrorsSet() {
-		Assert.notNull(this.errors,
-				"The errors instance must be set on this BindingActionForm in order to access form properties, however it is null.");
 	}
 
 	private Object[] resolveArgs(Object[] arguments) {
@@ -172,7 +166,6 @@ public class BindingActionForm extends ActionForm {
 	 * @return true if yes, false otherwise.
 	 */
 	public boolean hasTypeConversionError(String propertyPath) {
-		assertErrorsSet();
 		if (getErrors() != null) {
 			Errors errors = getErrors();
 			if (errors.hasFieldErrors(propertyPath)) {
@@ -189,7 +182,6 @@ public class BindingActionForm extends ActionForm {
 	 * @return the rejected value
 	 */
 	public Object getRejectedValue(String propertyPath) {
-		assertErrorsSet();
 		if (getErrors() != null) {
 			Errors errors = getErrors();
 			if (errors.hasFieldErrors(propertyPath)) {
@@ -208,8 +200,11 @@ public class BindingActionForm extends ActionForm {
 	 * @return The formatted property value
 	 */
 	public Object getFieldValue(String propertyPath) {
-		assertErrorsSet();
-		return getErrors().getFieldValue(propertyPath);
+		if (getErrors() != null) {
+			return getErrors().getFieldValue(propertyPath);
+		} else {
+			return null;
+		}
 	}
 
 	/**

@@ -168,7 +168,6 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 */
 	public static final String VALIDATOR_METHOD_PROPERTY = "validatorMethod";
 	
-
 	/**
 	 * The name the form object should be exposed under.
 	 */
