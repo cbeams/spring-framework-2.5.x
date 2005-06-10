@@ -24,6 +24,8 @@ package org.springframework.binding.convert;
 public interface ConversionService {
 
 	/**
+	 * Returns the class aliased by the given name--e.g "boolean" might return
+	 * java.lang.Boolean.
 	 * @param alias
 	 * @return the class with the given alias
 	 */
