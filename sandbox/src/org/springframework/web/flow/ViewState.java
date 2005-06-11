@@ -213,6 +213,13 @@ public class ViewState extends TransitionableState {
 		return viewDescriptor(context);
 	}
 	
+	/**
+	 * Returns the view descriptor that should be rendered by this
+	 * state for given execution context.
+	 * @param context the state context for the executing flow
+	 * @return a view descriptor containing model and view information needed to
+	 *         render the results of the state execution
+	 */
 	public ViewDescriptor viewDescriptor(StateContext context) {
 		if (isMarker()) {
 			if (logger.isDebugEnabled()) {
