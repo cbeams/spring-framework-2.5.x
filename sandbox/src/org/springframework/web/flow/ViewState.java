@@ -165,7 +165,7 @@ public class ViewState extends TransitionableState {
 
 	/**
 	 * Set the state to transition to if the setup criteria fails.
-	 * @param errorStateId the state id
+	 * @param setupErrorStateId the state id
 	 */
 	public void setSetupErrorStateId(String setupErrorStateId) {
 		this.setupErrorStateId = setupErrorStateId;

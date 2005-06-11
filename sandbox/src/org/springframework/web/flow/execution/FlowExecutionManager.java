@@ -136,7 +136,9 @@ public class FlowExecutionManager implements BeanFactoryAware {
 	 * @see #setFlow(Flow)
 	 * @see #setFlowLocator(FlowLocator)
 	 * @see #setListener(FlowExecutionListener)
-	 * @see #setListeners(FlowExecutionListener[])
+	 * @see #setListener(FlowExecutionListenerCriteria, FlowExecutionListener)
+	 * @see #setListeners(Collection)
+	 * @see #setListeners(FlowExecutionListenerCriteria, Collection)
 	 * @see #setStorage(FlowExecutionStorage) 
 	 * @see #setTransactionSynchronizer(TransactionSynchronizer)
 	 */
