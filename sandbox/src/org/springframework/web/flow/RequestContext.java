@@ -52,14 +52,19 @@ import org.springframework.binding.AttributeSource;
 public interface RequestContext {
 
 	/**
-	 * Returns the client event that originated (triggered) this request.
+	 * Returns the client event that originated (or triggered) this request.  This 
+	 * event may contain parameters provided as input by the client.  In addition,
+	 * this event may be downcastable to a specific event type for a specific client environment, like
+	 * a HttpServletEvent for servlets or a PortletEvent for portlets.  Such downcasting will give
+	 * you full access to a native HttpServletRequest, for example. Noting that, avoid coupling your
+	 * flow artifacts to a specific deployment where possible.
 	 * @return the originating event, the one that triggered the current
 	 *         execution request
 	 */
 	public Event getSourceEvent();
 
 	/**
-	 * Returns additional information about the executing flow.
+	 * Returns additional contextual information about the executing flow.
 	 * @return the flow execution context
 	 */
 	public FlowContext getFlowContext();
@@ -105,8 +110,8 @@ public interface RequestContext {
 	
 	/**
 	 * Returns the data model for this context, suitable for exposing to clients
-	 * (e.g. web views). Typically the model will contain the data available in
-	 * request scope and flow scope.
+	 * (e.g. web views). Typically the model will contain the union of the data
+	 * available in request scope and flow scope.
 	 * @return the model that can be exposed to a client
 	 */
 	public Map getModel();
