@@ -82,7 +82,7 @@ public interface FlowAttributeMapper {
 	 * added to flow scope of the child subflow session when the session is
 	 * spawned and activated.
 	 * @param context the request execution context, which gives access to the
-	 *        parent flow scope
+	 *        parent flow scope as well as request scope
 	 * @return a map of attributes (name=value pairs) to pass as input to the
 	 *         spawning subflow.
 	 */
@@ -93,7 +93,7 @@ public interface FlowAttributeMapper {
 	 * resuming parent flow session. This maps the <i>output</i> of the child
 	 * as new input to the resuming parent.
 	 * @param context the request execution context, which gives access to the
-	 *        subflow and parent flow scope
+	 *        ending subflow scope and resuming parent flow scope
 	 */
 	public void mapSubflowOutput(RequestContext context);
 }
