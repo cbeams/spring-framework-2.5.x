@@ -27,35 +27,68 @@ import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * A transitionable state that executes one or more actions when entered. If
- * more than one action is specified, they are executed in an ordered chain
+ * A transitionable state that executes one or more actions when entered.  
+ * When the action(s) are executed, this state responds to their result(s) to
+ * decide to go next.
+ * <p>
+ * If more than one action is configured, they are executed in an ordered chain
  * until one returns a result event that matches a valid state transition out of
  * this state. This is a form of the Chain of Responsibility (CoR) pattern.
  * <p>
- * As mentioned, the result of an action's execution is typically treated as a
- * contributing criterion for a state transition. In addition, anything else in
- * the Flow's <code>RequestContext</code> may be tested as part of custom
- * transitional criteria, allowing for sophisticated transition expressions.
+ * The result of an action's execution is treated as a contributing
+ * criterion for a state transition. In addition, anything else in the
+ * Flow's <code>RequestContext</code> may be tested as part of custom
+ * transitional criteria, allowing for sophisticated transition expressions 
+ * that reason on contextual state.
  * <p>
- * Each action executed by this action state may be first qualified with a set of
- * arbitrary properties. For example, an identifying name and description.
+ * Each action executed by this action state may be provisioned with a set of
+ * arbitrary properties.  These properties are made available to the action 
+ * at execution time.
  * <p>
- * By default, the 'name' property is used as a qualifier for a given action
- * result event. For example, if an action named <code>myAction</code> returns
- * a <code>success</code> result, a transition for event
- * <code>myAction.success</code> will be searched, and if found, executed. If
- * the action is not named, a transition for the base <code>success</code>
- * event will be searched, and if found, executed.
+ * Common action execution properties include:
  * <p>
- * Also, the value of the 'method' property is used by the <code>MultiAction</code>
- * implementation to dispatch calls on a target action instance to a particular
- * handler method.
+ * <table>
+ * <th>Property</th><th>Description</th>
+ * <tr><td valign="top">Name</td>
+ * <td>The 'name' property is used as a qualifier for action's result event.
+ * For example, if an action named <code>myAction</code> returns a <code>success</code>
+ * result, a transition for event <code>myAction.success</code> will be searched,
+ * and if found, executed. If the action is not named a transition for the base
+ * <code>success</code> event will be searched and if found, executed.
+ * <br>
+ * This is useful in situations where you want to execute actions in an ordered chain as part
+ * of one action state, and wish to transition on the result of the last one in the chain.
+ * For example:
+ * <pre>
+ * &lt;action-state id="setupForm"&gt; 
+ *     &lt;action name="setup" bean="myAction" method="setupForm"/&gt; 
+ *     &lt;action name="referenceData" bean="myAction" method="setupReferenceData"/&gt; 
+ *     &lt;transition on="referenceData.success" to="displayForm"/&gt; 
+ * &lt;/action-state&gt;
+ * </pre>
+ * The above will trigger the execution of the 'setup' action followed by the 'referenceData' action.  The
+ * flow will then respond to the referenceData 'success' event by transitioning to 'displayForm'.
+ * </td>
+ * <tr><td valign="top">Method</td>
+ * <td>
+ * The 'method' property is the name of the method on a <code>{@link org.springframework.web.flow.action.MultiAction}</code>
+ * implementation to call when this action is executed.  The named method must have the signature
+ * <code>public Event ${method}(RequestContext)</code>, for example a method property with value
+ * <code>setupForm</code> would bind to a method on the MultiAction with the signature:
+ * <code>public Event setupForm(RequestContext context)</code>.
+ * </td>
+ * </tr>
+ * </table>
+ * 
+ * @see org.springframework.web.flow.Action
+ * @see org.springframework.web.flow.action.MultiAction
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
  */
 public class ActionState extends TransitionableState {
 
+	
 	/**
 	 * The set of actions to be executed when this action state is entered.
 	 */
