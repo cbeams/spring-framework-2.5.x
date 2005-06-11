@@ -23,12 +23,13 @@ import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * A base superclass for state definitions. Each state is associated with
- * exactly one owning flow definition. Standard types of states include action
- * states, view states, subflow states, and end states.
+ * A point in a flow where something happens. What happens is determined by a 
+ * state's type. Standard types of states include action states, view states,
+ * subflow states, and end states.
  * <p>
- * Subclasses of this class capture all the configuration information needed for
- * a specific type of state.
+ * Each state is associated with exactly one owning flow definition.
+ * Specializations of this class capture all the configuration information needed for
+ * a specific type of state. 
  * <p>
  * Subclasses should implement the <code>doEnter</code> method to execute
  * the processing that should occur when this state is entered, acting on its
