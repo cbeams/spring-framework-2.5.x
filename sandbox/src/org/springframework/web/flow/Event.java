@@ -25,10 +25,10 @@ import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * Signals the occurence of an <i>event</i> that is relevant to the web flow
- * system. Each event has a string id. An event may optionally contain
- * information about the state in which it occured. Events may have parameters
- * that store arbitrary payload data.
+ * Signals the occurence of something the webflow system should respond to.
+ * Each event has a string id that provides a key for what happen: e.g "coinInserted", or "pinDropped".
+ * An event may optionally contain information about the state in which it occured, e.g "displayingVendingMachine",
+ * or "waitingForUser".  Events may have parameters that provide arbitrary payload data.
  * <p>
  * For example, a "submit" event might signal that a Submit button was pressed
  * in a web browser. A "success" event might signal an action executed
