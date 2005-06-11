@@ -22,9 +22,15 @@ import java.util.Map;
 import org.springframework.binding.AttributeSource;
 
 /**
- * Holder for a logical view name and the dynamic model data neccessary to
- * render it. It is expected that a client map this logical view descriptor to a
- * physical view template for rendering.
+ * Value object that provides clients with information about a logical view to render
+ * and the dynamic model data neccessary to render it. It is expected that
+ * clients map this view descriptor to a physical view template for rendering.
+ * <p>
+ * View descriptors are returned as a result of entering a ViewState or EndState.
+ * When a state of either of those types is entered and returns, the caller into the 
+ * webflow system is handed a fully-configured ViewDescriptor instance and is expected to
+ * present a screen to the user that allows them to interact at that point within
+ * the flow.
  * <p>
  * For readers familiar with Spring MVC, this class is very similiar to the
  * <code>ModelAndView</code> construct. This class is provided to prevent a

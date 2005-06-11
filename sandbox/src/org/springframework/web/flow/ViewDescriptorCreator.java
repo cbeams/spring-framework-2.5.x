@@ -21,8 +21,9 @@ package org.springframework.web.flow;
  * Note that this is a runtime factory! It is used at flow execution time by objects like the
  * <code>ViewState</code> to produce new <code>ViewDescriptor</code>s.
  * <p>
- * This allows easy insertion of dynamic view descriptor configuration logic, for example to
- * vary the view to render or the available model for rendering based on some context.
+ * This allows easy insertion of dynamic view descriptor configuration logic.  This alows you to
+ * determine the view to render or the available model data for rendering based on contextual 
+ * information.
  * 
  * @see org.springframework.web.flow.ViewDescriptor
  * @see org.springframework.web.flow.ViewState
