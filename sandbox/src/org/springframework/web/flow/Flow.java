@@ -304,8 +304,10 @@ public class Flow extends AnnotatedObject {
 	 */
 	public TransitionableState getTransitionableState(String stateId) throws IllegalStateException {
 		State state = getState(stateId);
-		Assert.state(state.isTransitionable(), "The state '" + stateId + "' of flow '" + getId()
+		if (state != null && !state.isTransitionable()) {
+			throw new IllegalArgumentException("The state '" + stateId + "' of flow '" + getId()
 				+ "' must be transitionable");
+		}
 		return (TransitionableState)state;
 	}	
 	
