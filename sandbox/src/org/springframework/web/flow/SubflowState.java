@@ -22,13 +22,19 @@ import org.springframework.core.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * State that spawns a subflow when executed.
+ * A transitionable state that spawns a subflow when executed.  When the subflow this
+ * state spawns ends, the ending result is used as grounds for a state transition out
+ * of this state.
  * <p>
- * A sub flow state has the ability to map data between the parent and sub flow.
- * See the {@link FlowAttributeMapper} interface definition for info on how to
- * do this.
+ * A sub flow state may be configured to map input data from its flow -- acting as the
+ * parent flow -- down to the subflow when the subflow is spawned.  In addition, output
+ * data produced by the subflow may be mapped up to the parent flow when the subflow ends
+ * and the parent flow resumes.  See the {@link FlowAttributeMapper} interface definition
+ * for more information on how to do this. The logic for ending a subflow is located in the
+ * {@link EndState} implementation.
  * 
  * @see org.springframework.web.flow.FlowAttributeMapper
+ * @see org.springframework.web.flow.EndState
  * 
  * @author Keith Donald
  * @author Erwin Vervaet
