@@ -22,13 +22,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.binding.AttributeMapper;
 import org.springframework.binding.MutableAttributeSource;
 import org.springframework.binding.support.Mapping;
 import org.springframework.binding.support.ParameterizableAttributeMapper;
+import org.springframework.core.ToStringCreator;
 import org.springframework.web.flow.FlowAttributeMapper;
 import org.springframework.web.flow.RequestContext;
 
@@ -239,7 +239,7 @@ public class ParameterizableFlowAttributeMapper implements FlowAttributeMapper, 
 	}
 	
 	public String toString() {
-		return new ToStringBuilder(this).append("inputMapper", inputMapper).
+		return new ToStringCreator(this).append("inputMapper", inputMapper).
 			append("outputMapper", outputMapper).toString();
 	}
 }
