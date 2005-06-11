@@ -108,6 +108,11 @@ public class AttributeMapperAction extends AbstractAction {
 		return success();
 	}
 	
+	/**
+	 * Returns a map containing extra data available during attribute mapping.
+	 * The default implementation just returns an empty map. Subclasses
+	 * can override this if necessary.
+	 */
 	protected Map getMappingContext(RequestContext context) {
 		return Collections.EMPTY_MAP;
 	}
