@@ -22,9 +22,10 @@ import org.springframework.util.Assert;
 
 /**
  * Terminates an active web flow session when entered. If the terminated session
- * is the root flow session, the entire flow execution ends. If the terminated
- * session is a subflow session, control returns to the parent flow session, and
- * this state is used as grounds for the transition in that resuming parent.
+ * is the root flow session, the entire flow execution ends.  On the other hand, 
+ * if the terminated session was acting as a subflow, the governing flow execution
+ * continues and control is returned to the parent flow.  In that case, this state is
+ * treated as ending result event the resuming parent flow is expected to respond to.
  * <p>
  * An end state may optionally be configured with the name of a view. This view
  * will be rendered if the end state terminates the entire flow execution.
@@ -37,6 +38,7 @@ import org.springframework.util.Assert;
  * responsibility falls on the parent flow.
  * 
  * @see org.springframework.web.flow.ViewDescriptorCreator
+ * @see org.springframework.web.flow.SubflowState
  * 
  * @author Keith Donald
  * @author Colin Sampaleanu
