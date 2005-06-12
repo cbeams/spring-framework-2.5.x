@@ -39,7 +39,6 @@ public class FormObjectAccessor {
 	 */
 	public static final String FORM_OBJECT_ALIAS = "#formObject";
 	
-
 	private RequestContext context;
 
 	/**

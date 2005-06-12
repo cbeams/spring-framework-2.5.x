@@ -59,9 +59,9 @@ import org.springframework.web.flow.RequestContext;
  * <p>
  * A typical use of the MultiAction is to combine all CRUD operations for a
  * certain domain object into a single controller. Another typical use is to
- * centralize form setup and submit logic into one place. This action also
- * allows you to reduce the number of action beans you have to define and
- * configure.
+ * centralize form setup and submit logic into one place, or command logic for
+ * an entire flow in once place. This action allows you to reduce the
+ * number of action beans you have to define and configure.
  * <p>
  * <b>Exposed configuration properties:</b> <br>
  * <table border="1">

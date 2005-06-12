@@ -109,7 +109,7 @@ public class DelegatingAction implements Action, BeanNameAware {
 	 */
 	public Event execute(RequestContext context) throws Exception {
 		Object locator = (ApplicationContext)context.getFlowScope().getRequiredAttribute(getActionLocatorAttribute());
-		Action action;
+		Action action = null;
 		if (locator instanceof ActionLocator) {
 			action = ((ActionLocator)locator).getAction(actionId);
 		}
@@ -117,8 +117,13 @@ public class DelegatingAction implements Action, BeanNameAware {
 			action = (Action)((BeanFactory)locator).getBean(actionId, Action.class);
 		}
 		else {
-			throw new IllegalStateException("Attribute with name '" + actionLocatorAttributeName
-					+ "' must be an ActionLocator or a BeanFactory but was a " + locator);
+			if (action != null) {
+				throw new IllegalStateException("Attribute with name '" + actionLocatorAttributeName
+						+ "' must be an ActionLocator or a BeanFactory but was an unexpected instance " + locator);
+			} else {
+				throw new IllegalStateException("Attribute with name '" + actionLocatorAttributeName
+						+ "' must be an ActionLocator or a BeanFactory but was [null]");
+			}
 		}
 		return action.execute(context);
 	}

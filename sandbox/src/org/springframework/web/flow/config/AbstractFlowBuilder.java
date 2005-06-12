@@ -48,20 +48,20 @@ import org.springframework.web.flow.execution.ServiceLookupException;
  * <pre>
  * public class CustomerDetailFlowBuilder extends AbstractFlowBuilder {
  *     protected String flowId() {
- *         return &quot;customer.Detail&quot;;
+ *         return &quot;customerDetails&quot;;
  *     }
  * 
  *     public void buildStates() {
  *         // get customer information
  *         addActionState(&quot;getDetails&quot;,
  *             action(GetCustomerAction.class, AutowireMode.BY_TYPE),
- *             on(success(), &quot;viewDetails&quot;));
+ *             on(success(), &quot;displayDetails&quot;));
  *         // view customer information               
- *         addViewState(&quot;viewDetails&quot;, &quot;customer.Detail.view&quot;,
+ *         addViewState(&quot;displayDetails&quot;, &quot;customerDetails&quot;,
  *             on(submit(), &quot;bindAndValidate&quot;);
  *         // bind and validate customer information updates 
  *         addActionState(&quot;bindAndValidate&quot;,
- *             action(&quot;customer.Detail.bindAndValidate&quot;),
+ *             method("bindAndValidate", action(&quot;customerAction&quot;)),
  *             new Transition[] {
  *                 on(error(), &quot;viewDetails&quot;),
  *                 on(success(), &quot;finish&quot;)
@@ -73,7 +73,7 @@ import org.springframework.web.flow.execution.ServiceLookupException;
  * </pre>
  * 
  * What this Java-based FlowBuilder implementation does is add four states to a
- * flow identified as "customer.Detail". These include a "get"
+ * flow identified as "customerDetails". These include a "get"
  * <code>ActionState</code> (the start state), a <code>ViewState</code>
  * state, a "bind and validate" <code>ActionState</code>, and an end marker
  * state (<code>EndState</code>).
@@ -87,38 +87,40 @@ import org.springframework.web.flow.execution.ServiceLookupException;
  * entered. In this example, that <code>Action</code> will go out to the DB,
  * load the Customer, and put it in the Flow's request context.
  * <li>A <code>success</code> transition to a default view state, called
- * <code>viewDetails</code>. This means when the get <code>Action</code>
- * returns a <code>success</code> result event (aka outcome), the <code>viewDetails</code>
+ * <code>displayDetails</code>. This means when the get <code>Action</code>
+ * returns a <code>success</code> result event (aka outcome), the <code>displayDetails</code>
  * state will be entered.
  * <li>It will act as the start state for this flow (by default, the first
  * state added to a flow during the build process is treated as the start
  * state).
  * </ol>
  * 
- * The second state, a view state, will be identified as <code>viewDetails</code>.
+ * The second state, a view state, will be identified as <code>displayDetails</code>.
  * This view state will automatically be configured with the following defaults:
  * <ol>
- * <li>A view name called <code>customer.Detail.view</code> -- this is the
+ * <li>A view name called <code>customerDetails</code> -- this is the
  * logical name of a view resource. This logical view name gets mapped to a
  * physical view resource (jsp, etc.) by the calling front controller (via a
  * Spring view resolver, or a Struts action forward, for example).
  * <li>A <code>submit</code> transition to a bind and validate action state,
- * indentified by the default id <code>"bindAndValidate"</code>. This means
+ * indentified by the default id <code>bindAndValidate</code>. This means
  * when a <code>submit</code> event is signaled by the view (for example, on a
  * submit button click), the bindAndValidate action state will be entered and
- * the <code>customer.Detail.bindAndValidate</code> <code>Action</code>
- * implementation will be executed.
+ * the <code>bindAndValidate</code> method of the 
+ * <code>customerDetailsAction</code> <code>Action</code> implementation
+ * will be executed.
  * </ol>
  * 
  * The third state, an action state, will be indentified as <code>
  * bindAndValidate</code>. This action state will automatically be configured
  * with the following defaults:
  * <ol>
- * <li>An action bean named <code>customer.Detail.bindAndValidate</code> --
+ * <li>An action bean named <code>customerAction</code> --
  * this is the name of the <code>Action</code> implementation exported in the application
  * context that will execute when this state is entered. In this example, the
- * <code>Action</code> will bind form input in the HTTP request to a backing
- * Customer form object, validate it, and update the DB.
+ * <code>Action</code> has a "bindAndValidate" method that
+ * will bind form input in the HTTP request to a backing Customer form
+ * object, validate it, and update the DB.
  * <li>A <code>success</code> transition to a default end state, called
  * <code>finish</code>. This means if the <code>Action</code> returns a
  * <code>success</code> result, the <code>finish</code> end state will be
