@@ -71,9 +71,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * request, to avoid initialization order issues (when using ContextLoaderServlet,
  * the root application context will get initialized <i>after</i> this filter).
  *
- * <p><b>NOTE</b>: This filter will by default not flush the Hibernate session, as
- * it assumes to be used in combination with business layer transactions that care for
- * the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
+ * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
+ * as it assumes to be used in combination with business layer transactions that care
+ * for the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
  * filter to flush after completed request processing, override closeSession and
  * invoke flush on the Session before closing it. Note that closeSession will just
  * be invoked in single session mode!
@@ -152,7 +152,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				participate = true;
 			}
 			else {
-				logger.debug("Opening single Hibernate session in OpenSessionInViewFilter");
+				logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
 				session = getSession(sessionFactory);
 				TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
 			}
@@ -177,7 +177,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				if (isSingleSession()) {
 					// single session mode
 					TransactionSynchronizationManager.unbindResource(sessionFactory);
-					logger.debug("Closing single Hibernate session in OpenSessionInViewFilter");
+					logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
 					try {
 						closeSession(session, sessionFactory);
 					}
@@ -214,7 +214,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 */
 	protected SessionFactory lookupSessionFactory() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Using session factory '" + getSessionFactoryBeanName() + "' for OpenSessionInViewFilter");
+			logger.debug("Using SessionFactory '" + getSessionFactoryBeanName() + "' for OpenSessionInViewFilter");
 		}
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 		return (SessionFactory) wac.getBean(getSessionFactoryBeanName(), SessionFactory.class);

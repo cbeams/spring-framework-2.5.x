@@ -65,7 +65,7 @@ import org.springframework.web.servlet.ModelAndView;
  * no Open Session in View in that respect, while still allowing for lazy loading
  * in views (but not providing a first-level cache for the entire request).
  *
- * <p><b>NOTE</b>: This interceptor will by default not flush the Hibernate session,
+ * <p><b>NOTE</b>: This interceptor will by default <i>not</i> flush the Hibernate Session,
  * as it assumes to be used in combination with business layer transactions that care
  * for the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
  * interceptor to flush after the handler has been invoked but before view rendering,
@@ -146,7 +146,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 		else {
 			if (isSingleSession()) {
 				// single session mode
-				logger.debug("Opening single Hibernate session in OpenSessionInViewInterceptor");
+				logger.debug("Opening single Hibernate Session in OpenSessionInViewInterceptor");
 				Session session = SessionFactoryUtils.getSession(
 						getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
 				if (getFlushMode() == FLUSH_NEVER) {
@@ -178,7 +178,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 			// only potentially flush in single session mode
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
-			logger.debug("Flushing single Hibernate session in OpenSessionInViewInterceptor");
+			logger.debug("Flushing single Hibernate Session in OpenSessionInViewInterceptor");
 			try {
 				flushIfNecessary(sessionHolder.getSession(), false);
 			}
@@ -216,7 +216,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 				// single session mode
 				SessionHolder sessionHolder =
 						(SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
-				logger.debug("Closing single Hibernate session in OpenSessionInViewInterceptor");
+				logger.debug("Closing single Hibernate Session in OpenSessionInViewInterceptor");
 				SessionFactoryUtils.releaseSession(sessionHolder.getSession(), getSessionFactory());
 			}
 			else {
