@@ -26,6 +26,9 @@ import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 import org.springframework.dao.DataAccessException;
@@ -43,7 +46,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * @see HibernateInterceptor
  * @see #setFlushMode
  */
-public abstract class HibernateAccessor implements InitializingBean {
+public abstract class HibernateAccessor implements InitializingBean, BeanFactoryAware {
 
 	/**
 	 * Never flush is a good strategy for read-only units of work.
@@ -86,13 +89,19 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 	private SessionFactory sessionFactory;
 
-	private Interceptor entityInterceptor;
+	private Object entityInterceptor;
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
 
 	private int flushMode = FLUSH_AUTO;
 
 	private String[] filterNames;
+
+	/**
+	 * Just needed for entityInterceptorBeanName.
+	 * @see #setEntityInterceptorBeanName
+	 */
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -112,6 +121,24 @@ public abstract class HibernateAccessor implements InitializingBean {
 	}
 
 	/**
+	 * Set the bean name of a Hibernate entity interceptor that allows to inspect
+	 * and change property values before writing to and reading from the database.
+	 * Will get applied to any new Session created by this transaction manager.
+	 * <p>Requires the bean factory to be known, to be able to resolve the bean
+	 * name to an interceptor instance on session creation. Typically used for
+	 * prototype interceptors, i.e. a new interceptor instance per session.
+	 * <p>Can also be used for shared interceptor instances, but it is recommended
+	 * to set the interceptor reference directly in such a scenario.
+	 * @param entityInterceptorBeanName the name of the entity interceptor in
+	 * the bean factory
+	 * @see #setBeanFactory
+	 * @see #setEntityInterceptor
+	 */
+	public void setEntityInterceptorBeanName(String entityInterceptorBeanName) {
+		this.entityInterceptor = entityInterceptorBeanName;
+	}
+
+	/**
 	 * Set a Hibernate entity interceptor that allows to inspect and change
 	 * property values before writing to and reading from the database.
 	 * Will get applied to any <b>new</b> Session created by this object.
@@ -120,6 +147,7 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 * HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
 	 * It's preferable to set it on LocalSessionFactoryBean or HibernateTransactionManager
 	 * to avoid repeated configuration and guarantee consistent behavior in transactions.
+	 * @see #setEntityInterceptorBeanName
 	 * @see LocalSessionFactoryBean#setEntityInterceptor
 	 * @see HibernateTransactionManager#setEntityInterceptor
 	 */
@@ -129,9 +157,22 @@ public abstract class HibernateAccessor implements InitializingBean {
 
 	/**
 	 * Return the current Hibernate entity interceptor, or null if none.
+	 * Resolves an entity interceptor bean name via the bean factory,
+	 * if necessary.
+	 * @throws IllegalStateException if bean name specified but no bean factory set
+	 * @throws org.springframework.beans.BeansException if bean name resolution via the bean factory failed
+	 * @see #setEntityInterceptor
+	 * @see #setEntityInterceptorBeanName
+	 * @see #setBeanFactory
 	 */
-	public Interceptor getEntityInterceptor() {
-		return entityInterceptor;
+	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
+		if (this.entityInterceptor instanceof String) {
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
+			}
+			return (Interceptor) this.beanFactory.getBean((String) this.entityInterceptor, Interceptor.class);
+		}
+		return (Interceptor) this.entityInterceptor;
 	}
 
 	/**
@@ -228,6 +269,15 @@ public abstract class HibernateAccessor implements InitializingBean {
 	 */
 	public String[] getFilterNames() {
 		return filterNames;
+	}
+
+	/**
+	 * The bean factory just needs to be known for resolving entity interceptor
+	 * bean names. It does not need to be set for any other mode of operation.
+	 * @see #setEntityInterceptorBeanName
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 	public void afterPropertiesSet() {
