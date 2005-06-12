@@ -167,6 +167,7 @@ public class FormAction extends MultiAction implements InitializingBean {
 	 */
 	public static final String VALIDATOR_METHOD_PROPERTY = "validatorMethod";
 	
+	
 	/**
 	 * The name the form object should be exposed under.
 	 */
@@ -334,6 +335,14 @@ public class FormAction extends MultiAction implements InitializingBean {
 	}
 
 	/**
+	 * Returns if request parameters should be bound to the form object during
+	 * the {@link #setupForm(RequestContext)} action. Defaults to false.
+	 */
+	protected boolean isBindOnSetupForm(RequestContext context) {
+		return bindOnSetupForm;
+	}
+
+	/**
 	 * Set if request parameters should be bound to the form object during the
 	 * {@link #setupForm(RequestContext)} action.
 	 */
@@ -406,27 +415,22 @@ public class FormAction extends MultiAction implements InitializingBean {
 		if (formObject == null) {
 			formObject = createFormObject(context);
 			accessor.exposeFormObject(formObject, getFormObjectName(), getFormObjectScope());
-			if (bindOnSetupForm(context)) {
+			if (isBindOnSetupForm(context)) {
 				return doBindAndValidate(context, formObject);
-			} else {
+			}
+			else {
 				accessor.exposeErrors(formObject, getFormObjectName(), getErrorsScope());
 				return success();
 			}
-		} else {
-			if (bindOnSetupForm(context)) {
+		}
+		else {
+			if (isBindOnSetupForm(context)) {
 				return doBindAndValidate(context, formObject);
-			} else {
+			}
+			else {
 				return success();
 			}	
 		}
-	}
-
-	/**
-	 * Returns if request parameters should be bound to the form object during
-	 * the {@link #setupForm(RequestContext)} action. Defaults to false.
-	 */
-	protected boolean bindOnSetupForm(RequestContext context) {
-		return bindOnSetupForm;
 	}
 
 	/**
@@ -443,6 +447,9 @@ public class FormAction extends MultiAction implements InitializingBean {
 		return doBindAndValidate(context, loadFormObject(context));
 	}
 
+	/**
+	 * Internal helper method to do bind and validate logic.
+	 */
 	private Event doBindAndValidate(RequestContext context, Object formObject) throws Exception {
 		DataBinder binder = createBinder(context, formObject);
 		Event result = bindAndValidateInternal(context, binder);
@@ -488,7 +495,8 @@ public class FormAction extends MultiAction implements InitializingBean {
 		Object formObject = new FormObjectAccessor(context).getFormObject();
 		if (formObject != null) {
 			return formObject;
-		} else {
+		}
+		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new form object '" + getFormObjectName() + "'");
 			}
