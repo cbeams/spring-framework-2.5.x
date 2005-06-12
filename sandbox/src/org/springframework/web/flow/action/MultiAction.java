@@ -18,6 +18,7 @@ package org.springframework.web.flow.action;
 import org.springframework.binding.AttributeSource;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
+import org.springframework.web.flow.util.DispatchMethodInvoker;
 
 /**
  * Action implementation that bundles many action execution methods into a

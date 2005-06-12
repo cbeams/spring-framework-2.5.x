@@ -31,6 +31,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.ScopeType;
+import org.springframework.web.flow.util.DispatchMethodInvoker;
 
 /**
  * Multi-action that implements logic dealing with input forms: form setup and

@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 import org.springframework.web.flow.Scope;
+import org.springframework.web.flow.util.RandomGuid;
 
 /**
  * Application transaction synchronizer implementation that uses a

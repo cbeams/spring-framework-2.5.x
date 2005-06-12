@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.web.flow.action;
+package org.springframework.web.flow.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  * Invoker and cache for dispatch methods that all share the same target object.
  * The dispatch methods typically share the same form, but multiple exist per target
  * object, and they only differ in name.
+ * 
  * @author Keith Donald
  */
 public class DispatchMethodInvoker {
@@ -34,7 +35,7 @@ public class DispatchMethodInvoker {
 	/**
 	 * The target object to cache methods on.
 	 */
-	private Object target;
+	private Object target = this;
 
 	/**
 	 * The method parameter types describing the form of the dispatcher methods.
@@ -59,7 +60,8 @@ public class DispatchMethodInvoker {
 			String methodName = (String)key;
 			try {
 				return getTarget().getClass().getMethod(methodName, parameterTypes);
-			} catch (NoSuchMethodException e) {
+			}
+			catch (NoSuchMethodException e) {
 				throw new MethodLookupException("Unable to resolve " + getTypeCaption() + " method with name '"
 						+ methodName + "' and signature '" + getSignature(methodName)
 						+ "'; make sure the method name is correct "
@@ -69,15 +71,23 @@ public class DispatchMethodInvoker {
 	};
 
 	/**
-	 * Creates a still-to-be-configured dispatch method invoker. 
+	 * Creates a still-to-be-configured dispatch method invoker.
+	 * 
+	 * @see #setParameterTypes(Class[])
+	 * @see #setReturnType(Class)
+	 * @see #setTypeCaption(String)
+	 * @see #setTarget(Object)
 	 */
 	public DispatchMethodInvoker() {
-
 	}
 
 	/**
 	 * Creates a dispatch method invoker.
-	 * @param the parameter types defining the form of the dispatch method
+	 * @param parameterTypes the parameter types defining the form of the
+	 *        dispatch methods
+	 * @param returnType the return type of the dispatch methods, use null for void
+	 * @param typeCaption a description of the method type
+	 * @see #setTarget(Object)
 	 */
 	public DispatchMethodInvoker(Class[] parameterTypes, Class returnType, String typeCaption) {
 		setParameterTypes(parameterTypes);
@@ -88,7 +98,10 @@ public class DispatchMethodInvoker {
 	/**
 	 * Creates a dispatch method invoker.
 	 * @param target the object
-	 * @param the parameter types defining the form of the dispatch method
+	 * @param parameterTypes the parameter types defining the form of the
+	 *        dispatch methods
+	 * @param returnType the return type of the dispatch methods, use null for void
+	 * @param typeCaption a description of the method type
 	 */
 	public DispatchMethodInvoker(Object target, Class[] parameterTypes, Class returnType, String typeCaption) {
 		setTarget(target);
@@ -108,7 +121,7 @@ public class DispatchMethodInvoker {
 	}
 
 	/**
-	 * @param parameterTypes
+	 * Set the parameter types defining the form of the dispatch methods.
 	 */
 	public void setParameterTypes(Class[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
@@ -117,14 +130,14 @@ public class DispatchMethodInvoker {
 
 	/**
 	 * Sets the expected return type for the dispatch methods.
-	 * @param returnType The expected return type
+	 * @param returnType the expected return type, or null for void
 	 */
 	public void setReturnType(Class returnType) {
 		this.returnType = returnType;
 	}
 
 	/**
-	 * @param methodTypeCaption The methodTypeCaption to set.
+	 * Set the method type description (e.g. "action").
 	 */
 	public void setTypeCaption(String typeCaption) {
 		this.typeCaption = typeCaption;
@@ -139,13 +152,17 @@ public class DispatchMethodInvoker {
 	}
 
 	/**
-	 * Returns the parameter types of describing the form of the dispatch method.
+	 * Returns the parameter types describing the form of the dispatch method.
 	 * @return the parameter types
 	 */
 	public Class[] getParameterTypes() {
 		return parameterTypes;
 	}
 
+	/**
+	 * Convenience method that returns the parameter types describing the form of
+	 * the dispatch method as a string.
+	 */
 	protected String getParameterTypesString() {
 		StringBuffer parameterTypesString = new StringBuffer();
 		for (int i = 0; i < parameterTypes.length; i++) {
@@ -165,9 +182,14 @@ public class DispatchMethodInvoker {
 		return returnType;
 	}
 
+	/**
+	 * Convenience method that returns the return type of the dispatch methods
+	 * as a string.
+	 */
 	protected String getReturnTypeString() {
 		return (returnType != null ? returnType.getName() : "void");
 	}
+	
 	/**
 	 * Returns a optional description of the type of method resolved by this cache.
 	 * @return the method type description
@@ -176,13 +198,17 @@ public class DispatchMethodInvoker {
 		return typeCaption;
 	}
 
+	/**
+	 * Returns the signature of the dispatch methods invoked by this class.
+	 * @param methodName name of the dispatch method
+	 */
 	protected String getSignature(String methodName) {
 		return "public " + getReturnTypeString() + " " + methodName + "(" + getParameterTypesString() + ");";
 	}
 	
 	/**
 	 * Get a handle to the method of the specified name, with the signature defined by the
-	 * configured parameterTypes.
+	 * configured parameter types and return type.
 	 * @param methodName the method name
 	 * @return the method
 	 */
@@ -199,6 +225,13 @@ public class DispatchMethodInvoker {
 		}
 	}
 
+	/**
+	 * Dispatch a call with given arguments to named dispatcher method.
+	 * @param methodName the name of the method to invoke
+	 * @param arguments the arguments to pass to the method
+	 * @return the result of the method invokation
+	 * @throws Exception when the invoked method throws an exception
+	 */
 	public Object dispatch(String methodName, Object[] arguments) throws Exception {
 		try {
 			Method dispatchMethod = getDispatchMethod(methodName);
@@ -210,7 +243,8 @@ public class DispatchMethodInvoker {
 						+ result.getClass());
 			}
 			return result;
-		} catch (InvocationTargetException e) {
+		}
+		catch (InvocationTargetException e) {
 			Throwable t = e.getTargetException();
 			if (t instanceof Exception) {
 				throw (Exception)e.getTargetException();

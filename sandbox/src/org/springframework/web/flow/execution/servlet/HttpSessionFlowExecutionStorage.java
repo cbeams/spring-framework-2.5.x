@@ -26,7 +26,7 @@ import org.springframework.web.flow.execution.FlowExecution;
 import org.springframework.web.flow.execution.FlowExecutionStorage;
 import org.springframework.web.flow.execution.FlowExecutionStorageException;
 import org.springframework.web.flow.execution.NoSuchFlowExecutionException;
-import org.springframework.web.flow.execution.RandomGuid;
+import org.springframework.web.flow.util.RandomGuid;
 import org.springframework.web.util.WebUtils;
 
 /**
