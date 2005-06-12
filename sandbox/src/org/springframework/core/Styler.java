@@ -104,7 +104,7 @@ public class Styler {
 	 * toString styling conventions.
 	 * @author Keith Donald
 	 */
-	public static class SpringStylingStrategy implements StylingStrategy, Visitor {
+	public static class SpringStylingStrategy implements StylingStrategy {
 
 		private static final String EMPTY = "[empty]";
 

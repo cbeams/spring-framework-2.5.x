@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util;
+package org.springframework.core;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -25,21 +25,21 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.ToStringCreator;
+import org.springframework.util.Assert;
 
 /**
- * A simple template encapsulating the workflow for caching expensive values in
- * a map. Supports caching weak or strong keys.
+ * A simple decorator encapsulating the workflow for caching expensive values in
+ * a target map. Supports caching weak or strong keys.
  * <p>
- * This class is an abstract template; caching map implementations should subclass
+ * This class is also an abstract template; caching map implementations should subclass
  * and override the <code>create(key)</code> method which encapsulates new
  * expensive object creation.
  * 
  * @author Keith Donald
  */
-public abstract class CachingMapTemplate implements Map, Serializable {
+public abstract class CachingMapDecorator implements Map, Serializable {
 	
-	protected final Log logger = LogFactory.getLog(CachingMapTemplate.class);
+	protected final Log logger = LogFactory.getLog(CachingMapDecorator.class);
 
 	private static Object NULL_VALUE = new Object();
 
@@ -48,7 +48,7 @@ public abstract class CachingMapTemplate implements Map, Serializable {
 	/**
 	 * Creates a caching map template; defaults to strong keys.
 	 */
-	public CachingMapTemplate() {
+	public CachingMapDecorator() {
 		this(false);
 	}
 
@@ -57,7 +57,7 @@ public abstract class CachingMapTemplate implements Map, Serializable {
 	 * 
 	 * @param weakKeys Use weak references for keys.
 	 */
-	public CachingMapTemplate(boolean weakKeys) {
+	public CachingMapDecorator(boolean weakKeys) {
 		this.map = weakKeys ? (Map)new WeakHashMap() : new HashMap();
 		this.map = Collections.synchronizedMap(this.map);
 	}
@@ -68,7 +68,7 @@ public abstract class CachingMapTemplate implements Map, Serializable {
 	 * @param weakKeys Use weak references for keys.
 	 * @param size The initial cache size.
 	 */
-	public CachingMapTemplate(boolean weakKeys, int size) {
+	public CachingMapDecorator(boolean weakKeys, int size) {
 		this.map = weakKeys ? (Map)new WeakHashMap(size) : new HashMap(size);
 		this.map = Collections.synchronizedMap(this.map);
 	}
@@ -78,7 +78,7 @@ public abstract class CachingMapTemplate implements Map, Serializable {
 	 * 
 	 * @param map The map
 	 */
-	public CachingMapTemplate(Map map) {
+	public CachingMapDecorator(Map map) {
 		Assert.notNull(map, "Map cannot be null");
 		this.map = map;
 	}

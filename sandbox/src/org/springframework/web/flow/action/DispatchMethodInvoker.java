@@ -13,13 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util;
+package org.springframework.web.flow.action;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import org.springframework.core.CachingMapDecorator;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.util.Assert;
 
 /**
  * Invoker and cache for dispatch methods that all share the same target object.
@@ -52,7 +54,7 @@ public class DispatchMethodInvoker {
 	/**
 	 * The resolved method cache.
 	 */
-	private Map methodCache = new CachingMapTemplate() {
+	private Map methodCache = new CachingMapDecorator() {
 		public Object create(Object key) {
 			String methodName = (String)key;
 			try {

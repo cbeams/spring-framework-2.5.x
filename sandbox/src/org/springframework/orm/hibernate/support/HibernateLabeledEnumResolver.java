@@ -18,11 +18,11 @@ package org.springframework.orm.hibernate.support;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.closure.support.Block;
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.core.enums.LabeledEnumResolver;
 import org.springframework.dao.support.DataAccessUtils;
@@ -84,12 +84,11 @@ public class HibernateLabeledEnumResolver implements LabeledEnumResolver {
 	public Map getLabeledEnumMap(Class type) {
 		Collection all = getLabeledEnumCollection(type);
 		final Map map = new HashMap(all.size());
-		new Block() {
-			protected void handle(Object o) {
-				LabeledEnum ce = (LabeledEnum)o;
-				map.put(ce.getCode(), ce);
-			}
-		}.forEach(all);
+		Iterator it = all.iterator();
+		while (it.hasNext()) {
+			LabeledEnum ce = (LabeledEnum)it.next();
+			map.put(ce.getCode(), ce);
+		}
 		return map;
 	}
 }

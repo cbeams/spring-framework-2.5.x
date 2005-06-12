@@ -23,7 +23,6 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.CachingMapTemplate;
 
 /**
  * Helper implementation of a reflective visitor.
@@ -51,7 +50,7 @@ public final class ReflectiveVisitorSupport {
 
 	private static final String VISIT_NULL = "visitNull";
 
-	private CachingMapTemplate visitorClassVisitMethods = new CachingMapTemplate() {
+	private CachingMapDecorator visitorClassVisitMethods = new CachingMapDecorator() {
 		public Object create(Object key) {
 			return new ClassVisitMethods((Class)key);
 		}
@@ -65,7 +64,7 @@ public final class ReflectiveVisitorSupport {
 
 		private Method defaultVisitMethod;
 
-		private CachingMapTemplate visitMethodCache = new CachingMapTemplate() {
+		private CachingMapDecorator visitMethodCache = new CachingMapDecorator() {
 			public Object create(Object argumentClazz) {
 				if (argumentClazz == null) {
 					return findNullVisitorMethod();
@@ -187,41 +186,34 @@ public final class ReflectiveVisitorSupport {
 	 * @param argument The argument to dispatch, or a instanceof Vistable
 	 * @throws IllegalArgumentException if the visitor parameter is null
 	 */
-	public final Object invokeVisit(Visitor visitor, Object argument) {
+	public final Object invokeVisit(Object visitor, Object argument) {
 		Assert.notNull(visitor, "The visitor to visit is required");
-		if (argument instanceof Visitable) {
-			// trigger call back on visitor by invoking accept
-			callAccept((Visitable)argument, visitor);
+		// perform call back on the visitor by reflection
+		Method method = getMethod(visitor.getClass(), argument);
+		if (method == null) {
+			logger.warn("No method found by reflection for visitor class '" + visitor.getClass()
+					+ "' and argument of type '" + (argument != null ? argument.getClass() : null) + "'");
 			return null;
 		}
-		else {
-			// perform call back on the visitor by reflection
-			Method method = getMethod(visitor.getClass(), argument);
-			if (method == null) {
-				logger.warn("No method found by reflection for visitor class '" + visitor.getClass()
-						+ "' and argument of type '" + (argument != null ? argument.getClass() : null) + "'");
-				return null;
+		try {
+			Object[] args = null;
+			if (argument != null) {
+				args = new Object[] { argument };
 			}
-			try {
-				Object[] args = null;
-				if (argument != null) {
-					args = new Object[] { argument };
-				}
-				if (!Modifier.isPublic(method.getModifiers()) && method.isAccessible() == false) {
-					method.setAccessible(true);
-				}
-				return method.invoke(visitor, args);
+			if (!Modifier.isPublic(method.getModifiers()) && method.isAccessible() == false) {
+				method.setAccessible(true);
+			}
+			return method.invoke(visitor, args);
 
-			}
-			catch (InvocationTargetException e) {
-				logger.error("Invocation target exception invoking method '" + method.getName() + "(" + argument + ")@"
-						+ visitor.getClass() + "'" + e.getTargetException());
-				throw new ReflectiveDispatchException("Exception occured invoking method '" + method.getName()
-						+ "' on visitor", e);
-			}
-			catch (Exception e) {
-				throw new ReflectiveDispatchException("Unable to invoke visit method on visitor", e);
-			}
+		}
+		catch (InvocationTargetException e) {
+			logger.error("Invocation target exception invoking method '" + method.getName() + "(" + argument + ")@"
+					+ visitor.getClass() + "'" + e.getTargetException());
+			throw new ReflectiveDispatchException("Exception occured invoking method '" + method.getName()
+					+ "' on visitor", e);
+		}
+		catch (Exception e) {
+			throw new ReflectiveDispatchException("Unable to invoke visit method on visitor", e);
 		}
 	}
 
@@ -234,16 +226,5 @@ public final class ReflectiveVisitorSupport {
 	private Method getMethod(Class visitorClass, Object argument) {
 		ClassVisitMethods visitMethods = (ClassVisitMethods)visitorClassVisitMethods.get(visitorClass);
 		return visitMethods.getVisitMethod((argument != null ? argument.getClass() : null));
-	}
-
-	/**
-	 * Call the accept(visitor) method on the visitable object, passing in the
-	 * visitor (the first of the double-dispatch.)
-	 * 
-	 * @param visitable The vistable (the type)
-	 * @param visitor The visitor (the algorithm)
-	 */
-	protected void callAccept(Visitable visitable, Visitor visitor) {
-		visitable.accept(visitor);
 	}
 }

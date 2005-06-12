@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.util;
+package org.springframework.web.flow.execution;
 
 /*
  * RandomGUID from http://www.javaexchange.com/aboutRandomGUID.html

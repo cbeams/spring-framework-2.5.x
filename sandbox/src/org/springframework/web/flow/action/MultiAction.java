@@ -16,7 +16,6 @@
 package org.springframework.web.flow.action;
 
 import org.springframework.binding.AttributeSource;
-import org.springframework.util.DispatchMethodInvoker;
 import org.springframework.web.flow.Event;
 import org.springframework.web.flow.RequestContext;
 

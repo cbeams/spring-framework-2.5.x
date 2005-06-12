@@ -69,10 +69,6 @@ public class ReflectiveVisitorSupportTests extends TestCase {
 		ensureVisit(new InheritedArgMockVisitor(), new ArrayList());
 	}
 
-	public void testVisitableHook() {
-		ensureVisit(new CustomVisitor(), new VisitorAwareVisitable());
-	}
-
 	public void testNullArgument() {
 		ensureVisit(new NullVisitor(), null);
 	}
@@ -99,7 +95,7 @@ public class ReflectiveVisitorSupportTests extends TestCase {
 		assertTrue("Visitor was not visited!", visitor.visited);
 	}
 
-	public abstract class AbstractMockVisitor implements Visitor {
+	public abstract class AbstractMockVisitor {
 		boolean visited;
 	}
 
@@ -143,12 +139,6 @@ public class ReflectiveVisitorSupportTests extends TestCase {
 		}
 	}
 
-	public class CustomVisitor extends AbstractMockVisitor {
-		public void doVisitMe(VisitorAwareVisitable value) {
-			visited = true;
-		}
-	}
-
 	private class InvisibleClassVisitor extends AbstractMockVisitor {
 		public void visit(ArrayList list) {
 			visited = true;
@@ -160,12 +150,4 @@ public class ReflectiveVisitorSupportTests extends TestCase {
 			visited = true;
 		}
 	}
-
-	public class VisitorAwareVisitable implements Visitable {
-		public void accept(Visitor visitor) {
-			CustomVisitor custom = (CustomVisitor)visitor;
-			custom.doVisitMe(this);
-		}
-	}
-
 }

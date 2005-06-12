@@ -23,10 +23,10 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.CachingMapDecorator;
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.core.enums.LabeledEnumResolver;
 import org.springframework.util.Assert;
-import org.springframework.util.CachingMapTemplate;
 
 /**
  * Abstract base class for labeled enum resolvers.
@@ -35,7 +35,7 @@ import org.springframework.util.CachingMapTemplate;
 public abstract class AbstractLabeledEnumResolver implements LabeledEnumResolver {
 	protected transient final Log logger = LogFactory.getLog(getClass());
 
-	private CachingMapTemplate labeledEnumCache = new CachingMapTemplate() {
+	private CachingMapDecorator labeledEnumCache = new CachingMapDecorator() {
 		protected Object create(Object key) {
 			Map typeEnums = findLabeledEnums((Class)key);
 			if (typeEnums != null && !typeEnums.isEmpty()) {

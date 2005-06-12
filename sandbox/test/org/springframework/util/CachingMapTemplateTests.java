@@ -5,6 +5,8 @@
 
 package org.springframework.util;
 
+import org.springframework.core.CachingMapDecorator;
+
 import junit.framework.TestCase;
 
 public class CachingMapTemplateTests extends TestCase {
@@ -28,7 +30,7 @@ public class CachingMapTemplateTests extends TestCase {
         assertEquals(value, "expensive value to cache");
     }
 
-    private static class MyCachingMap extends CachingMapTemplate {
+    private static class MyCachingMap extends CachingMapDecorator {
         private boolean createCalled;
         
         protected Object create(Object key) {

@@ -17,14 +17,12 @@ package org.springframework.binding.convert;
 
 import java.io.Serializable;
 
-import org.springframework.core.closure.Closure;
-
 /**
  * A command object that is parameterized with the information neccessary to
  * perform a conversion of a source input to a target output.
  * @author Keith Donald
  */
-public class ConversionExecutor implements Closure, Serializable {
+public class ConversionExecutor implements Serializable {
 
 	private Converter converter;
 

@@ -22,9 +22,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.closure.Closure;
-import org.springframework.core.closure.support.AbstractElementGenerator;
-import org.springframework.core.closure.support.Block;
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.util.Assert;
 
@@ -43,21 +40,23 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 
 	protected Map findLabeledEnums(Class type) {
 		final Map enums = new TreeMap();
-		new LabeledEnumFieldValueGenerator(type).run(new Block() {
-			protected void handle(Object value) {
-				LabeledEnum e = (LabeledEnum)value;
+		new LabeledEnumFieldValueGenerator(type).run(new LabeledEnumCallback() {
+			public void handle(LabeledEnum e) {
 				enums.put(e.getCode(), e);
 			}
 		});
 		return enums;
 	}
 
+	private static interface LabeledEnumCallback {
+		public void handle(LabeledEnum value);
+	}
 	/**
 	 * Generator that generates a list of static field values that can be
 	 * processed.
 	 * @author Keith Donald
 	 */
-	private static class LabeledEnumFieldValueGenerator extends AbstractElementGenerator {
+	private static class LabeledEnumFieldValueGenerator {
 		private static final Log logger = LogFactory.getLog(LabeledEnumFieldValueGenerator.class);
 
 		private Class clazz;
@@ -67,7 +66,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 			this.clazz = clazz;
 		}
 
-		public void run(Closure fieldValueCallback) {
+		public void run(LabeledEnumCallback fieldValueCallback) {
 			Field[] fields = clazz.getFields();
 			for (int i = 0; i < fields.length; i++) {
 				Field field = fields[i];
@@ -77,7 +76,7 @@ public class StaticLabeledEnumResolver extends AbstractLabeledEnumResolver {
 							Object value = field.get(null);
 							Assert.isTrue(LabeledEnum.class.isInstance(value),
 									"Field value must be a LabeledEnum instance.");
-							fieldValueCallback.call(value);
+							fieldValueCallback.handle((LabeledEnum)value);
 						}
 						catch (IllegalAccessException e) {
 							logger.warn("Unable to access field value " + field, e);
