@@ -16,7 +16,9 @@
 
 package org.springframework.jmx.export;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.JMException;
@@ -24,6 +26,7 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 import junit.framework.TestCase;
@@ -123,6 +126,42 @@ public class MBeanExporterTests extends TestCase {
 		}
 	}
 
+	public void testWithMBeanExporterListeners() throws Exception {
+		MockMBeanExporterListener listener1 = new MockMBeanExporterListener();
+		MockMBeanExporterListener listener2 = new MockMBeanExporterListener();
+
+		List listeners = new ArrayList();
+		listeners.add(listener1);
+		listeners.add(listener2);
+
+		MBeanServer server = MBeanServerFactory.newMBeanServer();
+		MBeanExporter adaptor = null;
+		try {
+			adaptor = new MBeanExporter();
+			adaptor.setBeans(getBeanMap());
+			adaptor.setServer(server);
+			adaptor.setListeners(listeners);
+			adaptor.afterPropertiesSet();
+		}
+		finally {
+			if (adaptor != null) {
+				adaptor.destroy();
+			}
+		}
+
+		assertListener(listener1);
+		assertListener(listener2);
+	}
+
+	private void assertListener(MockMBeanExporterListener listener) throws MalformedObjectNameException {
+		ObjectName desired = ObjectNameManager.getInstance(OBJECT_NAME);
+		assertEquals("Incorrect number of registrations", 1, listener.getRegistered().size());
+		assertEquals("Incorrect number of unregistrations", 1, listener.getUnregistered().size());
+		assertEquals("Incorrect ObjectName in register", desired, listener.getRegistered().get(0));
+		assertEquals("Incorrect ObjectName in unregister", desired, listener.getUnregistered().get(0));
+	}
+
+
 	public void testExportJdkProxy() throws Exception {
 		JmxTestBean bean = new JmxTestBean();
 		bean.setName("Rob Harrop");
@@ -130,7 +169,7 @@ public class MBeanExporterTests extends TestCase {
 		ProxyFactory factory = new ProxyFactory();
 		factory.setTarget(bean);
 		factory.addAdvice(new NopInterceptor());
-		factory.setInterfaces(new Class[] {IJmxTestBean.class});
+		factory.setInterfaces(new Class[]{IJmxTestBean.class});
 
 		IJmxTestBean proxy = (IJmxTestBean) factory.getProxy();
 		String name = "bean:proxy=true";
@@ -171,4 +210,26 @@ public class MBeanExporterTests extends TestCase {
 		}
 	}
 
+	private static class MockMBeanExporterListener implements MBeanExporterListener {
+
+		private List registered = new ArrayList();
+
+		private List unregistered = new ArrayList();
+
+		public void mbeanRegistered(ObjectName objectName) {
+			registered.add(objectName);
+		}
+
+		public void mbeanUnregistered(ObjectName objectName) {
+			unregistered.add(objectName);
+		}
+
+		public List getRegistered() {
+			return registered;
+		}
+
+		public List getUnregistered() {
+			return unregistered;
+		}
+	}
 }
