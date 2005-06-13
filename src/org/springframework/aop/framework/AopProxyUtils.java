@@ -18,14 +18,39 @@ package org.springframework.aop.framework;
 
 import java.util.Arrays;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.util.Assert;
 
 /**
- * Miscellaneous utilities for AOP proxy implementations.
+ * Miscellaneous utilities for AOP proxy users and AOP proxy implementations.
+ * Mainly for internal use within the framework.
+ *
+ * <p>See AopUtils for a collection of generic AOP utility methods
+ * which do not depend on the AOP framework itself.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AopProxyUtils {
+
+	/**
+	 * Return the target class of the given bean instance.
+	 * <p>Returns the target class for an AOP proxy and the plain bean class else.
+	 * @param proxy the instance to check (might be an AOP proxy)
+	 * @return the target class
+	 * @see org.springframework.aop.framework.Advised#getTargetSource
+	 * @see org.springframework.aop.TargetSource#getTargetClass
+	 */
+	public static Class getTargetClass(Object proxy) {
+		if (AopUtils.isCglibProxy(proxy)) {
+			return proxy.getClass().getSuperclass();
+		}
+		if (proxy instanceof Advised) {
+			return ((Advised) proxy).getTargetSource().getTargetClass();
+		}
+		return proxy.getClass();
+	}
 
 	/**
 	 * Get complete set of interfaces to proxy. This will always add the Advised interface
