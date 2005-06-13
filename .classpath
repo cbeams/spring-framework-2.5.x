@@ -16,14 +16,6 @@
 	<classpathentry output="samples/petclinic/.classes" kind="src" path="samples/petclinic/src"/>
 	<classpathentry kind="src" path="samples/tiles-example/src"/>
 	<classpathentry kind="src" path="samples/webapp-minimal/src"/>
-	<classpathentry kind="src" path="samples/webflow/birthdate/src"/>
-	<classpathentry kind="src" path="samples/webflow/fileupload/src"/>
-	<classpathentry kind="src" path="samples/webflow/flowlauncher/src"/>
-	<classpathentry kind="src" path="samples/webflow/itemlist/src"/>
-	<classpathentry kind="src" path="samples/webflow/numberguess/src"/>
-	<classpathentry kind="src" path="samples/webflow/phonebook/src"/>
-	<classpathentry kind="src" path="samples/webflow/phonebook/test"/>
-	<classpathentry kind="src" path="samples/webflow/sellitem/src"/>
 	<classpathentry output="target/autobuilds/classes" kind="src" path="autobuilds/src"/>
 	<classpathentry kind="src" path="benchmark/cmt/src"/>
 	<classpathentry kind="src" path="benchmark/cmt/test"/>
