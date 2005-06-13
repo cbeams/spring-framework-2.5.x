@@ -157,7 +157,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
     /**
      * All the reserved Spring XML element names which cannot be overloaded by an XML extension
      */
-    protected static final String[] RESERVED_ELEMENT_NAMES = { DESCRIPTION_ELEMENT, IMPORT_ELEMENT, ALIAS_ELEMENT,
+    protected static final String[] RESERVED_ELEMENT_NAMES = { "beans", DESCRIPTION_ELEMENT, IMPORT_ELEMENT, ALIAS_ELEMENT,
                                                                BEAN_ELEMENT,
                                                                CONSTRUCTOR_ARG_ELEMENT, PROPERTY_ELEMENT,
                                                                LOOKUP_METHOD_ELEMENT, REPLACED_METHOD_ELEMENT,
@@ -189,8 +189,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 		logger.debug("Loading bean definitions");
 
-		Element root = doc.getDocumentElement();
-        preprocessXml(reader, root, resource);
+        preprocessXml(reader, doc.getDocumentElement(), resource);
+        Element root = doc.getDocumentElement();
 
 		this.defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
 		this.defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
@@ -214,27 +214,28 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
      * of the XML.
      */
     protected void preprocessXml(BeanDefinitionReader reader, Element root, Resource resource) throws BeanDefinitionStoreException {
+        String localName = root.getNodeName();
+        String uri = root.getNamespaceURI();
+        boolean extensible = true;
+        if (uri == null || uri.length() == 0) {
+            if (reservedElementNames.contains(localName)) {
+                extensible = false;
+            }
+        }
+        if (extensible) {
+            // lets see if we have a custom XML processor
+            ElementProcessor handler = findElementProcessor(uri, localName);
+            if (handler != null) {
+                handler.processElement(root, reader, resource);
+            }
+        }
+
+        // lets recurse into any children
         NodeList nl = root.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
             Node node = nl.item(i);
             if (node instanceof Element) {
                 Element element = (Element) node;
-                String localName = node.getNodeName();
-                String uri = node.getNamespaceURI();
-                boolean extensible = true;
-                if (uri == null || uri.length() == 0) {
-                    if (reservedElementNames.contains(localName)) {
-                        extensible = false;
-                    }
-                }
-                if (extensible) {
-                    // lets see if we have a custom XML processor
-                    ElementProcessor handler = findElementProcessor(uri, localName);
-                    if (handler != null) {
-                        handler.processElement(element, reader, resource);
-                    }
-                }
-                // lets recurse into any children
                 preprocessXml(reader, element, resource);
             }
         }
@@ -250,12 +251,14 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
      */
     protected ElementProcessor findElementProcessor(String namespaceURI, String localName) throws BeanDefinitionStoreException  {
         String uri = "META-INF/services/org/springframework/config/" + createDiscoveryPathName(namespaceURI, localName);
-                            // lets try the thread context class loader first
+
+        // lets try the thread context class loader first
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(uri);
         if (in == null) {
             in = getClass().getClassLoader().getResourceAsStream(uri);
             if (in == null) {
-                throw new BeanDefinitionStoreException("Could not find resource: " + uri);
+                logger.warn("Could not find resource: " + uri);
+                return null;
             }
         }
 
@@ -304,7 +307,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
         }
         // TODO proper encoding required
         // lets replace any dodgy characters
-        return uri.replace(':', '_').replace(' ', '_') + "/" + localName;
+        return uri.replaceAll("://", "/").replace(':', '/').replace(' ', '_') + "/" + localName;
     }
 
     /**

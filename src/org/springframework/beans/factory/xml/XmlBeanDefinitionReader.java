@@ -57,6 +57,7 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private boolean validating = true;
+    private boolean namespaceAware = true;
 
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
 
@@ -65,7 +66,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	private Class parserClass = DefaultXmlBeanDefinitionParser.class;
 
 
-	/**
+    /**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
 	 */
 	public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
@@ -78,6 +79,20 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public void setValidating(boolean validating) {
 		this.validating = validating;
 	}
+
+    /**
+     * Returns whether or not the reader is XML namespace aware.
+     */
+    public boolean isNamespaceAware() {
+        return namespaceAware;
+    }
+
+    /**
+     * Sets whether or not the definition reader should be XML namespace aware.
+     */ 
+    public void setNamespaceAware(boolean namespaceAware) {
+        this.namespaceAware = namespaceAware;
+    }
 
 	/**
 	 * Set an implementation of the <code>org.xml.sax.ErrorHandler</code>
@@ -136,6 +151,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				logger.debug("Using JAXP implementation [" + factory + "]");
 			}
 			factory.setValidating(this.validating);
+            factory.setNamespaceAware(this.namespaceAware);
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			docBuilder.setErrorHandler(this.errorHandler);
 			if (this.entityResolver != null) {
