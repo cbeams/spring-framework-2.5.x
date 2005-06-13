@@ -983,7 +983,7 @@ public class ExampleBean {
 
         <para>is equivalent to:</para>
 
-        <para><programlisting>&lt;property name="myProperty" ref="myBean"/&gt;</programlisting><programlisting>&lt;constructor-arg value="myBean"/&gt;</programlisting></para>
+        <para><programlisting>&lt;property name="myProperty" ref="myBean"/&gt;</programlisting><programlisting>&lt;constructor-arg ref="myBean"/&gt;</programlisting></para>
 
         <para>Note however that the shortcut form is equivalent to a
         <literal>&lt;ref bean="xxx"&gt;</literal> element, there is no
