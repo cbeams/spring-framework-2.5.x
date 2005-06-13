@@ -866,7 +866,9 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	protected void executeSchemaScript(Connection con, String[] sql) throws SQLException {
 		if (sql != null && sql.length > 0) {
 			boolean oldAutoCommit = con.getAutoCommit();
-			con.setAutoCommit(false);
+			if (!oldAutoCommit) {
+				con.setAutoCommit(true);
+			}
 			try {
 				Statement stmt = con.createStatement();
 				try {
@@ -883,10 +885,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				finally {
 					JdbcUtils.closeStatement(stmt);
 				}
-				con.commit();
 			}
 			finally {
-				con.setAutoCommit(oldAutoCommit);
+				if (!oldAutoCommit) {
+					con.setAutoCommit(false);
+				}
 			}
 		}
 	}
