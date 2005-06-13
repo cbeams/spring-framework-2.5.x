@@ -25,7 +25,7 @@ import javax.management.modelmbean.ModelMBeanInfoSupport;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
-import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 
 /**
@@ -91,17 +91,10 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * and the plain bean class else.
 	 * @param managedBean the bean instance (might be an AOP proxy)
 	 * @return the bean class to expose
-	 * @see org.springframework.aop.framework.Advised#getTargetSource
-	 * @see org.springframework.aop.TargetSource#getTargetClass
+	 * @see org.springframework.aop.framework.AopProxyUtils#getTargetClass
 	 */
 	protected Class getTargetClass(Object managedBean) {
-		if (AopUtils.isCglibProxy(managedBean)) {
-			return managedBean.getClass().getSuperclass();
-		}
-		if (managedBean instanceof Advised) {
-			return ((Advised) managedBean).getTargetSource().getTargetClass();
-		}
-		return managedBean.getClass();
+		return AopProxyUtils.getTargetClass(managedBean);
 	}
 
 	/**
