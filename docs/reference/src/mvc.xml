@@ -563,7 +563,7 @@ public class SampleController extends AbstractController {
         ModelAndView mav = new ModelAndView("foo", new HashMap());
     }
 }</programlisting> <programlisting>&lt;bean id="sampleController" class="samples.SampleController"&gt;
-    &lt;property name="cacheSeconds"&gt;&lt;value&gt;120&lt;/value&lt;/property&gt;
+    &lt;property name="cacheSeconds"&gt;&lt;value&gt;120&lt;/value&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting> The class above and the declaration in the
       web application context is all you need besides setting up a handler
       mapping (see <xref linkend="mvc-handlermapping" />) to get this very

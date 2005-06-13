@@ -2661,7 +2661,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     <literal>targetObject</literal> property as the target object, and the
     <literal>targetMethod</literal> property as the name of the method to call
     on that target object. Arguments for the method invocation may be
-    specified by setting the <literal>args</literal> property.</para>
+    specified by setting the <literal>arguments</literal> property.</para>
   </sect1>
 
   <sect1 id="context-import">
