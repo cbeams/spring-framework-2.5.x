@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * Base <code>MethodInterceptor</code> implementation for tracing.
  *
  * <p>By default, log messages are written to the log for the interceptor class,
- * not the class which is being intercepted. Setting the <code>useDynamicLog</code>
+ * not the class which is being intercepted. Setting the <code>useDynamicLogger</code>
  * bean property to <code>true</code> causes all log messages to be written to
  * the <code>Log</code> for the target class being intercepted.
  *

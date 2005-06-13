@@ -47,7 +47,7 @@ import org.springframework.util.MethodInvoker;
  * specified, by setting the {@link #setTargetObject targetObject} property as the target
  * object, and the {@link #setTargetMethod targetMethod} property as the name of the
  * method to call on that target object. Arguments for the method invocation may be
- * specified by setting the args property.</p>
+ * specified by setting the {@link #setArguments arguments} property.</p>
  *
  * <p>This class depends on {@link #afterPropertiesSet()} being called once
  * all properties have been set, as per the InitializingBean contract.</p>

@@ -27,9 +27,9 @@ import java.io.PrintWriter;
  * applications written to use Java 1.4 need not extend this class. To ease
  * migration, this class mirrors Java 1.4's nested exceptions as closely as possible.
  *
- * <p>Abstract to force the programmer to extend the class. getMessage will include
- * nested exception information; printStackTrace etc will delegate to the wrapped
- * exception, if any.
+ * <p>Abstract to force the programmer to extend the class. <code>getMessage</code>
+ * will include nested exception information; <code>printStackTrace</code> etc will
+ * delegate to the wrapped exception, if any.
  *
  * <p>The similarity between this class and the NestedCheckedException class is
  * unavoidable, as Java forces these two classes to have different superclasses
@@ -45,6 +45,7 @@ import java.io.PrintWriter;
  * @author Juergen Hoeller
  * @see #getMessage
  * @see #printStackTrace
+ * @see NestedCheckedException
  */
 public abstract class NestedRuntimeException extends RuntimeException {
 
