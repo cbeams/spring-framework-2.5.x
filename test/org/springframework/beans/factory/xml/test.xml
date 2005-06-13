@@ -95,6 +95,12 @@
 		<property name="dummyFactory"><ref bean="&amp;singletonFactory"/></property>
 	</bean>
 
+	<bean id="factoryReferencerWithConstructor" class="org.springframework.beans.factory.xml.DummyReferencer">
+		<constructor-arg><ref bean="&amp;singletonFactory"/></constructor-arg>
+		<property name="testBean1"><ref bean="singletonFactory"/></property>
+		<property name="testBean2"><ref local="singletonFactory"/></property>
+	</bean>
+
 	<!-- Check that the circular reference resolution mechanism doesn't break
 	     prototype instantiation -->
 	<bean id="prototypeReferencer" class="org.springframework.beans.factory.xml.DummyReferencer" singleton="false">

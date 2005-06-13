@@ -79,7 +79,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	public void testCount() {
-		assertCount(22);
+		assertCount(23);
 	}
 
 	public void testTestBeanCount() {
@@ -147,7 +147,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		assertEquals(null, tb4.getName());
 
 		Map drs = getListableBeanFactory().getBeansOfType(DummyReferencer.class, false, false);
-		assertEquals(4, drs.size());
+		assertEquals(5, drs.size());
 		assertTrue(drs.containsKey(DummyReferencer.class.getName()));
 		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#2"));
 		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#3"));
@@ -166,10 +166,15 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	}
 
 	public void testFactoryReferences() {
-		DummyReferencer ref = (DummyReferencer) getBeanFactory().getBean("factoryReferencer");
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
+
+		DummyReferencer ref = (DummyReferencer) getBeanFactory().getBean("factoryReferencer");
 		assertTrue(ref.getTestBean1() == ref.getTestBean2());
 		assertTrue(ref.getDummyFactory() == factory);
+
+		DummyReferencer ref2 = (DummyReferencer) getBeanFactory().getBean("factoryReferencerWithConstructor");
+		assertTrue(ref2.getTestBean1() == ref2.getTestBean2());
+		assertTrue(ref2.getDummyFactory() == factory);
 	}
 
 	public void testPrototypeReferences() {
