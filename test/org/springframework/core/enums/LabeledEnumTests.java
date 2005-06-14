@@ -1,41 +1,38 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.core.enums;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.enums.support.ShortCodedLabeledEnum;
-import org.springframework.core.enums.support.StaticLabeledEnumResolver;
-
 /**
- * @author Rod Johnson
+ * @author Keith Donald
  */
 public class LabeledEnumTests extends TestCase {
 
 	public void testForCodeFound() {
-		Dog golden = (Dog)StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short)11));
-		Dog borderCollie = (Dog)StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short)13));
+		Dog golden = (Dog) new StaticLabeledEnumResolver().getLabeledEnumByCode(Dog.class, new Short((short) 11));
+		Dog borderCollie = (Dog) new StaticLabeledEnumResolver().getLabeledEnumByCode(Dog.class, new Short((short) 13));
 		assertSame(golden, Dog.GOLDEN_RETRIEVER);
 		assertSame(borderCollie, Dog.BORDER_COLLIE);
 	}
 
 	public void testDoesNotMatchWrongClass() {
 		try {
-			LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnum(Dog.class, new Short((short)1));
+			LabeledEnum none = new StaticLabeledEnumResolver().getLabeledEnumByCode(Dog.class, new Short((short) 1));
 			fail("Should have failed");
 		}
 		catch (IllegalArgumentException e) {
@@ -48,7 +45,9 @@ public class LabeledEnumTests extends TestCase {
 		assertFalse("Code inequality means notEquals", Dog.GOLDEN_RETRIEVER.equals(new Dog(12, "Golden Retriever")));
 	}
 
+
 	public static class Other extends ShortCodedLabeledEnum {
+
 		public static Other THING1 = new Other(1, "Thing1");
 
 		public static Other THING2 = new Other(2, "Thing2");
@@ -57,6 +56,7 @@ public class LabeledEnumTests extends TestCase {
 			super(code, name);
 		}
 	}
+
 
 	public static class Dog extends ShortCodedLabeledEnum {
 
@@ -82,4 +82,5 @@ public class LabeledEnumTests extends TestCase {
 			super(code, name);
 		}
 	}
+
 }
