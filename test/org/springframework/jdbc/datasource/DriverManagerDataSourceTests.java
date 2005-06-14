@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
@@ -24,13 +25,12 @@ import org.easymock.MockControl;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 /**
-* @author Rod Johnson
-* @version $Id: DriverManagerDataSourceTests.java,v 1.10 2005-04-05 19:17:03 jhoeller Exp $
-*/
+ * @author Rod Johnson
+ */
 public class DriverManagerDataSourceTests extends TestCase {
 
-	public void testValidUsage() throws Exception {
-		final String url = "url";
+	public void testStandardUsage() throws Exception {
+		final String jdbcUrl = "url";
 		final String uname = "uname";
 		final String pwd = "pwd";
 
@@ -40,40 +40,117 @@ public class DriverManagerDataSourceTests extends TestCase {
 		ctrlConnection.replay();
 
 		class TestDriverManagerDataSource extends DriverManagerDataSource {
-			protected Connection getConnectionFromDriverManager(String purl, String pusername, String ppassword) {
-				assertTrue(purl.equals(url));
-				assertTrue(pusername.equals(uname));
-				assertTrue(ppassword.equals(pwd));
+			protected Connection getConnectionFromDriverManager(String url, Properties props) {
+				assertEquals(jdbcUrl, url);
+				assertEquals(uname, props.getProperty("user"));
+				assertEquals(pwd, props.getProperty("password"));
 				return mockConnection;
 			}
 		}
 
 		DriverManagerDataSource ds = new TestDriverManagerDataSource();
-		ds.setUrl(url);
-		ds.setPassword(pwd);
-		ds.setUsername(uname);
 		//ds.setDriverClassName("foobar");
+		ds.setUrl(jdbcUrl);
+		ds.setUsername(uname);
+		ds.setPassword(pwd);
+
 		Connection actualCon = ds.getConnection();
 		assertTrue(actualCon == mockConnection);
 
-		assertTrue(ds.getUrl().equals(url));
+		assertTrue(ds.getUrl().equals(jdbcUrl));
 		assertTrue(ds.getPassword().equals(pwd));
 		assertTrue(ds.getUsername().equals(uname));
 
 		ctrlConnection.verify();
 	}
 
-	public void testInvalidClassname() throws Exception {
-		final String url = "url";
+	public void testUsageWithConnectionProperties() throws Exception {
+		final String jdbcUrl = "url";
+
+		final Properties connProps = new Properties();
+		connProps.setProperty("myProp", "myValue");
+		connProps.setProperty("yourProp", "yourValue");
+		connProps.setProperty("user", "uname");
+		connProps.setProperty("password", "pwd");
+
+		MockControl ctrlConnection =
+			MockControl.createControl(Connection.class);
+		final Connection mockConnection = (Connection) ctrlConnection.getMock();
+		ctrlConnection.replay();
+
+		class TestDriverManagerDataSource extends DriverManagerDataSource {
+			protected Connection getConnectionFromDriverManager(String url, Properties props) {
+				assertEquals(jdbcUrl, url);
+				assertEquals("uname", props.getProperty("user"));
+				assertEquals("pwd", props.getProperty("password"));
+				assertEquals("myValue", props.getProperty("myProp"));
+				assertEquals("yourValue", props.getProperty("yourProp"));
+				return mockConnection;
+			}
+		}
+
+		DriverManagerDataSource ds = new TestDriverManagerDataSource();
+		//ds.setDriverClassName("foobar");
+		ds.setUrl(jdbcUrl);
+		ds.setConnectionProperties(connProps);
+
+		Connection actualCon = ds.getConnection();
+		assertTrue(actualCon == mockConnection);
+
+		assertTrue(ds.getUrl().equals(jdbcUrl));
+
+		ctrlConnection.verify();
+	}
+
+	public void testUsageWithConnectionPropertiesAndUserCredentials() throws Exception {
+		final String jdbcUrl = "url";
 		final String uname = "uname";
 		final String pwd = "pwd";
-		String bogusClassname = "foobar";
-		DriverManagerDataSource ds = new DriverManagerDataSource();
-		ds.setUrl(url);
-		ds.setPassword(pwd);
+
+		final Properties connProps = new Properties();
+		connProps.setProperty("myProp", "myValue");
+		connProps.setProperty("yourProp", "yourValue");
+		connProps.setProperty("user", "uname2");
+		connProps.setProperty("password", "pwd2");
+
+		MockControl ctrlConnection =
+			MockControl.createControl(Connection.class);
+		final Connection mockConnection = (Connection) ctrlConnection.getMock();
+		ctrlConnection.replay();
+
+		class TestDriverManagerDataSource extends DriverManagerDataSource {
+			protected Connection getConnectionFromDriverManager(String url, Properties props) {
+				assertEquals(jdbcUrl, url);
+				assertEquals(uname, props.getProperty("user"));
+				assertEquals(pwd, props.getProperty("password"));
+				assertEquals("myValue", props.getProperty("myProp"));
+				assertEquals("yourValue", props.getProperty("yourProp"));
+				return mockConnection;
+			}
+		}
+
+		DriverManagerDataSource ds = new TestDriverManagerDataSource();
+		//ds.setDriverClassName("foobar");
+		ds.setUrl(jdbcUrl);
 		ds.setUsername(uname);
+		ds.setPassword(pwd);
+		ds.setConnectionProperties(connProps);
+
+		Connection actualCon = ds.getConnection();
+		assertTrue(actualCon == mockConnection);
+
+		assertTrue(ds.getUrl().equals(jdbcUrl));
+		assertTrue(ds.getPassword().equals(pwd));
+		assertTrue(ds.getUsername().equals(uname));
+
+		ctrlConnection.verify();
+	}
+
+	public void testInvalidClassName() throws Exception {
+		String bogusClassName = "foobar";
+		DriverManagerDataSource ds = new DriverManagerDataSource();
 		try {
-			ds.setDriverClassName(bogusClassname);
+			ds.setDriverClassName(bogusClassName);
 			fail("Should have thrown CannotGetJdbcConnectionException");
 		}
 		catch (CannotGetJdbcConnectionException ex) {

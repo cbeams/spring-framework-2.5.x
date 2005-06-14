@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.util.StringUtils;
@@ -28,28 +29,43 @@ import org.springframework.util.StringUtils;
  * a plain old JDBC Driver via bean properties, and returning a new Connection
  * for every <code>getConnection</code> call.
  *
+ * <p><b>NOTE: This class is not an actual connection pool; it does not actually
+ * pool Connections.</b> It just serves as simple replacement for a full-blown
+ * connection pool, implementing the same standard interface, but creating new
+ * Connections on every call.
+ *
  * <p>Useful for test or standalone environments outside of a J2EE container, either
  * as a DataSource bean in a respective ApplicationContext, or in conjunction with a
  * simple JNDI environment. Pool-assuming <code>Connection.close()</code> calls will
  * simply close the Connection, so any DataSource-aware persistence code should work.
  *
  * <p>In a J2EE container, it is recommended to use a JNDI DataSource provided by
- * the container. Such a DataSource can be exported as a DataSource bean in an
+ * the container. Such a DataSource can be exposed as a DataSource bean in a Spring
  * ApplicationContext via JndiObjectFactoryBean, for seamless switching to and from
- * a local DataSource bean like this class.
+ * a local DataSource bean like this class. For tests, you can then either set up a
+ * mock JNDI environment through Spring's SimpleNamingContextBuilder, or switch the
+ * bean definition to a local DataSource (which is simpler and thus recommended).
  *
  * <p>If you need a "real" connection pool outside of a J2EE container, consider
- * <a href="http://jakarta.apache.org/commons/dbcp">Apache's Jakarta Commons DBCP</a>.
- * Its BasicDataSource is a full connection pool bean, supporting the same basic
- * properties as this class plus specific settings. It can be used as a replacement
- * for an instance of this class just by changing the class name of the bean
- * definition to "org.apache.commons.dbcp.BasicDataSource".
+ * <a href="http://jakarta.apache.org/commons/dbcp">Apache's Jakarta Commons DBCP</a>
+ * or <a href="http://sourceforge.net/projects/c3p0">C3P0</a>.
+ * Commons DBCP's BasicDataSource and C3P0's ComboPooledDataSource are full
+ * connection pool beans, supporting the same basic properties as this class
+ * plus specific settings (such as minimal/maximal pool size etc).
+ *
+ * <p>Commons DBCP's BasicDataSource can even be used as a direct replacement for an
+ * instance of this class just by changing the class name of the bean definition to
+ * "org.apache.commons.dbcp.BasicDataSource", because the names of all common
+ * properties match exactly. Note that both BasicDataSource and ComboPooledDataSource
+ * should be defined with destroy-method="close", for immediate shutdown when the
+ * Spring ApplicationContext shuts down.
  *
  * @author Juergen Hoeller
  * @since 14.03.2003
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see org.springframework.mock.jndi.SimpleNamingContextBuilder
  * @see org.apache.commons.dbcp.BasicDataSource
+ * @see com.mchange.v2.c3p0.ComboPooledDataSource
  */
 public class DriverManagerDataSource extends AbstractDataSource {
 
@@ -60,6 +76,8 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	private String username;
 
 	private String password;
+
+	private Properties connectionProperties;
 
 
 	/**
@@ -192,6 +210,26 @@ public class DriverManagerDataSource extends AbstractDataSource {
 		return password;
 	}
 
+	/**
+	 * Specify arbitrary connection properties as key/value pairs,
+	 * to be passed to the DriverManager.
+	 * <p>Can also contain "user" and "password" properties. However,
+	 * any "username" and "password" bean properties specified on this
+	 * DataSource will override the respective connection properties.
+	 * @see java.sql.DriverManager#getConnection(String, java.util.Properties)
+	 */
+	public void setConnectionProperties(Properties connectionProperties) {
+		this.connectionProperties = connectionProperties;
+	}
+
+	/**
+	 * Return the connection properties to be passed to the DriverManager,
+	 * if any.
+	 */
+	public Properties getConnectionProperties() {
+		return connectionProperties;
+	}
+
 
 	/**
 	 * This implementation delegates to <code>getConnectionFromDriverManager</code>,
@@ -205,33 +243,51 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	/**
 	 * This implementation delegates to <code>getConnectionFromDriverManager</code>,
 	 * using the given username and password.
-	 * @see #getConnectionFromDriverManager(String, String, String)
+	 * @see #getConnectionFromDriverManager(String, String)
 	 */
 	public Connection getConnection(String username, String password) throws SQLException {
-		return getConnectionFromDriverManager(getUrl(), username, password);
+		return getConnectionFromDriverManager(username, password);
 	}
 
 	/**
 	 * Get a Connection from the DriverManager,
 	 * using the default username and password of this DataSource.
-	 * @see #getConnectionFromDriverManager(String, String, String)
+	 * @see #getConnectionFromDriverManager(String, String)
 	 */
 	protected Connection getConnectionFromDriverManager() throws SQLException {
-		return getConnectionFromDriverManager(getUrl(), getUsername(), getPassword());
+		return getConnectionFromDriverManager(getUsername(), getPassword());
+	}
+
+	/**
+	 * Build properties for the DriverManager, including the given username
+	 * and password (if any).
+	 * @see #getConnectionFromDriverManager(String, java.util.Properties)
+	 */
+	protected Connection getConnectionFromDriverManager(String username, String password)
+	    throws SQLException {
+
+		Properties props = new Properties(getConnectionProperties());
+		if (username != null) {
+			props.setProperty("user", username);
+		}
+		if (password != null) {
+			props.setProperty("password", password);
+		}
+		return getConnectionFromDriverManager(getUrl(), props);
 	}
 
 	/**
 	 * Getting a connection using the nasty static from DriverManager is extracted
 	 * into a protected method to allow for easy unit testing.
-	 * @see java.sql.DriverManager#getConnection(String, String, String)
+	 * @see java.sql.DriverManager#getConnection(String, java.util.Properties)
 	 */
-	protected Connection getConnectionFromDriverManager(String url, String username, String password)
+	protected Connection getConnectionFromDriverManager(String url, Properties props)
 	    throws SQLException {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating new JDBC connection to [" + url + "]");
+			logger.debug("Creating new JDBC Connection to [" + url + "]");
 		}
-		return DriverManager.getConnection(url, username, password);
+		return DriverManager.getConnection(url, props);
 	}
 
 }
