@@ -1,18 +1,19 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.springframework.orm.hibernate.support;
 
 import java.io.Serializable;
@@ -24,14 +25,14 @@ import net.sf.hibernate.Hibernate;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.UserType;
 import net.sf.hibernate.type.NullableType;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.core.enums.LabeledEnumResolver;
-import org.springframework.core.enums.support.LetterCodedLabeledEnum;
-import org.springframework.core.enums.support.ShortCodedLabeledEnum;
-import org.springframework.core.enums.support.StaticLabeledEnumResolver;
+import org.springframework.core.enums.LetterCodedLabeledEnum;
+import org.springframework.core.enums.ShortCodedLabeledEnum;
+import org.springframework.core.enums.StaticLabeledEnumResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -43,17 +44,18 @@ public abstract class AbstractLabeledEnumUserType implements UserType, Serializa
 
 	private transient final Log logger = LogFactory.getLog(getClass());
 
-	private transient LabeledEnumResolver resolver = StaticLabeledEnumResolver.instance();
+	private transient LabeledEnumResolver labeledEnumResolver;
 
-	protected LabeledEnumResolver getResolver() {
-		if (resolver == null) {
-			return StaticLabeledEnumResolver.instance();
-		}
-		return resolver;
+
+	public void setLabeledEnumResolver(LabeledEnumResolver labeledEnumResolver) {
+		this.labeledEnumResolver = labeledEnumResolver;
 	}
 
-	public void setResolver(LabeledEnumResolver resolver) {
-		this.resolver = resolver;
+	protected LabeledEnumResolver getLabeledEnumResolver() {
+		if (this.labeledEnumResolver == null) {
+			this.labeledEnumResolver = new StaticLabeledEnumResolver();
+		}
+		return this.labeledEnumResolver;
 	}
 
 	public int[] sqlTypes() {
@@ -76,22 +78,26 @@ public abstract class AbstractLabeledEnumUserType implements UserType, Serializa
 		}
 	}
 
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
+	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
+			throws HibernateException, SQLException {
+
 		Comparable code = (Comparable) persistentType().nullSafeGet(rs, names[0]);
 		if (code == null) {
 			return null;
 		}
-		LabeledEnum e = resolver.getLabeledEnum(returnedClass(), code);
+		LabeledEnum e = getLabeledEnumResolver().getLabeledEnumByCode(returnedClass(), code);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolved enum '" + e + "' of type '" + returnedClass() + "' from persisted code " + code);
 		}
 		return e;
 	}
 
-	public void nullSafeSet(PreparedStatement stmt, Object value, int index) throws HibernateException, SQLException {
+	public void nullSafeSet(PreparedStatement stmt, Object value, int index)
+			throws HibernateException, SQLException {
+
 		if ((value != null) && !returnedClass().isAssignableFrom(value.getClass())) {
-			throw new IllegalArgumentException("Received value is not a [" + returnedClass().getName() + "] but ["
-					+ value.getClass() + "]");
+			throw new IllegalArgumentException("Received value is not a [" + returnedClass().getName() +
+					"] but [" + value.getClass().getName() + "]");
 		}
 		LabeledEnum codedEnum = (LabeledEnum) value;
 		Comparable code = null;
@@ -112,4 +118,5 @@ public abstract class AbstractLabeledEnumUserType implements UserType, Serializa
 	public boolean isMutable() {
 		return false;
 	}
+
 }
