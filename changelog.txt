@@ -3,20 +3,28 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.2 (18.6.2005)
+Changes in version 1.2.2 (23.6.2005)
 ------------------------------------
 
+Package org.springframework.aop
+* added "getTargetClass" method to AopProxyUtils (factored out from the JMX support's AbstractMBeanInfoAssembler)
+
 Package org.springframework.beans
-* fixed AbstractAutowireCapableBeanFactory to not track dependencies for passed-in existing beans (avoiding memory leak)
+* BeanWrapperImpl supports JDK 1.5 enums and old-style enum classes: String values will be treated as enum value names
+* added convenience constructor to PropertyComparator, passing in "property", "ignoreCase" and "ascending" directly
 * PropertiesFactoryBean also supports JDK 1.5's properties XML files, for files with ".xml" filename
 * PropertyResourceConfigurer and subclasses also support JDK 1.5's properties XML files, for files with ".xml" filename
+* fixed AbstractAutowireCapableBeanFactory to not track dependencies for passed-in existing beans (avoiding memory leak)
 
 Package org.springframework.context
+* added "alwaysUseMessageFormat" property to AbstractMessageSource, enforcing MessageFormat for messages without args
 * refined AbstractMessageSource to format passed-in default messages as well, resolving arguments when necessary
 * ReloadableResourceBundleMessageSource also supports JDK 1.5's properties XML files, for files with ".xml" filename
 
 Package org.springframework.core
 * fixed ClassPathResource to fall back to its ClassLoader if none specified and no thread context ClassLoader available
+* added "enums" package, containing support for type-safe enums with code and label (working on JDK >= 1.3)
+* added "styler" package, containing a ToStringCreator utility class with ToStringStyler/ValueStyler strategy mechanism
 
 Package org.springframework.dao
 * added generic DaoSupport base class, defining a logger and "initDao" method and pre-implementing "afterPropertiesSet"
@@ -25,19 +33,27 @@ Package org.springframework.jca
 * reworked CciDaoSupport class to extend the new generic DaoSupport base class
 
 Package org.springframework.jdbc
+* added "connectionProperties" bean property to DriverManagerDataSource, accepting arbitrary properties for the driver
 * SQLState/SQLErrorCodeSQLExceptionTranslator always include SQL in message, even for generic DataAccessExceptions
 * UncategorizedSQLException includes SQL state and error code in message, to indicate potential exception classification
 * reworked JdbcDaoSupport class to extend the new generic DaoSupport base class
 
 Package org.springframework.jms
-* reworked JmsGatewaySupport class to follow DaoSupport pattern (afterPropertiesSet not throwing Exception anymore)
+* reworked JmsGatewaySupport class to follow DaoSupport pattern ("afterPropertiesSet" not throwing Exception anymore)
+
+Package org.springframework.jmx
+* introduced MBeanExporterListener interface, for notification about MBean registration and unregistration events
+* added "listeners" bean property to MBeanExporter, accepting a list of MBeanExporterListeners to be notified
 
 Package org.springframework.jndi
 * added "expectedType" bean property to JndiObjectLocator, for eager checking of the type of the located JNDI object
 
 Package org.springframework.orm
+* added sections on JDO, TopLink and OJB to the reference documentation
 * reworked all XxxDaoSupport classes to extend the new generic DaoSupport base class
 * fixed PersistenceBrokerDaoSupport to be abstract and to actually implement InitializingBean
+* LocalSessionFactoryBean executes DDL scripts with autoCommit=true, to be able to proceed after a failed statement
+* made "entityInterceptorBeanName" property available to OpenSessionInViewInterceptor (for Hibernate 2.1 and Hibernate3)
 * added dedicated support for Hibernate Annotation 3.0 beta 2: AnnotationSessionFactoryBean in "tiger" source tree
 
 Package org.springframework.transaction
@@ -45,6 +61,8 @@ Package org.springframework.transaction
 
 Package org.springframework.util
 * added "loadFromXml" and "storeToXml" methods to PropertiesPersister, by default implemented to delegate to JDK 1.5
+* refined ClassLoaderUtils to not expose recursion arguments as public and to offer overloaded convenience methods
+* added "comparator" subpackage, containing useful generic Comparator implementations (e.g. invertible, compound)
 
 Package org.springframework.web
 * added "indent" bean property to AbstractXlstView, to be turned off when the choice should be up to the stylesheet
