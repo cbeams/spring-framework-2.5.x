@@ -721,11 +721,11 @@ public class DispatcherServlet extends FrameworkServlet {
 			throw ex;
 		}
 		catch (Error err) {
-			// Trigger after-completion for thrown error (rare case).
-			// Better trigger callback without exception argument rather than no callback at all;
-			// after-completion callbacks offen perform finally-style cleanup.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
-			throw err;
+			ServletException ex =
+					new ServletException("Error occured during request processing: " + err.getMessage(), err);
+			// Trigger after-completion for thrown exception.
+			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			throw ex;
 		}
 
 		finally {
