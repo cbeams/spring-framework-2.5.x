@@ -30,6 +30,7 @@ import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract implementation of the HierarchicalMessageSource interface,
@@ -198,7 +199,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			locale = Locale.getDefault();
 		}
 
-		if (!this.alwaysUseMessageFormat && (args == null || args.length == 0)) {
+		if (!this.alwaysUseMessageFormat && ObjectUtils.isEmpty(args)) {
 			// Optimized resolution: no arguments to apply,
 			// therefore no MessageFormat needs to be involved.
 			// Note that the default implementation still uses MessageFormat;

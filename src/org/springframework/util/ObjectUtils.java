@@ -85,6 +85,14 @@ public abstract class ObjectUtils {
 	}
 
 	/**
+	 * Return whether the given array is empty: that is, null or of zero length.
+	 * @param array the array to check
+	 */
+	public static boolean isEmpty(Object[] array) {
+		return (array == null || array.length == 0);
+	}
+
+	/**
 	 * Convert a primitive array to an object array of primitive wrapper objects.
 	 * @param primitiveArray the primitive array
 	 * @return the object array
