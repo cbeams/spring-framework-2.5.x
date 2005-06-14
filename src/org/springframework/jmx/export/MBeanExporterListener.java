@@ -23,14 +23,14 @@ import javax.management.ObjectName;
  * Allows application code to be notified when an MBean is registered and unregistered.
  *
  * @author Rob Harrop
- * @see org.springframework.jmx.export.MBeanExporter
+ * @since 1.2.2
+ * @see org.springframework.jmx.export.MBeanExporter#setListeners
  */
 public interface MBeanExporterListener {
 
 	/**
 	 * Called by <code>MBeanExporter</code> after an MBean has been registered with the
 	 * <code>MBeanServer</code>.
-	 *
 	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 */
 	void mbeanRegistered(ObjectName objectName);
@@ -38,7 +38,8 @@ public interface MBeanExporterListener {
 	/**
 	 * Called by <code>MBeanExporter</code> after an MBean has been unregistered from the
 	 * <code>MBeanServer</code>.
-	 * @param objectName the <code>ObjectName</code> of the unregistered MBean.
+	 * @param objectName the <code>ObjectName</code> of the unregistered MBean
 	 */
 	void mbeanUnregistered(ObjectName objectName);
+
 }

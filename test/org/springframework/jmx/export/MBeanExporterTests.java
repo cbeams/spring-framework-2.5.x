@@ -24,9 +24,9 @@ import java.util.Map;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 import junit.framework.TestCase;
@@ -130,17 +130,13 @@ public class MBeanExporterTests extends TestCase {
 		MockMBeanExporterListener listener1 = new MockMBeanExporterListener();
 		MockMBeanExporterListener listener2 = new MockMBeanExporterListener();
 
-		List listeners = new ArrayList();
-		listeners.add(listener1);
-		listeners.add(listener2);
-
 		MBeanServer server = MBeanServerFactory.newMBeanServer();
 		MBeanExporter adaptor = null;
 		try {
 			adaptor = new MBeanExporter();
 			adaptor.setBeans(getBeanMap());
 			adaptor.setServer(server);
-			adaptor.setListeners(listeners);
+			adaptor.setListeners(new MBeanExporterListener[] {listener1, listener2});
 			adaptor.afterPropertiesSet();
 		}
 		finally {
@@ -160,7 +156,6 @@ public class MBeanExporterTests extends TestCase {
 		assertEquals("Incorrect ObjectName in register", desired, listener.getRegistered().get(0));
 		assertEquals("Incorrect ObjectName in unregister", desired, listener.getUnregistered().get(0));
 	}
-
 
 	public void testExportJdkProxy() throws Exception {
 		JmxTestBean bean = new JmxTestBean();
@@ -210,6 +205,7 @@ public class MBeanExporterTests extends TestCase {
 		}
 	}
 
+
 	private static class MockMBeanExporterListener implements MBeanExporterListener {
 
 		private List registered = new ArrayList();
@@ -232,4 +228,5 @@ public class MBeanExporterTests extends TestCase {
 			return unregistered;
 		}
 	}
+
 }
