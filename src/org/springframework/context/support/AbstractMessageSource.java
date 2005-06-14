@@ -41,6 +41,13 @@ import org.springframework.context.NoSuchMessageException;
  * <code>resolveCodeWithoutArguments</code> method should be overridden
  * as well, resolving messages without a MessageFormat being involved.
  *
+ * <p><b>Note:</b> By default, message texts are only parsed through
+ * MessageFormat if arguments have been passed in for the message. In case
+ * of no arguments, message texts will be returned as-is. As a consequence,
+ * you should only use MessageFormat escaping for messages with actual
+ * arguments, and keep all other messages unescaped. If you prefer to
+ * escape all messages, set the "alwaysUseMessageFormat" flag to "true".
+ *
  * <p>Supports not only MessageSourceResolvables as primary messages
  * but also resolution of message arguments that are in turn
  * MessageSourceResolvables themselves.
@@ -50,16 +57,20 @@ import org.springframework.context.NoSuchMessageException;
  * encouraged to cache their messages in a modification-aware fashion,
  * allowing for hot deployment of updated messages.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @see #resolveCode(String, java.util.Locale)
  * @see #resolveCodeWithoutArguments(String, java.util.Locale)
+ * @see #setAlwaysUseMessageFormat
+ * @see java.text.MessageFormat
  */
 public abstract class AbstractMessageSource implements HierarchicalMessageSource {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private MessageSource parentMessageSource;
+
+	private boolean alwaysUseMessageFormat = false;
 
 	private boolean useCodeAsDefaultMessage = false;
 
@@ -77,6 +88,24 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 
 	public MessageSource getParentMessageSource() {
 		return parentMessageSource;
+	}
+
+	/**
+	 * Set whether to always apply the MessageFormat rules, parsing even
+	 * messages without arguments.
+	 * <p>Default is "false": Messages without arguments are by default
+	 * returned as-is, without parsing them through MessageFormat.
+	 * Set this to "true" to enforce MessageFormat for all messages,
+	 * expecting all message texts to be written with MessageFormat escaping.
+	 * <p>For example, MessageFormat expects a single quote to be escaped
+	 * as "''". If your message texts are all written with such escaping,
+	 * even when not defining argument placeholders, you need to set this
+	 * flag to "true". Else, only message texts with actual arguments
+	 * are supposed to be written with MessageFormat escaping.
+	 * @see java.text.MessageFormat
+	 */
+	public void setAlwaysUseMessageFormat(boolean alwaysUseMessageFormat) {
+		this.alwaysUseMessageFormat = alwaysUseMessageFormat;
 	}
 
 	/**
@@ -151,12 +180,9 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * Resolve the given code and arguments as message in the given Locale,
 	 * returning null if not found. Does <i>not</i> fall back to the code
 	 * as default message. Invoked by getMessage methods.
-	 * @param code the code to lookup up, such as 'calculator.noRateSet'. Users of
-	 * this class are encouraged to base message names on the relevant fully
-	 * qualified class name, thus avoiding conflict and ensuring maximum clarity.
-	 * @param args array of arguments that will be filled in for params within
-	 * the message (params look like "{0}", "{1,date}", "{2,time}" within a message),
-	 * or null if none.
+	 * @param code the code to lookup up, such as 'calculator.noRateSet'
+	 * @param args array of arguments that will be filled in for params
+	 * within the message
 	 * @param locale the Locale in which to do the lookup
 	 * @return the resolved message, or null if not found
 	 * @see #getMessage(String, Object[], String, Locale)
@@ -172,7 +198,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			locale = Locale.getDefault();
 		}
 
-		if (args == null || args.length == 0) {
+		if (!this.alwaysUseMessageFormat && (args == null || args.length == 0)) {
 			// Optimized resolution: no arguments to apply,
 			// therefore no MessageFormat needs to be involved.
 			// Note that the default implementation still uses MessageFormat;
@@ -189,22 +215,36 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 			}
 		}
 
-		// not found -> check parent, if any
-		if (this.parentMessageSource != null) {
-			if (this.parentMessageSource instanceof AbstractMessageSource) {
+		// Not found -> check parent, if any.
+		return getMessageFromParent(code, args, locale);
+	}
+
+	/**
+	 * Try to retrieve the given message from the parent MessageSource, if any.
+	 * @param code the code to lookup up, such as 'calculator.noRateSet'
+	 * @param args array of arguments that will be filled in for params
+	 * within the message
+	 * @param locale the Locale in which to do the lookup
+	 * @return the resolved message, or null if not found
+	 * @see #getParentMessageSource()
+	 */
+	protected String getMessageFromParent(String code, Object[] args, Locale locale) {
+		MessageSource parent = getParentMessageSource();
+		if (parent != null) {
+			if (parent instanceof AbstractMessageSource) {
 				// Call internal method to avoid getting the default code back
 				// in case of "useCodeAsDefaultMessage" being activated.
-				return ((AbstractMessageSource) this.parentMessageSource).getMessageInternal(code, args, locale);
+				return ((AbstractMessageSource) parent).getMessageInternal(code, args, locale);
 			}
 			else {
 				// Check parent MessageSource, returning null if not found there.
-				return this.parentMessageSource.getMessage(code, args, null, locale);
+				return parent.getMessage(code, args, null, locale);
 			}
 		}
-
-		// not found at all
+		// Not found in parent either.
 		return null;
 	}
+
 
 	/**
 	 * Format the given message String, using cached MessageFormats.
@@ -217,7 +257,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @return the formatted message (with resolved arguments)
 	 */
 	protected String formatMessage(String msg, Object[] args, Locale locale) {
-		if (args == null || args.length == 0) {
+		if (!this.alwaysUseMessageFormat && (args == null || args.length == 0)) {
 			return msg;
 		}
 		MessageFormat messageFormat = null;
@@ -231,6 +271,49 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		return messageFormat.format(resolveArguments(args, locale));
 	}
 
+	/**
+	 * Create a MessageFormat for the given message and Locale.
+	 * <p>This implementation creates an empty MessageFormat first,
+	 * populating it with Locale and pattern afterwards, to stay
+	 * compatible with J2SE 1.3.
+	 * @param msg the message to create a MessageFormat for
+	 * @param locale the Locale to create a MessageFormat for
+	 * @return the MessageFormat instance
+	 */
+	protected MessageFormat createMessageFormat(String msg, Locale locale) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating MessageFormat for pattern [" + msg + "] and locale '" + locale + "'");
+		}
+		MessageFormat messageFormat = new MessageFormat("");
+		messageFormat.setLocale(locale);
+		messageFormat.applyPattern(msg);
+		return messageFormat;
+	}
+
+
+	/**
+	 * Search through the given array of objects, find any
+	 * MessageSourceResolvable objects and resolve them.
+	 * <p>Allows for messages to have MessageSourceResolvables as arguments.
+	 * @param args array of arguments for a message
+	 * @param locale the locale to resolve through
+	 * @return an array of arguments with any MessageSourceResolvables resolved
+	 */
+	protected Object[] resolveArguments(Object[] args, Locale locale) {
+		if (args == null) {
+			return new Object[0];
+		}
+		List resolvedArgs = new ArrayList(args.length);
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] instanceof MessageSourceResolvable) {
+				resolvedArgs.add(getMessage((MessageSourceResolvable) args[i], locale));
+			}
+			else {
+				resolvedArgs.add(args[i]);
+			}
+		}
+		return resolvedArgs.toArray(new Object[resolvedArgs.size()]);
+	}
 
 	/**
 	 * Subclasses can override this method to resolve a message without
@@ -258,50 +341,6 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 		}
 		return null;
 	}
-
-	/**
-	 * Search through the given array of objects, find any
-	 * MessageSourceResolvable objects and resolve them.
-	 * <p>Allows for messages to have MessageSourceResolvables as arguments.
-	 * @param args array of arguments for a message
-	 * @param locale the locale to resolve through
-	 * @return an array of arguments with any MessageSourceResolvables resolved
-	 */
-	protected Object[] resolveArguments(Object[] args, Locale locale) {
-		if (args == null) {
-			return new Object[0];
-		}
-		List resolvedArgs = new ArrayList(args.length);
-		for (int i = 0; i < args.length; i++) {
-			if (args[i] instanceof MessageSourceResolvable) {
-				resolvedArgs.add(getMessage((MessageSourceResolvable) args[i], locale));
-			}
-			else {
-				resolvedArgs.add(args[i]);
-			}
-		}
-		return resolvedArgs.toArray(new Object[resolvedArgs.size()]);
-	}
-
-	/**
-	 * Create a MessageFormat for the given message and Locale.
-	 * <p>This implementation creates an empty MessageFormat first,
-	 * populating it with Locale and pattern afterwards, to stay
-	 * compatible with J2SE 1.3.
-	 * @param msg the message to create a MessageFormat for
-	 * @param locale the Locale to create a MessageFormat for
-	 * @return the MessageFormat instance
-	 */
-	protected MessageFormat createMessageFormat(String msg, Locale locale) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating MessageFormat for pattern [" + msg + "] and locale '" + locale + "'");
-		}
-		MessageFormat messageFormat = new MessageFormat("");
-		messageFormat.setLocale(locale);
-		messageFormat.applyPattern(msg);
-		return messageFormat;
-	}
-
 
 	/**
 	 * Subclasses must implement this method to resolve a message.

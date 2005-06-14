@@ -35,7 +35,7 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 
 	protected void doTestMessageAccess(
 			boolean reloadable, boolean fallbackToSystemLocale,
-			boolean expectGermanFallback, boolean useCodeAsDefaultMessage) {
+			boolean expectGermanFallback, boolean useCodeAsDefaultMessage, boolean alwaysUseMessageFormat) {
 
 		StaticApplicationContext ac = new StaticApplicationContext();
 		if (reloadable) {
@@ -63,6 +63,9 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		}
 		if (useCodeAsDefaultMessage) {
 			pvs.addPropertyValue("useCodeAsDefaultMessage", Boolean.TRUE);
+		}
+		if (alwaysUseMessageFormat) {
+			pvs.addPropertyValue("alwaysUseMessageFormat", Boolean.TRUE);
 		}
 		Class clazz = reloadable ?
 				(Class) ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
@@ -104,11 +107,13 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		Object[] args = new Object[] {"Hello", new DefaultMessageSourceResolvable(new String[] {"code1"})};
 		assertEquals("Hello, message1", ac.getMessage("hello", args, Locale.ENGLISH));
 
+		// test default message without and with args
 		assertEquals("default", ac.getMessage(null, null, "default", Locale.ENGLISH));
 		assertEquals("default", ac.getMessage(null, args, "default", Locale.ENGLISH));
 		assertEquals("{0}, default", ac.getMessage(null, null, "{0}, default", Locale.ENGLISH));
 		assertEquals("Hello, default", ac.getMessage(null, args, "{0}, default", Locale.ENGLISH));
 
+		// test resolvable with default message, without and with args
 		resolvable = new DefaultMessageSourceResolvable(null, null, "default");
 		assertEquals("default", ac.getMessage(resolvable, Locale.ENGLISH));
 		resolvable = new DefaultMessageSourceResolvable(null, args, "default");
@@ -118,8 +123,17 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		resolvable = new DefaultMessageSourceResolvable(null, args, "{0}, default");
 		assertEquals("Hello, default", ac.getMessage(resolvable, Locale.ENGLISH));
 
-		// test null message args
+		// test message args
+		assertEquals("Arg1, Arg2", ac.getMessage("hello", new Object[] {"Arg1", "Arg2"}, Locale.ENGLISH));
 		assertEquals("{0}, {1}", ac.getMessage("hello", null, Locale.ENGLISH));
+
+		if (alwaysUseMessageFormat) {
+			assertEquals("I'm", ac.getMessage("escaped", null, Locale.ENGLISH));
+		}
+		else {
+			assertEquals("I''m", ac.getMessage("escaped", null, Locale.ENGLISH));
+		}
+		assertEquals("I'm", ac.getMessage("escaped", new Object[] {"some arg"}, Locale.ENGLISH));
 
 		try {
 			assertEquals("code4", ac.getMessage("code4", null, Locale.GERMAN));
@@ -135,27 +149,35 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 	}
 
 	public void testMessageAccessWithDefaultMessageSource() {
-		doTestMessageAccess(false, true, false, false);
+		doTestMessageAccess(false, true, false, false, false);
+	}
+
+	public void testMessageAccessWithDefaultMessageSourceAndMessageFormat() {
+		doTestMessageAccess(false, true, false, false, true);
 	}
 
 	public void testMessageAccessWithDefaultMessageSourceAndFallbackToGerman() {
-		doTestMessageAccess(false, true, true, true);
+		doTestMessageAccess(false, true, true, true, false);
 	}
 
 	public void testMessageAccessWithReloadableMessageSource() {
-		doTestMessageAccess(true, true, false, false);
+		doTestMessageAccess(true, true, false, false, false);
+	}
+
+	public void testMessageAccessWithReloadableMessageSourceAndMessageFormat() {
+		doTestMessageAccess(true, true, false, false, true);
 	}
 
 	public void testMessageAccessWithReloadableMessageSourceAndFallbackToGerman() {
-		doTestMessageAccess(true, true, true, true);
+		doTestMessageAccess(true, true, true, true, false);
 	}
 
 	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOff() {
-		doTestMessageAccess(true, false, false, false);
+		doTestMessageAccess(true, false, false, false, false);
 	}
 
 	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
-		doTestMessageAccess(true, false, true, true);
+		doTestMessageAccess(true, false, true, true, false);
 	}
 
 	public void testResourceBundleMessageSourceStandalone() {
