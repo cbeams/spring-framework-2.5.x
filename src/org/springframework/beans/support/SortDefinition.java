@@ -25,7 +25,8 @@ package org.springframework.beans.support;
 public interface SortDefinition {
 
 	/**
-	 * Return the name of the property to sort by.
+	 * Return the name of the bean property to compare.
+	 * Can also be a nested bean property path.
 	 */
 	String getProperty();
 
@@ -35,7 +36,7 @@ public interface SortDefinition {
 	boolean isIgnoreCase();
 
 	/**
-	 * Return if ascending or descending.
+	 * Return whether to sort ascending (true) or descending (false).
 	 */
 	boolean isAscending();
 

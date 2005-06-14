@@ -32,11 +32,12 @@ import org.springframework.beans.BeansException;
 
 /**
  * PropertyComparator performs a comparison of two beans,
- * using the specified bean property via a BeanWrapper.
+ * evaluating the specified bean property via a BeanWrapper.
  *
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 19.05.2003
+ * @see org.springframework.beans.BeanWrapper
  */
 public class PropertyComparator implements Comparator {
 
@@ -47,9 +48,24 @@ public class PropertyComparator implements Comparator {
 	private final Map cachedBeanWrappers = new HashMap();
 
 
+	/**
+	 * Create a new PropertyComparator for the given SortDefinition.
+	 * @see MutableSortDefinition
+	 */
 	public PropertyComparator(SortDefinition sortDefinition) {
 		this.sortDefinition = sortDefinition;
 	}
+
+	/**
+	 * Create a PropertyComparator for the given settings.
+	 * @param property the property to compare
+	 * @param ignoreCase whether upper and lower case in String values should be ignored
+	 * @param ascending whether to sort ascending (true) or descending (false)
+	 */
+	public PropertyComparator(String property, boolean ignoreCase, boolean ascending) {
+		this.sortDefinition = new MutableSortDefinition(property, ignoreCase, ascending);
+	}
+
 
 	public int compare(Object o1, Object o2) {
 		Object v1 = getPropertyValue(o1);
@@ -58,25 +74,16 @@ public class PropertyComparator implements Comparator {
 			v1 = ((String) v1).toLowerCase();
 			v2 = ((String) v2).toLowerCase();
 		}
+
 		int result;
 		
-		// Put a null property at the end of the sort.
+		// Put an object with null property at the end of the sort result.
 		try {
 			if (v1 != null) {
-				if (v2 != null) {
-					result = ((Comparable) v1).compareTo(v2);
-				}
-				else {
-					result = -1;
-				}
+				result = (v2 != null ? ((Comparable) v1).compareTo(v2) : -1);
 			}
 			else {
-				if (v2 != null) {
-					result = 1;
-				}
-				else {
-					result = 0;
-				}
+				result = (v2 != null ? 1 : 0);
 			}
 		}
 		catch (RuntimeException ex) {
@@ -85,6 +92,7 @@ public class PropertyComparator implements Comparator {
 			}
 			return 0;
 		}
+
 		return (this.sortDefinition.isAscending() ? result : -result);
 	}
 

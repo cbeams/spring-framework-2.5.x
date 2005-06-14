@@ -38,15 +38,33 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 	private boolean toggleAscendingOnProperty = false;
 
 
+	/**
+	 * Create an empty MutableSortDefinition,
+	 * to be populated via its bean properties.
+	 * @see #setProperty
+	 * @see #setIgnoreCase
+	 * @see #setAscending
+	 */
 	public MutableSortDefinition() {
 	}
 
+	/**
+	 * Copy constructor: create a new MutableSortDefinition
+	 * that mirrors the given sort definition.
+	 * @param source the original sort definition
+	 */
 	public MutableSortDefinition(SortDefinition source) {
 		this.property = source.getProperty();
 		this.ignoreCase = source.isIgnoreCase();
 		this.ascending = source.isAscending();
 	}
 
+	/**
+	 * Create a MutableSortDefinition for the given settings.
+	 * @param property the property to compare
+	 * @param ignoreCase whether upper and lower case in String values should be ignored
+	 * @param ascending whether to sort ascending (true) or descending (false)
+	 */
 	public MutableSortDefinition(String property, boolean ignoreCase, boolean ascending) {
 		this.property = property;
 		this.ignoreCase = ignoreCase;
@@ -59,9 +77,10 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 
 
 	/**
-	 * Set the sort property.
-	 * If the property was the same as the current, the sort is reversed if
+	 * Set the property to compare.
+	 * <p>If the property was the same as the current, the sort is reversed if
 	 * "toggleAscendingOnProperty" is activated, else simply ignored.
+	 * @see #setToggleAscendingOnProperty
 	 */
 	public void setProperty(String property) {
 		if (property == null || "".equals(property)) {
@@ -85,6 +104,9 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		return property;
 	}
 
+	/**
+	 * Set whether upper and lower case in String values should be ignored.
+	 */
 	public void setIgnoreCase(boolean ignoreCase) {
 		this.ignoreCase = ignoreCase;
 	}
@@ -93,6 +115,9 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		return ignoreCase;
 	}
 
+	/**
+	 * Set whether to sort ascending (true) or descending (false).
+	 */
 	public void setAscending(boolean ascending) {
 		this.ascending = ascending;
 	}

@@ -1,22 +1,41 @@
-package org.springframework.core.comparator;
+/*
+ * Copyright 2002-2005 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.PropertyComparator;
+import org.springframework.beans.support.PropertyComparator;
 
+/**
+ * @author Keith Donald
+ */
 public class ComparatorTests extends TestCase {
 
 	public void testComparableComparator() {
-		Comparator c = ComparableComparator.instance();
+		Comparator c = ComparableComparator.INSTANCE;
 		String s1 = "abc";
 		String s2 = "cde";
 		assertTrue(c.compare(s1, s2) < 0);
 	}
 
 	public void testComparableComparatorIllegalArgs() {
-		Comparator c = ComparableComparator.instance();
+		Comparator c = ComparableComparator.INSTANCE;
 		Object o1 = new Object();
 		Object o2 = new Object();
 		try {
@@ -29,27 +48,14 @@ public class ComparatorTests extends TestCase {
 	}
 
 	public void testBooleanComparatorTrueLow() {
-		Comparator c = BooleanComparator.instance(true);
+		Comparator c = BooleanComparator.TRUE_LOW;
 		assertTrue(c.compare(new Boolean(true), new Boolean(false)) < 0);
 	}
 
 	public void testBooleanComparatorTrueHigh() {
-		Comparator c = BooleanComparator.instance(false);
+		Comparator c = BooleanComparator.TRUE_HIGH;
 		assertTrue(c.compare(new Boolean(true), new Boolean(false)) > 0);
 		assertTrue(c.compare(Boolean.TRUE, Boolean.TRUE) == 0);
-	}
-
-	public void testPropertyComparatorNoProperties() {
-		Dog dog = new Dog();
-		dog.setNickName("mace");
-
-		Dog dog2 = new Dog();
-		dog2.setNickName("biscy");
-
-		PropertyComparator c = new PropertyComparator();
-		assertTrue(c.compare(dog, dog2) > 0);
-		assertTrue(c.compare(dog, dog) == 0);
-		assertTrue(c.compare(dog2, dog) < 0);
 	}
 
 	public void testPropertyComparator() {
@@ -59,7 +65,7 @@ public class ComparatorTests extends TestCase {
 		Dog dog2 = new Dog();
 		dog2.setNickName("biscy");
 
-		PropertyComparator c = new PropertyComparator("nickName");
+		PropertyComparator c = new PropertyComparator("nickName", false, true);
 		assertTrue(c.compare(dog, dog2) > 0);
 		assertTrue(c.compare(dog, dog) == 0);
 		assertTrue(c.compare(dog2, dog) < 0);
@@ -68,17 +74,17 @@ public class ComparatorTests extends TestCase {
 	public void testPropertyComparatorNulls() {
 		Dog dog = new Dog();
 		Dog dog2 = new Dog();
-		PropertyComparator c = new PropertyComparator("nickName");
+		PropertyComparator c = new PropertyComparator("nickName", false, true);
 		assertTrue(c.compare(dog, dog2) == 0);
 	}
 
 	public void testNullSafeComparatorNullsLow() {
-		Comparator c = NullSafeComparator.instance();
+		Comparator c = NullSafeComparator.NULLS_LOW;
 		assertTrue(c.compare(null, "boo") < 0);
 	}
 
 	public void testNullSafeComparatorNullsHigh() {
-		Comparator c = NullSafeComparator.instance(false);
+		Comparator c = NullSafeComparator.NULLS_HIGH;
 		assertTrue(c.compare(null, "boo") > 0);
 		assertTrue(c.compare(null, null) == 0);
 	}
@@ -96,7 +102,8 @@ public class ComparatorTests extends TestCase {
 
 	public void testCompoundComparator() {
 		CompoundComparator c = new CompoundComparator();
-		c.addComparator(new PropertyComparator("lastName"));
+		c.addComparator(new PropertyComparator("lastName", false, true));
+
 		Dog dog1 = new Dog();
 		dog1.setFirstName("macy");
 		dog1.setLastName("grayspots");
@@ -106,17 +113,18 @@ public class ComparatorTests extends TestCase {
 		dog2.setLastName("grayspots");
 
 		assertTrue(c.compare(dog1, dog2) == 0);
-		c.addComparator(new PropertyComparator("firstName"));
+
+		c.addComparator(new PropertyComparator("firstName", false, true));
 		assertTrue(c.compare(dog1, dog2) > 0);
 
 		dog2.setLastName("konikk dog");
 		assertTrue(c.compare(dog2, dog1) > 0);
 	}
 
-	public void testCompoundComparatorFlip() {
+	public void testCompoundComparatorInvert() {
 		CompoundComparator c = new CompoundComparator();
-		c.addComparator(new PropertyComparator("lastName"));
-		c.addComparator(new PropertyComparator("firstName"));
+		c.addComparator(new PropertyComparator("lastName", false, true));
+		c.addComparator(new PropertyComparator("firstName", false, true));
 		Dog dog1 = new Dog();
 		dog1.setFirstName("macy");
 		dog1.setLastName("grayspots");
@@ -126,23 +134,10 @@ public class ComparatorTests extends TestCase {
 		dog2.setLastName("grayspots");
 
 		assertTrue(c.compare(dog1, dog2) > 0);
-		c.flipOrder();
+		c.invertOrder();
 		assertTrue(c.compare(dog1, dog2) < 0);
 	}
 
-	public void testStaticFactoryMethods() {
-		CompoundComparator c = new CompoundComparator(SortDefinition.createSortDefinitionList(new Comparator[] {
-				new PropertyComparator("lastName"), new PropertyComparator("firstName") }));
-		Dog dog1 = new Dog();
-		dog1.setFirstName("macy");
-		dog1.setLastName("grayspots");
-
-		Dog dog2 = new Dog();
-		dog2.setFirstName("biscuit");
-		dog2.setLastName("grayspots");
-
-		assertTrue(c.compare(dog1, dog2) > 0);
-	}
 
 	private static class Dog implements Comparable {
 
