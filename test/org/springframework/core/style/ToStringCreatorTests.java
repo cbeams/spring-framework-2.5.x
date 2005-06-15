@@ -17,14 +17,13 @@
 package org.springframework.core.style;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -59,24 +58,22 @@ public class ToStringCreatorTests extends TestCase {
 				return new ToStringCreator(this).append("familyFavoriteSport", map).toString();
 			}
 		};
-		System.out.println(stringy.toString());
 		assertEquals("[ToStringCreatorTests.4@" + ObjectUtils.getIdentityHexString(stringy)
 				+ " familyFavoriteSport = map['Keri' -> 'Softball', 'Scot' -> 'Fishing', 'Keith' -> 'Flag Football']]",
 				stringy.toString());
 	}
 
 	private Map getMap() {
-		Map map = new HashMap();
-		map.put("Keith", "Flag Football");
+		Map map = CollectionFactory.createLinkedMapIfPossible(3);
 		map.put("Keri", "Softball");
 		map.put("Scot", "Fishing");
+		map.put("Keith", "Flag Football");
 		return map;
 	}
 
 	public void testDefaultStyleArray() {
 		SomeObject[] array = new SomeObject[] { s1, s2, s3 };
 		String str = new ToStringCreator(array).toString();
-		System.out.println(str);
 		assertEquals("[@" + ObjectUtils.getIdentityHexString(array)
 				+ " array<ToStringCreatorTests.SomeObject>[A, B, C]]", str);
 	}
@@ -84,7 +81,6 @@ public class ToStringCreatorTests extends TestCase {
 	public void testPrimitiveArrays() {
 		int[] integers = new int[] { 0, 1, 2, 3, 4 };
 		String str = new ToStringCreator(integers).toString();
-		System.out.println(str);
 		assertEquals("[@" + ObjectUtils.getIdentityHexString(integers) + " array<Integer>[0, 1, 2, 3, 4]]", str);
 	}
 
@@ -94,25 +90,22 @@ public class ToStringCreatorTests extends TestCase {
 		list.add(s2);
 		list.add(s3);
 		String str = new ToStringCreator(this).append("myLetters", list).toString();
-		System.out.println(str);
 		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) + " myLetters = list[A, B, C]]",
 				str);
 	}
 
 	public void testSet() {
-		Set set = new LinkedHashSet();
+		Set set = CollectionFactory.createLinkedSetIfPossible(3);
 		set.add(s1);
 		set.add(s2);
 		set.add(s3);
 		String str = new ToStringCreator(this).append("myLetters", set).toString();
-		System.out.println(str);
 		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this) + " myLetters = set[A, B, C]]",
 				str);
 	}
 
 	public void testClass() {
 		String str = new ToStringCreator(this).append("myClass", this.getClass()).toString();
-		System.out.println(str);
 		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this)
 				+ " myClass = ToStringCreatorTests]", str);
 	}
@@ -120,7 +113,6 @@ public class ToStringCreatorTests extends TestCase {
 	public void testMethod() throws Exception {
 		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("testMethod", null))
 				.toString();
-		System.out.println(str);
 		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this)
 				+ " myMethod = testMethod@ToStringCreatorTests]", str);
 	}
