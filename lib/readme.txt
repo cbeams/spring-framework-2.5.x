@@ -9,7 +9,7 @@ distribution/website before using any of them in your own applications.
 
 * antlr/antlr-2.7.5H3.jar
 - ANTLR 2.7.5 with Hibernate3 patch (http://www.antlr.org)
-- required for running Petclinic (by Hibernate3)
+- required for running PetClinic (by Hibernate3)
 
 * aopalliance/aopalliance.jar
 - AOP Alliance 1.0 (http://aopalliance.sourceforge.net)
@@ -17,7 +17,7 @@ distribution/website before using any of them in your own applications.
 - included in spring.jar and spring-aop.jar
 
 * axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
-- Apache Axis 1.2 (http://ws.apache.org/axis)
+- Apache Axis 1.2.1 (http://ws.apache.org/axis)
 - required for running JPetStore
 
 * c3p0/c3p0-0.8.5.2.jar
@@ -36,8 +36,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when Spring's Hessian remoting support
 
-* cglib/cglib-nodep-2.1.jar
-- CGLIB 2.1 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net)
+* cglib/cglib-nodep-2.1_1.jar
+- CGLIB 2.1_1 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net)
 - required for building the framework
 - required at runtime when proxying full target classes via Spring AOP
 
@@ -48,7 +48,7 @@ distribution/website before using any of them in your own applications.
 
 * dom4j/dom4j-1.6, dom4j/jaxen-1.1-beta-4.jar
 - DOM4J 1.6 XML parser (http://www.dom4j.org)
-- required for running Petclinic (by Hibernate)
+- required for running PetClinic (by Hibernate)
 - required for building and running Tiles Example
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
@@ -59,7 +59,7 @@ distribution/website before using any of them in your own applications.
 - EHCache 1.1 (http://ehcache.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's EHCache support
-- required for running Petclinic (by Hibernate)
+- required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
 - FreeMarker 2.3.2 (http://www.freemarker.org)
@@ -83,7 +83,7 @@ distribution/website before using any of them in your own applications.
 
 * hsqldb/hsqldb.jar
 - HSQLDB 1.7.3.3 (http://hsqldb.sourceforge.net)
-- required for running JPetStore and Petclinic
+- required for running JPetStore and PetClinic
 
 * ibatis/ibatis-sqlmap.jar
 - iBATIS SQL Maps 1.3.1 (http://www.ibatis.com)
@@ -175,7 +175,7 @@ distribution/website before using any of them in your own applications.
 - Commons Collections 3.1 (http://jakarta.apache.org/commons/collections)
 - required for building the framework
 - optional for using linked/identity maps in Spring core (on JDK < 1.4)
-- required for running Petclinic, JPetStore (by Commons DBCP, Hibernate, OJB)
+- required for running PetClinic, JPetStore (by Commons DBCP, Hibernate, OJB)
 
 * jakarta-commons/commons-dbcp.jar
 - Commons DBCP 1.2.1 (http://jakarta.apache.org/commons/dbcp)
@@ -184,7 +184,7 @@ distribution/website before using any of them in your own applications.
 - required for running JPetStore
 
 * jakarta-commons/commons-digester.jar
-- Commons Digester 1.5 (http://jakarta.apache.org/commons/digester)
+- Commons Digester 1.6 (http://jakarta.apache.org/commons/digester)
 - required for running JPetStore's Struts web tier
 
 * jakarta-commons/commons-discovery.jar
@@ -202,7 +202,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
 * jakarta-commons/commons-lang.jar
-- Commons Lang 2.0 (http://jakarta.apache.org/commons/lang)
+- Commons Lang 2.1 (http://jakarta.apache.org/commons/lang)
 - required for building the framework (by OJB)
 - required at runtime when using Spring's OJB support (by OJB)
 
@@ -221,7 +221,7 @@ distribution/website before using any of them in your own applications.
 
 * jakarta-taglibs/standard.jar
 - Jakarta's JSTL implementation 1.0.6 (http://jakarta.apache.org/taglibs)
-- required for running JPetStore, Petclinic, Countries, and Tiles Example
+- required for running JPetStore, PetClinic, Countries, and Tiles Example
 
 * jamon/JAMon.jar
 - JAMon API (Java Application Monitor) 1.0 (http://www.jamonapi.com)
@@ -298,7 +298,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Quartz scheduling support
 
 * struts/struts.jar
-- Apache Struts 1.2.4 (http://jakarta.apache.org/struts)
+- Apache Struts 1.2.7 (http://jakarta.apache.org/struts)
 - required for building the framework
 - required at runtime when using the Struts support or TilesView
 - required for running JPetStore's Struts web tier
