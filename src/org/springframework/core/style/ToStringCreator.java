@@ -29,12 +29,18 @@ import org.springframework.util.Assert;
  */
 public class ToStringCreator {
 
-	private static ToStringStyler DEFAULT_TO_STRING_STYLER =
-			new DefaultToStringStyler(new DefaultValueStyler());
+	/**
+	 * Default ValueStyler instance used by this ToStringCreator.
+	 * Also available for direct use.
+	 */
+	public static final ValueStyler DEFAULT_VALUE_STYLER = new DefaultValueStyler();
 
-	public static final void load(ToStringStyler defaultStyler) {
-		DEFAULT_TO_STRING_STYLER = defaultStyler;
-	}
+	/**
+	 * Default ToStringStyler instance used by this ToStringCreator.
+	 * Also available for direct use.
+	 */
+	public static final ToStringStyler DEFAULT_TO_STRING_STYLER =
+			new DefaultToStringStyler(DEFAULT_VALUE_STYLER);
 
 
 	private StringBuffer buffer = new StringBuffer(512);
@@ -51,13 +57,22 @@ public class ToStringCreator {
 	 * @param obj the object to be stringified
 	 */
 	public ToStringCreator(Object obj) {
-		this(obj, null);
+		this(obj, (ToStringStyler) null);
 	}
 
 	/**
 	 * Create a ToStringBuilder for this object with the provided style.
 	 * @param obj the object to be stringified
-	 * @param styler the styler encapsulating pretty-print instructions
+	 * @param styler the ValueStyler encapsulating pretty-print instructions
+	 */
+	public ToStringCreator(Object obj, ValueStyler styler) {
+		this(obj, new DefaultToStringStyler(styler != null ? styler : DEFAULT_VALUE_STYLER));
+	}
+
+	/**
+	 * Create a ToStringBuilder for this object with the provided style.
+	 * @param obj the object to be stringified
+	 * @param styler the ToStringStyler encapsulating pretty-print instructions
 	 */
 	public ToStringCreator(Object obj, ToStringStyler styler) {
 		Assert.notNull(obj, "The object to be styled is required");
