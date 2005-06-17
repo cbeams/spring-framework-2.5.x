@@ -77,6 +77,7 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 	 */
 	protected WebApplicationContext initWebApplicationContext(
 			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
+
 		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 

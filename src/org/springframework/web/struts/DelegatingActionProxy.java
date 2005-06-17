@@ -101,6 +101,7 @@ public class DelegatingActionProxy extends Action {
 	public ActionForward execute(
 			ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+
 		Action delegateAction = getDelegateAction(mapping);
 		return delegateAction.execute(mapping, form, request, response);
 	}
@@ -133,6 +134,7 @@ public class DelegatingActionProxy extends Action {
 	 */
 	protected WebApplicationContext getWebApplicationContext(
 			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
+
 		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 

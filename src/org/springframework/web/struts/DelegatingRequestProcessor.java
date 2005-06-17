@@ -121,6 +121,7 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 	 */
 	protected WebApplicationContext initWebApplicationContext(
 			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
+
 		return DelegatingActionUtils.getRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 
