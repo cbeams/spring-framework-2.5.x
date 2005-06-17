@@ -2,12 +2,13 @@
 <!DOCTYPE struts-config PUBLIC
           "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN"
           "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
 <struts-config>
 
 	<form-beans>
-		<!-- A single action form adapter for your entire app is all you need, if you
+		<!-- A single ActionForm adapter for your entire app is all you need, if you
 			 wish to take advantage of Spring's POJO-based data binding and validation. -->
-		<form-bean name="actionForm" type="org.springframework.web.struts.BindingActionForm"/>
+		<form-bean name="actionForm" type="org.springframework.web.struts.SpringBindingActionForm"/>
 	</form-beans>
 
 	<global-forwards>
@@ -20,22 +21,14 @@
 		<action path="/home" forward="/WEB-INF/index.jsp"/>
 		
 		<!-- flow actions -->
-		<action path="/birthDate"
-			type="org.springframework.web.flow.struts.FlowAction"
-			name="actionForm" scope="request" 
-			className="org.springframework.web.flow.struts.FlowActionMapping">
-			<set-property property="flowId" value="birthDate" />
+		<action path="/birthDate" name="actionForm" scope="request"
+				type="org.springframework.web.flow.struts.FlowAction"
+				className="org.springframework.web.flow.struts.FlowActionMapping">
+			<set-property property="flowId" value="birthDate"/>
 		</action>
 
 	</action-mappings>
 
-	<!-- A custom request processor is neccessary for deferred, POJO-based binding and validation
-		 No more Action Form proliferation! :-) -->
-    <controller processorClass="org.springframework.web.struts.BindingRequestProcessor"/>
-
-	<message-resources parameter="org.springframework.samples.birthdate.MessageResources" />
-	
-	<!-- plugin neccessary for making Commons BeanUtils aware of the BindingActionForm adapter -->
-    <plug-in className="org.springframework.web.struts.BindingPlugin"/>
+	<message-resources parameter="org.springframework.samples.birthdate.MessageResources"/>
 
 </struts-config>
