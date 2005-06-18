@@ -15,7 +15,6 @@
  */
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -38,7 +37,7 @@ import java.io.StringWriter;
  * new Spring configuration items and for tranforming DOM nodes.
  *
  * @author James Strachan
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ElementProcessorSupport {
 
