@@ -97,11 +97,13 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	 */
 	protected List findCandidateAdvisors() {
 		if (!(getBeanFactory() instanceof ListableBeanFactory)) {
-			throw new IllegalStateException("Cannot use DefaultAdvisorAutoProxyCreator without a ListableBeanFactory");
+			throw new IllegalStateException(
+					"Cannot use DefaultAdvisorAutoProxyCreator without a ListableBeanFactory");
 		}
 		ListableBeanFactory owningFactory = (ListableBeanFactory) getBeanFactory();
 		
-		String[] adviceNames = BeanFactoryUtils.beanNamesIncludingAncestors(owningFactory, Advisor.class);
+		String[] adviceNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(owningFactory, Advisor.class);
 		List candidateAdvisors = new LinkedList();
 		for (int i = 0; i < adviceNames.length; i++) {
 			String name = adviceNames[i];

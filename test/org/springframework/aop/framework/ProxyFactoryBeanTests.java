@@ -505,6 +505,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	*/
 
 	public void testEmptyInterceptorNames() {
+		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("invalidProxyFactory.xml", getClass()));
 		try {
 			ITestBean tb = (ITestBean) factory.getBean("emptyInterceptorNames");
 			fail("Interceptor names cannot be empty");
@@ -518,6 +519,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	 * Globals must be followed by a target.
 	 */
 	public void testGlobalsWithoutTarget() {
+		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("invalidProxyFactory.xml", getClass()));
 		try {
 			ITestBean tb = (ITestBean) factory.getBean("globalsWithoutTarget");
 			fail("Should require target name");
@@ -526,7 +528,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 			assertTrue(ex.getCause() instanceof AopConfigException);
 		}
 	}
-	
+
 	/**
 	 * Checks that globals get invoked,
 	 * and that they can add aspect interfaces unavailable

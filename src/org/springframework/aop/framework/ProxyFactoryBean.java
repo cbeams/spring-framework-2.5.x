@@ -399,8 +399,10 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * Add all global interceptors and pointcuts.
 	 */
 	private void addGlobalAdvisor(ListableBeanFactory beanFactory, String prefix) {
-		String[] globalAdvisorNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Advisor.class);
-		String[] globalInterceptorNames = BeanFactoryUtils.beanNamesIncludingAncestors(beanFactory, Interceptor.class);
+		String[] globalAdvisorNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Advisor.class);
+		String[] globalInterceptorNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Interceptor.class);
 		List beans = new ArrayList(globalAdvisorNames.length + globalInterceptorNames.length);
 		Map names = new HashMap();
 		for (int i = 0; i < globalAdvisorNames.length; i++) {
