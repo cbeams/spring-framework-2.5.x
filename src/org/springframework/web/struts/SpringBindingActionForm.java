@@ -41,7 +41,7 @@ import org.springframework.validation.ObjectError;
 /**
  * A thin Struts ActionForm adapter that delegates to Spring's more complete
  * and advanced data binder and Errors object underneath the covers to bind
- * to POJOs and manage rejected values. Used by Spring WebFlow.
+ * to POJOs and manage rejected values.
  *
  * <p>Exposes Spring-managed errors to the standard Struts view tags, through
  * exposing a corresponding Struts ActionMessages object as request attribute.
