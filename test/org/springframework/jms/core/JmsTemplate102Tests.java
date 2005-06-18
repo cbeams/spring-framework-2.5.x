@@ -219,12 +219,14 @@ public class JmsTemplate102Tests extends TestCase {
 		mockTopicPublisher.getPriority();
 		topicPublisherControl.setReturnValue(4);
 
+		mockTopicPublisher.close();
+		topicPublisherControl.setVoidCallable(1);
 		mockTopicSession.close();
 		topicSessionControl.setVoidCallable(1);
-
 		mockTopicConnection.close();
 		topicConnectionControl.setVoidCallable(1);
 
+		topicPublisherControl.replay();
 		topicSessionControl.replay();
 		topicConnectionControl.replay();
 
@@ -265,12 +267,14 @@ public class JmsTemplate102Tests extends TestCase {
 		mockTopicPublisher.getPriority();
 		topicPublisherControl.setReturnValue(4);
 
+		mockTopicPublisher.close();
+		topicPublisherControl.setVoidCallable(1);
 		mockTopicSession.close();
 		topicSessionControl.setVoidCallable(1);
-
 		mockTopicConnection.close();
 		topicConnectionControl.setVoidCallable(1);
 
+		topicPublisherControl.replay();
 		topicSessionControl.replay();
 		topicConnectionControl.replay();
 
@@ -333,17 +337,17 @@ public class JmsTemplate102Tests extends TestCase {
 		mockQueueSession.createSender(null);
 		queueSessionControl.setReturnValue(mockQueueSender);
 
-		mockQueueSession.close();
-		queueSessionControl.setVoidCallable(1);
-
 		mockQueueSender.getPriority();
 		queueSenderControl.setReturnValue(4);
 
-		queueSenderControl.replay();
-
+		mockQueueSender.close();
+		queueSenderControl.setVoidCallable(1);
+		mockQueueSession.close();
+		queueSessionControl.setVoidCallable(1);
 		mockQueueConnection.close();
 		queueConnectionControl.setVoidCallable(1);
 
+		queueSenderControl.replay();
 		queueSessionControl.replay();
 		queueConnectionControl.replay();
 
@@ -375,9 +379,6 @@ public class JmsTemplate102Tests extends TestCase {
 		mockQueueSession.createSender(null);
 		queueSessionControl.setReturnValue(mockQueueSender);
 
-		mockQueueSession.close();
-		queueSessionControl.setVoidCallable(1);
-
 		mockQueueSender.setDisableMessageID(true);
 		queueSenderControl.setVoidCallable(1);
 		mockQueueSender.setDisableMessageTimestamp(true);
@@ -385,17 +386,19 @@ public class JmsTemplate102Tests extends TestCase {
 		mockQueueSender.getPriority();
 		queueSenderControl.setReturnValue(4);
 
-		queueSenderControl.replay();
-
+		mockQueueSender.close();
+		queueSenderControl.setVoidCallable(1);
+		mockQueueSession.close();
+		queueSessionControl.setVoidCallable(1);
 		mockQueueConnection.close();
 		queueConnectionControl.setVoidCallable(1);
 
+		queueSenderControl.replay();
 		queueSessionControl.replay();
 		queueConnectionControl.replay();
 
 		template.execute(new ProducerCallback() {
-			public Object doInJms(Session session, MessageProducer msgProducer)
-			    throws JMSException {
+			public Object doInJms(Session session, MessageProducer msgProducer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = msgProducer.getPriority();
 				return null;
@@ -421,8 +424,8 @@ public class JmsTemplate102Tests extends TestCase {
 			s102.afterPropertiesSet();
 			fail("IllegalArgumentException not thrown. ConnectionFactory should be set");
 		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Exception message not matching", "connectionFactory is required", e.getMessage());
+		catch (IllegalArgumentException ex) {
+			assertEquals("Exception message not matching", "connectionFactory is required", ex.getMessage());
 		}
 
 		// The default is for the JmsTemplate102 to send to queues.
@@ -530,10 +533,10 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Common method for testing a send method that uses the MessageCreator
 	 * callback but with different QOS options.
-	 * @param ignoreQOS test using default QOS options.
 	 */
-	private void sendQueue(boolean ignoreQOS, boolean explicitQueue, boolean useDefaultDestination,
-			boolean disableIdAndTimestamp) throws Exception {
+	private void sendQueue(
+			boolean ignoreQOS, boolean explicitQueue, boolean useDefaultDestination, boolean disableIdAndTimestamp)
+			throws Exception {
 
 		JmsTemplate102 template = createTemplate();
 		template.setConnectionFactory(mockQueueConnectionFactory);
@@ -560,9 +563,6 @@ public class JmsTemplate102Tests extends TestCase {
 			queueSenderControl.setVoidCallable(1);
 		}
 
-		mockQueueConnection.close();
-		queueConnectionControl.setVoidCallable(1);
-
 		mockQueueSession.createSender(this.mockQueue);
 		queueSessionControl.setReturnValue(mockQueueSender);
 		mockQueueSession.createTextMessage("just testing");
@@ -572,12 +572,6 @@ public class JmsTemplate102Tests extends TestCase {
 			mockQueueSession.commit();
 			queueSessionControl.setVoidCallable(1);
 		}
-
-		mockQueueSession.close();
-		queueSessionControl.setVoidCallable(1);
-
-		queueConnectionControl.replay();
-		queueSessionControl.replay();
 
 		if (ignoreQOS) {
 			mockQueueSender.send(mockMessage);
@@ -589,7 +583,18 @@ public class JmsTemplate102Tests extends TestCase {
 			template.setTimeToLive(timeToLive);
 			mockQueueSender.send(mockMessage, deliveryMode, priority, timeToLive);
 		}
+		queueSenderControl.setVoidCallable(1);
+
+		mockQueueSender.close();
+		queueSenderControl.setVoidCallable(1);
+		mockQueueSession.close();
+		queueSessionControl.setVoidCallable(1);
+		mockQueueConnection.close();
+		queueConnectionControl.setVoidCallable(1);
+
 		queueSenderControl.replay();
+		queueSessionControl.replay();
+		queueConnectionControl.replay();
 
 		if (useDefaultDestination) {
 			template.send(new MessageCreator() {
@@ -618,9 +623,8 @@ public class JmsTemplate102Tests extends TestCase {
 
 		queueConnectionFactoryControl.verify();
 		queueConnectionControl.verify();
-		queueSenderControl.verify();
-
 		queueSessionControl.verify();
+		queueSenderControl.verify();
 	}
 
 	private void sendTopic(boolean ignoreQOS, boolean explicitTopic) throws Exception {
@@ -635,9 +639,6 @@ public class JmsTemplate102Tests extends TestCase {
 		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
-		mockTopicConnection.close();
-		topicConnectionControl.setVoidCallable(1);
-
 		mockTopicSession.createPublisher(this.mockTopic);
 		topicSessionControl.setReturnValue(mockTopicPublisher);
 		mockTopicSession.createTextMessage("just testing");
@@ -648,11 +649,16 @@ public class JmsTemplate102Tests extends TestCase {
 			topicSessionControl.setVoidCallable(1);
 		}
 
+		mockTopicPublisher.close();
+		topicPublisherControl.setVoidCallable(1);
 		mockTopicSession.close();
 		topicSessionControl.setVoidCallable(1);
+		mockTopicConnection.close();
+		topicConnectionControl.setVoidCallable(1);
 
-		topicConnectionControl.replay();
+
 		topicSessionControl.replay();
+		topicConnectionControl.replay();
 
 		if (ignoreQOS) {
 			mockTopicPublisher.publish(mockMessage);
@@ -703,9 +709,6 @@ public class JmsTemplate102Tests extends TestCase {
 		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
-		mockQueueConnection.close();
-		queueConnectionControl.setVoidCallable(1);
-
 		mockQueueSession.createSender(this.mockQueue);
 		queueSessionControl.setReturnValue(mockQueueSender);
 		mockQueueSession.createTextMessage("Hello world");
@@ -716,22 +719,26 @@ public class JmsTemplate102Tests extends TestCase {
 			queueSessionControl.setVoidCallable(1);
 		}
 
+		mockQueueSender.send(mockMessage);
+		queueSenderControl.setVoidCallable(1);
+
+		mockQueueSender.close();
+		queueSenderControl.setVoidCallable(1);
 		mockQueueSession.close();
 		queueSessionControl.setVoidCallable(1);
+		mockQueueConnection.close();
+		queueConnectionControl.setVoidCallable(1);
 
-		queueConnectionControl.replay();
-		queueSessionControl.replay();
-
-		mockQueueSender.send(mockMessage);
 		queueSenderControl.replay();
+		queueSessionControl.replay();
+		queueConnectionControl.replay();
 
 		template.convertAndSend(mockQueue, s);
 
 		queueConnectionFactoryControl.verify();
 		queueConnectionControl.verify();
-		queueSenderControl.verify();
-
 		queueSessionControl.verify();
+		queueSenderControl.verify();
 	}
 
 	public void testQueueReceiveDefaultDestination() throws Exception {

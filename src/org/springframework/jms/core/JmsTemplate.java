@@ -26,7 +26,6 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TransactionInProgressException;
 
-import org.springframework.core.Constants;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionHolder;
 import org.springframework.jms.support.JmsAccessor;
@@ -598,7 +597,12 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 		return execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
 				MessageProducer producer = createProducer(session, null);
-				return action.doInJms(session, producer);
+				try {
+					return action.doInJms(session, producer);
+				}
+				finally {
+					JmsUtils.closeMessageProducer(producer);
+				}
 			}
 		});
 	}
@@ -637,16 +641,21 @@ public class JmsTemplate extends JmsAccessor implements JmsOperations {
 			throws JMSException {
 
 		MessageProducer producer = createProducer(session, destination);
-		Message message = messageCreator.createMessage(session);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Sending created message [" + message + "]");
+		try {
+			Message message = messageCreator.createMessage(session);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Sending created message [" + message + "]");
+			}
+			doSend(producer, message);
+			// Check commit - avoid commit call within a JTA transaction.
+			if (session.getTransacted() && isSessionTransacted() &&
+					!TransactionSynchronizationManager.hasResource(getConnectionFactory())) {
+				// Transacted session created by this template -> commit.
+				commitIfNecessary(session);
+			}
 		}
-		doSend(producer, message);
-		// Check commit - avoid commit call within a JTA transaction.
-		if (session.getTransacted() && isSessionTransacted() &&
-				!TransactionSynchronizationManager.hasResource(getConnectionFactory())) {
-			// Transacted session created by this template -> commit.
-			commitIfNecessary(session);
+		finally {
+			JmsUtils.closeMessageProducer(producer);
 		}
 	}
 

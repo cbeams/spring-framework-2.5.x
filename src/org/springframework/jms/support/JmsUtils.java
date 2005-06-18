@@ -22,6 +22,7 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.apache.commons.logging.Log;
@@ -33,7 +34,8 @@ import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.util.ClassUtils;
 
 /**
- * Generic utility methods for working with JMS.
+ * Generic utility methods for working with JMS. Mainly for internal use
+ * within the framework, but also useful for custom JMS access code.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -53,7 +55,7 @@ public abstract class JmsUtils {
 				con.close();
 			}
 			catch (JMSException ex) {
-				logger.warn("Failed to close the connection", ex);
+				logger.warn("Could not close JMS Connection", ex);
 			}
 		}
 	}
@@ -69,7 +71,23 @@ public abstract class JmsUtils {
 				session.close();
 			}
 			catch (JMSException ex) {
-				logger.warn("Failed to close the session", ex);
+				logger.warn("Could not close JMS Session", ex);
+			}
+		}
+	}
+
+	/**
+	 * Close the given JMS MessageProducer and ignore any thrown exception.
+	 * This is useful for typical finally blocks in manual JMS code.
+	 * @param producer the JMS MessageProducer to close
+	 */
+	public static void closeMessageProducer(MessageProducer producer) {
+		if (producer != null) {
+			try {
+				producer.close();
+			}
+			catch (JMSException ex) {
+				logger.warn("Could not close JMS MessageProducer", ex);
 			}
 		}
 	}
@@ -85,7 +103,7 @@ public abstract class JmsUtils {
 				consumer.close();
 			}
 			catch (JMSException ex) {
-				logger.warn("Failed to close the consumer", ex);
+				logger.warn("Could not close JMS MessageConsumer", ex);
 			}
 		}
 	}

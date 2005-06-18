@@ -157,14 +157,14 @@ public class JmsTemplateTests extends TestCase {
 		mockMessageProducer.getPriority();
 		messageProducerControl.setReturnValue(4);
 
-		messageProducerControl.replay();
-
+		mockMessageProducer.close();
+		messageProducerControl.setVoidCallable(1);
 		mockSession.close();
 		sessionControl.setVoidCallable(1);
-
 		mockConnection.close();
 		connectionControl.setVoidCallable(1);
 
+		messageProducerControl.replay();
 		sessionControl.replay();
 		connectionControl.replay();
 
@@ -200,9 +200,10 @@ public class JmsTemplateTests extends TestCase {
 		mockMessageProducer.getPriority();
 		messageProducerControl.setReturnValue(4);
 
+		mockMessageProducer.close();
+		messageProducerControl.setVoidCallable(1);
 		mockSession.close();
 		sessionControl.setVoidCallable(1);
-
 		mockConnection.close();
 		connectionControl.setVoidCallable(1);
 
@@ -344,12 +345,6 @@ public class JmsTemplateTests extends TestCase {
 		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
-		mockSession.close();
-		sessionControl.setVoidCallable(1);
-
-		mockConnection.close();
-		connectionControl.setVoidCallable(1);
-
 		mockSession.createProducer(mockQueue);
 		sessionControl.setReturnValue(mockMessageProducer);
 		mockSession.createTextMessage("just testing");
@@ -359,9 +354,6 @@ public class JmsTemplateTests extends TestCase {
 			mockSession.commit();
 			sessionControl.setVoidCallable(1);
 		}
-
-		sessionControl.replay();
-		connectionControl.replay();
 
 		if (disableIdAndTimestamp) {
 			mockMessageProducer.setDisableMessageID(true);
@@ -380,8 +372,18 @@ public class JmsTemplateTests extends TestCase {
 			template.setTimeToLive(timeToLive);
 			mockMessageProducer.send(mockMessage, deliveryMode, priority, timeToLive);
 		}
+		messageProducerControl.setVoidCallable(1);
+
+		mockMessageProducer.close();
+		messageProducerControl.setVoidCallable(1);
+		mockSession.close();
+		sessionControl.setVoidCallable(1);
+		mockConnection.close();
+		connectionControl.setVoidCallable(1);
 
 		messageProducerControl.replay();
+		sessionControl.replay();
+		connectionControl.replay();
 
 		if (useDefaultDestination) {
 			template.send(new MessageCreator() {
@@ -427,23 +429,25 @@ public class JmsTemplateTests extends TestCase {
 		MockControl messageControl = MockControl.createControl(TextMessage.class);
 		TextMessage mockMessage = (TextMessage) messageControl.getMock();
 
-		mockSession.close();
-		sessionControl.setVoidCallable(1);
-
-		mockConnection.close();
-		connectionControl.setVoidCallable(1);
-
 		mockSession.createProducer(mockQueue);
 		sessionControl.setReturnValue(mockMessageProducer);
 		mockSession.createTextMessage("Hello world");
 		sessionControl.setReturnValue(mockMessage);
 
 		mockMessageProducer.send(mockMessage);
+		messageProducerControl.setVoidCallable(1);
+		mockMessageProducer.close();
+		messageProducerControl.setVoidCallable(1);
 
 		if (useTransactedTemplate()) {
 			mockSession.commit();
 			sessionControl.setVoidCallable(1);
 		}
+
+		mockSession.close();
+		sessionControl.setVoidCallable(1);
+		mockConnection.close();
+		connectionControl.setVoidCallable(1);
 
 		messageProducerControl.replay();
 		sessionControl.replay();
