@@ -25,8 +25,8 @@ import org.springframework.util.Assert;
  * other objects. Can decorate a given Comparator or work on Comparables.
  * 
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 1.2.2
- * @see ComparableComparator
  * @see Comparable
  */
 public class NullSafeComparator implements Comparator {
@@ -51,24 +51,28 @@ public class NullSafeComparator implements Comparator {
 
 	/**
 	 * Create a NullSafeComparator that sorts <code>null</code> based on
-	 * the provided flag. When comparing two non-null objects, the
-	 * ComparableComparator is used.
-	 * <p>Alternatively, you can use the default shared instances:
+	 * the provided flag, working on Comparables.
+	 * <p>When comparing two non-null objects, their Comparable implementation
+	 * will be used: this means that non-null elements (that this Comparator
+	 * will be applied to) need to implement Comparable.
+	 * <p>As a convenience, you can use the default shared instances:
 	 * <code>NullSafeComparator.NULLS_LOW</code> and
 	 * <code>NullSafeComparator.NULLS_HIGH</code>.
 	 * @param nullsLow whether to treat nulls lower or higher than non-null objects
-	 * @see ComparableComparator
+	 * @see java.lang.Comparable
 	 * @see #NULLS_LOW
 	 * @see #NULLS_HIGH
 	 */
 	private NullSafeComparator(boolean nullsLow) {
-		this(ComparableComparator.INSTANCE, nullsLow);
+		this(new ComparableComparator(), nullsLow);
 	}
 
 	/**
 	 * Create a NullSafeComparator that sorts <code>null</code> based on the
-	 * provided flag. When comparing two non-null objects, the specified
-	 * Comparator will be used.
+	 * provided flag, decorating the given Comparator.
+	 * <p>When comparing two non-null objects, the specified Comparator will be used.
+	 * The given underlying Comparator must be able to handle the elements that this
+	 * Comparator will be applied to.
 	 * @param comparator the comparator to use when comparing two non-null objects
 	 * @param nullsLow whether to treat nulls lower or higher than non-null objects
 	 */

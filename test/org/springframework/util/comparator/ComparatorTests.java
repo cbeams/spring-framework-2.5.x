@@ -28,14 +28,14 @@ import org.springframework.beans.support.PropertyComparator;
 public class ComparatorTests extends TestCase {
 
 	public void testComparableComparator() {
-		Comparator c = ComparableComparator.INSTANCE;
+		Comparator c = new ComparableComparator();
 		String s1 = "abc";
 		String s2 = "cde";
 		assertTrue(c.compare(s1, s2) < 0);
 	}
 
 	public void testComparableComparatorIllegalArgs() {
-		Comparator c = ComparableComparator.INSTANCE;
+		Comparator c = new ComparableComparator();
 		Object o1 = new Object();
 		Object o2 = new Object();
 		try {

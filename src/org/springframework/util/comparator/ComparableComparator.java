@@ -21,22 +21,15 @@ import java.util.Comparator;
 import org.springframework.util.Assert;
 
 /**
- * Adapter adapting a Comparable to the Comparator interface.
+ * Comparator that adapts Comparables to the Comparator interface.
+ * Mainly for internal use in other Comparators, when supposed
+ * to work on Comparables.
  * 
  * @author Keith Donald
  * @since 1.2.2
  * @see Comparable
  */
 public class ComparableComparator implements Comparator {
-
-	/**
-	 * A shared default instance of this comparator.
-	 */
-	public static final ComparableComparator INSTANCE = new ComparableComparator();
-
-
-	private ComparableComparator() {
-	}
 
 	public int compare(Object o1, Object o2) {
 		Assert.isTrue(o1 instanceof Comparable, "The first object provided is not Comparable");

@@ -18,7 +18,6 @@ package org.springframework.core.enums;
 
 import java.util.Comparator;
 
-import org.springframework.util.comparator.ComparableComparator;
 import org.springframework.util.comparator.CompoundComparator;
 import org.springframework.util.comparator.NullSafeComparator;
 
@@ -48,9 +47,9 @@ public interface LabeledEnum extends Comparable {
 	public static final Comparator CODE_ORDER = new Comparator() {
 
 		public int compare(Object o1, Object o2) {
-			Object c1 = ((LabeledEnum) o1).getCode();
-			Object c2 = ((LabeledEnum) o2).getCode();
-			return ComparableComparator.INSTANCE.compare(c1, c2);
+			Comparable c1 = ((LabeledEnum) o1).getCode();
+			Comparable c2 = ((LabeledEnum) o2).getCode();
+			return c1.compareTo(c2);
 		}
 	};
 
@@ -62,8 +61,8 @@ public interface LabeledEnum extends Comparable {
 		public int compare(Object o1, Object o2) {
 			LabeledEnum e1 = (LabeledEnum) o1;
 			LabeledEnum e2 = (LabeledEnum) o2;
-			Comparator c = new NullSafeComparator(String.CASE_INSENSITIVE_ORDER, true);
-			return c.compare(e1.getLabel(), e2.getLabel());
+			Comparator comp = new NullSafeComparator(String.CASE_INSENSITIVE_ORDER, true);
+			return comp.compare(e1.getLabel(), e2.getLabel());
 		}
 	};
 
