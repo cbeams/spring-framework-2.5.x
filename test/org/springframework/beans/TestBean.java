@@ -1,5 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.20 2005-05-27 19:50:44 jhoeller Exp $
+ *	$Id: TestBean.java,v 1.21 2005-06-19 22:06:47 robharrop Exp $
  */
 
 /*
@@ -75,6 +75,8 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	private IndexedTestBean nestedIndexedBean;
 
 	private boolean destroyed = false;
+
+	private Number someNumber;
 
 
 	public TestBean() {
@@ -210,6 +212,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	public void setLawyer(INestedTestBean bean) {
 		lawyer = bean;
+	}
+
+	public Number getSomeNumber() {
+		return someNumber;
+	}
+
+	public void setSomeNumber(Number someNumber) {
+		this.someNumber = someNumber;
 	}
 
 	public IndexedTestBean getNestedIndexedBean() {

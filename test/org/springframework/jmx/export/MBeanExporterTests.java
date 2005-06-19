@@ -38,6 +38,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
+import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
 
 /**
@@ -183,6 +184,32 @@ public class MBeanExporterTests extends TestCase {
 		assertEquals("Rob Harrop", nameValue);
 	}
 
+	public void testSelfNaming() throws Exception {
+        ObjectName objectName = ObjectNameManager.getInstance(OBJECT_NAME);
+		SelfNamingTestBean testBean = new SelfNamingTestBean();
+		testBean.setObjectName(objectName);
+
+		Map beans = new HashMap();
+		beans.put("foo", testBean);
+
+
+		MBeanServer server = MBeanServerFactory.createMBeanServer();
+		try {
+
+			MBeanExporter adaptor = new MBeanExporter();
+			adaptor.setServer(server);
+			adaptor.setBeans(beans);
+
+			adaptor.afterPropertiesSet();
+
+			ObjectInstance instance = server.getObjectInstance(objectName);
+			assertNotNull(instance);
+		}
+		finally {
+			MBeanServerFactory.releaseMBeanServer(server);
+		}
+	}
+
 	private Map getBeanMap() {
 		Map map = new HashMap();
 		map.put(OBJECT_NAME, new JmxTestBean());
@@ -226,6 +253,19 @@ public class MBeanExporterTests extends TestCase {
 
 		public List getUnregistered() {
 			return unregistered;
+		}
+	}
+
+	private static class SelfNamingTestBean implements SelfNaming {
+
+		private ObjectName objectName;
+
+		public void setObjectName(ObjectName objectName) {
+			this.objectName = objectName;
+		}
+
+		public ObjectName getObjectName() throws MalformedObjectNameException {
+			return this.objectName;
 		}
 	}
 
