@@ -431,7 +431,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			boolean beforeCompletionInvoked = false;
 			try {
 				triggerBeforeCommit(status);
-				triggerBeforeCompletion(status, null);
+				triggerBeforeCompletion(status);
 				beforeCompletionInvoked = true;
 				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
@@ -453,7 +453,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			catch (UnexpectedRollbackException ex) {
 				// can only be caused by doCommit
-				triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
+				triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
 				throw ex;
 			}
 			catch (TransactionException ex) {
@@ -462,25 +462,25 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					doRollbackOnCommitException(status, ex);
 				}
 				else {
-					triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN, ex);
+					triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 				}
 				throw ex;
 			}
 			catch (RuntimeException ex) {
 				if (!beforeCompletionInvoked) {
-					triggerBeforeCompletion(status, ex);
+					triggerBeforeCompletion(status);
 				}
 				doRollbackOnCommitException(status, ex);
 				throw ex;
 			}
 			catch (Error err) {
 				if (!beforeCompletionInvoked) {
-					triggerBeforeCompletion(status, err);
+					triggerBeforeCompletion(status);
 				}
 				doRollbackOnCommitException(status, err);
 				throw err;
 			}
-			triggerAfterCompletion(status, TransactionSynchronization.STATUS_COMMITTED, null);
+			triggerAfterCompletion(status, TransactionSynchronization.STATUS_COMMITTED);
 		}
 		finally {
 			cleanupAfterCompletion(status);
@@ -514,7 +514,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void processRollback(DefaultTransactionStatus status) {
 		try {
 			try {
-				triggerBeforeCompletion(status, null);
+				triggerBeforeCompletion(status);
 				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
 						logger.debug("Rolling back transaction to savepoint");
@@ -536,14 +536,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 			}
 			catch (RuntimeException ex) {
-				triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN, ex);
+				triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 				throw ex;
 			}
 			catch (Error err) {
-				triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN, err);
+				triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 				throw err;
 			}
-			triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK, null);
+			triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
 		}
 		finally {
 			cleanupAfterCompletion(status);
@@ -569,15 +569,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		catch (RuntimeException rbex) {
 			logger.error("Commit exception overridden by rollback exception", ex);
-			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN, rbex);
+			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 			throw rbex;
 		}
 		catch (Error rberr) {
 			logger.error("Commit exception overridden by rollback exception", ex);
-			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN, rberr);
+			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 			throw rberr;
 		}
-		triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK, ex);
+		triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
 	}
 
 	/**
@@ -597,28 +597,18 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Trigger beforeCompletion callback.
 	 * @param status object representing the transaction
-	 * @param ex the thrown application exception or error, or null
 	 */
-	private void triggerBeforeCompletion(DefaultTransactionStatus status, Throwable ex) {
+	private void triggerBeforeCompletion(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
 			logger.debug("Triggering beforeCompletion synchronization");
-			try {
-				for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-					TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
+				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+				try {
 					synchronization.beforeCompletion();
 				}
-			}
-			catch (RuntimeException tsex) {
-				if (ex != null) {
-					logger.error("Rollback exception overridden by synchronization exception", ex);
+				catch (Throwable tsex) {
+					logger.error("TransactionSynchronization.beforeCompletion threw exception", tsex);
 				}
-				throw tsex;
-			}
-			catch (Error tserr) {
-				if (ex != null) {
-					logger.error("Rollback exception overridden by synchronization exception", ex);
-				}
-				throw tserr;
 			}
 		}
 	}
@@ -627,28 +617,18 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Trigger afterCompletion callback, handling exceptions properly.
 	 * @param status object representing the transaction
 	 * @param completionStatus completion status according to TransactionSynchronization constants
-	 * @param ex the thrown application exception or error, or null
 	 */
-	private void triggerAfterCompletion(DefaultTransactionStatus status, int completionStatus, Throwable ex) {
+	private void triggerAfterCompletion(DefaultTransactionStatus status, int completionStatus) {
 		if (status.isNewSynchronization()) {
 			logger.debug("Triggering afterCompletion synchronization");
-			try {
-				for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-					TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
+				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+				try {
 					synchronization.afterCompletion(completionStatus);
 				}
-			}
-			catch (RuntimeException tsex) {
-				if (ex != null) {
-					logger.error("Rollback exception overridden by synchronization exception", ex);
+				catch (Throwable tsex) {
+					logger.error("TransactionSynchronization.afterCompletion threw exception", tsex);
 				}
-				throw tsex;
-			}
-			catch (Error tserr) {
-				if (ex != null) {
-					logger.error("Rollback exception overridden by synchronization exception", ex);
-				}
-				throw tserr;
 			}
 		}
 	}
