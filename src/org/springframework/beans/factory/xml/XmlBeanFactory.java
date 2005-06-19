@@ -68,18 +68,4 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
 		this.reader.loadBeanDefinitions(resource);
 	}
 
-	/**
-	 * Create a new XmlBeanFactory with the given input stream,
-	 * which must be parsable using DOM.
-	 * @param resource XML resource to load bean definitions from
-	 * @param parentBeanFactory parent bean factory
-     * @param xmlValidating whether or not XML validation should be used
-	 * @throws BeansException in case of loading or parsing errors
-	 */
-	public XmlBeanFactory(Resource resource, BeanFactory parentBeanFactory, boolean xmlValidating) throws BeansException {
-		super(parentBeanFactory);
-        this.reader.setValidating(xmlValidating);
-		this.reader.loadBeanDefinitions(resource);
-	}
-
 }
