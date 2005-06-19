@@ -57,7 +57,8 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private boolean validating = true;
-    private boolean namespaceAware = true;
+
+	private boolean namespaceAware = false;
 
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
 
@@ -66,7 +67,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	private Class parserClass = DefaultXmlBeanDefinitionParser.class;
 
 
-    /**
+	/**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
 	 */
 	public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
@@ -75,24 +76,19 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Set if the XML parser should validate the document and thus enforce a DTD.
+	 * Default is "true".
 	 */
 	public void setValidating(boolean validating) {
 		this.validating = validating;
 	}
 
-    /**
-     * Returns whether or not the reader is XML namespace aware.
-     */
-    public boolean isNamespaceAware() {
-        return namespaceAware;
-    }
-
-    /**
-     * Sets whether or not the definition reader should be XML namespace aware.
-     */ 
-    public void setNamespaceAware(boolean namespaceAware) {
-        this.namespaceAware = namespaceAware;
-    }
+	/**
+	 * Set whether or not the XML parser should be XML namespace aware.
+	 * Default is "false".
+	 */
+	public void setNamespaceAware(boolean namespaceAware) {
+		this.namespaceAware = namespaceAware;
+	}
 
 	/**
 	 * Set an implementation of the <code>org.xml.sax.ErrorHandler</code>
@@ -141,24 +137,21 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		if (resource == null) {
 			throw new BeanDefinitionStoreException("resource cannot be null: expected an XML file");
 		}
+
 		InputStream is = null;
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Loading XML bean definitions from " + resource + "");
-			}
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory factory = createDocumentBuilderFactory();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using JAXP implementation [" + factory + "]");
 			}
-			factory.setValidating(this.validating);
-            factory.setNamespaceAware(this.namespaceAware);
-			DocumentBuilder docBuilder = factory.newDocumentBuilder();
-			docBuilder.setErrorHandler(this.errorHandler);
-			if (this.entityResolver != null) {
-				docBuilder.setEntityResolver(this.entityResolver);
+			DocumentBuilder builder = createDocumentBuilder(factory);
+
+			if (logger.isInfoEnabled()) {
+				logger.info("Loading XML bean definitions from " + resource + "");
 			}
 			is = resource.getInputStream();
-			Document doc = docBuilder.parse(is);
+			Document doc = builder.parse(is);
+
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (ParserConfigurationException ex) {
@@ -187,6 +180,45 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * Create a JAXP DocumentBuilderFactory that this bean definition reader
+	 * will use for parsing XML documents. Can be overridden in subclasses,
+	 * adding further initialization of the factory.
+	 * @return the JAXP DocumentBuilderFactory
+	 * @throws ParserConfigurationException if thrown by JAXP methods
+	 */
+	protected DocumentBuilderFactory createDocumentBuilderFactory()
+			throws ParserConfigurationException {
+
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setValidating(this.validating);
+		factory.setNamespaceAware(this.namespaceAware);
+		return factory;
+	}
+
+	/**
+	 * Create a JAXP DocumentBuilder that this bean definition reader
+	 * will use for parsing XML documents. Can be overridden in subclasses,
+	 * adding further initialization of the builder.
+	 * @param factory the JAXP DocumentBuilderFactory that the
+	 * DocumentBuilder should be created with
+	 * @return the JAXP DocumentBuilder
+	 * @throws ParserConfigurationException if thrown by JAXP methods
+	 */
+	protected DocumentBuilder createDocumentBuilder(DocumentBuilderFactory factory)
+			throws ParserConfigurationException {
+
+		DocumentBuilder docBuilder = factory.newDocumentBuilder();
+		if (this.errorHandler != null) {
+			docBuilder.setErrorHandler(this.errorHandler);
+		}
+		if (this.entityResolver != null) {
+			docBuilder.setEntityResolver(this.entityResolver);
+		}
+		return docBuilder;
+	}
+
+
+	/**
 	 * Register the bean definitions contained in the given DOM document.
 	 * Called by <code>loadBeanDefinitions</code>.
 	 * <p>Creates a new instance of the parser class and invokes
@@ -194,13 +226,16 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @param doc the DOM document
 	 * @param resource the resource descriptor (for context information)
 	 * @return the number of bean definitions found
-	 * @throws BeansException in case of parsing errors
+	 * @throws BeansException in case of parser instantiation failure
+	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 * @see #loadBeanDefinitions
 	 * @see #setParserClass
 	 * @see XmlBeanDefinitionParser#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
-		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
+		XmlBeanDefinitionParser parser =
+				(XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);
 		return parser.registerBeanDefinitions(this, doc, resource);
 	}
+
 }
