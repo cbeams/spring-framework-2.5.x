@@ -145,13 +145,13 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 				value = NULL_VALUE;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Caching expensive value " + value);
+				logger.debug("Caching expensive value: " + value);
 			}
 			put(key, value);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("For key '" + key + "', returning cached value " + value);
+				logger.debug("For key '" + key + "', returning cached value: " + value);
 			}
 		}
 		return (value == NULL_VALUE) ? null : value;

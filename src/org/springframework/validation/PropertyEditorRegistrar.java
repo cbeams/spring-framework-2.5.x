@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.validation;
 
-import org.springframework.validation.DataBinder;
+package org.springframework.validation;
 
 /**
  * Interface for strategies that register custom property editors with a
@@ -23,17 +22,17 @@ import org.springframework.validation.DataBinder;
  * same set of property editors in several different situations: write
  * a corresponding registrar and reuse that in each case.
  * 
- * @see java.beans.PropertyEditor
- * @see org.springframework.validation.DataBinder
- *  
  * @author Keith Donald
- * @author Erwin Vervaet
+ * @since 1.2.2
+ * @see DataBinder
+ * @see java.beans.PropertyEditor
  */
 public interface PropertyEditorRegistrar {
 	
 	/**
-	 * Register custom property editors with given data binder.
-	 * @param binder the binder to register the custom property editors with
+	 * Register custom PropertyEditors with the given DataBinder.
+	 * @param binder the binder to register the custom PropertyEditors with
 	 */
-	public void registerCustomEditors(DataBinder binder);
+	void registerCustomEditors(DataBinder binder);
+
 }

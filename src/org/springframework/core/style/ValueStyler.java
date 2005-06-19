@@ -27,6 +27,8 @@ public interface ValueStyler {
 
 	/**
 	 * Style the given value, returning a String representation.
+	 * @param value the Object value to style
+	 * @return the styled String
 	 */
 	String style(Object value);
 
