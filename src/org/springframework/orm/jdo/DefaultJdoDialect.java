@@ -18,6 +18,7 @@ package org.springframework.orm.jdo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
@@ -43,18 +44,19 @@ import org.springframework.transaction.TransactionException;
  *
  * <p>Simply begins a standard JDO transaction in <code>beginTransaction</code>.
  * Returns a handle for a JDO2 DataStoreConnection on <code>getJdbcConnection</code>.
+ * Calls the corresponding JDO2 operations on <code>detachCopy(All)</code>,
+ * <code>attachCopy(All)</code>, <code>flush</code> and <code>newNamedQuery</code>.
  * Ignores a given query timeout in <code>applyQueryTimeout</code>.
- * Calls the JDO2 flush operation on <code>flush</code>.
- * Delegates to PersistenceManagerFactoryUtils for exception translation.
+ * Uses a Spring SQLExceptionTranslator for exception translation, if applicable.
  *
  * <p>Note that, even with JDO2, vendor-specific subclasses are still necessary
  * for special transaction semantics and more sophisticated exception translation.
- * Furthermore, vendor-specific subclasses are encouraged to expose the native
- * JDBC Connection on <code>getJdbcConnection</code>, rather than JDO2's wrapper
- * handle.
+ * Furthermore, vendor-specific subclasses are encouraged to expose the native JDBC
+ * Connection on <code>getJdbcConnection</code>, rather than JDO2's wrapper handle.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see #setJdbcExceptionTranslator
  * @see JdoAccessor#setJdoDialect
  * @see JdoTransactionManager#setJdoDialect
  */
@@ -129,6 +131,10 @@ public class DefaultJdoDialect implements JdoDialect {
 	}
 
 
+	//-------------------------------------------------------------------------
+	// Hooks for transaction management (used by JdoTransactionManager)
+	//-------------------------------------------------------------------------
+
 	/**
 	 * This implementation invokes the standard JDO <code>Transaction.begin</code>
 	 * method. Throws an InvalidIsolationLevelException if a non-default isolation
@@ -195,11 +201,51 @@ public class DefaultJdoDialect implements JdoDialect {
 			throws JDOException, SQLException {
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Hooks for special data access operations (used by JdoTemplate)
+	//-------------------------------------------------------------------------
+
 	/**
-	 * This implementation logs a warning that it cannot apply a query timeout.
+	 * This implementation delegates to JDO 2.0's <code>detachCopy</code> method.
+	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
+	 * vendor-specific mechanism there.
+	 * @see javax.jdo.PersistenceManager#detachCopy(Object)
 	 */
-	public void applyQueryTimeout(Query query, int remainingTimeInSeconds) throws JDOException {
-		logger.info("DefaultJdoDialect does not support query timeouts: ignoring remaining transaction time");
+	public Object detachCopy(PersistenceManager pm, Object entity) throws JDOException {
+		return pm.detachCopy(entity);
+	}
+
+	/**
+	 * This implementation delegates to JDO 2.0's <code>detachCopyAll</code> method.
+	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
+	 * vendor-specific mechanism there.
+	 * @see javax.jdo.PersistenceManager#detachCopyAll(java.util.Collection)
+	 */
+	public Collection detachCopyAll(PersistenceManager pm, Collection entities) throws JDOException {
+		return pm.detachCopyAll(entities);
+	}
+
+	/**
+	 * This implementation delegates to JDO 2.0's <code>attachCopy</code> method,
+	 * passing in "true" for the "makeTransactional" argument.
+	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
+	 * vendor-specific mechanism there.
+	 * @see javax.jdo.PersistenceManager#attachCopy(Object, boolean)
+	 */
+	public Object attachCopy(PersistenceManager pm, Object detachedEntity) throws JDOException {
+		return pm.attachCopy(detachedEntity, true);
+	}
+
+	/**
+	 * This implementation delegates to JDO 2.0's <code>attachCopyAll</code> method,
+	 * passing in "true" for the "makeTransactional" argument.
+	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
+	 * vendor-specific mechanism there.
+	 * @see javax.jdo.PersistenceManager#attachCopyAll(java.util.Collection, boolean)
+	 */
+	public Collection attachCopyAll(PersistenceManager pm, Collection detachedEntities) throws JDOException {
+		return pm.attachCopyAll(detachedEntities, true);
 	}
 
 	/**
@@ -211,6 +257,28 @@ public class DefaultJdoDialect implements JdoDialect {
 	public void flush(PersistenceManager pm) throws JDOException {
 		pm.flush();
 	}
+
+	/**
+	 * This implementation delegates to JDO 2.0's <code>newNamedQuery</code> method.
+	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
+	 * vendor-specific mechanism there.
+	 * @see javax.jdo.PersistenceManager#newNamedQuery(Class, String)
+	 */
+	public Query newNamedQuery(PersistenceManager pm, Class entityClass, String queryName) throws JDOException {
+		return pm.newNamedQuery(entityClass, queryName);
+	}
+
+	/**
+	 * This implementation logs a warning that it cannot apply a query timeout.
+	 */
+	public void applyQueryTimeout(Query query, int remainingTimeInSeconds) throws JDOException {
+		logger.info("DefaultJdoDialect does not support query timeouts: ignoring remaining transaction time");
+	}
+
+
+	//-----------------------------------------------------------------------------------
+	// Hook for exception translation (used by JdoTransactionManager and JdoTemplate)
+	//-----------------------------------------------------------------------------------
 
 	/**
 	 * This implementation delegates to PersistenceManagerFactoryUtils.

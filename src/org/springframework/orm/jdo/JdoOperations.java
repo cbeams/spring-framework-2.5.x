@@ -36,8 +36,11 @@ import org.springframework.dao.DataAccessException;
  * Furthermore, some operations just make sense within transactions,
  * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
  *
- * <p>Updated to expose JDO 2.0 API functionality, as of Spring 1.2:
+ * <p>Updated to expose JDO 2.0 functionality, as of Spring 1.2:
  * <code>detachCopy</code>, <code>attachCopy</code>, <code>findByNamedQuery</code>, etc.
+ * Those operations will by default only work on top of the standard JDO 2.0 API.
+ * Since Spring 1.2.2, the execution of those operations can also be adapted through
+ * the JdoDialect mechanism (for example, for vendor-specific pre-JDO2 methods).
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -45,6 +48,7 @@ import org.springframework.dao.DataAccessException;
  * @see javax.jdo.PersistenceManager
  * @see JdoTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see JdoDialect
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor
  */
@@ -198,7 +202,7 @@ public interface JdoOperations {
 	/**
 	 * Detach a copy of the given persistent instance from the current JDO transaction,
 	 * for use outside a JDO transaction (for example, as web form object).
-	 * <p>Only available on JDO 2.0 and higher.
+	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param entity the persistent instance to detach
 	 * @see javax.jdo.PersistenceManager#detachCopy(Object)
 	 */
@@ -207,7 +211,7 @@ public interface JdoOperations {
 	/**
 	 * Detach copies of the given persistent instances from the current JDO transaction,
 	 * for use outside a JDO transaction (for example, as web form objects).
-	 * <p>Only available on JDO 2.0 and higher.
+	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param entities the persistent instances to detach
 	 * @see javax.jdo.PersistenceManager#detachCopyAll(Collection)
 	 */
@@ -217,7 +221,7 @@ public interface JdoOperations {
 	 * Reattach the given detached instance (for example, a web form object) with
 	 * the current JDO transaction, merging its changes into the current persistence
 	 * instance that represents the corresponding entity.
-	 * <p>Only available on JDO 2.0 and higher.
+	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param detachedEntity the detached instance to attach
 	 * @return the corresponding persistent instance
 	 * @see javax.jdo.PersistenceManager#attachCopy(Object, boolean)
@@ -228,7 +232,7 @@ public interface JdoOperations {
 	 * Reattach the given detached instances (for example, web form objects) with
 	 * the current JDO transaction, merging their changes into the current persistence
 	 * instances that represent the corresponding entities.
-	 * <p>Only available on JDO 2.0 and higher.
+	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param detachedEntities the detached instances to reattach
 	 * @return the corresponding persistent instances
 	 * @see javax.jdo.PersistenceManager#attachCopyAll(java.util.Collection, boolean)
@@ -382,7 +386,7 @@ public interface JdoOperations {
 
 	/**
 	 * Find persistent instances through the given named query.
-	 * <p>Only available on JDO 2.0 and higher.
+	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param entityClass a persistent class
 	 * @param queryName the name of the query
 	 * @return the persistent instances

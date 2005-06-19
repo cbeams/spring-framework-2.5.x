@@ -17,6 +17,7 @@
 package org.springframework.orm.jdo;
 
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
@@ -32,19 +33,35 @@ import org.springframework.transaction.TransactionException;
  * SPI strategy that encapsulates certain functionality that standard JDO 1.0 does
  * not offer despite being relevant in the context of O/R mapping, like access to
  * the underlying JDBC Connection and explicit flushing of changes to the database.
+ * Also defines various further hooks that even go beyond standard JDO 2.0.
  *
- * <p>To be implemented for specific JDO implementations like Kodo, Lido, or JPOX.
- * Almost every O/R-based JDO implementation offers proprietary means to access the
- * underlying JDBC Connection and to explicitly flush changes. JDO 2.0 respectively
- * JDO/R 2.0 are likely to define standard ways for these: If applicable, a JdoDialect
- * implementation for JDO 2.0 will be provided to leverage them with Spring's JDO support.
+ * <p>To be implemented for specific JDO implementations such as JPOX, Kodo, Lido,
+ * Versant Open Access. Almost every O/R-based JDO implementation offers proprietary
+ * means to access the underlying JDBC Connection and to explicitly flush changes;
+ * hence, this would be the minimum functionality level that should be supported.
+ *
+ * <p>JDO 2.0 defines standard ways for most of the functionality covered here.
+ * Hence, Spring's DefaultJdoDialect uses the corresponding JDO 2.0 methods
+ * by default, to be overridden in a vendor-specific fashion if necessary.
+ * Vendor-specific subclasses of DefaultJdoDialect are still required for special
+ * transaction semantics and more sophisticated exception translation (if needed).
+ *
+ * <p>In general, it is recommended to derive from DefaultJdoDialect instead of
+ * implementing this interface directly. This allows for inheriting common
+ * behavior (present and future) from DefaultJdoDialect, only overriding
+ * specific hooks to plug in concrete vendor-specific behavior.
  *
  * @author Juergen Hoeller
  * @since 02.11.2003
  * @see JdoTransactionManager#setJdoDialect
  * @see JdoAccessor#setJdoDialect
+ * @see DefaultJdoDialect
  */
 public interface JdoDialect {
+
+	//-------------------------------------------------------------------------
+	// Hooks for transaction management (used by JdoTransactionManager)
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Begin the given JDO transaction, applying the semantics specified by the
@@ -56,7 +73,10 @@ public interface JdoDialect {
 	 * <p>An implementation can also apply read-only flag and isolation level to the
 	 * underlying JDBC Connection before beginning the transaction. In that case,
 	 * a transaction data object can be returned that holds the previous isolation
-	 * level (and possibly other data), to be reset in cleanupTransaction.
+	 * level (and possibly other data), to be reset in <code>cleanupTransaction</code>.
+	 * <p>Implementations can also use the Spring transaction name, as exposed by the
+	 * passed-in TransactionDefinition, to optimize for specific data access use cases
+	 * (effectively using the current transaction name as use case identifier).
 	 * @param transaction the JDO transaction to begin
 	 * @param definition the Spring transaction definition that defines semantics
 	 * @return an arbitrary object that holds transaction data, if any
@@ -75,7 +95,8 @@ public interface JdoDialect {
 	 * Clean up the transaction via the given transaction data.
 	 * Invoked by JdoTransactionManager on transaction cleanup.
 	 * <p>An implementation can, for example, reset read-only flag and
-	 * isolation level of the underlying JDBC Connection.
+	 * isolation level of the underlying JDBC Connection. Furthermore,
+	 * an exposed data access use case can be reset here.
 	 * @param transactionData arbitrary object that holds transaction data, if any
 	 * (as returned by beginTransaction)
 	 * @see #beginTransaction
@@ -132,16 +153,54 @@ public interface JdoDialect {
 	void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
 			throws JDOException, SQLException;
 
+
+	//-------------------------------------------------------------------------
+	// Hooks for special data access operations (used by JdoTemplate)
+	//-------------------------------------------------------------------------
+
 	/**
-	 * Apply the given timeout to the given JDO query object.
-	 * <p>Invoked by JdoTemplate with the remaining time of a specified
-	 * transaction timeout, if any.
-	 * @param query the JDO query object to apply the timeout to
-	 * @param timeout the timeout value to apply
-	 * @throws JDOException if thrown by JDO methods
-	 * @see JdoTemplate#prepareQuery
+	 * Detach a copy of the given persistent instance from the current JDO transaction,
+	 * for use outside a JDO transaction (for example, as web form object).
+	 * @param pm the current JDO PersistenceManager
+	 * @param entity the persistent instance to detach
+	 * @throws JDOException in case of errors
+	 * @see javax.jdo.PersistenceManager#detachCopy(Object)
 	 */
-	void applyQueryTimeout(Query query, int timeout) throws JDOException;
+	Object detachCopy(PersistenceManager pm, Object entity) throws JDOException;
+
+	/**
+	 * Detach copies of the given persistent instances from the current JDO transaction,
+	 * for use outside a JDO transaction (for example, as web form objects).
+	 * @param pm the current JDO PersistenceManager
+	 * @param entities the persistent instances to detach
+	 * @throws JDOException in case of errors
+	 * @see javax.jdo.PersistenceManager#detachCopyAll(java.util.Collection)
+	 */
+	Collection detachCopyAll(PersistenceManager pm, Collection entities) throws JDOException;
+
+	/**
+	 * Reattach the given detached instance (for example, a web form object) with
+	 * the current JDO transaction, merging its changes into the current persistence
+	 * instance that represents the corresponding entity.
+	 * @param pm the current JDO PersistenceManager
+	 * @param detachedEntity the detached instance to attach
+	 * @return the corresponding persistent instance
+	 * @throws JDOException in case of errors
+	 * @see javax.jdo.PersistenceManager#attachCopy(Object, boolean)
+	 */
+	Object attachCopy(PersistenceManager pm, Object detachedEntity) throws JDOException;
+
+	/**
+	 * Reattach the given detached instances (for example, web form objects) with
+	 * the current JDO transaction, merging their changes into the current persistence
+	 * instances that represent the corresponding entities.
+	 * @param pm the current JDO PersistenceManager
+	 * @param detachedEntities the detached instances to reattach
+	 * @return the corresponding persistent instances
+	 * @throws JDOException in case of errors
+	 * @see javax.jdo.PersistenceManager#attachCopyAll(java.util.Collection, boolean)
+	 */
+	Collection attachCopyAll(PersistenceManager pm, Collection detachedEntities) throws JDOException;
 
 	/**
 	 * Flush the given PersistenceManager, i.e. flush all changes (that have been
@@ -153,6 +212,33 @@ public interface JdoDialect {
 	 * @see JdoAccessor#setFlushEager
 	 */
 	void flush(PersistenceManager pm) throws JDOException;
+
+	/**
+	 * Create a new Query object for the given named query.
+	 * @param pm the current JDO PersistenceManager
+	 * @param entityClass a persistent class
+	 * @param queryName the name of the query
+	 * @return the Query object
+	 * @throws JDOException in case of errors
+	 * @see javax.jdo.PersistenceManager#newNamedQuery(Class, String)
+	 */
+	Query newNamedQuery(PersistenceManager pm, Class entityClass, String queryName) throws JDOException;
+
+	/**
+	 * Apply the given timeout to the given JDO query object.
+	 * <p>Invoked by JdoTemplate with the remaining time of a specified
+	 * transaction timeout, if any.
+	 * @param query the JDO query object to apply the timeout to
+	 * @param timeout the timeout value to apply
+	 * @throws JDOException if thrown by JDO methods
+	 * @see JdoTemplate#prepareQuery
+	 */
+	void applyQueryTimeout(Query query, int timeout) throws JDOException;
+
+
+	//-----------------------------------------------------------------------------------
+	// Hook for exception translation (used by JdoTransactionManager and JdoTemplate)
+	//-----------------------------------------------------------------------------------
 
 	/**
 	 * Translate the given JDOException to a corresponding exception from Spring's

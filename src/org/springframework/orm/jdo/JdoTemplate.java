@@ -380,7 +380,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Object detachCopy(final Object entity) {
 		return execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return pm.detachCopy(entity);
+				return getJdoDialect().detachCopy(pm, entity);
 			}
 		}, true);
 	}
@@ -388,7 +388,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Collection detachCopyAll(final Collection entities) {
 		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return pm.detachCopyAll(entities);
+				return getJdoDialect().detachCopyAll(pm, entities);
 			}
 		}, true);
 	}
@@ -396,7 +396,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Object attachCopy(final Object detachedEntity) {
 		return execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return pm.attachCopy(detachedEntity, true);
+				return getJdoDialect().attachCopy(pm, detachedEntity);
 			}
 		}, true);
 	}
@@ -404,7 +404,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Collection attachCopyAll(final Collection detachedEntities) {
 		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return pm.attachCopyAll(detachedEntities, true);
+				return getJdoDialect().attachCopyAll(pm, detachedEntities);
 			}
 		}, true);
 	}
@@ -515,7 +515,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Collection findByNamedQuery(final Class entityClass, final String queryName) throws DataAccessException {
 		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = pm.newNamedQuery(entityClass, queryName);
+				Query query = getJdoDialect().newNamedQuery(pm, entityClass, queryName);
 				prepareQuery(query);
 				return query.execute();
 			}
