@@ -138,20 +138,20 @@ public abstract class CachingMapDecorator implements Map, Serializable {
 		Object value = this.targetMap.get(key);
 		if (value == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Creating new expensive value with key '" + key + "'");
+				logger.debug("Creating new expensive value for key '" + key + "'");
 			}
 			value = create(key);
 			if (value == null) {
 				value = NULL_VALUE;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Caching key value pair '" + key + "' -> '" + value + "'");
+				logger.debug("Caching expensive value " + value);
 			}
 			put(key, value);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Returning cached value with key '" + key + "'");
+				logger.debug("For key '" + key + "', returning cached value " + value);
 			}
 		}
 		return (value == NULL_VALUE) ? null : value;
