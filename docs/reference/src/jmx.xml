@@ -41,7 +41,7 @@
 
     <para>The core class in the Spring JMX framework is the
     <literal>MBeanExporter</literal>. This class is responsible for taking
-    your Spring beans and registering them the JMX
+    your Spring beans and registering them with the JMX
     <literal>MBeanServer</literal>. For example, consider the simple bean
     class shown below:</para>
 
@@ -116,7 +116,8 @@ public class JmxTestBean implements IJmxTestBean {
     to configure the beans to be exported. In the default configuration, the
     key of an entry in of the <literal>Map</literal> is used as the
     <literal>ObjectName</literal> for the bean that is the value of that
-    entry. This behaviour can be changed as described in section XXX.</para>
+    entry. This behaviour can be changed as described in section <xref
+    linkend="jmx-naming" />.</para>
 
     <para>With this configuration the <literal>testBean</literal> bean is
     exposed as a JMX MBean under the <literal>ObjectName</literal>
@@ -176,9 +177,9 @@ public class JmxTestBean implements IJmxTestBean {
       the <literal>MBeanServerFactoryBean</literal> and is supplied to the
       <literal>MBeanExporter</literal> via the server property. When you
       supply your own <literal>MBeanServer</literal>,
-      <literal>MBeanExporter</literal> will not attempt to locate a running.
-      For this to work correctly, you must have a JMX implementation on your
-      classpath.</para>
+      <literal>MBeanExporter</literal> will not attempt to locate a running
+      <literal>MBeanServer</literal>. For this to work correctly, you must
+      have a JMX implementation on your classpath.</para>
     </section>
 
     <section id="jmx-exporting-lazy">
@@ -198,7 +199,7 @@ public class JmxTestBean implements IJmxTestBean {
 
       <para>Any beans that are exported through the
       <literal>MBeanExporter</literal> and are already valid MBeans are
-      registed as is with the <literal>MBeanServer</literal> without further
+      registered as is with the <literal>MBeanServer</literal> without further
       intervention from Spring. MBeans can be automatically detected by the
       <literal>MBeanExporter</literal> by setting the
       <literal>autodetect</literal> property to true:</para>
@@ -224,7 +225,7 @@ public class JmxTestBean implements IJmxTestBean {
 
     <para>In the previous example, you had little control over the management
     interface of your bean with all the public properties and methods being
-    exposed. To solve this proble, Spring JMX provides a comprehensive and
+    exposed. To solve this problem, Spring JMX provides a comprehensive and
     extensible mechanism for controlling the management interfaces of your
     beans.</para>
 
@@ -273,7 +274,7 @@ public class JmxTestBean implements IJmxTestBean {
       respectively.</para>
 
       <para>The example below shows the <literal>JmxTestBean</literal> class
-      that you show earlier marked with Commons Attributes metadata:</para>
+      that you saw earlier marked with Commons Attributes metadata:</para>
 
       <programlisting>package org.springframework.jmx;
 
@@ -360,7 +361,7 @@ public class JmxTestBean implements IJmxTestBean {
       <literal>MetadataMBeanInfoAssembler</literal>:</para>
 
       <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
  "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
 &lt;beans&gt;
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
@@ -375,7 +376,7 @@ public class JmxTestBean implements IJmxTestBean {
       &lt;ref local="assembler"/&gt;
     &lt;/property&gt;
   &lt;/bean&gt;
-  
+
   &lt;bean id="testBean" class="org.springframework.jmx.JmxTestBean"&gt;
     &lt;property name="name"&gt;
       &lt;value&gt;TEST&lt;/value&gt;
@@ -385,7 +386,7 @@ public class JmxTestBean implements IJmxTestBean {
     &lt;/property&gt;
   &lt;/bean&gt;
 
-  &lt;bean id="attributeSource" 
+  &lt;bean id="attributeSource"
         class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
 
   &lt;bean id="assembler" class="org.springframework.jmx.assembler.MetadataMBeanInfoAssembler"&gt;
@@ -699,13 +700,12 @@ public class AnnotationTestBean implements IJmxTestBean {
       this:</para>
 
       <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
  "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
 &lt;beans&gt;
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
-    &lt;property name="assembler"&gt;
-      &lt;ref local="assembler"/&gt;
-    &lt;/property&gt;
+    &lt;property name="assembler" ref="assembler"/&gt;
+	&lt;property name="autodetect" value="true"/&gt;
   &lt;/bean&gt;
 
   &lt;bean id="bean:name=testBean1" class="org.springframework.jmx.JmxTestBean"&gt;
@@ -716,8 +716,8 @@ public class AnnotationTestBean implements IJmxTestBean {
       &lt;value&gt;100&lt;/value&gt;
     &lt;/property&gt;
   &lt;/bean&gt;
-  
-  &lt;bean id="attributeSource" 
+
+  &lt;bean id="attributeSource"
         class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
 
   &lt;bean id="assembler" class="org.springframework.jmx.assembler.MetadataMBeanInfoAssembler"&gt;
@@ -771,7 +771,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 
   public void setName(String name);
 
-  public String getName();  
+  public String getName();
 }</programlisting>
 
       <para>This interface defines the methods and properties that will be
@@ -911,7 +911,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <literal>KeyNamingStrategy</literal>:</para>
 
       <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
  "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
 &lt;beans&gt;
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
@@ -973,7 +973,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       for the <literal>MetadataNamingStrategy</literal>:</para>
 
       <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
  "http://www.springframework.org/dtd/spring-beans.dtd"&gt;
 &lt;beans&gt;
   &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
@@ -997,8 +997,8 @@ public class AnnotationTestBean implements IJmxTestBean {
       &lt;value&gt;100&lt;/value&gt;
     &lt;/property&gt;
   &lt;/bean&gt;
-  
-  &lt;bean id="attributeSource" 
+
+  &lt;bean id="attributeSource"
         class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/&gt;
 
   &lt;bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy"&gt;
@@ -1029,7 +1029,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 
       <para>By default <literal>ConnectorServerFactoryBean</literal> creates a
       <literal>JMXConnectorServer</literal> bound to
-      “service:jmx:jmxmp://localhost:9875”. The serverConnector bean thus
+      “service:jmx:jmxmp://localhost:9875‿. The serverConnector bean thus
       exposes the local <literal>MBeanServer</literal> to clients through the
       jmxmp protocol on localhost, port 9875. Note that JMXMP protocol is
       marked as optional by the JSR 160 – currently popular open-source
