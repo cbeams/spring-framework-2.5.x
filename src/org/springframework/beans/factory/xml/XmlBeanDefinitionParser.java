@@ -26,10 +26,10 @@ import org.springframework.core.io.Resource;
  * Strategy interface for parsing XML bean definitions.
  * Used by XmlBeanDefinitionReader for actually parsing a DOM document.
  *
- * <p>Instantiated per document to parse: Implementations can hold state in
- * instance variables during the execution of the registerBeanDefinitions
- * method, for example global settings that are defined for all bean
- * definitions in the document.
+ * <p>Instantiated per document to parse: Implementations can hold
+ * state in instance variables during the execution of the
+ * <code>registerBeanDefinitions</code> method, for example global
+ * settings that are defined for all bean definitions in the document.
  *
  * @author Juergen Hoeller
  * @since 18.12.2003
@@ -46,6 +46,7 @@ public interface XmlBeanDefinitionParser {
 	 * @param doc the DOM document
 	 * @param resource descriptor of the original XML resource
 	 * (useful for displaying parse errors)
+	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
 	int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
