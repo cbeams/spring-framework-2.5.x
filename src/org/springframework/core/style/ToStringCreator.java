@@ -30,17 +30,10 @@ import org.springframework.util.Assert;
 public class ToStringCreator {
 
 	/**
-	 * Default ValueStyler instance used by this ToStringCreator.
-	 * Also available for direct use.
-	 */
-	public static final ValueStyler DEFAULT_VALUE_STYLER = new DefaultValueStyler();
-
-	/**
 	 * Default ToStringStyler instance used by this ToStringCreator.
-	 * Also available for direct use.
 	 */
-	public static final ToStringStyler DEFAULT_TO_STRING_STYLER =
-			new DefaultToStringStyler(DEFAULT_VALUE_STYLER);
+	private static final ToStringStyler DEFAULT_TO_STRING_STYLER =
+			new DefaultToStringStyler(StylerUtils.DEFAULT_VALUE_STYLER);
 
 
 	private StringBuffer buffer = new StringBuffer(512);
@@ -66,7 +59,7 @@ public class ToStringCreator {
 	 * @param styler the ValueStyler encapsulating pretty-print instructions
 	 */
 	public ToStringCreator(Object obj, ValueStyler styler) {
-		this(obj, new DefaultToStringStyler(styler != null ? styler : DEFAULT_VALUE_STYLER));
+		this(obj, new DefaultToStringStyler(styler != null ? styler : StylerUtils.DEFAULT_VALUE_STYLER));
 	}
 
 	/**
