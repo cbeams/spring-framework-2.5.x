@@ -17,9 +17,6 @@
 package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -27,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,7 +58,7 @@ import org.springframework.util.xml.DomUtils;
 /**
  * Default implementation of the XmlBeanDefinitionParser interface.
  * Parses bean definitions according to the "spring-beans" DTD,
- * i.e. Spring's default XML bean definition format.
+ * that is, Spring's default XML bean definition format.
  *
  * <p>The structure, elements and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
@@ -95,8 +91,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE = "objects";
 
 	public static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
-	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
 	public static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
+	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
 
 	public static final String IMPORT_ELEMENT = "import";
 	public static final String RESOURCE_ATTRIBUTE = "resource";
@@ -153,17 +149,6 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	public static final String PROPS_ELEMENT = "props";
 	public static final String PROP_ELEMENT = "prop";
 
-    /**
-     * All the reserved Spring XML element names which cannot be overloaded by an XML extension
-     */
-    protected static final String[] RESERVED_ELEMENT_NAMES = { "beans", DESCRIPTION_ELEMENT, IMPORT_ELEMENT, ALIAS_ELEMENT,
-                                                               BEAN_ELEMENT,
-                                                               CONSTRUCTOR_ARG_ELEMENT, PROPERTY_ELEMENT,
-                                                               LOOKUP_METHOD_ELEMENT, REPLACED_METHOD_ELEMENT,
-                                                               ARG_TYPE_ELEMENT, REF_ELEMENT, IDREF_ELEMENT,
-                                                               VALUE_ELEMENT, NULL_ELEMENT, LIST_ELEMENT,
-                                                               SET_ELEMENT, MAP_ELEMENT, ENTRY_ELEMENT, KEY_ELEMENT,
-                                                               PROPS_ELEMENT, PROP_ELEMENT };
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -173,11 +158,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	private String defaultLazyInit;
 
-	private String defaultDependencyCheck;
-
 	private String defaultAutowire;
 
-    private Set reservedElementNames = new HashSet(Arrays.asList(RESERVED_ELEMENT_NAMES));
+	private String defaultDependencyCheck;
 
 
 	public int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
@@ -187,17 +170,16 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		this.resource = resource;
 
 		logger.debug("Loading bean definitions");
-
-        preprocessXml(reader, doc.getDocumentElement(), resource);
-        Element root = doc.getDocumentElement();
+		Element root = doc.getDocumentElement();
+		preProcessXml(root);
 
 		this.defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
-		this.defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
 		this.defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
+		this.defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Default lazy init '" + this.defaultLazyInit + "'");
-			logger.debug("Default dependency check '" + this.defaultDependencyCheck + "'");
 			logger.debug("Default autowire '" + this.defaultAutowire + "'");
+			logger.debug("Default dependency check '" + this.defaultDependencyCheck + "'");
 		}
 
 		int beanDefinitionCount = parseBeanDefinitions(root);
@@ -207,140 +189,55 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		return beanDefinitionCount;
 	}
 
-    /**
-     * Allow the XML to be extensible by processing any custom element types first before we start to
-     * process the XML. This method is also a natural extension point for any other custom pre processing
-     * of the XML.
-     */
-    protected void preprocessXml(BeanDefinitionReader reader, Element root, Resource resource) throws BeanDefinitionStoreException {
-        String localName = root.getNodeName();
-        String uri = root.getNamespaceURI();
-        boolean extensible = true;
-        if (uri == null || uri.length() == 0) {
-            if (reservedElementNames.contains(localName)) {
-                extensible = false;
-            }
-        }
-        if (extensible) {
-            // lets see if we have a custom XML processor
-            ElementProcessor handler = findElementProcessor(uri, localName);
-            if (handler != null) {
-                handler.processElement(root, reader, resource);
-            }
-        }
-
-        // lets recurse into any children
-        NodeList nl = root.getChildNodes();
-        for (int i = 0; i < nl.getLength(); i++) {
-            Node node = nl.item(i);
-            if (node instanceof Element) {
-                Element element = (Element) node;
-                preprocessXml(reader, element, resource);
-            }
-        }
-    }
-
-    /**
-     * Uses META-INF/services discovery to find an {@link ElementProcessor} for the given
-     * namespace and localName
-     *
-     * @param namespaceURI the namespace URI of the element
-     * @param localName the local name of the element
-     * @return the custom processor for the given element name if it could be found, otherwise return null
-     */
-    protected ElementProcessor findElementProcessor(String namespaceURI, String localName) throws BeanDefinitionStoreException  {
-        String uri = "META-INF/services/org/springframework/config/" + createDiscoveryPathName(namespaceURI, localName);
-
-        // lets try the thread context class loader first
-        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(uri);
-        if (in == null) {
-            in = getClass().getClassLoader().getResourceAsStream(uri);
-            if (in == null) {
-                logger.warn("Could not find resource: " + uri);
-                return null;
-            }
-        }
-
-        // lets load the file
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(in));
-            String line = reader.readLine();
-            if (line == null) {
-                throw new BeanDefinitionStoreException("Empty file found for: " + uri);
-            }
-            line = line.trim();
-            Class answer = null;
-            try {
-                answer = loadClass(line);
-            }
-            catch (ClassNotFoundException e) {
-                throw new BeanDefinitionStoreException("Could not find class: " + line, e);
-            }
-            try {
-                return (ElementProcessor) answer.newInstance();
-            }
-            catch (Exception e) {
-                throw new BeanDefinitionStoreException("Failed to instantiate bean of type: " + answer.getName() + ". Reason: " + e, e);
-            }
-        }
-        catch (IOException e) {
-            throw new BeanDefinitionStoreException("Failed to load file for URI: " + uri + ". Reason: " + e, e);
-        }
-        finally {
-            try {
-                reader.close();
-            }
-            catch (Exception e) {
-                // ignore
-            }
-        }
-    }
-
-    /**
-     * Converts the namespace and localName into a valid path name we can use on the classpath to discover a text file
-     */
-    protected String createDiscoveryPathName(String uri, String localName) {
-        if (uri == null || uri.length() == 0) {
-            return localName;
-        }
-        // TODO proper encoding required
-        // lets replace any dodgy characters
-        return uri.replaceAll("://", "/").replace(':', '/').replace(' ', '_') + "/" + localName;
-    }
-
-    /**
-     * Attempts to load the class on the current thread context class loader or the class loader which loaded us
-     */
-    protected Class loadClass(String name) throws ClassNotFoundException {
-        try {
-            return Thread.currentThread().getContextClassLoader().loadClass(name);
-        }
-        catch (ClassNotFoundException e) {
-            return getClass().getClassLoader().loadClass(name);
-        }
-    }
-
-    protected final BeanDefinitionReader getBeanDefinitionReader() {
+	/**
+	 * Return the BeanDefinitionReader that this parser has been called from.
+	 */
+	protected final BeanDefinitionReader getBeanDefinitionReader() {
 		return beanDefinitionReader;
 	}
 
+	/**
+	 * Return the descriptor for the XML resource that this parser works on.
+	 */
 	protected final Resource getResource() {
 		return resource;
 	}
 
+	/**
+	 * Return the default lazy-init flag for the document that's currently parsed.
+	 */
 	protected final String getDefaultLazyInit() {
 		return defaultLazyInit;
 	}
 
-	protected final String getDefaultDependencyCheck() {
-		return defaultDependencyCheck;
-	}
-
+	/**
+	 * Return the default autowire setting for the document that's currently parsed.
+	 */
 	protected final String getDefaultAutowire() {
 		return defaultAutowire;
 	}
 
+	/**
+	 * Return the default dependency-check setting for the document that's currently parsed.
+	 */
+	protected final String getDefaultDependencyCheck() {
+		return defaultDependencyCheck;
+	}
+
+
+	/**
+	 * Allow the XML to be extensible by processing any custom element types first,
+	 * before we start to process the bean definitions. This method is a natural
+	 * extension point for any other custom pre processing of the XML.
+	 * <p>Default implementation is empty. Subclasses can override this method to
+	 * convert custom elements into standard Spring bean definitions, for example.
+	 * Implementors have access to the parser's bean definition reader and the
+	 * underlying XML resource, through the corresponding accessors.
+	 * @see #getBeanDefinitionReader()
+	 * @see #getResource()
+	 */
+	protected void preProcessXml(Element root) throws BeanDefinitionStoreException {
+	}
 
 	/**
 	 * Parse the elements at the root level in the document:
@@ -366,8 +263,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				else if (BEAN_ELEMENT.equals(node.getNodeName())) {
 					beanDefinitionCounter++;
 					BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele);
-					BeanDefinitionReaderUtils.registerBeanDefinition(
-							bdHolder, this.beanDefinitionReader.getBeanFactory());
+					BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, this.beanDefinitionReader.getBeanFactory());
 				}
 			}
 		}
@@ -382,7 +278,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
 		Resource relativeResource = null;
 		if (ResourceUtils.isUrl(location)) {
-			ResourceLoader resourceLoader = this.beanDefinitionReader.getResourceLoader();
+			ResourceLoader resourceLoader = getBeanDefinitionReader().getResourceLoader();
 			if (resourceLoader == null) {
 				throw new BeanDefinitionStoreException(
 						"Cannot import bean definitions from location [" + location + "]: no resource loader available");
@@ -391,15 +287,16 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		}
 		else {
 			try {
-				relativeResource = this.resource.createRelative(location);
+				relativeResource = getResource().createRelative(location);
 			}
 			catch (IOException ex) {
 				throw new BeanDefinitionStoreException(
 						"Invalid relative resource location [" + location + "] to import bean definitions from", ex);
 			}
 		}
-		this.beanDefinitionReader.loadBeanDefinitions(relativeResource);
+		getBeanDefinitionReader().loadBeanDefinitions(relativeResource);
 	}
+
 
 	/**
 	 * Parse a standard bean definition into a BeanDefinitionHolder,
@@ -463,7 +360,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			MutablePropertyValues pvs = parsePropertyElements(ele, beanName);
 
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					className, parent, cargs, pvs, this.beanDefinitionReader.getBeanClassLoader());
+					className, parent, cargs, pvs, getBeanDefinitionReader().getBeanClassLoader());
 
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
@@ -479,13 +376,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(dependencyCheck)) {
-				dependencyCheck = this.defaultDependencyCheck;
+				dependencyCheck = getDefaultDependencyCheck();
 			}
 			bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
 
 			String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(autowire)) {
-				autowire = this.defaultAutowire;
+				autowire = getDefaultAutowire();
 			}
 			bd.setAutowireMode(getAutowireMode(autowire));
 
@@ -501,13 +398,13 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			parseLookupOverrideSubElements(ele, beanName, bd.getMethodOverrides());
 			parseReplacedMethodSubElements(ele, beanName, bd.getMethodOverrides());
 
-			bd.setResourceDescription(this.resource.getDescription());
+			bd.setResourceDescription(getResource().getDescription());
 
 			if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
 				bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
 			}
 
-			if (ele.hasAttribute(SINGLETON_ATTRIBUTE) ) {
+			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
 			}
 
@@ -562,6 +459,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		// Else leave default value.
 		return autowire;
 	}
+
 
 	/**
 	 * Parse constructor-arg sub-elements of the given bean element.
@@ -653,7 +551,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			try {
 				int index = Integer.parseInt(indexAttr);
 				if (index < 0) {
-					throw new BeanDefinitionStoreException(this.resource, beanName, "'index' cannot be lower than 0");
+					throw new BeanDefinitionStoreException(getResource(), beanName, "'index' cannot be lower than 0");
 				}
 				if (StringUtils.hasLength(typeAttr)) {
 					cargs.addIndexedArgumentValue(index, val, typeAttr);
@@ -663,7 +561,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				}
 			}
 			catch (NumberFormatException ex) {
-				throw new BeanDefinitionStoreException(this.resource, beanName,
+				throw new BeanDefinitionStoreException(getResource(), beanName,
 						"Attribute 'index' of tag 'constructor-arg' must be an integer");
 			}
 		}
@@ -686,15 +584,16 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
 		if (!StringUtils.hasLength(propertyName)) {
 			throw new BeanDefinitionStoreException(
-					this.resource, beanName, "Tag 'property' must have a 'name' attribute");
+					getResource(), beanName, "Tag 'property' must have a 'name' attribute");
 		}
 		if (pvs.contains(propertyName)) {
 			throw new BeanDefinitionStoreException(
-					this.resource, beanName, "Multiple 'property' definitions for property '" + propertyName + "'");
+					getResource(), beanName, "Multiple 'property' definitions for property '" + propertyName + "'");
 		}
 		Object val = parsePropertyValue(ele, beanName, propertyName);
 		pvs.addPropertyValue(propertyName, val);
 	}
+
 
 	/**
 	 * Get the value of a property element. May be a list etc.
@@ -720,7 +619,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					// Child element is what we're looking for.
 					if (subElement != null) {
 						throw new BeanDefinitionStoreException(
-								this.resource, beanName, elementName + " must not contain more than one sub-element");
+								getResource(), beanName, elementName + " must not contain more than one sub-element");
 					}
 					subElement = candidateEle;
 				}
@@ -732,7 +631,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		if ((hasRefAttribute && hasValueAttribute) ||
 				((hasRefAttribute || hasValueAttribute)) && subElement != null) {
 			throw new BeanDefinitionStoreException(
-					this.resource, beanName, elementName +
+					getResource(), beanName, elementName +
 					" is only allowed to contain either a 'ref' attribute OR a 'value' attribute OR a sub-element");
 		}
 		if (hasRefAttribute) {
@@ -745,7 +644,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		if (subElement == null) {
 			// Neither child element nor "ref" or "value" attribute found.
 			throw new BeanDefinitionStoreException(
-					this.resource, beanName, elementName + " must specify a ref or value");
+					getResource(), beanName, elementName + " must specify a ref or value");
 		}
 
 		return parsePropertySubElement(subElement, beanName);
@@ -771,7 +670,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					beanRef = ele.getAttribute(PARENT_REF_ATTRIBUTE);
 					if (!StringUtils.hasLength(beanRef)) {
 						throw new BeanDefinitionStoreException(
-								this.resource, beanName, "'bean', 'local' or 'parent' is required for a reference");
+								getResource(), beanName, "'bean', 'local' or 'parent' is required for a reference");
 					}
 					return new RuntimeBeanReference(beanRef, true);
 				}
@@ -786,7 +685,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
 				if (!StringUtils.hasLength(beanRef)) {
 					throw new BeanDefinitionStoreException(
-							this.resource, beanName, "Either 'bean' or 'local' is required for an idref");
+							getResource(), beanName, "Either 'bean' or 'local' is required for an idref");
 				}
 			}
 			return beanRef;
@@ -802,7 +701,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				}
 				catch (ClassNotFoundException ex) {
 					throw new BeanDefinitionStoreException(
-							this.resource, beanName, "Value type class [" + typeClassName + "] not found", ex);
+							getResource(), beanName, "Value type class [" + typeClassName + "] not found", ex);
 				}
 			}
 			return value;
@@ -824,7 +723,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			return parsePropsElement(ele, beanName);
 		}
 		throw new BeanDefinitionStoreException(
-					this.resource, beanName, "Unknown property sub-element: <" + ele.getTagName() + ">");
+				getResource(), beanName, "Unknown property sub-element: <" + ele.getTagName() + ">");
 	}
 
 	/**
@@ -878,7 +777,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 					if (candidateEle.getTagName().equals(KEY_ELEMENT)) {
 						if (keyEle != null) {
 							throw new BeanDefinitionStoreException(
-									this.resource, beanName, "<entry> is only allowed to contain one <key> sub-element");
+									getResource(), beanName, "<entry> is only allowed to contain one <key> sub-element");
 						}
 						keyEle = candidateEle;
 					}
@@ -886,7 +785,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 						// Child element is what we're looking for.
 						if (valueEle != null) {
 							throw new BeanDefinitionStoreException(
-									this.resource, beanName, "<entry> must not contain more than one value sub-element");
+									getResource(), beanName, "<entry> must not contain more than one value sub-element");
 						}
 						valueEle = candidateEle;
 					}
@@ -900,7 +799,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if ((hasKeyAttribute && hasKeyRefAttribute) ||
 					((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
 				throw new BeanDefinitionStoreException(
-						this.resource, beanName, "<entry> is only allowed to contain either " +
+						getResource(), beanName, "<entry> is only allowed to contain either " +
 						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element");
 			}
 			if (hasKeyAttribute) {
@@ -914,7 +813,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 			else {
 				throw new BeanDefinitionStoreException(
-						this.resource, beanName, "<entry> must specify a key");
+						getResource(), beanName, "<entry> must specify a key");
 			}
 
 			// Extract value from attribute or sub-element.
@@ -924,7 +823,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if ((hasValueAttribute && hasValueRefAttribute) ||
 					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
 				throw new BeanDefinitionStoreException(
-						this.resource, beanName, "<entry> is only allowed to contain either " +
+						getResource(), beanName, "<entry> is only allowed to contain either " +
 						"a 'value' attribute OR a 'value-ref' attribute OR a value sub-element");
 			}
 			if (hasValueAttribute) {
@@ -938,7 +837,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			}
 			else {
 				throw new BeanDefinitionStoreException(
-						this.resource, beanName, "<entry> must specify a value");
+						getResource(), beanName, "<entry> must specify a value");
 			}
 
 			// Add final key and value to the Map.
@@ -960,7 +859,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				// Child element is what we're looking for.
 				if (subElement != null) {
 					throw new BeanDefinitionStoreException(
-							this.resource, beanName, "<key> must not contain more than one value sub-element");
+							getResource(), beanName, "<key> must not contain more than one value sub-element");
 				}
 				subElement = candidateEle;
 			}
