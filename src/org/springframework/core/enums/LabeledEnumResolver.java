@@ -35,7 +35,7 @@ public interface LabeledEnumResolver {
 	 * @return a set of localized enumeration instances for the provided type
 	 * @throws IllegalArgumentException if the type is not supported
 	 */
-	public Set getLabeledEnumSet(Class type);
+	public Set getLabeledEnumSet(Class type) throws IllegalArgumentException;
 
 	/**
 	 * Return a map of enumerations of a particular type. Each element in the
@@ -46,7 +46,7 @@ public interface LabeledEnumResolver {
 	 * with enum code as key and <code>LabeledEnum</code> instance as value
 	 * @throws IllegalArgumentException if the type is not supported
 	 */
-	public Map getLabeledEnumMap(Class type);
+	public Map getLabeledEnumMap(Class type) throws IllegalArgumentException;
 
 	/**
 	 * Resolve a single <code>LabeledEnum</code> by its identifying code.
