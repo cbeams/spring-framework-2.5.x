@@ -822,7 +822,8 @@ public abstract class SessionFactoryUtils {
 					}
 					catch (JDBCException ex) {
 						if (this.jdbcExceptionTranslator != null) {
-							throw this.jdbcExceptionTranslator.translate("SessionSynchronization", null, ex.getSQLException());
+							throw this.jdbcExceptionTranslator.translate(
+									"Hibernate transaction synchronization", null, ex.getSQLException());
 						}
 						else {
 							throw new HibernateJdbcException(ex);
