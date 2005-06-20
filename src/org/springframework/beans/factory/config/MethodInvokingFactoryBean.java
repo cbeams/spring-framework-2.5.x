@@ -107,13 +107,30 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		this.singleton = singleton;
 	}
 
-	public void afterPropertiesSet()
-			throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-
+	public void afterPropertiesSet() throws Exception {
 		prepare();
 		if (this.singleton) {
-			Object obj = invoke();
+			Object obj = doInvoke();
 			this.singletonObject = (obj != null ? obj : MethodInvoker.VOID);
+		}
+	}
+
+	/**
+	 * Perform the invocation and convert InvocationTargetException
+	 * into the underlying target exception.
+	 */
+	private Object doInvoke() throws Exception {
+		try {
+			return invoke();
+		}
+		catch (InvocationTargetException ex) {
+			if (ex.getTargetException() instanceof Exception) {
+				throw (Exception) ex.getTargetException();
+			}
+			if (ex.getTargetException() instanceof Error) {
+				throw (Error) ex.getTargetException();
+			}
+			throw ex;
 		}
 	}
 
@@ -125,14 +142,14 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 * method returns null or has a void return type, since factory beans
 	 * must return a result.
 	 */
-	public Object getObject() throws InvocationTargetException, IllegalAccessException {
+	public Object getObject() throws Exception {
 		if (this.singleton) {
 			// Singleton: return shared object.
 			return this.singletonObject;
 		}
 		else {
 			// Prototype: new object on each call.
-			Object retVal = invoke();
+			Object retVal = doInvoke();
 			return (retVal != null ? retVal : MethodInvoker.VOID);
 		}
 	}
