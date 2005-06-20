@@ -31,6 +31,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -159,11 +160,27 @@ public class BeanWrapperImpl implements BeanWrapper {
 
 	/**
 	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
+	 * Registers default editors.
 	 * @see #setWrappedInstance
 	 */
 	public BeanWrapperImpl() {
-		this.defaultEditors = new HashMap(32);
-		registerDefaultEditors();
+		this(true);
+	}
+
+	/**
+	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
+	 * @param registerDefaultEditors whether to register default editors
+	 * (can be suppressed if the BeanWrapper won't need any type conversion)
+	 * @see #setWrappedInstance
+	 */
+	public BeanWrapperImpl(boolean registerDefaultEditors) {
+		if (registerDefaultEditors) {
+			this.defaultEditors = new HashMap(32);
+			registerDefaultEditors();
+		}
+		else {
+			this.defaultEditors = Collections.EMPTY_MAP;
+		}
 	}
 
 	/**

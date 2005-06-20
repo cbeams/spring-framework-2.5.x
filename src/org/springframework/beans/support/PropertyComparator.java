@@ -19,14 +19,11 @@ package org.springframework.beans.support;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 
@@ -45,7 +42,7 @@ public class PropertyComparator implements Comparator {
 
 	private final SortDefinition sortDefinition;
 
-	private final Map cachedBeanWrappers = new HashMap();
+	private final BeanWrapperImpl beanWrapper = new BeanWrapperImpl(false);
 
 
 	/**
@@ -102,17 +99,12 @@ public class PropertyComparator implements Comparator {
 	 * @return the property value
 	 */
 	private Object getPropertyValue(Object obj) {
-		BeanWrapper bw = (BeanWrapper) this.cachedBeanWrappers.get(obj);
-		if (bw == null) {
-			bw = new BeanWrapperImpl(obj);
-			this.cachedBeanWrappers.put(obj, bw);
-		}
-
 		// If a nested property cannot be read, simply return null
 		// (similar to JSTL EL). If the property doesn't exist in the
 		// first place, let the exception through.
 		try {
-			return bw.getPropertyValue(this.sortDefinition.getProperty());
+			this.beanWrapper.setWrappedInstance(obj);
+			return this.beanWrapper.getPropertyValue(this.sortDefinition.getProperty());
 		}
 		catch (BeansException ex) {
 			logger.info("PropertyComparator could not access property - treating as null for sorting", ex);
