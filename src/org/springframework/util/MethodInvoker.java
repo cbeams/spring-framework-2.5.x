@@ -237,14 +237,14 @@ public class MethodInvoker {
 	 * Invoke the specified method.
 	 * The invoker needs to have been prepared before.
 	 * @return the object (possibly null) returned by the method invocation,
-	 *         or null if the method has a void return type
+	 * or null if the method has a void return type
 	 * @see #prepare
 	 */
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
 		if (this.methodObject == null) {
 			throw new IllegalStateException("prepare() must be called prior to invoke() on MethodInvoker");
 		}
-		// in the static case, target will just be null
+		// In the static case, target will just be null.
 		return this.methodObject.invoke(this.targetObject, this.arguments);
 	}
 
