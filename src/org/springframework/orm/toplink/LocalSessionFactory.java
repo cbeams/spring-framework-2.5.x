@@ -30,9 +30,9 @@ import oracle.toplink.sessions.SessionLog;
 import oracle.toplink.threetier.ServerSession;
 import oracle.toplink.tools.sessionconfiguration.XMLLoader;
 import oracle.toplink.tools.sessionmanagement.SessionManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -257,6 +257,14 @@ public class LocalSessionFactory {
 		// Initialize the TopLink Session, using the configuration file
 		// and the session name.
 		DatabaseSession session = loadDatabaseSession(this.configLocation, this.sessionName, classLoader);
+        
+        // it is possible for SessionManager to return a null Session
+        if (session==null)
+        {
+            logger.info("A session named "+this.sessionName+" could not be loaded from resource "+this.configLocation+" using ClassLoader "+classLoader);
+            logger.info("This is most likely a deployment issue.  Can the sessionClassLoader load the "+this.configLocation+" with a getResourceAsStream call?");           
+            throw new RuntimeException("A session named "+this.sessionName+" could not be loaded from resource "+this.configLocation+" using ClassLoader "+classLoader);
+        }
 
 		// Override default DatabaseLogin instance with specified one, if any.
 		if (this.databaseLogin != null) {
