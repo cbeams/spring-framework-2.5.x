@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+
+	<!--
+	<aspect target="testBean">
+		<advice ref="interceptor">
+			<pointcut expression="execution(int org.springframework.beans.ITestBean.getAge())"/>
+		</advice>
+	</aspect>-->
+
+
+	<bean id="proxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+	<bean id="advisor" class="org.springframework.aop.support.aspectj.AspectJExpressionPointcutAdvisor">
+		<property name="expression" value="execution(int org.springframework.beans.ITestBean.getAge())"/>
+		<property name="advice" ref="interceptor"/>
+	</bean>
+
+	<bean id="interceptor" class="org.springframework.aop.support.aspectj.CallCountingInterceptor"/>
+</beans>
