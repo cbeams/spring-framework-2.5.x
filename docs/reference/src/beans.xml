@@ -79,8 +79,8 @@
       <para>Although for most scenarios, almost all user code managed by the
       BeanFactory does not have to be aware of the BeanFactory, the
       BeanFactory does have to be instantiated somehow. This can happen via
-      explicit user code such as:<programlisting>InputStream is = new FileInputStream("beans.xml");
-XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
+      explicit user code such as:<programlisting>Resource res = new FileSystemResource("beans.xml");
+XmlBeanFactory factory = new XmlBeanFactory(res);</programlisting></para>
 
       <para>or<programlisting>ClassPathResource res = new ClassPathResource("beans.xml");
 XmlBeanFactory factory = new XmlBeanFactory(res);</programlisting></para>
