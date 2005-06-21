@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.2 (23.6.2005)
+Changes in version 1.2.2 (24.6.2005)
 ------------------------------------
 
 Package org.springframework.aop
@@ -12,8 +12,10 @@ Package org.springframework.aop
 Package org.springframework.beans
 * BeanWrapperImpl supports JDK 1.5 enums and old-style enum classes: String values will be treated as enum value names
 * added convenience constructor to PropertyComparator, passing in "property", "ignoreCase" and "ascending" directly
+* optimized PropertyComparator to reuse a single BeanWrapperImpl instance without default editors
 * PropertiesFactoryBean also supports JDK 1.5's properties XML files, for files with ".xml" filename
 * PropertyResourceConfigurer and subclasses also support JDK 1.5's properties XML files, for files with ".xml" filename
+* MethodInvokingFactoryBean throws target exception in case of InvocationTargetException
 * fixed AbstractAutowireCapableBeanFactory to not track dependencies for passed-in existing beans (avoiding memory leak)
 
 Package org.springframework.context
@@ -39,6 +41,7 @@ Package org.springframework.jdbc
 * reworked JdbcDaoSupport class to extend the new generic DaoSupport base class
 
 Package org.springframework.jms
+* fixed JmsTemplate to always close JMS MessageProducers (not relying on implicit close through JMS Session)
 * reworked JmsGatewaySupport class to follow DaoSupport pattern ("afterPropertiesSet" not throwing Exception anymore)
 
 Package org.springframework.jmx
@@ -55,8 +58,11 @@ Package org.springframework.orm
 * LocalSessionFactoryBean executes DDL scripts with autoCommit=true, to be able to proceed after a failed statement
 * made "entityInterceptorBeanName" property available to OpenSessionInViewInterceptor (for Hibernate 2.1 and Hibernate3)
 * added dedicated support for Hibernate Annotation 3.0 beta 2: AnnotationSessionFactoryBean in "tiger" source tree
+* made JDO2-style "detachCopy(All)", "attachCopy(All)" and "newNamedQuery" behavior overridable through JdoDialect
 
 Package org.springframework.transaction
+* fixed AbstractPlatformTransactionManager to always execute all synchronizations, even on unexpected assertion failures
+* AbstractPlatformTransactionManager logs exceptions thrown by before/afterCompletion, keeping the original exception
 * JtaTransactionManager throws UnexpectedRollbackException in case of global rollback-only if not thrown by JTA commit
 
 Package org.springframework.util
@@ -65,8 +71,10 @@ Package org.springframework.util
 * added "comparator" subpackage, containing useful generic Comparator implementations (e.g. invertible, compound)
 
 Package org.springframework.web
+* DispatcherServlet throws ServletException in case of Error during request processing, rather than the Error itself
 * added "indent" bean property to AbstractXlstView, to be turned off when the choice should be up to the stylesheet
 * changed "showErrors" macro for FreeMarker to not add a separator after the final error shown
+* added SpringBindingActionForm adapter, using Spring's POJO binding and validation, exposing results to Struts tags
 
 
 Changes in version 1.2.1 (28.5.2005)
